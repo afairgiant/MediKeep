@@ -98,7 +98,8 @@ const PatientFormWrapper = ({
     return (
       <Modal opened={isOpen} onClose={onClose} title="Error" radius="lg">
         <Stack align="center" gap="md">
-          <Alert variant="light" color="red" title="Form Error" radius="md">
+          {/* eslint-disable-next-line i18next/no-literal-string -- error fallback */}
+          <Alert variant="light" color="red" title={'Form Error'} radius="md">
             Unable to display the patient form. Please try refreshing the page.
           </Alert>
         </Stack>

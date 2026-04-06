@@ -1,5 +1,6 @@
 import React from 'react';
 import { Stack, Text, List } from '@mantine/core';
+import i18n from '../i18n/config';
 
 /**
  * Utility functions for handling invitation-related logic
@@ -34,22 +35,22 @@ export const renderFamilyHistoryContextDetails = (invitation) => {
 export const renderBulkInvitationDetails = (contextData) => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>Sharing Details:</Text>
+      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>Family Members:</Text> {contextData.family_member_count} members
+          <Text span fw={500}>{i18n.t('invitations:response.familyMembers')}</Text> {i18n.t('invitations:utils.familyMemberCount', { count: contextData.family_member_count })}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>Access Level:</Text> {contextData.permission_level}
+          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
         </List.Item>
         {contextData.sharing_note && (
           <List.Item>
-            <Text span fw={500}>Note:</Text> {contextData.sharing_note}
+            <Text span fw={500}>{i18n.t('invitations:response.note')}</Text> {contextData.sharing_note}
           </List.Item>
         )}
       </List>
       <Stack gap="xs" mt="sm">
-        <Text size="xs" fw={500} c="dimmed">Family Members:</Text>
+        <Text size="xs" fw={500} c="dimmed">{i18n.t('invitations:response.familyMembers')}</Text>
         <List size="xs" spacing="xs">
           {contextData.family_members.map((member, index) => (
             <List.Item key={index}>
@@ -70,20 +71,20 @@ export const renderBulkInvitationDetails = (contextData) => {
 export const renderSingleInvitationDetails = (contextData) => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>Sharing Details:</Text>
+      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>Family Member:</Text> {contextData.family_member_name}
+          <Text span fw={500}>{i18n.t('invitations:response.familyMember')}</Text> {contextData.family_member_name}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>Relationship:</Text> {contextData.family_member_relationship}
+          <Text span fw={500}>{i18n.t('invitations:response.relationship')}</Text> {contextData.family_member_relationship}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>Access Level:</Text> {contextData.permission_level}
+          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
         </List.Item>
         {contextData.sharing_note && (
           <List.Item>
-            <Text span fw={500}>Note:</Text> {contextData.sharing_note}
+            <Text span fw={500}>{i18n.t('invitations:response.note')}</Text> {contextData.sharing_note}
           </List.Item>
         )}
       </List>
@@ -126,7 +127,7 @@ export const formatInvitationSummary = (invitation) => {
 
   if (isBulkInvitation(invitation)) {
     const count = getFamilyMemberCount(invitation);
-    return `${count} family member${count !== 1 ? 's' : ''}`;
+    return i18n.t('invitations:utils.familyMemberCount', { count });
   }
 
   const memberName = invitation.context_data?.family_member_name;
@@ -136,7 +137,7 @@ export const formatInvitationSummary = (invitation) => {
     return `${memberName} (${relationship})`;
   }
 
-  return memberName || 'family member';
+  return memberName || i18n.t('invitations:utils.familyMemberDefault');
 };
 
 /**
@@ -166,22 +167,22 @@ export const renderPatientShareContextDetails = (invitation) => {
 export const renderBulkPatientShareDetails = (contextData) => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>Sharing Details:</Text>
+      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>Patients:</Text> {contextData.patient_count} patient{contextData.patient_count !== 1 ? 's' : ''}
+          <Text span fw={500}>{i18n.t('invitations:response.patients')}</Text> {i18n.t('invitations:utils.patientCount', { count: contextData.patient_count })}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>Access Level:</Text> {contextData.permission_level}
+          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
         </List.Item>
         {contextData.message && (
           <List.Item>
-            <Text span fw={500}>Message:</Text> {contextData.message}
+            <Text span fw={500}>{i18n.t('invitations:response.message')}</Text> {contextData.message}
           </List.Item>
         )}
       </List>
       <Stack gap="xs" mt="sm">
-        <Text size="xs" fw={500} c="dimmed">Patients:</Text>
+        <Text size="xs" fw={500} c="dimmed">{i18n.t('invitations:response.patients')}</Text>
         <List size="xs" spacing="xs">
           {contextData.patients.map((patient, index) => (
             <List.Item key={index}>
@@ -202,17 +203,17 @@ export const renderBulkPatientShareDetails = (contextData) => {
 export const renderSinglePatientShareDetails = (contextData) => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>Sharing Details:</Text>
+      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>Patient:</Text> {contextData.patient_name}
+          <Text span fw={500}>{i18n.t('invitations:response.patient')}</Text> {contextData.patient_name}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>Access Level:</Text> {contextData.permission_level}
+          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
         </List.Item>
         {contextData.message && (
           <List.Item>
-            <Text span fw={500}>Message:</Text> {contextData.message}
+            <Text span fw={500}>{i18n.t('invitations:response.message')}</Text> {contextData.message}
           </List.Item>
         )}
       </List>
@@ -244,8 +245,8 @@ export const formatPatientShareSummary = (invitation) => {
 
   if (isBulkInvitation(invitation)) {
     const count = getPatientShareCount(invitation);
-    return `${count} patient${count !== 1 ? 's' : ''}`;
+    return i18n.t('invitations:utils.patientCount', { count });
   }
 
-  return invitation.context_data.patient_name || 'patient';
+  return invitation.context_data.patient_name || i18n.t('invitations:utils.patientDefault');
 };

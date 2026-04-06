@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "Problem med webbläsarkompatibilitet",
+    "chartError": "Fel vid visning av diagram",
+    "chartErrorDescription": "Kan inte visa diagram. Försök att uppdatera sidan.",
+    "documentError": "Fel i dokumenthanteraren",
+    "documentErrorDescription": "Ett fel uppstod vid hantering av dokument. Dina data är säkra.",
+    "errorDetails": "Felinformation",
+    "invalidData": "Ogiltig data från servern",
+    "networkIssues": "Problem med nätverksanslutning",
+    "tempIssues": "Tillfälliga systemproblem",
+    "tryAgain": "Försök igen",
+    "uploadError": "Fel i uppladdningsförloppet",
+    "uploadErrorDescription": "Uppladdningsförloppsvisaren stötte på ett fel."
+  },
+  "fileCount": {
+    "attached": "{{count}} bifogade",
+    "attached_one": "{{count}} bifogade",
+    "attached_other": "{{count}} bifogade",
+    "fileCount": "{{count}} fil",
+    "fileCount_one": "{{count}} fil",
+    "fileCount_other": "{{count}} filer",
+    "noFiles": "Inga filer"
+  },
+  "fileList": {
+    "fileDetails": "FILDETALJER",
+    "loading": "Laddar filer...",
+    "markedCount": "{{count}} fil markerad för borttagning",
+    "markedCount_one": "{{count}} fil markerad för borttagning",
+    "markedCount_other": "{{count}} filer markerade för borttagning",
+    "markedForDeletion": "Markerad för borttagning",
+    "noFiles": "Inga filer bifogade",
+    "noMatch": "Inga filer matchar dina sökkriterier.",
+    "showingFiles": "Visar {{showing}} av {{total}} filer",
+    "statusDuplicate": "Duplikat",
+    "statusFailed": "Misslyckades",
+    "statusMissing": "Saknas",
+    "statusProcessing": "Bearbetar"
+  },
+  "fileUpload": {
+    "accepted": "Godkända: {{types}} • Max storlek: {{size}}MB",
+    "chooseFiles": "Välj filer",
+    "dragOrClick": "Dra filer hit eller klicka för att välja",
+    "remove": "Ta bort",
+    "selectedFiles": "Valda filer ({{count}})",
+    "selectedFiles_one": "Valda filer ({{count}})",
+    "selectedFiles_other": "Valda filer ({{count}})"
+  },
+  "linkPaperless": {
+    "from": "Från: {{name}}",
+    "infoText": "Sök efter dokument som redan finns i Paperless för att länka dem till denna {{entityType}}. Ingen filuppladdning behövs!",
+    "linkDocument": "Länka dokument",
+    "moreTags": "+{{count}} till",
+    "moreTags_one": "+{{count}} till",
+    "moreTags_other": "+{{count}} till",
+    "noDocumentsFound": "Inga dokument hittades",
+    "searchDocuments": "Sök dokument",
+    "searchPlaceholder": "Sök efter titel, innehåll eller taggar...",
+    "selected": "Vald",
+    "title": "Länka befintligt Paperless-dokument",
+    "tryDifferent": "Försök med en annan sökterm",
+    "type": "Typ: {{type}}"
+  },
+  "linkPapra": {
+    "infoText": "Sök efter dokument som redan finns i Papra för att länka dem till denna {{entityType}}. Ingen filuppladdning behövs!",
+    "linkDocument": "Länka dokument",
+    "noDocumentsFound": "Inga dokument hittades",
+    "searchPlaceholder": "Sök dokument...",
+    "selected": "Vald",
+    "title": "Länka befintligt Papra-dokument",
+    "tryDifferent": "Försök med en annan sökterm"
+  },
+  "manager": {
+    "addDocument": "Lägg till dokument",
+    "currentFiles": "Aktuella filer:",
+    "duplicateDocument": "Duplicerat dokument",
+    "duplicateExists": "Detta dokument finns redan i Paperless och kan inte laddas upp igen.",
+    "filesToUpload": "Filer att ladda upp:",
+    "linkPaperless": "Länka befintligt Paperless-dokument",
+    "linkPapra": "Länka befintligt Papra-dokument",
+    "manageDocuments": "Hantera dokument",
+    "processingPaperless": "Bearbetar dokument i Paperless...",
+    "searchFiles": "Sök filer...",
+    "statusDuplicate": "Duplikat",
+    "statusFailed": "Misslyckades",
+    "statusUploaded": "Uppladdad",
+    "statusUploading": "Laddar upp till Paperless...",
+    "syncCheck": "Synkroniseringskontroll",
+    "uploadNewFile": "Ladda upp ny fil",
+    "uploadSuccess": "Dokument uppladdades framgångsrikt!"
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "Automatisk synkronisering aktiverad",
+    "documentAlreadyExists": "\"{{fileName}}\" är identisk med ett dokument som redan finns i Paperless.",
+    "duplicateHint": "Om du behöver ladda upp en ny version, ändra först dokumentet.",
+    "processingDocument": "Dokument bearbetas av Paperless...",
+    "syncFailed": "Synkronisering misslyckades",
+    "syncing": "Synkroniserar..."
+  },
+  "renderMode": {
+    "compactView": "Kompakt vy",
+    "gridView": "Rutnätsvy",
+    "listView": "Listvy",
+    "viewMode": "Visningsläge"
+  },
+  "storage": {
+    "backendLabel": "Lagringsbackend:",
+    "connectedBadge": "Ansluten",
+    "local": "Lokal lagring",
+    "paperless": "Paperless-ngx",
+    "papra": "Papra",
+    "selectBackend": "Välj lagringsbackend"
+  },
+  "upload": {
+    "completed": "{{count}} slutförda",
+    "completed_one": "{{count}} slutförda",
+    "completed_other": "{{count}} slutförda",
+    "dragOrClick": "Dra filer hit eller klicka för att välja",
+    "failed": "{{count}} misslyckades",
+    "failed_one": "{{count}} misslyckades",
+    "failed_other": "{{count}} misslyckades",
+    "filesProgress": "{{completed}}/{{total}} filer",
+    "maxSize": "Max filstorlek: {{size}}MB",
+    "overallProgress": "Totalt framsteg",
+    "percentComplete": "{{percent}}% slutfört",
+    "remaining": "{{time}} kvar",
+    "retryFailed": "Försök igen med misslyckade",
+    "uploading": "{{count}} laddas upp",
+    "uploading_one": "{{count}} laddas upp",
+    "uploading_other": "{{count}} laddas upp"
+  }
+}

@@ -25,7 +25,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, error, clearError, isAuthenticated } = useAuth();
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['auth', 'common', 'shared']);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -125,12 +125,13 @@ const Login = () => {
               height={40}
               style={{ verticalAlign: 'middle', marginRight: '8px' }}
             />
-            MediKeep
+            {/* eslint-disable-next-line i18next/no-literal-string -- brand name */}
+            {'MediKeep'}
           </h1>
         </div>
 
         <div className={styles.loginDivider}>
-          <span>{t('auth.login.title')}</span>
+          <span>{t('login.title')}</span>
         </div>
 
         {error && <div className={styles.errorMessage}>{error}</div>}
@@ -148,7 +149,7 @@ const Login = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                placeholder={t('auth.login.usernamePlaceholder')}
+                placeholder={t('login.usernamePlaceholder')}
                 required
                 disabled={isLoading}
               />
@@ -167,7 +168,7 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder={t('auth.login.passwordPlaceholder')}
+                placeholder={t('login.passwordPlaceholder')}
                 required
                 disabled={isLoading}
               />
@@ -182,7 +183,7 @@ const Login = () => {
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label={showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
+                aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
               >
                 {showPassword ? (
                   <IconEyeOff size={18} />
@@ -195,7 +196,7 @@ const Login = () => {
 
 
           <button type="submit" disabled={isLoading} className={styles.submitBtn}>
-            {isLoading ? t('auth.login.submitting') : t('auth.login.submit')}
+            {isLoading ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
 
@@ -203,7 +204,7 @@ const Login = () => {
         {configLoaded && ssoConfig.enabled && (
           <div className={styles.ssoSection}>
             <div className={styles.divider}>
-              <span>{t('auth.login.or')}</span>
+              <span>{t('login.or')}</span>
             </div>
             <button
               type="button"
@@ -211,7 +212,7 @@ const Login = () => {
               onClick={handleSSOLogin}
               disabled={isLoading || ssoLoading}
             >
-              {ssoLoading ? t('labels.loading') : t('auth.login.continueWith', { provider: ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO' })}
+              {ssoLoading ? t('common:labels.loading') : t('login.continueWith', { provider: ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO' })}
             </button>
           </div>
         )}
@@ -225,11 +226,11 @@ const Login = () => {
                 onClick={handleCreateUserNavigation}
                 disabled={isLoading}
               >
-                {t('auth.login.createAccount')}
+                {t('login.createAccount')}
               </button>
             ) : (
               <div className={styles.registrationDisabledMessage}>
-                {registrationMessage || t('auth.login.registrationDisabled')}
+                {registrationMessage || t('login.registrationDisabled')}
               </div>
             )}
           </div>

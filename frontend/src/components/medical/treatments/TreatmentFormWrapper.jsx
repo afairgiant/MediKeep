@@ -317,7 +317,7 @@ const TreatmentFormWrapper = ({
                       </Badge>
                     ) : null}
                   >
-                    Medications
+                    {t('shared:categories.medications')}
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="visits"
@@ -328,7 +328,7 @@ const TreatmentFormWrapper = ({
                       </Badge>
                     ) : null}
                   >
-                    Visits
+                    {t('shared:tabs.visits')}
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="labs"
@@ -339,7 +339,7 @@ const TreatmentFormWrapper = ({
                       </Badge>
                     ) : null}
                   >
-                    Labs
+                    {t('shared:categories.lab_results')}
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="equipment"
@@ -350,7 +350,7 @@ const TreatmentFormWrapper = ({
                       </Badge>
                     ) : null}
                   >
-                    Equipment
+                    {t('shared:categories.medical_equipment')}
                   </Tabs.Tab>
                 </>
               )}

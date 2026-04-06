@@ -30,6 +30,7 @@ import {
   IconX,
   IconSend2,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { notifications } from '@mantine/notifications';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -50,6 +51,7 @@ const FamilyHistorySharingModal = ({
   bulkMode = false,
   enableErrorQueue = false, // New prop to enable error queue system (addresses reviewer feedback)
 }) => {
+  const { t } = useTranslation(['invitations', 'common', 'shared']);
   const { formatDateTime } = useDateFormat();
   const [shares, setShares] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -327,7 +329,7 @@ const FamilyHistorySharingModal = ({
         {bulkMode && (
           <Paper p="md" withBorder>
             <Group justify="space-between" mb="sm">
-              <Text fw={500}>Select Family Members</Text>
+              <Text fw={500}>{t('sharing.selectFamilyMembers')}</Text>
               <Button variant="subtle" size="xs" onClick={handleSelectAll}>
                 {selectedMembers.length === familyMembers.length
                   ? 'Deselect All'
@@ -461,7 +463,7 @@ const FamilyHistorySharingModal = ({
               </Group>
             ) : shares.length > 0 ? (
               <Stack gap="md">
-                <Title order={4}>Currently Shared With:</Title>
+                <Title order={4}>{t('sharing.currentlySharedWith')}</Title>
                 <Stack gap="xs">
                   {shares.map((share, index) => (
                     <Paper key={index} p="sm" withBorder>
@@ -472,7 +474,7 @@ const FamilyHistorySharingModal = ({
                             {share.shared_with.email}
                           </Text>
                           <Text size="xs" c="dimmed">
-                            Shared on {formatDateTime(share.created_at)}
+                            {t('sharing.sharedOn', { date: formatDateTime(share.created_at) })}
                           </Text>
                           {share.sharing_note && (
                             <Text size="xs" c="dimmed" italic>
@@ -506,7 +508,7 @@ const FamilyHistorySharingModal = ({
             ) : (
               <Paper p="md" radius="md" bg="gray.2">
                 <Text size="sm" c="dimmed" ta="center">
-                  This family history is not currently shared with anyone.
+                  {t('sharing.notSharedYet')}
                 </Text>
               </Paper>
             )}
@@ -516,9 +518,7 @@ const FamilyHistorySharingModal = ({
         {/* Footer */}
         <Alert icon={<IconInfoCircle />} color="blue" variant="light">
           <Text size="xs">
-            Recipients will receive an invitation that they can accept or
-            reject. Only accepted invitations will grant access to the family
-            history.
+            {t('sharing.invitationInfo')}
           </Text>
         </Alert>
       </Stack>

@@ -20,6 +20,7 @@ import {
   IconTrendingUp,
   IconTrendingDown
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import {
   LabTestComponent,
   labTestComponentApi,
@@ -48,6 +49,7 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
   compact = true,
   onError
 }) => {
+  const { t } = useTranslation(['medical', 'shared']);
   const [stats, setStats] = useState<SummaryStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -165,7 +167,7 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
       <Group gap="xs">
         <IconFlask size={14} color="var(--mantine-color-gray-5)" />
         <Text size="sm" c="dimmed">
-          Test components unavailable
+          {t('labresults:summary.unavailable')}
         </Text>
       </Group>
     );
@@ -176,7 +178,7 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
       <Group gap="xs">
         <IconFlask size={14} color="var(--mantine-color-gray-5)" />
         <Text size="sm" c="dimmed">
-          No test components
+          {t('labresults:summary.noComponents')}
         </Text>
       </Group>
     );
@@ -191,11 +193,11 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
         <Group gap="xs">
           <IconFlask size={14} />
           <Text size="sm" fw={500}>
-            {stats.total} test component{stats.total !== 1 ? 's' : ''}
+            {t('labresults:summary.testComponentsTotal', { count: stats.total })}
           </Text>
           {stats.categories.length > 0 && (
             <Text size="xs" c="dimmed">
-              • {stats.categories.length} categor{stats.categories.length !== 1 ? 'ies' : 'y'}
+              {'\u2022'} {t('labresults:stats.categoriesCount', { count: stats.categories.length })}
             </Text>
           )}
         </Group>
@@ -268,7 +270,7 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
             ))}
             {stats.categories.length > 3 && (
               <Text size="xs" c="dimmed">
-                +{stats.categories.length - 3} more
+                {t('labresults:summary.moreCategories', { count: stats.categories.length - 3 })}
               </Text>
             )}
           </Group>
@@ -283,10 +285,10 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
       <Group justify="space-between">
         <Group gap="xs">
           <IconFlask size={16} />
-          <Text fw={600}>Test Components ({stats.total})</Text>
+          <Text fw={600}>{t('labresults:summary.testComponentsCount', { count: stats.total })}</Text>
         </Group>
         <Badge color={getHealthScoreColor(healthScore)}>
-          {healthScore}% Healthy
+          {t('labresults:summary.healthyPercent', { score: healthScore })}
         </Badge>
       </Group>
 
@@ -294,28 +296,28 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
         {stats.normal > 0 && (
           <Group gap="xs">
             <IconCheck size={16} color="green" />
-            <Text size="sm">{stats.normal} Normal</Text>
+            <Text size="sm">{stats.normal} {t('labresults:stats.normal')}</Text>
           </Group>
         )}
 
         {stats.abnormal > 0 && (
           <Group gap="xs">
             <IconTrendingUp size={16} color="orange" />
-            <Text size="sm">{stats.abnormal} Abnormal</Text>
+            <Text size="sm">{stats.abnormal} {t('labresults:stats.abnormal')}</Text>
           </Group>
         )}
 
         {stats.critical > 0 && (
           <Group gap="xs">
             <IconAlertTriangle size={16} color="red" />
-            <Text size="sm">{stats.critical} Critical</Text>
+            <Text size="sm">{stats.critical} {t('labresults:stats.critical')}</Text>
           </Group>
         )}
       </Group>
 
       {stats.categories.length > 0 && (
         <Stack gap="xs">
-          <Text size="sm" fw={500} c="dimmed">Categories:</Text>
+          <Text size="sm" fw={500} c="dimmed">{t('labresults:summary.categoriesLabel')}</Text>
           <Group gap="xs">
             {stats.categories.map(category => (
               <Badge

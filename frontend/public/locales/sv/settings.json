@@ -1,0 +1,164 @@
+{
+  "account": {
+    "deleteAccount": {
+      "button": "Radera konto",
+      "description": "Radera ditt konto permanent och all associerad medicinsk data. Denna åtgärd kan inte ångras.",
+      "title": "Radera konto"
+    }
+  },
+  "actions": {
+    "reset": "Återställ ändringar",
+    "save": "Spara alla ändringar",
+    "unsavedChanges": "Du har osparade ändringar"
+  },
+  "documents": {
+    "cleanup": {
+      "button": "Rensa filer",
+      "cleaning": "Rensar...",
+      "description": "Rensa osynkroniserade filer och lös inkonsekvenser i dokumentlagring. Detta återställer misslyckade uppladdningar, rensar föräldralösa uppgifter och åtgärdar databassynkroniseringsproblem.",
+      "title": "Filrensning"
+    },
+    "paperlessDescription": "Konfigurera Paperless-ngx dokumenthanteringsintegration"
+  },
+  "help": {
+    "documentation": {
+      "description": "Bläddra i wikin för guider, installationsinstruktioner och funktionsdokumentation.",
+      "title": "Dokumentation"
+    },
+    "issues": {
+      "description": "Hittat en bugg eller har en funktionsförfrågan? Öppna ett ärende på GitHub.",
+      "title": "Rapportera ett problem"
+    }
+  },
+  "paperlessConnection": {
+    "apiTokenHelp": "Din paperless-ngx API-token. Hitta den i Paperless-adminpanelen under Inställningar.",
+    "apiTokenLabel": "API-token",
+    "apiTokenRecommended": "API-token (Rekommenderas)",
+    "authMethod": "Autentiseringsmetod",
+    "connected": "Ansluten till Paperless-ngx",
+    "connectionError": "Kan inte ansluta. Kontrollera din URL och uppgifter.",
+    "methodInfo": "API-tokens är den rekommenderade autentiseringsmetoden för bättre säkerhet.",
+    "passwordHelp": "Ditt paperless-ngx lösenord.",
+    "passwordLabel": "Lösenord",
+    "sessionStorage": "Använder sessionslagring för token",
+    "title": "Paperless-ngx anslutning",
+    "urlHelp": "URL:en till din Paperless-ngx instans (t.ex. https://paperless.example.com)",
+    "urlLabel": "Server-URL",
+    "usernameHelp": "Ditt paperless-ngx användarnamn.",
+    "usernameLabel": "Användarnamn",
+    "usernamePassword": "Användarnamn och lösenord"
+  },
+  "papra": {
+    "apiTokenPlaceholder": "Ange din Papra API-token",
+    "connectionFailed": "Anslutning misslyckades",
+    "connectionSuccess": "Anslutning lyckades",
+    "description": "Anslut till din Papra-instans för dokumenthantering",
+    "organization": "Organisation",
+    "organizationPlaceholder": "Välj en organisation",
+    "urlPlaceholder": "https://din-papra-instans.com"
+  },
+  "preferences": {
+    "dateFormat": {
+      "description": "Välj hur datum visas genom hela applikationen",
+      "dmy": "DD/MM/ÅÅÅÅ (Europeisk)",
+      "mdy": "MM/DD/ÅÅÅÅ (USA)",
+      "title": "Datumformat",
+      "ymd": "ÅÅÅÅ-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Ange varaktigheten för inaktivitet innan din session går ut (i minuter)",
+      "range": "minuter (5-1440)",
+      "title": "Sessionstimeout"
+    },
+    "unitSystem": {
+      "description": "Välj om mätningar ska visas i Imperial (pund, fot, °F) eller metriska (kilogram, centimeter, °C) enheter",
+      "imperial": "Imperial (lbs, fot, °F)",
+      "metric": "Metrisk (kg, cm, °C)",
+      "title": "Enhetssystem"
+    }
+  },
+  "releaseNotes": {
+    "currentVersion": "Aktuell",
+    "dismiss": "Förstått",
+    "empty": "Inga versionsanteckningar tillgängliga",
+    "error": "Kan inte ladda versionsanteckningar",
+    "publishedOn": "Släppt {{date}}",
+    "retry": "Försök igen",
+    "showAll": "Visa fler versioner",
+    "showLess": "Visa färre",
+    "viewOnGithub": "Visa på GitHub",
+    "whatsNewTitle": "Vad är nytt"
+  },
+  "sections": {
+    "accountManagement": "Kontohantering",
+    "gettingHelp": "Få hjälp",
+    "preferences": "Applikationsinställningar",
+    "releaseNotes": "Versionsanteckningar",
+    "security": "Säkerhet",
+    "supportMediKeep": "Stöd MediKeep",
+    "systemInfo": "Systeminformation"
+  },
+  "security": {
+    "password": {
+      "button": "Ändra lösenord",
+      "confirmPassword": "Bekräfta nytt lösenord",
+      "currentPassword": "Nuvarande lösenord",
+      "description": "Ändra ditt kontolösenord för att hålla ditt konto säkert",
+      "forceChange": {
+        "errors": {
+          "allFieldsRequired": "Alla fält krävs.",
+          "changeFailed": "Misslyckades med att ändra lösenord. Försök igen.",
+          "passwordComplexity": "Nytt lösenord måste innehålla minst en bokstav och en siffra.",
+          "passwordMustDiffer": "Nytt lösenord måste skilja sig från ditt nuvarande lösenord.",
+          "passwordsMustMatch": "De nya lösenorden stämmer inte överens.",
+          "passwordTooShort": "Nytt lösenord måste vara minst 6 tecken."
+        },
+        "submit": "Ange nytt lösenord",
+        "submitting": "Ändrar lösenord...",
+        "subtitle": "Ditt konto kräver en lösenordsändring innan du kan fortsätta. Ange ett nytt lösenord nedan.",
+        "title": "Lösenordsändring krävs"
+      },
+      "newPassword": "Nytt lösenord",
+      "passwordHelp": "Minst 6 tecken, måste innehålla en bokstav och en siffra."
+    }
+  },
+  "settings": {
+    "releaseNotes": {
+      "noChanges": "Inga ändringar listade för denna version",
+      "whatsNewSubtitle": "Här är vad som ändrades sedan din senaste uppdatering"
+    }
+  },
+  "sponsor": {
+    "button": "Sponsra på GitHub",
+    "buttonShort": "Sponsra",
+    "description": "MediKeep är gratis och öppen källkod. Om du tycker den är användbar, överväg att sponsra projektet för att hjälpa till att finansiera utveckling och hålla det igång."
+  },
+  "storage": {
+    "connectionRequired": "Anslutning krävs",
+    "defaultLocation": "Standardlagringsplats",
+    "filesCount": "{{count}} filer",
+    "filesCount_one": "{{count}} filer",
+    "filesCount_other": "{{count}} filer",
+    "localDescription": "Filer lagras direkt på denna server. Bra för enkla installationer utan externa tjänster.",
+    "localStorage": "Lokal lagring",
+    "noUsageData": "Ingen lagringsanvändningsdata tillgänglig",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "Filer laddas upp till din Paperless-ngx server. Tillhandahåller OCR, taggning och avancerad dokumenthantering.",
+    "papra": "Papra",
+    "papraDescription": "Filer lagras i din Papra-instans. Tillhandahåller organiserad dokumenthantering med organisationer.",
+    "title": "Lagringsinställningar",
+    "usageLabel": "Lagringsanvändning"
+  },
+  "system": {
+    "timezone": {
+      "title": "Tidszon"
+    },
+    "version": {
+      "loading": "Laddar versionsinformation...",
+      "title": "Applikationsversion",
+      "unavailable": "Versionsinformation otillgänglig",
+      "unknownApp": "Okänd app",
+      "unknownVersion": "Okänd version"
+    }
+  }
+}

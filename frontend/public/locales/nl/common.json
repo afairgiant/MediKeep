@@ -1,33 +1,7 @@
 {
-  "auth": {
-    "login": {
-      "continueWith": "Doorgaan met {{provider}}",
-      "createAccount": "Nieuw account aanmaken",
-      "hidePassword": "Wachtwoord verbergen",
-      "or": "of",
-      "passwordPlaceholder": "Voer uw wachtwoord in",
-      "registrationDisabled": "Registratie van nieuwe gebruikers is momenteel uitgeschakeld.",
-      "showPassword": "Wachtwoord tonen",
-      "submit": "Inloggen",
-      "submitting": "Bezig met inloggen...",
-      "title": "INLOGGEN OP UW ACCOUNT",
-      "usernamePlaceholder": "Voer uw gebruikersnaam in"
-    },
-    "userCreation": {
-      "accountCreated": "Account succesvol aangemaakt! Log in met uw inloggegevens.",
-      "backToLogin": "Terug naar inloggen",
-      "cardSubtitle": "Vul het onderstaande formulier in om uw nieuwe account aan te maken",
-      "cardTitle": "Accountgegevens",
-      "nextSteps": {
-        "autoRecord": "Uw patiëntdossier wordt automatisch aangemaakt",
-        "dataSecure": "Al uw gegevens zijn veilig en privé",
-        "loggedIn": "U wordt direct ingelogd na het aanmaken van uw account",
-        "startManaging": "U kunt direct beginnen met het beheren van uw medische gegevens"
-      },
-      "pageSubtitle": "Meld u vandaag aan bij MediKeep en beheer uw medische dossiers veilig",
-      "pageTitle": "Maak uw account aan",
-      "welcomeMessage": "Welkom {{name}}! Uw account is succesvol aangemaakt.",
-      "whatHappensNext": "Wat gebeurt er hierna?"
+  "allergies": {
+    "messages": {
+      "loading": "Allergieën laden..."
     }
   },
   "buttons": {
@@ -164,17 +138,17 @@
     "editEquipment": "Apparatuur bewerken",
     "fields": {
       "modelNumber": "Model",
-      "nextService": "Volgende onderhoud",
+      "nextService": "Volgend onderhoud",
       "prescribedDate": "Voorgeschreven",
       "serialNumber": "Serienr."
     },
     "form": {
       "create": "Apparatuur aanmaken",
       "lastService": "Datum laatste onderhoud",
-      "manufacturerPlaceholder": "e.g., ResMed, Philips",
+      "manufacturerPlaceholder": "bijv. ResMed, Philips",
       "modelNumber": "Modelnummer",
-      "modelPlaceholder": "e.g., AirSense 11",
-      "namePlaceholder": "e.g., ResMed AirSense 11",
+      "modelPlaceholder": "bijv. AirSense 11",
+      "namePlaceholder": "bijv. ResMed AirSense 11",
       "nextService": "Datum volgend onderhoud",
       "notesPlaceholder": "Aanvullende notities over deze apparatuur",
       "practitioner": "Voorgeschreven door",
@@ -206,103 +180,6 @@
   "errors": {
     "invalidPhone": "Voer een geldig telefoonnummer in",
     "loadFailed": "Laden mislukt"
-  },
-  "exportPage": {
-    "availableData": {
-      "moreItems_one": "{{count}} more item",
-      "moreItems_other": "{{count}} more items",
-      "title": "Beschikbare gegevens"
-    },
-    "buttons": {
-      "bulkExport": "{{count}} typen bulkexporteren als ZIP",
-      "bulkExport_one": "Bulk Export {{count}} type as ZIP",
-      "bulkExport_other": "Bulk Export {{count}} types as ZIP",
-      "creatingZip": "ZIP aanmaken...",
-      "exportAs": "{{scope}} exporteren als {{format}}",
-      "exporting": "Exporteren...",
-      "goToDashboard": "Naar dashboard",
-      "refreshPage": "Pagina vernieuwen"
-    },
-    "configuration": {
-      "bulkSelection": {
-        "label": "Selecteer gegevenstypen voor bulkexport"
-      },
-      "dataToExport": {
-        "label": "Te exporteren gegevens",
-        "placeholder": "Selecteer gegevenstype"
-      },
-      "dateRange": {
-        "endDate": "Einddatum (optioneel)",
-        "startDate": "Startdatum (optioneel)"
-      },
-      "format": {
-        "label": "Exportformaat",
-        "placeholder": "Selecteer formaat"
-      },
-      "includeFiles": "Bijlagen opnemen (maakt ZIP-bestand aan)",
-      "includePatientInfo": {
-        "description": "Uitvinken om persoonlijke patiëntgegevens uit te sluiten voor privacy",
-        "label": "Patiëntinformatie opnemen (naam, demografische gegevens, enz.)"
-      },
-      "title": "Exportconfiguratie"
-    },
-    "description": "Download uw medische gegevens in verschillende formaten voor back-up of om te delen met zorgverleners",
-    "errors": {
-      "bulkExportFailed": "Bulkexport mislukt: {{message}}",
-      "bulkInvalidSettings": "Controleer uw bulkexportinstellingen. Zorg ervoor dat u minimaal één gegevenstype en een geldig formaat heeft geselecteerd.",
-      "bulkNoDataFound": "Geen gegevens gevonden voor de geselecteerde exportcriteria. Probeer andere gegevenstypen te selecteren of het datumbereik aan te passen.",
-      "exportFailed": "Export mislukt: {{message}}",
-      "invalidSettings": "Controleer uw exportinstellingen. Zorg ervoor dat u een geldig gegevenstype en formaat heeft geselecteerd.",
-      "loadFailed": "Exportgegevens konden niet worden geladen: {{message}}",
-      "noActivePatient": "Er is momenteel geen patiëntprofiel geselecteerd. Selecteer een patiënt vanuit het dashboard om de exportfunctie te gebruiken.",
-      "noDataFound": "Geen gegevens gevonden voor de geselecteerde exportcriteria. Probeer een ander gegevenstype of datumbereik te selecteren.",
-      "noDataType": "Selecteer minimaal één gegevenstype voor bulkexport",
-      "sessionExpired": "Uw sessie is verlopen. Vernieuw de pagina of log opnieuw in om toegang te krijgen tot de exportfuncties.",
-      "validationFailed": "{{errors}}"
-    },
-    "exportMode": {
-      "bulkDescription": "Exporteer meerdere gegevenstypen samen in een ZIP-bestand",
-      "bulkExport": "Bulkexport",
-      "singleDescription": "Exporteer één gegevenstype in het door u gekozen formaat",
-      "singleExport": "Enkele export",
-      "title": "Exportmodus"
-    },
-    "icon": "📤",
-    "information": {
-      "bulk": {
-        "description": "Maakt een ZIP-bestand aan met meerdere gegevenstypen in het door u gekozen formaat voor uitgebreide gegevensback-up.",
-        "title": "Bulkexport:"
-      },
-      "csv": {
-        "description": "Door komma's gescheiden waarden, geschikt voor spreadsheetapplicaties zoals Excel of Google Sheets.",
-        "title": "CSV-formaat:"
-      },
-      "fileAttachments": {
-        "description": "Indien beschikbaar bij PDF-exports kunnen labresultaatbestanden worden opgenomen in een ZIP-archief.",
-        "title": "Bestandsbijlagen:"
-      },
-      "json": {
-        "description": "Machineleesbaar gestructureerd gegevensformaat, ideaal voor import in andere systemen of applicaties.",
-        "title": "JSON-formaat:"
-      },
-      "pdf": {
-        "description": "Leesbaar documentformaat, perfect voor afdrukken of delen met zorgverleners.",
-        "title": "PDF-formaat:"
-      },
-      "title": "Exportinformatie"
-    },
-    "loading": "Exportopties laden...",
-    "scopes": {
-      "all": "Alle dossiers",
-      "encounters": "Consulten"
-    },
-    "success": {
-      "bulkExportComplete": "Bulkexport succesvol voltooid! Uw ZIP-bestand met {{count}} gegevenstypen is gedownload.",
-      "bulkExportComplete_one": "Bulk export completed successfully! Your ZIP file containing {{count}} data type has been downloaded.",
-      "bulkExportComplete_other": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",
-      "exportComplete": "Export succesvol voltooid! Uw {{format}}-bestand is gedownload."
-    },
-    "title": "Gezondheidsdossiers exporteren"
   },
   "familyHistory": {
     "addFamilyMember": "Familielid toevoegen",
@@ -383,7 +260,7 @@
       "editFamilyMember": "Familielid bewerken",
       "editMember": "Familielid bewerken",
       "memberDetails": "Gegevens familielid",
-      "modalTitle": "Familiemedische geschiedenis",
+      "modalTitle": "Medische familiegeschiedenis",
       "sharedAt": "Gedeeld op",
       "sharingNote": "Opmerking bij delen"
     }
@@ -391,8 +268,8 @@
   "fields": {
     "endDate": {
       "description": "Wanneer dit eindigde (indien van toepassing)",
-      "placeholder": "Selecteer einddatum",
-      "label": "Einddatum"
+      "label": "Einddatum",
+      "placeholder": "Selecteer einddatum"
     },
     "notes": {
       "description": "Eventuele aanvullende details of notities",
@@ -400,8 +277,8 @@
     },
     "startDate": {
       "description": "Wanneer dit begon",
-      "placeholder": "Selecteer startdatum",
-      "label": "Startdatum"
+      "label": "Startdatum",
+      "placeholder": "Selecteer startdatum"
     },
     "status": {
       "description": "Huidige status"
@@ -518,10 +395,12 @@
     "loading": "Verzekeringsgegevens laden...",
     "viewModal": {
       "additionalDetails": "Aanvullende dekkingsdetails",
+      "attachedDocuments": "Bijgevoegde documenten",
       "claimsAddress": "Claimsadres",
       "claimsPhone": "Claimstelefoonnummer",
       "coinsurance": "Medeverzekering",
       "copay": "Eigen bijdrage",
+      "coverageDetails": "Dekkingsdetails",
       "coveragePeriod": "Dekkingsperiode",
       "customerServicePhone": "Klantenservicetelefoonnummer",
       "deductible": "Eigen risico",
@@ -545,6 +424,9 @@
       "visionCoverage": "Oogzorgdekking"
     }
   },
+  "invitations": {
+    "from": "Van"
+  },
   "key": "Standaard {{var}}",
   "labels": {
     "addCustom": "+ \"{{value}}\" toevoegen",
@@ -565,73 +447,35 @@
     "notCompleted": "Niet voltooid",
     "noVisitsLinked": "Geen bezoeken gekoppeld aan dit labresultaat",
     "ordered": "Aangevraagd",
+    "phoneNumber": "Telefoonnummer",
     "ratingStars": "{{count}}/5 sterren",
-    "ratingStars_one": "{{count}}/5 star",
-    "ratingStars_other": "{{count}}/5 stars",
+    "ratingStars_one": "{{count}}/5 ster",
+    "ratingStars_other": "{{count}}/5 sterren",
     "selectPurpose": "Selecteer doel",
-    "viewDetails": "View Details",
+    "viewDetails": "Details bekijken",
     "viewPharmacyDetails": "Apotheekgegevens bekijken",
     "visitDate": "Bezoekdatum",
     "visitWebsite": "Website bezoeken ↗",
-    "yes": "Ja",
-    "phoneNumber": "Telefoonnummer"
+    "yes": "Ja"
   },
   "labResults": {
-    "addFirst": "Voeg uw eerste labresultaat toe",
-    "addNew": "+ Nieuw labresultaat toevoegen",
-    "addTitle": "Nieuw labresultaat toevoegen",
-    "continueEditing": "Doorgaan met bewerken",
-    "createAndContinue": "Aanmaken en PDF uploaden",
-    "createFailed": "Labresultaat kon niet worden aangemaakt",
-    "createFailedTryAgain": "Labresultaat kon niet worden aangemaakt. Probeer het opnieuw.",
-    "creatingLabResult": "Labresultaat aanmaken...",
-    "deleteEmptyLabResult": "Labresultaat verwijderen",
-    "deleteFailed": "Labresultaat kon niet worden verwijderd",
-    "discardParsedData": "Verwerkte gegevens weggooien",
-    "editTitle": "Labresultaat bewerken",
-    "errorOccurred": "Er is een fout opgetreden",
+    "emptyLabResultMessage": "U heeft een labresultaat aangemaakt maar geen testcomponenten toegevoegd. Wilt u dit labresultaat verwijderen?",
+    "emptyLabResultWarning": "Labresultaat aangemaakt maar leeg",
     "form": {
       "linkedVisits": "Gekoppelde consulten",
       "linkVisitsDescription": "Koppel dit labresultaat aan consulten waar het is aangevraagd of beoordeeld.",
       "linkVisitsTitle": "Koppelen aan consulten"
     },
-    "keepEmptyLabResult": "Labresultaat behouden",
-    "labResultDeleted": "Labresultaat verwijderd",
-    "loading": "Labresultaten laden...",
-    "loadingHint": "Als dit te lang duurt, herlaad dan de pagina",
-    "modal": {
-      "editLabResult": "Labresultaat bewerken",
-      "labels": {
-        "testType": "Testtype"
-      },
-      "sections": {
-        "associatedFiles": "Bijbehorende documenten",
-        "testInfo": "Testinformatie",
-        "testResults": "Testresultaten"
-      },
-      "tabs": {
-        "testComponents": "Testcomponenten"
-      },
-      "title": "Labresultaatdetails"
-    },
-    "networkError": "Netwerkfout. Controleer uw verbinding en probeer het opnieuw.",
-    "noResults": "Geen labresultaten gevonden",
-    "patientIdRequired": "Patiënt-ID is verplicht. Selecteer eerst een patiënt.",
-    "quickPdfImport": "Snelle PDF-import",
-    "startAdding": "Begin met het toevoegen van uw eerste labresultaat.",
-    "stepperLabels": {
-      "enterTestName": "Voer testnaam in",
-      "importFromPdf": "Importeren uit PDF",
-      "labResultInfo": "Labresultaatinfo",
-      "uploadParse": "Uploaden en verwerken"
-    },
-    "testNameLabel": "Naam labtest",
-    "testNameRequired": "Testnaam is verplicht",
-    "testNameTooLong": "Testnaam mag niet langer zijn dan {{maxLength}} tekens",
-    "testNameTooShort": "Testnaam moet minimaal {{minLength}} tekens bevatten",
-    "timeoutError": "Verzoek verlopen. Probeer het opnieuw.",
+    "labResultCreated": "Labresultaat \"{{testName}}\" is aangemaakt. Nu kunt u uw PDF uploaden en verwerken.",
+    "quickFormInstructions": "Voer een naam in voor dit labresultaat, daarna kunt u uw PDF uploaden en verwerken.",
+    "quickImportModalTitle": "Snelle PDF-import - Stap {{step}} van 2",
+    "quickImportSuccess": "Labresultaat en testcomponenten succesvol geïmporteerd",
+    "testNameDescription": "Dit is het enige verplichte veld - u kunt later meer details toevoegen",
+    "testNamePlaceholder": "Endocrien bloedonderzoek enz.",
+    "unsavedDataInstructions": "Klik op \"Componenten toevoegen\" in het tabblad Voorbeeld om uw geparseerde gegevens op te slaan voordat u sluit.",
     "unsavedDataMessage_one": "U heeft {{count}} geparseerd(e) testcomponent(en) die nog niet zijn toegevoegd. Als u nu sluit, gaan deze geparseerde gegevens verloren.",
-    "unsavedDataMessage_other": "U heeft {{count}} geparseerd(e) testcomponent(en) die nog niet zijn toegevoegd. Als u nu sluit, gaan deze geparseerde gegevens verloren."
+    "unsavedDataMessage_other": "U heeft {{count}} geparseerd(e) testcomponent(en) die nog niet zijn toegevoegd. Als u nu sluit, gaan deze geparseerde gegevens verloren.",
+    "unsavedDataWarning": "Niet-opgeslagen geparseerde gegevens"
   },
   "medications": {
     "addNew": "Nieuwe medicatie toevoegen",
@@ -675,11 +519,14 @@
     }
   },
   "messages": {
+    "checkBackSoon": "Kom binnenkort terug voor updates!",
+    "clearAll": "Alles wissen",
     "confirmRemoveConditionRelationship": "Weet u zeker dat u deze aandoeningsrelatie wilt verwijderen?",
     "confirmRemoveEquipmentRelationship": "Weet u zeker dat u deze apparatuurkoppeling wilt verwijderen?",
     "confirmRemoveLabResultLink": "Deze labresultaatkoppeling verwijderen?",
     "confirmRemoveVisitLink": "Deze bezoekskoppeling verwijderen?",
     "displayError": "Dit item kan niet worden weergegeven. Probeer de pagina te vernieuwen.",
+    "doNotClose": "Sluit dit venster niet en navigeer niet weg",
     "failedToLinkLabResult": "Koppelen van labresultaat mislukt",
     "failedToLinkVisit": "Koppelen van bezoek mislukt",
     "failedToUnlinkLabResult": "Ontkoppelen van labresultaat mislukt",
@@ -688,6 +535,7 @@
     "processing": "Verwerken...",
     "selectLabResult": "Selecteer een labresultaat",
     "selectVisit": "Selecteer een bezoek",
+    "underDevelopment": "Dit onderdeel is momenteel in ontwikkeling.",
     "updateSuccess": "Succesvol bijgewerkt"
   },
   "modals": {
@@ -744,6 +592,7 @@
   "patients": {
     "form": {
       "address": {
+        "label": "Adres",
         "placeholder": "Voer adres in"
       },
       "birthDate": {
@@ -803,7 +652,9 @@
         "description": "Vink dit aan als u een dossier voor uzelf aanmaakt",
         "label": "Dit is mijn eigen medisch dossier"
       }
-    }
+    },
+    "photoFormat": "JPEG, PNG, GIF of BMP -- Max 15 MB",
+    "removePhoto": "Foto verwijderen"
   },
   "patientSelector": {
     "buttons": {
@@ -910,11 +761,11 @@
       "emptyTitle": "Geen praktijken gevonden",
       "searchPlaceholder": "Zoek praktijken...",
       "totalCount": "{{count}} praktijken totaal",
-      "totalCount_one": "{{count}} practice total",
-      "totalCount_other": "{{count}} practices total",
+      "totalCount_one": "{{count}} praktijk totaal",
+      "totalCount_other": "{{count}} praktijken totaal",
       "unusedCount": "{{count}} ongebruikt",
-      "unusedCount_one": "{{count}} unused",
-      "unusedCount_other": "{{count}} unused"
+      "unusedCount_one": "{{count}} ongebruikt",
+      "unusedCount_other": "{{count}} ongebruikt"
     },
     "tabs": {
       "practices": "Praktijken"
@@ -996,82 +847,13 @@
       "title": "Proceduredetails"
     }
   },
-  "reportBuilder": {
-    "buttons": {
-      "addRecords": "Medische dossiers toevoegen",
-      "clearSelections": "Alle selecties wissen",
-      "generateReport": "Rapport genereren ({{count}} dossiers)",
-      "generateReport_one": "Generate Report ({{count}} record)",
-      "generateReport_other": "Generate Report ({{count}} records)",
-      "generateReportChartsOnly": "Rapport genereren ({{chartCount}} grafieken)",
-      "generateReportWithCharts": "Rapport genereren ({{recordCount}} dossiers, {{chartCount}} grafieken)",
-      "selectAll": "Alle dossiers selecteren"
-    },
-    "configuration": {
-      "description": "Selecteer medische dossiers om op te nemen in uw aangepaste rapport",
-      "title": "Rapportconfiguratie"
-    },
-    "icon": "📊",
-    "loading": "Rapportbouwer laden...",
-    "noData": {
-      "description": "Voeg eerst medische dossiers toe om de rapportbouwer te gebruiken.",
-      "title": "Geen medische gegevens beschikbaar"
-    },
-    "notifications": {
-      "templateLoaded": "Sjabloon geladen",
-      "templateLoadedMessage": "Sjabloon \"{{name}}\" is geladen."
-    },
-    "progress": {
-      "recordsSelected": "Dossiers geselecteerd"
-    },
-    "settingsModal": {
-      "includePatientInfo": {
-        "description": "Demografische en contactinformatie toevoegen",
-        "label": "Patiëntinformatie opnemen"
-      },
-      "includeProfilePicture": {
-        "description": "Patiëntfoto toevoegen aan de rapportkop",
-        "label": "Profielfoto opnemen"
-      },
-      "includeSummary": {
-        "description": "Overzicht en statistiekensectie toevoegen",
-        "label": "Samenvattingsstatistieken opnemen"
-      },
-      "reportTitle": {
-        "label": "Rapporttitel"
-      },
-      "title": "Rapportinstellingen"
-    },
-    "title": "Aangepaste rapportbouwer",
-    "trendCharts": {
-      "dateFrom": "Van",
-      "dateTo": "Tot",
-      "emptyState": "Geen trendgegevens beschikbaar. Voeg vitale functies of labresultaten toe om trendgrafieken mogelijk te maken.",
-      "labTestCharts": {
-        "description": "Zoek en selecteer labtesten voor grafieken",
-        "searchPlaceholder": "Labtesten zoeken...",
-        "title": "Grafieken labtesten"
-      },
-      "maxReached": "Maximum van 10 grafieken bereikt",
-      "recordCount": "{{count}} dossiers",
-      "recordCount_one": "{{count}} record",
-      "recordCount_other": "{{count}} records",
-      "removeChart": "Grafiek {{name}} verwijderen",
-      "selectedCharts": "Geselecteerde grafieken ({{count}})",
-      "selectedCharts_one": "Selected Charts ({{count}})",
-      "selectedCharts_other": "Selected Charts ({{count}})",
-      "vitalCharts": {
-        "description": "Selecteer vitale functies voor grafieken",
-        "title": "Grafieken vitale functies"
-      }
-    }
-  },
   "search": {
     "activeFilterCount": "{{count}} actieve filters",
-    "activeFilterCount_one": "{{count}} active filter",
-    "activeFilterCount_other": "{{count}} active filters",
+    "activeFilterCount_one": "{{count}} actief filter",
+    "activeFilterCount_other": "{{count}} actieve filters",
     "activeFilters": "Actieve filters",
     "addMoreTags": "Meer tags toevoegen",
+    "advancedFilters": "Geavanceerde filters",
     "allTags": "Alle tags",
     "allTime": "Altijd",
     "anyTag": "Elke tag",
@@ -1102,12 +884,16 @@
     "filterByTag": "Filteren op tag: {{tag}}",
     "filtered": "(gefilterd)",
     "filters": "Filters",
+    "forQuery": "voor \"{{query}}\"",
     "last30Days": "Laatste 30 dagen",
     "last6Months": "Laatste 6 maanden",
     "last7Days": "Laatste 7 dagen",
     "lastYear": "Vorig jaar",
     "loadingTags": "Tags laden...",
     "matchAll": "Alles matchen",
+    "matchAllDesc": "Toon items die alle geselecteerde tags bevatten",
+    "matchAny": "ELKE geselecteerde tag matchen",
+    "matchAnyDesc": "Toon items die minimaal één geselecteerde tag bevatten",
     "noPatientMessage": "Selecteer een patiënt vanuit het dashboard om medische dossiers te doorzoeken.",
     "noPatientTitle": "Geen patiënt geselecteerd",
     "noResults": "Geen resultaten gevonden",
@@ -1121,10 +907,15 @@
     "previewRecord": "Dossiervoorbeeld",
     "recordTypes": "Dossiertypen",
     "removeTypeFilter": "{{type}}-filter verwijderen",
+    "resultCount": "{{count}} resultaten",
     "resultCount_one": "{{count}} resultaat",
     "resultCount_other": "{{count}} resultaten",
+    "resultsFound": "{{count}} resultaat gevonden",
+    "resultsFound_one": "{{count}} resultaat gevonden",
+    "resultsFound_other": "{{count}} resultaten gevonden",
     "searchFailed": "Zoekopdracht mislukt. Probeer het opnieuw.",
     "searching": "Zoeken...",
+    "seeAll": "Alles bekijken",
     "selectTags": "Selecteer tags...",
     "sortBy": "Sorteren op",
     "sortDateNewest": "Datum (Nieuwste eerst)",
@@ -1144,8 +935,7 @@
       "vitals": "Vitale functies"
     },
     "viewCards": "Kaartenweergave",
-    "viewTable": "Tabelweergave",
-    "resultCount": "{{count}} resultaten"
+    "viewTable": "Tabelweergave"
   },
   "searchPlaceholders": {
     "allergies": "Zoek allergieën, reacties, tags...",
@@ -1166,129 +956,6 @@
     "visits": "Zoek consulten, redenen, notities, tags...",
     "vitals": "Zoek notities vitale functies..."
   },
-  "settings": {
-    "account": {
-      "deleteAccount": {
-        "button": "Account verwijderen",
-        "description": "Verwijder permanent uw account en alle bijbehorende medische gegevens. Deze actie kan niet ongedaan worden gemaakt.",
-        "title": "Account verwijderen"
-      }
-    },
-    "actions": {
-      "reset": "Wijzigingen ongedaan maken",
-      "save": "Alle wijzigingen opslaan",
-      "unsavedChanges": "U heeft niet-opgeslagen wijzigingen"
-    },
-    "documents": {
-      "cleanup": {
-        "button": "Bestanden opschonen",
-        "cleaning": "Opschonen...",
-        "description": "Ruim niet-gesynchroniseerde bestanden op en los inconsistenties in documentopslag op. Dit herstelt mislukte uploads, wist loze taken en lost databasesynchronisatieproblemen op.",
-        "title": "Bestandsopschoning"
-      },
-      "paperlessDescription": "Configureer Paperless-ngx documentbeheerIntegratie"
-    },
-    "help": {
-      "documentation": {
-        "description": "Blader door de wiki voor handleidingen, installatie-instructies en functiedocumentatie.",
-        "title": "Documentatie"
-      },
-      "issues": {
-        "description": "Een bug gevonden of een functieverzoek? Open een issue op GitHub.",
-        "title": "Probleem melden"
-      }
-    },
-    "papra": {
-      "apiTokenPlaceholder": "Voer uw Papra API-token in",
-      "connectionFailed": "Verbinding mislukt",
-      "connectionSuccess": "Verbinding geslaagd",
-      "description": "Verbind met uw Papra-instantie voor documentbeheer",
-      "organization": "Organisatie",
-      "organizationPlaceholder": "Selecteer een organisatie",
-      "urlPlaceholder": "https://uw-papra-instantie.nl"
-    },
-    "preferences": {
-      "dateFormat": {
-        "description": "Kies hoe datums worden weergegeven in de applicatie",
-        "dmy": "DD/MM/JJJJ (Europees)",
-        "mdy": "MM/DD/JJJJ (Amerikaans)",
-        "title": "Datumformaat",
-        "ymd": "JJJJ-MM-DD (ISO)"
-      },
-      "sessionTimeout": {
-        "description": "Stel de duur van inactiviteit in voordat uw sessie verloopt (in minuten)",
-        "range": "minuten (5-1440)",
-        "title": "Sessietime-out"
-      },
-      "unitSystem": {
-        "description": "Kies of metingen worden weergegeven in het imperiale (ponden, voet, °F) of metrische (kilogrammen, centimeters, °C) systeem",
-        "imperial": "Imperiaal (lbs, voet, °F)",
-        "metric": "Metrisch (kg, cm, °C)",
-        "title": "Eenhedensysteem"
-      }
-    },
-    "releaseNotes": {
-      "currentVersion": "Huidige versie",
-      "dismiss": "Begrepen",
-      "empty": "Geen releaseopmerkingen beschikbaar",
-      "error": "Releaseopmerkingen konden niet worden geladen",
-      "publishedOn": "Uitgebracht op {{date}}",
-      "retry": "Opnieuw proberen",
-      "showAll": "Alle releases tonen",
-      "showLess": "Minder tonen",
-      "viewOnGithub": "Bekijken op GitHub",
-      "whatsNewTitle": "Wat is er nieuw"
-    },
-    "sections": {
-      "accountManagement": "Accountbeheer",
-      "gettingHelp": "Hulp verkrijgen",
-      "preferences": "Applicatievoorkeuren",
-      "releaseNotes": "Releaseopmerkingen",
-      "security": "Beveiliging",
-      "supportMediKeep": "MediKeep ondersteunen",
-      "systemInfo": "Systeeminformatie"
-    },
-    "security": {
-      "password": {
-        "button": "Wachtwoord wijzigen",
-        "confirmPassword": "Bevestig nieuw wachtwoord",
-        "currentPassword": "Huidig wachtwoord",
-        "description": "Wijzig uw accountwachtwoord om uw account veilig te houden",
-        "forceChange": {
-          "errors": {
-            "allFieldsRequired": "Alle velden zijn verplicht.",
-            "changeFailed": "Wachtwoord kon niet worden gewijzigd. Probeer het opnieuw.",
-            "passwordComplexity": "Nieuw wachtwoord moet minimaal één letter en één cijfer bevatten.",
-            "passwordMustDiffer": "Nieuw wachtwoord moet anders zijn dan uw huidige wachtwoord.",
-            "passwordsMustMatch": "Nieuwe wachtwoorden komen niet overeen.",
-            "passwordTooShort": "Nieuw wachtwoord moet minimaal 6 tekens bevatten."
-          },
-          "submit": "Nieuw wachtwoord instellen",
-          "submitting": "Wachtwoord wijzigen...",
-          "subtitle": "Uw account vereist een wachtwoordwijziging voordat u verder kunt gaan. Stel hieronder een nieuw wachtwoord in.",
-          "title": "Wachtwoordwijziging vereist"
-        },
-        "newPassword": "Nieuw wachtwoord",
-        "passwordHelp": "Minimaal 6 tekens, moet een letter en een cijfer bevatten."
-      }
-    },
-    "sponsor": {
-      "button": "Sponsoren op GitHub",
-      "description": "MediKeep is gratis en open source. Als u het nuttig vindt, overweeg dan het project te sponsoren om de ontwikkeling te financieren en het voort te zetten."
-    },
-    "system": {
-      "timezone": {
-        "title": "Tijdzone"
-      },
-      "version": {
-        "loading": "Versie-informatie laden...",
-        "title": "Applicatieversie",
-        "unavailable": "Versie-informatie niet beschikbaar",
-        "unknownApp": "Onbekende app",
-        "unknownVersion": "Onbekende versie"
-      }
-    }
-  },
   "severity": {
     "critical": "Kritiek - Levensbedreigend",
     "lifeThreatening": "Levensbedreigend - Risico op anafylaxie",
@@ -1300,11 +967,11 @@
     "severeImpact": "Ernstig - Significante impact"
   },
   "status": {
+    "completed": "Voltooid",
     "expired": "Verlopen",
     "onHold": "In de wacht",
     "planned": "Gepland",
-    "stopped": "Gestopt",
-    "completed": "Voltooid"
+    "stopped": "Gestopt"
   },
   "statusDescriptions": {
     "activeAllergic": "Actief - Momenteel allergisch",
@@ -1370,6 +1037,7 @@
       "recorded": "geregistreerd",
       "title": "Symptoomtijdlijn"
     },
+    "title": "Symptomen",
     "viewModal": {
       "acute": "Acuut",
       "confirmDeleteEpisode": "Weet u zeker dat u deze episode wilt verwijderen?",
@@ -1399,15 +1067,15 @@
     "createTag": "Tag aanmaken",
     "deleteModal": {
       "description": "Dit verwijdert de tag uit alle {{count}} dossiers. Deze actie kan niet ongedaan worden gemaakt.",
-      "description_one": "This will remove the tag from {{count}} record. This action cannot be undone.",
-      "description_other": "This will remove the tag from all {{count}} records. This action cannot be undone.",
+      "description_one": "Dit verwijdert de tag uit {{count}} dossier. Deze actie kan niet ongedaan worden gemaakt.",
+      "description_other": "Dit verwijdert de tag uit alle {{count}} dossiers. Deze actie kan niet ongedaan worden gemaakt.",
       "message": "Weet u zeker dat u de tag \"{{tag}}\" wilt verwijderen?"
     },
     "editModal": {
       "colorLabel": "Tagkleur",
       "description": "Dit hernoemt de tag in alle {{count}} dossiers.",
-      "description_one": "This will rename the tag across {{count}} record.",
-      "description_other": "This will rename the tag across all {{count}} records.",
+      "description_one": "Dit hernoemt de tag in {{count}} dossier.",
+      "description_other": "Dit hernoemt de tag in alle {{count}} dossiers.",
       "placeholder": "Voer nieuwe tagnaam in...",
       "submit": "Opslaan",
       "title": "Tag bewerken"
@@ -1427,10 +1095,11 @@
     "noTags": "Geen tags gevonden",
     "noTagsDescription": "Begin tags te gebruiken in uw medische dossiers om ze hier te zien.",
     "noTagsSearch": "Geen tags komen overeen met uw zoekopdracht.",
+    "pressEnterToAdd": "Druk op Enter om een tag toe te voegen",
     "replaceModal": {
       "description": "Dit vervangt \"{{oldTag}}\" door \"{{newTag}}\" in alle {{count}} dossiers.",
-      "description_one": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across {{count}} record.",
-      "description_other": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across all {{count}} records.",
+      "description_one": "Dit vervangt \"{{oldTag}}\" door \"{{newTag}}\" in {{count}} dossier.",
+      "description_other": "Dit vervangt \"{{oldTag}}\" door \"{{newTag}}\" in alle {{count}} dossiers.",
       "label": "Vervangen door",
       "placeholder": "Voer vervangende tagnaam in...",
       "submit": "Tag vervangen",
@@ -1450,76 +1119,6 @@
     },
     "title": "Tagbeheer"
   },
-  "testComponents": {
-    "addTestComponents": "Testcomponenten toevoegen",
-    "addTests": "Testen toevoegen",
-    "categories": {
-      "cardiology": "Cardiologie - Hart- en cardiale markers",
-      "chemistry": "Chemie - Elektrolyten en mineralen",
-      "endocrinology": "Endocrinologie - Hormonen en diabetes",
-      "genetics": "Genetica - Genetisch onderzoek",
-      "hematology": "Hematologie - Bloedbeeld en ijzer",
-      "hepatology": "Hepatologie - Leverenzymen en -functie",
-      "immunology": "Immunologie - Afweersysteem en antilichamen",
-      "lipids": "Lipiden - Cholesterol en triglyceriden",
-      "microbiology": "Microbiologie - Infecties en kweken",
-      "molecular": "Moleculair - DNA-testen",
-      "other": "Overige testen",
-      "pathology": "Pathologie - Weefsel- en biopsie-analyse",
-      "toxicology": "Toxicologie - Drug- en toxinescreening"
-    },
-    "editModal": {
-      "descriptions": {
-        "linkedTest": "Koppel deze test aan een standaard testnaam voor trendregistratie over verschillende labnaamvariaties"
-      },
-      "editing": "Bewerken",
-      "fields": {
-        "abbreviation": "Afkorting",
-        "linkedTest": "Koppelen aan standaardtest",
-        "maximum": "Maximum",
-        "minimum": "Minimum",
-        "rangeText": "Bereiktekst (alternatief)",
-        "referenceRange": "Referentiebereik",
-        "result": "Resultaat",
-        "status": "Status (automatisch berekend)",
-        "unit": "Eenheid"
-      },
-      "linkedInfo": "Deze test wordt gegroepeerd met andere \"{{testName}}\" tests in trendgrafieken.",
-      "notDetermined": "Niet bepaald",
-      "placeholders": {
-        "abbreviation": "bijv. HGB",
-        "linkedTest": "Selecteer een standaardtest om aan te koppelen...",
-        "maxValue": "Maximumwaarde",
-        "minValue": "Minimumwaarde",
-        "notes": "Aanvullende notities over dit testresultaat",
-        "rangeText": "bijv. 'Negatief' of 'Man: 13,5-17,5, Vrouw: 12,0-15,5'",
-        "result": "Selecteer resultaat",
-        "testCode": "bijv. 718-7",
-        "testName": "bijv. hemoglobine",
-        "unit": "bijv. g/dL",
-        "value": "Voer testwaarde in"
-      },
-      "title": "Testcomponent bewerken",
-      "trendLinking": "Trendkoppeling",
-      "updating": "Testcomponent bijwerken..."
-    },
-    "emptyState": {
-      "description": "Sjablonen bieden veelgebruikte labpanelen (bloedbeeld, CMP, enz.) waarin u waarden en referentiebereiken kunt invoeren. Bulk-import stelt u in staat resultaten van labrapporten te kopiëren en plakken voor automatische verwerking."
-    },
-    "errorLoading": "Fout bij laden van testcomponenten",
-    "noComponents": "Geen testcomponenten",
-    "noComponentsDescription": "Dit labresultaat heeft nog geen individuele testcomponenten.",
-    "notifications": {
-      "componentDeleted": "Component verwijderd",
-      "hasBeenDeleted": "{{name}} is verwijderd"
-    },
-    "refreshComponents": "Componenten vernieuwen",
-    "tabs": {
-      "statistics": "Statistieken",
-      "testResults": "Testresultaten"
-    },
-    "title": "Testcomponenten"
-  },
   "time": {
     "day": "dag",
     "days": "dagen",
@@ -1530,16 +1129,21 @@
     "year": "jaar",
     "years": "jaar"
   },
+  "trash": {
+    "fileCount_one": "{{count}} bestand"
+  },
   "treatments": {
     "addFirstTreatment": "Voeg uw eerste behandeling toe",
     "addTreatment": "+ Behandeling toevoegen",
     "card": {
       "conditionId": "Aandoening #{{id}}"
     },
+    "clickToExpand": "Klik om uit te vouwen en details toe te voegen (optioneel)",
     "conditionsLoadingError": "Fout bij laden van aandoeningen",
+    "createNew": "Nieuw aanmaken",
     "form": {
       "createTreatment": "Behandeling aanmaken",
-      "createWithLinks": "Creating treatment plan and linking items...",
+      "createWithLinks": "Behandelplan aanmaken en items koppelen...",
       "creatingWithLinks": "Behandeling aanmaken en items koppelen...",
       "descriptionDesc": "Korte beschrijving van de behandeling",
       "descriptionPlaceholder": "Beschrijf de behandeling",
@@ -1551,6 +1155,7 @@
       "frequencyDesc": "Hoe vaak de behandeling wordt uitgevoerd",
       "frequencyPlaceholder": "bijv. dagelijks, tweemaal per week",
       "linkingPartialFailure": "Sommige items konden niet worden gekoppeld",
+      "linkingPartialFailureMessage": "De behandeling is aangemaakt, maar sommige items konden niet worden gekoppeld. U kunt ze handmatig koppelen door de behandeling te bewerken.",
       "notesDesc": "Aanvullende informatie over deze behandeling",
       "notesPlaceholder": "Voer behandelnotities, observaties of aanvullende details in",
       "practitionerDesc": "Zorgverlener die de behandeling uitvoert",
@@ -1571,6 +1176,7 @@
       "treatmentTypePlaceholder": "bijv. fysiotherapie, operatie",
       "updateTreatment": "Behandeling bijwerken"
     },
+    "linkExisting": "Bestaande koppelen",
     "loadingTreatments": "Behandelingen laden...",
     "medications": {
       "default": "(van medicijn)",
@@ -1582,11 +1188,14 @@
     },
     "mode": {
       "advancedDescription": "Medicijngericht plan met per-medicijn overschrijvingen",
+      "label": "Behandelmodus",
       "simple": "Eenvoudig",
       "simpleDescription": "Basisregistratie met schema en dosering"
     },
+    "noEquipmentLinkedDescription": "Zoek en koppel medische apparatuur die wordt gebruikt bij deze behandeling.",
     "noTreatmentsFound": "Geen behandelingen gevonden",
     "startAdding": "Begin met het toevoegen van uw eerste behandeling.",
+    "timingLabel": "Timing:",
     "viewModal": {
       "amountDosage": "Hoeveelheid/Dosering",
       "conditionId": "Aandoening #{{id}}",
@@ -1630,56 +1239,38 @@
     "loadingVisits": "Consulten laden...",
     "noVisitsFound": "Geen medische consulten gevonden",
     "table": {
-      "visitDate": "Consultdatum"
+      "visitDate": "Consultdatum",
+      "visitType": "Consulttype"
     },
     "title": "Medische consulten",
     "viewModal": {
+      "chiefComplaint": "Hoofdklacht",
       "clinicalInformation": "Klinische informatie",
       "editVisit": "Consult bewerken",
+      "followUpInstructions": "Opvolginstructies",
       "generalVisit": "Algemeen consult",
+      "location": "Locatie",
+      "priority": "Prioriteit",
       "tabs": {
         "clinical": "Klinisch",
         "visitInfo": "Consultinfo"
       },
       "title": "Consult - {{date}}",
+      "treatmentPlan": "Behandelplan",
       "visitInformation": "Consultinformatie"
     }
   },
   "vitals": {
-    "addNew": "Nieuwe vitale functies toevoegen",
-    "addTitle": "Vitale functies toevoegen",
-    "card": {
-      "notRecorded": "Niet geregistreerd",
-      "oxygenSaturation": "Zuurstofsaturatie",
-      "title": "Registratie vitale functies"
-    },
-    "categories": {
-      "diabetes": "Diabetes",
-      "high": "Hoog",
-      "low": "Laag",
-      "normal": "Normaal",
-      "prediabetes": "Prediabetes"
-    },
-    "diastolic": "Diastolisch",
-    "editTitle": "Vitale functies bewerken",
     "form": {
-      "deviceUsed": "Gebruikt apparaat/hulpmiddel",
-      "diastolicBP": "Diastolische bloeddruk",
-      "healthAlerts": "Gezondheidswaarschuwingen",
-      "locations": {
-        "ambulatory": "Ambulante zorg",
-        "clinic": "Kliniek",
-        "home": "Thuis",
-        "hospital": "Ziekenhuis",
-        "urgentCare": "Spoedeisende hulp"
-      },
-      "measurementLocation": "Meetlocatie",
-      "openCalendar": "Kalender openen",
-      "painScaleUnit": "(0-10)",
-      "recordedDateTime": "Meetdatum en -tijd",
-      "saveVitals": "Vitale functies opslaan",
-      "systolicBP": "Systolische bloeddruk",
-      "updateVitals": "Vitale functies bijwerken",
+      "dateTimePlaceholder": "",
+      "devicePlaceholder": "bijv. digitale bloeddrukmeter, thermometermodel...",
+      "heightNotSet": "Lengte niet ingesteld in patiëntprofiel - BMI-berekening niet beschikbaar",
+      "locationPlaceholder": "Waar zijn deze metingen afgenomen?",
+      "lockedByImport": "Beheerd door apparaatimportgemiddelde",
+      "missingPatientInfo": "Ontbrekende patiëntinformatie",
+      "notesPlaceholder": "Aanvullende notities over de meting van vitale functies...",
+      "pasteDateTimeDescription": "Typ of plak datum/tijd, of klik op de kalender om te selecteren",
+      "patientHeight": "Patiëntlengte: {{height}} inch (uit profiel)",
       "validation": {
         "a1cMax": "A1C mag niet hoger zijn dan 20%",
         "a1cMin": "A1C moet minimaal 0% zijn",
@@ -1690,160 +1281,23 @@
         "deviceMaxLength": "Apparaatnaam mag niet langer zijn dan 100 tekens",
         "diastolicMax": "Diastolische bloeddruk mag niet hoger zijn dan 200 mmHg",
         "diastolicMin": "Diastolische bloeddruk moet minimaal 30 mmHg zijn",
-        "firstNameRequired": "Voer uw voornaam in",
         "heartRateMax": "Hartslag mag niet hoger zijn dan 250 BPM",
         "heartRateMin": "Hartslag moet minimaal 30 BPM zijn",
-        "lastNameRequired": "Voer uw achternaam in",
-        "notesMaxLength": "Notities mogen niet langer zijn dan 1000 tekens",
+        "notesMaxLength": "Notities mogen niet langer zijn dan 5000 tekens",
         "oxygenMax": "Zuurstofsaturatie mag niet hoger zijn dan 100%",
         "oxygenMin": "Zuurstofsaturatie moet minimaal 50% zijn",
         "painScaleMax": "Pijnschaal mag niet hoger zijn dan 10",
         "painScaleMin": "Pijnschaal moet minimaal 0 zijn",
-        "passwordLength": "Wachtwoord moet minimaal 6 tekens bevatten",
-        "passwordRequirements": "Wachtwoord moet minimaal één letter en één cijfer bevatten",
         "respiratoryRateMax": "Ademhalingsfrequentie mag niet hoger zijn dan 100/min",
         "respiratoryRateMin": "Ademhalingsfrequentie moet minimaal 5/min zijn",
         "systolicMax": "Systolische bloeddruk mag niet hoger zijn dan 300 mmHg",
         "systolicMin": "Systolische bloeddruk moet minimaal 50 mmHg zijn",
         "temperatureMax": "Temperatuur mag niet hoger zijn dan {{max}}{{unit}}",
         "temperatureMin": "Temperatuur moet minimaal {{min}}{{unit}} zijn",
-        "timeInFuture": "Geselecteerde tijd mag niet in de toekomst liggen",
-        "usernameLength": "Gebruikersnaam moet minimaal 3 tekens bevatten",
         "weightMax": "Gewicht mag niet hoger zijn dan {{max}} {{unit}}",
         "weightMin": "Gewicht moet minimaal {{min}} {{unit}} zijn"
       }
-    },
-    "glucoseContext": {
-      "after_meal": "Na de maaltijd",
-      "before_meal": "Voor de maaltijd",
-      "fasting": "Nuchter",
-      "random": "Willekeurig"
-    },
-    "healthSummary": "Gezondheidsoverzicht",
-    "import": {
-      "back": "Terug",
-      "dateRange": "Datumbereik",
-      "duplicate": "Duplicaat",
-      "duplicatesFound": "Duplicaten gevonden",
-      "importButton": "Importeren",
-      "importing": "Vitale functies importeren...",
-      "newReadings": "Nieuwe metingen",
-      "noDevice": "Selecteer een apparaat",
-      "noFile": "Selecteer een CSV-bestand",
-      "parsingFailed": "CSV-bestand kon niet worden verwerkt",
-      "preview": "Voorbeeld",
-      "previewTitle": "Importvoorbeeld",
-      "selectDevice": "Apparaat selecteren",
-      "selectDevicePlaceholder": "Kies uw apparaat...",
-      "skipDuplicates": "Dubbele metingen overslaan",
-      "successWithSkipped": "{{imported}} metingen geïmporteerd ({{skipped}} duplicaten overgeslagen)",
-      "title": "Vitale functies importeren",
-      "totalReadings": "Totaal aantal metingen",
-      "uploadFile": "CSV-bestand uploaden"
-    },
-    "loading": "Vitale functies laden...",
-    "loadingStats": "Gezondheidsstatistieken laden...",
-    "modal": {
-      "a1c": "HbA1c",
-      "additionalMeasurements": "Aanvullende metingen",
-      "bloodGlucose": "Bloedglucose",
-      "deviceUsed": "Gebruikt apparaat",
-      "glucoseContext": "Meettype",
-      "glucoseContextPlaceholder": "Optioneel",
-      "painScale": "Pijnschaal",
-      "physicalMeasurements": "Lichamelijke metingen",
-      "practitionerId": "Zorgverlener-ID",
-      "respiratoryRate": "Ademhalingsfrequentie",
-      "title": "Details vitale functies"
-    },
-    "noDataAvailable": "Geen gegevens over vitale functies beschikbaar",
-    "noPatientSelected": "Geen patiënt geselecteerd",
-    "recordVitalsPrompt": "Registreer uw eerste meting van vitale functies om gezondheidsgegevens bij te houden.",
-    "secondary": "Secundair",
-    "selectPatientPrompt": "Selecteer een patiënt om vitale functies te bekijken en te beheren.",
-    "stats": {
-      "a1cDesc": "Klik om te filteren op A1C",
-      "bloodGlucoseDesc": "Klik om te filteren op bloedglucose",
-      "bloodPressure": "Bloeddruk",
-      "bloodPressureDesc": "Klik om te filteren op bloeddruk",
-      "bmi": "BMI",
-      "bmiDesc": "Body Mass Index",
-      "heartRate": "Hartslag",
-      "heartRateDesc": "Klik om te filteren op hartslag",
-      "temperature": "Laatste temperatuur",
-      "temperatureDesc": "Klik om te filteren op temperatuur",
-      "weight": "Laatste gewicht",
-      "weightDesc": "Klik om te filteren op gewicht"
-    },
-    "statsLoadError": "Kan gezondheidsstatistieken niet laden",
-    "summary": {
-      "avgGlucose": "Gem.",
-      "deleteDay": "Dag verwijderen",
-      "glucoseTrend": "Glucosetrend"
-    },
-    "summaryDescription": "Laatste metingen en gemiddelden - Klik op een kaart om de tabel hieronder te filteren",
-    "systolic": "Systolisch",
-    "table": {
-      "errorLoading": "Fout bij laden van vitale functies",
-      "noRecords": "Geen registraties van vitale functies gevonden",
-      "noRecordsDesc": "Vitale functies worden hier weergegeven zodra ze zijn geregistreerd",
-      "oxygenSat": "O2-sat."
-    },
-    "tabs": {
-      "context": "Context",
-      "dateTime": "Datum en tijd"
-    },
-    "trends": {
-      "allContexts": "Alle types",
-      "allDates": "Alle datums",
-      "average": "Gemiddelde",
-      "chart": "Grafiek",
-      "chooseTimeRange": "Kies tijdsbereik",
-      "dataPoints": "datapunten",
-      "dataTable": "Gegevenstabel",
-      "exportCsv": "Exporteren naar CSV",
-      "exportError": "Exporteren van gegevens mislukt. Probeer het opnieuw.",
-      "exportSuccess": "Data exported successfully",
-      "glucoseContextFilter": "Bloedsuikertype",
-      "latest": "Meest recent",
-      "noData": "Geen trendgegevens beschikbaar",
-      "noDataDesc": "Er zijn geen historische datapunten voor dit vitaal teken.",
-      "noDataPoints": "Geen datapunten om weer te geven",
-      "noHeightForBMI": "De lengte van de patiënt is vereist om BMI-trends te berekenen. Werk het patiëntprofiel bij met de lengte.",
-      "past2Years": "Afgelopen 2 jaar",
-      "past3Months": "Afgelopen 3 maanden",
-      "past5Years": "Afgelopen 5 jaar",
-      "past6Months": "Afgelopen 6 maanden",
-      "pastYear": "Afgelopen jaar",
-      "range": "Bereik",
-      "readings": "metingen",
-      "selectTimeRange": "Selecteer tijdsbereik",
-      "showing": "Weergeven",
-      "stdDev": "Std. afw.",
-      "summaryStatistics": "Samenvattende statistieken",
-      "timeRange": "Tijdsbereik",
-      "title": "Trendanalyse"
-    },
-    "units": {
-      "bpm": "BPM",
-      "celsius": "°C",
-      "cm": "cm",
-      "fahrenheit": "°F",
-      "inches": "inch",
-      "kg": "kg",
-      "lbs": "lbs",
-      "mgdl": "mg/dL",
-      "mmHg": "mmHg",
-      "perMin": "/min"
     }
   },
-  "warning": "Waarschuwing",
-  "allergies": {
-    "messages": {
-      "loading": "Allergieën laden..."
-    }
-  },
-  "trash": {
-    "fileCount_one": "{{count}} bestand"
-  }
+  "warning": "Waarschuwing"
 }

@@ -87,7 +87,7 @@
       "name": {
         "description": "Un nome descrittivo per identificare questo canale",
         "label": "Nome del canale",
-        "placeholder": "es., Il mio server Discord"
+        "placeholder": "ad es., Il mio server Discord"
       },
       "title": "Dettagli del canale",
       "type": {
@@ -103,7 +103,7 @@
         "placeholder": "Token dell'applicazione da Gotify"
       },
       "priority": {
-        "description": "Priorita del messaggio (1-10, predefinito 5)",
+        "description": "Priorità del messaggio (1-10, predefinito 5)",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -117,9 +117,8 @@
     "noChannels": "Nessun canale di notifica configurato",
     "noChannelsHint": "Aggiungi un canale per iniziare a ricevere notifiche",
     "notificationsSent": "{{count}} notifiche inviate",
-    "sentCount_one": "{{count}} inviati",
-    "sentCount_many": "{{count}} sent",
-    "sentCount_other": "{{count}} inviati",
+    "sentCount_one": "{{count}} inviata",
+    "sentCount_other": "{{count}} inviate",
     "test": "Testa",
     "testError": "Invio della notifica di test non riuscito",
     "testFailed": "Notifica di test non riuscita",
@@ -173,7 +172,7 @@
       "name": "Vaccinazione in scadenza"
     },
     "immunization_overdue": {
-      "description": "Quando una vaccinazione e oltre la data prevista",
+      "description": "Quando una vaccinazione è oltre la data prevista",
       "name": "Vaccinazione scaduta"
     },
     "invitation_accepted": {
@@ -219,7 +218,7 @@
     "noHistoryHint": "Le notifiche appariranno qui una volta inviate",
     "page": "Pagina {{current}} di {{total}}",
     "showLess": "Mostra meno",
-    "showMore": "Mostra di piu",
+    "showMore": "Mostra di più",
     "status": {
       "failed": "Non riuscita",
       "sent": "Inviata"
@@ -250,13 +249,13 @@
     "auth": {
       "accessDeniedAdmin": "Accesso negato: privilegi di amministratore richiesti",
       "accessDeniedRole": "Accesso negato: ruolo {{role}} richiesto",
-      "accessDeniedRoles": "Accesso negato: uno di questi ruoli e richiesto: {{roles}}",
+      "accessDeniedRoles": "Accesso negato: uno di questi ruoli è richiesto: {{roles}}",
       "accountCreatedSuccess": "Account creato con successo! Accesso in corso...",
       "loginFailed": "Accesso non riuscito",
       "loginRequired": "Effettui l'accesso per visualizzare questa pagina",
       "loginSuccess": "Accesso effettuato con successo!",
       "logoutSuccess": "Disconnessione avvenuta con successo",
-      "sessionExpired": "Sessione scaduta per inattivita",
+      "sessionExpired": "Sessione scaduta per inattività",
       "sessionExpiredLogin": "Sessione scaduta. Effettui nuovamente l'accesso.",
       "ssoFailed": "Impossibile avviare l'accesso SSO",
       "userCreatedSuccess": "Account utente creato con successo!",
@@ -293,12 +292,12 @@
     },
     "invitations": {
       "accessRevoked": "Accesso revocato",
-      "accessRevokedMessage": "L'accesso e stato revocato.",
-      "alreadyRevoked": "Gia revocato",
-      "alreadyRevokedMessage": "Questo invito e stato gia revocato.",
+      "accessRevokedMessage": "L'accesso è stato revocato.",
+      "alreadyRevoked": "Già revocato",
+      "alreadyRevokedMessage": "Questo invito è stato già revocato.",
       "cancelFailed": "Impossibile annullare l'invito",
       "cancelled": "Invito annullato",
-      "cancelledMessage": "L'invito e stato annullato.",
+      "cancelledMessage": "L'invito è stato annullato.",
       "respondFailed": "Impossibile rispondere all'invito",
       "revokeFailed": "Impossibile revocare l'accesso"
     },
@@ -306,7 +305,7 @@
       "addedMessage": "Aggiunti {{count}} componenti del test al risultato di laboratorio.",
       "addedSuccess": "Operazione riuscita!",
       "addFailed": "Impossibile aggiungere i componenti del test",
-      "deletedMessage": "{{name}} e stato eliminato",
+      "deletedMessage": "{{name}} è stato eliminato",
       "deletedSuccess": "Componente eliminato",
       "noTextMessage": "Incolla il testo dei risultati di laboratorio nell'area di inserimento.",
       "noTextToParse": "Nessun testo da analizzare",
@@ -325,16 +324,16 @@
       "deletedSuccess": "{{name}} eliminato con successo",
       "deletedSwitched": "{{name}} eliminato con successo. Passaggio a {{fallbackName}}.",
       "deleteFailed": "Eliminazione non riuscita: {{message}}",
-      "deleteOwnOnly": "E possibile eliminare solo i pazienti di cui si e proprietari",
+      "deleteOwnOnly": "È possibile eliminare solo i pazienti di cui si è proprietari",
       "nowViewing": "Visualizzazione di {{name}}",
       "removeAccessFailed": "Rimozione accesso non riuscita: {{message}}",
       "removedAccess": "Accesso a {{name}} rimosso",
-      "removeOwnOnly": "Non e possibile rimuovere l'accesso ai pazienti di cui si e proprietari",
+      "removeOwnOnly": "Non è possibile rimuovere l'accesso ai pazienti di cui si è proprietari",
       "switchFailed": "Cambio non riuscito: {{message}}",
       "updatedSuccess": "{{name}} aggiornato con successo"
     },
     "photo": {
-      "photoBeingUploaded": "Una foto e attualmente in fase di caricamento. Attenda il completamento.",
+      "photoBeingUploaded": "Una foto è attualmente in fase di caricamento. Attenda il completamento.",
       "pleaseWait": "Attendere",
       "uploadSuccess": "Foto caricata con successo"
     },
@@ -344,16 +343,16 @@
       "templateDeleted": "Modello eliminato con successo",
       "templateDeleteFailed": "Impossibile eliminare il modello",
       "templateLoaded": "Modello \"{{name}}\" caricato",
-      "templateNameRequired": "Il nome del modello e obbligatorio",
+      "templateNameRequired": "Il nome del modello è obbligatorio",
       "templateSaved": "Modello salvato con successo",
       "templateSaveFailed": "Impossibile salvare il modello",
       "validationError": "Errore di validazione"
     },
     "settings": {
       "cleanupComplete": "Pulizia completata: {{cleaned}} file ripuliti, {{deleted}} file eliminati",
-      "cleanupFailed": "Impossibile ripulire i file. Riprovi piu tardi.",
+      "cleanupFailed": "Impossibile ripulire i file. Riprovi più tardi.",
       "noOutOfSync": "Nessun file non sincronizzato trovato da ripulire",
-      "sessionTimeoutUpdated": "Timeout sessione aggiornato a {{minutes}} minuti. La sessione e stata aggiornata."
+      "sessionTimeoutUpdated": "Timeout sessione aggiornato a {{minutes}} minuti. La sessione è stata aggiornata."
     },
     "sharing": {
       "accessRevoked": "Accesso revocato per l'utente {{userId}}",
@@ -373,7 +372,7 @@
       "searchFailed": "Impossibile cercare le registrazioni per tag"
     },
     "upload": {
-      "backgroundProcessing": "\"{{fileName}}\" e in fase di elaborazione in background. Ricevera una notifica al completamento.",
+      "backgroundProcessing": "\"{{fileName}}\" è in fase di elaborazione in background. Riceverà una notifica al completamento.",
       "completedWithErrors": "Caricamento completato con errori",
       "documentAdded": "Documento aggiunto a Paperless",
       "duplicateDocument": "Documento duplicato",
@@ -391,25 +390,25 @@
     }
   },
   "validation": {
-    "appTokenRequired": "Il token dell'app e obbligatorio",
+    "appTokenRequired": "Il token dell'app è obbligatorio",
     "fromEmailInvalid": "Formato email non valido",
-    "fromEmailRequired": "L'email del mittente e obbligatoria",
+    "fromEmailRequired": "L'email del mittente è obbligatoria",
     "headersInvalid": "Le intestazioni devono essere in formato JSON valido",
-    "nameRequired": "Il nome del canale e obbligatorio",
-    "nameTooLong": "Il nome non puo superare i 100 caratteri",
+    "nameRequired": "Il nome del canale è obbligatorio",
+    "nameTooLong": "Il nome non può superare i 100 caratteri",
     "serverUrlInvalid": "Formato URL non valido",
-    "serverUrlRequired": "L'URL del server e obbligatorio",
-    "smtpHostRequired": "Il server SMTP e obbligatorio",
-    "smtpPasswordRequired": "La password SMTP e obbligatoria",
+    "serverUrlRequired": "L'URL del server è obbligatorio",
+    "smtpHostRequired": "Il server SMTP è obbligatorio",
+    "smtpPasswordRequired": "La password SMTP è obbligatoria",
     "smtpPortInvalid": "La porta deve essere compresa tra 1 e 65535",
-    "smtpPortRequired": "La porta SMTP e obbligatoria",
-    "smtpUserRequired": "Il nome utente SMTP e obbligatorio",
+    "smtpPortRequired": "La porta SMTP è obbligatoria",
+    "smtpUserRequired": "Il nome utente SMTP è obbligatorio",
     "toEmailInvalid": "Formato email non valido",
-    "toEmailRequired": "L'email del destinatario e obbligatoria",
-    "typeRequired": "Il tipo di canale e obbligatorio",
+    "toEmailRequired": "L'email del destinatario è obbligatoria",
+    "typeRequired": "Il tipo di canale è obbligatorio",
     "urlInvalid": "Formato URL non valido",
-    "urlRequired": "L'URL del webhook e obbligatorio",
+    "urlRequired": "L'URL del webhook è obbligatorio",
     "webhookUrlInvalid": "Formato URL webhook non valido",
-    "webhookUrlRequired": "L'URL del webhook e obbligatorio"
+    "webhookUrlRequired": "L'URL del webhook è obbligatorio"
   }
 }

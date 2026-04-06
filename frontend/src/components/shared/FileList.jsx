@@ -32,6 +32,7 @@ import {
   IconX,
   IconUnlink
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 
 const FileList = ({
@@ -48,6 +49,7 @@ const FileList = ({
   className = ''
 }) => {
   const { formatDate } = useDateFormat();
+  const { t } = useTranslation('documents');
   const [sortBy, setSortBy] = useState('uploaded_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -220,7 +222,7 @@ const FileList = ({
           <ThemeIcon size="xl" variant="light" color="gray">
             <IconFile size={24} />
           </ThemeIcon>
-          <Text c="dimmed">No files attached</Text>
+          <Text c="dimmed">{t('fileList.noFiles')}</Text>
         </Stack>
       </Paper>
     );
@@ -280,7 +282,7 @@ const FileList = ({
       <Stack gap="sm">
         {processedFiles.length === 0 ? (
           <Alert color="gray" variant="light">
-            No files match your search criteria.
+            {t('fileList.noMatch')}
           </Alert>
         ) : (
           processedFiles.map((file) => {
@@ -347,7 +349,7 @@ const FileList = ({
                                 leftSection={<IconAlertTriangle size={10} />}
                                 title="This document is missing from Paperless"
                               >
-                                Missing
+                                {t('fileList.statusMissing')}
                               </Badge>
                             )}
                             {isProcessing && (
@@ -358,7 +360,7 @@ const FileList = ({
                                 leftSection={<IconClock size={10} />}
                                 title="Document is being processed by Paperless"
                               >
-                                Processing
+                                {t('fileList.statusProcessing')}
                               </Badge>
                             )}
                             {isDuplicate && (
@@ -369,18 +371,17 @@ const FileList = ({
                                 leftSection={<IconCopy size={10} />}
                                 title="Document was detected as a duplicate in Paperless"
                               >
-                                Duplicate
+                                {t('fileList.statusDuplicate')}
                               </Badge>
                             )}
                             {isFailed && (
                               <Badge 
-                                color="red" 
-                                variant="light" 
+                                color="red"
+                                variant="light"
                                 size="xs"
                                 leftSection={<IconX size={10} />}
-                                title="Document upload/processing failed in Paperless"
                               >
-                                Failed
+                                {t('fileList.statusFailed')}
                               </Badge>
                             )}
                           </Group>
@@ -420,7 +421,7 @@ const FileList = ({
                         
                         {isMarkedForDeletion && (
                           <Badge color="red" size="sm">
-                            Marked for deletion
+                            {t('fileList.markedForDeletion')}
                           </Badge>
                         )}
                       </Group>
@@ -508,11 +509,11 @@ const FileList = ({
         <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              Showing {processedFiles.length} of {files.length} files
+              {t('fileList.showingFiles', { showing: processedFiles.length, total: files.length })}
             </Text>
             {filesToDelete.length > 0 && (
               <Text size="sm" c="red">
-                {filesToDelete.length} file{filesToDelete.length !== 1 ? 's' : ''} marked for deletion
+                {t('fileList.markedCount', { count: filesToDelete.length })}
               </Text>
             )}
           </Group>

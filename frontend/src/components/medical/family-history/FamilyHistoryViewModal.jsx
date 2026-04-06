@@ -407,7 +407,8 @@ const FamilyHistoryViewModal = ({
 
                     {condition.icd10_code && (
                       <Text size="sm" c="dimmed" mb="xs">
-                        <strong>ICD-10:</strong> {condition.icd10_code}
+                        {/* eslint-disable-next-line i18next/no-literal-string -- medical coding standard name */}
+                        <strong>{'ICD-10:'}</strong> {condition.icd10_code}
                       </Text>
                     )}
 

@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { IconArrowUp, IconArrowDown, IconArrowsSort } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { TrendResponse, TrendDataPoint } from '../../../services/api/labTestComponentApi';
 import { getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -27,6 +28,7 @@ type SortField = 'date' | 'value' | 'status';
 type SortOrder = 'asc' | 'desc';
 
 const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trendData }) => {
+  const { t } = useTranslation(['labresults', 'shared']);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc'); // Most recent first by default
   const { formatDate: formatPreferredDate } = useDateFormat();
@@ -141,7 +143,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
     return (
       <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">
-          No data points to display
+          {t('trendTable.noDataPoints')}
         </Text>
       </Paper>
     );
@@ -151,10 +153,10 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
     <Stack gap="md">
       <Group justify="space-between" align="center">
         <Text size="sm" fw={600}>
-          Historical Data ({trendData.data_points.length} records)
+          {t('trendTable.historicalData', { count: trendData.data_points.length })}
         </Text>
         <Text size="xs" c="dimmed">
-          Click column headers to sort
+          {t('trendTable.clickToSort')}
         </Text>
       </Group>
 
@@ -165,30 +167,30 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
               <Table.Tr>
                 <Table.Th>
                   <Group gap="xs" style={{ cursor: 'pointer' }} onClick={() => handleSort('date')}>
-                    <Text size="xs" fw={600}>Date</Text>
+                    <Text size="xs" fw={600}>{t('shared:labels.date')}</Text>
                     <SortIcon field="date" />
                   </Group>
                 </Table.Th>
                 <Table.Th>
                   <Group gap="xs" style={{ cursor: 'pointer' }} onClick={() => handleSort('value')}>
-                    <Text size="xs" fw={600}>Value</Text>
+                    <Text size="xs" fw={600}>{t('shared:labels.value')}</Text>
                     <SortIcon field="value" />
                   </Group>
                 </Table.Th>
                 <Table.Th>
-                  <Text size="xs" fw={600}>Unit</Text>
+                  <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.unit')}</Text>
                 </Table.Th>
                 <Table.Th>
                   <Group gap="xs" style={{ cursor: 'pointer' }} onClick={() => handleSort('status')}>
-                    <Text size="xs" fw={600}>Status</Text>
+                    <Text size="xs" fw={600}>{t('shared:fields.status')}</Text>
                     <SortIcon field="status" />
                   </Group>
                 </Table.Th>
                 <Table.Th>
-                  <Text size="xs" fw={600}>Reference Range</Text>
+                  <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.referenceRange')}</Text>
                 </Table.Th>
                 <Table.Th>
-                  <Text size="xs" fw={600}>Lab Result</Text>
+                  <Text size="xs" fw={600}>{t('trendTable.labResult')}</Text>
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>

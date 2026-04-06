@@ -7,6 +7,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Stack, Group, Text, Divider, UnstyledButton, Button } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconLogout } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import './DesktopSidebar.css';
 
 const DesktopSidebarSimple = ({
@@ -18,6 +19,7 @@ const DesktopSidebarSimple = ({
   onLogout,
   className = ''
 }) => {
+  const { t } = useTranslation('shared');
   // Simple active path check
   const isActivePath = (itemPath) => {
     return currentPath && currentPath.includes(itemPath);
@@ -50,7 +52,7 @@ const DesktopSidebarSimple = ({
           <Group justify="space-between" align="center">
             {isOpen && (
               <Text size="lg" fw={700} c="blue">
-                Admin Panel
+                {t('labels.admin')}
               </Text>
             )}
             <UnstyledButton onClick={onToggle} title={isOpen ? 'Collapse' : 'Expand'}>

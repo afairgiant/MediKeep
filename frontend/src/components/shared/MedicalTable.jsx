@@ -2,6 +2,7 @@ import React from 'react';
 import { Table, ScrollArea, ActionIcon, Group, Text, Title, Stack, Card } from '@mantine/core';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 import MantineResponsiveAdapter from '../../adapters/MantineResponsiveAdapter';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -16,6 +17,7 @@ const MedicalTable = ({
   onView,
   formatters = {},
 }) => {
+  const { t } = useTranslation('shared');
   const responsive = useResponsive();
   const { formatDate } = useDateFormat();
 
@@ -55,7 +57,7 @@ const MedicalTable = ({
             {tableName} - {patientData?.first_name} {patientData?.last_name}
           </ResponsiveTitle>
           <ResponsiveText color="dimmed">
-            Generated on: {formatDate(new Date().toISOString())}
+            {t('labels.generatedOn', { date: formatDate(new Date().toISOString()) })}
           </ResponsiveText>
         </Stack>
 
@@ -123,7 +125,7 @@ const MedicalTable = ({
           {tableName} - {patientData?.first_name} {patientData?.last_name}
         </ResponsiveTitle>
         <ResponsiveText color="dimmed">
-          Generated on: {formatDate(new Date().toISOString())}
+          {t('labels.generatedOn', { date: formatDate(new Date().toISOString()) })}
         </ResponsiveText>
       </Stack>
 
@@ -139,7 +141,7 @@ const MedicalTable = ({
               {columns.map((column, index) => (
                 <th key={index}>{column.header}</th>
               ))}
-              <th className="no-print">Actions</th>
+              <th className="no-print">{t('labels.actions')}</th>
             </tr>
           </thead>
           <tbody>

@@ -1,33 +1,7 @@
 {
-  "auth": {
-    "login": {
-      "continueWith": "Continuer avec {{provider}}",
-      "createAccount": "Créer un nouveau compte",
-      "hidePassword": "Masquer le mot de passe",
-      "or": "ou",
-      "passwordPlaceholder": "Entrez votre mot de passe",
-      "registrationDisabled": "L'inscription de nouveaux utilisateurs est actuellement désactivée.",
-      "showPassword": "Afficher le mot de passe",
-      "submit": "Se connecter",
-      "submitting": "Connexion en cours...",
-      "title": "CONNEXION À VOTRE COMPTE",
-      "usernamePlaceholder": "Entrez votre nom d'utilisateur"
-    },
-    "userCreation": {
-      "accountCreated": "Compte créé avec succès ! Veuillez vous connecter avec vos identifiants.",
-      "backToLogin": "Retour à la connexion",
-      "cardSubtitle": "Remplissez le formulaire ci-dessous pour créer votre nouveau compte",
-      "cardTitle": "Détails du compte",
-      "nextSteps": {
-        "autoRecord": "Votre dossier patient sera automatiquement créé",
-        "dataSecure": "Toutes vos données sont sécurisées et confidentielles",
-        "loggedIn": "Vous serez connecté immédiatement après la création du compte",
-        "startManaging": "Vous pouvez commencer à gérer vos informations médicales immédiatement"
-      },
-      "pageSubtitle": "Rejoignez MediKeep aujourd'hui et gérez vos dossiers de santé en toute sécurité",
-      "pageTitle": "Créez votre compte",
-      "welcomeMessage": "Bienvenue {{name}} ! Votre compte a été créé avec succès.",
-      "whatHappensNext": "Que se passe-t-il ensuite ?"
+  "allergies": {
+    "messages": {
+      "loading": "Chargement des allergies..."
     }
   },
   "buttons": {
@@ -84,10 +58,10 @@
         "codeDescription": "Description du code médical",
         "conditionName": "Saisir le nom de la pathologie",
         "diagnosis": "Saisir le diagnostic",
-        "icd10Code": "e.g., E11.9",
+        "icd10Code": "par ex., E11.9",
         "notes": "Saisir les notes cliniques, observations ou informations supplémentaires",
         "severity": "Sélectionner la sévérité",
-        "snomedCode": "e.g., 44054006"
+        "snomedCode": "par ex., 44054006"
       },
       "saving": "Enregistrement de la pathologie...",
       "severity": {
@@ -105,8 +79,8 @@
     "loading": "Chargement des pathologies...",
     "modal": {
       "labels": {
-        "endDate": "End Date",
-        "onsetDate": "Onset Date"
+        "endDate": "Date de fin",
+        "onsetDate": "Date de début"
       },
       "noNotesAvailable": "Aucune note clinique disponible",
       "sections": {
@@ -120,7 +94,7 @@
       "medicationLinkWarning": "Problème de liaison de médicament"
     },
     "table": {
-      "icd10": "ICD-10"
+      "icd10": "CIM-10"
     }
   },
   "emergencyContacts": {
@@ -171,10 +145,10 @@
     "form": {
       "create": "Créer l'équipement",
       "lastService": "Date du dernier entretien",
-      "manufacturerPlaceholder": "e.g., ResMed, Philips",
+      "manufacturerPlaceholder": "par ex., ResMed, Philips",
       "modelNumber": "Numéro de modèle",
-      "modelPlaceholder": "e.g., AirSense 11",
-      "namePlaceholder": "e.g., ResMed AirSense 11",
+      "modelPlaceholder": "par ex., AirSense 11",
+      "namePlaceholder": "par ex., ResMed AirSense 11",
       "nextService": "Date du prochain entretien",
       "notesPlaceholder": "Notes supplémentaires sur cet équipement",
       "practitioner": "Prescrit par",
@@ -207,106 +181,6 @@
     "invalidPhone": "Veuillez saisir un numéro de téléphone valide",
     "loadFailed": "Échec du chargement"
   },
-  "exportPage": {
-    "availableData": {
-      "moreItems_one": "{{count}} more item",
-      "moreItems_many": "{{count}} more items",
-      "moreItems_other": "{{count}} more items",
-      "title": "Données disponibles"
-    },
-    "buttons": {
-      "bulkExport_one": "Bulk Export {{count}} type as ZIP",
-      "bulkExport_many": "Bulk Export {{count}} types as ZIP",
-      "bulkExport_other": "Bulk Export {{count}} types as ZIP",
-      "creatingZip": "Création du ZIP...",
-      "exportAs": "Exporter {{scope}} en {{format}}",
-      "exporting": "Exportation en cours...",
-      "goToDashboard": "Accéder au tableau de bord",
-      "refreshPage": "Actualiser la page",
-      "bulkExport": "Exportation groupée de {{count}} types en ZIP"
-    },
-    "configuration": {
-      "bulkSelection": {
-        "label": "Sélectionner les types de données pour l'exportation groupée"
-      },
-      "dataToExport": {
-        "label": "Données à exporter",
-        "placeholder": "Sélectionner le type de données"
-      },
-      "dateRange": {
-        "endDate": "Date de fin (optionnelle)",
-        "startDate": "Date de début (optionnelle)"
-      },
-      "format": {
-        "label": "Format d'exportation",
-        "placeholder": "Sélectionner le format"
-      },
-      "includeFiles": "Inclure les pièces jointes (crée un fichier ZIP)",
-      "includePatientInfo": {
-        "description": "Décochez pour exclure les informations personnelles du patient pour des raisons de confidentialité",
-        "label": "Inclure les informations du patient (nom, données démographiques, etc.)"
-      },
-      "title": "Configuration de l'exportation"
-    },
-    "description": "Téléchargez vos données médicales dans différents formats pour la sauvegarde ou le partage avec des professionnels de santé",
-    "errors": {
-      "bulkExportFailed": "L'exportation groupée a échoué : {{message}}",
-      "bulkInvalidSettings": "Veuillez vérifier vos paramètres d'exportation groupée. Assurez-vous d'avoir sélectionné au moins un type de données et un format valide.",
-      "bulkNoDataFound": "Aucune donnée trouvée pour les critères d'exportation sélectionnés. Essayez de sélectionner d'autres types de données ou d'ajuster la plage de dates.",
-      "exportFailed": "L'exportation a échoué : {{message}}",
-      "invalidSettings": "Veuillez vérifier vos paramètres d'exportation. Assurez-vous d'avoir sélectionné un type de données et un format valides.",
-      "loadFailed": "Échec du chargement des données d'exportation : {{message}}",
-      "noActivePatient": "Aucun profil patient n'est actuellement sélectionné. Veuillez sélectionner un patient depuis le tableau de bord pour utiliser la fonction d'exportation.",
-      "noDataFound": "Aucune donnée trouvée pour les critères d'exportation sélectionnés. Essayez de sélectionner un autre type de données ou une autre plage de dates.",
-      "noDataType": "Veuillez sélectionner au moins un type de données pour l'exportation groupée",
-      "sessionExpired": "Votre session a expiré. Veuillez actualiser la page ou vous reconnecter pour accéder aux fonctions d'exportation.",
-      "validationFailed": "{{errors}}"
-    },
-    "exportMode": {
-      "bulkDescription": "Exporter plusieurs types de données ensemble dans un fichier ZIP",
-      "bulkExport": "Exportation groupée",
-      "singleDescription": "Exporter un seul type de données dans le format de votre choix",
-      "singleExport": "Exportation simple",
-      "title": "Mode d'exportation"
-    },
-    "icon": "📤",
-    "information": {
-      "bulk": {
-        "description": "Crée un fichier ZIP contenant plusieurs types de données dans le format de votre choix pour une sauvegarde complète des données.",
-        "title": "Exportation groupée :"
-      },
-      "csv": {
-        "description": "Valeurs séparées par des virgules, adaptées aux tableurs comme Excel ou Google Sheets.",
-        "title": "Format CSV :"
-      },
-      "fileAttachments": {
-        "description": "Lorsque disponible pour les exportations PDF, les fichiers de résultats de laboratoire peuvent être inclus dans une archive ZIP.",
-        "title": "Pièces jointes :"
-      },
-      "json": {
-        "description": "Format de données structurées lisible par machine, idéal pour l'importation dans d'autres systèmes ou applications.",
-        "title": "Format JSON :"
-      },
-      "pdf": {
-        "description": "Format de document lisible par l'homme, idéal pour l'impression ou le partage avec des professionnels de santé.",
-        "title": "Format PDF :"
-      },
-      "title": "Informations sur l'exportation"
-    },
-    "loading": "Chargement des options d'exportation...",
-    "success": {
-      "bulkExportComplete_one": "Bulk export completed successfully! Your ZIP file containing {{count}} data type has been downloaded.",
-      "bulkExportComplete_many": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",
-      "bulkExportComplete_other": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",
-      "exportComplete": "Exportation terminée avec succès ! Votre fichier {{format}} a été téléchargé.",
-      "bulkExportComplete": "Exportation groupée terminée avec succès ! Votre fichier ZIP contenant {{count}} types de données a été téléchargé."
-    },
-    "title": "Exporter les dossiers de santé",
-    "scopes": {
-      "all": "Tous les enregistrements",
-      "encounters": "Consultations"
-    }
-  },
   "familyHistory": {
     "addFamilyMember": "Ajouter un membre de la famille",
     "card": {
@@ -314,7 +188,6 @@
       "age": "Âge",
       "birthYear": "Année de naissance",
       "cannotEditSharedMember": "Impossible de modifier un membre partagé",
-      "conditionCount_many": "{{count}} Condition(s)",
       "conditions": "pathologies",
       "deathYear": "Année de décès",
       "deceased": "Décédé(e)",
@@ -326,7 +199,6 @@
       "subtitle": "Membre de la famille",
       "years": "ans"
     },
-    "clickToSelectForSharing_many": "Click on family member cards to select them for sharing. {{count}} selected.",
     "conditionCountAcrossMembers": "{{conditionCount}} pathologie(s) pour {{memberCount}} membre(s) de la famille",
     "confirmations": {
       "deleteCondition": "Êtes-vous sûr de vouloir supprimer cette pathologie ?",
@@ -353,7 +225,6 @@
     },
     "loadingFamilyHistory": "Chargement de l'historique familial...",
     "manageInvitations": "Gérer les invitations",
-    "memberCountRecorded_many": "{{count}} family member(s) recorded",
     "notifications": {
       "cannotDelete": "Impossible de supprimer",
       "cannotDeleteShared": "Vous ne pouvez pas supprimer les antécédents familiaux partagés",
@@ -365,7 +236,6 @@
     "sharedMemberCount": "{{filteredCount}} sur {{totalCount}} membre(s) de la famille partagé(s) avec vous",
     "sharedMembersCannotBeSelected": "Les membres de la famille partagés ne peuvent pas être sélectionnés pour un partage supplémentaire.",
     "sharedTableName": "Antécédents familiaux partagés",
-    "shareSelected_many": "Share Selected ({{count}})",
     "sharingMode": "Mode de partage",
     "sharingModeActive": "Mode de partage actif",
     "table": {
@@ -396,32 +266,31 @@
     }
   },
   "fields": {
+    "endDate": {
+      "description": "Date de fin (le cas échéant)",
+      "label": "Date de fin",
+      "placeholder": "Sélectionner la date de fin"
+    },
     "notes": {
       "description": "Toute information ou note supplémentaire",
       "placeholder": "Informations complémentaires..."
     },
-    "tags": {
-      "description": "Add tags to help organize and search",
-      "placeholder": "Add tags to organize..."
-    },
     "startDate": {
-      "label": "Date de début",
       "description": "Date de début",
+      "label": "Date de début",
       "placeholder": "Sélectionner la date de début"
-    },
-    "endDate": {
-      "label": "Date de fin",
-      "description": "Date de fin (le cas échéant)",
-      "placeholder": "Sélectionner la date de fin"
     },
     "status": {
       "description": "Statut actuel"
+    },
+    "tags": {
+      "description": "Ajoutez des étiquettes pour organiser et retrouver cet enregistrement plus facilement",
+      "placeholder": "Ajouter des étiquettes pour organiser et retrouver cet enregistrement"
     }
   },
   "filters": {
     "clear": "Effacer",
     "itemCount": "{{filtered}} sur {{total}} éléments",
-    "moreFilters_many": "{{count}} more filters",
     "title": "Filtres et recherche"
   },
   "immunizations": {
@@ -447,13 +316,13 @@
       "expirationDateDesc": "Date d'expiration du vaccin",
       "location": "Lieu/Établissement",
       "locationDesc": "Lieu d'administration du vaccin",
-      "locationPlaceholder": "e.g., CVS Pharmacy, Hospital, Clinic",
+      "locationPlaceholder": "par ex., Pharmacie, Hôpital, Clinique",
       "lotNumberDesc": "Numéro de lot du vaccin",
       "lotNumberPlaceholder": "Saisir le numéro de lot",
       "manufacturerDesc": "Fabricant du vaccin",
       "manufacturerPlaceholder": "Saisir le fabricant",
       "ndcNumberDesc": "Code national du médicament",
-      "ndcNumberPlaceholder": "e.g., 12345-6789-01",
+      "ndcNumberPlaceholder": "par ex., 12345-6789-01",
       "practitionerDesc": "Professionnel de santé ayant administré le vaccin",
       "practitionerPlaceholder": "Sélectionner le praticien administrateur",
       "routeID": "Intradermique (ID)",
@@ -470,10 +339,10 @@
       "tagsDesc": "Ajouter des étiquettes pour classer et organiser les vaccinations",
       "tradeName": "Nom commercial/officiel",
       "tradeNameDesc": "Nom officiel complet figurant dans la documentation du vaccin",
-      "tradeNamePlaceholder": "e.g., Flublok TRIV 2025-2026 PFS",
+      "tradeNamePlaceholder": "par ex., Flublok TRIV 2025-2026 PFS",
       "updateImmunization": "Mettre à jour la vaccination",
       "vaccineNameDesc": "Nom courant du vaccin",
-      "vaccineNamePlaceholder": "e.g., Flu Shot, COVID-19, Tdap"
+      "vaccineNamePlaceholder": "par ex., Grippe, COVID-19, dTcaP"
     },
     "loadingImmunizations": "Chargement des vaccinations...",
     "noImmunizationsFound": "Aucune vaccination trouvée",
@@ -526,16 +395,18 @@
     "loading": "Chargement des dossiers d'assurance...",
     "viewModal": {
       "additionalDetails": "Détails supplémentaires de la couverture",
+      "attachedDocuments": "Documents joints",
       "claimsAddress": "Adresse pour les demandes de remboursement",
       "claimsPhone": "Téléphone pour les demandes de remboursement",
       "coinsurance": "Coassurance",
       "copay": "Ticket modérateur",
+      "coverageDetails": "Détails de la couverture",
       "coveragePeriod": "Période de couverture",
       "customerServicePhone": "Téléphone du service clientèle",
       "deductible": "Franchise",
       "dentalCoverage": "Couverture dentaire",
       "effectiveDate": "Date d'entrée en vigueur",
-      "employerGroup": "Employeur / Parrain du groupe",
+      "employerGroup": "Employeur/Parrain du groupe",
       "memberInfo": "Informations du membre",
       "memberName": "Nom du membre",
       "mentalHealthCoverage": "Couverture en santé mentale",
@@ -553,9 +424,12 @@
       "visionCoverage": "Couverture optique"
     }
   },
+  "invitations": {
+    "from": "De"
+  },
   "key": "Par défaut {{var}}",
   "labels": {
-    "addCustom": "+ Ajouter \"{{value}}\"",
+    "addCustom": "+ Ajouter « {{value}} »",
     "linkedMedications": "Médicaments associés",
     "loading": "Chargement...",
     "loadingOption": "Chargement de {{option}}...",
@@ -566,82 +440,42 @@
     "noEncountersLinked": "Aucune consultation liée à ce traitement",
     "noEquipmentLinked": "Aucun équipement lié à ce traitement",
     "noLabResultsLinked": "Aucun résultat d'analyse lié à cette consultation",
-    "noMedicationsLinked": "No medications linked to this treatment",
+    "noMedicationsLinked": "Aucun médicament lié à cette pathologie",
     "none": "—",
     "noRating": "Aucune évaluation",
     "notAvailable": "N/D",
     "notCompleted": "Non terminé",
     "noVisitsLinked": "Aucune consultation liée à ce résultat d'analyse",
     "ordered": "Prescrit",
-    "ratingStars_one": "{{count}}/5 star",
-    "ratingStars_many": "{{count}}/5 stars",
-    "ratingStars_other": "{{count}}/5 stars",
+    "phoneNumber": "Numéro de téléphone",
+    "ratingStars": "{{count}}/5 étoiles",
+    "ratingStars_one": "{{count}}/5 étoile",
+    "ratingStars_other": "{{count}}/5 étoiles",
     "selectPurpose": "Sélectionner l'objet",
-    "viewDetails": "View Details",
+    "viewDetails": "Voir les détails",
     "viewPharmacyDetails": "Voir les détails de la pharmacie",
     "visitDate": "Date de la consultation",
     "visitWebsite": "Visiter le site web ↗",
-    "yes": "Oui",
-    "ratingStars": "{{count}}/5 étoiles",
-    "phoneNumber": "Numéro de téléphone"
+    "yes": "Oui"
   },
   "labResults": {
-    "addFirst": "Add Your First Lab Result",
-    "addNew": "+ Ajouter un nouveau résultat d'analyse",
-    "addTitle": "Ajouter un nouveau résultat d'analyse",
-    "continueEditing": "Continuer la modification",
-    "createAndContinue": "Créer et télécharger le PDF",
-    "createFailed": "Échec de la création du résultat d'analyse",
-    "createFailedTryAgain": "Échec de la création du résultat d'analyse. Veuillez réessayer.",
-    "creatingLabResult": "Création du résultat d'analyse...",
-    "deleteEmptyLabResult": "Supprimer le résultat d'analyse",
-    "deleteFailed": "Échec de la suppression du résultat d'analyse",
-    "discardParsedData": "Ignorer les données analysées",
-    "editTitle": "Modifier le résultat d'analyse",
-    "errorOccurred": "Une erreur s'est produite",
+    "emptyLabResultMessage": "Vous avez créé un résultat d'analyse mais n'avez ajouté aucune composante d'examen. Souhaitez-vous supprimer ce résultat d'analyse ?",
+    "emptyLabResultWarning": "Résultat d'analyse créé mais vide",
     "form": {
       "linkedVisits": "Consultations associées",
       "linkVisitsDescription": "Associez ce résultat d'analyse aux consultations lors desquelles il a été prescrit ou examiné.",
       "linkVisitsTitle": "Lier aux consultations"
     },
-    "keepEmptyLabResult": "Conserver le résultat d'analyse",
-    "labResultDeleted": "Résultat d'analyse supprimé",
-    "loading": "Chargement des résultats d'analyses...",
-    "loadingHint": "If this takes too long, please refresh the page",
-    "modal": {
-      "editLabResult": "Modifier le résultat d'analyse",
-      "labels": {
-        "testType": "Type d'examen"
-      },
-      "sections": {
-        "associatedFiles": "Documents associés",
-        "testInfo": "Informations sur l'examen",
-        "testResults": "Résultats de l'examen"
-      },
-      "tabs": {
-        "testComponents": "Composantes de l'examen"
-      },
-      "title": "Détails du résultat d'analyse"
-    },
-    "networkError": "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
-    "noResults": "No Lab Results Found",
-    "patientIdRequired": "L'identifiant du patient est requis. Veuillez d'abord sélectionner un patient.",
-    "quickPdfImport": "Importation rapide de PDF",
-    "startAdding": "Start by adding your first lab result.",
-    "stepperLabels": {
-      "enterTestName": "Saisir le nom de l'examen",
-      "importFromPdf": "Importer depuis un PDF",
-      "labResultInfo": "Informations sur le résultat d'analyse",
-      "uploadParse": "Télécharger et analyser"
-    },
-    "testNameLabel": "Nom de l'examen de laboratoire",
-    "testNameRequired": "Le nom de l'examen est requis",
-    "testNameTooLong": "Le nom de l'examen ne peut pas dépasser {{maxLength}} caractères",
-    "testNameTooShort": "Le nom de l'examen doit comporter au moins {{minLength}} caractères",
-    "timeoutError": "La demande a expiré. Veuillez réessayer.",
-    "unsavedDataMessage_one": "Vous avez {{count}} composante(s) d'examen analysée(s) qui n'ont pas encore été ajoutées. Si vous fermez maintenant, vous perdrez ces données analysées.",
-    "unsavedDataMessage_many": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
-    "unsavedDataMessage_other": "Vous avez {{count}} composante(s) d'examen analysée(s) qui n'ont pas encore été ajoutées. Si vous fermez maintenant, vous perdrez ces données analysées."
+    "labResultCreated": "Le résultat d'analyse « {{testName}} » a été créé. Vous pouvez maintenant téléverser et analyser votre PDF.",
+    "quickFormInstructions": "Saisissez un nom pour ce résultat d'analyse, puis vous pourrez téléverser et analyser votre PDF.",
+    "quickImportModalTitle": "Importation rapide de PDF - Étape {{step}} sur 2",
+    "quickImportSuccess": "Résultat d'analyse et composantes d'examen importés avec succès",
+    "testNameDescription": "C'est le seul champ obligatoire - vous pourrez ajouter plus de détails ultérieurement",
+    "testNamePlaceholder": "Bilan endocrinien, etc.",
+    "unsavedDataInstructions": "Cliquez sur « Ajouter les composantes » dans l'onglet Aperçu pour enregistrer vos données analysées avant de fermer.",
+    "unsavedDataMessage_one": "Vous avez {{count}} composante d'examen analysée qui n'a pas encore été ajoutée. Si vous fermez maintenant, vous perdrez ces données analysées.",
+    "unsavedDataMessage_other": "Vous avez {{count}} composantes d'examen analysées qui n'ont pas encore été ajoutées. Si vous fermez maintenant, vous perdrez ces données analysées.",
+    "unsavedDataWarning": "Données analysées non enregistrées"
   },
   "medications": {
     "addNew": "Ajouter un nouveau médicament",
@@ -657,7 +491,7 @@
       "labels": {
         "alternativeName": "Nom alternatif",
         "form": "Forme",
-        "purposeIndication": "Objet / Indication"
+        "purposeIndication": "Objet/Indication"
       },
       "noSideEffects": "Aucun effet secondaire signalé",
       "sections": {
@@ -678,18 +512,21 @@
       "overrideFrequency": "Fréq."
     },
     "types": {
-      "herbal": "Plante / Naturel",
+      "herbal": "Plante/Naturel",
       "otc": "Sans ordonnance",
       "prescription": "Sur ordonnance",
-      "supplement": "Supplément / Vitamine"
+      "supplement": "Supplément/Vitamine"
     }
   },
   "messages": {
+    "checkBackSoon": "Revenez bientôt pour les mises à jour !",
+    "clearAll": "Tout effacer",
     "confirmRemoveConditionRelationship": "Êtes-vous sûr de vouloir supprimer cette relation de pathologie ?",
     "confirmRemoveEquipmentRelationship": "Êtes-vous sûr de vouloir supprimer ce lien d'équipement ?",
     "confirmRemoveLabResultLink": "Supprimer ce lien vers le résultat d'analyse ?",
     "confirmRemoveVisitLink": "Supprimer ce lien vers la consultation ?",
     "displayError": "Impossible d'afficher cet élément. Veuillez essayer d'actualiser la page.",
+    "doNotClose": "Veuillez ne pas fermer cette fenêtre ni naviguer ailleurs",
     "failedToLinkLabResult": "Échec de l'association du résultat d'analyse",
     "failedToLinkVisit": "Échec de l'association de la consultation",
     "failedToUnlinkLabResult": "Échec de la dissociation du résultat d'analyse",
@@ -698,7 +535,8 @@
     "processing": "Traitement en cours...",
     "selectLabResult": "Veuillez sélectionner un résultat d'analyse",
     "selectVisit": "Veuillez sélectionner une consultation",
-    "updateSuccess": "Success"
+    "underDevelopment": "Cette section est actuellement en cours de développement.",
+    "updateSuccess": "Mis à jour avec succès"
   },
   "modals": {
     "chooseConditionsToLink": "Choisir les pathologies à associer",
@@ -739,21 +577,22 @@
     "fields": {
       "birthDate": "Date de naissance",
       "patientId": "Identifiant du patient",
-      "physician": "Primary Care Physician"
+      "physician": "Médecin traitant"
     },
     "loading": "Chargement des informations du patient...",
-    "noProfile": "No Patient Profile Found",
+    "noProfile": "Aucun profil patient trouvé",
     "notAssigned": "Non attribué",
     "notProvided": "Non renseigné",
     "personalInfo": "Informations personnelles",
     "welcome": {
-      "message": "Your account has been created successfully. Please complete your patient profile below to get started with managing your medical records.",
+      "message": "Votre compte a été créé avec succès. Veuillez compléter votre profil patient ci-dessous pour commencer à gérer vos dossiers médicaux.",
       "title": "Bienvenue sur MediKeep !"
     }
   },
   "patients": {
     "form": {
       "address": {
+        "label": "Adresse",
         "placeholder": "Saisir l'adresse"
       },
       "birthDate": {
@@ -801,7 +640,7 @@
           "parent": "Parent",
           "partner": "Partenaire",
           "select": "Sélectionner le lien (facultatif)",
-          "sibling": "Frère / Sœur",
+          "sibling": "Frère/Sœur",
           "sister": "Sœur",
           "son": "Fils",
           "spouse": "Conjoint(e)"
@@ -813,7 +652,9 @@
         "description": "Cochez cette case si vous créez un dossier pour vous-même",
         "label": "Il s'agit de mon propre dossier médical"
       }
-    }
+    },
+    "photoFormat": "JPEG, PNG, GIF ou BMP -- 15 Mo max.",
+    "removePhoto": "Supprimer la photo"
   },
   "patientSelector": {
     "buttons": {
@@ -919,14 +760,12 @@
       "emptyNoData": "Cliquez sur « Ajouter un cabinet » pour en créer un, ou ils sont créés automatiquement lors de l'ajout de praticiens.",
       "emptyTitle": "Aucun cabinet trouvé",
       "searchPlaceholder": "Rechercher des cabinets...",
-      "totalCount_one": "{{count}} practice total",
-      "totalCount_many": "{{count}} practices total",
-      "totalCount_other": "{{count}} practices total",
-      "unusedCount_one": "{{count}} unused",
-      "unusedCount_many": "{{count}} unused",
-      "unusedCount_other": "{{count}} unused",
       "totalCount": "{{count}} cabinets au total",
-      "unusedCount": "{{count}} non utilisé(s)"
+      "totalCount_one": "{{count}} cabinet au total",
+      "totalCount_other": "{{count}} cabinets au total",
+      "unusedCount": "{{count}} non utilisé(s)",
+      "unusedCount_one": "{{count}} non utilisé",
+      "unusedCount_other": "{{count}} non utilisés"
     },
     "tabs": {
       "practices": "Cabinets"
@@ -956,7 +795,7 @@
       "anesthesiaNotesDesc": "Informations complémentaires sur l'anesthésie",
       "anesthesiaNotesPlaceholder": "Saisir les détails et les notes sur l'anesthésie",
       "anesthesiaTypeDesc": "Type d'anesthésie utilisé",
-      "anesthesiaTypePlaceholder": "e.g., General, Local, Regional",
+      "anesthesiaTypePlaceholder": "par ex., Générale, Locale, Locorégionale",
       "clinicalNotesDesc": "Informations complémentaires sur cet acte médical",
       "clinicalNotesPlaceholder": "Saisir les notes cliniques, observations ou informations supplémentaires",
       "complicationsDesc": "Tout problème ou complication survenu",
@@ -967,7 +806,7 @@
       "durationDesc": "Durée de l'acte médical",
       "durationPlaceholder": "Saisir la durée",
       "facilityDesc": "Établissement médical",
-      "facilityPlaceholder": "e.g., Hospital name",
+      "facilityPlaceholder": "par ex., Nom de l'hôpital",
       "outcomeAbnormal": "Anormal",
       "outcomeDesc": "Résultat ou issue de l'acte médical",
       "outcomeInconclusive": "Non concluant",
@@ -975,16 +814,16 @@
       "outcomeSuccessful": "Réussi",
       "practitionerDesc": "Professionnel de santé réalisant l'acte",
       "procedureCodeDesc": "Code de facturation médicale",
-      "procedureCodePlaceholder": "e.g., CPT code",
+      "procedureCodePlaceholder": "par ex., code CPT",
       "procedureDate": "Date de l'acte médical",
-      "procedureDateDesc": "When the procedure is scheduled or was performed",
+      "procedureDateDesc": "Date de réalisation de l'acte médical",
       "procedureNameDesc": "Nom de l'acte médical",
       "procedureNamePlaceholder": "Saisir le nom de l'acte médical",
       "procedureTypeDesc": "Type ou catégorie de l'acte médical",
-      "procedureTypePlaceholder": "e.g., Surgical, Diagnostic",
+      "procedureTypePlaceholder": "par ex., Chirurgical, Diagnostique",
       "savingProcedure": "Enregistrement de l'acte médical...",
       "settingDesc": "Lieu de réalisation de l'acte médical",
-      "settingPlaceholder": "e.g., Inpatient, Outpatient",
+      "settingPlaceholder": "par ex., Hospitalisation, Ambulatoire",
       "statusDesc": "Statut actuel de l'acte médical",
       "statusInProgress": "En cours",
       "statusPostponed": "Reporté",
@@ -1008,90 +847,18 @@
       "title": "Détails de l'acte médical"
     }
   },
-  "reportBuilder": {
-    "buttons": {
-      "addRecords": "Ajouter des dossiers médicaux",
-      "clearSelections": "Effacer toutes les sélections",
-      "generateReport_one": "Generate Report ({{count}} record)",
-      "generateReport_many": "Generate Report ({{count}} records)",
-      "generateReport_other": "Generate Report ({{count}} records)",
-      "generateReportChartsOnly": "Générer le rapport ({{chartCount}} graphiques)",
-      "generateReportWithCharts": "Générer le rapport ({{recordCount}} dossiers, {{chartCount}} graphiques)",
-      "selectAll": "Sélectionner tous les dossiers",
-      "generateReport": "Générer le rapport ({{count}} dossiers)"
-    },
-    "configuration": {
-      "description": "Sélectionner les dossiers médicaux à inclure dans votre rapport personnalisé",
-      "title": "Configuration du rapport"
-    },
-    "icon": "📊",
-    "loading": "Loading reports...",
-    "noData": {
-      "description": "Ajoutez d'abord des dossiers médicaux pour utiliser le générateur de rapports.",
-      "title": "Aucune donnée médicale disponible"
-    },
-    "notifications": {
-      "templateLoaded": "Modèle chargé",
-      "templateLoadedMessage": "Le modèle « {{name}} » a été chargé."
-    },
-    "progress": {
-      "recordsSelected": "Dossiers sélectionnés"
-    },
-    "settingsModal": {
-      "includePatientInfo": {
-        "description": "Ajouter les informations démographiques et de contact",
-        "label": "Inclure les informations du patient"
-      },
-      "includeProfilePicture": {
-        "description": "Ajouter la photo du patient à l'en-tête du rapport",
-        "label": "Inclure la photo de profil"
-      },
-      "includeSummary": {
-        "description": "Ajouter une section de synthèse et de statistiques",
-        "label": "Inclure les statistiques récapitulatives"
-      },
-      "reportTitle": {
-        "label": "Titre du rapport"
-      },
-      "title": "Paramètres du rapport"
-    },
-    "title": "Générateur de rapports personnalisés",
-    "trendCharts": {
-      "dateFrom": "Du",
-      "dateTo": "Au",
-      "emptyState": "Aucune donnée de tendance disponible. Ajoutez des signes vitaux ou des résultats de laboratoire pour activer les graphiques de tendances.",
-      "labTestCharts": {
-        "description": "Rechercher et sélectionner des tests de laboratoire à représenter graphiquement",
-        "searchPlaceholder": "Rechercher des tests de laboratoire...",
-        "title": "Graphiques des tests de laboratoire"
-      },
-      "maxReached": "Maximum de 10 graphiques atteint",
-      "recordCount_one": "{{count}} record",
-      "recordCount_many": "{{count}} records",
-      "recordCount_other": "{{count}} records",
-      "removeChart": "Supprimer le graphique {{name}}",
-      "selectedCharts_one": "Selected Charts ({{count}})",
-      "selectedCharts_many": "Selected Charts ({{count}})",
-      "selectedCharts_other": "Selected Charts ({{count}})",
-      "vitalCharts": {
-        "description": "Sélectionner les signes vitaux à représenter graphiquement",
-        "title": "Graphiques des signes vitaux"
-      },
-      "recordCount": "{{count}} enregistrements",
-      "selectedCharts": "Graphiques sélectionnés ({{count}})"
-    }
-  },
   "search": {
-    "activeFilterCount_one": "{{count}} active filter",
-    "activeFilterCount_many": "{{count}} active filters",
-    "activeFilterCount_other": "{{count}} active filters",
+    "activeFilterCount": "{{count}} filtres actifs",
+    "activeFilterCount_one": "{{count}} filtre actif",
+    "activeFilterCount_other": "{{count}} filtres actifs",
     "activeFilters": "Filtres actifs",
     "addMoreTags": "Ajouter plus d'étiquettes",
+    "advancedFilters": "Filtres avancés",
     "allTags": "Toutes les étiquettes",
     "allTime": "Toute la période",
     "anyTag": "N'importe quelle étiquette",
     "collapseFilters": "Réduire les filtres",
-    "columnType": "Type",
+    "columnType": "Type d'enregistrement",
     "dateLabels": {
       "diagnosed": "Diagnostiqué",
       "given": "Administré",
@@ -1109,20 +876,24 @@
     "fallbacks": {
       "allergy": "Allergie",
       "encounter": "Consultation",
-      "immunization": "Immunisation",
+      "immunization": "Vaccination",
       "medication": "Médicament",
-      "procedure": "Procédure",
+      "procedure": "Acte médical",
       "record": "Enregistrement"
     },
     "filterByTag": "Filtrer par étiquette : {{tag}}",
     "filtered": "(filtré)",
     "filters": "Filtres",
+    "forQuery": "pour « {{query}} »",
     "last30Days": "30 derniers jours",
     "last6Months": "6 derniers mois",
     "last7Days": "7 derniers jours",
-    "lastYear": "Dernière année",
+    "lastYear": "Année passée",
     "loadingTags": "Chargement des étiquettes...",
-    "matchAll": "Tout correspondre",
+    "matchAll": "Correspondre à tous",
+    "matchAllDesc": "Afficher les éléments possédant toutes les étiquettes sélectionnées",
+    "matchAny": "Correspondre à N'IMPORTE QUELLE étiquette sélectionnée",
+    "matchAnyDesc": "Afficher les éléments possédant au moins une étiquette sélectionnée",
     "noPatientMessage": "Veuillez sélectionner un patient depuis le tableau de bord pour rechercher des dossiers médicaux.",
     "noPatientTitle": "Aucun patient sélectionné",
     "noResults": "Aucun résultat trouvé",
@@ -1136,11 +907,15 @@
     "previewRecord": "Aperçu du dossier",
     "recordTypes": "Types d'enregistrements",
     "removeTypeFilter": "Supprimer le filtre {{type}}",
-    "resultCount_one": "{{count}} resultat",
-    "resultCount_many": "{{count}} resultats",
-    "resultCount_other": "{{count}} resultats",
+    "resultCount": "{{count}} résultats",
+    "resultCount_one": "{{count}} résultat",
+    "resultCount_other": "{{count}} résultats",
+    "resultsFound": "{{count}} résultat trouvé",
+    "resultsFound_one": "{{count}} résultat trouvé",
+    "resultsFound_other": "{{count}} résultats trouvés",
     "searchFailed": "La recherche a échoué. Veuillez réessayer.",
     "searching": "Recherche en cours...",
+    "seeAll": "Tout voir",
     "selectTags": "Sélectionner des étiquettes...",
     "sortBy": "Trier par",
     "sortDateNewest": "Date (plus récent en premier)",
@@ -1151,151 +926,63 @@
     "subtitles": {
       "result": "Résultat : {{value}}"
     },
-    "tagSearchFailed": "La recherche par étiquette a échoué. Veuillez réessayer.",
-    "title": "Résultats de recherche",
-    "viewCards": "Vue en cartes",
-    "viewTable": "Vue en tableau",
-    "resultCount": "{{count}} resultats",
-    "activeFilterCount": "{{count}} filtres actifs",
     "tagResultCount_other": "{{count}} résultats d'étiquettes",
+    "tagSearchFailed": "La recherche par étiquette a échoué. Veuillez réessayer.",
     "textResultCount_other": "{{count}} résultats textuels",
+    "title": "Résultats de recherche",
     "types": {
       "encounters": "Consultations",
       "vitals": "Signes vitaux"
-    }
+    },
+    "viewCards": "Vue en cartes",
+    "viewTable": "Vue en tableau"
   },
-  "settings": {
-    "account": {
-      "deleteAccount": {
-        "button": "Supprimer le compte",
-        "description": "Supprimez définitivement votre compte et toutes les données médicales associées. Cette action est irréversible.",
-        "title": "Supprimer le compte"
-      }
-    },
-    "actions": {
-      "reset": "Réinitialiser les modifications",
-      "save": "Enregistrer toutes les modifications",
-      "unsavedChanges": "Vous avez des modifications non enregistrées"
-    },
-    "documents": {
-      "cleanup": {
-        "button": "Nettoyer les fichiers",
-        "cleaning": "Nettoyage en cours...",
-        "description": "Nettoyez les fichiers désynchronisés et résolvez les incohérences de stockage des documents. Cela réinitialisera les téléchargements échoués, effacera les tâches orphelines et corrigera les problèmes de synchronisation de la base de données.",
-        "title": "Nettoyage des fichiers"
-      },
-      "paperlessDescription": "Configurer l'intégration de la gestion documentaire Paperless-ngx"
-    },
-    "help": {
-      "documentation": {
-        "description": "Consultez le wiki pour des guides, des instructions de configuration et la documentation des fonctionnalités.",
-        "title": "Documentation"
-      },
-      "issues": {
-        "description": "Vous avez trouvé un bogue ou avez une demande de fonctionnalité ? Ouvrez un ticket sur GitHub.",
-        "title": "Signaler un problème"
-      }
-    },
-    "papra": {
-      "apiTokenPlaceholder": "Saisissez votre jeton API Papra",
-      "connectionFailed": "Échec de la connexion",
-      "connectionSuccess": "Connexion réussie",
-      "description": "Connectez-vous à votre instance Papra pour la gestion documentaire",
-      "organization": "Organisation",
-      "organizationPlaceholder": "Sélectionner une organisation",
-      "urlPlaceholder": "https://your-papra-instance.com"
-    },
-    "preferences": {
-      "dateFormat": {
-        "description": "Choisissez comment les dates sont affichées dans l'application",
-        "dmy": "JJ/MM/AAAA (Européen)",
-        "mdy": "MM/JJ/AAAA (Américain)",
-        "title": "Format de date",
-        "ymd": "AAAA-MM-JJ (ISO)"
-      },
-      "sessionTimeout": {
-        "description": "Définissez la durée d'inactivité avant l'expiration de votre session (en minutes)",
-        "range": "minutes (5-1440)",
-        "title": "Délai d'expiration de la session"
-      },
-      "unitSystem": {
-        "description": "Choisissez d'afficher les mesures en unités impériales (livres, pieds, °F) ou métriques (kilogrammes, centimètres, °C)",
-        "imperial": "Impérial (lbs, pieds, °F)",
-        "metric": "Métrique (kg, cm, °C)",
-        "title": "Système d'unités"
-      }
-    },
-    "releaseNotes": {
-      "currentVersion": "Actuel",
-      "dismiss": "Compris",
-      "empty": "Aucune note de version disponible",
-      "error": "Impossible de charger les notes de version",
-      "publishedOn": "Publié le {{date}}",
-      "retry": "Réessayer",
-      "showAll": "Afficher plus de versions",
-      "showLess": "Afficher moins",
-      "viewOnGithub": "Voir sur GitHub",
-      "whatsNewTitle": "Nouveautés"
-    },
-    "sections": {
-      "accountManagement": "Gestion du compte",
-      "gettingHelp": "Obtenir de l'aide",
-      "preferences": "Préférences de l'application",
-      "releaseNotes": "Notes de version",
-      "security": "Sécurité",
-      "supportMediKeep": "Soutenir MediKeep",
-      "systemInfo": "Informations système"
-    },
-    "security": {
-      "password": {
-        "button": "Changer le mot de passe",
-        "confirmPassword": "Confirmer le nouveau mot de passe",
-        "currentPassword": "Mot de passe actuel",
-        "description": "Changez le mot de passe de votre compte pour le sécuriser",
-        "forceChange": {
-          "errors": {
-            "allFieldsRequired": "Tous les champs sont obligatoires.",
-            "changeFailed": "Échec du changement de mot de passe. Veuillez réessayer.",
-            "passwordComplexity": "Le nouveau mot de passe doit contenir au moins une lettre et un chiffre.",
-            "passwordMustDiffer": "Le nouveau mot de passe doit être différent de votre mot de passe actuel.",
-            "passwordsMustMatch": "Les nouveaux mots de passe ne correspondent pas.",
-            "passwordTooShort": "Le nouveau mot de passe doit comporter au moins 6 caractères."
-          },
-          "submit": "Définir le nouveau mot de passe",
-          "submitting": "Changement du mot de passe...",
-          "subtitle": "Votre compte nécessite un changement de mot de passe avant de pouvoir continuer. Veuillez définir un nouveau mot de passe ci-dessous.",
-          "title": "Changement de mot de passe requis"
-        },
-        "newPassword": "Nouveau mot de passe",
-        "passwordHelp": "Au moins 6 caractères, doit inclure une lettre et un chiffre."
-      }
-    },
-    "sponsor": {
-      "button": "Parrainer sur GitHub",
-      "description": "MediKeep est gratuit et open source. Si vous le trouvez utile, envisagez de parrainer le projet pour contribuer au financement du développement et à sa pérennité."
-    },
-    "system": {
-      "timezone": {
-        "title": "Fuseau horaire"
-      },
-      "version": {
-        "loading": "Chargement des informations de version...",
-        "title": "Version de l'application",
-        "unavailable": "Informations de version non disponibles",
-        "unknownApp": "Application inconnue",
-        "unknownVersion": "Version inconnue"
-      }
-    }
+  "searchPlaceholders": {
+    "allergies": "Rechercher allergies, réactions, étiquettes...",
+    "conditions": "Rechercher pathologies, notes, étiquettes...",
+    "emergencyContacts": "Rechercher contacts, relations, téléphone, e-mail...",
+    "familyHistory": "Rechercher membres de la famille, pathologies, notes...",
+    "generic": "Rechercher...",
+    "immunizations": "Rechercher vaccinations, vaccins, étiquettes...",
+    "injuries": "Rechercher blessures, parties du corps, notes, étiquettes...",
+    "insurance": "Rechercher compagnies d'assurance, noms des assurés...",
+    "labResults": "Rechercher résultats de laboratoire, codes de tests, établissements, praticiens, étiquettes...",
+    "medications": "Rechercher médicaments, indications, dosages, étiquettes...",
+    "pharmacies": "Rechercher pharmacies...",
+    "practitioners": "Rechercher praticiens...",
+    "procedures": "Rechercher actes médicaux, notes, étiquettes...",
+    "symptoms": "Rechercher symptômes, descriptions, étiquettes...",
+    "treatments": "Rechercher traitements, notes, étiquettes...",
+    "visits": "Rechercher consultations, motifs, notes, étiquettes...",
+    "vitals": "Rechercher notes sur les signes vitaux..."
   },
   "severity": {
-    "lifeThreatening": "Life-threatening",
-    "mild": "Mild",
-    "moderate": "Moderate",
-    "severe": "Severe",
     "critical": "Critique - Risque vital",
+    "lifeThreatening": "Danger de mort - Risque d'anaphylaxie",
+    "mild": "Léger - Gêne mineure",
     "mildImpact": "Léger - Impact mineur",
+    "moderate": "Modéré - Symptômes notables",
     "moderateImpact": "Modéré - Impact notable",
+    "severe": "Sévère - Réaction importante",
     "severeImpact": "Sévère - Impact significatif"
+  },
+  "status": {
+    "completed": "Terminé",
+    "expired": "Expiré",
+    "onHold": "En attente",
+    "planned": "Planifié",
+    "stopped": "Arrêté"
+  },
+  "statusDescriptions": {
+    "activeAllergic": "Actif - Allergique actuellement",
+    "activeCondition": "Actif - Pathologie en cours",
+    "activeExperiencing": "Actif - Ressenti actuellement",
+    "chronicCondition": "Chronique - Pathologie à long terme",
+    "inactiveAllergic": "Inactif - Plus allergique",
+    "recurring": "Récurrent - Intermittent",
+    "resolvedAllergy": "Résolu - Allergie dépassée",
+    "resolvedCondition": "Résolu - Plus présent",
+    "resolvedExperiencing": "Résolu - Plus ressenti"
   },
   "symptoms": {
     "addSymptom": "Ajouter un symptôme",
@@ -1330,7 +1017,6 @@
     "loading": "Chargement des symptômes...",
     "logEpisode": "Enregistrer un épisode",
     "logEpisodeTitle": "Enregistrer un épisode",
-    "moreCount_many": "+{{count}} more",
     "noPatientSelected": "Aucun patient sélectionné",
     "noRecords": "Aucun symptôme enregistré pour l'instant",
     "noRecordsPrompt": "Cliquez sur « Ajouter un symptôme » pour commencer à suivre un nouveau symptôme",
@@ -1351,6 +1037,7 @@
       "recorded": "enregistré",
       "title": "Chronologie des symptômes"
     },
+    "title": "Symptômes",
     "viewModal": {
       "acute": "Aigu",
       "confirmDeleteEpisode": "Êtes-vous sûr de vouloir supprimer cet épisode ?",
@@ -1365,9 +1052,6 @@
       "noEpisodesYet": "Aucun épisode enregistré pour l'instant",
       "noNotesProvided": "Aucune note fournie",
       "relief": "Soulagement",
-      "tabs": {
-        "episodes_many": "Episodes ({{count}})"
-      },
       "title": "{{name}} - Détails",
       "totalEpisodes": "Total des épisodes",
       "triggers": "Déclencheurs"
@@ -1382,21 +1066,19 @@
     },
     "createTag": "Créer une étiquette",
     "deleteModal": {
-      "description_one": "This will remove the tag from {{count}} record. This action cannot be undone.",
-      "description_many": "This will remove the tag from all {{count}} records. This action cannot be undone.",
-      "description_other": "This will remove the tag from all {{count}} records. This action cannot be undone.",
-      "message": "Êtes-vous sûr de vouloir supprimer l'étiquette « {{tag}} » ?",
-      "description": "Cela supprimera l'étiquette de tous les {{count}} enregistrements. Cette action est irréversible."
+      "description": "Cela supprimera l'étiquette de tous les {{count}} enregistrements. Cette action est irréversible.",
+      "description_one": "Cela supprimera l'étiquette de {{count}} enregistrement. Cette action est irréversible.",
+      "description_other": "Cela supprimera l'étiquette de tous les {{count}} enregistrements. Cette action est irréversible.",
+      "message": "Êtes-vous sûr de vouloir supprimer l'étiquette « {{tag}} » ?"
     },
     "editModal": {
       "colorLabel": "Couleur de l'étiquette",
-      "description_one": "This will rename the tag across {{count}} record.",
-      "description_many": "This will rename the tag across all {{count}} records.",
-      "description_other": "This will rename the tag across all {{count}} records.",
+      "description": "Cela renommera l'étiquette dans tous les {{count}} enregistrements.",
+      "description_one": "Cela renommera l'étiquette dans {{count}} enregistrement.",
+      "description_other": "Cela renommera l'étiquette dans tous les {{count}} enregistrements.",
       "placeholder": "Saisir le nouveau nom de l'étiquette...",
       "submit": "Enregistrer",
-      "title": "Modifier l'étiquette",
-      "description": "Cela renommera l'étiquette dans tous les {{count}} enregistrements."
+      "title": "Modifier l'étiquette"
     },
     "errors": {
       "createFailed": "Échec de la création de l'étiquette",
@@ -1413,15 +1095,15 @@
     "noTags": "Aucune étiquette trouvée",
     "noTagsDescription": "Commencez à utiliser des étiquettes dans vos dossiers médicaux pour les voir ici.",
     "noTagsSearch": "Aucune étiquette ne correspond à votre recherche.",
+    "pressEnterToAdd": "Appuyez sur Entrée pour ajouter une étiquette",
     "replaceModal": {
-      "description_one": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across {{count}} record.",
-      "description_many": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across all {{count}} records.",
-      "description_other": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across all {{count}} records.",
+      "description": "Cela remplacera « {{oldTag}} » par « {{newTag}} » dans tous les {{count}} enregistrements.",
+      "description_one": "Cela remplacera « {{oldTag}} » par « {{newTag}} » dans {{count}} enregistrement.",
+      "description_other": "Cela remplacera « {{oldTag}} » par « {{newTag}} » dans tous les {{count}} enregistrements.",
       "label": "Remplacer par",
       "placeholder": "Saisir le nom de l'étiquette de remplacement...",
       "submit": "Remplacer l'étiquette",
-      "title": "Remplacer l'étiquette",
-      "description": "Cela remplacera « {{oldTag}} » par « {{newTag}} » dans tous les {{count}} enregistrements."
+      "title": "Remplacer l'étiquette"
     },
     "searchPlaceholder": "Rechercher des étiquettes...",
     "success": {
@@ -1437,77 +1119,6 @@
     },
     "title": "Gestion des étiquettes"
   },
-  "testComponents": {
-    "addTestComponents": "Ajouter des composants de test",
-    "addTests": "Ajouter des tests",
-    "categories": {
-      "cardiology": "Cardiologie - Cœur et marqueurs cardiaques",
-      "chemistry": "Chimie - Électrolytes et minéraux",
-      "endocrinology": "Endocrinologie - Hormones et diabète",
-      "genetics": "Génétique - Tests génétiques",
-      "hematology": "Hématologie - Numération sanguine et fer",
-      "hepatology": "Hépatologie - Enzymes et fonctions hépatiques",
-      "immunology": "Immunologie - Système immunitaire et anticorps",
-      "lipids": "Lipides - Cholestérol et triglycérides",
-      "microbiology": "Microbiologie - Infections et cultures",
-      "molecular": "Moléculaire - Tests ADN",
-      "other": "Autres tests",
-      "pathology": "Pathologie - Analyse des tissus et biopsies",
-      "toxicology": "Toxicologie - Dépistage des médicaments et toxines"
-    },
-    "editModal": {
-      "descriptions": {
-        "linkedTest": "Associez ce test à un nom de test standard pour le suivi des tendances entre différentes variantes de nommage des laboratoires"
-      },
-      "editing": "Modification en cours",
-      "fields": {
-        "abbreviation": "Abréviation",
-        "linkedTest": "Associer à un test standard",
-        "maximum": "Maximum",
-        "minimum": "Minimum",
-        "rangeText": "Texte de plage (alternative)",
-        "referenceRange": "Plage de référence",
-        "result": "Résultat",
-        "status": "Statut (calculé automatiquement)",
-        "unit": "Unité"
-      },
-      "linkedInfo": "Ce test sera regroupé avec les autres tests « {{testName}} » dans les graphiques de tendances.",
-      "notDetermined": "Non déterminé",
-      "placeholders": {
-        "abbreviation": "e.g., HGB",
-        "linkedTest": "Sélectionner un test standard à associer...",
-        "maxValue": "Max value",
-        "minValue": "Min value",
-        "notes": "Notes supplémentaires sur ce résultat de test",
-        "rangeText": "e.g., 'Negative' or 'Male: 13.5-17.5, Female: 12.0-15.5'",
-        "result": "Sélectionner le résultat",
-        "testCode": "e.g., 718-7",
-        "testName": "e.g., Hemoglobin",
-        "unit": "e.g., g/dL",
-        "value": "Saisir la valeur du test"
-      },
-      "title": "Modifier le composant de test",
-      "trendLinking": "Association de tendances",
-      "updating": "Mise à jour du composant de test..."
-    },
-    "emptyState": {
-      "description": "Les modèles fournissent des panels de laboratoire courants (NFS, BMP, etc.) où vous pouvez saisir des valeurs et des plages. L'importation en masse vous permet de copier/coller les résultats des rapports de laboratoire pour une analyse automatique."
-    },
-    "errorLoading": "Erreur lors du chargement des composants de test",
-    "noComponents": "Aucun composant de test",
-    "noComponentsDescription": "This lab result doesn't have any individual test components added yet.",
-    "notifications": {
-      "componentDeleted": "Component Deleted",
-      "hasBeenDeleted": "{{name}} a été supprimé"
-    },
-    "refreshComponents": "Actualiser les composants",
-    "tabs": {
-      "statistics": "Statistiques",
-      "testResults": "Résultats des tests"
-    },
-    "testCount_many": "{{count}} test",
-    "title": "Composants de test"
-  },
   "time": {
     "day": "jour",
     "days": "jours",
@@ -1518,34 +1129,40 @@
     "year": "an",
     "years": "ans"
   },
+  "trash": {
+    "fileCount_one": "{{count}} fichier"
+  },
   "treatments": {
     "addFirstTreatment": "Ajouter votre premier traitement",
     "addTreatment": "+ Ajouter un traitement",
     "card": {
       "conditionId": "Pathologie n°{{id}}"
     },
+    "clickToExpand": "Cliquez pour développer et ajouter des détails (facultatif)",
     "conditionsLoadingError": "Erreur de chargement des pathologies",
+    "createNew": "Créer un nouveau",
     "form": {
       "createTreatment": "Créer un traitement",
-      "createWithLinks": "Creating treatment plan and linking items...",
+      "createWithLinks": "Création du plan de traitement et liaison des éléments...",
       "creatingWithLinks": "Création du traitement et liaison des éléments...",
       "descriptionDesc": "Brève description du traitement",
       "descriptionPlaceholder": "Décrire le traitement",
       "dosageAmount": "Dosage/Quantité",
       "dosageDesc": "Quantité ou dosage par traitement",
-      "dosagePlaceholder": "e.g., 10mg, 1 session",
+      "dosagePlaceholder": "par ex., 10 mg, 1 séance",
       "endDateDesc": "Date de fin du traitement (si applicable)",
       "enterTreatmentName": "Saisir le nom du traitement",
       "frequencyDesc": "Fréquence d'administration du traitement",
-      "frequencyPlaceholder": "e.g., Daily, Twice weekly",
+      "frequencyPlaceholder": "par ex., Quotidien, Deux fois par semaine",
       "linkingPartialFailure": "Certains éléments n'ont pas pu être liés",
+      "linkingPartialFailureMessage": "Le traitement a été créé, mais certains éléments n'ont pas pu être liés. Vous pouvez les lier manuellement en modifiant le traitement.",
       "notesDesc": "Informations supplémentaires sur ce traitement",
       "notesPlaceholder": "Saisir des notes, observations ou détails supplémentaires sur le traitement",
       "practitionerDesc": "Professionnel de santé administrant le traitement",
       "relatedConditionDesc": "Lier ce traitement à une pathologie",
       "savingTreatment": "Enregistrement du traitement...",
       "selectCondition": "Sélectionner une pathologie",
-      "startDateDesc": "When treatment is planned to begin or began",
+      "startDateDesc": "Date de début du traitement",
       "statusDesc": "Statut actuel du traitement",
       "statusOnHold": "En attente",
       "statusPlanned": "Planifié",
@@ -1555,10 +1172,11 @@
       "tagsDesc": "Ajouter des étiquettes pour classer et organiser les traitements",
       "treatmentNameDesc": "Nom du traitement",
       "treatmentNotes": "Notes sur le traitement",
-      "treatmentTypeDesc": "Select a category or type your own",
-      "treatmentTypePlaceholder": "Select or type category",
+      "treatmentTypeDesc": "Type ou catégorie de traitement",
+      "treatmentTypePlaceholder": "par ex., Kinésithérapie, Chirurgie",
       "updateTreatment": "Mettre à jour le traitement"
     },
+    "linkExisting": "Lier un existant",
     "loadingTreatments": "Chargement des traitements...",
     "medications": {
       "default": "(depuis le médicament)",
@@ -1570,11 +1188,14 @@
     },
     "mode": {
       "advancedDescription": "Plan centré sur les médicaments avec substitutions par médicament",
+      "label": "Mode de traitement",
       "simple": "Simple",
       "simpleDescription": "Suivi de base avec calendrier et posologie"
     },
+    "noEquipmentLinkedDescription": "Recherchez et liez l'équipement médical utilisé dans ce traitement.",
     "noTreatmentsFound": "Aucun traitement trouvé",
     "startAdding": "Commencez par ajouter votre premier traitement.",
+    "timingLabel": "Horaire :",
     "viewModal": {
       "amountDosage": "Quantité/Posologie",
       "conditionId": "Pathologie n°{{id}}",
@@ -1593,94 +1214,76 @@
     }
   },
   "viewToggle": {
-    "label": "Mode d'affichage",
     "cards": "Cartes",
     "components": "Composants",
+    "label": "Mode d'affichage",
     "table": "Tableau"
   },
   "visits": {
-    "addNewVisit": "Ajouter une nouvelle visite",
-    "addVisit": "Ajouter une nouvelle visite",
+    "addNewVisit": "Ajouter une nouvelle consultation",
+    "addVisit": "Ajouter une nouvelle consultation",
     "card": {
-      "generalVisit": "Visite générale"
+      "generalVisit": "Consultation générale"
     },
-    "clickToGetStarted": "Cliquez sur « Ajouter une nouvelle visite » pour commencer.",
-    "editVisit": "Modifier la visite",
+    "clickToGetStarted": "Cliquez sur « Ajouter une nouvelle consultation » pour commencer.",
+    "editVisit": "Modifier la consultation",
     "form": {
-      "addVisit": "Ajouter une visite",
-      "savingVisit": "Enregistrement de la visite...",
+      "addVisit": "Ajouter une consultation",
+      "savingVisit": "Enregistrement de la consultation...",
       "tabs": {
         "clinical": "Clinique",
-        "visitInfo": "Informations sur la visite"
+        "visitInfo": "Informations sur la consultation"
       },
-      "updateVisit": "Mettre à jour la visite"
+      "updateVisit": "Mettre à jour la consultation"
     },
-    "loadingVisits": "Chargement des visites...",
+    "loadingVisits": "Chargement des consultations...",
     "noVisitsFound": "Aucune consultation médicale trouvée",
     "table": {
-      "visitDate": "Date de la visite"
+      "visitDate": "Date de la consultation",
+      "visitType": "Type de consultation"
     },
     "title": "Consultations médicales",
     "viewModal": {
+      "chiefComplaint": "Motif principal de consultation",
       "clinicalInformation": "Informations cliniques",
-      "editVisit": "Modifier la visite",
-      "generalVisit": "Visite générale",
+      "editVisit": "Modifier la consultation",
+      "followUpInstructions": "Instructions de suivi",
+      "generalVisit": "Consultation générale",
+      "location": "Lieu",
+      "priority": "Priorité",
       "tabs": {
         "clinical": "Clinique",
-        "visitInfo": "Informations sur la visite"
+        "visitInfo": "Informations sur la consultation"
       },
-      "title": "Visite - {{date}}",
-      "visitInformation": "Informations sur la visite"
+      "title": "Consultation - {{date}}",
+      "treatmentPlan": "Plan de traitement",
+      "visitInformation": "Informations sur la consultation"
     }
   },
   "vitals": {
-    "addNew": "Ajouter de nouveaux signes vitaux",
-    "addTitle": "Add New Vital Signs",
-    "card": {
-      "notRecorded": "Non enregistré",
-      "oxygenSaturation": "Saturation en oxygène",
-      "title": "Enregistrement des signes vitaux"
-    },
-    "categories": {
-      "high": "Élevé",
-      "low": "Bas",
-      "normal": "Normal",
-      "diabetes": "Diabète",
-      "prediabetes": "Prédiabète"
-    },
-    "diastolic": "Diastolique",
-    "editTitle": "Modifier les signes vitaux",
     "form": {
-      "deviceUsed": "Appareil/Équipement utilisé",
-      "diastolicBP": "PA diastolique",
-      "healthAlerts": "Alertes de santé",
-      "locations": {
-        "ambulatory": "Soins ambulatoires",
-        "clinic": "Clinique",
-        "home": "Domicile",
-        "hospital": "Hôpital",
-        "urgentCare": "Soins urgents"
-      },
-      "measurementLocation": "Lieu de mesure",
-      "openCalendar": "Ouvrir le calendrier",
-      "painScaleUnit": "(0-10)",
-      "recordedDateTime": "Date et heure de mesure",
-      "saveVitals": "Enregistrer les signes vitaux",
-      "systolicBP": "PA systolique",
-      "updateVitals": "Mettre à jour les signes vitaux",
+      "dateTimePlaceholder": "Sélectionner la date et l'heure",
+      "devicePlaceholder": "par ex., Tensiomètre numérique, Modèle de thermomètre...",
+      "heightNotSet": "Taille non renseignée dans le profil patient - Calcul de l'IMC indisponible",
+      "locationPlaceholder": "Où ces mesures ont-elles été prises ?",
+      "lockedByImport": "Géré par la moyenne d'importation de l'appareil",
+      "missingPatientInfo": "Informations patient manquantes",
+      "notesPlaceholder": "Notes supplémentaires sur la mesure des signes vitaux...",
+      "pasteDateTimeDescription": "Saisissez ou collez la date/heure, ou cliquez sur le calendrier pour sélectionner",
+      "patientHeight": "Taille du patient : {{height}} cm (depuis le profil)",
       "validation": {
         "a1cMax": "L'HbA1c ne peut pas dépasser 20 %",
         "a1cMin": "L'HbA1c doit être d'au moins 0 %",
-        "bloodGlucoseMax": "La glycémie ne peut pas dépasser 800 mg/dL",
-        "bloodGlucoseMin": "La glycémie doit être d'au moins 20 mg/dL",
+        "bloodGlucoseMax": "La glycémie ne peut pas dépasser 44,4 mmol/L",
+        "bloodGlucoseMin": "La glycémie doit être d'au moins 1,1 mmol/L",
         "dateInFuture": "La date ne peut pas être dans le futur",
-        "dateRequired": "Measurement date and time is required",
+        "dateRequired": "La date et l'heure de mesure sont obligatoires",
         "deviceMaxLength": "Le nom de l'appareil ne peut pas dépasser 100 caractères",
         "diastolicMax": "La PA diastolique ne peut pas dépasser 200 mmHg",
         "diastolicMin": "La PA diastolique doit être d'au moins 30 mmHg",
         "heartRateMax": "La fréquence cardiaque ne peut pas dépasser 250 BPM",
         "heartRateMin": "La fréquence cardiaque doit être d'au moins 30 BPM",
-        "notesMaxLength": "Notes cannot exceed 5000 characters",
+        "notesMaxLength": "Les notes ne peuvent pas dépasser 5000 caractères",
         "oxygenMax": "La saturation en oxygène ne peut pas dépasser 100 %",
         "oxygenMin": "La saturation en oxygène doit être d'au moins 50 %",
         "painScaleMax": "L'échelle de douleur ne peut pas dépasser 10",
@@ -1692,186 +1295,9 @@
         "temperatureMax": "La température ne peut pas dépasser {{max}}{{unit}}",
         "temperatureMin": "La température doit être d'au moins {{min}}{{unit}}",
         "weightMax": "Le poids ne peut pas dépasser {{max}} {{unit}}",
-        "weightMin": "Le poids doit être d'au moins {{min}} {{unit}}",
-        "firstNameRequired": "Veuillez saisir votre prénom",
-        "lastNameRequired": "Veuillez saisir votre nom de famille",
-        "passwordLength": "Le mot de passe doit contenir au moins 6 caractères",
-        "passwordRequirements": "Le mot de passe doit contenir au moins une lettre et un chiffre",
-        "timeInFuture": "L'heure sélectionnée ne peut pas être dans le futur",
-        "usernameLength": "Le nom d'utilisateur doit contenir au moins 3 caractères"
+        "weightMin": "Le poids doit être d'au moins {{min}} {{unit}}"
       }
-    },
-    "glucoseContext": {
-      "after_meal": "Après le repas",
-      "before_meal": "Avant le repas",
-      "fasting": "À jeun",
-      "random": "Aléatoire"
-    },
-    "healthSummary": "Bilan de santé",
-    "import": {
-      "back": "Retour",
-      "dateRange": "Plage de dates",
-      "duplicate": "Doublon",
-      "duplicatesFound": "Doublons trouvés",
-      "duplicateWarning_many": "{{count}} readings already exist in this date range. Check the box above to skip them.",
-      "importButton": "Importer",
-      "importing": "Importation des signes vitaux...",
-      "newReadings": "Nouvelles mesures",
-      "noDevice": "Veuillez sélectionner un appareil",
-      "noFile": "Veuillez sélectionner un fichier CSV",
-      "parsingFailed": "Échec de l'analyse du fichier CSV",
-      "preview": "Aperçu",
-      "previewTitle": "Aperçu de l'importation",
-      "selectDevice": "Sélectionner un appareil",
-      "selectDevicePlaceholder": "Choisir votre appareil...",
-      "skipDuplicates": "Ignorer les mesures en double",
-      "success_many": "Successfully imported {{count}} readings",
-      "successWithSkipped": "{{imported}} mesures importées ({{skipped}} doublons ignorés)",
-      "title": "Importer les signes vitaux",
-      "totalReadings": "Total des mesures",
-      "uploadFile": "Téléverser un fichier CSV"
-    },
-    "loading": "Chargement des signes vitaux...",
-    "loadingStats": "Loading statistics...",
-    "modal": {
-      "a1c": "HbA1c",
-      "additionalMeasurements": "Mesures supplémentaires",
-      "bloodGlucose": "Glycémie",
-      "deviceUsed": "Appareil utilisé",
-      "glucoseContext": "Type de mesure",
-      "glucoseContextPlaceholder": "Facultatif",
-      "painScale": "Échelle de douleur",
-      "physicalMeasurements": "Mesures physiques",
-      "practitionerId": "ID du praticien",
-      "respiratoryRate": "Fréquence respiratoire",
-      "title": "Détails des signes vitaux"
-    },
-    "noDataAvailable": "No Data Available",
-    "noPatientSelected": "Aucun patient sélectionné",
-    "recordVitalsPrompt": "Record some vitals to see statistics here",
-    "secondary": "Secondaire",
-    "selectPatientPrompt": "Veuillez sélectionner un patient pour afficher et gérer les signes vitaux.",
-    "stats": {
-      "a1cDesc": "Click to view trend analysis",
-      "bloodGlucoseDesc": "Click to view trend analysis",
-      "bloodPressure": "Tension artérielle",
-      "bloodPressureDesc": "Click to view trend analysis",
-      "bmi": "BMI",
-      "bmiDesc": "Click to view trend analysis",
-      "heartRate": "Fréquence cardiaque",
-      "heartRateDesc": "Click to view trend analysis",
-      "temperature": "Latest Temperature",
-      "temperatureDesc": "Click to view trend analysis",
-      "weight": "Latest Weight",
-      "weightDesc": "Click to view trend analysis"
-    },
-    "statsLoadError": "Failed to load statistics",
-    "summary": {
-      "avgGlucose": "Moy",
-      "confirmDeleteDay_many": "Delete all {{count}} imported readings for this day?",
-      "deleteDay": "Supprimer le jour",
-      "glucoseTrend": "Tendance glycémique"
-    },
-    "summaryDescription": "Latest readings and averages - Click any card to view trend analysis",
-    "systolic": "Systolique",
-    "table": {
-      "errorLoading": "Error Loading Vitals",
-      "noRecords": "No vitals records found",
-      "noRecordsDesc": "Vital signs will appear here once recorded",
-      "oxygenSat": "SpO2"
-    },
-    "tabs": {
-      "context": "Contexte",
-      "dateTime": "Date et heure"
-    },
-    "trends": {
-      "allContexts": "Tous les types",
-      "allDates": "Toutes les dates",
-      "average": "Moyenne",
-      "chart": "Graphique",
-      "chooseTimeRange": "Choisir une plage de temps",
-      "dataPoints": "points de données",
-      "dataTable": "Tableau de données",
-      "exportCsv": "Exporter en CSV",
-      "exportError": "Échec de l'exportation des données. Veuillez réessayer.",
-      "exportSuccess": "Data exported successfully",
-      "glucoseContextFilter": "Type de glycémie",
-      "latest": "Dernier",
-      "noData": "Aucune donnée de tendance disponible",
-      "noDataDesc": "Il n'y a aucun point de données historique pour ce signe vital.",
-      "noDataPoints": "Aucun point de données à afficher",
-      "noHeightForBMI": "La taille du patient est requise pour calculer les tendances de l'IMC. Veuillez mettre à jour le profil du patient avec sa taille.",
-      "past2Years": "2 dernières années",
-      "past3Months": "3 derniers mois",
-      "past5Years": "5 dernières années",
-      "past6Months": "6 derniers mois",
-      "pastYear": "Année passée",
-      "range": "Plage",
-      "readings": "mesures",
-      "selectTimeRange": "Sélectionner une plage de temps",
-      "showing": "Affichage",
-      "stdDev": "Écart type",
-      "summaryStatistics": "Statistiques récapitulatives",
-      "timeRange": "Plage de temps",
-      "title": "Analyse des tendances"
-    },
-    "units": {
-      "bpm": "BPM",
-      "mgdl": "mg/dL",
-      "mmHg": "mmHg",
-      "perMin": "/min",
-      "celsius": "°C",
-      "cm": "cm",
-      "fahrenheit": "°F",
-      "inches": "pouces",
-      "kg": "kg",
-      "lbs": "lbs"
     }
   },
-  "warning": "Avertissement",
-  "allergies": {
-    "messages": {
-      "loading": "Chargement des allergies..."
-    }
-  },
-  "trash": {
-    "fileCount_one": "{{count}} fichier"
-  },
-  "searchPlaceholders": {
-    "allergies": "Rechercher allergies, réactions, étiquettes...",
-    "conditions": "Rechercher pathologies, notes, étiquettes...",
-    "emergencyContacts": "Rechercher contacts, relations, téléphone, e-mail...",
-    "familyHistory": "Rechercher membres de la famille, pathologies, notes...",
-    "generic": "Rechercher...",
-    "immunizations": "Rechercher immunisations, vaccins, étiquettes...",
-    "injuries": "Rechercher blessures, parties du corps, notes, étiquettes...",
-    "insurance": "Rechercher compagnies d'assurance, noms des assurés...",
-    "labResults": "Rechercher résultats de laboratoire, codes de tests, établissements, praticiens, étiquettes...",
-    "medications": "Rechercher médicaments, indications, dosages, étiquettes...",
-    "pharmacies": "Rechercher pharmacies...",
-    "practitioners": "Rechercher praticiens...",
-    "procedures": "Rechercher procédures, notes, étiquettes...",
-    "symptoms": "Rechercher symptômes, descriptions, étiquettes...",
-    "treatments": "Rechercher traitements, notes, étiquettes...",
-    "visits": "Rechercher visites, motifs, notes, étiquettes...",
-    "vitals": "Rechercher notes sur les signes vitaux..."
-  },
-  "status": {
-    "expired": "Expiré",
-    "onHold": "En attente",
-    "planned": "Planifié",
-    "stopped": "Arrêté",
-    "completed": "Terminé"
-  },
-  "statusDescriptions": {
-    "activeAllergic": "Actif - Allergique actuellement",
-    "activeCondition": "Actif - Pathologie en cours",
-    "activeExperiencing": "Actif - Ressenti actuellement",
-    "chronicCondition": "Chronique - Pathologie à long terme",
-    "inactiveAllergic": "Inactif - Plus allergique",
-    "recurring": "Récurrent - Intermittent",
-    "resolvedAllergy": "Résolu - Allergie dépassée",
-    "resolvedCondition": "Résolu - Plus présent",
-    "resolvedExperiencing": "Résolu - Plus ressenti"
-  }
+  "warning": "Avertissement"
 }

@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "Problèmes de compatibilité du navigateur",
+    "chartError": "Erreur d'affichage du graphique",
+    "chartErrorDescription": "Impossible d'afficher le graphique. Veuillez essayer d'actualiser la page.",
+    "documentError": "Erreur du gestionnaire de documents",
+    "documentErrorDescription": "Une erreur s'est produite lors de la gestion des documents. Vos données sont en sécurité.",
+    "errorDetails": "Détails de l'erreur",
+    "invalidData": "Données invalides du serveur",
+    "networkIssues": "Problèmes de connectivité réseau",
+    "tempIssues": "Problèmes temporaires du système",
+    "tryAgain": "Réessayer",
+    "uploadError": "Erreur de progression du téléversement",
+    "uploadErrorDescription": "Le suivi de progression du téléversement a rencontré une erreur."
+  },
+  "fileCount": {
+    "attached": "{{count}} joint",
+    "attached_one": "{{count}} joint",
+    "attached_other": "{{count}} joint",
+    "fileCount": "{{count}} fichier",
+    "fileCount_one": "{{count}} fichier",
+    "fileCount_other": "{{count}} fichiers",
+    "noFiles": "Aucun fichier"
+  },
+  "fileList": {
+    "fileDetails": "DÉTAILS DU FICHIER",
+    "loading": "Chargement des fichiers...",
+    "markedCount": "{{count}} fichier marqué pour suppression",
+    "markedCount_one": "{{count}} fichier marqué pour suppression",
+    "markedCount_other": "{{count}} fichiers marqués pour suppression",
+    "markedForDeletion": "Marqué pour suppression",
+    "noFiles": "Aucun fichier joint",
+    "noMatch": "Aucun fichier ne correspond à vos critères de recherche.",
+    "showingFiles": "Affichage de {{showing}} sur {{total}} fichiers",
+    "statusDuplicate": "Doublon",
+    "statusFailed": "Échoué",
+    "statusMissing": "Manquant",
+    "statusProcessing": "En cours de traitement"
+  },
+  "fileUpload": {
+    "accepted": "Acceptés : {{types}} • Taille max : {{size}} Mo",
+    "chooseFiles": "Choisir des fichiers",
+    "dragOrClick": "Glissez des fichiers ici ou cliquez pour sélectionner",
+    "remove": "Supprimer",
+    "selectedFiles": "Fichiers sélectionnés ({{count}})",
+    "selectedFiles_one": "Fichiers sélectionnés ({{count}})",
+    "selectedFiles_other": "Fichiers sélectionnés ({{count}})"
+  },
+  "linkPaperless": {
+    "from": "De : {{name}}",
+    "infoText": "Recherchez des documents déjà présents dans Paperless pour les lier à ce(tte) {{entityType}}. Aucun téléversement nécessaire !",
+    "linkDocument": "Lier le document",
+    "moreTags": "+{{count}} de plus",
+    "moreTags_one": "+{{count}} de plus",
+    "moreTags_other": "+{{count}} de plus",
+    "noDocumentsFound": "Aucun document trouvé",
+    "searchDocuments": "Rechercher des documents",
+    "searchPlaceholder": "Rechercher par titre, contenu ou étiquettes...",
+    "selected": "Sélectionné",
+    "title": "Lier un document Paperless existant",
+    "tryDifferent": "Essayez un autre terme de recherche",
+    "type": "Type : {{type}}"
+  },
+  "linkPapra": {
+    "infoText": "Recherchez des documents déjà présents dans Papra pour les lier à ce(tte) {{entityType}}. Aucun téléversement nécessaire !",
+    "linkDocument": "Lier le document",
+    "noDocumentsFound": "Aucun document trouvé",
+    "searchPlaceholder": "Rechercher des documents...",
+    "selected": "Sélectionné",
+    "title": "Lier un document Papra existant",
+    "tryDifferent": "Essayez un autre terme de recherche"
+  },
+  "manager": {
+    "addDocument": "Ajouter un document",
+    "currentFiles": "Fichiers actuels :",
+    "duplicateDocument": "Document en double",
+    "duplicateExists": "Ce document existe déjà dans Paperless et ne peut pas être téléversé à nouveau.",
+    "filesToUpload": "Fichiers à téléverser :",
+    "linkPaperless": "Lier un document Paperless existant",
+    "linkPapra": "Lier un document Papra existant",
+    "manageDocuments": "Gérer les documents",
+    "processingPaperless": "Traitement du document dans Paperless...",
+    "searchFiles": "Rechercher des fichiers...",
+    "statusDuplicate": "Doublon",
+    "statusFailed": "Échoué",
+    "statusUploaded": "Téléversé",
+    "statusUploading": "Téléversement vers Paperless...",
+    "syncCheck": "Vérification de synchronisation",
+    "uploadNewFile": "Téléverser un nouveau fichier",
+    "uploadSuccess": "Document téléversé avec succès !"
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "Synchronisation automatique activée",
+    "documentAlreadyExists": "\"{{fileName}}\" est identique à un document déjà présent dans Paperless.",
+    "duplicateHint": "Si vous devez téléverser une nouvelle version, veuillez d'abord modifier le document.",
+    "processingDocument": "Le document est en cours de traitement par Paperless...",
+    "syncFailed": "Échec de la synchronisation",
+    "syncing": "Synchronisation..."
+  },
+  "renderMode": {
+    "compactView": "Vue compacte",
+    "gridView": "Vue en grille",
+    "listView": "Vue en liste",
+    "viewMode": "Mode d'affichage"
+  },
+  "storage": {
+    "backendLabel": "Stockage :",
+    "connectedBadge": "Connecté",
+    "local": "Stockage local",
+    "paperless": "Paperless-ngx",
+    "papra": "Papra",
+    "selectBackend": "Sélectionner le stockage"
+  },
+  "upload": {
+    "completed": "{{count}} terminé",
+    "completed_one": "{{count}} terminé",
+    "completed_other": "{{count}} terminé",
+    "dragOrClick": "Glissez des fichiers ici ou cliquez pour sélectionner",
+    "failed": "{{count}} échoué",
+    "failed_one": "{{count}} échoué",
+    "failed_other": "{{count}} échoué",
+    "filesProgress": "{{completed}}/{{total}} fichiers",
+    "maxSize": "Taille maximale du fichier : {{size}} Mo",
+    "overallProgress": "Progression globale",
+    "percentComplete": "{{percent}}% terminé",
+    "remaining": "{{time}} restant",
+    "retryFailed": "Réessayer les échoués",
+    "uploading": "{{count}} en cours",
+    "uploading_one": "{{count}} en cours",
+    "uploading_other": "{{count}} en cours"
+  }
+}

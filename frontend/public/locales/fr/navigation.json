@@ -5,45 +5,45 @@
       "deleted": "Supprimé",
       "modified": "Modifié",
       "removed": "Retiré",
-      "scheduled": "Prévu",
+      "scheduled": "Planifié",
       "updated": "Mis à jour",
-      "viewed": "Visionné"
+      "viewed": "Consulté"
     }
   },
   "dashboard": {
     "activity": {
       "lastUpdated": "Dernière mise à jour",
       "noActivity": "Aucune activité récente",
-      "noActivityDescription": "L'activité de vos données médicales apparaîtra ici."
+      "noActivityDescription": "L'activité de vos dossiers médicaux apparaîtra ici"
     },
     "hello": "Bonjour",
     "loading": "Chargement de votre tableau de bord médical...",
     "modules": {
-      "exportRecords": "Exporter les données",
+      "exportRecords": "Exporter les dossiers",
       "visitHistory": "Historique des visites"
     },
     "search": {
       "advancedSearch": "Recherche avancée",
-      "placeholder": "Rechercher dans les données médicales..."
+      "placeholder": "Rechercher dans les dossiers médicaux..."
     },
     "sections": {
       "additionalResources": "Ressources supplémentaires",
       "coreMedical": "Informations médicales principales",
       "healthMonitoring": "Surveillance de la santé",
-      "prevention": "Prévention & Historique",
+      "prevention": "Prévention et antécédents",
       "recentActivity": "Activité récente",
       "treatments": "Traitements et procédures"
     },
     "stats": {
       "activeMedications": "Médicaments actifs"
     },
-    "subtitle": "Gérez vos données de santé en toute sécurité",
-    "title": "Tableau de bord de MediKeep"
+    "subtitle": "Gérez vos informations de santé en toute sécurité",
+    "title": "Tableau de bord MediKeep"
   },
   "invitations": {
     "acceptButton": "Accepter l'invitation",
-    "confirmDescription": "En acceptant ceci, vous obtiendrez l'accès aux informations médicales partagées.",
-    "confirmQuestion": "Souhaitez-vous vraiment accepter cette invitation ?",
+    "confirmDescription": "En acceptant, vous obtiendrez l'accès aux informations médicales partagées.",
+    "confirmQuestion": "Êtes-vous sûr de vouloir accepter cette invitation ?",
     "confirmTitle": "Confirmer l'acceptation de l'invitation",
     "from": "De",
     "lastUpdated": "Dernière mise à jour",
@@ -53,20 +53,23 @@
     "sharePatient": "Partager un patient",
     "title": "Invitations",
     "types": {
-      "patientRecord": "Données du patient"
-    },
-    "viewAll_many": "View all {{count}} invitations"
+      "patientRecord": "Dossier patient"
+    }
   },
   "menu": {
+    "account": "Compte",
     "backToDashboard": "Retour au tableau de bord",
+    "darkMode": "Mode sombre",
     "help": "Aide",
+    "lightMode": "Mode clair",
     "logout": "Déconnexion",
     "patients": "Patients",
     "profile": "Profil",
-    "reports": "Rapports"
+    "reports": "Rapports",
+    "userActions": "Actions utilisateur"
   },
   "pages": {
-    "help": "Aide & Support",
+    "help": "Aide et support",
     "medicalHistory": "Antécédents médicaux",
     "patientDetails": "Détails du patient",
     "patientList": "Liste des patients",
@@ -80,16 +83,38 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Tableau de bord administrateur",
+      "allergies": "Allergies",
+      "backupManagement": "Gestion des sauvegardes",
+      "conditions": "Pathologies",
       "customReports": "Rapports personnalisés",
-      "exportRecords": "Exporter des données",
+      "dataModels": "Modèles de données",
+      "emergencyContacts": "Contacts d'urgence",
+      "exportRecords": "Exporter les dossiers",
+      "familyHistory": "Antécédents familiaux",
+      "immunizations": "Vaccinations",
+      "injuries": "Blessures",
+      "insurance": "Assurance",
+      "labResults": "Résultats de laboratoire",
       "language": "Langue",
+      "medicalEquipment": "Équipement médical",
+      "medications": "Médicaments",
       "patientInfo": "Informations du patient",
+      "pharmacies": "Pharmacies",
+      "practitioners": "Praticiens",
+      "procedures": "Procédures",
+      "settings": "Paramètres",
+      "symptoms": "Symptômes",
+      "systemHealth": "État du système",
       "tagManagement": "Gestion des étiquettes",
       "theme": "Thème",
-      "visitHistory": "Historique des visites"
+      "treatments": "Traitements",
+      "visitHistory": "Historique des visites",
+      "vitalSigns": "Signes vitaux"
     },
     "sections": {
-      "careAndTreatment": "Soins & Traitement",
+      "administration": "Administration",
+      "careAndTreatment": "Soins et traitement",
       "misc": "Divers",
       "tools": "Outils"
     }

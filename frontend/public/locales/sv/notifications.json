@@ -117,7 +117,7 @@
     "noChannels": "Inga aviseringskanaler konfigurerade",
     "noChannelsHint": "Lägg till en kanal för att börja ta emot aviseringar",
     "notificationsSent": "{{count}} aviseringar skickade",
-    "sentCount_one": "{{count}} skickade",
+    "sentCount_one": "{{count}} skickad",
     "sentCount_other": "{{count}} skickade",
     "test": "Testa",
     "testError": "Det gick inte att skicka testnotifiering",
@@ -160,7 +160,7 @@
   "error": "Kunde inte ladda aviseringsinställningar",
   "events": {
     "backup_completed": {
-      "description": "När en säkerhetskopiering slutförs",
+      "description": "När en säkerhetskopiering slutförs framgångsrikt",
       "name": "Säkerhetskopiering slutförd"
     },
     "backup_failed": {

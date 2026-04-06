@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from '../adapters/Modal';
 import Button from '../adapters/Button';
 import FormInput from '../adapters/FormInput';
@@ -11,6 +12,7 @@ const GitHubLinkModal = ({
   onLinkComplete,
   onError 
 }) => {
+  const { t } = useTranslation(['auth', 'shared']);
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -25,7 +27,7 @@ const GitHubLinkModal = ({
 
     // Basic validation
     if (!formData.username || !formData.password) {
-      setErrors({ general: 'Please enter both username and password' });
+      setErrors({ general: t('github.validationError') });
       setIsLoading(false);
       return;
     }
@@ -72,8 +74,8 @@ const GitHubLinkModal = ({
 
   const handleCreateNew = () => {
     // For now, just show a message that this isn't supported yet
-    setErrors({ 
-      general: 'Creating a new account for GitHub users without public email is not yet supported. Please link to an existing account.' 
+    setErrors({
+      general: t('github.createNewNotSupported')
     });
   };
 
@@ -83,49 +85,47 @@ const GitHubLinkModal = ({
     <Modal 
       isOpen={isOpen} 
       onClose={onClose}
-      title="Link GitHub Account"
+      title={t('github.title')}
       className="github-link-modal"
     >
       <div className="github-link-content">
         <div className="github-info-section">
-          <h4>GitHub Account Details</h4>
+          <h4>{t('github.accountDetails')}</h4>
           <div className="github-user-info">
-            <p><strong>GitHub Username:</strong> {githubUserInfo?.github_username}</p>
-            <p><strong>GitHub ID:</strong> {githubUserInfo?.github_id}</p>
+            <p><strong>{t('github.githubUsername')}</strong> {githubUserInfo?.github_username}</p>
+            <p><strong>{t('github.githubId')}</strong> {githubUserInfo?.github_id}</p>
             {githubUserInfo?.name && (
-              <p><strong>Name:</strong> {githubUserInfo.name}</p>
+              <p><strong>{t('shared:labels.name')}:</strong> {githubUserInfo.name}</p>
             )}
           </div>
         </div>
 
         <div className="link-options">
-          <h4>Link to Existing Account</h4>
+          <h4>{t('github.linkToExisting')}</h4>
           <p>
-            Your GitHub account doesn't have a public email address that we can use to automatically 
-            match with an existing account. Please enter your login credentials to link this GitHub 
-            account to your existing account.
+            {t('github.noPublicEmail')}
           </p>
 
           <form onSubmit={handleSubmit} className="link-form">
             <FormInput
-              label="Username"
+              label={t('shared:labels.username')}
               name="username"
               type="text"
               value={formData.username}
               onChange={handleInputChange}
-              placeholder="Enter your existing account username"
+              placeholder={t('github.enterExistingUsername')}
               required
               disabled={isLoading}
               error={errors.username}
             />
 
             <FormInput
-              label="Password"
+              label={t('shared:labels.password')}
               name="password"
               type="password"
               value={formData.password}
               onChange={handleInputChange}
-              placeholder="Enter your existing account password"
+              placeholder={t('github.enterExistingPassword')}
               required
               disabled={isLoading}
               error={errors.password}
@@ -144,7 +144,7 @@ const GitHubLinkModal = ({
                 disabled={isLoading}
                 loading={isLoading}
               >
-                {isLoading ? 'Linking...' : 'Link Accounts'}
+                {isLoading ? t('github.linking') : t('github.linkAccounts')}
               </Button>
 
               <Button
@@ -153,7 +153,7 @@ const GitHubLinkModal = ({
                 onClick={handleCreateNew}
                 disabled={isLoading}
               >
-                Create New Account
+                {t('github.createNewAccount')}
               </Button>
 
               <Button
@@ -162,7 +162,7 @@ const GitHubLinkModal = ({
                 onClick={onClose}
                 disabled={isLoading}
               >
-                Cancel
+                {t('shared:fields.cancel')}
               </Button>
             </div>
           </form>

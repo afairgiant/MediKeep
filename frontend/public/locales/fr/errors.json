@@ -1,13 +1,33 @@
 {
+  "alert": {
+    "errorCount": "{{count}} erreur",
+    "errorCount_one": "{{count}} erreur",
+    "errorCount_other": "{{count}} erreurs",
+    "formError": "Erreur de formulaire",
+    "highPriority": "{{count}} haute priorité",
+    "highPriority_one": "{{count}} haute priorité",
+    "highPriority_other": "{{count}} haute priorité",
+    "suggestions": "Suggestions :"
+  },
+  "boundary": {
+    "componentLabel": "Composant :",
+    "errorDetails": "Détails de l'erreur",
+    "errorIdLabel": "ID de l'erreur :",
+    "errorLogged": "L'erreur a été automatiquement enregistrée pour investigation.",
+    "reloadPage": "Recharger la page",
+    "somethingWentWrong": "Une erreur s'est produite",
+    "tryAgain": "Réessayer",
+    "unexpectedError": "Nous sommes désolés, mais quelque chose d'inattendu s'est produit dans le système de dossiers médicaux."
+  },
   "file": {
-    "deleteFailed": "Echec de la suppression du fichier. Veuillez réessayer.",
-    "downloadFailed": "Echec du téléchargement du fichier. Veuillez réessayer.",
+    "deleteFailed": "Échec de la suppression du fichier. Veuillez réessayer.",
+    "downloadFailed": "Échec du téléchargement du fichier. Veuillez réessayer.",
     "notFound": "Fichier non trouvé.",
-    "viewFailed": "Echec de l'ouverture du fichier pour le visionner. Veuillez réessayer."
+    "viewFailed": "Échec de l'ouverture du fichier pour visualisation. Veuillez réessayer."
   },
   "form": {
-    "conditionNotSelected": "Veuillez sélectionner une condition",
-    "entityNotFound": "L'objet demandé ne peut pas être trouvé.",
+    "conditionNotSelected": "Veuillez sélectionner une affection",
+    "entityNotFound": "L'élément demandé n'a pas pu être trouvé.",
     "equipmentFieldsRequired": "Le nom et le type de l'équipement sont requis",
     "equipmentNotSelected": "Veuillez sélectionner au moins un équipement",
     "invalidDate": "Veuillez saisir une date valide.",
@@ -16,77 +36,77 @@
     "invalidPhoneDigits": "Veuillez saisir un numéro de téléphone valide",
     "invalidWebsiteUrl": "Veuillez saisir une URL de site web valide",
     "medicationNotSelected": "Veuillez sélectionner un médicament",
-    "mustBeValidNumber": "Le nombre doit être valide",
+    "mustBeValidNumber": "Doit être un nombre valide",
     "patientNotSelected": "Veuillez sélectionner un patient.",
     "requiredFieldMissing": "Veuillez remplir tous les champs requis.",
-    "submissionFailed": "Echec de la sauvegarde du formulaire. Veuillez vérifier votre saisie et réessayer."
+    "submissionFailed": "Échec de la sauvegarde du formulaire. Veuillez vérifier votre saisie et réessayer."
   },
   "general": {
     "maintenanceMode": "Le système est actuellement en cours de maintenance. Veuillez réessayer plus tard.",
-    "permissionDenied": "Vous n'avez pas la permission pour réaliser cette action.",
-    "rateLimitExceeded": "Requêtes trop nombreuses. Veuillez attendre un instant et réessayer.",
+    "permissionDenied": "Vous n'avez pas l'autorisation d'effectuer cette action.",
+    "rateLimitExceeded": "Trop de requêtes. Veuillez patienter un moment et réessayer.",
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
-    "storageFull": "Capacité maximale de stockage atteinte. Veuillez libérer de la place et réessayer.",
-    "unknownError": "Une erreur est survenue. Veuillez réessayer.",
+    "storageFull": "Limite de stockage atteinte. Veuillez libérer de l'espace et réessayer.",
+    "unknownError": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "validationError": "Veuillez vérifier votre saisie et réessayer."
   },
   "network": {
     "connectionError": "Erreur de connexion. Veuillez vérifier votre réseau et réessayer.",
-    "serverError": "Une erreur s'est produite sur le serveur. Veuillez réessayer plus tard.",
-    "timeout": "Requête expirée. Veuillez réessayer.",
+    "serverError": "Une erreur serveur s'est produite. Veuillez réessayer plus tard.",
+    "timeout": "Délai d'attente dépassé. Veuillez réessayer.",
     "unavailable": "Réseau indisponible. Veuillez vérifier votre connexion."
   },
   "paperless": {
-    "authFailed": "Echec de l'authentification auprès du service Paperless. Veuillez vérifier les identifiants.",
-    "configIncomplete": "La configuration de Paperless est incomplète. Veuillez vérifier vos paramètres.",
+    "authFailed": "Échec de l'authentification avec le service Paperless. Veuillez vérifier les identifiants.",
+    "configIncomplete": "La configuration Paperless est incomplète. Veuillez vérifier vos paramètres.",
     "connectionFailed": "Impossible de se connecter au service Paperless. Veuillez vérifier la configuration.",
-    "duplicateDocument": "Ce document existe déjà dans Paperless. Les documents indentiques ne peuvent pas être téléversés plusieurs fois.",
-    "notEnabled": "L'intégration à Paperless n'est pas activée. Veuillez l'activer dans les paramètres.",
-    "taskFailed": "Echec du téléversement du document vers Paperless. Veuillez réessayer ou contacter le support.",
-    "taskTimeout": "Expiration de la durée de traitement du document. Celui-ci est peut-être encore en cours de traitement dans Paperless.",
-    "unavailable": "Le service de gestion des documents est actuellement indisponible.",
-    "uploadFailed": "Echec du téléversement vers le système de gestion de document Paperless."
+    "duplicateDocument": "Ce document existe déjà dans Paperless. Les documents identiques ne peuvent pas être téléversés deux fois.",
+    "notEnabled": "L'intégration Paperless n'est pas activée. Veuillez l'activer dans les Paramètres.",
+    "taskFailed": "Échec du téléversement du document vers Paperless. Veuillez réessayer ou contacter le support.",
+    "taskTimeout": "Délai de traitement du document dépassé. Le document peut encore être en cours de traitement dans Paperless.",
+    "unavailable": "Le service de gestion documentaire est actuellement indisponible.",
+    "uploadFailed": "Échec du téléversement vers le système de gestion documentaire Paperless."
   },
   "patientForm": {
-    "birthDateFuture": "La date de naissance ne peut avoir lieu dans le futur",
+    "birthDateFuture": "La date de naissance ne peut pas être dans le futur",
     "birthDateRequired": "La date de naissance est requise",
-    "createFailed": "Echec de création : {{message}}",
+    "createFailed": "Échec de la création : {{message}}",
     "firstNameRequired": "Le prénom est requis",
     "lastNameRequired": "Le nom de famille est requis",
-    "updateFailed": "Echec de mise à jour : {{message}}"
+    "updateFailed": "Échec de la mise à jour : {{message}}"
   },
   "patientNotAvailable": "Informations du patient non disponibles",
   "relationships": {
-    "addConditionFailed": "Echec de l'ajout d'une relation à une condition",
-    "addFailed": "Echec de l'ajout d'une relation",
-    "addMedicationFailed": "Echec de l'ajout d'une relation à un médicament",
-    "deleteFailed": "Echec de la suppression d'une relation",
-    "fetchFailed": "Echec du chargement des relations",
-    "updateFailed": "Echec de la mise à jour d'une relation"
+    "addConditionFailed": "Échec de l'ajout de la relation d'affection",
+    "addFailed": "Échec de l'ajout de la relation",
+    "addMedicationFailed": "Échec de l'ajout de la relation médicamenteuse",
+    "deleteFailed": "Échec de la suppression de la relation",
+    "fetchFailed": "Échec du chargement des relations",
+    "updateFailed": "Échec de la mise à jour de la relation"
   },
   "success": {
-    "batchUploadSuccess": "Tous les fichiers ont été téléversés avec succès.",
+    "batchUploadSuccess": "Tous les fichiers ont été téléversés avec succès !",
     "fileDeleted": "Fichier supprimé avec succès.",
-    "formSaved": "Formulaire sauvegardé avec succès.",
-    "paperlessSyncSuccess": "Synchronisation réussie avec le système de gestion de document Paperless.",
-    "uploadMultipleSuccess": "Tous les fichiers ont été téléversés avec succès.",
-    "uploadSuccess": "Fichier téléversé avec succès."
+    "formSaved": "Formulaire sauvegardé avec succès !",
+    "paperlessSyncSuccess": "Synchronisation réussie avec la gestion documentaire Paperless.",
+    "uploadMultipleSuccess": "Tous les fichiers ont été téléversés avec succès !",
+    "uploadSuccess": "Fichier téléversé avec succès !"
   },
   "upload": {
-    "allUploadsFailed": "Echec de tous les téléversements. Veuillez vérifier votre réseau et réessayer.",
-    "batchUploadFailed": "Echec du téléversement de certains fichiers. Veuillez consulter les erreurs des fichiers individuels.",
+    "allUploadsFailed": "Échec de tous les téléversements de fichiers. Veuillez vérifier votre connexion et réessayer.",
+    "batchUploadFailed": "Échec du téléversement de certains fichiers. Veuillez vérifier les erreurs de fichiers individuels.",
     "connectionError": "Erreur de connexion. Veuillez vérifier votre réseau et réessayer.",
     "duplicateFile": "Ce fichier a déjà été téléversé.",
-    "failed": "Echec du téléversement. Veuillez réessayer.",
-    "fileProcessingFailed": "Echec du traitement du fichier. Veuillez essayer un fichier différent.",
+    "failed": "Échec du téléversement du fichier. Veuillez réessayer.",
+    "fileProcessingFailed": "Échec du traitement du fichier. Veuillez essayer un fichier différent.",
     "fileTooLarge": "La taille du fichier dépasse la limite maximale.",
-    "invalidFileType": "Format de fichier non supporté.",
-    "partialUploadSuccess": "Téléversement complété avec des erreurs. Veuillez vérifier les fichiers en échec."
+    "invalidFileType": "Type de fichier non pris en charge.",
+    "partialUploadSuccess": "Téléversement terminé avec quelques erreurs. Veuillez vérifier les fichiers en échec."
   },
   "warnings": {
     "duplicateWarning": "Ce fichier semble être un doublon.",
-    "largeFileWarning": "Fichier lourd détecté. Le téléversement peut prendre plusieurs minutes.",
-    "partialSuccess": "Opération complétée avec des alertes.",
+    "largeFileWarning": "Fichier volumineux détecté. Le téléversement peut prendre plusieurs minutes.",
+    "partialSuccess": "Opération terminée avec quelques avertissements.",
     "slowConnection": "Le téléversement prend plus de temps que d'habitude en raison d'une connexion lente."
   }
 }

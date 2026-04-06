@@ -167,7 +167,7 @@ function TreatmentLabResultRelationships({
 
                     {(labResult?.completed_date || labResult?.ordered_date) && (
                       <Text size="sm" c="dimmed">
-                        <strong>Date:</strong> {formatDateDisplay(labResult.completed_date || labResult.ordered_date)}
+                        <strong>{t('shared:labels.date')}:</strong> {formatDateDisplay(labResult.completed_date || labResult.ordered_date)}
                         {labResult?.labs_result && ` | Result: ${labResult.labs_result}`}
                       </Text>
                     )}

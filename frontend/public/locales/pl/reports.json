@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "Dodaj dokumentację medyczną",
+      "clearSelections": "Wyczyść wszystkie zaznaczenia",
+      "generateReport": "Generuj raport ({{count}} rekordów)",
+      "generateReport_one": "Generuj raport ({{count}} rekord)",
+      "generateReport_other": "Generuj raport ({{count}} rekordów)",
+      "generateReportChartsOnly": "Generuj raport ({{chartCount}} wykresów)",
+      "generateReportWithCharts": "Generuj raport ({{recordCount}} rekordów, {{chartCount}} wykresów)",
+      "selectAll": "Zaznacz wszystkie rekordy"
+    },
+    "configuration": {
+      "description": "Wybierz dokumentację medyczną do uwzględnienia w niestandardowym raporcie",
+      "title": "Konfiguracja raportu"
+    },
+    "icon": "",
+    "loading": "Ładowanie kreatora raportów...",
+    "noData": {
+      "description": "Najpierw dodaj dokumentację medyczną, aby skorzystać z kreatora raportów.",
+      "title": "Brak dostępnych danych medycznych"
+    },
+    "notifications": {
+      "templateLoaded": "Szablon załadowany",
+      "templateLoadedMessage": "Szablon \"{{name}}\" został załadowany."
+    },
+    "progress": {
+      "recordsSelected": "Wybrane rekordy"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "Dodaj dane demograficzne i kontaktowe",
+        "label": "Dołącz informacje o pacjencie"
+      },
+      "includeProfilePicture": {
+        "description": "Dodaj zdjęcie pacjenta w nagłówku raportu",
+        "label": "Dołącz zdjęcie profilowe"
+      },
+      "includeSummary": {
+        "description": "Dodaj sekcję przeglądu i statystyk",
+        "label": "Dołącz statystyki podsumowujące"
+      },
+      "reportTitle": {
+        "label": "Tytuł raportu"
+      },
+      "title": "Ustawienia raportu"
+    },
+    "title": "Kreator niestandardowych raportów",
+    "trendCharts": {
+      "dateFrom": "Od",
+      "dateTo": "Do",
+      "emptyState": "Brak danych trendów. Dodaj parametry życiowe lub wyniki badań laboratoryjnych, aby włączyć wykresy trendów.",
+      "labTestCharts": {
+        "description": "Wyszukaj i wybierz badania laboratoryjne do wykresów",
+        "searchPlaceholder": "Wyszukaj badania laboratoryjne...",
+        "title": "Wykresy badań laboratoryjnych"
+      },
+      "maxReached": "Osiągnięto maksimum 10 wykresów",
+      "recordCount": "{{count}} rekordów",
+      "recordCount_one": "{{count}} rekord",
+      "recordCount_other": "{{count}} rekordów",
+      "removeChart": "Usuń wykres {{name}}",
+      "selectedCharts": "Wybrane wykresy ({{count}})",
+      "selectedCharts_one": "Wybrane wykresy ({{count}})",
+      "selectedCharts_other": "Wybrane wykresy ({{count}})",
+      "vitalCharts": {
+        "description": "Wybierz parametry życiowe do wykresów",
+        "title": "Wykresy parametrów życiowych"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "Brak dostępnych kategorii",
+    "noCategoriesDescription": "Brak dostępnych kategorii danych medycznych do generowania raportów.",
+    "noRecords": "Brak dostępnych rekordów",
+    "recordCount": "{{count}} rekordów",
+    "recordCount_one": "{{count}} rekord",
+    "recordCount_other": "{{count}} rekordów",
+    "selected": "{{count}} wybranych",
+    "selected_one": "{{count}} wybrany",
+    "selected_other": "{{count}} wybranych",
+    "showingFirst": "Wyświetlanie pierwszych {{count}} rekordów. Więcej rekordów jest dostępnych, ale nie są wyświetlane ze względów wydajnościowych.",
+    "showingFirst_one": "Wyświetlanie pierwszego {{count}} rekordu. Więcej rekordów jest dostępnych, ale nie są wyświetlane ze względów wydajnościowych.",
+    "showingFirst_other": "Wyświetlanie pierwszych {{count}} rekordów. Więcej rekordów jest dostępnych, ale nie są wyświetlane ze względów wydajnościowych.",
+    "totalCount": "{{count}} łącznie",
+    "totalCount_one": "{{count}} łącznie",
+    "totalCount_other": "{{count}} łącznie"
+  },
+  "dataExport": {
+    "availableData": "Dostępne dane",
+    "bulkExport": "Eksport zbiorczy",
+    "csvDescription": "Format CSV jest idealny do arkuszy kalkulacyjnych",
+    "dateFilterNote": "Filtry dat dotyczą wszystkich wybranych typów",
+    "exportInfo": "Informacje eksportu",
+    "exportTitle": "Eksportuj dokumentację medyczną",
+    "includeFilesNote": "Może to znacznie zwiększyć rozmiar pobieranego pliku",
+    "jsonDescription": "Format JSON zapewnia pełną strukturę danych",
+    "pdfDescription": "Format PDF tworzy raporty do wydruku",
+    "singleExport": "Eksport pojedynczy",
+    "zipDescription": "Eksporty zbiorcze są pakowane w plik ZIP"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "{{count}} dodatkowy element",
+      "moreItems_other": "{{count}} dodatkowych elementów",
+      "title": "Dostępne dane"
+    },
+    "buttons": {
+      "bulkExport": "Eksport zbiorczy {{count}} typów jako ZIP",
+      "bulkExport_one": "Eksport zbiorczy {{count}} typu jako ZIP",
+      "bulkExport_other": "Eksport zbiorczy {{count}} typów jako ZIP",
+      "creatingZip": "Tworzenie pliku ZIP...",
+      "exportAs": "Eksportuj {{scope}} jako {{format}}",
+      "exporting": "Eksportowanie...",
+      "goToDashboard": "Przejdź do panelu głównego",
+      "refreshPage": "Odśwież stronę"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "Wybierz typy danych do eksportu zbiorczego"
+      },
+      "dataToExport": {
+        "label": "Dane do eksportu",
+        "placeholder": "Wybierz typ danych"
+      },
+      "dateRange": {
+        "endDate": "Data końcowa (opcjonalna)",
+        "startDate": "Data początkowa (opcjonalna)"
+      },
+      "format": {
+        "label": "Format eksportu",
+        "placeholder": "Wybierz format"
+      },
+      "includeFiles": "Dołącz załączniki plików (tworzy plik ZIP)",
+      "includePatientInfo": {
+        "description": "Odznacz, aby wykluczyć osobiste dane pacjenta w celu ochrony prywatności",
+        "label": "Dołącz informacje o pacjencie (imię, nazwisko, dane demograficzne itp.)"
+      },
+      "title": "Konfiguracja eksportu"
+    },
+    "description": "Pobierz swoje dane medyczne w różnych formatach do archiwizacji lub udostępniania dostawcom opieki zdrowotnej",
+    "errors": {
+      "bulkExportFailed": "Eksport zbiorczy nieudany: {{message}}",
+      "bulkInvalidSettings": "Sprawdź ustawienia eksportu zbiorczego. Upewnij się, że wybrałeś co najmniej jeden typ danych i prawidłowy format.",
+      "bulkNoDataFound": "Nie znaleziono danych dla wybranych kryteriów eksportu. Spróbuj wybrać inne typy danych lub dostosować zakres dat.",
+      "exportFailed": "Eksport nieudany: {{message}}",
+      "invalidSettings": "Sprawdź ustawienia eksportu. Upewnij się, że wybrałeś prawidłowy typ danych i format.",
+      "loadFailed": "Nie udało się załadować danych eksportu: {{message}}",
+      "noActivePatient": "Aktualnie nie wybrano profilu pacjenta. Wybierz pacjenta z panelu głównego, aby skorzystać z funkcji eksportu.",
+      "noDataFound": "Nie znaleziono danych dla wybranych kryteriów eksportu. Spróbuj wybrać inny typ danych lub zakres dat.",
+      "noDataType": "Wybierz co najmniej jeden typ danych do eksportu zbiorczego",
+      "sessionExpired": "Twoja sesja wygasła. Odśwież stronę lub zaloguj się ponownie, aby uzyskać dostęp do funkcji eksportu.",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "Eksportuj wiele typów danych razem w pliku ZIP",
+      "bulkExport": "Eksport zbiorczy",
+      "singleDescription": "Eksportuj jeden typ danych w wybranym formacie",
+      "singleExport": "Eksport pojedynczy",
+      "title": "Tryb eksportu"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "Tworzy plik ZIP zawierający wiele typów danych w wybranym formacie do kompleksowej archiwizacji danych.",
+        "title": "Eksport zbiorczy:"
+      },
+      "csv": {
+        "description": "Wartości rozdzielane przecinkami odpowiednie dla aplikacji arkuszowych takich jak Excel czy Arkusze Google.",
+        "title": "Format CSV:"
+      },
+      "fileAttachments": {
+        "description": "Gdy dostępne dla eksportów PDF, pliki wyników badań laboratoryjnych mogą być dołączone w archiwum ZIP.",
+        "title": "Załączniki plików:"
+      },
+      "json": {
+        "description": "Czytelny dla maszyn format danych strukturalnych, idealny do importu do innych systemów lub aplikacji.",
+        "title": "Format JSON:"
+      },
+      "pdf": {
+        "description": "Czytelny dla człowieka format dokumentu idealny do drukowania lub udostępniania dostawcom opieki zdrowotnej.",
+        "title": "Format PDF:"
+      },
+      "title": "Informacje o eksporcie"
+    },
+    "loading": "Ładowanie opcji eksportu...",
+    "scopes": {
+      "all": "Wszystkie rekordy",
+      "encounters": "Wizyty"
+    },
+    "success": {
+      "bulkExportComplete": "Eksport zbiorczy zakończony pomyślnie! Plik ZIP zawierający {{count}} typów danych został pobrany.",
+      "bulkExportComplete_one": "Eksport zbiorczy zakończony pomyślnie! Plik ZIP zawierający {{count}} typ danych został pobrany.",
+      "bulkExportComplete_other": "Eksport zbiorczy zakończony pomyślnie! Plik ZIP zawierający {{count}} typów danych został pobrany.",
+      "exportComplete": "Eksport zakończony pomyślnie! Plik {{format}} został pobrany."
+    },
+    "title": "Eksportuj dokumentację zdrowotną"
+  },
+  "templates": {
+    "categories": "{{count}} kategorii",
+    "categories_one": "{{count}} kategoria",
+    "categories_other": "{{count}} kategorii",
+    "deleteConfirm": "Czy na pewno chcesz usunąć ten szablon?",
+    "editTemplate": "Edytuj szablon",
+    "loadTemplate": "Załaduj szablon",
+    "manageTemplates": "Zarządzaj szablonami",
+    "moreTemplates": "... i {{count}} dodatkowy szablon",
+    "moreTemplates_one": "... i {{count}} dodatkowy szablon",
+    "moreTemplates_other": "... i {{count}} dodatkowych szablonów",
+    "noSaved": "Brak zapisanych szablonów",
+    "records": "{{count}} rekordów",
+    "reportTemplates": "Szablony raportów",
+    "saveAsTemplate": "Zapisz jako szablon",
+    "saveDescription": "Ten szablon zapisze Twoje bieżące ustawienia raportu, wybrane rekordy i wybrane wykresy trendów.",
+    "savedTemplates": "Zapisane szablony",
+    "updateTemplate": "Aktualizuj szablon"
+  }
+}

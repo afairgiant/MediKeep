@@ -2,7 +2,7 @@
   "activity": {
     "actions": {
       "added": "Tillagd",
-      "deleted": "Borttagen",
+      "deleted": "Raderad",
       "modified": "Ändrad",
       "removed": "Borttagen",
       "scheduled": "Schemalagd",
@@ -57,12 +57,16 @@
     }
   },
   "menu": {
+    "account": "Konto",
     "backToDashboard": "Tillbaka till instrumentpanelen",
+    "darkMode": "Mörkt läge",
     "help": "Hjälp",
+    "lightMode": "Ljust läge",
     "logout": "Logga ut",
     "patients": "Patienter",
     "profile": "Profil",
-    "reports": "Rapporter"
+    "reports": "Rapporter",
+    "userActions": "Användaråtgärder"
   },
   "pages": {
     "help": "Hjälp och support",
@@ -79,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Administrationspanel",
+      "allergies": "Allergier",
+      "backupManagement": "Backup-hantering",
+      "conditions": "Tillstånd",
       "customReports": "Anpassade rapporter",
+      "dataModels": "Datamodeller",
+      "emergencyContacts": "Nödkontakter",
       "exportRecords": "Exportera journaler",
+      "familyHistory": "Familjehistorik",
+      "immunizations": "Vaccinationer",
+      "injuries": "Skador",
+      "insurance": "Försäkring",
+      "labResults": "Laboratorieresultat",
       "language": "Språk",
+      "medicalEquipment": "Medicinsk utrustning",
+      "medications": "Mediciner",
       "patientInfo": "Patientinfo",
+      "pharmacies": "Apotek",
+      "practitioners": "Vårdgivare",
+      "procedures": "Ingrepp",
+      "settings": "Inställningar",
+      "symptoms": "Symptom",
+      "systemHealth": "Systemhälsa",
       "tagManagement": "Tagghantering",
       "theme": "Tema",
-      "visitHistory": "Besökshistorik"
+      "treatments": "Behandlingar",
+      "visitHistory": "Besökshistorik",
+      "vitalSigns": "Vitalparametrar"
     },
     "sections": {
+      "administration": "Administration",
       "careAndTreatment": "Vård och behandling",
       "misc": "Övrigt",
       "tools": "Verktyg"

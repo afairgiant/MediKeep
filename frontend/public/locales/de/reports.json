@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "Medizinische Datensätze hinzufügen",
+      "clearSelections": "Alle Auswahlen löschen",
+      "generateReport": "Bericht erstellen ({{count}} Datensätze)",
+      "generateReport_one": "Bericht erstellen ({{count}} Datensatz)",
+      "generateReport_other": "Bericht erstellen ({{count}} Datensätze)",
+      "generateReportChartsOnly": "Bericht erstellen ({{chartCount}} Diagramme)",
+      "generateReportWithCharts": "Bericht erstellen ({{recordCount}} Datensätze, {{chartCount}} Diagramme)",
+      "selectAll": "Alle Datensätze auswählen"
+    },
+    "configuration": {
+      "description": "Wählen Sie medizinische Datensätze für Ihren individuellen Bericht aus",
+      "title": "Berichtkonfiguration"
+    },
+    "icon": "",
+    "loading": "Berichtgenerator wird geladen...",
+    "noData": {
+      "description": "Fügen Sie zuerst medizinische Datensätze hinzu, um den Berichtgenerator zu verwenden.",
+      "title": "Keine medizinischen Daten verfügbar"
+    },
+    "notifications": {
+      "templateLoaded": "Vorlage geladen",
+      "templateLoadedMessage": "Vorlage \"{{name}}\" wurde geladen."
+    },
+    "progress": {
+      "recordsSelected": "Datensätze ausgewählt"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "Demografische und Kontaktinformationen hinzufügen",
+        "label": "Patienteninformationen einbeziehen"
+      },
+      "includeProfilePicture": {
+        "description": "Patientenfoto zur Berichtkopfzeile hinzufügen",
+        "label": "Profilbild einbeziehen"
+      },
+      "includeSummary": {
+        "description": "Übersichts- und Statistikbereich hinzufügen",
+        "label": "Zusammenfassende Statistiken einbeziehen"
+      },
+      "reportTitle": {
+        "label": "Berichttitel"
+      },
+      "title": "Berichteinstellungen"
+    },
+    "title": "Individueller Berichtgenerator",
+    "trendCharts": {
+      "dateFrom": "Von",
+      "dateTo": "Bis",
+      "emptyState": "Keine Trenddaten verfügbar. Fügen Sie Vitalzeichen oder Laborergebnisse hinzu, um Trenddiagramme zu aktivieren.",
+      "labTestCharts": {
+        "description": "Labortests suchen und für Diagramme auswählen",
+        "searchPlaceholder": "Labortests suchen...",
+        "title": "Labortest-Diagramme"
+      },
+      "maxReached": "Maximum von 10 Diagrammen erreicht",
+      "recordCount": "{{count}} Datensätze",
+      "recordCount_one": "{{count}} Datensatz",
+      "recordCount_other": "{{count}} Datensätze",
+      "removeChart": "Diagramm {{name}} entfernen",
+      "selectedCharts": "Ausgewählte Diagramme ({{count}})",
+      "selectedCharts_one": "Ausgewählte Diagramme ({{count}})",
+      "selectedCharts_other": "Ausgewählte Diagramme ({{count}})",
+      "vitalCharts": {
+        "description": "Vitalzeichen für Diagramme auswählen",
+        "title": "Vitalzeichen-Diagramme"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "Keine Kategorien verfügbar",
+    "noCategoriesDescription": "Keine medizinischen Datenkategorien für die Berichterstellung verfügbar.",
+    "noRecords": "Keine Datensätze verfügbar",
+    "recordCount": "{{count}} Datensätze",
+    "recordCount_one": "{{count}} Datensatz",
+    "recordCount_other": "{{count}} Datensätze",
+    "selected": "{{count}} ausgewählt",
+    "selected_one": "{{count}} ausgewählt",
+    "selected_other": "{{count}} ausgewählt",
+    "showingFirst": "Erste {{count}} Datensätze werden angezeigt. Weitere Datensätze sind verfügbar, werden aber aus Leistungsgründen nicht angezeigt.",
+    "showingFirst_one": "Erster {{count}} Datensatz wird angezeigt. Weitere Datensätze sind verfügbar, werden aber aus Leistungsgründen nicht angezeigt.",
+    "showingFirst_other": "Erste {{count}} Datensätze werden angezeigt. Weitere Datensätze sind verfügbar, werden aber aus Leistungsgründen nicht angezeigt.",
+    "totalCount": "{{count}} insgesamt",
+    "totalCount_one": "{{count}} insgesamt",
+    "totalCount_other": "{{count}} insgesamt"
+  },
+  "dataExport": {
+    "availableData": "Verfügbare Daten",
+    "bulkExport": "Massenexport",
+    "csvDescription": "CSV-Format ist ideal für Tabellenkalkulationen",
+    "dateFilterNote": "Datumsfilter gelten für alle ausgewählten Typen",
+    "exportInfo": "Exportinformationen",
+    "exportTitle": "Medizinische Unterlagen exportieren",
+    "includeFilesNote": "Dies kann die Downloadgröße erheblich erhöhen",
+    "jsonDescription": "JSON-Format bietet die vollständige Datenstruktur",
+    "pdfDescription": "PDF-Format erstellt druckbare Berichte",
+    "singleExport": "Einzelexport",
+    "zipDescription": "Massenexporte werden als ZIP-Datei verpackt"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "{{count}} weiteres Element",
+      "moreItems_other": "{{count}} weitere Elemente",
+      "title": "Verfügbare Daten"
+    },
+    "buttons": {
+      "bulkExport": "Massenexport {{count}} Typen als ZIP",
+      "bulkExport_one": "Massenexport {{count}} Typ als ZIP",
+      "bulkExport_other": "Massenexport {{count}} Typen als ZIP",
+      "creatingZip": "ZIP wird erstellt...",
+      "exportAs": "{{scope}} als {{format}} exportieren",
+      "exporting": "Wird exportiert...",
+      "goToDashboard": "Zum Dashboard",
+      "refreshPage": "Seite aktualisieren"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "Datentypen für Massenexport auswählen"
+      },
+      "dataToExport": {
+        "label": "Zu exportierende Daten",
+        "placeholder": "Datentyp auswählen"
+      },
+      "dateRange": {
+        "endDate": "Enddatum (Optional)",
+        "startDate": "Startdatum (Optional)"
+      },
+      "format": {
+        "label": "Exportformat",
+        "placeholder": "Format auswählen"
+      },
+      "includeFiles": "Dateianhänge einbeziehen (erstellt ZIP-Datei)",
+      "includePatientInfo": {
+        "description": "Deaktivieren, um persönliche Patientendaten aus Datenschutzgründen auszuschließen",
+        "label": "Patienteninformationen einbeziehen (Name, Demografie usw.)"
+      },
+      "title": "Exportkonfiguration"
+    },
+    "description": "Laden Sie Ihre medizinischen Daten in verschiedenen Formaten herunter, zur Sicherung oder zum Teilen mit Gesundheitsdienstleistern",
+    "errors": {
+      "bulkExportFailed": "Massenexport fehlgeschlagen: {{message}}",
+      "bulkInvalidSettings": "Bitte überprüfen Sie Ihre Massenexport-Einstellungen. Stellen Sie sicher, dass Sie mindestens einen Datentyp und ein gültiges Format ausgewählt haben.",
+      "bulkNoDataFound": "Keine Daten für die ausgewählten Exportkriterien gefunden. Versuchen Sie, andere Datentypen auszuwählen oder den Datumsbereich anzupassen.",
+      "exportFailed": "Export fehlgeschlagen: {{message}}",
+      "invalidSettings": "Bitte überprüfen Sie Ihre Export-Einstellungen. Stellen Sie sicher, dass Sie einen gültigen Datentyp und ein gültiges Format ausgewählt haben.",
+      "loadFailed": "Exportdaten konnten nicht geladen werden: {{message}}",
+      "noActivePatient": "Es ist kein Patientenprofil ausgewählt. Bitte wählen Sie einen Patienten vom Dashboard aus, um die Exportfunktion zu nutzen.",
+      "noDataFound": "Keine Daten für die ausgewählten Exportkriterien gefunden. Versuchen Sie, einen anderen Datentyp oder Datumsbereich auszuwählen.",
+      "noDataType": "Bitte wählen Sie mindestens einen Datentyp für den Massenexport aus",
+      "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte aktualisieren Sie die Seite oder melden Sie sich erneut an, um auf die Exportfunktionen zuzugreifen.",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "Mehrere Datentypen zusammen als ZIP-Datei exportieren",
+      "bulkExport": "Massenexport",
+      "singleDescription": "Einen einzelnen Datentyp im gewählten Format exportieren",
+      "singleExport": "Einzelexport",
+      "title": "Exportmodus"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "Erstellt eine ZIP-Datei mit mehreren Datentypen im gewählten Format für eine umfassende Datensicherung.",
+        "title": "Massenexport:"
+      },
+      "csv": {
+        "description": "Kommagetrennte Werte, geeignet für Tabellenkalkulationsanwendungen wie Excel oder Google Sheets.",
+        "title": "CSV-Format:"
+      },
+      "fileAttachments": {
+        "description": "Bei PDF-Exporten können Laborergebnisdateien, sofern verfügbar, in einem ZIP-Archiv beigefügt werden.",
+        "title": "Dateianhänge:"
+      },
+      "json": {
+        "description": "Maschinenlesbares strukturiertes Datenformat, ideal zum Importieren in andere Systeme oder Anwendungen.",
+        "title": "JSON-Format:"
+      },
+      "pdf": {
+        "description": "Menschenlesbares Dokumentformat, perfekt zum Drucken oder Teilen mit Gesundheitsdienstleistern.",
+        "title": "PDF-Format:"
+      },
+      "title": "Exportinformationen"
+    },
+    "loading": "Exportoptionen werden geladen...",
+    "scopes": {
+      "all": "Alle Datensätze",
+      "encounters": "Patientenkontakte"
+    },
+    "success": {
+      "bulkExportComplete": "Massenexport erfolgreich abgeschlossen! Ihre ZIP-Datei mit {{count}} Datentypen wurde heruntergeladen.",
+      "bulkExportComplete_one": "Massenexport erfolgreich abgeschlossen! Ihre ZIP-Datei mit {{count}} Datentyp wurde heruntergeladen.",
+      "bulkExportComplete_other": "Massenexport erfolgreich abgeschlossen! Ihre ZIP-Datei mit {{count}} Datentypen wurde heruntergeladen.",
+      "exportComplete": "Export erfolgreich abgeschlossen! Ihre {{format}}-Datei wurde heruntergeladen."
+    },
+    "title": "Gesundheitsdaten exportieren"
+  },
+  "templates": {
+    "categories": "{{count}} Kategorien",
+    "categories_one": "{{count}} Kategorie",
+    "categories_other": "{{count}} Kategorien",
+    "deleteConfirm": "Sind Sie sicher, dass Sie diese Vorlage löschen möchten?",
+    "editTemplate": "Vorlage bearbeiten",
+    "loadTemplate": "Vorlage laden",
+    "manageTemplates": "Vorlagen verwalten",
+    "moreTemplates": "... und {{count}} weitere Vorlage",
+    "moreTemplates_one": "... und {{count}} weitere Vorlage",
+    "moreTemplates_other": "... und {{count}} weitere Vorlagen",
+    "noSaved": "Keine gespeicherten Vorlagen",
+    "records": "{{count}} Datensätze",
+    "reportTemplates": "Berichtvorlagen",
+    "saveAsTemplate": "Als Vorlage speichern",
+    "saveDescription": "Diese Vorlage speichert Ihre aktuellen Berichteinstellungen, ausgewählte Datensätze und ausgewählte Trenddiagramme.",
+    "savedTemplates": "Gespeicherte Vorlagen",
+    "updateTemplate": "Vorlage aktualisieren"
+  }
+}

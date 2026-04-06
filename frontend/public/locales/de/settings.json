@@ -1,0 +1,164 @@
+{
+  "account": {
+    "deleteAccount": {
+      "button": "Konto löschen",
+      "description": "Löschen Sie Ihr Konto und alle zugehörigen medizinischen Daten dauerhaft. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "title": "Konto löschen"
+    }
+  },
+  "actions": {
+    "reset": "Änderungen zurücksetzen",
+    "save": "Alle Änderungen speichern",
+    "unsavedChanges": "Sie haben ungespeicherte Änderungen"
+  },
+  "documents": {
+    "cleanup": {
+      "button": "Dateien bereinigen",
+      "cleaning": "Bereinigung läuft...",
+      "description": "Bereinigen Sie nicht synchronisierte Dateien und beheben Sie Inkonsistenzen im Dokumentenspeicher. Fehlgeschlagene Uploads werden zurückgesetzt, verwaiste Aufgaben entfernt und Datenbank-Synchronisierungsprobleme behoben.",
+      "title": "Dateibereinigung"
+    },
+    "paperlessDescription": "Paperless-ngx-Dokumentenverwaltungsintegration konfigurieren"
+  },
+  "help": {
+    "documentation": {
+      "description": "Durchsuchen Sie das Wiki nach Anleitungen, Einrichtungshinweisen und Funktionsdokumentation.",
+      "title": "Dokumentation"
+    },
+    "issues": {
+      "description": "Einen Fehler gefunden oder einen Funktionswunsch? Erstellen Sie ein Issue auf GitHub.",
+      "title": "Problem melden"
+    }
+  },
+  "paperlessConnection": {
+    "apiTokenHelp": "Ihr Paperless-ngx-API-Token. Sie finden es im Paperless-Adminbereich unter Einstellungen.",
+    "apiTokenLabel": "API-Token",
+    "apiTokenRecommended": "API-Token (Empfohlen)",
+    "authMethod": "Authentifizierungsmethode",
+    "connected": "Mit Paperless-ngx verbunden",
+    "connectionError": "Verbindung nicht möglich. Bitte überprüfen Sie Ihre URL und Anmeldedaten.",
+    "methodInfo": "API-Token sind die empfohlene Authentifizierungsmethode für bessere Sicherheit.",
+    "passwordHelp": "Ihr Paperless-ngx-Passwort.",
+    "passwordLabel": "Passwort",
+    "sessionStorage": "Sitzungsspeicher wird für Token verwendet",
+    "title": "Paperless-ngx-Verbindung",
+    "urlHelp": "Die URL Ihrer Paperless-ngx-Instanz (z. B. https://paperless.example.com)",
+    "urlLabel": "Server-URL",
+    "usernameHelp": "Ihr Paperless-ngx-Benutzername.",
+    "usernameLabel": "Benutzername",
+    "usernamePassword": "Benutzername & Passwort"
+  },
+  "papra": {
+    "apiTokenPlaceholder": "Geben Sie Ihr Papra-API-Token ein",
+    "connectionFailed": "Verbindung fehlgeschlagen",
+    "connectionSuccess": "Verbindung erfolgreich",
+    "description": "Verbinden Sie sich mit Ihrer Papra-Instanz für die Dokumentenverwaltung",
+    "organization": "Organisation",
+    "organizationPlaceholder": "Organisation auswählen",
+    "urlPlaceholder": "https://ihre-papra-instanz.com"
+  },
+  "preferences": {
+    "dateFormat": {
+      "description": "Wählen Sie, wie Datumsangaben in der gesamten Anwendung angezeigt werden",
+      "dmy": "TT.MM.JJJJ (Europäisch)",
+      "mdy": "MM/TT/JJJJ (US)",
+      "title": "Datumsformat",
+      "ymd": "JJJJ-MM-TT (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Legen Sie die Dauer der Inaktivität fest, bevor Ihre Sitzung abläuft (in Minuten)",
+      "range": "Minuten (5-1440)",
+      "title": "Sitzungszeitlimit"
+    },
+    "unitSystem": {
+      "description": "Wählen Sie, ob Messungen in imperialen (Pfund, Fuß, °F) oder metrischen (Kilogramm, Zentimeter, °C) Einheiten angezeigt werden sollen",
+      "imperial": "Imperial (lbs, Fuß, °F)",
+      "metric": "Metrisch (kg, cm, °C)",
+      "title": "Maßeinheitensystem"
+    }
+  },
+  "releaseNotes": {
+    "currentVersion": "Aktuell",
+    "dismiss": "Verstanden",
+    "empty": "Keine Versionshinweise verfügbar",
+    "error": "Versionshinweise konnten nicht geladen werden",
+    "publishedOn": "Veröffentlicht am {{date}}",
+    "retry": "Erneut versuchen",
+    "showAll": "Weitere Versionen anzeigen",
+    "showLess": "Weniger anzeigen",
+    "viewOnGithub": "Auf GitHub ansehen",
+    "whatsNewTitle": "Neuigkeiten"
+  },
+  "sections": {
+    "accountManagement": "Kontoverwaltung",
+    "gettingHelp": "Hilfe erhalten",
+    "preferences": "Anwendungseinstellungen",
+    "releaseNotes": "Versionshinweise",
+    "security": "Sicherheit",
+    "supportMediKeep": "MediKeep unterstützen",
+    "systemInfo": "Systeminformationen"
+  },
+  "security": {
+    "password": {
+      "button": "Passwort ändern",
+      "confirmPassword": "Neues Passwort bestätigen",
+      "currentPassword": "Aktuelles Passwort",
+      "description": "Ändern Sie Ihr Kontopasswort, um Ihr Konto sicher zu halten",
+      "forceChange": {
+        "errors": {
+          "allFieldsRequired": "Alle Felder sind erforderlich.",
+          "changeFailed": "Passwortänderung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+          "passwordComplexity": "Das neue Passwort muss mindestens einen Buchstaben und eine Zahl enthalten.",
+          "passwordMustDiffer": "Das neue Passwort muss sich vom aktuellen Passwort unterscheiden.",
+          "passwordsMustMatch": "Die neuen Passwörter stimmen nicht überein.",
+          "passwordTooShort": "Das neue Passwort muss mindestens 6 Zeichen lang sein."
+        },
+        "submit": "Neues Passwort festlegen",
+        "submitting": "Passwort wird geändert...",
+        "subtitle": "Ihr Konto erfordert eine Passwortänderung, bevor Sie fortfahren können. Bitte legen Sie unten ein neues Passwort fest.",
+        "title": "Passwortänderung erforderlich"
+      },
+      "newPassword": "Neues Passwort",
+      "passwordHelp": "Mindestens 6 Zeichen, muss einen Buchstaben und eine Zahl enthalten."
+    }
+  },
+  "settings": {
+    "releaseNotes": {
+      "noChanges": "Keine Änderungen für diese Version aufgeführt",
+      "whatsNewSubtitle": "Das hat sich seit Ihrem letzten Update geändert"
+    }
+  },
+  "sponsor": {
+    "button": "Auf GitHub sponsern",
+    "buttonShort": "Sponsern",
+    "description": "MediKeep ist kostenlos und quelloffen. Wenn Sie es nützlich finden, erwägen Sie, das Projekt zu sponsern, um die Entwicklung zu finanzieren und es am Laufen zu halten."
+  },
+  "storage": {
+    "connectionRequired": "Verbindung erforderlich",
+    "defaultLocation": "Standardspeicherort",
+    "filesCount": "{{count}} Dateien",
+    "filesCount_one": "{{count}} Datei",
+    "filesCount_other": "{{count}} Dateien",
+    "localDescription": "Dateien werden direkt auf diesem Server gespeichert. Gut für einfache Setups ohne externe Dienste.",
+    "localStorage": "Lokaler Speicher",
+    "noUsageData": "Keine Speichernutzungsdaten verfügbar",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "Dateien werden auf Ihren Paperless-ngx-Server hochgeladen. Bietet OCR, Tagging und erweiterte Dokumentenverwaltung.",
+    "papra": "Papra",
+    "papraDescription": "Dateien werden in Ihrer Papra-Instanz gespeichert. Bietet organisierte Dokumentenverwaltung mit Organisationen.",
+    "title": "Speichereinstellungen",
+    "usageLabel": "Speichernutzung"
+  },
+  "system": {
+    "timezone": {
+      "title": "Zeitzone"
+    },
+    "version": {
+      "loading": "Versionsinformationen werden geladen...",
+      "title": "Anwendungsversion",
+      "unavailable": "Versionsinformationen nicht verfügbar",
+      "unknownApp": "Unbekannte Anwendung",
+      "unknownVersion": "Unbekannte Version"
+    }
+  }
+}

@@ -69,8 +69,9 @@ const MobileNavigation = ({
 
           <div className="mobile-nav-section">
             <h4 className="mobile-section-title">{t('menu.profile', 'Account')}</h4>
+            {/* eslint-disable-next-line i18next/no-literal-string -- emoji + translated text */}
             <button className="mobile-nav-item" onClick={() => handleNavigation('/settings')}>
-              ⚙️ {t('shared:labels.settings', 'Settings')}
+              {'\u2699\uFE0F'} {t('shared:labels.settings', 'Settings')}
             </button>
             <div className="mobile-theme-toggle">
               <span>{t('sidebarNav.items.theme', 'Theme')}</span>

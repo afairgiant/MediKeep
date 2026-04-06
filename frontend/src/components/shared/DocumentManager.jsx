@@ -40,6 +40,7 @@ import {
   IconLink,
   IconChevronDown,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
 import { getPaperlessSettings, linkPaperlessDocument } from '../../services/api/paperlessApi.jsx';
 import { linkPapraDocument } from '../../services/api/papraApi.jsx';
@@ -62,6 +63,7 @@ const DocumentManager = ({
   onUploadPendingFiles, // Callback to expose upload function
   className = '',
 }) => {
+  const { t } = useTranslation(['documents', 'shared']);
   // Add spinning animation styles
   const spinKeyframes = `
     @keyframes spin {
@@ -1145,14 +1147,14 @@ const DocumentManager = ({
           {/* File Upload Section */}
           <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Group justify="space-between" align="center">
-              <Text fw={500}>Manage Documents</Text>
+              <Text fw={500}>{t('manager.manageDocuments')}</Text>
               <Menu position="bottom-end" shadow="md">
                 <Menu.Target>
                   <Button
                     rightSection={<IconChevronDown size={16} />}
                     disabled={loading}
                   >
-                    Add Document
+                    {t('manager.addDocument')}
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
@@ -1160,14 +1162,14 @@ const DocumentManager = ({
                     leftSection={<IconUpload size={16} />}
                     onClick={() => setShowUploadModal(true)}
                   >
-                    Upload New File
+                    {t('manager.uploadNewFile')}
                   </Menu.Item>
                   {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
                     <Menu.Item
                       leftSection={<IconLink size={16} />}
                       onClick={() => setShowLinkModal(true)}
                     >
-                      Link Existing Paperless Document
+                      {t('manager.linkPaperless')}
                     </Menu.Item>
                   )}
                   {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
@@ -1175,7 +1177,7 @@ const DocumentManager = ({
                       leftSection={<IconLink size={16} />}
                       onClick={() => setIsPapraLinkModalOpen(true)}
                     >
-                      Link Existing Papra Document
+                      {t('manager.linkPapra')}
                     </Menu.Item>
                   )}
                 </Menu.Dropdown>
@@ -1226,7 +1228,7 @@ const DocumentManager = ({
           {files.length > 0 && (
             <Stack gap="md">
               <Group justify="space-between" align="center">
-                <Title order={5}>Current Files:</Title>
+                <Title order={5}>{t('manager.currentFiles')}</Title>
                 <Button
                   variant="light"
                   size="xs"
@@ -1235,7 +1237,7 @@ const DocumentManager = ({
                   onClick={() => checkSyncStatus(true)}
                   title="Check sync status with Paperless"
                 >
-                  Sync Check
+                  {t('manager.syncCheck')}
                 </Button>
               </Group>
               <FileList
@@ -1254,14 +1256,14 @@ const DocumentManager = ({
           {/* Add Document Menu */}
           <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Group justify="space-between" align="center">
-              <Text fw={500}>Manage Documents</Text>
+              <Text fw={500}>{t('manager.manageDocuments')}</Text>
               <Menu position="bottom-end" shadow="md">
                 <Menu.Target>
                   <Button
                     rightSection={<IconChevronDown size={16} />}
                     disabled={loading}
                   >
-                    Add Document
+                    {t('manager.addDocument')}
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
@@ -1269,14 +1271,14 @@ const DocumentManager = ({
                     leftSection={<IconUpload size={16} />}
                     onClick={() => setShowUploadModal(true)}
                   >
-                    Upload New File
+                    {t('manager.uploadNewFile')}
                   </Menu.Item>
                   {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
                     <Menu.Item
                       leftSection={<IconLink size={16} />}
                       onClick={() => setShowLinkModal(true)}
                     >
-                      Link Existing Paperless Document
+                      {t('manager.linkPaperless')}
                     </Menu.Item>
                   )}
                   {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
@@ -1284,7 +1286,7 @@ const DocumentManager = ({
                       leftSection={<IconLink size={16} />}
                       onClick={() => setIsPapraLinkModalOpen(true)}
                     >
-                      Link Existing Papra Document
+                      {t('manager.linkPapra')}
                     </Menu.Item>
                   )}
                 </Menu.Dropdown>
@@ -1295,7 +1297,7 @@ const DocumentManager = ({
           {/* Pending Files */}
           {pendingFiles.length > 0 && (
             <Stack gap="md">
-              <Title order={5}>Files to Upload:</Title>
+              <Title order={5}>{t('manager.filesToUpload')}</Title>
               <Stack gap="sm">
                 {pendingFiles.map((pendingFile, index) => {
                   const fileProgress = uploadProgress[index];
@@ -1348,22 +1350,22 @@ const DocumentManager = ({
                               </Text>
                               {isUploading && selectedStorageBackend === 'paperless' && (
                                 <Badge variant="light" color="yellow" size="xs">
-                                  Uploading to Paperless...
+                                  {t('manager.statusUploading')}
                                 </Badge>
                               )}
                               {isCompleted && (
                                 <Badge variant="light" color="green" size="xs">
-                                  Uploaded
+                                  {t('manager.statusUploaded')}
                                 </Badge>
                               )}
                               {isDuplicate && (
                                 <Badge variant="light" color="orange" size="xs">
-                                  Duplicate
+                                  {t('manager.statusDuplicate')}
                                 </Badge>
                               )}
                               {isFailed && (
                                 <Badge variant="light" color="red" size="xs">
-                                  Failed
+                                  {t('manager.statusFailed')}
                                 </Badge>
                               )}
                             </Group>
@@ -1486,14 +1488,14 @@ const DocumentManager = ({
           {/* Add Document Menu */}
           <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Group justify="space-between" align="center">
-              <Text fw={500}>Manage Documents</Text>
+              <Text fw={500}>{t('manager.manageDocuments')}</Text>
               <Menu position="bottom-end" shadow="md">
                 <Menu.Target>
                   <Button
                     rightSection={<IconChevronDown size={16} />}
                     disabled={loading}
                   >
-                    Add Document
+                    {t('manager.addDocument')}
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
@@ -1501,14 +1503,14 @@ const DocumentManager = ({
                     leftSection={<IconUpload size={16} />}
                     onClick={() => setShowUploadModal(true)}
                   >
-                    Upload New File
+                    {t('manager.uploadNewFile')}
                   </Menu.Item>
                   {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
                     <Menu.Item
                       leftSection={<IconLink size={16} />}
                       onClick={() => setShowLinkModal(true)}
                     >
-                      Link Existing Paperless Document
+                      {t('manager.linkPaperless')}
                     </Menu.Item>
                   )}
                   {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
@@ -1516,7 +1518,7 @@ const DocumentManager = ({
                       leftSection={<IconLink size={16} />}
                       onClick={() => setIsPapraLinkModalOpen(true)}
                     >
-                      Link Existing Papra Document
+                      {t('manager.linkPapra')}
                     </Menu.Item>
                   )}
                 </Menu.Dropdown>
@@ -1527,7 +1529,7 @@ const DocumentManager = ({
           {/* Pending Files */}
           {pendingFiles.length > 0 && (
             <Stack gap="md">
-              <Title order={5}>Files to Upload:</Title>
+              <Title order={5}>{t('manager.filesToUpload')}</Title>
               <Stack gap="sm">
                 {pendingFiles.map((pendingFile, index) => {
                   const fileProgress = uploadProgress[index];
@@ -1580,22 +1582,22 @@ const DocumentManager = ({
                               </Text>
                               {isUploading && selectedStorageBackend === 'paperless' && (
                                 <Badge variant="light" color="yellow" size="xs">
-                                  Uploading to Paperless...
+                                  {t('manager.statusUploading')}
                                 </Badge>
                               )}
                               {isCompleted && (
                                 <Badge variant="light" color="green" size="xs">
-                                  Uploaded
+                                  {t('manager.statusUploaded')}
                                 </Badge>
                               )}
                               {isDuplicate && (
                                 <Badge variant="light" color="orange" size="xs">
-                                  Duplicate
+                                  {t('manager.statusDuplicate')}
                                 </Badge>
                               )}
                               {isFailed && (
                                 <Badge variant="light" color="red" size="xs">
-                                  Failed
+                                  {t('manager.statusFailed')}
                                 </Badge>
                               )}
                             </Group>
@@ -1741,19 +1743,19 @@ const DocumentManager = ({
                 {modalProgress.status === 'processing' && (
                   <Group gap="sm">
                     <Loader size="sm" />
-                    <Text size="sm">Processing document in Paperless...</Text>
+                    <Text size="sm">{t('manager.processingPaperless')}</Text>
                   </Group>
                 )}
                 
                 {modalProgress.status === 'completed' && (
                   <Alert icon={<IconCheck size={16} />} color="green">
-                    Document uploaded successfully!
+                    {t('manager.uploadSuccess')}
                   </Alert>
                 )}
                 
                 {modalProgress.status === 'completed_duplicate' && (
                   <Alert icon={<IconAlertTriangle size={16} />} color="orange">
-                    <Text size="sm" fw={500}>Duplicate Document</Text>
+                    <Text size="sm" fw={500}>{t('manager.duplicateDocument')}</Text>
                     <Text size="sm" c="dimmed" mt="xs">
                       {modalProgress.message || 'This document already exists in Paperless and cannot be uploaded again.'}
                     </Text>
@@ -1801,7 +1803,7 @@ const DocumentManager = ({
                   setModalProgress({ status: null, error: null });
                 }}
               >
-                Cancel
+                {t('shared:fields.cancel')}
               </Button>
               <Button
                 type="submit"

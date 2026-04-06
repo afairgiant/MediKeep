@@ -1,6 +1,7 @@
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { Select as MantineSelect, Loader, Group, Text, Box, rem } from '@mantine/core';
 import { IconSearch, IconChevronDown } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 
@@ -62,6 +63,7 @@ export const ResponsiveSelect = memo(({
   
   ...props
 }) => {
+  const { t } = useTranslation('shared');
   const { breakpoint, deviceType, isMobile, isTablet, isDesktop } = useResponsive();
   const [searchValue, setSearchValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -367,7 +369,7 @@ export const ResponsiveSelect = memo(({
       {processedOptions.length > 0 && showCount && (
         <Group justify="space-between" px="xs" py="xs" bg="var(--color-bg-secondary)">
           <Text size="xs" c="dimmed">
-            {processedOptions.length} option{processedOptions.length !== 1 ? 's' : ''} available
+            {t('labels.countTotal', { count: processedOptions.length })}
           </Text>
         </Group>
       )}

@@ -87,7 +87,7 @@
       "name": {
         "description": "Um nome amigável para identificar este canal",
         "label": "Nome do Canal",
-        "placeholder": "ex.: Meu Servidor Discord"
+        "placeholder": "p. ex., Meu Servidor Discord"
       },
       "title": "Detalhes do Canal",
       "type": {
@@ -117,9 +117,8 @@
     "noChannels": "Nenhum canal de notificação configurado",
     "noChannelsHint": "Adicione um canal para começar a receber notificações",
     "notificationsSent": "{{count}} notificações enviadas",
-    "sentCount_one": "{{count}} enviados",
-    "sentCount_many": "{{count}} sent",
-    "sentCount_other": "{{count}} enviados",
+    "sentCount_one": "{{count}} enviada",
+    "sentCount_other": "{{count}} enviadas",
     "test": "Testar",
     "testError": "Falha ao enviar notificação de teste",
     "testFailed": "Falha na notificação de teste",

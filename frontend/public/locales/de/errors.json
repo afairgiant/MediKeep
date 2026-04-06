@@ -1,4 +1,24 @@
 {
+  "alert": {
+    "errorCount": "{{count}} Fehler",
+    "errorCount_one": "{{count}} Fehler",
+    "errorCount_other": "{{count}} Fehler",
+    "formError": "Formularfehler",
+    "highPriority": "{{count}} mit hoher Priorität",
+    "highPriority_one": "{{count}} mit hoher Priorität",
+    "highPriority_other": "{{count}} mit hoher Priorität",
+    "suggestions": "Vorschläge:"
+  },
+  "boundary": {
+    "componentLabel": "Komponente:",
+    "errorDetails": "Fehlerdetails",
+    "errorIdLabel": "Fehler-ID:",
+    "errorLogged": "Der Fehler wurde automatisch zur Untersuchung protokolliert.",
+    "reloadPage": "Seite neu laden",
+    "somethingWentWrong": "Etwas ist schiefgelaufen",
+    "tryAgain": "Erneut versuchen",
+    "unexpectedError": "Es tut uns leid, aber im medizinischen Aktensystem ist ein unerwarteter Fehler aufgetreten."
+  },
   "file": {
     "deleteFailed": "Datei konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
     "downloadFailed": "Datei konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.",

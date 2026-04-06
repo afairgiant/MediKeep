@@ -43,6 +43,7 @@ import {
   IconLoader
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { useTranslation } from 'react-i18next';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponentCreate, LabTestComponent, labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { apiService } from '../../../services/api';
@@ -182,6 +183,7 @@ const TableRow = React.memo<{
   onRemove: (index: number) => void;
   getConfidenceColor: (confidence: number) => string;
 }>(({ index, component, onEdit, onRemove, getConfidenceColor }) => {
+  const { t } = useTranslation(['medical', 'common', 'shared']);
 
   // Local state for inputs to avoid triggering parent re-renders on every keystroke
   const [localTestName, setLocalTestName] = React.useState(component.test_name);
@@ -250,11 +252,11 @@ const TableRow = React.memo<{
               )}
               {component.canonical_test_name ? (
                 <Badge size="xs" variant="light" color="green">
-                  Linked: {component.canonical_test_name}
+                  {t('labresults:bulkEntry.linked', { name: component.canonical_test_name })}
                 </Badge>
               ) : (
                 <Text size="xs" c="dimmed">
-                  No standard match
+                  {t('labresults:bulkEntry.noMatch')}
                 </Text>
               )}
             </Stack>
@@ -370,9 +372,8 @@ const TableRow = React.memo<{
                 {component.issues.join(', ')}
               </Text>
             ) : (
-              <Text size="xs" c="green">
-                ✓
-              </Text>
+              // eslint-disable-next-line i18next/no-literal-string -- unicode symbol
+              <Text size="xs" c="green">{'\u2713'}</Text>
             )}
           </Table.Td>
           <Table.Td style={{ width: '60px' }}>
@@ -399,6 +400,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   onError,
   disabled = false
 }) => {
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
   const [rawText, setRawText] = useState('');
@@ -1074,19 +1076,19 @@ SARS-CoV-2: Not Detected`
             <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'input')}>
               <Tabs.List>
                 <Tabs.Tab value="input" leftSection={<IconFileText size={16} />}>
-                  Text Input
+                  {t('labresults:bulkEntry.textInput')}
                 </Tabs.Tab>
                 <Tabs.Tab value="pdf-upload" leftSection={<IconUpload size={16} />}>
-                  PDF Upload
+                  {t('labresults:bulkEntry.pdfUpload')}
                 </Tabs.Tab>
                 <Tabs.Tab value="preview" leftSection={<IconTable size={16} />}>
-                  Preview ({parsedComponents.length})
+                  {t('labresults:bulkEntry.previewCount', { count: parsedComponents.length })}
                 </Tabs.Tab>
                 <Tabs.Tab value="examples" leftSection={<IconCopy size={16} />}>
-                  Examples
+                  {t('labresults:bulkEntry.examples')}
                 </Tabs.Tab>
                 <Tabs.Tab value="settings" leftSection={<IconSettings size={16} />}>
-                  Parse Settings
+                  {t('labresults:bulkEntry.parseSettings')}
                 </Tabs.Tab>
               </Tabs.List>
 
@@ -1094,12 +1096,12 @@ SARS-CoV-2: Not Detected`
                 <Stack gap="md" mt="md">
                   <Group justify="space-between">
                     <Select
-                      label="Parse Mode"
+                      label={t('labresults:bulkEntry.parseMode')}
                       value={parseMode}
                       onChange={(value) => setParseMode(value as 'auto' | 'manual')}
                       data={[
-                        { value: 'auto', label: 'Auto-parse as you type' },
-                        { value: 'manual', label: 'Manual parsing' }
+                        { value: 'auto', label: t('labresults:bulkEntry.autoParseDescription') },
+                        { value: 'manual', label: t('labresults:bulkEntry.manualParsing') }
                       ]}
                       style={{ width: 200 }}
                     />
@@ -1109,32 +1111,32 @@ SARS-CoV-2: Not Detected`
                         onClick={handleManualParse}
                         variant="light"
                       >
-                        Parse Text
+                        {t('labresults:bulkEntry.parseText')}
                       </Button>
                     )}
                   </Group>
 
                   <Textarea
-                    label="Lab Results Text"
-                    placeholder="Paste your lab results here..."
+                    label={t('labresults:bulkEntry.labResultsText')}
+                    placeholder={t('labresults:bulkEntry.pastePlaceholder')}
                     value={rawText}
                     onChange={(event) => setRawText(event.currentTarget.value)}
                     minRows={12}
                     maxRows={20}
-                    description="Copy and paste lab results from reports, PDFs, or other sources"
+                    description={t('labresults:bulkEntry.copyDescription')}
                   />
 
                   {parsedComponents.length > 0 && (
                     <Group gap="md">
                       <Badge color={getConfidenceColor(averageConfidence)}>
-                        Confidence: {Math.round(averageConfidence * 100)}%
+                        {t('labresults:bulkEntry.confidence', { percent: Math.round(averageConfidence * 100) })}
                       </Badge>
                       <Badge color="blue">
-                        {validComponents.length} valid components
+                        {t('labresults:bulkEntry.validComponents', { count: validComponents.length })}
                       </Badge>
                       {parsedComponents.length !== validComponents.length && (
                         <Badge color="orange">
-                          {parsedComponents.length - validComponents.length} with issues
+                          {t('labresults:bulkEntry.withIssues', { count: parsedComponents.length - validComponents.length })}
                         </Badge>
                       )}
                     </Group>
@@ -1177,12 +1179,12 @@ SARS-CoV-2: Not Detected`
                       </Dropzone.Idle>
 
                       <div style={{ textAlign: 'center' }}>
-                        <Text size="xl" inline>Drop PDF here or click to select</Text>
+                        <Text size="xl" inline>{t('labresults:bulkEntry.dropPdf')}</Text>
                         <Text size="sm" c="dimmed" mt={7}>
-                          Lab results will be extracted and parsed automatically
+                          {t('labresults:bulkEntry.pdfAutoExtract')}
                         </Text>
                         <Text size="xs" c="dimmed" mt="xs">
-                          Accepted: PDF only • Max size: 15MB
+                          {t('labresults:bulkEntry.pdfAccepted')}
                         </Text>
                       </div>
                     </Group>
@@ -1205,9 +1207,9 @@ SARS-CoV-2: Not Detected`
                       <Stack gap="sm">
                         <Group justify="space-between">
                           <div>
-                            <Text size="sm" fw={500}>Text extracted successfully!</Text>
+                            <Text size="sm" fw={500}>{t('labresults:bulkEntry.textExtracted')}</Text>
                             <Text size="xs" c="dimmed">
-                              {extractionMetadata.char_count} characters from {extractionMetadata.page_count} page{extractionMetadata.page_count !== 1 ? 's' : ''}
+                              {t('labresults:bulkEntry.extractedChars', { charCount: extractionMetadata.char_count, pageCount: extractionMetadata.page_count, count: extractionMetadata.page_count })}
                             </Text>
                             <Badge size="xs" mt={4} variant="light" color={extractionMetadata.method === 'native' ? 'blue' : 'orange'}>
                               {extractionMetadata.method === 'native' ? 'Fast Extraction' : 'OCR Extraction'}
@@ -1218,7 +1220,7 @@ SARS-CoV-2: Not Detected`
                             onClick={handleParseExtractedText}
                             leftSection={<IconWand size={16} />}
                           >
-                            Parse Results
+                            {t('labresults:bulkEntry.parseResults')}
                           </Button>
                         </Group>
 
@@ -1238,9 +1240,9 @@ SARS-CoV-2: Not Detected`
                     <Alert color="blue" icon={<IconTable size={16} />}>
                       <Group justify="space-between" align="center">
                         <div>
-                          <Text size="sm" fw={500}>Parsing complete!</Text>
+                          <Text size="sm" fw={500}>{t('labresults:bulkEntry.parsingComplete')}</Text>
                           <Text size="xs" c="dimmed">
-                            Found {validComponents.length} valid component{validComponents.length !== 1 ? 's' : ''} ready to review
+                            {t('labresults:bulkEntry.foundComponents', { count: validComponents.length })}
                           </Text>
                         </div>
                         <Button
@@ -1248,7 +1250,7 @@ SARS-CoV-2: Not Detected`
                           onClick={() => setActiveTab('preview')}
                           leftSection={<IconTable size={16} />}
                         >
-                          Preview {validComponents.length} Result{validComponents.length !== 1 ? 's' : ''}
+                          {t('labresults:bulkEntry.previewComponents', { count: validComponents.length })}
                         </Button>
                       </Group>
                     </Alert>
@@ -1258,10 +1260,10 @@ SARS-CoV-2: Not Detected`
                   {extractionError && (
                     <Alert color="red" icon={<IconAlertCircle size={16} />}>
                       <Stack gap="xs">
-                        <Text size="sm" fw={500}>Error processing PDF</Text>
+                        <Text size="sm" fw={500}>{t('labresults:bulkEntry.errorProcessingPdf')}</Text>
                         <Text size="xs">{extractionError}</Text>
                         <Text size="xs" c="dimmed" fs="italic">
-                          Try using the Text Input tab to manually paste your results.
+                          {t('labresults:bulkEntry.tryTextInput')}
                         </Text>
                       </Stack>
                     </Alert>
@@ -1272,15 +1274,15 @@ SARS-CoV-2: Not Detected`
               <Tabs.Panel value="preview">
                 <Stack gap="md" mt="md">
                   {/* Test Completed Date - required for trends */}
-                  <Alert color="blue" title="Test Date" icon={<IconAlertCircle />}>
+                  <Alert color="blue" title={t('labresults:bulkEntry.testDate')} icon={<IconAlertCircle />}>
                     <Stack gap="xs">
                       <Text size="sm">
-                        Specify when these lab results were completed. This date is required for tracking trends over time.
+                        {t('labresults:bulkEntry.completedDateDescription')}
                       </Text>
                       <DateInput
                         value={completedDate}
                         onChange={setCompletedDate}
-                        label="Test Completed Date"
+                        label={t('labresults:bulkEntry.completedDate')}
                         placeholder={dateInputFormat}
                         valueFormat={dateInputFormat}
                         clearable
@@ -1297,9 +1299,9 @@ SARS-CoV-2: Not Detected`
                     <Center p="xl">
                       <Stack align="center" gap="md">
                         <IconTable size={48} color="var(--mantine-color-gray-5)" />
-                        <Text size="lg" c="dimmed">No parsed components</Text>
+                        <Text size="lg" c="dimmed">{t('labresults:bulkEntry.noParsedComponents')}</Text>
                         <Text size="sm" c="dimmed" ta="center">
-                          Go to the Text Input tab and paste some lab results to get started
+                          {t('labresults:bulkEntry.noParsedDescription')}
                         </Text>
                       </Stack>
                     </Center>
@@ -1308,15 +1310,15 @@ SARS-CoV-2: Not Detected`
                       <Table striped>
                         <Table.Thead>
                           <Table.Tr>
-                            <Table.Th style={{ width: '180px' }}>Test Name</Table.Th>
-                            <Table.Th style={{ width: '100px' }}>Value</Table.Th>
-                            <Table.Th style={{ width: '80px' }}>Unit</Table.Th>
-                            <Table.Th style={{ width: '140px' }}>Reference Range</Table.Th>
-                            <Table.Th style={{ width: '120px' }}>Status</Table.Th>
-                            <Table.Th style={{ width: '100px' }}>Category</Table.Th>
-                            <Table.Th style={{ width: '90px' }}>Confidence</Table.Th>
-                            <Table.Th style={{ width: '150px' }}>Issues</Table.Th>
-                            <Table.Th style={{ width: '60px' }}>Actions</Table.Th>
+                            <Table.Th style={{ width: '180px' }}>{t('shared:fields.testName')}</Table.Th>
+                            <Table.Th style={{ width: '100px' }}>{t('shared:labels.value')}</Table.Th>
+                            <Table.Th style={{ width: '80px' }}>{t('labresults:testComponents.editModal.fields.unit')}</Table.Th>
+                            <Table.Th style={{ width: '140px' }}>{t('labresults:testComponents.editModal.fields.referenceRange')}</Table.Th>
+                            <Table.Th style={{ width: '120px' }}>{t('shared:fields.status')}</Table.Th>
+                            <Table.Th style={{ width: '100px' }}>{t('shared:labels.category')}</Table.Th>
+                            <Table.Th style={{ width: '90px' }}>{t('labresults:bulkEntry.confidenceLabel')}</Table.Th>
+                            <Table.Th style={{ width: '150px' }}>{t('shared:labels.warnings')}</Table.Th>
+                            <Table.Th style={{ width: '60px' }}>{t('shared:labels.actions')}</Table.Th>
                           </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
@@ -1339,17 +1341,17 @@ SARS-CoV-2: Not Detected`
 
               <Tabs.Panel value="examples">
                 <Stack gap="md" mt="md">
-                  <Text size="sm">Try copying and pasting these example formats:</Text>
+                  <Text size="sm">{t('labresults:bulkEntry.tryExamples')}</Text>
 
                   {Object.entries(exampleTexts).map(([key, text]) => (
                     <Card key={key} withBorder p="sm">
                       <Stack gap="xs">
                         <Group justify="space-between">
                           <Text size="sm" fw={500}>
-                            {key === 'format1' ? 'Colon-separated with ranges' :
-                             key === 'format2' ? 'Tabular format' :
-                             key === 'format3' ? 'CSV format' :
-                             'Qualitative results (positive/negative)'}
+                            {key === 'format1' ? t('labresults:bulkEntry.colonSeparated') :
+                             key === 'format2' ? t('labresults:bulkEntry.tabularFormat') :
+                             key === 'format3' ? t('labresults:bulkEntry.csvFormat') :
+                             t('labresults:bulkEntry.qualitativeResults')}
                           </Text>
                           <Button
                             size="xs"
@@ -1357,7 +1359,7 @@ SARS-CoV-2: Not Detected`
                             leftSection={<IconCopy size={12} />}
                             onClick={() => setRawText(text)}
                           >
-                            Use Example
+                            {t('labresults:bulkEntry.useExample')}
                           </Button>
                         </Group>
                         <Text size="xs" ff="monospace" c="dimmed" style={{ whiteSpace: 'pre-line' }}>
@@ -1371,12 +1373,12 @@ SARS-CoV-2: Not Detected`
 
               <Tabs.Panel value="settings">
                 <Stack gap="md" mt="md">
-                  <Text size="sm" fw={500}>Parsing Settings</Text>
+                  <Text size="sm" fw={500}>{t('labresults:bulkEntry.parseSettings')}</Text>
 
                   <Stack gap="sm">
                     <Switch
-                      label="Auto-detect headers"
-                      description="Skip first line if it contains header keywords"
+                      label={t('labresults:bulkEntry.detectHeaders')}
+                      description={t('labresults:bulkEntry.detectHeadersDesc')}
                       checked={parseSettings.detectHeaders}
                       onChange={(event) => setParseSettings(prev => ({
                         ...prev,
@@ -1385,8 +1387,8 @@ SARS-CoV-2: Not Detected`
                     />
 
                     <Switch
-                      label="Assume first column is test name"
-                      description="Treat first column as test name in tabular data"
+                      label={t('labresults:bulkEntry.firstColumnName')}
+                      description={t('labresults:bulkEntry.firstColumnNameDesc')}
                       checked={parseSettings.assumeFirstColumnIsName}
                       onChange={(event) => setParseSettings(prev => ({
                         ...prev,
@@ -1395,8 +1397,8 @@ SARS-CoV-2: Not Detected`
                     />
 
                     <Switch
-                      label="Auto-detect units"
-                      description="Try to identify measurement units automatically"
+                      label={t('labresults:bulkEntry.detectUnits')}
+                      description={t('labresults:bulkEntry.detectUnitsDesc')}
                       checked={parseSettings.detectUnits}
                       onChange={(event) => setParseSettings(prev => ({
                         ...prev,
@@ -1405,8 +1407,8 @@ SARS-CoV-2: Not Detected`
                     />
 
                     <Switch
-                      label="Auto-detect reference ranges"
-                      description="Parse reference ranges from text"
+                      label={t('labresults:bulkEntry.detectRanges')}
+                      description={t('labresults:bulkEntry.detectRangesDesc')}
                       checked={parseSettings.detectRanges}
                       onChange={(event) => setParseSettings(prev => ({
                         ...prev,
@@ -1415,8 +1417,8 @@ SARS-CoV-2: Not Detected`
                     />
 
                     <Switch
-                      label="Skip empty lines"
-                      description="Ignore blank lines during parsing"
+                      label={t('labresults:bulkEntry.skipEmptyLines')}
+                      description={t('labresults:bulkEntry.skipEmptyLinesDesc')}
                       checked={parseSettings.skipEmptyLines}
                       onChange={(event) => setParseSettings(prev => ({
                         ...prev,
@@ -1441,7 +1443,7 @@ SARS-CoV-2: Not Detected`
                 }}
                 disabled={isSubmitting}
               >
-                Clear All
+                {t('labresults:bulkEntry.clearAll')}
               </Button>
               {activeTab !== 'preview' ? (
                 <Button
@@ -1449,7 +1451,7 @@ SARS-CoV-2: Not Detected`
                   disabled={validComponents.length === 0}
                   leftSection={<IconTable size={16} />}
                 >
-                  Preview {validComponents.length} Component{validComponents.length !== 1 ? 's' : ''}
+                  {t('labresults:bulkEntry.previewComponents', { count: validComponents.length })}
                 </Button>
               ) : (
                 <Button
@@ -1458,7 +1460,7 @@ SARS-CoV-2: Not Detected`
                   loading={isSubmitting}
                   leftSection={<IconCheck size={16} />}
                 >
-                  Add {validComponents.length} Component{validComponents.length !== 1 ? 's' : ''}
+                  {t('labresults:bulkEntry.addComponents', { count: validComponents.length })}
                 </Button>
               )}
             </Group>

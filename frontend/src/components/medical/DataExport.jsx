@@ -24,11 +24,13 @@ import {
   IconFileExport,
   IconDatabase,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { exportService } from '../../services/exportService';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 
 const DataExport = () => {
+  const { t } = useTranslation('reports');
   const { dateInputFormat } = useDateFormat();
   const { unitSystem } = useUserPreferences();
 
@@ -153,7 +155,7 @@ const DataExport = () => {
             <Title order={2} fw={600}>
               <Group gap="sm">
                 <IconFileExport size={24} />
-                Export Medical Records
+                {t('dataExport.exportTitle')}
               </Group>
             </Title>
           </Group>
@@ -189,7 +191,7 @@ const DataExport = () => {
                 <Group gap="sm">
                   <IconDatabase size={20} />
                   <Text fw={500} size="lg">
-                    Available Data
+                    {t('dataExport.availableData')}
                   </Text>
                 </Group>
                 <Grid>
@@ -217,14 +219,14 @@ const DataExport = () => {
               onClick={() => setBulkExport(false)}
               size="xs"
             >
-              Single Export
+              {t('dataExport.singleExport')}
             </Button>
             <Button
               variant={bulkExport ? 'filled' : 'outline'}
               onClick={() => setBulkExport(true)}
               size="xs"
             >
-              Bulk Export
+              {t('dataExport.bulkExport')}
             </Button>
           </Group>
 
@@ -235,7 +237,7 @@ const DataExport = () => {
             {/* Format Selection */}
             <Box>
               <Text fw={500} size="sm" mb="xs" c="inherit">
-                Export Format
+                {t('export.configuration.format.label')}
               </Text>
               <Select
                 value={selectedFormat}
@@ -252,7 +254,7 @@ const DataExport = () => {
             {!bulkExport ? (
               <Box>
                 <Text fw={500} size="sm" mb="xs" c="inherit">
-                  Data to Export
+                  {t('export.configuration.dataToExport.label')}
                 </Text>
                 <Select
                   value={selectedScope}
@@ -270,7 +272,7 @@ const DataExport = () => {
             ) : (
               <Box>
                 <Text fw={500} size="sm" mb="xs" c="inherit">
-                  Select Data Types (Bulk Export)
+                  {t('export.configuration.bulkSelection.label')}
                 </Text>
                 <Grid>
                   {scopes
@@ -292,7 +294,7 @@ const DataExport = () => {
             <Grid>
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Text fw={500} size="sm" mb="xs" c="inherit">
-                  Start Date (Optional)
+                  {t('export.configuration.dateRange.startDate')}
                 </Text>
                 <DateInput
                   value={startDate}
@@ -304,7 +306,7 @@ const DataExport = () => {
               </Grid.Col>
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <Text fw={500} size="sm" mb="xs" c="inherit">
-                  End Date (Optional)
+                  {t('export.configuration.dateRange.endDate')}
                 </Text>
                 <DateInput
                   value={endDate}
@@ -327,7 +329,7 @@ const DataExport = () => {
                   label="Include attached files in PDF export"
                 />
                 <Text size="xs" c="dimmed" mt="xs">
-                  This may significantly increase export time and file size
+                  {t('dataExport.includeFilesNote')}
                 </Text>
               </Box>
             )}
@@ -367,23 +369,23 @@ const DataExport = () => {
           <Paper withBorder p="md" radius="md">
             <Stack gap="sm">
               <Text fw={500} c="blue">
-                Export Information
+                {t('dataExport.exportInfo')}
               </Text>
               <Stack gap="xs">
                 <Text size="sm" c="blue">
-                  • JSON format provides complete machine-readable data
+                  {'\u2022'} {t('dataExport.jsonDescription')}
                 </Text>
                 <Text size="sm" c="blue">
-                  • CSV format is ideal for spreadsheet applications
+                  {'\u2022'} {t('dataExport.csvDescription')}
                 </Text>
                 <Text size="sm" c="blue">
-                  • PDF format creates human-readable documents
+                  {'\u2022'} {t('dataExport.pdfDescription')}
                 </Text>
                 <Text size="sm" c="blue">
-                  • Date filters apply to record dates where available
+                  {'\u2022'} {t('dataExport.dateFilterNote')}
                 </Text>
                 <Text size="sm" c="blue">
-                  • Bulk exports are packaged in ZIP files for convenience
+                  {'\u2022'} {t('dataExport.zipDescription')}
                 </Text>
               </Stack>
             </Stack>

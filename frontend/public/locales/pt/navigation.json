@@ -54,16 +54,19 @@
     "title": "Convites",
     "types": {
       "patientRecord": "Prontuário do Paciente"
-    },
-    "viewAll_many": "View all {{count}} invitations"
+    }
   },
   "menu": {
-    "backToDashboard": "Voltar ao painel",
+    "account": "Conta",
+    "backToDashboard": "Voltar ao Painel",
+    "darkMode": "Modo Escuro",
     "help": "Ajuda",
+    "lightMode": "Modo Claro",
     "logout": "Sair",
     "patients": "Pacientes",
     "profile": "Perfil",
-    "reports": "Relatórios"
+    "reports": "Relatórios",
+    "userActions": "Ações do Usuário"
   },
   "pages": {
     "help": "Ajuda e Suporte",
@@ -80,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Painel Administrativo",
+      "allergies": "Alergias",
+      "backupManagement": "Gerenciamento de Backup",
+      "conditions": "Condições",
       "customReports": "Relatórios Personalizados",
+      "dataModels": "Modelos de Dados",
+      "emergencyContacts": "Contatos de Emergência",
       "exportRecords": "Exportar Registros",
+      "familyHistory": "Histórico Familiar",
+      "immunizations": "Imunizações",
+      "injuries": "Lesões",
+      "insurance": "Seguro",
+      "labResults": "Resultados Laboratoriais",
       "language": "Idioma",
+      "medicalEquipment": "Equipamentos Médicos",
+      "medications": "Medicamentos",
       "patientInfo": "Informações do Paciente",
+      "pharmacies": "Farmácias",
+      "practitioners": "Profissionais",
+      "procedures": "Procedimentos",
+      "settings": "Configurações",
+      "symptoms": "Sintomas",
+      "systemHealth": "Saúde do Sistema",
       "tagManagement": "Gerenciamento de Tags",
       "theme": "Tema",
-      "visitHistory": "Histórico de Consultas"
+      "treatments": "Tratamentos",
+      "visitHistory": "Histórico de Consultas",
+      "vitalSigns": "Sinais Vitais"
     },
     "sections": {
+      "administration": "Administração",
       "careAndTreatment": "Cuidados e Tratamento",
       "misc": "Diversos",
       "tools": "Ferramentas"

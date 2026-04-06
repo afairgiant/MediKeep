@@ -32,13 +32,13 @@ function WhatsNewModal({
   releases,
   currentVersion,
 }: WhatsNewModalProps): React.ReactElement {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('settings');
 
   return (
     <ResponsiveModal
       opened={opened}
       onClose={onClose}
-      title={t('settings.releaseNotes.whatsNewTitle', "What's New")}
+      title={t('releaseNotes.whatsNewTitle', "What's New")}
       size="auto"
       centered
       withScrollArea={false}
@@ -54,7 +54,7 @@ function WhatsNewModal({
 
         {releases.length === 0 ? (
           <Text c="dimmed" ta="center" py="xl">
-            {t('settings.releaseNotes.empty', 'No release notes available')}
+            {t('releaseNotes.empty', 'No release notes available')}
           </Text>
         ) : (
           <ScrollArea.Autosize
@@ -78,12 +78,12 @@ function WhatsNewModal({
                       </Text>
                       {isCurrentRelease(release.tag_name, currentVersion) && (
                         <Badge color="blue" size="sm" variant="light">
-                          {t('settings.releaseNotes.currentVersion', 'Current')}
+                          {t('releaseNotes.currentVersion', 'Current')}
                         </Badge>
                       )}
                     </Group>
                     <Text c="dimmed" size="xs" style={{ flexShrink: 0 }}>
-                      {t('settings.releaseNotes.publishedOn', {
+                      {t('releaseNotes.publishedOn', {
                         date: formatReleaseDate(release.published_at),
                         defaultValue: 'Released {{date}}',
                       })}
@@ -114,7 +114,7 @@ function WhatsNewModal({
                     mt="xs"
                     display="inline-block"
                   >
-                    {t('settings.releaseNotes.viewOnGithub', 'View on GitHub')}
+                    {t('releaseNotes.viewOnGithub', 'View on GitHub')}
                   </Anchor>
                 </Paper>
               ))}
@@ -124,7 +124,7 @@ function WhatsNewModal({
 
         <Group justify="flex-end" mt="xs">
           <Button onClick={onClose}>
-            {t('settings.releaseNotes.dismiss', 'Got it')}
+            {t('releaseNotes.dismiss', 'Got it')}
           </Button>
         </Group>
       </Stack>

@@ -29,7 +29,7 @@
     "sections": {
       "additionalResources": "Recursos adicionales",
       "coreMedical": "Información médica principal",
-      "healthMonitoring": "Seguimiento de salud",
+      "healthMonitoring": "Monitoreo de salud",
       "prevention": "Prevención e historial",
       "recentActivity": "Actividad reciente",
       "treatments": "Tratamientos y procedimientos"
@@ -54,19 +54,22 @@
     "title": "Invitaciones",
     "types": {
       "patientRecord": "Historial del paciente"
-    },
-    "viewAll_many": "View all {{count}} invitations"
+    }
   },
   "menu": {
-    "backToDashboard": "Volver al tablero",
+    "account": "Cuenta",
+    "backToDashboard": "Volver al panel",
+    "darkMode": "Modo oscuro",
     "help": "Ayuda",
+    "lightMode": "Modo claro",
     "logout": "Cerrar sesión",
     "patients": "Pacientes",
     "profile": "Perfil",
-    "reports": "Informes"
+    "reports": "Informes",
+    "userActions": "Acciones de usuario"
   },
   "pages": {
-    "help": "Ayuda",
+    "help": "Ayuda y soporte",
     "medicalHistory": "Historial médico",
     "patientDetails": "Detalles del paciente",
     "patientList": "Lista de pacientes",
@@ -80,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Panel de administración",
+      "allergies": "Alergias",
+      "backupManagement": "Gestión de respaldos",
+      "conditions": "Condiciones",
       "customReports": "Informes personalizados",
+      "dataModels": "Modelos de datos",
+      "emergencyContacts": "Contactos de emergencia",
       "exportRecords": "Exportar registros",
+      "familyHistory": "Historial familiar",
+      "immunizations": "Inmunizaciones",
+      "injuries": "Lesiones",
+      "insurance": "Seguro",
+      "labResults": "Resultados de laboratorio",
       "language": "Idioma",
+      "medicalEquipment": "Equipo médico",
+      "medications": "Medicamentos",
       "patientInfo": "Info. del paciente",
+      "pharmacies": "Farmacias",
+      "practitioners": "Médicos",
+      "procedures": "Procedimientos",
+      "settings": "Configuración",
+      "symptoms": "Síntomas",
+      "systemHealth": "Estado del sistema",
       "tagManagement": "Gestión de etiquetas",
       "theme": "Tema",
-      "visitHistory": "Historial de visitas"
+      "treatments": "Tratamientos",
+      "visitHistory": "Historial de visitas",
+      "vitalSigns": "Signos vitales"
     },
     "sections": {
+      "administration": "Administración",
       "careAndTreatment": "Atención y tratamiento",
       "misc": "Varios",
       "tools": "Herramientas"

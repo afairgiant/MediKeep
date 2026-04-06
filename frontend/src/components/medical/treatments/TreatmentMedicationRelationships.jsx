@@ -176,7 +176,7 @@ function TreatmentMedicationRelationships({
 
                     {relationship.timing_instructions && (
                       <Text size="sm" c="dimmed">
-                        <strong>Timing:</strong> {relationship.timing_instructions}
+                        <strong>{t('treatments.timingLabel')}</strong> {relationship.timing_instructions}
                       </Text>
                     )}
 

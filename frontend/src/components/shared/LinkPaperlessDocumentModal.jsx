@@ -24,6 +24,7 @@ import {
   IconCalendar,
   IconTag,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useDebouncedValue } from '@mantine/hooks';
 import { searchPaperlessDocuments } from '../../services/api/paperlessApi';
 import logger from '../../services/logger';
@@ -48,6 +49,7 @@ const LinkPaperlessDocumentModal = ({
   entityType,
   entityId,
 }) => {
+  const { t } = useTranslation(['documents', 'shared']);
   const { formatDate } = useDateFormat();
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(searchQuery, 300);
@@ -203,8 +205,7 @@ const LinkPaperlessDocumentModal = ({
 
         {/* Info Alert */}
         <Alert variant="light" color="blue" icon={<IconAlertCircle size={16} />}>
-          Search for documents already in Paperless to link them to this {entityType}.
-          No file upload needed!
+          {t('linkPaperless.infoText', { entityType })}
         </Alert>
 
         {/* Error Alert */}
@@ -227,9 +228,9 @@ const LinkPaperlessDocumentModal = ({
             <Center py="xl">
               <Stack align="center" gap="sm">
                 <IconFile size={48} stroke={1} color="gray" />
-                <Text c="dimmed">No documents found</Text>
+                <Text c="dimmed">{t('linkPaperless.noDocumentsFound')}</Text>
                 <Text size="sm" c="dimmed">
-                  Try a different search term
+                  {t('linkPaperless.tryDifferent')}
                 </Text>
               </Stack>
             </Center>
@@ -275,7 +276,7 @@ const LinkPaperlessDocumentModal = ({
                             ))}
                             {doc.tags.length > 3 && (
                               <Text size="xs" c="dimmed">
-                                +{doc.tags.length - 3} more
+                                {t('linkPaperless.moreTags', { count: doc.tags.length - 3 })}
                               </Text>
                             )}
                           </Group>
@@ -283,13 +284,13 @@ const LinkPaperlessDocumentModal = ({
 
                         {doc.correspondent && (
                           <Text size="xs" c="dimmed">
-                            From: {doc.correspondent}
+                            {t('linkPaperless.from', { name: doc.correspondent })}
                           </Text>
                         )}
 
                         {doc.document_type && (
                           <Text size="xs" c="dimmed">
-                            Type: {doc.document_type}
+                            {t('linkPaperless.type', { type: doc.document_type })}
                           </Text>
                         )}
                       </Stack>
@@ -297,7 +298,7 @@ const LinkPaperlessDocumentModal = ({
 
                     {selectedDoc?.id === doc.id && (
                       <Badge color="blue" variant="filled">
-                        Selected
+                        {t('linkPaperless.selected')}
                       </Badge>
                     )}
                   </Group>
@@ -333,7 +334,7 @@ const LinkPaperlessDocumentModal = ({
         {/* Action Buttons */}
         <Group justify="flex-end">
           <Button variant="outline" onClick={onClose} disabled={linking}>
-            Cancel
+            {t('shared:fields.cancel')}
           </Button>
           <Button
             onClick={handleConfirmLink}
@@ -341,7 +342,7 @@ const LinkPaperlessDocumentModal = ({
             loading={linking}
             leftSection={<IconLink size={16} />}
           >
-            Link Document
+            {t('linkPaperless.linkDocument')}
           </Button>
         </Group>
       </Stack>

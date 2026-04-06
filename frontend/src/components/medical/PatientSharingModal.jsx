@@ -41,6 +41,7 @@ import {
   IconUsers,
   IconRefresh,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 // Note: Using simple date input instead of @mantine/dates DateTimePicker
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import patientSharingApi from '../../services/api/patientSharingApi';
@@ -82,6 +83,7 @@ const PatientSharingModal = ({
   patient,
   onShareUpdate
 }) => {
+  const { t } = useTranslation(['invitations', 'shared']);
   const { invalidatePatientList } = useCacheManager();
   const { formatDate, formatDateTime } = useDateFormat();
   const [shares, setShares] = useState([]);
@@ -459,7 +461,7 @@ const PatientSharingModal = ({
       title={
         <Group gap="sm">
           <IconShare size="1.2rem" />
-          <Text fw={500}>Share Patient: {patient.first_name} {patient.last_name}</Text>
+          <Text fw={500}>{t('sharing.sharePatient', { name: `${patient.first_name} ${patient.last_name}` })}</Text>
         </Group>
       }
       size="xl"
@@ -489,7 +491,7 @@ const PatientSharingModal = ({
                 {patient.first_name} {patient.last_name}
               </Text>
               <Text size="sm" c="dimmed">
-                Born: {patient.birth_date} • Privacy: {patient.privacy_level}
+                {t('sharing.born', { date: patient.birth_date, level: patient.privacy_level })}
               </Text>
             </div>
           </Group>
@@ -504,9 +506,9 @@ const PatientSharingModal = ({
             onClick={() => setShowCreateForm(true)}
             disabled={loading}
           >
-            Send Invitation
+            {t('sharing.sendInvitation')}
           </Button>
-          
+
           <Button
             variant="light"
             color="gray"
@@ -514,7 +516,7 @@ const PatientSharingModal = ({
             onClick={loadPatientShares}
             loading={loading}
           >
-            Refresh
+            {t('shared:labels.retry')}
           </Button>
         </Group>
 
@@ -524,7 +526,7 @@ const PatientSharingModal = ({
             <form onSubmit={handleFormSubmit}>
               <Stack gap="md">
                 <Title order={5}>
-                  {editingShare ? 'Edit Share' : 'Send Invitation'}
+                  {editingShare ? t('sharing.editShare') : t('sharing.sendInvitation')}
                 </Title>
 
                 <TextInput
@@ -610,7 +612,7 @@ const PatientSharingModal = ({
                       resetForm();
                     }}
                   >
-                    Cancel
+                    {t('shared:fields.cancel')}
                   </Button>
                   <Button
                     type="submit"
@@ -630,16 +632,16 @@ const PatientSharingModal = ({
           <div>
             <Title order={5} mb="md">
               <IconClock size="1rem" style={{ marginRight: 8 }} />
-              Pending Invitations ({pendingInvitations.length})
+              {t('manager.pendingInvitationsCount', { count: pendingInvitations.length })}
             </Title>
 
             <Table striped highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Sent To</Table.Th>
-                  <Table.Th>Permission</Table.Th>
-                  <Table.Th>Expires</Table.Th>
-                  <Table.Th>Actions</Table.Th>
+                  <Table.Th>{t('card.sentTo')}</Table.Th>
+                  <Table.Th>{t('card.permission')}</Table.Th>
+                  <Table.Th>{t('card.expires')}</Table.Th>
+                  <Table.Th>{t('shared:labels.actions')}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -693,7 +695,7 @@ const PatientSharingModal = ({
         <div>
           <Title order={5} mb="md">
             <IconUsers size="1rem" style={{ marginRight: 8 }} />
-            Active Shares ({shares.length})
+            {t('sharing.currentlySharedWith')} ({shares.length})
           </Title>
 
           {loading && shares.length === 0 ? (
@@ -703,21 +705,20 @@ const PatientSharingModal = ({
           ) : shares.length === 0 ? (
             <Alert
               icon={<IconAlertCircle size="1rem" />}
-              title="No shares found"
               color="gray"
               variant="light"
             >
-              This patient is not currently shared with anyone.
+              {t('sharing.noActiveShares')}
             </Alert>
           ) : (
             <Table striped highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>User</Table.Th>
-                  <Table.Th>Permission</Table.Th>
-                  <Table.Th>Expires</Table.Th>
-                  <Table.Th>Status</Table.Th>
-                  <Table.Th>Actions</Table.Th>
+                  <Table.Th>{t('shared:labels.user')}</Table.Th>
+                  <Table.Th>{t('card.permission')}</Table.Th>
+                  <Table.Th>{t('card.expires')}</Table.Th>
+                  <Table.Th>{t('shared:fields.status')}</Table.Th>
+                  <Table.Th>{t('shared:labels.actions')}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>

@@ -22,6 +22,7 @@ import {
   Cell
 } from 'recharts';
 import { Paper, Stack, Text, Badge, Group } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import { TrendResponse } from '../../../services/api/labTestComponentApi';
 import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
 import { getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
@@ -31,6 +32,7 @@ interface TestComponentTrendChartProps {
 }
 
 const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData }) => {
+  const { t } = useTranslation(['medical', 'shared']);
   const chartData = useMemo(() => {
     return trendData.data_points.map((point) => {
       const dateStr = point.recorded_date || point.created_at.split('T')[0];
@@ -63,7 +65,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
           >
             {getQualitativeDisplayName(data.qualitativeValue)}
           </Badge>
-          <Text size="xs" c="dimmed">Lab: {data.testName}</Text>
+          <Text size="xs" c="dimmed">{t('labresults:trendChart.labLabel', { name: data.testName })}</Text>
         </Stack>
       </Paper>
     );
@@ -72,7 +74,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
   if (chartData.length === 0) {
     return (
       <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
-        <Text size="sm" c="dimmed" ta="center">No data points to display</Text>
+        <Text size="sm" c="dimmed" ta="center">{t('labresults:trendChart.noDataPoints')}</Text>
       </Paper>
     );
   }
@@ -117,14 +119,15 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({ trendData })
         </ResponsiveContainer>
       </Paper>
       <Group gap="sm" justify="center">
-        <Badge size="sm" variant="light" color="red">Positive/Detected</Badge>
-        <Badge size="sm" variant="light" color="green">Negative/Undetected</Badge>
+        <Badge size="sm" variant="light" color="red">{t('labresults:trendChart.positiveDetected')}</Badge>
+        <Badge size="sm" variant="light" color="green">{t('labresults:trendChart.negativeUndetected')}</Badge>
       </Group>
     </Stack>
   );
 };
 
 const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trendData }) => {
+  const { t } = useTranslation(['medical', 'shared']);
   const chartData = useMemo(() => {
     return trendData.data_points.map((point) => {
       // Use recorded_date if available, otherwise use created_at date
@@ -213,12 +216,12 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
 
           {(data.refMin !== null || data.refMax !== null) && (
             <Text size="xs" c="dimmed">
-              Reference: {data.refMin ?? '?'} - {data.refMax ?? '?'} {trendData.unit}
+              {t('labresults:trendChart.referenceValue', { min: data.refMin ?? '?', max: data.refMax ?? '?' })} {trendData.unit}
             </Text>
           )}
 
           <Text size="xs" c="dimmed">
-            Lab: {data.testName}
+            {t('labresults:trendChart.labLabel', { name: data.testName })}
           </Text>
         </Stack>
       </Paper>
@@ -233,7 +236,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
     return (
       <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">
-          No data points to display
+          {t('labresults:trendChart.noDataPoints')}
         </Text>
       </Paper>
     );
@@ -245,7 +248,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
       {referenceRange && (referenceRange.min !== null || referenceRange.max !== null || referenceRange.text) && (
         <Paper withBorder p="xs" radius="md" bg="var(--color-bg-secondary)">
           <Group gap="xs">
-            <Text size="xs" fw={600}>Reference Range:</Text>
+            <Text size="xs" fw={600}>{t('labresults:trendChart.referenceRange')}</Text>
             <Text size="xs">
               {referenceRange.text
                 ? `${referenceRange.text} ${trendData.unit}`
@@ -338,10 +341,10 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({ trend
 
       {/* Status Legend */}
       <Group gap="sm" justify="center">
-        <Badge size="sm" variant="light" color="green">Normal</Badge>
-        <Badge size="sm" variant="light" color="orange">High/Low</Badge>
-        <Badge size="sm" variant="light" color="red">Critical</Badge>
-        <Badge size="sm" variant="light" color="yellow">Abnormal</Badge>
+        <Badge size="sm" variant="light" color="green">{t('labresults:stats.normal')}</Badge>
+        <Badge size="sm" variant="light" color="orange">{t('labresults:trendChart.highLow')}</Badge>
+        <Badge size="sm" variant="light" color="red">{t('labresults:stats.critical')}</Badge>
+        <Badge size="sm" variant="light" color="yellow">{t('labresults:stats.abnormal')}</Badge>
       </Group>
     </Stack>
   );

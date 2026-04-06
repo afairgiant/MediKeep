@@ -12,6 +12,7 @@ import {
   IconUpload,
   IconAlertTriangle,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import useDocumentManagerCore from './DocumentManagerCore';
 import ProgressTracking from './ProgressTracking';
 import RenderModeContent from './RenderModeContent';
@@ -48,6 +49,7 @@ const DocumentManagerContent = ({
   updateHandlersRef,
   className
 }) => {
+  const { t } = useTranslation(['documents', 'shared']);
   // Get handlers from DocumentManagerCore hook
   const coreHandlers = useDocumentManagerCore({
     entityType,
@@ -151,14 +153,14 @@ const DocumentManagerContent = ({
           />
           <Group justify="flex-end">
             <Button variant="outline" onClick={onUploadModalClose}>
-              Cancel
+              {t('shared:fields.cancel')}
             </Button>
             <Button
               disabled={!fileUpload.file || coreHandlers.loading}
               leftSection={<IconUpload size={16} />}
               onClick={handleUploadConfirm}
             >
-              Upload
+              {t('manager.uploadNewFile')}
             </Button>
           </Group>
         </Stack>

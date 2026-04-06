@@ -1,4 +1,5 @@
 import React from 'react';
+import i18n from '../../i18n/config';
 import logger from '../../services/logger';
 import { isDevelopment } from '../../config/env';
 
@@ -63,27 +64,26 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="error-boundary">
           <div className="error-content">
-            <h1>🚨 Something went wrong</h1>
+            <h1>{i18n.t('errors:boundary.somethingWentWrong')}</h1>
             <p>
-              We're sorry, but something unexpected happened in the medical
-              records system.
+              {i18n.t('errors:boundary.unexpectedError')}
             </p>
 
             <div className="error-details">
               {this.state.errorId && (
                 <p>
-                  <strong>Error ID:</strong> {this.state.errorId}
+                  <strong>{i18n.t('errors:boundary.errorIdLabel')}</strong> {this.state.errorId}
                 </p>
               )}
               {this.props.componentName && (
                 <p>
-                  <strong>Component:</strong> {this.props.componentName}
+                  <strong>{i18n.t('errors:boundary.componentLabel')}</strong> {this.props.componentName}
                 </p>
               )}
             </div>
 
             <details>
-              <summary>Error details</summary>
+              <summary>{i18n.t('errors:boundary.errorDetails')}</summary>
               <pre>{this.state.error?.toString()}</pre>
               {isDevelopment() &&
                 this.state.error?.stack && <pre>{this.state.error.stack}</pre>}
@@ -96,18 +96,18 @@ class ErrorBoundary extends React.Component {
                 type="button"
                 style={{ marginRight: '10px' }}
               >
-                Try Again
+                {i18n.t('errors:boundary.tryAgain')}
               </button>
               <button
                 onClick={() => window.location.reload()}
                 className="reload-button"
               >
-                Reload Page
+                {i18n.t('errors:boundary.reloadPage')}
               </button>
             </div>
 
             <p style={{ marginTop: '20px', fontSize: '0.9em', color: 'var(--mantine-color-gray-6)' }}>
-              The error has been automatically logged for investigation.
+              {i18n.t('errors:boundary.errorLogged')}
             </p>
           </div>
         </div>

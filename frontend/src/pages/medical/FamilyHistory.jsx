@@ -1200,10 +1200,10 @@ const FamilyHistory = () => {
             <Card shadow="sm" p="xl" style={{ textAlign: 'center' }}>
               <IconUsers size={48} color="var(--mantine-color-gray-5)" />
               <Title order={4} mt="md" color="dimmed">
-                No Shared Family History
+                {t('invitations:manager.noSharedTitle')}
               </Title>
               <Text color="dimmed" mb="lg">
-                No family medical history has been shared with you yet.
+                {t('invitations:manager.noSharedDescription')}
               </Text>
             </Card>
           ) : viewMode === 'table' ? (

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Alert, Text, Stack, List, Badge, Group, Collapse, Button } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import { ErrorIcon } from './ErrorIcon';
 import { ERROR_SEVERITY } from './constants';
 
@@ -27,8 +28,9 @@ export const ErrorAlert = ({
     variant = 'light',
     style = {},
     onClose,
-    ...props 
+    ...props
 }) => {
+    const { t } = useTranslation(['errors', 'common']);
     if (!error) {
         return null;
     }
@@ -49,7 +51,7 @@ export const ErrorAlert = ({
             {showSuggestions && error.suggestions && error.suggestions.length > 0 && (
                 <Stack gap="xs" mt="sm">
                     <Text size="sm" fw={500} c="dimmed">
-                        Suggestions:
+                        {t('alert.suggestions')}
                     </Text>
                     <List size="sm" spacing="xs">
                         {error.suggestions.map((suggestion, index) => (
@@ -107,8 +109,9 @@ export const ErrorQueueAlert = ({
     maxVisible = 3,
     ...props 
 }) => {
+    const { t } = useTranslation(['errors', 'common']);
     const [expanded, setExpanded] = React.useState(false);
-    
+
     if (!errorQueue || errorQueue.length === 0) {
         return null;
     }
@@ -131,15 +134,15 @@ export const ErrorQueueAlert = ({
                 <Group justify="space-between">
                     <Group gap="xs">
                         <Badge color="red" variant="light">
-                            {sortedErrors.length} Error{sortedErrors.length !== 1 ? 's' : ''}
+                            {t('alert.errorCount', { count: sortedErrors.length })}
                         </Badge>
                         <Text size="sm" c="dimmed">
-                            {sortedErrors.filter(e => e.severity === ERROR_SEVERITY.HIGH).length} high priority
+                            {t('alert.highPriority', { count: sortedErrors.filter(e => e.severity === ERROR_SEVERITY.HIGH).length })}
                         </Text>
                     </Group>
                     {onClearAll && (
                         <Button size="xs" variant="subtle" color="red" onClick={onClearAll}>
-                            Clear All
+                            {t('common:messages.clearAll')}
                         </Button>
                     )}
                 </Group>
@@ -177,6 +180,7 @@ export const ErrorQueueAlert = ({
  * @returns {JSX.Element} Error boundary fallback UI
  */
 export const ErrorBoundaryFallback = ({ error, resetError }) => {
+    const { t } = useTranslation('errors');
     const formattedError = {
         title: 'Something Went Wrong',
         message: 'An unexpected error occurred. The error has been logged and will be investigated.',
@@ -203,7 +207,7 @@ export const ErrorBoundaryFallback = ({ error, resetError }) => {
                         borderRadius: '4px',
                         cursor: 'pointer'
                     }}>
-                        Try Again
+                        {t('boundary.tryAgain')}
                     </button>
                 </div>
             )}

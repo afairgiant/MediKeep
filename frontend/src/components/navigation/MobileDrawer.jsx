@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Drawer, Stack, Group, Text, Divider, UnstyledButton, ScrollArea, Button } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 import { useResponsive } from '../../hooks/useResponsive';
 import NavigationToggle from './NavigationToggle';
@@ -25,6 +26,7 @@ const MobileDrawer = ({
   onLogout,
   className = ''
 }) => {
+  const { t } = useTranslation(['navigation', 'shared']);
   const responsive = useResponsive();
 
   // Handle escape key to close drawer
@@ -116,7 +118,7 @@ const MobileDrawer = ({
               {/* App Title */}
               <Group justify="center" align="center" mt="xl">
                 <ResponsiveText fw={700} c="blue" ta="center">
-                  🔧 Admin Panel
+                  {t('shared:labels.admin')}
                 </ResponsiveText>
               </Group>
               
@@ -221,7 +223,7 @@ const MobileDrawer = ({
                 fullWidth
                 style={{ marginBottom: '16px' }}
               >
-                Logout
+                {t('menu.logout')}
               </Button>
             )}
           </ResponsiveStack>

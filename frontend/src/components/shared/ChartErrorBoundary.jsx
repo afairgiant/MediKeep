@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert, Stack, Button, Text } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
+import i18n from '../../i18n/config';
 import logger from '../../services/logger';
 
 class ChartErrorBoundary extends React.Component {
@@ -39,8 +40,7 @@ class ChartErrorBoundary extends React.Component {
         >
           <Stack gap="sm">
             <Text size="sm">
-              Unable to render chart. This may be due to invalid data or a
-              temporary issue.
+              {i18n.t('documents:errorBoundary.chartErrorDescription')}
             </Text>
             <Button
               size="xs"
@@ -48,7 +48,7 @@ class ChartErrorBoundary extends React.Component {
               leftSection={<IconRefresh size={14} />}
               onClick={this.handleReset}
             >
-              Try Again
+              {i18n.t('documents:errorBoundary.tryAgain')}
             </Button>
           </Stack>
         </Alert>

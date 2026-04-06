@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "Compatibiliteitsproblemen met de browser",
+    "chartError": "Fout bij weergave van grafiek",
+    "chartErrorDescription": "Kan grafiek niet weergeven. Probeer de pagina te vernieuwen.",
+    "documentError": "Fout in documentbeheer",
+    "documentErrorDescription": "Er is een fout opgetreden bij het beheren van documenten. Uw gegevens zijn veilig.",
+    "errorDetails": "Foutdetails",
+    "invalidData": "Ongeldige gegevens van de server",
+    "networkIssues": "Problemen met netwerkverbinding",
+    "tempIssues": "Tijdelijke systeemproblemen",
+    "tryAgain": "Opnieuw proberen",
+    "uploadError": "Fout bij uploadvoortgang",
+    "uploadErrorDescription": "De uploadvoortgangsmonitor heeft een fout aangetroffen."
+  },
+  "fileCount": {
+    "attached": "{{count}} bijgevoegd",
+    "attached_one": "{{count}} bijgevoegd",
+    "attached_other": "{{count}} bijgevoegd",
+    "fileCount": "{{count}} bestand",
+    "fileCount_one": "{{count}} bestand",
+    "fileCount_other": "{{count}} bestanden",
+    "noFiles": "Geen bestanden"
+  },
+  "fileList": {
+    "fileDetails": "BESTANDSDETAILS",
+    "loading": "Bestanden laden...",
+    "markedCount": "{{count}} bestand gemarkeerd voor verwijdering",
+    "markedCount_one": "{{count}} bestand gemarkeerd voor verwijdering",
+    "markedCount_other": "{{count}} bestanden gemarkeerd voor verwijdering",
+    "markedForDeletion": "Gemarkeerd voor verwijdering",
+    "noFiles": "Geen bestanden bijgevoegd",
+    "noMatch": "Geen bestanden komen overeen met uw zoekcriteria.",
+    "showingFiles": "{{showing}} van {{total}} bestanden weergegeven",
+    "statusDuplicate": "Duplicaat",
+    "statusFailed": "Mislukt",
+    "statusMissing": "Ontbrekend",
+    "statusProcessing": "Verwerken"
+  },
+  "fileUpload": {
+    "accepted": "Geaccepteerd: {{types}} • Max. grootte: {{size}}MB",
+    "chooseFiles": "Bestanden kiezen",
+    "dragOrClick": "Sleep bestanden hierheen of klik om te selecteren",
+    "remove": "Verwijderen",
+    "selectedFiles": "Geselecteerde bestanden ({{count}})",
+    "selectedFiles_one": "Geselecteerde bestanden ({{count}})",
+    "selectedFiles_other": "Geselecteerde bestanden ({{count}})"
+  },
+  "linkPaperless": {
+    "from": "Van: {{name}}",
+    "infoText": "Zoek naar documenten die al in Paperless staan om ze aan dit/deze {{entityType}} te koppelen. Geen upload nodig!",
+    "linkDocument": "Document koppelen",
+    "moreTags": "+{{count}} meer",
+    "moreTags_one": "+{{count}} meer",
+    "moreTags_other": "+{{count}} meer",
+    "noDocumentsFound": "Geen documenten gevonden",
+    "searchDocuments": "Documenten zoeken",
+    "searchPlaceholder": "Zoeken op titel, inhoud of tags...",
+    "selected": "Geselecteerd",
+    "title": "Bestaand Paperless-document koppelen",
+    "tryDifferent": "Probeer een andere zoekterm",
+    "type": "Type: {{type}}"
+  },
+  "linkPapra": {
+    "infoText": "Zoek naar documenten die al in Papra staan om ze aan dit/deze {{entityType}} te koppelen. Geen upload nodig!",
+    "linkDocument": "Document koppelen",
+    "noDocumentsFound": "Geen documenten gevonden",
+    "searchPlaceholder": "Documenten zoeken...",
+    "selected": "Geselecteerd",
+    "title": "Bestaand Papra-document koppelen",
+    "tryDifferent": "Probeer een andere zoekterm"
+  },
+  "manager": {
+    "addDocument": "Document toevoegen",
+    "currentFiles": "Huidige bestanden:",
+    "duplicateDocument": "Duplicaat document",
+    "duplicateExists": "Dit document bestaat al in Paperless en kan niet opnieuw worden geüpload.",
+    "filesToUpload": "Te uploaden bestanden:",
+    "linkPaperless": "Bestaand Paperless-document koppelen",
+    "linkPapra": "Bestaand Papra-document koppelen",
+    "manageDocuments": "Documenten beheren",
+    "processingPaperless": "Document wordt verwerkt in Paperless...",
+    "searchFiles": "Bestanden zoeken...",
+    "statusDuplicate": "Duplicaat",
+    "statusFailed": "Mislukt",
+    "statusUploaded": "Geüpload",
+    "statusUploading": "Uploaden naar Paperless...",
+    "syncCheck": "Synchronisatiecontrole",
+    "uploadNewFile": "Nieuw bestand uploaden",
+    "uploadSuccess": "Document succesvol geüpload!"
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "Automatische synchronisatie ingeschakeld",
+    "documentAlreadyExists": "\"{{fileName}}\" is identiek aan een document dat al in Paperless staat.",
+    "duplicateHint": "Als u een nieuwe versie wilt uploaden, wijzig dan eerst het document.",
+    "processingDocument": "Document wordt verwerkt door Paperless...",
+    "syncFailed": "Synchronisatie mislukt",
+    "syncing": "Synchroniseren..."
+  },
+  "renderMode": {
+    "compactView": "Compacte weergave",
+    "gridView": "Rasterweergave",
+    "listView": "Lijstweergave",
+    "viewMode": "Weergavemodus"
+  },
+  "storage": {
+    "backendLabel": "Opslag:",
+    "connectedBadge": "Verbonden",
+    "local": "Lokale opslag",
+    "paperless": "Paperless-ngx",
+    "papra": "Papra",
+    "selectBackend": "Opslag selecteren"
+  },
+  "upload": {
+    "completed": "{{count}} voltooid",
+    "completed_one": "{{count}} voltooid",
+    "completed_other": "{{count}} voltooid",
+    "dragOrClick": "Sleep bestanden hierheen of klik om te selecteren",
+    "failed": "{{count}} mislukt",
+    "failed_one": "{{count}} mislukt",
+    "failed_other": "{{count}} mislukt",
+    "filesProgress": "{{completed}}/{{total}} bestanden",
+    "maxSize": "Maximale bestandsgrootte: {{size}}MB",
+    "overallProgress": "Totale voortgang",
+    "percentComplete": "{{percent}}% voltooid",
+    "remaining": "{{time}} resterend",
+    "retryFailed": "Mislukte opnieuw proberen",
+    "uploading": "{{count}} wordt geüpload",
+    "uploading_one": "{{count}} wordt geüpload",
+    "uploading_other": "{{count}} worden geüpload"
+  }
+}

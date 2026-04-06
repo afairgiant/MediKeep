@@ -10,6 +10,7 @@ import {
   Alert,
 } from '@mantine/core';
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useTranslation } from 'react-i18next';
 
 /**
  * RecordSelector Component
@@ -25,12 +26,13 @@ const RecordSelector = ({
   onToggleCategory,
   categoryDisplayName,
 }) => {
+  const { t } = useTranslation('reports');
   const { formatDate } = useDateFormat();
 
   if (!categoryData || !categoryData.records) {
     return (
       <Paper p="md" withBorder radius="md">
-        <Text c="dimmed" ta="center">No records available</Text>
+        <Text c="dimmed" ta="center">{t('categories.noRecords')}</Text>
       </Paper>
     );
   }
@@ -46,11 +48,11 @@ const RecordSelector = ({
           <Group>
             <Text fw={500} size="lg">{categoryDisplayName}</Text>
             <Badge color="blue" variant="light">
-              {categoryData.count} total
+              {t('categories.totalCount', { count: categoryData.count })}
             </Badge>
             {selectedCount > 0 && (
               <Badge color="green" variant="light">
-                {selectedCount} selected
+                {t('categories.selected', { count: selectedCount })}
               </Badge>
             )}
           </Group>
@@ -82,8 +84,7 @@ const RecordSelector = ({
       {categoryData.has_more && (
         <Alert color="blue" variant="light">
           <Text size="sm">
-            Showing first {categoryData.records.length} records. 
-            More records are available but not displayed for performance.
+            {t('categories.showingFirst', { count: categoryData.records.length })}
           </Text>
         </Alert>
       )}
@@ -133,7 +134,8 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
             )}
             {record.practitioner && (
               <Text size="xs" c="dimmed">
-                <span aria-hidden="true">👨‍⚕️ </span>{record.practitioner}
+                {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+                <span aria-hidden="true">{'\uD83D\uDC68\u200D\u2695\uFE0F '}</span>{record.practitioner}
               </Text>
             )}
             {record.status && (

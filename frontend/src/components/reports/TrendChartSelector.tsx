@@ -62,7 +62,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   updateLabTestChartDates,
   trendChartCount,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['reports', 'common']);
   const [loading, setLoading] = useState(true);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -204,7 +204,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
           <Stack align="center" gap="md">
             <IconChartLine size={48} stroke={1} color="var(--mantine-color-gray-5)" />
             <Text c="dimmed" ta="center">
-              {t('reportBuilder.trendCharts.emptyState')}
+              {t('builder.trendCharts.emptyState')}
             </Text>
           </Stack>
         </Center>
@@ -216,16 +216,16 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
     <Stack gap="lg" p="md">
       {maxReached && (
         <Alert color="yellow" icon={<IconInfoCircle size={16} />}>
-          {t('reportBuilder.trendCharts.maxReached')}
+          {t('builder.trendCharts.maxReached')}
         </Alert>
       )}
 
       {/* Vital Sign Charts */}
       {availableVitals.length > 0 && (
         <Stack gap="sm">
-          <Title order={5}>{t('reportBuilder.trendCharts.vitalCharts.title')}</Title>
+          <Title order={5}>{t('builder.trendCharts.vitalCharts.title')}</Title>
           <Text size="sm" c="dimmed">
-            {t('reportBuilder.trendCharts.vitalCharts.description')}
+            {t('builder.trendCharts.vitalCharts.description')}
           </Text>
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xs">
             {availableVitals.map(vital => (
@@ -244,16 +244,16 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
       {/* Lab Test Charts */}
       {availableLabTests.length > 0 && (
         <Stack gap="sm">
-          <Title order={5}>{t('reportBuilder.trendCharts.labTestCharts.title')}</Title>
+          <Title order={5}>{t('builder.trendCharts.labTestCharts.title')}</Title>
           <Text size="sm" c="dimmed">
-            {t('reportBuilder.trendCharts.labTestCharts.description')}
+            {t('builder.trendCharts.labTestCharts.description')}
           </Text>
           <MultiSelect
             data={labTestSelectData}
             value={selectedLabTestNames}
             onChange={handleLabTestChange}
             searchable
-            placeholder={t('reportBuilder.trendCharts.labTestCharts.searchPlaceholder')}
+            placeholder={t('builder.trendCharts.labTestCharts.searchPlaceholder')}
             maxDropdownHeight={200}
             disabled={maxReached && selectedLabTestNames.length === 0}
             clearable
@@ -265,7 +265,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
       {trendChartCount > 0 && (
         <Stack gap="sm">
           <Title order={5}>
-            {t('reportBuilder.trendCharts.selectedCharts', { count: trendChartCount })}
+            {t('builder.trendCharts.selectedCharts', { count: trendChartCount })}
           </Title>
 
           {/* Vital chart rows */}
@@ -282,8 +282,8 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   onChange={(val) => updateVitalChartDates(chart.vital_type, val, chart.date_to)}
                   size="xs"
                   style={{ width: 130 }}
-                  placeholder={t('reportBuilder.trendCharts.dateFrom')}
-                  aria-label={t('reportBuilder.trendCharts.dateFrom')}
+                  placeholder={t('builder.trendCharts.dateFrom')}
+                  aria-label={t('builder.trendCharts.dateFrom')}
                   clearable
                   maxDate={chart.date_to || undefined}
                   popoverProps={{ withinPortal: true }}
@@ -293,8 +293,8 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   onChange={(val) => updateVitalChartDates(chart.vital_type, chart.date_from, val)}
                   size="xs"
                   style={{ width: 130 }}
-                  placeholder={t('reportBuilder.trendCharts.dateTo')}
-                  aria-label={t('reportBuilder.trendCharts.dateTo')}
+                  placeholder={t('builder.trendCharts.dateTo')}
+                  aria-label={t('builder.trendCharts.dateTo')}
                   clearable
                   minDate={chart.date_from || undefined}
                   maxDate={today}
@@ -302,7 +302,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                 />
                 {count !== undefined && (
                   <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                    {t('reportBuilder.trendCharts.recordCount', { count })}
+                    {t('builder.trendCharts.recordCount', { count })}
                   </Text>
                 )}
                 <ActionIcon
@@ -310,7 +310,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   color="red"
                   size="sm"
                   onClick={() => removeVitalChart(chart.vital_type)}
-                  aria-label={t('reportBuilder.trendCharts.removeChart', { name: vitalInfo?.display_name || chart.vital_type })}
+                  aria-label={t('builder.trendCharts.removeChart', { name: vitalInfo?.display_name || chart.vital_type })}
                 >
                   <IconX size={14} />
                 </ActionIcon>
@@ -331,8 +331,8 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   onChange={(val) => updateLabTestChartDates(chart.test_name, val, chart.date_to)}
                   size="xs"
                   style={{ width: 130 }}
-                  placeholder={t('reportBuilder.trendCharts.dateFrom')}
-                  aria-label={t('reportBuilder.trendCharts.dateFrom')}
+                  placeholder={t('builder.trendCharts.dateFrom')}
+                  aria-label={t('builder.trendCharts.dateFrom')}
                   clearable
                   maxDate={chart.date_to || undefined}
                   popoverProps={{ withinPortal: true }}
@@ -342,8 +342,8 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   onChange={(val) => updateLabTestChartDates(chart.test_name, chart.date_from, val)}
                   size="xs"
                   style={{ width: 130 }}
-                  placeholder={t('reportBuilder.trendCharts.dateTo')}
-                  aria-label={t('reportBuilder.trendCharts.dateTo')}
+                  placeholder={t('builder.trendCharts.dateTo')}
+                  aria-label={t('builder.trendCharts.dateTo')}
                   clearable
                   minDate={chart.date_from || undefined}
                   maxDate={today}
@@ -351,7 +351,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                 />
                 {count !== undefined && (
                   <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                    {t('reportBuilder.trendCharts.recordCount', { count })}
+                    {t('builder.trendCharts.recordCount', { count })}
                   </Text>
                 )}
                 <ActionIcon
@@ -359,7 +359,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   color="red"
                   size="sm"
                   onClick={() => removeLabTestChart(chart.test_name)}
-                  aria-label={t('reportBuilder.trendCharts.removeChart', { name: chart.test_name })}
+                  aria-label={t('builder.trendCharts.removeChart', { name: chart.test_name })}
                 >
                   <IconX size={14} />
                 </ActionIcon>

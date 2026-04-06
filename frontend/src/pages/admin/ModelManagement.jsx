@@ -503,7 +503,7 @@ const ModelManagement = () => {
                       </Group>
                     </Table.Th>
                   ))}
-                  <Table.Th>Actions</Table.Th>
+                  <Table.Th>{t('shared:labels.actions')}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>

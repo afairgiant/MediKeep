@@ -59,14 +59,14 @@ describe('Login Component', () => {
       render(<Login />);
 
       // Before config loads: button must NOT be in the document
-      expect(screen.queryByText('auth.login.createAccount')).not.toBeInTheDocument();
+      expect(screen.queryByText('login.createAccount')).not.toBeInTheDocument();
 
       // Resolve both config fetches
       resolveRegistration({ registration_enabled: true });
       resolveSSO({ enabled: false });
 
       // After config loads: button appears
-      expect(await screen.findByText('auth.login.createAccount')).toBeInTheDocument();
+      expect(await screen.findByText('login.createAccount')).toBeInTheDocument();
     });
 
     test('renders with MediKeep title', () => {

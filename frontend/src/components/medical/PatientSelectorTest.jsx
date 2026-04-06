@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- test component, not user-facing */
 /**
  * Simple test component to verify PatientSelector imports and basic functionality
  */

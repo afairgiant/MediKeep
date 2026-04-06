@@ -92,7 +92,7 @@ const VitalViewModal = ({
           icon: IconMapPin,
         },
         {
-          label: t('vitals.modal.deviceUsed', 'Device Used'),
+          label: t('vitals:modal.deviceUsed', 'Device Used'),
           value: vital.device_used || t('shared:labels.notSpecified', 'Not specified'),
           icon: IconDevices,
         },
@@ -103,19 +103,19 @@ const VitalViewModal = ({
       icon: IconHeart,
       items: [
         {
-          label: t('vitals.stats.bloodPressure', 'Blood Pressure'),
+          label: t('vitals:stats.bloodPressure', 'Blood Pressure'),
           value: getBPDisplay(vital.systolic_bp, vital.diastolic_bp),
           icon: IconHeart,
-          unit: t('vitals.units.mmHg', 'mmHg'),
+          unit: t('vitals:units.mmHg', 'mmHg'),
         },
         {
-          label: t('vitals.stats.heartRate', 'Heart Rate'),
+          label: t('vitals:stats.heartRate', 'Heart Rate'),
           value: vital.heart_rate || t('labels.notAvailable', 'N/A'),
           icon: IconActivity,
-          unit: vital.heart_rate ? t('vitals.units.bpm', 'BPM') : '',
+          unit: vital.heart_rate ? t('vitals:units.bpm', 'BPM') : '',
         },
         {
-          label: t('vitals.stats.temperature', 'Temperature'),
+          label: t('vitals:stats.temperature', 'Temperature'),
           value: vital.temperature
             ? (convertForDisplay(vital.temperature, 'temperature', unitSystem)?.toFixed(1) ?? vital.temperature)
             : t('labels.notAvailable', 'N/A'),
@@ -123,13 +123,13 @@ const VitalViewModal = ({
           unit: vital.temperature ? unitLabels[unitSystem].temperature : '',
         },
         {
-          label: t('vitals.modal.respiratoryRate', 'Respiratory Rate'),
+          label: t('vitals:modal.respiratoryRate', 'Respiratory Rate'),
           value: vital.respiratory_rate || t('labels.notAvailable', 'N/A'),
           icon: IconLungs,
-          unit: vital.respiratory_rate ? t('vitals.units.perMin', '/min') : '',
+          unit: vital.respiratory_rate ? t('vitals:units.perMin', '/min') : '',
         },
         {
-          label: t('vitals.card.oxygenSaturation', 'Oxygen Saturation'),
+          label: t('vitals:card.oxygenSaturation', 'Oxygen Saturation'),
           value: vital.oxygen_saturation || t('labels.notAvailable', 'N/A'),
           icon: IconDroplet,
           unit: vital.oxygen_saturation ? '%' : '',
@@ -137,11 +137,11 @@ const VitalViewModal = ({
       ],
     },
     {
-      title: t('vitals.modal.physicalMeasurements', 'Physical Measurements'),
+      title: t('vitals:modal.physicalMeasurements', 'Physical Measurements'),
       icon: IconWeight,
       items: [
         {
-          label: t('vitals.stats.weight', 'Weight'),
+          label: t('vitals:stats.weight', 'Weight'),
           value: vital.weight
             ? (convertForDisplay(vital.weight, 'weight', unitSystem)?.toFixed(1) ?? vital.weight)
             : t('labels.notAvailable', 'N/A'),
@@ -160,37 +160,37 @@ const VitalViewModal = ({
           unit: vital.height && unitSystem === 'metric' ? unitLabels[unitSystem].height : '',
         },
         {
-          label: t('vitals.stats.bmi', 'BMI'),
+          label: t('vitals:stats.bmi', 'BMI'),
           value: getBMIDisplay(vital.weight, vital.height),
           icon: IconTrendingUp,
         },
       ],
     },
     {
-      title: t('vitals.modal.additionalMeasurements', 'Additional Measurements'),
+      title: t('vitals:modal.additionalMeasurements', 'Additional Measurements'),
       icon: IconDroplet,
       items: [
         {
-          label: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
+          label: t('vitals:modal.bloodGlucose', 'Blood Glucose'),
           value: vital.blood_glucose || t('labels.notAvailable', 'N/A'),
           icon: IconDroplet,
-          unit: vital.blood_glucose ? t('vitals.units.mgdl', 'mg/dL') : '',
+          unit: vital.blood_glucose ? t('vitals:units.mgdl', 'mg/dL') : '',
         },
         ...(vital.blood_glucose ? [{
-          label: t('vitals.modal.glucoseContext', 'Measurement Type'),
+          label: t('vitals:modal.glucoseContext', 'Measurement Type'),
           value: vital.glucose_context
             ? t(`vitals.glucoseContext.${vital.glucose_context}`, vital.glucose_context)
             : t('shared:labels.notSpecified', 'Not specified'),
           icon: IconDroplet,
         }] : []),
         {
-          label: t('vitals.modal.a1c', 'A1C'),
+          label: t('vitals:modal.a1c', 'A1C'),
           value: vital.a1c || t('labels.notAvailable', 'N/A'),
           icon: IconDroplet,
           unit: vital.a1c ? '%' : '',
         },
         {
-          label: t('vitals.modal.painScale', 'Pain Scale'),
+          label: t('vitals:modal.painScale', 'Pain Scale'),
           value: vital.pain_scale !== null ? `${vital.pain_scale}/10` : t('labels.notAvailable', 'N/A'),
           icon: IconMoodSad,
         },
@@ -202,7 +202,7 @@ const VitalViewModal = ({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={t('vitals.modal.title', 'Vital Signs Details')}
+      title={t('vitals:modal.title', 'Vital Signs Details')}
       size="xl"
       centered
       zIndex={2000}
@@ -235,7 +235,7 @@ const VitalViewModal = ({
             </div>
             {vital.systolic_bp && vital.diastolic_bp && (
               <Badge variant="filled" color="red" size="lg">
-                {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)} mmHg
+                {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)} {t('vitals:units.mmHg')}
               </Badge>
             )}
           </Group>
@@ -332,7 +332,7 @@ const VitalViewModal = ({
                 </>
               ) : (
                 <Text size="sm" c="dimmed">
-                  {t('vitals.modal.practitionerId', 'Practitioner ID')}: {vital.practitioner_id}
+                  {t('vitals:modal.practitionerId', 'Practitioner ID')}: {vital.practitioner_id}
                 </Text>
               )}
             </Card>

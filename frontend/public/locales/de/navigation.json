@@ -28,9 +28,9 @@
     },
     "sections": {
       "additionalResources": "Zusätzliche Ressourcen",
-      "coreMedical": "Kern-Medizininformationen",
+      "coreMedical": "Medizinische Grundinformationen",
       "healthMonitoring": "Gesundheitsüberwachung",
-      "prevention": "Prävention & Historie",
+      "prevention": "Prävention & Vorgeschichte",
       "recentActivity": "Letzte Aktivitäten",
       "treatments": "Behandlungen und Eingriffe"
     },
@@ -38,7 +38,7 @@
       "activeMedications": "Aktive Medikamente"
     },
     "subtitle": "Verwalten Sie Ihre Gesundheitsinformationen sicher",
-    "title": "MediKeep-Dashboard"
+    "title": "MediKeep Dashboard"
   },
   "invitations": {
     "acceptButton": "Einladung annehmen",
@@ -57,12 +57,16 @@
     }
   },
   "menu": {
+    "account": "Konto",
     "backToDashboard": "Zurück zum Dashboard",
+    "darkMode": "Dunkler Modus",
     "help": "Hilfe",
+    "lightMode": "Heller Modus",
     "logout": "Abmelden",
     "patients": "Patienten",
     "profile": "Profil",
-    "reports": "Berichte"
+    "reports": "Berichte",
+    "userActions": "Benutzeraktionen"
   },
   "pages": {
     "help": "Hilfe & Support",
@@ -79,15 +83,37 @@
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Administrator-Dashboard",
+      "allergies": "Allergien",
+      "backupManagement": "Backup-Verwaltung",
+      "conditions": "Erkrankungen",
       "customReports": "Benutzerdefinierte Berichte",
+      "dataModels": "Datenmodelle",
+      "emergencyContacts": "Notfallkontakte",
       "exportRecords": "Daten exportieren",
+      "familyHistory": "Familienanamnese",
+      "immunizations": "Impfungen",
+      "injuries": "Verletzungen",
+      "insurance": "Versicherung",
+      "labResults": "Laborergebnisse",
       "language": "Sprache",
+      "medicalEquipment": "Medizinische Geräte",
+      "medications": "Medikamente",
       "patientInfo": "Patienteninformationen",
+      "pharmacies": "Apotheken",
+      "practitioners": "Behandler",
+      "procedures": "Eingriffe",
+      "settings": "Einstellungen",
+      "symptoms": "Symptome",
+      "systemHealth": "Systemzustand",
       "tagManagement": "Tag-Verwaltung",
       "theme": "Design",
-      "visitHistory": "Besuchsverlauf"
+      "treatments": "Behandlungen",
+      "visitHistory": "Besuchsverlauf",
+      "vitalSigns": "Vitalzeichen"
     },
     "sections": {
+      "administration": "Administration",
       "careAndTreatment": "Pflege & Behandlung",
       "misc": "Sonstiges",
       "tools": "Werkzeuge"

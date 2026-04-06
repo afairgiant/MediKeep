@@ -2,16 +2,16 @@
   "channels": {
     "add": "Ajouter un canal",
     "configTitle": "Configuration {{type}}",
-    "confirmDelete": "Souhaitez-vous vraiment supprimer ce canal ?",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce canal ?",
     "createError": "Échec de la création du canal",
-    "createFailed": "Echec de la création du canal",
+    "createFailed": "Échec de la création du canal",
     "createSuccess": "Canal créé avec succès",
     "delete": "Supprimer le canal",
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce canal ?",
     "deleteError": "Échec de la suppression du canal",
-    "deleteFailed": "Echec de la suppression du canal",
+    "deleteFailed": "Échec de la suppression du canal",
     "deleteSuccess": "Canal supprimé avec succès",
-    "description": "Ajoutez et gérez vos canaux de notification",
+    "description": "Ajoutez et gérez vos canaux de diffusion de notifications",
     "discord": {
       "avatarUrl": {
         "description": "Avatar personnalisé pour le bot de notification",
@@ -29,45 +29,45 @@
         "placeholder": "https://discord.com/api/webhooks/..."
       }
     },
-    "edit": "Editer le canal",
+    "edit": "Modifier le canal",
     "email": {
       "fromEmail": {
-        "description": "L'adresse email de l'expéditeur",
-        "label": "Adresse de l'expéditeur",
+        "description": "L'adresse e-mail de l'expéditeur",
+        "label": "E-mail expéditeur",
         "placeholder": "notifications@exemple.com"
       },
       "smtpHost": {
-        "description": "Le serveur SMTP de votre fournisseur d'adresse email",
+        "description": "Le serveur SMTP de votre fournisseur de messagerie",
         "label": "Serveur SMTP",
         "placeholder": "smtp.gmail.com"
       },
       "smtpPassword": {
-        "description": "Pour GMail, utilisez un mot de passe d'application",
+        "description": "Pour Gmail, utilisez un mot de passe d'application",
         "label": "Mot de passe SMTP",
-        "placeholder": "Mot de passe d'application ou d'email"
+        "placeholder": "Mot de passe d'application ou mot de passe e-mail"
       },
       "smtpPort": {
-        "description": "Habituellement 587 (TLS) ou 465 (SSL)",
+        "description": "Généralement 587 (TLS) ou 465 (SSL)",
         "label": "Port SMTP",
         "placeholder": "587"
       },
       "smtpUser": {
-        "description": "Votre adresse email ou votre pseudonyme",
-        "label": "Pseudonyme SMTP",
+        "description": "Votre adresse e-mail ou nom d'utilisateur",
+        "label": "Nom d'utilisateur SMTP",
         "placeholder": "votre-email@gmail.com"
       },
       "toEmail": {
         "description": "Où envoyer les notifications",
-        "label": "Adresse du destinataire",
+        "label": "E-mail destinataire",
         "placeholder": "votre-email@exemple.com"
       },
       "useTls": {
         "description": "Activer le chiffrement TLS (recommandé)",
-        "label": "Utiliser le TLS"
+        "label": "Utiliser TLS"
       }
     },
     "empty": "Aucun canal de notification configuré.",
-    "emptyHint": "Ajoutez un canal pour commencer à recevoir des notifications via Discord, Email, Gotify ou Webhook.",
+    "emptyHint": "Ajoutez un canal pour commencer à recevoir des notifications via Discord, e-mail, Gotify ou webhook.",
     "errors": {
       "fieldRequired": "{{field}} est requis",
       "nameRequired": "Le nom du canal est requis"
@@ -81,17 +81,17 @@
     "form": {
       "configSection": "Configuration du canal",
       "enabled": {
-        "description": "Recevez des notifications via ce canal",
+        "description": "Recevoir des notifications via ce canal",
         "label": "Activer le canal"
       },
       "name": {
-        "description": "Un nom simple pour identifier ce canal",
+        "description": "Un nom convivial pour identifier ce canal",
         "label": "Nom du canal",
-        "placeholder": "ex : Mon serveur Discord"
+        "placeholder": "par ex. Mon serveur Discord"
       },
       "title": "Détails du canal",
       "type": {
-        "description": "Le service via lequel envoyer des notifications",
+        "description": "Le service via lequel envoyer les notifications",
         "label": "Type de canal",
         "placeholder": "Sélectionnez le type de canal"
       }
@@ -103,7 +103,7 @@
         "placeholder": "Jeton d'application de Gotify"
       },
       "priority": {
-        "description": "Niveau de priorité des messages(entre 1-10, par défaut : 5)",
+        "description": "Priorité du message (1-10, par défaut 5)",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -117,12 +117,11 @@
     "noChannels": "Aucun canal de notification configuré",
     "noChannelsHint": "Ajoutez un canal pour commencer à recevoir des notifications",
     "notificationsSent": "{{count}} notifications envoyées",
-    "sentCount_one": "{{count}} envoyé(s)",
-    "sentCount_many": "{{count}} sent",
-    "sentCount_other": "{{count}} envoyé(s)",
+    "sentCount_one": "{{count}} envoyée",
+    "sentCount_other": "{{count}} envoyées",
     "test": "Tester",
     "testError": "Échec de l'envoi de la notification de test",
-    "testFailed": "Echec de la notification de test",
+    "testFailed": "Échec de la notification de test",
     "testing": "Test en cours...",
     "testSuccess": "Notification de test envoyée avec succès !",
     "title": "Canaux de notification",
@@ -132,7 +131,7 @@
       "webhook": "Webhook"
     },
     "updateError": "Échec de la mise à jour du canal",
-    "updateFailed": "Echec de la mise à jour du canal",
+    "updateFailed": "Échec de la mise à jour du canal",
     "updateSuccess": "Canal mis à jour avec succès",
     "verified": "Vérifié",
     "webhook": {
@@ -147,61 +146,61 @@
         "placeholder": "{\"Authorization\": \"Bearer token\"}"
       },
       "method": {
-        "description": "Méthode HTTP pour la requête du webhook",
+        "description": "Méthode HTTP pour la requête webhook",
         "label": "Méthode HTTP"
       },
       "url": {
-        "description": "URL pour recevoir les charges utiles des notifications",
+        "description": "URL pour recevoir les données utiles des notifications",
         "label": "URL du webhook",
         "placeholder": "https://api.exemple.com/webhook"
       }
     }
   },
-  "description": "Configurez comment vous recevez des notifications pour les événements importants",
-  "error": "Echec du chargement des paramètres de notification",
+  "description": "Configurez comment vous recevez les notifications pour les événements importants",
+  "error": "Échec du chargement des paramètres de notification",
   "events": {
     "backup_completed": {
-      "description": "Quand un backup se termine avec succès",
-      "name": "Succès de backup"
+      "description": "Lorsqu'une sauvegarde se termine avec succès",
+      "name": "Sauvegarde terminée"
     },
     "backup_failed": {
-      "description": "Quand un backup échoue",
-      "name": "Echec de backup"
+      "description": "Lorsqu'une sauvegarde échoue",
+      "name": "Échec de sauvegarde"
     },
     "immunization_due": {
-      "description": "Quand une immunisation doit être réalisée",
-      "name": "Immunisation à réaliser"
+      "description": "Lorsqu'une immunisation arrive à échéance",
+      "name": "Immunisation à effectuer"
     },
     "immunization_overdue": {
-      "description": "Quand une immunisation n'a pas été réalisée à la date prévue",
+      "description": "Lorsqu'une immunisation est en retard",
       "name": "Immunisation en retard"
     },
     "invitation_accepted": {
-      "description": "Quand votre invitation de partage est acceptée",
+      "description": "Lorsque votre invitation de partage est acceptée",
       "name": "Invitation acceptée"
     },
     "invitation_received": {
-      "description": "Quand quelqu'un partage un dossier avec vous",
+      "description": "Lorsque quelqu'un partage des dossiers avec vous",
       "name": "Invitation reçue"
     },
     "lab_result_abnormal": {
-      "description": "Quand un résultat d'analyse se trouve en dehors des plages habituelles",
-      "name": "Résultat d'analyse anormal"
+      "description": "Lorsque les résultats d'analyse sont en dehors des valeurs normales",
+      "name": "Résultats d'analyse anormaux"
     },
     "lab_result_available": {
-      "description": "Quand un nouveau résultat d'analyse est ajouté",
-      "name": "Résultat d'analyse disponible"
+      "description": "Lorsque de nouveaux résultats d'analyse sont ajoutés",
+      "name": "Résultats d'analyse disponibles"
     },
     "login_from_new_device": {
-      "description": "Quand votre compte reçoit une connexion depuis un nouvel appareil",
+      "description": "Lorsque votre compte est accédé depuis un nouvel appareil",
       "name": "Connexion depuis un nouvel appareil"
     },
     "password_changed": {
-      "description": "Quand votre mot de passe est modifié",
+      "description": "Lorsque votre mot de passe est modifié",
       "name": "Mot de passe modifié"
     },
     "share_revoked": {
-      "description": "Quand l'accès à un dossier partagé est révoqué",
+      "description": "Lorsque l'accès aux dossiers partagés est révoqué",
       "name": "Partage révoqué"
     },
     "test_notification": {
@@ -210,18 +209,18 @@
     }
   },
   "history": {
-    "description": "Notifications récentes envoyées dans vos canaux",
+    "description": "Notifications récentes envoyées via vos canaux",
     "fields": {
       "channel": "Canal"
     },
     "loading": "Chargement de l'historique...",
-    "noHistory": "Aucune notification envoyée pour l'instant",
+    "noHistory": "Aucune notification envoyée pour le moment",
     "noHistoryHint": "Les notifications apparaîtront ici une fois envoyées",
     "page": "Page {{current}} sur {{total}}",
     "showLess": "Afficher moins",
     "showMore": "Afficher plus",
     "status": {
-      "failed": "Echec",
+      "failed": "Échec",
       "sent": "Envoyée"
     },
     "title": "Historique des notifications"
@@ -230,18 +229,18 @@
   "preferences": {
     "categories": {
       "collaboration": "Partage et collaboration",
-      "medical": "Evénements médicaux",
+      "medical": "Événements médicaux",
       "other": "Autres événements",
       "security": "Alertes de sécurité",
       "sharing": "Partage et invitations",
-      "system": "Evénements système"
+      "system": "Événements système"
     },
-    "comingSoon": "A venir",
-    "description": "Choisissez quels événements déclenchent des notifications dans chaque canal",
+    "comingSoon": "Prochainement",
+    "description": "Choisissez quels événements déclenchent des notifications sur chaque canal",
     "loading": "Chargement des préférences...",
     "noChannels": "Ajoutez d'abord un canal de notification pour configurer les préférences d'événements",
-    "saveFailed": "Echec de la sauvegarde des préférences",
-    "saveSuccess": "Préférences sauvegardées",
+    "saveFailed": "Échec de la sauvegarde de la préférence",
+    "saveSuccess": "Préférence sauvegardée",
     "title": "Notifications d'événements",
     "updateError": "Échec de la mise à jour de la préférence"
   },
@@ -250,44 +249,44 @@
     "auth": {
       "accessDeniedAdmin": "Accès refusé : privilèges d'administrateur requis",
       "accessDeniedRole": "Accès refusé : rôle {{role}} requis",
-      "accessDeniedRoles": "Accès refusé : un des rôles suivants est requis : {{roles}}",
+      "accessDeniedRoles": "Accès refusé : un de ces rôles est requis : {{roles}}",
       "accountCreatedSuccess": "Compte créé avec succès ! Connexion en cours...",
-      "loginFailed": "Echec de la connexion",
+      "loginFailed": "Échec de la connexion",
       "loginRequired": "Veuillez vous connecter pour accéder à cette page",
       "loginSuccess": "Connexion réussie !",
       "logoutSuccess": "Déconnexion réussie",
-      "sessionExpired": "La session a expiré pour cause d'inactivité.",
+      "sessionExpired": "Session expirée en raison de l'inactivité",
       "sessionExpiredLogin": "Session expirée. Veuillez vous reconnecter.",
-      "ssoFailed": "Echec du lancement de la connexion SSO",
+      "ssoFailed": "Échec du démarrage de la connexion SSO",
       "userCreatedSuccess": "Compte utilisateur créé avec succès !",
-      "userCreatedWithLinkSuccess": "Utilisateur créé et connecté à un patient existant avec succès !"
+      "userCreatedWithLinkSuccess": "Utilisateur créé et lié au patient existant avec succès !"
     },
     "documents": {
-      "linkFailed": "Echec de la connexion du document",
-      "linkSuccess": "Document connecté avec succès",
-      "unlinkFailed": "Echec de la déconnexion du document",
-      "unlinkSuccess": "Document déconnecté avec succès"
+      "linkFailed": "Échec de la liaison du document",
+      "linkSuccess": "Document lié avec succès",
+      "unlinkFailed": "Échec de la suppression du lien du document",
+      "unlinkSuccess": "Lien du document supprimé avec succès"
     },
     "familySharing": {
       "accessRevoked": "Accès révoqué",
-      "invitationFailed": "Echec de l'envoi de l'invitation",
+      "invitationFailed": "Échec de l'envoi de l'invitation",
       "invitationSent": "Invitation envoyée avec succès !",
-      "loadFailed": "Echec du chargement des informations de partage",
-      "revokeFailed": "Echec de la révocation de l'accès"
+      "loadFailed": "Échec du chargement des informations de partage",
+      "revokeFailed": "Échec de la révocation de l'accès"
     },
     "files": {
-      "downloadFailed": "Echec du téléchargement du fichier"
+      "downloadFailed": "Échec du téléchargement du fichier"
     },
     "generic": {
-      "allOperationsFailed": "{{operation}}s : toutes ont échoué. Veuillez réessayer.",
-      "allOperationsSuccess": "{{total}} {{operation}}s : toutes complété(e)s avec succès !",
-      "downloadFailed": "Echec du téléchargement",
-      "operationFailed": "Echec de l'opération",
-      "operationFailedTitle": "Echec : {{operation}}",
-      "operationPartial": "{{success}}/{{total}} {{operation}}s complété(e)s avec succès. {{failed}} en échec.",
-      "operationPartialTitle": "{{operation}} complété(e) avec des erreurs",
-      "operationSuccess": "{{operation}} complété(e) avec succès !",
-      "saveFailed": "Echec de la sauvegarde",
+      "allOperationsFailed": "Toutes les {{operation}}s ont échoué. Veuillez réessayer.",
+      "allOperationsSuccess": "Toutes les {{total}} {{operation}}s ont été complétées avec succès !",
+      "downloadFailed": "Échec du téléchargement",
+      "operationFailed": "Échec de l'opération",
+      "operationFailedTitle": "Échec de {{operation}}",
+      "operationPartial": "{{success}}/{{total}} {{operation}}s complétées avec succès. {{failed}} ont échoué.",
+      "operationPartialTitle": "{{operation}} complétée avec des erreurs",
+      "operationSuccess": "{{operation}} complétée avec succès !",
+      "saveFailed": "Échec de la sauvegarde",
       "success": "Succès !",
       "warning": "Avertissement"
     },
@@ -296,120 +295,120 @@
       "accessRevokedMessage": "L'accès a été révoqué.",
       "alreadyRevoked": "Déjà révoqué",
       "alreadyRevokedMessage": "Cette invitation a déjà été révoquée.",
-      "cancelFailed": "Echec de l'annulation de l'invitation",
+      "cancelFailed": "Échec de l'annulation de l'invitation",
       "cancelled": "Invitation annulée",
       "cancelledMessage": "L'invitation a été annulée.",
-      "respondFailed": "Echec de réponse à l'invitation",
-      "revokeFailed": "Echec de révocation de l'accès"
+      "respondFailed": "Échec de la réponse à l'invitation",
+      "revokeFailed": "Échec de la révocation de l'accès"
     },
     "labResults": {
-      "addedMessage": "Ajout de {{count}} composant(s) d'analyse au résultat d'analyse.",
+      "addedMessage": "{{count}} composants de test ajoutés au résultat d'analyse.",
       "addedSuccess": "Succès !",
-      "addFailed": "Echec de l'ajout des composants d'analyse",
+      "addFailed": "Échec de l'ajout des composants de test",
       "deletedMessage": "{{name}} a été supprimé",
       "deletedSuccess": "Composant supprimé",
-      "noTextMessage": "Veuillez coller les résultats d'analyse dans la zone de saisie.",
+      "noTextMessage": "Veuillez coller le texte des résultats d'analyse dans la zone de saisie.",
       "noTextToParse": "Aucun texte à analyser",
-      "parsedCount": "{{count}} composants d'analyse trouvés. Passez-les en revue dans l'onglet Aperçu.",
+      "parsedCount": "{{count}} composants de test trouvés. Examinez-les dans l'onglet Aperçu.",
       "parseWarning": "Certaines lignes n'ont pas pu être analysées",
       "templateApplied": "Modèle appliqué",
-      "templateAppliedMessage": "Ajout de {{count}} composant(s) à partir du modèle \"{{name}}\".",
+      "templateAppliedMessage": "{{count}} composants ajoutés à partir du modèle \"{{name}}\".",
       "textParsed": "Texte analysé",
-      "trendExportFailed": "Echec de l'exportation du graphique",
+      "trendExportFailed": "Échec de l'exportation du graphique",
       "trendExportSuccess": "Graphique exporté avec succès",
-      "updateFailed": "Echec de la mise à jour du composant"
+      "updateFailed": "Échec de la mise à jour du composant"
     },
     "patient": {
-      "createdSuccess": "Création réussie : {{name}}",
-      "deletedNoOthers": "Suppression réussie : {{name}}. Aucun autre patient disponible.",
-      "deletedSuccess": "Suppression réussie : {{name}}.",
-      "deletedSwitched": "Suppression réussie : {{name}}. Changement vers {{fallbackName}}.",
-      "deleteFailed": "Echec de la supperssion : {{message}}",
-      "deleteOwnOnly": "Vous ne pouvez supprimer que les patients que vous possédez",
-      "nowViewing": "Affichage : {{name}}",
-      "removeAccessFailed": "Echec du retrait de l'accès : {{message}}",
-      "removedAccess": "Accès à {{name}} retiré",
-      "removeOwnOnly": "Vous ne pouvez pas retirer l'accès aux patients que vous possédez.",
-      "switchFailed": "Echec du changement : {{message}}",
-      "updatedSuccess": "Mise à jour réussie : {{name}}"
+      "createdSuccess": "{{name}} créé avec succès",
+      "deletedNoOthers": "{{name}} supprimé avec succès. Aucun autre patient disponible.",
+      "deletedSuccess": "{{name}} supprimé avec succès",
+      "deletedSwitched": "{{name}} supprimé avec succès. Basculé vers {{fallbackName}}.",
+      "deleteFailed": "Échec de la suppression : {{message}}",
+      "deleteOwnOnly": "Vous ne pouvez supprimer que les patients qui vous appartiennent",
+      "nowViewing": "Consultation de {{name}} en cours",
+      "removeAccessFailed": "Échec de la suppression de l'accès : {{message}}",
+      "removedAccess": "Accès à {{name}} supprimé",
+      "removeOwnOnly": "Vous ne pouvez pas supprimer l'accès aux patients qui vous appartiennent",
+      "switchFailed": "Échec du basculement : {{message}}",
+      "updatedSuccess": "{{name}} mis à jour avec succès"
     },
     "photo": {
-      "photoBeingUploaded": "Une photo est en cours de téléversement. Veuillez attendre la fin de l'opération.",
+      "photoBeingUploaded": "Une photo est actuellement en cours de téléversement. Veuillez attendre la fin de l'opération.",
       "pleaseWait": "Veuillez patienter",
       "uploadSuccess": "Photo téléversée avec succès"
     },
     "reports": {
-      "noRecordsMessage": "Veuillez sélectionner au moins une entrée dans les catégories ci-dessous pour générer un rapport.",
-      "noRecordsSelected": "Aucune entrée sélectionnée",
-      "templateDeleted": "Moddèle supprimé avec succès",
-      "templateDeleteFailed": "Echec de la suppression du modèle",
-      "templateLoaded": "Le modèle \"{{name}}\" a été chargé",
-      "templateNameRequired": "Un nom est requis pour le modèle",
+      "noRecordsMessage": "Veuillez sélectionner au moins un dossier parmi les catégories ci-dessous pour générer un rapport.",
+      "noRecordsSelected": "Aucun dossier sélectionné",
+      "templateDeleted": "Modèle supprimé avec succès",
+      "templateDeleteFailed": "Échec de la suppression du modèle",
+      "templateLoaded": "Modèle \"{{name}}\" chargé",
+      "templateNameRequired": "Le nom du modèle est requis",
       "templateSaved": "Modèle sauvegardé avec succès",
-      "templateSaveFailed": "Echec de la sauvegarde du modèle",
+      "templateSaveFailed": "Échec de la sauvegarde du modèle",
       "validationError": "Erreur de validation"
     },
     "settings": {
-      "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
-      "cleanupFailed": "Echec du nettoyage des fichiers. Veuillez réessayer ultérieurement.",
-      "noOutOfSync": "Aucun fichier désynchronisé à nettoyer",
-      "sessionTimeoutUpdated": "Expiration de session mise à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie."
+      "cleanupComplete": "Nettoyage terminé : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
+      "cleanupFailed": "Échec du nettoyage des fichiers. Veuillez réessayer plus tard.",
+      "noOutOfSync": "Aucun fichier désynchronisé trouvé à nettoyer",
+      "sessionTimeoutUpdated": "Délai d'expiration de session mis à jour à {{minutes}} minutes. Votre session a été actualisée."
     },
     "sharing": {
       "accessRevoked": "Accès révoqué pour l'utilisateur {{userId}}",
-      "cancelFailed": "Echec de l'annulation de l'invitation : {{message}}",
+      "cancelFailed": "Échec de l'annulation de l'invitation : {{message}}",
       "invalidJson": "Format JSON invalide dans {{fieldName}}. Veuillez vérifier votre syntaxe.",
       "invitationCancelled": "Invitation annulée avec succès",
-      "invitationFailed": "Echec de l'invitation : {{message}}",
+      "invitationFailed": "Échec de l'invitation : {{message}}",
       "invitationSent": "Invitation envoyée avec succès à {{recipient}}",
-      "revokeFailed": "Echec de la révocation : {{message}}",
-      "shareUpdated": "Partage des patients mis à jour avec succès",
-      "updateFailed": "Echec de la mise à jour : {{message}}"
+      "revokeFailed": "Échec de la révocation : {{message}}",
+      "shareUpdated": "Partage de patient mis à jour avec succès",
+      "updateFailed": "Échec de la mise à jour : {{message}}"
     },
     "tagSearch": {
-      "loadFailed": "Echec du chargement des étiquettes populaires",
+      "loadFailed": "Échec du chargement des étiquettes populaires",
       "noTagsSelected": "Veuillez sélectionner au moins une étiquette à rechercher",
       "noTagsSelectedTitle": "Aucune étiquette sélectionnée",
-      "searchFailed": "Echec de la recherche des données par étiquettes"
+      "searchFailed": "Échec de la recherche de dossiers par étiquettes"
     },
     "upload": {
-      "backgroundProcessing": "\"{{fileName}}\" est en cours de traitement en arrière-plan. Vous recevrez une notification une fois le traitement terminé.",
-      "completedWithErrors": "Téléversement complété avec des erreurs",
+      "backgroundProcessing": "\"{{fileName}}\" est en cours de traitement en arrière-plan. Vous serez notifié lorsque le traitement sera terminé.",
+      "completedWithErrors": "Téléversement terminé avec des erreurs",
       "documentAdded": "Document ajouté à Paperless",
-      "duplicateDocument": "Document dupliqué",
+      "duplicateDocument": "Document en double",
       "fileUploadedSuccess": "\"{{fileName}}\" téléversé vers Paperless avec succès !",
-      "fileUploadFailed": "Echec du téléversement du fichier",
-      "paperlessUploadFailed": "Echec du téléversement vers Paperless",
-      "partialSuccess": "{{completed}}/{{total}} fichiers téléversés avec succès. {{failed}} fichiers en échec."
+      "fileUploadFailed": "Échec du téléversement du fichier",
+      "paperlessUploadFailed": "Échec du téléversement vers Paperless",
+      "partialSuccess": "{{completed}}/{{total}} fichiers téléversés avec succès. {{failed}} ont échoué."
     },
     "vitals": {
-      "deleteFailed": "Echec de la suppression des signes vitaux",
-      "deleteSuccess": "Signes vitaux supprimés avec succès",
-      "formErrors": "Veuillez corriger les erreurs de formulation",
+      "deleteFailed": "Échec de la suppression du dossier de signes vitaux",
+      "deleteSuccess": "Dossier de signes vitaux supprimé avec succès",
+      "formErrors": "Veuillez corriger les erreurs du formulaire",
       "savedSuccess": "Signes vitaux {{action}} avec succès !",
-      "saveFailed": "Echec : {{action}} des signes vitaux"
+      "saveFailed": "Échec de {{action}} des signes vitaux"
     }
   },
   "validation": {
     "appTokenRequired": "Le jeton d'application est requis",
-    "fromEmailInvalid": "Format d'adresse email invalide",
-    "fromEmailRequired": "L'adresse de l'expéditeur est requise",
-    "headersInvalid": "Les en-têtes doivent constituer du code JSON valide",
+    "fromEmailInvalid": "Format d'e-mail invalide",
+    "fromEmailRequired": "L'e-mail expéditeur est requis",
+    "headersInvalid": "Les en-têtes doivent être un JSON valide",
     "nameRequired": "Le nom du canal est requis",
-    "nameTooLong": "Le nom ne peut dépasser 100 caractères",
+    "nameTooLong": "Le nom ne peut pas dépasser 100 caractères",
     "serverUrlInvalid": "Format d'URL invalide",
     "serverUrlRequired": "L'URL du serveur est requise",
     "smtpHostRequired": "Le serveur SMTP est requis",
     "smtpPasswordRequired": "Le mot de passe SMTP est requis",
-    "smtpPortInvalid": "Le port doit valoir entre 1 et 65535",
+    "smtpPortInvalid": "Le port doit être compris entre 1 et 65535",
     "smtpPortRequired": "Le port SMTP est requis",
-    "smtpUserRequired": "Le pseudonyme SMTP est requis",
-    "toEmailInvalid": "Format d'adresse email invalide",
-    "toEmailRequired": "L'adresse du destinataire est requise",
-    "typeRequired": "Le type du canal est requis",
+    "smtpUserRequired": "Le nom d'utilisateur SMTP est requis",
+    "toEmailInvalid": "Format d'e-mail invalide",
+    "toEmailRequired": "L'e-mail destinataire est requis",
+    "typeRequired": "Le type de canal est requis",
     "urlInvalid": "Format d'URL invalide",
     "urlRequired": "L'URL du webhook est requise",
-    "webhookUrlInvalid": "Format d'URL du webhook invalide",
+    "webhookUrlInvalid": "Format d'URL de webhook invalide",
     "webhookUrlRequired": "L'URL du webhook est requise"
   }
 }

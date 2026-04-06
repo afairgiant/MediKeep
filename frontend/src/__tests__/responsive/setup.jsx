@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- test setup file */
 // Vitest setup file for responsive tests
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';

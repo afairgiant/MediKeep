@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "Add Medical Records",
+      "clearSelections": "Clear All Selections",
+      "generateReport": "Generate Report ({{count}} records)",
+      "generateReport_one": "Generate Report ({{count}} record)",
+      "generateReport_other": "Generate Report ({{count}} records)",
+      "generateReportChartsOnly": "Generate Report ({{chartCount}} charts)",
+      "generateReportWithCharts": "Generate Report ({{recordCount}} records, {{chartCount}} charts)",
+      "selectAll": "Select All Records"
+    },
+    "configuration": {
+      "description": "Select medical records to include in your custom report",
+      "title": "Report Configuration"
+    },
+    "icon": "",
+    "loading": "Loading report builder...",
+    "noData": {
+      "description": "Add some medical records first to use the report builder.",
+      "title": "No Medical Data Available"
+    },
+    "notifications": {
+      "templateLoaded": "Template Loaded",
+      "templateLoadedMessage": "Template \"{{name}}\" has been loaded."
+    },
+    "progress": {
+      "recordsSelected": "Records Selected"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "Add demographic and contact information",
+        "label": "Include Patient Information"
+      },
+      "includeProfilePicture": {
+        "description": "Add patient photo to the report header",
+        "label": "Include Profile Picture"
+      },
+      "includeSummary": {
+        "description": "Add overview and statistics section",
+        "label": "Include Summary Statistics"
+      },
+      "reportTitle": {
+        "label": "Report Title"
+      },
+      "title": "Report Settings"
+    },
+    "title": "Custom Report Builder",
+    "trendCharts": {
+      "dateFrom": "From",
+      "dateTo": "To",
+      "emptyState": "No trend data available. Add vital signs or lab results to enable trend charts.",
+      "labTestCharts": {
+        "description": "Search and select lab tests to chart",
+        "searchPlaceholder": "Search lab tests...",
+        "title": "Lab Test Charts"
+      },
+      "maxReached": "Maximum of 10 charts reached",
+      "recordCount": "{{count}} records",
+      "recordCount_one": "{{count}} record",
+      "recordCount_other": "{{count}} records",
+      "removeChart": "Remove {{name}} chart",
+      "selectedCharts": "Selected Charts ({{count}})",
+      "selectedCharts_one": "Selected Charts ({{count}})",
+      "selectedCharts_other": "Selected Charts ({{count}})",
+      "vitalCharts": {
+        "description": "Select vital signs to chart",
+        "title": "Vital Sign Charts"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "No Categories Available",
+    "noCategoriesDescription": "No medical data categories are available for report generation.",
+    "noRecords": "No records available",
+    "recordCount": "{{count}} records",
+    "recordCount_one": "{{count}} records",
+    "recordCount_other": "{{count}} records",
+    "selected": "{{count}} selected",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "showingFirst": "Showing first {{count}} records. More records are available but not displayed for performance.",
+    "showingFirst_one": "Showing first {{count}} records. More records are available but not displayed for performance.",
+    "showingFirst_other": "Showing first {{count}} records. More records are available but not displayed for performance.",
+    "totalCount": "{{count}} total",
+    "totalCount_one": "{{count}} total",
+    "totalCount_other": "{{count}} total"
+  },
+  "dataExport": {
+    "availableData": "Available Data",
+    "bulkExport": "Bulk Export",
+    "csvDescription": "CSV format is ideal for spreadsheets",
+    "dateFilterNote": "Date filters apply to all selected types",
+    "exportInfo": "Export Information",
+    "exportTitle": "Export Medical Records",
+    "includeFilesNote": "This may significantly increase the download size",
+    "jsonDescription": "JSON format provides full data structure",
+    "pdfDescription": "PDF format creates printable reports",
+    "singleExport": "Single Export",
+    "zipDescription": "Bulk exports are packaged in a ZIP file"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "{{count}} more item",
+      "moreItems_other": "{{count}} more items",
+      "title": "Available Data"
+    },
+    "buttons": {
+      "bulkExport": "Bulk Export {{count}} types as ZIP",
+      "bulkExport_one": "Bulk Export {{count}} type as ZIP",
+      "bulkExport_other": "Bulk Export {{count}} types as ZIP",
+      "creatingZip": "Creating ZIP...",
+      "exportAs": "Export {{scope}} as {{format}}",
+      "exporting": "Exporting...",
+      "goToDashboard": "Go to Dashboard",
+      "refreshPage": "Refresh Page"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "Select Data Types for Bulk Export"
+      },
+      "dataToExport": {
+        "label": "Data to Export",
+        "placeholder": "Select data type"
+      },
+      "dateRange": {
+        "endDate": "End Date (Optional)",
+        "startDate": "Start Date (Optional)"
+      },
+      "format": {
+        "label": "Export Format",
+        "placeholder": "Select format"
+      },
+      "includeFiles": "Include file attachments (creates ZIP file)",
+      "includePatientInfo": {
+        "description": "Uncheck to exclude personal patient details for privacy",
+        "label": "Include patient information (name, demographics, etc.)"
+      },
+      "title": "Export Configuration"
+    },
+    "description": "Download your medical data in various formats for backup or sharing with healthcare providers",
+    "errors": {
+      "bulkExportFailed": "Bulk export failed: {{message}}",
+      "bulkInvalidSettings": "Please check your bulk export settings. Make sure you have selected at least one data type and a valid format.",
+      "bulkNoDataFound": "No data found for the selected export criteria. Try selecting different data types or adjusting the date range.",
+      "exportFailed": "Export failed: {{message}}",
+      "invalidSettings": "Please check your export settings. Make sure you have selected a valid data type and format.",
+      "loadFailed": "Failed to load export data: {{message}}",
+      "noActivePatient": "No patient profile is currently selected. Please select a patient from the dashboard to use the export feature.",
+      "noDataFound": "No data found for the selected export criteria. Try selecting a different data type or date range.",
+      "noDataType": "Please select at least one data type for bulk export",
+      "sessionExpired": "Your session has expired. Please refresh the page or log in again to access export features.",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "Export multiple data types together in a ZIP file",
+      "bulkExport": "Bulk Export",
+      "singleDescription": "Export a single data type in your chosen format",
+      "singleExport": "Single Export",
+      "title": "Export Mode"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "Creates a ZIP file containing multiple data types in your chosen format for comprehensive data backup.",
+        "title": "Bulk Export:"
+      },
+      "csv": {
+        "description": "Comma-separated values suitable for spreadsheet applications like Excel or Google Sheets.",
+        "title": "CSV Format:"
+      },
+      "fileAttachments": {
+        "description": "When available for PDF exports, lab result files can be included in a ZIP archive.",
+        "title": "File Attachments:"
+      },
+      "json": {
+        "description": "Machine-readable structured data format, ideal for importing into other systems or applications.",
+        "title": "JSON Format:"
+      },
+      "pdf": {
+        "description": "Human-readable document format perfect for printing or sharing with healthcare providers.",
+        "title": "PDF Format:"
+      },
+      "title": "Export Information"
+    },
+    "loading": "Loading export options...",
+    "scopes": {
+      "all": "All Records",
+      "encounters": "Encounters"
+    },
+    "success": {
+      "bulkExportComplete": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",
+      "bulkExportComplete_one": "Bulk export completed successfully! Your ZIP file containing {{count}} data type has been downloaded.",
+      "bulkExportComplete_other": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",
+      "exportComplete": "Export completed successfully! Your {{format}} file has been downloaded."
+    },
+    "title": "Export Health Records"
+  },
+  "templates": {
+    "categories": "{{count}} categories",
+    "categories_one": "{{count}} categories",
+    "categories_other": "{{count}} categories",
+    "deleteConfirm": "Are you sure you want to delete this template?",
+    "editTemplate": "Edit Template",
+    "loadTemplate": "Load Template",
+    "manageTemplates": "Manage Templates",
+    "moreTemplates": "... and {{count}} more template",
+    "moreTemplates_one": "... and {{count}} more template",
+    "moreTemplates_other": "... and {{count}} more templates",
+    "noSaved": "No saved templates",
+    "records": "{{count}} records",
+    "reportTemplates": "Report Templates",
+    "saveAsTemplate": "Save as Template",
+    "saveDescription": "This template will save your current report settings, selected records, and selected trend charts.",
+    "savedTemplates": "Saved Templates",
+    "updateTemplate": "Update Template"
+  }
+}

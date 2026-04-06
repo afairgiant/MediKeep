@@ -18,6 +18,7 @@ import {
   IconMoon,
   IconLogout,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import OldHeader from '../layout/Header';
 
@@ -31,6 +32,7 @@ const Header = ({
   showThemeToggle = true,
   ...props
 }) => {
+  const { t } = useTranslation('navigation');
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
@@ -92,7 +94,7 @@ const Header = ({
                 leftSection={<IconArrowLeft size="1rem" />}
                 onClick={handleBack}
               >
-                Back to Dashboard
+                {t('menu.backToDashboard')}
               </Button>
             )}
           </Group>
@@ -153,7 +155,7 @@ const Header = ({
               leftSection={<IconLogout size="1rem" />}
               onClick={handleLogout}
             >
-              Logout
+              {t('menu.logout')}
             </Button>
           </Group>
         </Group>

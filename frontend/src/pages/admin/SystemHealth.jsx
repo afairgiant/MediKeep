@@ -431,9 +431,10 @@ const SystemHealth = () => {
                   <div>
                     <Group justify="space-between" mb="xs">
                       <Text fw={500}>{t('health.storage.diskUsage', 'Disk Usage')}</Text>
+                      {/* eslint-disable-next-line i18next/no-literal-string -- number formatting */}
                       <Text size="sm" c="dimmed">
-                        {storageHealth.disk_space.usage_percent}% (
-                        {t('health.storage.freeOf', '{{free}} GB free of {{total}} GB', { free: storageHealth.disk_space.free_gb, total: storageHealth.disk_space.total_gb })})
+                        {`${storageHealth.disk_space.usage_percent}% (`}
+                        {t('health.storage.freeOf', '{{free}} GB free of {{total}} GB', { free: storageHealth.disk_space.free_gb, total: storageHealth.disk_space.total_gb })}{')'}
                       </Text>
                     </Group>
                     <Progress

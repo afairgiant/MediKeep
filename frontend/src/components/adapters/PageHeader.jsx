@@ -24,6 +24,7 @@ import {
   IconChevronDown,
   IconLanguage,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import LayoutPageHeader from '../layout/PageHeader';
@@ -45,6 +46,7 @@ const PageHeader = ({
   showTitle = true,
   ...props
 }) => {
+  const { t } = useTranslation(['navigation', 'shared']);
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
@@ -310,23 +312,23 @@ const PageHeader = ({
                         rightSection={<IconChevronDown size={14} />}
                         size="sm"
                       >
-                        Account
+                        {t('menu.account')}
                       </Button>
                     </Menu.Target>
                     <Menu.Dropdown>
-                      <Menu.Label>User Actions</Menu.Label>
+                      <Menu.Label>{t('menu.userActions')}</Menu.Label>
                       <Menu.Item
                         leftSection={<IconSettings size="1rem" />}
                         onClick={() => navigate('/settings')}
                       >
-                        Settings
+                        {t('shared:labels.settings')}
                       </Menu.Item>
                       <Menu.Item
                         leftSection={<IconLanguage size="1rem" />}
                         closeMenuOnClick={false}
                       >
                         <Group gap="xs">
-                          <Text size="sm">Language:</Text>
+                          <Text size="sm">{t('sidebarNav.items.language')}:</Text>
                           <LanguageSwitcher size="xs" />
                         </Group>
                       </Menu.Item>
@@ -340,7 +342,7 @@ const PageHeader = ({
                         }
                         onClick={toggleTheme}
                       >
-                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                        {theme === 'dark' ? t('menu.lightMode') : t('menu.darkMode')}
                       </Menu.Item>
                       <Menu.Divider />
                       <Menu.Item
@@ -348,7 +350,7 @@ const PageHeader = ({
                         onClick={handleLogout}
                         color="red"
                       >
-                        Logout
+                        {t('menu.logout')}
                       </Menu.Item>
                     </Menu.Dropdown>
                   </Menu>

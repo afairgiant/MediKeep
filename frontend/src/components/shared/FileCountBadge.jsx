@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge, Group, Text, Loader, ActionIcon, ThemeIcon } from '@mantine/core';
 import { IconFile, IconFiles } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 const FileCountBadge = ({
   count = 0,
@@ -11,6 +12,7 @@ const FileCountBadge = ({
   loading = false,
   className = ''
 }) => {
+  const { t } = useTranslation('documents');
   // Wrap onClick to stop propagation (prevents double-firing when inside clickable cards)
   const handleClick = onClick ? (e) => {
     e.stopPropagation();
@@ -41,7 +43,7 @@ const FileCountBadge = ({
             style={{ cursor: onClick ? 'pointer' : 'default' }}
             className={className}
           >
-            No files
+            {t('fileCount.noFiles')}
           </Badge>
         );
       
@@ -54,7 +56,7 @@ const FileCountBadge = ({
             style={{ cursor: onClick ? 'pointer' : 'default' }}
             className={className}
           >
-            No files
+            {t('fileCount.noFiles')}
           </Text>
         );
       
@@ -74,7 +76,7 @@ const FileCountBadge = ({
   }
 
   // Handle positive count
-  const displayText = count === 1 ? '1 file' : `${count} files`;
+  const displayText = t('fileCount.fileCount', { count });
   const badgeColor = count > 0 ? 'green' : 'gray';
   const icon = count === 1 ? IconFile : IconFiles;
 
@@ -91,7 +93,7 @@ const FileCountBadge = ({
           className={className}
           title={onClick ? `Click to view ${displayText}` : undefined}
         >
-          {count} attached
+          {t('fileCount.attached', { count })}
         </Badge>
       );
     

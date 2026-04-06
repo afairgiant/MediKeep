@@ -1,0 +1,164 @@
+{
+  "account": {
+    "deleteAccount": {
+      "button": "Usuń konto",
+      "description": "Trwale usuń swoje konto i wszystkie powiązane dane medyczne. Tej operacji nie można cofnąć.",
+      "title": "Usuń konto"
+    }
+  },
+  "actions": {
+    "reset": "Resetuj zmiany",
+    "save": "Zapisz wszystkie zmiany",
+    "unsavedChanges": "Masz niezapisane zmiany"
+  },
+  "documents": {
+    "cleanup": {
+      "button": "Wyczyść pliki",
+      "cleaning": "Czyszczenie...",
+      "description": "Wyczyść niezsynchronizowane pliki i rozwiąż niespójności magazynu dokumentów. Spowoduje to zresetowanie nieudanych przesyłań, wyczyszczenie osieroconych zadań i naprawienie problemów z synchronizacją bazy danych.",
+      "title": "Czyszczenie plików"
+    },
+    "paperlessDescription": "Skonfiguruj integrację z systemem zarządzania dokumentami Paperless-ngx"
+  },
+  "help": {
+    "documentation": {
+      "description": "Przeglądaj wiki zawierające przewodniki, instrukcje konfiguracji i dokumentację funkcji.",
+      "title": "Dokumentacja"
+    },
+    "issues": {
+      "description": "Znalazłeś błąd lub masz prośbę o nową funkcję? Zgłoś problem na GitHub.",
+      "title": "Zgłoś problem"
+    }
+  },
+  "paperlessConnection": {
+    "apiTokenHelp": "Twój token API paperless-ngx. Znajdziesz go w panelu administracyjnym Paperless w ustawieniach.",
+    "apiTokenLabel": "Token API",
+    "apiTokenRecommended": "Token API (zalecane)",
+    "authMethod": "Metoda uwierzytelniania",
+    "connected": "Połączono z Paperless-ngx",
+    "connectionError": "Nie można nawiązać połączenia. Sprawdź adres URL i dane uwierzytelniające.",
+    "methodInfo": "Tokeny API to zalecana metoda uwierzytelniania zapewniająca lepsze bezpieczeństwo.",
+    "passwordHelp": "Twoje hasło paperless-ngx.",
+    "passwordLabel": "Hasło",
+    "sessionStorage": "Używanie magazynu sesji dla tokenu",
+    "title": "Połączenie Paperless-ngx",
+    "urlHelp": "Adres URL Twojej instancji Paperless-ngx (np. https://paperless.example.com)",
+    "urlLabel": "Adres URL serwera",
+    "usernameHelp": "Twoja nazwa użytkownika paperless-ngx.",
+    "usernameLabel": "Nazwa użytkownika",
+    "usernamePassword": "Nazwa użytkownika i hasło"
+  },
+  "papra": {
+    "apiTokenPlaceholder": "Wprowadź swój token API Papra",
+    "connectionFailed": "Połączenie nieudane",
+    "connectionSuccess": "Połączenie udane",
+    "description": "Połącz się z Twoją instancją Papra do zarządzania dokumentami",
+    "organization": "Organizacja",
+    "organizationPlaceholder": "Wybierz organizację",
+    "urlPlaceholder": "https://twoja-instancja-papra.com"
+  },
+  "preferences": {
+    "dateFormat": {
+      "description": "Wybierz sposób wyświetlania dat w całej aplikacji",
+      "dmy": "DD/MM/YYYY (europejski)",
+      "mdy": "MM/DD/YYYY (amerykański)",
+      "title": "Format daty",
+      "ymd": "YYYY-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Ustaw czas bezczynności przed wygaśnięciem sesji (w minutach)",
+      "range": "minuty (5-1440)",
+      "title": "Limit czasu sesji"
+    },
+    "unitSystem": {
+      "description": "Wybierz, czy wyświetlać pomiary w jednostkach imperialnych (funty, stopy, °F) czy metrycznych (kilogramy, centymetry, °C)",
+      "imperial": "Imperialne (lbs, stopy, °F)",
+      "metric": "Metryczne (kg, cm, °C)",
+      "title": "System jednostek"
+    }
+  },
+  "releaseNotes": {
+    "currentVersion": "Bieżąca",
+    "dismiss": "Rozumiem",
+    "empty": "Brak dostępnych informacji o wydaniu",
+    "error": "Nie można załadować informacji o wydaniu",
+    "publishedOn": "Wydano {{date}}",
+    "retry": "Spróbuj ponownie",
+    "showAll": "Pokaż więcej wydań",
+    "showLess": "Pokaż mniej",
+    "viewOnGithub": "Zobacz na GitHub",
+    "whatsNewTitle": "Co nowego"
+  },
+  "sections": {
+    "accountManagement": "Zarządzanie kontem",
+    "gettingHelp": "Uzyskiwanie pomocy",
+    "preferences": "Preferencje aplikacji",
+    "releaseNotes": "Informacje o wydaniu",
+    "security": "Bezpieczeństwo",
+    "supportMediKeep": "Wspieraj MediKeep",
+    "systemInfo": "Informacje o systemie"
+  },
+  "security": {
+    "password": {
+      "button": "Zmień hasło",
+      "confirmPassword": "Potwierdź nowe hasło",
+      "currentPassword": "Bieżące hasło",
+      "description": "Zmień hasło do swojego konta, aby zachować bezpieczeństwo",
+      "forceChange": {
+        "errors": {
+          "allFieldsRequired": "Wszystkie pola są wymagane.",
+          "changeFailed": "Nie udało się zmienić hasła. Spróbuj ponownie.",
+          "passwordComplexity": "Nowe hasło musi zawierać przynajmniej jedną literę i jedną cyfrę.",
+          "passwordMustDiffer": "Nowe hasło musi różnić się od bieżącego hasła.",
+          "passwordsMustMatch": "Nowe hasła nie są identyczne.",
+          "passwordTooShort": "Nowe hasło musi mieć co najmniej 6 znaków."
+        },
+        "submit": "Ustaw nowe hasło",
+        "submitting": "Zmiana hasła...",
+        "subtitle": "Twoje konto wymaga zmiany hasła przed kontynuowaniem. Ustaw nowe hasło poniżej.",
+        "title": "Wymagana zmiana hasła"
+      },
+      "newPassword": "Nowe hasło",
+      "passwordHelp": "Co najmniej 6 znaków, musi zawierać literę i cyfrę."
+    }
+  },
+  "settings": {
+    "releaseNotes": {
+      "noChanges": "Brak zmian wymienionych dla tego wydania",
+      "whatsNewSubtitle": "Oto co się zmieniło od Twojej ostatniej aktualizacji"
+    }
+  },
+  "sponsor": {
+    "button": "Wspieraj na GitHub",
+    "buttonShort": "Wspieraj",
+    "description": "MediKeep jest darmowy i open source. Jeśli uważasz go za przydatny, rozważ sponsorowanie projektu, aby pomóc w finansowaniu rozwoju i kontynuacji prac."
+  },
+  "storage": {
+    "connectionRequired": "Wymagane połączenie",
+    "defaultLocation": "Domyślna lokalizacja magazynu",
+    "filesCount": "{{count}} plików",
+    "filesCount_one": "{{count}} plik",
+    "filesCount_other": "{{count}} plików",
+    "localDescription": "Pliki są przechowywane bezpośrednio na tym serwerze. Dobre dla prostych konfiguracji bez zewnętrznych usług.",
+    "localStorage": "Magazyn lokalny",
+    "noUsageData": "Brak dostępnych danych o wykorzystaniu magazynu",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "Pliki są przesyłane na Twój serwer Paperless-ngx. Zapewnia OCR, tagowanie i zaawansowane zarządzanie dokumentami.",
+    "papra": "Papra",
+    "papraDescription": "Pliki są przechowywane w Twojej instancji Papra. Zapewnia zorganizowane zarządzanie dokumentami z organizacjami.",
+    "title": "Preferencje magazynu",
+    "usageLabel": "Wykorzystanie magazynu"
+  },
+  "system": {
+    "timezone": {
+      "title": "Strefa czasowa"
+    },
+    "version": {
+      "loading": "Ładowanie informacji o wersji...",
+      "title": "Wersja aplikacji",
+      "unavailable": "Informacje o wersji niedostępne",
+      "unknownApp": "Nieznana aplikacja",
+      "unknownVersion": "Nieznana wersja"
+    }
+  }
+}

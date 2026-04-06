@@ -16,6 +16,7 @@ import {
   IconFileX,
   IconInfoCircle
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * PaperlessUploadStatus Component
@@ -33,6 +34,7 @@ const PaperlessUploadStatus = ({
   storageBackend = 'local',
   showDetailedStatus = true
 }) => {
+  const { t } = useTranslation('documents');
   
   // Define status configurations
   const statusConfig = {
@@ -152,11 +154,10 @@ const PaperlessUploadStatus = ({
       >
         <Stack gap="xs">
           <Text size="sm">
-            "{fileName}" is identical to a document already in Paperless. 
-            This is normal behavior - Paperless prevents duplicate content to save storage space.
+            {t('paperlessStatus.documentAlreadyExists', { fileName })}
           </Text>
           <Text size="xs" c="dimmed">
-            If you need to upload a new version, please modify the document first.
+            {t('paperlessStatus.duplicateHint')}
           </Text>
         </Stack>
       </Alert>
@@ -207,7 +208,8 @@ const PaperlessUploadStatus = ({
       {/* Additional info for completed Paperless uploads */}
       {status === 'completed' && storageBackend === 'paperless' && documentId && showDetailedStatus && (
         <Text size="xs" c="dimmed" ml={28}>
-          Document ID: {documentId}
+          {/* eslint-disable-next-line i18next/no-literal-string -- technical ID display */}
+          {'Document ID: '}{documentId}
         </Text>
       )}
 

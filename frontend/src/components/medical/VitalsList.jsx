@@ -529,7 +529,7 @@ const VitalsList = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconNotes size={18} />
               </ActionIcon>
-              <Title order={4}>Notes</Title>
+              <Title order={4}>{t('shared:tabs.notes')}</Title>
             </Group>
             <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
               {selectedVital.notes}
@@ -544,7 +544,7 @@ const VitalsList = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconUser size={18} />
               </ActionIcon>
-              <Title order={4}>Recorded By</Title>
+              <Title order={4}>{t('shared:labels.recordedBy')}</Title>
             </Group>
             <Card shadow="xs" p="sm" radius="md" withBorder>
               {selectedVital.practitioner ? (
@@ -559,7 +559,7 @@ const VitalsList = ({
                 </>
               ) : (
                 <Text size="sm" c="dimmed">
-                  Practitioner ID: {selectedVital.practitioner_id}
+                  {t('shared:labels.practitionerId', { id: selectedVital.practitioner_id })}
                 </Text>
               )}
             </Card>
@@ -693,7 +693,7 @@ const VitalsList = ({
       <Center py="xl">
         <Stack align="center" gap="md">
           <Loader size="lg" />
-          <Text>{t('vitals.loading', 'Loading vitals...')}</Text>
+          <Text>{t('vitals:loading', 'Loading vitals...')}</Text>
         </Stack>
       </Center>
     );
@@ -705,7 +705,7 @@ const VitalsList = ({
         variant="light"
         color="red"
         icon={<IconAlertTriangle size={16} />}
-        title={t('vitals.table.errorLoading', 'Error Loading Vitals')}
+        title={t('vitals:table.errorLoading', 'Error Loading Vitals')}
       >
         <Group justify="space-between" align="center">
           <Text size="sm">{currentError}</Text>
@@ -732,9 +732,9 @@ const VitalsList = ({
             color="var(--mantine-color-gray-5)"
           />
           <Stack align="center" gap="xs">
-            <Text fw={500}>{t('vitals.table.noRecords', 'No vitals records found')}</Text>
+            <Text fw={500}>{t('vitals:table.noRecords', 'No vitals records found')}</Text>
             <Text c="dimmed" ta="center" size="sm">
-              {t('vitals.table.noRecordsDesc', 'Vital signs will appear here once recorded')}
+              {t('vitals:table.noRecordsDesc', 'Vital signs will appear here once recorded')}
             </Text>
           </Stack>
         </Stack>
@@ -743,7 +743,7 @@ const VitalsList = ({
   }
 
   // Reusable N/A cell for summary rows where columns are not applicable
-  const naCell = <Table.Td><Text size="sm" c="dimmed">N/A</Text></Table.Td>;
+  const naCell = <Table.Td><Text size="sm" c="dimmed">{t('labels.notAvailable')}</Text></Table.Td>;
 
   // Render a single vital row (used for both individual records and expanded group readings)
   const renderVitalRow = (vital, isNested = false) => (
@@ -760,7 +760,7 @@ const VitalsList = ({
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -771,7 +771,7 @@ const VitalsList = ({
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -786,7 +786,7 @@ const VitalsList = ({
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -801,7 +801,7 @@ const VitalsList = ({
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -812,7 +812,7 @@ const VitalsList = ({
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -820,7 +820,7 @@ const VitalsList = ({
         {vital.blood_glucose ? (
           <Group gap="xs" wrap="nowrap">
             <Text size="sm" fw={500}>
-              {vital.blood_glucose} mg/dL
+              {vital.blood_glucose} {t('vitals:units.mgdl')}
             </Text>
             {vital.glucose_context && (
               <Badge
@@ -834,7 +834,7 @@ const VitalsList = ({
           </Group>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -845,7 +845,7 @@ const VitalsList = ({
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -856,7 +856,7 @@ const VitalsList = ({
           </Text>
         ) : (
           <Text size="sm" c="dimmed">
-            N/A
+            {t('labels.notAvailable')}
           </Text>
         )}
       </Table.Td>
@@ -970,7 +970,7 @@ const VitalsList = ({
               {chartData.length > 1 && (
                 <Box>
                   <Text size="xs" fw={500} c="dimmed" mb="xs">
-                    {t('vitals.summary.glucoseTrend', 'Glucose Trend')}
+                    {t('vitals:summary.glucoseTrend', 'Glucose Trend')}
                   </Text>
                   <ResponsiveContainer width="100%" height={180}>
                     <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
@@ -988,7 +988,7 @@ const VitalsList = ({
                       />
                       <Tooltip
                         contentStyle={{ fontSize: 12 }}
-                        formatter={(value) => [`${value} mg/dL`, t('vitals.modal.bloodGlucose', 'Glucose')]}
+                        formatter={(value) => [`${value} mg/dL`, t('vitals:modal.bloodGlucose', 'Glucose')]}
                       />
                       <ReferenceLine y={normalMin} stroke="var(--mantine-color-green-4)" strokeDasharray="4 4" />
                       <ReferenceLine y={normalMax} stroke="var(--mantine-color-orange-4)" strokeDasharray="4 4" />
@@ -1009,16 +1009,16 @@ const VitalsList = ({
               {item.stats && (
                 <Group grow>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals.summary.avgGlucose', 'Avg')}</Text>
-                    <Text size="sm" fw={600}>{item.stats.avg} mg/dL</Text>
+                    <Text size="xs" c="dimmed">{t('vitals:summary.avgGlucose', 'Avg')}</Text>
+                    <Text size="sm" fw={600}>{item.stats.avg} {t('vitals:units.mgdl')}</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
                     <Text size="xs" c="dimmed">{t('shared:labels.min', 'Min')}</Text>
-                    <Text size="sm" fw={600}>{item.stats.min} mg/dL</Text>
+                    <Text size="sm" fw={600}>{item.stats.min} {t('vitals:units.mgdl')}</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
                     <Text size="xs" c="dimmed">{t('shared:labels.max', 'Max')}</Text>
-                    <Text size="sm" fw={600}>{item.stats.max} mg/dL</Text>
+                    <Text size="sm" fw={600}>{item.stats.max} {t('vitals:units.mgdl')}</Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
                     <Text size="xs" c="dimmed">{t('shared:labels.countReadings', 'Readings')}</Text>
@@ -1033,7 +1033,7 @@ const VitalsList = ({
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>{t('shared:labels.time', 'Time')}</Table.Th>
-                      <Table.Th>{t('vitals.modal.bloodGlucose', 'Glucose')} (mg/dL)</Table.Th>
+                      <Table.Th>{t('vitals:modal.bloodGlucose', 'Glucose')} ({t('vitals:units.mgdl')})</Table.Th>
                       {showActions && <Table.Th />}
                     </Table.Tr>
                   </Table.Thead>
@@ -1125,10 +1125,10 @@ const VitalsList = ({
                 <Text span size="xs" c="dimmed">
                   ({item.stats.min}-{item.stats.max})
                 </Text>{' '}
-                mg/dL
+                {t('vitals:units.mgdl')}
               </Text>
             ) : (
-              <Text size="sm" c="dimmed">N/A</Text>
+              <Text size="sm" c="dimmed">{t('labels.notAvailable')}</Text>
             )}
           </Table.Td>
           {/* A1C, O2 Sat - not applicable for grouped rows */}
@@ -1173,7 +1173,7 @@ const VitalsList = ({
                     e.stopPropagation();
                     handleDeleteDay(item);
                   }}
-                  title={t('vitals.summary.deleteDay', 'Delete Day')}
+                  title={t('vitals:summary.deleteDay', 'Delete Day')}
                 >
                   <IconTrash size={14} />
                 </ActionIcon>
@@ -1211,7 +1211,7 @@ const VitalsList = ({
                 </Table.Th>
                 <Table.Th>
                   <ThComponent sorted="bp" onSort={() => handleSort('bp')}>
-                    {t('vitals.stats.bloodPressure', 'Blood Pressure')}
+                    {t('vitals:stats.bloodPressure', 'Blood Pressure')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1219,7 +1219,7 @@ const VitalsList = ({
                     sorted="heart_rate"
                     onSort={() => handleSort('heart_rate')}
                   >
-                    {t('vitals.stats.heartRate', 'Heart Rate')}
+                    {t('vitals:stats.heartRate', 'Heart Rate')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1227,7 +1227,7 @@ const VitalsList = ({
                     sorted="temperature"
                     onSort={() => handleSort('temperature')}
                   >
-                    {t('vitals.stats.temperature', 'Temperature')}
+                    {t('vitals:stats.temperature', 'Temperature')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1235,12 +1235,12 @@ const VitalsList = ({
                     sorted="weight"
                     onSort={() => handleSort('weight')}
                   >
-                    {t('vitals.stats.weight', 'Weight')}
+                    {t('vitals:stats.weight', 'Weight')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
                   <ThComponent sorted="bmi" onSort={() => handleSort('bmi')}>
-                    {t('vitals.stats.bmi', 'BMI')}
+                    {t('vitals:stats.bmi', 'BMI')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1248,7 +1248,7 @@ const VitalsList = ({
                     sorted="blood_glucose"
                     onSort={() => handleSort('blood_glucose')}
                   >
-                    {t('vitals.modal.bloodGlucose', 'Glucose')}
+                    {t('vitals:modal.bloodGlucose', 'Glucose')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1256,7 +1256,7 @@ const VitalsList = ({
                     sorted="a1c"
                     onSort={() => handleSort('a1c')}
                   >
-                    {t('vitals.modal.a1c', 'A1C')}
+                    {t('vitals:modal.a1c', 'A1C')}
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
@@ -1264,7 +1264,7 @@ const VitalsList = ({
                     sorted="oxygen_saturation"
                     onSort={() => handleSort('oxygen_saturation')}
                   >
-                    {t('vitals.table.oxygenSat', 'O2 Sat')}
+                    {t('vitals:table.oxygenSat', 'O2 Sat')}
                   </ThComponent>
                 </Table.Th>
                 {showActions && (
@@ -1333,7 +1333,7 @@ const VitalsList = ({
         title={
           <Group gap="sm">
             <IconEye size={20} />
-            <Title order={3}>Vital Signs Details</Title>
+            <Title order={3}>{t('vitals:detailsTitle')}</Title>
           </Group>
         }
         size="xl"

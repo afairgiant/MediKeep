@@ -111,7 +111,7 @@ const LabResultViewModal = ({
       <Modal
         opened={isOpen}
         onClose={() => !isBlocking && onClose()}
-        title={labResult.test_name || t('labResults.modal.title', 'Lab Result Details')}
+        title={labResult.test_name || t('labresults:modal.title', 'Lab Result Details')}
         size="xl"
         centered
         zIndex={2000}
@@ -148,7 +148,7 @@ const LabResultViewModal = ({
                 {t('shared:tabs.overview', 'Overview')}
               </Tabs.Tab>
               <Tabs.Tab value="test-components" leftSection={<IconFlask size={16} />}>
-                {t('labResults.modal.tabs.testComponents', 'Test Components')}
+                {t('labresults:modal.tabs.testComponents', 'Test Components')}
               </Tabs.Tab>
               {fetchLabResultConditions && (
                 <Tabs.Tab value="conditions" leftSection={<IconUsers size={16} />}>
@@ -184,7 +184,7 @@ const LabResultViewModal = ({
                 <Stack gap="lg">
                   {/* Test Information Section */}
                   <div>
-                    <Title order={4} mb="sm">{t('labResults.modal.sections.testInfo', 'Test Information')}</Title>
+                    <Title order={4} mb="sm">{t('labresults:modal.sections.testInfo', 'Test Information')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
                         <Text fw={600} size="sm" c="dimmed">{t('shared:fields.testCode', 'Test Code')}</Text>
@@ -195,7 +195,7 @@ const LabResultViewModal = ({
                         <Text>{labResult.test_category || t('shared:labels.notSpecified', 'Not specified')}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={600} size="sm" c="dimmed">{t('labResults.modal.labels.testType', 'Test Type')}</Text>
+                        <Text fw={600} size="sm" c="dimmed">{t('labresults:modal.labels.testType', 'Test Type')}</Text>
                         <Text c={labResult.test_type ? 'inherit' : 'dimmed'}>
                           {labResult.test_type || t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
@@ -211,7 +211,7 @@ const LabResultViewModal = ({
 
                   {/* Test Results Section */}
                   <div>
-                    <Title order={4} mb="sm">{t('labResults.modal.sections.testResults', 'Test Results')}</Title>
+                    <Title order={4} mb="sm">{t('labresults:modal.sections.testResults', 'Test Results')}</Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
                         <Text fw={600} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
@@ -354,7 +354,7 @@ const LabResultViewModal = ({
             <Tabs.Panel value="files">
               <Box mt="md">
                 <Stack gap="md">
-                  <Title order={4}>{t('labResults.modal.sections.associatedFiles', 'Associated Documents')}</Title>
+                  <Title order={4}>{t('labresults:modal.sections.associatedFiles', 'Associated Documents')}</Title>
                   <DocumentManagerWithProgress
                     entityType="lab-result"
                     entityId={labResult.id}
@@ -379,7 +379,7 @@ const LabResultViewModal = ({
                 onEdit(labResult);
               }}
             >
-              {t('labResults.modal.editLabResult', 'Edit Lab Result')}
+              {t('labresults:modal.editLabResult', 'Edit Lab Result')}
             </Button>
           </Group>
         </Stack>

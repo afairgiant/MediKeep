@@ -2,7 +2,7 @@
   "admin": {
     "createUser": {
       "linkPatient": {
-        "hint": "Maak in plaats van een nieuw patiëntdossier een koppeling met een bestaande patiënt (bijv. een kind dat nu een eigen login nodig heeft).",
+        "hint": "Maak in plaats van een nieuw patiëntdossier een koppeling met een bestaande patiënt (bijv. een kind dat nu een eigen inlog nodig heeft).",
         "selfRecordBadge": "Eigen dossier",
         "selfRecordWarning": "Dit is het eigen dossier van de huidige eigenaar. Er wordt een nieuw eigen dossier aangemaakt voor de oorspronkelijke eigenaar met hun demografische gegevens overgenomen. De oorspronkelijke eigenaar krijgt bewerkingstoegang tot deze patiënt."
       },
@@ -214,7 +214,7 @@
       "checkbox": "Koppelen aan bestaand patiëntdossier",
       "currentOwner": "Huidige eigenaar",
       "dob": "Geb.datum",
-      "hint": "In plaats van een nieuw patiëntdossier aan te maken, koppelt u de nieuwe gebruiker aan een bestaande patiënt (bijv. een kind dat nu een eigen login nodig heeft).",
+      "hint": "In plaats van een nieuw patiëntdossier aan te maken, koppelt u de nieuwe gebruiker aan een bestaande patiënt (bijv. een kind dat nu een eigen inlog nodig heeft).",
       "loading": "Patiënten laden...",
       "owner": "Eigenaar",
       "patientId": "ID",
@@ -424,6 +424,7 @@
     "backToModel": "Terug naar {{modelName}}",
     "bulkDeleteAssociated": "Alle bijbehorende gegevens (inclusief {{types}}) worden ook verwijderd.",
     "bulkDeleteFailed": "Bulkverwijdering mislukt",
+    "bulkDeleteWarning": "U staat op het punt {{count}} {{modelName}}-records permanent te verwijderen.",
     "bulkDeleteWarning_one": "U staat op het punt {{count}} {{modelName}}-record permanent te verwijderen.",
     "bulkDeleteWarning_other": "U staat op het punt {{count}} {{modelName}}-records permanent te verwijderen.",
     "changeRole": "Rol wijzigen",
@@ -475,6 +476,7 @@
     "saveFailed": "Opslaan mislukt",
     "searchPlaceholder": "Zoeken in {{modelName}}...",
     "searchRecords": "Dossiers zoeken",
+    "searchResult": "{{count}} resultaten voor \"{{query}}\"",
     "searchResult_one": "{{count}} resultaat voor \"{{query}}\"",
     "searchResult_other": "{{count}} resultaten voor \"{{query}}\"",
     "selected": "{{count}} geselecteerd",
@@ -488,9 +490,7 @@
     "usernameUpdated": "Gebruikersnaam bijgewerkt",
     "usernameUpdatedMessage": "Uw gebruikersnaam is gewijzigd. Log in met uw nieuwe gebruikersnaam: \"{{username}}\"",
     "viewRecord": "{{modelName}} bekijken",
-    "visibleColumns": "Zichtbare kolommen",
-    "searchResult": "{{count}} resultaten voor \"{{query}}\"",
-    "bulkDeleteWarning": "U staat op het punt {{count}} {{modelName}}-records permanent te verwijderen."
+    "visibleColumns": "Zichtbare kolommen"
   },
   "settings": {
     "dataRetention": {
@@ -557,6 +557,7 @@
     "title": "Hulpmiddelen & onderhoud"
   },
   "trash": {
+    "clearFilters": "Filters wissen",
     "deleteConfirm": "Weet u zeker dat u <strong>{{filename}}</strong> permanent wilt verwijderen?",
     "deletedDateRange": "Verwijderd datumbereik",
     "deleteFailed": "Verwijderen mislukt",
@@ -564,6 +565,7 @@
     "deleteWarning": "Deze actie kan niet ongedaan worden gemaakt. Het bestand wordt permanent uit het systeem verwijderd.",
     "errorLoading": "Fout bij laden prullenbak",
     "fileCount_one": "{{count}} bestand",
+    "fileCount_other": "{{count}} bestanden",
     "fileDeleted": "Bestand verwijderd",
     "fileDeletedMessage": "{{filename}} permanent verwijderd",
     "fileRestored": "Bestand hersteld",
@@ -580,6 +582,8 @@
     "permanentlyDeleteFile": "Bestand permanent verwijderen",
     "purgedDirectories_one": "in {{count}} map",
     "purgedDirectories_other": "in {{count}} mappen",
+    "purgeDescription_one": "Bestanden die de bewaartermijn hebben overschreden worden verwijderd. Momenteel {{verb}} er <strong>{{count}} {{files}}</strong> in de prullenbak met een totale grootte van <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Bestanden die de bewaartermijn hebben overschreden worden verwijderd. Momenteel {{verb}} er <strong>{{count}} {{files}}</strong> in de prullenbak met een totale grootte van <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} verlopen bestand permanent verwijderd",
     "purgedMessage_other": "{{count}} verlopen bestanden permanent verwijderd",
     "purgeExpired": "Verlopen opschonen",
@@ -597,14 +601,16 @@
     "showingFiltered": "{{shown}} van {{total}} {{files}} weergegeven",
     "subtitle": "Beheer verwijderde geüploade bestanden. Herstel bestanden naar hun oorspronkelijke locatie of verwijder ze permanent om opslagruimte vrij te maken.",
     "tableHeaders": {
+      "actions": "Acties",
       "deleted": "Verwijderd",
       "filename": "Bestandsnaam",
-      "originalLocation": "Oorspronkelijke locatie"
+      "originalLocation": "Oorspronkelijke locatie",
+      "reason": "Reden",
+      "size": "Grootte"
     },
     "title": "Prullenbakbeheer",
     "totalSize": "{{size}} totaal",
-    "trashPurged": "Prullenbak opgeschoond",
-    "fileCount_other": "{{count}} bestanden"
+    "trashPurged": "Prullenbak opgeschoond"
   },
   "users": {
     "actionsFor": "Acties voor {{username}}",
@@ -627,24 +633,33 @@
     },
     "deleteUser": "Gebruiker verwijderen",
     "justNow": "Zojuist",
-    "loginHistory": "Logingeschiedenis",
+    "loginHistory": "Inloggeschiedenis",
     "loginHistoryModal": {
       "dateTime": "Datum & tijd",
       "ipAddress": "IP-adres",
-      "noHistory": "Geen logingeschiedenis gevonden",
+      "noHistory": "Geen inloggeschiedenis gevonden",
       "notAvailable": "N.v.t.",
-      "title": "Logingeschiedenis: {{username}}"
+      "title": "Inloggeschiedenis: {{username}}"
     },
     "never": "Nooit",
     "noUsersFound": "Geen gebruikers gevonden",
     "noUsersInSystem": "Geen gebruikers in het systeem.",
     "noUsersMatchFilters": "Geen gebruikers komen overeen met uw filters. Probeer de filters aan te passen of te wissen.",
     "passwordModal": {
-      "forceChange": "Wachtwoordwijziging afdwingen bij volgende login",
+      "bothFieldsRequired": "Beide wachtwoordvelden zijn verplicht",
+      "confirmPlaceholder": "Bevestig nieuw wachtwoord",
+      "enterNewPassword": "Voer nieuw wachtwoord in",
+      "forceChange": "Wachtwoordwijziging afdwingen bij volgende inlog",
+      "immediateReset": "Hiermee wordt het wachtwoord van de gebruiker onmiddellijk hersteld. De gebruiker moet het nieuwe wachtwoord gebruiken om in te loggen.",
       "newPassword": "Nieuw wachtwoord",
       "passwordDescription": "Minimaal 6 tekens, ten minste 1 letter en 1 cijfer",
+      "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
+      "resetFailed": "Wachtwoord herstellen mislukt. Probeer het opnieuw.",
+      "resetSuccess": "Wachtwoord succesvol hersteld voor {{username}}!",
       "resettingFor": "Wachtwoord herstellen voor <strong>{{username}}</strong>",
-      "ssoWarning": "Deze gebruiker authenticeert via SSO ({{provider}}). Het instellen van een lokaal wachtwoord maakt hybride authenticatie mogelijk."
+      "ssoWarning": "Deze gebruiker authenticeert via SSO ({{provider}}). Het instellen van een lokaal wachtwoord maakt hybride authenticatie mogelijk.",
+      "title": "Wachtwoord herstellen voor {{username}}",
+      "userInfo": "Gebruiker: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Alle rollen"
@@ -662,7 +677,7 @@
     },
     "tableHeaders": {
       "auth": "Authenticatie",
-      "lastLogin": "Laatste login"
+      "lastLogin": "Laatste inlog"
     },
     "toggleActiveModal": {
       "activateConfirm": "\"{{username}}\" activeren? Deze gebruiker kan dan weer inloggen.",
@@ -672,8 +687,8 @@
       "deactivateConfirm": "\"{{username}}\" deactiveren? Deze gebruiker kan niet meer inloggen totdat het account opnieuw wordt geactiveerd.",
       "deactivateTitle": "Gebruiker deactiveren"
     },
+    "userCount": "{{count}} gebruikers",
     "userCount_one": "{{count}} gebruiker",
-    "userCount_other": "{{count}} gebruikers",
-    "userCount": "{{count}} gebruikers"
+    "userCount_other": "{{count}} gebruikers"
   }
 }

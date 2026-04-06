@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   Card,
@@ -29,6 +30,7 @@ const MedicalCard = ({
   onDelete,
   ...props
 }) => {
+  const { t } = useTranslation('shared');
   const { formatLongDate, formatDateTime } = useDateFormat();
 
   const getStatusColor = (status, type) => {
@@ -131,12 +133,12 @@ const MedicalCard = ({
           <Stack gap="xs">
             {dateInfo.created && (
               <Text size="xs" c="dimmed">
-                Created: {formatLongDate(dateInfo.created)}
+                {t('labels.created')}: {formatLongDate(dateInfo.created)}
               </Text>
             )}
             {dateInfo.updated && (
               <Text size="xs" c="dimmed">
-                Updated: {formatDateTime(dateInfo.updated)}
+                {t('navigation:activity.actions.updated')}: {formatDateTime(dateInfo.updated)}
               </Text>
             )}
             {dateInfo.custom && (

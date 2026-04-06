@@ -69,39 +69,39 @@ const Vitals = () => {
   // Quick stats card configurations with Mantine icons and filter mappings
   const STATS_CONFIGS = useMemo(() => ({
     blood_pressure: {
-      title: t('vitals.stats.bloodPressure', 'Blood Pressure'),
+      title: t('vitals:stats.bloodPressure', 'Blood Pressure'),
       icon: IconHeart,
       getValue: stats =>
         stats.avg_systolic_bp && stats.avg_diastolic_bp
           ? `${Math.round(stats.avg_systolic_bp)}/${Math.round(stats.avg_diastolic_bp)}`
           : t('labels.notAvailable', 'N/A'),
-      getUnit: () => t('vitals.units.mmHg', 'mmHg'),
+      getUnit: () => t('vitals:units.mmHg', 'mmHg'),
       getCategory: () => null,
       color: 'red',
       filterType: VITAL_FILTER_TYPES.WITH_BLOOD_PRESSURE,
       vitalType: 'blood_pressure',
-      description: t('vitals.stats.bloodPressureDesc', 'Click to view trend analysis')
+      description: t('vitals:stats.bloodPressureDesc', 'Click to view trend analysis')
     },
     heart_rate: {
-      title: t('vitals.stats.heartRate', 'Heart Rate'),
+      title: t('vitals:stats.heartRate', 'Heart Rate'),
       icon: IconActivity,
       getValue: stats =>
         stats.avg_heart_rate ? Math.round(stats.avg_heart_rate) : t('labels.notAvailable', 'N/A'),
-      getUnit: () => t('vitals.units.bpm', 'BPM'),
+      getUnit: () => t('vitals:units.bpm', 'BPM'),
       getCategory: stats => {
         if (!stats.avg_heart_rate) return null;
         const hr = stats.avg_heart_rate;
-        if (hr < 60) return t('vitals.categories.low', 'Low');
-        if (hr > 100) return t('vitals.categories.high', 'High');
-        return t('vitals.categories.normal', 'Normal');
+        if (hr < 60) return t('vitals:categories.low', 'Low');
+        if (hr > 100) return t('vitals:categories.high', 'High');
+        return t('vitals:categories.normal', 'Normal');
       },
       color: 'blue',
       filterType: VITAL_FILTER_TYPES.WITH_HEART_RATE,
       vitalType: 'heart_rate',
-      description: t('vitals.stats.heartRateDesc', 'Click to view trend analysis')
+      description: t('vitals:stats.heartRateDesc', 'Click to view trend analysis')
     },
     temperature: {
-      title: t('vitals.stats.temperature', 'Latest Temperature'),
+      title: t('vitals:stats.temperature', 'Latest Temperature'),
       icon: IconTrendingUp,
       getValue: stats =>
         stats.current_temperature
@@ -111,17 +111,17 @@ const Vitals = () => {
       getCategory: stats => {
         if (!stats.current_temperature) return null;
         const temp = stats.current_temperature;
-        if (temp < 97.0) return t('vitals.categories.low', 'Low');
-        if (temp > 99.5) return t('vitals.categories.high', 'High');
-        return t('vitals.categories.normal', 'Normal');
+        if (temp < 97.0) return t('vitals:categories.low', 'Low');
+        if (temp > 99.5) return t('vitals:categories.high', 'High');
+        return t('vitals:categories.normal', 'Normal');
       },
       color: 'green',
       filterType: VITAL_FILTER_TYPES.WITH_TEMPERATURE,
       vitalType: 'temperature',
-      description: t('vitals.stats.temperatureDesc', 'Click to view trend analysis')
+      description: t('vitals:stats.temperatureDesc', 'Click to view trend analysis')
     },
     weight: {
-      title: t('vitals.stats.weight', 'Latest Weight'),
+      title: t('vitals:stats.weight', 'Latest Weight'),
       icon: IconTrendingUp,
       getValue: stats =>
         stats.current_weight
@@ -132,10 +132,10 @@ const Vitals = () => {
       color: 'violet',
       filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
       vitalType: 'weight',
-      description: t('vitals.stats.weightDesc', 'Click to view trend analysis')
+      description: t('vitals:stats.weightDesc', 'Click to view trend analysis')
     },
     bmi: {
-      title: t('vitals.stats.bmi', 'BMI'),
+      title: t('vitals:stats.bmi', 'BMI'),
       icon: IconChartBar,
       getValue: stats =>
         stats.current_bmi ? stats.current_bmi.toFixed(1) : t('labels.notAvailable', 'N/A'),
@@ -144,28 +144,28 @@ const Vitals = () => {
       color: 'yellow',
       filterType: VITAL_FILTER_TYPES.WITH_WEIGHT,
       vitalType: 'bmi',
-      description: t('vitals.stats.bmiDesc', 'Click to view trend analysis')
+      description: t('vitals:stats.bmiDesc', 'Click to view trend analysis')
     },
     blood_glucose: {
-      title: t('vitals.modal.bloodGlucose', 'Blood Glucose'),
+      title: t('vitals:modal.bloodGlucose', 'Blood Glucose'),
       icon: IconDroplet,
       getValue: stats =>
         stats.current_blood_glucose ? stats.current_blood_glucose.toFixed(0) : t('labels.notAvailable', 'N/A'),
-      getUnit: () => t('vitals.units.mgdl', 'mg/dL'),
+      getUnit: () => t('vitals:units.mgdl', 'mg/dL'),
       getCategory: stats => {
         if (!stats.current_blood_glucose) return null;
         const glucose = stats.current_blood_glucose;
-        if (glucose < 70) return t('vitals.categories.low', 'Low');
-        if (glucose > 180) return t('vitals.categories.high', 'High');
-        return t('vitals.categories.normal', 'Normal');
+        if (glucose < 70) return t('vitals:categories.low', 'Low');
+        if (glucose > 180) return t('vitals:categories.high', 'High');
+        return t('vitals:categories.normal', 'Normal');
       },
       color: 'orange',
       filterType: VITAL_FILTER_TYPES.WITH_BLOOD_GLUCOSE,
       vitalType: 'blood_glucose',
-      description: t('vitals.stats.bloodGlucoseDesc', 'Click to view trend analysis')
+      description: t('vitals:stats.bloodGlucoseDesc', 'Click to view trend analysis')
     },
     a1c: {
-      title: t('vitals.modal.a1c', 'A1C'),
+      title: t('vitals:modal.a1c', 'A1C'),
       icon: IconChartBar,
       getValue: stats =>
         stats.current_a1c ? stats.current_a1c.toFixed(1) : t('labels.notAvailable', 'N/A'),
@@ -174,7 +174,7 @@ const Vitals = () => {
       color: 'pink',
       filterType: VITAL_FILTER_TYPES.WITH_A1C,
       vitalType: 'a1c',
-      description: t('vitals.stats.a1cDesc', 'Click to view trend analysis')
+      description: t('vitals:stats.a1cDesc', 'Click to view trend analysis')
     },
   }), [t, unitSystem]);
   const navigate = useNavigate();
@@ -485,7 +485,7 @@ const Vitals = () => {
 
   // Loading state
   if (vitalsLoading) {
-    return <MedicalPageLoading message={t('vitals.loading', 'Loading vital signs...')} />;
+    return <MedicalPageLoading message={t('vitals:loading', 'Loading vital signs...')} />;
   }
 
   // No patient selected
@@ -495,9 +495,9 @@ const Vitals = () => {
         <Stack align="center" gap="lg">
           <IconHeart size={64} stroke={1} color="var(--mantine-color-gray-5)" />
           <Stack align="center" gap="xs">
-            <Title order={3}>{t('vitals.noPatientSelected', 'No Patient Selected')}</Title>
+            <Title order={3}>{t('vitals:noPatientSelected', 'No Patient Selected')}</Title>
             <Text c="dimmed" ta="center">
-              {t('vitals.selectPatientPrompt', 'Please select a patient to view and manage vital signs.')}
+              {t('vitals:selectPatientPrompt', 'Please select a patient to view and manage vital signs.')}
             </Text>
           </Stack>
         </Stack>
@@ -518,13 +518,13 @@ const Vitals = () => {
 
         <MedicalPageActions
           primaryAction={{
-            label: t('vitals.addNew', 'Add New Vital Signs'),
+            label: t('vitals:addNew', 'Add New Vital Signs'),
             onClick: handleAddNew,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
           }}
           secondaryActions={[{
-            label: t('vitals.import.title', 'Import Vitals'),
+            label: t('vitals:import.title', 'Import Vitals'),
             onClick: () => setShowImportModal(true),
             variant: 'light',
             size: 'sm',
@@ -544,9 +544,9 @@ const Vitals = () => {
           <Paper shadow="sm" p="lg" radius="md" mb="lg">
             <Group justify="space-between" mb="md">
               <Box>
-                <Title order={3}>{t('vitals.healthSummary', 'Health Summary')}</Title>
+                <Title order={3}>{t('vitals:healthSummary', 'Health Summary')}</Title>
                 <Text c="dimmed" size="sm">
-                  {t('vitals.summaryDescription', 'Latest readings and averages - Click any card to view trend analysis')}
+                  {t('vitals:summaryDescription', 'Latest readings and averages - Click any card to view trend analysis')}
                 </Text>
               </Box>
               <Button
@@ -565,7 +565,7 @@ const Vitals = () => {
                 <Stack align="center" gap="md">
                   <Loader size="md" />
                   <Text size="sm" c="dimmed">
-                    {t('vitals.loadingStats', 'Loading statistics...')}
+                    {t('vitals:loadingStats', 'Loading statistics...')}
                   </Text>
                 </Stack>
               </Center>
@@ -574,7 +574,7 @@ const Vitals = () => {
                 variant="light"
                 color="red"
                 icon={<IconAlertTriangle size={16} />}
-                title={t('vitals.statsLoadError', 'Failed to load statistics')}
+                title={t('vitals:statsLoadError', 'Failed to load statistics')}
                 style={{ whiteSpace: 'pre-line' }}
               >
                 <Group justify="space-between" align="center">
@@ -604,9 +604,9 @@ const Vitals = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={4}>{t('vitals.noDataAvailable', 'No Data Available')}</Title>
+                    <Title order={4}>{t('vitals:noDataAvailable', 'No Data Available')}</Title>
                     <Text c="dimmed" ta="center">
-                      {t('vitals.recordVitalsPrompt', 'Record some vitals to see statistics here')}
+                      {t('vitals:recordVitalsPrompt', 'Record some vitals to see statistics here')}
                     </Text>
                   </Stack>
                 </Stack>
@@ -621,7 +621,7 @@ const Vitals = () => {
         <VitalFormWrapper
           isOpen={showForm}
           onClose={handleFormCancel}
-          title={editingVitals ? t('vitals.editTitle', 'Edit Vital Signs') : t('vitals.addTitle', 'Add New Vital Signs')}
+          title={editingVitals ? t('vitals:editTitle', 'Edit Vital Signs') : t('vitals:addTitle', 'Add New Vital Signs')}
           editingVital={editingVitals}
           patientId={currentPatient?.id}
           practitionerId={null}

@@ -1,33 +1,7 @@
 {
-  "auth": {
-    "login": {
-      "continueWith": "Продолжить через {{provider}}",
-      "createAccount": "Создать новый аккаунт",
-      "hidePassword": "Скрыть пароль",
-      "or": "или",
-      "passwordPlaceholder": "Введите пароль",
-      "registrationDisabled": "Регистрация новых пользователей в настоящее время отключена.",
-      "showPassword": "Показать пароль",
-      "submit": "Войти",
-      "submitting": "Вход...",
-      "title": "ВХОД В АККАУНТ",
-      "usernamePlaceholder": "Введите имя пользователя"
-    },
-    "userCreation": {
-      "accountCreated": "Аккаунт успешно создан! Пожалуйста, войдите с вашими учётными данными.",
-      "backToLogin": "Назад к входу",
-      "cardSubtitle": "Заполните форму ниже для создания нового аккаунта",
-      "cardTitle": "Данные аккаунта",
-      "nextSteps": {
-        "autoRecord": "Ваша запись пациента будет создана автоматически",
-        "dataSecure": "Все ваши данные защищены и конфиденциальны",
-        "loggedIn": "Вы войдёте в систему сразу после создания аккаунта",
-        "startManaging": "Вы сможете сразу начать управлять своей медицинской информацией"
-      },
-      "pageSubtitle": "Присоединяйтесь к MediKeep сегодня и управляйте своими медицинскими записями безопасно",
-      "pageTitle": "Создайте свой аккаунт",
-      "welcomeMessage": "Добро пожаловать, {{name}}! Ваш аккаунт успешно создан.",
-      "whatHappensNext": "Что будет дальше?"
+  "allergies": {
+    "messages": {
+      "loading": "Загрузка аллергий..."
     }
   },
   "buttons": {
@@ -38,11 +12,11 @@
     "delete": "Удалить",
     "done": "Готово",
     "link": "Связать",
-    "linkCondition": "Привязать заболевание",
-    "linkConditions": "Привязать заболевания",
+    "linkCondition": "Связать заболевание",
+    "linkConditions": "Связать заболевания",
     "linkEquipment": "Связать оборудование",
     "linkLabResult": "Связать результат анализа",
-    "linkMedication": "Привязать лекарство",
+    "linkMedication": "Связать лекарство",
     "linkVisit": "Связать визит",
     "print": "Печать",
     "refresh": "Обновить",
@@ -116,11 +90,11 @@
     },
     "noResults": "Заболевания не найдены",
     "notifications": {
-      "medicationLinkFailed": "Состояние было создано, но некоторые лекарства не удалось связать. Вы можете связать их вручную, отредактировав состояние.",
+      "medicationLinkFailed": "Заболевание было создано, но некоторые лекарства не удалось связать. Вы можете связать их вручную, отредактировав заболевание.",
       "medicationLinkWarning": "Проблема при связывании лекарств"
     },
     "table": {
-      "icd10": "ICD-10"
+      "icd10": "МКБ-10"
     }
   },
   "emergencyContacts": {
@@ -171,10 +145,10 @@
     "form": {
       "create": "Создать оборудование",
       "lastService": "Дата последнего ТО",
-      "manufacturerPlaceholder": "e.g., ResMed, Philips",
+      "manufacturerPlaceholder": "напр., ResMed, Philips",
       "modelNumber": "Номер модели",
-      "modelPlaceholder": "e.g., AirSense 11",
-      "namePlaceholder": "e.g., ResMed AirSense 11",
+      "modelPlaceholder": "напр., AirSense 11",
+      "namePlaceholder": "напр., ResMed AirSense 11",
       "nextService": "Дата следующего ТО",
       "notesPlaceholder": "Дополнительные заметки об этом оборудовании",
       "practitioner": "Назначено врачом",
@@ -207,109 +181,6 @@
     "invalidPhone": "Введите корректный номер телефона",
     "loadFailed": "Ошибка загрузки"
   },
-  "exportPage": {
-    "availableData": {
-      "moreItems_one": "{{count}} more item",
-      "moreItems_few": "{{count}} элемента ещё",
-      "moreItems_many": "{{count}} элементов ещё",
-      "moreItems_other": "{{count}} more items",
-      "title": "Доступные данные"
-    },
-    "buttons": {
-      "bulkExport": "Массовый экспорт {{count}} типов как ZIP",
-      "bulkExport_one": "Bulk Export {{count}} type as ZIP",
-      "bulkExport_few": "Массовый экспорт {{count}} типов как ZIP",
-      "bulkExport_many": "Массовый экспорт {{count}} типов как ZIP",
-      "bulkExport_other": "Bulk Export {{count}} types as ZIP",
-      "creatingZip": "Создание ZIP...",
-      "exportAs": "Экспорт {{scope}} как {{format}}",
-      "exporting": "Экспорт...",
-      "goToDashboard": "Перейти на панель управления",
-      "refreshPage": "Обновить страницу"
-    },
-    "configuration": {
-      "bulkSelection": {
-        "label": "Выберите типы данных для массового экспорта"
-      },
-      "dataToExport": {
-        "label": "Данные для экспорта",
-        "placeholder": "Выберите тип данных"
-      },
-      "dateRange": {
-        "endDate": "Дата окончания (необязательно)",
-        "startDate": "Дата начала (необязательно)"
-      },
-      "format": {
-        "label": "Формат экспорта",
-        "placeholder": "Выберите формат"
-      },
-      "includeFiles": "Включить вложенные файлы (создаст ZIP-файл)",
-      "includePatientInfo": {
-        "description": "Снимите отметку, чтобы исключить личные данные пациента для конфиденциальности",
-        "label": "Включить информацию о пациенте (имя, демография и т.д.)"
-      },
-      "title": "Настройка экспорта"
-    },
-    "description": "Скачайте ваши медицинские данные в различных форматах для резервного копирования или передачи медицинским специалистам",
-    "errors": {
-      "bulkExportFailed": "Ошибка массового экспорта: {{message}}",
-      "bulkInvalidSettings": "Проверьте настройки массового экспорта. Убедитесь, что выбран хотя бы один тип данных и допустимый формат.",
-      "bulkNoDataFound": "Данные не найдены для выбранных критериев экспорта. Попробуйте выбрать другие типы данных или изменить диапазон дат.",
-      "exportFailed": "Ошибка экспорта: {{message}}",
-      "invalidSettings": "Проверьте настройки экспорта. Убедитесь, что выбран допустимый тип данных и формат.",
-      "loadFailed": "Не удалось загрузить данные для экспорта: {{message}}",
-      "noActivePatient": "Профиль пациента не выбран. Выберите пациента на панели управления для использования экспорта.",
-      "noDataFound": "Данные не найдены для выбранных критериев экспорта. Попробуйте выбрать другой тип данных или диапазон дат.",
-      "noDataType": "Пожалуйста, выберите хотя бы один тип данных для массового экспорта",
-      "sessionExpired": "Ваша сессия истекла. Обновите страницу или войдите снова для доступа к экспорту.",
-      "validationFailed": "{{errors}}"
-    },
-    "exportMode": {
-      "bulkDescription": "Экспорт нескольких типов данных вместе в ZIP-файле",
-      "bulkExport": "Массовый экспорт",
-      "singleDescription": "Экспорт одного типа данных в выбранном формате",
-      "singleExport": "Одиночный экспорт",
-      "title": "Режим экспорта"
-    },
-    "icon": "📤",
-    "information": {
-      "bulk": {
-        "description": "Создаёт ZIP-файл, содержащий несколько типов данных в выбранном формате для полного резервного копирования.",
-        "title": "Массовый экспорт:"
-      },
-      "csv": {
-        "description": "Значения, разделённые запятыми, подходящие для табличных приложений, таких как Excel или Google Sheets.",
-        "title": "Формат CSV:"
-      },
-      "fileAttachments": {
-        "description": "При экспорте в PDF файлы результатов анализов могут быть включены в ZIP-архив.",
-        "title": "Вложенные файлы:"
-      },
-      "json": {
-        "description": "Машиночитаемый структурированный формат данных, идеальный для импорта в другие системы или приложения.",
-        "title": "Формат JSON:"
-      },
-      "pdf": {
-        "description": "Удобочитаемый формат документа, идеальный для печати или передачи медицинским специалистам.",
-        "title": "Формат PDF:"
-      },
-      "title": "Информация об экспорте"
-    },
-    "loading": "Загрузка параметров экспорта...",
-    "scopes": {
-      "all": "Все записи",
-      "encounters": "Визиты"
-    },
-    "success": {
-      "bulkExportComplete": "Массовый экспорт успешно завершён! Ваш ZIP-файл с {{count}} типами данных скачан.",
-      "bulkExportComplete_one": "Bulk export completed successfully! Your ZIP file containing {{count}} data type has been downloaded.",
-      "bulkExportComplete_few": "Массовый экспорт успешно завершён! Ваш ZIP-файл с {{count}} типами данных скачан.",
-      "bulkExportComplete_many": "Массовый экспорт успешно завершён! Ваш ZIP-файл с {{count}} типами данных скачан.",
-      "bulkExportComplete_other": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",
-      "exportComplete": "Экспорт успешно завершён! Ваш файл {{format}} скачан."
-    },
-    "title": "Экспорт медицинских записей"
-  },
   "familyHistory": {
     "addFamilyMember": "Добавить члена семьи",
     "card": {
@@ -317,12 +188,10 @@
       "age": "Возраст",
       "birthYear": "Год рождения",
       "cannotEditSharedMember": "Нельзя редактировать общего члена семьи",
-      "conditionCount_few": "{{count}} Condition(s)",
-      "conditionCount_many": "{{count}} Condition(s)",
-      "conditions": "состояния",
+      "conditions": "заболеваний",
       "deathYear": "Год смерти",
       "deceased": "Умер(ла)",
-      "diagnosedAtAge": "Диагностировано в возрасте {{age}}",
+      "diagnosedAtAge": "Диагностировано в возрасте {{age}} лет",
       "noConditionsRecorded": "Медицинские заболевания не записаны",
       "notSelectable": "Нельзя выбрать",
       "selected": "Выбран",
@@ -330,8 +199,6 @@
       "subtitle": "Член семьи",
       "years": "лет"
     },
-    "clickToSelectForSharing_few": "Click on family member cards to select them for sharing. {{count}} selected.",
-    "clickToSelectForSharing_many": "Click on family member cards to select them for sharing. {{count}} selected.",
     "conditionCountAcrossMembers": "{{conditionCount}} заболевание(й) у {{memberCount}} члена(ов) семьи",
     "confirmations": {
       "deleteCondition": "Вы уверены, что хотите удалить это заболевание?",
@@ -358,8 +225,6 @@
     },
     "loadingFamilyHistory": "Загрузка семейного анамнеза...",
     "manageInvitations": "Управление приглашениями",
-    "memberCountRecorded_few": "{{count}} family member(s) recorded",
-    "memberCountRecorded_many": "{{count}} family member(s) recorded",
     "notifications": {
       "cannotDelete": "Нельзя удалить",
       "cannotDeleteShared": "Вы не можете удалять общие записи семейного анамнеза",
@@ -371,8 +236,6 @@
     "sharedMemberCount": "{{filteredCount}} из {{totalCount}} члена(ов) семьи, к которым вам предоставлен доступ",
     "sharedMembersCannotBeSelected": "Общие члены семьи не могут быть выбраны для дополнительного обмена.",
     "sharedTableName": "Общий семейный анамнез",
-    "shareSelected_few": "Share Selected ({{count}})",
-    "shareSelected_many": "Share Selected ({{count}})",
     "sharingMode": "Режим обмена",
     "sharingModeActive": "Режим обмена активен",
     "table": {
@@ -405,8 +268,8 @@
   "fields": {
     "endDate": {
       "description": "Когда это закончилось (если применимо)",
-      "placeholder": "Выберите дату окончания",
-      "label": "Дата окончания"
+      "label": "Дата окончания",
+      "placeholder": "Выберите дату окончания"
     },
     "notes": {
       "description": "Любые дополнительные сведения или заметки",
@@ -414,8 +277,8 @@
     },
     "startDate": {
       "description": "Когда это началось",
-      "placeholder": "Выберите дату начала",
-      "label": "Дата начала"
+      "label": "Дата начала",
+      "placeholder": "Выберите дату начала"
     },
     "status": {
       "description": "Текущий статус"
@@ -428,8 +291,6 @@
   "filters": {
     "clear": "Очистить",
     "itemCount": "{{filtered}} из {{total}} записей",
-    "moreFilters_few": "{{count}} more filters",
-    "moreFilters_many": "{{count}} more filters",
     "title": "Фильтры и поиск"
   },
   "immunizations": {
@@ -481,7 +342,7 @@
       "tradeNamePlaceholder": "напр., Flublok TRIV 2025-2026 PFS",
       "updateImmunization": "Обновить прививку",
       "vaccineNameDesc": "Общепринятое название вакцины",
-      "vaccineNamePlaceholder": "напр., Грипп, COVID-19, Tdap"
+      "vaccineNamePlaceholder": "напр., Грипп, COVID-19, АКДС"
     },
     "loadingImmunizations": "Загрузка прививок...",
     "noImmunizationsFound": "Прививки не найдены",
@@ -490,7 +351,7 @@
     },
     "viewModal": {
       "adminDetails": "Детали введения",
-      "doseHash": "Доза #{{number}}",
+      "doseHash": "Доза №{{number}}",
       "locationFacility": "Место/Учреждение",
       "title": "Подробности прививки",
       "tradeName": "Торговое название",
@@ -534,10 +395,12 @@
     "loading": "Загрузка страховых записей...",
     "viewModal": {
       "additionalDetails": "Дополнительные детали покрытия",
+      "attachedDocuments": "Приложенные документы",
       "claimsAddress": "Адрес для претензий",
       "claimsPhone": "Телефон для претензий",
       "coinsurance": "Сострахование",
       "copay": "Доплата",
+      "coverageDetails": "Детали покрытия",
       "coveragePeriod": "Период покрытия",
       "customerServicePhone": "Телефон службы поддержки",
       "deductible": "Франшиза",
@@ -561,97 +424,58 @@
       "visionCoverage": "Покрытие зрения"
     }
   },
+  "invitations": {
+    "from": "От"
+  },
   "key": "По умолчанию {{var}}",
   "labels": {
     "addCustom": "+ Добавить \"{{value}}\"",
-    "linkedMedications": "Привязанные лекарства",
+    "linkedMedications": "Связанные лекарства",
     "loading": "Загрузка...",
     "loadingOption": "Загрузка {{option}}...",
     "loadingRelatedConditions": "Загрузка связанных заболеваний...",
     "new": "Новый",
     "no": "Нет",
-    "noConditionsLinked": "Нет заболеваний, привязанных к этому результату анализа",
-    "noEncountersLinked": "Визиты не привязаны к этому лечению",
-    "noEquipmentLinked": "Оборудование не привязано к этому лечению",
-    "noLabResultsLinked": "Результаты анализов не привязаны к этому визиту",
-    "noMedicationsLinked": "Нет лекарств, привязанных к этому заболеванию",
+    "noConditionsLinked": "Нет заболеваний, связанных с этим результатом анализа",
+    "noEncountersLinked": "Визиты не связаны с этим лечением",
+    "noEquipmentLinked": "Оборудование не связано с этим лечением",
+    "noLabResultsLinked": "Результаты анализов не связаны с этим визитом",
+    "noMedicationsLinked": "Нет лекарств, связанных с этим заболеванием",
     "none": "Нет",
     "noRating": "Нет оценки",
     "notAvailable": "Н/Д",
     "notCompleted": "Не завершено",
-    "noVisitsLinked": "Визиты не привязаны к этому результату анализа",
+    "noVisitsLinked": "Визиты не связаны с этим результатом анализа",
     "ordered": "Назначено",
+    "phoneNumber": "Номер телефона",
     "ratingStars": "{{count}}/5 звёзд",
-    "ratingStars_one": "{{count}}/5 star",
-    "ratingStars_few": "{{count}}/5 звезды",
-    "ratingStars_many": "{{count}}/5 звёзд",
-    "ratingStars_other": "{{count}}/5 stars",
+    "ratingStars_one": "{{count}}/5 звезда",
+    "ratingStars_other": "{{count}}/5 звёзд",
     "selectPurpose": "Выберите цель",
-    "viewDetails": "View Details",
+    "viewDetails": "Просмотреть подробности",
     "viewPharmacyDetails": "Просмотреть данные аптеки",
     "visitDate": "Дата визита",
     "visitWebsite": "Перейти на сайт ↗",
-    "yes": "Да",
-    "phoneNumber": "Номер телефона"
+    "yes": "Да"
   },
   "labResults": {
-    "addFirst": "Добавить первый результат анализа",
-    "addNew": "+ Добавить результат анализа",
-    "addTitle": "Добавить результат анализа",
-    "continueEditing": "Продолжить редактирование",
-    "createAndContinue": "Создать и загрузить PDF",
-    "createFailed": "Не удалось создать результат анализа",
-    "createFailedTryAgain": "Не удалось создать результат анализа. Попробуйте снова.",
-    "creatingLabResult": "Создание результата анализа...",
-    "deleteEmptyLabResult": "Удалить результат анализа",
-    "deleteFailed": "Не удалось удалить результат анализа",
-    "discardParsedData": "Отбросить разобранные данные",
-    "editTitle": "Редактировать результат анализа",
-    "errorOccurred": "Произошла ошибка",
+    "emptyLabResultMessage": "Вы создали результат анализа, но не добавили компоненты теста. Хотите удалить этот результат анализа?",
+    "emptyLabResultWarning": "Результат анализа создан, но пуст",
     "form": {
-      "linkedVisits": "Привязанные визиты",
+      "linkedVisits": "Связанные визиты",
       "linkVisitsDescription": "Свяжите этот результат анализа с визитами, на которых он был назначен или рассмотрен.",
-      "linkVisitsTitle": "Привязать к визитам"
+      "linkVisitsTitle": "Связать с визитами"
     },
-    "keepEmptyLabResult": "Оставить результат анализа",
-    "labResultDeleted": "Результат анализа удалён",
-    "loading": "Загрузка результатов анализов...",
-    "loadingHint": "Если загрузка длится слишком долго, перезагрузите страницу",
-    "modal": {
-      "editLabResult": "Редактировать результат анализа",
-      "labels": {
-        "testType": "Тип теста"
-      },
-      "sections": {
-        "associatedFiles": "Связанные документы",
-        "testInfo": "Информация об анализе",
-        "testResults": "Результаты тестов"
-      },
-      "tabs": {
-        "testComponents": "Компоненты тестов"
-      },
-      "title": "Подробности результата анализа"
-    },
-    "networkError": "Ошибка сети. Проверьте подключение и попробуйте снова.",
-    "noResults": "Результаты анализов не найдены",
-    "patientIdRequired": "ID пациента обязателен. Сначала выберите пациента.",
-    "quickPdfImport": "Быстрый импорт PDF",
-    "startAdding": "Начните добавлять ваш первый результат анализа.",
-    "stepperLabels": {
-      "enterTestName": "Введите название анализа",
-      "importFromPdf": "Импорт из PDF",
-      "labResultInfo": "Информация об анализе",
-      "uploadParse": "Загрузить и разобрать"
-    },
-    "testNameLabel": "Название анализа",
-    "testNameRequired": "Название анализа обязательно",
-    "testNameTooLong": "Название анализа не может превышать {{maxLength}} символов",
-    "testNameTooShort": "Название анализа должно содержать не менее {{minLength}} символов",
-    "timeoutError": "Время запроса истекло. Попробуйте снова.",
-    "unsavedDataMessage_one": "У вас есть {{count}} разобранный(е) компонент(ы) теста, которые ещё не были добавлены. Если закрыть сейчас, эти данные будут потеряны.",
-    "unsavedDataMessage_few": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
-    "unsavedDataMessage_many": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
-    "unsavedDataMessage_other": "У вас есть {{count}} разобранных компонентов теста, которые ещё не были добавлены. Если закрыть сейчас, эти данные будут потеряны."
+    "labResultCreated": "Результат анализа \"{{testName}}\" был создан. Теперь вы можете загрузить и разобрать ваш PDF.",
+    "quickFormInstructions": "Введите название для этого результата анализа, затем вы сможете загрузить и разобрать ваш PDF.",
+    "quickImportModalTitle": "Быстрый импорт PDF - Шаг {{step}} из 2",
+    "quickImportSuccess": "Результат анализа и компоненты теста успешно импортированы",
+    "testNameDescription": "Это единственное обязательное поле - подробности можно добавить позже",
+    "testNamePlaceholder": "Анализ на гормоны и т.д.",
+    "unsavedDataInstructions": "Нажмите \"Добавить компоненты\" на вкладке Предпросмотр, чтобы сохранить разобранные данные перед закрытием.",
+    "unsavedDataMessage_one": "У вас есть {{count}} разобранный компонент теста, который ещё не был добавлен. Если закрыть сейчас, эти данные будут потеряны.",
+    "unsavedDataMessage_other": "У вас есть {{count}} разобранных компонентов теста, которые ещё не были добавлены. Если закрыть сейчас, эти данные будут потеряны.",
+    "unsavedDataWarning": "Несохранённые разобранные данные"
   },
   "medications": {
     "addNew": "Добавить лекарство",
@@ -695,11 +519,14 @@
     }
   },
   "messages": {
+    "checkBackSoon": "Скоро будут обновления!",
+    "clearAll": "Очистить всё",
     "confirmRemoveConditionRelationship": "Вы уверены, что хотите убрать эту связь с заболеванием?",
     "confirmRemoveEquipmentRelationship": "Вы уверены, что хотите удалить эту связь с оборудованием?",
     "confirmRemoveLabResultLink": "Удалить эту связь с результатом анализа?",
     "confirmRemoveVisitLink": "Удалить эту связь с визитом?",
     "displayError": "Невозможно отобразить этот элемент. Попробуйте обновить страницу.",
+    "doNotClose": "Пожалуйста, не закрывайте это окно и не переходите на другую страницу",
     "failedToLinkLabResult": "Не удалось связать результат анализа",
     "failedToLinkVisit": "Не удалось связать визит",
     "failedToUnlinkLabResult": "Не удалось отвязать результат анализа",
@@ -708,29 +535,30 @@
     "processing": "Обработка...",
     "selectLabResult": "Пожалуйста, выберите результат анализа",
     "selectVisit": "Пожалуйста, выберите визит",
+    "underDevelopment": "Данный раздел в настоящее время разрабатывается.",
     "updateSuccess": "Успешно обновлено"
   },
   "modals": {
-    "chooseConditionsToLink": "Выберите заболевания для привязки",
-    "chooseConditionToLink": "Выберите заболевание для привязки",
-    "chooseLabResultToLink": "Выберите результат анализа для привязки",
-    "chooseMedicationToLink": "Выберите лекарства для привязки",
-    "chooseVisitToLink": "Выберите визит для привязки",
+    "chooseConditionsToLink": "Выберите заболевания для связывания",
+    "chooseConditionToLink": "Выберите заболевание для связывания",
+    "chooseLabResultToLink": "Выберите результат анализа для связывания",
+    "chooseMedicationToLink": "Выберите лекарства для связывания",
+    "chooseVisitToLink": "Выберите визит для связывания",
     "describeConditionRelevance": "Опишите, как это заболевание связано с результатом анализа (необязательно)",
     "describeLabResultRelevance": "Опишите, как этот результат анализа связан с данным визитом",
     "describeVisitRelevance": "Опишите, как этот визит связан с данным результатом анализа",
-    "linkConditionToLabResult": "Привязать заболевание к результату анализа",
-    "linkLabResultToVisit": "Привязать результат анализа к визиту",
-    "linkVisitToLabResult": "Привязать визит к результату анализа",
+    "linkConditionToLabResult": "Связать заболевание с результатом анализа",
+    "linkLabResultToVisit": "Связать результат анализа с визитом",
+    "linkVisitToLabResult": "Связать визит с результатом анализа",
     "noRelevanceNoteProvided": "Примечание о связи не указано",
     "purpose": "Цель",
     "relevanceNote": "Примечание о связи",
     "relevanceNoteOptional": "Примечание о связи (необязательно)",
     "selectCondition": "Выберите заболевание",
-    "selectLabResult": "Выбрать результат анализа",
+    "selectLabResult": "Выберите результат анализа",
     "selectMedications": "Выберите лекарства",
     "selectPurpose": "Выберите цель",
-    "selectVisit": "Выбрать визит"
+    "selectVisit": "Выберите визит"
   },
   "noResults": "Врачи не найдены",
   "pagination": {
@@ -764,6 +592,7 @@
   "patients": {
     "form": {
       "address": {
+        "label": "Адрес",
         "placeholder": "Введите адрес"
       },
       "birthDate": {
@@ -823,7 +652,9 @@
         "description": "Отметьте, если вы создаёте запись для себя",
         "label": "Это моя собственная медицинская запись"
       }
-    }
+    },
+    "photoFormat": "JPEG, PNG, GIF или BMP -- Максимум 15МБ",
+    "removePhoto": "Удалить фото"
   },
   "patientSelector": {
     "buttons": {
@@ -891,7 +722,7 @@
       "contact": "КОНТАКТНАЯ ИНФОРМАЦИЯ",
       "editButton": "Редактировать аптеку",
       "location": "МЕСТОПОЛОЖЕНИЕ",
-      "storeNumber": "Филиал #",
+      "storeNumber": "Филиал №",
       "title": "Данные аптеки"
     }
   },
@@ -900,13 +731,13 @@
       "addNew": "Добавить врача"
     },
     "card": {
-      "subtitle": "Лечащий врач"
+      "subtitle": "Медицинский специалист"
     },
     "createPracticeError": "Не удалось создать клинику. Попробуйте снова.",
     "editPracticeError": "Не удалось загрузить клинику для редактирования",
     "empty": {
       "noData": "Нажмите \"Добавить врача\", чтобы начать.",
-      "title": "Лечащие врачи не найдены"
+      "title": "Медицинские специалисты не найдены"
     },
     "errors": {
       "generic": "Произошла ошибка. Попробуйте снова.",
@@ -920,7 +751,7 @@
     "loading": "Загрузка врачей...",
     "practices": {
       "addNew": "Добавить клинику",
-      "cannotDelete": "Нельзя удалить - есть привязанные врачи",
+      "cannotDelete": "Нельзя удалить - есть связанные врачи",
       "createSuccess": "Клиника успешно создана",
       "createTitle": "Добавить клинику",
       "deleteConfirm": "Вы уверены, что хотите удалить \"{{name}}\"? Это действие нельзя отменить.",
@@ -930,15 +761,11 @@
       "emptyTitle": "Клиники не найдены",
       "searchPlaceholder": "Поиск клиник...",
       "totalCount": "{{count}} клиник всего",
-      "totalCount_one": "{{count}} practice total",
-      "totalCount_few": "{{count}} клиники всего",
-      "totalCount_many": "{{count}} клиник всего",
-      "totalCount_other": "{{count}} practices total",
+      "totalCount_one": "{{count}} клиника всего",
+      "totalCount_other": "{{count}} клиник всего",
       "unusedCount": "{{count}} неиспользуемых",
-      "unusedCount_one": "{{count}} unused",
-      "unusedCount_few": "{{count}} неиспользуемые",
-      "unusedCount_many": "{{count}} неиспользуемых",
-      "unusedCount_other": "{{count}} unused"
+      "unusedCount_one": "{{count}} неиспользуемая",
+      "unusedCount_other": "{{count}} неиспользуемых"
     },
     "tabs": {
       "practices": "Клиники"
@@ -1020,90 +847,13 @@
       "title": "Подробности процедуры"
     }
   },
-  "reportBuilder": {
-    "buttons": {
-      "addRecords": "Добавить медицинские записи",
-      "clearSelections": "Снять все выделения",
-      "generateReport": "Сформировать отчёт ({{count}} записей)",
-      "generateReport_one": "Generate Report ({{count}} record)",
-      "generateReport_few": "Сформировать отчёт ({{count}} записи)",
-      "generateReport_many": "Сформировать отчёт ({{count}} записей)",
-      "generateReport_other": "Generate Report ({{count}} records)",
-      "generateReportChartsOnly": "Сформировать отчёт ({{chartCount}} графиков)",
-      "generateReportWithCharts": "Сформировать отчёт ({{recordCount}} записей, {{chartCount}} графиков)",
-      "selectAll": "Выбрать все записи"
-    },
-    "configuration": {
-      "description": "Выберите медицинские записи для включения в ваш отчёт",
-      "title": "Настройка отчёта"
-    },
-    "icon": "📊",
-    "loading": "Загрузка конструктора отчётов...",
-    "noData": {
-      "description": "Сначала добавьте медицинские записи для использования конструктора отчётов.",
-      "title": "Нет медицинских данных"
-    },
-    "notifications": {
-      "templateLoaded": "Шаблон загружен",
-      "templateLoadedMessage": "Шаблон \"{{name}}\" загружен."
-    },
-    "progress": {
-      "recordsSelected": "Записей выбрано"
-    },
-    "settingsModal": {
-      "includePatientInfo": {
-        "description": "Добавить демографические и контактные данные",
-        "label": "Включить информацию о пациенте"
-      },
-      "includeProfilePicture": {
-        "description": "Добавить фото пациента в заголовок отчёта",
-        "label": "Включить фото профиля"
-      },
-      "includeSummary": {
-        "description": "Добавить раздел с обзором и статистикой",
-        "label": "Включить сводную статистику"
-      },
-      "reportTitle": {
-        "label": "Название отчёта"
-      },
-      "title": "Настройки отчёта"
-    },
-    "title": "Конструктор отчётов",
-    "trendCharts": {
-      "dateFrom": "С",
-      "dateTo": "По",
-      "emptyState": "Нет данных для трендов. Добавьте жизненные показатели или результаты анализов для отображения графиков.",
-      "labTestCharts": {
-        "description": "Найдите и выберите анализы для графиков",
-        "searchPlaceholder": "Поиск анализов...",
-        "title": "Графики анализов"
-      },
-      "maxReached": "Достигнут максимум в 10 графиков",
-      "recordCount": "{{count}} записей",
-      "recordCount_one": "{{count}} record",
-      "recordCount_few": "{{count}} записи",
-      "recordCount_many": "{{count}} записей",
-      "recordCount_other": "{{count}} records",
-      "removeChart": "Удалить график {{name}}",
-      "selectedCharts": "Выбранные графики ({{count}})",
-      "selectedCharts_one": "Selected Charts ({{count}})",
-      "selectedCharts_few": "Выбранные графики ({{count}})",
-      "selectedCharts_many": "Выбранные графики ({{count}})",
-      "selectedCharts_other": "Selected Charts ({{count}})",
-      "vitalCharts": {
-        "description": "Выберите жизненные показатели для графиков",
-        "title": "Графики жизненных показателей"
-      }
-    }
-  },
   "search": {
     "activeFilterCount": "{{count}} активных фильтров",
-    "activeFilterCount_one": "{{count}} active filter",
-    "activeFilterCount_few": "{{count}} активных фильтра",
-    "activeFilterCount_many": "{{count}} активных фильтров",
-    "activeFilterCount_other": "{{count}} active filters",
+    "activeFilterCount_one": "{{count}} активный фильтр",
+    "activeFilterCount_other": "{{count}} активных фильтров",
     "activeFilters": "Активные фильтры",
     "addMoreTags": "Добавить ещё теги",
+    "advancedFilters": "Расширенные фильтры",
     "allTags": "Все теги",
     "allTime": "За всё время",
     "anyTag": "Любой тег",
@@ -1116,7 +866,7 @@
       "performed": "Выполнено",
       "recorded": "Записано",
       "started": "Начато",
-      "tested": "Проведён",
+      "tested": "Проведён тест",
       "visited": "Визит"
     },
     "datePresets": "Быстрые пресеты",
@@ -1134,12 +884,16 @@
     "filterByTag": "Фильтр по тегу: {{tag}}",
     "filtered": "(отфильтровано)",
     "filters": "Фильтры",
+    "forQuery": "для \"{{query}}\"",
     "last30Days": "Последние 30 дней",
     "last6Months": "Последние 6 месяцев",
     "last7Days": "Последние 7 дней",
     "lastYear": "Последний год",
     "loadingTags": "Загрузка тегов...",
     "matchAll": "Совпадение со всеми",
+    "matchAllDesc": "Показать элементы, которые имеют все выбранные теги",
+    "matchAny": "Совпадение с ЛЮБЫМ выбранным тегом",
+    "matchAnyDesc": "Показать элементы, которые имеют хотя бы один выбранный тег",
     "noPatientMessage": "Выберите пациента на панели управления для поиска медицинских записей.",
     "noPatientTitle": "Пациент не выбран",
     "noResults": "Ничего не найдено",
@@ -1153,12 +907,15 @@
     "previewRecord": "Предпросмотр записи",
     "recordTypes": "Типы записей",
     "removeTypeFilter": "Убрать фильтр {{type}}",
-    "resultCount_one": "{{count}} rezultat",
-    "resultCount_few": "{{count}} результата",
-    "resultCount_many": "{{count}} результатов",
-    "resultCount_other": "{{count}} rezultaty",
+    "resultCount": "{{count}} результатов",
+    "resultCount_one": "{{count}} результат",
+    "resultCount_other": "{{count}} результатов",
+    "resultsFound": "Найдено {{count}} результат",
+    "resultsFound_one": "Найдено {{count}} результат",
+    "resultsFound_other": "Найдено {{count}} результатов",
     "searchFailed": "Поиск не удался. Попробуйте снова.",
     "searching": "Поиск...",
+    "seeAll": "Показать всё",
     "selectTags": "Выберите теги...",
     "sortBy": "Сортировать по",
     "sortDateNewest": "Дате (сначала новые)",
@@ -1178,8 +935,7 @@
       "vitals": "Жизненные показатели"
     },
     "viewCards": "Карточный вид",
-    "viewTable": "Табличный вид",
-    "resultCount": "{{count}} rezultaty"
+    "viewTable": "Табличный вид"
   },
   "searchPlaceholders": {
     "allergies": "Поиск аллергий, реакций, тегов...",
@@ -1200,129 +956,6 @@
     "visits": "Поиск визитов, причин, заметок, тегов...",
     "vitals": "Поиск по заметкам о показателях..."
   },
-  "settings": {
-    "account": {
-      "deleteAccount": {
-        "button": "Удалить аккаунт",
-        "description": "Безвозвратно удалить ваш аккаунт и все связанные медицинские данные. Это действие нельзя отменить.",
-        "title": "Удалить аккаунт"
-      }
-    },
-    "actions": {
-      "reset": "Сбросить изменения",
-      "save": "Сохранить все изменения",
-      "unsavedChanges": "У вас есть несохранённые изменения"
-    },
-    "documents": {
-      "cleanup": {
-        "button": "Очистить файлы",
-        "cleaning": "Очистка...",
-        "description": "Очистите несинхронизированные файлы и устраните несоответствия хранилища документов. Это сбросит неудачные загрузки, очистит потерянные задачи и исправит проблемы синхронизации базы данных.",
-        "title": "Очистка файлов"
-      },
-      "paperlessDescription": "Настроить интеграцию с системой управления документами Paperless-ngx"
-    },
-    "help": {
-      "documentation": {
-        "description": "Просмотрите вики для руководств, инструкций по настройке и документации по функциям.",
-        "title": "Документация"
-      },
-      "issues": {
-        "description": "Нашли ошибку или хотите предложить функцию? Создайте задачу на GitHub.",
-        "title": "Сообщить о проблеме"
-      }
-    },
-    "papra": {
-      "apiTokenPlaceholder": "Введите ваш API токен Papra",
-      "connectionFailed": "Ошибка подключения",
-      "connectionSuccess": "Подключение успешно",
-      "description": "Подключитесь к вашему экземпляру Papra для управления документами",
-      "organization": "Организация",
-      "organizationPlaceholder": "Выберите организацию",
-      "urlPlaceholder": "https://your-papra-instance.com"
-    },
-    "preferences": {
-      "dateFormat": {
-        "description": "Выберите, как отображать даты в приложении",
-        "dmy": "ДД/ММ/ГГГГ (Европейский)",
-        "mdy": "ММ/ДД/ГГГГ (США)",
-        "title": "Формат даты",
-        "ymd": "ГГГГ-ММ-ДД (ISO)"
-      },
-      "sessionTimeout": {
-        "description": "Установите время бездействия до истечения сессии (в минутах)",
-        "range": "минут (5-1440)",
-        "title": "Тайм-аут сессии"
-      },
-      "unitSystem": {
-        "description": "Выберите, в каких единицах отображать измерения: Имперские (фунты, футы, °F) или Метрические (килограммы, сантиметры, °C)",
-        "imperial": "Имперские (lbs, feet, °F)",
-        "metric": "Метрические (кг, см, °C)",
-        "title": "Система единиц"
-      }
-    },
-    "releaseNotes": {
-      "currentVersion": "Текущая",
-      "dismiss": "Понятно",
-      "empty": "Примечания к выпуску отсутствуют",
-      "error": "Не удалось загрузить примечания к выпуску",
-      "publishedOn": "Выпущено {{date}}",
-      "retry": "Повторить",
-      "showAll": "Показать все выпуски",
-      "showLess": "Показать меньше",
-      "viewOnGithub": "Смотреть на GitHub",
-      "whatsNewTitle": "Что нового"
-    },
-    "sections": {
-      "accountManagement": "Управление аккаунтом",
-      "gettingHelp": "Получить помощь",
-      "preferences": "Предпочтения приложения",
-      "releaseNotes": "Примечания к выпуску",
-      "security": "Безопасность",
-      "supportMediKeep": "Поддержать MediKeep",
-      "systemInfo": "Информация о системе"
-    },
-    "security": {
-      "password": {
-        "button": "Сменить пароль",
-        "confirmPassword": "Подтвердите новый пароль",
-        "currentPassword": "Текущий пароль",
-        "description": "Смените пароль аккаунта для обеспечения безопасности",
-        "forceChange": {
-          "errors": {
-            "allFieldsRequired": "Все поля обязательны.",
-            "changeFailed": "Не удалось сменить пароль. Попробуйте снова.",
-            "passwordComplexity": "Новый пароль должен содержать хотя бы одну букву и одну цифру.",
-            "passwordMustDiffer": "Новый пароль должен отличаться от текущего.",
-            "passwordsMustMatch": "Новые пароли не совпадают.",
-            "passwordTooShort": "Новый пароль должен содержать не менее 6 символов."
-          },
-          "submit": "Установить новый пароль",
-          "submitting": "Смена пароля...",
-          "subtitle": "Ваш аккаунт требует смены пароля, прежде чем вы сможете продолжить. Установите новый пароль ниже.",
-          "title": "Требуется смена пароля"
-        },
-        "newPassword": "Новый пароль",
-        "passwordHelp": "Минимум 6 символов, должен содержать букву и цифру."
-      }
-    },
-    "sponsor": {
-      "button": "Спонсировать на GitHub",
-      "description": "MediKeep бесплатный и с открытым исходным кодом. Если приложение полезно, рассмотрите возможность спонсорства проекта для поддержки разработки."
-    },
-    "system": {
-      "timezone": {
-        "title": "Часовой пояс"
-      },
-      "version": {
-        "loading": "Загрузка информации о версии...",
-        "title": "Версия приложения",
-        "unavailable": "Информация о версии недоступна",
-        "unknownApp": "Неизвестное приложение",
-        "unknownVersion": "Неизвестная версия"
-      }
-    }
-  },
   "severity": {
     "critical": "Критическая - Угроза жизни",
     "lifeThreatening": "Угрожающая жизни - Риск анафилаксии",
@@ -1334,20 +967,20 @@
     "severeImpact": "Тяжёлая - Значительное влияние"
   },
   "status": {
+    "completed": "Завершено",
     "expired": "Истекло",
     "onHold": "Приостановлено",
     "planned": "Запланировано",
-    "stopped": "Прекращено",
-    "completed": "Завершено"
+    "stopped": "Прекращено"
   },
   "statusDescriptions": {
-    "activeAllergic": "Активный - В настоящее время аллергия",
-    "activeCondition": "Активный - Текущее заболевание",
-    "activeExperiencing": "Активный - В настоящее время наблюдается",
+    "activeAllergic": "Активная - В настоящее время аллергия",
+    "activeCondition": "Активное - Текущее заболевание",
+    "activeExperiencing": "Активно - В настоящее время наблюдается",
     "chronicCondition": "Хроническое - Длительное заболевание",
-    "inactiveAllergic": "Неактивный - Аллергия прошла",
+    "inactiveAllergic": "Неактивная - Аллергия прошла",
     "recurring": "Рецидивирующее - Появляется периодически",
-    "resolvedAllergy": "Вылечено - Аллергия преодолена",
+    "resolvedAllergy": "Вылечена - Аллергия преодолена",
     "resolvedCondition": "Вылечено - Больше не присутствует",
     "resolvedExperiencing": "Вылечено - Больше не наблюдается"
   },
@@ -1384,8 +1017,6 @@
     "loading": "Загрузка симптомов...",
     "logEpisode": "Записать эпизод",
     "logEpisodeTitle": "Записать эпизод",
-    "moreCount_few": "+{{count}} more",
-    "moreCount_many": "+{{count}} more",
     "noPatientSelected": "Пациент не выбран",
     "noRecords": "Симптомы ещё не записаны",
     "noRecordsPrompt": "Нажмите \"Добавить симптом\", чтобы начать отслеживание нового симптома",
@@ -1406,6 +1037,7 @@
       "recorded": "записано",
       "title": "Хронология симптомов"
     },
+    "title": "Симптомы",
     "viewModal": {
       "acute": "Острый",
       "confirmDeleteEpisode": "Вы уверены, что хотите удалить этот эпизод?",
@@ -1420,10 +1052,6 @@
       "noEpisodesYet": "Эпизоды ещё не записаны",
       "noNotesProvided": "Заметки не указаны",
       "relief": "Облегчение",
-      "tabs": {
-        "episodes_few": "Episodes ({{count}})",
-        "episodes_many": "Episodes ({{count}})"
-      },
       "title": "{{name}} - Подробности",
       "totalEpisodes": "Всего эпизодов",
       "triggers": "Триггеры"
@@ -1439,19 +1067,15 @@
     "createTag": "Создать тег",
     "deleteModal": {
       "description": "Тег будет удалён из всех {{count}} записей. Это действие нельзя отменить.",
-      "description_one": "This will remove the tag from {{count}} record. This action cannot be undone.",
-      "description_few": "Тег будет удалён из {{count}} записей. Это действие нельзя отменить.",
-      "description_many": "Тег будет удалён из всех {{count}} записей. Это действие нельзя отменить.",
-      "description_other": "This will remove the tag from all {{count}} records. This action cannot be undone.",
+      "description_one": "Тег будет удалён из {{count}} записи. Это действие нельзя отменить.",
+      "description_other": "Тег будет удалён из всех {{count}} записей. Это действие нельзя отменить.",
       "message": "Вы уверены, что хотите удалить тег \"{{tag}}\"?"
     },
     "editModal": {
       "colorLabel": "Цвет тега",
       "description": "Тег будет переименован во всех {{count}} записях.",
-      "description_one": "This will rename the tag across {{count}} record.",
-      "description_few": "Тег будет переименован в {{count}} записях.",
-      "description_many": "Тег будет переименован во всех {{count}} записях.",
-      "description_other": "This will rename the tag across all {{count}} records.",
+      "description_one": "Тег будет переименован в {{count}} записи.",
+      "description_other": "Тег будет переименован во всех {{count}} записях.",
       "placeholder": "Введите новое название тега...",
       "submit": "Сохранить",
       "title": "Редактировать тег"
@@ -1471,12 +1095,11 @@
     "noTags": "Теги не найдены",
     "noTagsDescription": "Начните использовать теги в медицинских записях, чтобы увидеть их здесь.",
     "noTagsSearch": "Нет тегов, соответствующих поиску.",
+    "pressEnterToAdd": "Нажмите Enter, чтобы добавить тег",
     "replaceModal": {
       "description": "\"{{oldTag}}\" будет заменён на \"{{newTag}}\" во всех {{count}} записях.",
-      "description_one": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across {{count}} record.",
-      "description_few": "\"{{oldTag}}\" будет заменён на \"{{newTag}}\" в {{count}} записях.",
-      "description_many": "\"{{oldTag}}\" будет заменён на \"{{newTag}}\" во всех {{count}} записях.",
-      "description_other": "This will replace \"{{oldTag}}\" with \"{{newTag}}\" across all {{count}} records.",
+      "description_one": "\"{{oldTag}}\" будет заменён на \"{{newTag}}\" в {{count}} записи.",
+      "description_other": "\"{{oldTag}}\" будет заменён на \"{{newTag}}\" во всех {{count}} записях.",
       "label": "Заменить на",
       "placeholder": "Введите название нового тега...",
       "submit": "Заменить тег",
@@ -1496,78 +1119,6 @@
     },
     "title": "Управление тегами"
   },
-  "testComponents": {
-    "addTestComponents": "Добавить компоненты тестов",
-    "addTests": "Добавить тесты",
-    "categories": {
-      "cardiology": "Кардиология - Сердце и кардиомаркеры",
-      "chemistry": "Химия - Электролиты и минералы",
-      "endocrinology": "Эндокринология - Гормоны и диабет",
-      "genetics": "Генетика - Генетическое тестирование",
-      "hematology": "Гематология - Показатели крови и железо",
-      "hepatology": "Гепатология - Ферменты и функция печени",
-      "immunology": "Иммунология - Иммунная система и антитела",
-      "lipids": "Липиды - Холестерин и триглицериды",
-      "microbiology": "Микробиология - Инфекции и посевы",
-      "molecular": "Молекулярная - Тесты DNA",
-      "other": "Другие тесты",
-      "pathology": "Патология - Анализ тканей и биопсия",
-      "toxicology": "Токсикология - Скрининг лекарств и токсинов"
-    },
-    "editModal": {
-      "descriptions": {
-        "linkedTest": "Свяжите этот тест со стандартным наименованием теста для отслеживания тенденций при различных вариантах названий в лаборатории"
-      },
-      "editing": "Редактирование",
-      "fields": {
-        "abbreviation": "Сокращение",
-        "linkedTest": "Связать со стандартным тестом",
-        "maximum": "Максимум",
-        "minimum": "Минимум",
-        "rangeText": "Текст диапазона (альтернативный)",
-        "referenceRange": "Референсный диапазон",
-        "result": "Результат",
-        "status": "Статус (автовычисление)",
-        "unit": "Единица измерения"
-      },
-      "linkedInfo": "Этот тест будет сгруппирован с другими тестами «{{testName}}» на графиках тенденций.",
-      "notDetermined": "Не определено",
-      "placeholders": {
-        "abbreviation": "напр., HGB",
-        "linkedTest": "Выберите стандартный тест для привязки...",
-        "maxValue": "Максимальное значение",
-        "minValue": "Минимальное значение",
-        "notes": "Дополнительные заметки о результате теста",
-        "rangeText": "напр., 'Отрицательный' или 'Муж: 13.5-17.5, Жен: 12.0-15.5'",
-        "result": "Выбрать результат",
-        "testCode": "напр., 718-7",
-        "testName": "напр., Гемоглобин",
-        "unit": "напр., г/дл",
-        "value": "Введите значение теста"
-      },
-      "title": "Редактировать компонент теста",
-      "trendLinking": "Привязка тенденций",
-      "updating": "Обновление компонента теста..."
-    },
-    "emptyState": {
-      "description": "Шаблоны предоставляют распространённые панели анализов (CBC, CMP и т.д.), в которые можно ввести значения и диапазоны. Массовый импорт позволяет копировать/вставлять результаты из лабораторных отчётов для автоматического разбора."
-    },
-    "errorLoading": "Ошибка загрузки компонентов тестов",
-    "noComponents": "Нет компонентов тестов",
-    "noComponentsDescription": "У этого результата анализа пока нет отдельных компонентов тестов.",
-    "notifications": {
-      "componentDeleted": "Компонент удалён",
-      "hasBeenDeleted": "{{name}} удалён"
-    },
-    "refreshComponents": "Обновить компоненты",
-    "tabs": {
-      "statistics": "Статистика",
-      "testResults": "Результаты тестов"
-    },
-    "testCount_few": "{{count}} test",
-    "testCount_many": "{{count}} test",
-    "title": "Компоненты тестов"
-  },
   "time": {
     "day": "день",
     "days": "дней",
@@ -1578,17 +1129,22 @@
     "year": "год",
     "years": "лет"
   },
+  "trash": {
+    "fileCount_one": "{{count}} файл"
+  },
   "treatments": {
     "addFirstTreatment": "Добавить первое лечение",
     "addTreatment": "+ Добавить лечение",
     "card": {
-      "conditionId": "Заболевание #{{id}}"
+      "conditionId": "Заболевание №{{id}}"
     },
+    "clickToExpand": "Нажмите для развёртывания и добавления подробностей (необязательно)",
     "conditionsLoadingError": "Ошибка загрузки заболеваний",
+    "createNew": "Создать новое",
     "form": {
       "createTreatment": "Создать лечение",
-      "createWithLinks": "Creating treatment plan and linking items...",
-      "creatingWithLinks": "Создание лечения и привязка элементов...",
+      "createWithLinks": "Создание плана лечения и связывание элементов...",
+      "creatingWithLinks": "Создание лечения и связывание элементов...",
       "descriptionDesc": "Краткое описание лечения",
       "descriptionPlaceholder": "Опишите лечение",
       "dosageAmount": "Дозировка/Количество",
@@ -1598,11 +1154,12 @@
       "enterTreatmentName": "Введите название лечения",
       "frequencyDesc": "Как часто проводится лечение",
       "frequencyPlaceholder": "напр., Ежедневно, Дважды в неделю",
-      "linkingPartialFailure": "Некоторые элементы не удалось привязать",
+      "linkingPartialFailure": "Некоторые элементы не удалось связать",
+      "linkingPartialFailureMessage": "",
       "notesDesc": "Дополнительная информация об этом лечении",
       "notesPlaceholder": "Введите заметки о лечении, наблюдения или дополнительные сведения",
       "practitionerDesc": "Медицинский специалист, проводящий лечение",
-      "relatedConditionDesc": "Привязать это лечение к заболеванию",
+      "relatedConditionDesc": "Связать это лечение с заболеванием",
       "savingTreatment": "Сохранение лечения...",
       "selectCondition": "Выберите заболевание",
       "startDateDesc": "Когда начинается лечение",
@@ -1619,10 +1176,11 @@
       "treatmentTypePlaceholder": "напр., Физиотерапия, Хирургия",
       "updateTreatment": "Обновить лечение"
     },
+    "linkExisting": "Связать существующее",
     "loadingTreatments": "Загрузка лечения...",
     "medications": {
       "default": "(из лекарства)",
-      "empty": "Лекарства не привязаны к этому плану лечения.",
+      "empty": "Лекарства не связаны с этим планом лечения.",
       "loadError": "Не удалось загрузить лекарства",
       "loading": "Загрузка лекарств...",
       "prescriber": "Назначающий врач",
@@ -1630,18 +1188,21 @@
     },
     "mode": {
       "advancedDescription": "План, ориентированный на лекарства, с индивидуальными настройками для каждого препарата",
+      "label": "Режим лечения",
       "simple": "Простой",
       "simpleDescription": "Базовое отслеживание с расписанием и дозировкой"
     },
+    "noEquipmentLinkedDescription": "Найдите и свяжите медицинское оборудование, используемое в этом лечении.",
     "noTreatmentsFound": "Лечение не найдено",
     "startAdding": "Начните с добавления вашего первого лечения.",
+    "timingLabel": "Расписание:",
     "viewModal": {
       "amountDosage": "Количество/Дозировка",
-      "conditionId": "Заболевание #{{id}}",
+      "conditionId": "Заболевание №{{id}}",
       "conditionStatus": "Статус заболевания",
       "dosageFrequency": "Дозировка и частота",
-      "noConditionLinked": "Заболевание не привязано",
-      "practitionerId": "Врач #{{id}}",
+      "noConditionLinked": "Заболевание не связано",
+      "practitionerId": "Врач №{{id}}",
       "schedule": "Расписание",
       "tabs": {
         "equipment": "Оборудование",
@@ -1678,226 +1239,65 @@
     "loadingVisits": "Загрузка визитов...",
     "noVisitsFound": "Медицинские визиты не найдены",
     "table": {
-      "visitDate": "Дата визита"
+      "visitDate": "Дата визита",
+      "visitType": "Тип визита"
     },
     "title": "Медицинские визиты",
     "viewModal": {
+      "chiefComplaint": "Основная жалоба",
       "clinicalInformation": "Клиническая информация",
       "editVisit": "Редактировать визит",
+      "followUpInstructions": "Рекомендации по последующему наблюдению",
       "generalVisit": "Общий визит",
+      "location": "Местоположение",
+      "priority": "Приоритет",
       "tabs": {
         "clinical": "Клиника",
         "visitInfo": "Информация о визите"
       },
       "title": "Визит - {{date}}",
+      "treatmentPlan": "План лечения",
       "visitInformation": "Информация о визите"
     }
   },
   "vitals": {
-    "addNew": "Добавить жизненные показатели",
-    "addTitle": "Добавить жизненные показатели",
-    "card": {
-      "notRecorded": "Не записано",
-      "oxygenSaturation": "Сатурация кислорода",
-      "title": "Запись жизненных показателей"
-    },
-    "categories": {
-      "diabetes": "Диабет",
-      "high": "Высокий",
-      "low": "Низкий",
-      "normal": "Норма",
-      "prediabetes": "Предиабет"
-    },
-    "diastolic": "Диастолическое",
-    "editTitle": "Редактировать жизненные показатели",
     "form": {
-      "deviceUsed": "Используемое устройство/оборудование",
-      "diastolicBP": "Диастолическое АД",
-      "healthAlerts": "Предупреждения о здоровье",
-      "locations": {
-        "ambulatory": "Амбулаторная помощь",
-        "clinic": "Клиника",
-        "home": "Дом",
-        "hospital": "Больница",
-        "urgentCare": "Неотложная помощь"
-      },
-      "measurementLocation": "Место измерения",
-      "openCalendar": "Открыть календарь",
-      "painScaleUnit": "(0-10)",
-      "recordedDateTime": "Дата и время измерения",
-      "saveVitals": "Сохранить показатели",
-      "systolicBP": "Систолическое АД",
-      "updateVitals": "Обновить показатели",
+      "dateTimePlaceholder": "",
+      "devicePlaceholder": "напр., цифровой тонометр, модель термометра...",
+      "heightNotSet": "Рост не указан в профиле пациента - расчёт ИМТ недоступен",
+      "locationPlaceholder": "Где были сделаны эти измерения?",
+      "lockedByImport": "Управляется средним значением импорта с устройства",
+      "missingPatientInfo": "Отсутствует информация о пациенте",
+      "notesPlaceholder": "Дополнительные заметки об измерении жизненных показателей...",
+      "pasteDateTimeDescription": "Введите или вставьте дату/время, или нажмите календарь для выбора",
+      "patientHeight": "Рост пациента: {{height}} дюймов (из профиля)",
       "validation": {
         "a1cMax": "A1C не может превышать 20%",
         "a1cMin": "A1C должен быть не менее 0%",
-        "bloodGlucoseMax": "Глюкоза крови не может превышать 800 mg/dL",
-        "bloodGlucoseMin": "Глюкоза крови должна быть не менее 20 mg/dL",
+        "bloodGlucoseMax": "Глюкоза крови не может превышать 800 мг/дл",
+        "bloodGlucoseMin": "Глюкоза крови должна быть не менее 20 мг/дл",
         "dateInFuture": "Дата не может быть в будущем",
         "dateRequired": "Дата и время измерения обязательны",
         "deviceMaxLength": "Название устройства не может превышать 100 символов",
-        "diastolicMax": "Диастолическое АД не может превышать 200 mmHg",
-        "diastolicMin": "Диастолическое АД должно быть не менее 30 mmHg",
-        "firstNameRequired": "Пожалуйста, введите ваше имя",
-        "heartRateMax": "Частота пульса не может превышать 250 BPM",
-        "heartRateMin": "Частота пульса должна быть не менее 30 BPM",
-        "lastNameRequired": "Пожалуйста, введите вашу фамилию",
-        "notesMaxLength": "Заметки не могут превышать 1000 символов",
+        "diastolicMax": "Диастолическое АД не может превышать 200 мм рт. ст.",
+        "diastolicMin": "Диастолическое АД должно быть не менее 30 мм рт. ст.",
+        "heartRateMax": "Частота пульса не может превышать 250 уд/мин",
+        "heartRateMin": "Частота пульса должна быть не менее 30 уд/мин",
+        "notesMaxLength": "Заметки не могут превышать 5000 символов",
         "oxygenMax": "Сатурация кислорода не может превышать 100%",
         "oxygenMin": "Сатурация кислорода должна быть не менее 50%",
         "painScaleMax": "Шкала боли не может превышать 10",
         "painScaleMin": "Шкала боли должна быть не менее 0",
-        "passwordLength": "Пароль должен содержать не менее 6 символов",
-        "passwordRequirements": "Пароль должен содержать хотя бы одну букву и одну цифру",
         "respiratoryRateMax": "Частота дыхания не может превышать 100/мин",
         "respiratoryRateMin": "Частота дыхания должна быть не менее 5/мин",
-        "systolicMax": "Систолическое АД не может превышать 300 mmHg",
-        "systolicMin": "Систолическое АД должно быть не менее 50 mmHg",
+        "systolicMax": "Систолическое АД не может превышать 300 мм рт. ст.",
+        "systolicMin": "Систолическое АД должно быть не менее 50 мм рт. ст.",
         "temperatureMax": "Температура не может превышать {{max}}{{unit}}",
         "temperatureMin": "Температура должна быть не менее {{min}}{{unit}}",
-        "timeInFuture": "Выбранное время не может быть в будущем",
-        "usernameLength": "Имя пользователя должно содержать не менее 3 символов",
         "weightMax": "Вес не может превышать {{max}} {{unit}}",
         "weightMin": "Вес должен быть не менее {{min}} {{unit}}"
       }
-    },
-    "glucoseContext": {
-      "after_meal": "После еды",
-      "before_meal": "До еды",
-      "fasting": "Натощак",
-      "random": "Случайный"
-    },
-    "healthSummary": "Сводка здоровья",
-    "import": {
-      "back": "Назад",
-      "dateRange": "Диапазон дат",
-      "duplicate": "Дубликат",
-      "duplicatesFound": "Найдено дубликатов",
-      "duplicateWarning_few": "{{count}} readings already exist in this date range. Check the box above to skip them.",
-      "duplicateWarning_many": "{{count}} readings already exist in this date range. Check the box above to skip them.",
-      "importButton": "Импорт",
-      "importing": "Импорт показателей...",
-      "newReadings": "Новых показаний",
-      "noDevice": "Пожалуйста, выберите устройство",
-      "noFile": "Пожалуйста, выберите CSV файл",
-      "parsingFailed": "Не удалось разобрать CSV файл",
-      "preview": "Предпросмотр",
-      "previewTitle": "Предпросмотр импорта",
-      "selectDevice": "Выберите устройство",
-      "selectDevicePlaceholder": "Выберите ваше устройство...",
-      "skipDuplicates": "Пропустить дублирующиеся показания",
-      "success_few": "Successfully imported {{count}} readings",
-      "success_many": "Successfully imported {{count}} readings",
-      "successWithSkipped": "Импортировано {{imported}} показаний ({{skipped}} дубликатов пропущено)",
-      "title": "Импорт показателей",
-      "totalReadings": "Всего показаний",
-      "uploadFile": "Загрузить CSV файл"
-    },
-    "loading": "Загрузка жизненных показателей...",
-    "loadingStats": "Загрузка статистики здоровья...",
-    "modal": {
-      "a1c": "A1C",
-      "additionalMeasurements": "Дополнительные измерения",
-      "bloodGlucose": "Глюкоза крови",
-      "deviceUsed": "Используемое устройство",
-      "glucoseContext": "Тип измерения",
-      "glucoseContextPlaceholder": "Необязательно",
-      "painScale": "Шкала боли",
-      "physicalMeasurements": "Физические измерения",
-      "practitionerId": "ID врача",
-      "respiratoryRate": "Частота дыхания",
-      "title": "Подробности жизненных показателей"
-    },
-    "noDataAvailable": "Нет данных о жизненных показателях",
-    "noPatientSelected": "Пациент не выбран",
-    "recordVitalsPrompt": "Запишите первое измерение жизненных показателей, чтобы начать отслеживать метрики здоровья.",
-    "secondary": "Вторичное",
-    "selectPatientPrompt": "Пожалуйста, выберите пациента для просмотра и управления жизненными показателями.",
-    "stats": {
-      "a1cDesc": "Нажмите для фильтрации записей с A1C",
-      "bloodGlucoseDesc": "Нажмите для фильтрации записей с глюкозой крови",
-      "bloodPressure": "Артериальное давление",
-      "bloodPressureDesc": "Нажмите для фильтрации записей с артериальным давлением",
-      "bmi": "BMI",
-      "bmiDesc": "Индекс массы тела",
-      "heartRate": "Частота пульса",
-      "heartRateDesc": "Нажмите для фильтрации записей с частотой пульса",
-      "temperature": "Последняя температура",
-      "temperatureDesc": "Нажмите для фильтрации записей с температурой",
-      "weight": "Последний вес",
-      "weightDesc": "Нажмите для фильтрации записей с весом"
-    },
-    "statsLoadError": "Не удалось загрузить статистику здоровья",
-    "summary": {
-      "avgGlucose": "Сред",
-      "confirmDeleteDay_few": "Delete all {{count}} imported readings for this day?",
-      "confirmDeleteDay_many": "Delete all {{count}} imported readings for this day?",
-      "deleteDay": "Удалить день",
-      "glucoseTrend": "Тренд глюкозы"
-    },
-    "summaryDescription": "Последние показания и средние значения - Нажмите на карточку для фильтрации таблицы ниже",
-    "systolic": "Систолическое",
-    "table": {
-      "errorLoading": "Ошибка загрузки жизненных показателей",
-      "noRecords": "Записи жизненных показателей не найдены",
-      "noRecordsDesc": "Жизненные показатели появятся здесь после записи",
-      "oxygenSat": "SpO2"
-    },
-    "tabs": {
-      "context": "Контекст",
-      "dateTime": "Дата и время"
-    },
-    "trends": {
-      "allContexts": "Все типы",
-      "allDates": "Все даты",
-      "average": "Среднее",
-      "chart": "График",
-      "chooseTimeRange": "Выберите временной диапазон",
-      "dataPoints": "точки данных",
-      "dataTable": "Таблица данных",
-      "exportCsv": "Экспорт в CSV",
-      "exportError": "Не удалось экспортировать данные. Пожалуйста, попробуйте ещё раз.",
-      "exportSuccess": "Data exported successfully",
-      "glucoseContextFilter": "Тип сахара в крови",
-      "latest": "Последнее",
-      "noData": "Нет данных о тенденциях",
-      "noDataDesc": "Исторические данные для этого показателя жизнедеятельности отсутствуют.",
-      "noDataPoints": "Нет точек данных для отображения",
-      "noHeightForBMI": "Для расчёта тенденций ИМТ необходим рост пациента. Пожалуйста, укажите рост в профиле пациента.",
-      "past2Years": "За 2 года",
-      "past3Months": "За 3 месяца",
-      "past5Years": "За 5 лет",
-      "past6Months": "За 6 месяцев",
-      "pastYear": "За год",
-      "range": "Диапазон",
-      "readings": "показания",
-      "selectTimeRange": "Выбрать временной диапазон",
-      "showing": "Показано",
-      "stdDev": "Стд. откл.",
-      "summaryStatistics": "Сводная статистика",
-      "timeRange": "Временной диапазон",
-      "title": "Анализ тенденций"
-    },
-    "units": {
-      "bpm": "BPM",
-      "celsius": "°C",
-      "cm": "см",
-      "fahrenheit": "°F",
-      "inches": "дюймы",
-      "kg": "кг",
-      "lbs": "фунт",
-      "mgdl": "мг/дл",
-      "mmHg": "мм рт. ст.",
-      "perMin": "/мин"
     }
   },
-  "warning": "Предупреждение",
-  "allergies": {
-    "messages": {
-      "loading": "Загрузка аллергий..."
-    }
-  },
-  "trash": {
-    "fileCount_one": "{{count}} fajl"
-  }
+  "warning": "Предупреждение"
 }

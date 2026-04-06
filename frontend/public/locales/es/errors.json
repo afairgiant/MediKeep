@@ -1,13 +1,33 @@
 {
+  "alert": {
+    "errorCount": "{{count}} Error",
+    "errorCount_one": "{{count}} Error",
+    "errorCount_other": "{{count}} Errores",
+    "formError": "Error de Formulario",
+    "highPriority": "{{count}} alta prioridad",
+    "highPriority_one": "{{count}} alta prioridad",
+    "highPriority_other": "{{count}} alta prioridad",
+    "suggestions": "Sugerencias:"
+  },
+  "boundary": {
+    "componentLabel": "Componente:",
+    "errorDetails": "Detalles del error",
+    "errorIdLabel": "ID del error:",
+    "errorLogged": "El error ha sido registrado automáticamente para su investigación.",
+    "reloadPage": "Recargar página",
+    "somethingWentWrong": "Algo salió mal",
+    "tryAgain": "Intentar de nuevo",
+    "unexpectedError": "Lo sentimos, pero ocurrió algo inesperado en el sistema de registros médicos."
+  },
   "file": {
-    "deleteFailed": "Error al eliminar el archivo.",
+    "deleteFailed": "Error al eliminar el archivo. Por favor, inténtelo de nuevo.",
     "downloadFailed": "Error al descargar el archivo. Por favor, inténtelo de nuevo.",
-    "notFound": "Fichero no encontrado.",
+    "notFound": "Archivo no encontrado.",
     "viewFailed": "Error al abrir el archivo para visualizarlo. Por favor, inténtelo de nuevo."
   },
   "form": {
     "conditionNotSelected": "Por favor, seleccione una condición",
-    "entityNotFound": "El objeto solicitado no se puede encontrar.",
+    "entityNotFound": "El elemento solicitado no se pudo encontrar.",
     "equipmentFieldsRequired": "El nombre y tipo de equipo son obligatorios",
     "equipmentNotSelected": "Por favor, seleccione al menos un equipo",
     "invalidDate": "Por favor, introduzca una fecha válida.",
@@ -18,7 +38,7 @@
     "medicationNotSelected": "Por favor, seleccione un medicamento",
     "mustBeValidNumber": "Debe ser un número válido",
     "patientNotSelected": "Por favor, seleccione un paciente.",
-    "requiredFieldMissing": "Por favor, complete todos los campos requeridos.",
+    "requiredFieldMissing": "Por favor, complete todos los campos obligatorios.",
     "submissionFailed": "Error al guardar el formulario. Por favor, verifique su entrada y vuelva a intentarlo."
   },
   "general": {
@@ -26,8 +46,8 @@
     "permissionDenied": "No tiene permiso para realizar esta acción.",
     "rateLimitExceeded": "Demasiadas solicitudes. Por favor, espere un momento y vuelva a intentarlo.",
     "sessionExpired": "Su sesión ha expirado. Por favor, vuelva a iniciar sesión.",
-    "storageFull": "Capacidad de almacenamiento máxima alcanzada. Por favor, libere espacio y vuelva a intentarlo.",
-    "unknownError": "Se produjo un error desconocido. Por favor, inténtelo de nuevo.",
+    "storageFull": "Límite de almacenamiento alcanzado. Por favor, libere espacio y vuelva a intentarlo.",
+    "unknownError": "Se produjo un error inesperado. Por favor, inténtelo de nuevo.",
     "validationError": "Por favor, verifique su entrada y vuelva a intentarlo."
   },
   "network": {
@@ -40,53 +60,53 @@
     "authFailed": "Error de autenticación con el servicio Paperless. Por favor, verifique las credenciales.",
     "configIncomplete": "La configuración de Paperless está incompleta. Por favor, verifique sus ajustes.",
     "connectionFailed": "No se puede conectar al servicio Paperless. Por favor, verifique la configuración.",
-    "duplicateDocument": "Este documento ya existe en Paperless. Los documentos idénticos no pueden ser cargados varias veces.",
-    "notEnabled": "La integración con Paperless no está activada. Por favor, actívela en la configuración.",
-    "taskFailed": "Error al cargar el documento en Paperless. Por favor, inténtelo de nuevo o contacte con el soporte.",
-    "taskTimeout": "Tiempo de procesamiento del documento agotado. Es posible que aún se esté procesando en Paperless.",
+    "duplicateDocument": "Este documento ya existe en Paperless. Los documentos idénticos no pueden subirse dos veces.",
+    "notEnabled": "La integración con Paperless no está habilitada. Por favor, habilítela en Configuración.",
+    "taskFailed": "Error al subir el documento a Paperless. Por favor, inténtelo de nuevo o contacte con soporte.",
+    "taskTimeout": "Tiempo de procesamiento del documento agotado. Es posible que el documento aún se esté procesando en Paperless.",
     "unavailable": "El servicio de gestión de documentos no está disponible actualmente.",
-    "uploadFailed": "Error al cargar en el sistema de gestión de documentos Paperless."
+    "uploadFailed": "Error al subir al sistema de gestión de documentos Paperless."
   },
   "patientForm": {
     "birthDateFuture": "La fecha de nacimiento no puede ser en el futuro",
     "birthDateRequired": "La fecha de nacimiento es obligatoria",
-    "createFailed": "Error en la creación: {{message}}",
+    "createFailed": "Error de creación: {{message}}",
     "firstNameRequired": "El nombre es obligatorio",
     "lastNameRequired": "El apellido es obligatorio",
-    "updateFailed": "Error en la actualización: {{message}}"
+    "updateFailed": "Error de actualización: {{message}}"
   },
   "patientNotAvailable": "Información del paciente no disponible",
   "relationships": {
-    "addConditionFailed": "Error al añadir la relación con la condición",
-    "addFailed": "Error al añadir la relación",
-    "addMedicationFailed": "Error al añadir la relación con el medicamento",
+    "addConditionFailed": "Error al agregar la relación de condición",
+    "addFailed": "Error al agregar la relación",
+    "addMedicationFailed": "Error al agregar la relación de medicamento",
     "deleteFailed": "Error al eliminar la relación",
     "fetchFailed": "Error al cargar las relaciones",
     "updateFailed": "Error al actualizar la relación"
   },
   "success": {
-    "batchUploadSuccess": "Todos los archivos se han cargado con éxito.",
-    "fileDeleted": "Archivo eliminado con éxito.",
-    "formSaved": "Formulario guardado con éxito.",
-    "paperlessSyncSuccess": "Sincronización exitosa con el sistema de gestión de documentos Paperless.",
-    "uploadMultipleSuccess": "Todos los archivos se han cargado con éxito.",
-    "uploadSuccess": "Archivo cargado con éxito."
+    "batchUploadSuccess": "¡Todos los archivos se subieron exitosamente!",
+    "fileDeleted": "Archivo eliminado exitosamente.",
+    "formSaved": "¡Formulario guardado exitosamente!",
+    "paperlessSyncSuccess": "Sincronización exitosa con la gestión de documentos Paperless.",
+    "uploadMultipleSuccess": "¡Todos los archivos se subieron exitosamente!",
+    "uploadSuccess": "¡Archivo subido exitosamente!"
   },
   "upload": {
-    "allUploadsFailed": "Fallo en todas las cargas. Por favor, verifique su red e inténtelo de nuevo.",
-    "batchUploadFailed": "Error al cargar algunos archivos. Por favor, consulte los errores de los archivos individuales.",
+    "allUploadsFailed": "Todas las subidas de archivos fallaron. Por favor, verifique su conexión y vuelva a intentarlo.",
+    "batchUploadFailed": "Algunos archivos no se pudieron subir. Por favor, revise los errores de archivos individuales.",
     "connectionError": "Error de conexión. Por favor, verifique su red e inténtelo de nuevo.",
-    "duplicateFile": "Este archivo ya ha sido cargado.",
-    "failed": "Fallo en la carga. Por favor, inténtelo de nuevo.",
+    "duplicateFile": "Este archivo ya ha sido subido.",
+    "failed": "Error al subir el archivo. Por favor, inténtelo de nuevo.",
     "fileProcessingFailed": "Error al procesar el archivo. Por favor, intente con un archivo diferente.",
     "fileTooLarge": "El tamaño del archivo excede el límite máximo.",
-    "invalidFileType": "Formato de archivo no soportado.",
-    "partialUploadSuccess": "Carga completada con errores. Por favor, verifique los archivos que fallaron."
+    "invalidFileType": "Tipo de archivo no compatible.",
+    "partialUploadSuccess": "Subida completada con algunos errores. Por favor, revise los archivos que fallaron."
   },
   "warnings": {
     "duplicateWarning": "Este archivo parece ser un duplicado.",
-    "largeFileWarning": "Archivo grande detectado. La carga puede tardar varios minutos.",
-    "partialSuccess": "Operación completada con alertas.",
-    "slowConnection": "La carga está tardando más de lo habitual debido a una conexión lenta."
+    "largeFileWarning": "Archivo grande detectado. La subida puede tardar varios minutos.",
+    "partialSuccess": "Operación completada con algunas advertencias.",
+    "slowConnection": "La subida está tardando más de lo usual debido a una conexión lenta."
   }
 }

@@ -18,7 +18,7 @@ import '../../components/auth/ChangePasswordModal.css';
  * must set a new password before accessing the rest of the application.
  */
 const ForceChangePassword = () => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['settings', 'common']);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -41,29 +41,29 @@ const ForceChangePassword = () => {
     setError('');
 
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      setError(t('settings.security.password.forceChange.errors.allFieldsRequired'));
+      setError(t('settings:security.password.forceChange.errors.allFieldsRequired'));
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError(t('settings.security.password.forceChange.errors.passwordsMustMatch'));
+      setError(t('settings:security.password.forceChange.errors.passwordsMustMatch'));
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setError(t('settings.security.password.forceChange.errors.passwordTooShort'));
+      setError(t('settings:security.password.forceChange.errors.passwordTooShort'));
       return;
     }
 
     const hasLetter = /[a-zA-Z]/.test(passwordData.newPassword);
     const hasNumber = /[0-9]/.test(passwordData.newPassword);
     if (!hasLetter || !hasNumber) {
-      setError(t('settings.security.password.forceChange.errors.passwordComplexity'));
+      setError(t('settings:security.password.forceChange.errors.passwordComplexity'));
       return;
     }
 
     if (passwordData.currentPassword === passwordData.newPassword) {
-      setError(t('settings.security.password.forceChange.errors.passwordMustDiffer'));
+      setError(t('settings:security.password.forceChange.errors.passwordMustDiffer'));
       return;
     }
 
@@ -88,7 +88,7 @@ const ForceChangePassword = () => {
         event: 'force_password_change_failed',
         error: message,
       });
-      setError(t('settings.security.password.forceChange.errors.changeFailed'));
+      setError(t('settings:security.password.forceChange.errors.changeFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +104,7 @@ const ForceChangePassword = () => {
       <div className={`${styles.loginForm} ${styles.loginFormWide}`}>
         <FormLoadingOverlay
           visible={isSubmitting}
-          message={t('settings.security.password.forceChange.submitting')}
+          message={t('settings:security.password.forceChange.submitting')}
         />
         <h1>
           <img
@@ -114,11 +114,12 @@ const ForceChangePassword = () => {
             height={40}
             style={{ verticalAlign: 'middle', marginRight: '8px' }}
           />
-          MediKeep
+          {/* eslint-disable-next-line i18next/no-literal-string -- brand name */}
+          {'MediKeep'}
         </h1>
-        <h2>{t('settings.security.password.forceChange.title')}</h2>
+        <h2>{t('settings:security.password.forceChange.title')}</h2>
         <p style={{ color: 'var(--color-text-secondary, #666)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
-          {t('settings.security.password.forceChange.subtitle')}
+          {t('settings:security.password.forceChange.subtitle')}
         </p>
 
         <div className="change-password-content">
@@ -127,7 +128,7 @@ const ForceChangePassword = () => {
           <form onSubmit={handleSubmit} className="password-form">
             <div className="form-group">
               <label htmlFor="currentPassword">
-                {t('settings.security.password.currentPassword')}
+                {t('settings:security.password.currentPassword')}
               </label>
               <input
                 type="password"
@@ -145,7 +146,7 @@ const ForceChangePassword = () => {
 
             <div className="form-group">
               <label htmlFor="newPassword">
-                {t('settings.security.password.newPassword')}
+                {t('settings:security.password.newPassword')}
               </label>
               <input
                 type="password"
@@ -160,13 +161,13 @@ const ForceChangePassword = () => {
                 aria-describedby={error ? 'fcp-error' : undefined}
               />
               <small className="form-help">
-                {t('settings.security.password.passwordHelp')}
+                {t('settings:security.password.passwordHelp')}
               </small>
             </div>
 
             <div className="form-group">
               <label htmlFor="confirmPassword">
-                {t('settings.security.password.confirmPassword')}
+                {t('settings:security.password.confirmPassword')}
               </label>
               <input
                 type="password"
@@ -195,7 +196,7 @@ const ForceChangePassword = () => {
                 variant="primary"
                 disabled={isSubmitting}
               >
-                {t('settings.security.password.forceChange.submit')}
+                {t('settings:security.password.forceChange.submit')}
               </Button>
             </div>
           </form>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert, Stack, Text, Button, Group, ThemeIcon } from '@mantine/core';
 import { IconAlertTriangle, IconRefresh } from '@tabler/icons-react';
+import i18n from '../../i18n/config';
 import logger from '../../services/logger';
 import { env } from '../../config/env';
 
@@ -62,19 +63,19 @@ class DocumentManagerErrorBoundary extends React.Component {
         >
           <Stack gap="md">
             <Text size="sm">
-              An error occurred while rendering this component. This may be due to:
+              {i18n.t('documents:errorBoundary.documentErrorDescription')}
             </Text>
             <Text size="xs" c="dimmed" component="ul" style={{ margin: 0, paddingLeft: '1rem' }}>
-              <li>Network connectivity issues</li>
-              <li>Invalid data from the server</li>
-              <li>Browser compatibility problems</li>
-              <li>Temporary system issues</li>
+              <li>{i18n.t('documents:errorBoundary.networkIssues')}</li>
+              <li>{i18n.t('documents:errorBoundary.invalidData')}</li>
+              <li>{i18n.t('documents:errorBoundary.browserCompat')}</li>
+              <li>{i18n.t('documents:errorBoundary.tempIssues')}</li>
             </Text>
             
             {this.state.error && env.DEV && (
               <details style={{ marginTop: '0.5rem' }}>
                 <summary style={{ cursor: 'pointer', fontSize: '0.8rem', color: 'var(--mantine-color-dimmed)' }}>
-                  Technical Details (Development Mode)
+                  {i18n.t('documents:errorBoundary.errorDetails')}
                 </summary>
                 <Text size="xs" c="red" ff="monospace" style={{ 
                   marginTop: '0.5rem', 
@@ -99,7 +100,7 @@ class DocumentManagerErrorBoundary extends React.Component {
                 leftSection={<IconRefresh size={16} />}
                 onClick={this.handleRetry}
               >
-                Try Again
+                {i18n.t('documents:errorBoundary.tryAgain')}
               </Button>
               {this.props.onError && (
                 <Button
@@ -107,7 +108,7 @@ class DocumentManagerErrorBoundary extends React.Component {
                   size="sm"
                   onClick={() => this.props.onError(this.state.error)}
                 >
-                  Report Issue
+                  {i18n.t('documents:errorBoundary.errorDetails')}
                 </Button>
               )}
             </Group>

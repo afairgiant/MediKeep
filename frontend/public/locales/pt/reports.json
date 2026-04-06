@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "Adicionar Registos Médicos",
+      "clearSelections": "Limpar Todas as Seleções",
+      "generateReport": "Gerar Relatório ({{count}} registos)",
+      "generateReport_one": "Gerar Relatório ({{count}} registo)",
+      "generateReport_other": "Gerar Relatório ({{count}} registos)",
+      "generateReportChartsOnly": "Gerar Relatório ({{chartCount}} gráficos)",
+      "generateReportWithCharts": "Gerar Relatório ({{recordCount}} registos, {{chartCount}} gráficos)",
+      "selectAll": "Selecionar Todos os Registos"
+    },
+    "configuration": {
+      "description": "Selecione registos médicos para incluir no seu relatório personalizado",
+      "title": "Configuração do Relatório"
+    },
+    "icon": "",
+    "loading": "A carregar construtor de relatórios...",
+    "noData": {
+      "description": "Adicione primeiro alguns registos médicos para usar o construtor de relatórios.",
+      "title": "Nenhuns Dados Médicos Disponíveis"
+    },
+    "notifications": {
+      "templateLoaded": "Modelo Carregado",
+      "templateLoadedMessage": "O modelo \"{{name}}\" foi carregado."
+    },
+    "progress": {
+      "recordsSelected": "Registos Selecionados"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "Adicionar informações demográficas e de contacto",
+        "label": "Incluir Informações do Paciente"
+      },
+      "includeProfilePicture": {
+        "description": "Adicionar fotografia do paciente ao cabeçalho do relatório",
+        "label": "Incluir Fotografia do Perfil"
+      },
+      "includeSummary": {
+        "description": "Adicionar secção de resumo e estatísticas",
+        "label": "Incluir Estatísticas de Resumo"
+      },
+      "reportTitle": {
+        "label": "Título do Relatório"
+      },
+      "title": "Configurações do Relatório"
+    },
+    "title": "Construtor de Relatórios Personalizado",
+    "trendCharts": {
+      "dateFrom": "De",
+      "dateTo": "Até",
+      "emptyState": "Nenhuns dados de tendência disponíveis. Adicione sinais vitais ou resultados laboratoriais para ativar gráficos de tendência.",
+      "labTestCharts": {
+        "description": "Procure e selecione exames laboratoriais para criar gráficos",
+        "searchPlaceholder": "Procurar exames laboratoriais...",
+        "title": "Gráficos de Exames Laboratoriais"
+      },
+      "maxReached": "Máximo de 10 gráficos atingido",
+      "recordCount": "{{count}} registos",
+      "recordCount_one": "{{count}} registo",
+      "recordCount_other": "{{count}} registos",
+      "removeChart": "Remover gráfico de {{name}}",
+      "selectedCharts": "Gráficos Selecionados ({{count}})",
+      "selectedCharts_one": "Gráficos Selecionados ({{count}})",
+      "selectedCharts_other": "Gráficos Selecionados ({{count}})",
+      "vitalCharts": {
+        "description": "Selecione sinais vitais para criar gráficos",
+        "title": "Gráficos de Sinais Vitais"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "Nenhumas Categorias Disponíveis",
+    "noCategoriesDescription": "Nenhumas categorias de dados médicos estão disponíveis para geração de relatórios.",
+    "noRecords": "Nenhuns registos disponíveis",
+    "recordCount": "{{count}} registos",
+    "recordCount_one": "{{count}} registo",
+    "recordCount_other": "{{count}} registos",
+    "selected": "{{count}} selecionados",
+    "selected_one": "{{count}} selecionado",
+    "selected_other": "{{count}} selecionados",
+    "showingFirst": "A mostrar os primeiros {{count}} registos. Mais registos estão disponíveis mas não são exibidos por questões de desempenho.",
+    "showingFirst_one": "A mostrar o primeiro {{count}} registo. Mais registos estão disponíveis mas não são exibidos por questões de desempenho.",
+    "showingFirst_other": "A mostrar os primeiros {{count}} registos. Mais registos estão disponíveis mas não são exibidos por questões de desempenho.",
+    "totalCount": "{{count}} total",
+    "totalCount_one": "{{count}} total",
+    "totalCount_other": "{{count}} total"
+  },
+  "dataExport": {
+    "availableData": "Dados Disponíveis",
+    "bulkExport": "Exportação em Massa",
+    "csvDescription": "O formato CSV é ideal para folhas de cálculo",
+    "dateFilterNote": "Os filtros de data aplicam-se a todos os tipos selecionados",
+    "exportInfo": "Informações de Exportação",
+    "exportTitle": "Exportar Registos Médicos",
+    "includeFilesNote": "Isto pode aumentar significativamente o tamanho do download",
+    "jsonDescription": "O formato JSON fornece estrutura completa de dados",
+    "pdfDescription": "O formato PDF cria relatórios imprimíveis",
+    "singleExport": "Exportação Individual",
+    "zipDescription": "As exportações em massa são empacotadas num ficheiro ZIP"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "mais {{count}} item",
+      "moreItems_other": "mais {{count}} itens",
+      "title": "Dados Disponíveis"
+    },
+    "buttons": {
+      "bulkExport": "Exportação em Massa de {{count}} tipos como ZIP",
+      "bulkExport_one": "Exportação em Massa de {{count}} tipo como ZIP",
+      "bulkExport_other": "Exportação em Massa de {{count}} tipos como ZIP",
+      "creatingZip": "A criar ZIP...",
+      "exportAs": "Exportar {{scope}} como {{format}}",
+      "exporting": "A exportar...",
+      "goToDashboard": "Ir para o Painel",
+      "refreshPage": "Atualizar Página"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "Selecionar Tipos de Dados para Exportação em Massa"
+      },
+      "dataToExport": {
+        "label": "Dados a Exportar",
+        "placeholder": "Selecionar tipo de dados"
+      },
+      "dateRange": {
+        "endDate": "Data Final (Opcional)",
+        "startDate": "Data Inicial (Opcional)"
+      },
+      "format": {
+        "label": "Formato de Exportação",
+        "placeholder": "Selecionar formato"
+      },
+      "includeFiles": "Incluir anexos de ficheiros (cria ficheiro ZIP)",
+      "includePatientInfo": {
+        "description": "Desmarque para excluir dados pessoais do paciente por privacidade",
+        "label": "Incluir informações do paciente (nome, dados demográficos, etc.)"
+      },
+      "title": "Configuração de Exportação"
+    },
+    "description": "Descarregue os seus dados médicos em vários formatos para cópia de segurança ou partilha com profissionais de saúde",
+    "errors": {
+      "bulkExportFailed": "Falha na exportação em massa: {{message}}",
+      "bulkInvalidSettings": "Por favor, verifique as suas configurações de exportação em massa. Certifique-se de que selecionou pelo menos um tipo de dados e um formato válido.",
+      "bulkNoDataFound": "Nenhuns dados encontrados para os critérios de exportação selecionados. Tente selecionar tipos de dados diferentes ou ajustar o intervalo de datas.",
+      "exportFailed": "Falha na exportação: {{message}}",
+      "invalidSettings": "Por favor, verifique as suas configurações de exportação. Certifique-se de que selecionou um tipo de dados e formato válidos.",
+      "loadFailed": "Falha ao carregar dados de exportação: {{message}}",
+      "noActivePatient": "Nenhum perfil de paciente está atualmente selecionado. Por favor, selecione um paciente do painel para usar a funcionalidade de exportação.",
+      "noDataFound": "Nenhuns dados encontrados para os critérios de exportação selecionados. Tente selecionar um tipo de dados ou intervalo de datas diferente.",
+      "noDataType": "Por favor, selecione pelo menos um tipo de dados para exportação em massa",
+      "sessionExpired": "A sua sessão expirou. Por favor, atualize a página ou inicie sessão novamente para aceder às funcionalidades de exportação.",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "Exportar múltiplos tipos de dados juntos num ficheiro ZIP",
+      "bulkExport": "Exportação em Massa",
+      "singleDescription": "Exportar um único tipo de dados no formato escolhido",
+      "singleExport": "Exportação Individual",
+      "title": "Modo de Exportação"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "Cria um ficheiro ZIP contendo múltiplos tipos de dados no formato escolhido para cópia de segurança abrangente de dados.",
+        "title": "Exportação em Massa:"
+      },
+      "csv": {
+        "description": "Valores separados por vírgulas adequados para aplicações de folha de cálculo como Excel ou Google Sheets.",
+        "title": "Formato CSV:"
+      },
+      "fileAttachments": {
+        "description": "Quando disponível para exportações PDF, os ficheiros de resultados laboratoriais podem ser incluídos num arquivo ZIP.",
+        "title": "Anexos de Ficheiros:"
+      },
+      "json": {
+        "description": "Formato de dados estruturados legível por máquina, ideal para importar para outros sistemas ou aplicações.",
+        "title": "Formato JSON:"
+      },
+      "pdf": {
+        "description": "Formato de documento legível por humanos perfeito para imprimir ou partilhar com profissionais de saúde.",
+        "title": "Formato PDF:"
+      },
+      "title": "Informações de Exportação"
+    },
+    "loading": "A carregar opções de exportação...",
+    "scopes": {
+      "all": "Todos os Registos",
+      "encounters": "Consultas"
+    },
+    "success": {
+      "bulkExportComplete": "Exportação em massa concluída com sucesso! O seu ficheiro ZIP contendo {{count}} tipos de dados foi descarregado.",
+      "bulkExportComplete_one": "Exportação em massa concluída com sucesso! O seu ficheiro ZIP contendo {{count}} tipo de dados foi descarregado.",
+      "bulkExportComplete_other": "Exportação em massa concluída com sucesso! O seu ficheiro ZIP contendo {{count}} tipos de dados foi descarregado.",
+      "exportComplete": "Exportação concluída com sucesso! O seu ficheiro {{format}} foi descarregado."
+    },
+    "title": "Exportar Registos de Saúde"
+  },
+  "templates": {
+    "categories": "{{count}} categorias",
+    "categories_one": "{{count}} categoria",
+    "categories_other": "{{count}} categorias",
+    "deleteConfirm": "Tem a certeza de que quer eliminar este modelo?",
+    "editTemplate": "Editar Modelo",
+    "loadTemplate": "Carregar Modelo",
+    "manageTemplates": "Gerir Modelos",
+    "moreTemplates": "... e mais {{count}} modelo",
+    "moreTemplates_one": "... e mais {{count}} modelo",
+    "moreTemplates_other": "... e mais {{count}} modelos",
+    "noSaved": "Nenhuns modelos guardados",
+    "records": "{{count}} registos",
+    "reportTemplates": "Modelos de Relatório",
+    "saveAsTemplate": "Guardar como Modelo",
+    "saveDescription": "Este modelo irá guardar as suas configurações atuais do relatório, registos selecionados e gráficos de tendência selecionados.",
+    "savedTemplates": "Modelos Guardados",
+    "updateTemplate": "Atualizar Modelo"
+  }
+}

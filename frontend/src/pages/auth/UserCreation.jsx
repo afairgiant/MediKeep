@@ -9,7 +9,7 @@ import { IconUserPlus, IconArrowLeft } from '@tabler/icons-react';
 const UserCreation = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('auth');
 
   const handleSuccess = async ({ userData, formData }) => {
     // Public context success - auto-login and redirect to dashboard
@@ -25,14 +25,14 @@ const UserCreation = () => {
 
         navigate('/dashboard', {
           state: {
-            message: t('auth.userCreation.welcomeMessage', { name: formData.firstName })
+            message: t('userCreation.welcomeMessage', { name: formData.firstName })
           }
         });
       } else {
         // If login result indicates failure, redirect to login page
         navigate('/login', {
           state: {
-            message: t('auth.userCreation.accountCreated')
+            message: t('userCreation.accountCreated')
           }
         });
       }
@@ -40,7 +40,7 @@ const UserCreation = () => {
       // If auto-login fails, redirect to login page with success message
       navigate('/login', {
         state: {
-          message: t('auth.userCreation.accountCreated')
+          message: t('userCreation.accountCreated')
         }
       });
     }
@@ -62,7 +62,7 @@ const UserCreation = () => {
               onClick={() => navigate('/login')}
               color="gray"
             >
-              {t('auth.userCreation.backToLogin')}
+              {t('userCreation.backToLogin')}
             </Button>
           </Group>
 
@@ -72,10 +72,10 @@ const UserCreation = () => {
             </ThemeIcon>
             <div>
               <h1 style={{ margin: 0, fontSize: '1.875rem', fontWeight: 600, color: '#1f2937' }}>
-                {t('auth.userCreation.pageTitle')}
+                {t('userCreation.pageTitle')}
               </h1>
               <p style={{ margin: '0.5rem 0 0 0', color: '#6b7280', fontSize: '0.875rem' }}>
-                {t('auth.userCreation.pageSubtitle')}
+                {t('userCreation.pageSubtitle')}
               </p>
             </div>
           </Group>
@@ -89,10 +89,10 @@ const UserCreation = () => {
             </ThemeIcon>
             <div>
               <Text size="lg" fw={600}>
-                {t('auth.userCreation.cardTitle')}
+                {t('userCreation.cardTitle')}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('auth.userCreation.cardSubtitle')}
+                {t('userCreation.cardSubtitle')}
               </Text>
             </div>
           </Group>
@@ -111,13 +111,13 @@ const UserCreation = () => {
               </ThemeIcon>
               <div>
                 <Text size="sm" fw={500}>
-                  {t('auth.userCreation.whatHappensNext')}
+                  {t('userCreation.whatHappensNext')}
                 </Text>
                 <List size="xs" c="dimmed" listStyleType="disc" mt={4}>
-                  <List.Item>{t('auth.userCreation.nextSteps.autoRecord')}</List.Item>
-                  <List.Item>{t('auth.userCreation.nextSteps.loggedIn')}</List.Item>
-                  <List.Item>{t('auth.userCreation.nextSteps.startManaging')}</List.Item>
-                  <List.Item>{t('auth.userCreation.nextSteps.dataSecure')}</List.Item>
+                  <List.Item>{t('userCreation.nextSteps.autoRecord')}</List.Item>
+                  <List.Item>{t('userCreation.nextSteps.loggedIn')}</List.Item>
+                  <List.Item>{t('userCreation.nextSteps.startManaging')}</List.Item>
+                  <List.Item>{t('userCreation.nextSteps.dataSecure')}</List.Item>
                 </List>
               </div>
             </Group>

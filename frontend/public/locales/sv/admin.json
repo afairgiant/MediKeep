@@ -3,12 +3,12 @@
     "createUser": {
       "linkPatient": {
         "hint": "Istället för att skapa en ny patientpost, länka den nya användaren till en befintlig patient (t.ex. ett barn som nu behöver en egen inloggning).",
-        "selfRecordBadge": "Eget register",
-        "selfRecordWarning": "Detta är den nuvarande ägarens eget register. Ett nytt eget register skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren ges redigeringsbehörighet till denna patient."
+        "selfRecordBadge": "Egen journal",
+        "selfRecordWarning": "Detta är den nuvarande ägarens egen journal. En ny egen journal skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren får redigeringsbehörighet till denna patient."
       },
       "passwordReqs": {
         "hasLetter": "Innehåller minst en bokstav",
-        "hasNumber": "Innehåller minst ett tal",
+        "hasNumber": "Innehåller minst en siffra",
         "minLength": "Minst 6 tecken"
       }
     }
@@ -100,7 +100,7 @@
       "restoreSafetyNote": "En säkerhetskopia skapas automatiskt innan återställningsprocessen påbörjas.",
       "restoreWarning": "Detta kommer att återställa från säkerhetskopia och ERSÄTTA aktuell data!",
       "stayOnSettings": "Stanna på inställningar",
-      "typeCleanupToConfirm": "Skriv <strong>CLEANUP</strong> för att bekräfta",
+      "typeCleanupToConfirm": "Skriv <strong>RENSNING</strong> för att bekräfta",
       "unsavedChanges": "Osparade ändringar",
       "unsavedWarning": "Du har osparade ändringar i dina lagringsinställningar. Om du lämnar denna flik försvinner dina ändringar."
     },
@@ -219,8 +219,8 @@
       "owner": "Ägare",
       "patientId": "ID",
       "selectPlaceholder": "Välj en patient...",
-      "selfRecordBadge": "Egenpost",
-      "selfRecordWarning": "Detta är den nuvarande ägarens egenpost. En ny egenpost skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren får redigeringsåtkomst till denna patient."
+      "selfRecordBadge": "Egen journal",
+      "selfRecordWarning": "Detta är den nuvarande ägarens egen journal. En ny egen journal skapas för den ursprungliga ägaren med deras demografiska uppgifter kopierade. Den ursprungliga ägaren får redigeringsåtkomst till denna patient."
     },
     "noteText": "En patientpost skapas automatiskt för denna användare med standardrollen \"user\".",
     "pageSubtitle": "Skapa ett nytt användarkonto med patientprofil",
@@ -424,6 +424,7 @@
     "backToModel": "Tillbaka till {{modelName}}",
     "bulkDeleteAssociated": "All tillhörande data (inklusive {{types}}) kommer också att raderas.",
     "bulkDeleteFailed": "Massradering misslyckades",
+    "bulkDeleteWarning": "Du håller på att permanent radera {{count}} {{modelName}}-poster.",
     "bulkDeleteWarning_one": "Du håller på att permanent radera {{count}} {{modelName}}-post.",
     "bulkDeleteWarning_other": "Du håller på att permanent radera {{count}} {{modelName}}-poster.",
     "changeRole": "Ändra roll",
@@ -475,22 +476,21 @@
     "saveFailed": "Sparning misslyckades",
     "searchPlaceholder": "Sök {{modelName}}...",
     "searchRecords": "Sök poster",
+    "searchResult": "{{count}} resultat för \"{{query}}\"",
     "searchResult_one": "{{count}} resultat för \"{{query}}\"",
     "searchResult_other": "{{count}} resultat för \"{{query}}\"",
     "selected": "{{count}} markerade",
-    "selected_one": "{{count}} vald",
-    "selected_other": "{{count}} valda",
+    "selected_one": "{{count}} markerad",
+    "selected_other": "{{count}} markerade",
     "toggleColumnVisibility": "Växla kolumnsynlighet",
-    "typeDeleteToConfirm": "Skriv <strong>DELETE</strong> för att bekräfta",
+    "typeDeleteToConfirm": "Skriv <strong>RADERA</strong> för att bekräfta",
     "usernameChangeLogout": "Detta loggar ut dig omedelbart och du måste logga in igen med det nya användarnamnet.",
     "usernameChangeText": "Du är på väg att ändra ditt eget användarnamn från <strong>\"{{oldUsername}}\"</strong> till <strong>\"{{newUsername}}\"</strong>.",
     "usernameChangeWarning": "Varning om ändring av användarnamn",
     "usernameUpdated": "Användarnamn uppdaterat",
     "usernameUpdatedMessage": "Ditt användarnamn har ändrats. Logga in med ditt nya användarnamn: \"{{username}}\"",
     "viewRecord": "Visa {{modelName}}",
-    "visibleColumns": "Synliga kolumner",
-    "searchResult": "{{count}} resultat för \"{{query}}\"",
-    "bulkDeleteWarning": "Du håller på att permanent radera {{count}} {{modelName}}-poster."
+    "visibleColumns": "Synliga kolumner"
   },
   "settings": {
     "dataRetention": {
@@ -518,7 +518,7 @@
   },
   "shared": {
     "dark": "mörkt",
-    "healthy": "frisk",
+    "healthy": "hälsosam",
     "info": "Info",
     "light": "ljust"
   },
@@ -557,6 +557,7 @@
     "title": "Verktyg och underhåll"
   },
   "trash": {
+    "clearFilters": "Rensa filter",
     "deleteConfirm": "Är du säker på att du vill permanent radera <strong>{{filename}}</strong>?",
     "deletedDateRange": "Datumintervall för radering",
     "deleteFailed": "Radering misslyckades",
@@ -564,6 +565,7 @@
     "deleteWarning": "Denna åtgärd kan inte ångras. Filen kommer att tas bort permanent från systemet.",
     "errorLoading": "Fel vid laddning av papperskorgen",
     "fileCount_one": "{{count}} fil",
+    "fileCount_other": "{{count}} filer",
     "fileDeleted": "Fil raderad",
     "fileDeletedMessage": "{{filename}} permanent raderad",
     "fileRestored": "Fil återställd",
@@ -580,6 +582,8 @@
     "permanentlyDeleteFile": "Radera fil permanent",
     "purgedDirectories_one": "i {{count}} katalog",
     "purgedDirectories_other": "i {{count}} kataloger",
+    "purgeDescription_one": "Filer som överskridit lagringstiden kommer att tas bort. För närvarande finns det <strong>{{count}} {{files}}</strong> i papperskorgen med en total storlek på <strong>{{size}}</strong>.",
+    "purgeDescription_other": "Filer som överskridit lagringstiden kommer att tas bort. För närvarande finns det <strong>{{count}} {{files}}</strong> i papperskorgen med en total storlek på <strong>{{size}}</strong>.",
     "purgedMessage_one": "{{count}} utgången fil permanent raderad",
     "purgedMessage_other": "{{count}} utgångna filer permanent raderade",
     "purgeExpired": "Rensa utgångna",
@@ -597,14 +601,16 @@
     "showingFiltered": "Visar {{shown}} av {{total}} {{files}}",
     "subtitle": "Hantera raderade uppladdade filer. Återställ filer till deras ursprungliga plats eller ta bort dem permanent för att frigöra lagringsutrymme.",
     "tableHeaders": {
+      "actions": "Åtgärder",
       "deleted": "Raderad",
       "filename": "Filnamn",
-      "originalLocation": "Ursprunglig plats"
+      "originalLocation": "Ursprunglig plats",
+      "reason": "Anledning",
+      "size": "Storlek"
     },
     "title": "Papperskorgshantering",
     "totalSize": "{{size}} totalt",
-    "trashPurged": "Papperskorg rensad",
-    "fileCount_other": "{{count}} filer"
+    "trashPurged": "Papperskorg rensad"
   },
   "users": {
     "actionsFor": "Åtgärder för {{username}}",
@@ -640,11 +646,20 @@
     "noUsersInSystem": "Inga användare i systemet.",
     "noUsersMatchFilters": "Inga användare matchar dina filter. Försök justera eller rensa filter.",
     "passwordModal": {
+      "bothFieldsRequired": "Båda lösenordsfälten måste fyllas i",
+      "confirmPlaceholder": "Bekräfta nytt lösenord",
+      "enterNewPassword": "Ange nytt lösenord",
       "forceChange": "Tvinga lösenordsbyte vid nästa inloggning",
+      "immediateReset": "Detta återställer omedelbart användarens lösenord. De måste använda det nya lösenordet för att logga in.",
       "newPassword": "Nytt lösenord",
       "passwordDescription": "Minst 6 tecken, minst 1 bokstav och 1 siffra",
+      "passwordsDoNotMatch": "Lösenorden stämmer inte överens",
+      "resetFailed": "Kunde inte återställa lösenord. Försök igen.",
+      "resetSuccess": "Lösenord återställt för {{username}}!",
       "resettingFor": "Återställ lösenord för <strong>{{username}}</strong>",
-      "ssoWarning": "Denna användare autentiseras via SSO ({{provider}}). Att ange ett lokalt lösenord möjliggör hybridautentisering."
+      "ssoWarning": "Denna användare autentiseras via SSO ({{provider}}). Att ange ett lokalt lösenord möjliggör hybridautentisering.",
+      "title": "Återställ lösenord för {{username}}",
+      "userInfo": "Användare: {{username}} (ID: {{userId}})"
     },
     "roleFilter": {
       "all": "Alla roller"
@@ -672,8 +687,8 @@
       "deactivateConfirm": "Inaktivera \"{{username}}\"? De kommer inte att kunna logga in förrän kontot återaktiveras.",
       "deactivateTitle": "Inaktivera användare"
     },
+    "userCount": "{{count}} användare",
     "userCount_one": "{{count}} användare",
-    "userCount_other": "{{count}} användare",
-    "userCount": "{{count}} användare"
+    "userCount_other": "{{count}} användare"
   }
 }

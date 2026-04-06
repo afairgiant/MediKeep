@@ -15,6 +15,7 @@ import {
   IconFolder,
   IconCloud
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 import {
   MEDICAL_DOCUMENT_EXTENSIONS,
@@ -37,6 +38,7 @@ const FileUploadZone = ({
   mode = 'view',
   autoUpload = false,
 }) => {
+  const { t } = useTranslation('documents');
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
@@ -225,7 +227,7 @@ const FileUploadZone = ({
 
           <div style={{ textAlign: 'center' }}>
             <Text size="xl" inline>
-              Drag files here or click to select
+              {t('fileUpload.dragOrClick')}
             </Text>
             <Text size="sm" c="dimmed" inline mt={7}>
               {mode === 'create' 
@@ -234,7 +236,7 @@ const FileUploadZone = ({
               }
             </Text>
             <Text size="xs" c="dimmed" mt="xs">
-              Accepted: {acceptedTypes.join(', ')} • Max size: {Math.round(maxSize / 1024 / 1024)}MB
+              {t('fileUpload.accepted', { types: acceptedTypes.join(', '), size: Math.round(maxSize / 1024 / 1024) })}
             </Text>
             <Group justify="center" mt="md">
               <ThemeIcon size="sm" variant="light" color={storageInfo.color}>
@@ -264,7 +266,7 @@ const FileUploadZone = ({
           onClick={() => document.getElementById('file-input')?.click()}
           disabled={disabled}
         >
-          Choose Files
+          {t('fileUpload.chooseFiles')}
         </Button>
       </Group>
 
@@ -272,7 +274,7 @@ const FileUploadZone = ({
       {selectedFiles.length > 0 && (
         <Stack gap="sm">
           <Text fw={500} size="sm">
-            Selected Files ({selectedFiles.length})
+            {t('fileUpload.selectedFiles', { count: selectedFiles.length })}
           </Text>
           
           {selectedFiles.map((item) => (
@@ -292,7 +294,7 @@ const FileUploadZone = ({
                 size="xs"
                 onClick={() => removeFile(item.id)}
               >
-                Remove
+                {t('fileUpload.remove')}
               </Button>
             </Group>
           ))}

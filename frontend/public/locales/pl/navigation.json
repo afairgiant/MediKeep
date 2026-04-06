@@ -14,61 +14,63 @@
     "activity": {
       "lastUpdated": "Ostatnia aktualizacja",
       "noActivity": "Brak niedawnej aktywności",
-      "noActivityDescription": "Działania Twojego rejestru medycznego pojawią się tutaj"
+      "noActivityDescription": "Działania związane z dokumentacją medyczną będą wyświetlane tutaj"
     },
-    "hello": "Cześć",
-    "loading": "Ładowanie Twojego pulpitu medycznego...",
+    "hello": "Witaj",
+    "loading": "Ładowanie pulpitu medycznego...",
     "modules": {
-      "exportRecords": "Eksportuj rejestry",
+      "exportRecords": "Eksportuj dokumentację",
       "visitHistory": "Historia wizyt"
     },
     "search": {
       "advancedSearch": "Wyszukiwanie zaawansowane",
-      "placeholder": "Szukaj wśród rejestrów medycznych..."
+      "placeholder": "Przeszukaj dokumentację medyczną..."
     },
     "sections": {
-      "additionalResources": "Zasoby dodatkowe",
+      "additionalResources": "Dodatkowe zasoby",
       "coreMedical": "Podstawowe informacje medyczne",
       "healthMonitoring": "Monitorowanie zdrowia",
       "prevention": "Profilaktyka i historia",
-      "recentActivity": "Niedawna aktywność",
+      "recentActivity": "Ostatnia aktywność",
       "treatments": "Zabiegi i procedury"
     },
     "stats": {
       "activeMedications": "Aktywne leki"
     },
-    "subtitle": "Bezpiecznie zarządzaj swoimi informacjami zdrowotnymi",
+    "subtitle": "Bezpiecznie zarządzaj informacjami o swoim zdrowiu",
     "title": "Panel główny MediKeep"
   },
   "invitations": {
     "acceptButton": "Zaakceptuj zaproszenie",
-    "confirmDescription": "Zaakceptowując, zyskasz dostęp do przeglądania udostępnionych informacji medycznych.",
+    "confirmDescription": "Po zaakceptowaniu uzyskasz dostęp do udostępnionych informacji medycznych.",
     "confirmQuestion": "Czy na pewno chcesz zaakceptować to zaproszenie?",
     "confirmTitle": "Potwierdź zaakceptowanie zaproszenia",
     "from": "Od",
     "lastUpdated": "Ostatnia aktualizacja",
     "manageAll": "Zarządzaj wszystkimi zaproszeniami",
     "noPending": "Brak oczekujących zaproszeń",
-    "noPendingDescription": "Nowe zaproszenia do współdzielenia pojawią się tutaj",
+    "noPendingDescription": "Nowe zaproszenia do udostępniania będą wyświetlane tutaj",
     "sharePatient": "Udostępnij pacjenta",
     "title": "Zaproszenia",
     "types": {
-      "patientRecord": "Rekord pacjenta"
-    },
-    "viewAll_few": "View all {{count}} invitations",
-    "viewAll_many": "View all {{count}} invitations"
+      "patientRecord": "Dokumentacja pacjenta"
+    }
   },
   "menu": {
-    "backToDashboard": "Powrót do pulpitu",
+    "account": "Konto",
+    "backToDashboard": "Powrót do pulpitu głównego",
+    "darkMode": "Tryb ciemny",
     "help": "Pomoc",
+    "lightMode": "Tryb jasny",
     "logout": "Wyloguj",
     "patients": "Pacjenci",
     "profile": "Profil",
-    "reports": "Raporty"
+    "reports": "Raporty",
+    "userActions": "Akcje użytkownika"
   },
   "pages": {
     "help": "Pomoc i wsparcie",
-    "medicalHistory": "Historia medyczna",
+    "medicalHistory": "Historia choroby",
     "patientDetails": "Szczegóły pacjenta",
     "patientList": "Lista pacjentów",
     "preferences": "Preferencje",
@@ -76,20 +78,42 @@
     "userProfile": "Profil użytkownika"
   },
   "sections": {
-    "personalInfo": "Informacje osobiste",
+    "personalInfo": "Dane osobowe",
     "preferences": "Preferencje"
   },
   "sidebarNav": {
     "items": {
+      "adminDashboard": "Panel administratora",
+      "allergies": "Alergie",
+      "backupManagement": "Zarządzanie kopiami zapasowymi",
+      "conditions": "Schorzenia",
       "customReports": "Raporty niestandardowe",
-      "exportRecords": "Eksportuj rejestry",
+      "dataModels": "Modele danych",
+      "emergencyContacts": "Kontakty alarmowe",
+      "exportRecords": "Eksportuj dokumentację",
+      "familyHistory": "Historia rodzinna",
+      "immunizations": "Szczepienia",
+      "injuries": "Urazy",
+      "insurance": "Ubezpieczenie",
+      "labResults": "Wyniki badań",
       "language": "Język",
-      "patientInfo": "Informacje pacjenta",
+      "medicalEquipment": "Sprzęt medyczny",
+      "medications": "Leki",
+      "patientInfo": "Informacje o pacjencie",
+      "pharmacies": "Apteki",
+      "practitioners": "Lekarze",
+      "procedures": "Procedury",
+      "settings": "Ustawienia",
+      "symptoms": "Objawy",
+      "systemHealth": "Stan systemu",
       "tagManagement": "Zarządzanie tagami",
       "theme": "Motyw",
-      "visitHistory": "Historia wizyt"
+      "treatments": "Leczenie",
+      "visitHistory": "Historia wizyt",
+      "vitalSigns": "Podstawowe parametry życiowe"
     },
     "sections": {
+      "administration": "Administracja",
       "careAndTreatment": "Opieka i leczenie",
       "misc": "Różne",
       "tools": "Narzędzia"

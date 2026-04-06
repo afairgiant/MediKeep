@@ -1,0 +1,1452 @@
+{
+  "allergies": {
+    "allergen": {
+      "description": "ชื่อสารก่อภูมิแพ้",
+      "label": "สารก่อภูมิแพ้",
+      "placeholder": "กรอกชื่อสารก่อภูมิแพ้"
+    },
+    "allergyType": {
+      "description": "ประเภทของภูมิแพ้",
+      "label": "ประเภทภูมิแพ้",
+      "options": {
+        "environmental": "สิ่งแวดล้อม",
+        "food": "อาหาร",
+        "insect": "แมลง",
+        "medication": "ยา"
+      },
+      "placeholder": "เลือกประเภทภูมิแพ้"
+    },
+    "cardSubtitle": "ภูมิแพ้ทางการแพทย์",
+    "editTitle": "แก้ไขภูมิแพ้",
+    "emptyState": {
+      "noData": "คลิก \"เพิ่มภูมิแพ้ใหม่\" เพื่อเริ่มต้น",
+      "title": "ไม่พบข้อมูลภูมิแพ้"
+    },
+    "messages": {
+      "loading": "กำลังโหลดข้อมูลภูมิแพ้...",
+      "saving": "กำลังบันทึกข้อมูลภูมิแพ้..."
+    },
+    "modal": {
+      "title": "รายละเอียดภูมิแพ้"
+    },
+    "noMedicationLinked": "ไม่มียาที่เชื่อมโยง",
+    "onsetDate": {
+      "description": "วันที่พบภูมิแพ้ครั้งแรก",
+      "placeholder": "เลือกวันที่เริ่มมีอาการ"
+    },
+    "reaction": {
+      "description": "อาการและรายละเอียดของปฏิกิริยาแพ้",
+      "label": "รายละเอียดปฏิกิริยาแพ้",
+      "placeholder": "อธิบายปฏิกิริยาแพ้ที่เกิดขึ้น"
+    },
+    "reactionInformation": "ข้อมูลปฏิกิริยาแพ้",
+    "reactionType": {
+      "description": "ประเภทของปฏิกิริยาแพ้",
+      "label": "ประเภทปฏิกิริยาแพ้",
+      "options": {
+        "anaphylaxis": "ภูมิแพ้รุนแรง",
+        "gastrointestinal": "ระบบทางเดินอาหาร",
+        "respiratory": "ระบบทางเดินหายใจ",
+        "skin": "ผิวหนัง"
+      },
+      "placeholder": "เลือกประเภทปฏิกิริยาแพ้"
+    },
+    "relatedMedication": {
+      "description": "ยาที่ก่อให้เกิดภูมิแพ้นี้",
+      "label": "ยาที่เกี่ยวข้อง",
+      "placeholder": "เลือกยา"
+    },
+    "severity": {
+      "description": "ระดับความรุนแรงของปฏิกิริยาแพ้",
+      "placeholder": "เลือกระดับความรุนแรง"
+    },
+    "status": {
+      "description": "สถานะปัจจุบันของภูมิแพ้"
+    },
+    "tabs": {
+      "reactionDetails": "รายละเอียดปฏิกิริยาแพ้"
+    },
+    "viewMedication": "ดูรายละเอียดยา"
+  },
+  "componentCatalog": {
+    "fetchError": "ไม่สามารถโหลดรายการผลตรวจได้",
+    "noData": "เพิ่มผลตรวจแล็บพร้อมค่าการตรวจเพื่อดูที่นี่",
+    "noResults": "ไม่พบรายการตรวจ",
+    "readingCount_one": "{{count}} reading",
+    "refRange": "ค่าอ้างอิง",
+    "searchPlaceholder": "ค้นหาการตรวจ...",
+    "sort": {
+      "alphabetical": "ก-ฮ"
+    },
+    "status": {
+      "abnormal": "ผิดปกติ",
+      "borderline": "เกือบผิดปกติ",
+      "critical": "วิกฤติ",
+      "high": "สูง",
+      "low": "ต่ำ",
+      "normal": "ปกติ"
+    },
+    "trend": {
+      "decreasing": "ลดลง",
+      "improving": "ดีขึ้น",
+      "increasing": "เพิ่มขึ้น",
+      "stable": "คงที่",
+      "worsening": "แย่ลง"
+    }
+  },
+  "conditions": {
+    "codeDescription": {
+      "description": "คำอธิบายรหัสที่มนุษย์สามารถอ่านได้",
+      "label": "รายละเอียดรหัส",
+      "placeholder": "คำอธิบายรหัสทางการแพทย์"
+    },
+    "diagnosis": {
+      "description": "ชื่อโรคหรือการวินิจฉัย",
+      "label": "การวินิจฉัย",
+      "placeholder": "เช่น ความดันโลหิตสูง, เบาหวานชนิดที่ 2, หอบหืด"
+    },
+    "endDate": {
+      "description": "วันที่โรคหายแล้ว (หากมี)",
+      "placeholder": "เลือกวันที่สิ้นสุด"
+    },
+    "icd10Code": {
+      "description": "รหัสมาตรฐานสากลสำหรับการจัดประเภทโรค",
+      "label": "รหัส ICD-10",
+      "placeholder": "เช่น I10, E11.9"
+    },
+    "notes": {
+      "description": "รายละเอียดเพิ่มเติมเกี่ยวกับโรค ประวัติการรักษา หรือข้อสังเกต"
+    },
+    "onsetDate": {
+      "description": "วันที่เริ่มมีอาการครั้งแรก",
+      "placeholder": "เลือกวันที่เริ่มมีอาการ"
+    },
+    "relatedMedication": {
+      "description": "เชื่อมโยงโรคนี้กับยาที่เฉพาะเจาะจง",
+      "label": "ยาที่เกี่ยวข้อง",
+      "placeholder": "เลือกยา (ไม่จำเป็น)"
+    },
+    "severity": {
+      "description": "ระดับความรุนแรงของโรคนี้",
+      "placeholder": "เลือกระดับความรุนแรง"
+    },
+    "snomedCode": {
+      "description": "รหัสศัพท์คลินิกมาตรฐาน SNOMED CT",
+      "label": "รหัส SNOMED",
+      "placeholder": "เช่น 38341003"
+    },
+    "status": {
+      "description": "สถานะปัจจุบันของโรคนี้"
+    }
+  },
+  "emergencyContacts": {
+    "form": {
+      "address": {
+        "description": "ที่อยู่ของผู้ติดต่อ (ไม่จำเป็น)",
+        "label": "ที่อยู่",
+        "placeholder": "เช่น 123 ถนนใหญ่ เขต จังหวัด 10110"
+      },
+      "email": {
+        "description": "ที่อยู่อีเมลเสริม",
+        "label": "ที่อยู่อีเมล",
+        "placeholder": "เช่น john.smith@email.com"
+      },
+      "isActive": {
+        "description": "ผู้ติดต่อนี้สามารถติดต่อได้ในปัจจุบัน",
+        "label": "ผู้ติดต่อที่ใช้งานได้"
+      },
+      "isPrimary": {
+        "description": "บุคคลนี้จะถูกติดต่อเป็นคนแรกในกรณีฉุกเฉิน",
+        "label": "ผู้ติดต่อฉุกเฉินหลัก"
+      },
+      "name": {
+        "description": "ชื่อ-นามสกุลของผู้ติดต่อฉุกเฉิน",
+        "label": "ชื่อ-นามสกุล",
+        "placeholder": "เช่น จอห์น สมิธ"
+      },
+      "notes": {
+        "description": "หมายเหตุเพิ่มเติมเกี่ยวกับผู้ติดต่อนี้",
+        "placeholder": "ข้อมูลเพิ่มเติม (เช่น 'ติดต่อได้เฉพาะวันทำงาน', 'พูดภาษาสเปนได้')"
+      },
+      "primaryPhone": {
+        "description": "เบอร์โทรศัพท์หลัก",
+        "label": "เบอร์โทรหลัก",
+        "placeholder": "เช่น 081-234-5678"
+      },
+      "relationship": {
+        "description": "ความสัมพันธ์กับผู้ป่วย",
+        "label": "ความสัมพันธ์",
+        "placeholder": "เลือกความสัมพันธ์"
+      },
+      "secondaryPhone": {
+        "description": "เบอร์โทรศัพท์สำรองเสริม",
+        "label": "เบอร์โทรสำรอง",
+        "placeholder": "เช่น 089-876-5432"
+      }
+    },
+    "messages": {
+      "saving": "กำลังบันทึกผู้ติดต่อฉุกเฉิน..."
+    },
+    "tabs": {
+      "contactInfo": "ข้อมูลการติดต่อ"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "deviceDetails": "รายละเอียดอุปกรณ์",
+      "serviceDates": "บริการและวันที่"
+    }
+  },
+  "familyHistory": {
+    "form": {
+      "condition": {
+        "conditionName": {
+          "description": "ชื่อของโรค",
+          "label": "ชื่อโรค",
+          "placeholder": "เช่น เบาหวาน, โรคหัวใจ, มะเร็ง"
+        },
+        "conditionType": {
+          "description": "ประเภทของโรค",
+          "label": "ประเภทโรค",
+          "placeholder": "เลือกประเภทโรค"
+        },
+        "diagnosisAge": {
+          "description": "อายุเมื่อได้รับการวินิจฉัย",
+          "label": "อายุเมื่อวินิจฉัย",
+          "placeholder": "เช่น 45"
+        },
+        "icd10Code": {
+          "description": "รหัสการวินิจฉัยทางการแพทย์ (หากทราบ)",
+          "label": "รหัส ICD-10",
+          "placeholder": "เช่น E11.9"
+        },
+        "notes": {
+          "description": "รายละเอียดการรักษา ผลลัพธ์ หรือข้อมูลที่เกี่ยวข้องอื่นๆ",
+          "placeholder": "รายละเอียดเพิ่มเติมเกี่ยวกับโรค..."
+        },
+        "severity": {
+          "description": "ระดับความรุนแรงของโรค",
+          "label": "ความรุนแรง",
+          "placeholder": "เลือกระดับความรุนแรง"
+        },
+        "severityOptions": {
+          "critical": "🚨 วิกฤติ - คุกคามชีวิต",
+          "mild": "💛 เล็กน้อย - ผลกระทบเพียงเล็กน้อย",
+          "moderate": "⚡ ปานกลาง - ส่งผลกระทบที่เห็นได้ชัด",
+          "severe": "⚠️ รุนแรง - ส่งผลกระทบอย่างมาก"
+        },
+        "status": {
+          "description": "สถานะปัจจุบันของโรค",
+          "label": "สถานะ",
+          "placeholder": "เลือกสถานะ"
+        },
+        "statusOptions": {
+          "active": "ดำเนินอยู่ - โรคที่มีอาการต่อเนื่อง",
+          "chronic": "เรื้อรัง - โรคระยะยาว",
+          "resolved": "หายแล้ว - ไม่มีอาการแล้ว"
+        },
+        "typeOptions": {
+          "autoimmune": "ภูมิคุ้มกันผิดปกติ - โรคระบบภูมิคุ้มกัน",
+          "cancer": "มะเร็ง - โรคมะเร็ง",
+          "cardiovascular": "หัวใจและหลอดเลือด - โรคหัวใจและหลอดเลือด",
+          "diabetes": "เบาหวาน - โรคระดับน้ำตาลในเลือด",
+          "endocrine": "ต่อมไร้ท่อ - โรคฮอร์โมน",
+          "genetic": "พันธุกรรม - โรคทางพันธุกรรม",
+          "mentalHealth": "สุขภาพจิต - โรคทางจิตเวช",
+          "neurological": "ระบบประสาท - โรคสมองและระบบประสาท",
+          "other": "อื่นๆ - ระบุในหมายเหตุ",
+          "respiratory": "ระบบหายใจ - โรคปอดและการหายใจ"
+        }
+      },
+      "member": {
+        "birthYear": {
+          "description": "ปีที่สมาชิกในครอบครัวเกิด",
+          "label": "ปีเกิด",
+          "placeholder": "เช่น พ.ศ. 2508"
+        },
+        "deathYear": {
+          "description": "ปีที่สมาชิกในครอบครัวเสียชีวิต",
+          "label": "ปีเสียชีวิต",
+          "placeholder": "เช่น พ.ศ. 2563"
+        },
+        "deceased": {
+          "description": "ติ๊กถ้าสมาชิกในครอบครัวเสียชีวิตแล้ว",
+          "label": "เสียชีวิตแล้ว"
+        },
+        "gender": {
+          "description": "เพศของสมาชิกในครอบครัว",
+          "label": "เพศ",
+          "placeholder": "เลือกเพศ"
+        },
+        "genderOptions": {
+          "female": "หญิง",
+          "male": "ชาย"
+        },
+        "name": {
+          "description": "ชื่อ-นามสกุลของสมาชิกในครอบครัว",
+          "label": "ชื่อ-นามสกุล",
+          "placeholder": "กรอกชื่อสมาชิกในครอบครัว"
+        },
+        "notes": {
+          "description": "หมายเหตุเพิ่มเติมหรือข้อมูลสำคัญ",
+          "placeholder": "ข้อมูลเพิ่มเติมเกี่ยวกับสมาชิกในครอบครัว..."
+        },
+        "relationship": {
+          "description": "ความสัมพันธ์กับคุณ",
+          "label": "ความสัมพันธ์",
+          "placeholder": "เลือกความสัมพันธ์"
+        },
+        "relationshipOptions": {
+          "aunt": "ป้า/น้า/อา",
+          "brother": "พี่ชาย/น้องชาย",
+          "cousin": "ลูกพี่ลูกน้อง",
+          "father": "พ่อ",
+          "maternalGrandfather": "ปู่ฝ่ายมารดา",
+          "maternalGrandmother": "ย่าฝ่ายมารดา",
+          "mother": "แม่",
+          "paternalGrandfather": "ปู่ฝ่ายบิดา",
+          "paternalGrandmother": "ย่าฝ่ายบิดา",
+          "sister": "พี่สาว/น้องสาว",
+          "uncle": "ลุง/น้า/อา"
+        }
+      }
+    }
+  },
+  "form": {
+    "invalidPhoneDigits": "หมายเลขโทรศัพท์สามารถมีได้เฉพาะตัวเลข ช่องว่าง เส้นประ วงเล็บ จุด และ +",
+    "invalidWebsiteUrl": "โปรดกรอก URL เว็บไซต์ที่ถูกต้อง"
+  },
+  "immunizations": {
+    "dateAdministered": {
+      "description": "วันที่ได้รับวัคซีน",
+      "label": "วันที่ฉีดวัคซีน",
+      "placeholder": "เลือกวันที่ฉีดวัคซีน"
+    },
+    "doseNumber": {
+      "description": "เข็มที่เท่าไหร่ในชุด",
+      "label": "หมายเลขเข็ม",
+      "placeholder": "1, 2, 3..."
+    },
+    "expirationDate": {
+      "description": "วันหมดอายุของวัคซีนที่ใช้",
+      "label": "วันหมดอายุวัคซีน",
+      "placeholder": "เลือกวันหมดอายุ"
+    },
+    "location": {
+      "description": "สถานที่ที่ได้รับวัคซีน",
+      "placeholder": "เช่น ร้านขายยา โรงพยาบาล คลินิก กรมอนามัย"
+    },
+    "lotNumber": {
+      "description": "หมายเลขล็อตสำหรับการติดตาม",
+      "label": "หมายเลขล็อต",
+      "placeholder": "หมายเลขล็อต/แบทช์วัคซีน"
+    },
+    "manufacturer": {
+      "description": "ผู้ผลิตวัคซีน",
+      "label": "ผู้ผลิต",
+      "placeholder": "เลือกผู้ผลิต"
+    },
+    "manufacturerOptions": {
+      "astraZeneca": "แอสตร้าเซเนก้า",
+      "glaxoSmithKline": "แกล็กโซ สมิธไคลน์",
+      "johnsonJohnson": "จอห์นสัน แอนด์ จอห์นสัน",
+      "merck": "เมอร์ค",
+      "moderna": "โมเดอร์นา",
+      "pfizerBioNTech": "ไฟเซอร์-ไบโอเอ็นเทค",
+      "sanofi": "ซาโนฟี"
+    },
+    "ndcNumber": {
+      "description": "รหัสยาแห่งชาติสำหรับวัคซีน",
+      "label": "หมายเลข NDC",
+      "placeholder": "เช่น 12345-6789-01"
+    },
+    "notes": {
+      "description": "รายละเอียดที่เกี่ยวข้องเกี่ยวกับการฉีดวัคซีน",
+      "placeholder": "หมายเหตุเพิ่มเติมเกี่ยวกับการฉีดวัคซีนนี้..."
+    },
+    "route": {
+      "description": "วิธีการฉีดวัคซีน",
+      "label": "วิธีการฉีด",
+      "placeholder": "เลือกวิธีการฉีด"
+    },
+    "routeOptions": {
+      "intradermal": "ฉีดชั้นหนังแท้ (ID)",
+      "intramuscular": "ฉีดเข้ากล้ามเนื้อ (IM)",
+      "subcutaneous": "ฉีดใต้ผิวหนัง (SC)"
+    },
+    "site": {
+      "description": "ตำแหน่งที่ฉีดวัคซีน",
+      "label": "ตำแหน่งการฉีด",
+      "placeholder": "เลือกตำแหน่งการฉีด"
+    },
+    "siteOptions": {
+      "leftArm": "แขนซ้าย",
+      "leftDeltoid": "กล้ามเนื้อเดลทอยด์ซ้าย",
+      "leftThigh": "ต้นขาซ้าย",
+      "rightArm": "แขนขวา",
+      "rightDeltoid": "กล้ามเนื้อเดลทอยด์ขวา",
+      "rightThigh": "ต้นขาขวา"
+    },
+    "vaccineName": {
+      "description": "ชื่อวัคซีนที่ได้รับ",
+      "label": "ชื่อวัคซีน",
+      "placeholder": "เช่น วัคซีนโควิด-19 mRNA, วัคซีนไข้หวัดใหญ่, MMR"
+    }
+  },
+  "injuries": {
+    "addNew": "เพิ่มการบาดเจ็บใหม่",
+    "addTitle": "เพิ่มการบาดเจ็บใหม่",
+    "bodyLocation": {
+      "description": "ส่วนของร่างกายที่เฉพาะเจาะจงที่ได้รับบาดเจ็บ",
+      "label": "ตำแหน่งร่างกาย",
+      "placeholder": "เช่น เข่าซ้าย, ไหล่ขวา"
+    },
+    "bodyPart": {
+      "description": "ส่วนของร่างกายหรือบริเวณที่ได้รับผลกระทบ",
+      "label": "อวัยวะที่ได้รับบาดเจ็บ",
+      "placeholder": "เช่น ข้อเท้า, ข้อมือ, เข่า"
+    },
+    "cardSubtitle": "การบาดเจ็บทางกายภาพ",
+    "cause": {
+      "description": "การบาดเจ็บเกิดขึ้นอย่างไร (ล้ม, กีฬา, อุบัติเหตุ ฯลฯ)",
+      "label": "สาเหตุ / กลไกการบาดเจ็บ",
+      "placeholder": "อธิบายว่าการบาดเจ็บเกิดขึ้นอย่างไร..."
+    },
+    "dateOfInjury": {
+      "description": "วันที่เกิดการบาดเจ็บ (ไม่จำเป็นหากไม่ทราบ)",
+      "label": "วันที่ได้รับบาดเจ็บ"
+    },
+    "editTitle": "แก้ไขการบาดเจ็บ",
+    "emptyState": {
+      "noData": "คลิก \"เพิ่มการบาดเจ็บใหม่\" เพื่อเริ่มต้น",
+      "title": "ไม่พบข้อมูลการบาดเจ็บ"
+    },
+    "injuryDate": {
+      "description": "วันที่เกิดการบาดเจ็บ",
+      "label": "วันที่ได้รับบาดเจ็บ",
+      "placeholder": "เลือกวันที่ได้รับบาดเจ็บ"
+    },
+    "injuryName": {
+      "description": "ชื่อที่อธิบายการบาดเจ็บนี้",
+      "label": "ชื่อการบาดเจ็บ",
+      "placeholder": "เช่น แขนซ้ายหัก"
+    },
+    "injuryType": {
+      "description": "ประเภทการบาดเจ็บ (เช่น แขนหัก, เคล็ด)",
+      "label": "ประเภทการบาดเจ็บ",
+      "noResults": "ไม่พบประเภทที่ตรงกัน",
+      "placeholder": "เลือกหรือสร้างประเภท"
+    },
+    "laterality": {
+      "description": "ด้านใดของร่างกายที่ได้รับผลกระทบ",
+      "label": "ด้าน",
+      "options": {
+        "bilateral": "ทั้งสองด้าน",
+        "left": "ซ้าย",
+        "notApplicable": "ไม่เกี่ยวข้อง",
+        "right": "ขวา"
+      },
+      "placeholder": "เลือกด้าน"
+    },
+    "mechanism": {
+      "description": "อธิบายว่าการบาดเจ็บเกิดขึ้นอย่างไร",
+      "label": "สาเหตุการเกิด",
+      "placeholder": "เช่น ล้มขณะปีนเขา"
+    },
+    "messages": {
+      "loading": "กำลังโหลดข้อมูลการบาดเจ็บ...",
+      "saving": "กำลังบันทึกข้อมูลการบาดเจ็บ..."
+    },
+    "notes": {
+      "description": "หมายเหตุทั่วไปหรือรายละเอียดเพิ่มเติม",
+      "placeholder": "ข้อมูลที่เกี่ยวข้องอื่นๆ..."
+    },
+    "practitioner": {
+      "description": "ผู้ให้บริการทางการแพทย์ที่รักษาการบาดเจ็บนี้",
+      "label": "แพทย์ผู้รักษา",
+      "placeholder": "เลือกแพทย์"
+    },
+    "recoveryNotes": {
+      "description": "หมายเหตุเกี่ยวกับความคืบหน้าในการฟื้นตัว",
+      "label": "หมายเหตุการฟื้นตัว",
+      "placeholder": "อัปเดตความคืบหน้า เหตุการณ์สำคัญ หรือข้อสังเกต"
+    },
+    "severity": {
+      "description": "ระดับความรุนแรงของการบาดเจ็บนี้",
+      "options": {
+        "lifeThreatening": "คุกคามชีวิต - ต้องการการดูแลฉุกเฉิน",
+        "mild": "เล็กน้อย - รู้สึกไม่สบายเพียงเล็กน้อย",
+        "moderate": "ปานกลาง - ส่งผลกระทบที่เห็นได้ชัด",
+        "severe": "รุนแรง - ส่งผลกระทบอย่างมาก"
+      },
+      "placeholder": "เลือกระดับความรุนแรง"
+    },
+    "status": {
+      "description": "สถานะปัจจุบันของการบาดเจ็บนี้",
+      "options": {
+        "active": "ดำเนินอยู่ - กำลังได้รับการรักษา",
+        "chronic": "เรื้อรัง - ผลกระทบระยะยาว",
+        "healing": "กำลังหายดี - อยู่ระหว่างการฟื้นตัว",
+        "resolved": "หายแล้ว - หายสนิท"
+      }
+    },
+    "treatment": {
+      "description": "การรักษาพยาบาลที่ได้รับสำหรับการบาดเจ็บ",
+      "label": "การรักษาที่ได้รับ",
+      "placeholder": "อธิบายการรักษาที่ได้รับ..."
+    },
+    "treatmentReceived": {
+      "description": "รายละเอียดการรักษาที่ได้รับ",
+      "placeholder": "เช่น การพักผ่อน น้ำแข็งประคบ ใส่เฝือก"
+    },
+    "viewModal": {
+      "additionalInfo": "ข้อมูลเพิ่มเติม",
+      "injuryDetails": "รายละเอียดการบาดเจ็บ"
+    }
+  },
+  "insurance": {
+    "form": {
+      "addInsurance": "เพิ่มประกันภัย",
+      "annualMaximum": {
+        "description": "จำนวนสูงสุดของผลประโยชน์ต่อปี",
+        "label": "ผลประโยชน์สูงสุดต่อปี",
+        "placeholder": "เช่น 45000"
+      },
+      "basicCoverage": {
+        "description": "เปอร์เซ็นต์ความคุ้มครองสำหรับการรักษาพื้นฐาน",
+        "label": "ความคุ้มครองพื้นฐาน %",
+        "placeholder": "เช่น 80"
+      },
+      "binNumber": {
+        "description": "หมายเลขระบุธนาคารสำหรับร้านขายยา",
+        "label": "หมายเลข BIN",
+        "placeholder": "เช่น 123456"
+      },
+      "claimsAddress": {
+        "description": "ที่อยู่สำหรับส่งเคลมประกัน",
+        "label": "ที่อยู่เคลมประกัน",
+        "placeholder": "กรอกที่อยู่ทางไปรษณีย์สำหรับเคลม..."
+      },
+      "companyName": {
+        "description": "ชื่อบริษัทประกันภัย",
+        "label": "บริษัทประกันภัย",
+        "placeholder": "เช่น กรุงเทพประกันภัย"
+      },
+      "contactAllowance": {
+        "description": "เงินเบี้ยต่อปีสำหรับคอนแทคเลนส์",
+        "label": "เบี้ยคอนแทคเลนส์",
+        "placeholder": "เช่น 4500"
+      },
+      "copayBrand": {
+        "description": "จำนวน co-pay สำหรับยาตราสินค้า",
+        "label": "Co-pay ยาตราสินค้า",
+        "placeholder": "เช่น 900"
+      },
+      "copayEmergencyRoom": {
+        "description": "จำนวน co-pay สำหรับห้องฉุกเฉิน",
+        "label": "Co-pay ห้องฉุกเฉิน",
+        "placeholder": "เช่น 6000"
+      },
+      "copayGeneric": {
+        "description": "จำนวน co-pay สำหรับยาเจนเนอริก",
+        "label": "Co-pay ยาเจนเนอริก",
+        "placeholder": "เช่น 300"
+      },
+      "copayPrimaryCare": {
+        "description": "จำนวน co-pay สำหรับการพบแพทย์ปฐมภูมิ",
+        "label": "Co-pay แพทย์ปฐมภูมิ",
+        "placeholder": "เช่น 750"
+      },
+      "copaySpecialist": {
+        "description": "จำนวน co-pay สำหรับแพทย์เฉพาะทาง",
+        "label": "Co-pay แพทย์เฉพาะทาง",
+        "placeholder": "เช่น 1500"
+      },
+      "copaySpecialty": {
+        "description": "จำนวน co-pay สำหรับยาเฉพาะโรค",
+        "label": "Co-pay ยาเฉพาะโรค",
+        "placeholder": "เช่น 1500"
+      },
+      "copayUrgentCare": {
+        "description": "จำนวน co-pay สำหรับการรักษาเร่งด่วน",
+        "label": "Co-pay การรักษาเร่งด่วน",
+        "placeholder": "เช่น 2250"
+      },
+      "coveragePeriodStatus": "ระยะเวลาความคุ้มครองและสถานะ",
+      "customerServicePhone": {
+        "description": "หมายเลขโทรศัพท์บริการลูกค้า",
+        "label": "โทรบริการลูกค้า",
+        "placeholder": "เช่น 02-123-4567"
+      },
+      "deductibleFamily": {
+        "description": "จำนวนเงินที่ต้องจ่ายเองต่อปีสำหรับครอบครัว",
+        "label": "ค่าเสียหายครอบครัว",
+        "placeholder": "เช่น 60000"
+      },
+      "deductibleIndividual": {
+        "description": "จำนวนเงินที่ต้องจ่ายเองต่อปีสำหรับบุคคล",
+        "label": "ค่าเสียหายบุคคล",
+        "placeholder": "เช่น 30000"
+      },
+      "dentalPlanType": {
+        "description": "ประเภทแผนประกันฟัน",
+        "label": "ประเภทแผนประกันฟัน",
+        "options": {
+          "dhmo": "DHMO (องค์กรดูแลสุขภาพฟัน)",
+          "discount": "แผนส่วนลด",
+          "dppo": "DPPO (องค์กรผู้ให้บริการฟันที่มีข้อตกลง)"
+        },
+        "placeholder": "เลือกประเภทแผนประกันฟัน"
+      },
+      "dividers": {
+        "additionalInfo": "ข้อมูลเพิ่มเติม",
+        "basicInfo": "ข้อมูลประกันภัยพื้นฐาน",
+        "contactInfo": "ข้อมูลการติดต่อ",
+        "coverageDetails": "รายละเอียดความคุ้มครอง",
+        "coveragePeriodStatus": "ระยะเวลาความคุ้มครองและสถานะ",
+        "memberInfo": "ข้อมูลสมาชิก"
+      },
+      "effectiveDate": {
+        "description": "วันที่เริ่มความคุ้มครอง",
+        "label": "วันที่มีผล",
+        "placeholder": "เลือกวันที่มีผล"
+      },
+      "employerGroup": {
+        "description": "บริษัทหรือองค์กรที่ให้ประกันภัย (หากมี)",
+        "label": "นายจ้าง/ผู้สนับสนุนกลุ่ม",
+        "placeholder": "เช่น บริษัท ABC จำกัด, ทำงานอิสระ"
+      },
+      "examCopay": {
+        "description": "จำนวน co-pay สำหรับการตรวจตา",
+        "label": "Co-pay การตรวจตา",
+        "placeholder": "เช่น 300"
+      },
+      "expirationDate": {
+        "description": "วันที่สิ้นสุดความคุ้มครอง (หากทราบ)",
+        "label": "วันหมดอายุ",
+        "placeholder": "เลือกวันหมดอายุ"
+      },
+      "frameAllowance": {
+        "description": "เงินเบี้ยต่อปีสำหรับกรอบแว่นตา",
+        "label": "เบี้ยกรอบแว่นตา",
+        "placeholder": "เช่น 4500"
+      },
+      "groupNumber": {
+        "description": "หมายเลขกลุ่ม (หากมี)",
+        "label": "หมายเลขกลุ่ม",
+        "placeholder": "เช่น GRP123"
+      },
+      "insuranceType": {
+        "description": "ประเภทประกันภัย",
+        "label": "ประเภทประกันภัย",
+        "options": {
+          "dental": "🦷 ประกันฟัน",
+          "medical": "🏥 ประกันการรักษาพยาบาล",
+          "prescription": "💊 ประกันยา",
+          "vision": "👁️ ประกันสายตา"
+        },
+        "placeholder": "เลือกประเภทประกันภัย"
+      },
+      "isPrimary": {
+        "description": "ติ๊กถ้านี่เป็นประกันหลักของคุณ (เฉพาะประกันการแพทย์)",
+        "label": "ประกันหลัก"
+      },
+      "lensCoverage": {
+        "description": "รายละเอียดความคุ้มครองสำหรับเลนส์",
+        "label": "ความคุ้มครองเลนส์",
+        "placeholder": "เช่น คุ้มครอง 100%"
+      },
+      "majorCoverage": {
+        "description": "เปอร์เซ็นต์ความคุ้มครองสำหรับการรักษาใหญ่",
+        "label": "ความคุ้มครองใหญ่ %",
+        "placeholder": "เช่น 50"
+      },
+      "memberId": {
+        "description": "หมายเลขสมาชิกจากบัตรประกัน",
+        "label": "หมายเลขสมาชิก",
+        "placeholder": "เช่น ABC123456789"
+      },
+      "memberName": {
+        "description": "ชื่อตามที่ปรากฏในบัตรประกัน",
+        "label": "ชื่อสมาชิก",
+        "placeholder": "เช่น สมชาย ใจดี"
+      },
+      "notes": {
+        "description": "รายละเอียดเพิ่มเติมหรือหมายเหตุ",
+        "placeholder": "ข้อมูลเพิ่มเติมเกี่ยวกับประกันนี้..."
+      },
+      "pcnNumber": {
+        "description": "หมายเลขควบคุมผู้ประมวลผล",
+        "label": "หมายเลข PCN",
+        "placeholder": "เช่น ABC123"
+      },
+      "pharmacyNetworkInfo": {
+        "description": "ข้อมูลเกี่ยวกับเครือข่ายร้านขายยาที่แนะนำ",
+        "label": "ข้อมูลเครือข่ายร้านขายยา",
+        "placeholder": "กรอกรายละเอียดเครือข่ายร้านขายยา..."
+      },
+      "planName": {
+        "description": "ชื่อแผนประกันเฉพาะ",
+        "label": "ชื่อแผนประกัน",
+        "placeholder": "เช่น PPO โกลด์ พลัส"
+      },
+      "planType": {
+        "description": "ประเภทแผนประกันการรักษาพยาบาล",
+        "label": "ประเภทแผน",
+        "options": {
+          "epo": "EPO (องค์กรผู้ให้บริการเฉพาะ)",
+          "hdhp": "HDHP (แผนสุขภาพหักค่าใช้จ่ายสูง)",
+          "hmo": "HMO (องค์กรดูแลสุขภาพ)",
+          "indemnity": "การชดใช้ (ค่าบริการตามจริง)",
+          "pos": "POS (จุดบริการ)",
+          "ppo": "PPO (องค์กรผู้ให้บริการที่มีข้อตกลง)"
+        },
+        "placeholder": "เลือกประเภทแผน"
+      },
+      "policyHolderName": {
+        "description": "ชื่อผู้ถือกรมธรรม์ (หากต่างจากสมาชิก)",
+        "label": "ชื่อผู้ถือกรมธรรม์",
+        "placeholder": "เช่น สมหญิง ใจดี (ปล่อยว่างไว้หากเป็นคนเดียวกับสมาชิก)"
+      },
+      "preauthPhone": {
+        "description": "หมายเลขโทรศัพท์สำหรับการอนุมัติล่วงหน้า",
+        "label": "โทรอนุมัติล่วงหน้า"
+      },
+      "prescriptionPlanType": {
+        "description": "ประเภทแผนยาตามใบสั่งแพทย์",
+        "label": "ประเภทแผนยา",
+        "options": {
+          "formulary": "แผนตาม Formulary",
+          "integrated": "บูรณาการกับการแพทย์",
+          "medicarePartD": "Medicare Part D",
+          "tieredCopay": "แผน Co-pay แบบชั้น"
+        },
+        "placeholder": "เลือกประเภทแผนยา"
+      },
+      "preventiveCoverage": {
+        "description": "เปอร์เซ็นต์ความคุ้มครองสำหรับการป้องกัน",
+        "label": "ความคุ้มครองป้องกัน %",
+        "placeholder": "เช่น 100"
+      },
+      "primaryCarePhysician": {
+        "description": "ชื่อแพทย์ปฐมภูมิของคุณ",
+        "label": "แพทย์ปฐมภูมิ",
+        "placeholder": "เช่น นพ.สมชาย"
+      },
+      "providerServicesPhone": {
+        "description": "หมายเลขโทรศัพท์สำหรับบริการผู้ให้บริการ",
+        "label": "โทรบริการผู้ให้บริการ"
+      },
+      "relationshipToHolder": {
+        "description": "ความสัมพันธ์ของคุณกับผู้ถือกรมธรรม์",
+        "label": "ความสัมพันธ์กับผู้ถือกรมธรรม์",
+        "options": {
+          "child": "บุตร",
+          "dependent": "ผู้อยู่ในอุปการะ",
+          "self": "ตัวเอง",
+          "spouse": "คู่สมรส"
+        },
+        "placeholder": "เลือกความสัมพันธ์"
+      },
+      "rxgroup": {
+        "description": "หมายเลขกลุ่มยาตามใบสั่งแพทย์",
+        "label": "กลุ่ม RX",
+        "placeholder": "เช่น RXGRP123"
+      },
+      "saving": "กำลังบันทึกประกันภัย...",
+      "status": {
+        "description": "สถานะปัจจุบันของประกันภัย",
+        "options": {
+          "expired": "หมดอายุแล้ว"
+        },
+        "placeholder": "เลือกสถานะ"
+      },
+      "tabs": {
+        "contact": "การติดต่อ",
+        "coverage": "ความคุ้มครอง",
+        "member": "สมาชิก"
+      },
+      "updateInsurance": "อัปเดตประกันภัย",
+      "visionPlanType": {
+        "description": "ประเภทแผนประกันสายตา",
+        "label": "ประเภทแผนประกันสายตา",
+        "options": {
+          "visionDiscount": "แผนส่วนลดสายตา",
+          "visionHmo": "HMO สายตา",
+          "visionPpo": "PPO สายตา"
+        },
+        "placeholder": "เลือกประเภทแผนประกันสายตา"
+      },
+      "websiteUrl": {
+        "description": "URL พอร์ทัลสมาชิกหรือเว็บไซต์",
+        "label": "URL เว็บไซต์",
+        "placeholder": "เช่น https://member.insurance.com"
+      }
+    },
+    "viewModal": {
+      "coverageDetails": "รายละเอียดความคุ้มครอง"
+    }
+  },
+  "labResults": {
+    "form": {
+      "componentCreationWarning": "บันทึกผลแล็บแล้ว แต่ไม่สามารถเพิ่มรายการตรวจได้ คุณสามารถเพิ่มได้จากหน้าดู",
+      "relationshipCreationWarning": "บันทึกผลแล็บแล้ว แต่ไม่สามารถสร้างความสัมพันธ์บางอย่างได้ คุณสามารถเพิ่มได้จากหน้าแก้ไข"
+    }
+  },
+  "medications": {
+    "alternativeName": {
+      "description": "ชื่ออื่นหรือชื่อยี่ห้อเสริม (2-100 ตัวอักษร)",
+      "label": "ชื่ออื่น",
+      "placeholder": "เช่น ชื่อยี่ห้อหรือชื่อสามัญ"
+    },
+    "dosage": {
+      "description": "ความแรงและปริมาณต่อครั้ง",
+      "label": "ขนาดยา",
+      "placeholder": "เช่น 10 มก., 1 เม็ด"
+    },
+    "form": {
+      "addMedication": "เพิ่มยา",
+      "conditionLinkFailed": "บันทึกยาแล้ว แต่ไม่สามารถเชื่อมโยงโรคบางโรคได้ คุณสามารถเชื่อมโยงได้ในภายหลังโดยแก้ไขยา",
+      "conditionLinkPartialFailure": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
+      "conditionLinkPartialFailure_one": "{{count}} condition link failed",
+      "conditionLinkPartialFailure_other": "การเชื่อมโยงโรค {{count}} รายการล้มเหลว",
+      "linkConditionsDescription": "เชื่อมโยงยานี้กับโรคที่มีอยู่ (ไม่จำเป็น)",
+      "noConditionsFound": "ไม่พบโรค",
+      "saving": "กำลังบันทึกยา...",
+      "updateMedication": "อัปเดตยา"
+    },
+    "frequency": {
+      "description": "ความถี่ในการรับประทานยา",
+      "label": "ความถี่",
+      "placeholder": "เช่น วันละครั้ง, วันละสองครั้ง"
+    },
+    "indication": {
+      "description": "ยานี้ใช้รักษาอะไร? อธิบายเหตุผลหรือโรคที่รักษา",
+      "label": "ข้อบ่งใช้",
+      "placeholder": "เช่น ความดันโลหิตสูง, ใช้ตามต้องการเมื่อปวด, ควบคุมเบาหวาน"
+    },
+    "medicationName": {
+      "description": "ชื่อสามัญหรือชื่อยี่ห้อของยา (อย่างน้อย 2 ตัวอักษร)",
+      "label": "ชื่อยา",
+      "placeholder": "เช่น Lisinopril, Metformin"
+    },
+    "medicationType": {
+      "description": "ประเภทของยา",
+      "label": "ประเภทยา",
+      "placeholder": "เลือกประเภท"
+    },
+    "pharmacy": {
+      "description": "ร้านขายยาที่รับยา",
+      "label": "ร้านขายยา",
+      "placeholder": "เลือกร้านขายยา"
+    },
+    "prescribingProvider": {
+      "description": "แพทย์ที่สั่งยานี้",
+      "label": "แพทย์ผู้สั่งยา",
+      "placeholder": "เลือกแพทย์"
+    },
+    "route": {
+      "description": "วิธีการใช้ยา",
+      "label": "วิธีใช้",
+      "options": {
+        "inhalation": "สูดดม",
+        "injection": "ฉีด",
+        "intramuscular": "ฉีดเข้ากล้ามเนื้อ",
+        "intravenous": "ฉีดเข้าหลอดเลือดดำ",
+        "nasal": "ทางจมูก",
+        "oral": "รับประทาน",
+        "rectal": "ทางทวารหนัก",
+        "subcutaneous": "ฉีดใต้ผิวหนัง",
+        "sublingual": "ใต้ลิ้น",
+        "topical": "ทาภายนอก"
+      },
+      "placeholder": "เลือกวิธีใช้"
+    },
+    "sideEffects": {
+      "description": "ผลข้างเคียงที่ทราบหรือเคยพบ",
+      "label": "ผลข้างเคียง",
+      "placeholder": "ระบุผลข้างเคียงที่ทราบหรือเคยพบ..."
+    }
+  },
+  "pharmacies": {
+    "form": {
+      "brand": {
+        "description": "ร้านขายยาเครือข่ายใหญ่หรือประเภทร้านอิสระ",
+        "label": "ยี่ห้อร้านขายยา",
+        "options": {
+          "amazonPharmacy": "Amazon Pharmacy",
+          "compoundingPharmacy": "ร้านขายยาผสม",
+          "costcoPharmacy": "Costco Pharmacy",
+          "cvs": "CVS",
+          "hebPharmacy": "H-E-B Pharmacy",
+          "hospitalPharmacy": "ร้านขายยาโรงพยาบาล",
+          "independent": "อิสระ",
+          "kaiserPermanente": "Kaiser Permanente",
+          "krogerPharmacy": "Kroger Pharmacy",
+          "meijerPharmacy": "Meijer Pharmacy",
+          "onlinePharmacy": "ร้านขายยาออนไลน์",
+          "publixPharmacy": "Publix Pharmacy",
+          "riteAid": "Rite Aid",
+          "safewayPharmacy": "Safeway Pharmacy",
+          "specialtyPharmacy": "ร้านขายยาเฉพาะทาง",
+          "targetPharmacy": "Target Pharmacy",
+          "walgreens": "Walgreens",
+          "walmartPharmacy": "Walmart Pharmacy"
+        },
+        "placeholder": "เลือกเครือข่ายร้านขายยาหรือประเภท"
+      },
+      "city": {
+        "description": "เมืองที่ตั้ง",
+        "label": "เมือง",
+        "placeholder": "กรุงเทพมหานคร"
+      },
+      "country": {
+        "description": "ประเทศที่ร้านขายยาตั้งอยู่",
+        "label": "ประเทศ",
+        "placeholder": "เช่น ประเทศไทย, แคนาดา"
+      },
+      "locationDivider": "ข้อมูลสถานที่",
+      "name": {
+        "description": "ชื่อเฉพาะหรือตัวระบุสถานที่",
+        "label": "ชื่อร้านขายยา",
+        "placeholder": "ร้านขายยา CVS - ถนนใหญ่"
+      },
+      "phone": {
+        "description": "หมายเลขโทรศัพท์หลักของร้านขายยา",
+        "placeholder": "081-234-5678"
+      },
+      "postalCode": {
+        "description": "รหัสไปรษณีย์",
+        "label": "รหัสไปรษณีย์",
+        "placeholder": "เช่น 10110, M5V 2T6"
+      },
+      "specialtyServices": {
+        "description": "บริการพิเศษที่ร้านขายยานี้ให้บริการ",
+        "label": "บริการพิเศษ",
+        "placeholder": "เช่น ฉีดวัคซีน, ผสมยา, การจัดการการรักษาด้วยยา"
+      },
+      "stateProvince": {
+        "description": "จังหวัด, รัฐ หรือภูมิภาค",
+        "label": "จังหวัด / รัฐ",
+        "placeholder": "เช่น กรุงเทพมหานคร, ออนแทรีโอ"
+      },
+      "storeNumber": {
+        "description": "หมายเลขร้านภายใน",
+        "label": "หมายเลขร้าน",
+        "placeholder": "เช่น 1234, #5678, ร้าน ก"
+      },
+      "streetAddress": {
+        "description": "ที่อยู่ถนน",
+        "label": "ที่อยู่ถนน",
+        "placeholder": "123 ถนนใหญ่"
+      },
+      "website": {
+        "description": "เว็บไซต์ร้านขายยาสำหรับสั่งซื้อออนไลน์หรือข้อมูล",
+        "placeholder": "https://www.example.com"
+      }
+    }
+  },
+  "practices": {
+    "form": {
+      "fax": {
+        "description": "หมายเลขแฟกซ์ของคลินิก",
+        "label": "หมายเลขแฟกซ์",
+        "placeholder": "02-123-4568"
+      },
+      "name": {
+        "description": "ชื่อคลินิกหรือสถานพยาบาล",
+        "label": "ชื่อคลินิก",
+        "placeholder": "โรงพยาบาลเมืองกรุง"
+      },
+      "notes": {
+        "description": "ข้อมูลเพิ่มเติมเกี่ยวกับคลินิก",
+        "placeholder": "หมายเหตุเพิ่มเติมเกี่ยวกับคลินิกนี้..."
+      },
+      "patientPortal": {
+        "description": "URL สำหรับพอร์ทัลผู้ป่วย",
+        "label": "URL พอร์ทัลผู้ป่วย",
+        "placeholder": "https://portal.practice.com"
+      },
+      "phone": {
+        "description": "หมายเลขโทรศัพท์หลักของคลินิก",
+        "label": "โทรศัพท์คลินิก"
+      },
+      "website": {
+        "description": "เว็บไซต์ทางการของคลินิก",
+        "label": "เว็บไซต์คลินิก",
+        "placeholder": "https://www.practice.com"
+      }
+    }
+  },
+  "practitioners": {
+    "form": {
+      "email": {
+        "description": "ที่อยู่อีเมลทางวิชาชีพ",
+        "label": "ที่อยู่อีเมล",
+        "placeholder": "doctor@example.com"
+      },
+      "name": {
+        "description": "ชื่อเต็มของแพทย์รวมคำนำหน้า",
+        "label": "ชื่อ-นามสกุล",
+        "placeholder": "นพ.สมหญิง ใจดี"
+      },
+      "phone": {
+        "description": "หมายเลขติดต่อหลัก",
+        "label": "หมายเลขโทรศัพท์",
+        "placeholder": "081-234-5678"
+      },
+      "practice": {
+        "description": "เลือกคลินิกที่มีอยู่หรือพิมพ์เพื่อสร้างใหม่",
+        "label": "คลินิก/สถานพยาบาล",
+        "placeholder": "ค้นหาหรือสร้างคลินิก..."
+      },
+      "rating": {
+        "description": "คะแนนรวมของคุณที่ให้แพทย์ท่านนี้ (0-5)",
+        "label": "คะแนน"
+      },
+      "specialty": {
+        "description": "เลือกจากรายการหรือพิมพ์ความเชี่ยวชาญที่กำหนดเอง",
+        "label": "ความเชี่ยวชาญทางการแพทย์",
+        "placeholder": "ค้นหาความเชี่ยวชาญหรือพิมพ์กำหนดเอง..."
+      },
+      "website": {
+        "description": "เว็บไซต์ทางวิชาชีพหรือหน้าคลินิก",
+        "placeholder": "https://www.example.com"
+      }
+    }
+  },
+  "procedures": {
+    "anesthesiaNotes": {
+      "description": "หมายเหตุเกี่ยวกับการให้ยาสลบ",
+      "label": "หมายเหตุการสลบ",
+      "placeholder": "หมายเหตุเกี่ยวกับการสลบ..."
+    },
+    "anesthesiaType": {
+      "description": "ประเภทของการสลบที่ใช้",
+      "label": "ประเภทการสลบ",
+      "options": {
+        "general": "สลบทั่วไป - หมดสติสิ้น",
+        "local": "ชาเฉพาะที่ - ชาบริเวณเฉพาะ",
+        "none": "ไม่ใช้ - ไม่จำเป็นต้องสลบ",
+        "regional": "ชาเฉพาะภูมิภาค - ชาบริเวณใหญ่",
+        "sedation": "ให้ยาระงับประสาท - ผ่อนคลายแต่ยังมีสติ"
+      },
+      "placeholder": "เลือกประเภทการสลบ"
+    },
+    "complications": {
+      "description": "บันทึกภาวะแทรกซ้อน เหตุการณ์ไม่พึงประสงค์ หรือผลลัพธ์ที่ไม่คาดคิด",
+      "label": "ภาวะแทรกซ้อน",
+      "placeholder": "ภาวะแทรกซ้อนที่เกิดขึ้นระหว่างการผ่าตัด..."
+    },
+    "description": {
+      "description": "รายละเอียดเกี่ยวกับสิ่งที่การผ่าตัดรวมถึง",
+      "placeholder": "อธิบายการผ่าตัดโดยละเอียด..."
+    },
+    "facility": {
+      "description": "สถานที่ที่การผ่าตัดได้รับการดำเนินการหรือจะดำเนินการ",
+      "label": "สถานที่",
+      "placeholder": "เช่น โรงพยาบาลทั่วไป, ศูนย์ผู้ป่วยนอก"
+    },
+    "notes": {
+      "description": "ข้อสังเกตที่เกี่ยวข้อง คำแนะนำก่อน/หลังผ่าตัด หรือรายละเอียด",
+      "placeholder": "หมายเหตุเพิ่มเติมเกี่ยวกับการผ่าตัด..."
+    },
+    "practitioner": {
+      "description": "แพทย์หรือผู้เชี่ยวชาญที่ทำการผ่าตัด",
+      "label": "แพทย์ผู้ทำการผ่าตัด",
+      "placeholder": "เลือกแพทย์"
+    },
+    "procedureCode": {
+      "description": "รหัสทางการแพทย์ (CPT, ICD-10-PCS ฯลฯ)",
+      "label": "รหัสการผ่าตัด",
+      "placeholder": "เช่น CPT-12345, ICD-10-PCS"
+    },
+    "procedureDate": {
+      "description": "เมื่อการผ่าตัดได้รับการดำเนินการ/จะดำเนินการ",
+      "label": "วันที่ผ่าตัด",
+      "placeholder": "เลือกวันที่ผ่าตัด"
+    },
+    "procedureDuration": {
+      "description": "ใช้เวลานานแค่ไหน/จะใช้เวลา",
+      "label": "ระยะเวลา (นาที)",
+      "placeholder": "เช่น 30, 120"
+    },
+    "procedureName": {
+      "description": "ชื่อของการผ่าตัดทางการแพทย์",
+      "label": "ชื่อการผ่าตัด",
+      "placeholder": "เช่น การผ่าไส้ติ่ง, การสแกน MRI, การส่องกล้องลำไส้ใหญ่"
+    },
+    "procedureSetting": {
+      "description": "สถานที่ที่การผ่าตัดเกิดขึ้น",
+      "label": "สถานการณ์การผ่าตัด",
+      "options": {
+        "emergency": "ฉุกเฉิน - ห้องฉุกเฉิน/การดูแลเร่งด่วน",
+        "home": "ที่บ้าน - ที่บ้านผู้ป่วย",
+        "inpatient": "ผู้ป่วยใน - จำเป็นต้องพักโรงพยาบาล",
+        "office": "สำนักงาน - สำนักงานแพทย์/คลินิก",
+        "outpatient": "ผู้ป่วยนอก - จำหน่ายในวันเดียว"
+      },
+      "placeholder": "เลือกสถานการณ์"
+    },
+    "procedureType": {
+      "description": "ประเภทของการผ่าตัด",
+      "label": "ประเภทการผ่าตัด",
+      "options": {
+        "diagnostic": "การวินิจฉัย - การทดสอบ/ถ่ายภาพ",
+        "emergency": "ฉุกเฉิน - การดูแลเร่งด่วน",
+        "preventive": "ป้องกัน - การดูแลป้องกัน",
+        "surgical": "ศัลยกรรม - การผ่าตัดแบบรุกราน",
+        "therapeutic": "การรักษา - การรักษา"
+      },
+      "placeholder": "เลือกประเภท"
+    },
+    "status": {
+      "description": "สถานะปัจจุบันของการผ่าตัด"
+    }
+  },
+  "symptoms": {
+    "messages": {
+      "saving": "กำลังบันทึกอาการ..."
+    },
+    "occurrence": {
+      "additionalNotes": {
+        "description": "ข้อมูลอื่นๆ ที่เกี่ยวข้องเกี่ยวกับครั้งนี้",
+        "label": "หมายเหตุเพิ่มเติม",
+        "placeholder": "รายละเอียดเพิ่มเติมเกี่ยวกับครั้งนี้..."
+      },
+      "associatedSymptoms": {
+        "description": "อาการอื่นๆ ที่เกิดขึ้นพร้อมกับครั้งนี้",
+        "label": "อาการที่เกี่ยวข้อง",
+        "placeholder": "อาการอื่นๆ (คลื่นไส้, วิงเวียน ฯลฯ)"
+      },
+      "duration": {
+        "description": "ครั้งนี้อยู่นานแค่ไหน",
+        "label": "ระยะเวลา",
+        "placeholder": "เช่น 2 ชั่วโมง, 30 นาที, ทั้งวัน"
+      },
+      "impactLevel": {
+        "description": "ส่งผลกระทบต่อกิจกรรมประจำวันของคุณมากแค่ไหน",
+        "label": "ผลกระทบต่อชีวิตประจำวัน",
+        "placeholder": "เลือกระดับผลกระทบ"
+      },
+      "impactLevelOptions": {
+        "debilitating": "ทำให้อ่อนแอ - ไม่สามารถทำงานได้",
+        "mild": "เล็กน้อย - ทำกิจกรรมได้ยากเล็กน้อย",
+        "moderate": "ปานกลาง - กิจกรรมบางอย่างถูกจำกัด",
+        "noImpact": "ไม่มีผลกระทบ - สามารถทำงานได้ปกติ",
+        "severe": "รุนแรง - กิจกรรมส่วนใหญ่ทำได้ยาก"
+      },
+      "location": {
+        "description": "รู้สึกที่ไหนในร่างกายของคุณ",
+        "label": "ตำแหน่ง",
+        "placeholder": "เช่น ขมับซ้าย, หลังส่วนล่าง, ทั้งตัว"
+      },
+      "occurrenceDate": {
+        "description": "วันที่เกิดอาการครั้งนี้โดยเฉพาะ",
+        "label": "วันที่เกิดอาการ",
+        "placeholder": "ครั้งนี้เกิดขึ้นเมื่อไหร่"
+      },
+      "painScale": {
+        "description": "ประเมินระดับความปวดจาก 0 (ไม่ปวด) ถึง 10 (ปวดที่สุดที่เป็นไปได้)",
+        "label": "ระดับความปวด (0-10)",
+        "placeholder": "0 = ไม่ปวด, 10 = ปวดที่สุด"
+      },
+      "reliefMethods": {
+        "description": "สิ่งที่ช่วยบรรเทาสำหรับครั้งนี้",
+        "label": "วิธีบรรเทา",
+        "placeholder": "สิ่งที่ช่วย (ยา, พักผ่อน, น้ำแข็ง ฯลฯ)"
+      },
+      "resolutionNotes": {
+        "description": "รายละเอียดเกี่ยวกับว่าครั้งนี้จบลงอย่างไรหรือได้รับการรักษาอย่างไร",
+        "label": "หมายเหตุการแก้ไข",
+        "placeholder": "ครั้งนี้ได้รับการแก้ไขอย่างไร..."
+      },
+      "resolvedDate": {
+        "description": "เว้นว่างไว้หากยังคงมีอาการครั้งนี้",
+        "label": "วันที่หายแล้ว",
+        "placeholder": "ครั้งนี้หายเมื่อไหร่"
+      },
+      "resolvedTime": {
+        "description": "เวลาที่อาการครั้งนี้หายแล้ว",
+        "label": "เวลาที่หายแล้ว",
+        "placeholder": "เวลาที่อาการหายแล้ว"
+      },
+      "severity": {
+        "description": "ความรุนแรงของอาการระหว่างครั้งนี้",
+        "placeholder": "เลือกระดับความรุนแรง"
+      },
+      "timeOfDay": {
+        "description": "เกิดขึ้นช่วงไหนของวัน",
+        "label": "ช่วงเวลาของวัน",
+        "placeholder": "เลือกช่วงเวลาของวัน"
+      },
+      "triggers": {
+        "description": "ปัจจัยที่อาจทำให้ครั้งนี้เกิดขึ้นหรือแย่ลง",
+        "label": "ตัวกระตุ้น",
+        "placeholder": "สิ่งที่กระตุ้นให้เกิดครั้งนี้ (ความเครียด, อาหาร, สภาพอากาศ ฯลฯ)"
+      }
+    },
+    "parent": {
+      "category": {
+        "description": "ประเภทเสริมเพื่อจัดระเบียบอาการ",
+        "label": "หมวดหมู่",
+        "placeholder": "เช่น ความปวด, ระบบย่อยอาหาร, ระบบหายใจ"
+      },
+      "firstOccurrenceDate": {
+        "description": "เมื่อคุณสังเกตเห็นอาการนี้ครั้งแรก",
+        "label": "วันที่เกิดครั้งแรก",
+        "placeholder": "คุณมีอาการนี้ครั้งแรกเมื่อไหร่"
+      },
+      "generalNotes": {
+        "description": "ข้อมูลทั่วไปเกี่ยวกับรูปแบบ ประวัติ หรือข้อสังเกต",
+        "label": "หมายเหตุทั่วไป",
+        "placeholder": "หมายเหตุรวมเกี่ยวกับอาการนี้..."
+      },
+      "isChronic": {
+        "description": "ติ๊กหากนี่เป็นอาการต่อเนื่อง/ระยะยาว",
+        "label": "โรคเรื้อรัง"
+      },
+      "resolvedDate": {
+        "description": "วันที่อาการนี้หายสนิท",
+        "label": "วันที่หายแล้ว",
+        "placeholder": "อาการนี้หายเมื่อไหร่"
+      },
+      "status": {
+        "description": "สถานะรวมปัจจุบันของอาการนี้",
+        "label": "สถานะรวม",
+        "placeholder": "เลือกสถานะ"
+      },
+      "statusOptions": {
+        "active": "ดำเนินอยู่ - กำลังมีอาการ",
+        "recurring": "กลับมา - มาแล้วไป",
+        "resolved": "หายแล้ว - ไม่มีอาการแล้ว"
+      },
+      "symptomName": {
+        "description": "ชื่ออาการที่คุณต้องการติดตาม",
+        "label": "ชื่ออาการ",
+        "placeholder": "เช่น ปวดหัวไมเกรน, ปวดหลังเรื้อรัง"
+      },
+      "typicalTriggers": {
+        "description": "สิ่งที่มักกระตุ้นให้เกิดอาการนี้",
+        "label": "ตัวกระตุ้นทั่วไป",
+        "placeholder": "เพิ่มตัวกระตุ้นทั่วไป (ความเครียด, สภาพอากาศ, อาหาร ฯลฯ)"
+      }
+    }
+  },
+  "treatmentPlan": {
+    "clickToExpand": "คลิกเพื่อขยายและเพิ่มรายละเอียด (ไม่จำเป็น)",
+    "conditions": "โรค",
+    "encounters": "การพบแพทย์",
+    "equipment": "อุปกรณ์",
+    "medications": "ยา",
+    "noEquipment": "ไม่พบอุปกรณ์ สามารถเพิ่มอุปกรณ์ได้หลังจากสร้างการรักษา",
+    "noLabResults": "ไม่พบผลแล็บ สร้างผลแล็บก่อนเพื่อเชื่อมโยงที่นี่",
+    "noMedications": "ไม่พบยา สร้างยาก่อนเพื่อเชื่อมโยงที่นี่",
+    "noVisits": "ไม่พบการเข้ารับการรักษา สร้างการเข้ารับการรักษาก่อนเพื่อเชื่อมโยงที่นี่"
+  },
+  "treatments": {
+    "amount": {
+      "description": "ปริมาณหรือความเข้มต่อครั้ง",
+      "label": "ปริมาณ",
+      "placeholder": "เช่น 500 มก., 2 เม็ด, 30 นาที"
+    },
+    "endDate": {
+      "description": "วันที่คาดว่าจะเสร็จสิ้นหรือวันที่เสร็จสิ้นจริง",
+      "placeholder": "เลือกวันสิ้นสุด (หากทราบ)"
+    },
+    "frequency": {
+      "description": "ความถี่ในการรักษา",
+      "label": "ความถี่",
+      "placeholder": "เลือกความถี่"
+    },
+    "frequencyOptions": {
+      "asNeeded": "ตามต้องการ (PRN)",
+      "biWeekly": "สองสัปดาห์ครั้ง (ทุก 2 สัปดาห์)",
+      "continuous": "ต่อเนื่อง/กำลังดำเนินการ",
+      "fourTimes": "สี่ครั้งต่อวัน (QID)",
+      "monthly": "รายเดือน",
+      "onceDaily": "วันละครั้ง",
+      "oneTime": "ครั้งเดียวเท่านั้น",
+      "threeTimes": "สามครั้งต่อวัน (TID)",
+      "twiceDaily": "วันละสองครั้ง (BID)",
+      "weekly": "รายสัปดาห์"
+    },
+    "medications": {
+      "specificEndDate": "วันสิ้นสุดการรักษา",
+      "specificStartDate": "วันเริ่มการรักษา"
+    },
+    "mode": {
+      "advancedOption": "แผนการรักษา",
+      "description": "เลือกวิธีติดตามการรักษานี้",
+      "label": "โหมดการรักษา",
+      "simpleOption": "ง่าย"
+    },
+    "notes": {
+      "description": "อัปเดตความคืบหน้า ข้อสังเกต หรือหมายเหตุสำคัญ",
+      "label": "หมายเหตุเพิ่มเติม",
+      "placeholder": "หมายเหตุความคืบหน้า, ผลข้างเคียง, การปรับ, ผลลัพธ์..."
+    },
+    "practitioner": {
+      "description": "มอบหมายแพทย์ให้กับการรักษานี้",
+      "placeholder": "เลือกแพทย์ (ไม่จำเป็น)"
+    },
+    "relatedCondition": {
+      "description": "เชื่อมโยงการรักษานี้กับโรคเฉพาะ",
+      "label": "โรคที่เกี่ยวข้อง",
+      "placeholder": "เลือกโรค (ไม่จำเป็น)"
+    },
+    "startDate": {
+      "description": "เมื่อการรักษาเริ่มต้น/เริ่มแล้ว",
+      "placeholder": "เลือกวันเริ่มต้น"
+    },
+    "treatmentDescription": {
+      "description": "รายละเอียดครอบคลุมเกี่ยวกับแนวทางการรักษา",
+      "label": "รายละเอียดการรักษา",
+      "placeholder": "รายละเอียดแผนการรักษา..."
+    },
+    "treatmentName": {
+      "description": "ชื่อเฉพาะหรือคำอธิบายการรักษา",
+      "label": "ชื่อการรักษา",
+      "placeholder": "เช่น กายภาพบำบัดสำหรับปวดหลังส่วนล่าง"
+    },
+    "treatmentStatus": {
+      "description": "ขั้นตอนปัจจุบันในขั้นตอนการรักษา",
+      "label": "สถานะการรักษา",
+      "options": {
+        "active": "ดำเนินอยู่ - กำลังได้รับการรักษา",
+        "cancelled": "ยกเลิกแล้ว - หยุดการรักษา",
+        "completed": "เสร็จสิ้นแล้ว - การรักษาเสร็จสิ้นเรียบร้อย",
+        "onHold": "พักชั่วคราว - หยุดชั่วคราว",
+        "planned": "วางแผน - กำหนดการรักษาในอนาคต"
+      },
+      "placeholder": "เลือกสถานะ"
+    },
+    "treatmentType": {
+      "description": "ประเภทการรักษา",
+      "label": "ประเภทการรักษา",
+      "options": {
+        "behavioralTherapy": "บำบัดพฤติกรรม - การรักษาสุขภาพจิต",
+        "chemotherapy": "คีโมเธอราปี - การรักษามะเร็ง",
+        "dialysis": "การฟอกไต - การสนับสนุนการทำงานของไต",
+        "immunotherapy": "อิมมูโนเธอราปี - การรักษาระบบภูมิคุ้มกัน",
+        "medication": "ยา - การรักษาด้วยยา",
+        "occupationalTherapy": "กิจกรรมบำบัด - การปรับปรุงการทำงาน",
+        "other": "อื่นๆ - ระบุในคำอธิบาย",
+        "physicalTherapy": "กายภาพบำบัด - การฟื้นฟู",
+        "radiation": "รังสี - การรักษาด้วยรังสี",
+        "speechTherapy": "การบำบัดการพูด - การปรับปรุงการสื่อสาร",
+        "surgery": "ศัลยกรรม - การผ่าตัด"
+      },
+      "placeholder": "เลือกประเภท"
+    }
+  },
+  "visits": {
+    "attendingPractitioner": {
+      "label": "แพทย์เข้าร่วม"
+    },
+    "diagnosisAssessment": {
+      "label": "การวินิจฉัย/การประเมิน"
+    },
+    "followUpInstructions": {
+      "label": "คำแนะนำติดตาม"
+    },
+    "form": {
+      "dividers": {
+        "clinicalInformation": "ข้อมูลทางคลินิก"
+      },
+      "fields": {
+        "additionalNotes": {
+          "description": "ข้อสังเกตเพิ่มเติม หมายเหตุ หรือรายละเอียดสำคัญ",
+          "placeholder": "รายละเอียดสำคัญอื่นๆ เกี่ยวกับการเข้ารับการรักษา..."
+        },
+        "attendingPractitioner": {
+          "description": "แพทย์ที่ดำเนินการเข้ารับการรักษา",
+          "label": "แพทย์เข้าร่วม",
+          "placeholder": "เลือกแพทย์ (ไม่จำเป็น)"
+        },
+        "chiefComplaint": {
+          "description": "ปัญหาสุขภาพหลักหรืออาการที่ทำให้มาพบแพทย์",
+          "placeholder": "ความกังวลหลักหรืออาการที่รายงาน"
+        },
+        "diagnosisAssessment": {
+          "description": "การวินิจฉัยทางการแพทย์หรือการประเมินทางคลินิก",
+          "label": "การวินิจฉัย/การประเมิน",
+          "placeholder": "การประเมินทางคลินิกหรือการวินิจฉัยจากการเข้ารับการรักษา..."
+        },
+        "durationMinutes": {
+          "description": "การเข้ารับการรักษาใช้เวลานานแค่ไหน",
+          "label": "ระยะเวลา (นาที)",
+          "placeholder": "ระยะเวลาการเข้ารับการรักษา"
+        },
+        "followUpInstructions": {
+          "description": "คำแนะนำสำหรับการดูแลต่อเนื่องและการนัดติดตาม",
+          "placeholder": "คำแนะนำการดูแลติดตาม..."
+        },
+        "location": {
+          "description": "สถานที่ที่การเข้ารับการรักษาเกิดขึ้น",
+          "placeholder": "ที่ที่การเข้ารับการรักษาเกิดขึ้น"
+        },
+        "priority": {
+          "description": "ระดับความสำคัญของการเข้ารับการรักษา",
+          "placeholder": "เลือกระดับความสำคัญ"
+        },
+        "reason": {
+          "description": "วัตถุประสงค์หลักของการเข้ารับการรักษาทางการแพทย์นี้",
+          "label": "เหตุผลการเข้ารับการรักษา",
+          "placeholder": "เช่น ตรวจสุขภาพประจำปี, ติดตาม, ตรวจสอบอาการ"
+        },
+        "relatedCondition": {
+          "description": "เชื่อมโยงการเข้ารับการรักษานี้กับโรคเฉพาะหากมี",
+          "label": "โรคที่เกี่ยวข้อง (ไม่จำเป็น)",
+          "placeholder": "เลือกโรคที่การเข้ารับการรักษานี้เกี่ยวข้อง"
+        },
+        "treatmentPlan": {
+          "description": "คำแนะนำการรักษาและการแทรกแซงที่สั่ง",
+          "placeholder": "การรักษาที่แนะนำหรือขั้นตอนต่อไป..."
+        },
+        "visitDate": {
+          "description": "เมื่อการเข้ารับการรักษาเกิดขึ้น",
+          "label": "วันที่เข้ารับการรักษา",
+          "placeholder": "เลือกวันที่เข้ารับการรักษา"
+        },
+        "visitType": {
+          "description": "ประเภทการเข้ารับการรักษาทางการแพทย์",
+          "placeholder": "เลือกประเภทการเข้ารับการรักษา"
+        }
+      },
+      "locationOptions": {
+        "clinic": "คลินิก",
+        "doctorsOffice": "สำนักงานแพทย์",
+        "emergencyRoom": "ห้องฉุกเฉิน",
+        "homeVisit": "การเยี่ยมที่บ้าน",
+        "hospital": "โรงพยาบาล",
+        "telehealth": "เทเลเฮลธ์/เสมือนจริง",
+        "urgentCare": "การดูแลเร่งด่วน"
+      },
+      "priorityOptions": {
+        "routine": "ปกติ",
+        "urgent": "เร่งด่วน"
+      },
+      "visitTypeOptions": {
+        "annualCheckup": "ตรวจสุขภาพประจำปี",
+        "consultation": "ปรึกษา",
+        "emergency": "ฉุกเฉิน",
+        "followUp": "ติดตาม",
+        "preventiveCare": "การดูแลป้องกัน",
+        "routineVisit": "การเข้ารับการรักษาปกติ",
+        "specialistReferral": "การส่งต่อผู้เชี่ยวชาญ"
+      }
+    },
+    "relatedCondition": {
+      "label": "โรคที่เกี่ยวข้อง (ไม่จำเป็น)"
+    },
+    "table": {
+      "visitType": "ประเภทการเข้ารับการรักษา"
+    },
+    "viewModal": {
+      "chiefComplaint": "อาการหลัก",
+      "followUpInstructions": "คำแนะนำติดตาม",
+      "priority": "ความสำคัญ"
+    }
+  }
+}

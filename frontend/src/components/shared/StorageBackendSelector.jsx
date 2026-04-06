@@ -14,6 +14,7 @@ import {
   IconServer,
   IconCheck
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 const StorageBackendSelector = ({
   value = 'local',
@@ -26,6 +27,7 @@ const StorageBackendSelector = ({
   size = 'sm',
   className = ''
 }) => {
+  const { t } = useTranslation('documents');
   const data = [
     {
       value: 'local',
@@ -63,14 +65,14 @@ const StorageBackendSelector = ({
   return (
     <Stack gap="xs" className={className}>
       <Group gap="xs" align="center">
-        <Text size="sm" fw={500}>Storage Backend:</Text>
+        <Text size="sm" fw={500}>{t('storage.backendLabel')}</Text>
         {paperlessConnected && (
           <Badge
             size="xs"
             color="green"
             leftSection={<IconCheck size={10} />}
           >
-            Paperless Ready
+            {t('storage.connectedBadge')}
           </Badge>
         )}
         {papraConnected && (
@@ -79,7 +81,7 @@ const StorageBackendSelector = ({
             color="teal"
             leftSection={<IconCheck size={10} />}
           >
-            Papra Ready
+            {t('storage.connectedBadge')}
           </Badge>
         )}
       </Group>

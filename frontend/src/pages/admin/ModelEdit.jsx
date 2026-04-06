@@ -243,7 +243,7 @@ const ModelEdit = () => {
               {error}
             </Alert>
             <Button variant="default" leftSection={<IconArrowLeft size={16} />} onClick={handleCancel}>
-              Back
+              {t('admin:models.backToDataModels')}
             </Button>
           </Stack>
         </Center>

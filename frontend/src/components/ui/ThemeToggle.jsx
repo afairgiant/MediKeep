@@ -15,7 +15,8 @@ const ThemeToggle = () => {
       {theme === 'light' ? (
         <span className="theme-icon">🌙</span>
       ) : (
-        <span className="theme-icon">☀️</span>
+        // eslint-disable-next-line i18next/no-literal-string -- decorative emoji
+        <span className="theme-icon">{'\u2600\uFE0F'}</span>
       )}
     </button>
   );

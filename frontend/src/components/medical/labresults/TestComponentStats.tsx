@@ -22,6 +22,7 @@ import {
   Box,
   ThemeIcon
 } from '@mantine/core';
+import { useTranslation } from 'react-i18next';
 import {
   IconChartBar,
   IconTrendingUp,
@@ -68,6 +69,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
   loading = false,
   onError
 }) => {
+  const { t } = useTranslation(['medical', 'shared']);
   const handleError = useCallback((error: Error, context: string) => {
     logger.error('test_component_stats_error', {
       message: `Error in TestComponentStats: ${context}`,
@@ -242,9 +244,9 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Center h={200}>
           <Stack align="center" gap="md">
             <IconChartBar size={48} color="var(--mantine-color-gray-5)" />
-            <Text size="lg" c="dimmed">No data for statistics</Text>
+            <Text size="lg" c="dimmed">{t('labresults:stats.noData')}</Text>
             <Text size="sm" c="dimmed" ta="center">
-              Statistics will appear here once test components are added
+              {t('labresults:stats.noDataDescription')}
             </Text>
           </Stack>
         </Center>
@@ -261,7 +263,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
           <Group justify="space-between">
             <div>
               <Text size="lg" fw={700}>{stats.total}</Text>
-              <Text size="sm" c="dimmed">Total Tests</Text>
+              <Text size="sm" c="dimmed">{t('labresults:stats.totalTests')}</Text>
             </div>
             <ThemeIcon color="blue" variant="light" size="lg">
               <IconFlask size={20} />
@@ -274,7 +276,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
           <Group justify="space-between">
             <div>
               <Text size="lg" fw={700} c="red">{stats.criticalCount}</Text>
-              <Text size="sm" c="dimmed">Critical</Text>
+              <Text size="sm" c="dimmed">{t('labresults:stats.critical')}</Text>
             </div>
             <ThemeIcon color="red" variant="light" size="lg">
               <IconAlertTriangle size={20} />
@@ -287,7 +289,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
           <Group justify="space-between">
             <div>
               <Text size="lg" fw={700} c="orange">{stats.abnormalCount}</Text>
-              <Text size="sm" c="dimmed">Abnormal</Text>
+              <Text size="sm" c="dimmed">{t('labresults:stats.abnormal')}</Text>
             </div>
             <ThemeIcon color="orange" variant="light" size="lg">
               <IconTrendingUp size={20} />
@@ -300,7 +302,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
           <Group justify="space-between">
             <div>
               <Text size="lg" fw={700} c="green">{stats.normalCount}</Text>
-              <Text size="sm" c="dimmed">Normal</Text>
+              <Text size="sm" c="dimmed">{t('labresults:stats.normal')}</Text>
             </div>
             <ThemeIcon color="green" variant="light" size="lg">
               <IconCheck size={20} />
@@ -314,7 +316,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Card withBorder p="md" radius="md">
           <Stack gap="md">
             <Group justify="space-between" align="center">
-              <Title order={5}>Overall Health Score</Title>
+              <Title order={5}>{t('labresults:stats.healthScore')}</Title>
               <Badge color={getHealthScoreColor(overallHealthScore)}>
                 {overallHealthScore}%
               </Badge>
@@ -338,13 +340,12 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
             </Center>
 
             <Text size="sm" c="dimmed" ta="center">
-              Based on {stats.normalCount} normal results out of {stats.total} total tests
-              {components.some(c => c.result_type === 'qualitative') && ' (quantitative only)'}
+              {t('labresults:stats.basedOn', { count: stats.withRanges || stats.total })}
             </Text>
 
             {stats.criticalCount > 0 && (
               <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-                {stats.criticalCount} critical result{stats.criticalCount !== 1 ? 's' : ''} require immediate attention
+                {t('labresults:stats.criticalResultsWarning', { count: stats.criticalCount })}
               </Alert>
             )}
           </Stack>
@@ -353,7 +354,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         {/* Status Distribution */}
         <Card withBorder p="md" radius="md">
           <Stack gap="md">
-            <Title order={5}>Status Distribution</Title>
+            <Title order={5}>{t('labresults:stats.statusDistribution')}</Title>
 
             <Stack gap="sm">
               {Object.entries(stats.byStatus)
@@ -391,27 +392,27 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
       {stats.withRanges > 0 && (
         <Card withBorder p="md" radius="md">
           <Stack gap="md">
-            <Title order={5}>Reference Range Analysis</Title>
+            <Title order={5}>{t('labresults:stats.rangeAnalysis')}</Title>
 
             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
               <Paper withBorder p="sm" radius="sm">
                 <Stack gap={4} align="center">
                   <Text size="lg" fw={700}>{stats.withRanges}</Text>
-                  <Text size="xs" c="dimmed" ta="center">Tests with ranges</Text>
+                  <Text size="xs" c="dimmed" ta="center">{t('labresults:stats.testsWithRanges')}</Text>
                 </Stack>
               </Paper>
 
               <Paper withBorder p="sm" radius="sm">
                 <Stack gap={4} align="center">
                   <Text size="lg" fw={700} c="orange">{stats.outOfRange}</Text>
-                  <Text size="xs" c="dimmed" ta="center">Out of range</Text>
+                  <Text size="xs" c="dimmed" ta="center">{t('labresults:stats.outOfRange')}</Text>
                 </Stack>
               </Paper>
 
               <Paper withBorder p="sm" radius="sm">
                 <Stack gap={4} align="center">
                   <Text size="lg" fw={700} c="green">{stats.withRanges - stats.outOfRange}</Text>
-                  <Text size="xs" c="dimmed" ta="center">Within range</Text>
+                  <Text size="xs" c="dimmed" ta="center">{t('labresults:stats.withinRange')}</Text>
                 </Stack>
               </Paper>
             </SimpleGrid>
@@ -424,7 +425,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
                   size="lg"
                 />
                 <Text size="sm" ta="center" mt="xs">
-                  {stats.outOfRange} of {stats.withRanges} tests out of range
+                  {t('labresults:stats.outOfRangeCount', { count: stats.outOfRange, total: stats.withRanges })}
                 </Text>
               </>
             )}
@@ -437,21 +438,21 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Card withBorder p="md" radius="md">
           <Stack gap="md">
             <Group justify="space-between" align="center">
-              <Title order={5}>Test Categories</Title>
+              <Title order={5}>{t('labresults:stats.categories')}</Title>
               <Badge variant="light" color="blue">
-                {categoryStats.length} categor{categoryStats.length !== 1 ? 'ies' : 'y'}
+                {t('labresults:stats.categoriesCount', { count: categoryStats.length })}
               </Badge>
             </Group>
 
             <Table striped highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Category</Table.Th>
-                  <Table.Th>Tests</Table.Th>
-                  <Table.Th>Normal</Table.Th>
-                  <Table.Th>Abnormal</Table.Th>
-                  <Table.Th>Critical</Table.Th>
-                  <Table.Th>Distribution</Table.Th>
+                  <Table.Th>{t('shared:labels.category')}</Table.Th>
+                  <Table.Th>{t('labresults:stats.tests')}</Table.Th>
+                  <Table.Th>{t('labresults:stats.normal')}</Table.Th>
+                  <Table.Th>{t('labresults:stats.abnormal')}</Table.Th>
+                  <Table.Th>{t('labresults:stats.critical')}</Table.Th>
+                  <Table.Th>{t('labresults:stats.distribution')}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -506,24 +507,23 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Stack gap="md">
           <Group gap="xs">
             <IconCategory size={20} />
-            <Title order={5}>Insights</Title>
+            <Title order={5}>{t('labresults:stats.insights')}</Title>
           </Group>
 
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
             <Stack gap="xs">
-              <Text size="sm" fw={500}>Test Coverage</Text>
+              <Text size="sm" fw={500}>{t('labresults:stats.testCoverage')}</Text>
               <Text size="xs" c="dimmed">
-                {stats.withRanges} of {stats.total} tests ({((stats.withRanges / stats.total) * 100).toFixed(0)}%)
-                have reference ranges for proper evaluation.
+                {t('labresults:stats.coverageDetail', { withRanges: stats.withRanges, total: stats.total, percent: ((stats.withRanges / stats.total) * 100).toFixed(0) })}
               </Text>
             </Stack>
 
             <Stack gap="xs">
-              <Text size="sm" fw={500}>Results Quality</Text>
+              <Text size="sm" fw={500}>{t('labresults:stats.resultsQuality')}</Text>
               <Text size="xs" c="dimmed">
                 {stats.normalCount > stats.abnormalCount + stats.criticalCount
-                  ? 'Majority of results are within normal ranges.'
-                  : 'Several results require attention or follow-up.'}
+                  ? t('labresults:stats.resultsGood')
+                  : t('labresults:stats.resultsAttention')}
               </Text>
             </Stack>
           </SimpleGrid>
@@ -531,8 +531,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
           {stats.criticalCount > 0 && (
             <Alert color="red" variant="light">
               <Text size="sm">
-                <strong>Action Required:</strong> {stats.criticalCount} critical result{stats.criticalCount !== 1 ? 's' : ''}
-                detected. Please consult with healthcare provider immediately.
+                <span dangerouslySetInnerHTML={{ __html: t('labresults:stats.criticalAction', { count: stats.criticalCount }) }} />
               </Text>
             </Alert>
           )}

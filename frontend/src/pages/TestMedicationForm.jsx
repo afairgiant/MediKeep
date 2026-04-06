@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- test page, not user-facing */
 import React, { useState, useEffect } from 'react';
 import { Container, Title, Button, Text, Stack, Paper, Code } from '@mantine/core';
 import BaseMedicalForm from '../components/medical/BaseMedicalForm';

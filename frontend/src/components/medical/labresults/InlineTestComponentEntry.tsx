@@ -122,7 +122,7 @@ function InlineTestComponentEntry({
         <Group gap="xs">
           <IconFlask size={20} />
           <Text fw={500}>
-            {t('labResults.form.testComponents', 'Test Components (Optional)')}
+            {t('labresults:form.testComponents', 'Test Components (Optional)')}
           </Text>
           {pendingCount > 0 && (
             <Badge size="sm" variant="filled" color="blue">
@@ -136,7 +136,7 @@ function InlineTestComponentEntry({
       <Collapse in={expanded}>
         <Stack gap="md" mt="md">
           <Text size="sm" c="dimmed">
-            {t('labResults.form.testComponentsDescription', 'Optionally add individual test values. You can also add more later.')}
+            {t('labresults:form.testComponentsDescription', 'Optionally add individual test values. You can also add more later.')}
           </Text>
 
           {components.map((component, index) => (
@@ -153,8 +153,8 @@ function InlineTestComponentEntry({
                     onClick={() => removeRow(index)}
                     disabled={components.length === 1 || disabled}
                     title={components.length === 1
-                      ? t('labResults.form.cannotRemoveLastRow', 'Cannot remove last row')
-                      : t('labResults.form.removeRow', 'Remove row')
+                      ? t('labresults:form.cannotRemoveLastRow', 'Cannot remove last row')
+                      : t('labresults:form.removeRow', 'Remove row')
                     }
                   >
                     <IconTrash size={14} />
@@ -165,7 +165,7 @@ function InlineTestComponentEntry({
                   <Grid.Col span={12}>
                     <Autocomplete
                       label={t('shared:fields.testName', 'Test Name')}
-                      placeholder={t('labResults.form.searchTests', 'Type to search tests...')}
+                      placeholder={t('labresults:form.searchTests', 'Type to search tests...')}
                       size="xs"
                       value={component.test_name}
                       onChange={(value) => {
@@ -206,8 +206,8 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={6}>
                     <TextInput
-                      label={t('labResults.form.abbreviation', 'Abbreviation')}
-                      placeholder={t('labResults.form.abbreviationPlaceholder', 'e.g., HGB')}
+                      label={t('labresults:form.abbreviation', 'Abbreviation')}
+                      placeholder={t('labresults:form.abbreviationPlaceholder', 'e.g., HGB')}
                       size="xs"
                       value={component.abbreviation || ''}
                       onChange={(event) => updateComponent(index, 'abbreviation', event.target.value)}
@@ -217,7 +217,7 @@ function InlineTestComponentEntry({
                   <Grid.Col span={6}>
                     <TextInput
                       label={t('shared:fields.testCode', 'Test Code')}
-                      placeholder={t('labResults.form.testCodePlaceholder', 'e.g., 718-7')}
+                      placeholder={t('labresults:form.testCodePlaceholder', 'e.g., 718-7')}
                       size="xs"
                       value={component.test_code || ''}
                       onChange={(event) => updateComponent(index, 'test_code', event.target.value)}
@@ -227,8 +227,8 @@ function InlineTestComponentEntry({
 
                   <Grid.Col span={component.result_type === 'qualitative' ? 6 : 4}>
                     <TextInput
-                      label={t('labResults.form.unit', 'Unit')}
-                      placeholder={t('labResults.form.unit', 'Unit')}
+                      label={t('labresults:form.unit', 'Unit')}
+                      placeholder={t('labresults:form.unit', 'Unit')}
                       size="xs"
                       value={component.unit}
                       onChange={(event) => updateComponent(index, 'unit', event.target.value)}
@@ -239,8 +239,8 @@ function InlineTestComponentEntry({
                   <Grid.Col span={component.result_type === 'qualitative' ? 6 : 4}>
                     {component.result_type === 'qualitative' ? (
                       <Select
-                        label={t('labResults.form.result', 'Result')}
-                        placeholder={t('labResults.form.selectResult', 'Select result')}
+                        label={t('labresults:form.result', 'Result')}
+                        placeholder={t('labresults:form.selectResult', 'Select result')}
                         size="xs"
                         data={QUALITATIVE_SELECT_OPTIONS}
                         value={component.qualitative_value || null}
@@ -271,7 +271,7 @@ function InlineTestComponentEntry({
                   <Grid.Col span={4}>
                     <TextInput
                       label={t('shared:fields.status', 'Status')}
-                      placeholder={t('labResults.form.autoCalculated', 'Auto-calculated')}
+                      placeholder={t('labresults:form.autoCalculated', 'Auto-calculated')}
                       size="xs"
                       value={capitalizeStatus(component.status)}
                       readOnly
@@ -290,7 +290,7 @@ function InlineTestComponentEntry({
                     <>
                       <Grid.Col span={6}>
                         <NumberInput
-                          label={t('labResults.form.refMin', 'Ref Min')}
+                          label={t('labresults:form.refMin', 'Ref Min')}
                           placeholder={t('shared:labels.min', 'Min')}
                           size="xs"
                           value={component.ref_range_min}
@@ -301,7 +301,7 @@ function InlineTestComponentEntry({
                       </Grid.Col>
                       <Grid.Col span={6}>
                         <NumberInput
-                          label={t('labResults.form.refMax', 'Ref Max')}
+                          label={t('labresults:form.refMax', 'Ref Max')}
                           placeholder={t('shared:labels.max', 'Max')}
                           size="xs"
                           value={component.ref_range_max}
@@ -331,7 +331,7 @@ function InlineTestComponentEntry({
                   <Grid.Col span={6}>
                     <TextInput
                       label={t('shared:tabs.notes', 'Notes')}
-                      placeholder={t('labResults.form.notesOptional', 'Notes (optional)')}
+                      placeholder={t('labresults:form.notesOptional', 'Notes (optional)')}
                       size="xs"
                       value={component.notes || ''}
                       onChange={(event) => updateComponent(index, 'notes', event.target.value)}
@@ -351,7 +351,7 @@ function InlineTestComponentEntry({
             size="xs"
             disabled={disabled}
           >
-            {t('labResults.form.addAnotherTest', 'Add Another Test')}
+            {t('labresults:form.addAnotherTest', 'Add Another Test')}
           </Button>
         </Stack>
       </Collapse>

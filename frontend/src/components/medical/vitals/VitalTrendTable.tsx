@@ -139,7 +139,7 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
     return (
       <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
         <Text size="sm" c="dimmed" ta="center">
-          {t('vitals.trends.noDataPoints', 'No data points to display')}
+          {t('vitals:trends.noDataPoints', 'No data points to display')}
         </Text>
       </Paper>
     );
@@ -167,7 +167,7 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
               </Th>
               {isBloodGlucose && (
                 <Table.Th>
-                  <Text fw={500} size="sm">{t('vitals.modal.glucoseContext', 'Type')}</Text>
+                  <Text fw={500} size="sm">{t('vitals:modal.glucoseContext', 'Type')}</Text>
                 </Table.Th>
               )}
             </Table.Tr>

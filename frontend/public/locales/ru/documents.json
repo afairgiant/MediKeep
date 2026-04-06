@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "Проблемы совместимости браузера",
+    "chartError": "Ошибка отображения диаграммы",
+    "chartErrorDescription": "Не удалось отобразить диаграмму. Попробуйте обновить страницу.",
+    "documentError": "Ошибка менеджера документов",
+    "documentErrorDescription": "Произошла ошибка при управлении документами. Ваши данные в безопасности.",
+    "errorDetails": "Подробности ошибки",
+    "invalidData": "Недопустимые данные с сервера",
+    "networkIssues": "Проблемы с сетевым подключением",
+    "tempIssues": "Временные проблемы системы",
+    "tryAgain": "Повторить попытку",
+    "uploadError": "Ошибка отслеживания загрузки",
+    "uploadErrorDescription": "В процессе отслеживания загрузки произошла ошибка."
+  },
+  "fileCount": {
+    "attached": "{{count}} прикреплено",
+    "attached_one": "{{count}} прикреплено",
+    "attached_other": "{{count}} прикреплено",
+    "fileCount": "{{count}} файл",
+    "fileCount_one": "{{count}} файл",
+    "fileCount_other": "{{count}} файлов",
+    "noFiles": "Нет файлов"
+  },
+  "fileList": {
+    "fileDetails": "ПОДРОБНОСТИ ФАЙЛА",
+    "loading": "Загрузка файлов...",
+    "markedCount": "{{count}} файл отмечен для удаления",
+    "markedCount_one": "{{count}} файл отмечен для удаления",
+    "markedCount_other": "{{count}} файлов отмечено для удаления",
+    "markedForDeletion": "Отмечен для удаления",
+    "noFiles": "Нет прикреплённых файлов",
+    "noMatch": "Ни один файл не соответствует критериям поиска.",
+    "showingFiles": "Показано {{showing}} из {{total}} файлов",
+    "statusDuplicate": "Дубликат",
+    "statusFailed": "Ошибка",
+    "statusMissing": "Отсутствует",
+    "statusProcessing": "Обработка"
+  },
+  "fileUpload": {
+    "accepted": "Принимаются: {{types}} • Макс. размер: {{size}}МБ",
+    "chooseFiles": "Выбрать файлы",
+    "dragOrClick": "Перетащите файлы сюда или нажмите для выбора",
+    "remove": "Удалить",
+    "selectedFiles": "Выбранные файлы ({{count}})",
+    "selectedFiles_one": "Выбранные файлы ({{count}})",
+    "selectedFiles_other": "Выбранные файлы ({{count}})"
+  },
+  "linkPaperless": {
+    "from": "От: {{name}}",
+    "infoText": "Найдите документы, уже находящиеся в Paperless, чтобы связать их с этим {{entityType}}. Загружать файлы не нужно!",
+    "linkDocument": "Связать документ",
+    "moreTags": "+ещё {{count}}",
+    "moreTags_one": "+ещё {{count}}",
+    "moreTags_other": "+ещё {{count}}",
+    "noDocumentsFound": "Документы не найдены",
+    "searchDocuments": "Поиск документов",
+    "searchPlaceholder": "Поиск по названию, содержимому или тегам...",
+    "selected": "Выбран",
+    "title": "Связать существующий документ Paperless",
+    "tryDifferent": "Попробуйте другой поисковый запрос",
+    "type": "Тип: {{type}}"
+  },
+  "linkPapra": {
+    "infoText": "Найдите документы, уже находящиеся в Papra, чтобы связать их с этим {{entityType}}. Загружать файлы не нужно!",
+    "linkDocument": "Связать документ",
+    "noDocumentsFound": "Документы не найдены",
+    "searchPlaceholder": "Поиск документов...",
+    "selected": "Выбран",
+    "title": "Связать существующий документ Papra",
+    "tryDifferent": "Попробуйте другой поисковый запрос"
+  },
+  "manager": {
+    "addDocument": "Добавить документ",
+    "currentFiles": "Текущие файлы:",
+    "duplicateDocument": "Дублированный документ",
+    "duplicateExists": "Этот документ уже существует в Paperless и не может быть загружен повторно.",
+    "filesToUpload": "Файлы для загрузки:",
+    "linkPaperless": "Связать существующий документ Paperless",
+    "linkPapra": "Связать существующий документ Papra",
+    "manageDocuments": "Управление документами",
+    "processingPaperless": "Обработка документа в Paperless...",
+    "searchFiles": "Поиск файлов...",
+    "statusDuplicate": "Дубликат",
+    "statusFailed": "Ошибка",
+    "statusUploaded": "Загружен",
+    "statusUploading": "Загрузка в Paperless...",
+    "syncCheck": "Проверка синхронизации",
+    "uploadNewFile": "Загрузить новый файл",
+    "uploadSuccess": "Документ успешно загружен!"
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "Автосинхронизация включена",
+    "documentAlreadyExists": "\"{{fileName}}\" идентичен документу, уже находящемуся в Paperless.",
+    "duplicateHint": "Если нужно загрузить новую версию, сначала измените документ.",
+    "processingDocument": "Документ обрабатывается в Paperless...",
+    "syncFailed": "Синхронизация не удалась",
+    "syncing": "Синхронизация..."
+  },
+  "renderMode": {
+    "compactView": "Компактный вид",
+    "gridView": "Вид сетки",
+    "listView": "Вид списка",
+    "viewMode": "Режим просмотра"
+  },
+  "storage": {
+    "backendLabel": "Система хранения:",
+    "connectedBadge": "Подключено",
+    "local": "Локальное хранилище",
+    "paperless": "Paperless-ngx",
+    "papra": "Papra",
+    "selectBackend": "Выберите систему хранения"
+  },
+  "upload": {
+    "completed": "{{count}} завершено",
+    "completed_one": "{{count}} завершено",
+    "completed_other": "{{count}} завершено",
+    "dragOrClick": "Перетащите файлы сюда или нажмите для выбора",
+    "failed": "{{count}} с ошибкой",
+    "failed_one": "{{count}} с ошибкой",
+    "failed_other": "{{count}} с ошибкой",
+    "filesProgress": "{{completed}}/{{total}} файлов",
+    "maxSize": "Макс. размер файла: {{size}}МБ",
+    "overallProgress": "Общий прогресс",
+    "percentComplete": "{{percent}}% завершено",
+    "remaining": "осталось {{time}}",
+    "retryFailed": "Повторить неудачные",
+    "uploading": "{{count}} загружается",
+    "uploading_one": "{{count}} загружается",
+    "uploading_other": "{{count}} загружается"
+  }
+}

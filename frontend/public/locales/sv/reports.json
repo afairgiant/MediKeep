@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "Lägg till journalhandlingar",
+      "clearSelections": "Rensa alla val",
+      "generateReport": "Generera rapport ({{count}} handlingar)",
+      "generateReport_one": "Generera rapport ({{count}} handling)",
+      "generateReport_other": "Generera rapport ({{count}} handlingar)",
+      "generateReportChartsOnly": "Generera rapport ({{chartCount}} diagram)",
+      "generateReportWithCharts": "Generera rapport ({{recordCount}} handlingar, {{chartCount}} diagram)",
+      "selectAll": "Välj alla handlingar"
+    },
+    "configuration": {
+      "description": "Välj journalhandlingar att inkludera i din anpassade rapport",
+      "title": "Rapportkonfiguration"
+    },
+    "icon": "",
+    "loading": "Laddar rapportbyggare...",
+    "noData": {
+      "description": "Lägg först till journalhandlingar för att använda rapportbyggaren.",
+      "title": "Ingen medicinsk data tillgänglig"
+    },
+    "notifications": {
+      "templateLoaded": "Mall laddad",
+      "templateLoadedMessage": "Mallen \"{{name}}\" har laddats."
+    },
+    "progress": {
+      "recordsSelected": "Valda handlingar"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "Lägg till demografisk information och kontaktuppgifter",
+        "label": "Inkludera patientinformation"
+      },
+      "includeProfilePicture": {
+        "description": "Lägg till patientfoto i rapportrubriken",
+        "label": "Inkludera profilbild"
+      },
+      "includeSummary": {
+        "description": "Lägg till översikt och statistikavsnitt",
+        "label": "Inkludera sammanfattande statistik"
+      },
+      "reportTitle": {
+        "label": "Rapporttitel"
+      },
+      "title": "Rapportinställningar"
+    },
+    "title": "Anpassad rapportbyggare",
+    "trendCharts": {
+      "dateFrom": "Från",
+      "dateTo": "Till",
+      "emptyState": "Ingen trenddata tillgänglig. Lägg till vitala parametrar eller laboratorieresultat för att aktivera trenddiagram.",
+      "labTestCharts": {
+        "description": "Sök och välj laboratorietester för diagram",
+        "searchPlaceholder": "Sök laboratorietester...",
+        "title": "Laboratorietestdiagram"
+      },
+      "maxReached": "Maximalt 10 diagram uppnått",
+      "recordCount": "{{count}} handlingar",
+      "recordCount_one": "{{count}} handling",
+      "recordCount_other": "{{count}} handlingar",
+      "removeChart": "Ta bort {{name}}-diagram",
+      "selectedCharts": "Valda diagram ({{count}})",
+      "selectedCharts_one": "Valda diagram ({{count}})",
+      "selectedCharts_other": "Valda diagram ({{count}})",
+      "vitalCharts": {
+        "description": "Välj vitala parametrar för diagram",
+        "title": "Diagram för vitala parametrar"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "Inga kategorier tillgängliga",
+    "noCategoriesDescription": "Inga medicinska datakategorier är tillgängliga för rapportgenerering.",
+    "noRecords": "Inga handlingar tillgängliga",
+    "recordCount": "{{count}} handlingar",
+    "recordCount_one": "{{count}} handling",
+    "recordCount_other": "{{count}} handlingar",
+    "selected": "{{count}} valda",
+    "selected_one": "{{count}} vald",
+    "selected_other": "{{count}} valda",
+    "showingFirst": "Visar de första {{count}} handlingarna. Fler handlingar är tillgängliga men visas inte av prestandaskäl.",
+    "showingFirst_one": "Visar den första {{count}} handlingen. Fler handlingar är tillgängliga men visas inte av prestandaskäl.",
+    "showingFirst_other": "Visar de första {{count}} handlingarna. Fler handlingar är tillgängliga men visas inte av prestandaskäl.",
+    "totalCount": "{{count}} totalt",
+    "totalCount_one": "{{count}} totalt",
+    "totalCount_other": "{{count}} totalt"
+  },
+  "dataExport": {
+    "availableData": "Tillgänglig data",
+    "bulkExport": "Massexport",
+    "csvDescription": "CSV-format är idealiskt för kalkylblad",
+    "dateFilterNote": "Datumfilter gäller för alla valda typer",
+    "exportInfo": "Exportinformation",
+    "exportTitle": "Exportera journalhandlingar",
+    "includeFilesNote": "Detta kan avsevärt öka nedladdningsstorleken",
+    "jsonDescription": "JSON-format ger fullständig datastruktur",
+    "pdfDescription": "PDF-format skapar utskrivbara rapporter",
+    "singleExport": "Enskild export",
+    "zipDescription": "Massexporter paketeras i en ZIP-fil"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "{{count}} ytterligare objekt",
+      "moreItems_other": "{{count}} ytterligare objekt",
+      "title": "Tillgänglig data"
+    },
+    "buttons": {
+      "bulkExport": "Massexportera {{count}} typer som ZIP",
+      "bulkExport_one": "Massexportera {{count}} typ som ZIP",
+      "bulkExport_other": "Massexportera {{count}} typer som ZIP",
+      "creatingZip": "Skapar ZIP...",
+      "exportAs": "Exportera {{scope}} som {{format}}",
+      "exporting": "Exporterar...",
+      "goToDashboard": "Gå till instrumentpanel",
+      "refreshPage": "Uppdatera sida"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "Välj datatyper för massexport"
+      },
+      "dataToExport": {
+        "label": "Data att exportera",
+        "placeholder": "Välj datatyp"
+      },
+      "dateRange": {
+        "endDate": "Slutdatum (valfritt)",
+        "startDate": "Startdatum (valfritt)"
+      },
+      "format": {
+        "label": "Exportformat",
+        "placeholder": "Välj format"
+      },
+      "includeFiles": "Inkludera filbilagor (skapar ZIP-fil)",
+      "includePatientInfo": {
+        "description": "Avmarkera för att exkludera personliga patientuppgifter av integritetsskäl",
+        "label": "Inkludera patientinformation (namn, demografi, etc.)"
+      },
+      "title": "Exportkonfiguration"
+    },
+    "description": "Ladda ner din medicinska data i olika format för säkerhetskopiering eller delning med vårdgivare",
+    "errors": {
+      "bulkExportFailed": "Massexport misslyckades: {{message}}",
+      "bulkInvalidSettings": "Kontrollera dina massexportinställningar. Se till att du har valt minst en datatyp och ett giltigt format.",
+      "bulkNoDataFound": "Ingen data hittades för de valda exportkriterierna. Försök välja andra datatyper eller justera datumintervallet.",
+      "exportFailed": "Export misslyckades: {{message}}",
+      "invalidSettings": "Kontrollera dina exportinställningar. Se till att du har valt en giltig datatyp och format.",
+      "loadFailed": "Misslyckades att ladda exportdata: {{message}}",
+      "noActivePatient": "Ingen patientprofil är för närvarande vald. Välj en patient från instrumentpanelen för att använda exportfunktionen.",
+      "noDataFound": "Ingen data hittades för de valda exportkriterierna. Försök välja en annan datatyp eller datumintervall.",
+      "noDataType": "Välj minst en datatyp för massexport",
+      "sessionExpired": "Din session har gått ut. Uppdatera sidan eller logga in igen för att komma åt exportfunktioner.",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "Exportera flera datatyper tillsammans i en ZIP-fil",
+      "bulkExport": "Massexport",
+      "singleDescription": "Exportera en enskild datatyp i ditt valda format",
+      "singleExport": "Enskild export",
+      "title": "Exportläge"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "Skapar en ZIP-fil som innehåller flera datatyper i ditt valda format för omfattande datasäkerhetskopiering.",
+        "title": "Massexport:"
+      },
+      "csv": {
+        "description": "Kommaseparerade värden lämpliga för kalkylbladsapplikationer som Excel eller Google Sheets.",
+        "title": "CSV-format:"
+      },
+      "fileAttachments": {
+        "description": "När det är tillgängligt för PDF-exporter kan laboratorieresultatfiler inkluderas i ett ZIP-arkiv.",
+        "title": "Filbilagor:"
+      },
+      "json": {
+        "description": "Maskinläsbart strukturerat dataformat, idealiskt för import till andra system eller applikationer.",
+        "title": "JSON-format:"
+      },
+      "pdf": {
+        "description": "Människoläsbart dokumentformat perfekt för utskrift eller delning med vårdgivare.",
+        "title": "PDF-format:"
+      },
+      "title": "Exportinformation"
+    },
+    "loading": "Laddar exportalternativ...",
+    "scopes": {
+      "all": "Alla handlingar",
+      "encounters": "Vårdtillfällen"
+    },
+    "success": {
+      "bulkExportComplete": "Massexport slutförd framgångsrikt! Din ZIP-fil innehållande {{count}} datatyper har laddats ner.",
+      "bulkExportComplete_one": "Massexport slutförd framgångsrikt! Din ZIP-fil innehållande {{count}} datatyp har laddats ner.",
+      "bulkExportComplete_other": "Massexport slutförd framgångsrikt! Din ZIP-fil innehållande {{count}} datatyper har laddats ner.",
+      "exportComplete": "Export slutförd framgångsrikt! Din {{format}}-fil har laddats ner."
+    },
+    "title": "Exportera hälsojournal"
+  },
+  "templates": {
+    "categories": "{{count}} kategorier",
+    "categories_one": "{{count}} kategori",
+    "categories_other": "{{count}} kategorier",
+    "deleteConfirm": "Är du säker på att du vill ta bort denna mall?",
+    "editTemplate": "Redigera mall",
+    "loadTemplate": "Ladda mall",
+    "manageTemplates": "Hantera mallar",
+    "moreTemplates": "... och {{count}} mall till",
+    "moreTemplates_one": "... och {{count}} mall till",
+    "moreTemplates_other": "... och {{count}} mallar till",
+    "noSaved": "Inga sparade mallar",
+    "records": "{{count}} handlingar",
+    "reportTemplates": "Rapportmallar",
+    "saveAsTemplate": "Spara som mall",
+    "saveDescription": "Denna mall sparar dina aktuella rapportinställningar, valda handlingar och valda trenddiagram.",
+    "savedTemplates": "Sparade mallar",
+    "updateTemplate": "Uppdatera mall"
+  }
+}

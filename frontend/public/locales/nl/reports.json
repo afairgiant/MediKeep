@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "Medische dossiers toevoegen",
+      "clearSelections": "Alle selecties wissen",
+      "generateReport": "Rapport genereren ({{count}} dossiers)",
+      "generateReport_one": "Rapport genereren ({{count}} dossier)",
+      "generateReport_other": "Rapport genereren ({{count}} dossiers)",
+      "generateReportChartsOnly": "Rapport genereren ({{chartCount}} grafieken)",
+      "generateReportWithCharts": "Rapport genereren ({{recordCount}} dossiers, {{chartCount}} grafieken)",
+      "selectAll": "Alle dossiers selecteren"
+    },
+    "configuration": {
+      "description": "Selecteer medische dossiers om op te nemen in uw aangepaste rapport",
+      "title": "Rapportconfiguratie"
+    },
+    "icon": "",
+    "loading": "Rapportbouwer laden...",
+    "noData": {
+      "description": "Voeg eerst medische dossiers toe om de rapportbouwer te gebruiken.",
+      "title": "Geen medische gegevens beschikbaar"
+    },
+    "notifications": {
+      "templateLoaded": "Sjabloon geladen",
+      "templateLoadedMessage": "Sjabloon \"{{name}}\" is geladen."
+    },
+    "progress": {
+      "recordsSelected": "Dossiers geselecteerd"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "Demografische en contactgegevens toevoegen",
+        "label": "Patiëntinformatie opnemen"
+      },
+      "includeProfilePicture": {
+        "description": "Patiëntfoto toevoegen aan de rapportkop",
+        "label": "Profielfoto opnemen"
+      },
+      "includeSummary": {
+        "description": "Overzichts- en statistiekensectie toevoegen",
+        "label": "Samenvattende statistieken opnemen"
+      },
+      "reportTitle": {
+        "label": "Rapporttitel"
+      },
+      "title": "Rapportinstellingen"
+    },
+    "title": "Aangepaste rapportbouwer",
+    "trendCharts": {
+      "dateFrom": "Van",
+      "dateTo": "Tot",
+      "emptyState": "Geen trendgegevens beschikbaar. Voeg vitale functies of laboratoriumresultaten toe om trendgrafieken in te schakelen.",
+      "labTestCharts": {
+        "description": "Zoek en selecteer laboratoriumtests om in grafiek weer te geven",
+        "searchPlaceholder": "Laboratoriumtests zoeken...",
+        "title": "Laboratoriumtestgrafieken"
+      },
+      "maxReached": "Maximum van 10 grafieken bereikt",
+      "recordCount": "{{count}} dossiers",
+      "recordCount_one": "{{count}} dossier",
+      "recordCount_other": "{{count}} dossiers",
+      "removeChart": "Grafiek {{name}} verwijderen",
+      "selectedCharts": "Geselecteerde grafieken ({{count}})",
+      "selectedCharts_one": "Geselecteerde grafieken ({{count}})",
+      "selectedCharts_other": "Geselecteerde grafieken ({{count}})",
+      "vitalCharts": {
+        "description": "Selecteer vitale functies om in grafiek weer te geven",
+        "title": "Grafieken vitale functies"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "Geen categorieën beschikbaar",
+    "noCategoriesDescription": "Er zijn geen medische gegevenscategorieën beschikbaar voor het genereren van rapporten.",
+    "noRecords": "Geen dossiers beschikbaar",
+    "recordCount": "{{count}} dossiers",
+    "recordCount_one": "{{count}} dossier",
+    "recordCount_other": "{{count}} dossiers",
+    "selected": "{{count}} geselecteerd",
+    "selected_one": "{{count}} geselecteerd",
+    "selected_other": "{{count}} geselecteerd",
+    "showingFirst": "De eerste {{count}} dossiers worden weergegeven. Meer dossiers zijn beschikbaar maar worden om prestatieredenen niet getoond.",
+    "showingFirst_one": "Het eerste {{count}} dossier wordt weergegeven. Meer dossiers zijn beschikbaar maar worden om prestatieredenen niet getoond.",
+    "showingFirst_other": "De eerste {{count}} dossiers worden weergegeven. Meer dossiers zijn beschikbaar maar worden om prestatieredenen niet getoond.",
+    "totalCount": "{{count}} totaal",
+    "totalCount_one": "{{count}} totaal",
+    "totalCount_other": "{{count}} totaal"
+  },
+  "dataExport": {
+    "availableData": "Beschikbare gegevens",
+    "bulkExport": "Bulkexport",
+    "csvDescription": "CSV-formaat is ideaal voor spreadsheets",
+    "dateFilterNote": "Datumfilters zijn van toepassing op alle geselecteerde typen",
+    "exportInfo": "Exportinformatie",
+    "exportTitle": "Medische dossiers exporteren",
+    "includeFilesNote": "Dit kan de downloadgrootte aanzienlijk vergroten",
+    "jsonDescription": "JSON-formaat biedt de volledige gegevensstructuur",
+    "pdfDescription": "PDF-formaat maakt afdrukbare rapporten aan",
+    "singleExport": "Enkelvoudige export",
+    "zipDescription": "Bulkexporten worden verpakt in een ZIP-bestand"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "{{count}} extra item",
+      "moreItems_other": "{{count}} extra items",
+      "title": "Beschikbare gegevens"
+    },
+    "buttons": {
+      "bulkExport": "Bulkexport {{count}} typen als ZIP",
+      "bulkExport_one": "Bulkexport {{count}} type als ZIP",
+      "bulkExport_other": "Bulkexport {{count}} typen als ZIP",
+      "creatingZip": "ZIP aanmaken...",
+      "exportAs": "{{scope}} exporteren als {{format}}",
+      "exporting": "Exporteren...",
+      "goToDashboard": "Naar dashboard",
+      "refreshPage": "Pagina vernieuwen"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "Selecteer gegevenstypen voor bulkexport"
+      },
+      "dataToExport": {
+        "label": "Te exporteren gegevens",
+        "placeholder": "Selecteer gegevenstype"
+      },
+      "dateRange": {
+        "endDate": "Einddatum (optioneel)",
+        "startDate": "Startdatum (optioneel)"
+      },
+      "format": {
+        "label": "Exportformaat",
+        "placeholder": "Selecteer formaat"
+      },
+      "includeFiles": "Bestandsbijlagen opnemen (maakt een ZIP-bestand aan)",
+      "includePatientInfo": {
+        "description": "Schakel dit uit om persoonlijke patiëntgegevens voor privacy uit te sluiten",
+        "label": "Patiëntinformatie opnemen (naam, demografische gegevens, enz.)"
+      },
+      "title": "Exportconfiguratie"
+    },
+    "description": "Download uw medische gegevens in verschillende formaten voor back-up of om te delen met zorgverleners",
+    "errors": {
+      "bulkExportFailed": "Bulkexport mislukt: {{message}}",
+      "bulkInvalidSettings": "Controleer uw bulkexportinstellingen. Zorg ervoor dat u ten minste één gegevenstype en een geldig formaat heeft geselecteerd.",
+      "bulkNoDataFound": "Geen gegevens gevonden voor de geselecteerde exportcriteria. Probeer andere gegevenstypen te selecteren of het datumbereik aan te passen.",
+      "exportFailed": "Export mislukt: {{message}}",
+      "invalidSettings": "Controleer uw exportinstellingen. Zorg ervoor dat u een geldig gegevenstype en formaat heeft geselecteerd.",
+      "loadFailed": "Exportgegevens laden mislukt: {{message}}",
+      "noActivePatient": "Er is momenteel geen patiëntprofiel geselecteerd. Selecteer een patiënt vanuit het dashboard om de exportfunctie te gebruiken.",
+      "noDataFound": "Geen gegevens gevonden voor de geselecteerde exportcriteria. Probeer een ander gegevenstype of datumbereik te selecteren.",
+      "noDataType": "Selecteer ten minste één gegevenstype voor bulkexport",
+      "sessionExpired": "Uw sessie is verlopen. Vernieuw de pagina of log opnieuw in om toegang te krijgen tot exportfuncties.",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "Exporteer meerdere gegevenstypen samen in een ZIP-bestand",
+      "bulkExport": "Bulkexport",
+      "singleDescription": "Exporteer een enkel gegevenstype in het door u gekozen formaat",
+      "singleExport": "Enkelvoudige export",
+      "title": "Exportmodus"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "Maakt een ZIP-bestand met meerdere gegevenstypen in het door u gekozen formaat voor een uitgebreide gegevensback-up.",
+        "title": "Bulkexport:"
+      },
+      "csv": {
+        "description": "Kommagescheiden waarden geschikt voor spreadsheetapplicaties zoals Excel of Google Sheets.",
+        "title": "CSV-formaat:"
+      },
+      "fileAttachments": {
+        "description": "Indien beschikbaar voor PDF-exporten, kunnen laboratoriumresultaatbestanden worden opgenomen in een ZIP-archief.",
+        "title": "Bestandsbijlagen:"
+      },
+      "json": {
+        "description": "Machineleesbaar gestructureerd gegevensformaat, ideaal voor het importeren in andere systemen of applicaties.",
+        "title": "JSON-formaat:"
+      },
+      "pdf": {
+        "description": "Leesbaar documentformaat, perfect voor afdrukken of delen met zorgverleners.",
+        "title": "PDF-formaat:"
+      },
+      "title": "Exportinformatie"
+    },
+    "loading": "Exportopties laden...",
+    "scopes": {
+      "all": "Alle dossiers",
+      "encounters": "Consulten"
+    },
+    "success": {
+      "bulkExportComplete": "Bulkexport succesvol voltooid! Uw ZIP-bestand met {{count}} gegevenstypen is gedownload.",
+      "bulkExportComplete_one": "Bulkexport succesvol voltooid! Uw ZIP-bestand met {{count}} gegevenstype is gedownload.",
+      "bulkExportComplete_other": "Bulkexport succesvol voltooid! Uw ZIP-bestand met {{count}} gegevenstypen is gedownload.",
+      "exportComplete": "Export succesvol voltooid! Uw {{format}}-bestand is gedownload."
+    },
+    "title": "Gezondheidsdossiers exporteren"
+  },
+  "templates": {
+    "categories": "{{count}} categorieën",
+    "categories_one": "{{count}} categorie",
+    "categories_other": "{{count}} categorieën",
+    "deleteConfirm": "Weet u zeker dat u dit sjabloon wilt verwijderen?",
+    "editTemplate": "Sjabloon bewerken",
+    "loadTemplate": "Sjabloon laden",
+    "manageTemplates": "Sjablonen beheren",
+    "moreTemplates": "... en {{count}} sjablonen meer",
+    "moreTemplates_one": "... en {{count}} sjabloon meer",
+    "moreTemplates_other": "... en {{count}} sjablonen meer",
+    "noSaved": "Geen opgeslagen sjablonen",
+    "records": "{{count}} dossiers",
+    "reportTemplates": "Rapportsjablonen",
+    "saveAsTemplate": "Opslaan als sjabloon",
+    "saveDescription": "Dit sjabloon slaat uw huidige rapportinstellingen, geselecteerde dossiers en geselecteerde trendgrafieken op.",
+    "savedTemplates": "Opgeslagen sjablonen",
+    "updateTemplate": "Sjabloon bijwerken"
+  }
+}

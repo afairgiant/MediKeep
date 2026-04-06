@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../ui';
 import { getStorageUsageStats } from '../../services/api/paperlessApi.jsx';
 import frontendLogger from '../../services/frontendLogger';
@@ -16,6 +17,7 @@ const StoragePreferencesCard = ({
   connectionEnabled = false,
   papraConnectionEnabled = false
 }) => {
+  const { t } = useTranslation('settings');
   const [storageStats, setStorageStats] = useState({ local: null, paperless: null, papra: null });
   const [loadingStats, setLoadingStats] = useState(false);
 
@@ -84,14 +86,14 @@ const StoragePreferencesCard = ({
         <div className="paperless-section-header">
           <div className="paperless-section-title">
             <span className="paperless-section-icon">💾</span>
-            <h3>Storage Preferences</h3>
+            <h3>{t('storage.title')}</h3>
           </div>
         </div>
 
         {/* Default Storage Location */}
         <div className="paperless-form-section">
           <div className="paperless-form-group">
-            <label className="paperless-form-label">Default Storage Location</label>
+            <label className="paperless-form-label">{t('storage.defaultLocation')}</label>
             
             <div className="paperless-storage-options">
               {/* Local Storage Option */}
@@ -107,11 +109,12 @@ const StoragePreferencesCard = ({
                   />
                   <div className="paperless-storage-option-content">
                     <div className="paperless-storage-option-header">
-                      <span className="paperless-storage-icon">🖥️</span>
-                      <span className="paperless-storage-title">Local Storage</span>
+                      {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+                      <span className="paperless-storage-icon">{'🖥️'}</span>
+                      <span className="paperless-storage-title">{t('storage.localStorage')}</span>
                     </div>
                     <div className="paperless-storage-description">
-                      Built-in file storage - fast, reliable, and always available
+                      {t('storage.localDescription')}
                     </div>
                   </div>
                 </label>
@@ -131,14 +134,15 @@ const StoragePreferencesCard = ({
                   />
                   <div className="paperless-storage-option-content">
                     <div className="paperless-storage-option-header">
-                      <span className="paperless-storage-icon">☁️</span>
-                      <span className="paperless-storage-title">Paperless-ngx</span>
+                      {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+                      <span className="paperless-storage-icon">{'☁️'}</span>
+                      <span className="paperless-storage-title">{t('storage.paperless')}</span>
                       {!connectionEnabled && (
-                        <span className="paperless-storage-badge">Connection Required</span>
+                        <span className="paperless-storage-badge">{t('storage.connectionRequired')}</span>
                       )}
                     </div>
                     <div className="paperless-storage-description">
-                      Advanced document management with full-text search and tagging
+                      {t('storage.paperlessDescription')}
                     </div>
                   </div>
                 </label>
@@ -158,14 +162,15 @@ const StoragePreferencesCard = ({
                   />
                   <div className="paperless-storage-option-content">
                     <div className="paperless-storage-option-header">
-                      <span className="paperless-storage-icon">📄</span>
-                      <span className="paperless-storage-title">Papra</span>
+                      {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+                      <span className="paperless-storage-icon">{'\uD83D\uDCC4'}</span>
+                      <span className="paperless-storage-title">{t('storage.papra')}</span>
                       {!papraConnectionEnabled && (
-                        <span className="paperless-storage-badge">Connection Required</span>
+                        <span className="paperless-storage-badge">{t('storage.connectionRequired')}</span>
                       )}
                     </div>
                     <div className="paperless-storage-description">
-                      Organization-based document management with Papra
+                      {t('storage.papraDescription')}
                     </div>
                   </div>
                 </label>
@@ -177,7 +182,7 @@ const StoragePreferencesCard = ({
         {/* Storage Usage Statistics */}
         <div className="paperless-form-section">
           <div className="paperless-form-group">
-            <label className="paperless-form-label">Storage Usage</label>
+            <label className="paperless-form-label">{t('storage.usageLabel')}</label>
             
             {loadingStats ? (
               <div className="paperless-storage-stats-loading">
@@ -187,11 +192,12 @@ const StoragePreferencesCard = ({
               <div className="paperless-storage-stats">
                 {storageStats.local && (
                   <div className="paperless-storage-stat">
-                    <div className="storage-stat-icon">🖥️</div>
+                    {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+                    <div className="storage-stat-icon">{'🖥️'}</div>
                     <div className="storage-stat-content">
-                      <div className="storage-stat-label">Local Storage</div>
+                      <div className="storage-stat-label">{t('storage.localStorage')}</div>
                       <div className="storage-stat-value">
-                        {storageStats.local.count} files ({formatBytes(storageStats.local.size)})
+                        {t('storage.filesCount', { count: storageStats.local.count })} ({formatBytes(storageStats.local.size)})
                       </div>
                     </div>
                   </div>
@@ -199,11 +205,12 @@ const StoragePreferencesCard = ({
                 
                 {storageStats.paperless && (
                   <div className="paperless-storage-stat">
-                    <div className="storage-stat-icon">☁️</div>
+                    {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+                    <div className="storage-stat-icon">{'☁️'}</div>
                     <div className="storage-stat-content">
-                      <div className="storage-stat-label">Paperless-ngx</div>
+                      <div className="storage-stat-label">{t('storage.paperless')}</div>
                       <div className="storage-stat-value">
-                        {storageStats.paperless.count} files ({formatBytes(storageStats.paperless.size)})
+                        {t('storage.filesCount', { count: storageStats.paperless.count })} ({formatBytes(storageStats.paperless.size)})
                       </div>
                     </div>
                   </div>
@@ -211,11 +218,12 @@ const StoragePreferencesCard = ({
 
                 {storageStats.papra && (
                   <div className="paperless-storage-stat">
-                    <div className="storage-stat-icon">📄</div>
+                    {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
+                    <div className="storage-stat-icon">{'\uD83D\uDCC4'}</div>
                     <div className="storage-stat-content">
-                      <div className="storage-stat-label">Papra</div>
+                      <div className="storage-stat-label">{t('storage.papra')}</div>
                       <div className="storage-stat-value">
-                        {storageStats.papra.count} files ({formatBytes(storageStats.papra.size)})
+                        {t('storage.filesCount', { count: storageStats.papra.count })} ({formatBytes(storageStats.papra.size)})
                       </div>
                     </div>
                   </div>
@@ -223,7 +231,7 @@ const StoragePreferencesCard = ({
 
                 {!storageStats.local && !storageStats.paperless && !storageStats.papra && (
                   <div className="paperless-storage-stats-empty">
-                    No storage usage data available
+                    {t('storage.noUsageData')}
                   </div>
                 )}
               </div>

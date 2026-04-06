@@ -1,4 +1,24 @@
 {
+  "alert": {
+    "errorCount": "{{count}} Fel",
+    "errorCount_one": "{{count}} Fel",
+    "errorCount_other": "{{count}} Fel",
+    "formError": "Formulärfel",
+    "highPriority": "{{count}} hög prioritet",
+    "highPriority_one": "{{count}} hög prioritet",
+    "highPriority_other": "{{count}} hög prioritet",
+    "suggestions": "Förslag:"
+  },
+  "boundary": {
+    "componentLabel": "Komponent:",
+    "errorDetails": "Feldetaljer",
+    "errorIdLabel": "Fel-ID:",
+    "errorLogged": "Felet har loggats automatiskt för utredning.",
+    "reloadPage": "Ladda om sidan",
+    "somethingWentWrong": "Något gick fel",
+    "tryAgain": "Försök igen",
+    "unexpectedError": "Vi ber om ursäkt, men något oväntat inträffade i journalsystemet."
+  },
   "file": {
     "deleteFailed": "Det gick inte att ta bort filen. Försök igen.",
     "downloadFailed": "Det gick inte att ladda ner filen. Försök igen.",
@@ -65,12 +85,12 @@
     "updateFailed": "Det gick inte att uppdatera relationen"
   },
   "success": {
-    "batchUploadSuccess": "Alla filer har laddats upp!",
-    "fileDeleted": "Filen har tagits bort.",
-    "formSaved": "Formuläret har sparats!",
+    "batchUploadSuccess": "Alla filer har laddats upp framgångsrikt!",
+    "fileDeleted": "Filen har tagits bort framgångsrikt.",
+    "formSaved": "Formuläret har sparats framgångsrikt!",
     "paperlessSyncSuccess": "Synkronisering med Paperless dokumenthantering lyckades.",
-    "uploadMultipleSuccess": "Alla filer har laddats upp!",
-    "uploadSuccess": "Filen har laddats upp!"
+    "uploadMultipleSuccess": "Alla filer har laddats upp framgångsrikt!",
+    "uploadSuccess": "Filen har laddats upp framgångsrikt!"
   },
   "upload": {
     "allUploadsFailed": "Alla filuppladdningar misslyckades. Kontrollera din anslutning och försök igen.",
