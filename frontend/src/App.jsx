@@ -348,13 +348,17 @@ function App() {
   }, []);
   return (
     <ErrorBoundary componentName="App">
-      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
       <Router>
         <AuthProvider>
           <UserPreferencesProvider>
             <AppDataProvider>
               <ThemeProvider>
               <ThemedMantineProvider>
+                    {/* Suspense lives INSIDE the theme providers so Mantine and CSS
+                        variables remain applied to the fallback and stay mounted during
+                        language-change suspensions — otherwise the fallback renders
+                        un-themed and causes a dark/light flash on switch. */}
+                    <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
                     <NavigationTracker />
                     <WhatsNewTrigger />
                     {/* <ActivityTracker /> */}
@@ -653,13 +657,13 @@ function App() {
 
                     {/* Toast Notifications */}
                     <ThemedToastContainer />
+                    </Suspense>
               </ThemedMantineProvider>
               </ThemeProvider>
             </AppDataProvider>
           </UserPreferencesProvider>
         </AuthProvider>
       </Router>
-      </Suspense>
     </ErrorBoundary>
   );
 }

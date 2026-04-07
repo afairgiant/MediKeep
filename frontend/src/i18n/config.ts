@@ -86,6 +86,12 @@ i18n
       // The default ('') means components never update after late-arriving translations,
       // causing keys to persist in the UI until page reload.
       bindI18nStore: 'added removed',
+      // Include 'languageChanging' so Suspense activates the moment a language switch starts.
+      // This makes hasLoadedNamespace's precheck return false during an in-flight change,
+      // guaranteeing the UI suspends until the new language's resources are loaded. Without
+      // this, transitioning from a fully-loaded language (e.g. bundled English) to an
+      // HTTP-loaded language could leave components silently rendering the old language.
+      bindI18n: 'languageChanging languageChanged',
     },
   });
 
