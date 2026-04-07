@@ -475,6 +475,14 @@ class PaperlessServiceBase(ABC):
                                     "results_count": results.get("count", 0),
                                 },
                             )
+                    else:
+                        logger.warning(
+                            "Paperless search title fallback failed",
+                            extra={
+                                "user_id": self.user_id,
+                                "status": fallback_response.status,
+                            },
+                        )
 
             logger.info(
                 "Document search completed",

@@ -409,6 +409,9 @@ class TestBuildTitleFallbackQuery:
         q3 = _build_title_fallback_query('quote"x', user_id=1)
         assert 'title:*quote\\"x*' in q3
 
+        q4 = _build_title_fallback_query("foo\\bar", user_id=1)
+        assert "title:*foo\\\\bar*" in q4
+
 
 class TestPaperlessServiceCreation:
     """Test cases for paperless service creation."""
