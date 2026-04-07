@@ -14,21 +14,21 @@
     "activity": {
       "lastUpdated": "อัปเดตล่าสุด",
       "noActivity": "ไม่มีกิจกรรมล่าสุด",
-      "noActivityDescription": "กิจกรรมบันทึกทางการแพท์ยของคุณจะแสดงที่นี่"
+      "noActivityDescription": "กิจกรรมบันทึกทางการแพทย์ของคุณจะแสดงที่นี่"
     },
     "hello": "สวัสดี",
-    "loading": "กำลังโหลดแดชบอร์ดทางการแพท์ย...",
+    "loading": "กำลังโหลดแดชบอร์ดทางการแพทย์...",
     "modules": {
       "exportRecords": "ส่งออกบันทึก",
       "visitHistory": "ประวัติการรับบริการ"
     },
     "search": {
       "advancedSearch": "ค้นหาขั้นสูง",
-      "placeholder": "ค้นหาบันทึกทางการแพท์ย..."
+      "placeholder": "ค้นหาบันทึกทางการแพทย์..."
     },
     "sections": {
       "additionalResources": "ทรัพยากรเพิ่มเติม",
-      "coreMedical": "ข้อมูลทางการแพท์ยหลัก",
+      "coreMedical": "ข้อมูลทางการแพทย์หลัก",
       "healthMonitoring": "การตรวจติดตามสุขภาพ",
       "prevention": "การป้องกันและประวัติ",
       "recentActivity": "กิจกรรมล่าสุด",
@@ -42,7 +42,7 @@
   },
   "invitations": {
     "acceptButton": "รับคำเชิญ",
-    "confirmDescription": "เมื่อยอมรับแล้ว คุณจะสามารถเข้าถึงข้อมูลทางการแพท์ยที่แชร์ได้",
+    "confirmDescription": "เมื่อยอมรับแล้ว คุณจะสามารถเข้าถึงข้อมูลทางการแพทย์ที่แชร์ได้",
     "confirmQuestion": "คุณแน่ใจหรือไม่ว่าต้องการรับคำเชิญนี้?",
     "confirmTitle": "ยืนยันการรับคำเชิญ",
     "from": "จาก",
@@ -70,7 +70,7 @@
   },
   "pages": {
     "help": "ช่วยเหลือและสนับสนุน",
-    "medicalHistory": "ประวัติทางการแพท์ย",
+    "medicalHistory": "ประวัติทางการแพทย์",
     "patientDetails": "รายละเอียดผู้ป่วย",
     "patientList": "รายชื่อผู้ป่วย",
     "preferences": "การตั้งค่า",
@@ -97,7 +97,7 @@
       "insurance": "ประกันภัย",
       "labResults": "ผลตรวจทางห้องปฏิบัติการ",
       "language": "ภาษา",
-      "medicalEquipment": "อุปกรณ์ทางการแพท์ย",
+      "medicalEquipment": "อุปกรณ์ทางการแพทย์",
       "medications": "ยา",
       "patientInfo": "ข้อมูลผู้ป่วย",
       "pharmacies": "ร้านขายยา",
