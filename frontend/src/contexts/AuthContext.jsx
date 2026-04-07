@@ -166,9 +166,7 @@ export function AuthProvider({ children }) {
             sessionTimeoutMinutes = userPrefs.session_timeout_minutes;
             localStorage.setItem('medapp_sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
           }
-          if (userPrefs.language && userPrefs.language !== i18n.language) {
-            await i18n.changeLanguage(userPrefs.language);
-          }
+          // Language preference is applied by UserPreferencesContext
         } catch (prefError) {
           // Fall back to cached localStorage value
           const cached = localStorage.getItem('medapp_sessionTimeoutMinutes');
