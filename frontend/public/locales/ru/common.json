@@ -29,7 +29,8 @@
     "showMore": "Показать больше",
     "tryAgain": "Повторить попытку",
     "update": "Обновить",
-    "view": "Просмотр"
+    "view": "Просмотр",
+    "linkMedications": "Связать лекарства"
   },
   "conditions": {
     "addNew": "Добавить заболевание",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Просмотреть данные аптеки",
     "visitDate": "Дата визита",
     "visitWebsite": "Перейти на сайт ↗",
-    "yes": "Да"
+    "yes": "Да",
+    "noConditionsLinkedToMedication": "Нет заболеваний, связанных с этим лекарством",
+    "conditionsAvailableToLink": "Доступно для связывания: {{count}} заболеваний",
+    "medicationsAvailableToLink": "Доступно для связывания: {{count}} лекарств"
   },
   "labResults": {
     "emptyLabResultMessage": "Вы создали результат анализа, но не добавили компоненты теста. Хотите удалить этот результат анализа?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Пожалуйста, выберите результат анализа",
     "selectVisit": "Пожалуйста, выберите визит",
     "underDevelopment": "Данный раздел в настоящее время разрабатывается.",
-    "updateSuccess": "Успешно обновлено"
+    "updateSuccess": "Успешно обновлено",
+    "confirmRemoveMedicationRelationship": "Вы уверены, что хотите убрать эту связь с лекарством?"
   },
   "modals": {
     "chooseConditionsToLink": "Выберите заболевания для связывания",
@@ -558,7 +563,12 @@
     "selectLabResult": "Выберите результат анализа",
     "selectMedications": "Выберите лекарства",
     "selectPurpose": "Выберите цель",
-    "selectVisit": "Выберите визит"
+    "selectVisit": "Выберите визит",
+    "linkConditionsToMedication": "Связать заболевания с лекарством",
+    "linkMedicationsToCondition": "Связать лекарства с заболеванием",
+    "selectConditions": "Выберите заболевания",
+    "describeConditionRelevanceMedication": "Опишите, как это заболевание связано с лекарством",
+    "describeMedicationRelevance": "Опишите, как это лекарство связано с заболеванием"
   },
   "noResults": "Врачи не найдены",
   "pagination": {
