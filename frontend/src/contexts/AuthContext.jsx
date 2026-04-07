@@ -11,7 +11,6 @@ import { getActivityConfig } from '../config/activityConfig';
 import secureActivityLogger from '../utils/secureActivityLogger';
 import { isAdminRole } from '../utils/authUtils';
 import { getUserPreferences } from '../services/api/userPreferencesApi';
-import i18n from '../i18n';
 
 // Auth State Management
 const initialState = {
@@ -343,26 +342,7 @@ export function AuthProvider({ children }) {
         },
       });
 
-      // Load user's language preference from backend after successful login
-      try {
-        const userPrefs = await getUserPreferences();
-        if (userPrefs.language && userPrefs.language !== i18n.language) {
-          await i18n.changeLanguage(userPrefs.language);
-          logger.info('User language preference loaded from backend after login', {
-            category: 'language_loaded',
-            language: userPrefs.language,
-            userId: user.id,
-            timestamp: new Date().toISOString()
-          });
-        }
-      } catch (langError) {
-        logger.warn('Failed to load user language preference after login', {
-          category: 'language_load_failed',
-          error: langError.message,
-          userId: user.id,
-          timestamp: new Date().toISOString()
-        });
-      }
+      // Language preference is applied by UserPreferencesContext once isAuthenticated flips
 
       notifySuccess('notifications:toasts.auth.loginSuccess');
 
