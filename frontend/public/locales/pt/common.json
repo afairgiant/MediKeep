@@ -29,7 +29,8 @@
     "showMore": "Mostrar mais",
     "tryAgain": "Tentar Novamente",
     "update": "Atualizar",
-    "view": "Visualizar"
+    "view": "Visualizar",
+    "linkMedications": "Vincular Medicamentos"
   },
   "conditions": {
     "addNew": "Adicionar Nova Condição",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Ver detalhes da farmácia",
     "visitDate": "Data da consulta",
     "visitWebsite": "Visitar Site ↗",
-    "yes": "Sim"
+    "yes": "Sim",
+    "noConditionsLinkedToMedication": "Nenhuma condição vinculada a este medicamento",
+    "conditionsAvailableToLink": "{{count}} condições disponíveis para vincular",
+    "medicationsAvailableToLink": "{{count}} medicamentos disponíveis para vincular"
   },
   "labResults": {
     "emptyLabResultMessage": "Você criou um resultado de laboratório mas não adicionou nenhum componente de teste. Gostaria de excluir este resultado de laboratório?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Por favor, selecione um resultado de laboratório",
     "selectVisit": "Por favor, selecione uma consulta",
     "underDevelopment": "Esta seção está atualmente em desenvolvimento.",
-    "updateSuccess": "Atualizado com sucesso"
+    "updateSuccess": "Atualizado com sucesso",
+    "confirmRemoveMedicationRelationship": "Tem certeza de que deseja remover esta relação de medicamento?"
   },
   "modals": {
     "chooseConditionsToLink": "Escolha condições para vincular",
@@ -558,7 +563,12 @@
     "selectLabResult": "Selecionar Resultado de Laboratório",
     "selectMedications": "Selecionar Medicamentos",
     "selectPurpose": "Selecionar finalidade",
-    "selectVisit": "Selecionar Consulta"
+    "selectVisit": "Selecionar Consulta",
+    "linkConditionsToMedication": "Vincular condições ao medicamento",
+    "linkMedicationsToCondition": "Vincular medicamentos à condição",
+    "selectConditions": "Selecionar condições",
+    "describeConditionRelevanceMedication": "Descreva como esta condição se relaciona com o medicamento",
+    "describeMedicationRelevance": "Descreva como este medicamento se relaciona com a condição"
   },
   "noResults": "Nenhum profissional encontrado",
   "pagination": {

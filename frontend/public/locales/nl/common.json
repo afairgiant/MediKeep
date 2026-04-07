@@ -29,7 +29,8 @@
     "showMore": "Meer weergeven",
     "tryAgain": "Opnieuw proberen",
     "update": "Bijwerken",
-    "view": "Bekijken"
+    "view": "Bekijken",
+    "linkMedications": "Medicatie koppelen"
   },
   "conditions": {
     "addNew": "Nieuwe aandoening toevoegen",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Apotheekgegevens bekijken",
     "visitDate": "Bezoekdatum",
     "visitWebsite": "Website bezoeken ↗",
-    "yes": "Ja"
+    "yes": "Ja",
+    "noConditionsLinkedToMedication": "Geen aandoeningen gekoppeld aan deze medicatie",
+    "conditionsAvailableToLink": "{{count}} aandoeningen beschikbaar om te koppelen",
+    "medicationsAvailableToLink": "{{count}} medicatie beschikbaar om te koppelen"
   },
   "labResults": {
     "emptyLabResultMessage": "U heeft een labresultaat aangemaakt maar geen testcomponenten toegevoegd. Wilt u dit labresultaat verwijderen?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Selecteer een labresultaat",
     "selectVisit": "Selecteer een bezoek",
     "underDevelopment": "Dit onderdeel is momenteel in ontwikkeling.",
-    "updateSuccess": "Succesvol bijgewerkt"
+    "updateSuccess": "Succesvol bijgewerkt",
+    "confirmRemoveMedicationRelationship": "Weet u zeker dat u deze medicatierelatie wilt verwijderen?"
   },
   "modals": {
     "chooseConditionsToLink": "Kies aandoeningen om te koppelen",
@@ -558,7 +563,12 @@
     "selectLabResult": "Selecteer labresultaat",
     "selectMedications": "Selecteer medicatie",
     "selectPurpose": "Selecteer doel",
-    "selectVisit": "Selecteer bezoek"
+    "selectVisit": "Selecteer bezoek",
+    "linkConditionsToMedication": "Aandoeningen koppelen aan medicatie",
+    "linkMedicationsToCondition": "Medicatie koppelen aan aandoening",
+    "selectConditions": "Selecteer aandoeningen",
+    "describeConditionRelevanceMedication": "Beschrijf hoe deze aandoening verband houdt met de medicatie",
+    "describeMedicationRelevance": "Beschrijf hoe deze medicatie verband houdt met de aandoening"
   },
   "noResults": "Geen zorgverleners gevonden",
   "pagination": {

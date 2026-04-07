@@ -29,7 +29,8 @@
     "showMore": "Afficher plus",
     "tryAgain": "Réessayer",
     "update": "Mettre à jour",
-    "view": "Voir"
+    "view": "Voir",
+    "linkMedications": "Lier des médicaments"
   },
   "conditions": {
     "addNew": "Ajouter une nouvelle pathologie",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Voir les détails de la pharmacie",
     "visitDate": "Date de la consultation",
     "visitWebsite": "Visiter le site web ↗",
-    "yes": "Oui"
+    "yes": "Oui",
+    "noConditionsLinkedToMedication": "Aucune pathologie liée à ce médicament",
+    "conditionsAvailableToLink": "{{count}} pathologies disponibles à lier",
+    "medicationsAvailableToLink": "{{count}} médicaments disponibles à lier"
   },
   "labResults": {
     "emptyLabResultMessage": "Vous avez créé un résultat d'analyse mais n'avez ajouté aucune composante d'examen. Souhaitez-vous supprimer ce résultat d'analyse ?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Veuillez sélectionner un résultat d'analyse",
     "selectVisit": "Veuillez sélectionner une consultation",
     "underDevelopment": "Cette section est actuellement en cours de développement.",
-    "updateSuccess": "Mis à jour avec succès"
+    "updateSuccess": "Mis à jour avec succès",
+    "confirmRemoveMedicationRelationship": "Êtes-vous sûr de vouloir supprimer cette relation de médicament ?"
   },
   "modals": {
     "chooseConditionsToLink": "Choisir les pathologies à associer",
@@ -558,7 +563,12 @@
     "selectLabResult": "Sélectionner un résultat d'analyse",
     "selectMedications": "Sélectionner des médicaments",
     "selectPurpose": "Sélectionner l'objet",
-    "selectVisit": "Sélectionner une consultation"
+    "selectVisit": "Sélectionner une consultation",
+    "linkConditionsToMedication": "Lier des pathologies au médicament",
+    "linkMedicationsToCondition": "Lier des médicaments à la pathologie",
+    "selectConditions": "Sélectionner des pathologies",
+    "describeConditionRelevanceMedication": "Décrivez en quoi cette pathologie est pertinente pour ce médicament",
+    "describeMedicationRelevance": "Décrivez en quoi ce médicament est pertinent pour cette pathologie"
   },
   "noResults": "Aucun praticien trouvé",
   "pagination": {

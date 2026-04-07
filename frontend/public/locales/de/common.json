@@ -29,7 +29,8 @@
     "showMore": "Mehr anzeigen",
     "tryAgain": "Erneut versuchen",
     "update": "Aktualisieren",
-    "view": "Ansehen"
+    "view": "Ansehen",
+    "linkMedications": "Medikamente verknüpfen"
   },
   "conditions": {
     "addNew": "Neue Erkrankung hinzufügen",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Apothekendetails anzeigen",
     "visitDate": "Besuchsdatum",
     "visitWebsite": "Website besuchen ↗",
-    "yes": "Ja"
+    "yes": "Ja",
+    "noConditionsLinkedToMedication": "Keine Erkrankungen mit diesem Medikament verknüpft",
+    "conditionsAvailableToLink": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
+    "medicationsAvailableToLink": "{{count}} Medikamente zum Verknüpfen verfügbar"
   },
   "labResults": {
     "emptyLabResultMessage": "Sie haben ein Laborergebnis erstellt, aber keine Testkomponenten hinzugefügt. Möchten Sie dieses Laborergebnis löschen?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Bitte wählen Sie ein Laborergebnis aus",
     "selectVisit": "Bitte wählen Sie einen Termin aus",
     "underDevelopment": "Dieser Bereich befindet sich derzeit in Entwicklung.",
-    "updateSuccess": "Erfolgreich aktualisiert"
+    "updateSuccess": "Erfolgreich aktualisiert",
+    "confirmRemoveMedicationRelationship": "Möchten Sie diese Medikamentenverknüpfung wirklich entfernen?"
   },
   "modals": {
     "chooseConditionsToLink": "Wählen Sie Erkrankungen zum Verknüpfen",
@@ -558,7 +563,12 @@
     "selectLabResult": "Laborergebnis auswählen",
     "selectMedications": "Medikamente auswählen",
     "selectPurpose": "Zweck auswählen",
-    "selectVisit": "Termin auswählen"
+    "selectVisit": "Termin auswählen",
+    "linkConditionsToMedication": "Erkrankungen mit Medikament verknüpfen",
+    "linkMedicationsToCondition": "Medikamente mit Erkrankung verknüpfen",
+    "selectConditions": "Erkrankungen auswählen",
+    "describeConditionRelevanceMedication": "Beschreiben Sie, wie diese Erkrankung mit dem Medikament zusammenhängt",
+    "describeMedicationRelevance": "Beschreiben Sie, wie dieses Medikament mit der Erkrankung zusammenhängt"
   },
   "noResults": "Keine Ärzte gefunden",
   "pagination": {

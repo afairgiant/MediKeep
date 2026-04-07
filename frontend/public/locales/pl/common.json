@@ -29,7 +29,8 @@
     "showMore": "Pokaż więcej",
     "tryAgain": "Spróbuj ponownie",
     "update": "Aktualizuj",
-    "view": "Zobacz"
+    "view": "Zobacz",
+    "linkMedications": "Połącz leki"
   },
   "conditions": {
     "addNew": "Dodaj nowe schorzenie",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Zobacz szczegóły apteki",
     "visitDate": "Data wizyty",
     "visitWebsite": "Odwiedź stronę ↗",
-    "yes": "Tak"
+    "yes": "Tak",
+    "noConditionsLinkedToMedication": "Brak schorzeń powiązanych z tym lekiem",
+    "conditionsAvailableToLink": "Dostępne do połączenia: {{count}} schorzeń",
+    "medicationsAvailableToLink": "Dostępne do połączenia: {{count}} leków"
   },
   "labResults": {
     "emptyLabResultMessage": "Utworzono wynik badania, ale nie dodano żadnych składników testu. Czy chcesz usunąć ten wynik badania?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Proszę wybrać wynik badania",
     "selectVisit": "Proszę wybrać wizytę",
     "underDevelopment": "Ta sekcja jest obecnie w trakcie rozwoju.",
-    "updateSuccess": "Zaktualizowano pomyślnie"
+    "updateSuccess": "Zaktualizowano pomyślnie",
+    "confirmRemoveMedicationRelationship": "Czy na pewno chcesz usunąć to powiązanie z lekiem?"
   },
   "modals": {
     "chooseConditionsToLink": "Wybierz schorzenia do połączenia",
@@ -558,7 +563,12 @@
     "selectLabResult": "Wybierz wynik badania",
     "selectMedications": "Wybierz leki",
     "selectPurpose": "Wybierz cel",
-    "selectVisit": "Wybierz wizytę"
+    "selectVisit": "Wybierz wizytę",
+    "linkConditionsToMedication": "Połącz schorzenia z lekiem",
+    "linkMedicationsToCondition": "Połącz leki ze schorzeniem",
+    "selectConditions": "Wybierz schorzenia",
+    "describeConditionRelevanceMedication": "Opisz, jak to schorzenie odnosi się do leku",
+    "describeMedicationRelevance": "Opisz, jak ten lek odnosi się do schorzenia"
   },
   "noResults": "Nie znaleziono lekarzy",
   "pagination": {

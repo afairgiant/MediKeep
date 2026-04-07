@@ -29,7 +29,8 @@
     "showMore": "Visa mer",
     "tryAgain": "Försök igen",
     "update": "Uppdatera",
-    "view": "Visa"
+    "view": "Visa",
+    "linkMedications": "Länka läkemedel"
   },
   "conditions": {
     "addNew": "Lägg till nytt tillstånd",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Visa apoteksinformation",
     "visitDate": "Besöksdatum",
     "visitWebsite": "Besök webbplats ↗",
-    "yes": "Ja"
+    "yes": "Ja",
+    "noConditionsLinkedToMedication": "Inga tillstånd länkade till detta läkemedel",
+    "conditionsAvailableToLink": "{{count}} tillstånd tillgängliga att länka",
+    "medicationsAvailableToLink": "{{count}} läkemedel tillgängliga att länka"
   },
   "labResults": {
     "emptyLabResultMessage": "Du skapade ett labbresultat men lade inte till några testkomponenter. Vill du ta bort detta labbresultat?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Välj ett labbresultat",
     "selectVisit": "Välj ett besök",
     "underDevelopment": "Denna sektion är för närvarande under utveckling.",
-    "updateSuccess": "Uppdaterades framgångsrikt"
+    "updateSuccess": "Uppdaterades framgångsrikt",
+    "confirmRemoveMedicationRelationship": "Är du säker på att du vill ta bort denna läkemedelsrelation?"
   },
   "modals": {
     "chooseConditionsToLink": "Välj tillstånd att länka",
@@ -558,7 +563,12 @@
     "selectLabResult": "Välj labbresultat",
     "selectMedications": "Välj läkemedel",
     "selectPurpose": "Välj syfte",
-    "selectVisit": "Välj besök"
+    "selectVisit": "Välj besök",
+    "linkConditionsToMedication": "Länka tillstånd till läkemedel",
+    "linkMedicationsToCondition": "Länka läkemedel till tillstånd",
+    "selectConditions": "Välj tillstånd",
+    "describeConditionRelevanceMedication": "Beskriv hur detta tillstånd relaterar till läkemedlet",
+    "describeMedicationRelevance": "Beskriv hur detta läkemedel relaterar till tillståndet"
   },
   "noResults": "Inga vårdgivare hittades",
   "pagination": {

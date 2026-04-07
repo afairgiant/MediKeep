@@ -29,7 +29,8 @@
     "showMore": "Mostra altro",
     "tryAgain": "Riprova",
     "update": "Aggiorna",
-    "view": "Visualizza"
+    "view": "Visualizza",
+    "linkMedications": "Collega farmaci"
   },
   "conditions": {
     "addNew": "Aggiungi nuova condizione",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "Visualizza dettagli farmacia",
     "visitDate": "Data visita",
     "visitWebsite": "Visita il sito ↗",
-    "yes": "Sì"
+    "yes": "Sì",
+    "noConditionsLinkedToMedication": "Nessuna condizione collegata a questo farmaco",
+    "conditionsAvailableToLink": "{{count}} condizioni disponibili da collegare",
+    "medicationsAvailableToLink": "{{count}} farmaci disponibili da collegare"
   },
   "labResults": {
     "emptyLabResultMessage": "Hai creato un risultato di laboratorio ma non hai aggiunto alcun componente di test. Desideri eliminare questo risultato di laboratorio?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Selezionare un risultato di laboratorio",
     "selectVisit": "Selezionare una visita",
     "underDevelopment": "Questa sezione è attualmente in fase di sviluppo.",
-    "updateSuccess": "Aggiornato con successo"
+    "updateSuccess": "Aggiornato con successo",
+    "confirmRemoveMedicationRelationship": "Sei sicuro di voler rimuovere questa relazione del farmaco?"
   },
   "modals": {
     "chooseConditionsToLink": "Scegli condizioni da collegare",
@@ -558,7 +563,12 @@
     "selectLabResult": "Seleziona risultato di laboratorio",
     "selectMedications": "Seleziona farmaci",
     "selectPurpose": "Seleziona scopo",
-    "selectVisit": "Seleziona visita"
+    "selectVisit": "Seleziona visita",
+    "linkConditionsToMedication": "Collega condizioni al farmaco",
+    "linkMedicationsToCondition": "Collega farmaci alla condizione",
+    "selectConditions": "Seleziona condizioni",
+    "describeConditionRelevanceMedication": "Descrivi come questa condizione è correlata al farmaco",
+    "describeMedicationRelevance": "Descrivi come questo farmaco è correlato alla condizione"
   },
   "noResults": "Nessun operatore sanitario trovato",
   "pagination": {

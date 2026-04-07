@@ -29,7 +29,8 @@
     "showMore": "แสดงเพิ่มเติม",
     "tryAgain": "ลองอีกครั้ง",
     "update": "อัปเดต",
-    "view": "ดู"
+    "view": "ดู",
+    "linkMedications": "เชื่อมโยงยา"
   },
   "conditions": {
     "addNew": "เพิ่มโรคใหม่",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "ดูรายละเอียดร้านยา",
     "visitDate": "วันที่เยี่ยม",
     "visitWebsite": "เยี่ยมชมเว็บไซต์ ↗",
-    "yes": "ใช่"
+    "yes": "ใช่",
+    "noConditionsLinkedToMedication": "ไม่มีโรคที่เชื่อมโยงกับยานี้",
+    "conditionsAvailableToLink": "มีโรค {{count}} รายการที่สามารถเชื่อมโยงได้",
+    "medicationsAvailableToLink": "มียา {{count}} รายการที่สามารถเชื่อมโยงได้"
   },
   "labResults": {
     "emptyLabResultMessage": "คุณสร้างผลแลปแต่ไม่ได้เพิ่มส่วนประกอบการตรวจ คุณต้องการลบผลแลปนี้หรือไม่?",
@@ -536,7 +540,8 @@
     "selectLabResult": "กรุณาเลือกผลแลป",
     "selectVisit": "กรุณาเลือกการเยี่ยม",
     "underDevelopment": "ส่วนนี้อยู่ระหว่างการพัฒนา",
-    "updateSuccess": "อัปเดตสำเร็จ"
+    "updateSuccess": "อัปเดตสำเร็จ",
+    "confirmRemoveMedicationRelationship": "คุณแน่ใจหรือไม่ที่จะลบความสัมพันธ์ของยานี้?"
   },
   "modals": {
     "chooseConditionsToLink": "เลือกโรคที่จะเชื่อมโยง",
@@ -558,7 +563,12 @@
     "selectLabResult": "เลือกผลแลป",
     "selectMedications": "เลือกยา",
     "selectPurpose": "เลือกวัตถุประสงค์",
-    "selectVisit": "เลือกการเยี่ยม"
+    "selectVisit": "เลือกการเยี่ยม",
+    "linkConditionsToMedication": "เชื่อมโยงโรคกับยา",
+    "linkMedicationsToCondition": "เชื่อมโยงยากับโรค",
+    "selectConditions": "เลือกโรค",
+    "describeConditionRelevanceMedication": "อธิบายความเกี่ยวข้องของโรคนี้กับยา",
+    "describeMedicationRelevance": "อธิบายความเกี่ยวข้องของยานี้กับโรค"
   },
   "noResults": "ไม่พบแพทย์",
   "pagination": {

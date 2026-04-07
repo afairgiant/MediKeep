@@ -29,7 +29,8 @@
     "showMore": "Show more",
     "tryAgain": "Try Again",
     "update": "Update",
-    "view": "View"
+    "view": "View",
+    "linkMedications": "Link Medications"
   },
   "conditions": {
     "addNew": "Add New Condition",
@@ -456,7 +457,10 @@
     "viewPharmacyDetails": "View pharmacy details",
     "visitDate": "Visit date",
     "visitWebsite": "Visit Website ↗",
-    "yes": "Yes"
+    "yes": "Yes",
+    "noConditionsLinkedToMedication": "No conditions linked to this medication",
+    "conditionsAvailableToLink": "{{count}} conditions available to link",
+    "medicationsAvailableToLink": "{{count}} medications available to link"
   },
   "labResults": {
     "emptyLabResultMessage": "You created a lab result but didn't add any test components. Would you like to delete this lab result?",
@@ -536,7 +540,8 @@
     "selectLabResult": "Please select a lab result",
     "selectVisit": "Please select a visit",
     "underDevelopment": "This section is currently under development.",
-    "updateSuccess": "Updated successfully"
+    "updateSuccess": "Updated successfully",
+    "confirmRemoveMedicationRelationship": "Are you sure you want to remove this medication relationship?"
   },
   "modals": {
     "chooseConditionsToLink": "Choose conditions to link",
@@ -558,7 +563,12 @@
     "selectLabResult": "Select Lab Result",
     "selectMedications": "Select Medications",
     "selectPurpose": "Select purpose",
-    "selectVisit": "Select Visit"
+    "selectVisit": "Select Visit",
+    "linkConditionsToMedication": "Link Conditions to Medication",
+    "linkMedicationsToCondition": "Link Medications to Condition",
+    "selectConditions": "Select Conditions",
+    "describeConditionRelevanceMedication": "Describe how this condition is relevant to the medication",
+    "describeMedicationRelevance": "Describe how this medication is relevant to the condition"
   },
   "noResults": "No practitioners found",
   "pagination": {
