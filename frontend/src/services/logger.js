@@ -45,6 +45,16 @@ class Logger {
   setupGlobalHandlers() {
     // JavaScript errors
     window.addEventListener('error', event => {
+      // Ignore benign ResizeObserver loop warnings. These fire from Mantine/Chart
+      // components when a resize callback triggers another layout change in the
+      // same frame. They have no impact on functionality and flood the logs.
+      if (
+        typeof event.message === 'string' &&
+        event.message.startsWith('ResizeObserver loop')
+      ) {
+        return;
+      }
+
       this.error('JavaScript Error', {
         message: event.message,
         filename: event.filename,

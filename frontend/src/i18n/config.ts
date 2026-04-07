@@ -4,6 +4,24 @@ import HttpBackend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { isDevelopment } from '../config/env';
 
+// Bundle English translations so the fallback language is always available synchronously.
+// This eliminates the race condition where components render before HTTP-loaded translations
+// arrive, which caused translation keys to flash in the UI.
+import commonEn from '../../public/locales/en/common.json';
+import medicalEn from '../../public/locales/en/medical.json';
+import adminEn from '../../public/locales/en/admin.json';
+import errorsEn from '../../public/locales/en/errors.json';
+import navigationEn from '../../public/locales/en/navigation.json';
+import notificationsEn from '../../public/locales/en/notifications.json';
+import sharedEn from '../../public/locales/en/shared.json';
+import authEn from '../../public/locales/en/auth.json';
+import settingsEn from '../../public/locales/en/settings.json';
+import reportsEn from '../../public/locales/en/reports.json';
+import labresultsEn from '../../public/locales/en/labresults.json';
+import vitalsEn from '../../public/locales/en/vitals.json';
+import invitationsEn from '../../public/locales/en/invitations.json';
+import documentsEn from '../../public/locales/en/documents.json';
+
 i18n
   .use(HttpBackend)
   .use(LanguageDetector)
@@ -15,6 +33,27 @@ i18n
     // Only load the primary language code (e.g., 'en' not 'en-US')
     // This ensures i18n.language always matches our supported language codes
     load: 'languageOnly',
+
+    // English is bundled inline (see imports above); other languages load via HTTP backend.
+    partialBundledLanguages: true,
+    resources: {
+      en: {
+        common: commonEn,
+        medical: medicalEn,
+        admin: adminEn,
+        errors: errorsEn,
+        navigation: navigationEn,
+        notifications: notificationsEn,
+        shared: sharedEn,
+        auth: authEn,
+        settings: settingsEn,
+        reports: reportsEn,
+        labresults: labresultsEn,
+        vitals: vitalsEn,
+        invitations: invitationsEn,
+        documents: documentsEn,
+      },
+    },
 
     ns: ['common', 'medical', 'errors', 'navigation', 'notifications', 'admin', 'shared', 'auth', 'settings', 'reports', 'labresults', 'vitals', 'invitations', 'documents'],
     defaultNS: 'common',
@@ -43,6 +82,16 @@ i18n
 
     react: {
       useSuspense: true,
+      // Re-render components when translations are added to the store.
+      // The default ('') means components never update after late-arriving translations,
+      // causing keys to persist in the UI until page reload.
+      bindI18nStore: 'added removed',
+      // Include 'languageChanging' so Suspense activates the moment a language switch starts.
+      // This makes hasLoadedNamespace's precheck return false during an in-flight change,
+      // guaranteeing the UI suspends until the new language's resources are loaded. Without
+      // this, transitioning from a fully-loaded language (e.g. bundled English) to an
+      // HTTP-loaded language could leave components silently rendering the old language.
+      bindI18n: 'languageChanging languageChanged',
     },
   });
 
