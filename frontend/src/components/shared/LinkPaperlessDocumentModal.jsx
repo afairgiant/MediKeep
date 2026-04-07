@@ -236,7 +236,11 @@ const LinkPaperlessDocumentModal = ({
             </Center>
           ) : (
             <Stack gap="sm">
-              {searchResults.map((doc) => (
+              {searchResults.map((doc) => {
+                // Prefer backend-resolved names; fall back to raw IDs if the
+                // backend couldn't enrich (older response or lookup failure).
+                const tagLabels = doc.tag_names?.length ? doc.tag_names : (doc.tags || []);
+                return (
                 <Card
                   key={doc.id}
                   withBorder
@@ -266,31 +270,31 @@ const LinkPaperlessDocumentModal = ({
                           </Group>
                         )}
 
-                        {doc.tags && doc.tags.length > 0 && (
+                        {tagLabels.length > 0 && (
                           <Group gap="xs">
                             <IconTag size={14} />
-                            {doc.tags.slice(0, 3).map((tag) => (
-                              <Badge key={tag} size="xs" variant="light">
+                            {tagLabels.slice(0, 3).map((tag, idx) => (
+                              <Badge key={`${tag}-${idx}`} size="xs" variant="light">
                                 {tag}
                               </Badge>
                             ))}
-                            {doc.tags.length > 3 && (
+                            {tagLabels.length > 3 && (
                               <Text size="xs" c="dimmed">
-                                {t('linkPaperless.moreTags', { count: doc.tags.length - 3 })}
+                                {t('linkPaperless.moreTags', { count: tagLabels.length - 3 })}
                               </Text>
                             )}
                           </Group>
                         )}
 
-                        {doc.correspondent && (
+                        {(doc.correspondent_name || doc.correspondent) && (
                           <Text size="xs" c="dimmed">
-                            {t('linkPaperless.from', { name: doc.correspondent })}
+                            {t('linkPaperless.from', { name: doc.correspondent_name ?? doc.correspondent })}
                           </Text>
                         )}
 
-                        {doc.document_type && (
+                        {(doc.document_type_name || doc.document_type) && (
                           <Text size="xs" c="dimmed">
-                            {t('linkPaperless.type', { type: doc.document_type })}
+                            {t('linkPaperless.type', { type: doc.document_type_name ?? doc.document_type })}
                           </Text>
                         )}
                       </Stack>
@@ -303,7 +307,8 @@ const LinkPaperlessDocumentModal = ({
                     )}
                   </Group>
                 </Card>
-              ))}
+                );
+              })}
             </Stack>
           )}
         </ScrollArea>
