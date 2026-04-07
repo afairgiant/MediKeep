@@ -16,6 +16,7 @@ from app.services.paperless_service import (
     PaperlessConnectionError,
     PaperlessAuthenticationError,
     PaperlessUploadError,
+    _build_title_fallback_query,
     create_paperless_service,
     create_paperless_service_with_token,
     create_paperless_service_with_username_password
@@ -277,6 +278,139 @@ class TestPaperlessService:
             call_args = mock_request.call_args
             params = call_args[1]["params"]
             assert params["query"] == f"custom_fields.medical_record_user_id:{self.user_id}"
+
+    @pytest.mark.asyncio
+    async def test_search_documents_title_fallback_on_zero_results(self):
+        """When the primary full-text search returns 0 results, the service
+        retries with a title-wildcard query and returns those results."""
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
+
+        primary_response = AsyncMock()
+        primary_response.status = 200
+        primary_response.json.return_value = {"count": 0, "results": []}
+
+        fallback_response = AsyncMock()
+        fallback_response.status = 200
+        fallback_response.json.return_value = {
+            "count": 1,
+            "results": [{"id": 42, "title": "2026_Arztbericht Kalis"}],
+        }
+
+        responses = [primary_response, fallback_response]
+
+        def make_request(*args, **kwargs):
+            cm = AsyncMock()
+            cm.__aenter__.return_value = responses.pop(0)
+            return cm
+
+        with patch.object(service, '_make_request', side_effect=make_request) as mock_request:
+            result = await service.search_documents("2026_Arztbericht Kalis")
+
+            assert result["count"] == 1
+            assert result["results"][0]["id"] == 42
+            assert mock_request.call_count == 2
+
+            fallback_params = mock_request.call_args_list[1][1]["params"]
+            assert "title:*2026_Arztbericht*" in fallback_params["query"]
+            assert "title:*Kalis*" in fallback_params["query"]
+            assert f"custom_fields.medical_record_user_id:{self.user_id}" in fallback_params["query"]
+
+    @pytest.mark.asyncio
+    async def test_search_documents_no_fallback_when_primary_has_results(self):
+        """Fallback must not run when the primary search already has hits."""
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
+
+        primary_response = AsyncMock()
+        primary_response.status = 200
+        primary_response.json.return_value = {
+            "count": 1,
+            "results": [{"id": 1, "title": "hit"}],
+        }
+
+        with patch.object(service, '_make_request') as mock_request:
+            mock_request.return_value.__aenter__.return_value = primary_response
+
+            result = await service.search_documents("anything")
+
+            assert result["count"] == 1
+            assert mock_request.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_search_documents_no_fallback_when_query_empty(self):
+        """An empty query should never trigger the fallback path."""
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
+
+        primary_response = AsyncMock()
+        primary_response.status = 200
+        primary_response.json.return_value = {"count": 0, "results": []}
+
+        with patch.object(service, '_make_request') as mock_request:
+            mock_request.return_value.__aenter__.return_value = primary_response
+
+            result = await service.search_documents("")
+
+            assert result["count"] == 0
+            assert mock_request.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_search_documents_fallback_also_empty_returns_primary(self):
+        """If the fallback also finds nothing, the original empty result is returned."""
+        service = PaperlessService(self.base_url, self.username, self.password, self.user_id)
+
+        empty = {"count": 0, "results": []}
+        primary_response = AsyncMock()
+        primary_response.status = 200
+        primary_response.json.return_value = empty
+        fallback_response = AsyncMock()
+        fallback_response.status = 200
+        fallback_response.json.return_value = empty
+
+        responses = [primary_response, fallback_response]
+
+        def make_request(*args, **kwargs):
+            cm = AsyncMock()
+            cm.__aenter__.return_value = responses.pop(0)
+            return cm
+
+        with patch.object(service, '_make_request', side_effect=make_request) as mock_request:
+            result = await service.search_documents("nope")
+
+            assert result["count"] == 0
+            assert mock_request.call_count == 2
+
+
+class TestBuildTitleFallbackQuery:
+    """Unit tests for the title-wildcard fallback query builder."""
+
+    def test_single_term(self):
+        q = _build_title_fallback_query("Arztbericht", user_id=7)
+        assert q == "title:*Arztbericht* AND custom_fields.medical_record_user_id:7"
+
+    def test_multiple_terms_are_anded(self):
+        q = _build_title_fallback_query("2026_Arztbericht Kalis", user_id=1)
+        assert q == (
+            "title:*2026_Arztbericht* AND title:*Kalis* "
+            "AND custom_fields.medical_record_user_id:1"
+        )
+
+    def test_empty_query_returns_user_filter_only(self):
+        q = _build_title_fallback_query("   ", user_id=99)
+        assert q == "custom_fields.medical_record_user_id:99"
+
+    def test_lucene_special_chars_are_escaped(self):
+        # Whoosh special chars must be escaped so they aren't interpreted
+        # as query operators inside the wildcard term.
+        q = _build_title_fallback_query("foo:bar", user_id=1)
+        assert "title:*foo\\:bar*" in q
+
+        q2 = _build_title_fallback_query("a+b", user_id=1)
+        assert "title:*a\\+b*" in q2
+
+        q3 = _build_title_fallback_query('quote"x', user_id=1)
+        assert 'title:*quote\\"x*' in q3
+
+        q4 = _build_title_fallback_query("foo\\bar", user_id=1)
+        assert "title:*foo\\\\bar*" in q4
 
 
 class TestPaperlessServiceCreation:
