@@ -24,6 +24,28 @@ from app.services.credential_encryption import credential_encryption
 logger = get_logger(__name__)
 
 
+# Lucene/Whoosh special characters that must be escaped inside a query term.
+# See: https://whoosh.readthedocs.io/en/latest/querylang.html
+_LUCENE_SPECIAL_CHARS = re.compile(r'([+\-!(){}\[\]^"~*?:\\/])')
+
+
+def _build_title_fallback_query(query: str, user_id: int) -> str:
+    """
+    Build a Paperless query that matches the user's text against the document
+    title using wildcards (substring match), bypassing language-specific
+    full-text stemming. Each whitespace-separated term must appear in the title.
+    User isolation via the medical_record_user_id custom field is preserved.
+    """
+    terms = [t for t in query.split() if t]
+    title_clauses = [
+        f"title:*{_LUCENE_SPECIAL_CHARS.sub(r'\\\1', term)}*" for term in terms
+    ]
+    user_clause = f"custom_fields.medical_record_user_id:{user_id}"
+    if not title_clauses:
+        return user_clause
+    return " AND ".join(title_clauses) + " AND " + user_clause
+
+
 class PaperlessError(Exception):
     """Base exception for paperless service errors."""
 
@@ -393,6 +415,85 @@ class PaperlessServiceBase(ABC):
                 extra={"user_id": self.user_id, "task_id": task_id, "error": str(e)},
             )
             raise PaperlessError(f"Task status check failed: {str(e)}")
+
+    async def search_documents(
+        self, query: str = "", page: int = 1, page_size: int = 25
+    ) -> Dict[str, Any]:
+        """
+        Search documents in paperless-ngx with user context filtering.
+
+        Falls back to a title-wildcard query when the primary full-text search
+        returns no results, because Paperless's Whoosh index applies
+        language-specific stemming/tokenization that can miss titles in a
+        non-indexed language or titles containing punctuation/underscores.
+        """
+        try:
+            user_query = (
+                f"{query} AND custom_fields.medical_record_user_id:{self.user_id}"
+                if query
+                else f"custom_fields.medical_record_user_id:{self.user_id}"
+            )
+            capped_page_size = min(page_size, 100)
+
+            params = {
+                "query": user_query,
+                "page": page,
+                "page_size": capped_page_size,
+            }
+            async with self._make_request(
+                "GET", "/api/documents/", params=params
+            ) as response:
+                if response.status == 401:
+                    raise PaperlessAuthenticationError(
+                        "Authentication failed during search"
+                    )
+                elif response.status != 200:
+                    raise PaperlessError(f"Search failed: HTTP {response.status}")
+                results = await response.json()
+
+            if query and results.get("count", 0) == 0:
+                # Fallback always starts at page 1: when the primary search
+                # has zero hits there is no meaningful pagination context to
+                # carry over, and reusing the caller's page would silently
+                # return an empty page past the end of the fallback result set.
+                fallback_params = {
+                    "query": _build_title_fallback_query(query, self.user_id),
+                    "page": 1,
+                    "page_size": capped_page_size,
+                }
+                async with self._make_request(
+                    "GET", "/api/documents/", params=fallback_params
+                ) as fallback_response:
+                    if fallback_response.status == 200:
+                        fallback_results = await fallback_response.json()
+                        if fallback_results.get("count", 0) > 0:
+                            results = fallback_results
+                            logger.info(
+                                "Paperless search title fallback hit",
+                                extra={
+                                    "user_id": self.user_id,
+                                    "results_count": results.get("count", 0),
+                                },
+                            )
+
+            logger.info(
+                "Document search completed",
+                extra={
+                    "user_id": self.user_id,
+                    "query": query,
+                    "results_count": results.get("count", 0),
+                },
+            )
+            return results
+
+        except PaperlessError:
+            raise
+        except Exception as e:
+            logger.error(
+                "Document search failed unexpectedly",
+                extra={"user_id": self.user_id, "query": query, "error": str(e)},
+            )
+            raise PaperlessError(f"Search failed: {str(e)}")
 
 
 class PaperlessServiceToken(PaperlessServiceBase):
@@ -1086,71 +1187,6 @@ class PaperlessServiceToken(PaperlessServiceBase):
             )
             raise PaperlessError(f"Deletion failed: {str(e)}")
 
-    async def search_documents(
-        self, query: str = "", page: int = 1, page_size: int = 25
-    ) -> Dict[str, Any]:
-        """
-        Search documents in paperless-ngx with user context filtering.
-
-        Args:
-            query: Search query
-            page: Page number
-            page_size: Results per page
-
-        Returns:
-            Search results
-
-        Raises:
-            PaperlessError: If search fails
-        """
-        try:
-            # Add user context to search query to ensure user isolation
-            user_query = (
-                f"{query} AND custom_fields.medical_record_user_id:{self.user_id}"
-                if query
-                else f"custom_fields.medical_record_user_id:{self.user_id}"
-            )
-
-            params = {
-                "query": user_query,
-                "page": page,
-                "page_size": min(page_size, 100),  # Limit page size for security
-            }
-
-            async with self._make_request(
-                "GET", "/api/documents/", params=params
-            ) as response:
-
-                if response.status == 401:
-                    raise PaperlessAuthenticationError(
-                        "Authentication failed during search"
-                    )
-                elif response.status != 200:
-                    raise PaperlessError(f"Search failed: HTTP {response.status}")
-
-                results = await response.json()
-
-                logger.info(
-                    f"Document search completed",
-                    extra={
-                        "user_id": self.user_id,
-                        "query": query,
-                        "results_count": results.get("count", 0),
-                    },
-                )
-
-                return results
-
-        except PaperlessError:
-            raise
-        except Exception as e:
-            logger.error(
-                f"Document search failed unexpectedly",
-                extra={"user_id": self.user_id, "query": query, "error": str(e)},
-            )
-            raise PaperlessError(f"Search failed: {str(e)}")
-            
-
 
 class PaperlessService(PaperlessServiceBase):
     """
@@ -1828,70 +1864,6 @@ class PaperlessService(PaperlessServiceBase):
                 },
             )
             raise PaperlessError(f"Deletion failed: {str(e)}")
-
-    async def search_documents(
-        self, query: str = "", page: int = 1, page_size: int = 25
-    ) -> Dict[str, Any]:
-        """
-        Search documents in paperless-ngx with user context filtering.
-
-        Args:
-            query: Search query
-            page: Page number
-            page_size: Results per page
-
-        Returns:
-            Search results
-
-        Raises:
-            PaperlessError: If search fails
-        """
-        try:
-            # Add user context to search query to ensure user isolation
-            user_query = (
-                f"{query} AND custom_fields.medical_record_user_id:{self.user_id}"
-                if query
-                else f"custom_fields.medical_record_user_id:{self.user_id}"
-            )
-
-            params = {
-                "query": user_query,
-                "page": page,
-                "page_size": min(page_size, 100),  # Limit page size for security
-            }
-
-            async with self._make_request(
-                "GET", "/api/documents/", params=params
-            ) as response:
-
-                if response.status == 401:
-                    raise PaperlessAuthenticationError(
-                        "Authentication failed during search"
-                    )
-                elif response.status != 200:
-                    raise PaperlessError(f"Search failed: HTTP {response.status}")
-
-                results = await response.json()
-
-                logger.info(
-                    f"Document search completed",
-                    extra={
-                        "user_id": self.user_id,
-                        "query": query,
-                        "results_count": results.get("count", 0),
-                    },
-                )
-
-                return results
-
-        except PaperlessError:
-            raise
-        except Exception as e:
-            logger.error(
-                f"Document search failed unexpectedly",
-                extra={"user_id": self.user_id, "query": query, "error": str(e)},
-            )
-            raise PaperlessError(f"Search failed: {str(e)}")
 
 
 def create_paperless_service_with_username_password(
