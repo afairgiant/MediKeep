@@ -216,7 +216,7 @@ export function AuthProvider({ children }) {
 
     const { SESSION_CHECK_INTERVAL } = getActivityConfig();
 
-    const activityTimer = setInterval(() => {
+    const activityTimer = setInterval(async () => {
       const idle = Date.now() - lastActivityRef.current;
       const timeoutMs = (sessionTimeoutRef.current || 120) * 60 * 1000;
 
@@ -227,9 +227,15 @@ export function AuthProvider({ children }) {
           sessionTimeoutMinutes: sessionTimeoutRef.current || 120,
         });
         notifyInfo('notifications:toasts.auth.sessionExpired');
-        // Attempt to clear the HttpOnly cookie server-side.
-        // May fail if the JWT is already expired -- that's OK.
-        authService.logout().catch(() => {});
+        // Await the server-side cookie clear before tearing down auth state.
+        // Racing this with the Login page's config fetches caused the SSO
+        // button to disappear after auto-logout (issue #723). May fail if the
+        // JWT is already expired -- that's OK.
+        try {
+          await authService.logout();
+        } catch {
+          // ignored -- expired JWT will 401, that's expected
+        }
         clearAuthData();
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       }
