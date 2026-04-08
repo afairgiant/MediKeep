@@ -615,6 +615,8 @@
         "createPatient": "Créer le patient",
         "saveChanges": "Enregistrer les modifications"
       },
+      "createTitle": "Ajouter un nouveau patient",
+      "editTitle": "Modifier le patient",
       "firstName": {
         "placeholder": "Saisir le prénom"
       },

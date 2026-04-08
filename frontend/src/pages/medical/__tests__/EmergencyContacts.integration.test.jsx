@@ -618,21 +618,24 @@ describe('Emergency Contacts Page Integration Tests', () => {
     });
 
     test('filters contacts by active status', async () => {
+      const activeContacts = mockEmergencyContacts.filter(c => c.is_active);
       useDataManagement.mockReturnValue({
         ...mockDataManagement,
-        data: mockEmergencyContacts.filter(c => c.is_active),
+        data: activeContacts,
         hasActiveFilters: true,
       });
 
       renderWithPatient(<EmergencyContacts />);
 
+      // Wait for the filtered set to settle — in the full suite a prior render may
+      // still be flushing, so poll until Robert Smith (inactive) is gone.
       await waitFor(() => {
         expect(screen.getByText('Sarah Johnson')).toBeInTheDocument();
+        expect(screen.queryByText('Robert Smith')).not.toBeInTheDocument();
       });
 
       expect(screen.getByText('Michael Johnson')).toBeInTheDocument();
       expect(screen.getByText('Dr. Emily Chen')).toBeInTheDocument();
-      expect(screen.queryByText('Robert Smith')).not.toBeInTheDocument();
     });
 
     test('searches contacts by name and notes', async () => {

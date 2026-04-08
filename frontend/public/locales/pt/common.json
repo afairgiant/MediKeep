@@ -615,6 +615,8 @@
         "createPatient": "Criar Paciente",
         "saveChanges": "Salvar Alterações"
       },
+      "createTitle": "Adicionar novo paciente",
+      "editTitle": "Editar paciente",
       "firstName": {
         "placeholder": "Digite o nome"
       },
@@ -1165,7 +1167,7 @@
       "frequencyDesc": "Com que frequência o tratamento é administrado",
       "frequencyPlaceholder": "por exemplo, Diariamente, Duas vezes por semana",
       "linkingPartialFailure": "Alguns itens não puderam ser vinculados",
-      "linkingPartialFailureMessage": "",
+      "linkingPartialFailureMessage": "O tratamento foi criado, mas alguns itens não puderam ser vinculados. Você pode vinculá-los manualmente editando o tratamento.",
       "notesDesc": "Informações adicionais sobre este tratamento",
       "notesPlaceholder": "Digite notas, observações ou detalhes adicionais do tratamento",
       "practitionerDesc": "Profissional de saúde que administra o tratamento",
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "Selecione data e hora",
       "devicePlaceholder": "por exemplo, Monitor de PA Digital, Modelo de Termômetro...",
       "heightNotSet": "Altura não definida no perfil do paciente - cálculo de IMC indisponível",
       "locationPlaceholder": "Onde essas medições foram feitas?",

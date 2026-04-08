@@ -168,12 +168,10 @@ describe('useUploadProgress Hook', () => {
         vi.runAllTimers();
       });
 
-      await waitFor(() => {
-        const file = result.current.uploadState.files[0];
-        expect(file.progress).toBe(100);
-        expect(file.status).toBe('uploading');
-        expect(file.lastUpdate).toBeDefined();
-      });
+      const file = result.current.uploadState.files[0];
+      expect(file.progress).toBe(100);
+      expect(file.status).toBe('uploading');
+      expect(file.lastUpdate).toBeDefined();
     });
 
     test('should prevent progress from exceeding bounds (0-100)', () => {

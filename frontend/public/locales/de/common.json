@@ -615,6 +615,8 @@
         "createPatient": "Patient erstellen",
         "saveChanges": "Änderungen speichern"
       },
+      "createTitle": "Neuen Patienten hinzufügen",
+      "editTitle": "Patient bearbeiten",
       "firstName": {
         "placeholder": "Vorname eingeben"
       },
@@ -1165,7 +1167,7 @@
       "frequencyDesc": "Wie oft die Behandlung verabreicht wird",
       "frequencyPlaceholder": "z.B. Täglich, Zweimal wöchentlich",
       "linkingPartialFailure": "Einige Elemente konnten nicht verknüpft werden",
-      "linkingPartialFailureMessage": "",
+      "linkingPartialFailureMessage": "Die Behandlung wurde erstellt, aber einige Elemente konnten nicht verknüpft werden. Sie können sie manuell verknüpfen, indem Sie die Behandlung bearbeiten.",
       "notesDesc": "Zusätzliche Informationen zu dieser Behandlung",
       "notesPlaceholder": "Behandlungsnotizen, Beobachtungen oder zusätzliche Details eingeben",
       "practitionerDesc": "Gesundheitsdienstleister, der die Behandlung durchführt",
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "Datum und Uhrzeit auswählen",
       "devicePlaceholder": "z.B. Digitales Blutdruckmessgerät, Thermometer-Modell...",
       "heightNotSet": "Größe nicht im Patientenprofil hinterlegt – BMI-Berechnung nicht verfügbar",
       "locationPlaceholder": "Wo wurden diese Messungen vorgenommen?",

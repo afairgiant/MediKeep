@@ -166,9 +166,9 @@ describe('Translation Key Consistency', () => {
         const common = loadTranslations(locale, 'common');
 
         expect(common.modals).toBeDefined();
-        expect(common.modals.linkMedicationToCondition).toBeDefined();
+        expect(common.modals.linkMedicationsToCondition).toBeDefined();
         expect(common.modals.linkConditionToLabResult).toBeDefined();
-        expect(common.modals.selectMedication).toBeDefined();
+        expect(common.modals.selectMedications).toBeDefined();
         expect(common.modals.selectCondition).toBeDefined();
         expect(common.modals.relevanceNoteOptional).toBeDefined();
       });
@@ -181,8 +181,8 @@ describe('Translation Key Consistency', () => {
         expect(common.patients?.form).toBeDefined();
         expect(common.patients.form.createTitle).toBeDefined();
         expect(common.patients.form.editTitle).toBeDefined();
-        expect(common.patients.form.firstName?.label).toBeDefined();
-        expect(common.patients.form.lastName?.label).toBeDefined();
+        expect(common.patients.form.firstName?.placeholder).toBeDefined();
+        expect(common.patients.form.lastName?.placeholder).toBeDefined();
         expect(common.patients.form.birthDate?.label).toBeDefined();
         expect(common.patients.form.gender?.options).toBeDefined();
       });
@@ -191,25 +191,28 @@ describe('Translation Key Consistency', () => {
     it('should have symptom episode translations', () => {
       locales.forEach(locale => {
         const common = loadTranslations(locale, 'common');
+        const medical = loadTranslations(locale, 'medical');
 
         expect(common.symptoms).toBeDefined();
         expect(common.symptoms.logEpisodeTitle).toBeDefined();
         expect(common.symptoms.editEpisodeTitle).toBeDefined();
         expect(common.symptoms.addSymptomTitle).toBeDefined();
-        expect(common.symptoms.occurrence?.additionalNotes).toBeDefined();
+        expect(medical.symptoms?.occurrence?.additionalNotes).toBeDefined();
       });
     });
 
-    it('should have lab result enhanced translations', () => {
+    it('should have lab result translations', () => {
       locales.forEach(locale => {
+        const common = loadTranslations(locale, 'common');
         const medical = loadTranslations(locale, 'medical');
 
-        expect(medical.labResults).toBeDefined();
-        expect(medical.labResults.status).toBeDefined();
-        expect(medical.labResults.category).toBeDefined();
-        expect(medical.labResults.testType).toBeDefined();
-        expect(medical.labResults.result).toBeDefined();
-        expect(medical.labResults.form?.relatedConditions).toBeDefined();
+        // Lab result UI strings live in common.labResults after the i18n refactor.
+        expect(common.labResults).toBeDefined();
+        expect(common.labResults.labResultCreated).toBeDefined();
+        expect(common.labResults.quickImportModalTitle).toBeDefined();
+        expect(common.labResults.form?.linkVisitsTitle).toBeDefined();
+        // The medical namespace retains the form-warning strings.
+        expect(medical.labResults?.form).toBeDefined();
       });
     });
 
@@ -235,8 +238,8 @@ describe('Translation Key Consistency', () => {
 
         expect(medical.treatments?.frequency).toBeDefined();
         expect(medical.treatments.frequency.label).toBeDefined();
-        expect(medical.treatments.startDate?.label).toBeDefined();
-        expect(medical.treatments.endDate?.label).toBeDefined();
+        expect(medical.treatments.startDate?.description).toBeDefined();
+        expect(medical.treatments.endDate?.description).toBeDefined();
       });
     });
 

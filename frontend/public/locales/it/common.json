@@ -615,6 +615,8 @@
         "createPatient": "Crea paziente",
         "saveChanges": "Salva modifiche"
       },
+      "createTitle": "Aggiungi nuovo paziente",
+      "editTitle": "Modifica paziente",
       "firstName": {
         "placeholder": "Inserisci il nome"
       },
@@ -1165,7 +1167,7 @@
       "frequencyDesc": "Con quale frequenza viene somministrato il trattamento",
       "frequencyPlaceholder": "ad es., Giornaliero, Due volte a settimana",
       "linkingPartialFailure": "Alcuni elementi non hanno potuto essere collegati",
-      "linkingPartialFailureMessage": "",
+      "linkingPartialFailureMessage": "Il trattamento è stato creato, ma alcuni elementi non sono stati collegati. Puoi collegarli manualmente modificando il trattamento.",
       "notesDesc": "Informazioni aggiuntive su questo trattamento",
       "notesPlaceholder": "Inserisci note, osservazioni o dettagli aggiuntivi sul trattamento",
       "practitionerDesc": "Operatore sanitario che somministra il trattamento",
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "Seleziona data e ora",
       "devicePlaceholder": "ad es., Misuratore di pressione digitale, modello termometro...",
       "heightNotSet": "Altezza non impostata nel profilo del paziente - calcolo BMI non disponibile",
       "locationPlaceholder": "Dove sono state rilevate queste misurazioni?",

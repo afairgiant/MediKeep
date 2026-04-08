@@ -615,6 +615,8 @@
         "createPatient": "Создать пациента",
         "saveChanges": "Сохранить изменения"
       },
+      "createTitle": "Добавить нового пациента",
+      "editTitle": "Редактировать пациента",
       "firstName": {
         "placeholder": "Введите имя"
       },
@@ -1165,7 +1167,7 @@
       "frequencyDesc": "Как часто проводится лечение",
       "frequencyPlaceholder": "напр., Ежедневно, Дважды в неделю",
       "linkingPartialFailure": "Некоторые элементы не удалось связать",
-      "linkingPartialFailureMessage": "",
+      "linkingPartialFailureMessage": "Лечение создано, но некоторые элементы не удалось связать. Вы можете связать их вручную, отредактировав лечение.",
       "notesDesc": "Дополнительная информация об этом лечении",
       "notesPlaceholder": "Введите заметки о лечении, наблюдения или дополнительные сведения",
       "practitionerDesc": "Медицинский специалист, проводящий лечение",
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "Выберите дату и время",
       "devicePlaceholder": "напр., цифровой тонометр, модель термометра...",
       "heightNotSet": "Рост не указан в профиле пациента - расчёт ИМТ недоступен",
       "locationPlaceholder": "Где были сделаны эти измерения?",
