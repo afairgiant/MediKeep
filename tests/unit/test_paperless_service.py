@@ -412,6 +412,186 @@ class TestBuildTitleFallbackQuery:
         q4 = _build_title_fallback_query("foo\\bar", user_id=1)
         assert "title:*foo\\\\bar*" in q4
 
+    def test_no_user_id_omits_user_clause(self):
+        q = _build_title_fallback_query("Rechnung", user_id=None)
+        assert q == "title:*Rechnung*"
+        assert "custom_fields" not in q
+
+    def test_no_user_id_default(self):
+        # Default argument should also omit the user clause.
+        q = _build_title_fallback_query("Rechnung")
+        assert "custom_fields" not in q
+
+
+class TestPaperlessMetadataEnrichment:
+    """Tests for lookup helpers and enrich_documents_with_metadata."""
+
+    def setup_method(self):
+        self.base_url = "https://paperless.example.com"
+        self.username = "testuser"
+        self.password = "testpass"
+        self.user_id = 123
+
+    def _make_service(self):
+        return PaperlessService(
+            self.base_url, self.username, self.password, self.user_id
+        )
+
+    def _mock_lookup_response(self, items):
+        response = AsyncMock()
+        response.status = 200
+        response.json.return_value = {"results": items}
+        return response
+
+    @pytest.mark.asyncio
+    async def test_get_correspondents_returns_id_name_map(self):
+        service = self._make_service()
+        response = self._mock_lookup_response([
+            {"id": 1, "name": "Dr. Smith"},
+            {"id": 7, "name": "Hospital X"},
+        ])
+        with patch.object(service, '_make_request') as mock_request:
+            mock_request.return_value.__aenter__.return_value = response
+            result = await service.get_correspondents()
+            assert result == {1: "Dr. Smith", 7: "Hospital X"}
+            mock_request.assert_called_once()
+            assert mock_request.call_args[0][1] == "/api/correspondents/"
+
+    @pytest.mark.asyncio
+    async def test_get_tags_returns_id_name_map(self):
+        service = self._make_service()
+        response = self._mock_lookup_response([
+            {"id": 2, "name": "Important"},
+            {"id": 3, "name": "Lab"},
+        ])
+        with patch.object(service, '_make_request') as mock_request:
+            mock_request.return_value.__aenter__.return_value = response
+            result = await service.get_tags()
+            assert result == {2: "Important", 3: "Lab"}
+
+    @pytest.mark.asyncio
+    async def test_get_document_types_returns_id_name_map(self):
+        service = self._make_service()
+        response = self._mock_lookup_response([
+            {"id": 5, "name": "Lab Result"},
+        ])
+        with patch.object(service, '_make_request') as mock_request:
+            mock_request.return_value.__aenter__.return_value = response
+            result = await service.get_document_types()
+            assert result == {5: "Lab Result"}
+
+    @pytest.mark.asyncio
+    async def test_lookup_raises_authentication_error_on_401(self):
+        service = self._make_service()
+        response = AsyncMock()
+        response.status = 401
+        with patch.object(service, '_make_request') as mock_request:
+            mock_request.return_value.__aenter__.return_value = response
+            with pytest.raises(PaperlessAuthenticationError):
+                await service.get_correspondents()
+
+    @pytest.mark.asyncio
+    async def test_enrich_empty_list_makes_no_requests(self):
+        service = self._make_service()
+        with patch.object(service, '_make_request') as mock_request:
+            await service.enrich_documents_with_metadata([])
+            mock_request.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_enrich_resolves_all_fields_and_preserves_ids(self):
+        service = self._make_service()
+
+        responses = {
+            "/api/correspondents/": self._mock_lookup_response([
+                {"id": 7, "name": "Dr. Smith"},
+            ]),
+            "/api/document_types/": self._mock_lookup_response([
+                {"id": 3, "name": "Lab Result"},
+            ]),
+            "/api/tags/": self._mock_lookup_response([
+                {"id": 1, "name": "Important"},
+                {"id": 2, "name": "Lab"},
+            ]),
+        }
+
+        def make_request(method, endpoint, **kwargs):
+            cm = AsyncMock()
+            cm.__aenter__.return_value = responses[endpoint]
+            return cm
+
+        documents = [
+            {
+                "id": 100,
+                "title": "Doc A",
+                "correspondent": 7,
+                "document_type": 3,
+                "tags": [1, 2],
+            },
+            {
+                "id": 101,
+                "title": "Doc B",
+                "correspondent": None,
+                "document_type": None,
+                "tags": [],
+            },
+        ]
+
+        with patch.object(service, '_make_request', side_effect=make_request):
+            await service.enrich_documents_with_metadata(documents)
+
+        # New enriched fields are present
+        assert documents[0]["correspondent_name"] == "Dr. Smith"
+        assert documents[0]["document_type_name"] == "Lab Result"
+        assert documents[0]["tag_names"] == ["Important", "Lab"]
+        # Original integer IDs are left untouched
+        assert documents[0]["correspondent"] == 7
+        assert documents[0]["document_type"] == 3
+        assert documents[0]["tags"] == [1, 2]
+        # Docs without metadata still get None / empty
+        assert documents[1]["correspondent_name"] is None
+        assert documents[1]["document_type_name"] is None
+        assert documents[1]["tag_names"] == []
+
+    @pytest.mark.asyncio
+    async def test_enrich_partial_failure_degrades_gracefully(self):
+        """If the tags lookup fails, correspondent/document_type names still
+        populate and tag_names is simply omitted. Search must not fail."""
+        service = self._make_service()
+
+        ok_correspondents = self._mock_lookup_response([{"id": 7, "name": "Dr. Smith"}])
+        ok_document_types = self._mock_lookup_response([{"id": 3, "name": "Lab"}])
+        failing_tags = AsyncMock()
+        failing_tags.status = 500
+
+        responses = {
+            "/api/correspondents/": ok_correspondents,
+            "/api/document_types/": ok_document_types,
+            "/api/tags/": failing_tags,
+        }
+
+        def make_request(method, endpoint, **kwargs):
+            cm = AsyncMock()
+            cm.__aenter__.return_value = responses[endpoint]
+            return cm
+
+        documents = [
+            {
+                "id": 1,
+                "correspondent": 7,
+                "document_type": 3,
+                "tags": [1, 2],
+            }
+        ]
+
+        with patch.object(service, '_make_request', side_effect=make_request):
+            await service.enrich_documents_with_metadata(documents)
+
+        assert documents[0]["correspondent_name"] == "Dr. Smith"
+        assert documents[0]["document_type_name"] == "Lab"
+        assert "tag_names" not in documents[0]
+        # Raw tag IDs untouched
+        assert documents[0]["tags"] == [1, 2]
+
 
 class TestPaperlessServiceCreation:
     """Test cases for paperless service creation."""

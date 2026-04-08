@@ -21,12 +21,13 @@ from app.api.deps import get_current_user
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
 from app.services.paperless_service import (
+    _build_title_fallback_query,
     create_paperless_service,
-    create_paperless_service_with_username_password, 
+    create_paperless_service_with_username_password,
     create_paperless_service_with_token,
-    PaperlessConnectionError, 
-    PaperlessAuthenticationError, 
-    PaperlessUploadError, 
+    PaperlessConnectionError,
+    PaperlessAuthenticationError,
+    PaperlessUploadError,
     PaperlessError
 )
 # New simplified architecture
@@ -1371,54 +1372,100 @@ async def search_paperless_documents(
                 detail="Paperless configuration is incomplete"
             )
         
-        # Create paperless service using consistent auth method
-        paperless_service = create_paperless_service(
+        # This endpoint intentionally does NOT apply the medical_record_user_id
+        # custom-field filter: the "Link existing document" flow must surface
+        # pre-integration Paperless documents that were never uploaded through
+        # MediKeep.
+        normalized_query = query.strip()
+        logger.info(f"Searching Paperless documents with query: {normalized_query}")
+
+        capped_page_size = min(page_size, 100)
+
+        async with create_paperless_service(
             user_prefs.paperless_url,
             encrypted_token=user_prefs.paperless_api_token_encrypted,
             encrypted_username=user_prefs.paperless_username_encrypted,
             encrypted_password=user_prefs.paperless_password_encrypted,
             user_id=current_user.id
-        )
-        
-        # Simple search without user filtering for fallback during uploads
-        logger.info(f"Searching Paperless documents with query: {query}")
-        
-        params = {
-            "query": query,
-            "page": page,
-            "page_size": min(page_size, 100)
-        }
-        
-        # Make direct request to Paperless search API
-        async with paperless_service._make_request(
-            "GET", "/api/documents/", params=params
-        ) as response:
-            logger.info(f"Paperless search response status: {response.status}")
-            
-            if response.status == 401:
-                logger.error("Paperless authentication failed during search")
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Paperless authentication failed"
-                )
-            elif response.status != 200:
-                error_text = await response.text()
-                logger.error(f"Paperless search failed with status {response.status}: {error_text}")
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Paperless search failed: {error_text}"
-                )
-            
-            results = await response.json()
+        ) as paperless_service:
+
+            async def _run_search(search_params: Dict[str, Any]) -> Dict[str, Any]:
+                async with paperless_service._make_request(
+                    "GET", "/api/documents/", params=search_params
+                ) as response:
+                    if response.status == 401:
+                        logger.error("Paperless authentication failed during search")
+                        raise HTTPException(
+                            status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Paperless authentication failed"
+                        )
+                    if response.status != 200:
+                        error_text = await response.text()
+                        logger.error(
+                            f"Paperless search failed with status {response.status}: {error_text}"
+                        )
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Paperless search failed: {error_text}"
+                        )
+                    return await response.json()
+
+            primary_params = {
+                "query": normalized_query,
+                "page": page,
+                "page_size": capped_page_size,
+            }
+            results = await _run_search(primary_params)
+
+            # Fallback: Paperless full-text search uses language-specific
+            # stemming, so titles in a non-indexed language or containing
+            # punctuation can return zero hits even when the document exists.
+            # Retry with a title wildcard query. Only runs on page 1: the
+            # fallback result set is unrelated to the primary's pagination, so
+            # swapping in fallback results on page>1 would surprise the caller.
+            if (
+                normalized_query
+                and page == 1
+                and results.get("count", 0) == 0
+            ):
+                fallback_params = {
+                    "query": _build_title_fallback_query(
+                        normalized_query, user_id=None
+                    ),
+                    "page": 1,
+                    "page_size": capped_page_size,
+                }
+                try:
+                    fallback_results = await _run_search(fallback_params)
+                except HTTPException as fallback_exc:
+                    logger.warning(
+                        "Paperless search title fallback failed",
+                        extra={
+                            "user_id": current_user.id,
+                            "status": fallback_exc.status_code,
+                        },
+                    )
+                else:
+                    if fallback_results.get("count", 0) > 0:
+                        results = fallback_results
+                        logger.info(
+                            "Paperless search title fallback hit",
+                            extra={
+                                "user_id": current_user.id,
+                                "results_count": results.get("count", 0),
+                            },
+                        )
+
             documents = results.get("results", [])
             total_count = results.get("count", len(documents))
-            logger.info(f"Paperless search returned {len(documents)} results (total: {total_count})")
+            logger.info(
+                f"Paperless search returned {len(documents)} results (total: {total_count})"
+            )
 
             # Optionally filter out already-linked documents
             if exclude_linked and documents:
                 from app.models.models import EntityFile
 
-                # Get all Paperless document IDs linked by this user
                 linked_doc_ids = db.query(EntityFile.paperless_document_id).filter(
                     EntityFile.storage_backend == 'paperless',
                     EntityFile.paperless_document_id.isnot(None)
@@ -1426,18 +1473,30 @@ async def search_paperless_documents(
 
                 linked_ids_set = {str(doc_id[0]) for doc_id in linked_doc_ids if doc_id[0]}
 
-                # Filter out linked documents
                 original_count = len(documents)
                 documents = [
                     doc for doc in documents
                     if str(doc.get('id')) not in linked_ids_set
                 ]
 
-                logger.info(f"Filtered out {original_count - len(documents)} already-linked documents")
+                logger.info(
+                    f"Filtered out {original_count - len(documents)} already-linked documents"
+                )
+
+            # Resolve correspondent / document_type / tag IDs to human-readable
+            # names. Failures here are logged but non-fatal — the search result
+            # still ships with the raw integer IDs as a fallback.
+            try:
+                await paperless_service.enrich_documents_with_metadata(documents)
+            except Exception as enrich_exc:
+                logger.warning(
+                    "Paperless metadata enrichment failed",
+                    extra={"user_id": current_user.id, "error": str(enrich_exc)},
+                )
 
             return {
                 "results": documents,
-                "count": total_count  # Return original Paperless total for proper pagination
+                "count": total_count
             }
         
     except PaperlessAuthenticationError as e:

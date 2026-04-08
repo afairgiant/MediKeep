@@ -29,21 +29,24 @@ logger = get_logger(__name__)
 _LUCENE_SPECIAL_CHARS = re.compile(r'([+\-!(){}\[\]^"~*?:\\/])')
 
 
-def _build_title_fallback_query(query: str, user_id: int) -> str:
+def _build_title_fallback_query(query: str, user_id: Optional[int] = None) -> str:
     """
     Build a Paperless query that matches the user's text against the document
     title using wildcards (substring match), bypassing language-specific
     full-text stemming. Each whitespace-separated term must appear in the title.
-    User isolation via the medical_record_user_id custom field is preserved.
+
+    When user_id is provided, the medical_record_user_id custom-field filter
+    is ANDed in for user isolation. When omitted (e.g. the link-existing-doc
+    flow that needs to surface pre-integration Paperless documents), the
+    query matches titles across the whole Paperless instance.
     """
     terms = [t for t in query.split() if t]
-    title_clauses = [
+    clauses = [
         f"title:*{_LUCENE_SPECIAL_CHARS.sub(r'\\\1', term)}*" for term in terms
     ]
-    user_clause = f"custom_fields.medical_record_user_id:{user_id}"
-    if not title_clauses:
-        return user_clause
-    return " AND ".join(title_clauses) + " AND " + user_clause
+    if user_id is not None:
+        clauses.append(f"custom_fields.medical_record_user_id:{user_id}")
+    return " AND ".join(clauses) if clauses else "*"
 
 
 class PaperlessError(Exception):
@@ -85,6 +88,7 @@ class PaperlessServiceBase(ABC):
         """
         self.base_url = base_url.rstrip("/")
         self.user_id = user_id
+        self._lookup_cache: Dict[str, Dict[int, str]] = {}
 
         # Enforce HTTPS for external URLs, allow HTTP for local development
         parsed = urlparse(self.base_url)
@@ -502,6 +506,109 @@ class PaperlessServiceBase(ABC):
                 extra={"user_id": self.user_id, "query": query, "error": str(e)},
             )
             raise PaperlessError(f"Search failed: {str(e)}")
+
+    async def _fetch_lookup(self, endpoint: str) -> Dict[int, str]:
+        """
+        Fetch a Paperless lookup collection (correspondents, document types, or
+        tags) and return an ``{id: name}`` mapping. ``page_size=10000`` is an
+        intentional one-shot: MediKeep only ever resolves a few hundred items
+        worst-case and Paperless' DRF pagination respects the requested size.
+        Results are memoized on the service instance for the lifetime of the
+        current request so enrichment never re-fetches the same table.
+        """
+        if endpoint in self._lookup_cache:
+            return self._lookup_cache[endpoint]
+
+        async with self._make_request(
+            "GET", endpoint, params={"page_size": 10000}
+        ) as response:
+            if response.status == 401:
+                raise PaperlessAuthenticationError(
+                    f"Authentication failed fetching {endpoint}"
+                )
+            if response.status != 200:
+                raise PaperlessError(
+                    f"Lookup {endpoint} failed: HTTP {response.status}"
+                )
+            payload = await response.json()
+
+        mapping = {
+            item["id"]: item.get("name", "")
+            for item in payload.get("results", [])
+            if "id" in item
+        }
+        self._lookup_cache[endpoint] = mapping
+        return mapping
+
+    async def get_correspondents(self) -> Dict[int, str]:
+        """Return ``{id: name}`` for all Paperless correspondents."""
+        return await self._fetch_lookup("/api/correspondents/")
+
+    async def get_document_types(self) -> Dict[int, str]:
+        """Return ``{id: name}`` for all Paperless document types."""
+        return await self._fetch_lookup("/api/document_types/")
+
+    async def get_tags(self) -> Dict[int, str]:
+        """Return ``{id: name}`` for all Paperless tags."""
+        return await self._fetch_lookup("/api/tags/")
+
+    async def enrich_documents_with_metadata(
+        self, documents: List[Dict[str, Any]]
+    ) -> None:
+        """
+        Resolve Paperless foreign-key IDs on ``documents`` to human-readable
+        names and attach them as new sibling fields:
+
+        - ``correspondent_name``: Optional[str]
+        - ``document_type_name``: Optional[str]
+        - ``tag_names``: List[str]
+
+        The original integer ID fields are left untouched so existing consumers
+        keep working. All three lookup calls run concurrently. If a lookup
+        fails, the corresponding field is omitted and a warning is logged —
+        search must never fail because metadata couldn't be resolved.
+        """
+        if not documents:
+            return
+
+        labels = ("correspondent", "document_type", "tag")
+        raw_results = await asyncio.gather(
+            self.get_correspondents(),
+            self.get_document_types(),
+            self.get_tags(),
+            return_exceptions=True,
+        )
+
+        lookups: Dict[str, Optional[Dict[int, str]]] = {}
+        for label, value in zip(labels, raw_results):
+            if isinstance(value, Exception):
+                logger.warning(
+                    f"Paperless {label} lookup failed",
+                    extra={"user_id": self.user_id, "error": str(value)},
+                )
+                lookups[label] = None
+            else:
+                lookups[label] = value
+
+        correspondents = lookups["correspondent"]
+        document_types = lookups["document_type"]
+        tags = lookups["tag"]
+
+        for doc in documents:
+            if correspondents is not None:
+                c_id = doc.get("correspondent")
+                doc["correspondent_name"] = (
+                    correspondents.get(c_id) if c_id is not None else None
+                )
+            if document_types is not None:
+                dt_id = doc.get("document_type")
+                doc["document_type_name"] = (
+                    document_types.get(dt_id) if dt_id is not None else None
+                )
+            if tags is not None:
+                doc["tag_names"] = [
+                    tags[t] for t in (doc.get("tags") or []) if t in tags
+                ]
 
 
 class PaperlessServiceToken(PaperlessServiceBase):
