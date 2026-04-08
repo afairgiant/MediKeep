@@ -297,7 +297,6 @@ const Visits = () => {
       location: visit.location || '',
       priority: visit.priority || '',
       tags: visit.tags || [],
-      pending_lab_result_ids: [],
     });
     setShowModal(true);
   };
@@ -393,7 +392,6 @@ const Visits = () => {
               purpose: null,
               relevance_note: null,
             });
-            await fetchEncounterLabResults(resultId);
           } catch (err) {
             logger.error('visits_lab_result_link_failed', {
               message: 'Failed to link lab results to new visit',

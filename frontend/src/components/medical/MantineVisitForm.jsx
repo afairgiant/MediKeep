@@ -332,26 +332,22 @@ const MantineVisitForm = ({
                     navigate={navigate}
                   />
                 ) : (
-                  <>
-                    <Text size="sm" c="dimmed" mb="md">
-                      {t('common:visits.form.labResultsDescription', 'Link lab results relevant to this visit. You can set purpose and notes after creating the visit.')}
-                    </Text>
-                    <MultiSelect
-                      label={t('common:visits.form.selectLabResults', 'Select Lab Results')}
-                      placeholder={t('common:visits.form.chooseLabResultsToLink', 'Choose lab results to link')}
-                      data={(labResults || []).map(lr => ({
-                        value: lr.id.toString(),
-                        label: `${lr.test_name}${lr.ordered_date ? ` (${lr.ordered_date})` : ''}${lr.status ? ` - ${lr.status}` : ''}`,
-                      }))}
-                      value={formData.pending_lab_result_ids || []}
-                      onChange={(values) => {
-                        onInputChange({ target: { name: 'pending_lab_result_ids', value: values } });
-                      }}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </>
+                  <MultiSelect
+                    label={t('common:visits.form.selectLabResults', 'Select Lab Results')}
+                    placeholder={t('common:visits.form.chooseLabResultsToLink', 'Choose lab results to link')}
+                    description={t('common:visits.form.labResultsDescription', 'Link lab results relevant to this visit. You can set purpose and notes after creating the visit.')}
+                    data={(labResults || []).map(lr => ({
+                      value: lr.id.toString(),
+                      label: `${lr.test_name}${lr.ordered_date ? ` (${lr.ordered_date})` : ''}${lr.status ? ` - ${lr.status}` : ''}`,
+                    }))}
+                    value={formData.pending_lab_result_ids || []}
+                    onChange={(values) => {
+                      onInputChange({ target: { name: 'pending_lab_result_ids', value: values } });
+                    }}
+                    searchable
+                    clearable
+                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                  />
                 )}
               </Box>
             </Tabs.Panel>
