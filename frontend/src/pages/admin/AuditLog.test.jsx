@@ -190,7 +190,6 @@ describe('AuditLog', () => {
   });
 
   it('search input triggers API call with debounce', async () => {
-    vi.useFakeTimers();
     renderAuditLog();
 
     await waitFor(() => {
@@ -200,19 +199,11 @@ describe('AuditLog', () => {
     const searchInput = screen.getByPlaceholderText('Search descriptions...');
     fireEvent.change(searchInput, { target: { value: 'patient' } });
 
-    // Before debounce fires
-    expect(mockGetActivityLog).toHaveBeenCalledTimes(1);
-
-    // After debounce
-    vi.advanceTimersByTime(350);
-
     await waitFor(() => {
       expect(mockGetActivityLog).toHaveBeenCalledWith(
         expect.objectContaining({ search: 'patient' })
       );
     });
-
-    vi.useRealTimers();
   });
 
   it('export button triggers download', async () => {

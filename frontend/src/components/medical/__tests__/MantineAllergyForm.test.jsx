@@ -12,7 +12,7 @@ import MantineAllergyForm from '../MantineAllergyForm';
 // Mock Date Input component
 // The DateInput mock generates data-testid from the label prop.
 // Since i18n mock returns the key as-is, label will be 'common:labels.onsetDate'.
-// data-testid = 'date-common:labels.onsetdate'
+// data-testid = 'date-shared:fields.onsetdate'
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => (
     <div>
@@ -55,17 +55,17 @@ Element.prototype.scrollIntoView = vi.fn();
  *   life-threatening -> 'common:severity.lifeThreatening'
  *
  * Status options:
- *   active   -> 'common:status.active'
- *   inactive -> 'common:status.inactive'
- *   resolved -> 'common:status.resolved'
+ *   active   -> 'shared:labels.active'
+ *   inactive -> 'shared:labels.inactive'
+ *   resolved -> 'shared:labels.resolved'
  *
  * Buttons:
- *   Cancel -> 'common:buttons.cancel'
+ *   Cancel -> 'shared:fields.cancel'
  *   Submit -> derived from title: 'Add New Allergy' -> 'Add New Allergy'
  *             (entityName = title.replace('Add ', '') = 'New Allergy', button = 'Add New Allergy')
  *
  * Date input testid:
- *   'date-common:labels.onsetdate'
+ *   'date-shared:fields.onsetdate'
  *   (label 'common:labels.onsetDate' lowercased and spaces replaced with '-')
  */
 
@@ -116,10 +116,10 @@ describe('MantineAllergyForm', () => {
       expect(screen.getByLabelText(/medical:allergies\.reaction\.label/)).toBeInTheDocument();
 
       // Select fields (Mantine Select renders both input and listbox with same label, so use getAllBy)
-      expect(screen.getAllByLabelText(/common:labels\.severity/).length).toBeGreaterThan(0);
-      expect(screen.getByLabelText(/common:labels\.onsetDate/)).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/common:labels\.status/).length).toBeGreaterThan(0);
-      expect(screen.getByLabelText(/common:labels\.notes/)).toBeInTheDocument();
+      expect(screen.getAllByLabelText(/shared:fields\.severity/).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText(/shared:fields\.onsetDate/)).toBeInTheDocument();
+      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
     });
 
     test('shows edit mode title and button when editing', () => {
@@ -162,7 +162,7 @@ describe('MantineAllergyForm', () => {
     test('handles severity select changes', async () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const severitySelect = screen.getAllByLabelText(/common:labels\.severity/)[0];
+      const severitySelect = screen.getAllByLabelText(/shared:fields\.severity/)[0];
       fireEvent.click(severitySelect);
 
       // Options are rendered as i18n keys
@@ -179,13 +179,13 @@ describe('MantineAllergyForm', () => {
     test('handles status select changes', async () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const statusSelect = screen.getAllByLabelText(/common:labels\.status/)[0];
+      const statusSelect = screen.getAllByLabelText(/shared:fields\.status/)[0];
       fireEvent.click(statusSelect);
 
       await waitFor(() => {
-        expect(screen.getByText('common:status.active')).toBeInTheDocument();
+        expect(screen.getByText('shared:labels.active')).toBeInTheDocument();
       });
-      fireEvent.click(screen.getByText('common:status.active'));
+      fireEvent.click(screen.getByText('shared:labels.active'));
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
         target: { name: 'status', value: 'active' },
@@ -196,7 +196,7 @@ describe('MantineAllergyForm', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
       // data-testid is derived from lowercased label 'common:labels.onsetDate'
-      const dateInput = screen.getByTestId('date-common:labels.onsetdate');
+      const dateInput = screen.getByTestId('date-shared:fields.onsetdate');
       fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
       // The mock DateInput calls onChange with a Date object when value is non-empty.
@@ -213,7 +213,7 @@ describe('MantineAllergyForm', () => {
     test('handles notes textarea changes', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const notesTextarea = screen.getByLabelText(/common:labels\.notes/);
+      const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
       fireEvent.change(notesTextarea, { target: { value: 'Patient also experiences breathing difficulty' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -236,8 +236,8 @@ describe('MantineAllergyForm', () => {
     test('calls onClose when cancel button is clicked', async () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      // Cancel button uses i18n key: 'common:buttons.cancel'
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      // Cancel button uses i18n key: 'shared:fields.cancel'
+      const cancelButton = screen.getByText('shared:fields.cancel');
       fireEvent.click(cancelButton);
 
       await waitFor(() => {
@@ -294,7 +294,7 @@ describe('MantineAllergyForm', () => {
 
       render(<MantineAllergyForm {...propsWithDate} />);
 
-      const dateInput = screen.getByTestId('date-common:labels.onsetdate');
+      const dateInput = screen.getByTestId('date-shared:fields.onsetdate');
       expect(dateInput).toHaveValue('2024-01-15');
     });
   });
@@ -303,7 +303,7 @@ describe('MantineAllergyForm', () => {
     test('displays correct severity options', async () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const severitySelect = screen.getAllByLabelText(/common:labels\.severity/)[0];
+      const severitySelect = screen.getAllByLabelText(/shared:fields\.severity/)[0];
       fireEvent.click(severitySelect);
 
       // Options are i18n keys since mock returns key as value
@@ -318,13 +318,13 @@ describe('MantineAllergyForm', () => {
     test('displays correct status options', async () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const statusSelect = screen.getAllByLabelText(/common:labels\.status/)[0];
+      const statusSelect = screen.getAllByLabelText(/shared:fields\.status/)[0];
       fireEvent.click(statusSelect);
 
       await waitFor(() => {
-        expect(screen.getByText('common:status.active')).toBeInTheDocument();
-        expect(screen.getByText('common:status.inactive')).toBeInTheDocument();
-        expect(screen.getByText('common:status.resolved')).toBeInTheDocument();
+        expect(screen.getByText('shared:labels.active')).toBeInTheDocument();
+        expect(screen.getByText('shared:labels.inactive')).toBeInTheDocument();
+        expect(screen.getByText('shared:labels.resolved')).toBeInTheDocument();
       });
     });
   });
@@ -342,7 +342,7 @@ describe('MantineAllergyForm', () => {
 
       // severity is required per allergyFormFields config
       // Mantine Select renders a hidden input with required attribute
-      const severityLabel = screen.getByText('common:labels.severity');
+      const severityLabel = screen.getByText('shared:fields.severity');
       expect(severityLabel).toBeInTheDocument();
     });
 
@@ -481,8 +481,8 @@ describe('MantineAllergyForm', () => {
       expect(screen.getByLabelText(/medical:allergies\.reaction\.label/)).toBeInTheDocument();
 
       // severity and status select fields are present
-      expect(screen.getAllByLabelText(/common:labels\.severity/)[0]).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/common:labels\.status/)[0]).toBeInTheDocument();
+      expect(screen.getAllByLabelText(/shared:fields\.severity/)[0]).toBeInTheDocument();
+      expect(screen.getAllByLabelText(/shared:fields\.status/)[0]).toBeInTheDocument();
     });
 
     test('has proper descriptions for medical fields', () => {
@@ -503,7 +503,7 @@ describe('MantineAllergyForm', () => {
       const submitButton = allMatches.find(el => el.closest('[type="submit"]') !== null);
       expect(submitButton || allMatches[0]).toBeInTheDocument();
 
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
       expect(cancelButton).toBeInTheDocument();
     });
   });
@@ -521,21 +521,21 @@ describe('MantineAllergyForm', () => {
       });
 
       // Set severity
-      fireEvent.click(screen.getAllByLabelText(/common:labels\.severity/)[0]);
+      fireEvent.click(screen.getAllByLabelText(/shared:fields\.severity/)[0]);
       await waitFor(() => {
         expect(screen.getByText('common:severity.moderate')).toBeInTheDocument();
       });
       fireEvent.click(screen.getByText('common:severity.moderate'));
 
       // Set status
-      fireEvent.click(screen.getAllByLabelText(/common:labels\.status/)[0]);
+      fireEvent.click(screen.getAllByLabelText(/shared:fields\.status/)[0]);
       await waitFor(() => {
-        expect(screen.getByText('common:status.active')).toBeInTheDocument();
+        expect(screen.getByText('shared:labels.active')).toBeInTheDocument();
       });
-      fireEvent.click(screen.getByText('common:status.active'));
+      fireEvent.click(screen.getByText('shared:labels.active'));
 
       // Add notes
-      fireEvent.change(screen.getByLabelText(/common:labels\.notes/), {
+      fireEvent.change(screen.getByLabelText(/shared:tabs\.notes/), {
         target: { value: 'Patient should use alternative antibiotics' },
       });
 

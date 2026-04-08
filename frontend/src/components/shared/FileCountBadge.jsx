@@ -76,7 +76,7 @@ const FileCountBadge = ({
   }
 
   // Handle positive count
-  const displayText = t('fileCount.fileCount', { count });
+  const displayText = t('fileCount.fileCount', '{{count}} file', { count });
   const badgeColor = count > 0 ? 'green' : 'gray';
   const icon = count === 1 ? IconFile : IconFiles;
 
@@ -93,7 +93,7 @@ const FileCountBadge = ({
           className={className}
           title={onClick ? `Click to view ${displayText}` : undefined}
         >
-          {t('fileCount.attached', { count })}
+          {t('fileCount.attached', '{{count}} attached', { count })}
         </Badge>
       );
     

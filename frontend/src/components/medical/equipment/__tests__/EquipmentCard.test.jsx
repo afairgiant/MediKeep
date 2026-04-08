@@ -22,13 +22,6 @@ vi.mock('../../../../services/logger', () => ({
   },
 }));
 
-// Mock i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key, defaultValue) => defaultValue || key,
-  }),
-}));
-
 // Wrapper component with Mantine provider
 const MantineWrapper = ({ children }) => (
   <MantineProvider>{children}</MantineProvider>

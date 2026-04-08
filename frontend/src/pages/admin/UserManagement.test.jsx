@@ -245,8 +245,8 @@ describe('UserManagement', () => {
     renderUserManagement();
 
     await waitFor(() => {
-      // The mock t() returns the key when the second arg is an object
-      expect(screen.getByText('users.userCount')).toBeInTheDocument();
+      // The mock t() returns defaultValue with interpolation
+      expect(screen.getByText('3 users')).toBeInTheDocument();
     });
   });
 

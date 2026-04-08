@@ -141,7 +141,7 @@ describe('ConditionRelationships Component', () => {
       await userEvent.click(linkButton);
 
       await waitFor(() => {
-        expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
+        expect(screen.getByText('shared:fields.cancel')).toBeInTheDocument();
       });
     });
 

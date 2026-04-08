@@ -87,7 +87,7 @@ const I18N = {
   availableToLink: 'labels.conditionsAvailableToLink',
   modalTitle: 'modals.linkConditionsToMedication',
   selectConditions: 'modals.selectConditions',
-  cancel: 'buttons.cancel',
+  cancel: 'shared:fields.cancel',
   confirmRemove: 'messages.confirmRemoveConditionRelationship',
 };
 

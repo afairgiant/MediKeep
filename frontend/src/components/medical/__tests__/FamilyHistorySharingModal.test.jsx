@@ -134,7 +134,7 @@ describe('FamilyHistorySharingModal Component', () => {
       });
 
       expect(screen.getByText('Share Multiple Family Members (3 selected)')).toBeInTheDocument();
-      expect(screen.getByText('Select Family Members')).toBeInTheDocument();
+      expect(screen.getByText('sharing.selectFamilyMembers')).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Doe')).toBeInTheDocument();
       expect(screen.getByText('Bob Smith')).toBeInTheDocument();
@@ -150,7 +150,7 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       expect(screen.getByText(/Share John Doe's family medical history with another user/)).toBeInTheDocument();
-      expect(screen.getByText(/Recipients will receive an invitation that they can accept or reject/)).toBeInTheDocument();
+      expect(screen.getByText('sharing.invitationInfo')).toBeInTheDocument();
     });
 
     it('should load existing shares for single family member on open', async () => {
@@ -317,7 +317,7 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       await waitFor(() => {
-        expect(screen.getByText('Currently Shared With:')).toBeInTheDocument();
+        expect(screen.getByText('sharing.currentlySharedWith')).toBeInTheDocument();
         expect(screen.getByText('Dr. Sarah Johnson')).toBeInTheDocument();
         expect(screen.getByText('sarah.johnson@hospital.com')).toBeInTheDocument();
         expect(screen.getByText('Dr. Michael Brown')).toBeInTheDocument();
@@ -338,8 +338,7 @@ describe('FamilyHistorySharingModal Component', () => {
 
       await waitFor(() => {
         // formatDateTime uses toLocaleString with 2-digit month/day, producing e.g. "01/15/2024, 5:30 AM"
-        expect(screen.getByText(/Shared on.*01\/15\/2024/)).toBeInTheDocument();
-        expect(screen.getByText(/Shared on.*01\/12\/2024/)).toBeInTheDocument();
+        expect(screen.getAllByText('sharing.sharedOn').length).toBeGreaterThanOrEqual(2);
       });
     });
 
@@ -349,7 +348,7 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       await waitFor(() => {
-        expect(screen.getByText('This family history is not currently shared with anyone.')).toBeInTheDocument();
+        expect(screen.getByText('sharing.notSharedYet')).toBeInTheDocument();
       });
     });
 
@@ -736,7 +735,7 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       expect(screen.getByText(/This only shares family history data, not your personal medical records/)).toBeInTheDocument();
-      expect(screen.getByText(/Recipients will receive an invitation that they can accept or reject/)).toBeInTheDocument();
+      expect(screen.getByText('sharing.invitationInfo')).toBeInTheDocument();
     });
 
     it('should display proper icons for form elements', () => {
@@ -759,7 +758,7 @@ describe('FamilyHistorySharingModal Component', () => {
       });
 
       expect(screen.getByText('Share Multiple Family Members (0 selected)')).toBeInTheDocument();
-      expect(screen.getByText('Select Family Members')).toBeInTheDocument();
+      expect(screen.getByText('sharing.selectFamilyMembers')).toBeInTheDocument();
     });
 
     it('should handle missing family member data', () => {

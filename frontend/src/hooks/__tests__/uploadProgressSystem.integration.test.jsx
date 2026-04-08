@@ -463,8 +463,8 @@ describe('Upload Progress System Integration Tests', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
-      expect(screen.getByText('Something went wrong with progress tracking. Your upload may still be processing.')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadErrorDescription')).toBeInTheDocument();
     });
 
     test('should allow recovery from upload progress errors', () => {
@@ -485,13 +485,13 @@ describe('Upload Progress System Integration Tests', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
 
       // Fix the error before clicking Continue, so re-render doesn't throw again
       hasError = false;
 
       // Click Continue to attempt recovery
-      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      fireEvent.click(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' }));
 
       expect(screen.getByTestId('upload-progress-system')).toBeInTheDocument();
     });

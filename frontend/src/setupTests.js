@@ -44,7 +44,7 @@ vi.mock('./i18n/config', () => ({
 // Mock react-i18next hooks
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key, fallback) => (typeof fallback === 'string' ? fallback : key),
+    t: mockT,
     i18n: {
       language: 'en',
       changeLanguage: () => Promise.resolve(),

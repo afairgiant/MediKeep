@@ -601,7 +601,7 @@ describe('Procedures Page Integration Tests', () => {
       render(<Procedures />);
 
       // Page header
-      expect(screen.getByTestId('page-header')).toHaveTextContent('procedures.title');
+      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.procedures');
 
       // All three procedures displayed in cards
       expect(screen.getByText('Colonoscopy')).toBeInTheDocument();
@@ -890,7 +890,7 @@ describe('Procedures Page Integration Tests', () => {
         render(<Procedures />);
       }).not.toThrow();
 
-      expect(screen.getByTestId('page-header')).toHaveTextContent('procedures.title');
+      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.procedures');
     });
 
     it('displays practitioner names on cards', () => {
