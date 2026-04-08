@@ -7,20 +7,28 @@ import { isDevelopment } from '../config/env';
 // Bundle English translations so the fallback language is always available synchronously.
 // This eliminates the race condition where components render before HTTP-loaded translations
 // arrive, which caused translation keys to flash in the UI.
-import commonEn from '../../public/locales/en/common.json';
-import medicalEn from '../../public/locales/en/medical.json';
-import adminEn from '../../public/locales/en/admin.json';
-import errorsEn from '../../public/locales/en/errors.json';
-import navigationEn from '../../public/locales/en/navigation.json';
-import notificationsEn from '../../public/locales/en/notifications.json';
-import sharedEn from '../../public/locales/en/shared.json';
-import authEn from '../../public/locales/en/auth.json';
-import settingsEn from '../../public/locales/en/settings.json';
-import reportsEn from '../../public/locales/en/reports.json';
-import labresultsEn from '../../public/locales/en/labresults.json';
-import vitalsEn from '../../public/locales/en/vitals.json';
-import invitationsEn from '../../public/locales/en/invitations.json';
-import documentsEn from '../../public/locales/en/documents.json';
+// The JSONs live in public/locales/en so the HTTP backend can serve other languages from
+// the same tree; the `virtual:bundled-en-locales` module (see vite.config.ts) reads them
+// at build time so they can be bundled without violating Vite's public/ import rule.
+// @ts-expect-error - virtual module provided by Vite plugin
+import bundledEn from 'virtual:bundled-en-locales';
+
+const {
+  common: commonEn,
+  medical: medicalEn,
+  admin: adminEn,
+  errors: errorsEn,
+  navigation: navigationEn,
+  notifications: notificationsEn,
+  shared: sharedEn,
+  auth: authEn,
+  settings: settingsEn,
+  reports: reportsEn,
+  labresults: labresultsEn,
+  vitals: vitalsEn,
+  invitations: invitationsEn,
+  documents: documentsEn,
+} = bundledEn as Record<string, Record<string, unknown>>;
 
 i18n
   .use(HttpBackend)
