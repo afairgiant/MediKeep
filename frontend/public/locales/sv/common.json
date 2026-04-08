@@ -615,6 +615,8 @@
         "createPatient": "Skapa patient",
         "saveChanges": "Spara ändringar"
       },
+      "createTitle": "Lägg till ny patient",
+      "editTitle": "Redigera patient",
       "firstName": {
         "placeholder": "Ange förnamn"
       },

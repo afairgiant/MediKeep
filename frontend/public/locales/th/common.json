@@ -615,6 +615,8 @@
         "createPatient": "สร้างผู้ป่วย",
         "saveChanges": "บันทึกการเปลี่ยนแปลง"
       },
+      "createTitle": "เพิ่มผู้ป่วยใหม่",
+      "editTitle": "แก้ไขผู้ป่วย",
       "firstName": {
         "placeholder": "ป้อนชื่อ"
       },
@@ -1165,7 +1167,7 @@
       "frequencyDesc": "ความถี่ในการรักษา",
       "frequencyPlaceholder": "เช่น ทุกวัน, สัปดาห์ละ 2 ครั้ง",
       "linkingPartialFailure": "ไม่สามารถเชื่อมโยงรายการบางส่วนได้",
-      "linkingPartialFailureMessage": "",
+      "linkingPartialFailureMessage": "สร้างการรักษาเรียบร้อยแล้ว แต่ไม่สามารถเชื่อมโยงบางรายการได้ คุณสามารถเชื่อมโยงด้วยตนเองโดยแก้ไขการรักษา",
       "notesDesc": "ข้อมูลเพิ่มเติมเกี่ยวกับการรักษานี้",
       "notesPlaceholder": "ป้อนหมายเหตุการรักษา ข้อสังเกต หรือรายละเอียดเพิ่มเติม",
       "practitionerDesc": "ผู้ให้บริการสุขภาพที่ให้การรักษา",
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "เลือกวันที่และเวลา",
       "devicePlaceholder": "เช่น เครื่องวัดความดันแบบดิจิทัล รุ่นเครื่องวัดอุณหภูมิ...",
       "heightNotSet": "ไม่ได้ตั้งค่าส่วนสูงในโปรไฟล์ผู้ป่วย - ไม่สามารถคำนวณ BMI ได้",
       "locationPlaceholder": "วัดค่าเหล่านี้ที่ไหน?",

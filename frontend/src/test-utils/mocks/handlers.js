@@ -68,16 +68,8 @@ export const handlers = [
 
   // Patient endpoints
   rest.get(`${API_BASE}/patients/me`, (req, res, ctx) => {
-    const authHeader = req.headers.get('Authorization');
-    
-    if (!authHeader || !authHeader.includes('Bearer')) {
-      return res(
-        ctx.status(401),
-        ctx.json({ detail: 'Not authenticated' })
-      );
-    }
-
-    return res(
+    // Auth is handled via HttpOnly cookies in production; tests assume authenticated state.
+return res(
       ctx.json({
         id: 1,
         user_id: 1,
@@ -97,16 +89,8 @@ export const handlers = [
   }),
 
   rest.put(`${API_BASE}/patients/me`, (req, res, ctx) => {
-    const authHeader = req.headers.get('Authorization');
-    
-    if (!authHeader || !authHeader.includes('Bearer')) {
-      return res(
-        ctx.status(401),
-        ctx.json({ detail: 'Not authenticated' })
-      );
-    }
-
-    const updatedData = req.body;
+    // Auth is handled via HttpOnly cookies in production; tests assume authenticated state.
+const updatedData = req.body;
     
     return res(
       ctx.json({
@@ -119,16 +103,8 @@ export const handlers = [
   }),
 
   rest.post(`${API_BASE}/patients/me`, (req, res, ctx) => {
-    const authHeader = req.headers.get('Authorization');
-    
-    if (!authHeader || !authHeader.includes('Bearer')) {
-      return res(
-        ctx.status(401),
-        ctx.json({ detail: 'Not authenticated' })
-      );
-    }
-
-    const patientData = req.body;
+    // Auth is handled via HttpOnly cookies in production; tests assume authenticated state.
+const patientData = req.body;
     
     return res(
       ctx.status(201),

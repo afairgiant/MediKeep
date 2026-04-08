@@ -114,6 +114,13 @@ Object.defineProperty(window, 'scrollTo', {
   value: vi.fn(),
 });
 
+// jsdom lacks Element.prototype.scrollIntoView. Mantine Combobox schedules it via
+// setTimeout after the test finishes, which leaks an unhandled exception into the
+// next test file. Polyfill it globally so the callback is a no-op.
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = vi.fn();
+}
+
 // Mock localStorage
 const localStorageMock = {
   getItem: vi.fn(),

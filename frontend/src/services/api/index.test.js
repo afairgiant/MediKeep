@@ -237,29 +237,33 @@ describe('API Service', () => {
       await expect(apiService.getRecentActivity()).rejects.toThrow();
     });
 
-    test('handles requests without authentication token', async () => {
-      // Clear token from secureStorage
-      secureStorage.getItem.mockResolvedValue(null);
+    test('surfaces backend 401 as Not authenticated error', async () => {
+      // Force the /patients/me handler to return a 401 regardless of credentials.
+      server.use(
+        rest.get('*/api/v1/patients/me', (req, res, ctx) =>
+          res(ctx.status(401), ctx.json({ detail: 'Not authenticated' }))
+        )
+      );
 
       await expect(apiService.getCurrentPatient()).rejects.toThrow('Not authenticated');
     });
   });
 
   describe('Request Headers', () => {
-    test('includes authorization header when token is present', async () => {
-      let capturedHeaders;
-      
-      // Capture request headers
+    test('sends credentials so HttpOnly auth cookie is included', async () => {
+      let capturedCredentials;
+
+      // Capture request credentials mode (cookie-based auth replaced bearer tokens).
       server.use(
         rest.get('*/api/v1/patients/me', (req, res, ctx) => {
-          capturedHeaders = req.headers.get('Authorization');
+          capturedCredentials = req.credentials;
           return res(ctx.status(200), ctx.json({}));
         })
       );
 
       await apiService.getCurrentPatient();
 
-      expect(capturedHeaders).toBe('Bearer mock-jwt-token');
+      expect(capturedCredentials).toBe('include');
     });
 
     test('includes content-type header for POST requests', async () => {

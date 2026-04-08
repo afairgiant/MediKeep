@@ -615,6 +615,8 @@
         "createPatient": "Utwórz pacjenta",
         "saveChanges": "Zapisz zmiany"
       },
+      "createTitle": "Dodaj nowego pacjenta",
+      "editTitle": "Edytuj pacjenta",
       "firstName": {
         "placeholder": "Wprowadź imię"
       },
@@ -1165,7 +1167,7 @@
       "frequencyDesc": "Jak często leczenie jest przeprowadzane",
       "frequencyPlaceholder": "np. Codziennie, Dwa razy w tygodniu",
       "linkingPartialFailure": "Nie udało się połączyć niektórych elementów",
-      "linkingPartialFailureMessage": "",
+      "linkingPartialFailureMessage": "Leczenie zostało utworzone, ale niektóre elementy nie mogły zostać powiązane. Możesz powiązać je ręcznie, edytując leczenie.",
       "notesDesc": "Dodatkowe informacje o tym leczeniu",
       "notesPlaceholder": "Wprowadź notatki dotyczące leczenia, obserwacje lub dodatkowe szczegóły",
       "practitionerDesc": "Pracownik ochrony zdrowia przeprowadzający leczenie",
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "Wybierz datę i godzinę",
       "devicePlaceholder": "np. Monitor ciśnienia cyfrowy, Model termometru...",
       "heightNotSet": "Wzrost nie ustawiony w profilu pacjenta - obliczanie BMI niedostępne",
       "locationPlaceholder": "Gdzie wykonano te pomiary?",

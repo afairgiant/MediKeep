@@ -615,6 +615,8 @@
         "createPatient": "Patiënt aanmaken",
         "saveChanges": "Wijzigingen opslaan"
       },
+      "createTitle": "Nieuwe patiënt toevoegen",
+      "editTitle": "Patiënt bewerken",
       "firstName": {
         "placeholder": "Voer voornaam in"
       },
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "Selecteer datum en tijd",
       "devicePlaceholder": "bijv. digitale bloeddrukmeter, thermometermodel...",
       "heightNotSet": "Lengte niet ingesteld in patiëntprofiel - BMI-berekening niet beschikbaar",
       "locationPlaceholder": "Waar zijn deze metingen afgenomen?",

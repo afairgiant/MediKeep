@@ -126,10 +126,8 @@ describe('useFormSubmissionWithUploads Hook', () => {
       expect(result.current.submissionState.isCompleted).toBe(true);
       expect(result.current.submissionState.canClose).toBe(true);
 
-      // Verify onSuccess callback is triggered
-      await waitFor(() => {
-        expect(mockOnSuccess).toHaveBeenCalled();
-      });
+      // Verify onSuccess callback is triggered (state effect fires synchronously in act())
+      expect(mockOnSuccess).toHaveBeenCalled();
 
       expect(notifications.show).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -471,9 +469,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
         result.current.completeFileUpload(true, 2, 0);
       });
 
-      await waitFor(() => {
-        expect(mockOnSuccess).toHaveBeenCalledTimes(1);
-      });
+      expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
     test('should not call onSuccess when form fails', async () => {
@@ -522,9 +518,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
       });
 
       // Should not throw error
-      await waitFor(() => {
-        expect(result.current.submissionState.isCompleted).toBe(true);
-      });
+      expect(result.current.submissionState.isCompleted).toBe(true);
     });
 
     test('should handle missing onError callback gracefully', () => {

@@ -615,6 +615,8 @@
         "createPatient": "Create Patient",
         "saveChanges": "Save Changes"
       },
+      "createTitle": "Add New Patient",
+      "editTitle": "Edit Patient",
       "firstName": {
         "placeholder": "Enter first name"
       },
@@ -1165,7 +1167,7 @@
       "frequencyDesc": "How often treatment is administered",
       "frequencyPlaceholder": "e.g., Daily, Twice weekly",
       "linkingPartialFailure": "Some items could not be linked",
-      "linkingPartialFailureMessage": "",
+      "linkingPartialFailureMessage": "The treatment was created, but some items could not be linked. You can link them manually by editing the treatment.",
       "notesDesc": "Additional information about this treatment",
       "notesPlaceholder": "Enter treatment notes, observations, or additional details",
       "practitionerDesc": "Healthcare provider administering treatment",
@@ -1272,7 +1274,7 @@
   },
   "vitals": {
     "form": {
-      "dateTimePlaceholder": "",
+      "dateTimePlaceholder": "Select date and time",
       "devicePlaceholder": "e.g., Digital BP monitor, Thermometer model...",
       "heightNotSet": "Height not set in patient profile - BMI calculation unavailable",
       "locationPlaceholder": "Where were these readings taken?",
