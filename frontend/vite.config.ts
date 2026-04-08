@@ -16,6 +16,28 @@ export default defineConfig({
     }),
     svgr(), // Allows importing SVGs as React components
     tsconfigPaths(), // Respects tsconfig baseUrl: "src"
+    // Expose English locale JSONs (which live in public/locales/en so the HTTP backend
+    // can serve other languages from the same tree) as a virtual module so they can be
+    // bundled synchronously by the i18n config without triggering Vite's
+    // "no imports from public/" restriction.
+    {
+      name: 'bundled-en-locales',
+      resolveId(id) {
+        if (id === 'virtual:bundled-en-locales') return '\0' + id;
+        return null;
+      },
+      load(id) {
+        if (id !== '\0virtual:bundled-en-locales') return null;
+        const dir = path.resolve(__dirname, 'public/locales/en');
+        const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'));
+        const entries = files.map((f) => {
+          const ns = f.replace(/\.json$/, '');
+          const content = fs.readFileSync(path.join(dir, f), 'utf-8');
+          return `  ${JSON.stringify(ns)}: ${content}`;
+        });
+        return `export default {\n${entries.join(',\n')}\n};\n`;
+      },
+    },
     // Inject build version into service-worker.js so the browser detects SW updates
     {
       name: 'sw-version-inject',
