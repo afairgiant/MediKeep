@@ -69,7 +69,7 @@ export const handlers = [
   // Patient endpoints
   rest.get(`${API_BASE}/patients/me`, (req, res, ctx) => {
     // Auth is handled via HttpOnly cookies in production; tests assume authenticated state.
-return res(
+    return res(
       ctx.json({
         id: 1,
         user_id: 1,
@@ -90,8 +90,8 @@ return res(
 
   rest.put(`${API_BASE}/patients/me`, (req, res, ctx) => {
     // Auth is handled via HttpOnly cookies in production; tests assume authenticated state.
-const updatedData = req.body;
-    
+    const updatedData = req.body;
+
     return res(
       ctx.json({
         id: 1,
@@ -104,8 +104,8 @@ const updatedData = req.body;
 
   rest.post(`${API_BASE}/patients/me`, (req, res, ctx) => {
     // Auth is handled via HttpOnly cookies in production; tests assume authenticated state.
-const patientData = req.body;
-    
+    const patientData = req.body;
+
     return res(
       ctx.status(201),
       ctx.json({
