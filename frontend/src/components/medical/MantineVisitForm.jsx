@@ -12,6 +12,7 @@ import {
   Textarea,
   NumberInput,
   Text,
+  MultiSelect,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import {
@@ -274,11 +275,9 @@ const MantineVisitForm = ({
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
-              {editingVisit && fetchEncounterLabResults && (
-                <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
-                  {t('shared:categories.lab_results', 'Lab Results')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
+                {t('shared:categories.lab_results', 'Lab Results')}
+              </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
@@ -322,9 +321,9 @@ const MantineVisitForm = ({
             </Tabs.Panel>
 
             {/* Lab Results Tab */}
-            {editingVisit && fetchEncounterLabResults && (
-              <Tabs.Panel value="lab-results">
-                <Box mt="md">
+            <Tabs.Panel value="lab-results">
+              <Box mt="md">
+                {editingVisit && fetchEncounterLabResults ? (
                   <EncounterLabResultRelationships
                     encounterId={editingVisit.id}
                     encounterLabResults={encounterLabResults}
@@ -332,9 +331,30 @@ const MantineVisitForm = ({
                     fetchEncounterLabResults={fetchEncounterLabResults}
                     navigate={navigate}
                   />
-                </Box>
-              </Tabs.Panel>
-            )}
+                ) : (
+                  <>
+                    <Text size="sm" c="dimmed" mb="md">
+                      {t('common:visits.form.labResultsDescription', 'Link lab results relevant to this visit. You can set purpose and notes after creating the visit.')}
+                    </Text>
+                    <MultiSelect
+                      label={t('common:visits.form.selectLabResults', 'Select Lab Results')}
+                      placeholder={t('common:visits.form.chooseLabResultsToLink', 'Choose lab results to link')}
+                      data={(labResults || []).map(lr => ({
+                        value: lr.id.toString(),
+                        label: `${lr.test_name}${lr.ordered_date ? ` (${lr.ordered_date})` : ''}${lr.status ? ` - ${lr.status}` : ''}`,
+                      }))}
+                      value={formData.pending_lab_result_ids || []}
+                      onChange={(values) => {
+                        onInputChange({ target: { name: 'pending_lab_result_ids', value: values } });
+                      }}
+                      searchable
+                      clearable
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </>
+                )}
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">

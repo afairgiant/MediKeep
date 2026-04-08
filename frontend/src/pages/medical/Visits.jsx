@@ -8,6 +8,7 @@ import {
   IconPlus,
   IconShieldCheck,
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -250,6 +251,7 @@ const Visits = () => {
     location: '',
     priority: '',
     tags: [],
+    pending_lab_result_ids: [],
   });
 
   const handleAddVisit = () => {
@@ -271,6 +273,7 @@ const Visits = () => {
       location: '',
       priority: '',
       tags: [],
+      pending_lab_result_ids: [],
     });
     setShowModal(true);
   };
@@ -294,6 +297,7 @@ const Visits = () => {
       location: visit.location || '',
       priority: visit.priority || '',
       tags: visit.tags || [],
+      pending_lab_result_ids: [],
     });
     setShowModal(true);
   };
@@ -380,6 +384,31 @@ const Visits = () => {
       completeFormSubmission(success, resultId);
 
       if (success && resultId) {
+        // Link pending lab results for new visits
+        const pendingLabResults = formData.pending_lab_result_ids || [];
+        if (!editingVisit && pendingLabResults.length > 0) {
+          try {
+            await apiService.linkEncounterLabResultsBulk(resultId, {
+              lab_result_ids: pendingLabResults.map(id => parseInt(id)),
+              purpose: null,
+              relevance_note: null,
+            });
+            await fetchEncounterLabResults(resultId);
+          } catch (err) {
+            logger.error('visits_lab_result_link_failed', {
+              message: 'Failed to link lab results to new visit',
+              visitId: resultId,
+              error: err.message,
+              component: 'Visits',
+            });
+            notifications.show({
+              title: t('visits.notifications.labResultLinkWarning', 'Lab Result Linking Issue'),
+              message: t('visits.notifications.labResultLinkFailed', 'Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.'),
+              color: 'yellow',
+            });
+          }
+        }
+
         // Check if we have files to upload
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
         
