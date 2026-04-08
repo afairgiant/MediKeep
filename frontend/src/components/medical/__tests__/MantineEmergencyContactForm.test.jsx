@@ -43,7 +43,7 @@ describe('MantineEmergencyContactForm', () => {
 
       // Title and submit button both show "Add Emergency Contact"
       expect(screen.getAllByText('Add Emergency Contact').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByLabelText(/medical:emergencyContacts\.form\.name\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.fullName/)).toBeInTheDocument();
       expect(getAllRelationshipInputs().length).toBeGreaterThan(0);
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.primaryPhone\.label/)).toBeInTheDocument();
     });
@@ -58,15 +58,15 @@ describe('MantineEmergencyContactForm', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
       // Required fields
-      expect(screen.getByLabelText(/medical:emergencyContacts\.form\.name\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.fullName/)).toBeInTheDocument();
       expect(getAllRelationshipInputs().length).toBeGreaterThan(0);
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.primaryPhone\.label/)).toBeInTheDocument();
 
       // Optional fields
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.secondaryPhone\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:emergencyContacts\.form\.email\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:emergencyContacts\.form\.address\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/common:fields\.notes\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.emailAddress/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:labels\.address/)).toBeInTheDocument();
+      expect(screen.getAllByLabelText(/shared:tabs\.notes/).length).toBeGreaterThan(0);
 
       // Checkboxes
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.isPrimary\.label/)).toBeInTheDocument();
@@ -92,14 +92,14 @@ describe('MantineEmergencyContactForm', () => {
 
   // Helper to get the relationship select input (Mantine Select renders both input + listbox)
   function getAllRelationshipInputs() {
-    return screen.getAllByLabelText(/medical:emergencyContacts\.form\.relationship\.label/);
+    return screen.getAllByLabelText(/shared:labels\.relationship/);
   }
 
   describe('Form Interactions', () => {
     test('handles name input changes', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
-      const nameInput = screen.getByLabelText(/medical:emergencyContacts\.form\.name\.label/);
+      const nameInput = screen.getByLabelText(/shared:fields\.fullName/);
       fireEvent.change(nameInput, { target: { value: 'Jane Smith' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -132,7 +132,7 @@ describe('MantineEmergencyContactForm', () => {
     test('handles email input changes', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
-      const emailInput = screen.getByLabelText(/medical:emergencyContacts\.form\.email\.label/);
+      const emailInput = screen.getByLabelText(/shared:fields\.emailAddress/);
       fireEvent.change(emailInput, { target: { value: 'jane.smith@example.com' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -154,7 +154,8 @@ describe('MantineEmergencyContactForm', () => {
     test('handles textarea changes', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
-      const notesTextarea = screen.getByLabelText(/common:fields\.notes\.label/);
+      const notesTextareas = screen.getAllByLabelText(/shared:tabs\.notes/);
+      const notesTextarea = notesTextareas.find(el => el.tagName === 'TEXTAREA') || notesTextareas[notesTextareas.length - 1];
       fireEvent.change(notesTextarea, { target: { value: 'Available weekdays only' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -174,7 +175,7 @@ describe('MantineEmergencyContactForm', () => {
     test('calls onClose when cancel button is clicked', async () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
       await userEvent.click(cancelButton);
 
       expect(defaultProps.onClose).toHaveBeenCalled();
@@ -292,7 +293,7 @@ describe('MantineEmergencyContactForm', () => {
     test('accepts valid email formats', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
-      const emailInput = screen.getByLabelText(/medical:emergencyContacts\.form\.email\.label/);
+      const emailInput = screen.getByLabelText(/shared:fields\.emailAddress/);
 
       const validEmails = [
         'test@example.com',
@@ -391,13 +392,13 @@ describe('MantineEmergencyContactForm', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
       // Check required fields exist (with asterisks handled via regex)
-      expect(screen.getByLabelText(/medical:emergencyContacts\.form\.name\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.fullName/)).toBeInTheDocument();
       expect(getAllRelationshipInputs().length).toBeGreaterThan(0);
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.primaryPhone\.label/)).toBeInTheDocument();
 
       // Check optional fields
       expect(screen.getByLabelText(/medical:emergencyContacts\.form\.secondaryPhone\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:emergencyContacts\.form\.email\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.emailAddress/)).toBeInTheDocument();
     });
 
     test('has proper descriptions for contact fields', () => {
@@ -413,7 +414,7 @@ describe('MantineEmergencyContactForm', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
       const submitButton = document.querySelector('button[type="submit"]');
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
 
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).toHaveAttribute('type', 'submit');
@@ -426,7 +427,7 @@ describe('MantineEmergencyContactForm', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
       // Fill out a complete emergency contact
-      const nameInput = screen.getByLabelText(/medical:emergencyContacts\.form\.name\.label/);
+      const nameInput = screen.getByLabelText(/shared:fields\.fullName/);
       fireEvent.change(nameInput, { target: { value: 'Sarah Johnson' } });
 
       const relationshipInput = getAllRelationshipInputs()[0];
@@ -440,16 +441,17 @@ describe('MantineEmergencyContactForm', () => {
       const secondaryPhoneInput = screen.getByLabelText(/medical:emergencyContacts\.form\.secondaryPhone\.label/);
       fireEvent.change(secondaryPhoneInput, { target: { value: '555-987-6543' } });
 
-      const emailInput = screen.getByLabelText(/medical:emergencyContacts\.form\.email\.label/);
+      const emailInput = screen.getByLabelText(/shared:fields\.emailAddress/);
       fireEvent.change(emailInput, { target: { value: 'sarah.johnson@email.com' } });
 
       const primaryCheckbox = screen.getByLabelText(/medical:emergencyContacts\.form\.isPrimary\.label/);
       await userEvent.click(primaryCheckbox);
 
-      const addressInput = screen.getByLabelText(/medical:emergencyContacts\.form\.address\.label/);
+      const addressInput = screen.getByLabelText(/shared:labels\.address/);
       fireEvent.change(addressInput, { target: { value: '456 Oak Street, Springfield, IL 62701' } });
 
-      const notesInput = screen.getByLabelText(/common:fields\.notes\.label/);
+      const notesInputs = screen.getAllByLabelText(/shared:tabs\.notes/);
+      const notesInput = notesInputs.find(el => el.tagName === 'TEXTAREA') || notesInputs[notesInputs.length - 1];
       fireEvent.change(notesInput, { target: { value: 'Available 24/7, speaks English and Spanish' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -459,7 +461,7 @@ describe('MantineEmergencyContactForm', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
       // Fill only required fields for urgent entry
-      const nameInput = screen.getByLabelText(/medical:emergencyContacts\.form\.name\.label/);
+      const nameInput = screen.getByLabelText(/shared:fields\.fullName/);
       fireEvent.change(nameInput, { target: { value: 'Emergency Contact' } });
 
       const phoneInput = screen.getByLabelText(/medical:emergencyContacts\.form\.primaryPhone\.label/);
@@ -495,7 +497,7 @@ describe('MantineEmergencyContactForm', () => {
     test('requires name field', () => {
       render(<MantineEmergencyContactForm {...defaultProps} />);
 
-      const nameInput = screen.getByLabelText(/medical:emergencyContacts\.form\.name\.label/);
+      const nameInput = screen.getByLabelText(/shared:fields\.fullName/);
       expect(nameInput).toBeRequired();
     });
 

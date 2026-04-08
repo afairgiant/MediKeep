@@ -211,15 +211,15 @@ describe('InvitationManager Component', () => {
     it('should render the invitation manager modal when opened', async () => {
       renderInvitationManager();
 
-      expect(screen.getByText('Invitation Manager')).toBeInTheDocument();
-      expect(screen.getByText('Sent by Me')).toBeInTheDocument();
-      expect(screen.getByText('Shared with Me')).toBeInTheDocument();
+      expect(screen.getByText('manager.title')).toBeInTheDocument();
+      expect(screen.getByText('manager.sentByMe')).toBeInTheDocument();
+      expect(screen.getByText('manager.sharedWithMe')).toBeInTheDocument();
     });
 
     it('should not render when closed', () => {
       renderInvitationManager({ opened: false });
 
-      expect(screen.queryByText('Invitation Manager')).not.toBeInTheDocument();
+      expect(screen.queryByText('manager.title')).not.toBeInTheDocument();
     });
 
     it('should load all data on mount', async () => {
@@ -270,8 +270,9 @@ describe('InvitationManager Component', () => {
       renderInvitationManager();
 
       await waitFor(() => {
-        expect(screen.getByText(/You have sent 2 invitation/)).toBeInTheDocument();
-        expect(screen.getByText(/1 are still pending/)).toBeInTheDocument();
+        // Component renders both 'manager.sentInvitationsInfo' and 'manager.pendingStillCount' inside the same Text
+        expect(screen.getByText(/manager\.sentInvitationsInfo/)).toBeInTheDocument();
+        expect(screen.getByText(/manager\.pendingStillCount/)).toBeInTheDocument();
       });
     });
 
@@ -321,8 +322,8 @@ describe('InvitationManager Component', () => {
       renderInvitationManager();
 
       await waitFor(() => {
-        expect(screen.getByText('No Sent Invitations')).toBeInTheDocument();
-        expect(screen.getByText("You haven't sent any invitations or shared any patients yet.")).toBeInTheDocument();
+        expect(screen.getByText('manager.noSentTitle')).toBeInTheDocument();
+        expect(screen.getByText('manager.noSentDescription')).toBeInTheDocument();
       });
     });
 
@@ -353,21 +354,21 @@ describe('InvitationManager Component', () => {
       renderInvitationManager();
 
       await waitFor(() => {
-        expect(screen.getByText('Sent by Me')).toBeInTheDocument();
+        expect(screen.getByText('manager.sentByMe')).toBeInTheDocument();
       });
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
-        expect(screen.getByText('Pending Invitations (1)')).toBeInTheDocument();
-        expect(screen.getByText('Family History Shares (1)')).toBeInTheDocument();
+        expect(screen.getByText('manager.pendingInvitationsCount')).toBeInTheDocument();
+        expect(screen.getByText('manager.familySharesCount')).toBeInTheDocument();
       });
     });
 
     it('should display pending invitations section correctly', async () => {
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByTestId('invitation-card-received-1')).toBeInTheDocument();
@@ -375,29 +376,29 @@ describe('InvitationManager Component', () => {
         expect(screen.getByText('Variant: received')).toBeInTheDocument();
       });
 
-      expect(screen.getByText(/You have 1 pending invitation/)).toBeInTheDocument();
+      expect(screen.getByText('manager.pendingInvitationsInfo')).toBeInTheDocument();
     });
 
     it('should display active shares section correctly', async () => {
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByText('John Wilson')).toBeInTheDocument();
         // CSS capitalize is applied but DOM text is lowercase
         expect(screen.getByText('father • Born 1960')).toBeInTheDocument();
-        expect(screen.getByText(/Shared by.*Dr\. Smith/)).toBeInTheDocument();
+        expect(screen.getByText('manager.sharedBy')).toBeInTheDocument();
         expect(screen.getByText('view')).toBeInTheDocument();
         expect(screen.getByText('"Shared for consultation"')).toBeInTheDocument();
-        expect(screen.getByText('2 condition(s)')).toBeInTheDocument();
+        expect(screen.getByText('manager.conditionsCount')).toBeInTheDocument();
       });
     });
 
     it('should handle accepting a pending invitation with detailed response', async () => {
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByTestId('accept-received-1')).toBeInTheDocument();
@@ -415,7 +416,7 @@ describe('InvitationManager Component', () => {
     it('should handle rejecting a pending invitation directly', async () => {
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByTestId('reject-received-1')).toBeInTheDocument();
@@ -437,13 +438,13 @@ describe('InvitationManager Component', () => {
     it('should handle revoking access to shared family history', async () => {
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove Access')).toBeInTheDocument();
+        expect(screen.getByText('manager.removeAccess')).toBeInTheDocument();
       });
 
-      await userEvent.click(screen.getByText('Remove Access'));
+      await userEvent.click(screen.getByText('manager.removeAccess'));
 
       await waitFor(() => {
         expect(familyHistoryApi.removeMyAccess).toHaveBeenCalledWith('member-1');
@@ -462,11 +463,11 @@ describe('InvitationManager Component', () => {
       
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
-        expect(screen.getByText('No Shared Records')).toBeInTheDocument();
-        expect(screen.getByText('No medical records or family history has been shared with you yet.')).toBeInTheDocument();
+        expect(screen.getByText('manager.noSharedTitle')).toBeInTheDocument();
+        expect(screen.getByText('manager.noSharedDescription')).toBeInTheDocument();
       });
     });
   });
@@ -475,7 +476,7 @@ describe('InvitationManager Component', () => {
     it('should open response modal when accepting invitation with detailed response', async () => {
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByTestId('accept-received-1')).toBeInTheDocument();
@@ -491,7 +492,7 @@ describe('InvitationManager Component', () => {
     it('should close response modal and refresh data on success', async () => {
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
       await userEvent.click(screen.getByTestId('accept-received-1'));
 
       await waitFor(() => {
@@ -529,7 +530,7 @@ describe('InvitationManager Component', () => {
       
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByTestId('reject-received-1')).toBeInTheDocument();
@@ -552,13 +553,13 @@ describe('InvitationManager Component', () => {
       
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove Access')).toBeInTheDocument();
+        expect(screen.getByText('manager.removeAccess')).toBeInTheDocument();
       });
 
-      await userEvent.click(screen.getByText('Remove Access'));
+      await userEvent.click(screen.getByText('manager.removeAccess'));
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith({
@@ -581,7 +582,7 @@ describe('InvitationManager Component', () => {
       });
 
       // Click refresh button
-      await userEvent.click(screen.getByText('Refresh'));
+      await userEvent.click(screen.getByText('shared:labels.retry'));
 
       await waitFor(() => {
         expect(invitationApi.getPendingInvitations).toHaveBeenCalledTimes(2);
@@ -594,7 +595,7 @@ describe('InvitationManager Component', () => {
       const mockOnClose = vi.fn();
       renderInvitationManager({ onClose: mockOnClose });
 
-      await userEvent.click(screen.getByText('Close'));
+      await userEvent.click(screen.getByText('shared:labels.close'));
 
       expect(mockOnClose).toHaveBeenCalled();
     });
@@ -618,7 +619,7 @@ describe('InvitationManager Component', () => {
       renderInvitationManager();
 
       await waitFor(() => {
-        expect(screen.getByText(/2 sent.*1 pending.*1 active shares/)).toBeInTheDocument();
+        expect(screen.getByText('manager.summaryText')).toBeInTheDocument();
       });
     });
 
@@ -626,7 +627,7 @@ describe('InvitationManager Component', () => {
       renderInvitationManager();
 
       // Switch to shared tab
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByTestId('reject-received-1')).toBeInTheDocument();
@@ -637,7 +638,7 @@ describe('InvitationManager Component', () => {
 
       // Should remain on shared tab after operation
       await waitFor(() => {
-        expect(screen.getByText(/Pending Invitations/)).toBeInTheDocument();
+        expect(screen.getByText('manager.pendingInvitationsCount')).toBeInTheDocument();
       });
     });
   });
@@ -688,7 +689,7 @@ describe('InvitationManager Component', () => {
       
       renderInvitationManager();
 
-      await userEvent.click(screen.getByText('Shared with Me'));
+      await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         // Should only show pending invitations

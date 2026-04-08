@@ -67,7 +67,7 @@ describe('MantineImmunizationForm', () => {
       expect(screen.getAllByText('Add New Immunization').length).toBeGreaterThanOrEqual(1);
       expect(screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)).toBeInTheDocument();
       // Date field from mock
-      expect(screen.getByLabelText(/medical:immunizations\.dateAdministered\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.dateAdministered/)).toBeInTheDocument();
     });
 
     test('does not render when closed', () => {
@@ -81,7 +81,7 @@ describe('MantineImmunizationForm', () => {
 
       // Required fields
       expect(screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:immunizations\.dateAdministered\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.dateAdministered/)).toBeInTheDocument();
 
       // Optional fields
       expect(screen.getByLabelText(/medical:immunizations\.doseNumber\.label/)).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('MantineImmunizationForm', () => {
       // Expiration date from mock
       expect(screen.getByLabelText(/medical:immunizations\.expirationDate\.label/)).toBeInTheDocument();
       // Notes
-      expect(screen.getByLabelText(/medical:immunizations\.notes\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
     });
 
     test('shows edit mode title and button when editing', () => {
@@ -128,7 +128,7 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Date mock testid: date-{label.toLowerCase().replace(/\s+/g, '-')}
-      const dateInput = screen.getByTestId('date-medical:immunizations.dateadministered.label');
+      const dateInput = screen.getByTestId('date-shared:fields.dateadministered');
       fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
       // Date value may shift by timezone due to mock's new Date() UTC parsing
@@ -196,7 +196,7 @@ describe('MantineImmunizationForm', () => {
     test('handles notes textarea changes', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const notesTextarea = screen.getByLabelText(/medical:immunizations\.notes\.label/);
+      const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
       fireEvent.change(notesTextarea, { target: { value: 'Patient tolerated vaccine well' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -216,7 +216,7 @@ describe('MantineImmunizationForm', () => {
     test('calls onClose when cancel button is clicked', async () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
       await userEvent.click(cancelButton);
 
       expect(defaultProps.onClose).toHaveBeenCalled();
@@ -271,7 +271,7 @@ describe('MantineImmunizationForm', () => {
 
       render(<MantineImmunizationForm {...propsWithDates} />);
 
-      const adminDateInput = screen.getByTestId('date-medical:immunizations.dateadministered.label');
+      const adminDateInput = screen.getByTestId('date-shared:fields.dateadministered');
       const expDateInput = screen.getByTestId('date-medical:immunizations.expirationdate.label');
 
       expect(adminDateInput).toHaveValue('2024-01-15');
@@ -290,8 +290,8 @@ describe('MantineImmunizationForm', () => {
       expect(screen.getByText('immunizations.routeOptions.intramuscular')).toBeInTheDocument();
       expect(screen.getByText('immunizations.routeOptions.subcutaneous')).toBeInTheDocument();
       expect(screen.getByText('immunizations.routeOptions.intradermal')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.routeOptions.oral')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.routeOptions.nasal')).toBeInTheDocument();
+      expect(screen.getByText('shared:fields.oral')).toBeInTheDocument();
+      expect(screen.getByText('shared:fields.nasal')).toBeInTheDocument();
     });
 
     test('displays correct injection site options', async () => {
@@ -329,7 +329,7 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Date field from mock
-      const dateInput = screen.getByTestId('date-medical:immunizations.dateadministered.label');
+      const dateInput = screen.getByTestId('date-shared:fields.dateadministered');
       expect(dateInput).toBeInTheDocument();
     });
 
@@ -470,7 +470,7 @@ describe('MantineImmunizationForm', () => {
 
       // Check required fields exist
       expect(screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:immunizations\.dateAdministered\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.dateAdministered/)).toBeInTheDocument();
 
       // Check optional fields exist
       expect(screen.getByLabelText(/medical:immunizations\.doseNumber\.label/)).toBeInTheDocument();
@@ -489,7 +489,7 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       const submitButton = document.querySelector('button[type="submit"]');
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
 
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).toHaveAttribute('type', 'submit');
@@ -505,7 +505,7 @@ describe('MantineImmunizationForm', () => {
       const vaccineInput = screen.getByLabelText(/medical:immunizations\.vaccineName\.label/);
       fireEvent.change(vaccineInput, { target: { value: 'Tetanus-Diphtheria-Pertussis (Tdap)' } });
 
-      const dateInput = screen.getByTestId('date-medical:immunizations.dateadministered.label');
+      const dateInput = screen.getByTestId('date-shared:fields.dateadministered');
       fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
       const doseInput = screen.getByLabelText(/medical:immunizations\.doseNumber\.label/);

@@ -82,20 +82,20 @@ describe('MantineConditionForm', () => {
       expect(screen.getByLabelText(/medical:conditions\.diagnosis\.label/)).toBeInTheDocument();
 
       // Select fields
-      expect(screen.getAllByLabelText(/common:labels\.status/).length).toBeGreaterThan(0);
-      expect(screen.getAllByLabelText(/common:labels\.severity/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.severity/).length).toBeGreaterThan(0);
 
       // Date fields
-      expect(screen.getByLabelText(/common:labels\.onsetDate/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/common:labels\.endDate/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.onsetDate/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:labels\.endDate/)).toBeInTheDocument();
 
       // Medical coding fields
-      expect(screen.getByLabelText(/medical:conditions\.icd10Code\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:conditions\.snomedCode\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:conditions\.codeDescription\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.icd10Code/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.snomedCode/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.codeDescription/)).toBeInTheDocument();
 
       // Notes
-      expect(screen.getByLabelText(/common:labels\.notes/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
     });
 
     test('shows edit mode title and button when editing', () => {
@@ -127,7 +127,7 @@ describe('MantineConditionForm', () => {
     test('handles status select changes', async () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const statusInput = getSelectInput(/common:labels\.status/);
+      const statusInput = getSelectInput(/shared:fields\.status/);
       await userEvent.click(statusInput);
 
       const activeOption = await screen.findByText('Active - Currently being treated');
@@ -141,7 +141,7 @@ describe('MantineConditionForm', () => {
     test('handles severity select changes', async () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const severityInput = getSelectInput(/common:labels\.severity/);
+      const severityInput = getSelectInput(/shared:fields\.severity/);
       await userEvent.click(severityInput);
 
       const moderateOption = await screen.findByText('Moderate - Noticeable impact');
@@ -155,11 +155,11 @@ describe('MantineConditionForm', () => {
     test('handles medical code inputs', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const icd10Input = screen.getByLabelText(/medical:conditions\.icd10Code\.label/);
+      const icd10Input = screen.getByLabelText(/shared:fields\.icd10Code/);
       fireEvent.change(icd10Input, { target: { value: 'I10' } });
       expect(defaultProps.onInputChange).toHaveBeenCalled();
 
-      const snomedInput = screen.getByLabelText(/medical:conditions\.snomedCode\.label/);
+      const snomedInput = screen.getByLabelText(/shared:fields\.snomedCode/);
       fireEvent.change(snomedInput, { target: { value: '38341003' } });
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -167,7 +167,7 @@ describe('MantineConditionForm', () => {
     test('handles date input changes', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const onsetDateInput = screen.getByTestId('date-common:labels.onsetdate');
+      const onsetDateInput = screen.getByTestId('date-shared:fields.onsetdate');
       fireEvent.change(onsetDateInput, { target: { value: '2024-01-15' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith(
@@ -180,7 +180,7 @@ describe('MantineConditionForm', () => {
     test('handles notes textarea changes', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const notesTextarea = screen.getByLabelText(/common:labels\.notes/);
+      const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
       fireEvent.change(notesTextarea, { target: { value: 'Patient shows mild symptoms' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -200,7 +200,7 @@ describe('MantineConditionForm', () => {
     test('calls onClose when cancel button is clicked', async () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
       await userEvent.click(cancelButton);
 
       expect(defaultProps.onClose).toHaveBeenCalled();
@@ -256,8 +256,8 @@ describe('MantineConditionForm', () => {
 
       render(<MantineConditionForm {...propsWithDate} />);
 
-      const onsetDateInput = screen.getByTestId('date-common:labels.onsetdate');
-      const endDateInput = screen.getByTestId('date-common:labels.enddate');
+      const onsetDateInput = screen.getByTestId('date-shared:fields.onsetdate');
+      const endDateInput = screen.getByTestId('date-shared:labels.enddate');
 
       expect(onsetDateInput).toHaveValue('2024-01-15');
       expect(endDateInput).toHaveValue('2024-02-15');
@@ -268,7 +268,7 @@ describe('MantineConditionForm', () => {
     test('displays correct status options', async () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const statusInput = getSelectInput(/common:labels\.status/);
+      const statusInput = getSelectInput(/shared:fields\.status/);
       await userEvent.click(statusInput);
 
       expect(screen.getByText('Active - Currently being treated')).toBeInTheDocument();
@@ -281,7 +281,7 @@ describe('MantineConditionForm', () => {
     test('displays correct severity options', async () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const severityInput = getSelectInput(/common:labels\.severity/);
+      const severityInput = getSelectInput(/shared:fields\.severity/);
       await userEvent.click(severityInput);
 
       expect(screen.getByText('Mild - Minor impact')).toBeInTheDocument();
@@ -295,7 +295,7 @@ describe('MantineConditionForm', () => {
     test('accepts valid ICD-10 codes', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const icd10Input = screen.getByLabelText(/medical:conditions\.icd10Code\.label/);
+      const icd10Input = screen.getByLabelText(/shared:fields\.icd10Code/);
       fireEvent.change(icd10Input, { target: { value: 'I10' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -304,7 +304,7 @@ describe('MantineConditionForm', () => {
     test('accepts valid SNOMED codes', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const snomedInput = screen.getByLabelText(/medical:conditions\.snomedCode\.label/);
+      const snomedInput = screen.getByLabelText(/shared:fields\.snomedCode/);
       fireEvent.change(snomedInput, { target: { value: '38341003' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -313,7 +313,7 @@ describe('MantineConditionForm', () => {
     test('links code description with codes', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const codeDescriptionInput = screen.getByLabelText(/medical:conditions\.codeDescription\.label/);
+      const codeDescriptionInput = screen.getByLabelText(/shared:fields\.codeDescription/);
       fireEvent.change(codeDescriptionInput, { target: { value: 'Essential hypertension' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -351,8 +351,8 @@ describe('MantineConditionForm', () => {
       expect(screen.getByLabelText(/medical:conditions\.diagnosis\.label/)).toBeInTheDocument();
 
       // Check optional select fields exist
-      expect(screen.getAllByLabelText(/common:labels\.status/).length).toBeGreaterThan(0);
-      expect(screen.getAllByLabelText(/common:labels\.severity/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.severity/).length).toBeGreaterThan(0);
     });
 
     test('has proper descriptions for medical fields', () => {
@@ -367,7 +367,7 @@ describe('MantineConditionForm', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
       const submitButton = document.querySelector('button[type="submit"]');
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
 
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).toHaveAttribute('type', 'submit');
@@ -428,7 +428,7 @@ describe('MantineConditionForm', () => {
 
       render(<MantineConditionForm {...defaultProps} formData={resolvedConditionData} />);
 
-      const endDateInput = screen.getByTestId('date-common:labels.enddate');
+      const endDateInput = screen.getByTestId('date-shared:labels.enddate');
       expect(endDateInput).toHaveValue('2024-01-25');
     });
   });

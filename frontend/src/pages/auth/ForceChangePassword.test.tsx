@@ -64,14 +64,14 @@ describe('ForceChangePassword', () => {
     test('renders title via i18n key', () => {
       renderComponent();
       expect(
-        screen.getByText('settings.security.password.forceChange.title')
+        screen.getByText('settings:security.password.forceChange.title')
       ).toBeInTheDocument();
     });
 
     test('renders subtitle via i18n key', () => {
       renderComponent();
       expect(
-        screen.getByText('settings.security.password.forceChange.subtitle')
+        screen.getByText('settings:security.password.forceChange.subtitle')
       ).toBeInTheDocument();
     });
 
@@ -95,7 +95,7 @@ describe('ForceChangePassword', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'settings.security.password.forceChange.errors.allFieldsRequired'
+            'settings:security.password.forceChange.errors.allFieldsRequired'
           )
         ).toBeInTheDocument();
       });
@@ -108,7 +108,7 @@ describe('ForceChangePassword', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'settings.security.password.forceChange.errors.passwordsMustMatch'
+            'settings:security.password.forceChange.errors.passwordsMustMatch'
           )
         ).toBeInTheDocument();
       });
@@ -121,7 +121,7 @@ describe('ForceChangePassword', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'settings.security.password.forceChange.errors.passwordTooShort'
+            'settings:security.password.forceChange.errors.passwordTooShort'
           )
         ).toBeInTheDocument();
       });
@@ -134,7 +134,7 @@ describe('ForceChangePassword', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'settings.security.password.forceChange.errors.passwordMustDiffer'
+            'settings:security.password.forceChange.errors.passwordMustDiffer'
           )
         ).toBeInTheDocument();
       });
@@ -186,7 +186,7 @@ describe('ForceChangePassword', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'settings.security.password.forceChange.errors.changeFailed'
+            'settings:security.password.forceChange.errors.changeFailed'
           )
         ).toBeInTheDocument();
       });
@@ -214,7 +214,7 @@ describe('ForceChangePassword', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'settings.security.password.forceChange.errors.changeFailed'
+            'settings:security.password.forceChange.errors.changeFailed'
           )
         ).toBeInTheDocument();
       });

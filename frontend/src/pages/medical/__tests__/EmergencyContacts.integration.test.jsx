@@ -335,7 +335,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
       renderWithPatient(<EmergencyContacts />);
 
       // Page header uses i18n key
-      expect(screen.getByTestId('page-header')).toHaveTextContent('emergencyContacts.title');
+      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.emergency_contacts');
 
       // Check contacts are rendered via card grid
       await waitFor(() => {
@@ -377,9 +377,9 @@ describe('Emergency Contacts Page Integration Tests', () => {
       expect(screen.getByText('emergencyContacts.card.primary')).toBeInTheDocument();
 
       // Active/inactive badges use i18n keys
-      const activeBadges = screen.getAllByText('emergencyContacts.card.active');
+      const activeBadges = screen.getAllByText('shared:labels.active');
       expect(activeBadges.length).toBe(3);
-      expect(screen.getByText('emergencyContacts.card.inactive')).toBeInTheDocument();
+      expect(screen.getByText('shared:labels.inactive')).toBeInTheDocument();
     });
 
     test('displays contact information and notes', async () => {
@@ -460,7 +460,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
 
       // Find edit button for Michael Johnson's card
       const michaelWrapper = screen.getByTestId('card-wrapper-2');
-      const editButton = within(michaelWrapper).getByText('buttons.edit');
+      const editButton = within(michaelWrapper).getByText('shared:labels.edit');
       await userEvent.click(editButton);
 
       // Form should open with pre-filled data
@@ -506,7 +506,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
 
       // Edit Dr. Chen
       const drChenWrapper = screen.getByTestId('card-wrapper-3');
-      const editButton = within(drChenWrapper).getByText('buttons.edit');
+      const editButton = within(drChenWrapper).getByText('shared:labels.edit');
       await userEvent.click(editButton);
 
       // Uncheck active status
@@ -803,7 +803,7 @@ describe('Emergency Contacts Page Integration Tests', () => {
 
       renderWithPatient(<EmergencyContacts />);
 
-      expect(screen.getByTestId('page-header')).toHaveTextContent('emergencyContacts.title');
+      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.emergency_contacts');
       expect(screen.getByText('Basic Contact')).toBeInTheDocument();
     });
 

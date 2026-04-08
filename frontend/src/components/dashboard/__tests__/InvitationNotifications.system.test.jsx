@@ -120,7 +120,7 @@ describe('Family History Invitation Confirmation System Test', () => {
       expect(within(dialog).getByText('Are you sure you want to accept this invitation?')).toBeInTheDocument();
       // Title and type appear in both list and modal - use getAllByText
       expect(screen.getAllByText('Family History: Johnson Family Medical Records').length).toBeGreaterThan(0);
-      expect(within(dialog).getByText('From: Dr. Sarah Johnson')).toBeInTheDocument();
+      expect(within(dialog).getByText('invitations:card.from')).toBeInTheDocument();
       expect(within(dialog).getAllByText('Family History').length).toBeGreaterThan(0);
       expect(within(dialog).getByText('By accepting, you will gain access to view the shared medical information.')).toBeInTheDocument();
 

@@ -339,7 +339,7 @@ describe('Allergies Page Integration Tests', () => {
       renderWithPatient(<Allergies />);
 
       // Page header uses i18n key
-      expect(screen.getByTestId('page-header')).toHaveTextContent('allergies.title');
+      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.allergies');
 
       // Allergen names from data
       await waitFor(() => {
@@ -814,7 +814,7 @@ describe('Allergies Page Integration Tests', () => {
 
       renderWithPatient(<Allergies />);
 
-      expect(screen.getByTestId('page-header')).toHaveTextContent('allergies.title');
+      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.allergies');
       expect(screen.getByText('Unknown Food Allergy')).toBeInTheDocument();
     });
 

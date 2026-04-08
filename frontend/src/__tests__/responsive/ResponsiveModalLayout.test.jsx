@@ -584,7 +584,7 @@ describe('Responsive Modal and Layout Tests', () => {
         await user.click(select);
 
         await waitFor(() => {
-          expect(screen.getByText(/2 options available/i)).toBeInTheDocument();
+          expect(screen.getByText('labels.countTotal')).toBeInTheDocument();
         });
       });
     });

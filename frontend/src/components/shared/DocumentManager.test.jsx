@@ -126,7 +126,7 @@ describe('DocumentManager', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Paperless Ready')).toBeInTheDocument();
+      expect(screen.getByText('storage.connectedBadge')).toBeInTheDocument();
     });
   });
 
@@ -148,7 +148,7 @@ describe('DocumentManager', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Paperless Ready')).toBeInTheDocument();
+      expect(screen.getByText('storage.connectedBadge')).toBeInTheDocument();
     });
   });
 });

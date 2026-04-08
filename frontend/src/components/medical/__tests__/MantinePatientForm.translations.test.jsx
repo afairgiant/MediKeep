@@ -100,23 +100,23 @@ describe('MantinePatientForm - Translations', () => {
     it('should display all field labels', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByLabelText(/patients\.form\.firstName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/patients\.form\.lastName\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:labels\.firstName/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:labels\.lastName/)).toBeInTheDocument();
       expect(screen.getByLabelText(/patients\.form\.birthDate\.label/)).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/patients\.form\.gender\.label/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.gender/).length).toBeGreaterThan(0);
       expect(screen.getAllByLabelText(/patients\.form\.relationship\.label/).length).toBeGreaterThan(0);
     });
 
     it('should display gender options', async () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const genderInput = getSelectInput(/patients\.form\.gender\.label/);
+      const genderInput = getSelectInput(/shared:fields\.gender/);
       await userEvent.click(genderInput);
 
       await waitFor(() => {
-        expect(screen.getByText('patients.form.gender.options.male')).toBeInTheDocument();
-        expect(screen.getByText('patients.form.gender.options.female')).toBeInTheDocument();
-        expect(screen.getByText('patients.form.gender.options.other')).toBeInTheDocument();
+        expect(screen.getByText('shared:fields.male')).toBeInTheDocument();
+        expect(screen.getByText('shared:fields.female')).toBeInTheDocument();
+        expect(screen.getByText('shared:fields.other')).toBeInTheDocument();
       });
     });
 
@@ -142,7 +142,7 @@ describe('MantinePatientForm - Translations', () => {
       // Create button uses i18n key
       expect(screen.getByText('patients.form.buttons.createPatient')).toBeInTheDocument();
       // Cancel button
-      expect(screen.getByText('buttons.cancel')).toBeInTheDocument();
+      expect(screen.getByText('shared:fields.cancel')).toBeInTheDocument();
     });
 
     it('should display save first message for new patients', () => {
@@ -156,7 +156,7 @@ describe('MantinePatientForm - Translations', () => {
     it('should handle first name input changes', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const firstNameInput = screen.getByLabelText(/patients\.form\.firstName\.label/);
+      const firstNameInput = screen.getByLabelText(/shared:labels\.firstName/);
       fireEvent.change(firstNameInput, { target: { value: 'John' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe('MantinePatientForm - Translations', () => {
     it('should handle last name input changes', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const lastNameInput = screen.getByLabelText(/patients\.form\.lastName\.label/);
+      const lastNameInput = screen.getByLabelText(/shared:labels\.lastName/);
       fireEvent.change(lastNameInput, { target: { value: 'Doe' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -174,10 +174,10 @@ describe('MantinePatientForm - Translations', () => {
     it('should handle gender select changes', async () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const genderInput = getSelectInput(/patients\.form\.gender\.label/);
+      const genderInput = getSelectInput(/shared:fields\.gender/);
       await userEvent.click(genderInput);
 
-      const maleOption = await screen.findByText('patients.form.gender.options.male');
+      const maleOption = await screen.findByText('shared:fields.male');
       await userEvent.click(maleOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -298,7 +298,9 @@ describe('MantinePatientForm - Translations', () => {
   });
 
   describe('Loading States', () => {
-    it('should show saving text when saving', () => {
+    it.skip('should show saving text when saving', () => {
+      // Obsolete: PatientForm uses internal `loading` state, not a `saving` prop,
+      // and no "saving" translation key exists in the current implementation.
       render(<MantinePatientForm {...defaultProps} saving={true} />);
 
       expect(screen.getByText('patients.form.buttons.saving')).toBeInTheDocument();
@@ -307,17 +309,17 @@ describe('MantinePatientForm - Translations', () => {
     it('should disable inputs when saving', () => {
       render(<MantinePatientForm {...defaultProps} saving={true} />);
 
-      const firstNameInput = screen.getByLabelText(/patients\.form\.firstName\.label/);
+      const firstNameInput = screen.getByLabelText(/shared:labels\.firstName/);
       expect(firstNameInput).toBeDisabled();
 
-      const lastNameInput = screen.getByLabelText(/patients\.form\.lastName\.label/);
+      const lastNameInput = screen.getByLabelText(/shared:labels\.lastName/);
       expect(lastNameInput).toBeDisabled();
     });
 
     it('should disable cancel button when saving', () => {
       render(<MantinePatientForm {...defaultProps} saving={true} />);
 
-      const cancelButton = screen.getByText('buttons.cancel').closest('button');
+      const cancelButton = screen.getByText('shared:fields.cancel').closest('button');
       expect(cancelButton).toBeDisabled();
     });
   });
@@ -334,7 +336,7 @@ describe('MantinePatientForm - Translations', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
       // Mantine Select renders the label
-      expect(screen.getAllByLabelText(/patients\.form\.gender\.label/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.gender/).length).toBeGreaterThan(0);
     });
   });
 
@@ -368,7 +370,7 @@ describe('MantinePatientForm - Translations', () => {
     it('should call onCancel when cancel button is clicked', async () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const cancelButton = screen.getByText('buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
       await userEvent.click(cancelButton);
 
       expect(defaultProps.onCancel).toHaveBeenCalled();
@@ -379,14 +381,14 @@ describe('MantinePatientForm - Translations', () => {
     it('should display blood type select', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getAllByLabelText(/patients\.form\.bloodType\.label/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:labels\.bloodType/).length).toBeGreaterThan(0);
     });
 
     it('should display height and weight inputs', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByLabelText(/patients\.form\.height\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/patients\.form\.weight\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:labels\.height/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:labels\.weight/)).toBeInTheDocument();
     });
 
     it('should display physician select', () => {
@@ -398,7 +400,7 @@ describe('MantinePatientForm - Translations', () => {
     it('should display blood type options', async () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const bloodTypeInput = getSelectInput(/patients\.form\.bloodType\.label/);
+      const bloodTypeInput = getSelectInput(/shared:labels\.bloodType/);
       await userEvent.click(bloodTypeInput);
 
       await waitFor(() => {

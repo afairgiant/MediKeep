@@ -81,7 +81,7 @@ describe('InvitationCard Component', () => {
       renderInvitationCard(baseFamilyHistoryInvitation);
 
       expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
-      expect(screen.getByText('Family History Share')).toBeInTheDocument();
+      expect(screen.getByText('response.familyHistoryShare')).toBeInTheDocument();
       expect(screen.getByText('pending')).toBeInTheDocument();
       expect(screen.getByText('From: Dr. Sarah Johnson')).toBeInTheDocument();
     });
@@ -90,7 +90,7 @@ describe('InvitationCard Component', () => {
       renderInvitationCard(patientShareInvitation);
 
       expect(screen.getByText('Patient Record Share: Alice Wilson')).toBeInTheDocument();
-      expect(screen.getByText('Patient Record Share')).toBeInTheDocument();
+      expect(screen.getByText('response.patientRecordShare')).toBeInTheDocument();
       expect(screen.getByText('accepted')).toBeInTheDocument();
     });
 
@@ -116,9 +116,8 @@ describe('InvitationCard Component', () => {
       // The date part is rendered in a separate Text element from the label
       // created_at: 2024-01-15 -> 01/15/2024 (with time)
       expect(screen.getByText(/01\/15\/2024/)).toBeInTheDocument();
-      // expires_at label and date are split across elements, check each part separately
-      expect(screen.getByText(/Expires/)).toBeInTheDocument();
-      expect(screen.getByText(/02\/15\/2099/)).toBeInTheDocument();
+      // expires_at uses translation key 'card.expiresDate' (mock returns key as-is, no interpolation since key has no {{date}})
+      expect(screen.getByText('card.expiresDate')).toBeInTheDocument();
     });
   });
 
@@ -149,9 +148,9 @@ describe('InvitationCard Component', () => {
     it('should show expired warning for expired invitations', () => {
       renderInvitationCard(expiredInvitation);
 
-      expect(screen.getByText('This invitation has expired and can no longer be responded to.')).toBeInTheDocument();
-      // The "Expired" label and date are in the same Text element
-      expect(screen.getByText(/Expired.*01\/01\/2024/)).toBeInTheDocument();
+      expect(screen.getByText('card.expiredWarning')).toBeInTheDocument();
+      // The expired date label is rendered via translation key 'card.expiredDate'
+      expect(screen.getByText('card.expiredDate')).toBeInTheDocument();
     });
 
     it('should apply opacity to expired invitations', () => {
@@ -172,29 +171,29 @@ describe('InvitationCard Component', () => {
     it('should show action buttons for pending received invitations', () => {
       renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
 
-      expect(screen.getByRole('button', { name: 'Accept' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'card.acceptInvitation' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'card.rejectInvitation' })).toBeInTheDocument();
     });
 
     it('should not show action buttons for non-pending received invitations', () => {
       const acceptedInvitation = { ...baseFamilyHistoryInvitation, status: 'accepted' };
       renderInvitationCard(acceptedInvitation, { variant: 'received' });
 
-      expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'card.acceptInvitation' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'card.rejectInvitation' })).not.toBeInTheDocument();
     });
 
     it('should not show action buttons for expired received invitations', () => {
       renderInvitationCard(expiredInvitation, { variant: 'received' });
 
-      expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'card.acceptInvitation' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'card.rejectInvitation' })).not.toBeInTheDocument();
     });
 
     it('should handle accept button click', async () => {
       renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
 
-      await userEvent.click(screen.getByRole('button', { name: 'Accept' }));
+      await userEvent.click(screen.getByRole('button', { name: 'card.acceptInvitation' }));
 
       expect(mockProps.onRespond).toHaveBeenCalledWith(baseFamilyHistoryInvitation, 'accepted');
     });
@@ -202,7 +201,7 @@ describe('InvitationCard Component', () => {
     it('should handle reject button click', async () => {
       renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
 
-      await userEvent.click(screen.getByRole('button', { name: 'Reject' }));
+      await userEvent.click(screen.getByRole('button', { name: 'card.rejectInvitation' }));
 
       expect(mockProps.onRespond).toHaveBeenCalledWith(baseFamilyHistoryInvitation, 'rejected');
     });
@@ -223,7 +222,7 @@ describe('InvitationCard Component', () => {
       await userEvent.click(menuTrigger);
 
       await waitFor(() => {
-        expect(screen.getByText('Cancel')).toBeInTheDocument();
+        expect(screen.getByText('card.cancelInvitation')).toBeInTheDocument();
       });
     });
 
@@ -235,7 +234,7 @@ describe('InvitationCard Component', () => {
       await userEvent.click(menuTrigger);
 
       await waitFor(() => {
-        expect(screen.getByText('Revoke Access')).toBeInTheDocument();
+        expect(screen.getByText('card.revokeAccess')).toBeInTheDocument();
       });
     });
 
@@ -253,10 +252,10 @@ describe('InvitationCard Component', () => {
       await userEvent.click(menuTrigger);
 
       await waitFor(() => {
-        expect(screen.getByText('Cancel')).toBeInTheDocument();
+        expect(screen.getByText('card.cancelInvitation')).toBeInTheDocument();
       });
 
-      await userEvent.click(screen.getByText('Cancel'));
+      await userEvent.click(screen.getByText('card.cancelInvitation'));
 
       expect(mockProps.onCancel).toHaveBeenCalledWith(baseFamilyHistoryInvitation);
     });
@@ -269,10 +268,10 @@ describe('InvitationCard Component', () => {
       await userEvent.click(menuTrigger);
 
       await waitFor(() => {
-        expect(screen.getByText('Revoke Access')).toBeInTheDocument();
+        expect(screen.getByText('card.revokeAccess')).toBeInTheDocument();
       });
 
-      await userEvent.click(screen.getByText('Revoke Access'));
+      await userEvent.click(screen.getByText('card.revokeAccess'));
 
       expect(mockProps.onCancel).toHaveBeenCalledWith(acceptedInvitation);
     });
@@ -282,13 +281,14 @@ describe('InvitationCard Component', () => {
     it('should display single family member context for family history invitations', () => {
       renderInvitationCard(baseFamilyHistoryInvitation);
 
-      expect(screen.getByText('Sharing: John Doe (father)')).toBeInTheDocument();
+      // Component renders t('card.sharing', { details }); mock returns key 'card.sharing' since key has no {{details}}
+      expect(screen.getByText('card.sharing')).toBeInTheDocument();
     });
 
     it('should display bulk family member context for bulk invitations', () => {
       renderInvitationCard(bulkFamilyHistoryInvitation);
 
-      expect(screen.getByText('Sharing: 3 family members')).toBeInTheDocument();
+      expect(screen.getByText('card.sharing')).toBeInTheDocument();
     });
 
     it('should handle bulk invitations with family_members array', () => {
@@ -303,13 +303,13 @@ describe('InvitationCard Component', () => {
 
       renderInvitationCard(bulkWithArray);
 
-      expect(screen.getByText('Sharing: 3 family members')).toBeInTheDocument();
+      expect(screen.getByText('card.sharing')).toBeInTheDocument();
     });
 
     it('should not display context data for non-family-history invitations', () => {
       renderInvitationCard(patientShareInvitation);
 
-      expect(screen.queryByText(/Sharing:/)).not.toBeInTheDocument();
+      expect(screen.queryByText('card.sharing')).not.toBeInTheDocument();
     });
 
     it('should not display context data when context_data is missing', () => {
@@ -318,7 +318,7 @@ describe('InvitationCard Component', () => {
 
       renderInvitationCard(invitationWithoutContext);
 
-      expect(screen.queryByText(/Sharing:/)).not.toBeInTheDocument();
+      expect(screen.queryByText('card.sharing')).not.toBeInTheDocument();
     });
   });
 
@@ -332,9 +332,9 @@ describe('InvitationCard Component', () => {
       expect(screen.getByText('pending')).toBeInTheDocument();
 
       // Should not show detailed info
-      expect(screen.queryByText('Family History Share')).not.toBeInTheDocument();
+      expect(screen.queryByText('response.familyHistoryShare')).not.toBeInTheDocument();
       expect(screen.queryByText(/Please review/)).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'card.acceptInvitation' })).not.toBeInTheDocument();
     });
 
     it('should show chevron icon when onView is provided in compact mode', () => {
@@ -394,11 +394,11 @@ describe('InvitationCard Component', () => {
     it('should display correct type labels', () => {
       // Test family history share
       renderInvitationCard(baseFamilyHistoryInvitation);
-      expect(screen.getByText('Family History Share')).toBeInTheDocument();
+      expect(screen.getByText('response.familyHistoryShare')).toBeInTheDocument();
 
       // Test patient share
       renderInvitationCard(patientShareInvitation);
-      expect(screen.getByText('Patient Record Share')).toBeInTheDocument();
+      expect(screen.getByText('response.patientRecordShare')).toBeInTheDocument();
     });
 
     it('should handle unknown invitation types gracefully', () => {
@@ -455,8 +455,8 @@ describe('InvitationCard Component', () => {
       expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
 
       // Buttons should still be present but not functional
-      expect(screen.getByRole('button', { name: 'Accept' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Reject' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'card.acceptInvitation' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'card.rejectInvitation' })).toBeInTheDocument();
     });
 
     it('should handle very long titles with truncation in compact mode', () => {
@@ -487,8 +487,8 @@ describe('InvitationCard Component', () => {
     it('should have proper button roles and labels', () => {
       renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
 
-      const acceptButton = screen.getByRole('button', { name: 'Accept' });
-      const rejectButton = screen.getByRole('button', { name: 'Reject' });
+      const acceptButton = screen.getByRole('button', { name: 'card.acceptInvitation' });
+      const rejectButton = screen.getByRole('button', { name: 'card.rejectInvitation' });
 
       expect(acceptButton).toBeInTheDocument();
       expect(rejectButton).toBeInTheDocument();
@@ -497,7 +497,7 @@ describe('InvitationCard Component', () => {
     it('should support keyboard navigation for interactive elements', async () => {
       renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
 
-      const acceptButton = screen.getByRole('button', { name: 'Accept' });
+      const acceptButton = screen.getByRole('button', { name: 'card.acceptInvitation' });
 
       acceptButton.focus();
       expect(acceptButton).toHaveFocus();
@@ -509,7 +509,7 @@ describe('InvitationCard Component', () => {
     it('should have appropriate ARIA attributes for expired invitations', () => {
       renderInvitationCard(expiredInvitation);
 
-      const expiredAlert = screen.getByText('This invitation has expired and can no longer be responded to.');
+      const expiredAlert = screen.getByText('card.expiredWarning');
       expect(expiredAlert).toBeInTheDocument();
     });
   });

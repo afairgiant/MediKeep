@@ -88,7 +88,7 @@ describe('UploadProgressErrorBoundary', () => {
 
       expect(screen.getByTestId('problematic-component')).toBeInTheDocument();
       expect(screen.getByText('Normal content')).toBeInTheDocument();
-      expect(screen.queryByText('Upload Progress Error')).not.toBeInTheDocument();
+      expect(screen.queryByText('documents:errorBoundary.uploadError')).not.toBeInTheDocument();
     });
 
     test('should render multiple children correctly', () => {
@@ -122,9 +122,9 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
-      expect(screen.getByText('Something went wrong with progress tracking. Your upload may still be processing.')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadErrorDescription')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' })).toBeInTheDocument();
       expect(screen.queryByTestId('problematic-component')).not.toBeInTheDocument();
     });
 
@@ -137,7 +137,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
       expect(screen.queryByTestId('effect-component')).not.toBeInTheDocument();
     });
 
@@ -187,7 +187,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
       expect(logger.error).toHaveBeenCalledWith('upload_progress_error_boundary', 
         expect.objectContaining({
           error: 'Nested error',
@@ -211,10 +211,10 @@ describe('UploadProgressErrorBoundary', () => {
       );
 
       // Error should be displayed
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
 
       // Click Continue button
-      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      fireEvent.click(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' }));
 
       // Rerender with a working component
       rerender(
@@ -226,7 +226,7 @@ describe('UploadProgressErrorBoundary', () => {
       );
 
       // Should show normal content again
-      expect(screen.queryByText('Upload Progress Error')).not.toBeInTheDocument();
+      expect(screen.queryByText('documents:errorBoundary.uploadError')).not.toBeInTheDocument();
       expect(screen.getByTestId('problematic-component')).toBeInTheDocument();
     });
 
@@ -243,10 +243,10 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
 
       // Click Continue
-      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      fireEvent.click(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' }));
 
       // The error UI should be gone (component will try to render children again)
       // Since the problematic component will still throw, it will catch again
@@ -272,10 +272,10 @@ describe('UploadProgressErrorBoundary', () => {
       );
 
       // First error
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
 
       // Recover
-      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      fireEvent.click(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' }));
       shouldThrow = false;
       
       rerender(
@@ -306,7 +306,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
     });
 
     test.skip('should handle React errors', () => {
@@ -323,7 +323,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
     });
 
     test('should handle errors with different error objects', () => {
@@ -344,7 +344,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
     });
 
     test('should handle string errors', () => {
@@ -360,7 +360,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
     });
   });
 
@@ -377,7 +377,7 @@ describe('UploadProgressErrorBoundary', () => {
 
       // Component should render normally since async errors aren't caught
       expect(screen.getByTestId('async-component')).toBeInTheDocument();
-      expect(screen.queryByText('Upload Progress Error')).not.toBeInTheDocument();
+      expect(screen.queryByText('documents:errorBoundary.uploadError')).not.toBeInTheDocument();
     });
 
     test.skip('should NOT catch event handler errors', () => {
@@ -398,7 +398,7 @@ describe('UploadProgressErrorBoundary', () => {
       }).toThrow('Button click error');
 
       // Error boundary should not have caught this
-      expect(screen.queryByText('Upload Progress Error')).not.toBeInTheDocument();
+      expect(screen.queryByText('documents:errorBoundary.uploadError')).not.toBeInTheDocument();
     });
   });
 
@@ -416,10 +416,10 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
       
       // Error UI should remain visible
-      expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' })).toBeInTheDocument();
     });
 
     test('should handle props changes during error state', () => {
@@ -435,7 +435,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
 
       // Rerender with different props - should still show error UI
       rerender(
@@ -450,7 +450,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
     });
   });
 
@@ -469,7 +469,7 @@ describe('UploadProgressErrorBoundary', () => {
 
       const alert = screen.getByRole('alert');
       expect(alert).toBeInTheDocument();
-      expect(alert).toHaveTextContent('Upload Progress Error');
+      expect(alert).toHaveTextContent('documents:errorBoundary.uploadError');
     });
 
     test('should have accessible continue button', () => {
@@ -484,7 +484,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      const button = screen.getByRole('button', { name: 'Continue' });
+      const button = screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' });
       expect(button).toBeInTheDocument();
       expect(button).toBeEnabled();
     });
@@ -501,7 +501,7 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      const continueButton = screen.getByRole('button', { name: 'Continue' });
+      const continueButton = screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' });
       continueButton.focus();
       
       expect(document.activeElement).toBe(continueButton);
@@ -541,8 +541,8 @@ describe('UploadProgressErrorBoundary', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
-      expect(screen.getByText('Something went wrong with progress tracking. Your upload may still be processing.')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadErrorDescription')).toBeInTheDocument();
     });
 
     test('should handle multiple error boundaries', () => {
@@ -563,7 +563,7 @@ describe('UploadProgressErrorBoundary', () => {
       );
 
       // Inner error boundary should catch the error
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
     });
 
     test('should handle error in presence of other components', () => {
@@ -587,7 +587,7 @@ describe('UploadProgressErrorBoundary', () => {
       expect(screen.getByTestId('sibling-2')).toBeInTheDocument();
       
       // Error boundary should show error
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
     });
   });
 
@@ -631,11 +631,11 @@ describe('UploadProgressErrorBoundary', () => {
       );
 
       // Should show error
-      expect(screen.getByText('Upload Progress Error')).toBeInTheDocument();
+      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
 
       // Recover multiple times
       for (let i = 0; i < 3; i++) {
-        fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+        fireEvent.click(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' }));
         
         rerender(
           <MantineProvider>

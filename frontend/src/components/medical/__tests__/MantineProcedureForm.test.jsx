@@ -93,21 +93,21 @@ describe('MantineProcedureForm', () => {
       expect(screen.getByLabelText(/medical:procedures\.procedureDate\.label/)).toBeInTheDocument();
 
       // Optional fields - text
-      expect(screen.getByLabelText(/medical:procedures\.procedureCode\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:procedures\.procedureDuration\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.procedureCode/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:fields\.durationMinutes/)).toBeInTheDocument();
       expect(screen.getByLabelText(/medical:procedures\.facility\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:procedures\.description\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:procedures\.notes\.label/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:labels\.description/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
 
       // Optional fields - selects
-      expect(screen.getAllByLabelText(/medical:procedures\.procedureType\.label/).length).toBeGreaterThan(0);
-      expect(screen.getAllByLabelText(/common:labels\.status/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.procedureType/).length).toBeGreaterThan(0);
+      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
     });
 
     test('renders practitioner options correctly', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const practitionerInputs = screen.getAllByLabelText(/medical:procedures\.practitioner\.label/);
+      const practitionerInputs = screen.getAllByLabelText(/shared:fields\.performingPractitioner/);
       expect(practitionerInputs.length).toBeGreaterThan(0);
     });
 
@@ -140,7 +140,7 @@ describe('MantineProcedureForm', () => {
     test('handles select changes for procedure type', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const procedureTypeInput = getSelectInput(/medical:procedures\.procedureType\.label/);
+      const procedureTypeInput = getSelectInput(/shared:fields\.procedureType/);
       await userEvent.click(procedureTypeInput);
 
       // Options use labelKey so i18n keys are shown
@@ -155,7 +155,7 @@ describe('MantineProcedureForm', () => {
     test('handles status select changes', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const statusInput = getSelectInput(/common:labels\.status/);
+      const statusInput = getSelectInput(/shared:fields\.status/);
       await userEvent.click(statusInput);
 
       // Status options use plain labels (from component, not field config)
@@ -184,7 +184,7 @@ describe('MantineProcedureForm', () => {
     test('handles duration input validation', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const durationInput = screen.getByLabelText(/medical:procedures\.procedureDuration\.label/);
+      const durationInput = screen.getByLabelText(/shared:fields\.durationMinutes/);
       fireEvent.change(durationInput, { target: { value: '90' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -193,12 +193,12 @@ describe('MantineProcedureForm', () => {
     test('handles textarea inputs for description and notes', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const descriptionTextarea = screen.getByLabelText(/medical:procedures\.description\.label/);
+      const descriptionTextarea = screen.getByLabelText(/shared:labels\.description/);
       fireEvent.change(descriptionTextarea, { target: { value: 'Surgical removal of appendix' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
 
-      const notesTextarea = screen.getByLabelText(/medical:procedures\.notes\.label/);
+      const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
       fireEvent.change(notesTextarea, { target: { value: 'Patient recovery was smooth' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -207,7 +207,7 @@ describe('MantineProcedureForm', () => {
     test('handles anesthesia type selection', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const anesthesiaInput = getSelectInput(/medical:procedures\.anesthesiaType\.label/);
+      const anesthesiaInput = getSelectInput(/shared:fields\.anesthesiaType/);
       await userEvent.click(anesthesiaInput);
 
       // Options use labelKey so i18n keys are shown
@@ -242,7 +242,7 @@ describe('MantineProcedureForm', () => {
     test('calls onClose when cancel button is clicked', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
       await userEvent.click(cancelButton);
 
       expect(defaultProps.onClose).toHaveBeenCalled();
@@ -303,7 +303,7 @@ describe('MantineProcedureForm', () => {
     test('displays correct procedure type options', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const procedureTypeInput = getSelectInput(/medical:procedures\.procedureType\.label/);
+      const procedureTypeInput = getSelectInput(/shared:fields\.procedureType/);
       await userEvent.click(procedureTypeInput);
 
       // Options use labelKey - shows i18n keys
@@ -317,7 +317,7 @@ describe('MantineProcedureForm', () => {
     test('displays correct status options', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const statusInput = getSelectInput(/common:labels\.status/);
+      const statusInput = getSelectInput(/shared:fields\.status/);
       await userEvent.click(statusInput);
 
       // Status options have plain labels from component
@@ -344,7 +344,7 @@ describe('MantineProcedureForm', () => {
     test('displays correct anesthesia type options', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const anesthesiaInput = getSelectInput(/medical:procedures\.anesthesiaType\.label/);
+      const anesthesiaInput = getSelectInput(/shared:fields\.anesthesiaType/);
       await userEvent.click(anesthesiaInput);
 
       // Options use labelKey - shows i18n keys
@@ -365,7 +365,7 @@ describe('MantineProcedureForm', () => {
 
       render(<MantineProcedureForm {...propsWithNoPractitioners} />);
 
-      const practitionerInputs = screen.getAllByLabelText(/medical:procedures\.practitioner\.label/);
+      const practitionerInputs = screen.getAllByLabelText(/shared:fields\.performingPractitioner/);
       expect(practitionerInputs.length).toBeGreaterThan(0);
     });
 
@@ -402,7 +402,7 @@ describe('MantineProcedureForm', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
       const submitButton = document.querySelector('button[type="submit"]');
-      const cancelButton = screen.getByText('common:buttons.cancel');
+      const cancelButton = screen.getByText('shared:fields.cancel');
 
       expect(submitButton).toBeInTheDocument();
       expect(submitButton).toHaveAttribute('type', 'submit');
