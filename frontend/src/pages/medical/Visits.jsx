@@ -379,16 +379,17 @@ const Visits = () => {
         }
       }
 
-      // Complete form submission
-      completeFormSubmission(success, resultId);
+      // Link pending lab results for new visits before completing submission,
+      // so the form stays in a blocking state until linking finishes.
+      if (success && resultId && !editingVisit) {
+        const labResultIds = (formData.pending_lab_result_ids || [])
+          .map(id => parseInt(id, 10))
+          .filter(id => Number.isInteger(id) && id > 0);
 
-      if (success && resultId) {
-        // Link pending lab results for new visits
-        const pendingLabResults = formData.pending_lab_result_ids || [];
-        if (!editingVisit && pendingLabResults.length > 0) {
+        if (labResultIds.length > 0) {
           try {
             await apiService.linkEncounterLabResultsBulk(resultId, {
-              lab_result_ids: pendingLabResults.map(id => parseInt(id)),
+              lab_result_ids: labResultIds,
               purpose: null,
               relevance_note: null,
             });
@@ -406,7 +407,12 @@ const Visits = () => {
             });
           }
         }
+      }
 
+      // Complete form submission
+      completeFormSubmission(success, resultId);
+
+      if (success && resultId) {
         // Check if we have files to upload
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
         
