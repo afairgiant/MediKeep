@@ -47,7 +47,7 @@ pytest-html==4.2.0
 python-dateutil>=2.8.2
 python-dotenv==1.2.2
 python-jose==3.5.0
-python-json-logger==2.0.7
+python-json-logger==4.1.0
 python-multipart==0.0.22
 tzdata>=2024.1
 PyYAML==6.0.3
