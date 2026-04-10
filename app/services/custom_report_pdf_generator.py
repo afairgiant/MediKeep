@@ -37,6 +37,10 @@ class CustomReportPDFGenerator:
     # Constants for photo handling
     PATIENT_PHOTO_PATTERN = "patient_{patient_id}_*.jpg"
 
+    # CJK languages that require dedicated CJK fonts for PDF rendering.
+    # Latin-based fonts (DejaVu, Arial) lack glyphs for these scripts.
+    CJK_LANGUAGES = frozenset({"zh", "ja", "ko"})
+
     def __init__(self):
         self._register_fonts()
         self.styles = self._create_styles()
@@ -59,7 +63,7 @@ class CustomReportPDFGenerator:
             if Path(font_path).exists():
                 try:
                     pdfmetrics.registerFont(TTFont(font_name, font_path))
-                    logger.info(f"Registered Unicode font '{font_name}': {font_path}")
+                    logger.info(f"Registered font '{font_name}': {font_path}")
                     return True
                 except Exception as e:
                     logger.debug(f"Failed to register font from {font_path}: {e}")
@@ -70,22 +74,24 @@ class CustomReportPDFGenerator:
         """
         Register Unicode-compatible fonts for international character support.
 
-        This method attempts to find and register fonts that support international
-        characters including Cyrillic, Greek, and other non-Latin scripts.
+        Registers two font families:
+        1. Latin/Cyrillic fonts (UnicodeFont / UnicodeFont-Bold) for most languages
+        2. CJK fonts (CJKFont / CJKFont-Bold) for Chinese, Japanese, and Korean
 
-        Font Selection Priority:
-            1. DejaVu Sans - Best Unicode coverage, supports most international scripts
-            2. Arial - Common on Windows systems, supports Cyrillic and basic Unicode
+        Latin Font Priority:
+            1. DejaVu Sans - Best Unicode coverage for Latin/Cyrillic/Greek
+            2. Arial - Common on Windows, supports Cyrillic and basic Unicode
             3. Helvetica - Fallback, limited to Latin characters only
 
-        Fallback Behavior:
-            If no Unicode font is found, the system falls back to Helvetica (standard PDF font)
-            which only supports Latin characters. A warning is logged when this occurs.
+        CJK Font Priority:
+            1. Microsoft YaHei - Ships with modern Windows
+            2. Noto Sans CJK SC - Common on Linux
+            3. PingFang SC - Ships with macOS
 
         The method searches common font directories across Windows, Linux, and macOS.
         """
         try:
-            # Font paths for normal weight, prioritized by Unicode coverage
+            # --- Latin/Cyrillic fonts ---
             font_paths = [
                 # DejaVu Sans (best Unicode support)
                 'C:/Windows/Fonts/DejaVuSans.ttf',  # Windows
@@ -101,7 +107,6 @@ class CustomReportPDFGenerator:
                 '/System/Library/Fonts/Supplemental/Arial.ttf',
             ]
 
-            # Font paths for bold weight
             bold_paths = [
                 # DejaVu Sans Bold
                 'C:/Windows/Fonts/DejaVuSans-Bold.ttf',
@@ -117,7 +122,6 @@ class CustomReportPDFGenerator:
                 '/System/Library/Fonts/Supplemental/Arial Bold.ttf',
             ]
 
-            # Try to register normal and bold fonts
             font_registered = self._try_register_font('UnicodeFont', font_paths)
             bold_registered = self._try_register_font('UnicodeFont-Bold', bold_paths)
 
@@ -131,14 +135,55 @@ class CustomReportPDFGenerator:
             self.font_normal = 'UnicodeFont' if font_registered else 'Helvetica'
             self.font_bold = 'UnicodeFont-Bold' if bold_registered else 'Helvetica-Bold'
 
+            # --- CJK fonts (Chinese, Japanese, Korean) ---
+            cjk_normal_paths = [
+                # Microsoft YaHei (Windows - ships with all modern versions)
+                'C:/Windows/Fonts/msyh.ttc',
+                # Noto Sans CJK SC (Linux)
+                '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+                '/usr/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf',
+                '/usr/share/fonts/google-noto-cjk/NotoSansCJK-Regular.ttc',
+                # PingFang SC (macOS)
+                '/System/Library/Fonts/PingFang.ttc',
+                '/Library/Fonts/PingFang.ttc',
+            ]
+            cjk_bold_paths = [
+                'C:/Windows/Fonts/msyhbd.ttc',
+                '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
+                '/usr/share/fonts/noto-cjk/NotoSansCJKsc-Bold.otf',
+                '/usr/share/fonts/google-noto-cjk/NotoSansCJK-Bold.ttc',
+                '/System/Library/Fonts/PingFang.ttc',
+                '/Library/Fonts/PingFang.ttc',
+            ]
+
+            cjk_registered = self._try_register_font('CJKFont', cjk_normal_paths)
+            cjk_bold_registered = self._try_register_font('CJKFont-Bold', cjk_bold_paths)
+
+            # Store CJK font names (fall back to Latin fonts if unavailable)
+            self.font_cjk_normal = 'CJKFont' if cjk_registered else self.font_normal
+            self.font_cjk_bold = 'CJKFont-Bold' if cjk_bold_registered else self.font_bold
+
+            if not cjk_registered:
+                logger.warning(
+                    "No CJK font found (Microsoft YaHei, Noto Sans CJK, or PingFang). "
+                    "Chinese/Japanese/Korean characters in PDF reports will not render correctly."
+                )
+
         except Exception as e:
             logger.error(f"Error registering fonts: {e}")
-            # Fallback to standard fonts
             self.font_normal = 'Helvetica'
             self.font_bold = 'Helvetica-Bold'
+            self.font_cjk_normal = 'Helvetica'
+            self.font_cjk_bold = 'Helvetica-Bold'
 
-    def _create_styles(self) -> Dict[str, ParagraphStyle]:
-        """Create medical-grade styles for the PDF"""
+    def _create_styles(
+        self,
+        font_normal: Optional[str] = None,
+        font_bold: Optional[str] = None,
+    ) -> Dict[str, ParagraphStyle]:
+        """Create paragraph styles for the PDF using the given fonts."""
+        font_normal = font_normal or self.font_normal
+        font_bold = font_bold or self.font_bold
         styles = getSampleStyleSheet()
 
         # Medical document colors (from UI/UX recommendations)
@@ -157,7 +202,7 @@ class CustomReportPDFGenerator:
             textColor=dark_text,
             spaceAfter=20,
             alignment=TA_CENTER,
-            fontName=self.font_bold
+            fontName=font_bold
         ))
 
         # Patient header style
@@ -167,7 +212,7 @@ class CustomReportPDFGenerator:
             fontSize=16,
             textColor=dark_text,
             spaceAfter=10,
-            fontName=self.font_bold,
+            fontName=font_bold,
             alignment=TA_LEFT
         ))
 
@@ -177,7 +222,7 @@ class CustomReportPDFGenerator:
             parent=styles['BodyText'],
             fontSize=12,
             textColor=colors.white,
-            fontName=self.font_bold,
+            fontName=font_bold,
             alignment=TA_LEFT,
             leftIndent=10,
             rightIndent=10,
@@ -193,7 +238,7 @@ class CustomReportPDFGenerator:
             textColor=info_blue,
             spaceAfter=8,
             spaceBefore=16,
-            fontName=self.font_bold,
+            fontName=font_bold,
             leftIndent=0
         ))
 
@@ -205,7 +250,7 @@ class CustomReportPDFGenerator:
             textColor=dark_text,
             spaceAfter=4,
             spaceBefore=8,
-            fontName=self.font_bold
+            fontName=font_bold
         ))
 
         # Body text style
@@ -215,7 +260,7 @@ class CustomReportPDFGenerator:
             fontSize=10,
             leading=12,
             textColor=dark_text,
-            fontName=self.font_normal
+            fontName=font_normal
         ))
 
         # Critical info style
@@ -224,7 +269,7 @@ class CustomReportPDFGenerator:
             parent=styles['BodyText'],
             fontSize=10,
             textColor=critical_red,
-            fontName=self.font_bold
+            fontName=font_bold
         ))
 
         # Warning style
@@ -233,7 +278,7 @@ class CustomReportPDFGenerator:
             parent=styles['BodyText'],
             fontSize=10,
             textColor=warning_orange,
-            fontName=self.font_bold
+            fontName=font_bold
         ))
 
         # Info text style (for metadata)
@@ -243,7 +288,7 @@ class CustomReportPDFGenerator:
             fontSize=9,
             textColor=neutral_gray,
             alignment=TA_RIGHT,
-            fontName=self.font_normal
+            fontName=font_normal
         ))
 
         # Small text for references
@@ -252,7 +297,7 @@ class CustomReportPDFGenerator:
             parent=styles['BodyText'],
             fontSize=8,
             textColor=neutral_gray,
-            fontName=self.font_normal
+            fontName=font_normal
         ))
 
         return styles
@@ -286,6 +331,12 @@ class CustomReportPDFGenerator:
         date_format = report_data.get('date_format', 'mdy')
         self.unit_system = report_data.get('unit_system', 'imperial')
         self.translator = get_translator(language, date_format)
+
+        # Use CJK fonts for Chinese/Japanese/Korean reports
+        if language in self.CJK_LANGUAGES:
+            self.styles = self._create_styles(
+                font_normal=self.font_cjk_normal, font_bold=self.font_cjk_bold
+            )
 
         # Create document
         doc = SimpleDocTemplate(
@@ -376,11 +427,11 @@ class CustomReportPDFGenerator:
         
         # Build PDF
         doc.build(story)
-        
+
         # Get PDF bytes
         pdf_bytes = output_buffer.getvalue()
         output_buffer.close()
-        
+
         logger.info(f"Generated PDF report: {len(pdf_bytes)} bytes")
         return pdf_bytes
     

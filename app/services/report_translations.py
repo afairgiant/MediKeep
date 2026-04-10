@@ -24,7 +24,7 @@ from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 
-SUPPORTED_LANGUAGES = ("en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl")
+SUPPORTED_LANGUAGES = ("en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl", "zh")
 
 
 def _resolve_locales_dir() -> Path:

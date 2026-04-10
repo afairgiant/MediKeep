@@ -1,5 +1,5 @@
 module.exports = {
-  locales: ['en', 'de', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'sv'],
+  locales: ['en', 'de', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'sv', 'zh'],
 
   input: ['src/**/*.{js,jsx,ts,tsx}'],
   output: 'public/locales/$LOCALE/$NAMESPACE.json',

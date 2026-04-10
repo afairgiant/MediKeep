@@ -1,0 +1,414 @@
+{
+  "channels": {
+    "add": "添加通道",
+    "configTitle": "{{type}}配置",
+    "confirmDelete": "确定要删除此通道吗？",
+    "createError": "创建通道失败",
+    "createFailed": "创建通道失败",
+    "createSuccess": "通道创建成功",
+    "delete": "删除通道",
+    "deleteConfirm": "确定要删除此通道吗？",
+    "deleteError": "删除通道失败",
+    "deleteFailed": "删除通道失败",
+    "deleteSuccess": "通道删除成功",
+    "description": "添加和管理您的通知推送通道",
+    "discord": {
+      "avatarUrl": {
+        "description": "通知机器人的自定义头像",
+        "label": "头像URL（可选）",
+        "placeholder": "https://example.com/avatar.png"
+      },
+      "username": {
+        "description": "通知机器人的自定义名称",
+        "label": "机器人用户名（可选）",
+        "placeholder": "MediKeep"
+      },
+      "webhookUrl": {
+        "description": "在您的Discord服务器设置中创建webhook",
+        "label": "Webhook URL",
+        "placeholder": "https://discord.com/api/webhooks/..."
+      }
+    },
+    "edit": "编辑通道",
+    "email": {
+      "fromEmail": {
+        "description": "发送方邮箱地址",
+        "label": "发件人邮箱",
+        "placeholder": "notifications@example.com"
+      },
+      "smtpHost": {
+        "description": "您邮箱服务商的SMTP服务器",
+        "label": "SMTP服务器",
+        "placeholder": "smtp.gmail.com"
+      },
+      "smtpPassword": {
+        "description": "对于Gmail，请使用应用专用密码",
+        "label": "SMTP密码",
+        "placeholder": "应用专用密码或邮箱密码"
+      },
+      "smtpPort": {
+        "description": "通常为587（TLS）或465（SSL）",
+        "label": "SMTP端口",
+        "placeholder": "587"
+      },
+      "smtpUser": {
+        "description": "您的邮箱地址或用户名",
+        "label": "SMTP用户名",
+        "placeholder": "your-email@gmail.com"
+      },
+      "toEmail": {
+        "description": "接收通知的邮箱",
+        "label": "收件人邮箱",
+        "placeholder": "your-email@example.com"
+      },
+      "useTls": {
+        "description": "启用TLS加密（推荐）",
+        "label": "使用TLS"
+      }
+    },
+    "empty": "未配置通知通道。",
+    "emptyHint": "添加通道以开始通过Discord、邮件、Gotify或Webhook接收通知。",
+    "errors": {
+      "fieldRequired": "{{field}}为必填项",
+      "nameRequired": "通道名称为必填项"
+    },
+    "fields": {
+      "enabled": "启用此通道",
+      "name": "通道名称",
+      "namePlaceholder": "我的Discord服务器",
+      "type": "通道类型"
+    },
+    "form": {
+      "configSection": "通道配置",
+      "enabled": {
+        "description": "通过此通道接收通知",
+        "label": "启用通道"
+      },
+      "name": {
+        "description": "用于识别此通道的友好名称",
+        "label": "通道名称",
+        "placeholder": "例如：我的Discord服务器"
+      },
+      "title": "通道详情",
+      "type": {
+        "description": "发送通知的服务",
+        "label": "通道类型",
+        "placeholder": "选择通道类型"
+      }
+    },
+    "gotify": {
+      "appToken": {
+        "description": "在Gotify中创建应用程序以获取令牌",
+        "label": "应用令牌",
+        "placeholder": "来自Gotify的应用程序令牌"
+      },
+      "priority": {
+        "description": "消息优先级（1-10，默认5）",
+        "placeholder": "5"
+      },
+      "serverUrl": {
+        "description": "您的Gotify服务器URL",
+        "label": "服务器URL",
+        "placeholder": "https://gotify.example.com"
+      }
+    },
+    "lastUsed": "最后使用",
+    "loadError": "加载通道详情失败",
+    "noChannels": "未配置通知通道",
+    "noChannelsHint": "添加通道以开始接收通知",
+    "notificationsSent": "已发送{{count}}条通知",
+    "sentCount_one": "已发送{{count}}条",
+    "sentCount_other": "已发送{{count}}条",
+    "test": "测试",
+    "testError": "发送测试通知失败",
+    "testFailed": "测试通知失败",
+    "testing": "测试中...",
+    "testSuccess": "测试通知发送成功！",
+    "title": "通知通道",
+    "types": {
+      "discord": "Discord",
+      "gotify": "Gotify",
+      "webhook": "Webhook"
+    },
+    "updateError": "更新通道失败",
+    "updateFailed": "更新通道失败",
+    "updateSuccess": "通道更新成功",
+    "verified": "已验证",
+    "webhook": {
+      "authToken": {
+        "description": "Webhook的授权令牌",
+        "label": "授权令牌（可选）",
+        "placeholder": "Bearer令牌或API密钥"
+      },
+      "headers": {
+        "description": "包含自定义标头的JSON对象",
+        "label": "自定义标头（可选）",
+        "placeholder": "{\"Authorization\": \"Bearer token\"}"
+      },
+      "method": {
+        "description": "Webhook请求的HTTP方法",
+        "label": "HTTP方法"
+      },
+      "url": {
+        "description": "接收通知负载的URL",
+        "label": "Webhook URL",
+        "placeholder": "https://api.example.com/webhook"
+      }
+    }
+  },
+  "description": "配置如何接收重要事件的通知",
+  "error": "加载通知设置失败",
+  "events": {
+    "backup_completed": {
+      "description": "备份成功完成时",
+      "name": "备份完成"
+    },
+    "backup_failed": {
+      "description": "备份失败时",
+      "name": "备份失败"
+    },
+    "immunization_due": {
+      "description": "免疫接种即将到期时",
+      "name": "免疫接种到期"
+    },
+    "immunization_overdue": {
+      "description": "免疫接种已过期时",
+      "name": "免疫接种逾期"
+    },
+    "invitation_accepted": {
+      "description": "您的共享邀请被接受时",
+      "name": "邀请已接受"
+    },
+    "invitation_received": {
+      "description": "有人与您共享记录时",
+      "name": "收到邀请"
+    },
+    "lab_result_abnormal": {
+      "description": "检验结果超出正常范围时",
+      "name": "检验结果异常"
+    },
+    "lab_result_available": {
+      "description": "有新的检验结果添加时",
+      "name": "检验结果可用"
+    },
+    "login_from_new_device": {
+      "description": "从新设备访问您的账户时",
+      "name": "新设备登录"
+    },
+    "password_changed": {
+      "description": "密码更改时",
+      "name": "密码已更改"
+    },
+    "share_revoked": {
+      "description": "共享记录的访问权限被撤销时",
+      "name": "共享已撤销"
+    },
+    "test_notification": {
+      "description": "手动测试通知",
+      "name": "测试通知"
+    }
+  },
+  "history": {
+    "description": "通过您的通道发送的最近通知",
+    "fields": {
+      "channel": "通道"
+    },
+    "loading": "加载历史记录中...",
+    "noHistory": "尚未发送通知",
+    "noHistoryHint": "通知发送后将显示在此处",
+    "page": "第{{current}}页，共{{total}}页",
+    "showLess": "收起",
+    "showMore": "展开",
+    "status": {
+      "failed": "失败",
+      "sent": "已发送"
+    },
+    "title": "通知历史"
+  },
+  "loading": "加载通知设置中...",
+  "preferences": {
+    "categories": {
+      "collaboration": "共享与协作",
+      "medical": "医疗事件",
+      "other": "其他事件",
+      "security": "安全警报",
+      "sharing": "共享与邀请",
+      "system": "系统事件"
+    },
+    "comingSoon": "即将推出",
+    "description": "选择哪些事件在每个通道上触发通知",
+    "loading": "加载偏好设置中...",
+    "noChannels": "请先添加通知通道以配置事件偏好",
+    "saveFailed": "保存偏好设置失败",
+    "saveSuccess": "偏好设置已保存",
+    "title": "事件通知",
+    "updateError": "更新偏好设置失败"
+  },
+  "title": "通知设置",
+  "toasts": {
+    "auth": {
+      "accessDeniedAdmin": "访问被拒绝：需要管理员权限",
+      "accessDeniedRole": "访问被拒绝：需要{{role}}角色",
+      "accessDeniedRoles": "访问被拒绝：需要以下角色之一：{{roles}}",
+      "accountCreatedSuccess": "账户创建成功！正在为您登录...",
+      "loginFailed": "登录失败",
+      "loginRequired": "请登录以访问此页面",
+      "loginSuccess": "登录成功！",
+      "logoutSuccess": "退出登录成功",
+      "sessionExpired": "会话因不活跃而过期",
+      "sessionExpiredLogin": "会话已过期。请重新登录。",
+      "ssoFailed": "启动SSO登录失败",
+      "userCreatedSuccess": "用户账户创建成功！",
+      "userCreatedWithLinkSuccess": "用户已创建并成功关联到现有患者！"
+    },
+    "documents": {
+      "linkFailed": "关联文档失败",
+      "linkSuccess": "文档关联成功",
+      "unlinkFailed": "取消关联文档失败",
+      "unlinkSuccess": "文档取消关联成功"
+    },
+    "familySharing": {
+      "accessRevoked": "访问权限已撤销",
+      "invitationFailed": "发送邀请失败",
+      "invitationSent": "邀请发送成功！",
+      "loadFailed": "加载共享信息失败",
+      "revokeFailed": "撤销访问权限失败"
+    },
+    "files": {
+      "downloadFailed": "文件下载失败"
+    },
+    "generic": {
+      "allOperationsFailed": "所有{{operation}}都失败了。请重试。",
+      "allOperationsSuccess": "全部{{total}}个{{operation}}都成功完成！",
+      "downloadFailed": "下载失败",
+      "operationFailed": "操作失败",
+      "operationFailedTitle": "{{operation}}失败",
+      "operationPartial": "{{success}}/{{total}}个{{operation}}成功完成。{{failed}}个失败。",
+      "operationPartialTitle": "{{operation}}完成但有错误",
+      "operationSuccess": "{{operation}}成功完成！",
+      "saveFailed": "保存失败",
+      "success": "成功！",
+      "warning": "警告"
+    },
+    "invitations": {
+      "accessRevoked": "访问权限已撤销",
+      "accessRevokedMessage": "访问权限已被撤销。",
+      "alreadyRevoked": "已撤销",
+      "alreadyRevokedMessage": "此邀请已被撤销。",
+      "cancelFailed": "取消邀请失败",
+      "cancelled": "邀请已取消",
+      "cancelledMessage": "邀请已被取消。",
+      "respondFailed": "响应邀请失败",
+      "revokeFailed": "撤销访问权限失败"
+    },
+    "labResults": {
+      "addedMessage": "向检验结果添加了{{count}}个检验项目。",
+      "addedSuccess": "成功！",
+      "addFailed": "添加检验项目失败",
+      "deletedMessage": "{{name}}已被删除",
+      "deletedSuccess": "项目已删除",
+      "noTextMessage": "请在输入区域粘贴检验结果文本。",
+      "noTextToParse": "无文本可解析",
+      "parsedCount": "找到{{count}}个检验项目。在预览选项卡中查看。",
+      "parseWarning": "部分行无法解析",
+      "templateApplied": "模板已应用",
+      "templateAppliedMessage": "从\"{{name}}\"模板添加了{{count}}个项目。",
+      "textParsed": "文本已解析",
+      "trendExportFailed": "导出图表失败",
+      "trendExportSuccess": "图表导出成功",
+      "updateFailed": "更新项目失败"
+    },
+    "patient": {
+      "createdSuccess": "成功创建{{name}}",
+      "deletedNoOthers": "成功删除{{name}}。没有其他患者可用。",
+      "deletedSuccess": "成功删除{{name}}",
+      "deletedSwitched": "成功删除{{name}}。已切换到{{fallbackName}}。",
+      "deleteFailed": "删除失败：{{message}}",
+      "deleteOwnOnly": "您只能删除自己拥有的患者",
+      "nowViewing": "正在查看{{name}}",
+      "removeAccessFailed": "移除访问权限失败：{{message}}",
+      "removedAccess": "已移除对{{name}}的访问权限",
+      "removeOwnOnly": "您不能移除对自己拥有患者的访问权限",
+      "switchFailed": "切换失败：{{message}}",
+      "updatedSuccess": "成功更新{{name}}"
+    },
+    "photo": {
+      "photoBeingUploaded": "照片正在上传中。请等待完成。",
+      "pleaseWait": "请稍候",
+      "uploadSuccess": "照片上传成功"
+    },
+    "reports": {
+      "noRecordsMessage": "请从下面的类别中至少选择一条记录以生成报告。",
+      "noRecordsSelected": "未选择记录",
+      "templateDeleted": "模板删除成功",
+      "templateDeleteFailed": "删除模板失败",
+      "templateLoaded": "已加载模板\"{{name}}\"",
+      "templateNameRequired": "模板名称为必填项",
+      "templateSaved": "模板保存成功",
+      "templateSaveFailed": "保存模板失败",
+      "validationError": "验证错误"
+    },
+    "settings": {
+      "cleanupComplete": "清理完成：{{cleaned}}个文件已清理，{{deleted}}个文件已删除",
+      "cleanupFailed": "清理文件失败。请稍后重试。",
+      "noOutOfSync": "未发现需要清理的不同步文件",
+      "sessionTimeoutUpdated": "会话超时已更新为{{minutes}}分钟。您的会话已刷新。"
+    },
+    "sharing": {
+      "accessRevoked": "已撤销用户{{userId}}的访问权限",
+      "cancelFailed": "取消邀请失败：{{message}}",
+      "invalidJson": "{{fieldName}}中的JSON格式无效。请检查语法。",
+      "invitationCancelled": "邀请取消成功",
+      "invitationFailed": "邀请失败：{{message}}",
+      "invitationSent": "邀请已成功发送给{{recipient}}",
+      "revokeFailed": "撤销失败：{{message}}",
+      "shareUpdated": "患者共享更新成功",
+      "updateFailed": "更新失败：{{message}}"
+    },
+    "tagSearch": {
+      "loadFailed": "加载热门标签失败",
+      "noTagsSelected": "请至少选择一个标签进行搜索",
+      "noTagsSelectedTitle": "未选择标签",
+      "searchFailed": "按标签搜索记录失败"
+    },
+    "upload": {
+      "backgroundProcessing": "\"{{fileName}}\"正在后台处理中。完成时将通知您。",
+      "completedWithErrors": "上传完成但有错误",
+      "documentAdded": "文档已添加到Paperless",
+      "duplicateDocument": "重复文档",
+      "fileUploadedSuccess": "\"{{fileName}}\"成功上传到Paperless！",
+      "fileUploadFailed": "文件上传失败",
+      "paperlessUploadFailed": "Paperless上传失败",
+      "partialSuccess": "{{completed}}/{{total}}个文件成功上传。{{failed}}个失败。"
+    },
+    "vitals": {
+      "deleteFailed": "删除生命体征记录失败",
+      "deleteSuccess": "生命体征记录删除成功",
+      "formErrors": "请修正表单错误",
+      "savedSuccess": "生命体征{{action}}成功！",
+      "saveFailed": "{{action}}生命体征失败"
+    }
+  },
+  "validation": {
+    "appTokenRequired": "应用令牌为必填项",
+    "fromEmailInvalid": "邮箱格式无效",
+    "fromEmailRequired": "发件人邮箱为必填项",
+    "headersInvalid": "标头必须为有效的JSON",
+    "nameRequired": "通道名称为必填项",
+    "nameTooLong": "名称不能超过100个字符",
+    "serverUrlInvalid": "URL格式无效",
+    "serverUrlRequired": "服务器URL为必填项",
+    "smtpHostRequired": "SMTP服务器为必填项",
+    "smtpPasswordRequired": "SMTP密码为必填项",
+    "smtpPortInvalid": "端口必须在1到65535之间",
+    "smtpPortRequired": "SMTP端口为必填项",
+    "smtpUserRequired": "SMTP用户名为必填项",
+    "toEmailInvalid": "邮箱格式无效",
+    "toEmailRequired": "收件人邮箱为必填项",
+    "typeRequired": "通道类型为必填项",
+    "urlInvalid": "URL格式无效",
+    "urlRequired": "Webhook URL为必填项",
+    "webhookUrlInvalid": "Webhook URL格式无效",
+    "webhookUrlRequired": "Webhook URL为必填项"
+  }
+}
