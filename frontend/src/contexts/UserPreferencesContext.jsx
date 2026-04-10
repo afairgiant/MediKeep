@@ -150,7 +150,7 @@ export const UserPreferencesProvider = ({ children }) => {
   useEffect(() => {
     const syncAutoDetectedLanguage = async () => {
       if (isAuthenticated && user && preferences && !loading) {
-        const currentLanguage = i18n.language;
+        const currentLanguage = (i18n.language || 'en').split('-')[0].toLowerCase();
         const savedLanguage = preferences.language;
 
         // Only save if user has no language preference yet (still on default 'en')

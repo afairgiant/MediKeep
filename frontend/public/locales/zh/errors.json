@@ -71,8 +71,8 @@
     "birthDateFuture": "出生日期不能是未来时间",
     "birthDateRequired": "出生日期为必填项",
     "createFailed": "创建失败：{{message}}",
-    "firstNameRequired": "姓氏为必填项",
-    "lastNameRequired": "名字为必填项",
+    "firstNameRequired": "名字为必填项",
+    "lastNameRequired": "姓氏为必填项",
     "updateFailed": "更新失败：{{message}}"
   },
   "patientNotAvailable": "患者信息不可用",

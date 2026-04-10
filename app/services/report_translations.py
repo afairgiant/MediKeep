@@ -9,7 +9,7 @@ The module reads from: frontend/public/locales/{lang}/reportPdf.json
 Translation keys use camelCase to match the frontend i18next convention.
 Interpolation uses {{variable}} syntax matching i18next.
 
-Supports 9 languages: en, fr, de, es, it, pt, ru, sv, nl
+Supports 11 languages: en, fr, de, es, it, pt, ru, sv, nl, pl, zh
 """
 
 import json
@@ -211,7 +211,7 @@ def get_translator(language: str = "en", date_format: str = "mdy") -> ReportTran
     """Create a ReportTranslator for the given language and date format.
 
     Args:
-        language: ISO 639-1 language code (en, fr, de, es, it, pt, ru, sv, nl)
+        language: ISO 639-1 language code (en, fr, de, es, it, pt, ru, sv, nl, pl, zh)
         date_format: Date format preference (mdy, dmy, ymd)
 
     Returns:

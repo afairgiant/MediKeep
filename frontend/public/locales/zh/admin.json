@@ -1,0 +1,694 @@
+{
+  "admin": {
+    "createUser": {
+      "linkPatient": {
+        "hint": "无需创建新的患者记录，可将新用户链接至现有患者（例如：现在需要独立登录账号的儿童）。",
+        "selfRecordBadge": "自有记录",
+        "selfRecordWarning": "这是当前拥有者的自有记录。系统将为原拥有者创建新的自有记录，并复制其人口统计信息。原拥有者将保留对该患者的编辑权限。"
+      },
+      "passwordReqs": {
+        "hasLetter": "包含至少一个字母",
+        "hasNumber": "包含至少一个数字",
+        "minLength": "至少6个字符"
+      }
+    }
+  },
+  "analytics": {
+    "activityByRecordType": "按记录类型分析活动",
+    "activityTrend": "活动趋势",
+    "analyticsDateRange": "分析日期范围",
+    "axisLabels": {
+      "activities": "活动"
+    },
+    "breakdownByType": "按类型细分",
+    "chartLabels": {
+      "patients": "患者",
+      "userActivity": "用户活动"
+    },
+    "customDateRange": "自定义日期范围",
+    "dailyAverage": "日均值",
+    "filterByDays": "按最近{{days}}天筛选",
+    "loading": "正在加载分析数据...",
+    "period": "周期",
+    "recordsDistribution": "记录分布",
+    "subtitle": "活动趋势、对比分析和记录分布",
+    "title": "数据分析",
+    "totalActivities": "总活动数",
+    "userInteractions": "用户交互",
+    "vsPreviousPeriod": "与上期对比"
+  },
+  "auditLog": {
+    "actionFilter": "操作",
+    "dateRange": "日期范围",
+    "entityTypeFilter": "实体类型",
+    "errorLoading": "加载审计日志时出错",
+    "filterByAction": "按操作筛选",
+    "filterByDateRange": "按日期范围筛选",
+    "filterByEntityType": "按实体类型筛选",
+    "filterByUser": "按用户筛选",
+    "loading": "正在加载审计日志...",
+    "noLogs": "未找到活动日志",
+    "pageInfo": "第{{page}}页，共{{totalPages}}页",
+    "searchAriaLabel": "搜索活动日志",
+    "searchPlaceholder": "搜索描述...",
+    "showingResults": "显示{{shown}}/{{total}}条结果",
+    "subtitle": "完整的活动轨迹，用于合规性和审计",
+    "system": "系统",
+    "tableHeaders": {
+      "action": "操作",
+      "entityType": "实体类型",
+      "recordId": "记录ID",
+      "timestamp": "时间戳"
+    },
+    "viewRecord": "查看{{type}}记录",
+    "viewRecordAriaLabel": "查看{{type}} #{{id}}"
+  },
+  "backup": {
+    "existingBackups": {
+      "count_one": "{{count}}个备份",
+      "count_other": "{{count}}个备份",
+      "download": "下载",
+      "noBackups": "未找到备份",
+      "previewRestore": "预览恢复",
+      "restore": "恢复",
+      "tableHeaders": {
+        "fileExists": "文件存在",
+        "filename": "文件名"
+      },
+      "title": "现有备份",
+      "verify": "验证"
+    },
+    "loading": "正在加载备份管理...",
+    "modals": {
+      "analyzingBackup": "正在分析备份内容...",
+      "cannotBeUndone": "此操作无法撤销。",
+      "cleanupItems": {
+        "oldBackups": "旧备份文件",
+        "orphanedFiles": "孤立文件",
+        "trashFiles": "垃圾文件"
+      },
+      "cleanupWarning": "这将永久删除：",
+      "completeCleanup": "完整系统清理",
+      "deleteBackup": "删除备份",
+      "deleteConfirm": "您确定要删除备份\"{{filename}}\"吗？",
+      "discardChanges": "放弃更改",
+      "executeCleanup": "执行清理",
+      "proceedWithRestore": "继续恢复",
+      "restoreFromBackup": "从备份恢复",
+      "restoreNow": "立即恢复",
+      "restorePreview": "恢复预览",
+      "restoreSafetyNote": "恢复过程开始前将自动创建安全备份。",
+      "restoreWarning": "这将从备份恢复并替换当前数据！",
+      "stayOnSettings": "停留在设置",
+      "typeCleanupToConfirm": "输入<strong>CLEANUP</strong>确认",
+      "unsavedChanges": "未保存的更改",
+      "unsavedWarning": "您的保留设置有未保存的更改。离开此标签页将丢失您的更改。"
+    },
+    "operations": {
+      "advancedOptions": "高级选项",
+      "advancedOptionsDesc": "其他备份和清理操作",
+      "chooseFile": "选择备份文件",
+      "cleanupOld": "清理旧备份",
+      "completeCleanup": "完整清理",
+      "createFullBackup": "创建完整备份",
+      "creating": "正在创建...",
+      "databaseOnly": "仅数据库",
+      "filesOnly": "仅文件",
+      "fullBackup": "完整系统备份",
+      "fullBackupDesc": "完整备份（数据库+文件）",
+      "invalidFileType": "无效文件类型",
+      "invalidFileTypeDesc": "请选择.sql或.zip备份文件。",
+      "moreOptions": "更多选项",
+      "title": "备份操作",
+      "uploadBackup": "上传备份",
+      "uploadBackupDesc": "上传外部备份文件（.sql或.zip）"
+    },
+    "preview": {
+      "affectedData": "受影响的数据",
+      "analysisNotAvailable": "备份分析不可用",
+      "backupContent": "备份内容",
+      "backupDetails": "备份详情",
+      "backupFiles": "备份文件",
+      "components": "组件",
+      "createdAt": "创建时间：{{date}}",
+      "currentDatabase": "当前数据库",
+      "currentFiles": "当前文件",
+      "manifest": "清单",
+      "noAffectedData": "无受影响数据信息",
+      "noStatistics": "无统计信息",
+      "restoreMethod": "恢复方法",
+      "unknownType": "未知备份类型"
+    },
+    "retention": {
+      "backupsUnit": "个备份",
+      "currentStatus_one": "<strong>当前状态：</strong>已存储{{count}}个备份（最大：{{max}}）",
+      "currentStatus_other": "<strong>当前状态：</strong>已存储{{count}}个备份（最大：{{max}}）",
+      "daysUnit": "天",
+      "maximumCount": "最大备份数量",
+      "maximumCountDesc": "当备份数量超过此限制时发出警报（可选）",
+      "minimumCount": "最小备份数量",
+      "minimumCountDesc": "始终保留至少这么多备份（无论使用期限）",
+      "priority": "<strong>优先级：</strong>最小数量始终优先于时间限制",
+      "retentionDays": "备份保留（天数）",
+      "retentionDaysDesc": "删除超过此天数的备份（超出最小数量）",
+      "retentionLogic": "保留逻辑",
+      "saveRetention": "保存保留设置",
+      "timeBasedCleanup": "<strong>基于时间的清理：</strong>删除超过{{days}}天的备份（超出最小数量）",
+      "title": "备份保留设置"
+    },
+    "schedule": {
+      "completedSuccessfully": "成功完成",
+      "dayOfWeek": "星期",
+      "dayOfWeekDesc": "每周备份应在哪一天运行？",
+      "days": {
+        "fri": "星期五",
+        "mon": "星期一",
+        "sat": "星期六",
+        "sun": "星期日",
+        "thu": "星期四",
+        "tue": "星期二",
+        "wed": "星期三"
+      },
+      "failed": "失败：{{error}}",
+      "frequency": "备份频率",
+      "frequencyDesc": "计划自动完整备份（数据库+文件）",
+      "lastBackup": "上次备份：",
+      "nextScheduledRun": "下次计划运行",
+      "presets": {
+        "daily": "每日",
+        "every12Hours": "每12小时",
+        "every6Hours": "每6小时"
+      },
+      "saveSchedule": "保存计划",
+      "timeOfDay": "时间",
+      "timeOfDayDesc": "备份应在何时运行？（24小时格式）",
+      "title": "自动备份计划",
+      "unknownError": "未知错误"
+    },
+    "subtitle": "创建和管理系统备份",
+    "tabs": {
+      "backups": "备份"
+    },
+    "unsavedBadge": "未保存"
+  },
+  "createUser": {
+    "autoFeatures": {
+      "editAccess": "原拥有者将保留对链接患者的编辑权限",
+      "immediateLogin": "用户创建后可立即登录",
+      "linkExisting": "使用\"链接到现有患者\"将患者记录转移给新用户",
+      "patientRecord": "将自动创建患者记录（或链接到现有记录）",
+      "timestamps": "账户时间戳将自动设置"
+    },
+    "autoFeaturesTitle": "自动生成功能",
+    "cardSubtitle": "填写下面的表单以创建新用户账户",
+    "cardTitle": "用户账户详情",
+    "emailPlaceholder": "输入电子邮箱地址",
+    "errors": {
+      "accountCreateFailed": "创建账户失败",
+      "createFailed": "创建用户失败",
+      "createRetry": "创建用户失败。请重试。"
+    },
+    "firstNamePlaceholder": "输入名字",
+    "lastNamePlaceholder": "输入姓氏",
+    "linkPatient": {
+      "checkbox": "链接到现有患者记录",
+      "currentOwner": "当前拥有者",
+      "dob": "出生日期",
+      "hint": "无需创建新的患者记录，可将新用户链接至现有患者（例如：现在需要独立登录账号的儿童）。",
+      "loading": "正在加载患者...",
+      "owner": "拥有者",
+      "patientId": "ID",
+      "selectPlaceholder": "选择患者...",
+      "selfRecordBadge": "自有记录",
+      "selfRecordWarning": "这是当前拥有者的自有记录。系统将为原拥有者创建新的自有记录，并复制其人口统计信息。原拥有者将保留对该患者的编辑权限。"
+    },
+    "noteText": "系统将自动为该用户创建患者记录，默认角色为\"用户\"。",
+    "pageSubtitle": "创建带有患者资料的新用户账户",
+    "pageTitle": "创建新用户",
+    "passwordPlaceholder": "输入密码（最少6字符，包含字母和数字）",
+    "passwordReqs": {
+      "hasLetter": "包含至少一个字母",
+      "hasNumber": "包含至少一个数字",
+      "minLength": "至少6个字符"
+    },
+    "submitButton": "创建账户",
+    "successRedirect": "用户\"{{username}}\"创建成功！",
+    "usernamePlaceholder": "输入用户名",
+    "validation": {
+      "firstNameRequired": "请输入名字",
+      "lastNameRequired": "请输入姓氏",
+      "passwordMinLength": "密码长度至少为6个字符",
+      "passwordRequirements": "密码必须包含至少一个字母和一个数字",
+      "usernameMinLength": "用户名长度至少为3个字符"
+    }
+  },
+  "dashboard": {
+    "loading": "正在加载综合仪表板...",
+    "quickActions": {
+      "auditLogDesc": "查看系统活动日志",
+      "backups": "备份",
+      "backupsDesc": "备份管理",
+      "createUser": "创建新用户",
+      "createUserDesc": "创建带有患者资料的用户账户",
+      "dataModelsDesc": "查看和管理数据库表",
+      "manageUsers": "管理用户",
+      "manageUsersDesc": "查看和管理用户账户",
+      "settingsDesc": "系统配置",
+      "subtitle": "常用管理任务",
+      "systemHealthDesc": "监控系统状态",
+      "title": "快捷操作",
+      "trash": "垃圾箱",
+      "trashDesc": "恢复已删除文件"
+    },
+    "recentActivity": {
+      "errorLoading": "加载活动时出错",
+      "noActivity": "无近期活动显示",
+      "subtitle": "最新系统事件",
+      "title": "近期活动",
+      "viewAll": "查看所有活动"
+    },
+    "refreshAll": "全部刷新",
+    "stats": {
+      "activePatients": "活跃患者",
+      "totalUsers": "用户总数"
+    },
+    "subtitle": "综合系统概览和管理",
+    "systemHealth": {
+      "databaseStatus": "数据库状态",
+      "errorLoading": "加载系统健康状况时出错",
+      "lastBackup": "最后备份",
+      "noBackup": "无备份",
+      "subtitle": "当前系统状态",
+      "uptime": "运行时间"
+    }
+  },
+  "dataModels": {
+    "categories": {
+      "coreMedical": "核心医疗",
+      "fileManagement": "文件管理",
+      "healthcareDirectory": "医疗目录",
+      "patientSupport": "患者支持",
+      "sharingAccess": "共享与访问",
+      "system": "系统"
+    },
+    "clearFilter": "清除筛选",
+    "descriptions": {
+      "allergy": "患者过敏史和反应记录",
+      "condition": "疾病状况和诊断",
+      "emergency_contact": "患者紧急联系人信息",
+      "encounter": "患者就诊和预约记录",
+      "entity_file": "所有实体类型的文件附件",
+      "family_condition": "家族疾病状况",
+      "family_history_share": "家族病史共享关系",
+      "family_member": "用于病史记录的家庭成员",
+      "immunization": "疫苗接种记录和计划",
+      "injury": "外伤、扭伤、骨折和烧伤",
+      "injury_type": "可重复使用的外伤类型定义",
+      "insurance": "患者保险覆盖信息",
+      "invitation": "共享和协作的系统邀请",
+      "lab_result": "实验室检查结果和数值",
+      "lab_result_file": "实验室结果文档和附件",
+      "medical_equipment": "为患者开具的医疗设备和器械",
+      "medication": "处方药物和剂量",
+      "patient": "患者人口统计和联系信息",
+      "patient_share": "用户间患者数据共享关系",
+      "pharmacy": "药房位置和联系信息",
+      "practitioner": "医疗服务提供者和专科医生",
+      "procedure": "医疗程序和手术",
+      "symptom": "症状定义和跟踪",
+      "symptom_occurrence": "个人症状发作记录",
+      "treatment": "治疗计划和疗法",
+      "user": "系统用户和管理员",
+      "vitals": "血压、心率、体温"
+    },
+    "fallbackWarning": "无法从服务器加载模型。显示内置模型列表。",
+    "filterAriaLabel": "筛选数据模型",
+    "filterPlaceholder": "筛选模型...",
+    "noMatchFilter": "没有模型匹配\"{{query}}\"",
+    "subtitle": "管理和查看所有数据库表和记录"
+  },
+  "directoryCard": {
+    "files": "个文件",
+    "mb": "MB",
+    "ok": "确定"
+  },
+  "fieldRenderer": {
+    "autoGenerated": "自动生成",
+    "autoPopulated": "从当前用户自动填充",
+    "enterField": "输入{{field}}...",
+    "enterPassword": "为新用户输入密码...",
+    "notApplicable": "不适用",
+    "passwordHash": "密码哈希（出于安全考虑为只读）",
+    "passwordNote": "输入明文密码（最少{{minLength}}个字符，包含字母和数字）- 将被安全哈希处理",
+    "passwordNotSupported": "此模型不支持密码字段",
+    "patientIdAutoPopulated": "患者ID（自动填充）",
+    "patientIdLocked": "患者ID（锁定为当前用户）",
+    "primaryKeyAutoGenerated": "主键（自动生成）",
+    "primaryKeyReadOnly": "主键（只读）",
+    "selectDefault": "-- 选择 --",
+    "selectField": "-- 选择{{field}} --",
+    "systemTimestamp": "系统时间戳（自动生成）"
+  },
+  "header": {
+    "administrator": "管理员",
+    "logout": "退出",
+    "returnToDashboard": "返回仪表板",
+    "searchAriaLabel": "搜索数据模型",
+    "searchPlaceholder": "搜索记录、用户或数据...",
+    "switchToMode": "切换到{{mode}}模式",
+    "title": "医疗记录管理"
+  },
+  "health": {
+    "applicationUptime": "应用程序运行时间",
+    "database": {
+      "activeUsers": "活跃用户",
+      "connectionStatus": "连接状态",
+      "connectionTest": "连接测试",
+      "databaseSize": "数据库大小",
+      "failed": "失败",
+      "passed": "通过",
+      "patientRecords": "患者记录",
+      "title": "数据库健康状况"
+    },
+    "lastBackup": "最后备份",
+    "lastRunFailed": "上次运行失败",
+    "lastUpdated": "最后更新：{{time}}",
+    "loading": "正在加载系统健康状况...",
+    "next": "下次：{{time}}",
+    "noneYet": "尚无",
+    "noScheduleConfigured": "未配置计划",
+    "overallStatus": "整体系统状态",
+    "performance": {
+      "appMemory": "应用内存（RSS）",
+      "cpuDetails": "应用：{{appPercent}}%（共{{cores}}个内核），系统：{{systemPercent}}%",
+      "cpuUsage": "CPU使用率",
+      "memoryUsage": "内存使用",
+      "memoryUsed": "已使用{{used}}MB（系统：{{percent}}%，共{{total}}MB）",
+      "responseTime": "响应时间",
+      "systemLoad": "系统负载",
+      "title": "应用程序性能"
+    },
+    "scheduled": "计划：{{schedule}}",
+    "schedulePresets": {
+      "daily": "每日",
+      "every_12_hours": "每12小时",
+      "every_6_hours": "每6小时"
+    },
+    "services": {
+      "adminInterface": "管理界面",
+      "apiStatus": "API状态",
+      "authService": "身份验证服务",
+      "frontendLogging": "前端日志",
+      "title": "应用程序服务"
+    },
+    "sso": {
+      "allowed": "允许",
+      "blocked": "阻止",
+      "passwordOnlyInfo": "用户只能使用用户名/密码登录",
+      "providerType": "提供商类型",
+      "registrationViaSso": "通过SSO注册",
+      "ssoStatus": "SSO状态",
+      "title": "单点登录（SSO）"
+    },
+    "storage": {
+      "appStorage": "应用存储",
+      "diskUsage": "磁盘使用",
+      "freeOf": "{{free}}GB可用，共{{total}}GB",
+      "title": "存储健康状况"
+    },
+    "subtitle": "实时系统状态和性能指标",
+    "title": "系统健康监控"
+  },
+  "models": {
+    "backToDataModels": "返回数据模型",
+    "backToModel": "返回{{modelName}}",
+    "bulkDeleteAssociated": "所有关联数据（包括{{types}}）也将被删除。",
+    "bulkDeleteFailed": "批量删除失败",
+    "bulkDeleteWarning": "您即将永久删除{{count}}条{{modelName}}记录。",
+    "bulkDeleteWarning_one": "您即将永久删除{{count}}条{{modelName}}记录。",
+    "bulkDeleteWarning_other": "您即将永久删除{{count}}条{{modelName}}记录。",
+    "changeRole": "更改角色",
+    "changesSaved": "更改已保存",
+    "changeUsername": "更改用户名",
+    "clearSearch": "清除搜索",
+    "columnVisibility": "列可见性",
+    "confirmBulkDeletion": "确认批量删除",
+    "confirmDeletion": "确认删除",
+    "createNew": "创建新{{modelName}}",
+    "createRecord": "创建记录",
+    "deleteFailed": "删除失败",
+    "deleteRecords": "删除{{count}}条记录",
+    "deleteRecords_one": "删除{{count}}条记录",
+    "deleteRecords_other": "删除{{count}}条记录",
+    "deleteSelected": "删除选中项",
+    "deleteWarning": "这将永久删除此{{modelName}}记录和所有关联数据：",
+    "editRecord": "编辑{{modelName}}",
+    "exportFailed": "导出失败",
+    "exportToCSV": "导出为CSV",
+    "failedToBulkDelete": "删除记录失败",
+    "failedToDelete": "删除记录失败",
+    "failedToExport": "导出数据失败",
+    "failedToGetPatient": "获取患者信息失败。请确保您有患者记录。",
+    "failedToSave": "保存记录失败",
+    "fieldMaxLength": "最大长度：{{length}}",
+    "fieldReferences": "引用：{{reference}}",
+    "fieldRequired": "必填",
+    "fieldType": "类型：{{type}}",
+    "fillForm": "填写下面的表单以创建新记录",
+    "loadingForm": "正在加载模型创建表单...",
+    "noRecordsFound": "未找到记录",
+    "perPage": "每页{{count}}条",
+    "perPage_one": "每页{{count}}条",
+    "perPage_other": "每页{{count}}条",
+    "rawDataJson": "原始数据（JSON）",
+    "recordDeleted": "记录已删除",
+    "recordDeletedMessage": "成功删除{{modelName}}记录#{{id}}",
+    "recordId": "记录ID：{{id}}",
+    "recordsDeleted": "记录已删除",
+    "recordsDeletedMessage": "成功删除{{count}}条记录",
+    "recordsDeletedMessage_one": "成功删除{{count}}条记录",
+    "recordsDeletedMessage_other": "成功删除{{count}}条记录",
+    "recordUpdated": "记录更新成功",
+    "resetToDefault": "重置为默认值",
+    "roleChangeLastAdmin": "如果这是系统中最后一个管理员用户，您可能会失去管理员权限。",
+    "roleChangeText": "您即将移除此用户的管理员权限。",
+    "roleChangeWarning": "角色更改警告",
+    "saveFailed": "保存失败",
+    "searchPlaceholder": "搜索{{modelName}}...",
+    "searchRecords": "搜索记录",
+    "searchResult": "\"{{query}}\"的{{count}}个结果",
+    "searchResult_one": "\"{{query}}\"的{{count}}个结果",
+    "searchResult_other": "\"{{query}}\"的{{count}}个结果",
+    "selected": "已选择{{count}}项",
+    "selected_one": "已选择{{count}}项",
+    "selected_other": "已选择{{count}}项",
+    "toggleColumnVisibility": "切换列可见性",
+    "typeDeleteToConfirm": "输入<strong>DELETE</strong>确认",
+    "usernameChangeLogout": "这将立即使您退出登录，您需要使用新用户名重新登录。",
+    "usernameChangeText": "您即将将自己的用户名从<strong>\"{{oldUsername}}\"</strong>更改为<strong>\"{{newUsername}}\"</strong>。",
+    "usernameChangeWarning": "用户名更改警告",
+    "usernameUpdated": "用户名已更新",
+    "usernameUpdatedMessage": "您的用户名已更改。请使用新用户名登录：\"{{username}}\"",
+    "viewRecord": "查看{{modelName}}",
+    "visibleColumns": "可见列"
+  },
+  "settings": {
+    "dataRetention": {
+      "title": "数据保留",
+      "trashRetention": "垃圾箱保留",
+      "trashRetentionDesc": "在永久删除之前将已删除文件保留在垃圾箱中的天数"
+    },
+    "loading": "正在加载设置...",
+    "resetAll": "全部重置",
+    "saveAllChanges": "保存所有更改",
+    "sso": {
+      "ssoDisabledInfo": "SSO当前已禁用。要启用SSO，请配置以下环境变量并重启应用程序：",
+      "ssoRegistration": "SSO注册",
+      "testConnection": "测试连接",
+      "testConnectionDesc": "测试SSO提供商连接和配置",
+      "testSsoConnection": "测试SSO连接",
+      "title": "单点登录（SSO）"
+    },
+    "subtitle": "配置系统级设置和保留策略",
+    "title": "管理员设置",
+    "userManagement": {
+      "allowRegistration": "允许新用户注册",
+      "allowRegistrationDesc": "启用或禁用新用户从登录页面创建账户的功能"
+    }
+  },
+  "shared": {
+    "dark": "深色",
+    "healthy": "健康",
+    "info": "信息",
+    "light": "浅色"
+  },
+  "sidebar": {
+    "adminNavigation": "管理导航",
+    "comingSoon": "{{label}}（即将推出）",
+    "items": {
+      "analytics": "数据分析",
+      "maintenance": "维护",
+      "trash": "垃圾箱"
+    },
+    "sections": {
+      "dataManagement": "数据管理",
+      "monitoring": "监控",
+      "tools": "工具"
+    },
+    "toggleSidebar": "切换侧边栏"
+  },
+  "tools": {
+    "subtitle": "用于系统维护和数据管理的管理工具",
+    "testLibrary": {
+      "categories": "类别",
+      "forceSyncAll": "强制全部同步",
+      "forceSyncAllDesc": "<strong>强制全部同步：</strong>重新匹配所有组件（类别和标准名称）",
+      "libraryReloaded": "库已重新加载",
+      "libraryVersion": "库版本",
+      "operational": "正常运行",
+      "reloadDesc": "<strong>重新加载库：</strong>从磁盘刷新检测库（更新test_library.json后使用）",
+      "reloadLibrary": "重新加载库",
+      "syncComplete": "同步完成",
+      "syncUnmatched": "同步未匹配项",
+      "syncUnmatchedDesc": "<strong>同步未匹配项：</strong>更新尚未拥有标准名称的组件",
+      "title": "检测库维护",
+      "totalTests": "检测总数"
+    },
+    "title": "工具与维护"
+  },
+  "trash": {
+    "clearFilters": "清除筛选",
+    "deleteConfirm": "您确定要永久删除<strong>{{filename}}</strong>吗？",
+    "deletedDateRange": "删除日期范围",
+    "deleteFailed": "删除失败",
+    "deletePermanently": "永久删除",
+    "deleteWarning": "此操作无法撤销。文件将从系统中永久移除。",
+    "errorLoading": "加载垃圾箱时出错",
+    "fileCount_one": "{{count}}个文件",
+    "fileCount_other": "{{count}}个文件",
+    "fileDeleted": "文件已删除",
+    "fileDeletedMessage": "{{filename}}已永久删除",
+    "fileRestored": "文件已恢复",
+    "fileRestoredMessage": "{{filename}}已恢复到原位置",
+    "fileType": "文件类型",
+    "filterByDeletedDate": "按删除日期范围筛选",
+    "filterByFileType": "按文件类型筛选",
+    "filtered": "（已筛选）",
+    "loading": "正在加载垃圾箱内容...",
+    "manualDeletion": "手动删除",
+    "noFilesInTrash": "垃圾箱中无文件",
+    "noFilesMatch": "没有文件匹配您的筛选条件",
+    "permanentlyDelete": "永久删除",
+    "permanentlyDeleteFile": "永久删除文件",
+    "purgedDirectories_one": "跨越{{count}}个目录",
+    "purgedDirectories_other": "跨越{{count}}个目录",
+    "purgeDescription_one": "将移除超过保留期的文件。当前垃圾箱中{{verb}}<strong>{{count}}个{{files}}</strong>，总计<strong>{{size}}</strong>。",
+    "purgeDescription_other": "将移除超过保留期的文件。当前垃圾箱中{{verb}}<strong>{{count}}个{{files}}</strong>，总计<strong>{{size}}</strong>。",
+    "purgedMessage_one": "{{count}}个过期文件已永久删除",
+    "purgedMessage_other": "{{count}}个过期文件已永久删除",
+    "purgeExpired": "清理过期文件",
+    "purgeExpiredButton": "清理过期文件",
+    "purgeExpiredFiles": "清理过期文件",
+    "purgeFailed": "清理失败",
+    "purgeWarning": "这将从垃圾箱中永久删除所有过期文件。此操作无法撤销。",
+    "restoreConfirm": "您确定要恢复<strong>{{filename}}</strong>",
+    "restoreFailed": "恢复失败",
+    "restoreFile": "恢复文件",
+    "restoreTo": "到",
+    "restoreToOriginal": "恢复到原位置",
+    "searchAriaLabel": "搜索垃圾箱文件",
+    "searchPlaceholder": "按文件名或路径搜索...",
+    "showingFiltered": "显示{{shown}}/{{total}}个{{files}}",
+    "subtitle": "管理已删除的上传文件。将文件恢复到原位置或永久删除以释放存储空间。",
+    "tableHeaders": {
+      "actions": "操作",
+      "deleted": "删除时间",
+      "filename": "文件名",
+      "originalLocation": "原位置",
+      "reason": "原因",
+      "size": "大小"
+    },
+    "title": "垃圾箱管理",
+    "totalSize": "总计{{size}}",
+    "trashPurged": "垃圾箱已清理"
+  },
+  "users": {
+    "actionsFor": "{{username}}的操作",
+    "activate": "激活",
+    "authFilter": {
+      "all": "所有验证方式",
+      "hybrid": "混合",
+      "local": "本地",
+      "sso": "SSO"
+    },
+    "changeRole": "更改角色",
+    "clear": "清除",
+    "deactivate": "停用",
+    "deleteModal": {
+      "cannotDeleteLastAdmin": "无法删除最后一个管理员。",
+      "cannotDeleteSelf": "您无法删除自己的账户。",
+      "title": "删除用户",
+      "typeUsername": "输入\"{{username}}\"确认",
+      "warning": "此操作无法撤销。与此用户关联的所有数据将被永久删除。"
+    },
+    "deleteUser": "删除用户",
+    "justNow": "刚刚",
+    "loginHistory": "登录历史",
+    "loginHistoryModal": {
+      "dateTime": "日期时间",
+      "ipAddress": "IP地址",
+      "noHistory": "未找到登录历史",
+      "notAvailable": "不可用",
+      "title": "登录历史：{{username}}"
+    },
+    "never": "从未",
+    "noUsersFound": "未找到用户",
+    "noUsersInSystem": "系统中无用户。",
+    "noUsersMatchFilters": "没有用户匹配您的筛选条件。请尝试调整或清除筛选。",
+    "passwordModal": {
+      "bothFieldsRequired": "两个密码字段都必须填写",
+      "confirmPlaceholder": "确认新密码",
+      "enterNewPassword": "输入新密码",
+      "forceChange": "强制下次登录时更改密码",
+      "immediateReset": "这将立即重置用户密码。他们需要使用新密码登录。",
+      "newPassword": "新密码",
+      "passwordDescription": "最少6个字符，至少1个字母和1个数字",
+      "passwordsDoNotMatch": "密码不匹配",
+      "resetFailed": "重置密码失败。请重试。",
+      "resetSuccess": "{{username}}的密码重置成功！",
+      "resettingFor": "重置<strong>{{username}}</strong>的密码",
+      "ssoWarning": "此用户通过SSO（{{provider}}）验证。设置本地密码将允许混合身份验证。",
+      "title": "重置{{username}}的密码",
+      "userInfo": "用户：{{username}}（ID：{{userId}}）"
+    },
+    "roleFilter": {
+      "all": "所有角色"
+    },
+    "roleModal": {
+      "cannotRemoveLastAdmin": "无法移除最后一个管理员角色。",
+      "changingRole": "更改<strong>{{username}}</strong>的角色",
+      "grantAdmin": "这将授予完整的管理员权限。",
+      "revokeAdmin": "这将撤销管理员权限。",
+      "title": "更改用户角色"
+    },
+    "searchPlaceholder": "搜索用户...",
+    "statusFilter": {
+      "all": "所有状态"
+    },
+    "tableHeaders": {
+      "auth": "验证",
+      "lastLogin": "最后登录"
+    },
+    "toggleActiveModal": {
+      "activateConfirm": "激活\"{{username}}\"？他们将能够重新登录。",
+      "activateTitle": "激活用户",
+      "cannotDeactivateLastAdmin": "无法停用最后一个管理员。",
+      "cannotDeactivateSelf": "您无法停用自己的账户。",
+      "deactivateConfirm": "停用\"{{username}}\"？他们将无法登录，直到重新激活。",
+      "deactivateTitle": "停用用户"
+    },
+    "userCount": "{{count}}个用户",
+    "userCount_one": "{{count}}个用户",
+    "userCount_other": "{{count}}个用户"
+  }
+}

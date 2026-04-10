@@ -161,13 +161,8 @@ class CustomReportPDFGenerator:
 
             # Store CJK font names (fall back to Latin fonts if unavailable)
             self.font_cjk_normal = 'CJKFont' if cjk_registered else self.font_normal
-            self.font_cjk_bold = 'CJKFont-Bold' if cjk_bold_registered else self.font_bold
-
-            if not cjk_registered:
-                logger.warning(
-                    "No CJK font found (Microsoft YaHei, Noto Sans CJK, or PingFang). "
-                    "Chinese/Japanese/Korean characters in PDF reports will not render correctly."
-                )
+            self.font_cjk_bold = 'CJKFont-Bold' if cjk_bold_registered else self.font_cjk_normal
+            self._has_cjk_font = cjk_registered
 
         except Exception as e:
             logger.error(f"Error registering fonts: {e}")
@@ -175,6 +170,7 @@ class CustomReportPDFGenerator:
             self.font_bold = 'Helvetica-Bold'
             self.font_cjk_normal = 'Helvetica'
             self.font_cjk_bold = 'Helvetica-Bold'
+            self._has_cjk_font = False
 
     def _create_styles(
         self,
@@ -332,11 +328,19 @@ class CustomReportPDFGenerator:
         self.unit_system = report_data.get('unit_system', 'imperial')
         self.translator = get_translator(language, date_format)
 
-        # Use CJK fonts for Chinese/Japanese/Korean reports
+        # Rebuild styles per request so font selection is always correct
         if language in self.CJK_LANGUAGES:
+            if not self._has_cjk_font:
+                logger.warning(
+                    "No CJK font available for language '%s'. "
+                    "Characters may not render correctly in the PDF.",
+                    language,
+                )
             self.styles = self._create_styles(
                 font_normal=self.font_cjk_normal, font_bold=self.font_cjk_bold
             )
+        else:
+            self.styles = self._create_styles()
 
         # Create document
         doc = SimpleDocTemplate(
