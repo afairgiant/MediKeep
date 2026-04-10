@@ -1533,6 +1533,16 @@
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 137
+    },
+    {
+      "test_name": "Atc Varicella-Zoster IgCz",
+      "abbreviation": "VZV IgCz",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["VZV IgCz", "Varicella-Zoster IgCz", "Chickenpox Antibody IgCz", "Atc VZV IgCz"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 138
     }
   ]
 }

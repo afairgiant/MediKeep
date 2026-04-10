@@ -242,6 +242,7 @@ function TestComponentTemplates({
         { test_name: 'HSV-1 IgG', unit: '', default_display_order: 6, result_type: 'qualitative' },
         { test_name: 'HSV-2 IgM', unit: '', default_display_order: 7, result_type: 'qualitative' },
         { test_name: 'HSV-2 IgG', unit: '', default_display_order: 8, result_type: 'qualitative' },
+        { test_name: 'Atc Varicella-Zoster IgCz', abbreviation: 'VZV IgCz', unit: '', default_display_order: 9, result_type: 'qualitative' },
       ]
     },
   ];
