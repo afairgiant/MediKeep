@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.config import Settings
-from app.core.logging.config import get_logger
+from app.core.logging.config import get_logger, log_security_event
 from app.models.models import Base
 
 # Initialize logger
@@ -25,7 +25,10 @@ class DatabaseConfig:
         """Get database URL from settings configuration or Windows path"""
         # Check if running as Windows EXE (uses SQLite in AppData)
         try:
-            from app.core.platform.windows_config import is_windows_exe, get_database_path
+            from app.core.platform.windows_config import (
+                is_windows_exe,
+                get_database_path,
+            )
 
             if is_windows_exe():
                 db_path = get_database_path()
@@ -178,22 +181,51 @@ def check_database_connection():
 
 
 def create_default_user():
-    """Create a default admin user only if NO admin users exist (fresh installation)"""
+    """
+    Create a default admin user on fresh installs, or warn (without auto-healing)
+    when no admin users exist but users are present.
+
+    Fresh install (zero users) → creates the default 'admin' account with the
+    default password and must_change_password=True (unchanged behavior).
+
+    No admins but users exist → logs a loud WARNING-level security event with
+    the recovery command. Does NOT auto-promote any existing user, because the
+    demotion may be intentional (e.g. operator deliberately demoted the default
+    admin for security after creating a secondary admin that was later lost).
+    The explicit CLI invocation of create_emergency_admin.py is the only
+    consent signal for promotion.
+    """
     from app.crud.user import user
     from app.services.auth import AuthService
 
     db = SessionLocal()
     try:
-        # Check if ANY admin users exist in the system
         admin_count = user.get_admin_count(db)
 
-        if admin_count == 0:
-            # No admin users exist - create default admin
+        if admin_count > 0:
+            logger.info(
+                f"Admin users already exist ({admin_count} found) - skipping default user creation",
+                extra={
+                    "category": "app",
+                    "event": "admin_users_exist",
+                    "admin_count": admin_count,
+                },
+            )
+            return
+
+        # No admins exist. Branch on whether this is a fresh install.
+        total_users = user.get_total_count(db)
+
+        if total_users == 0:
+            # Fresh install - create default admin (unchanged behavior).
             default_password = settings.ADMIN_DEFAULT_PASSWORD
             # must_change_password=True is set atomically in the same commit as the
             # user row inside create_user — no second commit needed.
             AuthService.create_user(
-                db, username="admin", password=default_password, is_superuser=True,
+                db,
+                username="admin",
+                password=default_password,
+                is_superuser=True,
                 must_change_password=True,
             )
             logger.info(
@@ -201,24 +233,51 @@ def create_default_user():
                 extra={
                     "category": "app",
                     "event": "default_admin_created",
-                    "username": "admin"
-                }
+                    "username": "admin",
+                },
             )
             logger.warning(
                 "IMPORTANT: Default admin password in use - Please change after first login!",
                 extra={
                     "category": "security",
-                    "event": "default_password_warning"
-                }
+                    "event": "default_password_warning",
+                },
+            )
+            return
+
+        # Users exist but no admins. Detect whether the 'admin' username is
+        # demoted (most common case) or missing entirely, and warn loudly.
+        existing_admin_row = user.get_by_username(db, username="admin")
+
+        if existing_admin_row is not None:
+            log_security_event(
+                logger,
+                event="admin_user_demoted_no_other_admins",
+                user_id=existing_admin_row.id,
+                ip_address="startup",
+                message=(
+                    f"Startup detected zero admin users but username 'admin' exists "
+                    f"with role='{existing_admin_row.role}'. The system will NOT "
+                    f"auto-promote this user because the demotion may be intentional. "
+                    f"To restore admin access, run: "
+                    f"docker exec <container> python app/scripts/create_emergency_admin.py --username admin"
+                ),
+                existing_role=existing_admin_row.role,
+                total_users=total_users,
             )
         else:
-            logger.info(
-                f"Admin users already exist ({admin_count} found) - skipping default user creation",
-                extra={
-                    "category": "app",
-                    "event": "admin_users_exist",
-                    "admin_count": admin_count
-                }
+            log_security_event(
+                logger,
+                event="no_admin_users_detected",
+                ip_address="startup",
+                message=(
+                    f"Startup detected zero admin users but {total_users} non-admin "
+                    f"user(s) exist. The system will NOT auto-create an admin. "
+                    f"To restore admin access, run: "
+                    f"docker exec <container> python app/scripts/create_emergency_admin.py "
+                    f"--username <existing_username> --promote"
+                ),
+                total_users=total_users,
             )
     finally:
         db.close()
@@ -267,6 +326,7 @@ def database_migrations() -> bool:
         # Check if running as Windows EXE
         try:
             from app.core.platform.windows_config import is_windows_exe
+
             is_exe = is_windows_exe()
         except ImportError:
             is_exe = False
@@ -274,7 +334,9 @@ def database_migrations() -> bool:
         if is_exe:
             # Windows EXE mode: Skip Alembic and use create_all()
             # This is simpler and more reliable for frozen applications
-            logger.info("Windows EXE mode: Using SQLAlchemy create_all() instead of Alembic")
+            logger.info(
+                "Windows EXE mode: Using SQLAlchemy create_all() instead of Alembic"
+            )
             try:
                 # Create all tables if they don't exist
                 Base.metadata.create_all(bind=engine)
@@ -284,6 +346,7 @@ def database_migrations() -> bool:
             except Exception as e:
                 logger.error(f"❌ Failed to create database tables: {e}")
                 import traceback
+
                 logger.error(f"Full traceback: {traceback.format_exc()}")
                 return False
         else:
@@ -318,7 +381,9 @@ def database_migrations() -> bool:
                     logger.debug(f"Migration output: {result.stdout}")
                 return True
             else:
-                logger.error(f"❌ Migration failed with return code {result.returncode}")
+                logger.error(
+                    f"❌ Migration failed with return code {result.returncode}"
+                )
                 logger.error(f"Migration stderr: {result.stderr}")
                 if result.stdout:
                     logger.error(f"Migration stdout: {result.stdout}")

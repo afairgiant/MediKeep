@@ -119,6 +119,22 @@ Go to the patient's sharing settings and remove their access.
 
 There is no self-service password reset. An administrator can reset your password through the admin panel.
 
+### I lost admin access / I'm locked out of the admin panel
+
+If your admin account was demoted, deleted, or you never had one on a fresh install, MediKeep ships with an emergency recovery script that runs against the database directly.
+
+**One-liner recovery for the default `admin` account:**
+
+```bash
+docker exec -it <container_name> python app/scripts/create_emergency_admin.py --username admin
+```
+
+The script detects whether the user exists and either **promotes the existing user to admin** (preserving their current password — no reset) or **creates a new admin user** if no account with that username exists. It asks for confirmation before making any changes and writes both a security-log entry and an activity-log row for audit purposes.
+
+Full documentation including all flags, scenarios (lost default admin, non-default username, creating an additional admin), exit codes, and troubleshooting is in [`app/scripts/README_EMERGENCY_ADMIN.md`](../../app/scripts/README_EMERGENCY_ADMIN.md).
+
+MediKeep also runs a startup self-check that logs a prominent `WARNING` with the recovery command whenever it detects zero admin users in a non-empty database, so if you missed the lockout, you'll see it in `logs/security.log` on the next restart.
+
 ### The application is slow
 
 Try:

@@ -53,6 +53,22 @@ Admins can manage all user accounts in the system.
 - Deactivate users to prevent login without removing their data
 - Delete user accounts (cascades cleanup of related data)
 
+### Emergency Admin Recovery (CLI)
+
+If every admin account is ever demoted, deactivated, or deleted, the admin panel itself becomes unreachable and no UI action can recover it. MediKeep ships a CLI recovery script (`app/scripts/create_emergency_admin.py`) that runs directly against the database and can either **promote an existing user back to admin** (preserving their password) or **create a fresh admin user**.
+
+**Most common recovery — default `admin` account was demoted:**
+
+```bash
+docker exec -it <container_name> python app/scripts/create_emergency_admin.py --username admin
+```
+
+The script auto-detects state and picks promote-vs-create, shows a plan, asks for confirmation, and writes to both the security log and the activity log so the recovery action appears under the admin activity log after you regain access.
+
+**Careful with role changes in the admin panel:** the User Management section above lets you edit roles, which includes demoting other admins. If you demote your *only* admin account (or demote yourself after deleting the other admins), the admin panel becomes immediately unreachable. The CLI recovery script is the only way back at that point. MediKeep also logs a `WARNING`-level security event on every app startup when zero admin users exist, so a lockout shows up in `logs/security.log` on the next restart.
+
+Full CLI documentation: [`app/scripts/README_EMERGENCY_ADMIN.md`](../../app/scripts/README_EMERGENCY_ADMIN.md).
+
 ---
 
 ## Data Model Management

@@ -1,133 +1,74 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Center, Loader, Text, Alert, Button, Stack } from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react';
-import { useTranslation } from 'react-i18next';
+import { Center, Loader, Text, Stack } from '@mantine/core';
 import { useAuth } from '../../contexts/AuthContext';
+import { isUserAdmin } from '../../utils/authUtils';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import AdminBreadcrumbs from './AdminBreadcrumbs';
 import { adminApiService } from '../../services/api/adminApi';
-import { secureStorage, legacyMigration } from '../../utils/secureStorage';
-import logger from '../../services/logger';
 import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
-  const { t } = useTranslation('navigation');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    logout,
+  } = useAuth();
 
+  // Gate admin access on AuthContext user state (populated from /users/me),
+  // not client-side JWT decoding — the cookie-auth flow stores the token in
+  // an HttpOnly cookie that JS cannot read, so decoding always fails there.
   useEffect(() => {
-    const ENCRYPTION_INIT_RETRY_DELAY = 100;
-
-    async function checkAdminAccess() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        await legacyMigration.migrateFromLocalStorage();
-
-        let token = await secureStorage.getItem('token');
-
-        // Retry once if encryption key might not be ready yet
-        if (!token) {
-          await new Promise(resolve => setTimeout(resolve, ENCRYPTION_INIT_RETRY_DELAY));
-          token = await secureStorage.getItem('token');
-        }
-
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
-        let payload;
-        try {
-          payload = JSON.parse(atob(token.split('.')[1]));
-        } catch (decodeError) {
-          logger.error('Failed to decode token:', decodeError);
-          await secureStorage.removeItem('token');
-          navigate('/login');
-          return;
-        }
-
-        if (payload.exp < Date.now() / 1000) {
-          await secureStorage.removeItem('token');
-          navigate('/login');
-          return;
-        }
-
-        const userRole = payload.role || '';
-        if (
-          userRole.toLowerCase() !== 'admin' &&
-          userRole.toLowerCase() !== 'administrator'
-        ) {
-          navigate('/dashboard');
-          return;
-        }
-
-        setUser({
-          username: payload.sub,
-          role: userRole,
-          fullName: payload.full_name || payload.sub,
-        });
-
-        try {
-          await adminApiService.testAdminAccess();
-        } catch (apiError) {
-          // Backend test is optional -- user already passed token validation
-        }
-      } catch (error) {
-        setError('Authentication failed. Please try logging in again.');
-        setTimeout(() => navigate('/login'), 3000);
-      } finally {
-        setLoading(false);
-      }
+    // Wait for AuthContext to finish its initial /users/me lookup before deciding.
+    if (authLoading) {
+      return;
     }
 
-    checkAdminAccess();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!isAuthenticated || !user) {
+      navigate('/login');
+      return;
+    }
+
+    if (!isUserAdmin(user)) {
+      navigate('/dashboard');
+      return;
+    }
+
+    // Belt-and-suspenders: confirm with the backend that this user actually
+    // has admin access. We don't navigate away on failure because individual
+    // admin API calls will 403 the user anyway — this is an early-warning
+    // log hook.
+    adminApiService.testAdminAccess().catch(() => {
+      // Intentionally swallowed: context says admin, backend disagreement
+      // will surface on the next admin API call.
+    });
+  }, [authLoading, isAuthenticated, user, navigate]);
 
   const handleLogout = async () => {
     try {
       await logout();
-    } catch (error) {
+    } catch (logoutError) {
       navigate('/login');
     }
   };
 
   const toggleSidebar = () => setSidebarOpen((prev) => !prev);
 
-  if (loading) {
+  // While auth context is still resolving the session (or while we're in the
+  // middle of a navigate-away decision), render the loader instead of the
+  // admin shell. Once auth is resolved AND the user is confirmed admin, we
+  // fall through to the layout render.
+  if (authLoading || !user || !isUserAdmin(user)) {
     return (
       <Center h="100vh">
         <Stack align="center" gap="md">
           <Loader size="lg" />
           <Text c="dimmed">Verifying admin access...</Text>
-        </Stack>
-      </Center>
-    );
-  }
-
-  if (error) {
-    return (
-      <Center h="100vh">
-        <Stack align="center" gap="md" maw={500}>
-          <Alert
-            icon={<IconAlertCircle size={16} />}
-            title="Access Error"
-            color="red"
-            variant="light"
-          >
-            {error}
-          </Alert>
-          <Button variant="light" onClick={() => navigate('/dashboard')}>
-            {t('menu.backToDashboard')}
-          </Button>
         </Stack>
       </Center>
     );

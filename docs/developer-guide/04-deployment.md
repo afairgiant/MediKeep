@@ -1624,6 +1624,40 @@ docker compose restart medikeep-app
 
 ## Troubleshooting
 
+### Lost Admin Access Recovery
+
+If your admin account was demoted, deleted, or you never had one on a fresh install, MediKeep ships with an emergency recovery script that works against the database directly. This does **not** require a working admin session — it runs inside the container with database credentials only.
+
+**One-line recovery for the default `admin` account:**
+
+```bash
+docker exec -it <container_name> python app/scripts/create_emergency_admin.py --username admin
+```
+
+The script auto-detects whether the target user exists:
+
+- **User exists and is not admin** → promotes them to `role='admin'` **in place, preserving their password, email, and other fields**. The user logs in immediately with their existing credentials.
+- **User does not exist** → creates a new admin user. Prompts interactively for a password (or pass `--password` non-interactively). The new user is forced to change their password at first login.
+- **User already has admin role** → exits `0` with "nothing to do" (safe no-op, not an error).
+
+**Other scenarios:**
+
+```bash
+# Explicitly promote a non-default user when other admins are present
+docker exec -it medikeep-app \
+  python app/scripts/create_emergency_admin.py --username alice --promote
+
+# Create an additional admin user when admins already exist (non-emergency)
+docker exec -it medikeep-app \
+  python app/scripts/create_emergency_admin.py --username extra --force
+```
+
+**Audit trail:** every successful promotion or creation writes to both `logs/security.log` (event `emergency_admin_promoted` or `emergency_admin_created`) and the `activity_logs` table with `metadata.source='emergency_admin_script'`, so the action shows up in the admin activity log UI after recovery.
+
+**Startup self-check:** MediKeep logs a `WARNING`-level security event on every startup when it detects zero admin users in a non-empty database. The log message includes the exact recovery command. Check `logs/security.log` for event `admin_user_demoted_no_other_admins` or `no_admin_users_detected` if you are unsure whether you are in a recoverable lockout state.
+
+Full documentation of all flags, scenarios, exit codes, and troubleshooting: [`app/scripts/README_EMERGENCY_ADMIN.md`](../../app/scripts/README_EMERGENCY_ADMIN.md).
+
 ### Common Deployment Issues
 
 #### Container Won't Start
