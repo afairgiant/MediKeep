@@ -1,0 +1,122 @@
+{
+  "activity": {
+    "actions": {
+      "added": "已添加",
+      "deleted": "已删除",
+      "modified": "已修改",
+      "removed": "已移除",
+      "scheduled": "已安排",
+      "updated": "已更新",
+      "viewed": "已查看"
+    }
+  },
+  "dashboard": {
+    "activity": {
+      "lastUpdated": "最近更新",
+      "noActivity": "暂无近期活动",
+      "noActivityDescription": "您的医疗记录活动将显示在此处"
+    },
+    "hello": "您好",
+    "loading": "正在加载您的医疗面板...",
+    "modules": {
+      "exportRecords": "导出记录",
+      "visitHistory": "就诊记录"
+    },
+    "search": {
+      "advancedSearch": "高级搜索",
+      "placeholder": "搜索医疗记录..."
+    },
+    "sections": {
+      "additionalResources": "附加资源",
+      "coreMedical": "核心医疗信息",
+      "healthMonitoring": "健康监测",
+      "prevention": "预防与病史",
+      "recentActivity": "近期活动",
+      "treatments": "治疗与手术"
+    },
+    "stats": {
+      "activeMedications": "当前用药"
+    },
+    "subtitle": "安全管理您的健康信息",
+    "title": "MediKeep 面板"
+  },
+  "invitations": {
+    "acceptButton": "接受邀请",
+    "confirmDescription": "接受后，您将有权查看共享的医疗信息。",
+    "confirmQuestion": "您确定要接受此邀请吗？",
+    "confirmTitle": "确认接受邀请",
+    "from": "来自",
+    "lastUpdated": "最近更新",
+    "manageAll": "管理所有邀请",
+    "noPending": "暂无待处理邀请",
+    "noPendingDescription": "新的共享邀请将显示在此处",
+    "sharePatient": "共享患者",
+    "title": "邀请",
+    "types": {
+      "patientRecord": "患者档案"
+    }
+  },
+  "menu": {
+    "account": "账户",
+    "backToDashboard": "返回面板",
+    "darkMode": "深色模式",
+    "help": "帮助",
+    "lightMode": "浅色模式",
+    "logout": "退出登录",
+    "patients": "患者",
+    "profile": "个人资料",
+    "reports": "报告",
+    "userActions": "用户操作"
+  },
+  "pages": {
+    "help": "帮助与支持",
+    "medicalHistory": "病史",
+    "patientDetails": "患者详情",
+    "patientList": "患者列表",
+    "preferences": "偏好设置",
+    "reports": "报告",
+    "userProfile": "用户资料"
+  },
+  "sections": {
+    "personalInfo": "个人信息",
+    "preferences": "偏好设置"
+  },
+  "sidebarNav": {
+    "items": {
+      "adminDashboard": "管理面板",
+      "allergies": "过敏史",
+      "backupManagement": "备份管理",
+      "conditions": "病症",
+      "customReports": "自定义报告",
+      "dataModels": "数据模型",
+      "emergencyContacts": "紧急联系人",
+      "exportRecords": "导出记录",
+      "familyHistory": "家族病史",
+      "immunizations": "疫苗接种",
+      "injuries": "外伤",
+      "insurance": "保险",
+      "labResults": "检验结果",
+      "language": "语言",
+      "medicalEquipment": "医疗设备",
+      "medications": "药物",
+      "patientInfo": "患者信息",
+      "pharmacies": "药房",
+      "practitioners": "医务人员",
+      "procedures": "手术",
+      "settings": "设置",
+      "symptoms": "症状",
+      "systemHealth": "系统状态",
+      "tagManagement": "标签管理",
+      "theme": "主题",
+      "treatments": "治疗",
+      "visitHistory": "就诊记录",
+      "vitalSigns": "生命体征"
+    },
+    "sections": {
+      "administration": "管理",
+      "careAndTreatment": "护理与治疗",
+      "misc": "其他",
+      "tools": "工具"
+    }
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "errorBoundary": {
+    "browserCompat": "浏览器兼容性问题",
+    "chartError": "图表显示错误",
+    "chartErrorDescription": "无法渲染图表。请尝试刷新页面。",
+    "documentError": "文档管理器错误",
+    "documentErrorDescription": "管理文档时发生错误。您的数据是安全的。",
+    "errorDetails": "错误详情",
+    "invalidData": "来自服务器的无效数据",
+    "networkIssues": "网络连接问题",
+    "tempIssues": "临时系统问题",
+    "tryAgain": "重试",
+    "uploadError": "上传进度错误",
+    "uploadErrorDescription": "上传进度追踪器遇到错误。"
+  },
+  "fileCount": {
+    "attached": "{{count}} 个已附加",
+    "attached_one": "{{count}} 个已附加",
+    "attached_other": "{{count}} 个已附加",
+    "fileCount": "{{count}} 个文件",
+    "fileCount_one": "{{count}} 个文件",
+    "fileCount_other": "{{count}} 个文件",
+    "noFiles": "没有文件"
+  },
+  "fileList": {
+    "fileDetails": "文件详情",
+    "loading": "正在加载文件...",
+    "markedCount": "{{count}} 个文件标记为删除",
+    "markedCount_one": "{{count}} 个文件标记为删除",
+    "markedCount_other": "{{count}} 个文件标记为删除",
+    "markedForDeletion": "标记为删除",
+    "noFiles": "没有附加文件",
+    "noMatch": "没有符合搜索条件的文件。",
+    "showingFiles": "显示 {{showing}} / {{total}} 个文件",
+    "statusDuplicate": "重复",
+    "statusFailed": "失败",
+    "statusMissing": "缺失",
+    "statusProcessing": "处理中"
+  },
+  "fileUpload": {
+    "accepted": "接受格式：{{types}} • 最大大小：{{size}}MB",
+    "chooseFiles": "选择文件",
+    "dragOrClick": "将文件拖放到此处或点击选择",
+    "remove": "移除",
+    "selectedFiles": "已选文件 ({{count}})",
+    "selectedFiles_one": "已选文件 ({{count}})",
+    "selectedFiles_other": "已选文件 ({{count}})"
+  },
+  "linkPaperless": {
+    "from": "来源：{{name}}",
+    "infoText": "搜索 Paperless 中已有的文档以链接到此 {{entityType}}。无需上传文件！",
+    "linkDocument": "链接文档",
+    "moreTags": "还有 +{{count}}",
+    "moreTags_one": "还有 +{{count}}",
+    "moreTags_other": "还有 +{{count}}",
+    "noDocumentsFound": "未找到文档",
+    "searchDocuments": "搜索文档",
+    "searchPlaceholder": "按标题、内容或标签搜索...",
+    "selected": "已选择",
+    "title": "链接现有 Paperless 文档",
+    "tryDifferent": "尝试不同的搜索词",
+    "type": "类型：{{type}}"
+  },
+  "linkPapra": {
+    "infoText": "搜索 Papra 中已有的文档以链接到此 {{entityType}}。无需上传文件！",
+    "linkDocument": "链接文档",
+    "noDocumentsFound": "未找到文档",
+    "searchPlaceholder": "搜索文档...",
+    "selected": "已选择",
+    "title": "链接现有 Papra 文档",
+    "tryDifferent": "尝试不同的搜索词"
+  },
+  "manager": {
+    "addDocument": "添加文档",
+    "currentFiles": "当前文件：",
+    "duplicateDocument": "重复文档",
+    "duplicateExists": "此文档在 Paperless 中已存在，无法再次上传。",
+    "filesToUpload": "待上传文件：",
+    "linkPaperless": "链接现有 Paperless 文档",
+    "linkPapra": "链接现有 Papra 文档",
+    "manageDocuments": "管理文档",
+    "processingPaperless": "正在 Paperless 中处理文档...",
+    "searchFiles": "搜索文件...",
+    "statusDuplicate": "重复",
+    "statusFailed": "失败",
+    "statusUploaded": "已上传",
+    "statusUploading": "正在上传到 Paperless...",
+    "syncCheck": "同步检查",
+    "uploadNewFile": "上传新文件",
+    "uploadSuccess": "文档上传成功！"
+  },
+  "paperlessStatus": {
+    "autoSyncEnabled": "自动同步已启用",
+    "documentAlreadyExists": "\"{{fileName}}\" 与 Paperless 中已有文档完全相同。",
+    "duplicateHint": "如需上传新版本，请先修改文档。",
+    "processingDocument": "文档正在由 Paperless 处理...",
+    "syncFailed": "同步失败",
+    "syncing": "同步中..."
+  },
+  "renderMode": {
+    "compactView": "紧凑视图",
+    "gridView": "网格视图",
+    "listView": "列表视图",
+    "viewMode": "视图模式"
+  },
+  "storage": {
+    "backendLabel": "存储后端：",
+    "connectedBadge": "已连接",
+    "local": "本地存储",
+    "paperless": "Paperless-ngx",
+    "papra": "Papra",
+    "selectBackend": "选择存储后端"
+  },
+  "upload": {
+    "completed": "{{count}} 个已完成",
+    "completed_one": "{{count}} 个已完成",
+    "completed_other": "{{count}} 个已完成",
+    "dragOrClick": "将文件拖放到此处或点击选择",
+    "failed": "{{count}} 个失败",
+    "failed_one": "{{count}} 个失败",
+    "failed_other": "{{count}} 个失败",
+    "filesProgress": "{{completed}}/{{total}} 个文件",
+    "maxSize": "最大文件大小：{{size}}MB",
+    "overallProgress": "总体进度",
+    "percentComplete": "已完成 {{percent}}%",
+    "remaining": "剩余 {{time}}",
+    "retryFailed": "重试失败的",
+    "uploading": "{{count}} 个正在上传",
+    "uploading_one": "{{count}} 个正在上传",
+    "uploading_other": "{{count}} 个正在上传"
+  }
+}

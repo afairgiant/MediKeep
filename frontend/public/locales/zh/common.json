@@ -1,0 +1,1315 @@
+{
+  "allergies": {
+    "messages": {
+      "loading": "正在加载过敏记录..."
+    }
+  },
+  "buttons": {
+    "addNew": "新增",
+    "back": "返回",
+    "cancelSelection": "取消选择",
+    "create": "创建",
+    "delete": "删除",
+    "done": "完成",
+    "link": "关联",
+    "linkCondition": "关联病症",
+    "linkConditions": "关联多个病症",
+    "linkEquipment": "关联设备",
+    "linkLabResult": "关联检验结果",
+    "linkMedication": "关联药物",
+    "linkVisit": "关联就诊",
+    "print": "打印",
+    "refresh": "刷新",
+    "restore": "恢复",
+    "save": "保存",
+    "saveChanges": "保存更改",
+    "search": "搜索",
+    "share": "共享",
+    "showLess": "收起",
+    "showMore": "展开更多",
+    "tryAgain": "重试",
+    "update": "更新",
+    "view": "查看",
+    "linkMedications": "关联多个药物"
+  },
+  "conditions": {
+    "addNew": "新增病症",
+    "addTitle": "新增病症",
+    "card": {
+      "durationEnded": "{{duration}}（已结束）",
+      "durationOngoing": "{{duration}}（进行中）"
+    },
+    "editTitle": "编辑病症",
+    "form": {
+      "createCondition": "创建病症",
+      "descriptions": {
+        "codeDescription": "医疗编码的可读性描述",
+        "conditionName": "可选的替代名称",
+        "diagnosis": "主要诊断或病症",
+        "endDate": "病症结束日期（如适用）",
+        "icd10Code": "ICD-10疾病分类编码",
+        "notes": "关于该病症的附加信息",
+        "onsetDate": "病症开始日期",
+        "practitioner": "相关医疗提供者",
+        "snomedCode": "SNOMED CT编码",
+        "tags": "添加标签以分类和组织病症"
+      },
+      "medicationsDescription": "关联用于治疗的药物。",
+      "placeholders": {
+        "codeDescription": "医疗编码描述",
+        "conditionName": "输入病症名称",
+        "diagnosis": "输入诊断",
+        "icd10Code": "例如：E11.9",
+        "notes": "输入临床记录、观察结果或附加详情",
+        "severity": "选择严重程度",
+        "snomedCode": "例如：44054006"
+      },
+      "saving": "正在保存病症...",
+      "severity": {
+        "critical": "危重",
+        "mild": "轻度",
+        "moderate": "中度",
+        "severe": "重度"
+      },
+      "status": {
+        "chronic": "慢性"
+      },
+      "updateCondition": "更新病症"
+    },
+    "getStarted": "点击\"新增病症\"开始添加。",
+    "loading": "正在加载病症...",
+    "modal": {
+      "labels": {
+        "endDate": "结束",
+        "onsetDate": "发病"
+      },
+      "noNotesAvailable": "无可用临床记录",
+      "sections": {
+        "medicalCodes": "医疗编码"
+      },
+      "title": "病症详情"
+    },
+    "noResults": "未找到病症",
+    "notifications": {
+      "medicationLinkFailed": "病症已创建，但部分药物无法关联。您可以通过编辑病症手动关联它们。",
+      "medicationLinkWarning": "药物关联问题"
+    },
+    "table": {
+      "icd10": "ICD-10"
+    }
+  },
+  "emergencyContacts": {
+    "actions": {
+      "addNew": "新增紧急联系人"
+    },
+    "card": {
+      "address": "地址：",
+      "email": "电子邮箱：",
+      "notes": "📝 备注",
+      "phone": "电话：",
+      "primary": "主要",
+      "relationship": "关系：",
+      "secondaryPhone": "备用电话："
+    },
+    "form": {
+      "addTitle": "新增紧急联系人",
+      "editTitle": "编辑紧急联系人"
+    },
+    "page": {
+      "loading": "正在加载紧急联系人...",
+      "noContacts": "未找到紧急联系人",
+      "noContactsDescription": "在医疗紧急情况下，拥有紧急联系人非常重要。"
+    },
+    "table": {
+      "primary": "主要"
+    },
+    "viewModal": {
+      "contactInfo": "📞 联系信息",
+      "editContact": "编辑联系人",
+      "icon": "🚨",
+      "notes": "📝 备注",
+      "primaryPhone": "主要电话",
+      "secondaryPhone": "备用电话",
+      "title": "紧急联系人详情"
+    }
+  },
+  "equipment": {
+    "addEquipment": "新增设备",
+    "addFirstEquipment": "添加您的首个设备",
+    "editEquipment": "编辑设备",
+    "fields": {
+      "modelNumber": "型号",
+      "nextService": "下次维护",
+      "prescribedDate": "开具日期",
+      "serialNumber": "序列号"
+    },
+    "form": {
+      "create": "创建设备",
+      "lastService": "上次维护日期",
+      "manufacturerPlaceholder": "例如：ResMed、Philips",
+      "modelNumber": "型号",
+      "modelPlaceholder": "例如：AirSense 11",
+      "namePlaceholder": "例如：ResMed AirSense 11",
+      "nextService": "下次维护日期",
+      "notesPlaceholder": "关于此设备的附加备注",
+      "practitioner": "开具医生",
+      "prescribedDate": "开具日期",
+      "saving": "正在保存设备...",
+      "serialPlaceholder": "设备序列号",
+      "supplierPlaceholder": "设备供应商",
+      "type": "设备类型",
+      "update": "更新设备",
+      "usageInstructions": "使用说明",
+      "usagePlaceholder": "如何使用此设备"
+    },
+    "loading": "正在加载设备...",
+    "noEquipmentFound": "未找到设备",
+    "startAdding": "从添加您的第一个医疗设备开始。",
+    "viewModal": {
+      "dates": "重要日期",
+      "lastService": "上次维护",
+      "manufacturerDetails": "制造商详情",
+      "modelNumber": "型号",
+      "nextService": "下次维护",
+      "prescribedBy": "开具医生",
+      "prescribedDate": "开具日期",
+      "title": "设备详情",
+      "type": "设备类型",
+      "usageInstructions": "使用说明"
+    }
+  },
+  "errors": {
+    "invalidPhone": "请输入有效的电话号码",
+    "loadFailed": "加载失败"
+  },
+  "familyHistory": {
+    "addFamilyMember": "新增家庭成员",
+    "card": {
+      "addCondition": "添加病症",
+      "age": "年龄",
+      "birthYear": "出生年份",
+      "cannotEditSharedMember": "无法编辑共享成员",
+      "conditions": "病症",
+      "deathYear": "去世年份",
+      "deceased": "已故",
+      "diagnosedAtAge": "{{age}}岁时确诊",
+      "noConditionsRecorded": "未记录医疗病症",
+      "notSelectable": "不可选择",
+      "selected": "已选择",
+      "sharedBy": "共享者",
+      "subtitle": "家庭成员",
+      "years": "岁"
+    },
+    "conditionCountAcrossMembers": "{{memberCount}}位家庭成员的{{conditionCount}}个病症",
+    "confirmations": {
+      "deleteCondition": "您确定要删除此病症吗？",
+      "deleteMember": "您确定要删除此家庭成员吗？"
+    },
+    "emptyState": {
+      "addFirstMember": "添加您的第一位家庭成员",
+      "noFamilyMembers": "尚无家庭成员",
+      "startBuilding": "通过添加您的第一位家庭成员来开始建立家族病史。"
+    },
+    "endSharingMode": "结束共享模式",
+    "errors": {
+      "createdButFailedRefresh": "家庭成员创建成功，但刷新列表失败。请重新加载页面查看更改。",
+      "failedToDeleteCondition": "删除病症失败",
+      "failedToSaveCondition": "保存病症失败",
+      "familyMemberNotAvailable": "家庭成员信息不可用",
+      "updatedButFailedRefresh": "家庭成员更新成功，但刷新列表失败。请重新加载页面查看更改。"
+    },
+    "form": {
+      "addConditionForMember": "为{{name}}添加病症",
+      "addMemberTitle": "添加家庭成员",
+      "editConditionForMember": "为{{name}}编辑病症",
+      "editMemberTitle": "编辑家庭成员"
+    },
+    "loadingFamilyHistory": "正在加载家庭病史...",
+    "manageInvitations": "管理邀请",
+    "notifications": {
+      "cannotDelete": "无法删除",
+      "cannotDeleteShared": "您无法删除共享的家族病史记录",
+      "cannotEdit": "无法编辑",
+      "cannotEditShared": "您无法编辑共享的家族病史记录"
+    },
+    "pageTitle": "家族病史",
+    "sharedConditionCountAcrossMembers": "{{memberCount}}位共享家庭成员的{{conditionCount}}个病症",
+    "sharedMemberCount": "与您共享的{{totalCount}}位家庭成员中的{{filteredCount}}位",
+    "sharedMembersCannotBeSelected": "共享的家庭成员不能被选择用于额外共享。",
+    "sharedTableName": "共享的家族病史",
+    "sharingMode": "共享模式",
+    "sharingModeActive": "共享模式已激活",
+    "table": {
+      "diagnosisAge": "确诊年龄",
+      "familyMember": "家庭成员",
+      "noConditions": "无病症",
+      "sharedBy": "共享者",
+      "yearsOld": "{{age}}岁"
+    },
+    "tabs": {
+      "myFamily": "我的家庭",
+      "sharedWithMe": "与我共享"
+    },
+    "viewModal": {
+      "addCondition": "添加医疗病症",
+      "cannotAddConditionsShared": "无法向共享家庭成员添加病症",
+      "cannotDeleteConditionsShared": "无法删除共享家庭成员的病症",
+      "cannotEditConditionsShared": "无法编辑共享家庭成员的病症",
+      "cannotEditShared": "无法编辑共享家庭成员",
+      "deleteCondition": "删除病症",
+      "editCondition": "编辑病症",
+      "editFamilyMember": "编辑家庭成员",
+      "editMember": "编辑家庭成员",
+      "memberDetails": "成员详情",
+      "modalTitle": "家族病史",
+      "sharedAt": "共享于",
+      "sharingNote": "共享备注"
+    }
+  },
+  "fields": {
+    "endDate": {
+      "description": "结束时间（如适用）",
+      "label": "结束日期",
+      "placeholder": "选择结束日期"
+    },
+    "notes": {
+      "description": "任何附加详情或备注",
+      "placeholder": "附加信息..."
+    },
+    "startDate": {
+      "description": "开始时间",
+      "label": "开始日期",
+      "placeholder": "选择开始日期"
+    },
+    "status": {
+      "description": "当前状态"
+    },
+    "tags": {
+      "description": "添加标签以帮助组织和搜索此记录",
+      "placeholder": "添加标签以组织和查找此记录"
+    }
+  },
+  "filters": {
+    "clear": "清除",
+    "itemCount": "{{filtered}}/{{total}} 项",
+    "title": "筛选和搜索"
+  },
+  "immunizations": {
+    "addImmunization": "新增免疫接种",
+    "addNewImmunization": "新增免疫接种",
+    "card": {
+      "practitionerId": "ID：{{id}}"
+    },
+    "clickToGetStarted": "点击\"新增免疫接种\"开始添加。",
+    "editImmunization": "编辑免疫接种",
+    "form": {
+      "adminRoute": "给药途径",
+      "adminRouteDesc": "给药方法",
+      "adminRoutePlaceholder": "选择给药途径",
+      "adminSiteDesc": "疫苗接种部位",
+      "adminSitePlaceholder": "选择接种部位",
+      "clinicalNotesDesc": "关于此免疫接种的附加信息",
+      "clinicalNotesPlaceholder": "输入临床记录、反应或附加详情",
+      "createImmunization": "创建免疫接种",
+      "dateAdministeredDesc": "疫苗接种日期",
+      "doseNumberDesc": "系列中的第几剂",
+      "doseNumberPlaceholder": "输入剂次编号",
+      "expirationDateDesc": "疫苗过期日期",
+      "location": "地点/机构",
+      "locationDesc": "疫苗接种地点",
+      "locationPlaceholder": "例如：CVS药房、医院、诊所",
+      "lotNumberDesc": "疫苗批号",
+      "lotNumberPlaceholder": "输入批号",
+      "manufacturerDesc": "疫苗制造商",
+      "manufacturerPlaceholder": "输入制造商",
+      "ndcNumberDesc": "国家药品编码",
+      "ndcNumberPlaceholder": "例如：12345-6789-01",
+      "practitionerDesc": "接种疫苗的医疗提供者",
+      "practitionerPlaceholder": "选择接种医生",
+      "routeID": "皮内注射（ID）",
+      "routeIM": "肌肉注射（IM）",
+      "routeIV": "静脉注射（IV）",
+      "routeSC": "皮下注射（SC）",
+      "savingImmunization": "正在保存免疫接种...",
+      "siteLeftArm": "左臂",
+      "siteLeftDeltoid": "左三角肌",
+      "siteLeftThigh": "左大腿",
+      "siteRightArm": "右臂",
+      "siteRightDeltoid": "右三角肌",
+      "siteRightThigh": "右大腿",
+      "tagsDesc": "添加标签以分类和组织免疫接种",
+      "tradeName": "正式/商品名",
+      "tradeNameDesc": "疫苗文件中的完整正式名称",
+      "tradeNamePlaceholder": "例如：Flublok TRIV 2025-2026 PFS",
+      "updateImmunization": "更新免疫接种",
+      "vaccineNameDesc": "疫苗通用名",
+      "vaccineNamePlaceholder": "例如：流感疫苗、COVID-19、Tdap"
+    },
+    "loadingImmunizations": "正在加载免疫接种...",
+    "noImmunizationsFound": "未找到免疫接种",
+    "table": {
+      "site": "部位"
+    },
+    "viewModal": {
+      "adminDetails": "接种详情",
+      "doseHash": "第{{number}}剂",
+      "locationFacility": "地点/机构",
+      "title": "免疫接种详情",
+      "tradeName": "商品名",
+      "vaccineInfo": "疫苗信息"
+    }
+  },
+  "insurance": {
+    "actions": {
+      "addNew": "+ 新增保险"
+    },
+    "card": {
+      "annualMax": "年度最高额",
+      "basic": "基本",
+      "bin": "BIN",
+      "deductible": "免赔额",
+      "effective": "生效",
+      "examCopay": "检查自付额",
+      "expires": "过期",
+      "frameAllowance": "镜框额度",
+      "group": "组",
+      "holder": "持有人",
+      "member": "成员",
+      "memberId": "成员ID",
+      "pcn": "PCN",
+      "pcpCopay": "主治医生自付额",
+      "plan": "计划",
+      "preventive": "预防",
+      "primary": "主要",
+      "specialistCopay": "专科医生自付额"
+    },
+    "description": "管理您的保险信息和数字卡片",
+    "empty": {
+      "addFirst": "添加您的第一份保险",
+      "noData": "从添加您的第一份保险开始。",
+      "title": "未找到保险"
+    },
+    "form": {
+      "addTitle": "新增保险",
+      "editTitle": "编辑保险"
+    },
+    "loading": "正在加载保险记录...",
+    "viewModal": {
+      "additionalDetails": "附加保险详情",
+      "attachedDocuments": "附加文档",
+      "claimsAddress": "理赔地址",
+      "claimsPhone": "理赔电话",
+      "coinsurance": "共同保险",
+      "copay": "自付额",
+      "coverageDetails": "保险详情",
+      "coveragePeriod": "保险期限",
+      "customerServicePhone": "客服电话",
+      "deductible": "免赔额",
+      "dentalCoverage": "牙科保险",
+      "effectiveDate": "生效日期",
+      "employerGroup": "雇主/团体赞助商",
+      "memberInfo": "成员信息",
+      "memberName": "成员姓名",
+      "mentalHealthCoverage": "心理健康保险",
+      "outOfPocketMax": "自付最高额",
+      "pharmacyNetworkInfo": "药房网络信息",
+      "policyHolder": "投保人",
+      "prescriptionCoverage": "处方保险",
+      "printCard": "打印保险卡",
+      "sameAsMember": "与成员相同",
+      "tabs": {
+        "contact": "联系",
+        "coverage": "保险"
+      },
+      "title": "保险详情",
+      "visionCoverage": "视力保险"
+    }
+  },
+  "invitations": {
+    "from": "来自"
+  },
+  "key": "默认 {{var}}",
+  "labels": {
+    "addCustom": "+ 添加\"{{value}}\"",
+    "linkedMedications": "已关联药物",
+    "loading": "正在加载...",
+    "loadingOption": "正在加载{{option}}...",
+    "loadingRelatedConditions": "正在加载相关病症...",
+    "new": "新建",
+    "no": "否",
+    "noConditionsLinked": "无病症关联到此检验结果",
+    "noEncountersLinked": "无就诊关联到此治疗",
+    "noEquipmentLinked": "无设备关联到此治疗",
+    "noLabResultsLinked": "无检验结果关联到此就诊",
+    "noMedicationsLinked": "无药物关联到此病症",
+    "none": "无",
+    "noRating": "无评分",
+    "notAvailable": "N/A",
+    "notCompleted": "未完成",
+    "noVisitsLinked": "无就诊关联到此检验结果",
+    "ordered": "已开单",
+    "phoneNumber": "电话号码",
+    "ratingStars": "{{count}}/5 星",
+    "ratingStars_one": "{{count}}/5 星",
+    "ratingStars_other": "{{count}}/5 星",
+    "selectPurpose": "选择用途",
+    "viewDetails": "查看详情",
+    "viewPharmacyDetails": "查看药房详情",
+    "visitDate": "就诊日期",
+    "visitWebsite": "访问网站 ↗",
+    "yes": "是",
+    "noConditionsLinkedToMedication": "无病症关联到此药物",
+    "conditionsAvailableToLink": "{{count}} 个可关联的病症",
+    "medicationsAvailableToLink": "{{count}} 个可关联的药物"
+  },
+  "labResults": {
+    "emptyLabResultMessage": "您创建了检验结果但未添加任何检测项目。是否删除此检验结果？",
+    "emptyLabResultWarning": "检验结果已创建但为空",
+    "form": {
+      "linkedVisits": "已关联就诊",
+      "linkVisitsDescription": "将此检验结果与开单或审核的就诊关联。",
+      "linkVisitsTitle": "关联到就诊"
+    },
+    "labResultCreated": "检验结果\"{{testName}}\"已创建。现在您可以上传并解析PDF。",
+    "quickFormInstructions": "输入检验结果名称，然后您将能够上传并解析PDF。",
+    "quickImportModalTitle": "快速PDF导入 - 第{{step}}步，共2步",
+    "quickImportSuccess": "检验结果和检测项目导入成功",
+    "testNameDescription": "这是唯一必填字段 - 您可以稍后添加更多详情",
+    "testNamePlaceholder": "内分泌血液检查等",
+    "unsavedDataInstructions": "点击预览标签中的\"添加检测项目\"以在关闭前保存解析的数据。",
+    "unsavedDataMessage_one": "您有{{count}}个已解析的检测项目尚未添加。如果立即关闭，您将丢失这些解析的数据。",
+    "unsavedDataMessage_other": "您有{{count}}个已解析的检测项目尚未添加。如果立即关闭，您将丢失这些解析的数据。",
+    "unsavedDataWarning": "未保存的解析数据"
+  },
+  "medications": {
+    "addNew": "新增药物",
+    "allTypes": "全部类型",
+    "clickToStart": "点击\"新增药物\"开始添加。",
+    "fields": {
+      "noIndication": "未指定适应症",
+      "prescriber": "处方医生"
+    },
+    "loading": "正在加载药物...",
+    "modal": {
+      "editMedication": "编辑药物",
+      "labels": {
+        "alternativeName": "替代名称",
+        "form": "剂型",
+        "purposeIndication": "用途/适应症"
+      },
+      "noSideEffects": "未报告副作用",
+      "sections": {
+        "dosageInfo": "剂量信息",
+        "prescriberPharmacy": "处方医生和药房",
+        "usedInTreatments": "用于的治疗"
+      },
+      "tabs": {
+        "dosageRefills": "剂量和续方"
+      }
+    },
+    "noMedications": "未找到药物或补充剂",
+    "quickFilter": "快速筛选",
+    "treatments": {
+      "empty": "此药物未用于任何治疗。",
+      "loadError": "加载治疗失败",
+      "loading": "正在加载治疗...",
+      "overrideFrequency": "频率"
+    },
+    "types": {
+      "herbal": "草药/天然",
+      "otc": "非处方",
+      "prescription": "处方",
+      "supplement": "补充剂/维生素"
+    }
+  },
+  "messages": {
+    "checkBackSoon": "稍后再来查看更新！",
+    "clearAll": "全部清除",
+    "confirmRemoveConditionRelationship": "您确定要移除此病症关联吗？",
+    "confirmRemoveEquipmentRelationship": "您确定要移除此设备关联吗？",
+    "confirmRemoveLabResultLink": "移除此检验结果关联？",
+    "confirmRemoveVisitLink": "移除此就诊关联？",
+    "displayError": "无法显示此项目。请尝试刷新页面。",
+    "doNotClose": "请勿关闭此窗口或离开",
+    "failedToLinkLabResult": "关联检验结果失败",
+    "failedToLinkVisit": "关联就诊失败",
+    "failedToUnlinkLabResult": "解除检验结果关联失败",
+    "failedToUnlinkVisit": "解除就诊关联失败",
+    "failedToUpdateRelationship": "更新关联失败",
+    "processing": "正在处理...",
+    "selectLabResult": "请选择检验结果",
+    "selectVisit": "请选择就诊",
+    "underDevelopment": "此功能正在开发中。",
+    "updateSuccess": "更新成功",
+    "confirmRemoveMedicationRelationship": "您确定要移除此药物关联吗？"
+  },
+  "modals": {
+    "chooseConditionsToLink": "选择要关联的病症",
+    "chooseConditionToLink": "选择要关联的病症",
+    "chooseLabResultToLink": "选择要关联的检验结果",
+    "chooseMedicationToLink": "选择要关联的药物",
+    "chooseVisitToLink": "选择要关联的就诊",
+    "describeConditionRelevance": "描述此病症与检验结果的关系（可选）",
+    "describeLabResultRelevance": "描述此检验结果与此就诊的关系",
+    "describeVisitRelevance": "描述此就诊与此检验结果的关系",
+    "linkConditionToLabResult": "关联病症到检验结果",
+    "linkLabResultToVisit": "关联检验结果到就诊",
+    "linkVisitToLabResult": "关联就诊到检验结果",
+    "noRelevanceNoteProvided": "未提供关联备注",
+    "purpose": "用途",
+    "relevanceNote": "关联备注",
+    "relevanceNoteOptional": "关联备注（可选）",
+    "selectCondition": "选择病症",
+    "selectLabResult": "选择检验结果",
+    "selectMedications": "选择药物",
+    "selectPurpose": "选择用途",
+    "selectVisit": "选择就诊",
+    "linkConditionsToMedication": "关联病症到药物",
+    "linkMedicationsToCondition": "关联药物到病症",
+    "selectConditions": "选择病症",
+    "describeConditionRelevanceMedication": "描述此病症与药物的相关性",
+    "describeMedicationRelevance": "描述此药物与病症的相关性"
+  },
+  "noResults": "未找到医生",
+  "pagination": {
+    "itemsPerPage": "每页项目数",
+    "next": "下一页",
+    "pageOf": "第 {{page}} 页，共 {{total}} 页",
+    "previous": "上一页",
+    "showingRange": "显示 {{start}} 到 {{end}} 共 {{total}} 个结果"
+  },
+  "patientInfo": {
+    "createProfile": "创建个人资料",
+    "createPrompt": "请创建您的患者个人资料以开始使用。",
+    "createTitle": "创建患者个人资料",
+    "editProfile": "编辑个人资料",
+    "editTitle": "编辑患者信息",
+    "fields": {
+      "birthDate": "出生日期",
+      "patientId": "患者ID",
+      "physician": "主治医生"
+    },
+    "loading": "正在加载患者信息...",
+    "noProfile": "未找到患者个人资料",
+    "notAssigned": "未分配",
+    "notProvided": "未提供",
+    "personalInfo": "个人信息",
+    "welcome": {
+      "message": "您的账户已成功创建。请完成以下患者个人资料以开始管理您的医疗记录。",
+      "title": "欢迎使用MediKeep！"
+    }
+  },
+  "patients": {
+    "form": {
+      "address": {
+        "label": "地址",
+        "placeholder": "输入地址"
+      },
+      "birthDate": {
+        "label": "出生日期"
+      },
+      "bloodType": {
+        "placeholder": "选择血型"
+      },
+      "buttons": {
+        "createPatient": "创建患者",
+        "saveChanges": "保存更改"
+      },
+      "createTitle": "新增患者",
+      "editTitle": "编辑患者",
+      "firstName": {
+        "placeholder": "输入名字"
+      },
+      "gender": {
+        "options": {
+          "preferNotToSay": "不愿透露"
+        }
+      },
+      "lastName": {
+        "placeholder": "输入姓氏"
+      },
+      "messages": {
+        "createSuccess": "成功创建{{lastName}}{{firstName}}",
+        "updateSuccess": "成功更新{{lastName}}{{firstName}}"
+      },
+      "physician": {
+        "label": "主治医生",
+        "placeholder": "选择医生（可选）"
+      },
+      "relationship": {
+        "description": "此人与您的关系？",
+        "label": "与您的关系",
+        "options": {
+          "brother": "兄弟",
+          "child": "子女",
+          "daughter": "女儿",
+          "father": "父亲",
+          "friend": "朋友",
+          "grandchild": "孙辈",
+          "grandparent": "祖父母",
+          "mother": "母亲",
+          "otherFamily": "其他亲属",
+          "parent": "父母",
+          "partner": "伴侣",
+          "select": "选择关系（可选）",
+          "sibling": "兄弟姐妹",
+          "sister": "姐妹",
+          "son": "儿子",
+          "spouse": "配偶"
+        },
+        "placeholder": "选择关系（可选）"
+      },
+      "saveFirstMessage": "先保存患者信息，然后您可以添加照片",
+      "selfRecord": {
+        "description": "如果为自己创建记录，请勾选此项",
+        "label": "这是我自己的医疗记录"
+      }
+    },
+    "photoFormat": "JPEG、PNG、GIF或BMP -- 最大15MB",
+    "removePhoto": "移除照片"
+  },
+  "patientSelector": {
+    "buttons": {
+      "addNew": "新增患者",
+      "deletePatient": "删除患者",
+      "editPatient": "编辑患者",
+      "removeAccess": "移除访问权限",
+      "sharePatient": "共享患者"
+    },
+    "errors": {
+      "loadFailed": "加载患者失败",
+      "noPatients": "未找到患者"
+    },
+    "labels": {
+      "born": "出生",
+      "currentlyViewing": "当前查看：",
+      "patientActions": "患者操作",
+      "switching": "正在切换患者...",
+      "switchTo": "切换到其他患者："
+    },
+    "messages": {
+      "noAccess": "您还没有访问任何患者的权限。创建新患者以开始使用。"
+    },
+    "modals": {
+      "createTitle": "创建新患者",
+      "editTitle": "编辑患者"
+    },
+    "placeholders": {
+      "loading": "正在加载...",
+      "select": "选择要切换到的患者"
+    },
+    "stats": {
+      "owned": "拥有",
+      "total": "总计"
+    },
+    "title": "选择患者",
+    "tooltips": {
+      "addNew": "新增患者",
+      "expand": "展开患者选择器",
+      "minimize": "最小化为一行",
+      "refresh": "刷新患者列表",
+      "switchPatient": "切换患者"
+    }
+  },
+  "pharmacies": {
+    "actions": {
+      "addNew": "添加新药房"
+    },
+    "card": {
+      "storeNumber": "门店编号"
+    },
+    "empty": {
+      "noData": "点击\"添加新药房\"开始添加。",
+      "title": "未找到药房"
+    },
+    "errors": {
+      "loadFailed": "加载药房失败。请重试。"
+    },
+    "form": {
+      "addTitle": "添加新药房",
+      "editTitle": "编辑药房"
+    },
+    "loading": "正在加载药房...",
+    "viewModal": {
+      "contact": "联系信息",
+      "editButton": "编辑药房",
+      "location": "位置",
+      "storeNumber": "门店#",
+      "title": "药房详情"
+    }
+  },
+  "practitioners": {
+    "actions": {
+      "addNew": "添加新医生"
+    },
+    "card": {
+      "subtitle": "医疗从业者"
+    },
+    "createPracticeError": "创建医疗机构失败。请重试。",
+    "editPracticeError": "加载医疗机构以编辑失败",
+    "empty": {
+      "noData": "点击\"添加新医生\"开始添加。",
+      "title": "未找到医疗从业者"
+    },
+    "errors": {
+      "generic": "发生错误。请重试。",
+      "loadFailed": "加载医生失败。请重试。"
+    },
+    "form": {
+      "addTitle": "添加新医生",
+      "editTitle": "编辑医生"
+    },
+    "groupByPractice": "按医疗机构分组",
+    "loading": "正在加载医生...",
+    "practices": {
+      "addNew": "添加医疗机构",
+      "cannotDelete": "无法删除 - 有关联的医生",
+      "createSuccess": "医疗机构创建成功",
+      "createTitle": "添加医疗机构",
+      "deleteConfirm": "您确定要删除\"{{name}}\"吗？此操作无法撤销。",
+      "deleteError": "删除医疗机构失败",
+      "deleteSuccess": "医疗机构删除成功",
+      "emptyNoData": "点击\"添加医疗机构\"创建一个，或在添加医生时自动创建。",
+      "emptyTitle": "未找到医疗机构",
+      "searchPlaceholder": "搜索医疗机构...",
+      "totalCount": "共{{count}}个医疗机构",
+      "totalCount_one": "共{{count}}个医疗机构",
+      "totalCount_other": "共{{count}}个医疗机构",
+      "unusedCount": "{{count}}个未使用",
+      "unusedCount_one": "{{count}}个未使用",
+      "unusedCount_other": "{{count}}个未使用"
+    },
+    "tabs": {
+      "practices": "医疗机构"
+    },
+    "ungroupedTitle": "独立医生",
+    "viewModal": {
+      "editButton": "编辑医生",
+      "editPractice": "编辑医疗机构",
+      "practiceDetails": "医疗机构详情",
+      "practiceFax": "传真",
+      "practiceLoadError": "加载医疗机构详情失败",
+      "practiceLocations": "位置",
+      "practicePortal": "患者门户",
+      "practiceUpdateError": "更新医疗机构失败",
+      "practiceUpdateSuccess": "医疗机构更新成功",
+      "practitionerContact": "医生联系信息",
+      "savePractice": "保存医疗机构",
+      "title": "医生详情"
+    }
+  },
+  "procedures": {
+    "addFirstProcedure": "添加您的第一个手术",
+    "addNewProcedure": "新增手术",
+    "addProcedure": "+ 添加手术",
+    "editProcedure": "编辑手术",
+    "form": {
+      "anesthesiaNotesDesc": "附加麻醉信息",
+      "anesthesiaNotesPlaceholder": "输入麻醉详情和备注",
+      "anesthesiaTypeDesc": "使用的麻醉类型",
+      "anesthesiaTypePlaceholder": "例如：全身麻醉、局部麻醉、区域麻醉",
+      "clinicalNotesDesc": "关于此手术的附加信息",
+      "clinicalNotesPlaceholder": "输入临床记录、观察结果或附加详情",
+      "complicationsDesc": "发生的任何问题或并发症",
+      "complicationsPlaceholder": "记录任何并发症",
+      "createProcedure": "创建手术",
+      "descriptionDesc": "手术的简要描述",
+      "descriptionPlaceholder": "描述手术",
+      "durationDesc": "手术持续时间",
+      "durationPlaceholder": "输入持续时间",
+      "facilityDesc": "医疗机构",
+      "facilityPlaceholder": "例如：医院名称",
+      "outcomeAbnormal": "异常",
+      "outcomeDesc": "手术结果或效果",
+      "outcomeInconclusive": "无结论",
+      "outcomePlaceholder": "选择结果",
+      "outcomeSuccessful": "成功",
+      "practitionerDesc": "执行手术的医疗提供者",
+      "procedureCodeDesc": "医疗计费编码",
+      "procedureCodePlaceholder": "例如：CPT编码",
+      "procedureDate": "手术日期",
+      "procedureDateDesc": "手术执行日期",
+      "procedureNameDesc": "手术名称",
+      "procedureNamePlaceholder": "输入手术名称",
+      "procedureTypeDesc": "手术类型或分类",
+      "procedureTypePlaceholder": "例如：外科、诊断",
+      "savingProcedure": "正在保存手术...",
+      "settingDesc": "手术地点",
+      "settingPlaceholder": "例如：住院、门诊",
+      "statusDesc": "当前手术状态",
+      "statusInProgress": "进行中",
+      "statusPostponed": "推迟",
+      "statusScheduled": "已计划",
+      "tagsDesc": "添加标签以分类和组织手术",
+      "updateProcedure": "更新手术"
+    },
+    "loadingProcedures": "正在加载手术...",
+    "noProceduresFound": "未找到手术",
+    "processing": "正在处理...",
+    "startAdding": "从添加您的第一个手术开始。",
+    "table": {
+      "code": "编码"
+    },
+    "viewModal": {
+      "anesthesiaInfo": "麻醉信息",
+      "noAnesthesiaNotes": "无麻醉记录",
+      "noClinicalNotes": "无临床记录",
+      "noComplications": "未报告并发症",
+      "noDescription": "无描述",
+      "title": "手术详情"
+    }
+  },
+  "search": {
+    "activeFilterCount": "{{count}} 个活跃筛选",
+    "activeFilterCount_one": "{{count}} 个活跃筛选",
+    "activeFilterCount_other": "{{count}} 个活跃筛选",
+    "activeFilters": "活跃筛选",
+    "addMoreTags": "添加更多标签",
+    "advancedFilters": "高级筛选",
+    "allTags": "全部标签",
+    "allTime": "所有时间",
+    "anyTag": "任何标签",
+    "collapseFilters": "收起筛选",
+    "columnType": "记录类型",
+    "dateLabels": {
+      "diagnosed": "已诊断",
+      "given": "已接种",
+      "identified": "已识别",
+      "performed": "已执行",
+      "recorded": "已记录",
+      "started": "已开始",
+      "tested": "已检测",
+      "visited": "已就诊"
+    },
+    "datePresets": "快速预设",
+    "dateRange": "日期范围",
+    "dateRangePlaceholder": "选择日期范围...",
+    "expandFilters": "展开筛选",
+    "fallbacks": {
+      "allergy": "过敏",
+      "encounter": "就诊",
+      "immunization": "免疫接种",
+      "medication": "药物",
+      "procedure": "手术",
+      "record": "记录"
+    },
+    "filterByTag": "按标签筛选：{{tag}}",
+    "filtered": "（已筛选）",
+    "filters": "筛选",
+    "forQuery": "搜索\"{{query}}\"",
+    "last30Days": "最近30天",
+    "last6Months": "最近6个月",
+    "last7Days": "最近7天",
+    "lastYear": "去年",
+    "loadingTags": "正在加载标签...",
+    "matchAll": "匹配全部",
+    "matchAllDesc": "显示具有所有选定标签的项目",
+    "matchAny": "匹配任意选定标签",
+    "matchAnyDesc": "显示至少具有一个选定标签的项目",
+    "noPatientMessage": "请从仪表板选择患者以搜索医疗记录。",
+    "noPatientTitle": "未选择患者",
+    "noResults": "未找到结果",
+    "noResultsFiltered": "尝试调整您的筛选、标签或搜索词",
+    "noResultsGeneral": "尝试不同的搜索词或检查拼写",
+    "openFullRecord": "打开完整记录",
+    "page": "页",
+    "perPage": "每页项目数",
+    "placeholder": "搜索医疗记录...",
+    "popularTags": "热门标签",
+    "previewRecord": "预览记录",
+    "recordTypes": "记录类型",
+    "removeTypeFilter": "移除{{type}}筛选",
+    "resultCount": "{{count}} 个结果",
+    "resultCount_one": "{{count}} 个结果",
+    "resultCount_other": "{{count}} 个结果",
+    "resultsFound": "找到{{count}} 个结果",
+    "resultsFound_one": "找到{{count}} 个结果",
+    "resultsFound_other": "找到{{count}} 个结果",
+    "searchFailed": "搜索失败。请重试。",
+    "searching": "正在搜索...",
+    "seeAll": "查看全部",
+    "selectTags": "选择标签...",
+    "sortBy": "排序方式",
+    "sortDateNewest": "日期（最新优先）",
+    "sortDateOldest": "日期（最早优先）",
+    "sortRelevance": "相关性",
+    "sortTitle": "标题",
+    "subtitle": "搜索所有医疗记录",
+    "subtitles": {
+      "result": "结果：{{value}}"
+    },
+    "tagResultCount_other": "{{count}} 个标签结果",
+    "tagSearchFailed": "标签搜索失败。请重试。",
+    "textResultCount_other": "{{count}} 个文本结果",
+    "title": "搜索结果",
+    "types": {
+      "encounters": "就诊",
+      "vitals": "生命体征"
+    },
+    "viewCards": "卡片视图",
+    "viewTable": "表格视图"
+  },
+  "searchPlaceholders": {
+    "allergies": "搜索过敏、反应、标签...",
+    "conditions": "搜索病症、备注、标签...",
+    "emergencyContacts": "搜索联系人、关系、电话、电子邮件...",
+    "familyHistory": "搜索家庭成员、病症、备注...",
+    "generic": "搜索...",
+    "immunizations": "搜索免疫接种、疫苗、标签...",
+    "injuries": "搜索受伤、身体部位、备注、标签...",
+    "insurance": "搜索保险公司、成员姓名...",
+    "labResults": "搜索检验结果、检测编码、机构、医生、标签...",
+    "medications": "搜索药物、适应症、剂量、标签...",
+    "pharmacies": "搜索药房...",
+    "practitioners": "搜索医生...",
+    "procedures": "搜索手术、备注、标签...",
+    "symptoms": "搜索症状、描述、标签...",
+    "treatments": "搜索治疗、备注、标签...",
+    "visits": "搜索就诊、原因、备注、标签...",
+    "vitals": "搜索生命体征备注..."
+  },
+  "severity": {
+    "critical": "危重 - 危及生命",
+    "lifeThreatening": "危及生命 - 过敏性休克风险",
+    "mild": "轻度 - 轻微不适",
+    "mildImpact": "轻度 - 轻微影响",
+    "moderate": "中度 - 明显症状",
+    "moderateImpact": "中度 - 明显影响",
+    "severe": "重度 - 严重反应",
+    "severeImpact": "重度 - 严重影响"
+  },
+  "status": {
+    "completed": "已完成",
+    "expired": "已过期",
+    "onHold": "暂停",
+    "planned": "已计划",
+    "stopped": "已停止"
+  },
+  "statusDescriptions": {
+    "activeAllergic": "活跃 - 目前过敏",
+    "activeCondition": "活跃 - 持续病症",
+    "activeExperiencing": "活跃 - 正在经历",
+    "chronicCondition": "慢性 - 长期病症",
+    "inactiveAllergic": "不活跃 - 不再过敏",
+    "recurring": "复发 - 时好时坏",
+    "resolvedAllergy": "已解决 - 过敏已消退",
+    "resolvedCondition": "已解决 - 不再存在",
+    "resolvedExperiencing": "已解决 - 不再经历"
+  },
+  "symptoms": {
+    "addSymptom": "+ 添加症状",
+    "addSymptomTitle": "新增症状",
+    "calendar": {
+      "episodesOn": "{{date}}的症状发作",
+      "noEpisodes": "本月未记录症状发作",
+      "noOccurrences": "此日期未找到发作",
+      "occurrenceId": "发作ID",
+      "pain": "疼痛",
+      "title": "症状日历",
+      "viewSymptom": "查看症状",
+      "weekDays": {
+        "fri": "周五",
+        "mon": "周一",
+        "sat": "周六",
+        "sun": "周日",
+        "thu": "周四",
+        "tue": "周二",
+        "wed": "周三"
+      }
+    },
+    "chronic": "慢性",
+    "commonTriggers": "常见诱因",
+    "confirmDeleteSymptom": "您确定要删除此症状及其所有发作记录吗？",
+    "editEpisodeTitle": "编辑发作",
+    "editSymptomTitle": "编辑症状",
+    "episode": "发作",
+    "episodes": "发作",
+    "first": "首次",
+    "last": "最近",
+    "loading": "正在加载症状...",
+    "logEpisode": "记录发作",
+    "logEpisodeTitle": "记录发作",
+    "noPatientSelected": "未选择患者",
+    "noRecords": "尚未记录症状",
+    "noRecordsPrompt": "点击\"添加症状\"开始追踪新症状",
+    "selectPatientPrompt": "请选择或创建患者以追踪症状。",
+    "tabs": {
+      "calendar": "日历",
+      "list": "列表"
+    },
+    "timeline": {
+      "filters": {
+        "allDates": "所有日期",
+        "last3Months": "最近3个月",
+        "lastMonth": "最近1个月",
+        "lastWeek": "最近1周",
+        "lastYear": "最近1年"
+      },
+      "noEpisodes": "此期间未记录症状发作",
+      "recorded": "已记录",
+      "title": "症状时间线"
+    },
+    "title": "症状",
+    "viewModal": {
+      "acute": "急性",
+      "confirmDeleteEpisode": "您确定要删除此发作吗？",
+      "deleteSymptom": "删除症状",
+      "editSymptom": "编辑症状",
+      "episodeHistory": "发作历史",
+      "generalNotes": "一般备注",
+      "impact": "影响",
+      "logFirstEpisode": "记录首次发作",
+      "logNewEpisode": "记录新发作",
+      "noEpisodesLogged": "未记录发作",
+      "noEpisodesYet": "尚未记录发作",
+      "noNotesProvided": "未提供备注",
+      "relief": "缓解",
+      "title": "{{name}} - 详情",
+      "totalEpisodes": "发作总数",
+      "triggers": "诱因"
+    }
+  },
+  "tagManagement": {
+    "allTags": "所有标签",
+    "createModal": {
+      "placeholder": "输入标签名称...",
+      "submit": "创建标签",
+      "title": "创建新标签"
+    },
+    "createTag": "创建标签",
+    "deleteModal": {
+      "description": "这将从所有 {{count}} 条记录中移除此标签。此操作无法撤销。",
+      "description_one": "这将从 {{count}} 条记录中移除此标签。此操作无法撤销。",
+      "description_other": "这将从所有 {{count}} 条记录中移除此标签。此操作无法撤销。",
+      "message": "您确定要删除标签\"{{tag}}\"吗？"
+    },
+    "editModal": {
+      "colorLabel": "标签颜色",
+      "description": "这将在所有 {{count}} 条记录中重命名此标签。",
+      "description_one": "这将在 {{count}} 条记录中重命名此标签。",
+      "description_other": "这将在所有 {{count}} 条记录中重命名此标签。",
+      "placeholder": "输入新标签名称...",
+      "submit": "保存",
+      "title": "编辑标签"
+    },
+    "errors": {
+      "createFailed": "创建标签失败",
+      "deleteFailed": "删除标签失败",
+      "editFailed": "更新标签失败",
+      "loadFailed": "加载标签失败",
+      "replaceFailed": "替换标签失败"
+    },
+    "icon": "🏷️",
+    "loading": "正在加载标签...",
+    "menu": {
+      "replace": "替换为..."
+    },
+    "noTags": "未找到标签",
+    "noTagsDescription": "开始在您的医疗记录中使用标签以在此查看。",
+    "noTagsSearch": "没有标签匹配您的搜索。",
+    "pressEnterToAdd": "按回车添加标签",
+    "replaceModal": {
+      "description": "这将在所有 {{count}} 条记录中将\"{{oldTag}}\"替换为\"{{newTag}}\"。",
+      "description_one": "这将在 {{count}} 条记录中将\"{{oldTag}}\"替换为\"{{newTag}}\"。",
+      "description_other": "这将在所有 {{count}} 条记录中将\"{{oldTag}}\"替换为\"{{newTag}}\"。",
+      "label": "替换为",
+      "placeholder": "输入替换标签名称...",
+      "submit": "替换标签",
+      "title": "替换标签"
+    },
+    "searchPlaceholder": "搜索标签...",
+    "success": {
+      "created": "成功创建标签\"{{tag}}\"",
+      "deleted": "成功删除标签\"{{tag}}\"",
+      "renamed": "成功将\"{{oldTag}}\"重命名为\"{{newTag}}\"",
+      "replaced": "成功将\"{{oldTag}}\"替换为\"{{newTag}}\"",
+      "updated": "成功更新标签\"{{tag}}\""
+    },
+    "table": {
+      "usageCount": "使用次数",
+      "usedIn": "用于"
+    },
+    "title": "标签管理"
+  },
+  "time": {
+    "day": "天",
+    "days": "天",
+    "ended": "已结束",
+    "month": "月",
+    "months": "月",
+    "ongoing": "进行中",
+    "year": "年",
+    "years": "年"
+  },
+  "trash": {
+    "fileCount_one": "{{count}} 个文件"
+  },
+  "treatments": {
+    "addFirstTreatment": "添加您的第一个治疗",
+    "addTreatment": "+ 添加治疗",
+    "card": {
+      "conditionId": "病症 #{{id}}"
+    },
+    "clickToExpand": "点击展开并添加详情（可选）",
+    "conditionsLoadingError": "病症加载错误",
+    "createNew": "创建新治疗",
+    "form": {
+      "createTreatment": "创建治疗",
+      "createWithLinks": "正在创建治疗计划并关联项目...",
+      "creatingWithLinks": "正在创建治疗并关联项目...",
+      "descriptionDesc": "治疗的简要描述",
+      "descriptionPlaceholder": "描述治疗",
+      "dosageAmount": "剂量/数量",
+      "dosageDesc": "每次治疗的剂量或数量",
+      "dosagePlaceholder": "例如：10mg、1次疗程",
+      "endDateDesc": "治疗结束日期（如适用）",
+      "enterTreatmentName": "输入治疗名称",
+      "frequencyDesc": "治疗给药频率",
+      "frequencyPlaceholder": "例如：每日、每周两次",
+      "linkingPartialFailure": "部分项目无法关联",
+      "linkingPartialFailureMessage": "治疗已创建，但部分项目无法关联。您可以通过编辑治疗手动关联它们。",
+      "notesDesc": "关于此治疗的附加信息",
+      "notesPlaceholder": "输入治疗记录、观察结果或附加详情",
+      "practitionerDesc": "执行治疗的医疗提供者",
+      "relatedConditionDesc": "将此治疗关联到病症",
+      "savingTreatment": "正在保存治疗...",
+      "selectCondition": "选择病症",
+      "startDateDesc": "治疗开始日期",
+      "statusDesc": "当前治疗状态",
+      "statusOnHold": "暂停",
+      "statusPlanned": "已计划",
+      "tabs": {
+        "scheduleDosage": "计划和剂量"
+      },
+      "tagsDesc": "添加标签以分类和组织治疗",
+      "treatmentNameDesc": "治疗名称",
+      "treatmentNotes": "治疗记录",
+      "treatmentTypeDesc": "治疗类型或分类",
+      "treatmentTypePlaceholder": "例如：物理治疗、手术",
+      "updateTreatment": "更新治疗"
+    },
+    "linkExisting": "关联现有",
+    "loadingTreatments": "正在加载治疗...",
+    "medications": {
+      "default": "（来自药物）",
+      "empty": "无药物关联到此治疗计划。",
+      "loadError": "加载药物失败",
+      "loading": "正在加载药物...",
+      "prescriber": "开方医生",
+      "timing": "时间"
+    },
+    "mode": {
+      "advancedDescription": "以药物为中心的计划，每种药物可单独设置",
+      "label": "治疗模式",
+      "simple": "简单",
+      "simpleDescription": "基本跟踪，包含计划和剂量"
+    },
+    "noEquipmentLinkedDescription": "搜索并关联此治疗使用的医疗设备。",
+    "noTreatmentsFound": "未找到治疗",
+    "startAdding": "从添加您的第一个治疗开始。",
+    "timingLabel": "时间：",
+    "viewModal": {
+      "amountDosage": "数量/剂量",
+      "conditionId": "病症 #{{id}}",
+      "conditionStatus": "病症状态",
+      "dosageFrequency": "剂量和频率",
+      "noConditionLinked": "无关联病症",
+      "practitionerId": "医生 #{{id}}",
+      "schedule": "计划",
+      "tabs": {
+        "equipment": "设备",
+        "labs": "检验",
+        "schedule": "计划和剂量"
+      },
+      "title": "治疗详情",
+      "treatmentNotes": "治疗记录"
+    }
+  },
+  "viewToggle": {
+    "cards": "卡片",
+    "components": "组件",
+    "label": "视图模式",
+    "table": "表格"
+  },
+  "visits": {
+    "addNewVisit": "新增就诊",
+    "addVisit": "新增就诊",
+    "card": {
+      "generalVisit": "常规就诊"
+    },
+    "clickToGetStarted": "点击\"新增就诊\"开始添加。",
+    "editVisit": "编辑就诊",
+    "form": {
+      "addVisit": "添加就诊",
+      "savingVisit": "正在保存就诊...",
+      "tabs": {
+        "clinical": "临床",
+        "visitInfo": "就诊信息"
+      },
+      "updateVisit": "更新就诊"
+    },
+    "loadingVisits": "正在加载就诊...",
+    "noVisitsFound": "未找到医疗就诊",
+    "table": {
+      "visitDate": "就诊日期",
+      "visitType": "就诊类型"
+    },
+    "title": "医疗就诊",
+    "viewModal": {
+      "chiefComplaint": "主诉",
+      "clinicalInformation": "临床信息",
+      "editVisit": "编辑就诊",
+      "followUpInstructions": "随访说明",
+      "generalVisit": "常规就诊",
+      "location": "地点",
+      "priority": "优先级",
+      "tabs": {
+        "clinical": "临床",
+        "visitInfo": "就诊信息"
+      },
+      "title": "就诊 - {{date}}",
+      "treatmentPlan": "治疗计划",
+      "visitInformation": "就诊信息"
+    }
+  },
+  "vitals": {
+    "form": {
+      "dateTimePlaceholder": "选择日期和时间",
+      "devicePlaceholder": "例如：数字血压计、体温计型号...",
+      "heightNotSet": "患者个人资料中未设置身高 - 无法计算BMI",
+      "locationPlaceholder": "这些读数是在哪里测量的？",
+      "lockedByImport": "由设备导入平均值管理",
+      "missingPatientInfo": "缺少患者信息",
+      "notesPlaceholder": "关于生命体征测量的附加备注...",
+      "pasteDateTimeDescription": "输入或粘贴日期/时间，或点击日历选择",
+      "patientHeight": "患者身高：{{height}}英寸（来自个人资料）",
+      "validation": {
+        "a1cMax": "糖化血红蛋白不能超过20%",
+        "a1cMin": "糖化血红蛋白至少为0%",
+        "bloodGlucoseMax": "血糖不能超过800 mg/dL",
+        "bloodGlucoseMin": "血糖至少为20 mg/dL",
+        "dateInFuture": "日期不能是未来日期",
+        "dateRequired": "测量日期和时间为必填项",
+        "deviceMaxLength": "设备名称不能超过100字符",
+        "diastolicMax": "舒张压不能超过200 mmHg",
+        "diastolicMin": "舒张压至少为30 mmHg",
+        "heartRateMax": "心率不能超过250 BPM",
+        "heartRateMin": "心率至少为30 BPM",
+        "notesMaxLength": "备注不能超过5000字符",
+        "oxygenMax": "血氧饱和度不能超过100%",
+        "oxygenMin": "血氧饱和度至少为50%",
+        "painScaleMax": "疼痛评分不能超过10",
+        "painScaleMin": "疼痛评分至少为0",
+        "respiratoryRateMax": "呼吸频率不能超过100次/分钟",
+        "respiratoryRateMin": "呼吸频率至少为5次/分钟",
+        "systolicMax": "收缩压不能超过300 mmHg",
+        "systolicMin": "收缩压至少为50 mmHg",
+        "temperatureMax": "体温不能超过{{max}}{{unit}}",
+        "temperatureMin": "体温至少为{{min}}{{unit}}",
+        "weightMax": "体重不能超过{{max}} {{unit}}",
+        "weightMin": "体重至少为{{min}} {{unit}}"
+      }
+    }
+  },
+  "warning": "警告"
+}

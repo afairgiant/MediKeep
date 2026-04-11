@@ -1,0 +1,112 @@
+{
+  "alert": {
+    "errorCount": "{{count}} 个错误",
+    "errorCount_one": "{{count}} 个错误",
+    "errorCount_other": "{{count}} 个错误",
+    "formError": "表单错误",
+    "highPriority": "{{count}} 个高优先级",
+    "highPriority_one": "{{count}} 个高优先级",
+    "highPriority_other": "{{count}} 个高优先级",
+    "suggestions": "建议："
+  },
+  "boundary": {
+    "componentLabel": "组件：",
+    "errorDetails": "错误详情",
+    "errorIdLabel": "错误ID：",
+    "errorLogged": "错误已自动记录以供调查。",
+    "reloadPage": "重新加载页面",
+    "somethingWentWrong": "出了点问题",
+    "tryAgain": "重试",
+    "unexpectedError": "很抱歉，医疗记录系统中发生了意外错误。"
+  },
+  "file": {
+    "deleteFailed": "删除文件失败。请重试。",
+    "downloadFailed": "下载文件失败。请重试。",
+    "notFound": "未找到文件。",
+    "viewFailed": "无法打开文件进行查看。请重试。"
+  },
+  "form": {
+    "conditionNotSelected": "请选择病症",
+    "entityNotFound": "未找到请求的项目。",
+    "equipmentFieldsRequired": "设备名称和类型为必填项",
+    "equipmentNotSelected": "请至少选择一项设备",
+    "invalidDate": "请输入有效的日期。",
+    "invalidEmail": "请输入有效的电子邮件地址。",
+    "invalidPhone": "请输入有效的电话号码。",
+    "invalidPhoneDigits": "请输入有效的电话号码",
+    "invalidWebsiteUrl": "请输入有效的网站URL",
+    "medicationNotSelected": "请选择药物",
+    "mustBeValidNumber": "必须是有效的数字",
+    "patientNotSelected": "请选择患者。",
+    "requiredFieldMissing": "请填写所有必填字段。",
+    "submissionFailed": "保存表单失败。请检查输入后重试。"
+  },
+  "general": {
+    "maintenanceMode": "系统正在维护中。请稍后再试。",
+    "permissionDenied": "您没有权限执行此操作。",
+    "rateLimitExceeded": "请求过多。请稍等片刻后重试。",
+    "sessionExpired": "您的会话已过期。请重新登录。",
+    "storageFull": "已达到存储限制。请释放空间后重试。",
+    "unknownError": "发生意外错误。请重试。",
+    "validationError": "请检查输入后重试。"
+  },
+  "network": {
+    "connectionError": "连接错误。请检查网络后重试。",
+    "serverError": "服务器错误。请稍后再试。",
+    "timeout": "请求超时。请重试。",
+    "unavailable": "网络不可用。请检查连接。"
+  },
+  "paperless": {
+    "authFailed": "Paperless 服务认证失败。请检查凭据。",
+    "configIncomplete": "Paperless 配置不完整。请检查设置。",
+    "connectionFailed": "无法连接到 Paperless 服务。请检查配置。",
+    "duplicateDocument": "此文档已存在于 Paperless 中。相同的文档不能重复上传。",
+    "notEnabled": "Paperless 集成未启用。请在设置中启用。",
+    "taskFailed": "上传到 Paperless 失败。请重试或联系支持。",
+    "taskTimeout": "文档处理超时。文档可能仍在 Paperless 中处理。",
+    "unavailable": "文档管理服务当前不可用。",
+    "uploadFailed": "上传到 Paperless 文档管理系统失败。"
+  },
+  "patientForm": {
+    "birthDateFuture": "出生日期不能为未来日期",
+    "birthDateRequired": "出生日期为必填项",
+    "createFailed": "创建失败：{{message}}",
+    "firstNameRequired": "名字为必填项",
+    "lastNameRequired": "姓氏为必填项",
+    "updateFailed": "更新失败：{{message}}"
+  },
+  "patientNotAvailable": "患者信息不可用",
+  "relationships": {
+    "addConditionFailed": "添加病症关联失败",
+    "addFailed": "添加关联失败",
+    "addMedicationFailed": "添加药物关联失败",
+    "deleteFailed": "删除关联失败",
+    "fetchFailed": "加载关联失败",
+    "updateFailed": "更新关联失败"
+  },
+  "success": {
+    "batchUploadSuccess": "所有文件上传成功！",
+    "fileDeleted": "文件删除成功。",
+    "formSaved": "表单保存成功！",
+    "paperlessSyncSuccess": "与 Paperless 文档管理同步成功。",
+    "uploadMultipleSuccess": "所有文件上传成功！",
+    "uploadSuccess": "文件上传成功！"
+  },
+  "upload": {
+    "allUploadsFailed": "所有文件上传失败。请检查连接后重试。",
+    "batchUploadFailed": "部分文件上传失败。请检查单个文件错误。",
+    "connectionError": "连接错误。请检查网络后重试。",
+    "duplicateFile": "此文件已经上传过。",
+    "failed": "上传文件失败。请重试。",
+    "fileProcessingFailed": "处理文件失败。请尝试其他文件。",
+    "fileTooLarge": "文件大小超过最大限制。",
+    "invalidFileType": "不支持此文件类型。",
+    "partialUploadSuccess": "上传已完成，但有部分错误。请查看失败的文件。"
+  },
+  "warnings": {
+    "duplicateWarning": "此文件似乎是重复的。",
+    "largeFileWarning": "检测到大型文件。上传可能需要几分钟。",
+    "partialSuccess": "操作已完成，但有一些警告。",
+    "slowConnection": "由于连接较慢，上传时间比平时长。"
+  }
+}

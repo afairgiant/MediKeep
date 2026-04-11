@@ -22,7 +22,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const LOCALES_DIR = path.join(__dirname, '..', 'public', 'locales');
-const ALL_LOCALES = ['en', 'de', 'es', 'fr', 'it', 'nl', 'pt', 'ru', 'sv', 'pl'];
+const ALL_LOCALES = ['en', 'de', 'es', 'fr', 'it', 'nl', 'pt', 'ru', 'sv', 'pl', 'zh'];
 const ALL_NAMESPACES = ['common', 'medical', 'errors', 'navigation', 'notifications', 'admin', 'shared'];
 
 // ─── Argument Parsing ────────────────────────────────────────────────
@@ -66,6 +66,7 @@ Examples:
 // ─── Helpers ─────────────────────────────────────────────────────────
 
 function loadJSON(locale, namespace) {
+  console.log(namespace);
   const filePath = path.join(LOCALES_DIR, locale, `${namespace}.json`);
   if (!fs.existsSync(filePath)) return null;
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
