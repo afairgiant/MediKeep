@@ -415,22 +415,17 @@ describe('Dashboard Component', () => {
 
   describe('Admin Features', () => {
     it('shows admin dashboard for admin users', async () => {
-      // Mock admin JWT token - also mock the secureStorage prefixed key ('medapp_token')
-      // since checkAdminStatus uses secureStorage.getItem which reads from prefixed keys
-      localStorageMock.getItem.mockImplementation(key => {
-        if (key === 'token' || key === 'medapp_token') {
-          const payload = { role: 'admin' };
-          const encodedPayload = btoa(JSON.stringify(payload));
-          return `header.${encodedPayload}.signature`;
-        }
-        return null;
+      // Admin status is derived from AuthContext user.role (populated from
+      // /users/me), NOT from a client-side JWT decode — the cookie-auth flow
+      // puts the token in an HttpOnly cookie that JS cannot read.
+      const adminAuthContext = createMockAuthContext({
+        user: { id: 1, username: 'admin', role: 'admin' },
       });
 
       await act(async () => {
-        renderDashboard();
+        renderDashboard(adminAuthContext);
       });
 
-      // The admin status check happens asynchronously, so we need to wait for it
       await waitFor(() => {
         expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
       }, { timeout: 3000 });
@@ -446,24 +441,18 @@ describe('Dashboard Component', () => {
       });
     });
 
-    it('handles JWT decoding errors gracefully', async () => {
-      localStorageMock.getItem.mockImplementation(key => {
-        if (key === 'token') {
-          return 'invalid.jwt.token';
-        }
-        return null;
-      });
-
-      global.atob = vi.fn(() => {
-        throw new Error('Invalid base64');
+    it('does not show admin dashboard when authUser is null', async () => {
+      // Regression for the initial auth-loading state — if AuthContext has
+      // not resolved yet, the admin button must not render (fail closed).
+      const unauthContext = createMockAuthContext({
+        user: null,
+        isAuthenticated: false,
       });
 
       await act(async () => {
-        renderDashboard();
+        renderDashboard(unauthContext);
       });
 
-      // With secureStorage, JWT decode errors are handled silently inside the storage layer.
-      // The dashboard should render without admin features and without crashing.
       await waitFor(() => {
         expect(screen.queryByText('Admin Dashboard')).not.toBeInTheDocument();
         expect(screen.getByTestId('page-header')).toBeInTheDocument();

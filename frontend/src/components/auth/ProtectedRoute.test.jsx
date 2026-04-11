@@ -161,7 +161,7 @@ describe('ProtectedRoute', () => {
           authContextValue: {
             isLoading: false,
             isAuthenticated: true,
-            user: { id: 1, username: 'testuser', isAdmin: false },
+            user: { id: 1, username: 'testuser', role: 'user' },
             hasRole: vi.fn(() => true),
             hasAnyRole: vi.fn(() => true),
           },
@@ -186,7 +186,31 @@ describe('ProtectedRoute', () => {
           authContextValue: {
             isLoading: false,
             isAuthenticated: true,
-            user: { id: 1, username: 'admin', isAdmin: true },
+            user: { id: 1, username: 'admin', role: 'admin' },
+            hasRole: vi.fn(() => true),
+            hasAnyRole: vi.fn(() => true),
+          },
+        }
+      );
+
+      expect(screen.getByTestId('protected-content')).toBeInTheDocument();
+    });
+
+    test('allows admin users with role only and no isAdmin cache field', () => {
+      // Regression for the bug where regular-login / session-restore users
+      // had role='admin' but not the isAdmin field (only SSO login set it).
+      // ProtectedRoute must derive admin status from role via isUserAdmin,
+      // not from the isAdmin cache.
+      render(
+        <ProtectedRoute adminOnly={true}>
+          <TestComponent />
+        </ProtectedRoute>,
+        {
+          authContextValue: {
+            isLoading: false,
+            isAuthenticated: true,
+            user: { id: 1, username: 'admin', role: 'admin' },
+            // Note: deliberately no isAdmin field
             hasRole: vi.fn(() => true),
             hasAnyRole: vi.fn(() => true),
           },
@@ -310,7 +334,7 @@ describe('AdminRoute', () => {
         authContextValue: {
           isLoading: false,
           isAuthenticated: true,
-          user: { id: 1, username: 'admin', isAdmin: true },
+          user: { id: 1, username: 'admin', role: 'admin' },
           hasRole: vi.fn(() => true),
           hasAnyRole: vi.fn(() => true),
         },
@@ -329,7 +353,7 @@ describe('AdminRoute', () => {
         authContextValue: {
           isLoading: false,
           isAuthenticated: true,
-          user: { id: 1, username: 'testuser', isAdmin: false },
+          user: { id: 1, username: 'testuser', role: 'user' },
           hasRole: vi.fn(() => true),
           hasAnyRole: vi.fn(() => true),
         },

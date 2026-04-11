@@ -53,6 +53,7 @@ import frontendLogger from '../services/frontendLogger';
 import logger from '../services/logger';
 import { timezoneService } from '../services/timezoneService';
 import { useAuth } from '../contexts/AuthContext';
+import { isUserAdmin } from '../utils/authUtils';
 import { useViewport } from '../hooks/useViewport';
 import { useCurrentPatient, useCacheManager } from '../hooks/useGlobalData';
 import { useDateFormat } from '../hooks/useDateFormat';
@@ -90,7 +91,10 @@ const Dashboard = () => {
   const [activityLoading, setActivityLoading] = useState(true);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  // Admin status is derived from AuthContext user (populated from /users/me),
+  // not decoded client-side from the JWT — the cookie-auth flow stores the
+  // token in an HttpOnly cookie that JS cannot read.
+  const isAdmin = isUserAdmin(authUser);
   const [patientSelectorLoading, setPatientSelectorLoading] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [lastActivityUpdate, setLastActivityUpdate] = useState(null);
@@ -111,7 +115,6 @@ const Dashboard = () => {
       await Promise.all([
         fetchRecentActivity(),
         fetchDashboardStats(),
-        checkAdminStatus(),
       ]);
       setInitialLoadComplete(true);
     };
@@ -154,48 +157,6 @@ const Dashboard = () => {
       setShowWelcomeBox(dismissed !== 'true');
     }
   }, [authUser, currentPatient]);
-
-  const checkAdminStatus = async () => {
-    try {
-      // Use secure storage system instead of direct localStorage
-      const { secureStorage, legacyMigration } = await import(
-        '../utils/secureStorage'
-      );
-      await legacyMigration.migrateFromLocalStorage();
-      const token = await secureStorage.getItem('token');
-
-      logger.info('🔑 DASHBOARD_ADMIN_CHECK: Checking admin status', {
-        hasToken: !!token,
-        tokenPreview: token ? token.substring(0, 20) + '...' : null,
-        timestamp: new Date().toISOString(),
-      });
-
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role || '';
-        const adminCheck =
-          userRole.toLowerCase() === 'admin' ||
-          userRole.toLowerCase() === 'administrator';
-
-        logger.info('🔑 DASHBOARD_ADMIN_CHECK: Token payload analysis', {
-          role: userRole,
-          isAdmin: adminCheck,
-          fullPayload: payload,
-          timestamp: new Date().toISOString(),
-        });
-
-        setIsAdmin(adminCheck);
-      } else {
-        setIsAdmin(false);
-      }
-    } catch (error) {
-      frontendLogger.logError('Error checking admin status', {
-        error: error.message,
-        component: 'Dashboard',
-      });
-      setIsAdmin(false);
-    }
-  };
 
   const handlePatientChange = async newPatient => {
     // Prevent infinite loops by checking if patient actually changed

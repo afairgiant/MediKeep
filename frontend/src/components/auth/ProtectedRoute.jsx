@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { isUserAdmin } from '../../utils/authUtils';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { notifyError, notifyWarning } from '../../utils/notifyTranslated';
 
@@ -35,7 +36,11 @@ function ProtectedRoute({
       return { to: '/change-password', reason: 'must-change-password' };
     }
 
-    if (adminOnly && !user?.isAdmin) {
+    // Derive admin status from user.role via the canonical util — the
+    // `user.isAdmin` cache is only populated on the SSO login path, so
+    // regular-login and session-restored users would otherwise be falsely
+    // denied admin access even with role='admin'.
+    if (adminOnly && !isUserAdmin(user)) {
       return { to: '/dashboard', reason: 'admin-required' };
     }
     
