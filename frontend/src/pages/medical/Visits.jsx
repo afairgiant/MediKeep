@@ -8,6 +8,7 @@ import {
   IconPlus,
   IconShieldCheck,
 } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -250,6 +251,7 @@ const Visits = () => {
     location: '',
     priority: '',
     tags: [],
+    pending_lab_result_ids: [],
   });
 
   const handleAddVisit = () => {
@@ -271,6 +273,7 @@ const Visits = () => {
       location: '',
       priority: '',
       tags: [],
+      pending_lab_result_ids: [],
     });
     setShowModal(true);
   };
@@ -373,6 +376,36 @@ const Visits = () => {
         // Set flag to refresh after new visit creation (but only after form submission, not uploads)
         if (success) {
           needsRefreshAfterSubmissionRef.current = true;
+        }
+      }
+
+      // Link pending lab results for new visits before completing submission,
+      // so the form stays in a blocking state until linking finishes.
+      if (success && resultId && !editingVisit) {
+        const labResultIds = (formData.pending_lab_result_ids || [])
+          .map(id => parseInt(id, 10))
+          .filter(id => Number.isInteger(id) && id > 0);
+
+        if (labResultIds.length > 0) {
+          try {
+            await apiService.linkEncounterLabResultsBulk(resultId, {
+              lab_result_ids: labResultIds,
+              purpose: null,
+              relevance_note: null,
+            });
+          } catch (err) {
+            logger.error('visits_lab_result_link_failed', {
+              message: 'Failed to link lab results to new visit',
+              visitId: resultId,
+              error: err.message,
+              component: 'Visits',
+            });
+            notifications.show({
+              title: t('visits.notifications.labResultLinkWarning', 'Lab Result Linking Issue'),
+              message: t('visits.notifications.labResultLinkFailed', 'Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.'),
+              color: 'yellow',
+            });
+          }
         }
       }
 
