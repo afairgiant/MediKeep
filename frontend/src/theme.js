@@ -1,5 +1,8 @@
 import { createTheme } from '@mantine/core';
 
+const FONT_FAMILY =
+  'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif';
+
 /**
  * Mantine v8 CSS Variables Resolver.
  * Must be passed to MantineProvider via cssVariablesResolver prop.
@@ -102,12 +105,10 @@ export const theme = createTheme({
   defaultRadius: 'md',
 
   /** Font settings */
-  fontFamily:
-    'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+  fontFamily: FONT_FAMILY,
   fontFamilyMonospace: 'Monaco, Courier, monospace',
   headings: {
-    fontFamily:
-      'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+    fontFamily: FONT_FAMILY,
     fontWeight: '600',
   },
 

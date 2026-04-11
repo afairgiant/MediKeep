@@ -1,0 +1,164 @@
+{
+  "account": {
+    "deleteAccount": {
+      "button": "删除账户",
+      "description": "永久删除您的账户和所有相关医疗数据。此操作无法撤销。",
+      "title": "删除账户"
+    }
+  },
+  "actions": {
+    "reset": "重置更改",
+    "save": "保存所有更改",
+    "unsavedChanges": "您有未保存的更改"
+  },
+  "documents": {
+    "cleanup": {
+      "button": "清理文件",
+      "cleaning": "清理中...",
+      "description": "清理不同步的文件并解决文档存储不一致问题。这将重置失败的上传、清除孤立的任务并修复数据库同步问题。",
+      "title": "文件清理"
+    },
+    "paperlessDescription": "配置 Paperless-ngx 文档管理集成"
+  },
+  "help": {
+    "documentation": {
+      "description": "浏览 wiki 获取指南、设置说明和功能文档。",
+      "title": "文档"
+    },
+    "issues": {
+      "description": "发现错误或有功能请求？在 GitHub 上创建问题反馈。",
+      "title": "反馈问题"
+    }
+  },
+  "paperlessConnection": {
+    "apiTokenHelp": "您的 paperless-ngx API 令牌。可在 Paperless 管理面板的设置中找到。",
+    "apiTokenLabel": "API 令牌",
+    "apiTokenRecommended": "API 令牌（推荐）",
+    "authMethod": "身份验证方法",
+    "connected": "已连接到 Paperless-ngx",
+    "connectionError": "无法连接。请检查您的 URL 和凭据。",
+    "methodInfo": "API 令牌是推荐的身份验证方法，具有更好的安全性。",
+    "passwordHelp": "您的 paperless-ngx 密码。",
+    "passwordLabel": "密码",
+    "sessionStorage": "使用会话存储保存令牌",
+    "title": "Paperless-ngx 连接",
+    "urlHelp": "您的 Paperless-ngx 实例的 URL（例如：https://paperless.example.com）",
+    "urlLabel": "服务器 URL",
+    "usernameHelp": "您的 paperless-ngx 用户名。",
+    "usernameLabel": "用户名",
+    "usernamePassword": "用户名和密码"
+  },
+  "papra": {
+    "apiTokenPlaceholder": "输入您的 Papra API 令牌",
+    "connectionFailed": "连接失败",
+    "connectionSuccess": "连接成功",
+    "description": "连接到您的 Papra 实例进行文档管理",
+    "organization": "组织",
+    "organizationPlaceholder": "选择组织",
+    "urlPlaceholder": "https://your-papra-instance.com"
+  },
+  "preferences": {
+    "dateFormat": {
+      "description": "选择在整个应用程序中如何显示日期",
+      "dmy": "DD/MM/YYYY（欧洲格式）",
+      "mdy": "MM/DD/YYYY（美国格式）",
+      "title": "日期格式",
+      "ymd": "YYYY-MM-DD（ISO 格式）"
+    },
+    "sessionTimeout": {
+      "description": "设置会话过期前的非活动持续时间（以分钟为单位）",
+      "range": "分钟（5-1440）",
+      "title": "会话超时"
+    },
+    "unitSystem": {
+      "description": "选择是否以英制单位（磅、英尺、°F）或公制单位（千克、厘米、°C）显示测量值",
+      "imperial": "英制（磅、英尺、°F）",
+      "metric": "公制（千克、厘米、°C）",
+      "title": "单位制"
+    }
+  },
+  "releaseNotes": {
+    "currentVersion": "当前版本",
+    "dismiss": "知道了",
+    "empty": "无可用的发布说明",
+    "error": "无法加载发布说明",
+    "publishedOn": "发布于 {{date}}",
+    "retry": "重试",
+    "showAll": "显示更多版本",
+    "showLess": "显示较少",
+    "viewOnGithub": "在 GitHub 上查看",
+    "whatsNewTitle": "新功能"
+  },
+  "sections": {
+    "accountManagement": "账户管理",
+    "gettingHelp": "获取帮助",
+    "preferences": "应用程序首选项",
+    "releaseNotes": "发布说明",
+    "security": "安全性",
+    "supportMediKeep": "支持 MediKeep",
+    "systemInfo": "系统信息"
+  },
+  "security": {
+    "password": {
+      "button": "更改密码",
+      "confirmPassword": "确认新密码",
+      "currentPassword": "当前密码",
+      "description": "更改您的账户密码以保证账户安全",
+      "forceChange": {
+        "errors": {
+          "allFieldsRequired": "所有字段都是必需的。",
+          "changeFailed": "更改密码失败。请重试。",
+          "passwordComplexity": "新密码必须包含至少一个字母和一个数字。",
+          "passwordMustDiffer": "新密码必须与您的当前密码不同。",
+          "passwordsMustMatch": "新密码不匹配。",
+          "passwordTooShort": "新密码必须至少 6 个字符。"
+        },
+        "submit": "设置新密码",
+        "submitting": "正在更改密码...",
+        "subtitle": "您的账户需要在继续之前更改密码。请在下方设置新密码。",
+        "title": "需要更改密码"
+      },
+      "newPassword": "新密码",
+      "passwordHelp": "至少 6 个字符，必须包含字母和数字。"
+    }
+  },
+  "settings": {
+    "releaseNotes": {
+      "noChanges": "此版本未列出更改",
+      "whatsNewSubtitle": "这里是自您上次更新以来的更改"
+    }
+  },
+  "sponsor": {
+    "button": "在 GitHub 上赞助",
+    "buttonShort": "赞助",
+    "description": "MediKeep 是免费开源软件。如果您觉得它有用，请考虑赞助该项目以帮助资助开发并保持其持续发展。"
+  },
+  "storage": {
+    "connectionRequired": "需要连接",
+    "defaultLocation": "默认存储位置",
+    "filesCount": "{{count}} 个文件",
+    "filesCount_one": "{{count}} 个文件",
+    "filesCount_other": "{{count}} 个文件",
+    "localDescription": "文件直接存储在此服务器上。适合无需外部服务的简单设置。",
+    "localStorage": "本地存储",
+    "noUsageData": "无存储使用数据",
+    "paperless": "Paperless-ngx",
+    "paperlessDescription": "文件上传到您的 Paperless-ngx 服务器。提供 OCR、标签和高级文档管理。",
+    "papra": "Papra",
+    "papraDescription": "文件存储在您的 Papra 实例中。提供按组织划分的有序文档管理。",
+    "title": "存储首选项",
+    "usageLabel": "存储使用情况"
+  },
+  "system": {
+    "timezone": {
+      "title": "时区"
+    },
+    "version": {
+      "loading": "正在加载版本信息...",
+      "title": "应用程序版本",
+      "unavailable": "版本信息不可用",
+      "unknownApp": "未知应用",
+      "unknownVersion": "未知版本"
+    }
+  }
+}

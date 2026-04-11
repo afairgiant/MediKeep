@@ -1,0 +1,1452 @@
+{
+  "allergies": {
+    "allergen": {
+      "description": "过敏原名称",
+      "label": "过敏原",
+      "placeholder": "请输入过敏原名称"
+    },
+    "allergyType": {
+      "description": "过敏类型分类",
+      "label": "过敏类型",
+      "options": {
+        "environmental": "环境性",
+        "food": "食物",
+        "insect": "昆虫",
+        "medication": "药物"
+      },
+      "placeholder": "选择过敏类型"
+    },
+    "cardSubtitle": "医疗过敏记录",
+    "editTitle": "编辑过敏信息",
+    "emptyState": {
+      "noData": "点击\"添加新过敏\"开始记录。",
+      "title": "未找到过敏记录"
+    },
+    "messages": {
+      "loading": "正在加载过敏信息...",
+      "saving": "正在保存过敏信息..."
+    },
+    "modal": {
+      "title": "过敏详情"
+    },
+    "noMedicationLinked": "未关联药物",
+    "onsetDate": {
+      "description": "首次识别过敏的时间",
+      "placeholder": "选择发病日期"
+    },
+    "reaction": {
+      "description": "过敏反应的症状和详细描述",
+      "label": "反应描述",
+      "placeholder": "描述过敏反应"
+    },
+    "reactionInformation": "反应信息",
+    "reactionType": {
+      "description": "过敏反应的类型",
+      "label": "反应类型",
+      "options": {
+        "anaphylaxis": "过敏性休克",
+        "gastrointestinal": "消化系统",
+        "respiratory": "呼吸系统",
+        "skin": "皮肤反应"
+      },
+      "placeholder": "选择反应类型"
+    },
+    "relatedMedication": {
+      "description": "引起此过敏的药物",
+      "label": "相关药物",
+      "placeholder": "选择药物"
+    },
+    "severity": {
+      "description": "过敏反应的严重程度",
+      "placeholder": "选择严重程度"
+    },
+    "status": {
+      "description": "当前过敏状态"
+    },
+    "tabs": {
+      "reactionDetails": "反应详情"
+    },
+    "viewMedication": "查看药物详情"
+  },
+  "componentCatalog": {
+    "fetchError": "加载检测目录失败",
+    "noData": "添加包含检测项目的检验结果后，可在此查看。",
+    "noResults": "未找到检测项目",
+    "readingCount_one": "{{count}} 次检测",
+    "refRange": "参考值",
+    "searchPlaceholder": "搜索检测项目...",
+    "sort": {
+      "alphabetical": "A-Z"
+    },
+    "status": {
+      "abnormal": "异常",
+      "borderline": "边界值",
+      "critical": "危险",
+      "high": "偏高",
+      "low": "偏低",
+      "normal": "正常"
+    },
+    "trend": {
+      "decreasing": "下降",
+      "improving": "改善",
+      "increasing": "上升",
+      "stable": "稳定",
+      "worsening": "恶化"
+    }
+  },
+  "conditions": {
+    "codeDescription": {
+      "description": "医学编码的可读描述",
+      "label": "编码描述",
+      "placeholder": "医学编码的描述"
+    },
+    "diagnosis": {
+      "description": "疾病或诊断名称",
+      "label": "诊断",
+      "placeholder": "如：高血压、2型糖尿病、哮喘"
+    },
+    "endDate": {
+      "description": "疾病缓解的时间（如适用）",
+      "placeholder": "选择结束日期"
+    },
+    "icd10Code": {
+      "description": "国际疾病分类编码",
+      "label": "ICD-10编码",
+      "placeholder": "如：I10、E11.9"
+    },
+    "notes": {
+      "description": "关于疾病、治疗史或观察的其他详情"
+    },
+    "onsetDate": {
+      "description": "疾病首次出现的时间",
+      "placeholder": "选择发病日期"
+    },
+    "relatedMedication": {
+      "description": "将此疾病关联到特定药物",
+      "label": "相关药物",
+      "placeholder": "选择药物（可选）"
+    },
+    "severity": {
+      "description": "疾病的严重程度",
+      "placeholder": "选择严重程度"
+    },
+    "snomedCode": {
+      "description": "SNOMED CT临床术语编码",
+      "label": "SNOMED编码",
+      "placeholder": "如：38341003"
+    },
+    "status": {
+      "description": "疾病的当前状态"
+    }
+  },
+  "emergencyContacts": {
+    "form": {
+      "address": {
+        "description": "联系人地址（可选）",
+        "label": "地址",
+        "placeholder": "如：北京市朝阳区xx路xx号"
+      },
+      "email": {
+        "description": "可选的电子邮箱地址",
+        "label": "电子邮箱",
+        "placeholder": "如：zhang.san@email.com"
+      },
+      "isActive": {
+        "description": "此联系人当前可联系",
+        "label": "有效联系人"
+      },
+      "isPrimary": {
+        "description": "紧急情况时将首先联系此人",
+        "label": "主要紧急联系人"
+      },
+      "name": {
+        "description": "紧急联系人的全名",
+        "label": "姓名",
+        "placeholder": "如：张三"
+      },
+      "notes": {
+        "description": "关于此联系人的其他备注",
+        "placeholder": "附加信息（如\"仅工作日可联系\"、\"会说英语\"）"
+      },
+      "primaryPhone": {
+        "description": "主要电话号码",
+        "label": "主要电话",
+        "placeholder": "如：138 1234 5678"
+      },
+      "relationship": {
+        "description": "与患者的关系",
+        "label": "关系",
+        "placeholder": "选择关系"
+      },
+      "secondaryPhone": {
+        "description": "可选的备用电话号码",
+        "label": "备用电话",
+        "placeholder": "如：186 9876 5432"
+      }
+    },
+    "messages": {
+      "saving": "正在保存紧急联系人..."
+    },
+    "tabs": {
+      "contactInfo": "联系信息"
+    }
+  },
+  "equipment": {
+    "tabs": {
+      "deviceDetails": "设备详情",
+      "serviceDates": "服务和日期"
+    }
+  },
+  "familyHistory": {
+    "form": {
+      "condition": {
+        "conditionName": {
+          "description": "疾病名称",
+          "label": "疾病名称",
+          "placeholder": "如：糖尿病、心脏病、癌症"
+        },
+        "conditionType": {
+          "description": "疾病类型分类",
+          "label": "疾病类型",
+          "placeholder": "选择疾病类型"
+        },
+        "diagnosisAge": {
+          "description": "诊断时的年龄",
+          "label": "诊断年龄",
+          "placeholder": "如：45"
+        },
+        "icd10Code": {
+          "description": "医学诊断编码（如已知）",
+          "label": "ICD-10编码",
+          "placeholder": "如：E11.9"
+        },
+        "notes": {
+          "description": "治疗详情、结果或其他相关信息",
+          "placeholder": "关于此疾病的其他详情..."
+        },
+        "severity": {
+          "description": "疾病的严重程度",
+          "label": "严重程度",
+          "placeholder": "选择严重程度"
+        },
+        "severityOptions": {
+          "critical": "🚨 危重 - 危及生命",
+          "mild": "💛 轻度 - 轻微影响",
+          "moderate": "⚡ 中度 - 明显影响",
+          "severe": "⚠️ 重度 - 显著影响"
+        },
+        "status": {
+          "description": "疾病的当前状态",
+          "label": "状态",
+          "placeholder": "选择状态"
+        },
+        "statusOptions": {
+          "active": "活动期 - 持续进行的疾病",
+          "chronic": "慢性 - 长期疾病",
+          "resolved": "已缓解 - 不再存在"
+        },
+        "typeOptions": {
+          "autoimmune": "自免疫 - 免疫系统疾病",
+          "cancer": "癌症 - 恶性疾病",
+          "cardiovascular": "心血管 - 心脏和血管",
+          "diabetes": "糖尿病 - 血糖疾病",
+          "endocrine": "内分泌 - 激素疾病",
+          "genetic": "遗传性 - 遗传疾病",
+          "mentalHealth": "精神健康 - 心理疾病",
+          "neurological": "神经系统 - 大脑和神经系统",
+          "other": "其他 - 在备注中说明",
+          "respiratory": "呼吸系统 - 肺部和呼吸疾病"
+        }
+      },
+      "member": {
+        "birthYear": {
+          "description": "家族成员出生年份",
+          "label": "出生年份",
+          "placeholder": "如：1965"
+        },
+        "deathYear": {
+          "description": "家族成员去世年份",
+          "label": "去世年份",
+          "placeholder": "如：2020"
+        },
+        "deceased": {
+          "description": "勾选如家族成员已去世",
+          "label": "已故"
+        },
+        "gender": {
+          "description": "家族成员性别",
+          "label": "性别",
+          "placeholder": "选择性别"
+        },
+        "genderOptions": {
+          "female": "女性",
+          "male": "男性"
+        },
+        "name": {
+          "description": "家族成员的全名",
+          "label": "姓名",
+          "placeholder": "输入家族成员姓名"
+        },
+        "notes": {
+          "description": "任何其他备注或重要信息",
+          "placeholder": "关于家族成员的其他信息..."
+        },
+        "relationship": {
+          "description": "与您的关系",
+          "label": "关系",
+          "placeholder": "选择关系"
+        },
+        "relationshipOptions": {
+          "aunt": "姑妈/阿姨",
+          "brother": "兄弟",
+          "cousin": "表/堂兄弟姐妹",
+          "father": "父亲",
+          "maternalGrandfather": "外祖父",
+          "maternalGrandmother": "外祖母",
+          "mother": "母亲",
+          "paternalGrandfather": "祖父",
+          "paternalGrandmother": "祖母",
+          "sister": "姐妹",
+          "uncle": "叔叔/舅舅"
+        }
+      }
+    }
+  },
+  "form": {
+    "invalidPhoneDigits": "电话号码只能包含数字、空格、短划线、括号、句点和+",
+    "invalidWebsiteUrl": "请输入有效的网站地址"
+  },
+  "immunizations": {
+    "dateAdministered": {
+      "description": "疫苗接种时间",
+      "label": "接种日期",
+      "placeholder": "选择接种日期"
+    },
+    "doseNumber": {
+      "description": "系列中的第几剂",
+      "label": "剂次",
+      "placeholder": "1、2、3..."
+    },
+    "expirationDate": {
+      "description": "所用疫苗的有效期",
+      "label": "疫苗有效期",
+      "placeholder": "选择有效期"
+    },
+    "location": {
+      "description": "疫苗接种地点",
+      "placeholder": "如：社区卫生服务中心、医院、诊所、疾控中心"
+    },
+    "lotNumber": {
+      "description": "用于追踪的批次标识",
+      "label": "批次号",
+      "placeholder": "疫苗批次/批号"
+    },
+    "manufacturer": {
+      "description": "疫苗制造商",
+      "label": "制造商",
+      "placeholder": "选择制造商"
+    },
+    "manufacturerOptions": {
+      "astraZeneca": "阿斯利康",
+      "glaxoSmithKline": "葛兰素史克",
+      "johnsonJohnson": "强生",
+      "merck": "默克",
+      "moderna": "莫德纳",
+      "pfizerBioNTech": "辉瑞-BioNTech",
+      "sanofi": "赛诺菲"
+    },
+    "ndcNumber": {
+      "description": "疫苗的国家药品编码",
+      "label": "NDC编号",
+      "placeholder": "如：12345-6789-01"
+    },
+    "notes": {
+      "description": "关于此次免疫接种的任何相关详情",
+      "placeholder": "关于此次免疫接种的其他备注..."
+    },
+    "route": {
+      "description": "接种方式",
+      "label": "接种途径",
+      "placeholder": "选择接种途径"
+    },
+    "routeOptions": {
+      "intradermal": "皮内注射 (ID)",
+      "intramuscular": "肌肉注射 (IM)",
+      "subcutaneous": "皮下注射 (SC)"
+    },
+    "site": {
+      "description": "疫苗接种部位",
+      "label": "接种部位",
+      "placeholder": "选择接种部位"
+    },
+    "siteOptions": {
+      "leftArm": "左臂",
+      "leftDeltoid": "左三角肌",
+      "leftThigh": "左大腿",
+      "rightArm": "右臂",
+      "rightDeltoid": "右三角肌",
+      "rightThigh": "右大腿"
+    },
+    "vaccineName": {
+      "description": "接种的疫苗名称",
+      "label": "疫苗名称",
+      "placeholder": "如：新冠mRNA疫苗、流感疫苗、MMR疫苗"
+    }
+  },
+  "injuries": {
+    "addNew": "添加新外伤",
+    "addTitle": "添加新外伤",
+    "bodyLocation": {
+      "description": "外伤影响的具体身体部位",
+      "label": "身体部位",
+      "placeholder": "如：左膝、右肩"
+    },
+    "bodyPart": {
+      "description": "受影响的身体部位或区域",
+      "label": "身体部位",
+      "placeholder": "如：脚踝、手腕、膝盖"
+    },
+    "cardSubtitle": "外伤记录",
+    "cause": {
+      "description": "外伤发生的原因（跌倒、运动、事故等）",
+      "label": "原因/机制",
+      "placeholder": "描述外伤发生的经过..."
+    },
+    "dateOfInjury": {
+      "description": "外伤发生的日期（如不明确可选填）",
+      "label": "外伤日期"
+    },
+    "editTitle": "编辑外伤",
+    "emptyState": {
+      "noData": "点击\"添加新外伤\"开始记录。",
+      "title": "未找到外伤记录"
+    },
+    "injuryDate": {
+      "description": "外伤发生的时间",
+      "label": "外伤日期",
+      "placeholder": "选择外伤日期"
+    },
+    "injuryName": {
+      "description": "此外伤的描述性名称",
+      "label": "外伤名称",
+      "placeholder": "如：右脚踝扭伤"
+    },
+    "injuryType": {
+      "description": "外伤类型分类（如扭伤、骨折）",
+      "label": "外伤类型",
+      "noResults": "未找到匹配的类型",
+      "placeholder": "选择或创建类型"
+    },
+    "laterality": {
+      "description": "身体受影响的侧别",
+      "label": "侧别",
+      "options": {
+        "bilateral": "双侧",
+        "left": "左侧",
+        "notApplicable": "不适用",
+        "right": "右侧"
+      },
+      "placeholder": "选择侧别"
+    },
+    "mechanism": {
+      "description": "描述外伤发生的经过",
+      "label": "受伤经过",
+      "placeholder": "如：徒步时摔倒"
+    },
+    "messages": {
+      "loading": "正在加载外伤信息...",
+      "saving": "正在保存外伤信息..."
+    },
+    "notes": {
+      "description": "一般备注或其他详情",
+      "placeholder": "任何其他相关信息..."
+    },
+    "practitioner": {
+      "description": "治疗此外伤的医疗服务提供者",
+      "label": "治疗医生",
+      "placeholder": "选择医生"
+    },
+    "recoveryNotes": {
+      "description": "关于康复进展的备注",
+      "label": "康复备注",
+      "placeholder": "进展更新、里程碑或观察"
+    },
+    "severity": {
+      "description": "此外伤的严重程度",
+      "options": {
+        "lifeThreatening": "危及生命 - 需要紧急护理",
+        "mild": "轻度 - 轻微不适",
+        "moderate": "中度 - 明显影响",
+        "severe": "重度 - 显著影响"
+      },
+      "placeholder": "选择严重程度"
+    },
+    "status": {
+      "description": "此外伤的当前状态",
+      "options": {
+        "active": "活动期 - 目前正在治疗",
+        "chronic": "慢性 - 长期影响",
+        "healing": "愈合中 - 康复期",
+        "resolved": "已愈合 - 完全康复"
+      }
+    },
+    "treatment": {
+      "description": "为外伤提供的医疗治疗",
+      "label": "接受的治疗",
+      "placeholder": "描述接受的治疗..."
+    },
+    "treatmentReceived": {
+      "description": "接受治疗的描述",
+      "placeholder": "如：RICE疗法、打石膏"
+    },
+    "viewModal": {
+      "additionalInfo": "其他信息",
+      "injuryDetails": "外伤详情"
+    }
+  },
+  "insurance": {
+    "form": {
+      "addInsurance": "添加保险",
+      "annualMaximum": {
+        "description": "年度最高保险金额",
+        "label": "年度最高保险金",
+        "placeholder": "如：1500"
+      },
+      "basicCoverage": {
+        "description": "基础治疗的保险比例",
+        "label": "基础保险比例 %",
+        "placeholder": "如：80"
+      },
+      "binNumber": {
+        "description": "药房银行识别号码",
+        "label": "BIN号码",
+        "placeholder": "如：123456"
+      },
+      "claimsAddress": {
+        "description": "提交理赔的地址",
+        "label": "理赔地址",
+        "placeholder": "输入理赔邮寄地址..."
+      },
+      "companyName": {
+        "description": "保险公司名称",
+        "label": "保险公司",
+        "placeholder": "如：中国人寿"
+      },
+      "contactAllowance": {
+        "description": "隐形眼镜年度补贴",
+        "label": "隐形眼镜补贴",
+        "placeholder": "如：150"
+      },
+      "copayBrand": {
+        "description": "品牌药物的自付金额",
+        "label": "品牌药自付额",
+        "placeholder": "如：30"
+      },
+      "copayEmergencyRoom": {
+        "description": "急诊科就诊的自付金额",
+        "label": "急诊自付额",
+        "placeholder": "如：200"
+      },
+      "copayGeneric": {
+        "description": "通用药物的自付金额",
+        "label": "通用药自付额",
+        "placeholder": "如：10"
+      },
+      "copayPrimaryCare": {
+        "description": "初级护理就诊的自付金额",
+        "label": "初级护理自付额",
+        "placeholder": "如：25"
+      },
+      "copaySpecialist": {
+        "description": "专科医生就诊的自付金额",
+        "label": "专科医生自付额",
+        "placeholder": "如：50"
+      },
+      "copaySpecialty": {
+        "description": "专科药物的自付金额",
+        "label": "专科药物自付额",
+        "placeholder": "如：50"
+      },
+      "copayUrgentCare": {
+        "description": "急诊护理就诊的自付金额",
+        "label": "急诊护理自付额",
+        "placeholder": "如：75"
+      },
+      "coveragePeriodStatus": "保险期间和状态",
+      "customerServicePhone": {
+        "description": "客户服务电话号码",
+        "label": "客户服务电话",
+        "placeholder": "如：400-123-4567"
+      },
+      "deductibleFamily": {
+        "description": "家庭年度免赔额",
+        "label": "家庭免赔额",
+        "placeholder": "如：2000"
+      },
+      "deductibleIndividual": {
+        "description": "个人年度免赔额",
+        "label": "个人免赔额",
+        "placeholder": "如：1000"
+      },
+      "dentalPlanType": {
+        "description": "牙科保险计划类型",
+        "label": "牙科计划类型",
+        "options": {
+          "dhmo": "DHMO（牙科健康维护组织）",
+          "discount": "折扣计划",
+          "dppo": "DPPO（牙科优选提供者组织）"
+        },
+        "placeholder": "选择牙科计划类型"
+      },
+      "dividers": {
+        "additionalInfo": "附加信息",
+        "basicInfo": "基本保险信息",
+        "contactInfo": "联系信息",
+        "coverageDetails": "保险详情",
+        "coveragePeriodStatus": "保险期间和状态",
+        "memberInfo": "会员信息"
+      },
+      "effectiveDate": {
+        "description": "保险开始生效的日期",
+        "label": "生效日期",
+        "placeholder": "选择生效日期"
+      },
+      "employerGroup": {
+        "description": "提供保险的公司或组织（如适用）",
+        "label": "雇主/团体保险人",
+        "placeholder": "如：ABC公司、个体工商户"
+      },
+      "examCopay": {
+        "description": "眼科检查的自付金额",
+        "label": "检查自付额",
+        "placeholder": "如：10"
+      },
+      "expirationDate": {
+        "description": "保险结束的日期（如已知）",
+        "label": "到期日期",
+        "placeholder": "选择到期日期"
+      },
+      "frameAllowance": {
+        "description": "镜架年度补贴",
+        "label": "镜架补贴",
+        "placeholder": "如：150"
+      },
+      "groupNumber": {
+        "description": "团体号码（如适用）",
+        "label": "团体号码",
+        "placeholder": "如：GRP123"
+      },
+      "insuranceType": {
+        "description": "保险类型",
+        "label": "保险类型",
+        "options": {
+          "dental": "🦷 牙科保险",
+          "medical": "🏥 医疗保险",
+          "prescription": "💊 处方保险",
+          "vision": "👁️ 视力保险"
+        },
+        "placeholder": "选择保险类型"
+      },
+      "isPrimary": {
+        "description": "勾选如这是您的主要保险（仅适用于医疗保险）",
+        "label": "主要保险"
+      },
+      "lensCoverage": {
+        "description": "镜片保险详情",
+        "label": "镜片保险",
+        "placeholder": "如：100%保险"
+      },
+      "majorCoverage": {
+        "description": "重大治疗的保险比例",
+        "label": "重大治疗保险比例 %",
+        "placeholder": "如：50"
+      },
+      "memberId": {
+        "description": "保险卡上的会员ID号码",
+        "label": "会员ID",
+        "placeholder": "如：ABC123456789"
+      },
+      "memberName": {
+        "description": "保险卡上显示的姓名",
+        "label": "会员姓名",
+        "placeholder": "如：张三"
+      },
+      "notes": {
+        "description": "任何其他详情或备注",
+        "placeholder": "关于此保险的其他信息..."
+      },
+      "pcnNumber": {
+        "description": "处理器控制号码",
+        "label": "PCN号码",
+        "placeholder": "如：ABC123"
+      },
+      "pharmacyNetworkInfo": {
+        "description": "关于优选药房网络的信息",
+        "label": "药房网络信息",
+        "placeholder": "输入药房网络详情..."
+      },
+      "planName": {
+        "description": "具体保险计划名称",
+        "label": "计划名称",
+        "placeholder": "如：PPO金牌计划"
+      },
+      "planType": {
+        "description": "医疗保险计划类型",
+        "label": "计划类型",
+        "options": {
+          "epo": "EPO（专属提供者组织）",
+          "hdhp": "HDHP（高免赔额健康计划）",
+          "hmo": "HMO（健康维护组织）",
+          "indemnity": "补偿型（按服务收费）",
+          "pos": "POS（服务点）",
+          "ppo": "PPO（优选提供者组织）"
+        },
+        "placeholder": "选择计划类型"
+      },
+      "policyHolderName": {
+        "description": "保单持有人姓名（如与会员不同）",
+        "label": "保单持有人姓名",
+        "placeholder": "如：李四（如与会员相同请留空）"
+      },
+      "preauthPhone": {
+        "description": "预授权电话号码",
+        "label": "预授权电话"
+      },
+      "prescriptionPlanType": {
+        "description": "处方药计划类型",
+        "label": "处方计划类型",
+        "options": {
+          "formulary": "药物目录计划",
+          "integrated": "与医疗保险整合",
+          "medicarePartD": "医保D部分",
+          "tieredCopay": "分级自付计划"
+        },
+        "placeholder": "选择处方计划类型"
+      },
+      "preventiveCoverage": {
+        "description": "预防护理的保险比例",
+        "label": "预防护理保险比例 %",
+        "placeholder": "如：100"
+      },
+      "primaryCarePhysician": {
+        "description": "您的主治医生姓名",
+        "label": "主治医生",
+        "placeholder": "如：王医生"
+      },
+      "providerServicesPhone": {
+        "description": "提供者服务电话号码",
+        "label": "提供者服务电话"
+      },
+      "relationshipToHolder": {
+        "description": "您与保单持有人的关系",
+        "label": "与持有人的关系",
+        "options": {
+          "child": "子女",
+          "dependent": "家属",
+          "self": "本人",
+          "spouse": "配偶"
+        },
+        "placeholder": "选择关系"
+      },
+      "rxgroup": {
+        "description": "处方药组号",
+        "label": "处方药组",
+        "placeholder": "如：RXGRP123"
+      },
+      "saving": "正在保存保险信息...",
+      "status": {
+        "description": "保险的当前状态",
+        "options": {
+          "expired": "已过期"
+        },
+        "placeholder": "选择状态"
+      },
+      "tabs": {
+        "contact": "联系方式",
+        "coverage": "保险范围",
+        "member": "会员信息"
+      },
+      "updateInsurance": "更新保险",
+      "visionPlanType": {
+        "description": "视力保险计划类型",
+        "label": "视力计划类型",
+        "options": {
+          "visionDiscount": "视力折扣计划",
+          "visionHmo": "视力HMO",
+          "visionPpo": "视力PPO"
+        },
+        "placeholder": "选择视力计划类型"
+      },
+      "websiteUrl": {
+        "description": "会员门户或网站地址",
+        "label": "网站地址",
+        "placeholder": "如：https://member.insurance.com"
+      }
+    },
+    "viewModal": {
+      "coverageDetails": "保险详情"
+    }
+  },
+  "labResults": {
+    "form": {
+      "componentCreationWarning": "检验结果已保存，但无法添加检测项目。您可以在查看页面添加。",
+      "relationshipCreationWarning": "检验结果已保存，但某些关联无法创建。您可以在编辑页面添加。"
+    }
+  },
+  "medications": {
+    "alternativeName": {
+      "description": "可选的别名或品牌名（2-100个字符）",
+      "label": "别名",
+      "placeholder": "如：品牌名或通用名"
+    },
+    "dosage": {
+      "description": "每次服用的剂量和强度",
+      "label": "剂量",
+      "placeholder": "如：10毫克，1片"
+    },
+    "form": {
+      "addMedication": "添加药物",
+      "conditionLinkFailed": "药物已保存，但某些疾病无法关联。您可以稍后编辑药物进行关联。",
+      "conditionLinkPartialFailure": "{{count}} 个疾病关联失败",
+      "conditionLinkPartialFailure_one": "{{count}} 个疾病关联失败",
+      "conditionLinkPartialFailure_other": "{{count}} 个疾病关联失败",
+      "linkConditionsDescription": "可选择将此药物关联到现有疾病",
+      "noConditionsFound": "未找到疾病",
+      "saving": "正在保存药物信息...",
+      "updateMedication": "更新药物"
+    },
+    "frequency": {
+      "description": "服用药物的频率",
+      "label": "频率",
+      "placeholder": "如：每日一次，每日两次"
+    },
+    "indication": {
+      "description": "此药物的用途是什么？描述用药理由或所治疗的疾病",
+      "label": "适应症",
+      "placeholder": "如：高血压，疼痛时使用，糖尿病管理"
+    },
+    "medicationName": {
+      "description": "药物的通用名或品牌名（至少2个字符）",
+      "label": "药物名称",
+      "placeholder": "如：利辛普利，二甲双胍"
+    },
+    "medicationType": {
+      "description": "药物类别",
+      "label": "药物类型",
+      "placeholder": "选择类型"
+    },
+    "pharmacy": {
+      "description": "购药的药房",
+      "label": "药房",
+      "placeholder": "选择药房"
+    },
+    "prescribingProvider": {
+      "description": "开具此药物的医生",
+      "label": "开药医生",
+      "placeholder": "选择医生"
+    },
+    "route": {
+      "description": "药物给药方式",
+      "label": "给药途径",
+      "options": {
+        "inhalation": "吸入",
+        "injection": "注射",
+        "intramuscular": "肌肉注射",
+        "intravenous": "静脉注射",
+        "nasal": "鼻用",
+        "oral": "口服",
+        "rectal": "直肠给药",
+        "subcutaneous": "皮下注射",
+        "sublingual": "舌下含服",
+        "topical": "外用"
+      },
+      "placeholder": "选择给药途径"
+    },
+    "sideEffects": {
+      "description": "此药物的已知或经历的副作用",
+      "label": "副作用",
+      "placeholder": "列出任何已知或经历的副作用..."
+    }
+  },
+  "pharmacies": {
+    "form": {
+      "brand": {
+        "description": "主要药房连锁店或独立类型",
+        "label": "药房品牌",
+        "options": {
+          "amazonPharmacy": "亚马逊药房",
+          "compoundingPharmacy": "制剂药房",
+          "costcoPharmacy": "开市客药房",
+          "cvs": "CVS",
+          "hebPharmacy": "H-E-B药房",
+          "hospitalPharmacy": "医院药房",
+          "independent": "独立药房",
+          "kaiserPermanente": "凯撒医疗",
+          "krogerPharmacy": "克罗格药房",
+          "meijerPharmacy": "迈尔药房",
+          "onlinePharmacy": "网上药房",
+          "publixPharmacy": "帕布利克药房",
+          "riteAid": "来德爱",
+          "safewayPharmacy": "西夫韦药房",
+          "specialtyPharmacy": "专科药房",
+          "targetPharmacy": "塔吉特药房",
+          "walgreens": "沃尔格林",
+          "walmartPharmacy": "沃尔玛药房"
+        },
+        "placeholder": "选择药房连锁店或类型"
+      },
+      "city": {
+        "description": "所在城市",
+        "label": "城市",
+        "placeholder": "北京"
+      },
+      "country": {
+        "description": "药房所在国家",
+        "label": "国家",
+        "placeholder": "如：中国、美国"
+      },
+      "locationDivider": "位置信息",
+      "name": {
+        "description": "具体名称或位置标识",
+        "label": "药房名称",
+        "placeholder": "国大药房 - 中山路店"
+      },
+      "phone": {
+        "description": "药房主要电话号码",
+        "placeholder": "138 1234 5678"
+      },
+      "postalCode": {
+        "description": "邮政编码",
+        "label": "邮政编码",
+        "placeholder": "如：100000"
+      },
+      "specialtyServices": {
+        "description": "此药房提供的特殊服务",
+        "label": "专业服务",
+        "placeholder": "如：疫苗接种、制剂配制、药物治疗管理"
+      },
+      "stateProvince": {
+        "description": "省、州或地区",
+        "label": "省/州",
+        "placeholder": "如：北京市、广东省"
+      },
+      "storeNumber": {
+        "description": "内部门店标识",
+        "label": "门店号",
+        "placeholder": "如：1234、#5678、A店"
+      },
+      "streetAddress": {
+        "description": "实际街道地址",
+        "label": "街道地址",
+        "placeholder": "中山路123号"
+      },
+      "website": {
+        "description": "药房网站用于在线下单或获取信息",
+        "placeholder": "https://www.example.com"
+      }
+    }
+  },
+  "practices": {
+    "form": {
+      "fax": {
+        "description": "医疗机构传真号码",
+        "label": "传真号码",
+        "placeholder": "010-1234-5678"
+      },
+      "name": {
+        "description": "医疗机构或诊所名称",
+        "label": "医疗机构名称",
+        "placeholder": "市立总医院"
+      },
+      "notes": {
+        "description": "关于医疗机构的任何其他信息",
+        "placeholder": "关于此医疗机构的其他备注..."
+      },
+      "patientPortal": {
+        "description": "患者门户网址",
+        "label": "患者门户网址",
+        "placeholder": "https://portal.practice.com"
+      },
+      "phone": {
+        "description": "医疗机构主要电话号码",
+        "label": "医疗机构电话"
+      },
+      "website": {
+        "description": "医疗机构官方网站",
+        "label": "医疗机构网站",
+        "placeholder": "https://www.practice.com"
+      }
+    }
+  },
+  "practitioners": {
+    "form": {
+      "email": {
+        "description": "专业电子邮箱地址",
+        "label": "电子邮箱",
+        "placeholder": "doctor@example.com"
+      },
+      "name": {
+        "description": "医生全名包括职称",
+        "label": "姓名",
+        "placeholder": "张三医生"
+      },
+      "phone": {
+        "description": "主要联系电话",
+        "label": "电话号码",
+        "placeholder": "138 1234 5678"
+      },
+      "practice": {
+        "description": "选择现有医疗机构或输入创建新机构",
+        "label": "医疗机构/诊所",
+        "placeholder": "搜索或创建医疗机构..."
+      },
+      "rating": {
+        "description": "您对此医生的总体评价（0-5）",
+        "label": "评分"
+      },
+      "specialty": {
+        "description": "从列表选择或输入自定义专科",
+        "label": "医学专科",
+        "placeholder": "搜索专科或输入自定义..."
+      },
+      "website": {
+        "description": "专业网站或医疗机构页面",
+        "placeholder": "https://www.example.com"
+      }
+    }
+  },
+  "procedures": {
+    "anesthesiaNotes": {
+      "description": "关于麻醉实施的任何备注",
+      "label": "麻醉备注",
+      "placeholder": "与麻醉相关的备注..."
+    },
+    "anesthesiaType": {
+      "description": "使用的麻醉类型",
+      "label": "麻醉类型",
+      "options": {
+        "general": "全身麻醉 - 完全失去意识",
+        "local": "局部麻醉 - 特定区域麻痹",
+        "none": "无麻醉 - 不需要麻醉",
+        "regional": "区域麻醉 - 较大区域麻痹",
+        "sedation": "镇静 - 放松但清醒"
+      },
+      "placeholder": "选择麻醉类型"
+    },
+    "complications": {
+      "description": "记录任何并发症、不良事件或意外结果",
+      "label": "并发症",
+      "placeholder": "操作过程中发生的任何并发症..."
+    },
+    "description": {
+      "description": "操作过程的详细描述",
+      "placeholder": "详细描述操作过程..."
+    },
+    "facility": {
+      "description": "操作实施或将要实施的地点",
+      "label": "医疗机构",
+      "placeholder": "如：总医院、门诊中心"
+    },
+    "notes": {
+      "description": "任何相关观察、术前/术后指导或详情",
+      "placeholder": "关于操作的其他备注..."
+    },
+    "practitioner": {
+      "description": "实施操作的医生或专家",
+      "label": "执行医生",
+      "placeholder": "选择医生"
+    },
+    "procedureCode": {
+      "description": "医学编码（CPT、ICD-10-PCS等）",
+      "label": "操作编码",
+      "placeholder": "如：CPT-12345、ICD-10-PCS"
+    },
+    "procedureDate": {
+      "description": "操作实施/将要实施的时间",
+      "label": "操作日期",
+      "placeholder": "选择操作日期"
+    },
+    "procedureDuration": {
+      "description": "操作耗时/预计耗时",
+      "label": "持续时间（分钟）",
+      "placeholder": "如：30、120"
+    },
+    "procedureName": {
+      "description": "医疗操作名称",
+      "label": "操作名称",
+      "placeholder": "如：阑尾切除术、MRI扫描、结肠镜检查"
+    },
+    "procedureSetting": {
+      "description": "操作实施地点",
+      "label": "操作环境",
+      "options": {
+        "emergency": "急诊 - 急诊科/急诊护理",
+        "home": "居家 - 患者家中",
+        "inpatient": "住院 - 需要住院",
+        "office": "门诊 - 医生办公室/诊所",
+        "outpatient": "门诊 - 当天出院"
+      },
+      "placeholder": "选择环境"
+    },
+    "procedureType": {
+      "description": "操作类别",
+      "label": "操作类型",
+      "options": {
+        "diagnostic": "诊断性 - 检查/影像",
+        "emergency": "急诊 - 紧急护理",
+        "preventive": "预防性 - 预防护理",
+        "surgical": "手术性 - 侵入性操作",
+        "therapeutic": "治疗性 - 治疗"
+      },
+      "placeholder": "选择类型"
+    },
+    "status": {
+      "description": "操作的当前状态"
+    }
+  },
+  "symptoms": {
+    "messages": {
+      "saving": "正在保存症状..."
+    },
+    "occurrence": {
+      "additionalNotes": {
+        "description": "关于此次发作的任何其他相关信息",
+        "label": "其他备注",
+        "placeholder": "关于此次发作的其他详情..."
+      },
+      "associatedSymptoms": {
+        "description": "此次发作伴随的其他症状",
+        "label": "伴随症状",
+        "placeholder": "其他症状（恶心、头晕等）"
+      },
+      "duration": {
+        "description": "此次发作持续了多长时间",
+        "label": "持续时间",
+        "placeholder": "如：2小时、30分钟、全天"
+      },
+      "impactLevel": {
+        "description": "此症状对您日常活动的影响程度",
+        "label": "对日常生活的影响",
+        "placeholder": "选择影响程度"
+      },
+      "impactLevelOptions": {
+        "debilitating": "极严重 - 无法正常活动",
+        "mild": "轻度 - 活动稍有困难",
+        "moderate": "中度 - 部分活动受限",
+        "noImpact": "无影响 - 能够正常活动",
+        "severe": "严重 - 大部分活动困难"
+      },
+      "location": {
+        "description": "您在身体哪个部位感受到此症状",
+        "label": "部位",
+        "placeholder": "如：左太阳穴、下背部、全身"
+      },
+      "occurrenceDate": {
+        "description": "此次特定发作的日期",
+        "label": "发作日期",
+        "placeholder": "此次发作发生的时间"
+      },
+      "painScale": {
+        "description": "疼痛程度评分，从0（无痛）到10（最严重疼痛）",
+        "label": "疼痛评分（0-10）",
+        "placeholder": "0 = 无痛，10 = 最严重疼痛"
+      },
+      "reliefMethods": {
+        "description": "此次发作中提供缓解的方法",
+        "label": "缓解方法",
+        "placeholder": "什么有帮助（药物、休息、冰敷等）"
+      },
+      "resolutionNotes": {
+        "description": "关于此次发作如何结束或治疗的详情",
+        "label": "缓解备注",
+        "placeholder": "此次发作如何缓解..."
+      },
+      "resolvedDate": {
+        "description": "如仍在经历此次发作请留空",
+        "label": "缓解日期",
+        "placeholder": "此次发作何时缓解"
+      },
+      "resolvedTime": {
+        "description": "此次发作缓解的时间",
+        "label": "缓解时间",
+        "placeholder": "发作缓解的时间"
+      },
+      "severity": {
+        "description": "此次发作时症状的严重程度",
+        "placeholder": "选择严重程度"
+      },
+      "timeOfDay": {
+        "description": "此次发作发生在一天中的什么时候",
+        "label": "一天中的时间",
+        "placeholder": "选择时间段"
+      },
+      "triggers": {
+        "description": "可能引起或加重此次发作的因素",
+        "label": "诱发因素",
+        "placeholder": "引起此次发作的因素（压力、食物、天气等）"
+      }
+    },
+    "parent": {
+      "category": {
+        "description": "用于整理症状的可选分类",
+        "label": "分类",
+        "placeholder": "如：疼痛、消化、呼吸"
+      },
+      "firstOccurrenceDate": {
+        "description": "首次注意到此症状的时间",
+        "label": "首次出现日期",
+        "placeholder": "首次出现此症状的时间"
+      },
+      "generalNotes": {
+        "description": "关于模式、病史或观察的一般信息",
+        "label": "一般备注",
+        "placeholder": "关于此症状的总体备注..."
+      },
+      "isChronic": {
+        "description": "如果这是持续/长期症状请勾选",
+        "label": "慢性疾病"
+      },
+      "resolvedDate": {
+        "description": "此症状完全缓解的日期",
+        "label": "缓解日期",
+        "placeholder": "症状缓解的时间"
+      },
+      "status": {
+        "description": "此症状的当前总体状态",
+        "label": "总体状态",
+        "placeholder": "选择状态"
+      },
+      "statusOptions": {
+        "active": "活动期 - 目前正在经历",
+        "recurring": "复发性 - 时好时坏",
+        "resolved": "已缓解 - 不再经历"
+      },
+      "symptomName": {
+        "description": "您想要跟踪的症状名称",
+        "label": "症状名称",
+        "placeholder": "如：偏头痛、慢性背痛"
+      },
+      "typicalTriggers": {
+        "description": "通常引起此症状的因素",
+        "label": "常见诱因",
+        "placeholder": "添加常见诱因（压力、天气、食物等）"
+      }
+    }
+  },
+  "treatmentPlan": {
+    "clickToExpand": "点击展开并添加详情（可选）",
+    "conditions": "疾病",
+    "encounters": "就诊",
+    "equipment": "设备",
+    "medications": "药物",
+    "noEquipment": "未找到设备。创建治疗后可以添加设备。",
+    "noLabResults": "未找到检验结果。请先创建检验结果再关联。",
+    "noMedications": "未找到药物。请先创建药物再关联。",
+    "noVisits": "未找到就诊记录。请先创建就诊记录再关联。"
+  },
+  "treatments": {
+    "amount": {
+      "description": "每次治疗的剂量或强度",
+      "label": "剂量",
+      "placeholder": "如：500毫克、2片、30分钟"
+    },
+    "endDate": {
+      "description": "预期或实际完成日期",
+      "placeholder": "选择结束日期（如已知）"
+    },
+    "frequency": {
+      "description": "治疗频率",
+      "label": "频率",
+      "placeholder": "选择频率"
+    },
+    "frequencyOptions": {
+      "asNeeded": "按需使用（PRN）",
+      "biWeekly": "双周（每2周一次）",
+      "continuous": "持续/进行中",
+      "fourTimes": "每日四次（QID）",
+      "monthly": "每月",
+      "onceDaily": "每日一次",
+      "oneTime": "仅一次",
+      "threeTimes": "每日三次（TID）",
+      "twiceDaily": "每日两次（BID）",
+      "weekly": "每周"
+    },
+    "medications": {
+      "specificEndDate": "治疗结束日期",
+      "specificStartDate": "治疗开始日期"
+    },
+    "mode": {
+      "advancedOption": "治疗计划",
+      "description": "选择跟踪此治疗的方式",
+      "label": "治疗模式",
+      "simpleOption": "简单模式"
+    },
+    "notes": {
+      "description": "进展更新、观察或重要备注",
+      "label": "其他备注",
+      "placeholder": "进展备注、副作用、调整、结果..."
+    },
+    "practitioner": {
+      "description": "为此治疗分配医生",
+      "placeholder": "选择医生（可选）"
+    },
+    "relatedCondition": {
+      "description": "将此治疗关联到特定疾病",
+      "label": "相关疾病",
+      "placeholder": "选择疾病（可选）"
+    },
+    "startDate": {
+      "description": "治疗开始/已开始的时间",
+      "placeholder": "选择开始日期"
+    },
+    "treatmentDescription": {
+      "description": "治疗方法的全面详情",
+      "label": "治疗描述",
+      "placeholder": "治疗计划的详细描述..."
+    },
+    "treatmentName": {
+      "description": "治疗的具体名称或描述",
+      "label": "治疗名称",
+      "placeholder": "如：下背痛物理治疗"
+    },
+    "treatmentStatus": {
+      "description": "治疗工作流程中的当前阶段",
+      "label": "治疗状态",
+      "options": {
+        "active": "活动期 - 目前正在治疗",
+        "cancelled": "已取消 - 治疗终止",
+        "completed": "已完成 - 治疗成功结束",
+        "onHold": "暂停 - 暂时停止",
+        "planned": "计划中 - 预定未来治疗"
+      },
+      "placeholder": "选择状态"
+    },
+    "treatmentType": {
+      "description": "治疗类别",
+      "label": "治疗类型",
+      "options": {
+        "behavioralTherapy": "行为疗法 - 心理健康治疗",
+        "chemotherapy": "化疗 - 癌症治疗",
+        "dialysis": "透析 - 肾功能支持",
+        "immunotherapy": "免疫疗法 - 免疫系统治疗",
+        "medication": "药物治疗 - 药物疗法",
+        "occupationalTherapy": "职业疗法 - 功能改善",
+        "other": "其他 - 在描述中说明",
+        "physicalTherapy": "物理治疗 - 康复",
+        "radiation": "放疗 - 放射治疗",
+        "speechTherapy": "言语治疗 - 沟通改善",
+        "surgery": "手术 - 外科手术"
+      },
+      "placeholder": "选择类型"
+    }
+  },
+  "visits": {
+    "attendingPractitioner": {
+      "label": "主治医生"
+    },
+    "diagnosisAssessment": {
+      "label": "诊断/评估"
+    },
+    "followUpInstructions": {
+      "label": "随访指导"
+    },
+    "form": {
+      "dividers": {
+        "clinicalInformation": "临床信息"
+      },
+      "fields": {
+        "additionalNotes": {
+          "description": "任何其他观察、备注或重要详情",
+          "placeholder": "关于此次就诊的任何其他重要详情..."
+        },
+        "attendingPractitioner": {
+          "description": "进行此次就诊的医生",
+          "label": "主治医生",
+          "placeholder": "选择医生（可选）"
+        },
+        "chiefComplaint": {
+          "description": "促使就诊的主要健康问题或症状",
+          "placeholder": "报告的主要问题或症状"
+        },
+        "diagnosisAssessment": {
+          "description": "医学诊断或临床评估",
+          "label": "诊断/评估",
+          "placeholder": "就诊的临床评估或诊断..."
+        },
+        "durationMinutes": {
+          "description": "就诊持续时间",
+          "label": "持续时间（分钟）",
+          "placeholder": "就诊持续时间"
+        },
+        "followUpInstructions": {
+          "description": "持续护理和随访预约的指导",
+          "placeholder": "随访护理指导..."
+        },
+        "location": {
+          "description": "就诊地点",
+          "placeholder": "就诊发生的地点"
+        },
+        "priority": {
+          "description": "就诊的优先级",
+          "placeholder": "选择优先级"
+        },
+        "reason": {
+          "description": "此次医疗就诊的主要目的",
+          "label": "就诊原因",
+          "placeholder": "如：年度体检、随访、症状复查"
+        },
+        "relatedCondition": {
+          "description": "如适用，将此次就诊关联到特定疾病",
+          "label": "相关疾病（可选）",
+          "placeholder": "选择此次就诊相关的疾病"
+        },
+        "treatmentPlan": {
+          "description": "治疗建议和处方干预",
+          "placeholder": "推荐治疗或下一步措施..."
+        },
+        "visitDate": {
+          "description": "就诊发生的时间",
+          "label": "就诊日期",
+          "placeholder": "选择就诊日期"
+        },
+        "visitType": {
+          "description": "医疗就诊类型",
+          "placeholder": "选择就诊类型"
+        }
+      },
+      "locationOptions": {
+        "clinic": "诊所",
+        "doctorsOffice": "医生办公室",
+        "emergencyRoom": "急诊科",
+        "homeVisit": "家庭访问",
+        "hospital": "医院",
+        "telehealth": "远程医疗/虚拟",
+        "urgentCare": "急诊护理"
+      },
+      "priorityOptions": {
+        "routine": "常规",
+        "urgent": "紧急"
+      },
+      "visitTypeOptions": {
+        "annualCheckup": "年度体检",
+        "consultation": "会诊",
+        "emergency": "急诊",
+        "followUp": "随访",
+        "preventiveCare": "预防性护理",
+        "routineVisit": "常规就诊",
+        "specialistReferral": "专科转诊"
+      }
+    },
+    "relatedCondition": {
+      "label": "相关疾病（可选）"
+    },
+    "table": {
+      "visitType": "就诊类型"
+    },
+    "viewModal": {
+      "chiefComplaint": "主要主诉",
+      "followUpInstructions": "随访指导",
+      "priority": "优先级"
+    }
+  }
+}

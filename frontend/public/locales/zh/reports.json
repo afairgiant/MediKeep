@@ -1,0 +1,218 @@
+{
+  "builder": {
+    "buttons": {
+      "addRecords": "添加医疗记录",
+      "clearSelections": "清除所有选择",
+      "generateReport": "生成报告（{{count}} 条记录）",
+      "generateReport_one": "生成报告（{{count}} 条记录）",
+      "generateReport_other": "生成报告（{{count}} 条记录）",
+      "generateReportChartsOnly": "生成报告（{{chartCount}} 个图表）",
+      "generateReportWithCharts": "生成报告（{{recordCount}} 条记录，{{chartCount}} 个图表）",
+      "selectAll": "选择所有记录"
+    },
+    "configuration": {
+      "description": "选择要包含在自定义报告中的医疗记录",
+      "title": "报告配置"
+    },
+    "icon": "",
+    "loading": "正在加载报告生成器...",
+    "noData": {
+      "description": "请先添加一些医疗记录以使用报告生成器。",
+      "title": "无可用医疗数据"
+    },
+    "notifications": {
+      "templateLoaded": "模板已加载",
+      "templateLoadedMessage": "模板\"{{name}}\"已加载。"
+    },
+    "progress": {
+      "recordsSelected": "已选择记录"
+    },
+    "settingsModal": {
+      "includePatientInfo": {
+        "description": "添加人口统计学信息和联系信息",
+        "label": "包含患者信息"
+      },
+      "includeProfilePicture": {
+        "description": "在报告标题中添加患者照片",
+        "label": "包含个人照片"
+      },
+      "includeSummary": {
+        "description": "添加概览和统计部分",
+        "label": "包含汇总统计"
+      },
+      "reportTitle": {
+        "label": "报告标题"
+      },
+      "title": "报告设置"
+    },
+    "title": "自定义报告生成器",
+    "trendCharts": {
+      "dateFrom": "开始日期",
+      "dateTo": "结束日期",
+      "emptyState": "无趋势数据可用。请添加生命体征或实验室结果以启用趋势图表。",
+      "labTestCharts": {
+        "description": "搜索并选择要制图的实验室检查",
+        "searchPlaceholder": "搜索实验室检查...",
+        "title": "实验室检查图表"
+      },
+      "maxReached": "已达到最多 10 个图表",
+      "recordCount": "{{count}} 条记录",
+      "recordCount_one": "{{count}} 条记录",
+      "recordCount_other": "{{count}} 条记录",
+      "removeChart": "移除{{name}}图表",
+      "selectedCharts": "已选择图表（{{count}}）",
+      "selectedCharts_one": "已选择图表（{{count}}）",
+      "selectedCharts_other": "已选择图表（{{count}}）",
+      "vitalCharts": {
+        "description": "选择要制图的生命体征",
+        "title": "生命体征图表"
+      }
+    }
+  },
+  "categories": {
+    "noCategories": "无可用分类",
+    "noCategoriesDescription": "没有可用于报告生成的医疗数据分类。",
+    "noRecords": "无可用记录",
+    "recordCount": "{{count}} 条记录",
+    "recordCount_one": "{{count}} 条记录",
+    "recordCount_other": "{{count}} 条记录",
+    "selected": "已选择 {{count}} 个",
+    "selected_one": "已选择 {{count}} 个",
+    "selected_other": "已选择 {{count}} 个",
+    "showingFirst": "显示前 {{count}} 条记录。出于性能考虑，更多记录可用但未显示。",
+    "showingFirst_one": "显示前 {{count}} 条记录。出于性能考虑，更多记录可用但未显示。",
+    "showingFirst_other": "显示前 {{count}} 条记录。出于性能考虑，更多记录可用但未显示。",
+    "totalCount": "共 {{count}} 条",
+    "totalCount_one": "共 {{count}} 条",
+    "totalCount_other": "共 {{count}} 条"
+  },
+  "dataExport": {
+    "availableData": "可用数据",
+    "bulkExport": "批量导出",
+    "csvDescription": "CSV 格式适用于电子表格",
+    "dateFilterNote": "日期过滤器适用于所有选定类型",
+    "exportInfo": "导出信息",
+    "exportTitle": "导出医疗记录",
+    "includeFilesNote": "这可能会显著增加下载大小",
+    "jsonDescription": "JSON 格式提供完整的数据结构",
+    "pdfDescription": "PDF 格式创建可打印报告",
+    "singleExport": "单独导出",
+    "zipDescription": "批量导出打包为 ZIP 文件"
+  },
+  "export": {
+    "availableData": {
+      "moreItems_one": "还有 {{count}} 项",
+      "moreItems_other": "还有 {{count}} 项",
+      "title": "可用数据"
+    },
+    "buttons": {
+      "bulkExport": "批量导出 {{count}} 种类型为 ZIP",
+      "bulkExport_one": "批量导出 {{count}} 种类型为 ZIP",
+      "bulkExport_other": "批量导出 {{count}} 种类型为 ZIP",
+      "creatingZip": "正在创建 ZIP...",
+      "exportAs": "将{{scope}}导出为{{format}}",
+      "exporting": "正在导出...",
+      "goToDashboard": "前往仪表板",
+      "refreshPage": "刷新页面"
+    },
+    "configuration": {
+      "bulkSelection": {
+        "label": "选择批量导出的数据类型"
+      },
+      "dataToExport": {
+        "label": "要导出的数据",
+        "placeholder": "选择数据类型"
+      },
+      "dateRange": {
+        "endDate": "结束日期（可选）",
+        "startDate": "开始日期（可选）"
+      },
+      "format": {
+        "label": "导出格式",
+        "placeholder": "选择格式"
+      },
+      "includeFiles": "包含附件（创建 ZIP 文件）",
+      "includePatientInfo": {
+        "description": "取消勾选以出于隐私考虑排除患者个人详细信息",
+        "label": "包含患者信息（姓名、人口统计等）"
+      },
+      "title": "导出配置"
+    },
+    "description": "将您的医疗数据下载为各种格式，用于备份或与医疗服务提供者共享",
+    "errors": {
+      "bulkExportFailed": "批量导出失败：{{message}}",
+      "bulkInvalidSettings": "请检查您的批量导出设置。确保您至少选择了一种数据类型和有效的格式。",
+      "bulkNoDataFound": "未找到符合所选导出条件的数据。请尝试选择不同的数据类型或调整日期范围。",
+      "exportFailed": "导出失败：{{message}}",
+      "invalidSettings": "请检查您的导出设置。确保您选择了有效的数据类型和格式。",
+      "loadFailed": "加载导出数据失败：{{message}}",
+      "noActivePatient": "当前未选择患者档案。请从仪表板选择患者以使用导出功能。",
+      "noDataFound": "未找到符合所选导出条件的数据。请尝试选择不同的数据类型或日期范围。",
+      "noDataType": "请至少选择一种数据类型进行批量导出",
+      "sessionExpired": "您的会话已过期。请刷新页面或重新登录以访问导出功能。",
+      "validationFailed": "{{errors}}"
+    },
+    "exportMode": {
+      "bulkDescription": "将多种数据类型一起导出到 ZIP 文件中",
+      "bulkExport": "批量导出",
+      "singleDescription": "以您选择的格式导出单一数据类型",
+      "singleExport": "单独导出",
+      "title": "导出模式"
+    },
+    "icon": "",
+    "information": {
+      "bulk": {
+        "description": "创建包含多种数据类型的 ZIP 文件，采用您选择的格式进行全面数据备份。",
+        "title": "批量导出："
+      },
+      "csv": {
+        "description": "逗号分隔值，适用于电子表格应用程序，如 Excel 或 Google Sheets。",
+        "title": "CSV 格式："
+      },
+      "fileAttachments": {
+        "description": "当可用于 PDF 导出时，实验室结果文件可以包含在 ZIP 存档中。",
+        "title": "文件附件："
+      },
+      "json": {
+        "description": "机器可读的结构化数据格式，非常适合导入其他系统或应用程序。",
+        "title": "JSON 格式："
+      },
+      "pdf": {
+        "description": "人类可读的文档格式，非常适合打印或与医疗服务提供者共享。",
+        "title": "PDF 格式："
+      },
+      "title": "导出信息"
+    },
+    "loading": "正在加载导出选项...",
+    "scopes": {
+      "all": "所有记录",
+      "encounters": "就诊记录"
+    },
+    "success": {
+      "bulkExportComplete": "批量导出成功完成！您的包含 {{count}} 种数据类型的 ZIP 文件已下载。",
+      "bulkExportComplete_one": "批量导出成功完成！您的包含 {{count}} 种数据类型的 ZIP 文件已下载。",
+      "bulkExportComplete_other": "批量导出成功完成！您的包含 {{count}} 种数据类型的 ZIP 文件已下载。",
+      "exportComplete": "导出成功完成！您的{{format}}文件已下载。"
+    },
+    "title": "导出健康记录"
+  },
+  "templates": {
+    "categories": "{{count}} 个分类",
+    "categories_one": "{{count}} 个分类",
+    "categories_other": "{{count}} 个分类",
+    "deleteConfirm": "您确定要删除此模板吗？",
+    "editTemplate": "编辑模板",
+    "loadTemplate": "加载模板",
+    "manageTemplates": "管理模板",
+    "moreTemplates": "...还有 {{count}} 个模板",
+    "moreTemplates_one": "...还有 {{count}} 个模板",
+    "moreTemplates_other": "...还有 {{count}} 个模板",
+    "noSaved": "无已保存的模板",
+    "records": "{{count}} 条记录",
+    "reportTemplates": "报告模板",
+    "saveAsTemplate": "另存为模板",
+    "saveDescription": "此模板将保存您当前的报告设置、选定记录和选定趋势图表。",
+    "savedTemplates": "已保存的模板",
+    "updateTemplate": "更新模板"
+  }
+}

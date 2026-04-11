@@ -11,7 +11,7 @@ import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
 import i18n from '../i18n';
 
 // Supported languages - must match backend validation
-const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'ru', 'sv', 'nl', 'pl'];
+const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'ru', 'sv', 'nl', 'pl', 'zh'];
 
 /**
  * User Preferences Context
@@ -150,7 +150,7 @@ export const UserPreferencesProvider = ({ children }) => {
   useEffect(() => {
     const syncAutoDetectedLanguage = async () => {
       if (isAuthenticated && user && preferences && !loading) {
-        const currentLanguage = i18n.language;
+        const currentLanguage = (i18n.language || 'en').split('-')[0].toLowerCase();
         const savedLanguage = preferences.language;
 
         // Only save if user has no language preference yet (still on default 'en')

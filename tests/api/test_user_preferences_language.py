@@ -245,7 +245,7 @@ class TestUserPreferencesLanguage:
         self, client: TestClient, db_session: Session
     ):
         """Test that all supported languages can be set successfully."""
-        supported_languages = ["en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl"]
+        supported_languages = ["en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl", "zh"]
 
         for lang in supported_languages:
             # Create a new test user for each language
