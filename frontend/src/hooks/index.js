@@ -11,7 +11,6 @@ export { useFormHandlers } from './useFormHandlers';
 
 // Medical data hooks
 export { useMedicalData } from './useMedicalData';
-export { useAuth, AuthProvider, TokenManager } from './useAuth';
 export { useLabResults } from './useLabResults';
 
 // Timezone hook
