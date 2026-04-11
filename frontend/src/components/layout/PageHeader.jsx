@@ -1,12 +1,9 @@
-import logger from '../../services/logger';
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { isUserAdmin } from '../../utils/authUtils';
 import { NavigationWrapper } from '../navigation';
 import { useViewport } from '../../hooks/useViewport';
-import LanguageSwitcher from '../shared/LanguageSwitcher';
-import { secureStorage, legacyMigration } from '../../utils/secureStorage';
 import './PageHeader.css';
 
 /**
@@ -26,59 +23,19 @@ const PageHeader = ({
   showTitle = true,
 }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { isMobile } = useViewport();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const toggleMobileNav = useCallback(() => {
     setIsMobileNavOpen(prev => !prev);
   }, []);
-  
-  // Check if user is admin
-  const [adminStatus, setAdminStatus] = useState(false);
-  
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        // Migrate legacy data first
-        await legacyMigration.migrateFromLocalStorage();
-        const token = await secureStorage.getItem('token');
-        logger.info('🔑 ADMIN_CHECK: Checking admin status', {
-          hasToken: !!token,
-          tokenPreview: token ? token.substring(0, 20) + '...' : null,
-          timestamp: new Date().toISOString()
-        });
-        
-        if (token) {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          const userRole = payload.role || '';
-          const isAdminResult = (
-            userRole.toLowerCase() === 'admin' ||
-            userRole.toLowerCase() === 'administrator'
-          );
-          
-          logger.info('🔑 ADMIN_CHECK: Token payload analysis', {
-            role: userRole,
-            isAdmin: isAdminResult,
-            fullPayload: payload,
-            timestamp: new Date().toISOString()
-          });
-          
-          setAdminStatus(isAdminResult);
-        } else {
-          setAdminStatus(false);
-        }
-      } catch (error) {
-        logger.error('🔑 ADMIN_CHECK: Error checking admin status:', error);
-        setAdminStatus(false);
-      }
-    };
-    
-    checkAdminStatus();
-  }, []);
-  
-  const isAdmin = () => adminStatus;
-  
+
+  // Admin status is derived from AuthContext user (populated from /users/me),
+  // not decoded client-side from the JWT — the cookie-auth flow stores the
+  // token in an HttpOnly cookie that JS cannot read.
+  const isAdmin = isUserAdmin(user);
+
   const handleBackClick = () => {
     if (onBackClick) {
       onBackClick();
@@ -143,7 +100,7 @@ const PageHeader = ({
       {showNavigation && (
         <NavigationWrapper
           user={user}
-          isAdmin={isAdmin()}
+          isAdmin={isAdmin}
           showBackButton={showBackButton && isMobile}
           backButtonText={backButtonText}
           backButtonPath={backButtonPath}
