@@ -4,7 +4,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { isUserAdmin } from '../../utils/authUtils';
 import { NavigationWrapper } from '../navigation';
 import { useViewport } from '../../hooks/useViewport';
-import LanguageSwitcher from '../shared/LanguageSwitcher';
 import './PageHeader.css';
 
 /**
@@ -24,7 +23,7 @@ const PageHeader = ({
   showTitle = true,
 }) => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { isMobile } = useViewport();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
