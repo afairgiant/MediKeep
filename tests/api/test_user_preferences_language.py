@@ -111,7 +111,7 @@ class TestUserPreferencesLanguage:
         data = response.json()
         assert data["language"] == "pl"
 
-    def test_update_language_to_polish(
+    def test_update_language_to_simplified_chinese(
         self, client: TestClient, db_session: Session
     ):
         """Test updating user language preference to Chinese (Simplified)."""

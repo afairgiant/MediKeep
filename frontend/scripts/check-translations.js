@@ -66,7 +66,6 @@ Examples:
 // ─── Helpers ─────────────────────────────────────────────────────────
 
 function loadJSON(locale, namespace) {
-  console.log(namespace);
   const filePath = path.join(LOCALES_DIR, locale, `${namespace}.json`);
   if (!fs.existsSync(filePath)) return null;
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));

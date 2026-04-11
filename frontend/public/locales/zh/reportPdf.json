@@ -22,7 +22,7 @@
     "policyNumber": "保单号",
     "insuranceProvider": "保险公司",
     "coverageType": "保险类型",
-    "isPrimary": "主要联系人",
+    "isPrimary": "是否是主要保单",
     "purpose": "用途",
     "prescribedBy": "开方医生",
     "quantity": "数量",

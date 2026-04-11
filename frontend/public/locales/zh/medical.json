@@ -648,7 +648,7 @@
         "placeholder": "选择保险类型"
       },
       "isPrimary": {
-        "description": "勾选如果这是您的主要保险（仅限医疗）",
+        "description": "检查这是否是您的主要保险（仅限医疗）",
         "label": "主要保险"
       },
       "lensCoverage": {
@@ -1438,7 +1438,7 @@
       }
     },
     "relatedCondition": {
-      "label": "相关症状 (可选)"
+      "label": "相关病症 (可选)"
     },
     "table": {
       "visitType": "就诊类型"

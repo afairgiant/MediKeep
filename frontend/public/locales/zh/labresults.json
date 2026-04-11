@@ -385,7 +385,7 @@
     "title": "检测组件"
   },
   "testingFacility": {
-    "description": "检测执行/执行的地点",
+    "description": "检测地点",
     "label": "检测机构",
     "placeholder": "例如：主医院实验室"
   },
