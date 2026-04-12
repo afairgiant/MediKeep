@@ -604,7 +604,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
    * Get patient type badge
    */
   const getPatientBadge = (patient) => {
-    if (patient.is_self_record) {
+    if (patient.is_self_record && isPatientOwned(patient)) {
       return (
         <Badge size="xs" color="blue" variant="light">
           <IconUserCheck size="0.7rem" style={{ marginRight: 4 }} />
