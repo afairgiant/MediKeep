@@ -494,14 +494,18 @@ class PatientSharingService:
         if existing_share:
             raise AlreadySharedError("Patient already shared with this user")
 
-        # Check for existing pending invitations using database-level JSON filtering
-        existing_invitation = self.db.query(Invitation).filter(
+        pending_invitations = self.db.query(Invitation).filter(
             Invitation.invitation_type == 'patient_share',
             Invitation.sent_by_user_id == owner.id,
             Invitation.sent_to_user_id == recipient.id,
             Invitation.status == 'pending',
-            sa.func.json_extract(Invitation.context_data, '$.patient_id').cast(sa.Integer) == patient_id
-        ).first()
+        ).all()
+
+        existing_invitation = next(
+            (inv for inv in pending_invitations
+             if inv.context_data.get("patient_id") == patient_id),
+            None
+        )
 
         if existing_invitation:
             raise PendingInvitationError("Pending invitation already exists for this patient and user")
