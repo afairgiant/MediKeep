@@ -254,25 +254,29 @@ const InsuranceCard = ({
             {t('buttons.view', 'View')}
           </Button>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <Button
-              variant="filled"
-              size="xs"
-              disabled={disableActions}
-              onClick={() => onEdit(insurance)}
-            >
-              {t('shared:labels.edit', 'Edit')}
-            </Button>
+            <span>
+              <Button
+                variant="filled"
+                size="xs"
+                disabled={disableActions}
+                onClick={() => onEdit(insurance)}
+              >
+                {t('shared:labels.edit', 'Edit')}
+              </Button>
+            </span>
           </Tooltip>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <Button
-              variant="filled"
-              color="red"
-              size="xs"
-              disabled={disableActions}
-              onClick={() => onDelete(insurance)}
-            >
-              {t('buttons.delete', 'Delete')}
-            </Button>
+            <span>
+              <Button
+                variant="filled"
+                color="red"
+                size="xs"
+                disabled={disableActions}
+                onClick={() => onDelete(insurance)}
+              >
+                {t('buttons.delete', 'Delete')}
+              </Button>
+            </span>
           </Tooltip>
         </Group>
       </Stack>

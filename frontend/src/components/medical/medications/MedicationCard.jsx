@@ -237,25 +237,29 @@ const MedicationCard = ({
             {t('common:buttons.view')}
           </Button>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <Button
-              variant="filled"
-              size="xs"
-              disabled={disableActions}
-              onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
-            >
-              {t('shared:labels.edit')}
-            </Button>
+            <span>
+              <Button
+                variant="filled"
+                size="xs"
+                disabled={disableActions}
+                onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
+              >
+                {t('shared:labels.edit')}
+              </Button>
+            </span>
           </Tooltip>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <Button
-              variant="filled"
-              color="red"
-              size="xs"
-              disabled={disableActions}
-              onClick={(e) => { e.stopPropagation(); onDelete(medication.id); }}
-            >
-              {t('common:buttons.delete')}
-            </Button>
+            <span>
+              <Button
+                variant="filled"
+                color="red"
+                size="xs"
+                disabled={disableActions}
+                onClick={(e) => { e.stopPropagation(); onDelete(medication.id); }}
+              >
+                {t('common:buttons.delete')}
+              </Button>
+            </span>
           </Tooltip>
         </Group>
       </Stack>

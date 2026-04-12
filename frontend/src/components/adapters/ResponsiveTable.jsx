@@ -348,9 +348,9 @@ export const ResponsiveTable = memo(({
               variant="subtle"
               color="yellow"
               size={buttonSize}
-              onClick={() => onEdit(row)}
+              data-disabled={disableEdit || undefined}
+              onClick={(event) => { if (disableEdit) { event.preventDefault(); return; } onEdit(row); }}
               aria-label={t('shared:labels.edit')}
-              disabled={disableEdit}
             >
               <IconEdit size={iconSize} />
             </ActionIcon>
@@ -362,9 +362,9 @@ export const ResponsiveTable = memo(({
               variant="subtle"
               color="red"
               size={buttonSize}
-              onClick={() => onDelete(row.id)}
+              data-disabled={disableDelete || undefined}
+              onClick={(event) => { if (disableDelete) { event.preventDefault(); return; } onDelete(row.id); }}
               aria-label={t('buttons.delete')}
-              disabled={disableDelete}
             >
               <IconTrash size={iconSize} />
             </ActionIcon>

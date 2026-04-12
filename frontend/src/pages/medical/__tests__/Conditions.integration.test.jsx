@@ -37,7 +37,19 @@ vi.mock('../../../hooks/useDataManagement', () => {
 });
 vi.mock('../../../hooks/useGlobalData', () => ({
   useGlobalData: () => ({ patients: [], loading: false }),
+  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
   useCacheManager: () => ({ invalidatePatientList: vi.fn() }),
+}));
+vi.mock('../../../hooks/usePatientPermissions', () => ({
+  usePatientPermissions: () => ({
+    isOwner: true,
+    permissionLevel: 'full',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    isViewOnly: false,
+    viewOnlyTooltip: undefined,
+  }),
 }));
 vi.mock('../../../hooks/usePersistedViewMode', () => ({
   usePersistedViewMode,

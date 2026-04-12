@@ -38,6 +38,20 @@ vi.mock('../../../hooks/usePersistedViewMode', () => ({ usePersistedViewMode }))
 vi.mock('../../../hooks/useResponsive', () => ({
   useResponsive: () => ({ isMobile: false, isTablet: false, isDesktop: true }),
 }));
+vi.mock('../../../hooks/useGlobalData', () => ({
+  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+}));
+vi.mock('../../../hooks/usePatientPermissions', () => ({
+  usePatientPermissions: () => ({
+    isOwner: true,
+    permissionLevel: 'full',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    isViewOnly: false,
+    viewOnlyTooltip: undefined,
+  }),
+}));
 
 // --- Utility / service mocks ---
 vi.mock('../../../services/logger', () => ({

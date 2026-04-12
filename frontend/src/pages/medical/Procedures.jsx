@@ -405,7 +405,7 @@ const Procedures = () => {
               filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('procedures.startAdding', 'Start by adding your first procedure.')}
               actionButton={
-                <Button variant="filled" onClick={handleAddProcedure}>
+                <Button variant="filled" onClick={handleAddProcedure} disabled={isViewOnly}>
                   {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
                 </Button>
               }

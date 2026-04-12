@@ -614,6 +614,7 @@ const Symptoms = () => {
                         variant="filled"
                         color="green"
                         leftSection={<IconNote size={14} />}
+                        disabled={isViewOnly}
                         onClick={() => handleLogEpisode(symptom)}
                       >
                         {t('symptoms.logEpisode', 'Log Episode')}
@@ -630,6 +631,7 @@ const Symptoms = () => {
                         size="xs"
                         variant="light"
                         leftSection={<IconEdit size={14} />}
+                        disabled={isViewOnly}
                         onClick={() => handleEditSymptom(symptom)}
                       >
                         {t('shared:labels.edit', 'Edit')}
@@ -639,6 +641,7 @@ const Symptoms = () => {
                         variant="light"
                         color="red"
                         leftSection={<IconTrash size={14} />}
+                        disabled={isViewOnly}
                         onClick={() => handleDeleteSymptom(symptom.id)}
                       >
                         {t('buttons.delete', 'Delete')}

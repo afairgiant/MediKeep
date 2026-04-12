@@ -467,6 +467,7 @@ const EmergencyContacts = () => {
                       <Button
                         variant="filled"
                         size="xs"
+                        disabled={isViewOnly}
                         onClick={() => handleEditContact(contact)}
                       >
                         {t('shared:labels.edit')}
@@ -475,6 +476,7 @@ const EmergencyContacts = () => {
                         variant="filled"
                         color="red"
                         size="xs"
+                        disabled={isViewOnly}
                         onClick={() => handleDeleteContact(contact.id)}
                       >
                         {t('buttons.delete')}
@@ -746,6 +748,7 @@ const EmergencyContacts = () => {
               <Button
                 variant="filled"
                 size="xs"
+                disabled={isViewOnly}
                 onClick={() => {
                   handleCloseViewModal();
                   handleEditContact(viewingContact);

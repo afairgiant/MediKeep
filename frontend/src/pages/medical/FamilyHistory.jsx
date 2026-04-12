@@ -1087,6 +1087,7 @@ const FamilyHistory = () => {
                 leftSection={<IconUserPlus size={16} />}
                 onClick={handleAddMember}
                 variant="filled"
+                disabled={isViewOnly}
               >
                 {t('familyHistory.emptyState.addFirstMember', 'Add Your First Family Member')}
               </Button>

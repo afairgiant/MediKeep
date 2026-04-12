@@ -907,7 +907,7 @@ def create_lab_result_condition(
 
         verify_patient_ownership(
             db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         # Verify condition exists and belongs to the same patient
@@ -961,7 +961,7 @@ def update_lab_result_condition(
 
         verify_patient_ownership(
             db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         # Verify relationship exists
@@ -999,7 +999,7 @@ def delete_lab_result_condition(
 
         verify_patient_ownership(
             db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         # Verify relationship exists
@@ -1085,7 +1085,7 @@ def create_lab_result_encounter(
 
         verify_patient_ownership(
             db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         encounter_id = link_in.encounter_id
@@ -1140,7 +1140,7 @@ def bulk_create_lab_result_encounters(
 
         verify_patient_ownership(
             db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         encounter_ids = bulk_in.encounter_ids
@@ -1196,7 +1196,7 @@ def update_lab_result_encounter(
 
         verify_patient_ownership(
             db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
@@ -1229,7 +1229,7 @@ def delete_lab_result_encounter(
 
         verify_patient_ownership(
             db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)

@@ -182,7 +182,7 @@ const FamilyHistoryCard = ({
       e.stopPropagation();
     }
     try {
-      if (member.is_shared) {
+      if (disableActions || member.is_shared) {
         return;
       }
       onAddCondition(member);
@@ -197,7 +197,7 @@ const FamilyHistoryCard = ({
       e.stopPropagation();
     }
     try {
-      if (member.is_shared) {
+      if (disableActions || member.is_shared) {
         return;
       }
       onEditCondition(member, condition);
@@ -212,7 +212,7 @@ const FamilyHistoryCard = ({
       e.stopPropagation();
     }
     try {
-      if (member.is_shared) {
+      if (disableActions || member.is_shared) {
         return;
       }
       onDeleteCondition(member.id, conditionId);
@@ -227,7 +227,7 @@ const FamilyHistoryCard = ({
       e.stopPropagation();
     }
     try {
-      if (member.is_shared) {
+      if (disableActions || member.is_shared) {
         return;
       }
       onShare(member);
@@ -330,7 +330,7 @@ const FamilyHistoryCard = ({
           <Divider mb="md" />
           <Group justify="space-between" mb="md">
             <Text fw={500}>{t('shared:labels.medicalConditions', 'Medical Conditions')}</Text>
-            {!member.is_shared && (
+            {!member.is_shared && !disableActions && (
               <Button
                 size="xs"
                 variant="filled"
@@ -394,7 +394,7 @@ const FamilyHistoryCard = ({
                       )}
                     </div>
 
-                    {!member.is_shared && (
+                    {!member.is_shared && !disableActions && (
                       <Group gap="xs">
                         <Button
                           size="xs"
@@ -432,7 +432,7 @@ const FamilyHistoryCard = ({
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            {!member.is_shared && (
+            {!member.is_shared && !disableActions && (
               <>
                 <Menu.Item
                   leftSection={<IconShare size={14} />}

@@ -324,7 +324,7 @@ const SymptomViewModal = ({
               <Stack gap="md">
                 <Group justify="space-between">
                   <Title order={4}>{t('symptoms.viewModal.episodeHistory', 'Episode History')}</Title>
-                  {onLogEpisode && (
+                  {onLogEpisode && !disableEdit && (
                     <Button
                       size="xs"
                       leftSection={<IconNote size={14} />}
@@ -349,7 +349,7 @@ const SymptomViewModal = ({
                       <Text size="sm" c="dimmed">
                         {t('symptoms.viewModal.noEpisodesYet', 'No episodes logged yet')}
                       </Text>
-                      {onLogEpisode && (
+                      {onLogEpisode && !disableEdit && (
                         <Button
                           size="sm"
                           variant="light"
@@ -444,7 +444,7 @@ const SymptomViewModal = ({
                           </Stack>
 
                           <Group gap="xs">
-                            {onEditOccurrence && (
+                            {onEditOccurrence && !disableEdit && (
                               <Button
                                 size="xs"
                                 variant="light"
@@ -457,15 +457,17 @@ const SymptomViewModal = ({
                                 {t('shared:labels.edit', 'Edit')}
                               </Button>
                             )}
-                            <Button
-                              size="xs"
-                              variant="light"
-                              color="red"
-                              leftSection={<IconTrash size={14} />}
-                              onClick={() => handleDeleteOccurrence(occurrence.id)}
-                            >
-                              {t('buttons.delete', 'Delete')}
-                            </Button>
+                            {!disableEdit && (
+                              <Button
+                                size="xs"
+                                variant="light"
+                                color="red"
+                                leftSection={<IconTrash size={14} />}
+                                onClick={() => handleDeleteOccurrence(occurrence.id)}
+                              >
+                                {t('buttons.delete', 'Delete')}
+                              </Button>
+                            )}
                           </Group>
                         </Group>
                       </Paper>
@@ -519,7 +521,7 @@ const SymptomViewModal = ({
 
         {/* Action Buttons */}
         <Group justify="flex-end" mt="md">
-          {onDelete && (
+          {onDelete && !disableEdit && (
             <Button
               variant="light"
               color="red"
@@ -551,7 +553,7 @@ const SymptomViewModal = ({
               </span>
             </Tooltip>
           )}
-          {onLogEpisode && (
+          {onLogEpisode && !disableEdit && (
             <Button
               variant="filled"
               color="green"

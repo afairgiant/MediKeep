@@ -77,7 +77,21 @@ vi.mock('../../../hooks/useDataManagement', () => ({ useDataManagement, default:
 vi.mock('../../../hooks/useEntityFileCounts', () => ({ useEntityFileCounts }));
 vi.mock('../../../hooks/useViewModalNavigation', () => ({ useViewModalNavigation, default: useViewModalNavigation }));
 vi.mock('../../../hooks/usePersistedViewMode', () => ({ usePersistedViewMode }));
-vi.mock('../../../hooks/useGlobalData', () => ({ usePractitioners }));
+vi.mock('../../../hooks/useGlobalData', () => ({
+  usePractitioners,
+  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+}));
+vi.mock('../../../hooks/usePatientPermissions', () => ({
+  usePatientPermissions: () => ({
+    isOwner: true,
+    permissionLevel: 'full',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    isViewOnly: false,
+    viewOnlyTooltip: undefined,
+  }),
+}));
 vi.mock('../../../hooks/useDateFormat', () => ({ useDateFormat }));
 vi.mock('../../../hooks/useResponsive', () => ({ useResponsive, default: useResponsive }));
 vi.mock('../../../hooks/useFormSubmissionWithUploads', () => ({ useFormSubmissionWithUploads }));

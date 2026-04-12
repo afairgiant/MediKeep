@@ -54,6 +54,18 @@ vi.mock('../../../services/api/symptomApi', () => ({
 
 vi.mock('../../../hooks/useGlobalData', () => ({
   usePatientWithStaticData: () => stablePatientData,
+  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+}));
+vi.mock('../../../hooks/usePatientPermissions', () => ({
+  usePatientPermissions: () => ({
+    isOwner: true,
+    permissionLevel: 'full',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    isViewOnly: false,
+    viewOnlyTooltip: undefined,
+  }),
 }));
 
 vi.mock('../../../hooks/useViewModalNavigation', () => ({

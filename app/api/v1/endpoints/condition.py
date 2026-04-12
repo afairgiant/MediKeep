@@ -237,7 +237,7 @@ def create_condition_medication(
 
         verify_patient_ownership(
             db_condition, current_user_patient_id, "condition",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         # Verify medication exists and belongs to the same patient
@@ -342,7 +342,7 @@ def create_condition_medications_bulk(
 
         verify_patient_ownership(
             db_condition, current_user_patient_id, "condition",
-            db=db, current_user=current_user
+            db=db, current_user=current_user, permission='edit'
         )
 
         # Verify all medications exist and belong to the same patient
