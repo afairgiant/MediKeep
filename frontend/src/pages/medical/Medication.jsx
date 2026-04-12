@@ -59,9 +59,11 @@ import {
 } from '../../constants/medicationTypes';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import logger from '../../services/logger';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Medication = () => {
   const { t } = useTranslation(['common', 'medical', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -516,6 +518,8 @@ const Medication = () => {
             onClick: handleAddMedication,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -702,6 +706,8 @@ const Medication = () => {
                   fileCount={fileCounts[medication.id] || 0}
                   fileCountLoading={fileCountsLoading[medication.id] || false}
                   onError={setError}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -711,6 +717,9 @@ const Medication = () => {
                 persistKey="medications"
                 data={paginatedMedications}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   {
                     header: 'Medication Name',
@@ -806,6 +815,8 @@ const Medication = () => {
           onError={setError}
           practitioners={practitioners}
           conditions={conditions}
+          disableEdit={isViewOnly}
+          disableEditTooltip={viewOnlyTooltip}
         />
       </Stack>
     </Container>

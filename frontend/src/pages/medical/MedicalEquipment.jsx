@@ -23,6 +23,7 @@ import {
   EQUIPMENT_TYPE_OPTIONS,
   EQUIPMENT_STATUS_OPTIONS,
 } from '../../constants/equipmentConstants';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import {
   Button,
   Stack,
@@ -112,6 +113,7 @@ const useSimpleDataManagement = (data, config) => {
 
 const MedicalEquipment = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const [viewMode, setViewMode] = usePersistedViewMode('medical-equipment');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
@@ -283,6 +285,8 @@ const MedicalEquipment = () => {
               label: t('equipment.addEquipment', '+ Add Equipment'),
               onClick: handleAddEquipment,
               size: 'sm',
+              disabled: isViewOnly,
+              tooltip: viewOnlyTooltip,
             }}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
@@ -317,6 +321,8 @@ const MedicalEquipment = () => {
                   onEdit={handleEditEquipment}
                   onDelete={handleDeleteEquipment}
                   onView={handleViewEquipment}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                   onError={(error) => {
                     logger.error('EquipmentCard error', {
                       equipmentId: equip.id,
@@ -352,6 +358,8 @@ const MedicalEquipment = () => {
         equipment={viewingEquipment}
         onEdit={handleEditEquipment}
         practitioners={practitioners}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
       />
     </>
   );

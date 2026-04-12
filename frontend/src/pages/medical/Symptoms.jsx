@@ -41,9 +41,11 @@ import { SYMPTOM_STATUS_COLORS } from '../../constants/symptomEnums';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Symptoms = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
 
@@ -482,6 +484,8 @@ const Symptoms = () => {
           onClick: handleAddSymptom,
           leftSection: <IconPlus size={16} />,
           size: 'sm',
+          disabled: isViewOnly,
+          tooltip: viewOnlyTooltip,
         }}
         showViewToggle={false}
         mb={0}
@@ -668,6 +672,8 @@ const Symptoms = () => {
         onLogEpisode={handleLogEpisode}
         onEditOccurrence={handleEditOccurrence}
         onRefresh={fetchSymptoms}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
       />
 
       {/* Symptom Definition Form Modal */}

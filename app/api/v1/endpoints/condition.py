@@ -51,6 +51,8 @@ def create_condition(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new condition."""
     return handle_create_with_logging(
@@ -61,6 +63,8 @@ def create_condition(
         user_id=current_user_id,
         entity_name="Condition",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -154,6 +158,7 @@ def get_condition_medications(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Simple endpoint to get medications for a condition."""
     with handle_database_errors(request=request):
@@ -173,21 +178,10 @@ def get_condition_medications(
                 request=request
             )
 
-        # Verify condition belongs to current user
-        if db_condition.patient_id != current_user_patient_id:
-            log_security_event(
-                logger,
-                "unauthorized_condition_access",
-                request,
-                f"User attempted to access condition {condition_id} without permission",
-                user_id=current_user_id,
-                condition_id=condition_id
-            )
-            raise NotFoundException(
-                resource="Condition",
-                message="Condition not found",
-                request=request
-            )
+        verify_patient_ownership(
+            db_condition, current_user_patient_id, "condition",
+            db=db, current_user=current_user
+        )
 
         relationships = condition_medication.get_by_condition(db, condition_id=condition_id)
 
@@ -221,6 +215,7 @@ def create_condition_medication(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Create a new condition medication relationship."""
     with handle_database_errors(request=request):
@@ -240,21 +235,10 @@ def create_condition_medication(
                 request=request
             )
 
-        # Verify condition belongs to current user
-        if db_condition.patient_id != current_user_patient_id:
-            log_security_event(
-                logger,
-                "unauthorized_condition_access",
-                request,
-                f"User attempted to access condition {condition_id} without permission",
-                user_id=current_user_id,
-                condition_id=condition_id
-            )
-            raise NotFoundException(
-                resource="Condition",
-                message="Condition not found",
-                request=request
-            )
+        verify_patient_ownership(
+            db_condition, current_user_patient_id, "condition",
+            db=db, current_user=current_user
+        )
 
         # Verify medication exists and belongs to the same patient
         db_medication = medication_crud.get(db, id=medication_in.medication_id)
@@ -273,7 +257,7 @@ def create_condition_medication(
             )
 
         # Ensure medication belongs to the same patient as the condition
-        if db_medication.patient_id != current_user_patient_id:
+        if db_medication.patient_id != db_condition.patient_id:
             log_security_event(
                 logger,
                 "cross_patient_medication_link",
@@ -328,6 +312,7 @@ def create_condition_medications_bulk(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Create multiple condition medication relationships at once.
 
@@ -355,21 +340,10 @@ def create_condition_medications_bulk(
                 request=request
             )
 
-        # Verify condition belongs to current user
-        if db_condition.patient_id != current_user_patient_id:
-            log_security_event(
-                logger,
-                "unauthorized_condition_access",
-                request,
-                f"User attempted to access condition {condition_id} without permission",
-                user_id=current_user_id,
-                condition_id=condition_id
-            )
-            raise NotFoundException(
-                resource="Condition",
-                message="Condition not found",
-                request=request
-            )
+        verify_patient_ownership(
+            db_condition, current_user_patient_id, "condition",
+            db=db, current_user=current_user
+        )
 
         # Verify all medications exist and belong to the same patient
         for med_id in bulk_data.medication_ids:
@@ -388,7 +362,7 @@ def create_condition_medications_bulk(
                     request=request
                 )
 
-            if db_medication.patient_id != current_user_patient_id:
+            if db_medication.patient_id != db_condition.patient_id:
                 log_security_event(
                     logger,
                     "cross_patient_medication_link",
@@ -656,6 +630,7 @@ def read_condition(
     condition_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get condition by ID with related information - only allows access to user's own conditions."""
     with handle_database_errors(request=request):
@@ -666,7 +641,7 @@ def read_condition(
             relations=["patient", "practitioner", "treatments"],
         )
         handle_not_found(condition_obj, "Condition")
-        verify_patient_ownership(condition_obj, current_user_patient_id, "condition")
+        verify_patient_ownership(condition_obj, current_user_patient_id, "condition", db=db, current_user=current_user)
 
         log_data_access(
             logger,

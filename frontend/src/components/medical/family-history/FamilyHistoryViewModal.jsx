@@ -11,6 +11,7 @@ import {
   ActionIcon,
   Title,
   Paper,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -47,7 +48,9 @@ const FamilyHistoryViewModal = ({
   onAddCondition,
   onEditCondition,
   onDeleteCondition,
-  onError
+  onError,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
@@ -429,13 +432,18 @@ const FamilyHistoryViewModal = ({
               {t('shared:labels.close', 'Close')}
             </Button>
             {!member.is_shared && (
-              <Button
-                variant="filled"
-                onClick={handleEdit}
-                leftSection={<IconEdit size={16} />}
-              >
-                {t('familyHistory.viewModal.editFamilyMember', 'Edit Family Member')}
-              </Button>
+              <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+                <span>
+                  <Button
+                    variant="filled"
+                    onClick={handleEdit}
+                    leftSection={<IconEdit size={16} />}
+                    disabled={disableEdit}
+                  >
+                    {t('familyHistory.viewModal.editFamilyMember', 'Edit Family Member')}
+                  </Button>
+                </span>
+              </Tooltip>
             )}
           </Group>
         </Stack>

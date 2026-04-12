@@ -157,9 +157,12 @@ def handle_create_with_logging(
     user_id: int,
     entity_name: str,
     request: Optional[Request] = None,
+    current_user_patient_id: int = None,
+    current_user: Any = None,
+    permission: str = 'edit',
 ) -> Any:
     """
-    Handle entity creation with standardized logging.
+    Handle entity creation with standardized logging and ownership verification.
 
     Args:
         db: Database session
@@ -169,16 +172,31 @@ def handle_create_with_logging(
         user_id: Current user ID
         entity_name: Name of entity type for logging
         request: Request object for additional logging
+        current_user_patient_id: Current user's patient ID (for ownership verification)
+        current_user: Current user object (for multi-patient access verification)
+        permission: Required permission level (default: 'edit')
 
     Returns:
         Created entity object
 
     Raises:
-        HTTPException: If creation fails
+        HTTPException: If creation fails or user lacks permission
     """
     user_ip = request.client.host if request and request.client else "unknown"
 
     with handle_database_errors(request=request):
+        # SECURITY: Verify user has permission to create records for this patient
+        if current_user_patient_id is not None:
+            if getattr(obj_in, "patient_id", None) is not None:
+                verify_patient_ownership(
+                    obj=obj_in,
+                    current_user_patient_id=current_user_patient_id,
+                    entity_name=entity_name,
+                    db=db,
+                    current_user=current_user,
+                    permission=permission,
+                )
+
         entity_obj = crud_obj.create(db=db, obj_in=obj_in)
         entity_id = getattr(entity_obj, "id", None)
         patient_id = getattr(entity_obj, "patient_id", None)

@@ -41,6 +41,8 @@ def create_symptom(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new symptom definition (parent)."""
     return handle_create_with_logging(
@@ -51,6 +53,8 @@ def create_symptom(
         user_id=current_user_id,
         entity_name="Symptom",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 

@@ -14,6 +14,7 @@ import {
   Title,
   Card,
   Box,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -48,6 +49,8 @@ const VitalViewModal = ({
   onEdit,
   practitioners = [],
   navigate,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate, formatDateTime } = useDateFormat();
@@ -344,9 +347,13 @@ const VitalViewModal = ({
           <Button variant="default" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('shared:labels.edit', 'Edit')}
-          </Button>
+          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+            <span>
+              <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />} disabled={disableEdit}>
+                {t('shared:labels.edit', 'Edit')}
+              </Button>
+            </span>
+          </Tooltip>
         </Group>
       </Stack>
     </Modal>

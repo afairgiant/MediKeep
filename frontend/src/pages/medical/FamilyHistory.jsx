@@ -56,11 +56,13 @@ import {
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 // Removed style constants - now handled in extracted components
 
 const FamilyHistory = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -971,6 +973,8 @@ const FamilyHistory = () => {
             leftSection: <IconUserPlus size={16} />,
             visible: activeTab === 'my-family',
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           secondaryActions={[
             {
@@ -1092,6 +1096,9 @@ const FamilyHistory = () => {
               <ResponsiveTable
                 persistKey="family-history-conditions"
                 data={flattenedConditions}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
                   { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
@@ -1185,6 +1192,8 @@ const FamilyHistory = () => {
                         isSelected={selectedMembersForBulkSharing.includes(member.id)}
                         onBulkToggle={handleBulkMemberToggle}
                         onError={setError}
+                        disableActions={isViewOnly}
+                        disableActionsTooltip={viewOnlyTooltip}
                       />
                     )}
                   />
@@ -1211,6 +1220,9 @@ const FamilyHistory = () => {
               <ResponsiveTable
                 persistKey="family-history-shared"
                 data={flattenedSharedConditions}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
                   { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
@@ -1290,6 +1302,8 @@ const FamilyHistory = () => {
                           onEditCondition={handleEditCondition}
                           onDeleteCondition={handleDeleteCondition}
                           onShare={handleShareMember}
+                          disableActions={isViewOnly}
+                          disableActionsTooltip={viewOnlyTooltip}
                           expandedMembers={{
                             has: (id) => expandedMembers.has(`shared-${id}`),
                           }}
@@ -1362,6 +1376,8 @@ const FamilyHistory = () => {
         onEditCondition={handleEditConditionFromView}
         onDeleteCondition={handleDeleteCondition}
         onError={setError}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
       />
 
       {/* Invitation Manager Modal */}

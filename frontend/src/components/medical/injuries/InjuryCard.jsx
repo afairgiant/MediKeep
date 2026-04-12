@@ -23,6 +23,8 @@ const InjuryCard = ({
   navigate,
   fileCount = 0,
   fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -212,6 +214,8 @@ const InjuryCard = ({
         onView={() => onView(injury)}
         onEdit={() => onEdit(injury)}
         onDelete={() => onDelete(injury.id)}
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       >
         {customContent}

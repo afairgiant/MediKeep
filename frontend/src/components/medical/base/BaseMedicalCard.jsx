@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Stack, Group, Text, Badge, Button, Divider } from '@mantine/core';
+import { Card, Stack, Group, Text, Badge, Button, Divider, Tooltip } from '@mantine/core';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
@@ -26,6 +26,8 @@ const BaseMedicalCard = ({
   children,
   onError,
   disableCardClick = false,
+  disableActions = false,
+  disableActionsTooltip,
   getTagColor: getTagColorProp
 }) => {
   const { t } = useTranslation(['common', 'shared']);
@@ -175,12 +177,20 @@ const BaseMedicalCard = ({
             <Button variant="filled" size="xs" onClick={safeOnView}>
               {t('buttons.view')}
             </Button>
-            <Button variant="filled" size="xs" onClick={safeOnEdit}>
-              {t('shared:labels.edit')}
-            </Button>
-            <Button variant="filled" color="red" size="xs" onClick={safeOnDelete}>
-              {t('buttons.delete')}
-            </Button>
+            <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+              <span>
+                <Button variant="filled" size="xs" onClick={safeOnEdit} disabled={disableActions}>
+                  {t('shared:labels.edit')}
+                </Button>
+              </span>
+            </Tooltip>
+            <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+              <span>
+                <Button variant="filled" color="red" size="xs" onClick={safeOnDelete} disabled={disableActions}>
+                  {t('buttons.delete')}
+                </Button>
+              </span>
+            </Tooltip>
           </Group>
         </Stack>
       </Card>

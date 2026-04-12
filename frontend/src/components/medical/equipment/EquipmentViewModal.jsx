@@ -11,6 +11,7 @@ import {
   SimpleGrid,
   Title,
   Paper,
+  Tooltip,
 } from '@mantine/core';
 import { IconEdit } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,8 @@ const EquipmentViewModal = ({
   equipment,
   onEdit,
   practitioners = [],
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
@@ -206,9 +209,13 @@ const EquipmentViewModal = ({
           <Button variant="default" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('shared:labels.edit', 'Edit')}
-          </Button>
+          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+            <span>
+              <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />} disabled={disableEdit}>
+                {t('shared:labels.edit', 'Edit')}
+              </Button>
+            </span>
+          </Tooltip>
         </Group>
       </Stack>
     </Modal>
@@ -240,6 +247,8 @@ EquipmentViewModal.propTypes = {
     }),
   }),
   onEdit: PropTypes.func.isRequired,
+  disableEdit: PropTypes.bool,
+  disableEditTooltip: PropTypes.string,
   practitioners: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number,

@@ -14,6 +14,7 @@ import {
   Loader,
   Center,
   Table,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -45,6 +46,8 @@ const SymptomViewModal = ({
   onLogEpisode,
   onEditOccurrence,
   onRefresh,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
@@ -531,17 +534,22 @@ const SymptomViewModal = ({
             </Button>
           )}
           {onEdit && (
-            <Button
-              variant="light"
-              onClick={() => {
-                onClose();
-                setTimeout(() => {
-                  onEdit(symptom);
-                }, 100);
-              }}
-            >
-              {t('symptoms.viewModal.editSymptom', 'Edit Symptom')}
-            </Button>
+            <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+              <span>
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    onClose();
+                    setTimeout(() => {
+                      onEdit(symptom);
+                    }, 100);
+                  }}
+                  disabled={disableEdit}
+                >
+                  {t('symptoms.viewModal.editSymptom', 'Edit Symptom')}
+                </Button>
+              </span>
+            </Tooltip>
           )}
           {onLogEpisode && (
             <Button

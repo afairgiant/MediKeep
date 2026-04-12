@@ -45,6 +45,8 @@ def create_medication(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new medication."""
     medication_obj = handle_create_with_logging(
@@ -55,6 +57,8 @@ def create_medication(
         user_id=current_user_id,
         entity_name="Medication",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
     # Return with relationships loaded
@@ -167,6 +171,7 @@ def read_medication(
     medication_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get medication by ID - only allows access to user's own medications."""
     with handle_database_errors(request=request):
@@ -174,7 +179,7 @@ def read_medication(
             db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
         )
         handle_not_found(medication_obj, "Medication", request)
-        verify_patient_ownership(medication_obj, current_user_patient_id, "medication")
+        verify_patient_ownership(medication_obj, current_user_patient_id, "medication", db=db, current_user=current_user)
 
         log_data_access(
             logger,
@@ -289,6 +294,7 @@ def get_medication_treatments(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all treatments that use a specific medication."""
     with handle_database_errors(request=request):
@@ -299,11 +305,10 @@ def get_medication_treatments(
                 message="Medication not found",
                 request=request,
             )
-        if medication_obj.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Not authorized to access this medication",
-                request=request,
-            )
+        verify_patient_ownership(
+            medication_obj, current_user_patient_id, "medication",
+            db=db, current_user=current_user,
+        )
 
         relationships = treatment_medication.get_by_medication(db, medication_id=medication_id)
 

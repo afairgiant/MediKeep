@@ -37,11 +37,13 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 
 const Allergies = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['medical', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('allergies');
@@ -347,6 +349,8 @@ const Allergies = () => {
             onClick: handleAddAllergy,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -406,6 +410,8 @@ const Allergies = () => {
                   fileCount={fileCounts[allergy.id] || 0}
                   fileCountLoading={fileCountsLoading[allergy.id] || false}
                   onError={setError}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -415,6 +421,9 @@ const Allergies = () => {
                 persistKey="allergies"
                 data={paginatedAllergies}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },
                   { header: t('allergies.reaction.label'), accessor: 'reaction', priority: 'high', width: 180 },
@@ -457,6 +466,8 @@ const Allergies = () => {
           medications={medications}
           navigate={navigate}
           onError={setError}
+          disableEdit={isViewOnly}
+          disableEditTooltip={viewOnlyTooltip}
         />
       </Stack>
     </Container>

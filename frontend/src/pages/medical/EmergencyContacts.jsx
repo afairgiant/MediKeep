@@ -41,10 +41,12 @@ import PaginationControls from '../../components/shared/PaginationControls';
 import MantineEmergencyContactForm from '../../components/medical/MantineEmergencyContactForm';
 import { useTranslation } from 'react-i18next';
 import { phoneTelHref } from '../../utils/phoneUtils';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import '../../styles/shared/MedicalPageShared.css';
 
 const EmergencyContacts = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const [viewMode, setViewMode] = usePersistedViewMode('emergency-contacts');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
   const navigate = useNavigate();
@@ -278,6 +280,8 @@ const EmergencyContacts = () => {
             onClick: handleAddContact,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -486,6 +490,9 @@ const EmergencyContacts = () => {
                 persistKey="emergency-contacts"
                 data={paginatedContacts}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('shared:labels.name'), accessor: 'name', priority: 'high', width: 200 },
                   { header: t('shared:labels.relationship'), accessor: 'relationship', priority: 'high', width: 150 },

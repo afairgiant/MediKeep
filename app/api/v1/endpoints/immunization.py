@@ -40,6 +40,8 @@ def create_immunization(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new immunization record."""
     return handle_create_with_logging(
@@ -50,6 +52,8 @@ def create_immunization(
         user_id=current_user_id,
         entity_name="Immunization",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -128,6 +132,7 @@ def read_immunization(
     immunization_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get immunization by ID - only allows access to user's own immunizations.
 
@@ -137,7 +142,7 @@ def read_immunization(
     with handle_database_errors(request=request):
         immunization_obj = immunization.get(db=db, id=immunization_id)
         handle_not_found(immunization_obj, "Immunization", request)
-        verify_patient_ownership(immunization_obj, current_user_patient_id, "immunization")
+        verify_patient_ownership(immunization_obj, current_user_patient_id, "immunization", db=db, current_user=current_user)
 
         log_data_access(
             logger,

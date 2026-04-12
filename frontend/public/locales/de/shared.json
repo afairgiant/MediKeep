@@ -303,6 +303,9 @@
     "weekly": "Wöchentlich",
     "weight": "Körpergewicht"
   },
+  "permissions": {
+    "viewOnly": "Nur-Lese-Zugriff"
+  },
   "tabs": {
     "addFiles": "Dateien hinzufügen",
     "administration": "Verwaltung",

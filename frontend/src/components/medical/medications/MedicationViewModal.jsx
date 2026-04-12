@@ -12,6 +12,7 @@ import {
   Box,
   SimpleGrid,
   Paper,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -39,6 +40,8 @@ const MedicationViewModal = ({
   onFileUploadComplete,
   practitioners = [],
   conditions = [],
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
@@ -391,17 +394,22 @@ const MedicationViewModal = ({
 
         {/* Action Buttons */}
         <Group justify="flex-end" mt="md">
-          <Button
-            variant="light"
-            onClick={() => {
-              onClose();
-              setTimeout(() => {
-                onEdit(medication);
-              }, 100);
-            }}
-          >
-            {t('medications.modal.editMedication', 'Edit Medication')}
-          </Button>
+          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+            <span>
+              <Button
+                variant="light"
+                onClick={() => {
+                  onClose();
+                  setTimeout(() => {
+                    onEdit(medication);
+                  }, 100);
+                }}
+                disabled={disableEdit}
+              >
+                {t('medications.modal.editMedication', 'Edit Medication')}
+              </Button>
+            </span>
+          </Tooltip>
           <Button variant="filled" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>

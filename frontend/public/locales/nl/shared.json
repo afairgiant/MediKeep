@@ -303,6 +303,9 @@
     "weekly": "Wekelijks",
     "weight": "Gewicht"
   },
+  "permissions": {
+    "viewOnly": "Alleen-lezen toegang"
+  },
   "tabs": {
     "addFiles": "Bestanden toevoegen",
     "administration": "Toediening",

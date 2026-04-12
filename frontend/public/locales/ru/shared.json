@@ -303,6 +303,9 @@
     "weekly": "Еженедельно",
     "weight": "Вес"
   },
+  "permissions": {
+    "viewOnly": "Доступ только для чтения"
+  },
   "tabs": {
     "addFiles": "Добавить файлы",
     "administration": "Администрирование",

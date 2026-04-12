@@ -11,6 +11,7 @@ import {
   SimpleGrid,
   Title,
   Paper,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -47,6 +48,8 @@ const TreatmentViewModal = ({
   onLabResultClick,
   onEquipmentClick,
   onError,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
@@ -445,9 +448,13 @@ const TreatmentViewModal = ({
           <Button variant="default" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
-            {t('shared:labels.edit', 'Edit')}
-          </Button>
+          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+            <span>
+              <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />} disabled={disableEdit}>
+                {t('shared:labels.edit', 'Edit')}
+              </Button>
+            </span>
+          </Tooltip>
         </Group>
       </Stack>
     </Modal>

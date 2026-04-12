@@ -30,6 +30,7 @@ from app.api.v1.endpoints.utils import (
     handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
+    verify_patient_ownership,
 )
 from app.core.config import settings
 from app.core.database.database import get_db
@@ -233,6 +234,8 @@ def create_lab_result(
     request: Request,
     db: Session = Depends(get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ):
     """Create a new lab result."""
     return handle_create_with_logging(
@@ -243,6 +246,8 @@ def create_lab_result(
         user_id=current_user_id,
         entity_name="Lab result",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -892,6 +897,7 @@ def create_lab_result_condition(
     condition_in: LabResultConditionCreate,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Create a new lab result condition relationship."""
     with handle_database_errors(request=request):
@@ -899,18 +905,17 @@ def create_lab_result_condition(
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         # Verify condition exists and belongs to the same patient
         db_condition = condition_crud.get(db, id=condition_in.condition_id)
         handle_not_found(db_condition, "Condition", request)
 
         # Ensure condition belongs to the same patient as the lab result
-        if db_condition.patient_id != current_user_patient_id:
+        if db_condition.patient_id != db_lab_result.patient_id:
             raise BusinessLogicException(
                 message="Cannot link condition that doesn't belong to the same patient",
                 request=request
@@ -946,6 +951,7 @@ def update_lab_result_condition(
     condition_in: LabResultConditionUpdate,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Update a lab result condition relationship."""
     with handle_database_errors(request=request):
@@ -953,11 +959,10 @@ def update_lab_result_condition(
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         # Verify relationship exists
         relationship = lab_result_condition.get(db, id=relationship_id)
@@ -984,6 +989,7 @@ def delete_lab_result_condition(
     relationship_id: int,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Delete a lab result condition relationship."""
     with handle_database_errors(request=request):
@@ -991,11 +997,10 @@ def delete_lab_result_condition(
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         # Verify relationship exists
         relationship = lab_result_condition.get(db, id=relationship_id)
@@ -1025,17 +1030,17 @@ def get_lab_result_encounters(
     lab_result_id: int,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Get all encounter relationships for a specific lab result."""
     with handle_database_errors(request=request):
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request,
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         results = encounter_lab_result.get_by_lab_result_with_details(
             db, lab_result_id=lab_result_id
@@ -1071,23 +1076,23 @@ def create_lab_result_encounter(
     link_in: LabResultEncounterCreate,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Link an encounter to a lab result."""
     with handle_database_errors(request=request):
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request,
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         encounter_id = link_in.encounter_id
         db_enc = encounter_crud.get(db, id=encounter_id)
         handle_not_found(db_enc, "Encounter", request)
 
-        if db_enc.patient_id != current_user_patient_id:
+        if db_enc.patient_id != db_lab_result.patient_id:
             raise BusinessLogicException(
                 message="Cannot link encounter that doesn't belong to the same patient",
                 request=request,
@@ -1126,23 +1131,23 @@ def bulk_create_lab_result_encounters(
     bulk_in: LabResultEncounterBulkCreate,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Bulk link encounters to a lab result."""
     with handle_database_errors(request=request):
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request,
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         encounter_ids = bulk_in.encounter_ids
         for enc_id in encounter_ids:
             db_enc = encounter_crud.get(db, id=enc_id)
             handle_not_found(db_enc, "Encounter", request)
-            if db_enc.patient_id != current_user_patient_id:
+            if db_enc.patient_id != db_lab_result.patient_id:
                 raise BusinessLogicException(
                     message=f"Encounter {enc_id} doesn't belong to the same patient",
                     request=request,
@@ -1182,17 +1187,17 @@ def update_lab_result_encounter(
     link_in: EncounterLabResultUpdate,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Update a lab result-encounter relationship."""
     with handle_database_errors(request=request):
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request,
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
         handle_not_found(relationship, "Lab result encounter relationship", request)
@@ -1215,17 +1220,17 @@ def delete_lab_result_encounter(
     relationship_id: int,
     db: Session = Depends(get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ):
     """Unlink an encounter from a lab result."""
     with handle_database_errors(request=request):
         db_lab_result = lab_result.get(db, id=lab_result_id)
         handle_not_found(db_lab_result, "Lab result", request)
 
-        if db_lab_result.patient_id != current_user_patient_id:
-            raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request,
-            )
+        verify_patient_ownership(
+            db_lab_result, current_user_patient_id, "lab_result",
+            db=db, current_user=current_user
+        )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
         handle_not_found(relationship, "Lab result encounter relationship", request)

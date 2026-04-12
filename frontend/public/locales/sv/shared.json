@@ -303,6 +303,9 @@
     "weekly": "Veckovis",
     "weight": "Vikt"
   },
+  "permissions": {
+    "viewOnly": "Skrivskyddad åtkomst"
+  },
   "tabs": {
     "addFiles": "Lägg till filer",
     "administration": "Administration",

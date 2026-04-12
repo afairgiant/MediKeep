@@ -45,6 +45,7 @@ import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import PaginationControls from '../../components/shared/PaginationControls';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { useTranslation } from 'react-i18next';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import {
   Badge,
   Button,
@@ -60,6 +61,7 @@ import {
 
 const Insurance = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -473,6 +475,8 @@ const Insurance = () => {
             label: t('insurance.actions.addNew', '+ Add New Insurance'),
             onClick: handleAddNew,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -511,6 +515,8 @@ const Insurance = () => {
                   onView={handleViewInsurance}
                   fileCount={fileCounts[insurance.id] || 0}
                   fileCountLoading={fileCountsLoading[insurance.id] || false}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -520,6 +526,9 @@ const Insurance = () => {
               persistKey="insurance"
               data={paginatedInsurances}
               pagination={false}
+              disableEdit={isViewOnly}
+              disableDelete={isViewOnly}
+              disableActionsTooltip={viewOnlyTooltip}
               columns={[
                 { header: 'Type', accessor: 'insurance_type', priority: 'high', width: 100 },
                 { header: 'Company', accessor: 'company_name', priority: 'high', width: 180 },
@@ -591,6 +600,8 @@ const Insurance = () => {
         onClose={handleCloseViewModal}
         insurance={viewingInsurance}
         onEdit={handleEdit}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
         onPrint={(insurance) => {
           printInsuranceRecord(
             insurance,

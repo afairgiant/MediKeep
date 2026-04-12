@@ -46,3 +46,6 @@ export { usePersistedViewMode } from './usePersistedViewMode';
 
 // Toggle persistence hooks
 export { usePersistedToggle } from './usePersistedToggle';
+
+// Patient permission hooks
+export { usePatientPermissions } from './usePatientPermissions';

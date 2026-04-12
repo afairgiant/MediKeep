@@ -43,9 +43,11 @@ import {
   ConditionViewModal,
   ConditionFormWrapper,
 } from '../../components/medical/conditions';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Conditions = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -454,6 +456,8 @@ const Conditions = () => {
             onClick: handleAddCondition,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -514,6 +518,8 @@ const Conditions = () => {
                   navigate={navigate}
                   fileCount={fileCounts[condition.id] || 0}
                   fileCountLoading={fileCountsLoading[condition.id] || false}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -523,6 +529,9 @@ const Conditions = () => {
                 persistKey="conditions"
                 data={paginatedConditions}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('shared:labels.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
                   { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'high', width: 120 },
@@ -568,6 +577,8 @@ const Conditions = () => {
           conditionMedications={conditionMedications}
           fetchConditionMedications={fetchConditionMedications}
           navigate={navigate}
+          disableEdit={isViewOnly}
+          disableEditTooltip={viewOnlyTooltip}
         />
       </Stack>
     </Container>

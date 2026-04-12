@@ -68,6 +68,8 @@ def create_vitals(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new vitals reading."""
     return handle_create_with_logging(
@@ -78,6 +80,8 @@ def create_vitals(
         user_id=current_user_id,
         entity_name="Vitals",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -450,6 +454,7 @@ def read_vitals_by_id(
     vitals_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get vitals reading by ID with related information - only allows access to user's own vitals."""
     with handle_database_errors(request=request):
@@ -457,7 +462,7 @@ def read_vitals_by_id(
             db=db, record_id=vitals_id, relations=["patient", "practitioner"]
         )
         handle_not_found(vitals_obj, "Vitals reading", request)
-        verify_patient_ownership(vitals_obj, current_user_patient_id, "vitals")
+        verify_patient_ownership(vitals_obj, current_user_patient_id, "vitals", db=db, current_user=current_user)
 
         log_data_access(
             logger,

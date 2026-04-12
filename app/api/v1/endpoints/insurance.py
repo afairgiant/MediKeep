@@ -43,6 +43,8 @@ def create_insurance(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new insurance record."""
     insurance_obj = handle_create_with_logging(
@@ -53,6 +55,8 @@ def create_insurance(
         user_id=current_user_id,
         entity_name="Insurance",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
     return insurance_obj
@@ -174,6 +178,7 @@ def get_insurance(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get insurance record by ID."""
     with handle_database_errors(request=request):
@@ -182,7 +187,7 @@ def get_insurance(
 
         # Verify patient ownership using current user's patient record
         verify_patient_ownership(
-            insurance_obj, current_user_patient_id, "insurance"
+            insurance_obj, current_user_patient_id, "insurance", db=db, current_user=current_user
         )
 
         log_data_access(
@@ -294,7 +299,7 @@ def set_primary_insurance(
         insurance_obj = insurance.get(db=db, id=insurance_id)
         handle_not_found(insurance_obj, "Insurance", request)
 
-        verify_patient_ownership(insurance_obj, target_patient_id, "insurance")
+        verify_patient_ownership(insurance_obj, target_patient_id, "insurance", db=db, current_user=current_user, permission='edit')
 
         # Set as primary
         updated_insurance = insurance.set_primary(

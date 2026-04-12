@@ -61,9 +61,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { VITAL_FILTER_TYPES } from '../../constants/vitalFilters';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { convertForDisplay, unitLabels } from '../../utils/unitConversion';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Vitals = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { unitSystem } = useUserPreferences();
 
   // Quick stats card configurations with Mantine icons and filter mappings
@@ -522,6 +524,8 @@ const Vitals = () => {
             onClick: handleAddNew,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           secondaryActions={[{
             label: t('vitals:import.title', 'Import Vitals'),
@@ -658,6 +662,8 @@ const Vitals = () => {
           onEdit={handleEdit}
           practitioners={practitioners}
           navigate={navigate}
+          disableEdit={isViewOnly}
+          disableEditTooltip={viewOnlyTooltip}
         />
 
         {/* Vitals Import Modal */}

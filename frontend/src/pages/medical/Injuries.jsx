@@ -36,10 +36,12 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Injuries = () => {
   const navigate = useNavigate();
   const { t } = useTranslation(['medical', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('injuries');
@@ -379,6 +381,8 @@ const Injuries = () => {
             onClick: handleAddInjury,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -441,6 +445,8 @@ const Injuries = () => {
                   fileCount={fileCounts[injury.id] || 0}
                   fileCountLoading={fileCountsLoading[injury.id] || false}
                   onError={setError}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -450,6 +456,9 @@ const Injuries = () => {
                 persistKey="injuries"
                 data={paginatedInjuries}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('injuries.injuryName.label', 'Injury Name'), accessor: 'injury_name', priority: 'high', width: 180 },
                   { header: t('injuries.bodyPart.label', 'Body Part'), accessor: 'body_part', priority: 'high', width: 120 },
@@ -484,6 +493,8 @@ const Injuries = () => {
           practitioners={practitioners}
           injuryTypes={injuryTypes}
           navigate={navigate}
+          disableEdit={isViewOnly}
+          disableEditTooltip={viewOnlyTooltip}
         />
       </Stack>
     </Container>

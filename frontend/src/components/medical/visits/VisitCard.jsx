@@ -17,6 +17,8 @@ const VisitCard = ({
   practitioners,
   conditions,
   navigate,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -245,6 +247,8 @@ const VisitCard = ({
         onEdit={() => onEdit(visit)}
         onDelete={() => onDelete(visit)}
         entityType="visit"
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       >
         {additionalContent}

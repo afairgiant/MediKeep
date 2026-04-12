@@ -1,14 +1,15 @@
 import React, { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { 
-  Table as MantineTable, 
-  ScrollArea, 
-  Card, 
-  Group, 
-  Text, 
-  Badge, 
-  Stack, 
+import {
+  Table as MantineTable,
+  ScrollArea,
+  Card,
+  Group,
+  Text,
+  Badge,
+  Stack,
   Pagination,
   ActionIcon,
+  Tooltip,
   rem,
   Box,
   Skeleton,
@@ -76,6 +77,9 @@ export const ResponsiveTable = memo(({
   onView,
   onEdit,
   onDelete,
+  disableEdit = false,
+  disableDelete = false,
+  disableActionsTooltip,
   
   // Styling and behavior
   className = '',
@@ -339,30 +343,36 @@ export const ResponsiveTable = memo(({
           </ActionIcon>
         )}
         {onEdit && (
-          <ActionIcon
-            variant="subtle"
-            color="yellow"
-            size={buttonSize}
-            onClick={() => onEdit(row)}
-            aria-label={t('shared:labels.edit')}
-          >
-            <IconEdit size={iconSize} />
-          </ActionIcon>
+          <Tooltip label={disableActionsTooltip} disabled={!disableEdit || !disableActionsTooltip}>
+            <ActionIcon
+              variant="subtle"
+              color="yellow"
+              size={buttonSize}
+              onClick={() => onEdit(row)}
+              aria-label={t('shared:labels.edit')}
+              disabled={disableEdit}
+            >
+              <IconEdit size={iconSize} />
+            </ActionIcon>
+          </Tooltip>
         )}
         {onDelete && row.id != null && (
-          <ActionIcon
-            variant="subtle"
-            color="red"
-            size={buttonSize}
-            onClick={() => onDelete(row.id)}
-            aria-label={t('buttons.delete')}
-          >
-            <IconTrash size={iconSize} />
-          </ActionIcon>
+          <Tooltip label={disableActionsTooltip} disabled={!disableDelete || !disableActionsTooltip}>
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              size={buttonSize}
+              onClick={() => onDelete(row.id)}
+              aria-label={t('buttons.delete')}
+              disabled={disableDelete}
+            >
+              <IconTrash size={iconSize} />
+            </ActionIcon>
+          </Tooltip>
         )}
       </Group>
     );
-  }, [hasActions, isMobile, onView, onEdit, onDelete, t]);
+  }, [hasActions, isMobile, onView, onEdit, onDelete, disableEdit, disableDelete, disableActionsTooltip, t]);
 
   // Render table headers
   const renderTableHeader = useCallback(() => {

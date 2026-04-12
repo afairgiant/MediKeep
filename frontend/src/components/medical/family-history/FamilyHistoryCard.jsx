@@ -58,6 +58,8 @@ const FamilyHistoryCard = ({
   bulkSelectionMode = false,
   isSelected = false,
   onBulkToggle,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['common', 'shared']);
@@ -489,6 +491,8 @@ const FamilyHistoryCard = ({
           onEdit={!member.is_shared ? handleEditClick : undefined}
           onDelete={!member.is_shared ? handleDeleteClick : undefined}
           onError={handleError}
+          disableActions={disableActions}
+          disableActionsTooltip={disableActionsTooltip}
           disableCardClick={bulkSelectionMode}
         >
           {conditionsContent}
