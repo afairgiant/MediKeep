@@ -132,3 +132,23 @@ export const DATE_FORMAT_OPTIONS = {
 };
 
 export const DEFAULT_DATE_FORMAT = 'mdy';
+
+// Map i18n language codes to Intl locale strings for month/day name localization.
+// Date FORMAT (mdy/dmy/ymd) controls ordering; this map controls month NAME language.
+export const I18N_TO_INTL_LOCALE = {
+  en: 'en-US',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  es: 'es-ES',
+  it: 'it-IT',
+  pt: 'pt-BR',
+  ru: 'ru-RU',
+  sv: 'sv-SE',
+  nl: 'nl-NL',
+  pl: 'pl-PL',
+  th: 'th-TH',
+  zh: 'zh-CN',
+};
+
+export const getIntlLocale = langCode =>
+  I18N_TO_INTL_LOCALE[langCode] || 'en-US';

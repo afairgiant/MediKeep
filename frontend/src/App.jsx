@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Import i18n configuration (initialized in index.js)
 import './i18n';
+import { useTranslation } from 'react-i18next';
 
 // Mantine
 import { MantineProvider } from '@mantine/core';
@@ -19,6 +20,19 @@ import { Notifications } from '@mantine/notifications';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
+
+// dayjs locale imports for Mantine date picker calendar month names
+import 'dayjs/locale/fr';
+import 'dayjs/locale/de';
+import 'dayjs/locale/es';
+import 'dayjs/locale/it';
+import 'dayjs/locale/pt';
+import 'dayjs/locale/ru';
+import 'dayjs/locale/sv';
+import 'dayjs/locale/nl';
+import 'dayjs/locale/pl';
+import 'dayjs/locale/th';
+import 'dayjs/locale/zh';
 
 import { theme, cssVariablesResolver } from './theme';
 
@@ -304,11 +318,14 @@ function WhatsNewTrigger() {
 // so both CSS variables and Mantine switch in the same render - no flash.
 function ThemedMantineProvider({ children }) {
   const { theme: colorScheme } = useTheme();
+  // useSuspense: false — we only read i18n.language here, not translated strings,
+  // so there's no reason to suspend this high-tree component during language changes.
+  const { i18n } = useTranslation(undefined, { useSuspense: false });
   return (
     <MantineProvider theme={theme} forceColorScheme={colorScheme} cssVariablesResolver={cssVariablesResolver}>
       <Notifications />
       <ResponsiveProvider>
-        <DatesProvider settings={{}}>
+        <DatesProvider settings={{ locale: i18n.language }}>
           {children}
         </DatesProvider>
       </ResponsiveProvider>

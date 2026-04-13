@@ -91,17 +91,21 @@ export const formatDateWithPreference = (
  * Format a date for display with month name (e.g., "Jan 25, 2026")
  * @param {string|Date|null} dateValue - The date to format
  * @param {string} formatCode - User's preferred format code
- * @param {boolean} longMonth - Use full month name instead of abbreviation
+ * @param {Object} options - Formatting options
+ * @param {boolean} options.longMonth - Use full month name instead of abbreviation
+ * @param {string|null} options.displayLocale - Intl locale for month names (e.g. 'en-US', 'de-DE'),
+ *   overrides the format-derived locale so month names match the UI language instead of the date
+ *   ordering locale (which may be sv-SE for YMD format)
  * @returns {string} Formatted date string
  */
 export const formatDateLong = (
   dateValue,
   formatCode = DEFAULT_DATE_FORMAT,
-  longMonth = false
+  { longMonth = false, displayLocale = null } = {}
 ) => {
   if (!dateValue) return 'N/A';
 
-  const locale = getLocaleForFormat(formatCode);
+  const locale = displayLocale || getLocaleForFormat(formatCode);
 
   try {
     let date;
