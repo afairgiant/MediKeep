@@ -4,6 +4,9 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 import { expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 import { configure } from '@testing-library/react';
 
 // i18next mock t() — returns the fallback/default value when provided, otherwise the key.

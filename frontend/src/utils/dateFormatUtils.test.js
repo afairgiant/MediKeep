@@ -1,4 +1,5 @@
 import { describe, test, expect } from 'vitest';
+import dayjs from 'dayjs';
 import {
   getLocaleForFormat,
   formatDateWithPreference,
@@ -236,5 +237,34 @@ describe('dateFormatUtils', () => {
       const result = formatDateWithPreference('  2026-01-25  ', 'mdy');
       expect(result).toBe('01/25/2026');
     });
+  });
+});
+
+// Regression test: customParseFormat dayjs plugin must be registered (via setupTests.js and App.jsx)
+// so that Mantine's DateInput can parse manually-typed dates using the user's preferred format.
+// Without the plugin, dayjs ignores the valueFormat string and falls back to JS native Date
+// parsing (always US/MM-DD-YYYY), breaking European date input.
+describe('dayjs customParseFormat plugin (regression for European date input bug)', () => {
+  test('parses European date DD/MM/YYYY correctly', () => {
+    const parsed = dayjs('25/01/2026', 'DD/MM/YYYY');
+    expect(parsed.isValid()).toBe(true);
+    expect(parsed.month()).toBe(0); // January (0-indexed)
+    expect(parsed.date()).toBe(25);
+    expect(parsed.year()).toBe(2026);
+  });
+
+  test('parses US date MM/DD/YYYY correctly', () => {
+    const parsed = dayjs('01/25/2026', 'MM/DD/YYYY');
+    expect(parsed.isValid()).toBe(true);
+    expect(parsed.month()).toBe(0); // January (0-indexed)
+    expect(parsed.date()).toBe(25);
+    expect(parsed.year()).toBe(2026);
+  });
+
+  test('distinguishes DD/MM/YYYY from MM/DD/YYYY for ambiguous dates', () => {
+    const eu = dayjs('05/01/2026', 'DD/MM/YYYY');
+    const us = dayjs('05/01/2026', 'MM/DD/YYYY');
+    expect(eu.month()).toBe(0);  // January 5th (European)
+    expect(us.month()).toBe(4);  // May 1st (US)
   });
 });
