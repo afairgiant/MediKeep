@@ -1,6 +1,6 @@
 {
-  "version": "1.5.0",
-  "lastUpdated": "2026-02-17",
+  "version": "1.6.0",
+  "lastUpdated": "2026-04-13",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -1539,11 +1539,7 @@
       "abbreviation": "AKMI",
       "default_unit": "U/mL",
       "category": "immunology",
-      "common_names": [
-        "TPO Antibody",
-        "TPO-Antikörper",
-        "Thyroid Peroxidase Antibody"
-      ],
+      "common_names": ["TPO Antibody", "Anti-TPO"],
       "is_common": false,
       "display_order": 138
     },
@@ -1552,11 +1548,6 @@
       "abbreviation": "RF",
       "default_unit": "IU/mL",
       "category": "immunology",
-      "common_names": [
-        "Rheumafaktor",
-        "Rheumatoid Factor",
-        "RF"
-      ],
       "is_common": false,
       "display_order": 139
     },
@@ -1565,11 +1556,7 @@
       "abbreviation": "AKCCP",
       "default_unit": "U/mL",
       "category": "immunology",
-      "common_names": [
-        "CCP Antibody",
-        "Anti-CCP",
-        "CCP-Antikörper"
-      ],
+      "common_names": ["CCP Antibody", "Anti-CCP"],
       "is_common": false,
       "display_order": 140
     },
@@ -1578,10 +1565,7 @@
       "abbreviation": "ZIKAKG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "Zika IgG",
-        "Zika-Virus IgG-Antikörper"
-      ],
+      "common_names": ["Zika IgG"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 141
@@ -1591,10 +1575,7 @@
       "abbreviation": "ZIKAKM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "Zika IgM",
-        "Zika-Virus IgM-Antikörper"
-      ],
+      "common_names": ["Zika IgM"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 142
@@ -1604,10 +1585,7 @@
       "abbreviation": "BGVLSEBA",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "VlsE-Ba",
-        "Borrelia VlsE Ba"
-      ],
+      "common_names": ["VlsE-Ba", "Borrelia VlsE Ba"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 143
@@ -1617,10 +1595,7 @@
       "abbreviation": "BGVLSEBG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "VlsE-Bg",
-        "Borrelia VlsE Bg"
-      ],
+      "common_names": ["VlsE-Bg", "Borrelia VlsE Bg"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 144
@@ -1630,10 +1605,7 @@
       "abbreviation": "BGVLSEBB",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "VlsE-Bb",
-        "Borrelia VlsE Bb"
-      ],
+      "common_names": ["VlsE-Bb", "Borrelia VlsE Bb"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 145
@@ -1643,11 +1615,7 @@
       "abbreviation": "BORREG",
       "default_unit": "E/mL",
       "category": "immunology",
-      "common_names": [
-        "Borrelia IgG",
-        "Borrelia-AK IgG",
-        "Borrelia IgG ELISA"
-      ],
+      "common_names": ["Borrelia IgG", "Borrelia IgG ELISA"],
       "is_common": false,
       "display_order": 146
     },
@@ -1656,11 +1624,7 @@
       "abbreviation": "BORREM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "Borrelia IgM",
-        "Borrelia-AK IgM",
-        "Borrelia IgM ELISA"
-      ],
+      "common_names": ["Borrelia IgM", "Borrelia IgM ELISA"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 147
@@ -1670,10 +1634,6 @@
       "abbreviation": "BORRBG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "Borrelia Immunoblot IgG",
-        "Borr.-Immunoblot IgG"
-      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 148
@@ -1683,88 +1643,66 @@
       "abbreviation": "BORRBM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "Borrelia Immunoblot IgM",
-        "Borr.-Immunoblot IgM"
-      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 149
-    },
-    {
-      "test_name": "Treponema pallidum Antibody",
-      "abbreviation": "TPAK",
-      "default_unit": "",
-      "category": "immunology",
-      "common_names": [
-        "Treponema pallidum AK",
-        "Syphilis Antibody"
-      ],
-      "is_common": false,
-      "result_type": "qualitative",
-      "display_order": 150
     },
     {
       "test_name": "Borrelia DbpA Antibody",
       "abbreviation": "BGDBPA",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "DbpA",
-        "Borrelia DbpA"
-      ],
+      "common_names": ["DbpA", "Borrelia DbpA"],
       "is_common": false,
       "result_type": "qualitative",
-      "display_order": 151
+      "display_order": 150
     },
     {
       "test_name": "Borrelia OspC Antibody",
       "abbreviation": "BGOSPC",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "OspC",
-        "Borrelia OspC"
-      ],
+      "common_names": ["OspC", "Borrelia OspC"],
       "is_common": false,
       "result_type": "qualitative",
-      "display_order": 152
+      "display_order": 151
     },
     {
       "test_name": "Borrelia p39 Antibody",
       "abbreviation": "BGP39",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "p39",
-        "Borrelia p39"
-      ],
+      "common_names": ["p39", "Borrelia p39"],
       "is_common": false,
       "result_type": "qualitative",
-      "display_order": 153
+      "display_order": 152
     },
     {
       "test_name": "Borrelia p41 Antibody",
       "abbreviation": "BGP41",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "p41",
-        "Borrelia p41"
-      ],
+      "common_names": ["p41", "Borrelia p41"],
       "is_common": false,
       "result_type": "qualitative",
-      "display_order": 154
+      "display_order": 153
     },
     {
       "test_name": "Borrelia p83 Antibody",
       "abbreviation": "BGP83",
       "default_unit": "",
       "category": "immunology",
-      "common_names": [
-        "p83",
-        "Borrelia p83"
-      ],
+      "common_names": ["p83", "Borrelia p83"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 154
+    },
+    {
+      "test_name": "Treponema pallidum Antibody",
+      "abbreviation": "TPAK",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Syphilis Antibody"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 155
