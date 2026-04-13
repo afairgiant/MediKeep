@@ -148,11 +148,12 @@ describe('dateFormatUtils', () => {
       expect(result).toMatch(/Okt/);
     });
 
-    test('falls back to format locale when displayLocale is null', () => {
-      // Without displayLocale, ymd format uses sv-SE (backward compatible)
-      const result = formatDateLong('2026-10-25', 'ymd');
-      expect(result).toBeDefined();
-      expect(result).not.toBe('N/A');
+    test('falls back to format locale (sv-SE for ymd) when displayLocale is absent', () => {
+      // When displayLocale is not provided, ymd format should fall back to sv-SE,
+      // producing output identical to an explicit sv-SE displayLocale.
+      const omitted = formatDateLong('2026-10-25', 'ymd');
+      const explicit = formatDateLong('2026-10-25', 'ymd', { displayLocale: 'sv-SE' });
+      expect(omitted).toBe(explicit);
     });
   });
 
