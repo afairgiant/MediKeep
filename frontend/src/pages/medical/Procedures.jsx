@@ -36,6 +36,7 @@ import ProcedureCard from '../../components/medical/procedures/ProcedureCard';
 import ProcedureViewModal from '../../components/medical/procedures/ProcedureViewModal';
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import {
   Button,
   Stack,
@@ -66,6 +67,7 @@ const INITIAL_FORM_DATA = {
 
 const Procedures = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -383,6 +385,8 @@ const Procedures = () => {
               label: t('procedures.addProcedure', '+ Add Procedure'),
               onClick: handleAddProcedure,
               size: 'sm',
+              disabled: isViewOnly,
+              tooltip: viewOnlyTooltip,
             }}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
@@ -401,7 +405,7 @@ const Procedures = () => {
               filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
               noDataMessage={t('procedures.startAdding', 'Start by adding your first procedure.')}
               actionButton={
-                <Button variant="filled" onClick={handleAddProcedure}>
+                <Button variant="filled" onClick={handleAddProcedure} disabled={isViewOnly}>
                   {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
                 </Button>
               }
@@ -420,6 +424,8 @@ const Procedures = () => {
                   fileCount={fileCounts[procedure.id] || 0}
                   fileCountLoading={fileCountsLoading[procedure.id] || false}
                   navigate={navigate}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -429,6 +435,9 @@ const Procedures = () => {
                 persistKey="procedures"
                 data={paginatedProcedures}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('shared:fields.procedureName'), accessor: 'procedure_name', priority: 'high', width: 200 },
                   { header: t('shared:labels.type'), accessor: 'procedure_type', priority: 'medium', width: 120 },
@@ -491,6 +500,8 @@ const Procedures = () => {
         onEdit={handleEditProcedure}
         practitioners={practitioners}
         navigate={navigate}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
         onFileUploadComplete={(success) => {
           if (success && viewingProcedure) {
             refreshFileCount(viewingProcedure.id);

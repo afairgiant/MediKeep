@@ -16,6 +16,8 @@ const ProcedureCard = ({
   fileCountLoading,
   practitioners,
   navigate,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -129,6 +131,8 @@ const ProcedureCard = ({
         onEdit={() => onEdit(procedure)}
         onDelete={() => onDelete(procedure)}
         entityType="procedure"
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       />
     );

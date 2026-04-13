@@ -11,6 +11,7 @@ import {
   ActionIcon,
   Title,
   Paper,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconEdit,
@@ -47,7 +48,9 @@ const FamilyHistoryViewModal = ({
   onAddCondition,
   onEditCondition,
   onDeleteCondition,
-  onError
+  onError,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
@@ -108,9 +111,11 @@ const FamilyHistoryViewModal = ({
 
   const handleEdit = () => {
     try {
-      if (member.is_shared) {
-        logger.warn('Attempted to edit shared family member from view modal', {
+      if (isReadOnly) {
+        logger.warn('Attempted to edit read-only family member from view modal', {
           memberId: member.id,
+          isShared: member.is_shared,
+          disableEdit,
           component: 'FamilyHistoryViewModal'
         });
         return;
@@ -124,7 +129,7 @@ const FamilyHistoryViewModal = ({
 
   const handleAddCondition = () => {
     try {
-      if (member.is_shared) {
+      if (isReadOnly) {
         return;
       }
       onAddCondition();
@@ -135,7 +140,7 @@ const FamilyHistoryViewModal = ({
 
   const handleEditCondition = (condition) => {
     try {
-      if (member.is_shared) {
+      if (isReadOnly) {
         return;
       }
       onEditCondition(condition);
@@ -146,7 +151,7 @@ const FamilyHistoryViewModal = ({
 
   const handleDeleteCondition = (conditionId) => {
     try {
-      if (member.is_shared) {
+      if (isReadOnly) {
         return;
       }
       onDeleteCondition(member.id, conditionId);
@@ -154,6 +159,8 @@ const FamilyHistoryViewModal = ({
       handleError(error, 'delete_condition');
     }
   };
+
+  const isReadOnly = disableEdit || member?.is_shared;
 
   if (!isOpen || !member) {
     return null;
@@ -213,19 +220,19 @@ const FamilyHistoryViewModal = ({
                 <ActionIcon
                   variant="light"
                   onClick={handleEdit}
-                  disabled={member.is_shared}
+                  disabled={isReadOnly}
                   title={
-                    member.is_shared
+                    isReadOnly
                       ? t('familyHistory.viewModal.cannotEditShared', 'Cannot edit shared family member')
                       : t('familyHistory.viewModal.editMember', 'Edit family member')
                   }
                   aria-label={
-                    member.is_shared
+                    isReadOnly
                       ? t('familyHistory.viewModal.cannotEditShared', 'Cannot edit shared family member')
                       : t('familyHistory.viewModal.editMember', 'Edit family member')
                   }
                   style={
-                    member.is_shared
+                    isReadOnly
                       ? CARD_STYLES.disabledAction
                       : {}
                   }
@@ -286,19 +293,19 @@ const FamilyHistoryViewModal = ({
                 variant="filled"
                 leftSection={<IconStethoscope size={16} />}
                 onClick={handleAddCondition}
-                disabled={member.is_shared}
+                disabled={isReadOnly}
                 title={
-                  member.is_shared
+                  isReadOnly
                     ? t('familyHistory.viewModal.cannotAddConditionsShared', 'Cannot add conditions to shared family member')
                     : t('familyHistory.viewModal.addCondition', 'Add medical condition')
                 }
                 aria-label={
-                  member.is_shared
+                  isReadOnly
                     ? t('familyHistory.viewModal.cannotAddConditionsShared', 'Cannot add conditions to shared family member')
                     : t('familyHistory.viewModal.addCondition', 'Add medical condition')
                 }
                 style={
-                  member.is_shared
+                  isReadOnly
                     ? CARD_STYLES.disabledAction
                     : {}
                 }
@@ -353,19 +360,19 @@ const FamilyHistoryViewModal = ({
                           size="xs"
                           variant="filled"
                           onClick={() => handleEditCondition(condition)}
-                          disabled={member.is_shared}
+                          disabled={isReadOnly}
                           title={
-                            member.is_shared
+                            isReadOnly
                               ? t('familyHistory.viewModal.cannotEditConditionsShared', 'Cannot edit conditions of shared family member')
                               : t('familyHistory.viewModal.editCondition', 'Edit condition')
                           }
                           aria-label={
-                            member.is_shared
+                            isReadOnly
                               ? t('familyHistory.viewModal.cannotEditConditionsShared', 'Cannot edit conditions of shared family member')
                               : t('familyHistory.viewModal.editCondition', 'Edit condition')
                           }
                           style={
-                            member.is_shared
+                            isReadOnly
                               ? CARD_STYLES.disabledAction
                               : {}
                           }
@@ -377,19 +384,19 @@ const FamilyHistoryViewModal = ({
                           variant="filled"
                           color="red"
                           onClick={() => handleDeleteCondition(condition.id)}
-                          disabled={member.is_shared}
+                          disabled={isReadOnly}
                           title={
-                            member.is_shared
+                            isReadOnly
                               ? t('familyHistory.viewModal.cannotDeleteConditionsShared', 'Cannot delete conditions of shared family member')
                               : t('familyHistory.viewModal.deleteCondition', 'Delete condition')
                           }
                           aria-label={
-                            member.is_shared
+                            isReadOnly
                               ? t('familyHistory.viewModal.cannotDeleteConditionsShared', 'Cannot delete conditions of shared family member')
                               : t('familyHistory.viewModal.deleteCondition', 'Delete condition')
                           }
                           style={
-                            member.is_shared
+                            isReadOnly
                               ? CARD_STYLES.disabledAction
                               : {}
                           }
@@ -428,14 +435,19 @@ const FamilyHistoryViewModal = ({
             <Button variant="default" onClick={onClose}>
               {t('shared:labels.close', 'Close')}
             </Button>
-            {!member.is_shared && (
-              <Button
-                variant="filled"
-                onClick={handleEdit}
-                leftSection={<IconEdit size={16} />}
-              >
-                {t('familyHistory.viewModal.editFamilyMember', 'Edit Family Member')}
-              </Button>
+            {!isReadOnly && (
+              <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+                <span>
+                  <Button
+                    variant="filled"
+                    onClick={handleEdit}
+                    leftSection={<IconEdit size={16} />}
+                    disabled={disableEdit}
+                  >
+                    {t('familyHistory.viewModal.editFamilyMember', 'Edit Family Member')}
+                  </Button>
+                </span>
+              </Tooltip>
             )}
           </Group>
         </Stack>

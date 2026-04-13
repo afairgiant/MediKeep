@@ -11,6 +11,7 @@ vi.mock('@mantine/core', () => ({
       {children}
     </button>
   ),
+  Tooltip: ({ children }) => children,
 }));
 
 // Mock ViewToggle component

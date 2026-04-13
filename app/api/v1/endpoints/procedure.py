@@ -40,6 +40,8 @@ def create_procedure(
     db: Session = Depends(deps.get_db),
     procedure_in: ProcedureCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Create new procedure.
@@ -52,6 +54,8 @@ def create_procedure(
         user_id=current_user_id,
         entity_name="Procedure",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -127,6 +131,7 @@ def read_procedure(
     procedure_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Get procedure by ID with related information - only allows access to user's own procedures.
@@ -136,7 +141,7 @@ def read_procedure(
             db=db, record_id=procedure_id, relations=["patient", "practitioner", "condition"]
         )
         handle_not_found(procedure_obj, "Procedure", request)
-        verify_patient_ownership(procedure_obj, current_user_patient_id, "procedure")
+        verify_patient_ownership(procedure_obj, current_user_patient_id, "procedure", db=db, current_user=current_user)
 
         log_data_access(
             logger,

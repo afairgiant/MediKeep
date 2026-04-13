@@ -15,6 +15,8 @@ const ImmunizationCard = ({
   navigate,
   fileCount = 0,
   fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -148,6 +150,8 @@ const ImmunizationCard = ({
         onView={() => onView(immunization)}
         onEdit={() => onEdit(immunization)}
         onDelete={() => onDelete(immunization.id)}
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       />
     );

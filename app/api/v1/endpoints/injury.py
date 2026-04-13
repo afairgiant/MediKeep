@@ -68,6 +68,8 @@ def create_injury(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create a new injury record."""
     injury_obj = handle_create_with_logging(
@@ -78,6 +80,8 @@ def create_injury(
         user_id=current_user_id,
         entity_name="Injury",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
     # Return with relationships loaded
@@ -151,12 +155,13 @@ def read_injury(
     injury_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get an injury by ID with related information."""
     with handle_database_errors(request=request):
         injury_obj = injury.get_with_relations(db=db, record_id=injury_id)
         handle_not_found(injury_obj, "Injury")
-        verify_patient_ownership(injury_obj, current_user_patient_id, "injury")
+        verify_patient_ownership(injury_obj, current_user_patient_id, "injury", db=db, current_user=current_user)
 
         log_data_access(
             logger,
@@ -235,13 +240,14 @@ def get_injury_medications(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all medications linked to an injury."""
     with handle_database_errors(request=request):
         # Verify injury exists and belongs to user
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
 
         relationships = injury_medication.get_by_injury(db, injury_id=injury_id)
 
@@ -281,18 +287,19 @@ def create_injury_medication(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Link a medication to an injury."""
     with handle_database_errors(request=request):
         # Verify injury exists and belongs to user
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         # Verify medication exists and belongs to same patient
         db_medication = medication_crud.get(db, id=medication_in.medication_id)
         handle_not_found(db_medication, "Medication")
-        if db_medication.patient_id != current_user_patient_id:
+        if db_medication.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link medication that belongs to a different patient",
                 request=request
@@ -329,13 +336,14 @@ def delete_injury_medication(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Unlink a medication from an injury."""
     with handle_database_errors(request=request):
         # Verify injury exists and belongs to user
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         success = injury_medication.delete_by_injury_and_medication(
             db, injury_id=injury_id, medication_id=medication_id
@@ -367,12 +375,13 @@ def get_injury_conditions(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all conditions linked to an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
 
         relationships = injury_condition.get_by_injury(db, injury_id=injury_id)
 
@@ -411,16 +420,17 @@ def create_injury_condition(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Link a condition to an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         db_condition = condition_crud.get(db, id=condition_in.condition_id)
         handle_not_found(db_condition, "Condition")
-        if db_condition.patient_id != current_user_patient_id:
+        if db_condition.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link condition that belongs to a different patient",
                 request=request
@@ -456,12 +466,13 @@ def delete_injury_condition(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Unlink a condition from an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         success = injury_condition.delete_by_injury_and_condition(
             db, injury_id=injury_id, condition_id=condition_id
@@ -493,12 +504,13 @@ def get_injury_treatments(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all treatments linked to an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
 
         relationships = injury_treatment.get_by_injury(db, injury_id=injury_id)
 
@@ -536,16 +548,17 @@ def create_injury_treatment(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Link a treatment to an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         db_treatment = treatment_crud.get(db, id=treatment_in.treatment_id)
         handle_not_found(db_treatment, "Treatment")
-        if db_treatment.patient_id != current_user_patient_id:
+        if db_treatment.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link treatment that belongs to a different patient",
                 request=request
@@ -581,12 +594,13 @@ def delete_injury_treatment(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Unlink a treatment from an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         success = injury_treatment.delete_by_injury_and_treatment(
             db, injury_id=injury_id, treatment_id=treatment_id
@@ -618,12 +632,13 @@ def get_injury_procedures(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all procedures linked to an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
 
         relationships = injury_procedure.get_by_injury(db, injury_id=injury_id)
 
@@ -661,16 +676,17 @@ def create_injury_procedure(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Link a procedure to an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         db_procedure = procedure_crud.get(db, id=procedure_in.procedure_id)
         handle_not_found(db_procedure, "Procedure")
-        if db_procedure.patient_id != current_user_patient_id:
+        if db_procedure.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link procedure that belongs to a different patient",
                 request=request
@@ -706,12 +722,13 @@ def delete_injury_procedure(
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Unlink a procedure from an injury."""
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury")
+        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
 
         success = injury_procedure.delete_by_injury_and_procedure(
             db, injury_id=injury_id, procedure_id=procedure_id

@@ -22,6 +22,8 @@ const AllergyCard = ({
   navigate,
   fileCount = 0,
   fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -153,6 +155,8 @@ const AllergyCard = ({
         onView={() => onView(allergy)}
         onEdit={() => onEdit(allergy)}
         onDelete={() => onDelete(allergy.id)}
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       >
         {customContent}

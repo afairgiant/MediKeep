@@ -17,6 +17,7 @@ import {
   Box,
   SimpleGrid,
   Paper,
+  Tooltip,
 } from '@mantine/core';
 import { IconEdit, IconPrinter, IconStar, IconInfoCircle, IconShield, IconPhone, IconFileText } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -32,7 +33,9 @@ const InsuranceViewModal = ({
   onEdit,
   onPrint,
   onSetPrimary,
-  onFileUploadComplete
+  onFileUploadComplete,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
@@ -367,15 +370,20 @@ const InsuranceViewModal = ({
             <Button variant="outline" onClick={onClose}>
               {t('shared:labels.close', 'Close')}
             </Button>
-            <Button
-              leftSection={<IconEdit size={16} />}
-              onClick={() => {
-                onClose();
-                onEdit && onEdit(insurance);
-              }}
-            >
-              {t('shared:labels.edit', 'Edit')}
-            </Button>
+            <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+              <span>
+                <Button
+                  leftSection={<IconEdit size={16} />}
+                  onClick={() => {
+                    onClose();
+                    onEdit && onEdit(insurance);
+                  }}
+                  disabled={disableEdit}
+                >
+                  {t('shared:labels.edit', 'Edit')}
+                </Button>
+              </span>
+            </Tooltip>
           </Group>
         </Group>
       </Stack>

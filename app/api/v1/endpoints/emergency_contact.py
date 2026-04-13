@@ -38,9 +38,21 @@ def create_emergency_contact(
     db: Session = Depends(deps.get_db),
     emergency_contact_in: EmergencyContactCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Create new emergency contact."""
+    # Verify user has edit permission (get_accessible_patient_id only checks 'view')
+    deps.verify_patient_record_access(
+        record_patient_id=target_patient_id,
+        current_user_patient_id=current_user_patient_id,
+        record_type="emergency_contact",
+        db=db,
+        current_user=current_user,
+        permission='edit',
+    )
+
     # Use the specialized method that handles patient_id properly
     emergency_contact_obj = emergency_contact.create_for_patient(
         db=db, patient_id=target_patient_id, obj_in=emergency_contact_in

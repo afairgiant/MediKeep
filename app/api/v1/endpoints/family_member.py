@@ -42,6 +42,8 @@ def create_family_member(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new family member."""
     return handle_create_with_logging(
@@ -52,6 +54,8 @@ def create_family_member(
         user_id=current_user_id,
         entity_name="Family Member",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -91,9 +95,11 @@ def get_family_members_for_dropdown(
 @router.get("/{family_member_id}", response_model=FamilyMemberResponse)
 def read_family_member(
     *,
+    request: Request,
     db: Session = Depends(deps.get_db),
     family_member_id: int,
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get family member by ID with conditions - supports patient switching."""
     family_member_obj = family_member.get_with_relations(
@@ -102,7 +108,7 @@ def read_family_member(
         relations=["family_conditions"],
     )
     handle_not_found(family_member_obj, "Family Member", request)
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+    verify_patient_ownership(family_member_obj, target_patient_id, "family_member", db=db, current_user=current_user)
     return family_member_obj
 
 
@@ -183,13 +189,14 @@ def get_family_member_conditions(
     family_member_id: int,
     db: Session = Depends(deps.get_db),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all conditions for a specific family member - supports patient switching."""
     with handle_database_errors(request=request):
         # Verify family member exists and belongs to the accessible patient
         family_member_obj = family_member.get(db, id=family_member_id)
         handle_not_found(family_member_obj, "Family Member", request)
-        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member", db=db, current_user=current_user)
         
         # Get conditions
         conditions = family_condition.get_by_family_member(db, family_member_id=family_member_id)
@@ -205,13 +212,14 @@ def create_family_condition(
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Create a new condition for a family member - supports patient switching."""
     with handle_database_errors(request=request):
         # Verify family member exists and belongs to the accessible patient
         family_member_obj = family_member.get(db, id=family_member_id)
         handle_not_found(family_member_obj, "Family Member", request)
-        verify_patient_ownership(family_member_obj, target_patient_id, "family_member")
+        verify_patient_ownership(family_member_obj, target_patient_id, "family_member", db=db, current_user=current_user, permission='edit')
         
         # Set family_member_id
         condition_in.family_member_id = family_member_id

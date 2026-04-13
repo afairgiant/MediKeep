@@ -134,6 +134,7 @@ class PatientResponse(BaseModel):
     owner_user_id: int
     is_self_record: bool
     privacy_level: str
+    permission_level: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -144,6 +145,18 @@ class PatientListResponse(BaseModel):
     total_count: int
     owned_count: int
     shared_count: int
+
+
+def _build_patient_response(
+    access_service: PatientAccessService,
+    current_user: User,
+    patient: Patient,
+) -> PatientResponse:
+    """Build a PatientResponse with permission_level populated."""
+    response = PatientResponse.model_validate(patient)
+    context = access_service.get_patient_context(current_user, patient)
+    response.permission_level = context['permission_level']
+    return response
 
 
 class SharingStatsResponse(BaseModel):
@@ -208,7 +221,9 @@ def create_patient(
             is_self_record=patient_in.is_self_record
         )
         
-        return PatientResponse.model_validate(patient)
+        response = PatientResponse.model_validate(patient)
+        response.permission_level = 'full'
+        return response
 
 
 @router.get("/", response_model=PatientListResponse)
@@ -239,9 +254,12 @@ def get_accessible_patients(
         owned_count = len(owned_patients)
         shared_count = total_count - owned_count
         
-        # Convert to response format
-        patient_responses = [PatientResponse.model_validate(p) for p in accessible_patients]
-        
+        # Convert to response format with permission levels
+        patient_responses = [
+            _build_patient_response(access_service, current_user, p)
+            for p in accessible_patients
+        ]
+
         return PatientListResponse(
             patients=patient_responses,
             total_count=total_count,
@@ -264,7 +282,12 @@ def get_owned_patients(
         service = PatientManagementService(db)
         patients = service.get_owned_patients(current_user)
 
-        return [PatientResponse.model_validate(p) for p in patients]
+        responses = []
+        for p in patients:
+            response = PatientResponse.model_validate(p)
+            response.permission_level = 'full'
+            responses.append(response)
+        return responses
 
 
 @router.get("/self-record", response_model=Optional[PatientResponse])
@@ -284,7 +307,9 @@ def get_self_record(
         patient = service.get_self_record(current_user)
 
         if patient:
-            return PatientResponse.model_validate(patient)
+            response = PatientResponse.model_validate(patient)
+            response.permission_level = 'full'
+            return response
         else:
             return None
 
@@ -323,7 +348,8 @@ def switch_active_patient(
             patient_id=switch_request.patient_id
         )
 
-        return PatientResponse.model_validate(patient)
+        access_service = PatientAccessService(db)
+        return _build_patient_response(access_service, current_user, patient)
 
 
 @router.get("/active/current", response_model=Optional[PatientResponse])
@@ -343,7 +369,8 @@ def get_active_patient(
         patient = service.get_active_patient(current_user)
 
         if patient:
-            return PatientResponse.model_validate(patient)
+            access_service = PatientAccessService(db)
+            return _build_patient_response(access_service, current_user, patient)
         else:
             return None
 
@@ -397,7 +424,8 @@ def get_patient(
                 request=request
             )
 
-        return PatientResponse.model_validate(patient)
+        access_service = PatientAccessService(db)
+        return _build_patient_response(access_service, current_user, patient)
 
 
 @router.put("/{patient_id}", response_model=PatientResponse)
@@ -471,7 +499,7 @@ def update_patient(
             patient_id=patient_id
         )
 
-        return PatientResponse.model_validate(patient)
+        return _build_patient_response(access_service, current_user, patient)
 
 
 @router.delete("/{patient_id}")

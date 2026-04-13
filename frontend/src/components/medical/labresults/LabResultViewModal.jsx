@@ -13,6 +13,7 @@ import {
   Tabs,
   Badge,
   Box,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -51,6 +52,8 @@ const LabResultViewModal = ({
   encounters,
   labResultEncounters,
   fetchLabResultEncounters,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
@@ -271,7 +274,7 @@ const LabResultViewModal = ({
                 <TestComponentsTab
                   key={`test-components-${labResult.id}`}
                   labResultId={labResult.id}
-                  isViewMode={false}
+                  isViewMode={disableEdit}
                   onError={handleTestComponentsError}
                   onLabResultUpdated={onLabResultUpdated}
                 />
@@ -306,7 +309,7 @@ const LabResultViewModal = ({
                     encounters={encounters}
                     fetchLabResultEncounters={fetchLabResultEncounters}
                     navigate={navigate}
-                    isViewMode={false}
+                    isViewMode={disableEdit}
                   />
                 </Box>
               </Tabs.Panel>
@@ -373,14 +376,19 @@ const LabResultViewModal = ({
             <Button variant="outline" onClick={onClose}>
               {t('shared:labels.close', 'Close')}
             </Button>
-            <Button
-              onClick={() => {
-                onClose();
-                onEdit(labResult);
-              }}
-            >
-              {t('labresults:modal.editLabResult', 'Edit Lab Result')}
-            </Button>
+            <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+              <span>
+                <Button
+                  onClick={() => {
+                    onClose();
+                    onEdit(labResult);
+                  }}
+                  disabled={disableEdit}
+                >
+                  {t('labresults:modal.editLabResult', 'Edit Lab Result')}
+                </Button>
+              </span>
+            </Tooltip>
           </Group>
         </Stack>
       </Modal>

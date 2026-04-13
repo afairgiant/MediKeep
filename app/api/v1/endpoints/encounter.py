@@ -47,6 +47,8 @@ def create_encounter(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new encounter."""
     return handle_create_with_logging(
@@ -57,6 +59,8 @@ def create_encounter(
         user_id=current_user_id,
         entity_name="Encounter",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -124,6 +128,7 @@ def read_encounter(
     encounter_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get encounter by ID with related information - only allows access to user's own encounters."""
     with handle_database_errors(request=request):
@@ -131,7 +136,7 @@ def read_encounter(
             db=db, record_id=encounter_id, relations=["patient", "practitioner", "condition"]
         )
         handle_not_found(encounter_obj, "Encounter", request)
-        verify_patient_ownership(encounter_obj, current_user_patient_id, "encounter")
+        verify_patient_ownership(encounter_obj, current_user_patient_id, "encounter", db=db, current_user=current_user)
 
         log_data_access(
             logger,
@@ -267,12 +272,13 @@ def get_encounter_lab_results(
     encounter_id: int,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get all lab result relationships for a specific encounter."""
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user)
 
         results = encounter_lab_result.get_by_encounter_with_details(
             db, encounter_id=encounter_id
@@ -308,17 +314,18 @@ def create_encounter_lab_result(
     link_in: EncounterLabResultCreate,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Link a lab result to an encounter."""
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
 
         db_lab = lab_result.get(db, id=link_in.lab_result_id)
         handle_not_found(db_lab, "Lab result", request)
 
-        if db_lab.patient_id != current_user_patient_id:
+        if db_lab.patient_id != db_encounter.patient_id:
             raise BusinessLogicException(
                 message="Cannot link lab result that doesn't belong to the same patient",
                 request=request,
@@ -357,17 +364,18 @@ def bulk_create_encounter_lab_results(
     bulk_in: EncounterLabResultBulkCreate,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Bulk link lab results to an encounter."""
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
 
         for lr_id in bulk_in.lab_result_ids:
             db_lab = lab_result.get(db, id=lr_id)
             handle_not_found(db_lab, "Lab result", request)
-            if db_lab.patient_id != current_user_patient_id:
+            if db_lab.patient_id != db_encounter.patient_id:
                 raise BusinessLogicException(
                     message=f"Lab result {lr_id} doesn't belong to the same patient",
                     request=request,
@@ -395,12 +403,13 @@ def update_encounter_lab_result(
     link_in: EncounterLabResultUpdate,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Update an encounter-lab result relationship."""
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
         handle_not_found(relationship, "Encounter lab result relationship", request)
@@ -423,12 +432,13 @@ def delete_encounter_lab_result(
     relationship_id: int,
     db: Session = Depends(deps.get_db),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Unlink a lab result from an encounter."""
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter")
+        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
         handle_not_found(relationship, "Encounter lab result relationship", request)

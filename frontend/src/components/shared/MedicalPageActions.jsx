@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Group, Button } from '@mantine/core';
+import { Group, Button, Tooltip } from '@mantine/core';
 import ViewToggle from './ViewToggle';
 
 /**
@@ -81,30 +81,37 @@ function MedicalPageActions({
     <Group justify="space-between" align={align} mb={mb}>
       <Group gap={buttonGap}>
         {primaryVisible && primaryAction && (
-          <Button
-            variant={primaryAction.variant || 'filled'}
-            size={primaryAction.size || 'md'}
-            color={primaryAction.color}
-            leftSection={primaryAction.leftSection}
-            onClick={primaryAction.onClick}
-            disabled={primaryAction.disabled}
-          >
-            {primaryAction.label}
-          </Button>
+          <Tooltip label={primaryAction.tooltip} disabled={!primaryAction.disabled || !primaryAction.tooltip}>
+            <span>
+              <Button
+                variant={primaryAction.variant || 'filled'}
+                size={primaryAction.size || 'md'}
+                color={primaryAction.color}
+                leftSection={primaryAction.leftSection}
+                onClick={primaryAction.onClick}
+                disabled={primaryAction.disabled}
+              >
+                {primaryAction.label}
+              </Button>
+            </span>
+          </Tooltip>
         )}
 
         {visibleSecondaryActions.map((action, index) => (
-          <Button
-            key={action.key || `secondary-${index}`}
-            variant={action.variant || 'light'}
-            size={action.size || 'md'}
-            color={action.color}
-            leftSection={action.leftSection}
-            onClick={action.onClick}
-            disabled={action.disabled}
-          >
-            {action.label}
-          </Button>
+          <Tooltip key={action.key || `secondary-${index}`} label={action.tooltip} disabled={!action.disabled || !action.tooltip}>
+            <span>
+              <Button
+                variant={action.variant || 'light'}
+                size={action.size || 'md'}
+                color={action.color}
+                leftSection={action.leftSection}
+                onClick={action.onClick}
+                disabled={action.disabled}
+              >
+                {action.label}
+              </Button>
+            </span>
+          </Tooltip>
         ))}
 
         {children}
@@ -138,6 +145,8 @@ const actionShape = PropTypes.shape({
   color: PropTypes.string,
   /** Whether the button is disabled */
   disabled: PropTypes.bool,
+  /** Tooltip text shown when button is disabled */
+  tooltip: PropTypes.string,
   /** Whether the action is visible (defaults to true) */
   visible: PropTypes.bool,
   /** Unique key for the action (used for secondary actions) */

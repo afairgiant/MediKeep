@@ -49,9 +49,11 @@ import {
   ImmunizationViewModal,
   ImmunizationFormWrapper,
 } from '../../components/medical/immunizations';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Immunization = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('immunizations');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
@@ -361,6 +363,8 @@ const Immunization = () => {
             onClick: handleAddImmunization,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -401,6 +405,8 @@ const Immunization = () => {
           onEdit={handleEditImmunization}
           practitioners={practitioners}
           navigate={navigate}
+          disableEdit={isViewOnly}
+          disableEditTooltip={viewOnlyTooltip}
         />
 
         {/* Content */}
@@ -425,6 +431,8 @@ const Immunization = () => {
                   navigate={navigate}
                   fileCount={fileCounts[immunization.id] || 0}
                   fileCountLoading={fileCountsLoading[immunization.id] || false}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -434,6 +442,9 @@ const Immunization = () => {
                 persistKey="immunizations"
                 data={paginatedImmunizations}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('shared:fields.vaccineName', 'Vaccine Name'), accessor: 'vaccine_name', priority: 'high', width: 200 },
                   {

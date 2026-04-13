@@ -16,6 +16,8 @@ const TreatmentCard = ({
   navigate,
   fileCount = 0,
   fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -166,6 +168,8 @@ const TreatmentCard = ({
         onView={() => onView(treatment)}
         onEdit={() => onEdit(treatment)}
         onDelete={() => onDelete(treatment.id)}
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       >
         {customContent}

@@ -48,9 +48,11 @@ import {
   Paper,
 } from '@mantine/core';
 import { IconFileUpload } from '@tabler/icons-react';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const LabResults = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const location = useLocation();
@@ -674,6 +676,8 @@ const LabResults = () => {
               fileCount={fileCounts[result.id] || 0}
               fileCountLoading={fileCountsLoading[result.id] || false}
               navigate={navigate}
+              disableActions={isViewOnly}
+              disableActionsTooltip={viewOnlyTooltip}
             />
           )}
         />
@@ -686,6 +690,9 @@ const LabResults = () => {
           persistKey="lab-results"
           data={paginatedLabResults}
           pagination={false}
+          disableEdit={isViewOnly}
+          disableDelete={isViewOnly}
+          disableActionsTooltip={viewOnlyTooltip}
           columns={[
             { header: t('shared:fields.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
             { header: t('shared:labels.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
@@ -752,6 +759,8 @@ const LabResults = () => {
               label: t('labresults:addNew', '+ Add New Lab Result'),
               onClick: handleAddLabResult,
               size: 'sm',
+              disabled: isViewOnly,
+              tooltip: viewOnlyTooltip,
             }}
             secondaryActions={[
               {
@@ -824,6 +833,8 @@ const LabResults = () => {
         labResult={viewingLabResult}
         onEdit={handleEditLabResult}
         practitioners={practitioners}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
         conditions={conditions}
         labResultConditions={labResultConditions}
         fetchLabResultConditions={fetchLabResultConditions}

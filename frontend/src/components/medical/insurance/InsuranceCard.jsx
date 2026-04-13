@@ -7,6 +7,7 @@ import {
   Stack,
   Button,
   Divider,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconStarFilled,
@@ -25,7 +26,9 @@ const InsuranceCard = ({
   onSetPrimary,
   onView,
   fileCount = 0,
-  fileCountLoading = false
+  fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatLongDate } = useDateFormat();
@@ -250,21 +253,31 @@ const InsuranceCard = ({
           >
             {t('buttons.view', 'View')}
           </Button>
-          <Button
-            variant="filled"
-            size="xs"
-            onClick={() => onEdit(insurance)}
-          >
-            {t('shared:labels.edit', 'Edit')}
-          </Button>
-          <Button
-            variant="filled"
-            color="red"
-            size="xs"
-            onClick={() => onDelete(insurance)}
-          >
-            {t('buttons.delete', 'Delete')}
-          </Button>
+          <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+            <span onClick={e => e.stopPropagation()}>
+              <Button
+                variant="filled"
+                size="xs"
+                disabled={disableActions}
+                onClick={() => onEdit(insurance)}
+              >
+                {t('shared:labels.edit', 'Edit')}
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+            <span onClick={e => e.stopPropagation()}>
+              <Button
+                variant="filled"
+                color="red"
+                size="xs"
+                disabled={disableActions}
+                onClick={() => onDelete(insurance)}
+              >
+                {t('buttons.delete', 'Delete')}
+              </Button>
+            </span>
+          </Tooltip>
         </Group>
       </Stack>
     </Card>

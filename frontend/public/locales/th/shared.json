@@ -303,6 +303,9 @@
     "weekly": "รายสัปดาห์",
     "weight": "น้ำหนัก"
   },
+  "permissions": {
+    "viewOnly": "สิทธิ์ดูอย่างเดียว"
+  },
   "tabs": {
     "addFiles": "เพิ่มไฟล์",
     "administration": "การบริหารจัดการ",

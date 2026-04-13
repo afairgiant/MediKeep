@@ -39,6 +39,8 @@ def create_medical_equipment(
     request: Request,
     db: Session = Depends(deps.get_db),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """Create new medical equipment record."""
     return handle_create_with_logging(
@@ -49,6 +51,8 @@ def create_medical_equipment(
         user_id=current_user_id,
         entity_name="MedicalEquipment",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -176,6 +180,7 @@ def read_single_equipment(
     equipment_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """Get medical equipment by ID with related information."""
     with handle_database_errors(request=request):
@@ -185,7 +190,7 @@ def read_single_equipment(
             relations=["patient", "practitioner"],
         )
         handle_not_found(equipment_obj, "MedicalEquipment", request)
-        verify_patient_ownership(equipment_obj, current_user_patient_id, "medical equipment")
+        verify_patient_ownership(equipment_obj, current_user_patient_id, "medical equipment", db=db, current_user=current_user)
 
         log_data_access(
             logger,

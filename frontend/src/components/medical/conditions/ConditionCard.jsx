@@ -14,6 +14,8 @@ const ConditionCard = ({
   navigate,
   fileCount = 0,
   fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -163,6 +165,8 @@ const ConditionCard = ({
         onView={() => onView(condition)}
         onEdit={() => onEdit(condition)}
         onDelete={() => onDelete(condition.id)}
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       />
     );

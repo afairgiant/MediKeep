@@ -40,9 +40,11 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 import VisitCard from '../../components/medical/visits/VisitCard';
 import VisitViewModal from '../../components/medical/visits/VisitViewModal';
 import VisitFormWrapper from '../../components/medical/visits/VisitFormWrapper';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Visits = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('visits');
   const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
@@ -538,6 +540,8 @@ const Visits = () => {
             onClick: handleAddVisit,
             leftSection: <IconPlus size={16} />,
             size: 'sm',
+            disabled: isViewOnly,
+            tooltip: viewOnlyTooltip,
           }}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -570,6 +574,8 @@ const Visits = () => {
                   fileCount={fileCounts[visit.id] || 0}
                   fileCountLoading={fileCountsLoading[visit.id] || false}
                   navigate={navigate}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                 />
               )}
             />
@@ -579,6 +585,9 @@ const Visits = () => {
                 persistKey="visits"
                 data={paginatedVisits}
                 pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
                 columns={[
                   { header: t('visits.table.visitDate', 'Visit Date'), accessor: 'date', priority: 'high', width: 120 },
                   { header: t('shared:labels.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
@@ -661,6 +670,8 @@ const Visits = () => {
         conditions={conditions}
         navigate={navigate}
         isBlocking={isBlocking}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
         onFileUploadComplete={(success) => {
           if (success && viewingVisit) {
             refreshFileCount(viewingVisit.id);

@@ -11,6 +11,7 @@ import {
   Grid,
   Paper,
   Divider,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -33,6 +34,8 @@ const InjuryViewModal = ({
   practitioners = [],
   injuryTypes = [],
   navigate,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
@@ -302,9 +305,13 @@ const InjuryViewModal = ({
           <Button variant="subtle" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Button leftSection={<IconEdit size={16} />} onClick={() => onEdit(injury)}>
-            {t('shared:labels.edit', 'Edit')}
-          </Button>
+          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+            <span>
+              <Button leftSection={<IconEdit size={16} />} onClick={() => onEdit(injury)} disabled={disableEdit}>
+                {t('shared:labels.edit', 'Edit')}
+              </Button>
+            </span>
+          </Tooltip>
         </Group>
       </Stack>
     </Modal>

@@ -238,6 +238,7 @@ async def create_pending_file_record(
     storage_backend: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> EntityFileResponse:
     """
     Create a pending file record without actual file upload.
@@ -260,7 +261,7 @@ async def create_pending_file_record(
         # Get the parent entity (lab-result, procedure, etc.) and verify ownership
         parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
         handle_not_found(parent_entity, entity_type)
-        verify_patient_ownership(parent_entity, current_user_patient_id, entity_type)
+        verify_patient_ownership(parent_entity, current_user_patient_id, entity_type, db=db, current_user=current_user, permission='edit')
 
         log_endpoint_access(
             logger,
@@ -338,6 +339,7 @@ async def update_file_upload_status(
     paperless_document_id: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> EntityFileResponse:
     """
     Update the upload status of a pending file record.
@@ -355,11 +357,11 @@ async def update_file_upload_status(
         # Get file record first to check authorization
         file_record = file_service.get_file_by_id(db, file_id)
         handle_not_found(file_record, "File")
-        
+
         # Get the parent entity and verify ownership
         parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
         handle_not_found(parent_entity, file_record.entity_type)
-        verify_patient_ownership(parent_entity, current_user_patient_id, file_record.entity_type)
+        verify_patient_ownership(parent_entity, current_user_patient_id, file_record.entity_type, db=db, current_user=current_user, permission='edit')
 
         log_endpoint_access(
             logger,

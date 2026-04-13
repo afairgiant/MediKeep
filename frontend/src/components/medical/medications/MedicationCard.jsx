@@ -7,6 +7,7 @@ import {
   Group,
   Stack,
   Text,
+  Tooltip,
 } from '@mantine/core';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { createCardClickHandler } from '../../../utils/helpers';
@@ -35,6 +36,8 @@ const MedicationCard = ({
   navigate,
   fileCount = 0,
   fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -233,21 +236,31 @@ const MedicationCard = ({
           >
             {t('common:buttons.view')}
           </Button>
-          <Button
-            variant="filled"
-            size="xs"
-            onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
-          >
-            {t('shared:labels.edit')}
-          </Button>
-          <Button
-            variant="filled"
-            color="red"
-            size="xs"
-            onClick={(e) => { e.stopPropagation(); onDelete(medication.id); }}
-          >
-            {t('common:buttons.delete')}
-          </Button>
+          <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+            <span onClick={e => e.stopPropagation()}>
+              <Button
+                variant="filled"
+                size="xs"
+                disabled={disableActions}
+                onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
+              >
+                {t('shared:labels.edit')}
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+            <span onClick={e => e.stopPropagation()}>
+              <Button
+                variant="filled"
+                color="red"
+                size="xs"
+                disabled={disableActions}
+                onClick={(e) => { e.stopPropagation(); onDelete(medication.id); }}
+              >
+                {t('common:buttons.delete')}
+              </Button>
+            </span>
+          </Tooltip>
         </Group>
       </Stack>
     </Card>

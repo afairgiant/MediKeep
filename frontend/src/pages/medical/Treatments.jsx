@@ -39,9 +39,11 @@ import {
   Paper,
 } from '@mantine/core';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
+import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Treatments = () => {
   const { t } = useTranslation(['common', 'shared']);
+  const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const navigate = useNavigate();
   const responsive = useResponsive();
@@ -430,6 +432,8 @@ const Treatments = () => {
               label: t('treatments.addTreatment', '+ Add Treatment'),
               onClick: handleAddTreatment,
               size: 'sm',
+              disabled: isViewOnly,
+              tooltip: viewOnlyTooltip,
             }}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
@@ -468,6 +472,8 @@ const Treatments = () => {
                   navigate={navigate}
                   fileCount={fileCounts[treatment.id] || 0}
                   fileCountLoading={fileCountsLoading[treatment.id] || false}
+                  disableActions={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
                   onError={(error) => {
                     logger.error('TreatmentCard error', {
                       treatmentId: treatment.id,
@@ -484,6 +490,9 @@ const Treatments = () => {
               persistKey="treatments"
               data={paginatedTreatments}
               pagination={false}
+              disableEdit={isViewOnly}
+              disableDelete={isViewOnly}
+              disableActionsTooltip={viewOnlyTooltip}
               columns={[
                   { header: 'Treatment', accessor: 'treatment_name', priority: 'high', width: 200 },
                   { header: 'Type', accessor: 'treatment_type', priority: 'medium', width: 120 },
@@ -580,6 +589,8 @@ const Treatments = () => {
         onLabResultClick={handleLabResultClick}
         onEquipmentClick={handleEquipmentClick}
         navigate={navigate}
+        disableEdit={isViewOnly}
+        disableEditTooltip={viewOnlyTooltip}
       />
     </>
   );

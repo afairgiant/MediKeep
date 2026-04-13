@@ -555,10 +555,9 @@ def get_current_user_patient_id(
         # ensure_active_patient already verified ownership
         return resolved.id
 
-    # Verify the active patient exists and belongs to this user
+    # Verify the active patient exists and user has access (owned or shared)
     patient_record = db.query(Patient).filter(
         Patient.id == user.active_patient_id,
-        Patient.owner_user_id == current_user_id
     ).first()
 
     if not patient_record:
@@ -567,7 +566,20 @@ def get_current_user_patient_id(
             request=None
         )
 
-    return patient_record.id
+    # Owner always has access
+    if patient_record.owner_user_id == current_user_id:
+        return patient_record.id
+
+    # Check shared access
+    from app.services.patient_access import PatientAccessService
+    access_service = PatientAccessService(db)
+    if access_service.can_access_patient(user, patient_record, "view"):
+        return patient_record.id
+
+    raise NotFoundException(
+        message="Active patient record not found",
+        request=None
+    )
 
 
 def verify_patient_record_access(

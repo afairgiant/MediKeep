@@ -52,6 +52,18 @@ vi.mock('../../../hooks/useGlobalData', () => ({
       { id: 2, name: 'Walgreens - Downtown' },
     ]},
   }),
+  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+}));
+vi.mock('../../../hooks/usePatientPermissions', () => ({
+  usePatientPermissions: () => ({
+    isOwner: true,
+    permissionLevel: 'full',
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    isViewOnly: false,
+    viewOnlyTooltip: undefined,
+  }),
 }));
 
 // --- Service mocks ---

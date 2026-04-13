@@ -18,6 +18,8 @@ const EquipmentCard = ({
   onView,
   fileCount = 0,
   fileCountLoading = false,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['common', 'shared']);
@@ -107,6 +109,8 @@ const EquipmentCard = ({
         onView={() => onView(equipment)}
         onEdit={() => onEdit(equipment)}
         onDelete={() => onDelete(equipment.id)}
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       />
     );
@@ -135,6 +139,8 @@ EquipmentCard.propTypes = {
   onView: PropTypes.func.isRequired,
   fileCount: PropTypes.number,
   fileCountLoading: PropTypes.bool,
+  disableActions: PropTypes.bool,
+  disableActionsTooltip: PropTypes.string,
   onError: PropTypes.func,
 };
 

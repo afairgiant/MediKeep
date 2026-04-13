@@ -17,6 +17,8 @@ const LabResultCard = React.memo(({
   fileCountLoading,
   practitioners,
   navigate,
+  disableActions = false,
+  disableActionsTooltip,
   onError
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -120,6 +122,8 @@ const LabResultCard = React.memo(({
         onEdit={() => onEdit(labResult)}
         onDelete={() => onDelete(labResult)}
         entityType="lab-result"
+        disableActions={disableActions}
+        disableActionsTooltip={disableActionsTooltip}
         onError={handleError}
       />
     );
@@ -139,6 +143,8 @@ const LabResultCard = React.memo(({
     prevProps.labResult.completed_date === nextProps.labResult.completed_date &&
     prevProps.fileCount === nextProps.fileCount &&
     prevProps.fileCountLoading === nextProps.fileCountLoading &&
+    prevProps.disableActions === nextProps.disableActions &&
+    prevProps.disableActionsTooltip === nextProps.disableActionsTooltip &&
     prevProps.onEdit === nextProps.onEdit &&
     prevProps.onDelete === nextProps.onDelete &&
     prevProps.onView === nextProps.onView

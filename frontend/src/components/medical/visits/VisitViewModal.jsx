@@ -14,6 +14,7 @@ import {
   Tabs,
   Box,
   SimpleGrid,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconInfoCircle,
@@ -45,6 +46,8 @@ const VisitViewModal = ({
   labResults,
   encounterLabResults,
   fetchEncounterLabResults,
+  disableEdit = false,
+  disableEditTooltip,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatDate } = useDateFormat();
@@ -350,7 +353,7 @@ const VisitViewModal = ({
                     labResults={labResults}
                     fetchEncounterLabResults={fetchEncounterLabResults}
                     navigate={navigate}
-                    isViewMode={false}
+                    isViewMode={disableEdit}
                   />
                 </Box>
               </Tabs.Panel>
@@ -420,18 +423,23 @@ const VisitViewModal = ({
 
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
-            <Button
-              variant="light"
-              onClick={() => {
-                onClose();
-                // Small delay to ensure view modal is closed before opening edit modal
-                setTimeout(() => {
-                  onEdit(visit);
-                }, 100);
-              }}
-            >
-              {t('visits.viewModal.editVisit', 'Edit Visit')}
-            </Button>
+            <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+              <span>
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    onClose();
+                    // Small delay to ensure view modal is closed before opening edit modal
+                    setTimeout(() => {
+                      onEdit(visit);
+                    }, 100);
+                  }}
+                  disabled={disableEdit}
+                >
+                  {t('visits.viewModal.editVisit', 'Edit Visit')}
+                </Button>
+              </span>
+            </Tooltip>
             <Button variant="filled" onClick={onClose}>
               {t('shared:labels.close', 'Close')}
             </Button>

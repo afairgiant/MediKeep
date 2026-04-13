@@ -39,6 +39,8 @@ def create_allergy(
     db: Session = Depends(deps.get_db),
     allergy_in: AllergyCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
 ) -> Any:
     """
     Create new allergy record.
@@ -51,6 +53,8 @@ def create_allergy(
         user_id=current_user_id,
         entity_name="Allergy",
         request=request,
+        current_user_patient_id=current_user_patient_id,
+        current_user=current_user,
     )
 
 
@@ -159,6 +163,7 @@ def read_allergy(
     allergy_id: int,
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Get allergy by ID with related information - only allows access to user's own allergies.
@@ -169,7 +174,7 @@ def read_allergy(
             db=db, record_id=allergy_id, relations=["patient", "medication"]
         )
         handle_not_found(allergy_obj, "Allergy", request)
-        verify_patient_ownership(allergy_obj, current_user_patient_id, "allergy")
+        verify_patient_ownership(allergy_obj, current_user_patient_id, "allergy", db=db, current_user=current_user)
 
         log_data_access(
             logger,
