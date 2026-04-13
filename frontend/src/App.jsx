@@ -16,6 +16,9 @@ import { useTranslation } from 'react-i18next';
 // Mantine
 import { MantineProvider } from '@mantine/core';
 import { DatesProvider } from '@mantine/dates';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+dayjs.extend(customParseFormat);
 import { Notifications } from '@mantine/notifications';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
