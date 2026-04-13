@@ -124,7 +124,7 @@ describe('dateFormatUtils', () => {
     });
 
     test('formats date with long month name when longMonth is true', () => {
-      const result = formatDateLong('2026-01-25', 'mdy', true);
+      const result = formatDateLong('2026-01-25', 'mdy', { longMonth: true });
       // Should have "January" instead of "Jan"
       expect(result).toMatch(/January/);
     });
@@ -134,6 +134,26 @@ describe('dateFormatUtils', () => {
       const result = formatDateLong('2026-01-25', 'mdy');
       // Should show 25, not 24 (which would happen with UTC conversion)
       expect(result).toMatch(/25/);
+    });
+
+    test('uses displayLocale for month names when provided', () => {
+      // With en-US displayLocale, October should be "Oct" not "okt" (Swedish)
+      const result = formatDateLong('2026-10-25', 'ymd', { displayLocale: 'en-US' });
+      expect(result).toMatch(/Oct/);
+      expect(result).not.toMatch(/okt/i);
+    });
+
+    test('uses German month names with de-DE displayLocale', () => {
+      const result = formatDateLong('2026-10-25', 'ymd', { displayLocale: 'de-DE' });
+      expect(result).toMatch(/Okt/);
+    });
+
+    test('falls back to format locale (sv-SE for ymd) when displayLocale is absent', () => {
+      // When displayLocale is not provided, ymd format should fall back to sv-SE,
+      // producing output identical to an explicit sv-SE displayLocale.
+      const omitted = formatDateLong('2026-10-25', 'ymd');
+      const explicit = formatDateLong('2026-10-25', 'ymd', { displayLocale: 'sv-SE' });
+      expect(omitted).toBe(explicit);
     });
   });
 

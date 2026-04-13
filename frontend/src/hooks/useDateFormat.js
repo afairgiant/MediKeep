@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import {
   formatDateWithPreference,
@@ -18,7 +19,7 @@ import {
   formatDateTimeForInputWithPreference,
   getDateTimePlaceholder,
 } from '../utils/dateUtils';
-import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
+import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, getIntlLocale } from '../utils/constants';
 
 /**
  * Hook that provides date formatting functions using user's preferred format
@@ -26,7 +27,12 @@ import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
  */
 export const useDateFormat = () => {
   const { dateFormat } = useUserPreferences();
+  // useSuspense: false — we only read i18n.language for locale mapping, not translated strings,
+  // so this hook should not trigger Suspense boundaries during language changes.
+  const { i18n } = useTranslation(undefined, { useSuspense: false });
   const effectiveFormat = dateFormat || DEFAULT_DATE_FORMAT;
+
+  const displayLocale = getIntlLocale(i18n.language);
 
   const formatDate = useCallback(
     (dateValue, options = {}) => {
@@ -58,9 +64,9 @@ export const useDateFormat = () => {
 
   const formatLongDate = useCallback(
     (dateValue, longMonth = false) => {
-      return formatDateLong(dateValue, effectiveFormat, longMonth);
+      return formatDateLong(dateValue, effectiveFormat, { longMonth, displayLocale });
     },
-    [effectiveFormat]
+    [effectiveFormat, displayLocale]
   );
 
   const locale = useMemo(

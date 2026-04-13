@@ -17,9 +17,9 @@ vi.mock('../utils/dateFormatUtils', () => ({
     if (!dateValue) return 'N/A';
     return `formatted-${formatCode}-${dateValue}`;
   }),
-  formatDateLong: vi.fn((dateValue, formatCode, longMonth) => {
+  formatDateLong: vi.fn((dateValue, formatCode, { longMonth, displayLocale } = {}) => {
     if (!dateValue) return 'N/A';
-    return `long-${formatCode}-${dateValue}`;
+    return `long-${formatCode}-${dateValue}-${displayLocale || 'no-locale'}`;
   }),
   formatDateTimeWithPreference: vi.fn((dateValue, formatCode, options) => {
     if (!dateValue) return 'N/A';
@@ -47,6 +47,14 @@ vi.mock('../utils/dateFormatUtils', () => ({
   }),
 }));
 
+// Mock react-i18next
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    i18n: { language: 'en' },
+    t: key => key,
+  }),
+}));
+
 // Mock constants
 vi.mock('../utils/constants', () => ({
   DATE_FORMAT_OPTIONS: {
@@ -55,6 +63,10 @@ vi.mock('../utils/constants', () => ({
     ymd: { code: 'ymd', label: 'YYYY-MM-DD (ISO)', locale: 'sv-SE', pattern: 'YYYY-MM-DD' },
   },
   DEFAULT_DATE_FORMAT: 'mdy',
+  getIntlLocale: langCode => {
+    const map = { en: 'en-US', de: 'de-DE', fr: 'fr-FR' };
+    return map[langCode] || 'en-US';
+  },
 }));
 
 // Mock dateUtils
@@ -121,7 +133,8 @@ describe('useDateFormat', () => {
     const { result } = renderHook(() => useDateFormat());
 
     const formatted = result.current.formatLongDate('2026-01-25');
-    expect(formatted).toBe('long-mdy-2026-01-25');
+    // Should pass displayLocale derived from i18n language ('en' -> 'en-US')
+    expect(formatted).toBe('long-mdy-2026-01-25-en-US');
   });
 
   test('dateFormat returns the effective format from context', () => {
