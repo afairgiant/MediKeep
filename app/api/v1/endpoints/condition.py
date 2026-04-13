@@ -192,7 +192,7 @@ def get_condition_medications(
             "read",
             "ConditionMedication",
             record_id=condition_id,
-            patient_id=current_user_patient_id,
+            patient_id=db_condition.patient_id,
             count=len(relationships)
         )
 
@@ -295,7 +295,7 @@ def create_condition_medication(
             "create",
             "ConditionMedication",
             record_id=relationship.id,
-            patient_id=current_user_patient_id,
+            patient_id=db_condition.patient_id,
             condition_id=condition_id,
             medication_id=medication_in.medication_id
         )
@@ -388,7 +388,7 @@ def create_condition_medications_bulk(
             current_user_id,
             "create",
             "ConditionMedication",
-            patient_id=current_user_patient_id,
+            patient_id=db_condition.patient_id,
             condition_id=condition_id,
             created_count=len(created),
             skipped_count=len(skipped)
@@ -650,7 +650,7 @@ def read_condition(
             "read",
             "Condition",
             record_id=condition_id,
-            patient_id=current_user_patient_id
+            patient_id=condition_obj.patient_id
         )
 
         return condition_obj

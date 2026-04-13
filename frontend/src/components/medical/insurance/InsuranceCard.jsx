@@ -254,7 +254,7 @@ const InsuranceCard = ({
             {t('buttons.view', 'View')}
           </Button>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <span>
+            <span onClick={e => e.stopPropagation()}>
               <Button
                 variant="filled"
                 size="xs"
@@ -266,7 +266,7 @@ const InsuranceCard = ({
             </span>
           </Tooltip>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <span>
+            <span onClick={e => e.stopPropagation()}>
               <Button
                 variant="filled"
                 color="red"

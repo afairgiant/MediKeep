@@ -211,7 +211,7 @@ def read_treatment(
             "read",
             "Treatment",
             record_id=treatment_id,
-            patient_id=current_user_patient_id
+            patient_id=treatment_obj.patient_id
         )
 
         return treatment_obj

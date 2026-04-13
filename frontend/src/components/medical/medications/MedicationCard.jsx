@@ -237,7 +237,7 @@ const MedicationCard = ({
             {t('common:buttons.view')}
           </Button>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <span>
+            <span onClick={e => e.stopPropagation()}>
               <Button
                 variant="filled"
                 size="xs"
@@ -249,7 +249,7 @@ const MedicationCard = ({
             </span>
           </Tooltip>
           <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
-            <span>
+            <span onClick={e => e.stopPropagation()}>
               <Button
                 variant="filled"
                 color="red"
