@@ -33,12 +33,11 @@ vi.mock('../../../../services/logger', () => ({
   default: { info: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }));
 
-vi.mock('../DocumentManagerWithProgress', () => ({ default: () => null }));
-vi.mock('../../shared/DocumentManagerWithProgress', () => ({ default: () => null }));
+vi.mock('../../../shared/DocumentManagerWithProgress', () => ({ default: () => null }));
 vi.mock('../MedicationTreatmentsList', () => ({ default: () => null }));
-vi.mock('../MedicationRelationships', () => ({ default: () => null }));
+vi.mock('../../MedicationRelationships', () => ({ default: () => null }));
 vi.mock('../StatusBadge', () => ({ default: ({ status }) => <span>{status}</span> }));
-vi.mock('../../common/ClickableTagBadge', () => ({ ClickableTagBadge: ({ children }) => <span>{children}</span> }));
+vi.mock('../../../common/ClickableTagBadge', () => ({ ClickableTagBadge: ({ children }) => <span>{children}</span> }));
 
 const MantineWrapper = ({ children }) => <MantineProvider>{children}</MantineProvider>;
 
