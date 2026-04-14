@@ -17,6 +17,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlencode
 
 from cryptography.fernet import Fernet
 from sqlalchemy import and_, desc
@@ -75,33 +76,59 @@ def _build_email_url(config: Dict) -> str:
     return f"{protocol}://{smtp_user}:{smtp_password}@{smtp_host}:{smtp_port}?from={from_email}&to={to_email}"
 
 
+def _split_protocol(url: str) -> Tuple[str, str]:
+    """Split a URL into (host_path, tls_suffix) for Apprise URL assembly.
+
+    Returns host_path stripped of scheme and trailing slash, plus 's' for HTTPS
+    or '' for HTTP. Apprise schemes append this suffix to pick TLS (e.g.,
+    'gotify' + 's' -> 'gotifys').
+    """
+    url = url.rstrip("/")
+    if url.startswith("https://"):
+        return url[len("https://"):], "s"
+    if url.startswith("http://"):
+        return url[len("http://"):], ""
+    return url, ""
+
+
 def _build_gotify_url(config: Dict) -> str:
     """Build Apprise URL for Gotify."""
-    server_url = config.get("server_url", "").rstrip("/")
+    host, tls = _split_protocol(config.get("server_url", ""))
     app_token = config.get("app_token", "")
     priority = config.get("priority", 5)
 
-    # Strip protocol from server URL for Apprise format
-    host = server_url.replace("https://", "").replace("http://", "")
-    protocol = "gotifys" if "https://" in config.get("server_url", "") else "gotify"
+    # Extended timeout for services behind CDNs (rto=read timeout, cto=connect timeout)
+    return f"gotify{tls}://{host}/{app_token}?priority={priority}&rto=15&cto=15"
 
-    # Add extended timeout for services behind CDNs (rto=read timeout, cto=connect timeout)
-    return f"{protocol}://{host}/{app_token}?priority={priority}&rto=15&cto=15"
+
+def _build_ntfy_url(config: Dict) -> str:
+    """Build Apprise URL for ntfy."""
+    host, tls = _split_protocol(config.get("server_url", "https://ntfy.sh"))
+    topic = config.get("topic", "")
+    auth_token = config.get("auth_token")
+    priority = config.get("priority")
+
+    apprise_url = f"ntfy{tls}://{host}/{topic}"
+
+    params = {}
+    if auth_token:
+        params["token"] = auth_token
+    if priority is not None:
+        params["priority"] = priority
+    if params:
+        apprise_url += "?" + urlencode(params)
+
+    return apprise_url
 
 
 def _build_webhook_url(config: Dict) -> str:
     """Build Apprise URL for generic webhook."""
-    url = config.get("url", "")
+    # method is stored in config but Apprise JSON plugin uses POST by default
+    host_path, tls = _split_protocol(config.get("url", ""))
     auth_token = config.get("auth_token")
-    # Note: method is stored in config but Apprise JSON plugin uses POST by default
 
-    # Strip protocol for Apprise format
-    host_path = url.replace("https://", "").replace("http://", "")
-    protocol = "jsons" if "https://" in url else "json"
+    apprise_url = f"json{tls}://{host_path}"
 
-    apprise_url = f"{protocol}://{host_path}"
-
-    # Add auth header if provided
     if auth_token:
         apprise_url += f"?+Authorization=Bearer {auth_token}"
 
@@ -113,6 +140,7 @@ CHANNEL_BUILDERS = {
     ChannelType.DISCORD.value: _build_discord_url,
     ChannelType.EMAIL.value: _build_email_url,
     ChannelType.GOTIFY.value: _build_gotify_url,
+    ChannelType.NTFY.value: _build_ntfy_url,
     ChannelType.WEBHOOK.value: _build_webhook_url,
 }
 
@@ -331,7 +359,7 @@ class NotificationService:
         str_value = str(value)
         if len(str_value) > 12:
             return f"{str_value[:4]}...{str_value[-4:]}"
-        elif len(str_value) > 6:
+        if len(str_value) > 6:
             return f"{str_value[:2]}...{str_value[-2:]}"
         return "****"
 
@@ -375,7 +403,7 @@ class NotificationService:
             and_(
                 NotificationPreference.user_id == user_id,
                 NotificationPreference.event_type == event_type,
-                NotificationPreference.is_enabled == True
+                NotificationPreference.is_enabled.is_(True)
             )
         ).all()
 
@@ -418,7 +446,7 @@ class NotificationService:
         preferences = self.db.query(NotificationPreference).filter(
             and_(
                 NotificationPreference.event_type == event_type,
-                NotificationPreference.is_enabled == True
+                NotificationPreference.is_enabled.is_(True)
             )
         ).all()
 
@@ -474,7 +502,7 @@ class NotificationService:
         channels = self.db.query(NotificationChannel).filter(
             and_(
                 NotificationChannel.id.in_(channel_ids),
-                NotificationChannel.is_enabled == True
+                NotificationChannel.is_enabled.is_(True)
             )
         ).all()
 
@@ -664,12 +692,12 @@ class NotificationService:
                     extra={"channel_id": channel_id, "user_id": user_id}
                 )
                 return True, "Test notification sent successfully"
-            else:
-                channel.last_test_status = "failed"
-                history.status = NotificationStatus.FAILED.value
-                history.error_message = "Apprise returned failure"
-                self.db.commit()
-                return False, "Failed to send test notification"
+
+            channel.last_test_status = "failed"
+            history.status = NotificationStatus.FAILED.value
+            history.error_message = "Apprise returned failure"
+            self.db.commit()
+            return False, "Failed to send test notification"
 
         except Exception as e:
             channel.last_test_at = datetime.now(timezone.utc)
@@ -825,9 +853,9 @@ class NotificationService:
         try:
             decrypted = self._fernet.decrypt(encrypted_config.encode())
             return json.loads(decrypted.decode())
-        except InvalidToken:
+        except InvalidToken as exc:
             raise ValueError(
                 "Channel configuration is corrupted or was encrypted with a different key. "
                 "This usually happens when SECRET_KEY or NOTIFICATION_ENCRYPTION_SALT has changed. "
                 "Please delete and re-create this channel."
-            )
+            ) from exc

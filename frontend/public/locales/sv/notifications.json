@@ -67,7 +67,7 @@
       }
     },
     "empty": "Inga aviseringskanaler har konfigurerats.",
-    "emptyHint": "Lägg till en kanal för att börja ta emot aviseringar via Discord, e-post, Gotify eller Webhook.",
+    "emptyHint": "Lägg till en kanal för att börja ta emot aviseringar via Discord, e-post, Gotify, ntfy eller Webhook.",
     "errors": {
       "fieldRequired": "{{field}} krävs",
       "nameRequired": "Kanalnamn krävs"
@@ -117,6 +117,28 @@
     "noChannels": "Inga aviseringskanaler konfigurerade",
     "noChannelsHint": "Lägg till en kanal för att börja ta emot aviseringar",
     "notificationsSent": "{{count}} aviseringar skickade",
+    "ntfy": {
+      "authToken": {
+        "description": "Bearer-token för skyddade ämnen (lämna tomt för offentliga ämnen)",
+        "label": "Autentiseringstoken (valfritt)",
+        "placeholder": "tk_..."
+      },
+      "priority": {
+        "description": "Meddelandeprioritet (1=min, 3=standard, 5=max)",
+        "label": "Prioritet",
+        "placeholder": "3"
+      },
+      "serverUrl": {
+        "description": "ntfy-server-URL (standard: https://ntfy.sh)",
+        "label": "Server-URL",
+        "placeholder": "https://ntfy.sh"
+      },
+      "topic": {
+        "description": "Unikt ämnesnamn. Prenumerera på samma ämne på ntfy.sh eller i din ntfy-app.",
+        "label": "Ämne",
+        "placeholder": "my-alerts"
+      }
+    },
     "sentCount_one": "{{count}} skickad",
     "sentCount_other": "{{count}} skickade",
     "test": "Testa",
@@ -128,6 +150,7 @@
     "types": {
       "discord": "Discord",
       "gotify": "Gotify",
+      "ntfy": "ntfy",
       "webhook": "Webhook"
     },
     "updateError": "Det gick inte att uppdatera kanalen",

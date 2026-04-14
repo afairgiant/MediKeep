@@ -8,3 +8,27 @@ skips = [
 ]
 # Note: Scan targets (app/) must be passed via CLI, not config
 # Note: Blocking CI uses -ll -ii (MEDIUM+ severity/confidence); SARIF captures all remaining findings
+
+
+[tool.pylint.main]
+# ignore-paths entries are regex patterns — escape literal dots
+ignore-paths = ["alembic/", "tests/", "build/", "dist/", "\\.venv/", "frontend/", "node_modules/"]
+jobs = 0  # use all CPU cores
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint."messages control"]
+# Disabled: stylistic rules that conflict with framework conventions (Pydantic, FastAPI, structured logging).
+# Bug-finding rules (unused-import, undefined-variable, raise-missing-from, no-else-return, etc.) stay enabled.
+disable = [
+    "missing-module-docstring",       # C0114 — not every module needs a top-level docstring
+    "missing-class-docstring",        # C0115 — Pydantic schema classes are self-documenting
+    "missing-function-docstring",     # C0116 — Pydantic field_validators don't need docstrings
+    "too-few-public-methods",         # R0903 — Pydantic / config classes are intentionally data-only
+    "too-many-arguments",             # R0913 — FastAPI endpoints and service methods often exceed 5
+    "too-many-positional-arguments",  # R0917 — same reason
+    "import-outside-toplevel",        # C0415 — intentional lazy imports (e.g., apprise in send path)
+    "logging-fstring-interpolation",  # W1203 — project uses structured logging via extra={} dicts
+    "broad-exception-caught",         # W0718 — acceptable at service boundaries that log and continue
+]

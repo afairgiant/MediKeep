@@ -67,7 +67,7 @@
       }
     },
     "empty": "ไม่มีช่องทางการแจ้งเตือนที่ตั้งค่าไว้",
-    "emptyHint": "เพิ่มช่องทางเพื่อเริ่มรับการแจ้งเตือนผ่าน Discord, อีเมล, Gotify หรือ Webhook",
+    "emptyHint": "เพิ่มช่องทางเพื่อเริ่มรับการแจ้งเตือนผ่าน Discord, อีเมล, Gotify, ntfy หรือ Webhook",
     "errors": {
       "fieldRequired": "จำเป็นต้องระบุ {{field}}",
       "nameRequired": "จำเป็นต้องระบุชื่อช่องทาง"
@@ -117,6 +117,28 @@
     "noChannels": "ไม่มีช่องทางการแจ้งเตือนที่ตั้งค่าไว้",
     "noChannelsHint": "เพิ่มช่องทางเพื่อเริ่มรับการแจ้งเตือน",
     "notificationsSent": "ส่งการแจ้งเตือน {{count}} ครั้ง",
+    "ntfy": {
+      "authToken": {
+        "description": "Bearer token สำหรับหัวข้อที่ป้องกัน (เว้นว่างไว้สำหรับหัวข้อสาธารณะ)",
+        "label": "โทเค็นการยืนยันตัวตน (ไม่บังคับ)",
+        "placeholder": "tk_..."
+      },
+      "priority": {
+        "description": "ลำดับความสำคัญของข้อความ (1=ต่ำสุด, 3=ค่าเริ่มต้น, 5=สูงสุด)",
+        "label": "ลำดับความสำคัญ",
+        "placeholder": "3"
+      },
+      "serverUrl": {
+        "description": "URL เซิร์ฟเวอร์ ntfy (ค่าเริ่มต้น: https://ntfy.sh)",
+        "label": "URL เซิร์ฟเวอร์",
+        "placeholder": "https://ntfy.sh"
+      },
+      "topic": {
+        "description": "ชื่อหัวข้อที่ไม่ซ้ำกัน ติดตามหัวข้อเดียวกันบน ntfy.sh หรือแอป ntfy ของคุณ",
+        "label": "หัวข้อ",
+        "placeholder": "my-alerts"
+      }
+    },
     "sentCount_one": "ส่ง {{count}} ครั้ง",
     "sentCount_other": "ส่ง {{count}} ครั้ง",
     "test": "ทดสอบ",
@@ -128,6 +150,7 @@
     "types": {
       "discord": "Discord",
       "gotify": "Gotify",
+      "ntfy": "ntfy",
       "webhook": "Webhook"
     },
     "updateError": "ไม่สามารถอัปเดตช่องทางได้",

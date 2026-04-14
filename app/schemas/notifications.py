@@ -2,6 +2,7 @@
 Pydantic schemas for notification framework
 """
 
+import re
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -23,6 +24,7 @@ class ChannelType(str, Enum):
     DISCORD = "discord"
     EMAIL = "email"
     GOTIFY = "gotify"
+    NTFY = "ntfy"
     WEBHOOK = "webhook"
 
 
@@ -60,7 +62,11 @@ class DiscordChannelConfig(BaseModel):
     @classmethod
     def validate_webhook_url(cls, v):
         v = v.strip()
-        if not v.startswith("https://discord.com/api/webhooks/") and not v.startswith("https://discordapp.com/api/webhooks/"):
+        valid_prefixes = (
+            "https://discord.com/api/webhooks/",
+            "https://discordapp.com/api/webhooks/",
+        )
+        if not v.startswith(valid_prefixes):
             raise ValueError("Invalid Discord webhook URL format")
         return v
 
@@ -112,6 +118,36 @@ class GotifyChannelConfig(BaseModel):
         return v
 
 
+_NTFY_TOPIC_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+class NtfyChannelConfig(BaseModel):
+    """Configuration for ntfy push notifications"""
+    server_url: str = Field("https://ntfy.sh", description="ntfy server URL")
+    topic: str = Field(..., description="ntfy topic name")
+    auth_token: Optional[str] = Field(None, description="Bearer token for protected topics")
+    priority: Optional[int] = Field(None, ge=1, le=5, description="Notification priority (1-5)")
+
+    @field_validator("server_url")
+    @classmethod
+    def validate_server_url(cls, v):
+        return _validate_url_protocol(v)
+
+    @field_validator("topic")
+    @classmethod
+    def validate_topic(cls, v):
+        # ntfy topics: letters, digits, underscore, dash; 1-64 chars.
+        # Interpolated into the Apprise URL path, so reserved URL chars would silently misroute.
+        v = v.strip()
+        if not v:
+            raise ValueError("Topic cannot be empty")
+        if len(v) > 64:
+            raise ValueError("Topic cannot exceed 64 characters")
+        if not _NTFY_TOPIC_PATTERN.match(v):
+            raise ValueError("Topic may only contain letters, digits, underscores, and dashes")
+        return v
+
+
 class WebhookChannelConfig(BaseModel):
     """Configuration for generic webhook notifications"""
     url: str = Field(..., description="Webhook URL")
@@ -159,6 +195,7 @@ class ChannelCreate(BaseModel):
             ChannelType.DISCORD: DiscordChannelConfig,
             ChannelType.EMAIL: EmailChannelConfig,
             ChannelType.GOTIFY: GotifyChannelConfig,
+            ChannelType.NTFY: NtfyChannelConfig,
             ChannelType.WEBHOOK: WebhookChannelConfig,
         }
 

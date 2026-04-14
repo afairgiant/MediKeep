@@ -10,6 +10,7 @@ from app.services.notification_service import (
     _build_discord_url,
     _build_email_url,
     _build_gotify_url,
+    _build_ntfy_url,
     _build_webhook_url,
 )
 from app.services.notification_templates import (
@@ -163,6 +164,66 @@ class TestChannelURLBuilders:
 
         assert url.startswith("gotify://")
         assert "localhost:8080" in url
+
+    def test_build_ntfy_url_default(self):
+        """Test ntfy URL building with default ntfy.sh server."""
+        config = {
+            "server_url": "https://ntfy.sh",
+            "topic": "my-alerts",
+        }
+        url = _build_ntfy_url(config)
+
+        assert url.startswith("ntfys://")
+        assert "ntfy.sh/my-alerts" in url
+        assert "?" not in url  # no query params when none provided
+
+    def test_build_ntfy_url_with_auth_token(self):
+        """Test ntfy URL includes token query parameter when provided."""
+        config = {
+            "server_url": "https://ntfy.sh",
+            "topic": "my-alerts",
+            "auth_token": "tk_secret123",
+        }
+        url = _build_ntfy_url(config)
+
+        assert url.startswith("ntfys://ntfy.sh/my-alerts")
+        assert "token=tk_secret123" in url
+
+    def test_build_ntfy_url_with_priority(self):
+        """Test ntfy URL includes priority query parameter when provided."""
+        config = {
+            "server_url": "https://ntfy.sh",
+            "topic": "my-alerts",
+            "priority": 4,
+        }
+        url = _build_ntfy_url(config)
+
+        assert "priority=4" in url
+
+    def test_build_ntfy_url_self_hosted_http(self):
+        """Test ntfy URL building against self-hosted HTTP server."""
+        config = {
+            "server_url": "http://ntfy.local:8080",
+            "topic": "alerts",
+        }
+        url = _build_ntfy_url(config)
+
+        assert url.startswith("ntfy://")
+        assert "ntfy.local:8080/alerts" in url
+
+    def test_build_ntfy_url_with_all_params(self):
+        """Test ntfy URL includes both token and priority in query string."""
+        config = {
+            "server_url": "https://ntfy.sh",
+            "topic": "my-alerts",
+            "auth_token": "tk_secret123",
+            "priority": 5,
+        }
+        url = _build_ntfy_url(config)
+
+        assert "token=tk_secret123" in url
+        assert "priority=5" in url
+        assert url.count("?") == 1  # single query string separator
 
     def test_build_webhook_url_https(self):
         """Test webhook URL building with HTTPS."""
