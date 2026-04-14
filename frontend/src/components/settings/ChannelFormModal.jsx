@@ -63,6 +63,19 @@ const CHANNEL_TYPES = [
   { value: 'webhook', label: 'Webhook' },
 ];
 
+// Hydrate field defaults into config state so required fields with defaults
+// (e.g., ntfy server_url, email smtp_port) pass validation without user interaction.
+const buildDefaultConfig = channelType => {
+  const typeConfig = CHANNEL_CONFIGS[channelType];
+  if (!typeConfig) return {};
+  return typeConfig.fields.reduce((acc, field) => {
+    if (field.defaultValue !== undefined) {
+      acc[field.name] = field.defaultValue;
+    }
+    return acc;
+  }, {});
+};
+
 /**
  * ChannelFormModal Component
  *
@@ -73,7 +86,7 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
   const [formData, setFormData] = useState({
     name: '',
     channel_type: 'discord',
-    config: {},
+    config: buildDefaultConfig('discord'),
     is_enabled: true,
   });
   const [errors, setErrors] = useState({});
@@ -94,7 +107,7 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
       setFormData({
         name: '',
         channel_type: 'discord',
-        config: {},
+        config: buildDefaultConfig('discord'),
         is_enabled: true,
       });
     }
@@ -129,11 +142,11 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
 
   const handleChannelTypeChange = e => {
     const newType = e.target.value;
-    // Reset config when type changes, but keep name
+    // Reset config to the new type's defaults so required fields are pre-populated
     setFormData(prev => ({
       ...prev,
       channel_type: newType,
-      config: {},
+      config: buildDefaultConfig(newType),
     }));
     setErrors({});
   };
