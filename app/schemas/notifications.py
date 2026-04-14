@@ -23,6 +23,7 @@ class ChannelType(str, Enum):
     DISCORD = "discord"
     EMAIL = "email"
     GOTIFY = "gotify"
+    NTFY = "ntfy"
     WEBHOOK = "webhook"
 
 
@@ -60,7 +61,11 @@ class DiscordChannelConfig(BaseModel):
     @classmethod
     def validate_webhook_url(cls, v):
         v = v.strip()
-        if not v.startswith("https://discord.com/api/webhooks/") and not v.startswith("https://discordapp.com/api/webhooks/"):
+        valid_prefixes = (
+            "https://discord.com/api/webhooks/",
+            "https://discordapp.com/api/webhooks/",
+        )
+        if not v.startswith(valid_prefixes):
             raise ValueError("Invalid Discord webhook URL format")
         return v
 
@@ -112,6 +117,27 @@ class GotifyChannelConfig(BaseModel):
         return v
 
 
+class NtfyChannelConfig(BaseModel):
+    """Configuration for ntfy push notifications"""
+    server_url: str = Field("https://ntfy.sh", description="ntfy server URL")
+    topic: str = Field(..., description="ntfy topic name")
+    auth_token: Optional[str] = Field(None, description="Bearer token for protected topics")
+    priority: Optional[int] = Field(None, ge=1, le=5, description="Notification priority (1-5)")
+
+    @field_validator("server_url")
+    @classmethod
+    def validate_server_url(cls, v):
+        return _validate_url_protocol(v)
+
+    @field_validator("topic")
+    @classmethod
+    def validate_topic(cls, v):
+        v = v.strip()
+        if not v:
+            raise ValueError("Topic cannot be empty")
+        return v
+
+
 class WebhookChannelConfig(BaseModel):
     """Configuration for generic webhook notifications"""
     url: str = Field(..., description="Webhook URL")
@@ -159,6 +185,7 @@ class ChannelCreate(BaseModel):
             ChannelType.DISCORD: DiscordChannelConfig,
             ChannelType.EMAIL: EmailChannelConfig,
             ChannelType.GOTIFY: GotifyChannelConfig,
+            ChannelType.NTFY: NtfyChannelConfig,
             ChannelType.WEBHOOK: WebhookChannelConfig,
         }
 

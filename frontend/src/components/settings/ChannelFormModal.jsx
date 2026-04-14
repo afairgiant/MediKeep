@@ -38,6 +38,14 @@ const CHANNEL_CONFIGS = {
       { name: 'priority', label: 'Priority (0-10)', type: 'number', placeholder: '5', defaultValue: 5, min: 0, max: 10 },
     ],
   },
+  ntfy: {
+    fields: [
+      { name: 'topic', label: 'Topic', type: 'text', placeholder: 'my-alerts', required: true, helpText: 'Unique topic name. Subscribe to the same topic on ntfy.sh or your ntfy app.' },
+      { name: 'server_url', label: 'Server URL', type: 'text', placeholder: 'https://ntfy.sh', required: true, defaultValue: 'https://ntfy.sh' },
+      { name: 'auth_token', label: 'Auth Token (optional)', type: 'password', placeholder: 'tk_... (for protected topics)' },
+      { name: 'priority', label: 'Priority (1-5)', type: 'number', placeholder: '3', min: 1, max: 5 },
+    ],
+  },
   webhook: {
     fields: [
       { name: 'url', label: 'Webhook URL', type: 'text', placeholder: 'https://api.example.com/webhook', required: true },
@@ -51,6 +59,7 @@ const CHANNEL_TYPES = [
   { value: 'discord', label: 'Discord' },
   { value: 'email', label: 'Email (SMTP)' },
   { value: 'gotify', label: 'Gotify' },
+  { value: 'ntfy', label: 'ntfy' },
   { value: 'webhook', label: 'Webhook' },
 ];
 

@@ -77,3 +77,6 @@ pytesseract==0.3.13      # Tesseract OCR wrapper
 
 # Background task scheduling
 APScheduler>=3.10.0,<4.0.0   # Async scheduler for auto-backups
+
+# Linting (dev tooling)
+pylint==4.0.5

@@ -67,7 +67,7 @@
       }
     },
     "empty": "Каналы уведомлений не настроены.",
-    "emptyHint": "Добавьте канал, чтобы начать получать уведомления через Discord, электронную почту, Gotify или вебхук.",
+    "emptyHint": "Добавьте канал, чтобы начать получать уведомления через Discord, электронную почту, Gotify, ntfy или вебхук.",
     "errors": {
       "fieldRequired": "Поле «{{field}}» обязательно для заполнения",
       "nameRequired": "Название канала обязательно"
@@ -117,6 +117,28 @@
     "noChannels": "Каналы уведомлений не настроены",
     "noChannelsHint": "Добавьте канал, чтобы начать получать уведомления",
     "notificationsSent": "Отправлено уведомлений: {{count}}",
+    "ntfy": {
+      "authToken": {
+        "description": "Bearer-токен для защищённых тем (оставьте пустым для публичных тем)",
+        "label": "Токен аутентификации (необязательно)",
+        "placeholder": "tk_..."
+      },
+      "priority": {
+        "description": "Приоритет сообщения (1=мин, 3=по умолчанию, 5=макс)",
+        "label": "Приоритет",
+        "placeholder": "3"
+      },
+      "serverUrl": {
+        "description": "URL сервера ntfy (по умолчанию: https://ntfy.sh)",
+        "label": "URL сервера",
+        "placeholder": "https://ntfy.sh"
+      },
+      "topic": {
+        "description": "Уникальное имя темы. Подпишитесь на ту же тему на ntfy.sh или в приложении ntfy.",
+        "label": "Тема",
+        "placeholder": "my-alerts"
+      }
+    },
     "sentCount_one": "{{count}} отправлено",
     "sentCount_other": "{{count}} отправлено",
     "test": "Тест",
@@ -128,6 +150,7 @@
     "types": {
       "discord": "Discord",
       "gotify": "Gotify",
+      "ntfy": "ntfy",
       "webhook": "Webhook"
     },
     "updateError": "Не удалось обновить канал",

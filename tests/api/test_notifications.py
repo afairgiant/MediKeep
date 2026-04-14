@@ -135,6 +135,79 @@ class TestChannelManagement:
         data = response.json()
         assert data["channel_type"] == "webhook"
 
+    def test_create_ntfy_channel(self, client, user_token_headers):
+        """Test creating an ntfy channel with full config."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "My ntfy",
+                "channel_type": "ntfy",
+                "config": {
+                    "server_url": "https://ntfy.sh",
+                    "topic": "my-alerts",
+                    "auth_token": "tk_secret123",
+                    "priority": 3
+                }
+            }
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["channel_type"] == "ntfy"
+        assert data["name"] == "My ntfy"
+
+    def test_create_ntfy_channel_invalid_url(self, client, user_token_headers):
+        """Test ntfy channel rejects URL without protocol."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Bad ntfy",
+                "channel_type": "ntfy",
+                "config": {
+                    "server_url": "ntfy.sh",
+                    "topic": "my-alerts"
+                }
+            }
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def test_create_ntfy_channel_missing_topic(self, client, user_token_headers):
+        """Test ntfy channel requires topic field."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Bad ntfy",
+                "channel_type": "ntfy",
+                "config": {
+                    "server_url": "https://ntfy.sh"
+                }
+            }
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def test_create_ntfy_channel_invalid_priority(self, client, user_token_headers):
+        """Test ntfy channel rejects priority outside 1-5 range."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Bad ntfy",
+                "channel_type": "ntfy",
+                "config": {
+                    "server_url": "https://ntfy.sh",
+                    "topic": "my-alerts",
+                    "priority": 10
+                }
+            }
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
     def test_create_channel_invalid_type(self, client, user_token_headers):
         """Test creating a channel with invalid type."""
         response = client.post(
