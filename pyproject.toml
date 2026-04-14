@@ -11,7 +11,8 @@ skips = [
 
 
 [tool.pylint.main]
-ignore-paths = ["alembic/", "tests/", "build/", "dist/", ".venv/", "frontend/", "node_modules/"]
+# ignore-paths entries are regex patterns — escape literal dots
+ignore-paths = ["alembic/", "tests/", "build/", "dist/", "\\.venv/", "frontend/", "node_modules/"]
 jobs = 0  # use all CPU cores
 
 [tool.pylint.format]

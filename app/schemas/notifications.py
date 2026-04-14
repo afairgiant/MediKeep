@@ -2,6 +2,7 @@
 Pydantic schemas for notification framework
 """
 
+import re
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -117,6 +118,9 @@ class GotifyChannelConfig(BaseModel):
         return v
 
 
+_NTFY_TOPIC_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
 class NtfyChannelConfig(BaseModel):
     """Configuration for ntfy push notifications"""
     server_url: str = Field("https://ntfy.sh", description="ntfy server URL")
@@ -132,9 +136,15 @@ class NtfyChannelConfig(BaseModel):
     @field_validator("topic")
     @classmethod
     def validate_topic(cls, v):
+        # ntfy topics: letters, digits, underscore, dash; 1-64 chars.
+        # Interpolated into the Apprise URL path, so reserved URL chars would silently misroute.
         v = v.strip()
         if not v:
             raise ValueError("Topic cannot be empty")
+        if len(v) > 64:
+            raise ValueError("Topic cannot exceed 64 characters")
+        if not _NTFY_TOPIC_PATTERN.match(v):
+            raise ValueError("Topic may only contain letters, digits, underscores, and dashes")
         return v
 
 

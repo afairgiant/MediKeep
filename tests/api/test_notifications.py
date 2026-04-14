@@ -208,6 +208,41 @@ class TestChannelManagement:
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
+    def test_create_ntfy_channel_topic_with_url_reserved_chars(self, client, user_token_headers):
+        """Test ntfy channel rejects topic containing URL-reserved characters."""
+        for bad_topic in ["foo?bar", "foo/bar", "foo#bar", "foo bar"]:
+            response = client.post(
+                "/api/v1/notifications/channels",
+                headers=user_token_headers,
+                json={
+                    "name": f"Bad ntfy {bad_topic}",
+                    "channel_type": "ntfy",
+                    "config": {
+                        "server_url": "https://ntfy.sh",
+                        "topic": bad_topic
+                    }
+                }
+            )
+            assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, \
+                f"Expected 422 for topic {bad_topic!r}"
+
+    def test_create_ntfy_channel_topic_too_long(self, client, user_token_headers):
+        """Test ntfy channel rejects topic longer than 64 characters."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Long topic ntfy",
+                "channel_type": "ntfy",
+                "config": {
+                    "server_url": "https://ntfy.sh",
+                    "topic": "a" * 65
+                }
+            }
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
     def test_create_channel_invalid_type(self, client, user_token_headers):
         """Test creating a channel with invalid type."""
         response = client.post(
