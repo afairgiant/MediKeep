@@ -94,6 +94,7 @@ module.exports = {
         '**/__tests__/**/*.{js,jsx,ts,tsx}',
         '**/test-utils/**/*.{js,jsx,ts,tsx}',
         '**/testing/**/*.{js,jsx,ts,tsx}',
+        '**/setupTests.{js,jsx,ts,tsx}',
       ],
       globals: {
         describe: 'readonly',
@@ -108,6 +109,8 @@ module.exports = {
       },
       rules: {
         'i18next/no-literal-string': 'off',
+        // Tests frequently mock/suppress console output — allow console use.
+        'no-console': 'off',
       },
     },
     {
