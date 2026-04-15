@@ -59,4 +59,6 @@ export const Select = memo(
   }
 );
 
+Select.displayName = 'Select';
+
 export default Select;

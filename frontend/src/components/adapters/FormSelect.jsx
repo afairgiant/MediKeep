@@ -79,4 +79,6 @@ export const FormSelect = memo(
   }
 );
 
+FormSelect.displayName = 'FormSelect';
+
 export default FormSelect;

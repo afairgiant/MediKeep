@@ -82,7 +82,7 @@ const MedicalTable = ({
                   column,
                   index // Show only first 3 columns on mobile
                 ) => (
-                  <Group position="apart" noWrap>
+                  <Group key={column.accessor ?? index} position="apart" noWrap>
                     <Text size="xs" weight={500} color="dimmed">
                       {column.header}:
                     </Text>

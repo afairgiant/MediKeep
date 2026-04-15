@@ -200,7 +200,7 @@ const InvitationCard = ({
             p="sm"
           >
             <Text size="xs" style={{ fontStyle: 'italic' }}>
-              "{invitation.message}"
+              &ldquo;{invitation.message}&rdquo;
             </Text>
           </Alert>
         )}
