@@ -32,9 +32,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         """
         # Use direct query for better SQLite compatibility
         return (
-            db.query(self.model)
-            .filter(self.model.username == username.lower())
-            .first()
+            db.query(self.model).filter(self.model.username == username.lower()).first()
         )
 
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
@@ -58,7 +56,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         )
         return users[0] if users else None
 
-    def create(self, db: Session, *, obj_in: UserCreate, must_change_password: bool = False) -> User:
+    def create(
+        self, db: Session, *, obj_in: UserCreate, must_change_password: bool = False
+    ) -> User:
         """
         Create a new user with password hashing.
 
@@ -331,13 +331,13 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(self.model).count()
 
     def create_from_sso(
-        self, 
-        db: Session, 
-        *, 
-        email: str, 
-        username: str, 
-        full_name: str, 
-        external_id: str, 
+        self,
+        db: Session,
+        *,
+        email: str,
+        username: str,
+        full_name: str,
+        external_id: str,
         sso_provider: str
     ) -> User:
         """
@@ -365,13 +365,14 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             )
         """
         from datetime import datetime
-        
+
         # Generate a random password hash for SSO users (they won't use it)
         import secrets
         from app.core.utils.security import get_password_hash
+
         random_password = secrets.token_urlsafe(32)
         hashed_password = get_password_hash(random_password)
-        
+
         # Create the User object for SSO user
         db_obj = User(
             username=username.lower(),

@@ -37,14 +37,13 @@ security_logger = get_logger(__name__, "security")
 
 class TokenValidationResult(NamedTuple):
     """Result of JWT token validation containing decoded payload and username."""
+
     payload: dict
     username: str
 
 
 def _validate_and_decode_token(
-    token: str,
-    request: Request,
-    auth_method: str = "header"
+    token: str, request: Request, auth_method: str = "header"
 ) -> TokenValidationResult:
     """
     Shared JWT token validation and decoding logic.
@@ -89,13 +88,15 @@ def _validate_and_decode_token(
         raise UnauthorizedException(
             message="Authentication failed",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Basic JWT format validation (should have 3 parts separated by dots)
-    token_parts = token_str.split('.')
+    token_parts = token_str.split(".")
     if len(token_parts) != 3:
-        security_logger.info(f"AUTH ({auth_method}): Invalid token format - expected 3 parts, got {len(token_parts)}")
+        security_logger.info(
+            f"AUTH ({auth_method}): Invalid token format - expected 3 parts, got {len(token_parts)}"
+        )
         log_security_event(
             security_logger,
             event="token_invalid_format",
@@ -106,7 +107,7 @@ def _validate_and_decode_token(
         raise UnauthorizedException(
             message="Authentication failed",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Decode JWT token
@@ -129,7 +130,7 @@ def _validate_and_decode_token(
             raise UnauthorizedException(
                 message="Authentication failed",
                 request=request,
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
 
         security_logger.info(
@@ -150,7 +151,7 @@ def _validate_and_decode_token(
         raise UnauthorizedException(
             message="Token validation failed",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
 
@@ -205,15 +206,11 @@ def get_current_user(
         raise UnauthorizedException(
             message="Authentication required",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Validate and decode token using shared logic
-    result = _validate_and_decode_token(
-        jwt_token,
-        request,
-        auth_method=auth_method
-    )
+    result = _validate_and_decode_token(jwt_token, request, auth_method=auth_method)
 
     # Get user from database
     try:
@@ -230,7 +227,7 @@ def get_current_user(
             raise UnauthorizedException(
                 message="Authentication failed",
                 request=request,
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
     except Exception as e:
         # Don't catch UnauthorizedException - let it propagate naturally
@@ -247,7 +244,7 @@ def get_current_user(
         raise UnauthorizedException(
             message="Token validation failed",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Log successful token validation
@@ -283,8 +280,12 @@ def get_current_user(
 def get_current_user_flexible_auth(
     request: Request,
     db: Session = Depends(get_db),
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
-    token: Optional[str] = Query(None, description="JWT token for query parameter authentication")
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(
+        HTTPBearer(auto_error=False)
+    ),
+    token: Optional[str] = Query(
+        None, description="JWT token for query parameter authentication"
+    ),
 ) -> User:
     """
     Get current authenticated user with flexible authentication.
@@ -338,9 +339,13 @@ def get_current_user_flexible_auth(
         jwt_token = token
         auth_method = "query_param"
         # Log query parameter usage for security monitoring
-        security_logger.info("Authentication via query parameter token (for file viewing)")
+        security_logger.info(
+            "Authentication via query parameter token (for file viewing)"
+        )
     else:
-        security_logger.warning("No authentication token provided (header, cookie, or query param)")
+        security_logger.warning(
+            "No authentication token provided (header, cookie, or query param)"
+        )
         log_security_event(
             security_logger,
             event="auth_no_token_provided",
@@ -351,15 +356,11 @@ def get_current_user_flexible_auth(
         raise UnauthorizedException(
             message="Token validation failed",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Validate and decode token using shared logic
-    result = _validate_and_decode_token(
-        jwt_token,
-        request,
-        auth_method=auth_method
-    )
+    result = _validate_and_decode_token(jwt_token, request, auth_method=auth_method)
 
     # Get user from database
     try:
@@ -376,7 +377,7 @@ def get_current_user_flexible_auth(
             raise UnauthorizedException(
                 message="Authentication failed",
                 request=request,
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
     except Exception as e:
         # Don't catch UnauthorizedException - let it propagate naturally
@@ -393,7 +394,7 @@ def get_current_user_flexible_auth(
         raise UnauthorizedException(
             message="Token validation failed",
             request=request,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Log successful token validation with auth method
@@ -447,7 +448,9 @@ def get_current_user_id(current_user: User = Depends(get_current_user)) -> int:
     return _extract_user_id(current_user)
 
 
-def get_current_user_id_flexible_auth(current_user: User = Depends(get_current_user_flexible_auth)) -> int:
+def get_current_user_id_flexible_auth(
+    current_user: User = Depends(get_current_user_flexible_auth),
+) -> int:
     """
     Get the current user's ID as an integer using flexible authentication.
 
@@ -482,10 +485,7 @@ def get_current_admin_user(current_user: User = Depends(get_current_user)) -> Us
             message=f"Non-admin user attempted admin access: {current_user.username}",
             username=current_user.username,
         )
-        raise ForbiddenException(
-            message="Admin privileges required",
-            request=None
-        )
+        raise ForbiddenException(message="Admin privileges required", request=None)
 
     log_security_event(
         security_logger,
@@ -525,13 +525,11 @@ def get_current_user_patient_id(
     # Get user with active patient ID (multi-patient system)
     user = db.query(User).filter(User.id == current_user_id).first()
     if not user:
-        raise NotFoundException(
-            message="User not found",
-            request=None
-        )
-    
+        raise NotFoundException(message="User not found", request=None)
+
     if not user.active_patient_id:
         from app.services.patient_management import PatientManagementService
+
         try:
             patient_service = PatientManagementService(db)
             resolved = patient_service.ensure_active_patient(user)
@@ -542,29 +540,29 @@ def get_current_user_patient_id(
                 extra={
                     LogFields.USER_ID: current_user_id,
                     LogFields.ERROR: str(e),
-                }
+                },
             )
             resolved = None
 
         if not resolved:
             raise NotFoundException(
-                message="No patient records found for user",
-                request=None
+                message="No patient records found for user", request=None
             )
 
         # ensure_active_patient already verified ownership
         return resolved.id
 
     # Verify the active patient exists and user has access (owned or shared)
-    patient_record = db.query(Patient).filter(
-        Patient.id == user.active_patient_id,
-    ).first()
+    patient_record = (
+        db.query(Patient)
+        .filter(
+            Patient.id == user.active_patient_id,
+        )
+        .first()
+    )
 
     if not patient_record:
-        raise NotFoundException(
-            message="Active patient record not found",
-            request=None
-        )
+        raise NotFoundException(message="Active patient record not found", request=None)
 
     # Owner always has access
     if patient_record.owner_user_id == current_user_id:
@@ -572,14 +570,12 @@ def get_current_user_patient_id(
 
     # Check shared access
     from app.services.patient_access import PatientAccessService
+
     access_service = PatientAccessService(db)
     if access_service.can_access_patient(user, patient_record, "view"):
         return patient_record.id
 
-    raise NotFoundException(
-        message="Active patient record not found",
-        request=None
-    )
+    raise NotFoundException(message="Active patient record not found", request=None)
 
 
 def verify_patient_record_access(
@@ -588,7 +584,7 @@ def verify_patient_record_access(
     record_type: str = "record",
     db: Optional[Session] = None,
     current_user: Optional[User] = None,
-    permission: str = 'view',
+    permission: str = "view",
 ) -> None:
     """
     Verify that a medical record belongs to a patient accessible by the current user.
@@ -614,28 +610,29 @@ def verify_patient_record_access(
         from app.services.patient_access import PatientAccessService
 
         # Get the patient record
-        patient_record = db.query(Patient).filter(Patient.id == record_patient_id).first()
+        patient_record = (
+            db.query(Patient).filter(Patient.id == record_patient_id).first()
+        )
         if not patient_record:
             raise NotFoundException(
-                message=f"{record_type.title()} not found",
-                request=None
+                message=f"{record_type.title()} not found", request=None
             )
 
         # Check if user has access to this patient with required permission level
         access_service = PatientAccessService(db)
-        if not access_service.can_access_patient(current_user, patient_record, permission):
+        if not access_service.can_access_patient(
+            current_user, patient_record, permission
+        ):
             # Return 404 to avoid leaking information about existence of records
             raise NotFoundException(
-                message=f"{record_type.title()} not found",
-                request=None
+                message=f"{record_type.title()} not found", request=None
             )
     else:
         # Fallback to simple equality check for backward compatibility
         # This handles single-patient scenarios
         if record_patient_id != current_user_patient_id:
             raise NotFoundException(
-                message=f"{record_type.title()} not found",
-                request=None
+                message=f"{record_type.title()} not found", request=None
             )
 
 
@@ -643,11 +640,11 @@ def verify_patient_access(
     patient_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    required_permission: str = "view"
+    required_permission: str = "view",
 ) -> int:
     """
     Dependency that verifies the current user can access the specified patient's records.
-    
+
     This function supports Phase 1 patient access including:
     - Own patients (always accessible)
     - Shared patients (with proper permission levels)
@@ -667,45 +664,45 @@ def verify_patient_access(
     """
     from app.models.models import Patient
     from app.services.patient_access import PatientAccessService
-    
+
     # Get the patient record
     patient_record = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient_record:
-        raise NotFoundException(
-            message="Patient not found",
-            request=None
-        )
-    
+        raise NotFoundException(message="Patient not found", request=None)
+
     # Check access using the PatientAccessService
     access_service = PatientAccessService(db)
-    if not access_service.can_access_patient(current_user, patient_record, required_permission):
+    if not access_service.can_access_patient(
+        current_user, patient_record, required_permission
+    ):
         raise ForbiddenException(
-            message=f"Access denied to patient {patient_id}",
-            request=None
+            message=f"Access denied to patient {patient_id}", request=None
         )
-    
+
     return patient_id
 
 
 def get_accessible_patient_id(
-    patient_id: Optional[int] = Query(None, description="Patient ID for Phase 1 patient switching"),
+    patient_id: Optional[int] = Query(
+        None, description="Patient ID for Phase 1 patient switching"
+    ),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> int:
     """
     Get an accessible patient ID for Phase 1 patient switching.
-    
+
     If patient_id is provided, verifies access and returns it.
     If patient_id is None, returns the current user's own patient ID.
-    
+
     Args:
         patient_id: Optional patient ID from query parameter
         db: Database session
         current_user: Current authenticated user
-        
+
     Returns:
         Patient ID that the user can access
-        
+
     Raises:
         NotFoundException: If patient not found
         ForbiddenException: If access denied
@@ -714,21 +711,15 @@ def get_accessible_patient_id(
         # Verify user has access to this patient
         from app.models.models import Patient
         from app.services.patient_access import PatientAccessService
-        
+
         patient_record = db.query(Patient).filter(Patient.id == patient_id).first()
         if not patient_record:
-            raise NotFoundException(
-                message="Patient not found",
-                request=None
-            )
-        
+            raise NotFoundException(message="Patient not found", request=None)
+
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "view"):
-            raise ForbiddenException(
-                message="Access denied to patient",
-                request=None
-            )
-            
+            raise ForbiddenException(message="Access denied to patient", request=None)
+
         return patient_id
     else:
         # Fall back to user's own patient ID

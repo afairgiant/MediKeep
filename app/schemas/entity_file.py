@@ -6,6 +6,7 @@ from enum import Enum
 
 class EntityType(str, Enum):
     """Supported entity types for file management"""
+
     LAB_RESULT = "lab-result"
     INSURANCE = "insurance"
     VISIT = "visit"
@@ -293,7 +294,9 @@ class EntityFileResponse(EntityFileBase):
     paperless_task_uuid: Optional[str] = None  # Task UUID for Paperless processing
     papra_document_id: Optional[str] = None
     papra_organization_id: Optional[str] = None
-    sync_status: Optional[str] = "synced"  # 'synced', 'pending', 'failed', 'processing', 'duplicate', 'missing'
+    sync_status: Optional[str] = (
+        "synced"  # 'synced', 'pending', 'failed', 'processing', 'duplicate', 'missing'
+    )
     uploaded_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

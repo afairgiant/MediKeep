@@ -33,11 +33,10 @@ class TestNotificationTemplates:
 
     def test_backup_completed_template(self):
         """Test backup completed template formatting."""
-        title, message = get_template("backup_completed", {
-            "filename": "backup_20260127.zip",
-            "size_mb": 15.5,
-            "backup_type": "full"
-        })
+        title, message = get_template(
+            "backup_completed",
+            {"filename": "backup_20260127.zip", "size_mb": 15.5, "backup_type": "full"},
+        )
 
         assert title == "Backup Completed Successfully"
         assert "backup_20260127.zip" in message
@@ -46,10 +45,9 @@ class TestNotificationTemplates:
 
     def test_backup_failed_template(self):
         """Test backup failed template formatting."""
-        title, message = get_template("backup_failed", {
-            "error": "Disk full",
-            "backup_type": "database"
-        })
+        title, message = get_template(
+            "backup_failed", {"error": "Disk full", "backup_type": "database"}
+        )
 
         assert title == "Backup Failed"
         assert "Disk full" in message
@@ -57,10 +55,10 @@ class TestNotificationTemplates:
 
     def test_invitation_received_template(self):
         """Test invitation received template formatting."""
-        title, message = get_template("invitation_received", {
-            "from_user": "John Doe",
-            "invitation_type": "patient share"
-        })
+        title, message = get_template(
+            "invitation_received",
+            {"from_user": "John Doe", "invitation_type": "patient share"},
+        )
 
         assert title == "New Sharing Invitation"
         assert "John Doe" in message
@@ -68,9 +66,12 @@ class TestNotificationTemplates:
 
     def test_password_changed_template(self):
         """Test password changed template formatting."""
-        title, message = get_template("password_changed", {
-            "change_time": "2026-01-27 10:30:00",
-        })
+        title, message = get_template(
+            "password_changed",
+            {
+                "change_time": "2026-01-27 10:30:00",
+            },
+        )
 
         assert title == "Password Changed"
         assert "2026-01-27 10:30:00" in message
@@ -98,9 +99,7 @@ class TestChannelURLBuilders:
 
     def test_build_discord_url_discordapp(self):
         """Test Discord webhook URL with discordapp domain."""
-        config = {
-            "webhook_url": "https://discordapp.com/api/webhooks/123/abc"
-        }
+        config = {"webhook_url": "https://discordapp.com/api/webhooks/123/abc"}
         url = _build_discord_url(config)
 
         assert url == "discord://123/abc"
@@ -114,7 +113,7 @@ class TestChannelURLBuilders:
             "smtp_password": "app_password",
             "from_email": "sender@gmail.com",
             "to_email": "recipient@example.com",
-            "use_tls": True
+            "use_tls": True,
         }
         url = _build_email_url(config)
 
@@ -132,7 +131,7 @@ class TestChannelURLBuilders:
             "smtp_password": "pass",
             "from_email": "from@example.com",
             "to_email": "to@example.com",
-            "use_tls": False
+            "use_tls": False,
         }
         url = _build_email_url(config)
 
@@ -144,7 +143,7 @@ class TestChannelURLBuilders:
         config = {
             "server_url": "https://gotify.example.com",
             "app_token": "mytoken123",
-            "priority": 7
+            "priority": 7,
         }
         url = _build_gotify_url(config)
 
@@ -158,7 +157,7 @@ class TestChannelURLBuilders:
         config = {
             "server_url": "http://localhost:8080",
             "app_token": "token",
-            "priority": 5
+            "priority": 5,
         }
         url = _build_gotify_url(config)
 
@@ -241,7 +240,7 @@ class TestChannelURLBuilders:
         config = {
             "url": "https://api.example.com/webhook",
             "method": "POST",
-            "auth_token": "secret123"
+            "auth_token": "secret123",
         }
         url = _build_webhook_url(config)
 
@@ -255,12 +254,13 @@ class TestNotificationService:
         """Test creating a notification channel."""
         # Create a test user first
         from app.models.models import User
+
         user = User(
             username="testuser",
             email="test@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User"
+            full_name="Test User",
         )
         db_session.add(user)
         db_session.commit()
@@ -272,7 +272,7 @@ class TestNotificationService:
             name="My Discord",
             channel_type="discord",
             config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
-            is_enabled=True
+            is_enabled=True,
         )
 
         assert channel.id is not None
@@ -284,12 +284,13 @@ class TestNotificationService:
     def test_create_channel_duplicate_name(self, db_session):
         """Test that duplicate channel names are rejected."""
         from app.models.models import User
+
         user = User(
             username="testuser2",
             email="test2@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 2"
+            full_name="Test User 2",
         )
         db_session.add(user)
         db_session.commit()
@@ -302,7 +303,7 @@ class TestNotificationService:
             user_id=user.id,
             name="My Channel",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
         )
 
         # Try to create duplicate
@@ -311,18 +312,23 @@ class TestNotificationService:
                 user_id=user.id,
                 name="My Channel",
                 channel_type="gotify",
-                config={"server_url": "https://gotify.example.com", "app_token": "token", "priority": 5}
+                config={
+                    "server_url": "https://gotify.example.com",
+                    "app_token": "token",
+                    "priority": 5,
+                },
             )
 
     def test_encrypt_decrypt_config(self, db_session):
         """Test that channel config is properly encrypted and decrypted."""
         from app.models.models import User
+
         user = User(
             username="testuser3",
             email="test3@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 3"
+            full_name="Test User 3",
         )
         db_session.add(user)
         db_session.commit()
@@ -331,14 +337,14 @@ class TestNotificationService:
         service = NotificationService(db_session)
         original_config = {
             "smtp_host": "smtp.example.com",
-            "smtp_password": "supersecret"
+            "smtp_password": "supersecret",
         }
 
         channel = service.create_channel(
             user_id=user.id,
             name="Email Channel",
             channel_type="email",
-            config=original_config
+            config=original_config,
         )
 
         # Verify config is encrypted (not plain text)
@@ -352,12 +358,13 @@ class TestNotificationService:
     def test_get_masked_config(self, db_session):
         """Test that sensitive fields are masked."""
         from app.models.models import User
+
         user = User(
             username="testuser4",
             email="test4@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 4"
+            full_name="Test User 4",
         )
         db_session.add(user)
         db_session.commit()
@@ -371,8 +378,8 @@ class TestNotificationService:
             config={
                 "smtp_host": "smtp.example.com",
                 "smtp_password": "verysecretpassword123",
-                "smtp_user": "user@example.com"
-            }
+                "smtp_user": "user@example.com",
+            },
         )
 
         masked = service.get_masked_config(channel)
@@ -387,12 +394,13 @@ class TestNotificationService:
     def test_update_channel(self, db_session):
         """Test updating a channel."""
         from app.models.models import User
+
         user = User(
             username="testuser5",
             email="test5@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 5"
+            full_name="Test User 5",
         )
         db_session.add(user)
         db_session.commit()
@@ -403,14 +411,12 @@ class TestNotificationService:
             user_id=user.id,
             name="Original Name",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
         )
 
         # Update name
         updated = service.update_channel(
-            user_id=user.id,
-            channel_id=channel.id,
-            name="New Name"
+            user_id=user.id, channel_id=channel.id, name="New Name"
         )
 
         assert updated.name == "New Name"
@@ -418,12 +424,13 @@ class TestNotificationService:
     def test_delete_channel(self, db_session):
         """Test deleting a channel."""
         from app.models.models import User
+
         user = User(
             username="testuser6",
             email="test6@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 6"
+            full_name="Test User 6",
         )
         db_session.add(user)
         db_session.commit()
@@ -434,7 +441,7 @@ class TestNotificationService:
             user_id=user.id,
             name="To Delete",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
         )
 
         channel_id = channel.id
@@ -446,12 +453,13 @@ class TestNotificationService:
     def test_set_preference(self, db_session):
         """Test setting a notification preference."""
         from app.models.models import User
+
         user = User(
             username="testuser7",
             email="test7@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 7"
+            full_name="Test User 7",
         )
         db_session.add(user)
         db_session.commit()
@@ -462,14 +470,14 @@ class TestNotificationService:
             user_id=user.id,
             name="Pref Test",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
         )
 
         pref = service.set_preference(
             user_id=user.id,
             channel_id=channel.id,
             event_type="backup_completed",
-            is_enabled=True
+            is_enabled=True,
         )
 
         assert pref.event_type == "backup_completed"
@@ -478,12 +486,13 @@ class TestNotificationService:
     def test_get_user_preferences(self, db_session):
         """Test getting user preferences."""
         from app.models.models import User
+
         user = User(
             username="testuser8",
             email="test8@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 8"
+            full_name="Test User 8",
         )
         db_session.add(user)
         db_session.commit()
@@ -494,7 +503,7 @@ class TestNotificationService:
             user_id=user.id,
             name="Prefs Test 2",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
         )
 
         service.set_preference(user.id, channel.id, "backup_completed", True)
@@ -511,12 +520,13 @@ class TestNotificationSending:
     async def test_send_notification_no_channels(self, db_session):
         """Test sending notification when no channels configured."""
         from app.models.models import User
+
         user = User(
             username="testuser9",
             email="test9@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 9"
+            full_name="Test User 9",
         )
         db_session.add(user)
         db_session.commit()
@@ -527,7 +537,7 @@ class TestNotificationSending:
             user_id=user.id,
             event_type="backup_completed",
             title="Test",
-            message="Test message"
+            message="Test message",
         )
 
         assert results == []
@@ -535,12 +545,13 @@ class TestNotificationSending:
     async def test_send_notification_disabled(self, db_session):
         """Test that notifications are skipped when disabled."""
         from app.models.models import User
+
         user = User(
             username="testuser10",
             email="test10@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Test User 10"
+            full_name="Test User 10",
         )
         db_session.add(user)
         db_session.commit()
@@ -549,12 +560,14 @@ class TestNotificationSending:
         service = NotificationService(db_session)
 
         # Patch NOTIFICATIONS_ENABLED after service creation
-        with patch("app.services.notification_service.settings.NOTIFICATIONS_ENABLED", False):
+        with patch(
+            "app.services.notification_service.settings.NOTIFICATIONS_ENABLED", False
+        ):
             results = await service.send_notification(
                 user_id=user.id,
                 event_type="backup_completed",
                 title="Test",
-                message="Test message"
+                message="Test message",
             )
 
         assert results == []
@@ -575,8 +588,8 @@ class TestBroadcastNotifications:
                 username=f"broadcast_user{i}",
                 email=f"broadcast{i}@example.com",
                 password_hash="hashedpw",
-            role="user",
-                full_name=f"Broadcast User {i}"
+                role="user",
+                full_name=f"Broadcast User {i}",
             )
             db_session.add(user)
             users.append(user)
@@ -592,21 +605,24 @@ class TestBroadcastNotifications:
                 user_id=user.id,
                 name=f"Channel for {user.username}",
                 channel_type="discord",
-                config={"webhook_url": f"https://discord.com/api/webhooks/{user.id}/abc"}
+                config={
+                    "webhook_url": f"https://discord.com/api/webhooks/{user.id}/abc"
+                },
             )
             service.set_preference(user.id, channel.id, "backup_completed", True)
 
         # Send broadcast notification
-        with patch.object(service, '_send_to_channel') as mock_send:
+        with patch.object(service, "_send_to_channel") as mock_send:
             # Make the mock async
             async def async_noop(*args, **kwargs):
                 pass
+
             mock_send.side_effect = async_noop
 
             results = await service.send_broadcast_notification(
                 event_type="backup_completed",
                 title="Backup Complete",
-                message="Your backup completed successfully"
+                message="Your backup completed successfully",
             )
 
         # Should have created history records for all 3 users
@@ -624,14 +640,14 @@ class TestBroadcastNotifications:
             email="enabled@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Enabled User"
+            full_name="Enabled User",
         )
         user2 = User(
             username="disabled_user",
             email="disabled@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Disabled User"
+            full_name="Disabled User",
         )
         db_session.add(user1)
         db_session.add(user2)
@@ -646,13 +662,13 @@ class TestBroadcastNotifications:
             user_id=user1.id,
             name="Enabled Channel",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/1/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/1/abc"},
         )
         channel2 = service.create_channel(
             user_id=user2.id,
             name="Disabled Channel",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/2/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/2/abc"},
         )
 
         # Enable preference for user1, disable for user2
@@ -660,15 +676,17 @@ class TestBroadcastNotifications:
         service.set_preference(user2.id, channel2.id, "backup_completed", False)
 
         # Send broadcast notification
-        with patch.object(service, '_send_to_channel') as mock_send:
+        with patch.object(service, "_send_to_channel") as mock_send:
+
             async def async_noop(*args, **kwargs):
                 pass
+
             mock_send.side_effect = async_noop
 
             results = await service.send_broadcast_notification(
                 event_type="backup_completed",
                 title="Backup Complete",
-                message="Your backup completed successfully"
+                message="Your backup completed successfully",
             )
 
         # Should only have created history record for user1
@@ -685,7 +703,7 @@ class TestBroadcastNotifications:
             email="nopref@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="No Pref User"
+            full_name="No Pref User",
         )
         db_session.add(user)
         db_session.commit()
@@ -698,7 +716,7 @@ class TestBroadcastNotifications:
             user_id=user.id,
             name="No Pref Channel",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
         )
         # Set preference for a different event type
         service.set_preference(user.id, channel.id, "password_changed", True)
@@ -706,7 +724,7 @@ class TestBroadcastNotifications:
         results = await service.send_broadcast_notification(
             event_type="backup_completed",
             title="Backup Complete",
-            message="Your backup completed successfully"
+            message="Your backup completed successfully",
         )
 
         assert results == []
@@ -720,7 +738,7 @@ class TestBroadcastNotifications:
             email="disabled_notif@example.com",
             password_hash="hashedpw",
             role="user",
-            full_name="Disabled Notif User"
+            full_name="Disabled Notif User",
         )
         db_session.add(user)
         db_session.commit()
@@ -733,16 +751,18 @@ class TestBroadcastNotifications:
             user_id=user.id,
             name="Disabled Notif Channel",
             channel_type="discord",
-            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"}
+            config={"webhook_url": "https://discord.com/api/webhooks/123/abc"},
         )
         service.set_preference(user.id, channel.id, "backup_completed", True)
 
         # Now patch NOTIFICATIONS_ENABLED and test
-        with patch("app.services.notification_service.settings.NOTIFICATIONS_ENABLED", False):
+        with patch(
+            "app.services.notification_service.settings.NOTIFICATIONS_ENABLED", False
+        ):
             results = await service.send_broadcast_notification(
                 event_type="backup_completed",
                 title="Backup Complete",
-                message="Your backup completed successfully"
+                message="Your backup completed successfully",
             )
 
         assert results == []
@@ -758,8 +778,8 @@ class TestBroadcastNotifications:
                 username=f"log_test_user{i}",
                 email=f"logtest{i}@example.com",
                 password_hash="hashedpw",
-            role="user",
-                full_name=f"Log Test User {i}"
+                role="user",
+                full_name=f"Log Test User {i}",
             )
             db_session.add(user)
             users.append(user)
@@ -775,20 +795,24 @@ class TestBroadcastNotifications:
                 user_id=user.id,
                 name=f"Log Channel {user.username}",
                 channel_type="discord",
-                config={"webhook_url": f"https://discord.com/api/webhooks/{user.id}/abc"}
+                config={
+                    "webhook_url": f"https://discord.com/api/webhooks/{user.id}/abc"
+                },
             )
             service.set_preference(user.id, channel.id, "backup_completed", True)
 
         # Send broadcast notification
-        with patch.object(service, '_send_to_channel') as mock_send:
+        with patch.object(service, "_send_to_channel") as mock_send:
+
             async def async_noop(*args, **kwargs):
                 pass
+
             mock_send.side_effect = async_noop
 
             results = await service.send_broadcast_notification(
                 event_type="backup_completed",
                 title="Backup Complete",
-                message="Your backup completed successfully"
+                message="Your backup completed successfully",
             )
 
         # Verify correct number of recipients

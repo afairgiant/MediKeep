@@ -1,6 +1,7 @@
 """
 Unit tests for patient ownership transfer functionality in PatientManagementService.
 """
+
 import pytest
 from datetime import date
 
@@ -100,7 +101,13 @@ class TestTransferPatientOwnership:
         return patient
 
     def test_transfer_non_self_record(
-        self, service, db_session, admin_user, original_owner, new_owner, dependent_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        dependent_patient,
     ):
         """Transfer a non-self-record patient to new owner."""
         original_owner.active_patient_id = dependent_patient.id
@@ -125,7 +132,13 @@ class TestTransferPatientOwnership:
         assert dependent_patient.is_self_record is True
 
     def test_transfer_self_record_creates_replacement(
-        self, service, db_session, admin_user, original_owner, new_owner, self_record_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        self_record_patient,
     ):
         """Transfer a self-record creates replacement for original owner."""
         result = service.transfer_patient_ownership(
@@ -137,9 +150,11 @@ class TestTransferPatientOwnership:
         assert result["replacement_patient_id"] is not None
 
         # Verify replacement was created
-        replacement = db_session.query(Patient).filter(
-            Patient.id == result["replacement_patient_id"]
-        ).first()
+        replacement = (
+            db_session.query(Patient)
+            .filter(Patient.id == result["replacement_patient_id"])
+            .first()
+        )
         assert replacement is not None
         assert replacement.owner_user_id == original_owner.id
         assert replacement.is_self_record is True
@@ -150,7 +165,13 @@ class TestTransferPatientOwnership:
         assert replacement.blood_type == "A+"
 
     def test_transfer_updates_original_owner_active_patient(
-        self, service, db_session, admin_user, original_owner, new_owner, self_record_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        self_record_patient,
     ):
         """Original owner's active_patient_id redirects to replacement."""
         assert original_owner.active_patient_id == self_record_patient.id
@@ -166,7 +187,13 @@ class TestTransferPatientOwnership:
         assert original_owner.active_patient_id != self_record_patient.id
 
     def test_transfer_creates_edit_share(
-        self, service, db_session, admin_user, original_owner, new_owner, dependent_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        dependent_patient,
     ):
         """Original owner gets edit access via PatientShare after transfer."""
         service.transfer_patient_ownership(
@@ -175,10 +202,14 @@ class TestTransferPatientOwnership:
             admin_user=admin_user,
         )
 
-        share = db_session.query(PatientShare).filter(
-            PatientShare.patient_id == dependent_patient.id,
-            PatientShare.shared_with_user_id == original_owner.id,
-        ).first()
+        share = (
+            db_session.query(PatientShare)
+            .filter(
+                PatientShare.patient_id == dependent_patient.id,
+                PatientShare.shared_with_user_id == original_owner.id,
+            )
+            .first()
+        )
 
         assert share is not None
         assert share.permission_level == "edit"
@@ -186,7 +217,13 @@ class TestTransferPatientOwnership:
         assert share.shared_by_user_id == new_owner.id
 
     def test_transfer_sets_new_owner_active_patient(
-        self, service, db_session, admin_user, original_owner, new_owner, dependent_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        dependent_patient,
     ):
         """New owner gets the transferred patient as their active patient."""
         assert new_owner.active_patient_id is None
@@ -200,9 +237,7 @@ class TestTransferPatientOwnership:
         db_session.refresh(new_owner)
         assert new_owner.active_patient_id == dependent_patient.id
 
-    def test_transfer_patient_not_found(
-        self, service, admin_user, new_owner
-    ):
+    def test_transfer_patient_not_found(self, service, admin_user, new_owner):
         """Error when transferring non-existent patient."""
         with pytest.raises(ValueError, match="Patient not found"):
             service.transfer_patient_ownership(
@@ -212,7 +247,13 @@ class TestTransferPatientOwnership:
             )
 
     def test_transfer_reactivates_existing_inactive_share(
-        self, service, db_session, admin_user, original_owner, new_owner, dependent_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        dependent_patient,
     ):
         """Reactivates an existing inactive share instead of creating a duplicate."""
         # Create an existing inactive share
@@ -238,7 +279,13 @@ class TestTransferPatientOwnership:
         assert existing_share.shared_by_user_id == new_owner.id
 
     def test_transfer_self_record_copies_demographics(
-        self, service, db_session, admin_user, original_owner, new_owner, self_record_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        self_record_patient,
     ):
         """Replacement self-record copies all demographic fields."""
         result = service.transfer_patient_ownership(
@@ -247,9 +294,11 @@ class TestTransferPatientOwnership:
             admin_user=admin_user,
         )
 
-        replacement = db_session.query(Patient).filter(
-            Patient.id == result["replacement_patient_id"]
-        ).first()
+        replacement = (
+            db_session.query(Patient)
+            .filter(Patient.id == result["replacement_patient_id"])
+            .first()
+        )
 
         assert replacement.first_name == self_record_patient.first_name
         assert replacement.last_name == self_record_patient.last_name
@@ -261,7 +310,13 @@ class TestTransferPatientOwnership:
         assert replacement.address == self_record_patient.address
 
     def test_transfer_non_self_record_no_replacement(
-        self, service, db_session, admin_user, original_owner, new_owner, dependent_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        dependent_patient,
     ):
         """Non-self-record transfer does not create a replacement patient."""
         initial_count = db_session.query(Patient).count()
@@ -277,7 +332,13 @@ class TestTransferPatientOwnership:
         assert final_count == initial_count
 
     def test_transfer_updates_active_to_other_patient_when_no_replacement(
-        self, service, db_session, admin_user, original_owner, new_owner, dependent_patient
+        self,
+        service,
+        db_session,
+        admin_user,
+        original_owner,
+        new_owner,
+        dependent_patient,
     ):
         """When transferring non-self-record, active patient redirects to another owned patient."""
         # Create another patient owned by original owner

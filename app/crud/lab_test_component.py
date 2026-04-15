@@ -8,11 +8,13 @@ from app.models.models import LabTestComponent
 from app.schemas.lab_test_component import (
     LabTestComponentCreate,
     LabTestComponentUpdate,
-    LabTestComponentBulkCreate
+    LabTestComponentBulkCreate,
 )
 
 
-class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, LabTestComponentUpdate]):
+class CRUDLabTestComponent(
+    CRUDBase[LabTestComponent, LabTestComponentCreate, LabTestComponentUpdate]
+):
     """CRUD operations for LabTestComponent"""
 
     def __init__(self):
@@ -84,7 +86,13 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
         )
 
     def get_abnormal_results(
-        self, db: Session, *, lab_result_id: Optional[int] = None, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100
+        self,
+        db: Session,
+        *,
+        lab_result_id: Optional[int] = None,
+        patient_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100,
     ) -> List[LabTestComponent]:
         """Get all abnormal test results (high, low, critical, abnormal)"""
         abnormal_statuses = ["high", "low", "critical", "abnormal"]
@@ -95,20 +103,26 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
 
         if patient_id:
             # Join with lab_results table to filter by patient_id and eager load to prevent N+1
-            query = query.join(self.model.lab_result).filter(
-                self.model.lab_result.has(patient_id=patient_id)
-            ).options(joinedload(self.model.lab_result))
+            query = (
+                query.join(self.model.lab_result)
+                .filter(self.model.lab_result.has(patient_id=patient_id))
+                .options(joinedload(self.model.lab_result))
+            )
 
         return (
-            query
-            .order_by(self.model.status.desc(), self.model.test_name.asc())
+            query.order_by(self.model.status.desc(), self.model.test_name.asc())
             .offset(skip)
             .limit(limit)
             .all()
         )
 
     def get_critical_results(
-        self, db: Session, *, lab_result_id: Optional[int] = None, skip: int = 0, limit: int = 100
+        self,
+        db: Session,
+        *,
+        lab_result_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100,
     ) -> List[LabTestComponent]:
         """Get all critical test results"""
         query = db.query(self.model).filter(self.model.status == "critical")
@@ -117,31 +131,29 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             query = query.filter(self.model.lab_result_id == lab_result_id)
 
         return (
-            query
-            .order_by(self.model.created_at.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
+            query.order_by(self.model.created_at.desc()).offset(skip).limit(limit).all()
         )
 
     def search_components(
-        self, db: Session, *,
+        self,
+        db: Session,
+        *,
         query_text: str,
         lab_result_id: Optional[int] = None,
         patient_id: Optional[int] = None,
         category: Optional[str] = None,
         status: Optional[str] = None,
         skip: int = 0,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[LabTestComponent]:
         """Search test components by name, abbreviation, or test code"""
         # Escape SQL wildcards to prevent DoS via slow queries
-        escaped_query = query_text.replace('%', r'\%').replace('_', r'\_')
+        escaped_query = query_text.replace("%", r"\%").replace("_", r"\_")
 
         search_filter = or_(
-            self.model.test_name.ilike(f"%{escaped_query}%", escape='\\'),
-            self.model.abbreviation.ilike(f"%{escaped_query}%", escape='\\'),
-            self.model.test_code.ilike(f"%{escaped_query}%", escape='\\')
+            self.model.test_name.ilike(f"%{escaped_query}%", escape="\\"),
+            self.model.abbreviation.ilike(f"%{escaped_query}%", escape="\\"),
+            self.model.test_code.ilike(f"%{escaped_query}%", escape="\\"),
         )
 
         query_obj = db.query(self.model).filter(search_filter)
@@ -151,9 +163,11 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
 
         if patient_id:
             # Join with lab_results table to filter by patient_id and eager load to prevent N+1
-            query_obj = query_obj.join(self.model.lab_result).filter(
-                self.model.lab_result.has(patient_id=patient_id)
-            ).options(joinedload(self.model.lab_result))
+            query_obj = (
+                query_obj.join(self.model.lab_result)
+                .filter(self.model.lab_result.has(patient_id=patient_id))
+                .options(joinedload(self.model.lab_result))
+            )
 
         if category:
             query_obj = query_obj.filter(self.model.category == category.lower())
@@ -162,8 +176,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             query_obj = query_obj.filter(self.model.status == status.lower())
 
         return (
-            query_obj
-            .order_by(self.model.test_name.asc())
+            query_obj.order_by(self.model.test_name.asc())
             .offset(skip)
             .limit(limit)
             .all()
@@ -177,7 +190,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
         test_name: str,
         date_from: Optional[Any] = None,
         date_to: Optional[Any] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[LabTestComponent]:
         """
         Get all test components for a patient by test name (case-insensitive).
@@ -200,21 +213,22 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
                     or_(
                         and_(
                             self.model.canonical_test_name.isnot(None),
-                            func.lower(self.model.canonical_test_name) == func.lower(test_name)
+                            func.lower(self.model.canonical_test_name)
+                            == func.lower(test_name),
                         ),
                         and_(
                             self.model.canonical_test_name.is_(None),
-                            func.lower(func.rtrim(self.model.test_name, ',;: ')) == func.lower(test_name)
-                        )
-                    )
+                            func.lower(func.rtrim(self.model.test_name, ",;: "))
+                            == func.lower(test_name),
+                        ),
+                    ),
                 )
             )
         )
 
         if date_from or date_to:
             recorded_date_expr = func.coalesce(
-                LabResult.completed_date,
-                func.date(self.model.created_at)
+                LabResult.completed_date, func.date(self.model.created_at)
             )
             if date_from:
                 query = query.filter(recorded_date_expr >= date_from)
@@ -223,8 +237,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
 
         query = query.order_by(
             func.coalesce(
-                LabResult.completed_date,
-                func.date(self.model.created_at)
+                LabResult.completed_date, func.date(self.model.created_at)
             ).desc()
         )
 
@@ -275,9 +288,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
 
         return updated_components
 
-    def delete_by_lab_result(
-        self, db: Session, *, lab_result_id: int
-    ) -> int:
+    def delete_by_lab_result(self, db: Session, *, lab_result_id: int) -> int:
         """Delete all test components for a specific lab result"""
         deleted_count = (
             db.query(self.model)
@@ -287,9 +298,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
         db.commit()
         return deleted_count
 
-    def get_unique_test_names(
-        self, db: Session, *, limit: int = 100
-    ) -> List[str]:
+    def get_unique_test_names(self, db: Session, *, limit: int = 100) -> List[str]:
         """Get list of unique test names for autocomplete/suggestions"""
         results = (
             db.query(self.model.test_name)
@@ -300,9 +309,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
         )
         return [result[0] for result in results]
 
-    def get_unique_abbreviations(
-        self, db: Session, *, limit: int = 100
-    ) -> List[str]:
+    def get_unique_abbreviations(self, db: Session, *, limit: int = 100) -> List[str]:
         """Get list of unique abbreviations for autocomplete/suggestions"""
         results = (
             db.query(self.model.abbreviation)
@@ -341,11 +348,11 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
         )
 
         if search:
-            escaped_search = search.replace('%', r'\%').replace('_', r'\_')
+            escaped_search = search.replace("%", r"\%").replace("_", r"\_")
             query = query.filter(
                 or_(
-                    self.model.test_name.ilike(f"%{escaped_search}%", escape='\\'),
-                    self.model.abbreviation.ilike(f"%{escaped_search}%", escape='\\'),
+                    self.model.test_name.ilike(f"%{escaped_search}%", escape="\\"),
+                    self.model.abbreviation.ilike(f"%{escaped_search}%", escape="\\"),
                 )
             )
 
@@ -368,7 +375,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             key = (
                 comp.canonical_test_name.lower()
                 if comp.canonical_test_name
-                else comp.test_name.strip().rstrip(',;: ').lower()
+                else comp.test_name.strip().rstrip(",;: ").lower()
             )
             groups.setdefault(key, []).append(comp)
 
@@ -404,7 +411,9 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
                 # Qualitative trend based on abnormal rate shift
                 if len(group) >= 4:
                     mid = len(group) // 2
-                    recent_abnormal = sum(1 for c in group[:mid] if c.status != "normal")
+                    recent_abnormal = sum(
+                        1 for c in group[:mid] if c.status != "normal"
+                    )
                     older_abnormal = sum(1 for c in group[mid:] if c.status != "normal")
                     recent_rate = recent_abnormal / mid
                     older_rate = older_abnormal / (len(group) - mid)
@@ -418,7 +427,7 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             trend_name = (
                 latest.canonical_test_name
                 if latest.canonical_test_name
-                else latest.test_name.strip().rstrip(',;: ')
+                else latest.test_name.strip().rstrip(",;: ")
             )
 
             entry = ComponentCatalogEntry(
@@ -483,11 +492,12 @@ class CRUDLabTestComponent(CRUDBase[LabTestComponent, LabTestComponentCreate, La
             "status_breakdown": status_counts,
             "category_breakdown": category_counts,
             "abnormal_count": sum(
-                count for status, count in status_counts.items()
+                count
+                for status, count in status_counts.items()
                 if status in ["high", "low", "critical", "abnormal"]
             ),
             "critical_count": status_counts.get("critical", 0),
-            "normal_count": status_counts.get("normal", 0)
+            "normal_count": status_counts.get("normal", 0),
         }
 
 

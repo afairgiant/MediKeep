@@ -13,7 +13,9 @@ VALID_CONDITION_STATUSES = get_all_condition_statuses()
 VALID_SEVERITY_LEVELS = get_all_severity_levels()
 
 
-def _validate_condition_status(v: Optional[str], required: bool = True) -> Optional[str]:
+def _validate_condition_status(
+    v: Optional[str], required: bool = True
+) -> Optional[str]:
     """Validate condition status value."""
     if v is None:
         if required:
@@ -21,7 +23,9 @@ def _validate_condition_status(v: Optional[str], required: bool = True) -> Optio
         return None
     lower_v = v.lower()
     if lower_v not in VALID_CONDITION_STATUSES:
-        raise ValueError(f"Status must be one of: {', '.join(VALID_CONDITION_STATUSES)}")
+        raise ValueError(
+            f"Status must be one of: {', '.join(VALID_CONDITION_STATUSES)}"
+        )
     return lower_v
 
 
@@ -205,7 +209,9 @@ class ConditionWithRelations(ConditionResponse):
                     treatments.append(
                         {
                             "id": getattr(treatment, "id", None),
-                            "treatment_name": getattr(treatment, "treatment_name", None),
+                            "treatment_name": getattr(
+                                treatment, "treatment_name", None
+                            ),
                             "status": getattr(treatment, "status", None),
                             "start_date": getattr(treatment, "start_date", None),
                             "end_date": getattr(treatment, "end_date", None),

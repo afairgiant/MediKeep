@@ -1,6 +1,7 @@
 """
 Tests for TagService - verifying exact tag matching behavior.
 """
+
 import os
 import pytest
 from datetime import date
@@ -15,7 +16,7 @@ from app.schemas.patient import PatientCreate
 
 pytestmark = pytest.mark.skipif(
     "sqlite" in os.environ.get("DATABASE_URL", "sqlite"),
-    reason="Tag service requires PostgreSQL JSON functions"
+    reason="Tag service requires PostgreSQL JSON functions",
 )
 
 
@@ -30,7 +31,7 @@ class TestTagServiceExactMatching:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -50,8 +51,8 @@ class TestTagServiceExactMatching:
                 route="injection",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["diabetes"]
-            )
+                tags=["diabetes"],
+            ),
         )
 
         # Create medication with tag 'pre-diabetes'
@@ -65,8 +66,8 @@ class TestTagServiceExactMatching:
                 route="oral",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["pre-diabetes"]
-            )
+                tags=["pre-diabetes"],
+            ),
         )
 
         # Create medication with tag 'diabetes-type2'
@@ -80,8 +81,8 @@ class TestTagServiceExactMatching:
                 route="oral",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["diabetes-type2"]
-            )
+                tags=["diabetes-type2"],
+            ),
         )
 
         db_session.commit()
@@ -93,8 +94,10 @@ class TestTagServiceExactMatching:
         """Test that renaming 'diabetes' doesn't affect 'pre-diabetes' or 'diabetes-type2'."""
         # Rename only 'diabetes' tag
         updated_count = tag_service.rename_tag_across_entities(
-            db_session, old_tag="diabetes", new_tag="type1-diabetes",
-            user_id=test_user.id
+            db_session,
+            old_tag="diabetes",
+            new_tag="type1-diabetes",
+            user_id=test_user.id,
         )
 
         # Should update only 1 record
@@ -111,7 +114,9 @@ class TestTagServiceExactMatching:
 
         # Others should remain unchanged
         assert medications_with_similar_tags["pre-diabetes"].tags == ["pre-diabetes"]
-        assert medications_with_similar_tags["diabetes-type2"].tags == ["diabetes-type2"]
+        assert medications_with_similar_tags["diabetes-type2"].tags == [
+            "diabetes-type2"
+        ]
 
     def test_delete_tag_exact_match_only(
         self, db_session: Session, test_user, medications_with_similar_tags
@@ -135,7 +140,9 @@ class TestTagServiceExactMatching:
 
         # Others should remain unchanged
         assert medications_with_similar_tags["pre-diabetes"].tags == ["pre-diabetes"]
-        assert medications_with_similar_tags["diabetes-type2"].tags == ["diabetes-type2"]
+        assert medications_with_similar_tags["diabetes-type2"].tags == [
+            "diabetes-type2"
+        ]
 
     def test_replace_tag_exact_match_only(
         self, db_session: Session, test_user, medications_with_similar_tags
@@ -143,8 +150,10 @@ class TestTagServiceExactMatching:
         """Test that replacing 'diabetes' doesn't affect 'pre-diabetes' or 'diabetes-type2'."""
         # Replace only 'diabetes' tag
         updated_count = tag_service.replace_tag_across_entities(
-            db_session, old_tag="diabetes", new_tag="type1-diabetes",
-            user_id=test_user.id
+            db_session,
+            old_tag="diabetes",
+            new_tag="type1-diabetes",
+            user_id=test_user.id,
         )
 
         # Should update only 1 record
@@ -160,7 +169,9 @@ class TestTagServiceExactMatching:
 
         # Others should remain unchanged
         assert medications_with_similar_tags["pre-diabetes"].tags == ["pre-diabetes"]
-        assert medications_with_similar_tags["diabetes-type2"].tags == ["diabetes-type2"]
+        assert medications_with_similar_tags["diabetes-type2"].tags == [
+            "diabetes-type2"
+        ]
 
     def test_short_tag_doesnt_match_longer_tags(
         self, db_session: Session, test_user, test_patient
@@ -177,8 +188,8 @@ class TestTagServiceExactMatching:
                 route="oral",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["tag"]
-            )
+                tags=["tag"],
+            ),
         )
 
         med2 = medication_crud.create(
@@ -191,8 +202,8 @@ class TestTagServiceExactMatching:
                 route="oral",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["tags"]
-            )
+                tags=["tags"],
+            ),
         )
 
         med3 = medication_crud.create(
@@ -205,8 +216,8 @@ class TestTagServiceExactMatching:
                 route="oral",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["my-tag"]
-            )
+                tags=["my-tag"],
+            ),
         )
 
         db_session.commit()
@@ -243,8 +254,8 @@ class TestTagServiceExactMatching:
                 route="oral",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["covid-19"]
-            )
+                tags=["covid-19"],
+            ),
         )
 
         med2 = medication_crud.create(
@@ -257,16 +268,15 @@ class TestTagServiceExactMatching:
                 route="oral",
                 effective_period_start=date(2024, 1, 1),
                 status="active",
-                tags=["covid"]
-            )
+                tags=["covid"],
+            ),
         )
 
         db_session.commit()
 
         # Rename only 'covid-19'
         updated_count = tag_service.rename_tag_across_entities(
-            db_session, old_tag="covid-19", new_tag="sars-cov-2",
-            user_id=test_user.id
+            db_session, old_tag="covid-19", new_tag="sars-cov-2", user_id=test_user.id
         )
 
         # Should update only 1 record

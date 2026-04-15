@@ -14,7 +14,9 @@ from app.schemas.encounter import (
 )
 
 
-class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate], TagFilterMixin):
+class CRUDEncounter(
+    CRUDBase[Encounter, EncounterCreate, EncounterUpdate], TagFilterMixin
+):
     """
     Encounter-specific CRUD operations for medical encounters.
 
@@ -49,7 +51,9 @@ class CRUDEncounter(CRUDBase[Encounter, EncounterCreate, EncounterUpdate], TagFi
         )
 
 
-class CRUDEncounterLabResult(CRUDBase[EncounterLabResult, EncounterLabResultCreate, EncounterLabResultUpdate]):
+class CRUDEncounterLabResult(
+    CRUDBase[EncounterLabResult, EncounterLabResultCreate, EncounterLabResultUpdate]
+):
     """CRUD operations for EncounterLabResult junction table"""
 
     def __init__(self):
@@ -60,14 +64,10 @@ class CRUDEncounterLabResult(CRUDBase[EncounterLabResult, EncounterLabResultCrea
     ) -> List[EncounterLabResult]:
         """Get all lab result relationships for a specific encounter"""
         return (
-            db.query(self.model)
-            .filter(self.model.encounter_id == encounter_id)
-            .all()
+            db.query(self.model).filter(self.model.encounter_id == encounter_id).all()
         )
 
-    def get_by_encounter_with_details(
-        self, db: Session, *, encounter_id: int
-    ) -> List:
+    def get_by_encounter_with_details(self, db: Session, *, encounter_id: int) -> List:
         """Get all lab result relationships for an encounter with joined lab result data.
 
         Returns a list of (EncounterLabResult, LabResult) tuples, eliminating
@@ -85,9 +85,7 @@ class CRUDEncounterLabResult(CRUDBase[EncounterLabResult, EncounterLabResultCrea
     ) -> List[EncounterLabResult]:
         """Get all encounter relationships for a specific lab result"""
         return (
-            db.query(self.model)
-            .filter(self.model.lab_result_id == lab_result_id)
-            .all()
+            db.query(self.model).filter(self.model.lab_result_id == lab_result_id).all()
         )
 
     def get_by_lab_result_with_details(
@@ -134,8 +132,13 @@ class CRUDEncounterLabResult(CRUDBase[EncounterLabResult, EncounterLabResultCrea
         return False
 
     def create_bulk(
-        self, db: Session, *, encounter_id: int, lab_result_ids: List[int],
-        purpose: Optional[str] = None, relevance_note: Optional[str] = None
+        self,
+        db: Session,
+        *,
+        encounter_id: int,
+        lab_result_ids: List[int],
+        purpose: Optional[str] = None,
+        relevance_note: Optional[str] = None
     ) -> List[EncounterLabResult]:
         """Bulk create relationships, skipping existing ones"""
         created = []

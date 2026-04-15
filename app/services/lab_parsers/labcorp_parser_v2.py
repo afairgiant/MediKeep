@@ -19,10 +19,10 @@ class LabCorpParserV2(BaseLabParser):
     def can_parse(self, text: str) -> bool:
         """Detect LabCorp format by looking for signature elements."""
         indicators = [
-            r'Laboratory Corporation of America',
-            r'©\d{4} Laboratory Corporation',
-            r'labcorp',
-            r'Date Created and Stored.*Final Report'
+            r"Laboratory Corporation of America",
+            r"©\d{4} Laboratory Corporation",
+            r"labcorp",
+            r"Date Created and Stored.*Final Report",
         ]
 
         return any(re.search(pattern, text, re.IGNORECASE) for pattern in indicators)
@@ -37,7 +37,7 @@ class LabCorpParserV2(BaseLabParser):
         Pattern: TestName [01/02/etc] CurrentValue [Flag] PreviousValue Date Unit RefRange
         """
         results = []
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         # Extract date from PDF header (applies to all tests)
         test_date = self.extract_date_from_text(text)
@@ -46,9 +46,9 @@ class LabCorpParserV2(BaseLabParser):
         else:
             logger.warning("⚠️  No test date found in PDF")
 
-        logger.info("="*80)
+        logger.info("=" * 80)
         logger.info("LABCORP PARSER V2 - PROCESSING LINES")
-        logger.info("="*80)
+        logger.info("=" * 80)
 
         # Use index-based loop to support multi-line parsing
         i = 0
@@ -63,7 +63,9 @@ class LabCorpParserV2(BaseLabParser):
             # Try single-line parse first
             result = self._parse_line(line, test_date=test_date)
             if result:
-                logger.info(f"✓ PARSED (single): {result.test_name} = {result.value} {result.unit}")
+                logger.info(
+                    f"✓ PARSED (single): {result.test_name} = {result.value} {result.unit}"
+                )
                 results.append(result)
                 i += 1
                 continue
@@ -74,7 +76,9 @@ class LabCorpParserV2(BaseLabParser):
                 combined = line + " " + next_line
                 result = self._parse_line(combined, test_date=test_date)
                 if result:
-                    logger.info(f"✓ PARSED (multi-line): {result.test_name} = {result.value} {result.unit}")
+                    logger.info(
+                        f"✓ PARSED (multi-line): {result.test_name} = {result.value} {result.unit}"
+                    )
                     logger.info(f"  Line 1: {line[:60]}")
                     logger.info(f"  Line 2: {next_line[:60]}")
                     results.append(result)
@@ -85,9 +89,9 @@ class LabCorpParserV2(BaseLabParser):
             logger.info(f"✗ SKIPPED: {line[:80]}")
             i += 1
 
-        logger.info("="*80)
+        logger.info("=" * 80)
         logger.info(f"TOTAL PARSED: {len(results)} components")
-        logger.info("="*80)
+        logger.info("=" * 80)
 
         return results
 
@@ -143,7 +147,7 @@ class LabCorpParserV2(BaseLabParser):
                 except ValueError:
                     return None
 
-                remainder = line[match.end():].strip()
+                remainder = line[match.end() :].strip()
                 unit = self._extract_unit(remainder)
                 ref_range = self._extract_range(remainder)
 
@@ -154,7 +158,7 @@ class LabCorpParserV2(BaseLabParser):
                     reference_range=ref_range,
                     flag=flag,
                     confidence=0.9,  # Slightly lower confidence without superscript
-                    test_date=test_date
+                    test_date=test_date,
                 )
 
         if not match:
@@ -175,7 +179,7 @@ class LabCorpParserV2(BaseLabParser):
             return None
 
         # Extract unit and reference range from the rest of the line
-        remainder = line[match.end():].strip()
+        remainder = line[match.end() :].strip()
 
         unit = self._extract_unit(remainder)
         ref_range = self._extract_range(remainder)
@@ -187,7 +191,7 @@ class LabCorpParserV2(BaseLabParser):
             reference_range=ref_range,
             flag=flag,
             confidence=0.95,
-            test_date=test_date
+            test_date=test_date,
         )
 
     def _extract_unit(self, text: str) -> str:
@@ -201,31 +205,31 @@ class LabCorpParserV2(BaseLabParser):
         """
         # Try to extract the unit between date and reference range
         # Pattern: after date (MM/DD/YYYY), look for unit
-        date_pattern = r'\d{2}/\d{2}/\d{4}\s+'
+        date_pattern = r"\d{2}/\d{2}/\d{4}\s+"
         match = re.search(date_pattern, text)
 
         if match:
             # Get text after the date
-            after_date = text[match.end():].strip()
+            after_date = text[match.end() :].strip()
 
             # Unit should be at the start of this text, before the reference range
             # Common unit patterns - ORDER MATTERS (most specific first)
             unit_patterns = [
-                r'^(x10E\d+/[µu]L)',           # x10E3/uL, x10E6/uL
-                r'^(mL/min/[\d\.]+)',          # mL/min/1.73
-                r'^(ng/dL)',                   # ng/dL
-                r'^(pg/mL)',                   # pg/mL
-                r'^(ng/mL)',                   # ng/mL
-                r'^(mg/dL)',                   # mg/dL
-                r'^(mmol/L)',                  # mmol/L
-                r'^(mEq/L)',                   # mEq/L
-                r'^(g/dL)',                    # g/dL
-                r'^(IU/L)',                    # IU/L
-                r'^(U/L)',                     # U/L
-                r'^(fL)',                      # fL
-                r'^(pg)\s',                    # pg (with space after)
-                r'^(ratio)\b',                 # ratio (word boundary)
-                r'^(%)',                       # %
+                r"^(x10E\d+/[µu]L)",  # x10E3/uL, x10E6/uL
+                r"^(mL/min/[\d\.]+)",  # mL/min/1.73
+                r"^(ng/dL)",  # ng/dL
+                r"^(pg/mL)",  # pg/mL
+                r"^(ng/mL)",  # ng/mL
+                r"^(mg/dL)",  # mg/dL
+                r"^(mmol/L)",  # mmol/L
+                r"^(mEq/L)",  # mEq/L
+                r"^(g/dL)",  # g/dL
+                r"^(IU/L)",  # IU/L
+                r"^(U/L)",  # U/L
+                r"^(fL)",  # fL
+                r"^(pg)\s",  # pg (with space after)
+                r"^(ratio)\b",  # ratio (word boundary)
+                r"^(%)",  # %
             ]
 
             for pattern in unit_patterns:
@@ -235,20 +239,20 @@ class LabCorpParserV2(BaseLabParser):
 
         # Fallback: search anywhere in text (old behavior)
         unit_patterns_fallback = [
-            r'(x10E\d+/[µu]L)',
-            r'(ng/dL)',
-            r'(pg/mL)',
-            r'(ng/mL)',
-            r'(mg/dL)',
-            r'(mmol/L)',
-            r'(mEq/L)',
-            r'(g/dL)',
-            r'(IU/L)',
-            r'(U/L)',
-            r'(fL)',
-            r'(pg)(?!\s*/)',
-            r'\b(ratio)\b',
-            r'(%)',
+            r"(x10E\d+/[µu]L)",
+            r"(ng/dL)",
+            r"(pg/mL)",
+            r"(ng/mL)",
+            r"(mg/dL)",
+            r"(mmol/L)",
+            r"(mEq/L)",
+            r"(g/dL)",
+            r"(IU/L)",
+            r"(U/L)",
+            r"(fL)",
+            r"(pg)(?!\s*/)",
+            r"\b(ratio)\b",
+            r"(%)",
         ]
 
         for pattern in unit_patterns_fallback:
@@ -262,9 +266,9 @@ class LabCorpParserV2(BaseLabParser):
         """Extract reference range from text."""
         # Patterns: "3.4-10.8", ">39", "<5", "Not Estab."
         range_patterns = [
-            r'(\d+\.?\d*\s*-\s*\d+\.?\d*)',  # "3.4-10.8"
-            r'([><≤≥]\s*\d+\.?\d*)',  # ">39"
-            r'(Not\s+Estab\.?)',  # "Not Estab."
+            r"(\d+\.?\d*\s*-\s*\d+\.?\d*)",  # "3.4-10.8"
+            r"([><≤≥]\s*\d+\.?\d*)",  # ">39"
+            r"(Not\s+Estab\.?)",  # "Not Estab."
         ]
 
         for pattern in range_patterns:
@@ -283,18 +287,43 @@ class LabCorpParserV2(BaseLabParser):
 
         # Reject common false positives
         invalid_names = [
-            'interpretation', 'note', 'pdf', 'the', 'a', 'an', 'and', 'or',
-            'for', 'with', 'this', 'that', 'from', 'by', 'at', 'in',
-            'performing lab', 'performing', 'lab', 'labs', 'value',
-            'optimal', 'reference', 'range', 'test', 'result',
-            'men', 'women', 'avg.risk', 'avg risk',
+            "interpretation",
+            "note",
+            "pdf",
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "for",
+            "with",
+            "this",
+            "that",
+            "from",
+            "by",
+            "at",
+            "in",
+            "performing lab",
+            "performing",
+            "lab",
+            "labs",
+            "value",
+            "optimal",
+            "reference",
+            "range",
+            "test",
+            "result",
+            "men",
+            "women",
+            "avg.risk",
+            "avg risk",
         ]
 
         if name_lower in invalid_names:
             return False
 
         # Reject if starts with common articles/prepositions (likely descriptive text)
-        if re.match(r'^(a|an|the|for|with|this|that)\s+', name_lower):
+        if re.match(r"^(a|an|the|for|with|this|that)\s+", name_lower):
             return False
 
         # Reject if it's too long (likely a sentence fragment)
@@ -302,7 +331,7 @@ class LabCorpParserV2(BaseLabParser):
             return False
 
         # Require at least one letter (catches pure numbers)
-        if not re.search(r'[A-Za-z]', name):
+        if not re.search(r"[A-Za-z]", name):
             return False
 
         return True
@@ -312,27 +341,50 @@ class LabCorpParserV2(BaseLabParser):
         line_lower = line.lower()
 
         noise_keywords = [
-            'patient', 'specimen', 'date collected', 'ordering physician',
-            'test.*current result', 'reference interval',
-            'cbc with differential', 'metabolic panel', 'lipid panel',
-            'final report', 'page \\d+ of', 'labcorp', 'enterprise report',
-            'all rights reserved', 'confidential', 'pmid', 'et\\.?\\s*al',
-            'please note', 'disclaimer', 'reference range:', 'adult males',
-            'this test was', 'fda', 'supplemental report', 'performing labs',
-            'for inquiries', r'\d{2}:\s*[A-Z]{2}\s*-',  # "01: BN -"
-            'date created', 'date stored', 'travison', 'jcem',
-            'nonobese males', 'bmi\\s*[<>]',
+            "patient",
+            "specimen",
+            "date collected",
+            "ordering physician",
+            "test.*current result",
+            "reference interval",
+            "cbc with differential",
+            "metabolic panel",
+            "lipid panel",
+            "final report",
+            "page \\d+ of",
+            "labcorp",
+            "enterprise report",
+            "all rights reserved",
+            "confidential",
+            "pmid",
+            "et\\.?\\s*al",
+            "please note",
+            "disclaimer",
+            "reference range:",
+            "adult males",
+            "this test was",
+            "fda",
+            "supplemental report",
+            "performing labs",
+            "for inquiries",
+            r"\d{2}:\s*[A-Z]{2}\s*-",  # "01: BN -"
+            "date created",
+            "date stored",
+            "travison",
+            "jcem",
+            "nonobese males",
+            "bmi\\s*[<>]",
             # Section headers (not test names)
-            r'^interpretation\s+\d{2}',
-            r'^note\s+\d{2}',
-            r'^pdf\s+\d{2}',
-            'performing\\s+lab',
+            r"^interpretation\s+\d{2}",
+            r"^note\s+\d{2}",
+            r"^pdf\s+\d{2}",
+            "performing\\s+lab",
             # Explanatory text
-            'psa\\s+value.*between',
-            'serum\\s+folate\\s+concentration',
-            'optimal.*range',
-            'a\\s+serum\\s+',
-            'the\\s+reference\\s+',
+            "psa\\s+value.*between",
+            "serum\\s+folate\\s+concentration",
+            "optimal.*range",
+            "a\\s+serum\\s+",
+            "the\\s+reference\\s+",
         ]
 
         for keyword in noise_keywords:
@@ -344,7 +396,7 @@ class LabCorpParserV2(BaseLabParser):
             return True
 
         # Skip lines with no numbers
-        if not re.search(r'\d', line):
+        if not re.search(r"\d", line):
             return True
 
         return False

@@ -20,16 +20,20 @@ VALID_IMPACT_LEVELS = ["no_impact", "mild", "moderate", "severe", "debilitating"
 VALID_RELATIONSHIP_TYPES = ["side_effect", "helped_by", "related_to"]
 
 
-def _validate_enum_field(value: Optional[str], valid_values: List[str], field_name: str) -> Optional[str]:
+def _validate_enum_field(
+    value: Optional[str], valid_values: List[str], field_name: str
+) -> Optional[str]:
     """Validate a value is in an allowed list (for optional fields)."""
-    if value is None or value == '':
+    if value is None or value == "":
         return None
     if value not in valid_values:
         raise ValueError(f"{field_name} must be one of: {', '.join(valid_values)}")
     return value
 
 
-def _validate_required_enum_field(value: str, valid_values: List[str], field_name: str) -> str:
+def _validate_required_enum_field(
+    value: str, valid_values: List[str], field_name: str
+) -> str:
     """Validate a required value is in an allowed list."""
     if value not in valid_values:
         raise ValueError(f"{field_name} must be one of: {', '.join(valid_values)}")
@@ -152,7 +156,9 @@ class SymptomUpdate(BaseModel):
     @field_validator("typical_triggers", "tags")
     @classmethod
     def validate_list_fields(cls, v):
-        return validate_list_field(v, max_items=20, max_item_length=100, default_empty=False)
+        return validate_list_field(
+            v, max_items=20, max_item_length=100, default_empty=False
+        )
 
 
 class SymptomResponse(SymptomBase):
@@ -217,7 +223,9 @@ class SymptomOccurrenceBase(BaseModel):
             return None
         lower_v = v.lower()
         if lower_v not in VALID_TIMES_OF_DAY:
-            raise ValueError(f"Time of day must be one of: {', '.join(VALID_TIMES_OF_DAY)}")
+            raise ValueError(
+                f"Time of day must be one of: {', '.join(VALID_TIMES_OF_DAY)}"
+            )
         return lower_v
 
     @field_validator("location")
@@ -308,7 +316,9 @@ class SymptomOccurrenceUpdate(BaseModel):
             return v
         lower_v = v.lower()
         if lower_v not in VALID_TIMES_OF_DAY:
-            raise ValueError(f"Time of day must be one of: {', '.join(VALID_TIMES_OF_DAY)}")
+            raise ValueError(
+                f"Time of day must be one of: {', '.join(VALID_TIMES_OF_DAY)}"
+            )
         return lower_v
 
     @field_validator("location")
@@ -324,7 +334,9 @@ class SymptomOccurrenceUpdate(BaseModel):
     @field_validator("triggers", "relief_methods", "associated_symptoms")
     @classmethod
     def validate_list_fields(cls, v):
-        return validate_list_field(v, max_items=20, max_item_length=100, default_empty=False)
+        return validate_list_field(
+            v, max_items=20, max_item_length=100, default_empty=False
+        )
 
     @field_validator("resolved_date")
     @classmethod
@@ -408,7 +420,9 @@ class SymptomMedicationBase(BaseModel):
     @field_validator("relationship_type")
     @classmethod
     def validate_relationship_type(cls, v):
-        return _validate_required_enum_field(v, VALID_RELATIONSHIP_TYPES, "Relationship type")
+        return _validate_required_enum_field(
+            v, VALID_RELATIONSHIP_TYPES, "Relationship type"
+        )
 
     @field_validator("relevance_note")
     @classmethod

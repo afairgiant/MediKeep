@@ -44,7 +44,7 @@ class CRUDPatientShare:
 
         # Use the comprehensive access service
         access_service = PatientAccessService(db)
-        return access_service.can_access_patient(user, patient, permission='view')
+        return access_service.can_access_patient(user, patient, permission="view")
 
     def get_share(
         self, db: Session, patient_id: int, user_id: int
@@ -60,11 +60,15 @@ class CRUDPatientShare:
         Returns:
             PatientShare object if found, None otherwise
         """
-        return db.query(PatientShare).filter(
-            PatientShare.patient_id == patient_id,
-            PatientShare.shared_with_user_id == user_id,
-            PatientShare.is_active == True
-        ).first()
+        return (
+            db.query(PatientShare)
+            .filter(
+                PatientShare.patient_id == patient_id,
+                PatientShare.shared_with_user_id == user_id,
+                PatientShare.is_active == True,
+            )
+            .first()
+        )
 
 
 # Create singleton instance

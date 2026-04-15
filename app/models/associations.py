@@ -189,6 +189,7 @@ class InjuryMedication(Base):
     Junction table for many-to-many relationship between injuries and medications.
     Allows linking medications used to treat injuries.
     """
+
     __tablename__ = "injury_medications"
 
     id = Column(Integer, primary_key=True)
@@ -200,7 +201,9 @@ class InjuryMedication(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     injury = orm_relationship("Injury", back_populates="medication_relationships")
@@ -219,6 +222,7 @@ class InjuryCondition(Base):
     Junction table for many-to-many relationship between injuries and conditions.
     Allows linking conditions that resulted from or are related to injuries.
     """
+
     __tablename__ = "injury_conditions"
 
     id = Column(Integer, primary_key=True)
@@ -230,7 +234,9 @@ class InjuryCondition(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     injury = orm_relationship("Injury", back_populates="condition_relationships")
@@ -249,6 +255,7 @@ class InjuryTreatment(Base):
     Junction table for many-to-many relationship between injuries and treatments.
     Allows linking treatments used for injury recovery.
     """
+
     __tablename__ = "injury_treatments"
 
     id = Column(Integer, primary_key=True)
@@ -260,7 +267,9 @@ class InjuryTreatment(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     injury = orm_relationship("Injury", back_populates="treatment_relationships")
@@ -279,6 +288,7 @@ class InjuryProcedure(Base):
     Junction table for many-to-many relationship between injuries and procedures.
     Allows linking procedures performed to treat injuries.
     """
+
     __tablename__ = "injury_procedures"
 
     id = Column(Integer, primary_key=True)
@@ -290,7 +300,9 @@ class InjuryProcedure(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     injury = orm_relationship("Injury", back_populates="procedure_relationships")
@@ -314,11 +326,16 @@ class TreatmentMedication(Base):
     Junction table for many-to-many relationship between treatments and medications.
     Allows linking medications to treatment plans with specific dosing instructions.
     """
+
     __tablename__ = "treatment_medications"
 
     id = Column(Integer, primary_key=True)
-    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
-    medication_id = Column(Integer, ForeignKey("medications.id", ondelete="CASCADE"), nullable=False)
+    treatment_id = Column(
+        Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False
+    )
+    medication_id = Column(
+        Integer, ForeignKey("medications.id", ondelete="CASCADE"), nullable=False
+    )
 
     # Treatment-specific medication details (overrides)
     specific_dosage = Column(String, nullable=True)
@@ -339,11 +356,15 @@ class TreatmentMedication(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     treatment = orm_relationship("Treatment", back_populates="medication_relationships")
-    medication = orm_relationship("Medication", back_populates="treatment_relationships")
+    medication = orm_relationship(
+        "Medication", back_populates="treatment_relationships"
+    )
     specific_prescriber = orm_relationship(
         "Practitioner", foreign_keys=[specific_prescriber_id]
     )
@@ -357,7 +378,9 @@ class TreatmentMedication(Base):
         Index("idx_treatment_medication_medication_id", "medication_id"),
         Index("idx_treatment_medication_prescriber_id", "specific_prescriber_id"),
         Index("idx_treatment_medication_pharmacy_id", "specific_pharmacy_id"),
-        UniqueConstraint("treatment_id", "medication_id", name="uq_treatment_medication"),
+        UniqueConstraint(
+            "treatment_id", "medication_id", name="uq_treatment_medication"
+        ),
     )
 
 
@@ -366,11 +389,16 @@ class TreatmentEncounter(Base):
     Junction table for many-to-many relationship between treatments and encounters.
     Allows linking visits to treatment plans with labels (initial, follow-up, etc.).
     """
+
     __tablename__ = "treatment_encounters"
 
     id = Column(Integer, primary_key=True)
-    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
-    encounter_id = Column(Integer, ForeignKey("encounters.id", ondelete="CASCADE"), nullable=False)
+    treatment_id = Column(
+        Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False
+    )
+    encounter_id = Column(
+        Integer, ForeignKey("encounters.id", ondelete="CASCADE"), nullable=False
+    )
 
     # Encounter context within treatment
     visit_label = Column(String, nullable=True)  # initial, follow_up, review, final
@@ -379,7 +407,9 @@ class TreatmentEncounter(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     treatment = orm_relationship("Treatment", back_populates="encounter_relationships")
@@ -398,20 +428,29 @@ class TreatmentLabResult(Base):
     Junction table for many-to-many relationship between treatments and lab results.
     Allows linking lab results to treatment plans with purpose labels.
     """
+
     __tablename__ = "treatment_lab_results"
 
     id = Column(Integer, primary_key=True)
-    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
-    lab_result_id = Column(Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False)
+    treatment_id = Column(
+        Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False
+    )
+    lab_result_id = Column(
+        Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False
+    )
 
     # Lab result context within treatment
     purpose = Column(String, nullable=True)  # baseline, monitoring, outcome, safety
-    expected_frequency = Column(String, nullable=True)  # e.g., "Monthly", "Every 3 months"
+    expected_frequency = Column(
+        String, nullable=True
+    )  # e.g., "Monthly", "Every 3 months"
     relevance_note = Column(String, nullable=True)
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     treatment = orm_relationship("Treatment", back_populates="lab_result_relationships")
@@ -421,7 +460,9 @@ class TreatmentLabResult(Base):
     __table_args__ = (
         Index("idx_treatment_lab_result_treatment_id", "treatment_id"),
         Index("idx_treatment_lab_result_lab_result_id", "lab_result_id"),
-        UniqueConstraint("treatment_id", "lab_result_id", name="uq_treatment_lab_result"),
+        UniqueConstraint(
+            "treatment_id", "lab_result_id", name="uq_treatment_lab_result"
+        ),
     )
 
 
@@ -430,11 +471,16 @@ class TreatmentEquipment(Base):
     Junction table for many-to-many relationship between treatments and medical equipment.
     Allows linking equipment to treatment plans with usage details.
     """
+
     __tablename__ = "treatment_equipment"
 
     id = Column(Integer, primary_key=True)
-    treatment_id = Column(Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False)
-    equipment_id = Column(Integer, ForeignKey("medical_equipment.id", ondelete="CASCADE"), nullable=False)
+    treatment_id = Column(
+        Integer, ForeignKey("treatments.id", ondelete="CASCADE"), nullable=False
+    )
+    equipment_id = Column(
+        Integer, ForeignKey("medical_equipment.id", ondelete="CASCADE"), nullable=False
+    )
 
     # Equipment usage context within treatment
     usage_frequency = Column(String, nullable=True)  # e.g., "Nightly", "As needed"
@@ -443,11 +489,15 @@ class TreatmentEquipment(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     treatment = orm_relationship("Treatment", back_populates="equipment_relationships")
-    equipment = orm_relationship("MedicalEquipment", back_populates="treatment_relationships")
+    equipment = orm_relationship(
+        "MedicalEquipment", back_populates="treatment_relationships"
+    )
 
     # Indexes and constraints
     __table_args__ = (
@@ -467,19 +517,28 @@ class EncounterLabResult(Base):
     Junction table for many-to-many relationship between encounters and lab results.
     Allows linking lab results to visits with a purpose label (ordered_during, results_reviewed, etc.).
     """
+
     __tablename__ = "encounter_lab_results"
 
     id = Column(Integer, primary_key=True)
-    encounter_id = Column(Integer, ForeignKey("encounters.id", ondelete="CASCADE"), nullable=False)
-    lab_result_id = Column(Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False)
+    encounter_id = Column(
+        Integer, ForeignKey("encounters.id", ondelete="CASCADE"), nullable=False
+    )
+    lab_result_id = Column(
+        Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False
+    )
 
     # Purpose of the link between encounter and lab result
-    purpose = Column(String, nullable=True)  # ordered_during, results_reviewed, follow_up_for, reference, other
+    purpose = Column(
+        String, nullable=True
+    )  # ordered_during, results_reviewed, follow_up_for, reference, other
     relevance_note = Column(String, nullable=True)
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     encounter = orm_relationship("Encounter", back_populates="lab_result_relationships")
@@ -489,5 +548,7 @@ class EncounterLabResult(Base):
     __table_args__ = (
         Index("idx_encounter_lab_result_encounter_id", "encounter_id"),
         Index("idx_encounter_lab_result_lab_result_id", "lab_result_id"),
-        UniqueConstraint("encounter_id", "lab_result_id", name="uq_encounter_lab_result"),
+        UniqueConstraint(
+            "encounter_id", "lab_result_id", name="uq_encounter_lab_result"
+        ),
     )

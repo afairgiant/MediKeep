@@ -21,6 +21,7 @@ class InjuryType(Base):
     Users can select existing types or create new ones.
     System types (is_system=True) are seeded defaults and cannot be deleted.
     """
+
     __tablename__ = "injury_types"
 
     id = Column(Integer, primary_key=True)
@@ -30,7 +31,9 @@ class InjuryType(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     injuries = orm_relationship("Injury", back_populates="injury_type")
@@ -47,6 +50,7 @@ class Injury(Base):
     Represents a physical injury record for a patient.
     Tracks injuries like sprains, fractures, burns, etc.
     """
+
     __tablename__ = "injuries"
 
     id = Column(Integer, primary_key=True)
@@ -56,15 +60,21 @@ class Injury(Base):
     injury_name = Column(String(300), nullable=False)
     injury_type_id = Column(Integer, ForeignKey("injury_types.id"), nullable=True)
     body_part = Column(String(100), nullable=False)
-    laterality = Column(String(20), nullable=True)  # Use Laterality enum: left, right, bilateral, not_applicable
-    date_of_injury = Column(Date, nullable=True)  # Optional - user may not remember exact date
+    laterality = Column(
+        String(20), nullable=True
+    )  # Use Laterality enum: left, right, bilateral, not_applicable
+    date_of_injury = Column(
+        Date, nullable=True
+    )  # Optional - user may not remember exact date
 
     # How the injury occurred
     mechanism = Column(String(500), nullable=True)
 
     # Severity and status
     severity = Column(String(50), nullable=True)  # Use SeverityLevel enum
-    status = Column(String(50), nullable=False, default="active")  # Use InjuryStatus enum
+    status = Column(
+        String(50), nullable=False, default="active"
+    )  # Use InjuryStatus enum
 
     # Treatment and recovery
     treatment_received = Column(Text, nullable=True)
@@ -79,7 +89,9 @@ class Injury(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="injuries")

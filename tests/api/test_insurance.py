@@ -1,6 +1,7 @@
 """
 Tests for Insurance API endpoints.
 """
+
 import pytest
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
@@ -36,17 +37,21 @@ class TestInsuranceAPI:
             "status": "active",
             "is_primary": True,
             "patient_id": user_with_patient["patient"].id,
-            "notes": "Company provided insurance"
+            "notes": "Company provided insurance",
         }
 
     def test_create_insurance_success(
-        self, client: TestClient, user_with_patient, authenticated_headers, sample_insurance_data
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_insurance_data,
     ):
         """Test successful insurance creation."""
         response = client.post(
             "/api/v1/insurances/",
             json=sample_insurance_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -73,14 +78,12 @@ class TestInsuranceAPI:
             "coverage_details": {
                 "preventive_coverage": 100,
                 "basic_coverage": 80,
-                "major_coverage": 50
-            }
+                "major_coverage": 50,
+            },
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=insurance_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=insurance_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -99,13 +102,11 @@ class TestInsuranceAPI:
             "member_id": "VIS456789012",
             "effective_date": "2024-01-01",
             "status": "active",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=insurance_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=insurance_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -124,15 +125,11 @@ class TestInsuranceAPI:
             "effective_date": "2024-01-01",
             "status": "active",
             "patient_id": user_with_patient["patient"].id,
-            "coverage_details": {
-                "bin_number": "123456"
-            }
+            "coverage_details": {"bin_number": "123456"},
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=insurance_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=insurance_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -151,7 +148,7 @@ class TestInsuranceAPI:
                 "member_id": "AET001",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             },
             {
                 "insurance_type": "dental",
@@ -160,7 +157,7 @@ class TestInsuranceAPI:
                 "member_id": "MET002",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             },
             {
                 "insurance_type": "vision",
@@ -169,15 +166,13 @@ class TestInsuranceAPI:
                 "member_id": "EYE003",
                 "effective_date": "2024-01-01",
                 "status": "inactive",
-                "patient_id": user_with_patient["patient"].id
-            }
+                "patient_id": user_with_patient["patient"].id,
+            },
         ]
 
         for ins_data in insurances:
             client.post(
-                "/api/v1/insurances/",
-                json=ins_data,
-                headers=authenticated_headers
+                "/api/v1/insurances/", json=ins_data, headers=authenticated_headers
             )
 
         response = client.get("/api/v1/insurances/", headers=authenticated_headers)
@@ -203,7 +198,7 @@ class TestInsuranceAPI:
                 "member_id": "MED001",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             },
             {
                 "insurance_type": "dental",
@@ -212,20 +207,17 @@ class TestInsuranceAPI:
                 "member_id": "DEN001",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
-            }
+                "patient_id": user_with_patient["patient"].id,
+            },
         ]
 
         for ins_data in insurances:
             client.post(
-                "/api/v1/insurances/",
-                json=ins_data,
-                headers=authenticated_headers
+                "/api/v1/insurances/", json=ins_data, headers=authenticated_headers
             )
 
         response = client.get(
-            "/api/v1/insurances/?insurance_type=medical",
-            headers=authenticated_headers
+            "/api/v1/insurances/?insurance_type=medical", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -245,7 +237,7 @@ class TestInsuranceAPI:
                 "member_id": "ACT001",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             },
             {
                 "insurance_type": "medical",
@@ -254,20 +246,17 @@ class TestInsuranceAPI:
                 "member_id": "INACT001",
                 "effective_date": "2023-01-01",
                 "status": "inactive",
-                "patient_id": user_with_patient["patient"].id
-            }
+                "patient_id": user_with_patient["patient"].id,
+            },
         ]
 
         for ins_data in insurances:
             client.post(
-                "/api/v1/insurances/",
-                json=ins_data,
-                headers=authenticated_headers
+                "/api/v1/insurances/", json=ins_data, headers=authenticated_headers
             )
 
         response = client.get(
-            "/api/v1/insurances/?status=active",
-            headers=authenticated_headers
+            "/api/v1/insurances/?status=active", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -287,7 +276,7 @@ class TestInsuranceAPI:
                 "member_id": "ACT002",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             },
             {
                 "insurance_type": "medical",
@@ -296,20 +285,17 @@ class TestInsuranceAPI:
                 "member_id": "INACT002",
                 "effective_date": "2023-01-01",
                 "status": "inactive",
-                "patient_id": user_with_patient["patient"].id
-            }
+                "patient_id": user_with_patient["patient"].id,
+            },
         ]
 
         for ins_data in insurances:
             client.post(
-                "/api/v1/insurances/",
-                json=ins_data,
-                headers=authenticated_headers
+                "/api/v1/insurances/", json=ins_data, headers=authenticated_headers
             )
 
         response = client.get(
-            "/api/v1/insurances/?active_only=true",
-            headers=authenticated_headers
+            "/api/v1/insurances/?active_only=true", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -318,19 +304,22 @@ class TestInsuranceAPI:
             assert ins["status"] == "active"
 
     def test_get_insurance_by_id(
-        self, client: TestClient, user_with_patient, authenticated_headers, sample_insurance_data
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_insurance_data,
     ):
         """Test getting a specific insurance by ID."""
         create_response = client.post(
             "/api/v1/insurances/",
             json=sample_insurance_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         insurance_id = create_response.json()["id"]
 
         response = client.get(
-            f"/api/v1/insurances/{insurance_id}",
-            headers=authenticated_headers
+            f"/api/v1/insurances/{insurance_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -339,25 +328,26 @@ class TestInsuranceAPI:
         assert data["company_name"] == "Blue Cross Blue Shield"
 
     def test_update_insurance(
-        self, client: TestClient, user_with_patient, authenticated_headers, sample_insurance_data
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_insurance_data,
     ):
         """Test updating an insurance record."""
         create_response = client.post(
             "/api/v1/insurances/",
             json=sample_insurance_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         insurance_id = create_response.json()["id"]
 
-        update_data = {
-            "plan_name": "Premium Elite",
-            "notes": "Updated to new plan"
-        }
+        update_data = {"plan_name": "Premium Elite", "notes": "Updated to new plan"}
 
         response = client.put(
             f"/api/v1/insurances/{insurance_id}",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -367,20 +357,24 @@ class TestInsuranceAPI:
         assert data["company_name"] == "Blue Cross Blue Shield"
 
     def test_update_insurance_status(
-        self, client: TestClient, user_with_patient, authenticated_headers, sample_insurance_data
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_insurance_data,
     ):
         """Test updating only insurance status."""
         create_response = client.post(
             "/api/v1/insurances/",
             json=sample_insurance_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         insurance_id = create_response.json()["id"]
 
         response = client.patch(
             f"/api/v1/insurances/{insurance_id}/status",
             json={"status": "inactive"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -388,26 +382,28 @@ class TestInsuranceAPI:
         assert data["status"] == "inactive"
 
     def test_delete_insurance(
-        self, client: TestClient, user_with_patient, authenticated_headers, sample_insurance_data
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        sample_insurance_data,
     ):
         """Test deleting an insurance record."""
         create_response = client.post(
             "/api/v1/insurances/",
             json=sample_insurance_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         insurance_id = create_response.json()["id"]
 
         response = client.delete(
-            f"/api/v1/insurances/{insurance_id}",
-            headers=authenticated_headers
+            f"/api/v1/insurances/{insurance_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
 
         get_response = client.get(
-            f"/api/v1/insurances/{insurance_id}",
-            headers=authenticated_headers
+            f"/api/v1/insurances/{insurance_id}", headers=authenticated_headers
         )
         assert get_response.status_code == 404
 
@@ -424,7 +420,7 @@ class TestInsuranceAPI:
                 "effective_date": "2024-01-01",
                 "status": "active",
                 "is_primary": True,
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             },
             {
                 "insurance_type": "medical",
@@ -434,22 +430,20 @@ class TestInsuranceAPI:
                 "effective_date": "2024-01-01",
                 "status": "active",
                 "is_primary": False,
-                "patient_id": user_with_patient["patient"].id
-            }
+                "patient_id": user_with_patient["patient"].id,
+            },
         ]
 
         created_ids = []
         for ins_data in insurances:
             resp = client.post(
-                "/api/v1/insurances/",
-                json=ins_data,
-                headers=authenticated_headers
+                "/api/v1/insurances/", json=ins_data, headers=authenticated_headers
             )
             created_ids.append(resp.json()["id"])
 
         response = client.patch(
             f"/api/v1/insurances/{created_ids[1]}/set-primary",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -469,13 +463,11 @@ class TestInsuranceAPI:
             "effective_date": "2024-01-01",
             "status": "active",
             "is_primary": True,
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         resp1 = client.post(
-            "/api/v1/insurances/",
-            json=insurance1_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=insurance1_data, headers=authenticated_headers
         )
         assert resp1.status_code == 200
         insurance1_id = resp1.json()["id"]
@@ -488,13 +480,11 @@ class TestInsuranceAPI:
             "effective_date": "2024-01-01",
             "status": "active",
             "is_primary": False,
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         resp2 = client.post(
-            "/api/v1/insurances/",
-            json=insurance2_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=insurance2_data, headers=authenticated_headers
         )
         assert resp2.status_code == 200
         insurance2_id = resp2.json()["id"]
@@ -502,22 +492,20 @@ class TestInsuranceAPI:
         # Set second insurance as primary
         response = client.patch(
             f"/api/v1/insurances/{insurance2_id}/set-primary",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 200
 
         # Verify second is now primary
         check2 = client.get(
-            f"/api/v1/insurances/{insurance2_id}",
-            headers=authenticated_headers
+            f"/api/v1/insurances/{insurance2_id}", headers=authenticated_headers
         )
         assert check2.status_code == 200
         assert check2.json()["is_primary"] is True
 
         # Verify first is no longer primary (mutual exclusivity)
         check1 = client.get(
-            f"/api/v1/insurances/{insurance1_id}",
-            headers=authenticated_headers
+            f"/api/v1/insurances/{insurance1_id}", headers=authenticated_headers
         )
         assert check1.status_code == 200
         assert check1.json()["is_primary"] is False
@@ -534,7 +522,7 @@ class TestInsuranceAPI:
                 "member_id": "UHC001",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             },
             {
                 "insurance_type": "medical",
@@ -543,20 +531,17 @@ class TestInsuranceAPI:
                 "member_id": "HUM001",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
-            }
+                "patient_id": user_with_patient["patient"].id,
+            },
         ]
 
         for ins_data in insurances:
             client.post(
-                "/api/v1/insurances/",
-                json=ins_data,
-                headers=authenticated_headers
+                "/api/v1/insurances/", json=ins_data, headers=authenticated_headers
             )
 
         response = client.get(
-            "/api/v1/insurances/search?company=United",
-            headers=authenticated_headers
+            "/api/v1/insurances/search?company=United", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -568,15 +553,10 @@ class TestInsuranceAPI:
         self, client: TestClient, authenticated_headers
     ):
         """Test validation errors for missing required fields."""
-        invalid_data = {
-            "insurance_type": "medical",
-            "effective_date": "2024-01-01"
-        }
+        invalid_data = {"insurance_type": "medical", "effective_date": "2024-01-01"}
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -591,13 +571,11 @@ class TestInsuranceAPI:
             "member_name": "John Doe",
             "member_id": "TEST001",
             "effective_date": "2024-01-01",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -613,13 +591,11 @@ class TestInsuranceAPI:
             "member_id": "TEST001",
             "effective_date": "2024-01-01",
             "status": "invalid_status",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -635,13 +611,11 @@ class TestInsuranceAPI:
             "member_id": "TEST001",
             "effective_date": "2024-06-01",
             "expiration_date": "2024-01-01",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -657,13 +631,11 @@ class TestInsuranceAPI:
             "member_id": "TEST001",
             "effective_date": "2024-01-01",
             "relationship_to_holder": "invalid_relationship",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -672,10 +644,7 @@ class TestInsuranceAPI:
         """Test that users can only access their own insurances."""
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -687,10 +656,7 @@ class TestInsuranceAPI:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -707,28 +673,23 @@ class TestInsuranceAPI:
             "member_id": "PRIVATE001",
             "effective_date": "2024-01-01",
             "status": "active",
-            "patient_id": patient1.id
+            "patient_id": patient1.id,
         }
 
         create_response = client.post(
-            "/api/v1/insurances/",
-            json=insurance_data,
-            headers=headers1
+            "/api/v1/insurances/", json=insurance_data, headers=headers1
         )
         insurance_id = create_response.json()["id"]
 
         # Try to access user1's insurance as user2
-        response = client.get(
-            f"/api/v1/insurances/{insurance_id}",
-            headers=headers2
-        )
+        response = client.get(f"/api/v1/insurances/{insurance_id}", headers=headers2)
         assert response.status_code in [403, 404]
 
         # Try to update user1's insurance as user2
         update_response = client.put(
             f"/api/v1/insurances/{insurance_id}",
             json={"status": "inactive"},
-            headers=headers2
+            headers=headers2,
         )
         assert update_response.status_code in [403, 404]
 
@@ -744,17 +705,16 @@ class TestInsuranceAPI:
                 "member_id": f"PAG{i:03d}",
                 "effective_date": "2024-01-01",
                 "status": "active",
-                "patient_id": user_with_patient["patient"].id
+                "patient_id": user_with_patient["patient"].id,
             }
             client.post(
                 "/api/v1/insurances/",
                 json=insurance_data,
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
         response = client.get(
-            "/api/v1/insurances/?skip=0&limit=2",
-            headers=authenticated_headers
+            "/api/v1/insurances/?skip=0&limit=2", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -762,8 +722,7 @@ class TestInsuranceAPI:
         assert len(data) == 2
 
         response2 = client.get(
-            "/api/v1/insurances/?skip=2&limit=2",
-            headers=authenticated_headers
+            "/api/v1/insurances/?skip=2&limit=2", headers=authenticated_headers
         )
 
         assert response2.status_code == 200
@@ -787,27 +746,19 @@ class TestInsuranceAPI:
             "effective_date": "2024-01-01",
             "status": "active",
             "patient_id": user_with_patient["patient"].id,
-            "coverage_details": {
-                "preventive_coverage": -10
-            }
+            "coverage_details": {"preventive_coverage": -10},
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
         assert response.status_code in [200, 422]  # Should validate or accept
 
         # Test coverage > 100 (if percentages)
-        invalid_data["coverage_details"] = {
-            "preventive_coverage": 150
-        }
+        invalid_data["coverage_details"] = {"preventive_coverage": 150}
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
         assert response.status_code in [200, 422]
 
@@ -815,9 +766,7 @@ class TestInsuranceAPI:
         invalid_data["coverage_details"] = "not a dictionary"
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
         assert response.status_code == 422
 
@@ -833,13 +782,11 @@ class TestInsuranceAPI:
             "member_id": "TEST001",
             "effective_date": "not-a-date",
             "status": "active",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
         assert response.status_code == 422
 
@@ -847,9 +794,7 @@ class TestInsuranceAPI:
         invalid_data["effective_date"] = "01-15-2024"
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
         assert response.status_code in [200, 422]  # Depends on parsing strictness
 
@@ -857,9 +802,7 @@ class TestInsuranceAPI:
         invalid_data["effective_date"] = "2024-13-01"
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
         assert response.status_code == 422
 
@@ -867,8 +810,6 @@ class TestInsuranceAPI:
         invalid_data["effective_date"] = "2024-01-32"
 
         response = client.post(
-            "/api/v1/insurances/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=invalid_data, headers=authenticated_headers
         )
         assert response.status_code == 422

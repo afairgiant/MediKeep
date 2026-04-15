@@ -343,7 +343,9 @@ class ExportService:
             "pharmacies": self._export_pharmacies(patient, start_date, end_date),
             "symptoms": self._export_symptoms(patient, start_date, end_date),
             "injuries": self._export_injuries(patient, start_date, end_date),
-            "family_history": self._export_family_history(patient, start_date, end_date),
+            "family_history": self._export_family_history(
+                patient, start_date, end_date
+            ),
             "insurance": self._export_insurance(patient, start_date, end_date),
             "medical_equipment": self._export_medical_equipment(
                 patient, start_date, end_date
@@ -390,6 +392,7 @@ class ExportService:
     ) -> List[Dict[str, Any]]:
         """Export medications data."""
         from app.models.models import ConditionMedication
+
         query = (
             self.db.query(Medication)
             .options(joinedload(Medication.practitioner))
@@ -409,7 +412,9 @@ class ExportService:
             associated_conditions = [
                 {
                     "condition_id": rel.condition_id,
-                    "condition_name": rel.condition.condition_name if rel.condition else None,
+                    "condition_name": (
+                        rel.condition.condition_name if rel.condition else None
+                    ),
                     "relevance_note": rel.relevance_note,
                 }
                 for rel in med.condition_relationships
@@ -436,7 +441,9 @@ class ExportService:
                         else None
                     ),
                     "status": med.status,
-                    "prescribed_by": med.practitioner.name if med.practitioner else None,
+                    "prescribed_by": (
+                        med.practitioner.name if med.practitioner else None
+                    ),
                     "pharmacy": med.pharmacy.name if med.pharmacy else None,
                     "side_effects": med.side_effects,
                     "notes": med.notes,
@@ -496,7 +503,7 @@ class ExportService:
             if result.test_components:
                 sorted_components = sorted(
                     result.test_components,
-                    key=lambda c: (c.display_order or 999, c.test_name or '', c.id)
+                    key=lambda c: (c.display_order or 999, c.test_name or "", c.id),
                 )
                 components = []
                 for comp in sorted_components:
@@ -636,6 +643,7 @@ class ExportService:
     ) -> List[Dict[str, Any]]:
         """Export conditions data."""
         from app.models.models import ConditionMedication
+
         query = (
             self.db.query(Condition)
             .options(joinedload(Condition.practitioner))
@@ -654,7 +662,9 @@ class ExportService:
             associated_medications = [
                 {
                     "medication_id": rel.medication_id,
-                    "medication_name": rel.medication.medication_name if rel.medication else None,
+                    "medication_name": (
+                        rel.medication.medication_name if rel.medication else None
+                    ),
                     "relevance_note": rel.relevance_note,
                 }
                 for rel in condition.medication_relationships
@@ -1116,7 +1126,9 @@ class ExportService:
                 "typical_triggers": symptom.typical_triggers,
                 "general_notes": symptom.general_notes,
                 "tags": symptom.tags,
-                "occurrence_count": len(symptom.occurrences) if symptom.occurrences else 0,
+                "occurrence_count": (
+                    len(symptom.occurrences) if symptom.occurrences else 0
+                ),
                 "occurrences": [
                     {
                         "id": occ.id,
@@ -1175,9 +1187,7 @@ class ExportService:
                 "body_part": injury.body_part,
                 "laterality": injury.laterality,
                 "date_of_injury": (
-                    injury.date_of_injury.isoformat()
-                    if injury.date_of_injury
-                    else None
+                    injury.date_of_injury.isoformat() if injury.date_of_injury else None
                 ),
                 "mechanism": injury.mechanism,
                 "severity": injury.severity,
@@ -1210,7 +1220,9 @@ class ExportService:
 
         family_members = query.all()
 
-        logger.info(f"Successfully exported family_history data for patient {patient.id}")
+        logger.info(
+            f"Successfully exported family_history data for patient {patient.id}"
+        )
 
         return [
             {
@@ -1327,7 +1339,9 @@ class ExportService:
                 ),
                 "supplier": equip.supplier,
                 "usage_instructions": equip.usage_instructions,
-                "prescribed_by": equip.practitioner.name if equip.practitioner else None,
+                "prescribed_by": (
+                    equip.practitioner.name if equip.practitioner else None
+                ),
                 "notes": equip.notes,
                 "tags": equip.tags,
             }
@@ -1497,13 +1511,23 @@ class ExportService:
             output.write(
                 f"# {t.field('name')}: {patient_info.get('first_name', '')} {patient_info.get('last_name', '')}\n"
             )
-            birth_date_str = t.format_date(patient_info.get("birth_date")) if patient_info.get("birth_date") else ""
+            birth_date_str = (
+                t.format_date(patient_info.get("birth_date"))
+                if patient_info.get("birth_date")
+                else ""
+            )
             output.write(f"# {t.text('birth_date')}: {birth_date_str}\n")
-            output.write(f"# {t.text('blood_type')}: {patient_info.get('blood_type', '')}\n")
+            output.write(
+                f"# {t.text('blood_type')}: {patient_info.get('blood_type', '')}\n"
+            )
             if patient_info.get("height"):
-                output.write(f"# {t.field('height')}: {patient_info.get('height')} {height_unit}\n")
+                output.write(
+                    f"# {t.field('height')}: {patient_info.get('height')} {height_unit}\n"
+                )
             if patient_info.get("weight"):
-                output.write(f"# {t.field('weight')}: {patient_info.get('weight')} {weight_unit}\n")
+                output.write(
+                    f"# {t.field('weight')}: {patient_info.get('weight')} {weight_unit}\n"
+                )
             output.write("\n")
 
         if scope == "all":
@@ -1618,7 +1642,9 @@ class ExportService:
 
         return str(value)
 
-    def _write_csv_section(self, output: io.StringIO, records: List[Dict[str, Any]], translator=None):
+    def _write_csv_section(
+        self, output: io.StringIO, records: List[Dict[str, Any]], translator=None
+    ):
         """Write a section of data to CSV with translated headers."""
         if not records:
             return
@@ -1636,14 +1662,20 @@ class ExportService:
             translated_headers = {f: f.replace("_", " ").title() for f in fieldnames}
 
         # Use translated names as CSV column headers
-        writer = csv.DictWriter(output, fieldnames=[translated_headers[f] for f in fieldnames], extrasaction="ignore")
+        writer = csv.DictWriter(
+            output,
+            fieldnames=[translated_headers[f] for f in fieldnames],
+            extrasaction="ignore",
+        )
         writer.writeheader()
         # Write each record, mapping raw field names to translated header names
         for record in records:
             clean_record = {}
             for field in fieldnames:
                 value = record.get(field)
-                clean_record[translated_headers[field]] = self._format_csv_value(field, value)
+                clean_record[translated_headers[field]] = self._format_csv_value(
+                    field, value
+                )
             writer.writerow(clean_record)
 
     async def convert_to_pdf(
@@ -1687,7 +1719,9 @@ class ExportService:
 
             # Patient Info
             if "patient_info" in export_data:
-                story.append(Paragraph(t.text("patient_information"), styles["Heading2"]))
+                story.append(
+                    Paragraph(t.text("patient_information"), styles["Heading2"])
+                )
                 patient_info = export_data["patient_info"]
 
                 # Create patient info table with safe data handling
@@ -1700,7 +1734,14 @@ class ExportService:
                         t.field("name"),
                         f"{patient_info.get('first_name', '')} {patient_info.get('last_name', '')}".strip(),
                     ],
-                    [t.text("birth_date"), t.format_date(patient_info.get("birth_date")) if patient_info.get("birth_date") else "N/A"],
+                    [
+                        t.text("birth_date"),
+                        (
+                            t.format_date(patient_info.get("birth_date"))
+                            if patient_info.get("birth_date")
+                            else "N/A"
+                        ),
+                    ],
                     [t.text("blood_type"), str(patient_info.get("blood_type", "N/A"))],
                     [
                         t.field("height"),
@@ -1780,7 +1821,9 @@ class ExportService:
 
             # Export metadata
             if "export_metadata" in export_data:
-                gen_date = t.format_date(metadata.get("generated_at"), include_time=True)
+                gen_date = t.format_date(
+                    metadata.get("generated_at"), include_time=True
+                )
                 story.append(
                     Paragraph(
                         f"{t.text('generated_on')}: {gen_date} | {t.text('confidential_notice')}",
@@ -1792,8 +1835,16 @@ class ExportService:
                     "date_range", {}
                 ).get("end"):
                     date_range = metadata.get("date_range", {})
-                    start_date_str = t.format_date(date_range.get("start")) if date_range.get("start") else "N/A"
-                    end_date_str = t.format_date(date_range.get("end")) if date_range.get("end") else "N/A"
+                    start_date_str = (
+                        t.format_date(date_range.get("start"))
+                        if date_range.get("start")
+                        else "N/A"
+                    )
+                    end_date_str = (
+                        t.format_date(date_range.get("end"))
+                        if date_range.get("end")
+                        else "N/A"
+                    )
                     story.append(
                         Paragraph(
                             f"{t.field('start_date')}: {start_date_str} - {t.field('end_date')}: {end_date_str}",
@@ -1846,7 +1897,9 @@ class ExportService:
             error_buffer.close()
             return error_pdf_bytes
 
-    def _add_card_based_section(self, story, section_data, section_name, styles, translator=None):
+    def _add_card_based_section(
+        self, story, section_data, section_name, styles, translator=None
+    ):
         """Add a section using card-based format instead of tables for better readability."""
         from reportlab.lib import colors
         from reportlab.lib.units import inch
@@ -1880,12 +1933,25 @@ class ExportService:
             return field_name.replace("_", " ").title()
 
         _date_fields = {
-            "start_date", "end_date", "ordered_date", "completed_date",
-            "date_administered", "onset_date", "recorded_date", "date",
-            "created_at", "updated_at", "first_occurrence_date",
-            "last_occurrence_date", "date_of_injury", "effective_date",
-            "expiration_date", "resolved_date", "prescribed_date",
-            "last_service_date", "next_service_date",
+            "start_date",
+            "end_date",
+            "ordered_date",
+            "completed_date",
+            "date_administered",
+            "onset_date",
+            "recorded_date",
+            "date",
+            "created_at",
+            "updated_at",
+            "first_occurrence_date",
+            "last_occurrence_date",
+            "date_of_injury",
+            "effective_date",
+            "expiration_date",
+            "resolved_date",
+            "prescribed_date",
+            "last_service_date",
+            "next_service_date",
         }
 
         def format_value(field_name, value):
@@ -1974,9 +2040,15 @@ class ExportService:
                         age = cond.get("diagnosis_age")
                         severity = cond.get("severity", "")
                         if age:
-                            condition_strs.append(f"• {name} (age {age}, {severity})" if severity else f"• {name} (age {age})")
+                            condition_strs.append(
+                                f"• {name} (age {age}, {severity})"
+                                if severity
+                                else f"• {name} (age {age})"
+                            )
                         else:
-                            condition_strs.append(f"• {name} ({severity})" if severity else f"• {name}")
+                            condition_strs.append(
+                                f"• {name} ({severity})" if severity else f"• {name}"
+                            )
                 return "\n".join(condition_strs)
 
             # Format nested occurrences (for symptoms)

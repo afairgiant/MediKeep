@@ -77,7 +77,9 @@ def read_conditions(
     limit: int = Query(default=100, le=100),
     status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -95,7 +97,7 @@ def read_conditions(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
         elif status:
             conditions = condition.get_by_status(
@@ -113,7 +115,7 @@ def read_conditions(
             "read",
             "Condition",
             patient_id=target_patient_id,
-            count=len(conditions)
+            count=len(conditions),
         )
 
         return conditions
@@ -135,7 +137,9 @@ def get_conditions_for_dropdown(
                 db, patient_id=current_user_patient_id
             )
         else:
-            conditions = condition.get_by_patient(db, patient_id=current_user_patient_id)
+            conditions = condition.get_by_patient(
+                db, patient_id=current_user_patient_id
+            )
 
         log_data_access(
             logger,
@@ -144,7 +148,7 @@ def get_conditions_for_dropdown(
             "read",
             "Condition",
             patient_id=current_user_patient_id,
-            count=len(conditions)
+            count=len(conditions),
         )
 
         return conditions
@@ -170,20 +174,25 @@ def get_condition_medications(
                 "condition_not_found",
                 request,
                 f"Condition with ID {condition_id} not found",
-                user_id=current_user_id
+                user_id=current_user_id,
             )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
-                request=request
+                request=request,
             )
 
         verify_patient_ownership(
-            db_condition, current_user_patient_id, "condition",
-            db=db, current_user=current_user
+            db_condition,
+            current_user_patient_id,
+            "condition",
+            db=db,
+            current_user=current_user,
         )
 
-        relationships = condition_medication.get_by_condition(db, condition_id=condition_id)
+        relationships = condition_medication.get_by_condition(
+            db, condition_id=condition_id
+        )
 
         log_data_access(
             logger,
@@ -193,17 +202,20 @@ def get_condition_medications(
             "ConditionMedication",
             record_id=condition_id,
             patient_id=db_condition.patient_id,
-            count=len(relationships)
+            count=len(relationships),
         )
 
-        return [{
-            "id": rel.id,
-            "medication_id": rel.medication_id,
-            "condition_id": rel.condition_id,
-            "relevance_note": rel.relevance_note,
-            "created_at": rel.created_at,
-            "updated_at": rel.updated_at
-        } for rel in relationships]
+        return [
+            {
+                "id": rel.id,
+                "medication_id": rel.medication_id,
+                "condition_id": rel.condition_id,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+            }
+            for rel in relationships
+        ]
 
 
 @router.post("/{condition_id}/medications", response_model=ConditionMedicationResponse)
@@ -227,17 +239,21 @@ def create_condition_medication(
                 "condition_not_found",
                 request,
                 f"Condition with ID {condition_id} not found",
-                user_id=current_user_id
+                user_id=current_user_id,
             )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
-                request=request
+                request=request,
             )
 
         verify_patient_ownership(
-            db_condition, current_user_patient_id, "condition",
-            db=db, current_user=current_user, permission='edit'
+            db_condition,
+            current_user_patient_id,
+            "condition",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         # Verify medication exists and belongs to the same patient
@@ -248,12 +264,12 @@ def create_condition_medication(
                 "medication_not_found",
                 request,
                 f"Medication with ID {medication_in.medication_id} not found",
-                user_id=current_user_id
+                user_id=current_user_id,
             )
             raise NotFoundException(
                 resource="Medication",
                 message=f"Medication with ID {medication_in.medication_id} not found",
-                request=request
+                request=request,
             )
 
         # Ensure medication belongs to the same patient as the condition
@@ -265,11 +281,11 @@ def create_condition_medication(
                 f"User attempted to link medication {medication_in.medication_id} from different patient",
                 user_id=current_user_id,
                 medication_id=medication_in.medication_id,
-                condition_id=condition_id
+                condition_id=condition_id,
             )
             raise BusinessLogicException(
                 message="Cannot link medication that doesn't belong to the same patient",
-                request=request
+                request=request,
             )
 
         # Check if relationship already exists
@@ -279,7 +295,7 @@ def create_condition_medication(
         if existing:
             raise BusinessLogicException(
                 message="Relationship between this condition and medication already exists",
-                request=request
+                request=request,
             )
 
         # Set condition_id and create relationship
@@ -297,13 +313,15 @@ def create_condition_medication(
             record_id=relationship.id,
             patient_id=db_condition.patient_id,
             condition_id=condition_id,
-            medication_id=medication_in.medication_id
+            medication_id=medication_in.medication_id,
         )
 
         return relationship
 
 
-@router.post("/{condition_id}/medications/bulk", response_model=List[ConditionMedicationResponse])
+@router.post(
+    "/{condition_id}/medications/bulk", response_model=List[ConditionMedicationResponse]
+)
 def create_condition_medications_bulk(
     *,
     condition_id: int,
@@ -332,17 +350,21 @@ def create_condition_medications_bulk(
                 "condition_not_found",
                 request,
                 f"Condition with ID {condition_id} not found",
-                user_id=current_user_id
+                user_id=current_user_id,
             )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
-                request=request
+                request=request,
             )
 
         verify_patient_ownership(
-            db_condition, current_user_patient_id, "condition",
-            db=db, current_user=current_user, permission='edit'
+            db_condition,
+            current_user_patient_id,
+            "condition",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         # Verify all medications exist and belong to the same patient
@@ -354,12 +376,12 @@ def create_condition_medications_bulk(
                     "medication_not_found",
                     request,
                     f"Medication with ID {med_id} not found",
-                    user_id=current_user_id
+                    user_id=current_user_id,
                 )
                 raise NotFoundException(
                     resource="Medication",
                     message=f"Medication with ID {med_id} not found",
-                    request=request
+                    request=request,
                 )
 
             if db_medication.patient_id != db_condition.patient_id:
@@ -370,11 +392,11 @@ def create_condition_medications_bulk(
                     f"User attempted to link medication {med_id} from different patient",
                     user_id=current_user_id,
                     medication_id=med_id,
-                    condition_id=condition_id
+                    condition_id=condition_id,
                 )
                 raise BusinessLogicException(
                     message="Cannot link medication that doesn't belong to the same patient",
-                    request=request
+                    request=request,
                 )
 
         # Create bulk relationships
@@ -391,13 +413,16 @@ def create_condition_medications_bulk(
             patient_id=db_condition.patient_id,
             condition_id=condition_id,
             created_count=len(created),
-            skipped_count=len(skipped)
+            skipped_count=len(skipped),
         )
 
         return created
 
 
-@router.put("/{condition_id}/medications/{relationship_id}", response_model=ConditionMedicationResponse)
+@router.put(
+    "/{condition_id}/medications/{relationship_id}",
+    response_model=ConditionMedicationResponse,
+)
 def update_condition_medication(
     *,
     condition_id: int,
@@ -417,31 +442,31 @@ def update_condition_medication(
                 "condition_not_found",
                 request,
                 f"Condition with ID {condition_id} not found",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
-                request=request
+                request=request,
             )
 
         # Verify access using multi-patient system
         from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
 
-        patient_record = db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
+        patient_record = (
+            db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
+        )
         if not patient_record:
             log_security_event(
                 logger,
                 "patient_not_found",
                 request,
                 f"Patient {db_condition.patient_id} not found for condition {condition_id}",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
-                resource="Patient",
-                message="Patient not found",
-                request=request
+                resource="Patient", message="Patient not found", request=request
             )
 
         access_service = PatientAccessService(db)
@@ -453,11 +478,10 @@ def update_condition_medication(
                 f"User denied edit access to condition {condition_id}",
                 user_id=current_user.id,
                 patient_id=patient_record.id,
-                condition_id=condition_id
+                condition_id=condition_id,
             )
             raise ForbiddenException(
-                message="Access denied to this condition",
-                request=request
+                message="Access denied to this condition", request=request
             )
 
         # Get the relationship
@@ -468,12 +492,12 @@ def update_condition_medication(
                 "condition_medication_not_found",
                 request,
                 f"Condition medication relationship {relationship_id} not found",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
                 resource="Condition medication relationship",
                 message=f"Relationship with ID {relationship_id} not found",
-                request=request
+                request=request,
             )
 
         # Verify the relationship belongs to the specified condition
@@ -485,15 +509,17 @@ def update_condition_medication(
                 f"Relationship {relationship_id} does not belong to condition {condition_id}",
                 user_id=current_user.id,
                 relationship_id=relationship_id,
-                condition_id=condition_id
+                condition_id=condition_id,
             )
             raise BusinessLogicException(
                 message="Relationship does not belong to the specified condition",
-                request=request
+                request=request,
             )
 
         # Update the relationship
-        updated_relationship = condition_medication.update(db, db_obj=relationship, obj_in=medication_in)
+        updated_relationship = condition_medication.update(
+            db, db_obj=relationship, obj_in=medication_in
+        )
 
         log_data_access(
             logger,
@@ -503,7 +529,7 @@ def update_condition_medication(
             "ConditionMedication",
             record_id=relationship_id,
             patient_id=patient_record.id,
-            condition_id=condition_id
+            condition_id=condition_id,
         )
 
         return updated_relationship
@@ -528,31 +554,31 @@ def delete_condition_medication(
                 "condition_not_found",
                 request,
                 f"Condition with ID {condition_id} not found",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
                 resource="Condition",
                 message=f"Condition with ID {condition_id} not found",
-                request=request
+                request=request,
             )
 
         # Verify access using multi-patient system
         from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
 
-        patient_record = db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
+        patient_record = (
+            db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
+        )
         if not patient_record:
             log_security_event(
                 logger,
                 "patient_not_found",
                 request,
                 f"Patient {db_condition.patient_id} not found for condition {condition_id}",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
-                resource="Patient",
-                message="Patient not found",
-                request=request
+                resource="Patient", message="Patient not found", request=request
             )
 
         access_service = PatientAccessService(db)
@@ -564,11 +590,10 @@ def delete_condition_medication(
                 f"User denied delete access to condition {condition_id}",
                 user_id=current_user.id,
                 patient_id=patient_record.id,
-                condition_id=condition_id
+                condition_id=condition_id,
             )
             raise ForbiddenException(
-                message="Access denied to this condition",
-                request=request
+                message="Access denied to this condition", request=request
             )
 
         # Get the relationship
@@ -579,12 +604,12 @@ def delete_condition_medication(
                 "condition_medication_not_found",
                 request,
                 f"Condition medication relationship {relationship_id} not found",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
                 resource="Condition medication relationship",
                 message=f"Relationship with ID {relationship_id} not found",
-                request=request
+                request=request,
             )
 
         # Verify the relationship belongs to the specified condition
@@ -596,11 +621,11 @@ def delete_condition_medication(
                 f"Relationship {relationship_id} does not belong to condition {condition_id}",
                 user_id=current_user.id,
                 relationship_id=relationship_id,
-                condition_id=condition_id
+                condition_id=condition_id,
             )
             raise BusinessLogicException(
                 message="Relationship does not belong to the specified condition",
-                request=request
+                request=request,
             )
 
         # Delete the relationship
@@ -614,13 +639,14 @@ def delete_condition_medication(
             "ConditionMedication",
             record_id=relationship_id,
             patient_id=patient_record.id,
-            condition_id=condition_id
+            condition_id=condition_id,
         )
 
         return {"message": "Condition medication relationship deleted successfully"}
 
 
 # Generic condition routes (must come after specific medication routes)
+
 
 @router.get("/{condition_id}", response_model=ConditionWithRelations)
 def read_condition(
@@ -641,7 +667,13 @@ def read_condition(
             relations=["patient", "practitioner", "treatments"],
         )
         handle_not_found(condition_obj, "Condition")
-        verify_patient_ownership(condition_obj, current_user_patient_id, "condition", db=db, current_user=current_user)
+        verify_patient_ownership(
+            condition_obj,
+            current_user_patient_id,
+            "condition",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -650,7 +682,7 @@ def read_condition(
             "read",
             "Condition",
             record_id=condition_id,
-            patient_id=condition_obj.patient_id
+            patient_id=condition_obj.patient_id,
         )
 
         return condition_obj
@@ -725,7 +757,7 @@ def get_active_conditions(
             "read",
             "Condition",
             patient_id=patient_id,
-            count=len(conditions)
+            count=len(conditions),
         )
 
         return conditions
@@ -756,7 +788,7 @@ def get_patient_conditions(
             "read",
             "Condition",
             patient_id=patient_id,
-            count=len(conditions)
+            count=len(conditions),
         )
 
         return conditions
@@ -764,7 +796,11 @@ def get_patient_conditions(
 
 # Medication-focused endpoints (for showing conditions on medication view)
 
-@router.get("/medication/{medication_id}/conditions", response_model=List[ConditionMedicationWithDetails])
+
+@router.get(
+    "/medication/{medication_id}/conditions",
+    response_model=List[ConditionMedicationWithDetails],
+)
 def get_medication_conditions(
     *,
     medication_id: int,
@@ -782,31 +818,31 @@ def get_medication_conditions(
                 "medication_not_found",
                 request,
                 f"Medication with ID {medication_id} not found",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
                 resource="Medication",
                 message=f"Medication with ID {medication_id} not found",
-                request=request
+                request=request,
             )
 
         # Verify access using multi-patient system
         from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
 
-        patient_record = db.query(Patient).filter(Patient.id == db_medication.patient_id).first()
+        patient_record = (
+            db.query(Patient).filter(Patient.id == db_medication.patient_id).first()
+        )
         if not patient_record:
             log_security_event(
                 logger,
                 "patient_not_found",
                 request,
                 f"Patient {db_medication.patient_id} not found for medication {medication_id}",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise NotFoundException(
-                resource="Patient",
-                message="Patient not found",
-                request=request
+                resource="Patient", message="Patient not found", request=request
             )
 
         access_service = PatientAccessService(db)
@@ -818,15 +854,16 @@ def get_medication_conditions(
                 f"User denied view access to medication {medication_id}",
                 user_id=current_user.id,
                 patient_id=patient_record.id,
-                medication_id=medication_id
+                medication_id=medication_id,
             )
             raise ForbiddenException(
-                message="Access denied to this medication",
-                request=request
+                message="Access denied to this medication", request=request
             )
 
         # Get condition relationships
-        relationships = condition_medication.get_by_medication(db, medication_id=medication_id)
+        relationships = condition_medication.get_by_medication(
+            db, medication_id=medication_id
+        )
 
         # Enhance with condition details
         enhanced_relationships = []
@@ -836,20 +873,26 @@ def get_medication_conditions(
             if condition_obj and condition_obj.patient_id != db_medication.patient_id:
                 condition_obj = None  # Don't include conditions from other patients
 
-            enhanced_relationships.append({
-                "id": rel.id,
-                "condition_id": rel.condition_id,
-                "medication_id": rel.medication_id,
-                "relevance_note": rel.relevance_note,
-                "created_at": rel.created_at,
-                "updated_at": rel.updated_at,
-                "condition": {
-                    "id": condition_obj.id,
-                    "diagnosis": condition_obj.diagnosis,
-                    "status": condition_obj.status,
-                    "severity": condition_obj.severity,
-                } if condition_obj else None
-            })
+            enhanced_relationships.append(
+                {
+                    "id": rel.id,
+                    "condition_id": rel.condition_id,
+                    "medication_id": rel.medication_id,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "condition": (
+                        {
+                            "id": condition_obj.id,
+                            "diagnosis": condition_obj.diagnosis,
+                            "status": condition_obj.status,
+                            "severity": condition_obj.severity,
+                        }
+                        if condition_obj
+                        else None
+                    ),
+                }
+            )
 
         log_data_access(
             logger,
@@ -859,7 +902,7 @@ def get_medication_conditions(
             "ConditionMedication",
             patient_id=patient_record.id,
             medication_id=medication_id,
-            count=len(relationships)
+            count=len(relationships),
         )
 
         return enhanced_relationships

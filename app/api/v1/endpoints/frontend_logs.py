@@ -142,9 +142,7 @@ def log_frontend_event(
         )
 
     elif log_data.level.lower() == "debug":
-        frontend_logger.debug(
-            f"Frontend Debug: {log_data.message}", extra=log_context
-        )
+        frontend_logger.debug(f"Frontend Debug: {log_data.message}", extra=log_context)
 
     else:  # info and any other level
         frontend_logger.info(

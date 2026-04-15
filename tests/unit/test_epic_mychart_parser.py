@@ -79,21 +79,15 @@ class TestEpicMyChartBasicParsing:
         """Test that numeric values are correctly extracted."""
         results = parser.parse(EPIC_MYCHART_RENAL_PANEL)
 
-        creatinine = next(
-            (r for r in results if "Creatinine" in r.test_name), None
-        )
+        creatinine = next((r for r in results if "Creatinine" in r.test_name), None)
         assert creatinine is not None
         assert creatinine.value == 0.72
 
-        bun = next(
-            (r for r in results if "BUN" in r.test_name), None
-        )
+        bun = next((r for r in results if "BUN" in r.test_name), None)
         assert bun is not None
         assert bun.value == 15.0
 
-        calcium = next(
-            (r for r in results if "Calcium" in r.test_name), None
-        )
+        calcium = next((r for r in results if "Calcium" in r.test_name), None)
         assert calcium is not None
         assert calcium.value == 9.4
 
@@ -101,9 +95,7 @@ class TestEpicMyChartBasicParsing:
         """Test that units are correctly extracted from normal range lines."""
         results = parser.parse(EPIC_MYCHART_RENAL_PANEL)
 
-        creatinine = next(
-            (r for r in results if "Creatinine" in r.test_name), None
-        )
+        creatinine = next((r for r in results if "Creatinine" in r.test_name), None)
         assert creatinine is not None
         assert creatinine.unit == "mg/dL"
 
@@ -111,15 +103,11 @@ class TestEpicMyChartBasicParsing:
         """Test that reference ranges are correctly extracted."""
         results = parser.parse(EPIC_MYCHART_RENAL_PANEL)
 
-        creatinine = next(
-            (r for r in results if "Creatinine" in r.test_name), None
-        )
+        creatinine = next((r for r in results if "Creatinine" in r.test_name), None)
         assert creatinine is not None
         assert creatinine.reference_range == "0.50 - 0.90"
 
-        bun = next(
-            (r for r in results if "BUN" in r.test_name), None
-        )
+        bun = next((r for r in results if "BUN" in r.test_name), None)
         assert bun is not None
         assert bun.reference_range == "7 - 25"
 
@@ -148,9 +136,7 @@ class TestEpicMyChartSpecialCases:
         """Test parsing EGFR with 'above >=90' range format."""
         results = parser.parse(EPIC_MYCHART_FULL_PANEL)
 
-        egfr = next(
-            (r for r in results if "EGFR" in r.test_name), None
-        )
+        egfr = next((r for r in results if "EGFR" in r.test_name), None)
         assert egfr is not None
         assert egfr.value == 126.0
         assert egfr.reference_range == ">=90"
@@ -160,9 +146,7 @@ class TestEpicMyChartSpecialCases:
         """Test that 'Value' label before EGFR number is handled."""
         results = parser.parse(EPIC_MYCHART_FULL_PANEL)
 
-        egfr = next(
-            (r for r in results if "EGFR" in r.test_name), None
-        )
+        egfr = next((r for r in results if "EGFR" in r.test_name), None)
         assert egfr is not None
         # Value should be 126, not some artifact
         assert egfr.value == 126.0
@@ -171,9 +155,7 @@ class TestEpicMyChartSpecialCases:
         """Test Anion Gap (no 'Level' suffix) is parsed correctly."""
         results = parser.parse(EPIC_MYCHART_FULL_PANEL)
 
-        anion_gap = next(
-            (r for r in results if "Anion Gap" in r.test_name), None
-        )
+        anion_gap = next((r for r in results if "Anion Gap" in r.test_name), None)
         assert anion_gap is not None
         assert anion_gap.value == 10.0
         assert anion_gap.reference_range == "5 - 15"
@@ -198,9 +180,9 @@ class TestEpicMyChartSpecialCases:
         results = parser.parse(EPIC_MYCHART_FULL_PANEL)
 
         for result in results:
-            assert result.reference_range, (
-                f"Missing reference range for {result.test_name}"
-            )
+            assert (
+                result.reference_range
+            ), f"Missing reference range for {result.test_name}"
 
 
 class TestEpicMyChartFlagDetermination:
@@ -215,17 +197,15 @@ class TestEpicMyChartFlagDetermination:
         results = parser.parse(EPIC_MYCHART_RENAL_PANEL)
 
         for result in results:
-            assert result.flag == "", (
-                f"{result.test_name} = {result.value} should not be flagged"
-            )
+            assert (
+                result.flag == ""
+            ), f"{result.test_name} = {result.value} should not be flagged"
 
     def test_high_glucose_flagged(self, parser):
         """Test glucose above normal range is flagged High."""
         results = parser.parse(EPIC_MYCHART_WITH_FLAGS)
 
-        glucose = next(
-            (r for r in results if "Glucose" in r.test_name), None
-        )
+        glucose = next((r for r in results if "Glucose" in r.test_name), None)
         assert glucose is not None
         assert glucose.value == 118.0
         assert glucose.flag == "High"
@@ -234,9 +214,7 @@ class TestEpicMyChartFlagDetermination:
         """Test creatinine below normal range is flagged Low."""
         results = parser.parse(EPIC_MYCHART_WITH_FLAGS)
 
-        creatinine = next(
-            (r for r in results if "Creatinine" in r.test_name), None
-        )
+        creatinine = next((r for r in results if "Creatinine" in r.test_name), None)
         assert creatinine is not None
         assert creatinine.value == 0.42
         assert creatinine.flag == "Low"
@@ -245,9 +223,7 @@ class TestEpicMyChartFlagDetermination:
         """Test EGFR below >=90 threshold is flagged Low."""
         results = parser.parse(EPIC_MYCHART_WITH_FLAGS)
 
-        egfr = next(
-            (r for r in results if "EGFR" in r.test_name), None
-        )
+        egfr = next((r for r in results if "EGFR" in r.test_name), None)
         assert egfr is not None
         assert egfr.value == 72.0
         assert egfr.flag == "Low"
@@ -256,9 +232,7 @@ class TestEpicMyChartFlagDetermination:
         """Test sodium within range is not flagged."""
         results = parser.parse(EPIC_MYCHART_WITH_FLAGS)
 
-        sodium = next(
-            (r for r in results if "Sodium" in r.test_name), None
-        )
+        sodium = next((r for r in results if "Sodium" in r.test_name), None)
         assert sodium is not None
         assert sodium.value == 140.0
         assert sodium.flag == ""
@@ -289,9 +263,7 @@ class TestEpicMyChartGaugeArtifacts:
         """Test gauge endpoint numbers are filtered out."""
         results = parser.parse(EPIC_MYCHART_RENAL_PANEL)
 
-        creatinine = next(
-            (r for r in results if "Creatinine" in r.test_name), None
-        )
+        creatinine = next((r for r in results if "Creatinine" in r.test_name), None)
         assert creatinine is not None
         # Should be 0.72, not 0.50 or 0.90 (gauge endpoints)
         assert creatinine.value == 0.72
@@ -414,9 +386,7 @@ class TestEpicMyChartNormalRangeParsing:
 
     def test_above_gte_range(self, parser):
         """Test 'above >=N unit' format."""
-        ref, unit = parser._parse_normal_range(
-            "Normal range: above >=90 mL/min/1.73m2"
-        )
+        ref, unit = parser._parse_normal_range("Normal range: above >=90 mL/min/1.73m2")
         assert ref == ">=90"
         assert unit == "mL/min/1.73m2"
 

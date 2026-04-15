@@ -10,13 +10,19 @@ from fastapi.responses import Response
 from app.core.config import settings
 
 
-def set_auth_cookie(response: Response, token: str, max_age_minutes: int | None = None) -> None:
+def set_auth_cookie(
+    response: Response, token: str, max_age_minutes: int | None = None
+) -> None:
     """Set the HttpOnly authentication cookie on *response*.
 
     *max_age_minutes* should match the JWT lifetime so the cookie and token
     expire at the same time.  Falls back to ACCESS_TOKEN_EXPIRE_MINUTES.
     """
-    minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES if max_age_minutes is None else max_age_minutes
+    minutes = (
+        settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        if max_age_minutes is None
+        else max_age_minutes
+    )
     response.set_cookie(
         key=settings.AUTH_COOKIE_NAME,
         value=token,

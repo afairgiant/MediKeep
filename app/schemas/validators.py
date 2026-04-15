@@ -200,11 +200,11 @@ def validate_phone_number(
         raise ValueError(f"{field_name} must be {max_length} characters or less")
 
     # Allow digits, spaces, dashes, parentheses, periods, and +
-    if not re.match(r'^[0-9\s\-\+\(\)\.]+$', cleaned):
+    if not re.match(r"^[0-9\s\-\+\(\)\.]+$", cleaned):
         raise ValueError(f"{field_name} contains invalid characters")
 
     # Require at least one digit
-    if not re.search(r'\d', cleaned):
+    if not re.search(r"\d", cleaned):
         raise ValueError(f"{field_name} must contain at least one digit")
 
     return cleaned
@@ -248,7 +248,9 @@ def validate_list_field(
 
     for item in cleaned:
         if len(item) > max_item_length:
-            raise ValueError(f"Each item must be less than {max_item_length} characters")
+            raise ValueError(
+                f"Each item must be less than {max_item_length} characters"
+            )
 
     return cleaned
 
@@ -418,6 +420,8 @@ def validate_blood_type(value: Optional[str]) -> Optional[str]:
     upper_value = value.upper().strip()
 
     if upper_value not in VALID_BLOOD_TYPES:
-        raise ValueError(f"Blood type must be one of: {', '.join(sorted(VALID_BLOOD_TYPES))}")
+        raise ValueError(
+            f"Blood type must be one of: {', '.join(sorted(VALID_BLOOD_TYPES))}"
+        )
 
     return upper_value

@@ -381,9 +381,10 @@ class LabResultWithRelations(LabResultResponse):
 
 # Lab Result - Condition Relationship Schemas
 
+
 class LabResultConditionBase(BaseModel):
     """Base schema for lab result condition relationship"""
-    
+
     lab_result_id: int
     condition_id: int
     relevance_note: Optional[str] = None
@@ -399,12 +400,13 @@ class LabResultConditionBase(BaseModel):
 
 class LabResultConditionCreate(LabResultConditionBase):
     """Schema for creating a lab result condition relationship"""
+
     pass
 
 
 class LabResultConditionUpdate(BaseModel):
     """Schema for updating a lab result condition relationship"""
-    
+
     relevance_note: Optional[str] = None
 
     @field_validator("relevance_note")
@@ -418,7 +420,7 @@ class LabResultConditionUpdate(BaseModel):
 
 class LabResultConditionResponse(LabResultConditionBase):
     """Schema for lab result condition relationship response"""
-    
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

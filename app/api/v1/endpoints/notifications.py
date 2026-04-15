@@ -87,6 +87,7 @@ def get_event_types(
 # Channel Management
 # ============================================================================
 
+
 @router.get("/channels", response_model=List[ChannelResponse])
 def list_channels(
     request: Request,
@@ -115,16 +116,21 @@ def list_channels(
 
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to list notification channels", e,
-            user_id=current_user.id
+            logger,
+            request,
+            "Failed to list notification channels",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to list notification channels"
+            detail="Failed to list notification channels",
         )
 
 
-@router.post("/channels", response_model=ChannelResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/channels", response_model=ChannelResponse, status_code=status.HTTP_201_CREATED
+)
 def create_channel(
     request: Request,
     channel_data: ChannelCreate,
@@ -134,8 +140,11 @@ def create_channel(
     """Create a new notification channel."""
     try:
         log_endpoint_access(
-            logger, request, current_user.id, "notification_channel_created",
-            channel_type=channel_data.channel_type.value
+            logger,
+            request,
+            current_user.id,
+            "notification_channel_created",
+            channel_type=channel_data.channel_type.value,
         )
 
         service = NotificationService(db)
@@ -150,18 +159,18 @@ def create_channel(
         return ChannelResponse.model_validate(channel)
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to create notification channel", e,
-            user_id=current_user.id
+            logger,
+            request,
+            "Failed to create notification channel",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create notification channel"
+            detail="Failed to create notification channel",
         )
 
 
@@ -175,8 +184,11 @@ def get_channel(
     """Get a specific notification channel with masked config."""
     try:
         log_endpoint_access(
-            logger, request, current_user.id, "notification_channel_accessed",
-            channel_id=channel_id
+            logger,
+            request,
+            current_user.id,
+            "notification_channel_accessed",
+            channel_id=channel_id,
         )
 
         service = NotificationService(db)
@@ -184,8 +196,7 @@ def get_channel(
 
         if not channel:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Channel not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found"
             )
 
         response = ChannelWithConfigResponse(
@@ -209,12 +220,16 @@ def get_channel(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to get notification channel", e,
-            user_id=current_user.id, channel_id=channel_id
+            logger,
+            request,
+            "Failed to get notification channel",
+            e,
+            user_id=current_user.id,
+            channel_id=channel_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get notification channel"
+            detail="Failed to get notification channel",
         )
 
 
@@ -229,8 +244,11 @@ def update_channel(
     """Update a notification channel."""
     try:
         log_endpoint_access(
-            logger, request, current_user.id, "notification_channel_updated",
-            channel_id=channel_id
+            logger,
+            request,
+            current_user.id,
+            "notification_channel_updated",
+            channel_id=channel_id,
         )
 
         service = NotificationService(db)
@@ -244,27 +262,27 @@ def update_channel(
 
         if not channel:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Channel not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found"
             )
 
         return ChannelResponse.model_validate(channel)
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to update notification channel", e,
-            user_id=current_user.id, channel_id=channel_id
+            logger,
+            request,
+            "Failed to update notification channel",
+            e,
+            user_id=current_user.id,
+            channel_id=channel_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update notification channel"
+            detail="Failed to update notification channel",
         )
 
 
@@ -278,8 +296,11 @@ def delete_channel(
     """Delete a notification channel."""
     try:
         log_endpoint_access(
-            logger, request, current_user.id, "notification_channel_deleted",
-            channel_id=channel_id
+            logger,
+            request,
+            current_user.id,
+            "notification_channel_deleted",
+            channel_id=channel_id,
         )
 
         service = NotificationService(db)
@@ -287,8 +308,7 @@ def delete_channel(
 
         if not deleted:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Channel not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found"
             )
 
         return None
@@ -297,12 +317,16 @@ def delete_channel(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to delete notification channel", e,
-            user_id=current_user.id, channel_id=channel_id
+            logger,
+            request,
+            "Failed to delete notification channel",
+            e,
+            user_id=current_user.id,
+            channel_id=channel_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete notification channel"
+            detail="Failed to delete notification channel",
         )
 
 
@@ -317,8 +341,11 @@ async def test_channel(
     """Send a test notification to a channel."""
     try:
         log_endpoint_access(
-            logger, request, current_user.id, "notification_channel_tested",
-            channel_id=channel_id
+            logger,
+            request,
+            current_user.id,
+            "notification_channel_tested",
+            channel_id=channel_id,
         )
 
         service = NotificationService(db)
@@ -326,8 +353,7 @@ async def test_channel(
 
         if not channel:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Channel not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found"
             )
 
         # Check if channel config is valid before testing
@@ -357,18 +383,23 @@ async def test_channel(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to test notification channel", e,
-            user_id=current_user.id, channel_id=channel_id
+            logger,
+            request,
+            "Failed to test notification channel",
+            e,
+            user_id=current_user.id,
+            channel_id=channel_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to test notification channel"
+            detail="Failed to test notification channel",
         )
 
 
 # ============================================================================
 # Preference Management
 # ============================================================================
+
 
 @router.get("/preferences", response_model=List[PreferenceResponse])
 def list_preferences(
@@ -389,27 +420,32 @@ def list_preferences(
         response = []
         for pref in preferences:
             channel = channels.get(pref.channel_id)
-            response.append(PreferenceResponse(
-                id=pref.id,
-                channel_id=pref.channel_id,
-                channel_name=channel.name if channel else "Unknown",
-                event_type=pref.event_type,
-                is_enabled=pref.is_enabled,
-                remind_before_minutes=pref.remind_before_minutes,
-                created_at=pref.created_at,
-                updated_at=pref.updated_at,
-            ))
+            response.append(
+                PreferenceResponse(
+                    id=pref.id,
+                    channel_id=pref.channel_id,
+                    channel_name=channel.name if channel else "Unknown",
+                    event_type=pref.event_type,
+                    is_enabled=pref.is_enabled,
+                    remind_before_minutes=pref.remind_before_minutes,
+                    created_at=pref.created_at,
+                    updated_at=pref.updated_at,
+                )
+            )
 
         return response
 
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to list notification preferences", e,
-            user_id=current_user.id
+            logger,
+            request,
+            "Failed to list notification preferences",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to list notification preferences"
+            detail="Failed to list notification preferences",
         )
 
 
@@ -432,13 +468,17 @@ def get_preference_matrix(
         # Build preference lookup: event_type -> channel_id -> is_enabled
         pref_lookup = {}
         for pref in preferences:
-            pref_lookup.setdefault(pref.event_type, {})[pref.channel_id] = pref.is_enabled
+            pref_lookup.setdefault(pref.event_type, {})[
+                pref.channel_id
+            ] = pref.is_enabled
 
         # Build matrix with defaults (False for unconfigured)
         events = [e.value for e in EventType]
         channel_ids = [c.id for c in channels]
         matrix = {
-            event: {cid: pref_lookup.get(event, {}).get(cid, False) for cid in channel_ids}
+            event: {
+                cid: pref_lookup.get(event, {}).get(cid, False) for cid in channel_ids
+            }
             for event in events
         }
 
@@ -450,12 +490,15 @@ def get_preference_matrix(
 
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to get preference matrix", e,
-            user_id=current_user.id
+            logger,
+            request,
+            "Failed to get preference matrix",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get preference matrix"
+            detail="Failed to get preference matrix",
         )
 
 
@@ -469,9 +512,12 @@ def set_preference(
     """Set or update a notification preference."""
     try:
         log_endpoint_access(
-            logger, request, current_user.id, "notification_preference_updated",
+            logger,
+            request,
+            current_user.id,
+            "notification_preference_updated",
             channel_id=pref_data.channel_id,
-            event_type=pref_data.event_type.value
+            event_type=pref_data.event_type.value,
         )
 
         service = NotificationService(db)
@@ -480,8 +526,7 @@ def set_preference(
         channel = service.get_channel(current_user.id, pref_data.channel_id)
         if not channel:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Channel not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Channel not found"
             )
 
         pref = service.set_preference(
@@ -504,26 +549,27 @@ def set_preference(
         )
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to set notification preference", e,
-            user_id=current_user.id
+            logger,
+            request,
+            "Failed to set notification preference",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to set notification preference"
+            detail="Failed to set notification preference",
         )
 
 
 # ============================================================================
 # History
 # ============================================================================
+
 
 @router.get("/history", response_model=HistoryListResponse)
 def get_history(
@@ -538,15 +584,19 @@ def get_history(
     """Get notification history for the current user."""
     try:
         log_endpoint_access(
-            logger, request, current_user.id, "notification_history_accessed",
-            page=page, page_size=page_size
+            logger,
+            request,
+            current_user.id,
+            "notification_history_accessed",
+            page=page,
+            page_size=page_size,
         )
 
         # Validate page_size
         if page_size < 1 or page_size > 100:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="page_size must be between 1 and 100"
+                detail="page_size must be between 1 and 100",
             )
 
         service = NotificationService(db)
@@ -563,19 +613,21 @@ def get_history(
         history_items = []
         for item in items:
             channel = channels.get(item.channel_id) if item.channel_id else None
-            history_items.append(HistoryResponse(
-                id=item.id,
-                event_type=item.event_type,
-                title=item.title,
-                message_preview=item.message_preview,
-                channel_name=channel.name if channel else None,
-                channel_type=channel.channel_type if channel else None,
-                status=item.status,
-                attempt_count=item.attempt_count,
-                error_message=item.error_message,
-                created_at=item.created_at,
-                sent_at=item.sent_at,
-            ))
+            history_items.append(
+                HistoryResponse(
+                    id=item.id,
+                    event_type=item.event_type,
+                    title=item.title,
+                    message_preview=item.message_preview,
+                    channel_name=channel.name if channel else None,
+                    channel_type=channel.channel_type if channel else None,
+                    status=item.status,
+                    attempt_count=item.attempt_count,
+                    error_message=item.error_message,
+                    created_at=item.created_at,
+                    sent_at=item.sent_at,
+                )
+            )
 
         return HistoryListResponse(
             items=history_items,
@@ -588,10 +640,13 @@ def get_history(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to get notification history", e,
-            user_id=current_user.id
+            logger,
+            request,
+            "Failed to get notification history",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get notification history"
+            detail="Failed to get notification history",
         )

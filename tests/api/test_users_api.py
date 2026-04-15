@@ -1,6 +1,7 @@
 """
 Tests for Users API endpoints.
 """
+
 import pytest
 from datetime import date
 from fastapi.testclient import TestClient
@@ -9,7 +10,11 @@ from sqlalchemy.orm import Session
 from app.crud.patient import patient as patient_crud
 from app.crud.user import user as user_crud
 from app.schemas.patient import PatientCreate
-from tests.utils.user import create_random_user, create_user_token_headers, create_admin_user
+from tests.utils.user import (
+    create_random_user,
+    create_user_token_headers,
+    create_admin_user,
+)
 
 
 class TestUsersAPI:
@@ -24,10 +29,7 @@ class TestUsersAPI:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test getting current user profile."""
-        response = client.get(
-            "/api/v1/users/me",
-            headers=authenticated_headers
-        )
+        response = client.get("/api/v1/users/me", headers=authenticated_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -42,13 +44,11 @@ class TestUsersAPI:
         """Test updating current user profile."""
         update_data = {
             "full_name": "John Updated Doe",
-            "email": "updated.email@example.com"
+            "email": "updated.email@example.com",
         }
 
         response = client.put(
-            "/api/v1/users/me",
-            json=update_data,
-            headers=authenticated_headers
+            "/api/v1/users/me", json=update_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -66,14 +66,10 @@ class TestUsersAPI:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test updating user with invalid email format."""
-        update_data = {
-            "email": "not-a-valid-email"
-        }
+        update_data = {"email": "not-a-valid-email"}
 
         response = client.put(
-            "/api/v1/users/me",
-            json=update_data,
-            headers=authenticated_headers
+            "/api/v1/users/me", json=update_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -84,9 +80,7 @@ class TestUsersAPI:
         """Test email validation edge cases."""
         # Empty email
         response = client.put(
-            "/api/v1/users/me",
-            json={"email": ""},
-            headers=authenticated_headers
+            "/api/v1/users/me", json={"email": ""}, headers=authenticated_headers
         )
         assert response.status_code == 422
 
@@ -95,7 +89,7 @@ class TestUsersAPI:
         response = client.put(
             "/api/v1/users/me",
             json={"email": long_email},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
@@ -103,7 +97,7 @@ class TestUsersAPI:
         response = client.put(
             "/api/v1/users/me",
             json={"email": "test user@example.com"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
@@ -111,15 +105,13 @@ class TestUsersAPI:
         response = client.put(
             "/api/v1/users/me",
             json={"email": "testexample.com"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
         # Email without domain
         response = client.put(
-            "/api/v1/users/me",
-            json={"email": "test@"},
-            headers=authenticated_headers
+            "/api/v1/users/me", json={"email": "test@"}, headers=authenticated_headers
         )
         assert response.status_code == 422
 
@@ -137,8 +129,7 @@ class TestUserPreferencesAPI:
     ):
         """Test getting user preferences."""
         response = client.get(
-            "/api/v1/users/me/preferences",
-            headers=authenticated_headers
+            "/api/v1/users/me/preferences", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -151,14 +142,12 @@ class TestUserPreferencesAPI:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test updating unit system preference."""
-        update_data = {
-            "unit_system": "metric"
-        }
+        update_data = {"unit_system": "metric"}
 
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -169,14 +158,12 @@ class TestUserPreferencesAPI:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test updating language preference."""
-        update_data = {
-            "language": "es"
-        }
+        update_data = {"language": "es"}
 
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -187,14 +174,12 @@ class TestUserPreferencesAPI:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test updating session timeout preference."""
-        update_data = {
-            "session_timeout_minutes": 60
-        }
+        update_data = {"session_timeout_minutes": 60}
 
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -210,7 +195,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"session_timeout_minutes": 1},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code in [200, 422]  # Either accepts or validates minimum
 
@@ -218,7 +203,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"session_timeout_minutes": 0},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422, "Should reject zero timeout"
 
@@ -226,7 +211,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"session_timeout_minutes": -10},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422, "Should reject negative timeout"
 
@@ -234,7 +219,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"session_timeout_minutes": 10000},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code in [200, 422]  # Either accepts or validates maximum
 
@@ -242,7 +227,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"session_timeout_minutes": "not_a_number"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422, "Should reject non-numeric timeout"
 
@@ -257,7 +242,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -271,13 +256,13 @@ class TestUserPreferencesAPI:
         update_data = {
             "unit_system": "imperial",
             "language": "en",
-            "date_format": "mdy"  # Must use supported format codes: mdy, dmy, ymd
+            "date_format": "mdy",  # Must use supported format codes: mdy, dmy, ymd
         }
 
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -294,10 +279,7 @@ class TestUserPreferencesAPI:
 
     def test_update_preferences_unauthenticated(self, client: TestClient):
         """Test that updating preferences requires authentication."""
-        response = client.put(
-            "/api/v1/users/me/preferences",
-            json={"language": "en"}
-        )
+        response = client.put("/api/v1/users/me/preferences", json={"language": "en"})
 
         assert response.status_code == 401
 
@@ -308,12 +290,11 @@ class TestUserPreferencesAPI:
         client.put(
             "/api/v1/users/me/preferences",
             json={"unit_system": "metric"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response = client.get(
-            "/api/v1/users/me/preferences",
-            headers=authenticated_headers
+            "/api/v1/users/me/preferences", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -328,7 +309,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"unit_system": "invalid_system"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
@@ -336,7 +317,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"language": "invalid_lang_code_xyz"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
@@ -344,7 +325,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"date_format": "INVALID/FORMAT"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
@@ -352,7 +333,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"language": "'; DROP TABLE users; --"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
@@ -360,7 +341,7 @@ class TestUserPreferencesAPI:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"language": "<script>alert('xss')</script>"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422
 
@@ -377,14 +358,12 @@ class TestUserPaperlessPreferences:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test enabling Paperless integration."""
-        update_data = {
-            "paperless_enabled": True
-        }
+        update_data = {"paperless_enabled": True}
 
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -395,14 +374,12 @@ class TestUserPaperlessPreferences:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test setting Paperless URL."""
-        update_data = {
-            "paperless_url": "https://paperless.example.com"
-        }
+        update_data = {"paperless_url": "https://paperless.example.com"}
 
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -413,14 +390,12 @@ class TestUserPaperlessPreferences:
         self, client: TestClient, user_with_patient, authenticated_headers
     ):
         """Test setting Paperless auto sync preference."""
-        update_data = {
-            "paperless_auto_sync": True
-        }
+        update_data = {"paperless_auto_sync": True}
 
         response = client.put(
             "/api/v1/users/me/preferences",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -432,8 +407,7 @@ class TestUserPaperlessPreferences:
     ):
         """Test that response indicates whether Paperless token is set."""
         response = client.get(
-            "/api/v1/users/me/preferences",
-            headers=authenticated_headers
+            "/api/v1/users/me/preferences", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -448,10 +422,7 @@ class TestUserPaperlessPreferences:
     ):
         """Test that Paperless token is NEVER exposed in any response."""
         # Get user profile
-        response = client.get(
-            "/api/v1/users/me",
-            headers=authenticated_headers
-        )
+        response = client.get("/api/v1/users/me", headers=authenticated_headers)
         assert response.status_code == 200
         data = response.json()
         # Token should never be in user profile
@@ -460,8 +431,7 @@ class TestUserPaperlessPreferences:
 
         # Get preferences
         response = client.get(
-            "/api/v1/users/me/preferences",
-            headers=authenticated_headers
+            "/api/v1/users/me/preferences", headers=authenticated_headers
         )
         assert response.status_code == 200
         data = response.json()
@@ -476,7 +446,7 @@ class TestUserPaperlessPreferences:
         response = client.put(
             "/api/v1/users/me/preferences",
             json={"language": "en"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 200
         data = response.json()
@@ -488,8 +458,7 @@ class TestUserPaperlessPreferences:
     ):
         """Test that response indicates whether Paperless credentials are set."""
         response = client.get(
-            "/api/v1/users/me/preferences",
-            headers=authenticated_headers
+            "/api/v1/users/me/preferences", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -511,7 +480,7 @@ class TestUserAccountDeletion:
             first_name="Deletable",
             last_name="User",
             birth_date=date(1990, 1, 1),
-            gender="M"
+            gender="M",
         )
         patient = patient_crud.create_for_user(
             db_session, user_id=user_data["user"].id, patient_data=patient_data
@@ -530,10 +499,7 @@ class TestUserAccountDeletion:
         self, client: TestClient, deletable_user, deletable_user_headers
     ):
         """Test deleting own account."""
-        response = client.delete(
-            "/api/v1/users/me",
-            headers=deletable_user_headers
-        )
+        response = client.delete("/api/v1/users/me", headers=deletable_user_headers)
 
         # TODO: Account deletion may have business logic restrictions (last user, etc.)
         # 400 = validation/business logic error
@@ -551,10 +517,7 @@ class TestUserAccountDeletion:
         self, client: TestClient, deletable_user, deletable_user_headers
     ):
         """Test that account deletion returns a deletion summary."""
-        response = client.delete(
-            "/api/v1/users/me",
-            headers=deletable_user_headers
-        )
+        response = client.delete("/api/v1/users/me", headers=deletable_user_headers)
 
         # TODO: Account deletion may have business logic restrictions (last user, etc.)
         assert response.status_code in [200, 400, 404, 405]
@@ -573,7 +536,7 @@ class TestUserAccountDeletion:
             first_name="Delete",
             last_name="Test",
             birth_date=date(1990, 1, 1),
-            gender="M"
+            gender="M",
         )
         patient = patient_crud.create_for_user(
             db_session, user_id=user_data["user"].id, patient_data=patient_data
@@ -594,15 +557,12 @@ class TestUserAccountDeletion:
             medication_name="Test Med for Deletion",
             dosage="100mg",
             status="active",
-            patient_id=patient_id
+            patient_id=patient_id,
         )
         medication_crud.create(db_session, obj_in=med_data)
 
         # Delete account
-        response = client.delete(
-            "/api/v1/users/me",
-            headers=headers
-        )
+        response = client.delete("/api/v1/users/me", headers=headers)
         # TODO: Account deletion may have business logic restrictions (last user, etc.)
         assert response.status_code in [200, 400, 404, 405]
 
@@ -613,10 +573,11 @@ class TestUserAccountDeletion:
             db_session.expire_all()  # Clear cache
 
             from app.models.models import User
+
             deleted_user = db_session.query(User).filter(User.id == user_id).first()
 
             # User should be deleted or marked as deleted
-            assert deleted_user is None or getattr(deleted_user, 'is_deleted', True)
+            assert deleted_user is None or getattr(deleted_user, "is_deleted", True)
 
     def test_delete_account_unauthenticated(self, client: TestClient):
         """Test that account deletion requires authentication."""
@@ -625,12 +586,15 @@ class TestUserAccountDeletion:
         assert response.status_code == 401
 
     def test_deleted_user_cannot_login(
-        self, client: TestClient, db_session: Session, deletable_user, deletable_user_headers
+        self,
+        client: TestClient,
+        db_session: Session,
+        deletable_user,
+        deletable_user_headers,
     ):
         """Test that deleted user cannot access API."""
         delete_response = client.delete(
-            "/api/v1/users/me",
-            headers=deletable_user_headers
+            "/api/v1/users/me", headers=deletable_user_headers
         )
 
         # TODO: Account deletion may have business logic restrictions (last user, etc.)
@@ -639,10 +603,7 @@ class TestUserAccountDeletion:
 
         if delete_response.status_code == 200:
             # Only test if deletion succeeded
-            response = client.get(
-                "/api/v1/users/me",
-                headers=deletable_user_headers
-            )
+            response = client.get("/api/v1/users/me", headers=deletable_user_headers)
 
             assert response.status_code == 401
 
@@ -656,10 +617,7 @@ class TestUserIsolation:
         """Test that users cannot access other users' profiles."""
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -675,10 +633,7 @@ class TestUserIsolation:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -699,10 +654,7 @@ class TestUserIsolation:
         """Test that user preferences are isolated between users."""
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -714,10 +666,7 @@ class TestUserIsolation:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -730,13 +679,13 @@ class TestUserIsolation:
         client.put(
             "/api/v1/users/me/preferences",
             json={"unit_system": "metric"},
-            headers=headers1
+            headers=headers1,
         )
 
         client.put(
             "/api/v1/users/me/preferences",
             json={"unit_system": "imperial"},
-            headers=headers2
+            headers=headers2,
         )
 
         response1 = client.get("/api/v1/users/me/preferences", headers=headers1)

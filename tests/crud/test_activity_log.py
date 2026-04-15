@@ -1,6 +1,7 @@
 """
 Tests for ActivityLog CRUD operations.
 """
+
 import pytest
 from datetime import datetime, timedelta, date
 from sqlalchemy.orm import Session
@@ -22,7 +23,7 @@ class TestActivityLogCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -37,7 +38,7 @@ class TestActivityLogCRUD:
             description="Created new medication record",
             user_id=test_user.id,
             patient_id=test_patient.id,
-            entity_id=123
+            entity_id=123,
         )
 
         assert activity is not None
@@ -61,7 +62,7 @@ class TestActivityLogCRUD:
             user_id=test_user.id,
             metadata=metadata,
             ip_address="192.168.1.1",
-            user_agent="Mozilla/5.0"
+            user_agent="Mozilla/5.0",
         )
 
         assert activity is not None
@@ -78,12 +79,10 @@ class TestActivityLogCRUD:
                 entity_type=EntityType.PATIENT,
                 description=f"Viewed patient record {i+1}",
                 user_id=test_user.id,
-                patient_id=test_patient.id
+                patient_id=test_patient.id,
             )
 
-        activities = activity_log_crud.get_by_user(
-            db_session, user_id=test_user.id
-        )
+        activities = activity_log_crud.get_by_user(db_session, user_id=test_user.id)
 
         assert len(activities) == 5
         assert all(a.user_id == test_user.id for a in activities)
@@ -97,7 +96,7 @@ class TestActivityLogCRUD:
                 action=ActionType.VIEWED,
                 entity_type=EntityType.PATIENT,
                 description=f"Activity {i+1}",
-                user_id=test_user.id
+                user_id=test_user.id,
             )
 
         # Get first page
@@ -128,7 +127,7 @@ class TestActivityLogCRUD:
                 entity_type=EntityType.MEDICATION,
                 description=f"Medication {action}",
                 user_id=test_user.id,
-                patient_id=test_patient.id
+                patient_id=test_patient.id,
             )
 
         activities = activity_log_crud.get_by_patient(
@@ -147,12 +146,10 @@ class TestActivityLogCRUD:
                 action=ActionType.CREATED,
                 entity_type=EntityType.PATIENT,
                 description=f"Created patient {i+1}",
-                user_id=test_user.id
+                user_id=test_user.id,
             )
 
-        recent = activity_log_crud.get_recent_activity(
-            db_session, hours=24, limit=10
-        )
+        recent = activity_log_crud.get_recent_activity(db_session, hours=24, limit=10)
 
         assert len(recent) == 3
         # Should be ordered by timestamp descending
@@ -170,7 +167,7 @@ class TestActivityLogCRUD:
                 description=f"Medication action: {action}",
                 user_id=test_user.id,
                 patient_id=test_patient.id,
-                entity_id=entity_id
+                entity_id=entity_id,
             )
 
         # Create activity for different entity
@@ -180,7 +177,7 @@ class TestActivityLogCRUD:
             entity_type=EntityType.MEDICATION,
             description="Different medication",
             user_id=test_user.id,
-            entity_id=99
+            entity_id=99,
         )
 
         activities = activity_log_crud.get_by_entity(
@@ -198,21 +195,21 @@ class TestActivityLogCRUD:
             action=ActionType.CREATED,
             entity_type=EntityType.PATIENT,
             description="Created patient",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
         activity_log_crud.log_activity(
             db_session,
             action=ActionType.DELETED,
             entity_type=EntityType.MEDICATION,
             description="Deleted medication",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
         activity_log_crud.log_activity(
             db_session,
             action=ActionType.DELETED,
             entity_type=EntityType.ALLERGY,
             description="Deleted allergy",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
 
         # Get all deletions
@@ -223,7 +220,9 @@ class TestActivityLogCRUD:
         assert len(deletions) == 2
         assert all(a.action == ActionType.DELETED for a in deletions)
 
-    def test_get_by_action_type_for_user(self, db_session: Session, test_user, test_admin_user):
+    def test_get_by_action_type_for_user(
+        self, db_session: Session, test_user, test_admin_user
+    ):
         """Test getting activities by action type filtered by user."""
         # Create activities for different users
         activity_log_crud.log_activity(
@@ -231,14 +230,14 @@ class TestActivityLogCRUD:
             action=ActionType.LOGIN,
             entity_type=EntityType.USER,
             description="User logged in",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
         activity_log_crud.log_activity(
             db_session,
             action=ActionType.LOGIN,
             entity_type=EntityType.USER,
             description="Admin logged in",
-            user_id=test_admin_user.id
+            user_id=test_admin_user.id,
         )
 
         # Get logins for specific user
@@ -249,7 +248,9 @@ class TestActivityLogCRUD:
         assert len(user_logins) == 1
         assert user_logins[0].user_id == test_user.id
 
-    def test_search_activities_by_user(self, db_session: Session, test_user, test_admin_user):
+    def test_search_activities_by_user(
+        self, db_session: Session, test_user, test_admin_user
+    ):
         """Test searching activities with user filter."""
         # Create activities for different users
         for i in range(3):
@@ -258,7 +259,7 @@ class TestActivityLogCRUD:
                 action=ActionType.VIEWED,
                 entity_type=EntityType.PATIENT,
                 description=f"User activity {i+1}",
-                user_id=test_user.id
+                user_id=test_user.id,
             )
 
         for i in range(2):
@@ -267,12 +268,10 @@ class TestActivityLogCRUD:
                 action=ActionType.VIEWED,
                 entity_type=EntityType.PATIENT,
                 description=f"Admin activity {i+1}",
-                user_id=test_admin_user.id
+                user_id=test_admin_user.id,
             )
 
-        results = activity_log_crud.search_activities(
-            db_session, user_id=test_user.id
-        )
+        results = activity_log_crud.search_activities(db_session, user_id=test_user.id)
 
         assert len(results) == 3
         assert all(r.user_id == test_user.id for r in results)
@@ -284,14 +283,14 @@ class TestActivityLogCRUD:
             action=ActionType.CREATED,
             entity_type=EntityType.MEDICATION,
             description="Created medication",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
         activity_log_crud.log_activity(
             db_session,
             action=ActionType.CREATED,
             entity_type=EntityType.ALLERGY,
             description="Created allergy",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
 
         results = activity_log_crud.search_activities(
@@ -308,21 +307,21 @@ class TestActivityLogCRUD:
             action=ActionType.CREATED,
             entity_type=EntityType.MEDICATION,
             description="Created blood pressure medication",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
         activity_log_crud.log_activity(
             db_session,
             action=ActionType.CREATED,
             entity_type=EntityType.MEDICATION,
             description="Created cholesterol medication",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
         activity_log_crud.log_activity(
             db_session,
             action=ActionType.CREATED,
             entity_type=EntityType.ALLERGY,
             description="Created peanut allergy",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
 
         results = activity_log_crud.search_activities(
@@ -341,14 +340,14 @@ class TestActivityLogCRUD:
             action=ActionType.CREATED,
             entity_type=EntityType.PATIENT,
             description="Created patient",
-            user_id=test_user.id
+            user_id=test_user.id,
         )
 
         # Search within current time range
         results = activity_log_crud.search_activities(
             db_session,
             start_date=now - timedelta(hours=1),
-            end_date=now + timedelta(hours=1)
+            end_date=now + timedelta(hours=1),
         )
 
         assert len(results) >= 1
@@ -371,7 +370,7 @@ class TestActivityLogCRUD:
                 entity_type=entity_type,
                 description=f"{action} {entity_type}",
                 user_id=test_user.id,
-                patient_id=test_patient.id
+                patient_id=test_patient.id,
             )
 
         summary = activity_log_crud.get_activity_summary(
@@ -404,12 +403,10 @@ class TestActivityLogCRUD:
                 action=ActionType.VIEWED,
                 entity_type=EntityType.PATIENT,
                 description=f"Activity {i+1}",
-                user_id=test_user.id
+                user_id=test_user.id,
             )
 
-        activities = activity_log_crud.get_by_user(
-            db_session, user_id=test_user.id
-        )
+        activities = activity_log_crud.get_by_user(db_session, user_id=test_user.id)
 
         # Should be newest first
         for i in range(len(activities) - 1):
@@ -421,7 +418,7 @@ class TestActivityLogCRUD:
             db_session,
             action=ActionType.CREATED,
             entity_type=EntityType.SYSTEM,
-            description="System event"
+            description="System event",
         )
 
         assert activity is not None
@@ -430,16 +427,24 @@ class TestActivityLogCRUD:
         assert activity.entity_id is None
         assert activity.action == ActionType.CREATED
 
-    def test_multiple_patients_isolation(self, db_session: Session, test_user, test_admin_user):
+    def test_multiple_patients_isolation(
+        self, db_session: Session, test_user, test_admin_user
+    ):
         """Test that patient activities are properly isolated."""
         # Create two patients (each under a different user)
         patient1_data = PatientCreate(
-            first_name="Patient", last_name="One",
-            birth_date=date(1990, 1, 1), gender="M", address="123 St"
+            first_name="Patient",
+            last_name="One",
+            birth_date=date(1990, 1, 1),
+            gender="M",
+            address="123 St",
         )
         patient2_data = PatientCreate(
-            first_name="Patient", last_name="Two",
-            birth_date=date(1985, 1, 1), gender="F", address="456 Ave"
+            first_name="Patient",
+            last_name="Two",
+            birth_date=date(1985, 1, 1),
+            gender="F",
+            address="456 Ave",
         )
 
         patient1 = patient_crud.create_for_user(
@@ -457,7 +462,7 @@ class TestActivityLogCRUD:
                 entity_type=EntityType.PATIENT,
                 description=f"Patient 1 activity {i+1}",
                 user_id=test_user.id,
-                patient_id=patient1.id
+                patient_id=patient1.id,
             )
 
         for i in range(2):
@@ -467,7 +472,7 @@ class TestActivityLogCRUD:
                 entity_type=EntityType.PATIENT,
                 description=f"Patient 2 activity {i+1}",
                 user_id=test_user.id,
-                patient_id=patient2.id
+                patient_id=patient2.id,
             )
 
         patient1_activities = activity_log_crud.get_by_patient(

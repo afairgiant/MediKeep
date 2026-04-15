@@ -15,7 +15,9 @@ from app.schemas.condition import (
 )
 
 
-class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate], TagFilterMixin):
+class CRUDCondition(
+    CRUDBase[Condition, ConditionCreate, ConditionUpdate], TagFilterMixin
+):
     """
     Condition-specific CRUD operations for medical conditions.
 
@@ -41,7 +43,9 @@ class CRUDCondition(CRUDBase[Condition, ConditionCreate, ConditionUpdate], TagFi
         )
 
 
-class CRUDConditionMedication(CRUDBase[ConditionMedication, ConditionMedicationCreate, ConditionMedicationUpdate]):
+class CRUDConditionMedication(
+    CRUDBase[ConditionMedication, ConditionMedicationCreate, ConditionMedicationUpdate]
+):
     """CRUD operations for ConditionMedication junction table"""
 
     def __init__(self):
@@ -52,9 +56,7 @@ class CRUDConditionMedication(CRUDBase[ConditionMedication, ConditionMedicationC
     ) -> List[ConditionMedication]:
         """Get all medication relationships for a specific condition"""
         return (
-            db.query(self.model)
-            .filter(self.model.condition_id == condition_id)
-            .all()
+            db.query(self.model).filter(self.model.condition_id == condition_id).all()
         )
 
     def get_by_medication(
@@ -62,9 +64,7 @@ class CRUDConditionMedication(CRUDBase[ConditionMedication, ConditionMedicationC
     ) -> List[ConditionMedication]:
         """Get all condition relationships for a specific medication"""
         return (
-            db.query(self.model)
-            .filter(self.model.medication_id == medication_id)
-            .all()
+            db.query(self.model).filter(self.model.medication_id == medication_id).all()
         )
 
     def get_by_condition_and_medication(
@@ -76,7 +76,7 @@ class CRUDConditionMedication(CRUDBase[ConditionMedication, ConditionMedicationC
             .filter(
                 and_(
                     self.model.condition_id == condition_id,
-                    self.model.medication_id == medication_id
+                    self.model.medication_id == medication_id,
                 )
             )
             .first()

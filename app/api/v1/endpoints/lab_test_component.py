@@ -17,7 +17,7 @@ from app.core.http.error_handling import (
     ForbiddenException,
     BusinessLogicException,
     DatabaseException,
-    handle_database_errors
+    handle_database_errors,
 )
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
@@ -45,14 +45,21 @@ from app.schemas.lab_test_component import (
     ComponentCatalogResponse,
 )
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_data_access, log_endpoint_error, log_validation_error
+from app.core.logging.helpers import (
+    log_data_access,
+    log_endpoint_error,
+    log_validation_error,
+)
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
 
 
 # Lab Test Component Endpoints
-@router.get("/lab-result/{lab_result_id}/components", response_model=List[LabTestComponentResponse])
+@router.get(
+    "/lab-result/{lab_result_id}/components",
+    response_model=List[LabTestComponentResponse],
+)
 def get_lab_test_components_by_lab_result(
     *,
     request: Request,
@@ -83,14 +90,11 @@ def get_lab_test_components_by_lab_result(
                 category=category,
                 status=status,
                 skip=skip,
-                limit=limit
+                limit=limit,
             )
         else:
             components = lab_test_component.get_by_lab_result(
-                db,
-                lab_result_id=lab_result_id,
-                skip=skip,
-                limit=limit
+                db, lab_result_id=lab_result_id, skip=skip, limit=limit
             )
 
     return components
@@ -137,19 +141,27 @@ def get_lab_test_component(
         "qualitative_value": db_component.qualitative_value,
         "created_at": db_component.created_at,
         "updated_at": db_component.updated_at,
-        "lab_result": {
-            "id": db_component.lab_result.id,
-            "test_name": db_component.lab_result.test_name,
-            "ordered_date": db_component.lab_result.ordered_date,
-            "completed_date": db_component.lab_result.completed_date,
-            "status": db_component.lab_result.status,
-        } if db_component.lab_result else None,
+        "lab_result": (
+            {
+                "id": db_component.lab_result.id,
+                "test_name": db_component.lab_result.test_name,
+                "ordered_date": db_component.lab_result.ordered_date,
+                "completed_date": db_component.lab_result.completed_date,
+                "status": db_component.lab_result.status,
+            }
+            if db_component.lab_result
+            else None
+        ),
     }
 
     return result_dict
 
 
-@router.post("/lab-result/{lab_result_id}/components", response_model=LabTestComponentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/lab-result/{lab_result_id}/components",
+    response_model=LabTestComponentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_lab_test_component(
     *,
     request: Request,
@@ -185,7 +197,11 @@ def create_lab_test_component(
     return db_component
 
 
-@router.post("/lab-result/{lab_result_id}/components/bulk", response_model=LabTestComponentBulkResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/lab-result/{lab_result_id}/components/bulk",
+    response_model=LabTestComponentBulkResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_lab_test_components_bulk(
     *,
     request: Request,
@@ -213,35 +229,46 @@ def create_lab_test_components_bulk(
 
             # Log the bulk creation
             log_data_access(
-                logger, request, current_user.id, "create", "LabTestComponent",
+                logger,
+                request,
+                current_user.id,
+                "create",
+                "LabTestComponent",
                 count=len(created_components),
-                lab_result_id=lab_result_id
+                lab_result_id=lab_result_id,
             )
 
             return LabTestComponentBulkResponse(
                 created_count=len(created_components),
                 components=created_components,
-                errors=[]
+                errors=[],
             )
 
         except ValueError as e:
             # Handle validation errors
             log_validation_error(
-                logger, request, str(e),
+                logger,
+                request,
+                str(e),
                 user_id=current_user.id,
-                lab_result_id=lab_result_id
+                lab_result_id=lab_result_id,
             )
             raise BusinessLogicException(f"Validation error: {str(e)}")
 
         except IntegrityError as e:
             # Handle database constraint violations
             log_endpoint_error(
-                logger, request, "Database constraint violation in bulk create",
-                e, user_id=current_user.id,
-                lab_result_id=lab_result_id
+                logger,
+                request,
+                "Database constraint violation in bulk create",
+                e,
+                user_id=current_user.id,
+                lab_result_id=lab_result_id,
             )
             db.rollback()
-            raise BusinessLogicException("Data integrity error. Please check your input data.")
+            raise BusinessLogicException(
+                "Data integrity error. Please check your input data."
+            )
 
         except DatabaseException:
             # Re-raise database exceptions as-is (already handled by handle_database_errors)
@@ -250,13 +277,18 @@ def create_lab_test_components_bulk(
         except Exception as e:
             # Handle unexpected errors
             log_endpoint_error(
-                logger, request, "Unexpected error in bulk create",
-                e, user_id=current_user.id,
+                logger,
+                request,
+                "Unexpected error in bulk create",
+                e,
+                user_id=current_user.id,
                 lab_result_id=lab_result_id,
-                error_type=type(e).__name__
+                error_type=type(e).__name__,
             )
             db.rollback()
-            raise BusinessLogicException("An unexpected error occurred. Please try again later.")
+            raise BusinessLogicException(
+                "An unexpected error occurred. Please try again later."
+            )
 
 
 @router.put("/components/{component_id}", response_model=LabTestComponentResponse)
@@ -330,7 +362,9 @@ def delete_lab_test_component(
 def search_lab_test_components(
     *,
     request: Request,
-    q: str = Query(..., description="Search query for test name, abbreviation, or test code"),
+    q: str = Query(
+        ..., description="Search query for test name, abbreviation, or test code"
+    ),
     lab_result_id: Optional[int] = Query(None, description="Filter by lab result ID"),
     category: Optional[str] = Query(None, description="Filter by category"),
     status: Optional[str] = Query(None, description="Filter by status"),
@@ -357,11 +391,13 @@ def search_lab_test_components(
             db,
             query_text=validated_query,
             lab_result_id=lab_result_id,
-            patient_id=target_patient_id if not lab_result_id else None,  # Only filter by patient if not already filtered by specific lab result
+            patient_id=(
+                target_patient_id if not lab_result_id else None
+            ),  # Only filter by patient if not already filtered by specific lab result
             category=category,
             status=status,
             skip=skip,
-            limit=limit
+            limit=limit,
         )
 
     return components
@@ -391,9 +427,11 @@ def get_abnormal_lab_test_components(
         components = lab_test_component.get_abnormal_results(
             db,
             lab_result_id=lab_result_id,
-            patient_id=target_patient_id if not lab_result_id else None,  # Only filter by patient if not already filtered by specific lab result
+            patient_id=(
+                target_patient_id if not lab_result_id else None
+            ),  # Only filter by patient if not already filtered by specific lab result
             skip=skip,
-            limit=limit
+            limit=limit,
         )
 
     return components
@@ -418,7 +456,9 @@ def get_lab_test_component_statistics(
         deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # Get statistics
-        stats = lab_test_component.get_statistics_by_lab_result(db, lab_result_id=lab_result_id)
+        stats = lab_test_component.get_statistics_by_lab_result(
+            db, lab_result_id=lab_result_id
+        )
 
     return stats
 
@@ -457,12 +497,16 @@ def get_abbreviation_suggestions(
 
 
 # Component Catalog Endpoint
-@router.get("/patient/{patient_id}/component-catalog", response_model=ComponentCatalogResponse)
+@router.get(
+    "/patient/{patient_id}/component-catalog", response_model=ComponentCatalogResponse
+)
 def get_component_catalog(
     *,
     request: Request,
     patient_id: int,
-    search: Optional[str] = Query(None, description="Search by test name or abbreviation"),
+    search: Optional[str] = Query(
+        None, description="Search by test name or abbreviation"
+    ),
     category: Optional[str] = Query(None, description="Filter by category"),
     status: Optional[str] = Query(None, description="Filter by latest status"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -495,7 +539,11 @@ def get_component_catalog(
         )
 
         log_data_access(
-            logger, request, current_user.id, "read", "ComponentCatalog",
+            logger,
+            request,
+            current_user.id,
+            "read",
+            "ComponentCatalog",
             patient_id=patient_id,
             count=result["total"],
         )
@@ -504,23 +552,28 @@ def get_component_catalog(
 
 
 # Helper function for trend statistics
-def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendStatistics:
+def calculate_trend_statistics(
+    components: List[Any],
+) -> LabTestComponentTrendStatistics:
     """Calculate statistics for trend data. Handles both quantitative and qualitative results."""
     if not components:
         return LabTestComponentTrendStatistics(
-            count=0,
-            normal_count=0,
-            abnormal_count=0,
-            trend_direction="stable"
+            count=0, normal_count=0, abnormal_count=0, trend_direction="stable"
         )
 
     count = len(components)
 
     # Determine result type from components - check if mixed
-    result_types = {getattr(c, 'result_type', None) or 'quantitative' for c in components}
+    result_types = {
+        getattr(c, "result_type", None) or "quantitative" for c in components
+    }
     if len(result_types) > 1:
         # Mixed result types: default to quantitative stats, filtering to quantitative only
-        quant_components = [c for c in components if (getattr(c, 'result_type', None) or 'quantitative') == 'quantitative']
+        quant_components = [
+            c
+            for c in components
+            if (getattr(c, "result_type", None) or "quantitative") == "quantitative"
+        ]
         if quant_components:
             return _calculate_quantitative_statistics(quant_components, count)
         return _calculate_qualitative_statistics(components, count)
@@ -533,12 +586,14 @@ def calculate_trend_statistics(components: List[Any]) -> LabTestComponentTrendSt
     return _calculate_quantitative_statistics(components, count)
 
 
-def _calculate_qualitative_statistics(components: List[Any], count: int) -> LabTestComponentTrendStatistics:
+def _calculate_qualitative_statistics(
+    components: List[Any], count: int
+) -> LabTestComponentTrendStatistics:
     """Calculate statistics for qualitative trend data."""
     # Count occurrences of each qualitative value
     qualitative_summary: dict = {}
     for c in components:
-        qv = getattr(c, 'qualitative_value', None) or 'unknown'
+        qv = getattr(c, "qualitative_value", None) or "unknown"
         qualitative_summary[qv] = qualitative_summary.get(qv, 0) + 1
 
     normal_count = sum(1 for c in components if c.status == "normal")
@@ -567,15 +622,19 @@ def _calculate_qualitative_statistics(components: List[Any], count: int) -> LabT
         max=None,
         std_dev=None,
         trend_direction=trend,
-        time_in_range_percent=round((normal_count / count * 100), 1) if count > 0 else None,
+        time_in_range_percent=(
+            round((normal_count / count * 100), 1) if count > 0 else None
+        ),
         normal_count=normal_count,
         abnormal_count=abnormal_count,
         result_type="qualitative",
-        qualitative_summary=qualitative_summary
+        qualitative_summary=qualitative_summary,
     )
 
 
-def _calculate_quantitative_statistics(components: List[Any], count: int) -> LabTestComponentTrendStatistics:
+def _calculate_quantitative_statistics(
+    components: List[Any], count: int
+) -> LabTestComponentTrendStatistics:
     """Calculate statistics for quantitative trend data."""
     values = [c.value for c in components if c.value is not None]
 
@@ -585,7 +644,7 @@ def _calculate_quantitative_statistics(components: List[Any], count: int) -> Lab
             normal_count=0,
             abnormal_count=count,
             trend_direction="stable",
-            result_type="quantitative"
+            result_type="quantitative",
         )
 
     # Basic stats (values is guaranteed non-empty after the early return above)
@@ -596,6 +655,7 @@ def _calculate_quantitative_statistics(components: List[Any], count: int) -> Lab
 
     # Trend direction using linear regression slope
     from app.utils.trend_statistics import compute_trend_direction
+
     trend = compute_trend_direction(values)
 
     # Time in range
@@ -605,7 +665,7 @@ def _calculate_quantitative_statistics(components: List[Any], count: int) -> Lab
     # Standard deviation (population variance)
     if len(values) > 1 and average is not None:
         variance = sum((x - average) ** 2 for x in values) / len(values)
-        std_dev = variance ** 0.5
+        std_dev = variance**0.5
     else:
         std_dev = None
 
@@ -617,15 +677,21 @@ def _calculate_quantitative_statistics(components: List[Any], count: int) -> Lab
         max=round(maximum, 2) if maximum is not None else None,
         std_dev=round(std_dev, 2) if std_dev is not None else None,
         trend_direction=trend,
-        time_in_range_percent=round(time_in_range_percent, 1) if time_in_range_percent is not None else None,
+        time_in_range_percent=(
+            round(time_in_range_percent, 1)
+            if time_in_range_percent is not None
+            else None
+        ),
         normal_count=normal_count,
         abnormal_count=count - normal_count,
-        result_type="quantitative"
+        result_type="quantitative",
     )
 
 
 # Trend Tracking Endpoint
-@router.get("/patient/{patient_id}/trends", response_model=LabTestComponentTrendResponse)
+@router.get(
+    "/patient/{patient_id}/trends", response_model=LabTestComponentTrendResponse
+)
 def get_lab_test_component_trends(
     *,
     request: Request,
@@ -661,7 +727,7 @@ def get_lab_test_component_trends(
             test_name=validated_test_name,
             date_from=date_from,
             date_to=date_to,
-            limit=limit
+            limit=limit,
         )
 
         # Detect unit mismatches (only for quantitative tests)
@@ -670,22 +736,28 @@ def get_lab_test_component_trends(
             units_found = set(c.unit for c in components if c.unit)
             if len(units_found) > 1:
                 log_validation_error(
-                    logger, request, f"Unit mismatch detected in trend data for {test_name}",
+                    logger,
+                    request,
+                    f"Unit mismatch detected in trend data for {test_name}",
                     user_id=current_user.id,
                     patient_id=patient_id,
                     test_name=test_name,
                     primary_unit=primary_unit,
-                    all_units=list(units_found)
+                    all_units=list(units_found),
                 )
 
         # Log the request
         log_data_access(
-            logger, request, current_user.id, "read", "LabTestComponentTrends",
+            logger,
+            request,
+            current_user.id,
+            "read",
+            "LabTestComponentTrends",
             patient_id=patient_id,
             count=len(components),
             test_name=test_name,
             date_from=str(date_from) if date_from else None,
-            date_to=str(date_to) if date_to else None
+            date_to=str(date_to) if date_to else None,
         )
 
         # Return empty response if no components found
@@ -696,13 +768,10 @@ def get_lab_test_component_trends(
                 category=None,
                 data_points=[],
                 statistics=LabTestComponentTrendStatistics(
-                    count=0,
-                    normal_count=0,
-                    abnormal_count=0,
-                    trend_direction="stable"
+                    count=0, normal_count=0, abnormal_count=0, trend_direction="stable"
                 ),
                 is_aggregated=False,
-                aggregation_period=None
+                aggregation_period=None,
             )
 
         # Calculate statistics
@@ -712,7 +781,11 @@ def get_lab_test_component_trends(
         data_points = []
         for component in components:
             # Use completed_date if available
-            recorded_date = component.lab_result.completed_date if component.lab_result.completed_date else None
+            recorded_date = (
+                component.lab_result.completed_date
+                if component.lab_result.completed_date
+                else None
+            )
 
             data_point = LabTestComponentTrendDataPoint(
                 id=component.id,
@@ -724,20 +797,20 @@ def get_lab_test_component_trends(
                 ref_range_text=component.ref_range_text,
                 recorded_date=recorded_date,
                 created_at=component.created_at,
-                result_type=component.result_type or 'quantitative',
+                result_type=component.result_type or "quantitative",
                 qualitative_value=component.qualitative_value,
                 lab_result=LabResultBasicForTrend(
                     id=component.lab_result.id,
                     test_name=component.lab_result.test_name,
-                    completed_date=component.lab_result.completed_date
-                )
+                    completed_date=component.lab_result.completed_date,
+                ),
             )
             data_points.append(data_point)
 
         # Get unit, category, and result_type from most recent component
         unit = components[0].unit
         category = components[0].category
-        result_type = components[0].result_type or 'quantitative'
+        result_type = components[0].result_type or "quantitative"
 
         # Build response
         response = LabTestComponentTrendResponse(
@@ -748,7 +821,7 @@ def get_lab_test_component_trends(
             statistics=statistics,
             is_aggregated=False,
             aggregation_period=None,
-            result_type=result_type
+            result_type=result_type,
         )
 
         return response

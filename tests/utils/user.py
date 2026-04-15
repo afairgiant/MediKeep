@@ -1,6 +1,7 @@
 """
 User utilities for testing.
 """
+
 import random
 import string
 from typing import Dict
@@ -36,7 +37,7 @@ def create_random_user(db: Session) -> dict:
         email=email,
         password=password,
         full_name=full_name,
-        role="user"
+        role="user",
     )
 
     user = user_crud.create(db=db, obj_in=user_in)
@@ -47,11 +48,13 @@ def create_random_user(db: Session) -> dict:
         "password": password,
         "username": username,
         "email": email,
-        "full_name": full_name
+        "full_name": full_name,
     }
 
 
-def create_user_authentication_headers(*, client: TestClient, username: str, password: str) -> Dict[str, str]:
+def create_user_authentication_headers(
+    *, client: TestClient, username: str, password: str
+) -> Dict[str, str]:
     """Create authentication headers by logging in with username and password."""
     data = {"username": username, "password": password}
     r = client.post("/api/v1/auth/login", data=data)
@@ -82,7 +85,7 @@ def create_admin_user(db: Session) -> dict:
         email=email,
         password=password,
         full_name=full_name,
-        role="admin"
+        role="admin",
     )
 
     user = user_crud.create(db=db, obj_in=user_in)
@@ -93,7 +96,7 @@ def create_admin_user(db: Session) -> dict:
         "password": password,
         "username": username,
         "email": email,
-        "full_name": full_name
+        "full_name": full_name,
     }
 
 
@@ -119,12 +122,10 @@ def create_test_user_with_patient(db: Session) -> dict:
         last_name="Patient",
         birth_date=date(1990, 1, 1),
         gender="M",
-        address="123 Test Street"
+        address="123 Test Street",
     )
     patient = patient_crud.create_for_user(
-        db=db,
-        user_id=user.id,
-        patient_data=patient_data
+        db=db, user_id=user.id, patient_data=patient_data
     )
 
     # CRITICAL: Set as active patient for multi-patient system

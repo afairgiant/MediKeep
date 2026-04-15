@@ -22,7 +22,7 @@ from app.core.http.error_handling import (
     ForbiddenException,
     BusinessLogicException,
     DatabaseException,
-    handle_database_errors
+    handle_database_errors,
 )
 from app.api.v1.endpoints.utils import (
     ensure_directory_with_permissions,
@@ -83,7 +83,9 @@ def get_lab_results(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     db: Session = Depends(get_db),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ):
@@ -103,9 +105,9 @@ def get_lab_results(
             )
             # Load relationships manually for tag-filtered results
             for result in results:
-                if hasattr(result, 'practitioner_id') and result.practitioner_id:
+                if hasattr(result, "practitioner_id") and result.practitioner_id:
                     db.refresh(result, ["practitioner"])
-                if hasattr(result, 'patient_id') and result.patient_id:
+                if hasattr(result, "patient_id") and result.patient_id:
                     db.refresh(result, ["patient"])
         else:
             # Use regular patient filtering
@@ -119,7 +121,7 @@ def get_lab_results(
 
     # Convert to response format with practitioner names
     # NOTE: Manual dictionary building is required here because LabResultWithRelations
-    # expects computed string fields (practitioner_name, patient_name) that aren't 
+    # expects computed string fields (practitioner_name, patient_name) that aren't
     # actual database columns. Other endpoints avoid this by returning nested objects.
     response_results = []
     for result in results:
@@ -181,18 +183,14 @@ def get_lab_result(
     patient_record = db_lab_result.patient
     if not patient_record:
         raise NotFoundException(
-            resource="Lab result",
-            message="Lab result not found",
-            request=request
+            resource="Lab result", message="Lab result not found", request=request
         )
 
     access_service = PatientAccessService(db)
     if not access_service.can_access_patient(current_user, patient_record, "view"):
         # Return 404 to avoid leaking information about existence of records
         raise NotFoundException(
-            resource="Lab result",
-            message="Lab result not found",
-            request=request
+            resource="Lab result", message="Lab result not found", request=request
         )
 
     # Convert to response format with practitioner name
@@ -295,18 +293,19 @@ def delete_lab_result(
 
         # SECURITY FIX: Verify user has permission to delete this record
         from app.api.v1.endpoints.utils import verify_patient_ownership
+
         verify_patient_ownership(
             obj=db_lab_result,
             current_user_patient_id=current_user_patient_id,
             entity_name="Lab result",
             db=db,
             current_user=current_user,
-            permission='edit',
+            permission="edit",
         )
         # Log the deletion activity BEFORE deleting
         from app.api.activity_logging import log_delete
         from app.core.logging.config import get_logger
-        
+
         logger = get_logger(__name__)
 
         log_delete(
@@ -320,16 +319,16 @@ def delete_lab_result(
         # Delete associated files from both old and new systems
         # 1. Delete old system files (LabResultFile table)
         lab_result_file.delete_by_lab_result(db, lab_result_id=lab_result_id)
-        
+
         # 2. Delete new system files (EntityFile table) with selective deletion
         entity_file_service = GenericEntityFileService()
         file_cleanup_stats = entity_file_service.cleanup_entity_files_on_deletion(
             db=db,
             entity_type="lab-result",
             entity_id=lab_result_id,
-            preserve_paperless=True
+            preserve_paperless=True,
         )
-        
+
         deleted_local_files = file_cleanup_stats.get("files_deleted", 0)
         preserved_paperless_files = file_cleanup_stats.get("files_preserved", 0)
 
@@ -341,16 +340,16 @@ def delete_lab_result(
             message=f"EntityFile cleanup completed: {deleted_local_files} local files deleted, {preserved_paperless_files} Paperless files preserved",
             lab_result_id=lab_result_id,
             files_deleted=deleted_local_files,
-            files_preserved=preserved_paperless_files
+            files_preserved=preserved_paperless_files,
         )
 
         # Delete the lab result
         lab_result.delete(db, id=lab_result_id)
-        
+
         return {
             "message": "Lab result and associated files deleted successfully",
             "files_deleted": deleted_local_files,
-            "files_preserved": preserved_paperless_files
+            "files_preserved": preserved_paperless_files,
         }
 
 
@@ -362,7 +361,9 @@ def get_lab_results_by_patient(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     db: Session = Depends(get_db),
     patient_id: int = Depends(deps.verify_patient_access),
 ):
@@ -419,7 +420,9 @@ def get_lab_results_by_practitioner(
     with handle_database_errors(request=request):
         # SECURITY FIX: Get accessible patient IDs for the current user
         access_service = PatientAccessService(db)
-        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patients = access_service.get_accessible_patients(
+            current_user, "view"
+        )
         accessible_patient_ids = {p.id for p in accessible_patients}
 
         # Get all results for the practitioner
@@ -454,13 +457,16 @@ def search_lab_results_by_code(
     with handle_database_errors(request=request):
         # SECURITY FIX: Get accessible patient IDs for the current user
         access_service = PatientAccessService(db)
-        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patients = access_service.get_accessible_patients(
+            current_user, "view"
+        )
         accessible_patient_ids = {p.id for p in accessible_patients}
 
         # Get all results and filter by code and accessible patients
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
         filtered_results = [
-            result for result in all_results
+            result
+            for result in all_results
             if result.test_code == code and result.patient_id in accessible_patient_ids
         ]
         # Apply pagination
@@ -488,14 +494,19 @@ def search_lab_results_by_code_pattern(
     with handle_database_errors(request=request):
         # SECURITY FIX: Get accessible patient IDs for the current user
         access_service = PatientAccessService(db)
-        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patients = access_service.get_accessible_patients(
+            current_user, "view"
+        )
         accessible_patient_ids = {p.id for p in accessible_patients}
 
         # Get all results and filter by code pattern and accessible patients
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
         filtered_results = [
-            result for result in all_results
-            if result.test_code and code_pattern.lower() in result.test_code.lower() and result.patient_id in accessible_patient_ids
+            result
+            for result in all_results
+            if result.test_code
+            and code_pattern.lower() in result.test_code.lower()
+            and result.patient_id in accessible_patient_ids
         ]
         # Apply pagination
         paginated_results = (
@@ -523,20 +534,18 @@ def get_lab_result_files(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # SECURITY FIX: Verify user has access to this lab result's patient
-        patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+        patient_record = (
+            db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+        )
         if not patient_record:
             raise NotFoundException(
-                resource="Lab result",
-                message="Lab result not found",
-                request=request
+                resource="Lab result", message="Lab result not found", request=request
             )
 
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "view"):
             raise NotFoundException(
-                resource="Lab result",
-                message="Lab result not found",
-                request=request
+                resource="Lab result", message="Lab result not found", request=request
             )
 
         files = lab_result_file.get_by_lab_result(db, lab_result_id=lab_result_id)
@@ -562,28 +571,23 @@ async def upload_lab_result_file(
     handle_not_found(db_lab_result, "Lab result", request)
 
     # SECURITY FIX: Verify user has access to this lab result's patient (edit permission for upload)
-    patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+    patient_record = (
+        db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+    )
     if not patient_record:
         raise NotFoundException(
-            resource="Lab result",
-            message="Lab result not found",
-            request=request
+            resource="Lab result", message="Lab result not found", request=request
         )
 
     access_service = PatientAccessService(db)
     if not access_service.can_access_patient(current_user, patient_record, "edit"):
         raise NotFoundException(
-            resource="Lab result",
-            message="Lab result not found",
-            request=request
+            resource="Lab result", message="Lab result not found", request=request
         )
 
     # Validate file
     if not file.filename:
-        raise BusinessLogicException(
-            message="No file provided",
-            request=request
-        )
+        raise BusinessLogicException(message="No file provided", request=request)
 
     # Configuration
     UPLOAD_DIRECTORY = settings.UPLOAD_DIR / "lab_result_files"
@@ -607,15 +611,15 @@ async def upload_lab_result_file(
         ".dcm",  # DICOM medical imaging
         ".zip",  # Archive format for medical imaging packages
         ".iso",  # CD/DVD image format
-        ".7z",   # 7-Zip archive
+        ".7z",  # 7-Zip archive
         ".rar",  # RAR archive
         ".avi",  # Video - ultrasound recordings
         ".mp4",  # Video - procedures, endoscopy
         ".mov",  # Video - QuickTime format
-        ".webm", # Video - web format
+        ".webm",  # Video - web format
         ".stl",  # 3D models - surgical planning
         ".nii",  # NIfTI - neuroimaging research
-        ".nrrd", # Nearly Raw Raster Data - 3D medical imaging
+        ".nrrd",  # Nearly Raw Raster Data - 3D medical imaging
         ".mp3",  # Audio - voice notes, dictations
         ".wav",  # Audio - uncompressed
         ".m4a",  # Audio - compressed
@@ -626,7 +630,7 @@ async def upload_lab_result_file(
     if file_extension not in ALLOWED_EXTENSIONS:
         raise BusinessLogicException(
             message=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}",
-            request=request
+            request=request,
         )
 
     # Check file size
@@ -634,7 +638,7 @@ async def upload_lab_result_file(
     if len(file_content) > MAX_FILE_SIZE:
         raise BusinessLogicException(
             message=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024 * 1024)}MB",
-            request=request
+            request=request,
         )
 
     # Create upload directory if it doesn't exist with proper error handling
@@ -653,19 +657,19 @@ async def upload_lab_result_file(
             raise DatabaseException(
                 message=f"Permission denied writing file. This may be a Docker bind mount permission issue. Please ensure the container has write permissions to the upload directory: {str(e)}",
                 request=request,
-                original_error=e
+                original_error=e,
             )
         except OSError as e:
             raise DatabaseException(
                 message=f"Failed to save file: {str(e)}",
                 request=request,
-                original_error=e
+                original_error=e,
             )
         except Exception as e:
             raise DatabaseException(
                 message=f"Error saving file: {str(e)}",
                 request=request,
-                original_error=e
+                original_error=e,
             )
 
     # Create file entry in database
@@ -679,7 +683,7 @@ async def upload_lab_result_file(
         uploaded_at=datetime.utcnow(),
     )
 
-    # Create file entry in database  
+    # Create file entry in database
     with handle_database_errors(request=request):
         try:
             db_file = lab_result_file.create(db, obj_in=file_create)
@@ -694,7 +698,7 @@ async def upload_lab_result_file(
             raise DatabaseException(
                 message=f"Error creating file record: {str(e)}",
                 request=request,
-                original_error=e
+                original_error=e,
             )
 
 
@@ -717,20 +721,18 @@ def delete_lab_result_file(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # SECURITY FIX: Verify user has access to this lab result's patient (edit permission for delete)
-        patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+        patient_record = (
+            db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+        )
         if not patient_record:
             raise NotFoundException(
-                resource="Lab result",
-                message="Lab result not found",
-                request=request
+                resource="Lab result", message="Lab result not found", request=request
             )
 
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "edit"):
             raise NotFoundException(
-                resource="Lab result",
-                message="Lab result not found",
-                request=request
+                resource="Lab result", message="Lab result not found", request=request
             )
 
         # Verify file exists and belongs to this lab result
@@ -739,8 +741,7 @@ def delete_lab_result_file(
 
         if getattr(db_file, "lab_result_id") != lab_result_id:
             raise BusinessLogicException(
-                message="File does not belong to this lab result",
-                request=request
+                message="File does not belong to this lab result", request=request
             )
 
         try:
@@ -750,7 +751,7 @@ def delete_lab_result_file(
             raise DatabaseException(
                 message=f"Error deleting file: {str(e)}",
                 request=request,
-                original_error=e
+                original_error=e,
             )
 
 
@@ -782,13 +783,22 @@ def get_practitioner_lab_result_count(
     with handle_database_errors(request=request):
         # SECURITY FIX: Get accessible patient IDs for the current user
         access_service = PatientAccessService(db)
-        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patients = access_service.get_accessible_patients(
+            current_user, "view"
+        )
         accessible_patient_ids = {p.id for p in accessible_patients}
 
         # Get all results for the practitioner and filter to accessible patients
-        all_results = lab_result.get_by_practitioner(db, practitioner_id=practitioner_id)
-        filtered_results = [r for r in all_results if r.patient_id in accessible_patient_ids]
-        return {"practitioner_id": practitioner_id, "lab_result_count": len(filtered_results)}
+        all_results = lab_result.get_by_practitioner(
+            db, practitioner_id=practitioner_id
+        )
+        filtered_results = [
+            r for r in all_results if r.patient_id in accessible_patient_ids
+        ]
+        return {
+            "practitioner_id": practitioner_id,
+            "lab_result_count": len(filtered_results),
+        }
 
 
 @router.get("/stats/code/{code}/count")
@@ -805,13 +815,16 @@ def get_code_usage_count(
     with handle_database_errors(request=request):
         # SECURITY FIX: Get accessible patient IDs for the current user
         access_service = PatientAccessService(db)
-        accessible_patients = access_service.get_accessible_patients(current_user, "view")
+        accessible_patients = access_service.get_accessible_patients(
+            current_user, "view"
+        )
         accessible_patient_ids = {p.id for p in accessible_patients}
 
         # Get all results and filter by code and accessible patients
         all_results = lab_result.get_multi(db, skip=0, limit=10000)
         results = [
-            result for result in all_results
+            result
+            for result in all_results
             if result.test_code == code and result.patient_id in accessible_patient_ids
         ]
         return {"code": code, "usage_count": len(results)}
@@ -839,20 +852,21 @@ def get_lab_result_conditions(
         # Verify user has access to this lab result's patient
         from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
-        
-        patient_record = db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+
+        patient_record = (
+            db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
+        )
         if not patient_record:
             raise NotFoundException(
                 resource="Patient",
                 message="Patient record not found for this lab result",
-                request=request
+                request=request,
             )
-        
+
         access_service = PatientAccessService(db)
         if not access_service.can_access_patient(current_user, patient_record, "view"):
             raise ForbiddenException(
-                message="Access denied to this lab result",
-                request=request
+                message="Access denied to this lab result", request=request
             )
 
         # Get condition relationships
@@ -906,8 +920,12 @@ def create_lab_result_condition(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user, permission='edit'
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         # Verify condition exists and belongs to the same patient
@@ -918,7 +936,7 @@ def create_lab_result_condition(
         if db_condition.patient_id != db_lab_result.patient_id:
             raise BusinessLogicException(
                 message="Cannot link condition that doesn't belong to the same patient",
-                request=request
+                request=request,
             )
 
         # Check if relationship already exists
@@ -928,7 +946,7 @@ def create_lab_result_condition(
         if existing:
             raise BusinessLogicException(
                 message="Relationship between this lab result and condition already exists",
-                request=request
+                request=request,
             )
 
         # Override lab_result_id to ensure consistency
@@ -960,8 +978,12 @@ def update_lab_result_condition(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user, permission='edit'
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         # Verify relationship exists
@@ -971,7 +993,7 @@ def update_lab_result_condition(
         if relationship.lab_result_id != lab_result_id:
             raise BusinessLogicException(
                 message="Relationship does not belong to this lab result",
-                request=request
+                request=request,
             )
 
         # Update relationship
@@ -998,8 +1020,12 @@ def delete_lab_result_condition(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user, permission='edit'
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         # Verify relationship exists
@@ -1009,7 +1035,7 @@ def delete_lab_result_condition(
         if relationship.lab_result_id != lab_result_id:
             raise BusinessLogicException(
                 message="Relationship does not belong to this lab result",
-                request=request
+                request=request,
             )
 
         # Delete relationship
@@ -1038,8 +1064,11 @@ def get_lab_result_encounters(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
         )
 
         results = encounter_lab_result.get_by_lab_result_with_details(
@@ -1048,20 +1077,22 @@ def get_lab_result_encounters(
 
         enhanced = []
         for rel, enc in results:
-            enhanced.append({
-                "id": rel.id,
-                "encounter_id": rel.encounter_id,
-                "lab_result_id": rel.lab_result_id,
-                "purpose": rel.purpose,
-                "relevance_note": rel.relevance_note,
-                "created_at": rel.created_at,
-                "updated_at": rel.updated_at,
-                "lab_result_name": db_lab_result.test_name,
-                "lab_result_date": db_lab_result.ordered_date,
-                "lab_result_status": db_lab_result.status,
-                "encounter_reason": enc.reason,
-                "encounter_date": enc.date,
-            })
+            enhanced.append(
+                {
+                    "id": rel.id,
+                    "encounter_id": rel.encounter_id,
+                    "lab_result_id": rel.lab_result_id,
+                    "purpose": rel.purpose,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "lab_result_name": db_lab_result.test_name,
+                    "lab_result_date": db_lab_result.ordered_date,
+                    "lab_result_status": db_lab_result.status,
+                    "encounter_reason": enc.reason,
+                    "encounter_date": enc.date,
+                }
+            )
         return enhanced
 
 
@@ -1084,8 +1115,12 @@ def create_lab_result_encounter(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user, permission='edit'
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         encounter_id = link_in.encounter_id
@@ -1108,6 +1143,7 @@ def create_lab_result_encounter(
             )
 
         from app.models.models import EncounterLabResult as ELRModel
+
         obj = ELRModel(
             encounter_id=encounter_id,
             lab_result_id=lab_result_id,
@@ -1139,8 +1175,12 @@ def bulk_create_lab_result_encounters(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user, permission='edit'
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         encounter_ids = bulk_in.encounter_ids
@@ -1155,6 +1195,7 @@ def bulk_create_lab_result_encounters(
 
         created = []
         from app.models.models import EncounterLabResult as ELRModel
+
         for enc_id in encounter_ids:
             existing = encounter_lab_result.get_by_encounter_and_lab_result(
                 db, encounter_id=enc_id, lab_result_id=lab_result_id
@@ -1195,8 +1236,12 @@ def update_lab_result_encounter(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user, permission='edit'
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
@@ -1228,8 +1273,12 @@ def delete_lab_result_encounter(
         handle_not_found(db_lab_result, "Lab result", request)
 
         verify_patient_ownership(
-            db_lab_result, current_user_patient_id, "lab_result",
-            db=db, current_user=current_user, permission='edit'
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
         )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
@@ -1276,17 +1325,17 @@ async def parse_lab_pdf_with_ocr(
         deps.verify_patient_access(db_lab_result.patient_id, db, current_user)
 
         # 2. Validate file type (multiple checks to prevent spoofing)
-        if not file.filename.lower().endswith('.pdf'):
+        if not file.filename.lower().endswith(".pdf"):
             raise BusinessLogicException(
                 message="Only PDF files are supported for OCR extraction",
-                request=request
+                request=request,
             )
 
         # Check MIME type
-        if file.content_type != 'application/pdf':
+        if file.content_type != "application/pdf":
             raise BusinessLogicException(
                 message="Invalid file type. Only PDF files are supported.",
-                request=request
+                request=request,
             )
 
         # 3. Check file size
@@ -1303,7 +1352,7 @@ async def parse_lab_pdf_with_ocr(
                 if size > MAX_SIZE:
                     raise BusinessLogicException(
                         message=f"File size ({size // (1024*1024)}MB) exceeds {MAX_SIZE // (1024*1024)}MB limit. Please use a smaller file or compress the PDF.",
-                        request=request
+                        request=request,
                     )
             except ValueError:
                 pass  # Invalid content-length, will check after reading
@@ -1325,17 +1374,17 @@ async def parse_lab_pdf_with_ocr(
             if len(file_bytes) > MAX_SIZE:
                 raise BusinessLogicException(
                     message=f"File size exceeds {MAX_SIZE // (1024*1024)}MB limit. Please use a smaller file or compress the PDF.",
-                    request=request
+                    request=request,
                 )
 
         # Convert to bytes for consistency with rest of code
         file_bytes = bytes(file_bytes)
 
         # Validate PDF magic number to prevent file type spoofing
-        if len(file_bytes) < 4 or not file_bytes[:4] == b'%PDF':
+        if len(file_bytes) < 4 or not file_bytes[:4] == b"%PDF":
             raise BusinessLogicException(
                 message="Invalid PDF file format. File appears to be corrupted or not a valid PDF.",
-                request=request
+                request=request,
             )
 
         # 4. Extract text using hybrid service
@@ -1343,6 +1392,7 @@ async def parse_lab_pdf_with_ocr(
 
         # Hash filename to avoid logging PHI (filenames may contain patient names)
         import hashlib
+
         filename_hash = hashlib.sha256(file.filename.encode()).hexdigest()[:16]
 
         log_endpoint_access(
@@ -1354,12 +1404,11 @@ async def parse_lab_pdf_with_ocr(
             patient_id=db_lab_result.patient_id,
             lab_result_id=lab_result_id,
             filename_hash=filename_hash,
-            file_size=len(file_bytes)
+            file_size=len(file_bytes),
         )
 
         result = pdf_extraction_service.extract_text(
-            pdf_bytes=file_bytes,
-            filename=file.filename
+            pdf_bytes=file_bytes, filename=file.filename
         )
 
         # 5. Log activity for audit trail
@@ -1375,31 +1424,31 @@ async def parse_lab_pdf_with_ocr(
             patient_id=db_lab_result.patient_id,
             metadata={
                 "filename_hash": filename_hash,  # Hashed to protect PHI
-                "method": result['method'],
-                "page_count": result['page_count'],
-                "char_count": result['char_count'],
-                "confidence": result['confidence'],
-                "success": result['error'] is None
+                "method": result["method"],
+                "page_count": result["page_count"],
+                "char_count": result["char_count"],
+                "confidence": result["confidence"],
+                "success": result["error"] is None,
             },
             ip_address=request.client.host if request.client else None,
-            user_agent=request.headers.get("user-agent")
+            user_agent=request.headers.get("user-agent"),
         )
 
         # 6. Return result for client-side parsing using standardized schema
         metadata = PDFExtractionMetadata(
-            method=result['method'],
-            confidence=result['confidence'],
-            page_count=result['page_count'],
-            char_count=result['char_count'],
+            method=result["method"],
+            confidence=result["confidence"],
+            page_count=result["page_count"],
+            char_count=result["char_count"],
             filename=file.filename,
-            lab_name=result.get('lab_name'),
-            test_count=result.get('test_count'),
-            test_date=result.get('test_date')  # Include extracted test date
+            lab_name=result.get("lab_name"),
+            test_count=result.get("test_count"),
+            test_date=result.get("test_date"),  # Include extracted test date
         )
 
         return PDFExtractionResponse(
-            status="success" if result['error'] is None else "error",
-            extracted_text=result['text'],
+            status="success" if result["error"] is None else "error",
+            extracted_text=result["text"],
             metadata=metadata,
-            error=result['error']
+            error=result["error"],
         )

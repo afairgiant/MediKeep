@@ -7,7 +7,7 @@ from app.api import deps
 from app.core.http.error_handling import (
     NotFoundException,
     BusinessLogicException,
-    handle_database_errors
+    handle_database_errors,
 )
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -92,9 +92,7 @@ def get_insurances(
                 db=db, patient_id=target_patient_id, status=status
             )
         else:
-            insurances = insurance.get_by_patient(
-                db=db, patient_id=target_patient_id
-            )
+            insurances = insurance.get_by_patient(db=db, patient_id=target_patient_id)
 
         # Apply pagination
         paginated_insurances = insurances[skip : skip + limit]
@@ -106,7 +104,7 @@ def get_insurances(
             "read",
             "Insurance",
             patient_id=target_patient_id,
-            count=len(paginated_insurances)
+            count=len(paginated_insurances),
         )
 
         return paginated_insurances
@@ -117,7 +115,9 @@ def get_expiring_insurances(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
-    days: int = Query(30, ge=1, le=365, description="Days ahead to check for expiration"),
+    days: int = Query(
+        30, ge=1, le=365, description="Days ahead to check for expiration"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -135,7 +135,7 @@ def get_expiring_insurances(
             "read",
             "Insurance",
             patient_id=target_patient_id,
-            count=len(expiring_insurances)
+            count=len(expiring_insurances),
         )
 
         return expiring_insurances
@@ -164,7 +164,7 @@ def search_insurances(
             "read",
             "Insurance",
             patient_id=target_patient_id,
-            count=len(search_results)
+            count=len(search_results),
         )
 
         return search_results
@@ -187,7 +187,11 @@ def get_insurance(
 
         # Verify patient ownership using current user's patient record
         verify_patient_ownership(
-            insurance_obj, current_user_patient_id, "insurance", db=db, current_user=current_user
+            insurance_obj,
+            current_user_patient_id,
+            "insurance",
+            db=db,
+            current_user=current_user,
         )
 
         log_data_access(
@@ -197,7 +201,7 @@ def get_insurance(
             "read",
             "Insurance",
             record_id=insurance_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return insurance_obj
@@ -293,13 +297,20 @@ def set_primary_insurance(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Set insurance as primary (unsets others of same type)."""
-    
+
     with handle_database_errors(request=request):
         # Verify the insurance exists and belongs to the current patient
         insurance_obj = insurance.get(db=db, id=insurance_id)
         handle_not_found(insurance_obj, "Insurance", request)
 
-        verify_patient_ownership(insurance_obj, target_patient_id, "insurance", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            insurance_obj,
+            target_patient_id,
+            "insurance",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Set as primary
         updated_insurance = insurance.set_primary(
@@ -308,8 +319,7 @@ def set_primary_insurance(
 
         if not updated_insurance:
             raise BusinessLogicException(
-                message="Failed to set insurance as primary",
-                request=request
+                message="Failed to set insurance as primary", request=request
             )
 
         # Log the activity

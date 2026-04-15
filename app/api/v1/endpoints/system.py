@@ -158,7 +158,7 @@ def get_log_level(request: Request) -> Dict[str, Any]:
                 f"Rate limit exceeded for log level endpoint from {client_ip}",
                 endpoint="/api/v1/system/log-level",
                 remaining_requests=remaining_requests,
-                reset_time=reset_datetime.isoformat()
+                reset_time=reset_datetime.isoformat(),
             )
 
             raise HTTPException(
@@ -373,7 +373,10 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
         )
 
         # Get rotation configuration
-        from app.core.logging.config import _get_rotation_method, _is_logrotate_available
+        from app.core.logging.config import (
+            _get_rotation_method,
+            _is_logrotate_available,
+        )
         from pathlib import Path
 
         rotation_method = _get_rotation_method()

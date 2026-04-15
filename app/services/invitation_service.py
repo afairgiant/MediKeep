@@ -11,23 +11,33 @@ from sqlalchemy.orm import Session
 from app.core.events import get_event_bus
 from app.core.logging.config import get_logger
 from app.core.utils.datetime_utils import get_utc_now
-from app.events.collaboration_events import InvitationAcceptedEvent, InvitationReceivedEvent
+from app.events.collaboration_events import (
+    InvitationAcceptedEvent,
+    InvitationReceivedEvent,
+)
 from app.models.models import Invitation, User
 
 logger = get_logger(__name__, "app")
 
 
 class InvitationService:
-    
+
     def __init__(self, db: Session):
         self.db = db
-    
-    async def create_invitation(self, sent_by_user: User, sent_to_identifier: str,
-                         invitation_type: str, title: str, context_data: Dict[str, Any],
-                         message: Optional[str] = None, expires_hours: Optional[int] = 168) -> Invitation:
+
+    async def create_invitation(
+        self,
+        sent_by_user: User,
+        sent_to_identifier: str,
+        invitation_type: str,
+        title: str,
+        context_data: Dict[str, Any],
+        message: Optional[str] = None,
+        expires_hours: Optional[int] = 168,
+    ) -> Invitation:
         """
         Create a reusable invitation
-        
+
         Args:
             sent_by_user: User sending the invitation
             sent_to_identifier: Username or email of recipient
@@ -39,25 +49,31 @@ class InvitationService:
         """
         try:
             # Find recipient user
-            sent_to_user = self.db.query(User).filter(
-                or_(User.username == sent_to_identifier, 
-                    User.email == sent_to_identifier)
-            ).first()
-            
+            sent_to_user = (
+                self.db.query(User)
+                .filter(
+                    or_(
+                        User.username == sent_to_identifier,
+                        User.email == sent_to_identifier,
+                    )
+                )
+                .first()
+            )
+
             if not sent_to_user:
                 raise ValueError("Recipient user not found")
-            
+
             if sent_to_user.id == sent_by_user.id:
                 raise ValueError("Cannot send invitation to yourself")
-            
+
             # Skip duplicate check - let users send multiple invitations
             # The database constraint may prevent exact duplicates, but that's acceptable
-            
+
             # Set expiration
             expires_at = None
             if expires_hours:
                 expires_at = get_utc_now() + timedelta(hours=expires_hours)
-            
+
             # Create invitation
             invitation = Invitation(
                 sent_by_user_id=sent_by_user.id,
@@ -66,15 +82,18 @@ class InvitationService:
                 title=title,
                 message=message,
                 context_data=context_data,
-                expires_at=expires_at
+                expires_at=expires_at,
             )
 
-            logger.info("Creating invitation", extra={
-                "invitation_type": invitation_type,
-                "sent_by_user_id": sent_by_user.id,
-                "sent_to_user_id": sent_to_user.id,
-                "component": "invitation_service"
-            })
+            logger.info(
+                "Creating invitation",
+                extra={
+                    "invitation_type": invitation_type,
+                    "sent_by_user_id": sent_by_user.id,
+                    "sent_to_user_id": sent_to_user.id,
+                    "component": "invitation_service",
+                },
+            )
             self.db.add(invitation)
             self.db.commit()
             self.db.refresh(invitation)  # Refresh to get the ID
@@ -84,63 +103,70 @@ class InvitationService:
                 user_id=sent_to_user.id,
                 from_user=sent_by_user.full_name or sent_by_user.username,
                 invitation_type=invitation_type,
-                title=title
+                title=title,
             )
             await get_event_bus().publish(event)
 
             logger.info(f"Created invitation {invitation.id} of type {invitation_type}")
             return invitation
-            
+
         except Exception as e:
             self.db.rollback()
             logger.error(f"Error creating invitation: {e}")
             raise
-    
-    def get_pending_invitations(self, user: User, invitation_type: Optional[str] = None) -> List[Invitation]:
+
+    def get_pending_invitations(
+        self, user: User, invitation_type: Optional[str] = None
+    ) -> List[Invitation]:
         """Get pending invitations for a user"""
         try:
             query = self.db.query(Invitation).filter(
-                Invitation.sent_to_user_id == user.id,
-                Invitation.status == 'pending'
+                Invitation.sent_to_user_id == user.id, Invitation.status == "pending"
             )
-            
+
             if invitation_type:
                 query = query.filter(Invitation.invitation_type == invitation_type)
-            
+
             # Filter out expired invitations
             now = get_utc_now()
             query = query.filter(
-                or_(Invitation.expires_at.is_(None), 
-                    Invitation.expires_at > now)
+                or_(Invitation.expires_at.is_(None), Invitation.expires_at > now)
             )
-            
+
             return query.order_by(Invitation.created_at.desc()).all()
-            
+
         except Exception as e:
             logger.error(f"Error fetching pending invitations: {e}")
             raise
-    
-    def get_sent_invitations(self, user: User, invitation_type: Optional[str] = None) -> List[Invitation]:
+
+    def get_sent_invitations(
+        self, user: User, invitation_type: Optional[str] = None
+    ) -> List[Invitation]:
         """Get invitations sent by a user"""
         try:
             query = self.db.query(Invitation).filter(
                 Invitation.sent_by_user_id == user.id
             )
-            
+
             if invitation_type:
                 query = query.filter(Invitation.invitation_type == invitation_type)
-            
+
             return query.order_by(Invitation.created_at.desc()).all()
-            
+
         except Exception as e:
             logger.error(f"Error fetching sent invitations: {e}")
             raise
-    
-    async def respond_to_invitation(self, user: User, invitation_id: int,
-                            response: str, response_note: Optional[str] = None) -> Invitation:
+
+    async def respond_to_invitation(
+        self,
+        user: User,
+        invitation_id: int,
+        response: str,
+        response_note: Optional[str] = None,
+    ) -> Invitation:
         """
         Respond to an invitation
-        
+
         Args:
             user: User responding to invitation
             invitation_id: ID of invitation
@@ -148,15 +174,19 @@ class InvitationService:
             response_note: Optional note from recipient
         """
         try:
-            invitation = self.db.query(Invitation).filter(
-                Invitation.id == invitation_id,
-                Invitation.sent_to_user_id == user.id,
-                Invitation.status == 'pending'
-            ).first()
-            
+            invitation = (
+                self.db.query(Invitation)
+                .filter(
+                    Invitation.id == invitation_id,
+                    Invitation.sent_to_user_id == user.id,
+                    Invitation.status == "pending",
+                )
+                .first()
+            )
+
             if not invitation:
                 raise ValueError("Invitation not found or not pending")
-            
+
             # Check if expired
             if invitation.expires_at:
                 now = get_utc_now()
@@ -164,15 +194,16 @@ class InvitationService:
                 # Ensure both datetimes are comparable (SQLite stores naive datetimes)
                 if expires_at.tzinfo is None:
                     from datetime import timezone
+
                     expires_at = expires_at.replace(tzinfo=timezone.utc)
                 if expires_at < now:
-                    invitation.status = 'expired'
+                    invitation.status = "expired"
                     self.db.commit()
                     raise ValueError("Invitation has expired")
-            
-            if response not in ['accepted', 'rejected']:
+
+            if response not in ["accepted", "rejected"]:
                 raise ValueError("Response must be 'accepted' or 'rejected'")
-            
+
             # Update invitation
             invitation.status = response
             invitation.responded_at = get_utc_now()
@@ -181,84 +212,92 @@ class InvitationService:
             self.db.commit()
 
             # Publish invitation accepted event
-            if response == 'accepted':
+            if response == "accepted":
                 event = InvitationAcceptedEvent(
                     user_id=invitation.sent_by_user_id,
                     by_user=user.full_name or user.username,
                     invitation_type=invitation.invitation_type,
-                    title=invitation.title
+                    title=invitation.title,
                 )
                 await get_event_bus().publish(event)
 
             logger.info(f"Invitation {invitation_id} {response} by user {user.id}")
             return invitation
-            
+
         except Exception as e:
             self.db.rollback()
             logger.error(f"Error responding to invitation: {e}")
             raise
-    
+
     def expire_old_invitations(self) -> int:
         """Mark expired invitations as expired (cleanup task)"""
         try:
             now = get_utc_now()
-            expired_count = self.db.query(Invitation).filter(
-                Invitation.status == 'pending',
-                Invitation.expires_at < now
-            ).update({
-                'status': 'expired',
-                'updated_at': now
-            })
-            
+            expired_count = (
+                self.db.query(Invitation)
+                .filter(Invitation.status == "pending", Invitation.expires_at < now)
+                .update({"status": "expired", "updated_at": now})
+            )
+
             self.db.commit()
-            
+
             if expired_count > 0:
                 logger.info(f"Expired {expired_count} old invitations")
-            
+
             return expired_count
-            
+
         except Exception as e:
             self.db.rollback()
             logger.error(f"Error expiring old invitations: {e}")
             raise
-    
+
     def cancel_invitation(self, user: User, invitation_id: int) -> Invitation:
         """Cancel a sent invitation"""
         try:
-            invitation = self.db.query(Invitation).filter(
-                Invitation.id == invitation_id,
-                Invitation.sent_by_user_id == user.id,
-                Invitation.status == 'pending'
-            ).first()
-            
+            invitation = (
+                self.db.query(Invitation)
+                .filter(
+                    Invitation.id == invitation_id,
+                    Invitation.sent_by_user_id == user.id,
+                    Invitation.status == "pending",
+                )
+                .first()
+            )
+
             if not invitation:
                 raise ValueError("Invitation not found or not pending")
-            
-            invitation.status = 'cancelled'
+
+            invitation.status = "cancelled"
             invitation.updated_at = get_utc_now()
-            
+
             self.db.commit()
-            
+
             logger.info(f"Invitation {invitation_id} cancelled by user {user.id}")
             return invitation
-            
+
         except Exception as e:
             self.db.rollback()
             logger.error(f"Error cancelling invitation: {e}")
             raise
-    
+
     def get_invitation_by_id(self, invitation_id: int) -> Optional[Invitation]:
         """Get invitation by ID"""
         try:
-            return self.db.query(Invitation).filter(Invitation.id == invitation_id).first()
+            return (
+                self.db.query(Invitation).filter(Invitation.id == invitation_id).first()
+            )
         except Exception as e:
             logger.error(f"Error fetching invitation by ID: {e}")
             raise
-    
-    def update_invitation_status(self, invitation_id: int, status: str) -> Optional[Invitation]:
+
+    def update_invitation_status(
+        self, invitation_id: int, status: str
+    ) -> Optional[Invitation]:
         """Update invitation status by ID"""
         try:
-            invitation = self.db.query(Invitation).filter(Invitation.id == invitation_id).first()
+            invitation = (
+                self.db.query(Invitation).filter(Invitation.id == invitation_id).first()
+            )
             if invitation:
                 invitation.status = status
                 invitation.updated_at = get_utc_now()

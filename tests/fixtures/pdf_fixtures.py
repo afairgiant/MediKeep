@@ -1,6 +1,7 @@
 """
 PDF test fixtures for lab result parsing tests.
 """
+
 import io
 
 

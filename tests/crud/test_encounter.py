@@ -1,6 +1,7 @@
 """
 Tests for Encounter CRUD operations.
 """
+
 import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
@@ -23,7 +24,7 @@ class TestEncounterCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -37,7 +38,7 @@ class TestEncounterCRUD:
             date=date(2024, 1, 15),
             visit_type="routine",
             chief_complaint="General wellness check",
-            notes="Patient in good health"
+            notes="Patient in good health",
         )
 
         encounter = encounter_crud.create(db_session, obj_in=encounter_data)
@@ -52,9 +53,7 @@ class TestEncounterCRUD:
     def test_get_encounter(self, db_session: Session, test_patient):
         """Test getting an encounter by ID."""
         encounter_data = EncounterCreate(
-            patient_id=test_patient.id,
-            reason="Follow-up visit",
-            date=date(2024, 1, 20)
+            patient_id=test_patient.id, reason="Follow-up visit", date=date(2024, 1, 20)
         )
 
         created_encounter = encounter_crud.create(db_session, obj_in=encounter_data)
@@ -71,16 +70,14 @@ class TestEncounterCRUD:
 
         # Create encounters with different dates
         dates = [
-            today - timedelta(days=5),   # Recent (within 30 days)
+            today - timedelta(days=5),  # Recent (within 30 days)
             today - timedelta(days=15),  # Recent (within 30 days)
             today - timedelta(days=45),  # Old (outside 30 days)
         ]
 
         for i, enc_date in enumerate(dates):
             encounter_data = EncounterCreate(
-                patient_id=test_patient.id,
-                reason=f"Visit {i+1}",
-                date=enc_date
+                patient_id=test_patient.id, reason=f"Visit {i+1}", date=enc_date
             )
             encounter_crud.create(db_session, obj_in=encounter_data)
 
@@ -106,9 +103,7 @@ class TestEncounterCRUD:
 
         for i, enc_date in enumerate(dates):
             encounter_data = EncounterCreate(
-                patient_id=test_patient.id,
-                reason=f"Visit {i+1}",
-                date=enc_date
+                patient_id=test_patient.id, reason=f"Visit {i+1}", date=enc_date
             )
             encounter_crud.create(db_session, obj_in=encounter_data)
 
@@ -128,7 +123,7 @@ class TestEncounterCRUD:
         encounter_data = EncounterCreate(
             patient_id=test_patient.id,
             reason="Old visit",
-            date=today - timedelta(days=60)
+            date=today - timedelta(days=60),
         )
         encounter_crud.create(db_session, obj_in=encounter_data)
 
@@ -144,7 +139,7 @@ class TestEncounterCRUD:
             patient_id=test_patient.id,
             reason="Initial reason",
             date=date(2024, 1, 15),
-            notes="Initial notes"
+            notes="Initial notes",
         )
 
         created_encounter = encounter_crud.create(db_session, obj_in=encounter_data)
@@ -152,7 +147,7 @@ class TestEncounterCRUD:
         update_data = EncounterUpdate(
             reason="Updated reason",
             diagnosis="Common cold",
-            treatment_plan="Rest and fluids"
+            treatment_plan="Rest and fluids",
         )
 
         updated_encounter = encounter_crud.update(
@@ -167,9 +162,7 @@ class TestEncounterCRUD:
     def test_delete_encounter(self, db_session: Session, test_patient):
         """Test deleting an encounter."""
         encounter_data = EncounterCreate(
-            patient_id=test_patient.id,
-            reason="To be deleted",
-            date=date(2024, 1, 15)
+            patient_id=test_patient.id, reason="To be deleted", date=date(2024, 1, 15)
         )
 
         created_encounter = encounter_crud.create(db_session, obj_in=encounter_data)
@@ -198,7 +191,7 @@ class TestEncounterCRUD:
             follow_up_instructions="Schedule next appointment",
             duration_minutes=45,
             location="Main clinic",
-            priority="normal"
+            priority="normal",
         )
 
         encounter = encounter_crud.create(db_session, obj_in=encounter_data)
@@ -209,7 +202,9 @@ class TestEncounterCRUD:
         assert encounter.location == "Main clinic"
         assert encounter.priority == "normal"
 
-    def test_multiple_patients_recent_encounters(self, db_session: Session, test_user, test_admin_user):
+    def test_multiple_patients_recent_encounters(
+        self, db_session: Session, test_user, test_admin_user
+    ):
         """Test that get_recent returns only encounters for specific patient."""
         # Create two patients (each under a different user due to one-patient-per-user constraint)
         patient1_data = PatientCreate(
@@ -217,14 +212,14 @@ class TestEncounterCRUD:
             last_name="One",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Test St"
+            address="123 Test St",
         )
         patient2_data = PatientCreate(
             first_name="Patient",
             last_name="Two",
             birth_date=date(1985, 5, 15),
             gender="F",
-            address="456 Test Ave"
+            address="456 Test Ave",
         )
 
         patient1 = patient_crud.create_for_user(
@@ -241,7 +236,7 @@ class TestEncounterCRUD:
             encounter_data = EncounterCreate(
                 patient_id=patient1.id,
                 reason=f"Patient 1 Visit {i+1}",
-                date=today - timedelta(days=i)
+                date=today - timedelta(days=i),
             )
             encounter_crud.create(db_session, obj_in=encounter_data)
 
@@ -250,7 +245,7 @@ class TestEncounterCRUD:
             encounter_data = EncounterCreate(
                 patient_id=patient2.id,
                 reason=f"Patient 2 Visit {i+1}",
-                date=today - timedelta(days=i)
+                date=today - timedelta(days=i),
             )
             encounter_crud.create(db_session, obj_in=encounter_data)
 

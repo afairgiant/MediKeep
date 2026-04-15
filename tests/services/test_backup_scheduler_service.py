@@ -51,9 +51,7 @@ class TestUpdateSchedule:
 
         with patch.object(service, "_load_config", return_value=dict(DEFAULT_CONFIG)):
             with patch.object(service, "_save_config") as mock_save:
-                config = service.update_schedule(
-                    preset="daily", time_of_day="03:30"
-                )
+                config = service.update_schedule(preset="daily", time_of_day="03:30")
 
         assert config["preset"] == "daily"
         assert config["enabled"] is True
@@ -170,9 +168,7 @@ class TestRunBackup:
         mock_bs.create_full_backup = AsyncMock(return_value=mock_result)
 
         with patch.object(service, "_update_last_run") as mock_update:
-            with patch(
-                "app.core.database.database.SessionLocal", return_value=mock_db
-            ):
+            with patch("app.core.database.database.SessionLocal", return_value=mock_db):
                 with patch(
                     "app.services.backup_service.BackupService",
                     return_value=mock_bs,
@@ -192,14 +188,10 @@ class TestRunBackup:
 
         mock_db = MagicMock()
         mock_bs = MagicMock()
-        mock_bs.create_full_backup = AsyncMock(
-            side_effect=Exception("pg_dump failed")
-        )
+        mock_bs.create_full_backup = AsyncMock(side_effect=Exception("pg_dump failed"))
 
         with patch.object(service, "_update_last_run") as mock_update:
-            with patch(
-                "app.core.database.database.SessionLocal", return_value=mock_db
-            ):
+            with patch("app.core.database.database.SessionLocal", return_value=mock_db):
                 with patch(
                     "app.services.backup_service.BackupService",
                     return_value=mock_bs,

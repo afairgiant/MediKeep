@@ -3,6 +3,7 @@ Tests for Standardized Tests API endpoints.
 
 Tests LOINC-based test search, autocomplete, and category filtering.
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -32,7 +33,7 @@ class TestStandardizedTestsAPI:
                 category="hematology",
                 common_names=["White Blood Cell Count", "WBC", "Leukocyte Count"],
                 is_common=True,
-                display_order=1
+                display_order=1,
             ),
             StandardizedTest(
                 loinc_code="789-8",
@@ -42,7 +43,7 @@ class TestStandardizedTestsAPI:
                 category="hematology",
                 common_names=["Red Blood Cell Count", "RBC", "Erythrocyte Count"],
                 is_common=True,
-                display_order=2
+                display_order=2,
             ),
             StandardizedTest(
                 loinc_code="718-7",
@@ -52,7 +53,7 @@ class TestStandardizedTestsAPI:
                 category="hematology",
                 common_names=["Hemoglobin", "Hgb", "Hb"],
                 is_common=True,
-                display_order=3
+                display_order=3,
             ),
             StandardizedTest(
                 loinc_code="2093-3",
@@ -62,7 +63,7 @@ class TestStandardizedTestsAPI:
                 category="lipids",
                 common_names=["Total Cholesterol", "Cholesterol"],
                 is_common=True,
-                display_order=10
+                display_order=10,
             ),
             StandardizedTest(
                 loinc_code="2085-9",
@@ -72,7 +73,7 @@ class TestStandardizedTestsAPI:
                 category="lipids",
                 common_names=["HDL Cholesterol", "HDL", "Good Cholesterol"],
                 is_common=True,
-                display_order=11
+                display_order=11,
             ),
             StandardizedTest(
                 loinc_code="2571-8",
@@ -82,7 +83,7 @@ class TestStandardizedTestsAPI:
                 category="lipids",
                 common_names=["Triglycerides", "Trig"],
                 is_common=False,
-                display_order=12
+                display_order=12,
             ),
         ]
 
@@ -94,123 +95,143 @@ class TestStandardizedTestsAPI:
 
     # ========== Search Tests ==========
 
-    def test_search_by_test_name(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_by_test_name(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test searching for tests by name."""
         response = client.get(
             "/api/v1/standardized-tests/search?query=Hemoglobin",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['total'] >= 1
-        test_names = [t['test_name'] for t in data['tests']]
-        assert any('Hemoglobin' in name for name in test_names)
+        assert data["total"] >= 1
+        test_names = [t["test_name"] for t in data["tests"]]
+        assert any("Hemoglobin" in name for name in test_names)
 
-    def test_search_by_short_name(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_by_short_name(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test searching for tests by short name."""
         response = client.get(
-            "/api/v1/standardized-tests/search?query=WBC",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/search?query=WBC", headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['total'] >= 1
-        assert any(t['short_name'] == 'WBC' for t in data['tests'])
+        assert data["total"] >= 1
+        assert any(t["short_name"] == "WBC" for t in data["tests"])
 
-    def test_search_by_loinc_code(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_by_loinc_code(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test searching for tests by LOINC code."""
         response = client.get(
             "/api/v1/standardized-tests/search?query=6690-2",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['total'] >= 1
-        assert any(t['loinc_code'] == '6690-2' for t in data['tests'])
+        assert data["total"] >= 1
+        assert any(t["loinc_code"] == "6690-2" for t in data["tests"])
 
-    def test_search_partial_match(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_partial_match(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test partial text matching in search."""
         response = client.get(
             "/api/v1/standardized-tests/search?query=Chol",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['total'] >= 2  # Should match both Total Cholesterol and HDL Cholesterol
-        test_names = [t['test_name'] for t in data['tests']]
-        assert any('Cholesterol' in name for name in test_names)
+        assert (
+            data["total"] >= 2
+        )  # Should match both Total Cholesterol and HDL Cholesterol
+        test_names = [t["test_name"] for t in data["tests"]]
+        assert any("Cholesterol" in name for name in test_names)
 
-    def test_search_with_category_filter(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_with_category_filter(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test searching with category filter."""
         response = client.get(
             "/api/v1/standardized-tests/search?query=&category=hematology",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['total'] >= 3
-        assert all(t['category'] == 'hematology' for t in data['tests'])
+        assert data["total"] >= 3
+        assert all(t["category"] == "hematology" for t in data["tests"])
 
-    def test_search_empty_query_returns_common_tests(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_empty_query_returns_common_tests(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test that empty search query returns common tests."""
         response = client.get(
-            "/api/v1/standardized-tests/search?query=",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/search?query=", headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['total'] >= 1
-        assert all(t['is_common'] for t in data['tests'])
+        assert data["total"] >= 1
+        assert all(t["is_common"] for t in data["tests"])
 
-    def test_search_no_results(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_no_results(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test search with no matching results."""
         response = client.get(
             "/api/v1/standardized-tests/search?query=NonexistentTestName123",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['total'] == 0
-        assert len(data['tests']) == 0
+        assert data["total"] == 0
+        assert len(data["tests"]) == 0
 
-    def test_search_limit_parameter(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_limit_parameter(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test limit parameter in search."""
         response = client.get(
             "/api/v1/standardized-tests/search?query=&limit=2",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert len(data['tests']) <= 2
+        assert len(data["tests"]) <= 2
 
     # ========== Autocomplete Tests ==========
 
-    def test_autocomplete_basic(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_autocomplete_basic(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test basic autocomplete functionality."""
         response = client.get(
             "/api/v1/standardized-tests/autocomplete?query=WBC",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
         assert len(data) >= 1
-        assert any('WBC' in opt['label'] or 'WBC' in opt['value'] for opt in data)
+        assert any("WBC" in opt["label"] or "WBC" in opt["value"] for opt in data)
 
-    def test_autocomplete_returns_formatted_options(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_autocomplete_returns_formatted_options(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test that autocomplete returns properly formatted options."""
         response = client.get(
             "/api/v1/standardized-tests/autocomplete?query=Hemoglobin",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -219,29 +240,33 @@ class TestStandardizedTestsAPI:
 
         # Check structure of first option
         option = data[0]
-        assert 'value' in option
-        assert 'label' in option
-        assert 'loinc_code' in option
-        assert 'default_unit' in option
-        assert 'category' in option
+        assert "value" in option
+        assert "label" in option
+        assert "loinc_code" in option
+        assert "default_unit" in option
+        assert "category" in option
 
-    def test_autocomplete_with_category_filter(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_autocomplete_with_category_filter(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test autocomplete with category filter."""
         response = client.get(
             "/api/v1/standardized-tests/autocomplete?query=&category=lipids",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 2
-        assert all(opt['category'] == 'lipids' for opt in data)
+        assert all(opt["category"] == "lipids" for opt in data)
 
-    def test_autocomplete_limit(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_autocomplete_limit(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test autocomplete respects limit parameter."""
         response = client.get(
             "/api/v1/standardized-tests/autocomplete?query=&limit=3",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -250,150 +275,170 @@ class TestStandardizedTestsAPI:
 
     # ========== Common Tests Endpoint ==========
 
-    def test_get_common_tests(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_common_tests(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test getting common/frequently used tests."""
         response = client.get(
-            "/api/v1/standardized-tests/common",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/common", headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 5  # We created 5 common tests
-        assert all(t['is_common'] for t in data)
+        assert all(t["is_common"] for t in data)
 
-    def test_get_common_tests_by_category(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_common_tests_by_category(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test filtering common tests by category."""
         response = client.get(
             "/api/v1/standardized-tests/common?category=hematology",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 3
-        assert all(t['category'] == 'hematology' for t in data)
-        assert all(t['is_common'] for t in data)
+        assert all(t["category"] == "hematology" for t in data)
+        assert all(t["is_common"] for t in data)
 
-    def test_get_common_tests_ordered(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_common_tests_ordered(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test that common tests are returned in display order."""
         response = client.get(
             "/api/v1/standardized-tests/common?category=hematology",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
 
         # Check display order is ascending
-        orders = [t['display_order'] for t in data if t.get('display_order')]
+        orders = [t["display_order"] for t in data if t.get("display_order")]
         assert orders == sorted(orders)
 
     # ========== Category Endpoint ==========
 
-    def test_get_tests_by_category(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_tests_by_category(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test getting all tests in a category."""
         response = client.get(
             "/api/v1/standardized-tests/by-category/lipids",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 3
-        assert all(t['category'] == 'lipids' for t in data)
+        assert all(t["category"] == "lipids" for t in data)
 
-    def test_get_tests_by_nonexistent_category(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_tests_by_nonexistent_category(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test getting tests for non-existent category."""
         response = client.get(
             "/api/v1/standardized-tests/by-category/nonexistent",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 404
 
     # ========== LOINC Lookup ==========
 
-    def test_get_test_by_loinc(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_test_by_loinc(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test getting a test by LOINC code."""
         response = client.get(
-            "/api/v1/standardized-tests/by-loinc/6690-2",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/by-loinc/6690-2", headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['loinc_code'] == '6690-2'
-        assert data['short_name'] == 'WBC'
+        assert data["loinc_code"] == "6690-2"
+        assert data["short_name"] == "WBC"
 
-    def test_get_test_by_invalid_loinc(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_test_by_invalid_loinc(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test getting test with non-existent LOINC code."""
         response = client.get(
-            "/api/v1/standardized-tests/by-loinc/9999-9",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/by-loinc/9999-9", headers=authenticated_headers
         )
 
         assert response.status_code == 404
 
     # ========== Name Lookup ==========
 
-    def test_get_test_by_name(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_test_by_name(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test getting a test by exact name match."""
         response = client.get(
             "/api/v1/standardized-tests/by-name/Hemoglobin [Mass/volume] in Blood",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['test_name'] == 'Hemoglobin [Mass/volume] in Blood'
-        assert data['short_name'] == 'Hgb'
+        assert data["test_name"] == "Hemoglobin [Mass/volume] in Blood"
+        assert data["short_name"] == "Hgb"
 
-    def test_get_test_by_name_case_insensitive(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_test_by_name_case_insensitive(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test that name lookup is case-insensitive."""
         response = client.get(
             "/api/v1/standardized-tests/by-name/hemoglobin [mass/volume] in blood",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['test_name'] == 'Hemoglobin [Mass/volume] in Blood'
+        assert data["test_name"] == "Hemoglobin [Mass/volume] in Blood"
 
-    def test_get_test_by_invalid_name(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_get_test_by_invalid_name(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test getting test with non-existent name."""
         response = client.get(
             "/api/v1/standardized-tests/by-name/Nonexistent Test Name",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 404
 
     # ========== Count Endpoint ==========
 
-    def test_count_all_tests(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_count_all_tests(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test counting all tests."""
         response = client.get(
-            "/api/v1/standardized-tests/count",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/count", headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert 'count' in data
-        assert data['count'] >= 6
+        assert "count" in data
+        assert data["count"] >= 6
 
-    def test_count_tests_by_category(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_count_tests_by_category(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test counting tests in a specific category."""
         response = client.get(
             "/api/v1/standardized-tests/count?category=hematology",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['category'] == 'hematology'
-        assert data['count'] >= 3
+        assert data["category"] == "hematology"
+        assert data["count"] >= 3
 
     # ========== Authorization Tests ==========
 
@@ -403,7 +448,9 @@ class TestStandardizedTestsAPI:
 
         assert response.status_code == 200
 
-    def test_autocomplete_requires_authentication(self, client: TestClient, sample_tests):
+    def test_autocomplete_requires_authentication(
+        self, client: TestClient, sample_tests
+    ):
         """Test that autocomplete endpoint is publicly accessible (no auth required)."""
         response = client.get("/api/v1/standardized-tests/autocomplete")
 
@@ -411,54 +458,58 @@ class TestStandardizedTestsAPI:
 
     # ========== Edge Cases ==========
 
-    def test_search_with_special_characters(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_search_with_special_characters(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test search with special characters in query."""
         response = client.get(
             "/api/v1/standardized-tests/search?query=[#/volume]",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         # Should handle special regex characters safely
 
-    def test_very_long_query(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_very_long_query(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test search with very long query string."""
         long_query = "test" * 100  # 400 characters
 
         response = client.get(
             f"/api/v1/standardized-tests/search?query={long_query}",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
 
-    def test_limit_boundary_values(self, client: TestClient, sample_tests, authenticated_headers):
+    def test_limit_boundary_values(
+        self, client: TestClient, sample_tests, authenticated_headers
+    ):
         """Test limit parameter with boundary values."""
         # Minimum allowed
         response = client.get(
-            "/api/v1/standardized-tests/search?limit=1",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/search?limit=1", headers=authenticated_headers
         )
         assert response.status_code == 200
 
         # Maximum allowed
         response = client.get(
             "/api/v1/standardized-tests/search?limit=1000",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 200
 
         # Below minimum (should fail validation)
         response = client.get(
-            "/api/v1/standardized-tests/search?limit=0",
-            headers=authenticated_headers
+            "/api/v1/standardized-tests/search?limit=0", headers=authenticated_headers
         )
         assert response.status_code == 422
 
         # Above maximum (should fail validation)
         response = client.get(
             "/api/v1/standardized-tests/search?limit=1001",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 422

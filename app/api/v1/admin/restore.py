@@ -21,7 +21,7 @@ from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
-    log_validation_error
+    log_validation_error,
 )
 from app.models.models import User
 from app.services.restore_service import RestoreService
@@ -109,7 +109,7 @@ async def upload_backup_file(
                 user_id=current_user.id,
                 username=current_user.username,
                 backup_filename=file.filename,
-                backup_id=backup_record.id
+                backup_id=backup_record.id,
             )
 
             return UploadBackupResponse(
@@ -130,11 +130,7 @@ async def upload_backup_file(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Failed to upload backup file",
-            e,
-            user_id=current_user.id
+            logger, request, "Failed to upload backup file", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=500, detail=f"Failed to upload backup file: {str(e)}"
@@ -162,18 +158,14 @@ async def preview_restore(
             f"Restore preview requested",
             user_id=current_user.id,
             username=current_user.username,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
 
         return RestorePreviewResponse(**preview_data)
 
     except ValueError as e:
         log_validation_error(
-            logger,
-            request,
-            str(e),
-            user_id=current_user.id,
-            backup_id=backup_id
+            logger, request, str(e), user_id=current_user.id, backup_id=backup_id
         )
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
@@ -183,7 +175,7 @@ async def preview_restore(
             "Failed to preview restore",
             e,
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
         raise HTTPException(
             status_code=500, detail=f"Failed to preview restore: {str(e)}"
@@ -219,18 +211,14 @@ async def execute_restore(
             f"Restore executed for backup {backup_id}",
             user_id=user_id,
             username=username,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
 
         return RestoreExecuteResponse(**result)
 
     except ValueError as e:
         log_validation_error(
-            logger,
-            request,
-            str(e),
-            user_id=current_user.id,
-            backup_id=backup_id
+            logger, request, str(e), user_id=current_user.id, backup_id=backup_id
         )
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -240,7 +228,7 @@ async def execute_restore(
             "Failed to execute restore",
             e,
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
         raise HTTPException(
             status_code=500, detail=f"Failed to execute restore: {str(e)}"
@@ -269,7 +257,7 @@ async def get_confirmation_token(
             f"Confirmation token requested for restore operation",
             user_id=current_user.id,
             username=current_user.username,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
 
         return {
@@ -286,7 +274,7 @@ async def get_confirmation_token(
             "Failed to generate confirmation token",
             e,
             user_id=current_user.id,
-            backup_id=backup_id
+            backup_id=backup_id,
         )
         raise HTTPException(
             status_code=500, detail=f"Failed to generate confirmation token: {str(e)}"

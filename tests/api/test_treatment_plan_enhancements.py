@@ -6,6 +6,7 @@ Tests for Treatment Plan Enhancement features:
 - GET /medications/{id}/treatments endpoint
 - Date cross-validation on TreatmentMedication
 """
+
 import pytest
 from datetime import date
 from fastapi.testclient import TestClient
@@ -16,7 +17,9 @@ from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
 
 
-def _create_user_with_patient(db_session, first_name, last_name, birth_date, gender, address):
+def _create_user_with_patient(
+    db_session, first_name, last_name, birth_date, gender, address
+):
     """Helper to create a user with a patient record for testing."""
     user_data = create_random_user(db_session)
     patient_data = PatientCreate(
@@ -40,13 +43,17 @@ class TestTreatmentModeField:
 
     @pytest.fixture
     def user_with_patient(self, db_session: Session):
-        return _create_user_with_patient(db_session, "John", "Doe", date(1990, 1, 1), "M", "123 Main St")
+        return _create_user_with_patient(
+            db_session, "John", "Doe", date(1990, 1, 1), "M", "123 Main St"
+        )
 
     @pytest.fixture
     def authenticated_headers(self, user_with_patient):
         return create_user_token_headers(user_with_patient["user"].username)
 
-    def test_create_treatment_defaults_to_simple_mode(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_treatment_defaults_to_simple_mode(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Treatment created without mode should default to 'simple'."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -57,16 +64,16 @@ class TestTreatmentModeField:
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
         assert data["mode"] == "simple"
 
-    def test_create_treatment_with_simple_mode(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_treatment_with_simple_mode(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Treatment created with explicit simple mode."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -78,15 +85,15 @@ class TestTreatmentModeField:
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
         assert response.json()["mode"] == "simple"
 
-    def test_create_treatment_with_advanced_mode(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_treatment_with_advanced_mode(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Treatment created with advanced mode."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -98,15 +105,15 @@ class TestTreatmentModeField:
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
         assert response.json()["mode"] == "advanced"
 
-    def test_create_treatment_invalid_mode_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_treatment_invalid_mode_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Treatment with invalid mode should be rejected."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -117,14 +124,14 @@ class TestTreatmentModeField:
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
 
-    def test_update_treatment_mode(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_update_treatment_mode(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Treatment mode can be updated from simple to advanced."""
         # Create simple treatment
         treatment_data = {
@@ -137,9 +144,7 @@ class TestTreatmentModeField:
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
         treatment_id = create_response.json()["id"]
 
@@ -147,13 +152,15 @@ class TestTreatmentModeField:
         update_response = client.put(
             f"/api/v1/treatments/{treatment_id}",
             json={"mode": "advanced"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert update_response.status_code == 200
         assert update_response.json()["mode"] == "advanced"
 
-    def test_update_treatment_invalid_mode_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_update_treatment_invalid_mode_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Updating treatment to invalid mode should be rejected."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -164,21 +171,21 @@ class TestTreatmentModeField:
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
         treatment_id = create_response.json()["id"]
 
         update_response = client.put(
             f"/api/v1/treatments/{treatment_id}",
             json={"mode": "bogus"},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert update_response.status_code == 422
 
-    def test_treatment_list_returns_mode(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_treatment_list_returns_mode(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Treatment list should include mode field."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -190,15 +197,10 @@ class TestTreatmentModeField:
         }
 
         client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
-        list_response = client.get(
-            "/api/v1/treatments/",
-            headers=authenticated_headers
-        )
+        list_response = client.get("/api/v1/treatments/", headers=authenticated_headers)
 
         assert list_response.status_code == 200
         treatments = list_response.json()
@@ -213,14 +215,18 @@ class TestTreatmentMedicationOverrides:
 
     @pytest.fixture
     def user_with_patient(self, db_session: Session):
-        return _create_user_with_patient(db_session, "Jane", "Smith", date(1985, 6, 15), "F", "456 Oak Ave")
+        return _create_user_with_patient(
+            db_session, "Jane", "Smith", date(1985, 6, 15), "F", "456 Oak Ave"
+        )
 
     @pytest.fixture
     def authenticated_headers(self, user_with_patient):
         return create_user_token_headers(user_with_patient["user"].username)
 
     @pytest.fixture
-    def treatment_and_medication(self, client: TestClient, user_with_patient, authenticated_headers):
+    def treatment_and_medication(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Create a treatment and medication for linking tests."""
         patient_id = user_with_patient["patient"].id
 
@@ -235,7 +241,7 @@ class TestTreatmentMedicationOverrides:
                 "status": "active",
                 "mode": "advanced",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         treatment = treatment_response.json()
 
@@ -251,13 +257,15 @@ class TestTreatmentMedicationOverrides:
                 "effective_period_start": "2024-01-01",
                 "effective_period_end": "2024-12-31",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         medication = medication_response.json()
 
         return {"treatment": treatment, "medication": medication}
 
-    def test_link_medication_with_override_fields(self, client: TestClient, treatment_and_medication, authenticated_headers):
+    def test_link_medication_with_override_fields(
+        self, client: TestClient, treatment_and_medication, authenticated_headers
+    ):
         """Linking medication with specific override fields should work."""
         treatment_id = treatment_and_medication["treatment"]["id"]
         medication_id = treatment_and_medication["medication"]["id"]
@@ -273,7 +281,7 @@ class TestTreatmentMedicationOverrides:
                 "specific_end_date": "2024-06-30",
                 "relevance_note": "Higher dose for this treatment",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -284,7 +292,9 @@ class TestTreatmentMedicationOverrides:
         assert data["specific_end_date"] == "2024-06-30"
         assert data["relevance_note"] == "Higher dose for this treatment"
 
-    def test_link_medication_without_overrides(self, client: TestClient, treatment_and_medication, authenticated_headers):
+    def test_link_medication_without_overrides(
+        self, client: TestClient, treatment_and_medication, authenticated_headers
+    ):
         """Linking medication without overrides should default to nulls."""
         treatment_id = treatment_and_medication["treatment"]["id"]
         medication_id = treatment_and_medication["medication"]["id"]
@@ -295,7 +305,7 @@ class TestTreatmentMedicationOverrides:
                 "treatment_id": treatment_id,
                 "medication_id": medication_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -307,7 +317,9 @@ class TestTreatmentMedicationOverrides:
         assert data["specific_prescriber_id"] is None
         assert data["specific_pharmacy_id"] is None
 
-    def test_update_medication_relationship_overrides(self, client: TestClient, treatment_and_medication, authenticated_headers):
+    def test_update_medication_relationship_overrides(
+        self, client: TestClient, treatment_and_medication, authenticated_headers
+    ):
         """Updating medication relationship should allow changing overrides."""
         treatment_id = treatment_and_medication["treatment"]["id"]
         medication_id = treatment_and_medication["medication"]["id"]
@@ -319,7 +331,7 @@ class TestTreatmentMedicationOverrides:
                 "treatment_id": treatment_id,
                 "medication_id": medication_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         relationship_id = create_response.json()["id"]
 
@@ -331,7 +343,7 @@ class TestTreatmentMedicationOverrides:
                 "specific_start_date": "2024-03-01",
                 "specific_end_date": "2024-09-30",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert update_response.status_code == 200
@@ -340,7 +352,9 @@ class TestTreatmentMedicationOverrides:
         assert data["specific_start_date"] == "2024-03-01"
         assert data["specific_end_date"] == "2024-09-30"
 
-    def test_medication_relationship_date_validation(self, client: TestClient, treatment_and_medication, authenticated_headers):
+    def test_medication_relationship_date_validation(
+        self, client: TestClient, treatment_and_medication, authenticated_headers
+    ):
         """End date before start date should be rejected."""
         treatment_id = treatment_and_medication["treatment"]["id"]
         medication_id = treatment_and_medication["medication"]["id"]
@@ -353,7 +367,7 @@ class TestTreatmentMedicationOverrides:
                 "specific_start_date": "2024-06-01",
                 "specific_end_date": "2024-01-01",  # before start
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
@@ -364,14 +378,18 @@ class TestTreatmentMedicationEffectiveValues:
 
     @pytest.fixture
     def user_with_patient(self, db_session: Session):
-        return _create_user_with_patient(db_session, "Bob", "Jones", date(1975, 3, 20), "M", "789 Pine Rd")
+        return _create_user_with_patient(
+            db_session, "Bob", "Jones", date(1975, 3, 20), "M", "789 Pine Rd"
+        )
 
     @pytest.fixture
     def authenticated_headers(self, user_with_patient):
         return create_user_token_headers(user_with_patient["user"].username)
 
     @pytest.fixture
-    def treatment_with_linked_medication(self, client: TestClient, user_with_patient, authenticated_headers):
+    def treatment_with_linked_medication(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Create a treatment with a linked medication for effective value tests."""
         patient_id = user_with_patient["patient"].id
 
@@ -386,7 +404,7 @@ class TestTreatmentMedicationEffectiveValues:
                 "status": "active",
                 "mode": "advanced",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         treatment = treatment_response.json()
 
@@ -402,7 +420,7 @@ class TestTreatmentMedicationEffectiveValues:
                 "effective_period_start": "2024-01-01",
                 "effective_period_end": "2024-12-31",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         medication = medication_response.json()
 
@@ -412,7 +430,12 @@ class TestTreatmentMedicationEffectiveValues:
             "patient_id": patient_id,
         }
 
-    def test_effective_values_fallback_to_medication(self, client: TestClient, treatment_with_linked_medication, authenticated_headers):
+    def test_effective_values_fallback_to_medication(
+        self,
+        client: TestClient,
+        treatment_with_linked_medication,
+        authenticated_headers,
+    ):
         """When no overrides set, effective values should fall back to medication defaults."""
         treatment_id = treatment_with_linked_medication["treatment"]["id"]
         medication_id = treatment_with_linked_medication["medication"]["id"]
@@ -424,13 +447,13 @@ class TestTreatmentMedicationEffectiveValues:
                 "treatment_id": treatment_id,
                 "medication_id": medication_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # Fetch enriched medications
         response = client.get(
             f"/api/v1/treatments/{treatment_id}/medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -455,7 +478,12 @@ class TestTreatmentMedicationEffectiveValues:
         assert rel["medication"]["dosage"] == "100mg"
         assert rel["medication"]["frequency"] == "once daily"
 
-    def test_effective_values_use_overrides(self, client: TestClient, treatment_with_linked_medication, authenticated_headers):
+    def test_effective_values_use_overrides(
+        self,
+        client: TestClient,
+        treatment_with_linked_medication,
+        authenticated_headers,
+    ):
         """When overrides are set, effective values should use them."""
         treatment_id = treatment_with_linked_medication["treatment"]["id"]
         medication_id = treatment_with_linked_medication["medication"]["id"]
@@ -471,13 +499,13 @@ class TestTreatmentMedicationEffectiveValues:
                 "specific_start_date": "2024-03-01",
                 "specific_end_date": "2024-06-30",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # Fetch enriched medications
         response = client.get(
             f"/api/v1/treatments/{treatment_id}/medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -495,7 +523,12 @@ class TestTreatmentMedicationEffectiveValues:
         assert rel["medication"]["dosage"] == "100mg"
         assert rel["medication"]["frequency"] == "once daily"
 
-    def test_enriched_endpoint_returns_nested_objects(self, client: TestClient, treatment_with_linked_medication, authenticated_headers):
+    def test_enriched_endpoint_returns_nested_objects(
+        self,
+        client: TestClient,
+        treatment_with_linked_medication,
+        authenticated_headers,
+    ):
         """Enriched endpoint should include nested medication object."""
         treatment_id = treatment_with_linked_medication["treatment"]["id"]
         medication_id = treatment_with_linked_medication["medication"]["id"]
@@ -507,12 +540,12 @@ class TestTreatmentMedicationEffectiveValues:
                 "medication_id": medication_id,
                 "specific_dosage": "250mg",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response = client.get(
             f"/api/v1/treatments/{treatment_id}/medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -547,7 +580,12 @@ class TestTreatmentMedicationEffectiveValues:
         assert "frequency" in rel["medication"]
         assert "status" in rel["medication"]
 
-    def test_effective_end_date_discarded_when_before_overridden_start(self, client: TestClient, treatment_with_linked_medication, authenticated_headers):
+    def test_effective_end_date_discarded_when_before_overridden_start(
+        self,
+        client: TestClient,
+        treatment_with_linked_medication,
+        authenticated_headers,
+    ):
         """When start date is overridden to after the medication's end date, effective_end_date should be null."""
         treatment_id = treatment_with_linked_medication["treatment"]["id"]
         medication_id = treatment_with_linked_medication["medication"]["id"]
@@ -562,12 +600,12 @@ class TestTreatmentMedicationEffectiveValues:
                 "specific_start_date": "2026-01-09",
                 # no specific_end_date - would fall back to medication's 2024-12-31
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response = client.get(
             f"/api/v1/treatments/{treatment_id}/medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -579,13 +617,18 @@ class TestTreatmentMedicationEffectiveValues:
         # Fallback end date (2024-12-31) is before overridden start (2026-01-09), so it should be discarded
         assert rel["effective_end_date"] is None
 
-    def test_enriched_endpoint_empty_when_no_medications(self, client: TestClient, treatment_with_linked_medication, authenticated_headers):
+    def test_enriched_endpoint_empty_when_no_medications(
+        self,
+        client: TestClient,
+        treatment_with_linked_medication,
+        authenticated_headers,
+    ):
         """Enriched endpoint should return empty list for treatment with no medications."""
         treatment_id = treatment_with_linked_medication["treatment"]["id"]
 
         response = client.get(
             f"/api/v1/treatments/{treatment_id}/medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -597,14 +640,18 @@ class TestMedicationTreatmentsEndpoint:
 
     @pytest.fixture
     def user_with_patient(self, db_session: Session):
-        return _create_user_with_patient(db_session, "Alice", "Brown", date(1988, 11, 5), "F", "321 Elm St")
+        return _create_user_with_patient(
+            db_session, "Alice", "Brown", date(1988, 11, 5), "F", "321 Elm St"
+        )
 
     @pytest.fixture
     def authenticated_headers(self, user_with_patient):
         return create_user_token_headers(user_with_patient["user"].username)
 
     @pytest.fixture
-    def medication_with_treatments(self, client: TestClient, user_with_patient, authenticated_headers):
+    def medication_with_treatments(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Create a medication linked to multiple treatments."""
         patient_id = user_with_patient["patient"].id
 
@@ -619,7 +666,7 @@ class TestMedicationTreatmentsEndpoint:
                 "status": "active",
                 "effective_period_start": "2024-01-01",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         medication = med_response.json()
 
@@ -634,7 +681,7 @@ class TestMedicationTreatmentsEndpoint:
                 "status": "active",
                 "mode": "advanced",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         treatment1 = trt1_response.json()
 
@@ -649,7 +696,7 @@ class TestMedicationTreatmentsEndpoint:
                 "status": "active",
                 "mode": "advanced",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         treatment2 = trt2_response.json()
 
@@ -662,7 +709,7 @@ class TestMedicationTreatmentsEndpoint:
                 "specific_dosage": "1000mg",
                 "relevance_note": "Higher dose for diabetes plan",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # Link medication to treatment 2 without overrides
@@ -672,7 +719,7 @@ class TestMedicationTreatmentsEndpoint:
                 "treatment_id": treatment2["id"],
                 "medication_id": medication["id"],
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         return {
@@ -681,13 +728,15 @@ class TestMedicationTreatmentsEndpoint:
             "treatment2": treatment2,
         }
 
-    def test_get_medication_treatments_returns_all(self, client: TestClient, medication_with_treatments, authenticated_headers):
+    def test_get_medication_treatments_returns_all(
+        self, client: TestClient, medication_with_treatments, authenticated_headers
+    ):
         """Should return all treatments using this medication."""
         medication_id = medication_with_treatments["medication"]["id"]
 
         response = client.get(
             f"/api/v1/medications/{medication_id}/treatments",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -698,33 +747,41 @@ class TestMedicationTreatmentsEndpoint:
         assert "Diabetes Management" in treatment_names
         assert "Weight Management" in treatment_names
 
-    def test_get_medication_treatments_includes_overrides(self, client: TestClient, medication_with_treatments, authenticated_headers):
+    def test_get_medication_treatments_includes_overrides(
+        self, client: TestClient, medication_with_treatments, authenticated_headers
+    ):
         """Should include junction override fields."""
         medication_id = medication_with_treatments["medication"]["id"]
 
         response = client.get(
             f"/api/v1/medications/{medication_id}/treatments",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         data = response.json()
 
         # Find the one with overrides
-        diabetes_rel = next(d for d in data if d["treatment"]["treatment_name"] == "Diabetes Management")
+        diabetes_rel = next(
+            d for d in data if d["treatment"]["treatment_name"] == "Diabetes Management"
+        )
         assert diabetes_rel["specific_dosage"] == "1000mg"
         assert diabetes_rel["relevance_note"] == "Higher dose for diabetes plan"
 
         # The one without overrides
-        weight_rel = next(d for d in data if d["treatment"]["treatment_name"] == "Weight Management")
+        weight_rel = next(
+            d for d in data if d["treatment"]["treatment_name"] == "Weight Management"
+        )
         assert weight_rel["specific_dosage"] is None
 
-    def test_get_medication_treatments_includes_treatment_details(self, client: TestClient, medication_with_treatments, authenticated_headers):
+    def test_get_medication_treatments_includes_treatment_details(
+        self, client: TestClient, medication_with_treatments, authenticated_headers
+    ):
         """Should include nested treatment details."""
         medication_id = medication_with_treatments["medication"]["id"]
 
         response = client.get(
             f"/api/v1/medications/{medication_id}/treatments",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         data = response.json()
@@ -736,7 +793,9 @@ class TestMedicationTreatmentsEndpoint:
         assert "mode" in treatment_entry
         assert "start_date" in treatment_entry
 
-    def test_get_medication_treatments_empty(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_get_medication_treatments_empty(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Medication with no linked treatments should return empty list."""
         patient_id = user_with_patient["patient"].id
 
@@ -749,23 +808,24 @@ class TestMedicationTreatmentsEndpoint:
                 "dosage": "10mg",
                 "status": "active",
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         medication_id = med_response.json()["id"]
 
         response = client.get(
             f"/api/v1/medications/{medication_id}/treatments",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         assert response.json() == []
 
-    def test_get_medication_treatments_not_found(self, client: TestClient, authenticated_headers):
+    def test_get_medication_treatments_not_found(
+        self, client: TestClient, authenticated_headers
+    ):
         """Non-existent medication should return 404."""
         response = client.get(
-            "/api/v1/medications/99999/treatments",
-            headers=authenticated_headers
+            "/api/v1/medications/99999/treatments", headers=authenticated_headers
         )
 
         assert response.status_code == 404
@@ -776,7 +836,9 @@ class TestMedicationTreatmentsEndpoint:
 
         assert response.status_code == 401
 
-    def test_get_medication_treatments_patient_isolation(self, client: TestClient, db_session: Session, medication_with_treatments):
+    def test_get_medication_treatments_patient_isolation(
+        self, client: TestClient, db_session: Session, medication_with_treatments
+    ):
         """User should not access another user's medication treatments."""
         medication_id = medication_with_treatments["medication"]["id"]
 
@@ -787,7 +849,7 @@ class TestMedicationTreatmentsEndpoint:
             last_name="User",
             birth_date=date(1992, 7, 20),
             gender="M",
-            address="999 Other St"
+            address="999 Other St",
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user_data2["user"].id, patient_data=patient_data2
@@ -799,8 +861,7 @@ class TestMedicationTreatmentsEndpoint:
 
         # Second user tries to access first user's medication treatments
         response = client.get(
-            f"/api/v1/medications/{medication_id}/treatments",
-            headers=headers2
+            f"/api/v1/medications/{medication_id}/treatments", headers=headers2
         )
 
         # Should be 403 or 404 depending on implementation

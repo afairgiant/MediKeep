@@ -1,6 +1,7 @@
 """
 CRUD operations for standardized tests
 """
+
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, func, case, and_, String
@@ -39,21 +40,24 @@ def get_test_by_id(db: Session, test_id: int) -> Optional[StandardizedTest]:
 
 def get_test_by_loinc(db: Session, loinc_code: str) -> Optional[StandardizedTest]:
     """Get a standardized test by LOINC code."""
-    return db.query(StandardizedTest).filter(StandardizedTest.loinc_code == loinc_code).first()
+    return (
+        db.query(StandardizedTest)
+        .filter(StandardizedTest.loinc_code == loinc_code)
+        .first()
+    )
 
 
 def get_test_by_name(db: Session, test_name: str) -> Optional[StandardizedTest]:
     """Get a standardized test by exact name match (case-insensitive)."""
-    return db.query(StandardizedTest).filter(
-        func.lower(StandardizedTest.test_name) == test_name.lower()
-    ).first()
+    return (
+        db.query(StandardizedTest)
+        .filter(func.lower(StandardizedTest.test_name) == test_name.lower())
+        .first()
+    )
 
 
 def search_tests(
-    db: Session,
-    query: str,
-    category: Optional[str] = None,
-    limit: int = 200
+    db: Session, query: str, category: Optional[str] = None, limit: int = 200
 ) -> List[StandardizedTest]:
     """
     Search for standardized tests using full-text search and fuzzy matching.
@@ -97,25 +101,41 @@ def search_tests(
     )
 
     # 3. Starts with query (with LIKE escaping)
-    conditions.append(func.lower(StandardizedTest.test_name).startswith(search_term, autoescape=True))
-    conditions.append(func.lower(StandardizedTest.short_name).startswith(search_term, autoescape=True))
-    conditions.append(func.lower(StandardizedTest.loinc_code).startswith(search_term, autoescape=True))
+    conditions.append(
+        func.lower(StandardizedTest.test_name).startswith(search_term, autoescape=True)
+    )
+    conditions.append(
+        func.lower(StandardizedTest.short_name).startswith(search_term, autoescape=True)
+    )
+    conditions.append(
+        func.lower(StandardizedTest.loinc_code).startswith(search_term, autoescape=True)
+    )
 
     # 4. Contains query (with LIKE escaping for literal matching)
-    conditions.append(func.lower(StandardizedTest.test_name).contains(search_term, autoescape=True))
-    conditions.append(func.lower(StandardizedTest.short_name).contains(search_term, autoescape=True))
-    conditions.append(func.lower(StandardizedTest.loinc_code).contains(search_term, autoescape=True))
+    conditions.append(
+        func.lower(StandardizedTest.test_name).contains(search_term, autoescape=True)
+    )
+    conditions.append(
+        func.lower(StandardizedTest.short_name).contains(search_term, autoescape=True)
+    )
+    conditions.append(
+        func.lower(StandardizedTest.loinc_code).contains(search_term, autoescape=True)
+    )
 
     # 5. Word-based matching for multi-word queries (cross-database compatible)
     # Split search term and check if all words are present (with LIKE escaping)
-    if ' ' in search_term:
+    if " " in search_term:
         words = search_term.split()
         word_conditions = []
         for word in words:
             word_conditions.append(
                 or_(
-                    func.lower(StandardizedTest.test_name).contains(word, autoescape=True),
-                    func.lower(StandardizedTest.short_name).contains(word, autoescape=True)
+                    func.lower(StandardizedTest.test_name).contains(
+                        word, autoescape=True
+                    ),
+                    func.lower(StandardizedTest.short_name).contains(
+                        word, autoescape=True
+                    ),
                 )
             )
         if word_conditions:
@@ -132,29 +152,46 @@ def search_tests(
         (func.lower(StandardizedTest.short_name) == search_term, 1),
         (func.lower(StandardizedTest.loinc_code) == search_term, 1),
         # High priority: exact match in common_names JSON array (dialect-aware)
-        (_get_json_array_search_condition(StandardizedTest.common_names, search_term), 2),
+        (
+            _get_json_array_search_condition(
+                StandardizedTest.common_names, search_term
+            ),
+            2,
+        ),
         # Medium priority: starts with query
-        (func.lower(StandardizedTest.test_name).startswith(search_term, autoescape=True), 3),
-        (func.lower(StandardizedTest.short_name).startswith(search_term, autoescape=True), 3),
-        (func.lower(StandardizedTest.loinc_code).startswith(search_term, autoescape=True), 3),
+        (
+            func.lower(StandardizedTest.test_name).startswith(
+                search_term, autoescape=True
+            ),
+            3,
+        ),
+        (
+            func.lower(StandardizedTest.short_name).startswith(
+                search_term, autoescape=True
+            ),
+            3,
+        ),
+        (
+            func.lower(StandardizedTest.loinc_code).startswith(
+                search_term, autoescape=True
+            ),
+            3,
+        ),
         # Low priority: contains query or word-based match
-        else_=4
+        else_=4,
     )
 
     q = q.order_by(
         relevance_score.asc(),  # Lower score = higher relevance
         StandardizedTest.is_common.desc(),
-        StandardizedTest.test_name
+        StandardizedTest.test_name,
     )
 
     return q.limit(limit).all()
 
 
 def get_autocomplete_options(
-    db: Session,
-    query: str,
-    category: Optional[str] = None,
-    limit: int = 50
+    db: Session, query: str, category: Optional[str] = None, limit: int = 50
 ) -> List[dict]:
     """
     Get autocomplete suggestions for test names.
@@ -165,17 +202,23 @@ def get_autocomplete_options(
 
     return [
         {
-            'value': f"{test.test_name} ({test.short_name})" if test.short_name else test.test_name,
-            'label': test.test_name,
-            'loinc_code': test.loinc_code,
-            'default_unit': test.default_unit,
-            'category': test.category
+            "value": (
+                f"{test.test_name} ({test.short_name})"
+                if test.short_name
+                else test.test_name
+            ),
+            "label": test.test_name,
+            "loinc_code": test.loinc_code,
+            "default_unit": test.default_unit,
+            "category": test.category,
         }
         for test in tests
     ]
 
 
-def get_common_tests(db: Session, category: Optional[str] = None, limit: int = 100) -> List[StandardizedTest]:
+def get_common_tests(
+    db: Session, category: Optional[str] = None, limit: int = 100
+) -> List[StandardizedTest]:
     """Get common/frequently used tests."""
     q = db.query(StandardizedTest).filter(StandardizedTest.is_common == True)
 
@@ -187,9 +230,12 @@ def get_common_tests(db: Session, category: Optional[str] = None, limit: int = 1
 
 def get_tests_by_category(db: Session, category: str) -> List[StandardizedTest]:
     """Get all tests in a specific category."""
-    return db.query(StandardizedTest).filter(
-        StandardizedTest.category == category
-    ).order_by(StandardizedTest.display_order).all()
+    return (
+        db.query(StandardizedTest)
+        .filter(StandardizedTest.category == category)
+        .order_by(StandardizedTest.display_order)
+        .all()
+    )
 
 
 def create_test(db: Session, test_data: dict) -> StandardizedTest:
@@ -198,14 +244,17 @@ def create_test(db: Session, test_data: dict) -> StandardizedTest:
     db.add(test)
     db.commit()
     db.refresh(test)
-    logger.info(f"Created standardized test: {test.test_name}", extra={
-        LogFields.CATEGORY: "app",
-        LogFields.EVENT: "standardized_test_created",
-        LogFields.MODEL: "StandardizedTest",
-        LogFields.RECORD_ID: test.id,
-        "loinc_code": test.loinc_code,
-        "test_category": test.category
-    })
+    logger.info(
+        f"Created standardized test: {test.test_name}",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "standardized_test_created",
+            LogFields.MODEL: "StandardizedTest",
+            LogFields.RECORD_ID: test.id,
+            "loinc_code": test.loinc_code,
+            "test_category": test.category,
+        },
+    )
     return test
 
 
@@ -219,12 +268,15 @@ def bulk_create_tests(db: Session, tests_data: List[dict]) -> int:
     db.bulk_save_objects(tests)
     db.commit()
 
-    logger.info(f"Bulk created {len(tests)} standardized tests", extra={
-        LogFields.CATEGORY: "app",
-        LogFields.EVENT: "standardized_tests_bulk_created",
-        LogFields.MODEL: "StandardizedTest",
-        "count": len(tests)
-    })
+    logger.info(
+        f"Bulk created {len(tests)} standardized tests",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "standardized_tests_bulk_created",
+            LogFields.MODEL: "StandardizedTest",
+            "count": len(tests),
+        },
+    )
     return len(tests)
 
 
@@ -239,12 +291,15 @@ def update_test(db: Session, test_id: int, updates: dict) -> Optional[Standardiz
 
     db.commit()
     db.refresh(test)
-    logger.info(f"Updated standardized test: {test.test_name}", extra={
-        LogFields.CATEGORY: "app",
-        LogFields.EVENT: "standardized_test_updated",
-        LogFields.MODEL: "StandardizedTest",
-        LogFields.RECORD_ID: test_id
-    })
+    logger.info(
+        f"Updated standardized test: {test.test_name}",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "standardized_test_updated",
+            LogFields.MODEL: "StandardizedTest",
+            LogFields.RECORD_ID: test_id,
+        },
+    )
     return test
 
 
@@ -257,12 +312,15 @@ def delete_test(db: Session, test_id: int) -> bool:
     test_name = test.test_name  # Save before deletion
     db.delete(test)
     db.commit()
-    logger.info(f"Deleted standardized test: {test_name}", extra={
-        LogFields.CATEGORY: "app",
-        LogFields.EVENT: "standardized_test_deleted",
-        LogFields.MODEL: "StandardizedTest",
-        LogFields.RECORD_ID: test_id
-    })
+    logger.info(
+        f"Deleted standardized test: {test_name}",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "standardized_test_deleted",
+            LogFields.MODEL: "StandardizedTest",
+            LogFields.RECORD_ID: test_id,
+        },
+    )
     return True
 
 
@@ -282,10 +340,13 @@ def clear_all_tests(db: Session) -> int:
     count = db.query(StandardizedTest).count()
     db.query(StandardizedTest).delete()
     db.commit()
-    logger.warning(f"Cleared all {count} standardized tests from database", extra={
-        LogFields.CATEGORY: "app",
-        LogFields.EVENT: "standardized_tests_cleared",
-        LogFields.MODEL: "StandardizedTest",
-        "count": count
-    })
+    logger.warning(
+        f"Cleared all {count} standardized tests from database",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "standardized_tests_cleared",
+            LogFields.MODEL: "StandardizedTest",
+            "count": count,
+        },
+    )
     return count

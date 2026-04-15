@@ -1,6 +1,7 @@
 """
 Test emergency contact API endpoints.
 """
+
 import pytest
 from datetime import date
 from fastapi.testclient import TestClient
@@ -21,7 +22,7 @@ class TestEmergencyContactAPI:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         patient = patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -32,7 +33,9 @@ class TestEmergencyContactAPI:
         db_session.refresh(test_user)
         return patient
 
-    def test_create_emergency_contact(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_create_emergency_contact(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test creating a new emergency contact."""
         patient = test_patient_for_contacts
 
@@ -46,10 +49,12 @@ class TestEmergencyContactAPI:
             "is_primary": True,
             "is_active": True,
             "address": "123 Main St, Anytown, USA",
-            "notes": "Available 24/7"
+            "notes": "Available 24/7",
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact_data
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -60,7 +65,9 @@ class TestEmergencyContactAPI:
         assert data["is_primary"] is True
         assert data["patient_id"] == patient.id
 
-    def test_get_emergency_contacts_by_patient(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_get_emergency_contacts_by_patient(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test getting emergency contacts for a patient."""
         patient = test_patient_for_contacts
 
@@ -71,20 +78,22 @@ class TestEmergencyContactAPI:
                 "name": "Primary Contact",
                 "relationship": "spouse",
                 "phone_number": "555-111-1111",
-                "is_primary": True
+                "is_primary": True,
             },
             {
                 "patient_id": patient.id,
                 "name": "Secondary Contact",
                 "relationship": "parent",
                 "phone_number": "555-222-2222",
-                "is_primary": False
-            }
+                "is_primary": False,
+            },
         ]
 
         created_contacts = []
         for contact_data in contacts_data:
-            response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact_data)
+            response = authenticated_client.post(
+                "/api/v1/emergency-contacts/", json=contact_data
+            )
             assert response.status_code == 200
             created_contacts.append(response.json())
 
@@ -99,7 +108,9 @@ class TestEmergencyContactAPI:
         assert data[0]["is_primary"] is True
         assert data[0]["name"] == "Primary Contact"
 
-    def test_get_primary_contact(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_get_primary_contact(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test getting primary emergency contact."""
         patient = test_patient_for_contacts
 
@@ -110,30 +121,36 @@ class TestEmergencyContactAPI:
                 "name": "Non-Primary Contact",
                 "relationship": "friend",
                 "phone_number": "555-111-1111",
-                "is_primary": False
+                "is_primary": False,
             },
             {
                 "patient_id": patient.id,
                 "name": "Primary Contact",
                 "relationship": "spouse",
                 "phone_number": "555-222-2222",
-                "is_primary": True
-            }
+                "is_primary": True,
+            },
         ]
 
         for contact_data in contacts_data:
-            response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact_data)
+            response = authenticated_client.post(
+                "/api/v1/emergency-contacts/", json=contact_data
+            )
             assert response.status_code == 200
 
         # Get primary contact
-        response = authenticated_client.get(f"/api/v1/emergency-contacts/patient/{patient.id}/primary")
+        response = authenticated_client.get(
+            f"/api/v1/emergency-contacts/patient/{patient.id}/primary"
+        )
 
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Primary Contact"
         assert data["is_primary"] is True
 
-    def test_update_emergency_contact(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_update_emergency_contact(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test updating an emergency contact."""
         patient = test_patient_for_contacts
 
@@ -143,10 +160,12 @@ class TestEmergencyContactAPI:
             "name": "Original Name",
             "relationship": "friend",
             "phone_number": "555-111-1111",
-            "email": "original@example.com"
+            "email": "original@example.com",
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact_data
+        )
         assert response.status_code == 200
         contact = response.json()
 
@@ -155,10 +174,12 @@ class TestEmergencyContactAPI:
             "name": "Updated Name",
             "phone_number": "555-999-9999",
             "email": "updated@example.com",
-            "is_primary": True
+            "is_primary": True,
         }
 
-        response = authenticated_client.put(f"/api/v1/emergency-contacts/{contact['id']}", json=update_data)
+        response = authenticated_client.put(
+            f"/api/v1/emergency-contacts/{contact['id']}", json=update_data
+        )
 
         assert response.status_code == 200
         updated_contact = response.json()
@@ -168,7 +189,9 @@ class TestEmergencyContactAPI:
         assert updated_contact["is_primary"] is True
         assert updated_contact["relationship"] == "friend"  # Unchanged
 
-    def test_set_primary_contact(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_set_primary_contact(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test setting a contact as primary."""
         patient = test_patient_for_contacts
 
@@ -178,7 +201,7 @@ class TestEmergencyContactAPI:
             "name": "Contact 1",
             "relationship": "friend",
             "phone_number": "555-111-1111",
-            "is_primary": True
+            "is_primary": True,
         }
 
         contact2_data = {
@@ -186,31 +209,41 @@ class TestEmergencyContactAPI:
             "name": "Contact 2",
             "relationship": "sibling",
             "phone_number": "555-222-2222",
-            "is_primary": False
+            "is_primary": False,
         }
 
         # Create first contact as primary
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact1_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact1_data
+        )
         assert response.status_code == 200
 
         # Create second contact
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact2_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact2_data
+        )
         assert response.status_code == 200
         contact2 = response.json()
 
         # Set contact2 as primary
-        response = authenticated_client.post(f"/api/v1/emergency-contacts/{contact2['id']}/set-primary")
+        response = authenticated_client.post(
+            f"/api/v1/emergency-contacts/{contact2['id']}/set-primary"
+        )
 
         assert response.status_code == 200
 
         # Verify contact2 is now primary
-        response = authenticated_client.get(f"/api/v1/emergency-contacts/patient/{patient.id}/primary")
+        response = authenticated_client.get(
+            f"/api/v1/emergency-contacts/patient/{patient.id}/primary"
+        )
         assert response.status_code == 200
         primary_contact = response.json()
         assert primary_contact["id"] == contact2["id"]
         assert primary_contact["name"] == "Contact 2"
 
-    def test_delete_emergency_contact(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_delete_emergency_contact(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test deleting an emergency contact."""
         patient = test_patient_for_contacts
 
@@ -219,23 +252,31 @@ class TestEmergencyContactAPI:
             "patient_id": patient.id,
             "name": "Contact to Delete",
             "relationship": "neighbor",
-            "phone_number": "555-777-8888"
+            "phone_number": "555-777-8888",
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact_data
+        )
         assert response.status_code == 200
         contact = response.json()
 
         # Delete contact
-        response = authenticated_client.delete(f"/api/v1/emergency-contacts/{contact['id']}")
+        response = authenticated_client.delete(
+            f"/api/v1/emergency-contacts/{contact['id']}"
+        )
 
         assert response.status_code == 200
 
         # Verify contact is deleted
-        response = authenticated_client.get(f"/api/v1/emergency-contacts/{contact['id']}")
+        response = authenticated_client.get(
+            f"/api/v1/emergency-contacts/{contact['id']}"
+        )
         assert response.status_code == 404
 
-    def test_get_active_contacts_only(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_get_active_contacts_only(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test getting only active emergency contacts."""
         patient = test_patient_for_contacts
 
@@ -246,23 +287,27 @@ class TestEmergencyContactAPI:
                 "name": "Active Contact",
                 "relationship": "spouse",
                 "phone_number": "555-111-1111",
-                "is_active": True
+                "is_active": True,
             },
             {
                 "patient_id": patient.id,
                 "name": "Inactive Contact",
                 "relationship": "friend",
                 "phone_number": "555-222-2222",
-                "is_active": False
-            }
+                "is_active": False,
+            },
         ]
 
         for contact_data in contacts_data:
-            response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact_data)
+            response = authenticated_client.post(
+                "/api/v1/emergency-contacts/", json=contact_data
+            )
             assert response.status_code == 200
 
         # Get active contacts only
-        response = authenticated_client.get("/api/v1/emergency-contacts/?is_active=true")
+        response = authenticated_client.get(
+            "/api/v1/emergency-contacts/?is_active=true"
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -270,7 +315,9 @@ class TestEmergencyContactAPI:
         assert data[0]["name"] == "Active Contact"
         assert data[0]["is_active"] is True
 
-    def test_contact_validation_errors(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_contact_validation_errors(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test emergency contact validation errors."""
         patient = test_patient_for_contacts
 
@@ -281,7 +328,9 @@ class TestEmergencyContactAPI:
             # Missing relationship and phone_number (required)
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=invalid_contact)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=invalid_contact
+        )
         assert response.status_code == 422
 
         # Test invalid relationship
@@ -289,10 +338,12 @@ class TestEmergencyContactAPI:
             "patient_id": patient.id,
             "name": "Test Contact",
             "relationship": "invalid_relationship",
-            "phone_number": "555-111-1111"
+            "phone_number": "555-111-1111",
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=invalid_relationship_contact)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=invalid_relationship_contact
+        )
         assert response.status_code == 422
 
         # Test invalid phone number format (contains letters)
@@ -300,13 +351,17 @@ class TestEmergencyContactAPI:
             "patient_id": patient.id,
             "name": "Test Contact",
             "relationship": "friend",
-            "phone_number": "abc-def-ghij"  # Invalid characters
+            "phone_number": "abc-def-ghij",  # Invalid characters
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=invalid_phone_contact)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=invalid_phone_contact
+        )
         assert response.status_code == 422
 
-    def test_email_validation(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_email_validation(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test email validation and normalization."""
         patient = test_patient_for_contacts
 
@@ -316,10 +371,12 @@ class TestEmergencyContactAPI:
             "name": "Email Test Contact",
             "relationship": "friend",
             "phone_number": "555-111-1111",
-            "email": "Test.Email@Example.COM"
+            "email": "Test.Email@Example.COM",
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact_data
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -338,13 +395,15 @@ class TestEmergencyContactAPI:
             "patient_id": patient.id,
             "name": "Test Contact",
             "relationship": "friend",
-            "phone_number": "555-111-1111"
+            "phone_number": "555-111-1111",
         }
 
         response = client.post("/api/v1/emergency-contacts/", json=contact_data)
         assert response.status_code == 401
 
-    def test_multiple_primary_contact_handling(self, authenticated_client: TestClient, test_patient_for_contacts):
+    def test_multiple_primary_contact_handling(
+        self, authenticated_client: TestClient, test_patient_for_contacts
+    ):
         """Test that only one primary contact can exist per patient."""
         patient = test_patient_for_contacts
 
@@ -354,10 +413,12 @@ class TestEmergencyContactAPI:
             "name": "First Primary",
             "relationship": "spouse",
             "phone_number": "555-111-1111",
-            "is_primary": True
+            "is_primary": True,
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact1_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact1_data
+        )
         assert response.status_code == 200
 
         # Create second primary contact (should unset the first)
@@ -366,14 +427,18 @@ class TestEmergencyContactAPI:
             "name": "Second Primary",
             "relationship": "parent",
             "phone_number": "555-222-2222",
-            "is_primary": True
+            "is_primary": True,
         }
 
-        response = authenticated_client.post("/api/v1/emergency-contacts/", json=contact2_data)
+        response = authenticated_client.post(
+            "/api/v1/emergency-contacts/", json=contact2_data
+        )
         assert response.status_code == 200
 
         # Verify only the second contact is primary
-        response = authenticated_client.get(f"/api/v1/emergency-contacts/patient/{patient.id}/primary")
+        response = authenticated_client.get(
+            f"/api/v1/emergency-contacts/patient/{patient.id}/primary"
+        )
         assert response.status_code == 200
         primary_contact = response.json()
         assert primary_contact["name"] == "Second Primary"

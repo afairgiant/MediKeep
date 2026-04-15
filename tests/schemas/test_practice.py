@@ -1,6 +1,7 @@
 """
 Tests for Practice schema validation.
 """
+
 import pytest
 from pydantic import ValidationError
 
@@ -165,9 +166,7 @@ class TestPracticeCreate:
 
     def test_website_preserves_https(self):
         """Test that website with https:// is preserved."""
-        practice = PracticeCreate(
-            name="Test Practice", website="https://example.com"
-        )
+        practice = PracticeCreate(name="Test Practice", website="https://example.com")
         assert practice.website == "https://example.com"
 
     def test_website_invalid(self):

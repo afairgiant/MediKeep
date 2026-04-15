@@ -7,7 +7,9 @@ from app.models.models import FamilyCondition
 from app.schemas.family_condition import FamilyConditionCreate, FamilyConditionUpdate
 
 
-class CRUDFamilyCondition(CRUDBase[FamilyCondition, FamilyConditionCreate, FamilyConditionUpdate]):
+class CRUDFamilyCondition(
+    CRUDBase[FamilyCondition, FamilyConditionCreate, FamilyConditionUpdate]
+):
     """
     Family condition-specific CRUD operations for family medical history.
 
@@ -50,7 +52,10 @@ class CRUDFamilyCondition(CRUDBase[FamilyCondition, FamilyConditionCreate, Famil
         """
         return self.query(
             db=db,
-            filters={"family_member_id": family_member_id, "condition_type": condition_type},
+            filters={
+                "family_member_id": family_member_id,
+                "condition_type": condition_type,
+            },
             order_by="condition_name",
             order_desc=False,
         )
@@ -114,13 +119,13 @@ class CRUDFamilyCondition(CRUDBase[FamilyCondition, FamilyConditionCreate, Famil
             List of family conditions with family member info
         """
         from app.models.models import FamilyMember
-        
+
         return (
             db.query(self.model)
             .join(FamilyMember, self.model.family_member_id == FamilyMember.id)
             .filter(
                 FamilyMember.patient_id == patient_id,
-                self.model.condition_type == condition_type
+                self.model.condition_type == condition_type,
             )
             .order_by(FamilyMember.relationship, self.model.condition_name)
             .all()

@@ -15,6 +15,7 @@ from .base import Base, get_utc_now
 
 class Procedure(Base):
     """Represents a medical procedure performed on a patient."""
+
     __tablename__ = "procedures"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
@@ -82,6 +83,7 @@ class Procedure(Base):
 
 class Treatment(Base):
     """Represents a treatment plan for a patient, linked to conditions and medications."""
+
     __tablename__ = "treatments"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
@@ -156,15 +158,22 @@ class MedicalEquipment(Base):
     Represents medical equipment prescribed to or used by a patient.
     Examples: CPAP machines, nebulizers, inhalers, blood pressure monitors, etc.
     """
+
     __tablename__ = "medical_equipment"
 
     id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False)
-    practitioner_id = Column(Integer, ForeignKey("practitioners.id", ondelete="SET NULL"), nullable=True)
+    patient_id = Column(
+        Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False
+    )
+    practitioner_id = Column(
+        Integer, ForeignKey("practitioners.id", ondelete="SET NULL"), nullable=True
+    )
 
     # Equipment identification
     equipment_name = Column(String, nullable=False)
-    equipment_type = Column(String, nullable=False)  # CPAP, Nebulizer, Inhaler, Monitor, etc.
+    equipment_type = Column(
+        String, nullable=False
+    )  # CPAP, Nebulizer, Inhaler, Monitor, etc.
     manufacturer = Column(String, nullable=True)
     model_number = Column(String, nullable=True)
     serial_number = Column(String, nullable=True)
@@ -176,7 +185,9 @@ class MedicalEquipment(Base):
 
     # Usage information
     usage_instructions = Column(String, nullable=True)
-    status = Column(String, nullable=False, default="active")  # active, inactive, replaced
+    status = Column(
+        String, nullable=False, default="active"
+    )  # active, inactive, replaced
 
     # Additional info
     supplier = Column(String, nullable=True)
@@ -185,7 +196,9 @@ class MedicalEquipment(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="medical_equipment")

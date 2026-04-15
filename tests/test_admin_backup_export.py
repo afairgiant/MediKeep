@@ -77,8 +77,14 @@ class TestBackupExport:
         response = admin_client.get(self.BASE_URL)
         headers, _ = _parse_csv(response.text)
         assert headers == [
-            "ID", "Backup Type", "Status", "Filename",
-            "Size (bytes)", "Created At", "Description", "File Exists",
+            "ID",
+            "Backup Type",
+            "Status",
+            "Filename",
+            "Size (bytes)",
+            "Created At",
+            "Description",
+            "File Exists",
         ]
 
     @pytest.mark.usefixtures("_patch_backup_service")

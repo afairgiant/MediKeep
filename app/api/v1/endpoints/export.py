@@ -216,9 +216,7 @@ async def export_patient_data(
                     remote_user = None
                     if has_remote_files:
                         remote_user = (
-                            db.query(User)
-                            .filter(User.id == current_user_id)
-                            .first()
+                            db.query(User).filter(User.id == current_user_id).first()
                         )
 
                     with zipfile.ZipFile(
@@ -307,21 +305,32 @@ async def export_patient_data(
                                 elif storage_backend == "papra":
                                     # Handle Papra documents
                                     papra_doc_id = file_info.get("papra_document_id")
-                                    papra_org_id = file_info.get("papra_organization_id")
+                                    papra_org_id = file_info.get(
+                                        "papra_organization_id"
+                                    )
                                     if papra_doc_id and remote_user:
                                         if (
-                                            getattr(remote_user, 'papra_enabled', False)
-                                            and getattr(remote_user, 'papra_url', None)
-                                            and getattr(remote_user, 'papra_organization_id', None)
+                                            getattr(remote_user, "papra_enabled", False)
+                                            and getattr(remote_user, "papra_url", None)
+                                            and getattr(
+                                                remote_user,
+                                                "papra_organization_id",
+                                                None,
+                                            )
                                         ):
                                             try:
                                                 async with create_papra_client(
                                                     url=remote_user.papra_url,
                                                     encrypted_token=remote_user.papra_api_token_encrypted,
-                                                    organization_id=papra_org_id or remote_user.papra_organization_id,
+                                                    organization_id=papra_org_id
+                                                    or remote_user.papra_organization_id,
                                                     user_id=current_user_id,
                                                 ) as client:
-                                                    doc_content = await client.download_document(papra_doc_id)
+                                                    doc_content = (
+                                                        await client.download_document(
+                                                            papra_doc_id
+                                                        )
+                                                    )
                                                     zip_file.writestr(
                                                         f"lab_files/{safe_filename}",
                                                         doc_content,
@@ -334,7 +343,9 @@ async def export_patient_data(
                                                         LogFields.CATEGORY: "app",
                                                         LogFields.EVENT: "export_papra_download_failed",
                                                         LogFields.USER_ID: current_user_id,
-                                                        LogFields.ERROR: str(papra_error),
+                                                        LogFields.ERROR: str(
+                                                            papra_error
+                                                        ),
                                                         "papra_document_id": papra_doc_id,
                                                     },
                                                 )
@@ -392,9 +403,7 @@ async def export_patient_data(
             content_bytes = content
 
         if not content_bytes:
-            raise HTTPException(
-                status_code=500, detail="Generated content is empty"
-            )
+            raise HTTPException(status_code=500, detail="Generated content is empty")
 
         return Response(
             content=content_bytes,
@@ -657,7 +666,9 @@ async def create_bulk_export(
                         )
                         filename = f"medical_records_{scope}_{timestamp}.json"
                     elif request.format == ExportFormat.CSV:
-                        content = "\ufeff" + export_service.convert_to_csv(export_data, scope)
+                        content = "\ufeff" + export_service.convert_to_csv(
+                            export_data, scope
+                        )
                         filename = f"medical_records_{scope}_{timestamp}.csv"
                     elif request.format == ExportFormat.PDF:
                         content = await export_service.convert_to_pdf(
@@ -675,7 +686,9 @@ async def create_bulk_export(
                                 "format": request.format.value,
                             },
                         )
-                        failed_scopes.append((scope, f"Unsupported format: {request.format.value}"))
+                        failed_scopes.append(
+                            (scope, f"Unsupported format: {request.format.value}")
+                        )
                         continue
 
                     # Add to ZIP

@@ -19,11 +19,11 @@ class QuestParser(BaseLabParser):
     def can_parse(self, text: str) -> bool:
         """Detect Quest Diagnostics format by looking for signature elements."""
         indicators = [
-            r'Quest Diagnostics',
-            r'Quest,\s*Quest Diagnostics',
-            r'questdiagnostics\.com',
-            r'MyQuest',
-            r'Quest Diagnostics Incorporated',
+            r"Quest Diagnostics",
+            r"Quest,\s*Quest Diagnostics",
+            r"questdiagnostics\.com",
+            r"MyQuest",
+            r"Quest Diagnostics Incorporated",
         ]
 
         return any(re.search(pattern, text, re.IGNORECASE) for pattern in indicators)
@@ -38,7 +38,7 @@ class QuestParser(BaseLabParser):
         3. Table: "CHOLESTEROL, TOTAL 170 <200 mg/dL LL3"
         """
         results = []
-        lines = text.split('\n')
+        lines = text.split("\n")
 
         test_date = self.extract_date_from_text(text)
         if test_date:
@@ -46,9 +46,9 @@ class QuestParser(BaseLabParser):
         else:
             logger.warning("No test date found in PDF")
 
-        logger.info("="*80)
+        logger.info("=" * 80)
         logger.info("QUEST DIAGNOSTICS PARSER - PROCESSING LINES")
-        logger.info("="*80)
+        logger.info("=" * 80)
 
         i = 0
         while i < len(lines):
@@ -62,8 +62,14 @@ class QuestParser(BaseLabParser):
             result = self._parse_line(line, test_date=test_date)
             if result:
                 flag_str = f" [{result.flag}]" if result.flag else ""
-                range_str = f" (Ref: {result.reference_range})" if result.reference_range else ""
-                logger.info(f"PARSED: {result.test_name} = {result.value} {result.unit}{flag_str}{range_str}")
+                range_str = (
+                    f" (Ref: {result.reference_range})"
+                    if result.reference_range
+                    else ""
+                )
+                logger.info(
+                    f"PARSED: {result.test_name} = {result.value} {result.unit}{flag_str}{range_str}"
+                )
                 results.append(result)
                 continue
 
@@ -71,21 +77,29 @@ class QuestParser(BaseLabParser):
             result = self._parse_multiline(line, lines, i, test_date)
             if result:
                 flag_str = f" [{result.flag}]" if result.flag else ""
-                range_str = f" (Ref: {result.reference_range})" if result.reference_range else ""
-                logger.info(f"PARSED (multiline): {result.test_name} = {result.value} {result.unit}{flag_str}{range_str}")
+                range_str = (
+                    f" (Ref: {result.reference_range})"
+                    if result.reference_range
+                    else ""
+                )
+                logger.info(
+                    f"PARSED (multiline): {result.test_name} = {result.value} {result.unit}{flag_str}{range_str}"
+                )
                 results.append(result)
                 i += result.lines_consumed  # Skip the lines we consumed
                 continue
 
             logger.debug(f"SKIPPED: {line[:80]}")
 
-        logger.info("="*80)
+        logger.info("=" * 80)
         logger.info(f"TOTAL PARSED: {len(results)} components")
-        logger.info("="*80)
+        logger.info("=" * 80)
 
         return results
 
-    def _parse_multiline(self, line: str, lines: List[str], current_index: int, test_date: str = None) -> Optional[LabTestResult]:
+    def _parse_multiline(
+        self, line: str, lines: List[str], current_index: int, test_date: str = None
+    ) -> Optional[LabTestResult]:
         """
         Parse multi-line format where test name is on one line and value on the next.
 
@@ -96,11 +110,11 @@ class QuestParser(BaseLabParser):
         mg/dL
         """
         # Skip lines that are chart labels or descriptive text (from graph axes)
-        if line.startswith(('From', 'lbs', 'in ', 'mg/dL')):
+        if line.startswith(("From", "lbs", "in ", "mg/dL")):
             return None
 
         # Skip lines that contain date ranges (chart x-axis labels)
-        if 'From' in line and 'To' in line:
+        if "From" in line and "To" in line:
             return None
 
         # Check if this line looks like a valid test name
@@ -115,7 +129,7 @@ class QuestParser(BaseLabParser):
 
         # Try to extract value and optional flag from next line
         # Patterns: "170", "102 H", "3.6"
-        value_pattern = r'^(\d+\.?\d*)\s*([HLhl])?\s*$'
+        value_pattern = r"^(\d+\.?\d*)\s*([HLhl])?\s*$"
         match = re.match(value_pattern, next_line)
 
         if not match:
@@ -143,7 +157,7 @@ class QuestParser(BaseLabParser):
                 continue
 
             # Extract reference range if found
-            if not ref_range and 'Reference Range:' in look_line:
+            if not ref_range and "Reference Range:" in look_line:
                 ref_range = self._extract_range(look_line)
 
             # Extract unit if found
@@ -153,7 +167,7 @@ class QuestParser(BaseLabParser):
                     unit = potential_unit
 
             # Stop if we hit another test name or non-related content
-            if self._looks_like_test_name(look_line) or 'From' in look_line:
+            if self._looks_like_test_name(look_line) or "From" in look_line:
                 break
 
         # Normalize flag
@@ -167,7 +181,7 @@ class QuestParser(BaseLabParser):
             reference_range=ref_range,
             flag=flag,
             confidence=0.92,  # Slightly lower confidence for multi-line
-            test_date=test_date
+            test_date=test_date,
         )
 
         # Attach lines_consumed so caller knows how many lines to skip
@@ -179,10 +193,10 @@ class QuestParser(BaseLabParser):
         # All caps, reasonable length, no "From" or chart data
         if not line:
             return False
-        if 'From' in line or 'Sep' in line or 'Jan' in line or 'May' in line:
+        if "From" in line or "Sep" in line or "Jan" in line or "May" in line:
             return False
         # Must have some letters
-        if not re.search(r'[A-Za-z]{3,}', line):
+        if not re.search(r"[A-Za-z]{3,}", line):
             return False
         # Check if it's mostly uppercase letters
         letter_count = sum(1 for c in line if c.isalpha())
@@ -208,7 +222,7 @@ class QuestParser(BaseLabParser):
         # Handles: "LDL-CHOLESTEROL 102 H mg/dL (calc)"
         # Handles: "GLUCOSE 111 H Reference Range: 65-99 mg/dL"
 
-        pattern = r'^([A-Z][A-Z0-9\s,\-\(\)/]+?)\s+(\d+\.?\d*)\s*([HLhl])?\s*(.*)$'
+        pattern = r"^([A-Z][A-Z0-9\s,\-\(\)/]+?)\s+(\d+\.?\d*)\s*([HLhl])?\s*(.*)$"
         match = re.match(pattern, line)
 
         if not match:
@@ -244,7 +258,7 @@ class QuestParser(BaseLabParser):
             reference_range=ref_range,
             flag=flag,
             confidence=0.95,
-            test_date=test_date
+            test_date=test_date,
         )
 
     def _extract_unit(self, text: str) -> str:
@@ -258,21 +272,21 @@ class QuestParser(BaseLabParser):
         """
         # Common unit patterns - order matters (most specific first)
         unit_patterns = [
-            r'(mg/dL)',
-            r'(mmol/L)',
-            r'(mEq/L)',
-            r'(g/dL)',
-            r'(ng/dL)',
-            r'(pg/mL)',
-            r'(ng/mL)',
-            r'(IU/L)',
-            r'(U/L)',
-            r'(fL)',
-            r'(pg)\b',
-            r'(mmHg)',
-            r'(lbs)',
-            r'\b(in)\b',
-            r'(%)',
+            r"(mg/dL)",
+            r"(mmol/L)",
+            r"(mEq/L)",
+            r"(g/dL)",
+            r"(ng/dL)",
+            r"(pg/mL)",
+            r"(ng/mL)",
+            r"(IU/L)",
+            r"(U/L)",
+            r"(fL)",
+            r"(pg)\b",
+            r"(mmHg)",
+            r"(lbs)",
+            r"\b(in)\b",
+            r"(%)",
         ]
 
         for pattern in unit_patterns:
@@ -293,21 +307,23 @@ class QuestParser(BaseLabParser):
         - "Reference range: <100" -> "<100"
         """
         # Look for "Reference Range:" or "Reference range:" followed by the range
-        ref_range_pattern = r'Reference\s+[Rr]ange:\s*([<>≤≥=\s\d\.\-OR]+?)(?:\s+[a-zA-Z/]+|$)'
+        ref_range_pattern = (
+            r"Reference\s+[Rr]ange:\s*([<>≤≥=\s\d\.\-OR]+?)(?:\s+[a-zA-Z/]+|$)"
+        )
         match = re.search(ref_range_pattern, text, re.IGNORECASE)
 
         if match:
             range_str = match.group(1).strip()
             # Clean up "OR =" style ranges to just the operator
-            range_str = re.sub(r'>\s*OR\s*=', '>=', range_str)
-            range_str = re.sub(r'<\s*OR\s*=', '<=', range_str)
-            range_str = re.sub(r'\s+', ' ', range_str).strip()
+            range_str = re.sub(r">\s*OR\s*=", ">=", range_str)
+            range_str = re.sub(r"<\s*OR\s*=", "<=", range_str)
+            range_str = re.sub(r"\s+", " ", range_str).strip()
             return range_str
 
         # Fallback: look for common range patterns
         range_patterns = [
-            r'(\d+\.?\d*\s*-\s*\d+\.?\d*)',  # "65-99"
-            r'([<>≤≥]\s*\d+\.?\d*)',         # "<200", ">40"
+            r"(\d+\.?\d*\s*-\s*\d+\.?\d*)",  # "65-99"
+            r"([<>≤≥]\s*\d+\.?\d*)",  # "<200", ">40"
         ]
 
         for pattern in range_patterns:
@@ -326,31 +342,51 @@ class QuestParser(BaseLabParser):
 
         # Reject common false positives
         invalid_names = [
-            'analyte', 'value', 'reference', 'range', 'result',
-            'fasting', 'status', 'clinic', 'id', 'height', 'weight',
-            'collected', 'received', 'reported', 'specimen',
-            'patient', 'sex', 'phone', 'dob', 'age',
-            'performing sites', 'key', 'priority', 'copies sent to',
-            'clinic id', 'fasting status',
+            "analyte",
+            "value",
+            "reference",
+            "range",
+            "result",
+            "fasting",
+            "status",
+            "clinic",
+            "id",
+            "height",
+            "weight",
+            "collected",
+            "received",
+            "reported",
+            "specimen",
+            "patient",
+            "sex",
+            "phone",
+            "dob",
+            "age",
+            "performing sites",
+            "key",
+            "priority",
+            "copies sent to",
+            "clinic id",
+            "fasting status",
         ]
 
         if name_lower in invalid_names:
             return False
 
         # Reject city/state patterns (LENEXA, KS)
-        if re.match(r'^[A-Z]+,\s*[A-Z]{2}$', name):
+        if re.match(r"^[A-Z]+,\s*[A-Z]{2}$", name):
             return False
 
         # Reject names with patient identifiers or codes in parentheses
-        if re.search(r'\([A-Z0-9]+\)$', name):
+        if re.search(r"\([A-Z0-9]+\)$", name):
             return False
 
         # Reject measurement labels (HEIGHT (FT), HEIGHT (IN), etc.)
-        if re.match(r'^(HEIGHT|WEIGHT|BP|WAIST)\s*\(', name, re.IGNORECASE):
+        if re.match(r"^(HEIGHT|WEIGHT|BP|WAIST)\s*\(", name, re.IGNORECASE):
             return False
 
         # Reject company/organization names
-        if name_lower.startswith(('steadymd', 'quest', 'labcorp')):
+        if name_lower.startswith(("steadymd", "quest", "labcorp")):
             return False
 
         # Reject if too short (likely not a real test name)
@@ -362,11 +398,11 @@ class QuestParser(BaseLabParser):
             return False
 
         # Require at least one letter
-        if not re.search(r'[A-Za-z]', name):
+        if not re.search(r"[A-Za-z]", name):
             return False
 
         # Reject common section headers
-        if name_lower.startswith(('note', 'interpretation', 'for patients')):
+        if name_lower.startswith(("note", "interpretation", "for patients")):
             return False
 
         return True
@@ -376,26 +412,55 @@ class QuestParser(BaseLabParser):
         line_lower = line.lower()
 
         noise_keywords = [
-            r'^patient\b', r'^specimen\b', 'collected:', 'received:', 'reported:',
-            r'^analyte\s*$', r'^value\s*$', 'fasting reference interval',
-            'desirable range', 'for patients', 'ldl-c is now calculated',
-            'martin ss et al', 'jama', 'http://', 'https://',
-            'quest diagnostics', 'laboratory director', 'performing sites',
-            'copies sent to', 'privacy policy', 'all rights reserved',
-            r'page \d+ of', 'final', 'see report', 'client #',
-            r'^phone:', r'^fax:', r'^dob:', r'^sex:', r'^age:', 'requisition:',
-            'your receipt of these', 'should not be viewed',
-            'myquest', 'registered trademark', 'property of their',
+            r"^patient\b",
+            r"^specimen\b",
+            "collected:",
+            "received:",
+            "reported:",
+            r"^analyte\s*$",
+            r"^value\s*$",
+            "fasting reference interval",
+            "desirable range",
+            "for patients",
+            "ldl-c is now calculated",
+            "martin ss et al",
+            "jama",
+            "http://",
+            "https://",
+            "quest diagnostics",
+            "laboratory director",
+            "performing sites",
+            "copies sent to",
+            "privacy policy",
+            "all rights reserved",
+            r"page \d+ of",
+            "final",
+            "see report",
+            "client #",
+            r"^phone:",
+            r"^fax:",
+            r"^dob:",
+            r"^sex:",
+            r"^age:",
+            "requisition:",
+            "your receipt of these",
+            "should not be viewed",
+            "myquest",
+            "registered trademark",
+            "property of their",
             # Address patterns
-            r'\bblvd\b', r'\bave\b.*\d{5}',
+            r"\bblvd\b",
+            r"\bave\b.*\d{5}",
             # Panel names without values (section headers)
-            r'^lipid panel', r'^metabolic panel', r'^cbc\s*$',
+            r"^lipid panel",
+            r"^metabolic panel",
+            r"^cbc\s*$",
             # Explanatory text patterns
-            'treating to a non-hdl',
-            'considered a therapeutic',
-            'glucose value between',
-            'consistent with prediabetes',
-            'should be confirmed',
+            "treating to a non-hdl",
+            "considered a therapeutic",
+            "glucose value between",
+            "consistent with prediabetes",
+            "should be confirmed",
         ]
 
         for keyword in noise_keywords:
@@ -421,9 +486,9 @@ class QuestParser(BaseLabParser):
 
         # Quest-specific date patterns (prioritize collected > received > reported)
         date_patterns = [
-            r'Collected:\s*(\d{2}/\d{2}/\d{4})',
-            r'Received:\s*(\d{2}/\d{2}/\d{4})',
-            r'Reported:\s*(\d{2}/\d{2}/\d{4})',
+            r"Collected:\s*(\d{2}/\d{2}/\d{4})",
+            r"Received:\s*(\d{2}/\d{2}/\d{4})",
+            r"Reported:\s*(\d{2}/\d{2}/\d{4})",
         ]
 
         for pattern in date_patterns:
@@ -431,8 +496,8 @@ class QuestParser(BaseLabParser):
             if match:
                 date_str = match.group(1)
                 try:
-                    date_obj = datetime.strptime(date_str, '%m/%d/%Y')
-                    return date_obj.strftime('%Y-%m-%d')
+                    date_obj = datetime.strptime(date_str, "%m/%d/%Y")
+                    return date_obj.strftime("%Y-%m-%d")
                 except ValueError:
                     continue
 

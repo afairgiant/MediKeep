@@ -73,9 +73,7 @@ class AdminUserCreateRequest(BaseModel):
         if len(v) > 128:
             raise ValueError("Password must be less than 128 characters")
         if not any(c.isalpha() for c in v) or not any(c.isdigit() for c in v):
-            raise ValueError(
-                "Password must contain at least one letter and one number"
-            )
+            raise ValueError("Password must contain at least one letter and one number")
         return v
 
     @field_validator("first_name")

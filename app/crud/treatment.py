@@ -30,7 +30,9 @@ from app.schemas.treatment import (
 )
 
 
-class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate], TagFilterMixin):
+class CRUDTreatment(
+    CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate], TagFilterMixin
+):
     """
     Treatment-specific CRUD operations for medical treatments.
 
@@ -45,7 +47,7 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate], TagFi
         patient_id: Optional[int] = None,
         skip: int = 0,
         limit: int = 100,
-        load_relations: Optional[List[str]] = None
+        load_relations: Optional[List[str]] = None,
     ) -> List[Treatment]:
         """
         Retrieve all treatments for a specific condition.
@@ -128,7 +130,9 @@ class CRUDTreatment(CRUDBase[Treatment, TreatmentCreate, TreatmentUpdate], TagFi
 # =============================================================================
 
 
-class CRUDTreatmentMedication(CRUDBase[TreatmentMedication, TreatmentMedicationCreate, TreatmentMedicationUpdate]):
+class CRUDTreatmentMedication(
+    CRUDBase[TreatmentMedication, TreatmentMedicationCreate, TreatmentMedicationUpdate]
+):
     """CRUD operations for TreatmentMedication junction table."""
 
     def __init__(self):
@@ -173,7 +177,7 @@ class CRUDTreatmentMedication(CRUDBase[TreatmentMedication, TreatmentMedicationC
             .filter(
                 and_(
                     self.model.treatment_id == treatment_id,
-                    self.model.medication_id == medication_id
+                    self.model.medication_id == medication_id,
                 )
             )
             .first()
@@ -232,7 +236,9 @@ class CRUDTreatmentMedication(CRUDBase[TreatmentMedication, TreatmentMedicationC
 # =============================================================================
 
 
-class CRUDTreatmentEncounter(CRUDBase[TreatmentEncounter, TreatmentEncounterCreate, TreatmentEncounterUpdate]):
+class CRUDTreatmentEncounter(
+    CRUDBase[TreatmentEncounter, TreatmentEncounterCreate, TreatmentEncounterUpdate]
+):
     """CRUD operations for TreatmentEncounter junction table."""
 
     def __init__(self):
@@ -254,9 +260,7 @@ class CRUDTreatmentEncounter(CRUDBase[TreatmentEncounter, TreatmentEncounterCrea
     ) -> List[TreatmentEncounter]:
         """Get all treatment relationships for a specific encounter."""
         return (
-            db.query(self.model)
-            .filter(self.model.encounter_id == encounter_id)
-            .all()
+            db.query(self.model).filter(self.model.encounter_id == encounter_id).all()
         )
 
     def get_by_treatment_and_encounter(
@@ -268,7 +272,7 @@ class CRUDTreatmentEncounter(CRUDBase[TreatmentEncounter, TreatmentEncounterCrea
             .filter(
                 and_(
                     self.model.treatment_id == treatment_id,
-                    self.model.encounter_id == encounter_id
+                    self.model.encounter_id == encounter_id,
                 )
             )
             .first()
@@ -327,7 +331,9 @@ class CRUDTreatmentEncounter(CRUDBase[TreatmentEncounter, TreatmentEncounterCrea
 # =============================================================================
 
 
-class CRUDTreatmentLabResult(CRUDBase[TreatmentLabResult, TreatmentLabResultCreate, TreatmentLabResultUpdate]):
+class CRUDTreatmentLabResult(
+    CRUDBase[TreatmentLabResult, TreatmentLabResultCreate, TreatmentLabResultUpdate]
+):
     """CRUD operations for TreatmentLabResult junction table."""
 
     def __init__(self):
@@ -338,9 +344,7 @@ class CRUDTreatmentLabResult(CRUDBase[TreatmentLabResult, TreatmentLabResultCrea
     ) -> List[TreatmentLabResult]:
         """Get all lab result relationships for a specific treatment."""
         return (
-            db.query(self.model)
-            .filter(self.model.treatment_id == treatment_id)
-            .all()
+            db.query(self.model).filter(self.model.treatment_id == treatment_id).all()
         )
 
     def get_by_lab_result(
@@ -348,9 +352,7 @@ class CRUDTreatmentLabResult(CRUDBase[TreatmentLabResult, TreatmentLabResultCrea
     ) -> List[TreatmentLabResult]:
         """Get all treatment relationships for a specific lab result."""
         return (
-            db.query(self.model)
-            .filter(self.model.lab_result_id == lab_result_id)
-            .all()
+            db.query(self.model).filter(self.model.lab_result_id == lab_result_id).all()
         )
 
     def get_by_treatment_and_lab_result(
@@ -362,7 +364,7 @@ class CRUDTreatmentLabResult(CRUDBase[TreatmentLabResult, TreatmentLabResultCrea
             .filter(
                 and_(
                     self.model.treatment_id == treatment_id,
-                    self.model.lab_result_id == lab_result_id
+                    self.model.lab_result_id == lab_result_id,
                 )
             )
             .first()
@@ -422,7 +424,9 @@ class CRUDTreatmentLabResult(CRUDBase[TreatmentLabResult, TreatmentLabResultCrea
 # =============================================================================
 
 
-class CRUDTreatmentEquipment(CRUDBase[TreatmentEquipment, TreatmentEquipmentCreate, TreatmentEquipmentUpdate]):
+class CRUDTreatmentEquipment(
+    CRUDBase[TreatmentEquipment, TreatmentEquipmentCreate, TreatmentEquipmentUpdate]
+):
     """CRUD operations for TreatmentEquipment junction table."""
 
     def __init__(self):
@@ -433,9 +437,7 @@ class CRUDTreatmentEquipment(CRUDBase[TreatmentEquipment, TreatmentEquipmentCrea
     ) -> List[TreatmentEquipment]:
         """Get all equipment relationships for a specific treatment."""
         return (
-            db.query(self.model)
-            .filter(self.model.treatment_id == treatment_id)
-            .all()
+            db.query(self.model).filter(self.model.treatment_id == treatment_id).all()
         )
 
     def get_by_equipment(
@@ -443,9 +445,7 @@ class CRUDTreatmentEquipment(CRUDBase[TreatmentEquipment, TreatmentEquipmentCrea
     ) -> List[TreatmentEquipment]:
         """Get all treatment relationships for a specific equipment."""
         return (
-            db.query(self.model)
-            .filter(self.model.equipment_id == equipment_id)
-            .all()
+            db.query(self.model).filter(self.model.equipment_id == equipment_id).all()
         )
 
     def get_by_treatment_and_equipment(
@@ -457,7 +457,7 @@ class CRUDTreatmentEquipment(CRUDBase[TreatmentEquipment, TreatmentEquipmentCrea
             .filter(
                 and_(
                     self.model.treatment_id == treatment_id,
-                    self.model.equipment_id == equipment_id
+                    self.model.equipment_id == equipment_id,
                 )
             )
             .first()

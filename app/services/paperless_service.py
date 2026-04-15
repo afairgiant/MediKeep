@@ -41,9 +41,7 @@ def _build_title_fallback_query(query: str, user_id: Optional[int] = None) -> st
     query matches titles across the whole Paperless instance.
     """
     terms = [t for t in query.split() if t]
-    clauses = [
-        f"title:*{_LUCENE_SPECIAL_CHARS.sub(r'\\\1', term)}*" for term in terms
-    ]
+    clauses = [f"title:*{_LUCENE_SPECIAL_CHARS.sub(r'\\\1', term)}*" for term in terms]
     if user_id is not None:
         clauses.append(f"custom_fields.medical_record_user_id:{user_id}")
     return " AND ".join(clauses) if clauses else "*"
@@ -158,7 +156,9 @@ class PaperlessServiceBase(ABC):
             await self.session.close()
             self.session = None
 
-    def _make_request(self, method: str, endpoint: str, custom_timeout: Optional[int] = None, **kwargs):
+    def _make_request(
+        self, method: str, endpoint: str, custom_timeout: Optional[int] = None, **kwargs
+    ):
         """
         Create HTTP request context manager with validation.
 
@@ -189,8 +189,7 @@ class PaperlessServiceBase(ABC):
         # Apply custom timeout if provided
         if custom_timeout is not None:
             kwargs["timeout"] = aiohttp.ClientTimeout(
-                total=custom_timeout,
-                connect=settings.PAPERLESS_CONNECT_TIMEOUT
+                total=custom_timeout, connect=settings.PAPERLESS_CONNECT_TIMEOUT
             )
 
         return self._request_context_manager(
@@ -207,19 +206,31 @@ class PaperlessServiceBase(ABC):
                 await self._create_session()
 
             # Safe debug logging - no credential exposure
-            headers_to_log = {k: v for k, v in self.session.headers.items() if k.lower() != 'authorization'}
-            if any(k.lower() == 'authorization' for k in self.session.headers.keys()):
-                headers_to_log['Authorization'] = '[REDACTED]'
-            
+            headers_to_log = {
+                k: v
+                for k, v in self.session.headers.items()
+                if k.lower() != "authorization"
+            }
+            if any(k.lower() == "authorization" for k in self.session.headers.keys()):
+                headers_to_log["Authorization"] = "[REDACTED]"
+
             # Safe debug logging - no sensitive data
             logger.debug(f"Paperless request - Method: {method}")
             logger.debug(f"Paperless request - URL: {full_url}")
             # Only log safe headers, excluding authorization
-            safe_headers = {k: v for k, v in self.session.headers.items() if k.lower() != 'authorization'}
-            safe_headers['authorization'] = '[REDACTED]' if 'authorization' in [k.lower() for k in self.session.headers.keys()] else 'None'
+            safe_headers = {
+                k: v
+                for k, v in self.session.headers.items()
+                if k.lower() != "authorization"
+            }
+            safe_headers["authorization"] = (
+                "[REDACTED]"
+                if "authorization" in [k.lower() for k in self.session.headers.keys()]
+                else "None"
+            )
             logger.debug(f"Paperless request - Headers: {safe_headers}")
             logger.debug(f"Paperless request - User ID: {self.user_id}")
-            
+
             logger.info(
                 f"Making Paperless HTTP request",
                 extra={
@@ -228,8 +239,10 @@ class PaperlessServiceBase(ABC):
                     "url": full_url,
                     "request_id": request_id,
                     "session_headers": headers_to_log,
-                    "request_kwargs": {k: v for k, v in kwargs.items() if k != "headers"}
-                }
+                    "request_kwargs": {
+                        k: v for k, v in kwargs.items() if k != "headers"
+                    },
+                },
             )
 
             async with self.session.request(method, full_url, **kwargs) as response:
@@ -238,11 +251,13 @@ class PaperlessServiceBase(ABC):
                 try:
                     response_text = await response.text()
                     logger.debug(f"Paperless response - Status: {response.status}")
-                    logger.debug(f"Paperless response - Headers: {dict(response.headers)}")
+                    logger.debug(
+                        f"Paperless response - Headers: {dict(response.headers)}"
+                    )
                     logger.debug(f"Paperless response - Body: {response_text[:500]}...")
                 except Exception as read_error:
                     logger.debug(f"Could not read response: {read_error}")
-                
+
                 # Validate response headers
                 self._validate_response_headers(response)
 
@@ -276,6 +291,7 @@ class PaperlessServiceBase(ABC):
         except Exception as e:
             logger.debug(f"Paperless unexpected error: {type(e).__name__}: {str(e)}")
             import traceback
+
             logger.debug(f"Paperless error traceback: {traceback.format_exc()}")
             raise
 
@@ -379,13 +395,13 @@ class PaperlessServiceBase(ABC):
     async def get_task_status(self, task_id: str) -> Dict[str, Any]:
         """
         Get the status of a task in paperless-ngx.
-        
+
         Args:
             task_id: Task UUID to check
-            
+
         Returns:
             Task status information
-            
+
         Raises:
             PaperlessError: If task status check fails
         """
@@ -409,7 +425,9 @@ class PaperlessServiceBase(ABC):
                         "Authentication failed during task status check"
                     )
                 else:
-                    raise PaperlessError(f"Task status check failed: HTTP {response.status}")
+                    raise PaperlessError(
+                        f"Task status check failed: HTTP {response.status}"
+                    )
 
         except PaperlessError:
             raise
@@ -645,8 +663,10 @@ class PaperlessServiceToken(PaperlessServiceBase):
                 "user_id": self.user_id,
                 "base_url": self.base_url,
                 "auth_type": "token",
-                "headers": {k: v for k, v in auth_headers.items() if k != "Authorization"}
-            }
+                "headers": {
+                    k: v for k, v in auth_headers.items() if k != "Authorization"
+                },
+            },
         )
 
         # Use SSL context only for HTTPS connections
@@ -741,12 +761,17 @@ class PaperlessServiceToken(PaperlessServiceBase):
                 form_data.add_field("document_type", document_type)
 
             # Make upload request with extended timeout
-            logger.info(f"Uploading document to Paperless: {filename} (size: {len(file_data)} bytes)")
-            logger.info(f"Using extended upload timeout of {settings.PAPERLESS_UPLOAD_TIMEOUT}s to prevent timeout during processing")
+            logger.info(
+                f"Uploading document to Paperless: {filename} (size: {len(file_data)} bytes)"
+            )
+            logger.info(
+                f"Using extended upload timeout of {settings.PAPERLESS_UPLOAD_TIMEOUT}s to prevent timeout during processing"
+            )
             async with self._make_request(
-                "POST", "/api/documents/post_document/", 
+                "POST",
+                "/api/documents/post_document/",
                 custom_timeout=settings.PAPERLESS_UPLOAD_TIMEOUT,
-                data=form_data
+                data=form_data,
             ) as response:
 
                 logger.info(f"Paperless upload response: HTTP {response.status}")
@@ -772,12 +797,13 @@ class PaperlessServiceToken(PaperlessServiceBase):
                 # Get task UUID from response - read as text first then try to parse
                 response_text = await response.text()
                 logger.info(f"Raw upload response text: '{response_text}'")
-                
+
                 task_uuid = None
-                
+
                 # Try to parse as JSON
                 try:
                     import json
+
                     result = json.loads(response_text)
                     logger.info(f"Parsed JSON response: {result}")
                     # Response should be just the task UUID as a string
@@ -799,7 +825,9 @@ class PaperlessServiceToken(PaperlessServiceBase):
 
                 # Return immediately with task UUID - don't wait for completion
                 # The frontend will poll the task status separately
-                logger.info(f"Document uploaded to paperless, returning task UUID for polling: {filename} (task_id: {task_uuid})")
+                logger.info(
+                    f"Document uploaded to paperless, returning task UUID for polling: {filename} (task_id: {task_uuid})"
+                )
 
                 return {
                     "status": "processing",
@@ -833,11 +861,11 @@ class PaperlessServiceToken(PaperlessServiceBase):
     def _parse_upload_error(self, error_data: Union[Dict, str], filename: str) -> str:
         """
         Parse Paperless upload error and return user-friendly message.
-        
+
         Args:
             error_data: Error response from Paperless API
             filename: Original filename for context
-            
+
         Returns:
             User-friendly error message
         """
@@ -857,73 +885,116 @@ class PaperlessServiceToken(PaperlessServiceBase):
                 error_msg = str(error_data)
         else:
             error_msg = str(error_data)
-        
+
         # Check for common error patterns and provide user-friendly messages
         error_lower = error_msg.lower()
-        
+
         # Duplicate document detection
-        if any(keyword in error_lower for keyword in [
-            "duplicate", "already exists", "similar document", 
-            "document with this checksum", "identical file"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "duplicate",
+                "already exists",
+                "similar document",
+                "document with this checksum",
+                "identical file",
+            ]
+        ):
             return f"Document '{filename}' appears to be a duplicate. A similar or identical document already exists in Paperless. Please check your Paperless instance for existing documents."
-        
+
         # File format/type errors
-        if any(keyword in error_lower for keyword in [
-            "unsupported file", "invalid file type", "file format", 
-            "not supported", "invalid format"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "unsupported file",
+                "invalid file type",
+                "file format",
+                "not supported",
+                "invalid format",
+            ]
+        ):
             return f"File '{filename}' has an unsupported format. Please check that the file type is supported by Paperless-ngx."
-        
+
         # File size errors
-        if any(keyword in error_lower for keyword in [
-            "file too large", "size exceeds", "maximum file size", "too big"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "file too large",
+                "size exceeds",
+                "maximum file size",
+                "too big",
+            ]
+        ):
             return f"File '{filename}' is too large for Paperless. Please reduce the file size or check your Paperless configuration."
-        
+
         # Permission/access errors
-        if any(keyword in error_lower for keyword in [
-            "permission denied", "access denied", "not authorized", "forbidden"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "permission denied",
+                "access denied",
+                "not authorized",
+                "forbidden",
+            ]
+        ):
             return f"Permission denied uploading '{filename}'. Please check your Paperless user permissions."
-        
+
         # Storage/disk space errors
-        if any(keyword in error_lower for keyword in [
-            "disk space", "storage full", "no space", "insufficient space"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "disk space",
+                "storage full",
+                "no space",
+                "insufficient space",
+            ]
+        ):
             return f"Paperless storage is full. Unable to upload '{filename}'. Please contact your administrator."
-        
+
         # OCR/processing errors
-        if any(keyword in error_lower for keyword in [
-            "ocr failed", "processing failed", "document processing", "text extraction"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "ocr failed",
+                "processing failed",
+                "document processing",
+                "text extraction",
+            ]
+        ):
             return f"Paperless had trouble processing '{filename}'. The document was uploaded but text extraction may have failed."
-        
+
         # Network/timeout errors
-        if any(keyword in error_lower for keyword in [
-            "timeout", "connection", "network", "request failed"
-        ]):
-            return f"Network error uploading '{filename}' to Paperless. Please try again."
-        
+        if any(
+            keyword in error_lower
+            for keyword in ["timeout", "connection", "network", "request failed"]
+        ):
+            return (
+                f"Network error uploading '{filename}' to Paperless. Please try again."
+            )
+
         # Default message for unknown errors
         return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
 
-    async def wait_for_task_completion(self, task_uuid: str, timeout_seconds: int = 60) -> Optional[str]:
+    async def wait_for_task_completion(
+        self, task_uuid: str, timeout_seconds: int = 60
+    ) -> Optional[str]:
         """
         Public method to wait for task completion and get document ID.
-        
+
         Args:
             task_uuid: Task UUID to check
             timeout_seconds: Maximum time to wait in seconds
-            
+
         Returns:
             Document ID as string if completed successfully, None if still processing
-            
+
         Raises:
             PaperlessUploadError: If task fails
         """
         try:
-            return await self._wait_for_task_completion(task_uuid, "document", timeout_seconds)
+            return await self._wait_for_task_completion(
+                task_uuid, "document", timeout_seconds
+            )
         except PaperlessUploadError as e:
             # Re-raise upload errors
             raise e
@@ -932,38 +1003,44 @@ class PaperlessServiceToken(PaperlessServiceBase):
             logger.warning(f"Task check failed for {task_uuid}: {str(e)}")
             return None
 
-    async def _wait_for_task_completion(self, task_uuid: str, filename: str, max_wait_time: int = 60) -> str:
+    async def _wait_for_task_completion(
+        self, task_uuid: str, filename: str, max_wait_time: int = 60
+    ) -> str:
         """
         Poll the tasks endpoint to wait for document consumption completion and get document ID.
-        
+
         Args:
             task_uuid: Task UUID returned from upload
             filename: Original filename for logging
             max_wait_time: Maximum time to wait in seconds
-            
+
         Returns:
             Document ID as string
-            
+
         Raises:
             PaperlessUploadError: If task fails or times out
         """
         logger.info(f"Polling task status for {filename} (task: {task_uuid})")
-        
+
         start_time = datetime.utcnow()
         poll_interval = 2  # Start with 2 second intervals
         max_poll_interval = 10  # Cap at 10 seconds
-        
+
         while True:
             try:
-                async with self._make_request("GET", f"/api/tasks/?task_id={task_uuid}") as response:
+                async with self._make_request(
+                    "GET", f"/api/tasks/?task_id={task_uuid}"
+                ) as response:
                     if response.status != 200:
-                        logger.warning(f"Task status check failed: HTTP {response.status}")
+                        logger.warning(
+                            f"Task status check failed: HTTP {response.status}"
+                        )
                         await asyncio.sleep(poll_interval)
                         continue
-                    
+
                     data = await response.json()
                     logger.debug(f"Raw task API response: {data}")
-                    
+
                     # Handle both single task and list responses
                     if isinstance(data, list):
                         if not data:
@@ -981,65 +1058,76 @@ class PaperlessServiceToken(PaperlessServiceBase):
                         logger.warning(f"Unexpected task response format: {type(data)}")
                         await asyncio.sleep(poll_interval)
                         continue
-                    
+
                     status = task_data.get("status", "").lower()
                     task_name = task_data.get("task_name", "")
-                    
+
                     logger.debug(f"Task {task_uuid} status: {status} ({task_name})")
-                    
+
                     if status == "success":
                         # Task completed successfully - get document ID
                         result = task_data.get("result", {})
                         document_id = None
-                        
+
                         # Log the full result for debugging
                         logger.info(f"Task result: {result}")
-                        
+
                         if isinstance(result, dict):
                             document_id = result.get("document_id") or result.get("id")
                         elif isinstance(result, str):
                             # Parse document ID from string like "Success. New document id 2677 created"
                             import re
-                            match = re.search(r'document id (\d+)', result)
+
+                            match = re.search(r"document id (\d+)", result)
                             if match:
                                 document_id = match.group(1)
                             else:
                                 document_id = result
                         else:
                             document_id = result
-                            
+
                         if document_id:
-                            logger.info(f"Task completed successfully: document_id={document_id}")
+                            logger.info(
+                                f"Task completed successfully: document_id={document_id}"
+                            )
                             return str(document_id)
                         else:
-                            raise PaperlessUploadError(f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected.")
-                    
+                            raise PaperlessUploadError(
+                                f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
+                            )
+
                     elif status == "failure":
                         # Task failed
                         error_info = task_data.get("result", "Unknown error")
-                        raise PaperlessUploadError(f"Document processing failed for '{filename}': {error_info}")
-                    
+                        raise PaperlessUploadError(
+                            f"Document processing failed for '{filename}': {error_info}"
+                        )
+
                     elif status in ["pending", "started", "retry"]:
                         # Task still in progress
                         elapsed = (datetime.utcnow() - start_time).total_seconds()
                         if elapsed > max_wait_time:
-                            raise PaperlessUploadError(f"Upload of '{filename}' timed out after {max_wait_time} seconds")
-                        
+                            raise PaperlessUploadError(
+                                f"Upload of '{filename}' timed out after {max_wait_time} seconds"
+                            )
+
                         # Wait before next poll with exponential backoff
                         await asyncio.sleep(poll_interval)
                         poll_interval = min(poll_interval * 1.5, max_poll_interval)
                         continue
-                    
+
                     else:
                         logger.warning(f"Unknown task status: {status}")
                         await asyncio.sleep(poll_interval)
                         continue
-                        
+
             except Exception as e:
                 elapsed = (datetime.utcnow() - start_time).total_seconds()
                 if elapsed > max_wait_time:
-                    raise PaperlessUploadError(f"Upload of '{filename}' timed out after {max_wait_time} seconds")
-                
+                    raise PaperlessUploadError(
+                        f"Upload of '{filename}' timed out after {max_wait_time} seconds"
+                    )
+
                 logger.warning(f"Error checking task status: {e}")
                 await asyncio.sleep(poll_interval)
                 continue
@@ -1111,9 +1199,9 @@ class PaperlessServiceToken(PaperlessServiceBase):
         try:
             # Convert document_id to string and validate format
             doc_id_str = str(document_id).strip()
-            
+
             # Check if it's a UUID (task ID) vs numeric document ID
-            if len(doc_id_str) == 36 and '-' in doc_id_str:
+            if len(doc_id_str) == 36 and "-" in doc_id_str:
                 # This is likely a task UUID, not a document ID
                 logger.info(
                     f"Document ID {doc_id_str} appears to be a task UUID, not a document ID",
@@ -1123,7 +1211,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
                     },
                 )
                 return False
-            
+
             # Validate numeric document ID
             try:
                 numeric_id = int(doc_id_str)
@@ -1419,12 +1507,17 @@ class PaperlessService(PaperlessServiceBase):
                 form_data.add_field("document_type", document_type)
 
             # Make upload request with extended timeout
-            logger.info(f"Uploading document to Paperless: {filename} (size: {len(file_data)} bytes)")
-            logger.info(f"Using extended upload timeout of {settings.PAPERLESS_UPLOAD_TIMEOUT}s to prevent timeout during processing")
+            logger.info(
+                f"Uploading document to Paperless: {filename} (size: {len(file_data)} bytes)"
+            )
+            logger.info(
+                f"Using extended upload timeout of {settings.PAPERLESS_UPLOAD_TIMEOUT}s to prevent timeout during processing"
+            )
             async with self._make_request(
-                "POST", "/api/documents/post_document/", 
+                "POST",
+                "/api/documents/post_document/",
                 custom_timeout=settings.PAPERLESS_UPLOAD_TIMEOUT,
-                data=form_data
+                data=form_data,
             ) as response:
 
                 logger.info(f"Paperless upload response: HTTP {response.status}")
@@ -1450,12 +1543,13 @@ class PaperlessService(PaperlessServiceBase):
                 # Get task UUID from response - read as text first then try to parse
                 response_text = await response.text()
                 logger.info(f"Raw upload response text: '{response_text}'")
-                
+
                 task_uuid = None
-                
+
                 # Try to parse as JSON
                 try:
                     import json
+
                     result = json.loads(response_text)
                     logger.info(f"Parsed JSON response: {result}")
                     # Response should be just the task UUID as a string
@@ -1477,7 +1571,9 @@ class PaperlessService(PaperlessServiceBase):
 
                 # Return immediately with task UUID - don't wait for completion
                 # The frontend will poll the task status separately
-                logger.info(f"Document uploaded to paperless, returning task UUID for polling: {filename} (task_id: {task_uuid})")
+                logger.info(
+                    f"Document uploaded to paperless, returning task UUID for polling: {filename} (task_id: {task_uuid})"
+                )
 
                 return {
                     "status": "processing",
@@ -1511,11 +1607,11 @@ class PaperlessService(PaperlessServiceBase):
     def _parse_upload_error(self, error_data: Union[Dict, str], filename: str) -> str:
         """
         Parse Paperless upload error and return user-friendly message.
-        
+
         Args:
             error_data: Error response from Paperless API
             filename: Original filename for context
-            
+
         Returns:
             User-friendly error message
         """
@@ -1535,73 +1631,116 @@ class PaperlessService(PaperlessServiceBase):
                 error_msg = str(error_data)
         else:
             error_msg = str(error_data)
-        
+
         # Check for common error patterns and provide user-friendly messages
         error_lower = error_msg.lower()
-        
+
         # Duplicate document detection
-        if any(keyword in error_lower for keyword in [
-            "duplicate", "already exists", "similar document", 
-            "document with this checksum", "identical file"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "duplicate",
+                "already exists",
+                "similar document",
+                "document with this checksum",
+                "identical file",
+            ]
+        ):
             return f"Document '{filename}' appears to be a duplicate. A similar or identical document already exists in Paperless. Please check your Paperless instance for existing documents."
-        
+
         # File format/type errors
-        if any(keyword in error_lower for keyword in [
-            "unsupported file", "invalid file type", "file format", 
-            "not supported", "invalid format"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "unsupported file",
+                "invalid file type",
+                "file format",
+                "not supported",
+                "invalid format",
+            ]
+        ):
             return f"File '{filename}' has an unsupported format. Please check that the file type is supported by Paperless-ngx."
-        
+
         # File size errors
-        if any(keyword in error_lower for keyword in [
-            "file too large", "size exceeds", "maximum file size", "too big"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "file too large",
+                "size exceeds",
+                "maximum file size",
+                "too big",
+            ]
+        ):
             return f"File '{filename}' is too large for Paperless. Please reduce the file size or check your Paperless configuration."
-        
+
         # Permission/access errors
-        if any(keyword in error_lower for keyword in [
-            "permission denied", "access denied", "not authorized", "forbidden"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "permission denied",
+                "access denied",
+                "not authorized",
+                "forbidden",
+            ]
+        ):
             return f"Permission denied uploading '{filename}'. Please check your Paperless user permissions."
-        
+
         # Storage/disk space errors
-        if any(keyword in error_lower for keyword in [
-            "disk space", "storage full", "no space", "insufficient space"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "disk space",
+                "storage full",
+                "no space",
+                "insufficient space",
+            ]
+        ):
             return f"Paperless storage is full. Unable to upload '{filename}'. Please contact your administrator."
-        
+
         # OCR/processing errors
-        if any(keyword in error_lower for keyword in [
-            "ocr failed", "processing failed", "document processing", "text extraction"
-        ]):
+        if any(
+            keyword in error_lower
+            for keyword in [
+                "ocr failed",
+                "processing failed",
+                "document processing",
+                "text extraction",
+            ]
+        ):
             return f"Paperless had trouble processing '{filename}'. The document was uploaded but text extraction may have failed."
-        
+
         # Network/timeout errors
-        if any(keyword in error_lower for keyword in [
-            "timeout", "connection", "network", "request failed"
-        ]):
-            return f"Network error uploading '{filename}' to Paperless. Please try again."
-        
+        if any(
+            keyword in error_lower
+            for keyword in ["timeout", "connection", "network", "request failed"]
+        ):
+            return (
+                f"Network error uploading '{filename}' to Paperless. Please try again."
+            )
+
         # Default message for unknown errors
         return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
 
-    async def wait_for_task_completion(self, task_uuid: str, timeout_seconds: int = 60) -> Optional[str]:
+    async def wait_for_task_completion(
+        self, task_uuid: str, timeout_seconds: int = 60
+    ) -> Optional[str]:
         """
         Public method to wait for task completion and get document ID.
-        
+
         Args:
             task_uuid: Task UUID to check
             timeout_seconds: Maximum time to wait in seconds
-            
+
         Returns:
             Document ID as string if completed successfully, None if still processing
-            
+
         Raises:
             PaperlessUploadError: If task fails
         """
         try:
-            return await self._wait_for_task_completion(task_uuid, "document", timeout_seconds)
+            return await self._wait_for_task_completion(
+                task_uuid, "document", timeout_seconds
+            )
         except PaperlessUploadError as e:
             # Re-raise upload errors
             raise e
@@ -1610,38 +1749,44 @@ class PaperlessService(PaperlessServiceBase):
             logger.warning(f"Task check failed for {task_uuid}: {str(e)}")
             return None
 
-    async def _wait_for_task_completion(self, task_uuid: str, filename: str, max_wait_time: int = 60) -> str:
+    async def _wait_for_task_completion(
+        self, task_uuid: str, filename: str, max_wait_time: int = 60
+    ) -> str:
         """
         Poll the tasks endpoint to wait for document consumption completion and get document ID.
-        
+
         Args:
             task_uuid: Task UUID returned from upload
             filename: Original filename for logging
             max_wait_time: Maximum time to wait in seconds
-            
+
         Returns:
             Document ID as string
-            
+
         Raises:
             PaperlessUploadError: If task fails or times out
         """
         logger.info(f"Polling task status for {filename} (task: {task_uuid})")
-        
+
         start_time = datetime.utcnow()
         poll_interval = 2  # Start with 2 second intervals
         max_poll_interval = 10  # Cap at 10 seconds
-        
+
         while True:
             try:
-                async with self._make_request("GET", f"/api/tasks/?task_id={task_uuid}") as response:
+                async with self._make_request(
+                    "GET", f"/api/tasks/?task_id={task_uuid}"
+                ) as response:
                     if response.status != 200:
-                        logger.warning(f"Task status check failed: HTTP {response.status}")
+                        logger.warning(
+                            f"Task status check failed: HTTP {response.status}"
+                        )
                         await asyncio.sleep(poll_interval)
                         continue
-                    
+
                     data = await response.json()
                     logger.debug(f"Raw task API response: {data}")
-                    
+
                     # Handle both single task and list responses
                     if isinstance(data, list):
                         if not data:
@@ -1659,65 +1804,76 @@ class PaperlessService(PaperlessServiceBase):
                         logger.warning(f"Unexpected task response format: {type(data)}")
                         await asyncio.sleep(poll_interval)
                         continue
-                    
+
                     status = task_data.get("status", "").lower()
                     task_name = task_data.get("task_name", "")
-                    
+
                     logger.debug(f"Task {task_uuid} status: {status} ({task_name})")
-                    
+
                     if status == "success":
                         # Task completed successfully - get document ID
                         result = task_data.get("result", {})
                         document_id = None
-                        
+
                         # Log the full result for debugging
                         logger.info(f"Task result: {result}")
-                        
+
                         if isinstance(result, dict):
                             document_id = result.get("document_id") or result.get("id")
                         elif isinstance(result, str):
                             # Parse document ID from string like "Success. New document id 2677 created"
                             import re
-                            match = re.search(r'document id (\d+)', result)
+
+                            match = re.search(r"document id (\d+)", result)
                             if match:
                                 document_id = match.group(1)
                             else:
                                 document_id = result
                         else:
                             document_id = result
-                            
+
                         if document_id:
-                            logger.info(f"Task completed successfully: document_id={document_id}")
+                            logger.info(
+                                f"Task completed successfully: document_id={document_id}"
+                            )
                             return str(document_id)
                         else:
-                            raise PaperlessUploadError(f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected.")
-                    
+                            raise PaperlessUploadError(
+                                f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
+                            )
+
                     elif status == "failure":
                         # Task failed
                         error_info = task_data.get("result", "Unknown error")
-                        raise PaperlessUploadError(f"Document processing failed for '{filename}': {error_info}")
-                    
+                        raise PaperlessUploadError(
+                            f"Document processing failed for '{filename}': {error_info}"
+                        )
+
                     elif status in ["pending", "started", "retry"]:
                         # Task still in progress
                         elapsed = (datetime.utcnow() - start_time).total_seconds()
                         if elapsed > max_wait_time:
-                            raise PaperlessUploadError(f"Upload of '{filename}' timed out after {max_wait_time} seconds")
-                        
+                            raise PaperlessUploadError(
+                                f"Upload of '{filename}' timed out after {max_wait_time} seconds"
+                            )
+
                         # Wait before next poll with exponential backoff
                         await asyncio.sleep(poll_interval)
                         poll_interval = min(poll_interval * 1.5, max_poll_interval)
                         continue
-                    
+
                     else:
                         logger.warning(f"Unknown task status: {status}")
                         await asyncio.sleep(poll_interval)
                         continue
-                        
+
             except Exception as e:
                 elapsed = (datetime.utcnow() - start_time).total_seconds()
                 if elapsed > max_wait_time:
-                    raise PaperlessUploadError(f"Upload of '{filename}' timed out after {max_wait_time} seconds")
-                
+                    raise PaperlessUploadError(
+                        f"Upload of '{filename}' timed out after {max_wait_time} seconds"
+                    )
+
                 logger.warning(f"Error checking task status: {e}")
                 await asyncio.sleep(poll_interval)
                 continue
@@ -1789,9 +1945,9 @@ class PaperlessService(PaperlessServiceBase):
         try:
             # Convert document_id to string and validate format
             doc_id_str = str(document_id).strip()
-            
+
             # Check if it's a UUID (task ID) vs numeric document ID
-            if len(doc_id_str) == 36 and '-' in doc_id_str:
+            if len(doc_id_str) == 36 and "-" in doc_id_str:
                 # This is likely a task UUID, not a document ID
                 logger.info(
                     f"Document ID {doc_id_str} appears to be a task UUID, not a document ID",
@@ -1801,7 +1957,7 @@ class PaperlessService(PaperlessServiceBase):
                     },
                 )
                 return False
-            
+
             # Validate numeric document ID
             try:
                 numeric_id = int(doc_id_str)
@@ -2057,20 +2213,22 @@ def create_paperless_service_with_token(
 
 class PaperlessServiceWithFallback:
     """Wrapper service that attempts token auth first, then falls back to basic auth."""
-    
-    def __init__(self, 
-                 paperless_url: str,
-                 encrypted_token: Optional[str] = None,
-                 encrypted_username: Optional[str] = None,
-                 encrypted_password: Optional[str] = None,
-                 user_id: int = 0):
+
+    def __init__(
+        self,
+        paperless_url: str,
+        encrypted_token: Optional[str] = None,
+        encrypted_username: Optional[str] = None,
+        encrypted_password: Optional[str] = None,
+        user_id: int = 0,
+    ):
         self.paperless_url = paperless_url
         self.encrypted_token = encrypted_token
         self.encrypted_username = encrypted_username
         self.encrypted_password = encrypted_password
         self.user_id = user_id
         self.active_service = None
-        
+
     async def __aenter__(self):
         """Try primary service, fallback on auth error."""
         # Try token auth first if available
@@ -2086,18 +2244,23 @@ class PaperlessServiceWithFallback:
                 logger.info(f"Using token authentication for user {self.user_id}")
                 return token_service
             except PaperlessAuthenticationError as e:
-                logger.warning(f"Token auth failed for user {self.user_id}, trying basic auth: {e}")
+                logger.warning(
+                    f"Token auth failed for user {self.user_id}, trying basic auth: {e}"
+                )
                 if token_service:
                     try:
                         await token_service.__aexit__(None, None, None)
                     except Exception:
                         pass  # Silently ignore cleanup errors
-        
+
         # Fallback to username/password if available
         if self.encrypted_username and self.encrypted_password:
             try:
                 basic_service = create_paperless_service_with_username_password(
-                    self.paperless_url, self.encrypted_username, self.encrypted_password, self.user_id
+                    self.paperless_url,
+                    self.encrypted_username,
+                    self.encrypted_password,
+                    self.user_id,
                 )
                 await basic_service.__aenter__()
                 self.active_service = basic_service
@@ -2108,7 +2271,7 @@ class PaperlessServiceWithFallback:
                 raise
         else:
             raise PaperlessError("No fallback authentication method available")
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Clean up active service."""
         if self.active_service:
@@ -2120,26 +2283,26 @@ def create_paperless_service(
     encrypted_token: Optional[str] = None,
     encrypted_username: Optional[str] = None,
     encrypted_password: Optional[str] = None,
-    user_id: int = 0
+    user_id: int = 0,
 ) -> PaperlessServiceBase:
     """
     Create paperless service with automatic authentication method selection.
-    
+
     Priority:
     1. Token authentication (if token provided) - supports 2FA
     2. Username/Password authentication (if both provided)
     3. Raise error if no valid credentials
-    
+
     Args:
         paperless_url: Paperless instance URL
         encrypted_token: Optional encrypted API token
         encrypted_username: Optional encrypted username
         encrypted_password: Optional encrypted password
         user_id: User ID for logging and context
-        
+
     Returns:
         Configured paperless service with appropriate authentication
-        
+
     Raises:
         PaperlessError: If no valid credentials provided or service creation fails
     """
@@ -2151,25 +2314,31 @@ def create_paperless_service(
                 api_token = credential_encryption.decrypt_token(encrypted_token)
                 logger.debug(f"Token decryption successful: {bool(api_token)}")
                 if api_token:
-                    logger.info(f"Creating paperless service with token auth for user {user_id}")
+                    logger.info(
+                        f"Creating paperless service with token auth for user {user_id}"
+                    )
                     return PaperlessServiceToken(paperless_url, api_token, user_id)
             except Exception as e:
                 logger.warning(f"Token decryption failed for user {user_id}: {e}")
-        
+
         # Priority 2: Username/Password authentication
         if encrypted_username and encrypted_password:
             try:
                 username = credential_encryption.decrypt_token(encrypted_username)
                 password = credential_encryption.decrypt_token(encrypted_password)
                 if username and password:
-                    logger.info(f"Creating paperless service with basic auth for user {user_id}")
+                    logger.info(
+                        f"Creating paperless service with basic auth for user {user_id}"
+                    )
                     return PaperlessService(paperless_url, username, password, user_id)
             except Exception as e:
-                logger.warning(f"Username/password decryption failed for user {user_id}: {e}")
-        
+                logger.warning(
+                    f"Username/password decryption failed for user {user_id}: {e}"
+                )
+
         # No valid credentials found
         raise PaperlessError("No valid authentication credentials provided")
-        
+
     except PaperlessError:
         raise
     except Exception as e:

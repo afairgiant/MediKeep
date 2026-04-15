@@ -86,115 +86,127 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
         extraction_service,
         mock_pdf_bytes,
         labcorp_native_poor_quality,
-        labcorp_ocr_good_quality
+        labcorp_ocr_good_quality,
     ):
         """
         Test that OCR fallback is triggered when native extraction yields < 5 tests.
 
         Scenario: Native extracts 3 tests, OCR extracts 10 tests, fallback succeeds.
         """
-        with patch.object(extraction_service, '_extract_native_text') as mock_native, \
-             patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
-             patch.object(extraction_service, 'ocr_available', True):
+        with patch.object(
+            extraction_service, "_extract_native_text"
+        ) as mock_native, patch.object(
+            extraction_service, "_extract_ocr_text"
+        ) as mock_ocr, patch.object(
+            extraction_service, "ocr_available", True
+        ):
 
             # Mock native extraction returns poor quality text (3 tests)
             mock_native.return_value = {
-                'text': labcorp_native_poor_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_native_poor_quality)
+                "text": labcorp_native_poor_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_native_poor_quality),
             }
 
             # Mock OCR extraction returns good quality text (10 tests)
             mock_ocr.return_value = {
-                'text': labcorp_ocr_good_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_ocr_good_quality)
+                "text": labcorp_ocr_good_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_ocr_good_quality),
             }
 
             # Extract text
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is True, "Fallback triggered (OCR improved results)"
-            assert result['native_test_count'] == 3, "Should record original test count"
-            assert result['test_count'] == 10, "Should return OCR test count"
-            assert 'ocr' in result['method'], "Method should indicate OCR was used"
-            assert result['lab_name'] == 'LabCorp', "Should identify LabCorp"
-            assert result['confidence'] == 0.85, "OCR confidence should be 0.85"
+            assert (
+                result["fallback_triggered"] is True
+            ), "Fallback triggered (OCR improved results)"
+            assert result["native_test_count"] == 3, "Should record original test count"
+            assert result["test_count"] == 10, "Should return OCR test count"
+            assert "ocr" in result["method"], "Method should indicate OCR was used"
+            assert result["lab_name"] == "LabCorp", "Should identify LabCorp"
+            assert result["confidence"] == 0.85, "OCR confidence should be 0.85"
 
             # Verify OCR was called
             mock_ocr.assert_called_once()
 
     def test_fallback_not_triggered_on_good_quality(
-        self,
-        extraction_service,
-        mock_pdf_bytes,
-        labcorp_native_good_quality
+        self, extraction_service, mock_pdf_bytes, labcorp_native_good_quality
     ):
         """
         Test that OCR fallback is NOT triggered when native extraction yields >= 5 tests.
 
         Scenario: Native extracts 10 tests, no fallback needed.
         """
-        with patch.object(extraction_service, '_extract_native_text') as mock_native, \
-             patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
-             patch.object(extraction_service, 'ocr_available', True):
+        with patch.object(
+            extraction_service, "_extract_native_text"
+        ) as mock_native, patch.object(
+            extraction_service, "_extract_ocr_text"
+        ) as mock_ocr, patch.object(
+            extraction_service, "ocr_available", True
+        ):
 
             # Mock native extraction returns good quality text (10 tests)
             mock_native.return_value = {
-                'text': labcorp_native_good_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_native_good_quality)
+                "text": labcorp_native_good_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_native_good_quality),
             }
 
             # Extract text
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "Fallback not triggered (good quality)"
-            assert result['test_count'] == 10, "Should return native test count"
-            assert result['method'] == 'labcorp_parser', "Should use native parser"
-            assert result['confidence'] == 0.98, "Native confidence should be 0.98"
+            assert (
+                result["fallback_triggered"] is False
+            ), "Fallback not triggered (good quality)"
+            assert result["test_count"] == 10, "Should return native test count"
+            assert result["method"] == "labcorp_parser", "Should use native parser"
+            assert result["confidence"] == 0.98, "Native confidence should be 0.98"
 
             # Verify OCR was NOT called
             mock_ocr.assert_not_called()
 
     def test_fallback_unsuccessful_returns_native(
-        self,
-        extraction_service,
-        mock_pdf_bytes,
-        labcorp_native_poor_quality
+        self, extraction_service, mock_pdf_bytes, labcorp_native_poor_quality
     ):
         """
         Test that when OCR fallback doesn't improve results, native results are returned.
 
         Scenario: Native extracts 3 tests, OCR also extracts 3 tests, no improvement.
         """
-        with patch.object(extraction_service, '_extract_native_text') as mock_native, \
-             patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
-             patch.object(extraction_service, 'ocr_available', True):
+        with patch.object(
+            extraction_service, "_extract_native_text"
+        ) as mock_native, patch.object(
+            extraction_service, "_extract_ocr_text"
+        ) as mock_ocr, patch.object(
+            extraction_service, "ocr_available", True
+        ):
 
             # Both native and OCR return same poor quality (3 tests)
             mock_native.return_value = {
-                'text': labcorp_native_poor_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_native_poor_quality)
+                "text": labcorp_native_poor_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_native_poor_quality),
             }
 
             mock_ocr.return_value = {
-                'text': labcorp_native_poor_quality,  # OCR returns same quality
-                'page_count': 1,
-                'char_count': len(labcorp_native_poor_quality)
+                "text": labcorp_native_poor_quality,  # OCR returns same quality
+                "page_count": 1,
+                "char_count": len(labcorp_native_poor_quality),
             }
 
             # Extract text
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "Fallback not used (no improvement)"
-            assert result['test_count'] == 3, "Should return native test count"
-            assert result['method'] == 'labcorp_parser', "Should use native parser"
-            assert result['confidence'] == 0.98, "Should have native confidence"
+            assert (
+                result["fallback_triggered"] is False
+            ), "Fallback not used (no improvement)"
+            assert result["test_count"] == 3, "Should return native test count"
+            assert result["method"] == "labcorp_parser", "Should use native parser"
+            assert result["confidence"] == 0.98, "Should have native confidence"
 
             # Verify OCR was attempted
             mock_ocr.assert_called_once()
@@ -209,20 +221,22 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
         )
     )
     def test_fallback_disabled_by_config(
-        self,
-        extraction_service,
-        mock_pdf_bytes,
-        labcorp_native_poor_quality
+        self, extraction_service, mock_pdf_bytes, labcorp_native_poor_quality
     ):
         """
         Test that OCR fallback is NOT triggered when disabled in config.
 
         Scenario: Config disabled, native extracts 3 tests, no fallback attempted.
         """
-        with patch.object(extraction_service, '_extract_native_text') as mock_native, \
-             patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
-             patch.object(extraction_service, 'ocr_available', True), \
-             patch('app.services.pdf_text_extraction_service.Settings') as mock_settings:
+        with patch.object(
+            extraction_service, "_extract_native_text"
+        ) as mock_native, patch.object(
+            extraction_service, "_extract_ocr_text"
+        ) as mock_ocr, patch.object(
+            extraction_service, "ocr_available", True
+        ), patch(
+            "app.services.pdf_text_extraction_service.Settings"
+        ) as mock_settings:
 
             # Disable OCR fallback in config
             mock_settings_instance = Mock()
@@ -232,49 +246,54 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
 
             # Mock native extraction returns poor quality text (3 tests)
             mock_native.return_value = {
-                'text': labcorp_native_poor_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_native_poor_quality)
+                "text": labcorp_native_poor_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_native_poor_quality),
             }
 
             # Extract text
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "Fallback not triggered (disabled in config)"
-            assert result['test_count'] == 3, "Should return native test count"
+            assert (
+                result["fallback_triggered"] is False
+            ), "Fallback not triggered (disabled in config)"
+            assert result["test_count"] == 3, "Should return native test count"
 
             # Verify OCR was NOT called
             mock_ocr.assert_not_called()
 
     def test_fallback_not_attempted_when_ocr_unavailable(
-        self,
-        extraction_service,
-        mock_pdf_bytes,
-        labcorp_native_poor_quality
+        self, extraction_service, mock_pdf_bytes, labcorp_native_poor_quality
     ):
         """
         Test that OCR fallback is NOT attempted when Tesseract is unavailable.
 
         Scenario: OCR not available, native extracts 3 tests, no fallback.
         """
-        with patch.object(extraction_service, '_extract_native_text') as mock_native, \
-             patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
-             patch.object(extraction_service, 'ocr_available', False):
+        with patch.object(
+            extraction_service, "_extract_native_text"
+        ) as mock_native, patch.object(
+            extraction_service, "_extract_ocr_text"
+        ) as mock_ocr, patch.object(
+            extraction_service, "ocr_available", False
+        ):
 
             # Mock native extraction returns poor quality text (3 tests)
             mock_native.return_value = {
-                'text': labcorp_native_poor_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_native_poor_quality)
+                "text": labcorp_native_poor_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_native_poor_quality),
             }
 
             # Extract text
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Assertions
-            assert result['fallback_triggered'] is False, "Fallback not triggered (OCR unavailable)"
-            assert result['test_count'] == 3, "Should return native test count"
+            assert (
+                result["fallback_triggered"] is False
+            ), "Fallback not triggered (OCR unavailable)"
+            assert result["test_count"] == 3, "Should return native test count"
 
             # Verify OCR was NOT called
             mock_ocr.assert_not_called()
@@ -284,44 +303,52 @@ Neutrophils 52 55 11/23/2022 % Not Estab.
         extraction_service,
         mock_pdf_bytes,
         labcorp_native_poor_quality,
-        labcorp_ocr_good_quality
+        labcorp_ocr_good_quality,
     ):
         """
         Test that all required metadata fields are present in the response.
         """
-        with patch.object(extraction_service, '_extract_native_text') as mock_native, \
-             patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
-             patch.object(extraction_service, 'ocr_available', True):
+        with patch.object(
+            extraction_service, "_extract_native_text"
+        ) as mock_native, patch.object(
+            extraction_service, "_extract_ocr_text"
+        ) as mock_ocr, patch.object(
+            extraction_service, "ocr_available", True
+        ):
 
             mock_native.return_value = {
-                'text': labcorp_native_poor_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_native_poor_quality)
+                "text": labcorp_native_poor_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_native_poor_quality),
             }
 
             mock_ocr.return_value = {
-                'text': labcorp_ocr_good_quality,
-                'page_count': 1,
-                'char_count': len(labcorp_ocr_good_quality)
+                "text": labcorp_ocr_good_quality,
+                "page_count": 1,
+                "char_count": len(labcorp_ocr_good_quality),
             }
 
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # Verify all metadata fields are present
             required_fields = [
-                'text', 'method', 'confidence', 'page_count', 'char_count',
-                'error', 'lab_name', 'test_count', 'test_date',
-                'fallback_triggered', 'native_test_count'
+                "text",
+                "method",
+                "confidence",
+                "page_count",
+                "char_count",
+                "error",
+                "lab_name",
+                "test_count",
+                "test_date",
+                "fallback_triggered",
+                "native_test_count",
             ]
 
             for field in required_fields:
                 assert field in result, f"Missing required field: {field}"
 
-    def test_fallback_threshold_boundary(
-        self,
-        extraction_service,
-        mock_pdf_bytes
-    ):
+    def test_fallback_threshold_boundary(self, extraction_service, mock_pdf_bytes):
         """
         Test fallback behavior at the exact threshold boundary (5 tests).
 
@@ -342,19 +369,25 @@ Hematocrit 41.4 40.5 11/23/2022 % 37.5-51.0
 MCV 85 87 11/23/2022 fL 79-97
 """
 
-        with patch.object(extraction_service, '_extract_native_text') as mock_native, \
-             patch.object(extraction_service, '_extract_ocr_text') as mock_ocr, \
-             patch.object(extraction_service, 'ocr_available', True):
+        with patch.object(
+            extraction_service, "_extract_native_text"
+        ) as mock_native, patch.object(
+            extraction_service, "_extract_ocr_text"
+        ) as mock_ocr, patch.object(
+            extraction_service, "ocr_available", True
+        ):
 
             mock_native.return_value = {
-                'text': boundary_text,
-                'page_count': 1,
-                'char_count': len(boundary_text)
+                "text": boundary_text,
+                "page_count": 1,
+                "char_count": len(boundary_text),
             }
 
             result = extraction_service.extract_text(mock_pdf_bytes, "test.pdf")
 
             # At threshold (5 tests), no fallback should occur
-            assert result['fallback_triggered'] is False, "Fallback not triggered (at threshold)"
-            assert result['test_count'] == 5, "Should return exactly 5 tests"
+            assert (
+                result["fallback_triggered"] is False
+            ), "Fallback not triggered (at threshold)"
+            assert result["test_count"] == 5, "Should return exactly 5 tests"
             mock_ocr.assert_not_called()

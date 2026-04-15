@@ -1,7 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+    ValidationInfo,
+)
 
 # Import enums for validation
 from ..models.enums import get_all_family_relationships
@@ -32,7 +39,9 @@ class FamilyMemberBase(BaseModel):
     def validate_relationship(cls, v):
         valid_relationships = get_all_family_relationships()
         if v.lower() not in valid_relationships:
-            raise ValueError(f"Relationship must be one of: {', '.join(valid_relationships)}")
+            raise ValueError(
+                f"Relationship must be one of: {', '.join(valid_relationships)}"
+            )
         return v.lower()
 
     @field_validator("gender")
@@ -49,7 +58,9 @@ class FamilyMemberBase(BaseModel):
             }
             normalized = v.lower().strip()
             if normalized not in gender_mapping:
-                raise ValueError(f"Gender must be one of: male, female, other (or M, F)")
+                raise ValueError(
+                    f"Gender must be one of: male, female, other (or M, F)"
+                )
             return gender_mapping[normalized]
         return v
 
@@ -62,14 +73,18 @@ class FamilyMemberBase(BaseModel):
             # Only validate is_deceased flag if it's explicitly set to False
             # (don't fail if is_deceased isn't in values yet due to field order)
             if info.data.get("is_deceased") is False:
-                raise ValueError("Death year can only be set if family member is deceased")
+                raise ValueError(
+                    "Death year can only be set if family member is deceased"
+                )
         return v
 
     @field_validator("is_deceased")
     @classmethod
     def validate_is_deceased(cls, v, info: ValidationInfo):
         if not v and info.data.get("death_year"):
-            raise ValueError("If death year is provided, family member must be marked as deceased")
+            raise ValueError(
+                "If death year is provided, family member must be marked as deceased"
+            )
         return v
 
 
@@ -92,7 +107,9 @@ class FamilyMemberUpdate(BaseModel):
         if v is not None:
             valid_relationships = get_all_family_relationships()
             if v.lower() not in valid_relationships:
-                raise ValueError(f"Relationship must be one of: {', '.join(valid_relationships)}")
+                raise ValueError(
+                    f"Relationship must be one of: {', '.join(valid_relationships)}"
+                )
             return v.lower()
         return v
 
@@ -110,7 +127,9 @@ class FamilyMemberUpdate(BaseModel):
             }
             normalized = v.lower().strip()
             if normalized not in gender_mapping:
-                raise ValueError(f"Gender must be one of: male, female, other (or M, F)")
+                raise ValueError(
+                    f"Gender must be one of: male, female, other (or M, F)"
+                )
             return gender_mapping[normalized]
         return v
 
@@ -121,7 +140,9 @@ class FamilyMemberUpdate(BaseModel):
             if info.data.get("birth_year") and v < info.data["birth_year"]:
                 raise ValueError("Death year cannot be before birth year")
             if info.data.get("is_deceased") is False:
-                raise ValueError("Death year can only be set if family member is deceased")
+                raise ValueError(
+                    "Death year can only be set if family member is deceased"
+                )
         return v
 
 
@@ -131,7 +152,7 @@ class FamilyMemberResponse(FamilyMemberBase):
     updated_at: datetime
     family_conditions: List["FamilyConditionResponse"] = []
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def auto_correct_deceased_status(self):
         """Auto-correct is_deceased if death_year is present but is_deceased is False."""
         # If death_year exists but is_deceased is False, auto-correct it
@@ -167,4 +188,5 @@ class FamilyMemberDropdownOption(BaseModel):
 
 # Import this here to avoid circular imports
 from .family_condition import FamilyConditionResponse
+
 FamilyMemberResponse.model_rebuild()

@@ -1,6 +1,7 @@
 """
 Tests for Lab Results API endpoints.
 """
+
 import pytest
 from datetime import date
 from fastapi.testclient import TestClient
@@ -24,7 +25,7 @@ class TestLabResultsAPI:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         patient = patient_crud.create_for_user(
             db_session, user_id=user_data["user"].id, patient_data=patient_data
@@ -40,7 +41,9 @@ class TestLabResultsAPI:
         """Create authentication headers."""
         return create_user_token_headers(user_with_patient["user"].username)
 
-    def test_create_lab_result_success(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_lab_result_success(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test successful lab result creation."""
         lab_result_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -53,9 +56,7 @@ class TestLabResultsAPI:
         }
 
         response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=lab_result_data, headers=authenticated_headers
         )
 
         assert response.status_code == 201
@@ -66,7 +67,9 @@ class TestLabResultsAPI:
         assert data["status"] == "completed"
         assert data["patient_id"] == user_with_patient["patient"].id
 
-    def test_create_lab_result_with_file(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_lab_result_with_file(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test lab result creation with file upload."""
         # Create the lab result first
         lab_result_data = {
@@ -76,13 +79,11 @@ class TestLabResultsAPI:
             "labs_result": "normal",
             "status": "completed",
             "ordered_date": "2024-01-01",
-            "completed_date": "2024-01-02"
+            "completed_date": "2024-01-02",
         }
 
         response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=lab_result_data, headers=authenticated_headers
         )
 
         assert response.status_code == 201
@@ -92,14 +93,12 @@ class TestLabResultsAPI:
         test_file_content = b"This is a test lab result file content"
         test_file = io.BytesIO(test_file_content)
 
-        files = {
-            "file": ("test_lab_result.pdf", test_file, "application/pdf")
-        }
+        files = {"file": ("test_lab_result.pdf", test_file, "application/pdf")}
 
         upload_response = client.post(
             f"/api/v1/lab-results/{lab_result_id}/files",
             files=files,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert upload_response.status_code == 200
@@ -108,7 +107,9 @@ class TestLabResultsAPI:
         assert file_data["file_type"] == "application/pdf"
         assert file_data["lab_result_id"] == lab_result_id
 
-    def test_get_lab_results_list(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_get_lab_results_list(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test getting list of lab results."""
         # Create multiple lab results
         lab_results = [
@@ -118,7 +119,7 @@ class TestLabResultsAPI:
                 "test_code": "CBC",
                 "labs_result": "normal",
                 "status": "completed",
-                "ordered_date": "2024-01-01"
+                "ordered_date": "2024-01-01",
             },
             {
                 "patient_id": user_with_patient["patient"].id,
@@ -126,15 +127,13 @@ class TestLabResultsAPI:
                 "test_code": "LIPID",
                 "labs_result": "normal",
                 "status": "completed",
-                "ordered_date": "2024-01-15"
-            }
+                "ordered_date": "2024-01-15",
+            },
         ]
 
         for lab_data in lab_results:
             client.post(
-                "/api/v1/lab-results/",
-                json=lab_data,
-                headers=authenticated_headers
+                "/api/v1/lab-results/", json=lab_data, headers=authenticated_headers
             )
 
         # Get lab results list
@@ -143,13 +142,15 @@ class TestLabResultsAPI:
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 2
-        
+
         # Should be ordered by date (most recent first)
         test_names = [result["test_name"] for result in data]
         assert "Complete Blood Count" in test_names
         assert "Lipid Panel" in test_names
 
-    def test_get_lab_result_by_id(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_get_lab_result_by_id(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test getting a specific lab result by ID."""
         lab_result_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -157,21 +158,18 @@ class TestLabResultsAPI:
             "test_code": "GLU",
             "labs_result": "normal",
             "status": "completed",
-            "ordered_date": "2024-01-01"
+            "ordered_date": "2024-01-01",
         }
 
         create_response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=lab_result_data, headers=authenticated_headers
         )
 
         lab_result_id = create_response.json()["id"]
 
         # Get lab result by ID
         response = client.get(
-            f"/api/v1/lab-results/{lab_result_id}",
-            headers=authenticated_headers
+            f"/api/v1/lab-results/{lab_result_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -180,7 +178,9 @@ class TestLabResultsAPI:
         assert data["test_name"] == "Glucose Test"
         assert data["labs_result"] == "normal"
 
-    def test_update_lab_result(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_update_lab_result(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test updating a lab result."""
         lab_result_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -188,13 +188,11 @@ class TestLabResultsAPI:
             "test_code": "HBA1C",
             "labs_result": "high",
             "status": "in-progress",
-            "ordered_date": "2024-01-01"
+            "ordered_date": "2024-01-01",
         }
 
         create_response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=lab_result_data, headers=authenticated_headers
         )
 
         lab_result_id = create_response.json()["id"]
@@ -204,13 +202,13 @@ class TestLabResultsAPI:
             "labs_result": "high",
             "status": "completed",
             "completed_date": "2024-01-03",
-            "notes": "Corrected value after re-analysis"
+            "notes": "Corrected value after re-analysis",
         }
 
         response = client.put(
             f"/api/v1/lab-results/{lab_result_id}",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -220,7 +218,9 @@ class TestLabResultsAPI:
         assert data["completed_date"] == "2024-01-03"
         assert data["notes"] == "Corrected value after re-analysis"
 
-    def test_delete_lab_result(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_delete_lab_result(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test deleting a lab result."""
         lab_result_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -228,33 +228,31 @@ class TestLabResultsAPI:
             "test_code": "DEL",
             "labs_result": "normal",
             "status": "completed",
-            "ordered_date": "2024-01-01"
+            "ordered_date": "2024-01-01",
         }
 
         create_response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=lab_result_data, headers=authenticated_headers
         )
 
         lab_result_id = create_response.json()["id"]
 
         # Delete the lab result
         response = client.delete(
-            f"/api/v1/lab-results/{lab_result_id}",
-            headers=authenticated_headers
+            f"/api/v1/lab-results/{lab_result_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
 
         # Verify deletion
         get_response = client.get(
-            f"/api/v1/lab-results/{lab_result_id}",
-            headers=authenticated_headers
+            f"/api/v1/lab-results/{lab_result_id}", headers=authenticated_headers
         )
         assert get_response.status_code == 404
 
-    def test_lab_result_file_download(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_lab_result_file_download(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test downloading lab result files."""
         # Create lab result
         lab_result_data = {
@@ -263,13 +261,11 @@ class TestLabResultsAPI:
             "test_code": "XRAY",
             "labs_result": "normal",
             "status": "completed",
-            "ordered_date": "2024-01-01"
+            "ordered_date": "2024-01-01",
         }
 
         create_response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=lab_result_data, headers=authenticated_headers
         )
 
         lab_result_id = create_response.json()["id"]
@@ -278,14 +274,12 @@ class TestLabResultsAPI:
         test_file_content = b"This is test image data"
         test_file = io.BytesIO(test_file_content)
 
-        files = {
-            "file": ("xray.jpg", test_file, "image/jpeg")
-        }
+        files = {"file": ("xray.jpg", test_file, "image/jpeg")}
 
         upload_response = client.post(
             f"/api/v1/lab-results/{lab_result_id}/files",
             files=files,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         file_id = upload_response.json()["id"]
@@ -293,13 +287,15 @@ class TestLabResultsAPI:
         # Download the file
         download_response = client.get(
             f"/api/v1/lab-result-files/{file_id}/download",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert download_response.status_code == 200
         assert download_response.content == test_file_content
 
-    def test_lab_result_search_and_filtering(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_lab_result_search_and_filtering(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test lab result search and filtering."""
         # Create lab results with different test codes and statuses
         lab_results = [
@@ -309,7 +305,7 @@ class TestLabResultsAPI:
                 "test_code": "CBC",
                 "labs_result": "normal",
                 "status": "completed",
-                "ordered_date": "2024-01-01"
+                "ordered_date": "2024-01-01",
             },
             {
                 "patient_id": user_with_patient["patient"].id,
@@ -317,7 +313,7 @@ class TestLabResultsAPI:
                 "test_code": "BMP",
                 "labs_result": "normal",
                 "status": "in-progress",
-                "ordered_date": "2024-01-02"
+                "ordered_date": "2024-01-02",
             },
             {
                 "patient_id": user_with_patient["patient"].id,
@@ -325,21 +321,18 @@ class TestLabResultsAPI:
                 "test_code": "CBC",
                 "labs_result": "normal",
                 "status": "completed",
-                "ordered_date": "2024-01-03"
-            }
+                "ordered_date": "2024-01-03",
+            },
         ]
 
         for lab_data in lab_results:
             client.post(
-                "/api/v1/lab-results/",
-                json=lab_data,
-                headers=authenticated_headers
+                "/api/v1/lab-results/", json=lab_data, headers=authenticated_headers
             )
 
         # Test filtering by test code
         response = client.get(
-            "/api/v1/lab-results/?test_code=CBC",
-            headers=authenticated_headers
+            "/api/v1/lab-results/?test_code=CBC", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -349,8 +342,7 @@ class TestLabResultsAPI:
 
         # Test filtering by status
         response = client.get(
-            "/api/v1/lab-results/?status=completed",
-            headers=authenticated_headers
+            "/api/v1/lab-results/?status=completed", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -360,8 +352,7 @@ class TestLabResultsAPI:
 
         # Test search by test name
         response = client.get(
-            "/api/v1/lab-results/?search=Blood Count",
-            headers=authenticated_headers
+            "/api/v1/lab-results/?search=Blood Count", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -369,7 +360,9 @@ class TestLabResultsAPI:
         # TODO: PRODUCTION BUG - search doesn't work, returns all results
         assert len(data) >= 2  # Changed from == 2
 
-    def test_lab_result_date_range_filtering(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_lab_result_date_range_filtering(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test filtering lab results by date range."""
         # Create lab results across different dates
         lab_results = [
@@ -378,35 +371,33 @@ class TestLabResultsAPI:
                 "test_name": "January Test",
                 "test_code": "JAN",
                 "ordered_date": "2024-01-15",
-                "status": "completed"
+                "status": "completed",
             },
             {
                 "patient_id": user_with_patient["patient"].id,
                 "test_name": "February Test",
                 "test_code": "FEB",
                 "ordered_date": "2024-02-15",
-                "status": "completed"
+                "status": "completed",
             },
             {
                 "patient_id": user_with_patient["patient"].id,
                 "test_name": "March Test",
                 "test_code": "MAR",
                 "ordered_date": "2024-03-15",
-                "status": "completed"
-            }
+                "status": "completed",
+            },
         ]
 
         for lab_data in lab_results:
             client.post(
-                "/api/v1/lab-results/",
-                json=lab_data,
-                headers=authenticated_headers
+                "/api/v1/lab-results/", json=lab_data, headers=authenticated_headers
             )
 
         # Filter by date range (January to February)
         response = client.get(
             "/api/v1/lab-results/?start_date=2024-01-01&end_date=2024-02-28",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -415,15 +406,14 @@ class TestLabResultsAPI:
         assert len(data) >= 2  # Changed from == 2
         # Skip date validation since filtering is broken
 
-    def test_lab_result_patient_isolation(self, client: TestClient, db_session: Session):
+    def test_lab_result_patient_isolation(
+        self, client: TestClient, db_session: Session
+    ):
         """Test that users can only access their own lab results."""
         # Create two users with patients
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -436,10 +426,7 @@ class TestLabResultsAPI:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -457,28 +444,26 @@ class TestLabResultsAPI:
             "test_code": "PRIV",
             "labs_result": "normal",
             "status": "completed",
-            "ordered_date": "2024-01-01"
+            "ordered_date": "2024-01-01",
         }
 
         create_response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=headers1
+            "/api/v1/lab-results/", json=lab_result_data, headers=headers1
         )
 
         lab_result_id = create_response.json()["id"]
 
         # User2 tries to access User1's lab result - should fail with 404
         # SECURITY FIX APPLIED: Patient isolation now enforced via PatientAccessService
-        response = client.get(
-            f"/api/v1/lab-results/{lab_result_id}",
-            headers=headers2
-        )
+        response = client.get(f"/api/v1/lab-results/{lab_result_id}", headers=headers2)
         # User2 should NOT be able to access User1's lab result
-        assert response.status_code == 404, \
-            f"Patient isolation failed: User2 accessed User1's lab result (got {response.status_code})"
+        assert (
+            response.status_code == 404
+        ), f"Patient isolation failed: User2 accessed User1's lab result (got {response.status_code})"
 
-    def test_update_and_retrieve_long_notes(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_update_and_retrieve_long_notes(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Regression test: updating with >1000 char notes must not cause 500 on GET.
 
         This was the original bug (#625): notes >1000 chars could be saved via
@@ -531,7 +516,9 @@ class TestLabResultsAPI:
         assert list_response.status_code == 200
         assert any(r["id"] == lab_result_id for r in list_response.json())
 
-    def test_update_notes_exceeding_5000_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_update_notes_exceeding_5000_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Notes exceeding 5000 chars should be rejected on update."""
         lab_result_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -558,19 +545,19 @@ class TestLabResultsAPI:
         )
         assert update_response.status_code == 422
 
-    def test_lab_result_validation_errors(self, client: TestClient, authenticated_headers):
+    def test_lab_result_validation_errors(
+        self, client: TestClient, authenticated_headers
+    ):
         """Test various validation error scenarios."""
         # Test missing required fields
         invalid_data = {
             "labs_result": "normal",
-            "status": "completed"
+            "status": "completed",
             # Missing test_name and test_code
         }
 
         response = client.post(
-            "/api/v1/lab-results/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=invalid_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -579,13 +566,13 @@ class TestLabResultsAPI:
         invalid_date_data = {
             "test_name": "Test",
             "test_code": "TEST",
-            "ordered_date": "invalid-date-format"
+            "ordered_date": "invalid-date-format",
         }
 
         response = client.post(
             "/api/v1/lab-results/",
             json=invalid_date_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
@@ -594,13 +581,13 @@ class TestLabResultsAPI:
         invalid_status_data = {
             "test_name": "Test",
             "test_code": "TEST",
-            "status": "invalid_status"
+            "status": "invalid_status",
         }
 
         response = client.post(
             "/api/v1/lab-results/",
             json=invalid_status_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422

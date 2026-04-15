@@ -44,8 +44,17 @@ class TagColorUpdateRequest(BaseModel):
 async def get_popular_tags_across_entities(
     request: Request,
     entity_types: List[str] = Query(
-        default=["lab_result", "medication", "condition", "procedure", "immunization", "treatment", "encounter", "allergy"],
-        description="Entity types to search"
+        default=[
+            "lab_result",
+            "medication",
+            "condition",
+            "procedure",
+            "immunization",
+            "treatment",
+            "encounter",
+            "allergy",
+        ],
+        description="Entity types to search",
     ),
     limit: int = Query(default=20, le=50),
     db: Session = Depends(get_db),
@@ -54,9 +63,12 @@ async def get_popular_tags_across_entities(
     """Get most popular tags across multiple entity types"""
 
     log_endpoint_access(
-        logger, request, current_user.id, "popular_tags_retrieved",
+        logger,
+        request,
+        current_user.id,
+        "popular_tags_retrieved",
         entity_types=entity_types,
-        limit=limit
+        limit=limit,
     )
 
     # Time-gated sync: only re-sync if >5 min since last sync for this user
@@ -76,13 +88,21 @@ async def search_by_tags_across_entities(
     request: Request,
     tags: List[str] = Query(..., description="Tags to search for"),
     entity_types: List[str] = Query(
-        default=["lab_result", "medication", "condition", "procedure", "immunization", "treatment", "encounter", "allergy"],
-        description="Entity types to search"
+        default=[
+            "lab_result",
+            "medication",
+            "condition",
+            "procedure",
+            "immunization",
+            "treatment",
+            "encounter",
+            "allergy",
+        ],
+        description="Entity types to search",
     ),
     limit_per_entity: int = Query(default=10, le=20),
     match_mode: str = Query(
-        default="any",
-        description="Tag matching mode: 'any' (OR) or 'all' (AND)"
+        default="any", description="Tag matching mode: 'any' (OR) or 'all' (AND)"
     ),
     db: Session = Depends(get_db),
     current_user: User = Depends(deps.get_current_user),
@@ -94,19 +114,24 @@ async def search_by_tags_across_entities(
         match_mode = "any"
 
     log_endpoint_access(
-        logger, request, current_user.id, "tags_search_performed",
+        logger,
+        request,
+        current_user.id,
+        "tags_search_performed",
         tags=tags,
         entity_types=entity_types,
         limit_per_entity=limit_per_entity,
         match_mode=match_mode,
-        patient_id=target_patient_id
+        patient_id=target_patient_id,
     )
 
     return tag_service.search_across_entities_by_tags(
-        db, tags=tags, entity_types=entity_types,
+        db,
+        tags=tags,
+        entity_types=entity_types,
         limit_per_entity=limit_per_entity,
         match_mode=match_mode,
-        patient_id=target_patient_id
+        patient_id=target_patient_id,
     )
 
 
@@ -121,9 +146,12 @@ async def autocomplete_tags(
     """Get tag suggestions for autocomplete"""
 
     log_endpoint_access(
-        logger, request, current_user.id, "tag_autocomplete_requested",
+        logger,
+        request,
+        current_user.id,
+        "tag_autocomplete_requested",
         query=q,
-        limit=limit
+        limit=limit,
     )
 
     return tag_service.autocomplete_tags(db, query=q, limit=limit)
@@ -132,7 +160,9 @@ async def autocomplete_tags(
 @router.get("/suggestions", response_model=List[str])
 async def get_tag_suggestions(
     request: Request,
-    entity_type: Optional[str] = Query(None, description="Suggest tags for specific entity type"),
+    entity_type: Optional[str] = Query(
+        None, description="Suggest tags for specific entity type"
+    ),
     limit: int = Query(default=20, le=50),
     db: Session = Depends(get_db),
     current_user: User = Depends(deps.get_current_user),
@@ -140,9 +170,12 @@ async def get_tag_suggestions(
     """Get tag suggestions based on what users have actually created"""
 
     log_endpoint_access(
-        logger, request, current_user.id, "tag_suggestions_requested",
+        logger,
+        request,
+        current_user.id,
+        "tag_suggestions_requested",
         entity_type=entity_type,
-        limit=limit
+        limit=limit,
     )
 
     # Return most popular user-created tags, optionally filtered by entity type
@@ -150,7 +183,7 @@ async def get_tag_suggestions(
         db,
         entity_types=[entity_type] if entity_type else None,
         limit=limit,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
     # Extract just the tag names for suggestions
@@ -168,9 +201,13 @@ async def rename_tag(
     """Rename a tag across all entities owned by the current user"""
 
     log_data_access(
-        logger, request, current_user.id, "update", "Tag",
+        logger,
+        request,
+        current_user.id,
+        "update",
+        "Tag",
         old_tag=old_tag,
-        new_tag=new_tag
+        new_tag=new_tag,
     )
 
     result = tag_service.rename_tag_across_entities(
@@ -179,7 +216,7 @@ async def rename_tag(
 
     return {
         "message": f"Successfully renamed '{old_tag}' to '{new_tag}'",
-        "records_updated": result
+        "records_updated": result,
     }
 
 
@@ -192,19 +229,13 @@ async def delete_tag(
 ):
     """Delete a tag from all entities owned by the current user"""
 
-    log_data_access(
-        logger, request, current_user.id, "delete", "Tag",
-        tag=tag
-    )
+    log_data_access(logger, request, current_user.id, "delete", "Tag", tag=tag)
 
     result = tag_service.delete_tag_across_entities(
         db, tag=tag, user_id=current_user.id
     )
 
-    return {
-        "message": f"Successfully deleted tag '{tag}'",
-        "records_updated": result
-    }
+    return {"message": f"Successfully deleted tag '{tag}'", "records_updated": result}
 
 
 @router.put("/replace", response_model=Dict[str, Any])
@@ -218,10 +249,14 @@ async def replace_tag(
     """Replace one tag with another across all entities owned by the current user"""
 
     log_data_access(
-        logger, request, current_user.id, "update", "Tag",
+        logger,
+        request,
+        current_user.id,
+        "update",
+        "Tag",
         old_tag=old_tag,
         new_tag=new_tag,
-        operation_type="replace"
+        operation_type="replace",
     )
 
     result = tag_service.replace_tag_across_entities(
@@ -230,7 +265,7 @@ async def replace_tag(
 
     return {
         "message": f"Successfully replaced '{old_tag}' with '{new_tag}'",
-        "records_updated": result
+        "records_updated": result,
     }
 
 
@@ -243,17 +278,11 @@ async def create_tag(
 ):
     """Create a new tag in the user tags registry"""
 
-    log_data_access(
-        logger, req, current_user.id, "create", "Tag",
-        tag=request.tag
-    )
+    log_data_access(logger, req, current_user.id, "create", "Tag", tag=request.tag)
 
     result = tag_service.create_tag(db, tag=request.tag, user_id=current_user.id)
 
-    return {
-        "message": f"Successfully created tag '{request.tag}'",
-        "tag": request.tag
-    }
+    return {"message": f"Successfully created tag '{request.tag}'", "tag": request.tag}
 
 
 @router.patch("/{tag_id}/color", response_model=Dict[str, Any])
@@ -267,9 +296,13 @@ async def update_tag_color(
     """Update the color of a tag"""
 
     log_data_access(
-        logger, req, current_user.id, "update", "Tag",
+        logger,
+        req,
+        current_user.id,
+        "update",
+        "Tag",
         tag_id=tag_id,
-        color=request.color
+        color=request.color,
     )
 
     success = tag_service.update_tag_color(
@@ -282,5 +315,5 @@ async def update_tag_color(
     return {
         "message": "Tag color updated successfully",
         "tag_id": tag_id,
-        "color": request.color
+        "color": request.color,
     }

@@ -1,6 +1,7 @@
 """
 Pytest configuration and fixtures for Medical Records application tests.
 """
+
 import asyncio
 import os
 import tempfile
@@ -94,6 +95,7 @@ def test_db_engine():
     # Remove test database file
     # Use a small delay and retry to handle Windows file locking
     import time
+
     for attempt in range(5):
         try:
             if os.path.exists(test_db_file):
@@ -105,6 +107,7 @@ def test_db_engine():
             else:
                 # On final attempt, just warn instead of failing
                 import warnings
+
                 warnings.warn(f"Could not delete test database file: {test_db_file}")
 
 
@@ -167,12 +170,12 @@ def test_user(db_session: Session) -> User:
         email="test@example.com",
         password="testpassword123",
         full_name="Test User",
-        role="user"
+        role="user",
     )
     user = user_crud.create(db_session, obj_in=user_data)
-    
-# Don't create patient automatically - let tests create as needed
-    
+
+    # Don't create patient automatically - let tests create as needed
+
     return user
 
 
@@ -184,7 +187,7 @@ def test_admin_user(db_session: Session) -> User:
         email="admin@example.com",
         password="adminpassword123",
         full_name="Admin User",
-        role="admin"
+        role="admin",
     )
     return user_crud.create(db_session, obj_in=user_data)
 
@@ -197,12 +200,10 @@ def test_patient(db_session: Session, test_user: User) -> Patient:
         last_name="User",
         birth_date=date(1990, 1, 1),
         gender="M",
-        address="123 Test St"
+        address="123 Test St",
     )
     patient = patient_crud.create_for_user(
-        db_session,
-        user_id=test_user.id,
-        patient_data=patient_data
+        db_session, user_id=test_user.id, patient_data=patient_data
     )
     # Set as active patient for multi-patient system
     test_user.active_patient_id = patient.id
@@ -248,13 +249,13 @@ async def async_db_session(test_db_engine) -> AsyncGenerator[Session, None]:
     TestingSessionLocal = sessionmaker(
         autocommit=False, autoflush=False, bind=test_db_engine
     )
-    
+
     connection = test_db_engine.connect()
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
-    
+
     yield session
-    
+
     session.close()
     transaction.rollback()
     connection.close()
@@ -272,7 +273,7 @@ def sample_medication_data():
         "end_date": None,
         "prescribing_doctor": "Dr. Test",
         "notes": "Test medication notes",
-        "status": "active"
+        "status": "active",
     }
 
 
@@ -287,7 +288,7 @@ def sample_lab_result_data():
         "ordering_doctor": "Dr. Test",
         "lab_name": "Test Lab",
         "notes": "All values normal",
-        "status": "completed"
+        "status": "completed",
     }
 
 
@@ -302,7 +303,7 @@ def sample_practitioner_data():
         "address": "123 Medical Center Dr",
         "website": "https://drtest.com",
         "rating": 4.5,
-        "status": "active"
+        "status": "active",
     }
 
 
@@ -318,7 +319,7 @@ def sample_vitals_data():
         "weight": 180,
         "height": 70,
         "bmi": 25.8,
-        "notes": "Normal vitals"
+        "notes": "Normal vitals",
     }
 
 
@@ -367,7 +368,7 @@ def temp_upload_dir():
 @pytest.fixture
 def sample_test_file():
     """Create a sample test file for upload testing."""
-    with tempfile.NamedTemporaryFile(mode='w+', suffix='.txt', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w+", suffix=".txt", delete=False) as f:
         f.write("This is a test file for lab results.")
         f.flush()
 
@@ -389,13 +390,15 @@ def test_recipient(db_session: Session) -> User:
         email="recipient@example.com",
         password="recipientpass123",
         full_name="Recipient User",
-        role="user"
+        role="user",
     )
     return user_crud.create(db_session, obj_in=user_data)
 
 
 @pytest.fixture
-def test_invitation(db_session: Session, test_user: User, test_recipient: User, test_patient: Patient):
+def test_invitation(
+    db_session: Session, test_user: User, test_recipient: User, test_patient: Patient
+):
     """Create a pending patient share invitation."""
     from app.models.models import Invitation
     from app.core.utils.datetime_utils import get_utc_now
@@ -404,16 +407,18 @@ def test_invitation(db_session: Session, test_user: User, test_recipient: User, 
     invitation = Invitation(
         sent_by_user_id=test_user.id,
         sent_to_user_id=test_recipient.id,
-        invitation_type='patient_share',
-        status='pending',
+        invitation_type="patient_share",
+        status="pending",
         title=f"Patient Share: {test_patient.first_name} {test_patient.last_name}",
         context_data={
-            'patient_id': test_patient.id,
-            'patient_name': f"{test_patient.first_name} {test_patient.last_name}",
-            'patient_birth_date': test_patient.birth_date.isoformat() if test_patient.birth_date else None,
-            'permission_level': 'view'
+            "patient_id": test_patient.id,
+            "patient_name": f"{test_patient.first_name} {test_patient.last_name}",
+            "patient_birth_date": (
+                test_patient.birth_date.isoformat() if test_patient.birth_date else None
+            ),
+            "permission_level": "view",
         },
-        expires_at=get_utc_now() + timedelta(days=7)
+        expires_at=get_utc_now() + timedelta(days=7),
     )
     db_session.add(invitation)
     db_session.commit()
@@ -422,7 +427,9 @@ def test_invitation(db_session: Session, test_user: User, test_recipient: User, 
 
 
 @pytest.fixture
-def test_share(db_session: Session, test_user: User, test_recipient: User, test_patient: Patient):
+def test_share(
+    db_session: Session, test_user: User, test_recipient: User, test_patient: Patient
+):
     """Create an existing patient share."""
     from app.models.models import PatientShare
 
@@ -430,8 +437,8 @@ def test_share(db_session: Session, test_user: User, test_recipient: User, test_
         patient_id=test_patient.id,
         shared_by_user_id=test_user.id,
         shared_with_user_id=test_recipient.id,
-        permission_level='view',
-        is_active=True
+        permission_level="view",
+        is_active=True,
     )
     db_session.add(share)
     db_session.commit()
@@ -451,18 +458,14 @@ def recipient_token_headers(test_recipient: User) -> dict[str, str]:
 def mock_email_service(monkeypatch):
     """Mock email service for testing."""
     sent_emails = []
-    
+
     def mock_send_email(to_email: str, subject: str, body: str):
-        sent_emails.append({
-            "to": to_email,
-            "subject": subject,
-            "body": body
-        })
+        sent_emails.append({"to": to_email, "subject": subject, "body": body})
         return True
-    
+
     # Mock the email service if it exists
     # monkeypatch.setattr("app.services.email.send_email", mock_send_email)
-    
+
     return sent_emails
 
 
@@ -470,14 +473,14 @@ def mock_email_service(monkeypatch):
 def mock_file_storage(monkeypatch, temp_upload_dir):
     """Mock file storage operations for testing."""
     stored_files = {}
-    
+
     def mock_store_file(file_content: bytes, filename: str) -> str:
         file_path = os.path.join(temp_upload_dir, filename)
-        with open(file_path, 'wb') as f:
+        with open(file_path, "wb") as f:
             f.write(file_content)
         stored_files[filename] = file_path
         return file_path
-    
+
     def mock_delete_file(filename: str) -> bool:
         file_path = stored_files.get(filename)
         if file_path and os.path.exists(file_path):
@@ -485,11 +488,11 @@ def mock_file_storage(monkeypatch, temp_upload_dir):
             del stored_files[filename]
             return True
         return False
-    
+
     return {
         "store_file": mock_store_file,
         "delete_file": mock_delete_file,
-        "stored_files": stored_files
+        "stored_files": stored_files,
     }
 
 
@@ -498,25 +501,25 @@ def mock_file_storage(monkeypatch, temp_upload_dir):
 def performance_timer():
     """Utility for measuring test performance."""
     import time
-    
+
     class Timer:
         def __init__(self):
             self.start_time = None
             self.end_time = None
-        
+
         def start(self):
             self.start_time = time.time()
-        
+
         def stop(self):
             self.end_time = time.time()
             return self.duration
-        
+
         @property
         def duration(self):
             if self.start_time and self.end_time:
                 return self.end_time - self.start_time
             return None
-    
+
     return Timer()
 
 
@@ -525,7 +528,7 @@ def performance_timer():
 def cleanup_after_test():
     """Automatically cleanup after each test."""
     yield
-    
+
     # Clear any global state
     # Reset singletons, clear caches, etc.
     pass

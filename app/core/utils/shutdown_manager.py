@@ -66,7 +66,9 @@ class ShutdownManager:
         # Prevent multiple simultaneous shutdown attempts
         with self._shutdown_lock:
             if self.shutdown_in_progress:
-                logger.warning("Shutdown already in progress, ignoring duplicate request")
+                logger.warning(
+                    "Shutdown already in progress, ignoring duplicate request"
+                )
                 return
 
             self.shutdown_in_progress = True
@@ -133,16 +135,17 @@ class ShutdownManager:
             pass  # Ignore errors during emergency shutdown
 
         # On Windows, kill entire process tree
-        if sys.platform.startswith('win'):
+        if sys.platform.startswith("win"):
             try:
                 import subprocess
+
                 # Get current process ID
                 pid = os.getpid()
                 # Kill process tree (current process + all children)
                 subprocess.run(
-                    ['taskkill', '/F', '/T', '/PID', str(pid)],
+                    ["taskkill", "/F", "/T", "/PID", str(pid)],
                     capture_output=True,
-                    timeout=2
+                    timeout=2,
                 )
             except Exception as e:
                 logger.error(f"Failed to kill process tree: {e}")

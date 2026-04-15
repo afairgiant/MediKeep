@@ -8,14 +8,16 @@ from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import LabResult, LabResultCondition
 from app.schemas.lab_result import (
-    LabResultCreate, 
+    LabResultCreate,
     LabResultUpdate,
     LabResultConditionCreate,
-    LabResultConditionUpdate
+    LabResultConditionUpdate,
 )
 
 
-class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate], TagFilterMixin):
+class CRUDLabResult(
+    CRUDBase[LabResult, LabResultCreate, LabResultUpdate], TagFilterMixin
+):
     """CRUD operations for LabResult"""
 
     def __init__(self):
@@ -47,7 +49,7 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate], TagFi
             .filter(
                 and_(
                     self.model.patient_id == patient_id,
-                    self.model.test_code == test_code.upper()
+                    self.model.test_code == test_code.upper(),
                 )
             )
             .order_by(self.model.ordered_date.desc())
@@ -74,7 +76,9 @@ class CRUDLabResult(CRUDBase[LabResult, LabResultCreate, LabResultUpdate], TagFi
         )
 
 
-class CRUDLabResultCondition(CRUDBase[LabResultCondition, LabResultConditionCreate, LabResultConditionUpdate]):
+class CRUDLabResultCondition(
+    CRUDBase[LabResultCondition, LabResultConditionCreate, LabResultConditionUpdate]
+):
     """CRUD operations for LabResultCondition junction table"""
 
     def __init__(self):
@@ -85,9 +89,7 @@ class CRUDLabResultCondition(CRUDBase[LabResultCondition, LabResultConditionCrea
     ) -> List[LabResultCondition]:
         """Get all condition relationships for a specific lab result"""
         return (
-            db.query(self.model)
-            .filter(self.model.lab_result_id == lab_result_id)
-            .all()
+            db.query(self.model).filter(self.model.lab_result_id == lab_result_id).all()
         )
 
     def get_by_condition(
@@ -95,9 +97,7 @@ class CRUDLabResultCondition(CRUDBase[LabResultCondition, LabResultConditionCrea
     ) -> List[LabResultCondition]:
         """Get all lab result relationships for a specific condition"""
         return (
-            db.query(self.model)
-            .filter(self.model.condition_id == condition_id)
-            .all()
+            db.query(self.model).filter(self.model.condition_id == condition_id).all()
         )
 
     def get_by_lab_result_and_condition(
@@ -109,7 +109,7 @@ class CRUDLabResultCondition(CRUDBase[LabResultCondition, LabResultConditionCrea
             .filter(
                 and_(
                     self.model.lab_result_id == lab_result_id,
-                    self.model.condition_id == condition_id
+                    self.model.condition_id == condition_id,
                 )
             )
             .first()

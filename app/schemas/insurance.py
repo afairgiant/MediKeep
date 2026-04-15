@@ -1,7 +1,13 @@
 from datetime import date, datetime
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, model_validator, field_validator, ValidationInfo, ConfigDict
+from pydantic import (
+    BaseModel,
+    model_validator,
+    field_validator,
+    ValidationInfo,
+    ConfigDict,
+)
 
 from app.models.enums import InsuranceStatus, InsuranceType
 
@@ -49,7 +55,9 @@ class InsuranceBase(BaseModel):
     def validate_insurance_type(cls, v):
         """Validate insurance type is one of the allowed values"""
         if v not in [t.value for t in InsuranceType]:
-            raise ValueError(f"Invalid insurance type. Must be one of: {[t.value for t in InsuranceType]}")
+            raise ValueError(
+                f"Invalid insurance type. Must be one of: {[t.value for t in InsuranceType]}"
+            )
         return v
 
     @field_validator("status")
@@ -57,7 +65,9 @@ class InsuranceBase(BaseModel):
     def validate_status(cls, v):
         """Validate status is one of the allowed values"""
         if v not in [s.value for s in InsuranceStatus]:
-            raise ValueError(f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}")
+            raise ValueError(
+                f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}"
+            )
         return v
 
     @field_validator("company_name")
@@ -97,7 +107,9 @@ class InsuranceBase(BaseModel):
         if v is not None:
             allowed_relationships = ["self", "spouse", "child", "dependent", "other"]
             if v not in allowed_relationships:
-                raise ValueError(f"Invalid relationship. Must be one of: {allowed_relationships}")
+                raise ValueError(
+                    f"Invalid relationship. Must be one of: {allowed_relationships}"
+                )
         return v
 
     @field_validator("expiration_date")
@@ -117,7 +129,12 @@ class InsuranceBase(BaseModel):
 
         if insurance_type == "medical" and coverage_details:
             # Validate medical insurance specific fields
-            for field in ["copay_pcp", "copay_specialist", "copay_er", "copay_urgent_care"]:
+            for field in [
+                "copay_pcp",
+                "copay_specialist",
+                "copay_er",
+                "copay_urgent_care",
+            ]:
                 if field in coverage_details and coverage_details[field]:
                     try:
                         float(coverage_details[field])
@@ -131,7 +148,9 @@ class InsuranceBase(BaseModel):
                     try:
                         val = float(coverage_details[field])
                         if val < 0 or val > 100:
-                            raise ValueError(f"Invalid {field}: must be between 0 and 100")
+                            raise ValueError(
+                                f"Invalid {field}: must be between 0 and 100"
+                            )
                     except (ValueError, TypeError):
                         raise ValueError(f"Invalid {field}: must be a valid percentage")
 
@@ -146,6 +165,7 @@ class InsuranceBase(BaseModel):
 
 class InsuranceCreate(InsuranceBase):
     """Schema for creating insurance"""
+
     patient_id: int
 
 
@@ -192,7 +212,9 @@ class InsuranceUpdate(BaseModel):
     def validate_insurance_type(cls, v):
         """Validate insurance type is one of the allowed values"""
         if v is not None and v not in [t.value for t in InsuranceType]:
-            raise ValueError(f"Invalid insurance type. Must be one of: {[t.value for t in InsuranceType]}")
+            raise ValueError(
+                f"Invalid insurance type. Must be one of: {[t.value for t in InsuranceType]}"
+            )
         return v
 
     @field_validator("status")
@@ -200,7 +222,9 @@ class InsuranceUpdate(BaseModel):
     def validate_status(cls, v):
         """Validate status is one of the allowed values"""
         if v is not None and v not in [s.value for s in InsuranceStatus]:
-            raise ValueError(f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}")
+            raise ValueError(
+                f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}"
+            )
         return v
 
 
@@ -225,5 +249,7 @@ class InsuranceStatusUpdate(BaseModel):
     def validate_status(cls, v):
         """Validate status is one of the allowed values"""
         if v not in [s.value for s in InsuranceStatus]:
-            raise ValueError(f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}")
+            raise ValueError(
+                f"Invalid status. Must be one of: {[s.value for s in InsuranceStatus]}"
+            )
         return v

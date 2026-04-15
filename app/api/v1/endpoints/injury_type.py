@@ -5,6 +5,7 @@ InjuryType represents reusable injury types that populate the dropdown.
 Users can select existing types or create new ones.
 System types cannot be deleted.
 """
+
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, Request
@@ -45,12 +46,7 @@ def get_all_injury_types(
         types = injury_type.get_all(db)
 
         log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "InjuryType",
-            count=len(types)
+            logger, request, current_user_id, "read", "InjuryType", count=len(types)
         )
 
         return types
@@ -71,12 +67,7 @@ def get_injury_types_for_dropdown(
         types = injury_type.get_all(db)
 
         log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "InjuryType",
-            count=len(types)
+            logger, request, current_user_id, "read", "InjuryType", count=len(types)
         )
 
         return types
@@ -100,7 +91,7 @@ def create_injury_type(
         if existing:
             raise BusinessLogicException(
                 message=f"An injury type with the name '{injury_type_in.name}' already exists",
-                request=request
+                request=request,
             )
 
         return handle_create_with_logging(
@@ -129,7 +120,7 @@ def get_injury_type(
             raise NotFoundException(
                 resource="InjuryType",
                 message=f"Injury type with ID {injury_type_id} not found",
-                request=request
+                request=request,
             )
 
         log_data_access(
@@ -138,7 +129,7 @@ def get_injury_type(
             current_user_id,
             "read",
             "InjuryType",
-            record_id=injury_type_id
+            record_id=injury_type_id,
         )
 
         return db_type
@@ -163,7 +154,7 @@ def delete_injury_type(
             raise NotFoundException(
                 resource="InjuryType",
                 message=f"Injury type with ID {injury_type_id} not found",
-                request=request
+                request=request,
             )
 
         # Check if it's a system type
@@ -173,21 +164,23 @@ def delete_injury_type(
                 "delete_system_injury_type_attempt",
                 request,
                 f"User attempted to delete system injury type {injury_type_id}",
-                user_id=current_user_id
+                user_id=current_user_id,
             )
             raise BusinessLogicException(
-                message="Cannot delete system-defined injury types",
-                request=request
+                message="Cannot delete system-defined injury types", request=request
             )
 
         # Check if any injuries reference this type
         from app.models.models import Injury
-        injuries_count = db.query(Injury).filter(Injury.injury_type_id == injury_type_id).count()
+
+        injuries_count = (
+            db.query(Injury).filter(Injury.injury_type_id == injury_type_id).count()
+        )
 
         if injuries_count > 0:
             raise BusinessLogicException(
                 message=f"Cannot delete injury type that is referenced by {injuries_count} injuries",
-                request=request
+                request=request,
             )
 
         # Delete the type
@@ -199,7 +192,7 @@ def delete_injury_type(
             current_user_id,
             "delete",
             "InjuryType",
-            record_id=injury_type_id
+            record_id=injury_type_id,
         )
 
         return {"message": "Injury type deleted successfully"}

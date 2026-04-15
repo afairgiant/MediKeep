@@ -5,7 +5,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -18,7 +27,7 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
     log_data_access,
-    log_validation_error
+    log_validation_error,
 )
 from app.core.logging.constants import LogFields
 from app.crud.lab_result import lab_result
@@ -61,15 +70,15 @@ ALLOWED_EXTENSIONS = {
     ".dcm",  # DICOM medical imaging
     ".zip",  # Archive format for medical imaging packages
     ".iso",  # CD/DVD image format
-    ".7z",   # 7-Zip archive
+    ".7z",  # 7-Zip archive
     ".rar",  # RAR archive
     ".avi",  # Video - ultrasound recordings
     ".mp4",  # Video - procedures, endoscopy
     ".mov",  # Video - QuickTime format
-    ".webm", # Video - web format
+    ".webm",  # Video - web format
     ".stl",  # 3D models - surgical planning
     ".nii",  # NIfTI - neuroimaging research
-    ".nrrd", # Nearly Raw Raster Data - 3D medical imaging
+    ".nrrd",  # Nearly Raw Raster Data - 3D medical imaging
     ".mp3",  # Audio - voice notes, dictations
     ".wav",  # Audio - uncompressed
     ".m4a",  # Audio - compressed
@@ -125,7 +134,7 @@ async def upload_file(
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
-    request: Request
+    request: Request,
 ) -> LabResultFile:
     """
     Upload a file and create a lab result file entry.
@@ -137,7 +146,7 @@ async def upload_file(
         "lab_result_file_upload_started",
         message=f"Starting file upload for lab result {lab_result_id}",
         lab_result_id=lab_result_id,
-        uploaded_filename=file.filename
+        uploaded_filename=file.filename,
     )
 
     # Verify lab result exists
@@ -148,7 +157,7 @@ async def upload_file(
             request,
             f"Lab result {lab_result_id} not found",
             user_id=current_user_id,
-            lab_result_id=lab_result_id
+            lab_result_id=lab_result_id,
         )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
@@ -161,7 +170,7 @@ async def upload_file(
             request,
             "No filename provided",
             user_id=current_user_id,
-            lab_result_id=lab_result_id
+            lab_result_id=lab_result_id,
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No file provided"
@@ -176,7 +185,7 @@ async def upload_file(
             f"Invalid file extension: {file_extension}",
             user_id=current_user_id,
             lab_result_id=lab_result_id,
-            file_extension=file_extension
+            file_extension=file_extension,
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -193,7 +202,7 @@ async def upload_file(
             user_id=current_user_id,
             lab_result_id=lab_result_id,
             file_size=len(file_content),
-            max_size=MAX_FILE_SIZE
+            max_size=MAX_FILE_SIZE,
         )
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -222,8 +231,8 @@ async def upload_file(
                 LogFields.FILE: file_path,
                 "lab_result_id": lab_result_id,
                 "file_size": len(file_content),
-                "file_name": file.filename
-            }
+                "file_name": file.filename,
+            },
         )
     except Exception as e:
         log_endpoint_error(
@@ -233,7 +242,7 @@ async def upload_file(
             e,
             user_id=current_user_id,
             lab_result_id=lab_result_id,
-            file_path=file_path
+            file_path=file_path,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -269,7 +278,7 @@ async def upload_file(
         message=f"File uploaded successfully: {file.filename}",
         lab_result_id=lab_result_id,
         file_id=file_obj.id,
-        file_size=len(file_content)
+        file_size=len(file_content),
     )
 
     return file_obj
@@ -381,7 +390,7 @@ def delete_lab_result_file(
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
-    request: Request
+    request: Request,
 ):
     """
     Delete a lab result file.
@@ -393,7 +402,7 @@ def delete_lab_result_file(
             request,
             f"Lab result file {file_id} not found",
             user_id=current_user_id,
-            file_id=file_id
+            file_id=file_id,
         )
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
@@ -419,8 +428,8 @@ def delete_lab_result_file(
                     LogFields.EVENT: "physical_file_deleted",
                     LogFields.USER_ID: current_user_id,
                     LogFields.FILE: file_path,
-                    "file_id": file_id
-                }
+                    "file_id": file_id,
+                },
             )
     except Exception as e:
         # Log error but continue with database deletion
@@ -432,8 +441,8 @@ def delete_lab_result_file(
                 LogFields.USER_ID: current_user_id,
                 LogFields.ERROR: str(e),
                 LogFields.FILE: file_path,
-                "file_id": file_id
-            }
+                "file_id": file_id,
+            },
         )
 
     # Delete from database
@@ -445,7 +454,7 @@ def delete_lab_result_file(
         current_user_id,
         "lab_result_file_deleted",
         message=f"Lab result file {file_id} deleted successfully",
-        file_id=file_id
+        file_id=file_id,
     )
 
     return {"message": "Lab result file deleted successfully"}
@@ -593,7 +602,7 @@ def get_batch_file_counts(
     if len(lab_result_ids) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot request counts for more than 100 lab results at once"
+            detail="Cannot request counts for more than 100 lab results at once",
         )
 
     # Get counts for all lab results in a single query

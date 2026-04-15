@@ -4,9 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    handle_database_errors
-)
+from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
@@ -59,12 +57,7 @@ def read_pharmacies(
         pharmacies = pharmacy.get_multi(db, skip=skip, limit=limit)
 
         log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "Pharmacy",
-            count=len(pharmacies)
+            logger, request, current_user_id, "read", "Pharmacy", count=len(pharmacies)
         )
 
         return pharmacies
@@ -84,12 +77,7 @@ def read_pharmacy(
         handle_not_found(pharmacy_obj, "Pharmacy", request)
 
         log_data_access(
-            logger,
-            request,
-            current_user_id,
-            "read",
-            "Pharmacy",
-            record_id=id
+            logger, request, current_user_id, "read", "Pharmacy", record_id=id
         )
 
         return pharmacy_obj
@@ -133,7 +121,9 @@ def delete_pharmacy(
         handle_not_found(pharmacy_obj, "Pharmacy", request)
 
         # Check how many medications reference this pharmacy
-        medication_count = db.query(Medication).filter(Medication.pharmacy_id == id).count()
+        medication_count = (
+            db.query(Medication).filter(Medication.pharmacy_id == id).count()
+        )
 
         # Set pharmacy_id to NULL for all medications that reference this pharmacy
         if medication_count > 0:

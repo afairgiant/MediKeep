@@ -32,7 +32,7 @@ def _resolve_locales_dir() -> Path:
     candidates = []
 
     # PyInstaller EXE: files bundled under _MEIPASS/frontend/build/
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         candidates.append(Path(sys._MEIPASS) / "frontend" / "build" / "locales")
 
     project_root = Path(__file__).resolve().parents[2]
@@ -61,7 +61,9 @@ def _load_locale(language: str) -> Dict[str, Any]:
 
     locale_path = _LOCALES_DIR / language / "reportPdf.json"
     if not locale_path.exists():
-        logger.warning("reportPdf.json not found for language '%s', falling back to en", language)
+        logger.warning(
+            "reportPdf.json not found for language '%s', falling back to en", language
+        )
         if language != "en":
             return _load_locale("en")
         return {}
@@ -123,10 +125,9 @@ class ReportTranslator:
         key uses snake_case to match backend category identifiers
         (e.g., 'lab_results', 'emergency_contacts').
         """
-        result = (
-            self._data.get("categories", {}).get(key)
-            or self._en_data.get("categories", {}).get(key)
-        )
+        result = self._data.get("categories", {}).get(key) or self._en_data.get(
+            "categories", {}
+        ).get(key)
         return result or key.replace("_", " ").title()
 
     def field(self, key: str) -> str:
@@ -136,10 +137,9 @@ class ReportTranslator:
         (e.g., 'blood_pressure' -> 'bloodPressure').
         """
         camel_key = self._to_camel_case(key)
-        result = (
-            self._data.get("fields", {}).get(camel_key)
-            or self._en_data.get("fields", {}).get(camel_key)
-        )
+        result = self._data.get("fields", {}).get(camel_key) or self._en_data.get(
+            "fields", {}
+        ).get(camel_key)
         return result or key.replace("_", " ").title()
 
     def text(self, key: str, **kwargs) -> str:
@@ -149,10 +149,9 @@ class ReportTranslator:
         Interpolation uses Python kwargs: translator.text("records_summary", total=42, categories=5)
         """
         camel_key = self._to_camel_case(key)
-        template = (
-            self._data.get("report", {}).get(camel_key)
-            or self._en_data.get("report", {}).get(camel_key)
-        )
+        template = self._data.get("report", {}).get(camel_key) or self._en_data.get(
+            "report", {}
+        ).get(camel_key)
         if not template:
             return key
 

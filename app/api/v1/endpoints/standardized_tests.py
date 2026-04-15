@@ -1,6 +1,7 @@
 """
 API endpoints for standardized test search and autocomplete
 """
+
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
@@ -49,7 +50,7 @@ def search_standardized_tests(
     query: str = Query(None, description="Search query"),
     category: Optional[str] = Query(None, description="Filter by category"),
     limit: int = Query(200, ge=1, le=1000, description="Maximum results"),
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
 ):
     """
     Search standardized tests with full-text search.
@@ -63,16 +64,17 @@ def search_standardized_tests(
     tests = standardized_test.search_tests(db, query or "", category, limit)
 
     log_data_access(
-        logger, request, 0, "read", "StandardizedTest",
+        logger,
+        request,
+        0,
+        "read",
+        "StandardizedTest",
         count=len(tests),
         query=query,
-        category=category
+        category=category,
     )
 
-    return {
-        "tests": tests,
-        "total": len(tests)
-    }
+    return {"tests": tests, "total": len(tests)}
 
 
 @router.get("/autocomplete", response_model=List[AutocompleteOption])
@@ -81,7 +83,7 @@ def get_test_autocomplete(
     query: str = Query("", description="Autocomplete query"),
     category: Optional[str] = Query(None, description="Filter by category"),
     limit: int = Query(50, ge=1, le=200, description="Maximum results"),
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
 ):
     """
     Get autocomplete suggestions for test names.
@@ -92,10 +94,13 @@ def get_test_autocomplete(
     options = standardized_test.get_autocomplete_options(db, query, category, limit)
 
     log_endpoint_access(
-        logger, request, 0, "test_autocomplete_requested",
+        logger,
+        request,
+        0,
+        "test_autocomplete_requested",
         query=query,
         category=category,
-        results_count=len(options)
+        results_count=len(options),
     )
 
     return options
@@ -105,7 +110,7 @@ def get_test_autocomplete(
 def get_common_tests(
     category: Optional[str] = Query(None, description="Filter by category"),
     limit: int = Query(100, ge=1, le=500, description="Maximum results"),
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
 ):
     """Get frequently used/common tests."""
     tests = standardized_test.get_common_tests(db, category, limit)
@@ -114,38 +119,33 @@ def get_common_tests(
 
 
 @router.get("/by-category/{category}", response_model=List[StandardizedTestResponse])
-def get_tests_by_category(
-    category: str,
-    db: Session = Depends(deps.get_db)
-):
+def get_tests_by_category(category: str, db: Session = Depends(deps.get_db)):
     """Get all tests in a specific category (hematology, chemistry, etc.)."""
     tests = standardized_test.get_tests_by_category(db, category)
 
     if not tests:
-        raise HTTPException(status_code=404, detail=f"No tests found for category: {category}")
+        raise HTTPException(
+            status_code=404, detail=f"No tests found for category: {category}"
+        )
 
     return tests
 
 
 @router.get("/by-loinc/{loinc_code}", response_model=StandardizedTestResponse)
-def get_test_by_loinc(
-    loinc_code: str,
-    db: Session = Depends(deps.get_db)
-):
+def get_test_by_loinc(loinc_code: str, db: Session = Depends(deps.get_db)):
     """Get a standardized test by LOINC code."""
     test = standardized_test.get_test_by_loinc(db, loinc_code)
 
     if not test:
-        raise HTTPException(status_code=404, detail=f"Test not found with LOINC code: {loinc_code}")
+        raise HTTPException(
+            status_code=404, detail=f"Test not found with LOINC code: {loinc_code}"
+        )
 
     return test
 
 
 @router.get("/by-name/{test_name:path}", response_model=StandardizedTestResponse)
-def get_test_by_name(
-    test_name: str,
-    db: Session = Depends(deps.get_db)
-):
+def get_test_by_name(test_name: str, db: Session = Depends(deps.get_db)):
     """Get a standardized test by name (case-insensitive exact match)."""
     test = standardized_test.get_test_by_name(db, test_name)
 
@@ -158,15 +158,12 @@ def get_test_by_name(
 @router.get("/count")
 def count_tests(
     category: Optional[str] = Query(None, description="Filter by category"),
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
 ):
     """Get total count of standardized tests."""
     count = standardized_test.count_tests(db, category)
 
-    return {
-        "category": category,
-        "count": count
-    }
+    return {"category": category, "count": count}
 
 
 class BatchMatchRequest(BaseModel):
@@ -184,9 +181,7 @@ class BatchMatchResponse(BaseModel):
 
 @router.post("/batch-match", response_model=BatchMatchResponse)
 def batch_match_tests(
-    req: Request,
-    request: BatchMatchRequest,
-    db: Session = Depends(deps.get_db)
+    req: Request, request: BatchMatchRequest, db: Session = Depends(deps.get_db)
 ):
     """
     Match multiple test names at once.
@@ -208,15 +203,23 @@ def batch_match_tests(
             search_results = standardized_test.search_tests(db, test_name, limit=1)
             matched = search_results[0] if search_results else None
 
-        results.append(BatchMatchResult(
-            test_name=test_name,
-            matched_test=StandardizedTestResponse.from_orm(matched) if matched else None
-        ))
+        results.append(
+            BatchMatchResult(
+                test_name=test_name,
+                matched_test=(
+                    StandardizedTestResponse.from_orm(matched) if matched else None
+                ),
+            )
+        )
 
     log_data_access(
-        logger, req, 0, "read", "StandardizedTestBatch",
+        logger,
+        req,
+        0,
+        "read",
+        "StandardizedTestBatch",
         count=len(request.test_names),
-        matched_count=sum(1 for r in results if r.matched_test is not None)
+        matched_count=sum(1 for r in results if r.matched_test is not None),
     )
 
     return BatchMatchResponse(results=results)

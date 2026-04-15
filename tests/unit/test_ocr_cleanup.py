@@ -44,7 +44,7 @@ class TestOCRCleanup:
 
     def test_clean_multiple_trailing_quotes(self, parser):
         """Test removal of multiple trailing quote marks (Hemoglobin"' → Hemoglobin)."""
-        assert parser.clean_ocr_artifacts('Hemoglobin"\'') == "Hemoglobin"
+        assert parser.clean_ocr_artifacts("Hemoglobin\"'") == "Hemoglobin"
 
     # ===== Special Characters with Quotes Tests =====
 
@@ -54,7 +54,7 @@ class TestOCRCleanup:
 
     def test_clean_angle_bracket_without_quote(self, parser):
         """Test removal of < without quote (RBC< → RBC)."""
-        assert parser.clean_ocr_artifacts('RBC<') == "RBC"
+        assert parser.clean_ocr_artifacts("RBC<") == "RBC"
 
     def test_clean_greater_than_with_quote(self, parser):
         """Test removal of > with quote (TEST>" → TEST)."""
@@ -62,7 +62,7 @@ class TestOCRCleanup:
 
     def test_clean_greater_than_without_quote(self, parser):
         """Test removal of > without quote (TEST> → TEST)."""
-        assert parser.clean_ocr_artifacts('TEST>') == "TEST"
+        assert parser.clean_ocr_artifacts("TEST>") == "TEST"
 
     # ===== Unicode/OCR Misread Tests =====
 
@@ -114,7 +114,10 @@ class TestOCRCleanup:
 
     def test_clean_preserves_valid_characters(self, parser):
         """Test cleanup preserves valid characters like parentheses."""
-        assert parser.clean_ocr_artifacts("Neutrophils (Absolute)") == "Neutrophils (Absolute)"
+        assert (
+            parser.clean_ocr_artifacts("Neutrophils (Absolute)")
+            == "Neutrophils (Absolute)"
+        )
 
     def test_clean_multiple_patterns_in_one_string(self, parser):
         """Test multiple cleanup patterns applied to same string."""
@@ -124,7 +127,7 @@ class TestOCRCleanup:
         # But the patterns are independent, so order matters
         # Let's test what actually happens
         assert '"' not in result  # Quote should be removed
-        assert '^' not in result  # Caret should be removed
+        assert "^" not in result  # Caret should be removed
 
 
 class TestCleanTestName:
@@ -203,7 +206,7 @@ class TestCleanTestName:
 
     def test_clean_real_world_neutrophils(self, parser):
         """Test real example: Neutrophils"' from sample PDF."""
-        assert parser.clean_test_name('Neutrophils"\'') == "Neutrophils"
+        assert parser.clean_test_name("Neutrophils\"'") == "Neutrophils"
 
     def test_clean_real_world_basos(self, parser):
         """Test real example: ^asos" → Basos from sample PDF."""
@@ -234,12 +237,16 @@ class TestCleanTestName:
         """Test cleanup of already clean test name."""
         assert parser.clean_test_name("WBC") == "WBC"
         assert parser.clean_test_name("Hemoglobin A1c") == "Hemoglobin A1c"
-        assert parser.clean_test_name("Vitamin D, 25-Hydroxy") == "Vitamin D, 25-Hydroxy"
+        assert (
+            parser.clean_test_name("Vitamin D, 25-Hydroxy") == "Vitamin D, 25-Hydroxy"
+        )
 
     def test_clean_test_name_preserves_special_chars(self, parser):
         """Test that valid special characters are preserved."""
         # Parentheses, commas, hyphens should be preserved
-        assert parser.clean_test_name("Vitamin D, 25-Hydroxy") == "Vitamin D, 25-Hydroxy"
+        assert (
+            parser.clean_test_name("Vitamin D, 25-Hydroxy") == "Vitamin D, 25-Hydroxy"
+        )
         assert parser.clean_test_name("TSH (Thyroid)") == "TSH (Thyroid)"
         assert parser.clean_test_name("A/G Ratio") == "A/G Ratio"
 

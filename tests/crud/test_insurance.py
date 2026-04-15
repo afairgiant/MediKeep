@@ -1,6 +1,7 @@
 """
 Tests for Insurance CRUD operations.
 """
+
 import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
@@ -23,7 +24,7 @@ class TestInsuranceCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -40,7 +41,7 @@ class TestInsuranceCRUD:
             group_number="GRP001",
             effective_date=date(2024, 1, 1),
             status="active",
-            is_primary=True
+            is_primary=True,
         )
 
         insurance = insurance_crud.create(db_session, obj_in=insurance_data)
@@ -64,7 +65,7 @@ class TestInsuranceCRUD:
                 member_name="John Doe",
                 member_id="MED001",
                 effective_date=date(2024, 1, 1),
-                status="active"
+                status="active",
             ),
             InsuranceCreate(
                 patient_id=test_patient.id,
@@ -73,7 +74,7 @@ class TestInsuranceCRUD:
                 member_name="John Doe",
                 member_id="DEN001",
                 effective_date=date(2024, 1, 1),
-                status="active"
+                status="active",
             ),
             InsuranceCreate(
                 patient_id=test_patient.id,
@@ -82,8 +83,8 @@ class TestInsuranceCRUD:
                 member_name="John Doe",
                 member_id="VIS001",
                 effective_date=date(2024, 1, 1),
-                status="inactive"
-            )
+                status="inactive",
+            ),
         ]
 
         for ins_data in insurances:
@@ -105,7 +106,7 @@ class TestInsuranceCRUD:
             member_name="John Doe",
             member_id="ACT001",
             effective_date=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
         inactive_insurance = InsuranceCreate(
             patient_id=test_patient.id,
@@ -114,7 +115,7 @@ class TestInsuranceCRUD:
             member_name="John Doe",
             member_id="INA001",
             effective_date=date(2024, 1, 1),
-            status="inactive"
+            status="inactive",
         )
 
         insurance_crud.create(db_session, obj_in=active_insurance)
@@ -140,7 +141,7 @@ class TestInsuranceCRUD:
                 member_name="John Doe",
                 member_id=f"MEM{i+1:03d}",
                 effective_date=date(2024, 1, 1),
-                status="active"
+                status="active",
             )
             insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -167,7 +168,7 @@ class TestInsuranceCRUD:
             member_id="PRI001",
             effective_date=date(2024, 1, 1),
             status="active",
-            is_primary=True
+            is_primary=True,
         )
         secondary_insurance = InsuranceCreate(
             patient_id=test_patient.id,
@@ -177,7 +178,7 @@ class TestInsuranceCRUD:
             member_id="SEC001",
             effective_date=date(2024, 1, 1),
             status="active",
-            is_primary=False
+            is_primary=False,
         )
 
         insurance_crud.create(db_session, obj_in=primary_insurance)
@@ -202,7 +203,7 @@ class TestInsuranceCRUD:
             member_id="NP001",
             effective_date=date(2024, 1, 1),
             status="active",
-            is_primary=False
+            is_primary=False,
         )
         insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -223,7 +224,7 @@ class TestInsuranceCRUD:
                 member_name="John Doe",
                 member_id=f"STA{i+1:03d}",
                 effective_date=date(2024, 1, 1),
-                status=status
+                status=status,
             )
             insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -251,7 +252,7 @@ class TestInsuranceCRUD:
             member_name="John Doe",
             member_id="UPD001",
             effective_date=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
         created = insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -281,7 +282,7 @@ class TestInsuranceCRUD:
             member_id="INS001",
             effective_date=date(2024, 1, 1),
             status="active",
-            is_primary=True
+            is_primary=True,
         )
         insurance2 = InsuranceCreate(
             patient_id=test_patient.id,
@@ -291,7 +292,7 @@ class TestInsuranceCRUD:
             member_id="INS002",
             effective_date=date(2024, 1, 1),
             status="active",
-            is_primary=False
+            is_primary=False,
         )
 
         created1 = insurance_crud.create(db_session, obj_in=insurance1)
@@ -309,16 +310,24 @@ class TestInsuranceCRUD:
         db_session.refresh(created1)
         assert created1.is_primary is False
 
-    def test_set_primary_wrong_patient(self, db_session: Session, test_user, test_admin_user):
+    def test_set_primary_wrong_patient(
+        self, db_session: Session, test_user, test_admin_user
+    ):
         """Test setting primary fails for wrong patient."""
         # Create two patients (each under a different user)
         patient1_data = PatientCreate(
-            first_name="Patient", last_name="One",
-            birth_date=date(1990, 1, 1), gender="M", address="123 St"
+            first_name="Patient",
+            last_name="One",
+            birth_date=date(1990, 1, 1),
+            gender="M",
+            address="123 St",
         )
         patient2_data = PatientCreate(
-            first_name="Patient", last_name="Two",
-            birth_date=date(1985, 1, 1), gender="F", address="456 Ave"
+            first_name="Patient",
+            last_name="Two",
+            birth_date=date(1985, 1, 1),
+            gender="F",
+            address="456 Ave",
         )
 
         patient1 = patient_crud.create_for_user(
@@ -336,7 +345,7 @@ class TestInsuranceCRUD:
             member_name="John Doe",
             member_id="TEST001",
             effective_date=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
         created = insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -368,7 +377,7 @@ class TestInsuranceCRUD:
                 member_id=f"EXP{i+1:03d}",
                 effective_date=date(2024, 1, 1),
                 expiration_date=exp_date,
-                status="active"
+                status="active",
             )
             insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -380,7 +389,9 @@ class TestInsuranceCRUD:
         # Should be ordered by expiration date
         assert expiring[0].expiration_date <= expiring[1].expiration_date
 
-    def test_get_expiring_soon_inactive_excluded(self, db_session: Session, test_patient):
+    def test_get_expiring_soon_inactive_excluded(
+        self, db_session: Session, test_patient
+    ):
         """Test that inactive insurances are excluded from expiring soon."""
         today = date.today()
 
@@ -393,7 +404,7 @@ class TestInsuranceCRUD:
             member_id="AEX001",
             effective_date=date(2024, 1, 1),
             expiration_date=today + timedelta(days=15),
-            status="active"
+            status="active",
         )
 
         # Create inactive expiring insurance
@@ -405,7 +416,7 @@ class TestInsuranceCRUD:
             member_id="IEX001",
             effective_date=date(2024, 1, 1),
             expiration_date=today + timedelta(days=15),
-            status="inactive"
+            status="inactive",
         )
 
         insurance_crud.create(db_session, obj_in=active_insurance)
@@ -420,11 +431,7 @@ class TestInsuranceCRUD:
 
     def test_search_by_company(self, db_session: Session, test_patient):
         """Test searching insurance by company name."""
-        companies = [
-            "Blue Cross Blue Shield",
-            "Aetna Health",
-            "Blue Shield California"
-        ]
+        companies = ["Blue Cross Blue Shield", "Aetna Health", "Blue Shield California"]
 
         for i, company in enumerate(companies):
             insurance_data = InsuranceCreate(
@@ -434,7 +441,7 @@ class TestInsuranceCRUD:
                 member_name="John Doe",
                 member_id=f"SCH{i+1:03d}",
                 effective_date=date(2024, 1, 1),
-                status="active"
+                status="active",
             )
             insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -448,7 +455,9 @@ class TestInsuranceCRUD:
         assert "Blue Cross Blue Shield" in company_names
         assert "Blue Shield California" in company_names
 
-    def test_search_by_company_case_insensitive(self, db_session: Session, test_patient):
+    def test_search_by_company_case_insensitive(
+        self, db_session: Session, test_patient
+    ):
         """Test that company search is case insensitive."""
         insurance_data = InsuranceCreate(
             patient_id=test_patient.id,
@@ -457,7 +466,7 @@ class TestInsuranceCRUD:
             member_name="John Doe",
             member_id="UHC001",
             effective_date=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
         insurance_crud.create(db_session, obj_in=insurance_data)
 
@@ -481,18 +490,15 @@ class TestInsuranceCRUD:
             member_name="John Doe",
             member_id="ORI001",
             effective_date=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
         created = insurance_crud.create(db_session, obj_in=insurance_data)
 
         update_data = InsuranceUpdate(
-            company_name="Updated Company",
-            notes="Policy changed"
+            company_name="Updated Company", notes="Policy changed"
         )
 
-        updated = insurance_crud.update(
-            db_session, db_obj=created, obj_in=update_data
-        )
+        updated = insurance_crud.update(db_session, db_obj=created, obj_in=update_data)
 
         assert updated.company_name == "Updated Company"
         assert updated.notes == "Policy changed"
@@ -507,7 +513,7 @@ class TestInsuranceCRUD:
             member_name="John Doe",
             member_id="DEL001",
             effective_date=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
         created = insurance_crud.create(db_session, obj_in=insurance_data)
         insurance_id = created.id

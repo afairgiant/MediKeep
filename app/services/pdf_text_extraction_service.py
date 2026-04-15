@@ -20,7 +20,7 @@ from app.services.lab_parsers import lab_parser_registry
 from app.core.platform.external_binaries import (
     get_poppler_path,
     get_tesseract_path,
-    configure_environment_for_binaries
+    configure_environment_for_binaries,
 )
 
 logger = get_logger(__name__, "app")
@@ -36,69 +36,70 @@ OCR_DPI = 300  # High DPI for accuracy, tested with typical lab PDFs (2-10MB)
 OCR_THREAD_COUNT = 2  # Prevents thread exhaustion, optimized for 4-core containers
 
 # Common unit patterns for lab results
-UNIT_PATTERNS = r'\b(mg/dL|mmol/L|g/dL|%|IU/L|U/L|ng/mL|pg/mL|µg/L|mEq/L|k/µL|10\^3/µL|cells/µL)\b'
+UNIT_PATTERNS = (
+    r"\b(mg/dL|mmol/L|g/dL|%|IU/L|U/L|ng/mL|pg/mL|µg/L|mEq/L|k/µL|10\^3/µL|cells/µL)\b"
+)
 
 # Regex patterns for text cleaning
-LAB_ABBREV_PATTERN = r'\b[A-Z]{2,5}\d?\b'  # 2-5 uppercase letters, optionally with numbers
-LAB_TEST_PATTERN = r'^[A-Za-z][A-Za-z0-9\s\-/]*[\s:]+\d+\.?\d*'  # Test name followed by number
+LAB_ABBREV_PATTERN = (
+    r"\b[A-Z]{2,5}\d?\b"  # 2-5 uppercase letters, optionally with numbers
+)
+LAB_TEST_PATTERN = (
+    r"^[A-Za-z][A-Za-z0-9\s\-/]*[\s:]+\d+\.?\d*"  # Test name followed by number
+)
 
 # Noise patterns to filter out from PDF text
 # Extracted to module level for reusability and performance (compiled once)
 NOISE_PATTERNS = [
     # Patient/doctor information
-    r'^patient\s*(name|id|dob|date of birth|age|gender|sex)[:|\s].*$',
-    r'^(mr\.|mrs\.|ms\.|dr\.|doctor|physician)[\s\.].*$',
-    r'^(address|street|city|state|zip|phone|fax|email)[:|\s].*$',
-    r'^ordering\s+physician',
-
+    r"^patient\s*(name|id|dob|date of birth|age|gender|sex)[:|\s].*$",
+    r"^(mr\.|mrs\.|ms\.|dr\.|doctor|physician)[\s\.].*$",
+    r"^(address|street|city|state|zip|phone|fax|email)[:|\s].*$",
+    r"^ordering\s+physician",
     # Lab/clinic information
-    r'^(lab|laboratory|clinic|hospital|medical center)[\s:].*$',
-    r'^(collected|received|reported|ordered|test)\s*(date|time|on|by)[:|\s].*$',
-    r'^specimen\s+(id|details)',
-
+    r"^(lab|laboratory|clinic|hospital|medical center)[\s:].*$",
+    r"^(collected|received|reported|ordered|test)\s*(date|time|on|by)[:|\s].*$",
+    r"^specimen\s+(id|details)",
     # Headers and footers
-    r'^(page|test|result|value|unit|reference|range|status|flag)\s*(name)?[:|\s]*$',
-    r'^\s*-+\s*$',  # Separator lines
-    r'^\s*=+\s*$',  # Separator lines
-    r'^\*+\s*$',    # Asterisk separators
-
+    r"^(page|test|result|value|unit|reference|range|status|flag)\s*(name)?[:|\s]*$",
+    r"^\s*-+\s*$",  # Separator lines
+    r"^\s*=+\s*$",  # Separator lines
+    r"^\*+\s*$",  # Asterisk separators
     # Common phrases
-    r'^(results|report|summary|interpretation|comment|note)[:|\s]*$',
-    r'^(normal|abnormal|critical|high|low)\s*$',  # Status-only lines
-
+    r"^(results|report|summary|interpretation|comment|note)[:|\s]*$",
+    r"^(normal|abnormal|critical|high|low)\s*$",  # Status-only lines
     # Page footers and disclaimers
-    r'date\s+(created|issued|reported|stored)',
-    r'final\s+report',
-    r'page\s+\d+\s+of\s+\d+',
-    r'©\s*\d{4}',
-    r'all\s+rights\s+reserved',
-    r'enterprise\s+report\s+version',
-    r'confidential.*health.*information',
-    r'received.*in\s+error',
-
+    r"date\s+(created|issued|reported|stored)",
+    r"final\s+report",
+    r"page\s+\d+\s+of\s+\d+",
+    r"©\s*\d{4}",
+    r"all\s+rights\s+reserved",
+    r"enterprise\s+report\s+version",
+    r"confidential.*health.*information",
+    r"received.*in\s+error",
     # References and citations
-    r'pmid[:\s]*\d+',
-    r'et\.?\s*al\.?',
-    r'\d{4}[;,]\s*\d+',  # Journal citations
-    r'reference\s+(range|interval)[:\s]*$',
-
+    r"pmid[:\s]*\d+",
+    r"et\.?\s*al\.?",
+    r"\d{4}[;,]\s*\d+",  # Journal citations
+    r"reference\s+(range|interval)[:\s]*$",
     # Notes and explanations
-    r'^please\s+note',
-    r'^note[:\s]*$',
-    r'^\*+please',
-    r'bmi\s*[<>]',
-    r'this\s+test\s+was\s+developed',
-    r'fda',
-    r'^\(.*\)\s*$',  # Lines with just parenthetical content
-
+    r"^please\s+note",
+    r"^note[:\s]*$",
+    r"^\*+please",
+    r"bmi\s*[<>]",
+    r"this\s+test\s+was\s+developed",
+    r"fda",
+    r"^\(.*\)\s*$",  # Lines with just parenthetical content
     # Common descriptive text
-    r'^(male|female)s?\s*[:.]',
-    r'^(adult|child|pediatric)\s+(male|female)',
-    r'^\d+\s+years',
+    r"^(male|female)s?\s*[:.]",
+    r"^(adult|child|pediatric)\s+(male|female)",
+    r"^\d+\s+years",
 ]
 
 # Compile patterns once for performance
-COMPILED_NOISE_PATTERNS = [re.compile(pattern, re.IGNORECASE) for pattern in NOISE_PATTERNS]
+COMPILED_NOISE_PATTERNS = [
+    re.compile(pattern, re.IGNORECASE) for pattern in NOISE_PATTERNS
+]
 
 
 class PDFTextExtractionService:
@@ -139,18 +140,21 @@ class PDFTextExtractionService:
             tesseract_exe = get_tesseract_path()
             if tesseract_exe:
                 pytesseract.pytesseract.tesseract_cmd = str(tesseract_exe)
-                logger.info(f"Using bundled Tesseract: {tesseract_exe}", extra={
-                    "component": "PDFTextExtractionService",
-                    "tesseract_path": str(tesseract_exe)
-                })
+                logger.info(
+                    f"Using bundled Tesseract: {tesseract_exe}",
+                    extra={
+                        "component": "PDFTextExtractionService",
+                        "tesseract_path": str(tesseract_exe),
+                    },
+                )
 
             version = pytesseract.get_tesseract_version()
             logger.info(
                 "Tesseract OCR is available and ready for PDF text extraction",
                 extra={
                     "component": "PDFTextExtractionService",
-                    "tesseract_version": str(version)
-                }
+                    "tesseract_version": str(version),
+                },
             )
             PDFTextExtractionService._tesseract_available_cache = True
             return True
@@ -161,18 +165,15 @@ class PDFTextExtractionService:
                 "If running in production (Docker), this indicates a container build issue.",
                 extra={
                     "component": "PDFTextExtractionService",
-                    "recommendation": "Install Tesseract OCR (apt-get install tesseract-ocr tesseract-ocr-eng poppler-utils) for scanned PDF support"
-                }
+                    "recommendation": "Install Tesseract OCR (apt-get install tesseract-ocr tesseract-ocr-eng poppler-utils) for scanned PDF support",
+                },
             )
             PDFTextExtractionService._tesseract_available_cache = False
             return False
         except Exception as e:
             logger.warning(
                 f"Error checking Tesseract availability: {str(e)}. OCR will be disabled.",
-                extra={
-                    "component": "PDFTextExtractionService",
-                    "error": str(e)
-                }
+                extra={"component": "PDFTextExtractionService", "error": str(e)},
             )
             PDFTextExtractionService._tesseract_available_cache = False
             return False
@@ -203,33 +204,39 @@ class PDFTextExtractionService:
                     "component": "PDFTextExtractionService",
                     "pdf_filename": filename,
                     "native_test_count": native_test_count,
-                    "fallback_threshold": self.settings.OCR_FALLBACK_MIN_TESTS
-                }
+                    "fallback_threshold": self.settings.OCR_FALLBACK_MIN_TESTS,
+                },
             )
 
             # Extract text using OCR
             ocr_result = self._extract_ocr_text(pdf_bytes)
 
-            if not ocr_result or not ocr_result.get('text'):
+            if not ocr_result or not ocr_result.get("text"):
                 logger.warning(
                     "OCR fallback failed: No text extracted",
-                    extra={"component": "PDFTextExtractionService", "pdf_filename": filename}
+                    extra={
+                        "component": "PDFTextExtractionService",
+                        "pdf_filename": filename,
+                    },
                 )
                 return None
 
             # Try lab-specific parsing with OCR text
             parsed_result = self._try_lab_specific_parsing(
-                ocr_result['text'], extraction_method='ocr'
+                ocr_result["text"], extraction_method="ocr"
             )
 
             if not parsed_result:
                 logger.warning(
                     "OCR fallback failed: Lab-specific parsing unsuccessful",
-                    extra={"component": "PDFTextExtractionService", "pdf_filename": filename}
+                    extra={
+                        "component": "PDFTextExtractionService",
+                        "pdf_filename": filename,
+                    },
                 )
                 return None
 
-            ocr_test_count = parsed_result.get('test_count', 0)
+            ocr_test_count = parsed_result.get("test_count", 0)
 
             # Compare OCR vs native results
             if ocr_test_count > native_test_count:
@@ -241,8 +248,8 @@ class PDFTextExtractionService:
                         "pdf_filename": filename,
                         "native_count": native_test_count,
                         "ocr_count": ocr_test_count,
-                        "improvement": ocr_test_count - native_test_count
-                    }
+                        "improvement": ocr_test_count - native_test_count,
+                    },
                 )
                 return parsed_result
             else:
@@ -253,8 +260,8 @@ class PDFTextExtractionService:
                         "component": "PDFTextExtractionService",
                         "pdf_filename": filename,
                         "native_count": native_test_count,
-                        "ocr_count": ocr_test_count
-                    }
+                        "ocr_count": ocr_test_count,
+                    },
                 )
                 return None
 
@@ -264,8 +271,8 @@ class PDFTextExtractionService:
                 extra={
                     "component": "PDFTextExtractionService",
                     "pdf_filename": filename,
-                    "error": str(e)
-                }
+                    "error": str(e),
+                },
             )
             return None
 
@@ -292,26 +299,28 @@ class PDFTextExtractionService:
             extra={
                 "component": "PDFTextExtractionService",
                 "pdf_filename": filename,
-                "size_bytes": len(pdf_bytes)
-            }
+                "size_bytes": len(pdf_bytes),
+            },
         )
 
         try:
             # Phase 1: Try native text extraction (fast path)
             native_result = self._extract_native_text(pdf_bytes)
 
-            if self._is_valid_text(native_result['text']):
+            if self._is_valid_text(native_result["text"]):
                 # Try lab-specific parsing first
-                parsed_result = self._try_lab_specific_parsing(native_result['text'])
+                parsed_result = self._try_lab_specific_parsing(native_result["text"])
 
                 if parsed_result:
                     # Lab-specific parser succeeded, but check if quality is good enough
-                    test_count = parsed_result.get('test_count', 0)
+                    test_count = parsed_result.get("test_count", 0)
 
                     # Quality-based OCR fallback: retry if test count below threshold
-                    if (test_count < self.settings.OCR_FALLBACK_MIN_TESTS and
-                        self.settings.OCR_FALLBACK_ENABLED and
-                        self.ocr_available):
+                    if (
+                        test_count < self.settings.OCR_FALLBACK_MIN_TESTS
+                        and self.settings.OCR_FALLBACK_ENABLED
+                        and self.ocr_available
+                    ):
 
                         # Attempt OCR fallback
                         ocr_fallback_result = self._extract_ocr_text_with_retry(
@@ -320,8 +329,8 @@ class PDFTextExtractionService:
 
                         if ocr_fallback_result:
                             # OCR fallback succeeded - return improved results
-                            ocr_fallback_result['fallback_triggered'] = True
-                            ocr_fallback_result['native_test_count'] = test_count
+                            ocr_fallback_result["fallback_triggered"] = True
+                            ocr_fallback_result["native_test_count"] = test_count
                             return ocr_fallback_result
 
                         # OCR fallback didn't improve results - return native
@@ -330,36 +339,36 @@ class PDFTextExtractionService:
                             extra={
                                 "component": "PDFTextExtractionService",
                                 "pdf_filename": filename,
-                                "test_count": test_count
-                            }
+                                "test_count": test_count,
+                            },
                         )
 
                     # Return native result (either good quality or fallback didn't help)
-                    parsed_result['fallback_triggered'] = False
+                    parsed_result["fallback_triggered"] = False
                     return parsed_result
 
                 # Fallback to generic cleaning if no lab parser matched
-                cleaned_text = self._clean_extracted_text(native_result['text'])
+                cleaned_text = self._clean_extracted_text(native_result["text"])
 
                 logger.info(
                     "Native extraction successful (generic cleaning)",
                     extra={
                         "component": "PDFTextExtractionService",
                         "pdf_filename": filename,
-                        "char_count": native_result['char_count'],
+                        "char_count": native_result["char_count"],
                         "cleaned_char_count": len(cleaned_text),
-                        "page_count": native_result['page_count']
-                    }
+                        "page_count": native_result["page_count"],
+                    },
                 )
                 return {
-                    'text': cleaned_text,
-                    'page_count': native_result['page_count'],
-                    'char_count': len(cleaned_text),
-                    'method': 'native',
-                    'confidence': 0.95,
-                    'error': None,
-                    'lab_name': 'Unknown',
-                    'fallback_triggered': False
+                    "text": cleaned_text,
+                    "page_count": native_result["page_count"],
+                    "char_count": len(cleaned_text),
+                    "method": "native",
+                    "confidence": 0.95,
+                    "error": None,
+                    "lab_name": "Unknown",
+                    "fallback_triggered": False,
                 }
 
             # Phase 2: Fallback to OCR (slow path) - only if available
@@ -369,17 +378,17 @@ class PDFTextExtractionService:
                     extra={
                         "component": "PDFTextExtractionService",
                         "pdf_filename": filename,
-                        "native_char_count": native_result['char_count']
-                    }
+                        "native_char_count": native_result["char_count"],
+                    },
                 )
                 return {
-                    'text': '',
-                    'method': 'failed',
-                    'confidence': 0.0,
-                    'page_count': native_result['page_count'],
-                    'char_count': 0,
-                    'error': 'Tesseract OCR is not installed. Cannot extract text from scanned PDFs. Please install Tesseract or provide a digital PDF.',
-                    'fallback_triggered': False
+                    "text": "",
+                    "method": "failed",
+                    "confidence": 0.0,
+                    "page_count": native_result["page_count"],
+                    "char_count": 0,
+                    "error": "Tesseract OCR is not installed. Cannot extract text from scanned PDFs. Please install Tesseract or provide a digital PDF.",
+                    "fallback_triggered": False,
                 }
 
             logger.info(
@@ -387,22 +396,22 @@ class PDFTextExtractionService:
                 extra={
                     "component": "PDFTextExtractionService",
                     "pdf_filename": filename,
-                    "native_char_count": native_result['char_count']
-                }
+                    "native_char_count": native_result["char_count"],
+                },
             )
             ocr_result = self._extract_ocr_text(pdf_bytes)
 
             # Clean OCR text as well
-            cleaned_text = self._clean_extracted_text(ocr_result['text'])
+            cleaned_text = self._clean_extracted_text(ocr_result["text"])
 
             return {
-                'text': cleaned_text,
-                'page_count': ocr_result['page_count'],
-                'char_count': len(cleaned_text),
-                'method': 'ocr',
-                'confidence': 0.75,  # OCR is less reliable
-                'error': None,
-                'fallback_triggered': False
+                "text": cleaned_text,
+                "page_count": ocr_result["page_count"],
+                "char_count": len(cleaned_text),
+                "method": "ocr",
+                "confidence": 0.75,  # OCR is less reliable
+                "error": None,
+                "fallback_triggered": False,
             }
 
         except Exception as e:
@@ -411,18 +420,18 @@ class PDFTextExtractionService:
                 extra={
                     "component": "PDFTextExtractionService",
                     "pdf_filename": filename,
-                    "error": str(e)
+                    "error": str(e),
                 },
-                exc_info=True
+                exc_info=True,
             )
             return {
-                'text': '',
-                'method': 'failed',
-                'confidence': 0.0,
-                'page_count': 0,
-                'char_count': 0,
-                'error': str(e),
-                'fallback_triggered': False
+                "text": "",
+                "method": "failed",
+                "confidence": 0.0,
+                "page_count": 0,
+                "char_count": 0,
+                "error": str(e),
+                "fallback_triggered": False,
             }
 
     def _extract_native_text(self, pdf_bytes: bytes) -> Dict:
@@ -434,16 +443,12 @@ class PDFTextExtractionService:
             page_count = len(pdf.pages)
 
             for page in pdf.pages:
-                page_text = page.extract_text() or ''
+                page_text = page.extract_text() or ""
                 text_parts.append(page_text)
 
-        text = '\n'.join(text_parts)
+        text = "\n".join(text_parts)
 
-        return {
-            'text': text,
-            'page_count': page_count,
-            'char_count': len(text)
-        }
+        return {"text": text, "page_count": page_count, "char_count": len(text)}
 
     def _extract_ocr_text(self, pdf_bytes: bytes) -> Dict:
         """
@@ -455,7 +460,9 @@ class PDFTextExtractionService:
             RuntimeError: If Tesseract is not available
         """
         if not self.ocr_available:
-            raise RuntimeError("Tesseract OCR is not available. Cannot perform OCR extraction.")
+            raise RuntimeError(
+                "Tesseract OCR is not available. Cannot perform OCR extraction."
+            )
 
         text_parts = []
         page_count = 0
@@ -468,9 +475,9 @@ class PDFTextExtractionService:
         images = convert_from_bytes(
             pdf_bytes,
             dpi=OCR_DPI,  # Configured for accuracy vs performance balance
-            fmt='jpeg',
+            fmt="jpeg",
             thread_count=OCR_THREAD_COUNT,  # Optimized for container resources
-            poppler_path=str(poppler_path) if poppler_path else None
+            poppler_path=str(poppler_path) if poppler_path else None,
         )
         page_count = len(images)
 
@@ -481,8 +488,7 @@ class PDFTextExtractionService:
 
             # Run OCR
             page_text = pytesseract.image_to_string(
-                processed_image,
-                config='--psm 6'  # Assume uniform block of text
+                processed_image, config="--psm 6"  # Assume uniform block of text
             )
 
             text_parts.append(page_text)
@@ -490,27 +496,23 @@ class PDFTextExtractionService:
                 f"OCR page {i+1}/{page_count} complete",
                 extra={
                     "component": "PDFTextExtractionService",
-                    "page_number": i+1,
-                    "char_count": len(page_text)
-                }
+                    "page_number": i + 1,
+                    "char_count": len(page_text),
+                },
             )
 
             # Clear image from memory after processing
             del image
             del processed_image
 
-        text = '\n'.join(text_parts)
+        text = "\n".join(text_parts)
 
-        return {
-            'text': text,
-            'page_count': page_count,
-            'char_count': len(text)
-        }
+        return {"text": text, "page_count": page_count, "char_count": len(text)}
 
     def _preprocess_image(self, image: Image.Image) -> Image.Image:
         """Enhance image for better OCR accuracy."""
         # Convert to grayscale
-        image = image.convert('L')
+        image = image.convert("L")
 
         # Future enhancements (Phase 3):
         # - Deskew
@@ -525,7 +527,7 @@ class PDFTextExtractionService:
         Clean extracted text by removing common header/footer noise.
         Keep only lines that look like lab test results.
         """
-        lines = text.split('\n')
+        lines = text.split("\n")
         cleaned_lines = []
 
         for line in lines:
@@ -547,12 +549,14 @@ class PDFTextExtractionService:
 
             # Keep lines that look like lab results:
             # 1. Must contain at least one number
-            has_numbers = bool(re.search(r'\d', line))
+            has_numbers = bool(re.search(r"\d", line))
             if not has_numbers:
                 continue
 
             # 2. Check for indicators of lab results:
-            has_separators = ':' in line or '\t' in line or '  ' in line  # Colon, tab, or multiple spaces
+            has_separators = (
+                ":" in line or "\t" in line or "  " in line
+            )  # Colon, tab, or multiple spaces
             has_units = bool(re.search(UNIT_PATTERNS, line, re.IGNORECASE))
 
             # Common lab test abbreviations
@@ -566,7 +570,7 @@ class PDFTextExtractionService:
             if has_separators or has_units or has_lab_abbrev or has_test_pattern:
                 cleaned_lines.append(line)
 
-        cleaned_text = '\n'.join(cleaned_lines)
+        cleaned_text = "\n".join(cleaned_lines)
 
         logger.info(
             "Text cleaning complete",
@@ -574,13 +578,17 @@ class PDFTextExtractionService:
                 "component": "PDFTextExtractionService",
                 "original_lines": len(lines),
                 "cleaned_lines": len(cleaned_lines),
-                "reduction_pct": round((1 - len(cleaned_lines) / max(len(lines), 1)) * 100, 1)
-            }
+                "reduction_pct": round(
+                    (1 - len(cleaned_lines) / max(len(lines), 1)) * 100, 1
+                ),
+            },
         )
 
         return cleaned_text
 
-    def _try_lab_specific_parsing(self, text: str, extraction_method: str = 'native') -> Optional[Dict]:
+    def _try_lab_specific_parsing(
+        self, text: str, extraction_method: str = "native"
+    ) -> Optional[Dict]:
         """
         Try to parse using lab-specific parsers.
 
@@ -597,7 +605,7 @@ class PDFTextExtractionService:
             if not results:
                 logger.info(
                     "No lab-specific parser matched",
-                    extra={"component": "PDFTextExtractionService"}
+                    extra={"component": "PDFTextExtractionService"},
                 )
                 return None
 
@@ -621,10 +629,12 @@ class PDFTextExtractionService:
 
                 formatted_lines.append(" ".join(line_parts))
 
-            formatted_text = '\n'.join(formatted_lines)
+            formatted_text = "\n".join(formatted_lines)
 
             # Extract test date from first result (all tests from same PDF have same date)
-            test_date = results[0].test_date if results and results[0].test_date else None
+            test_date = (
+                results[0].test_date if results and results[0].test_date else None
+            )
 
             logger.info(
                 f"Lab-specific parsing successful: {lab_name}",
@@ -632,43 +642,48 @@ class PDFTextExtractionService:
                     "component": "PDFTextExtractionService",
                     "lab_name": lab_name,
                     "test_count": len(results),
-                    "avg_confidence": sum(r.confidence for r in results) / max(len(results), 1),
-                    "test_date": test_date
-                }
+                    "avg_confidence": sum(r.confidence for r in results)
+                    / max(len(results), 1),
+                    "test_date": test_date,
+                },
             )
 
             # Normalize lab name for method field (remove spaces, convert to lowercase)
             # "Quest Diagnostics" -> "quest_parser"
             # "LabCorp" -> "labcorp_parser"
-            lab_method_base = lab_name.lower().replace(' ', '_').replace('diagnostics', '').replace('__', '_').strip('_') + '_parser'
+            lab_method_base = (
+                lab_name.lower()
+                .replace(" ", "_")
+                .replace("diagnostics", "")
+                .replace("__", "_")
+                .strip("_")
+                + "_parser"
+            )
 
             # Adjust method name and confidence based on extraction method
-            if extraction_method == 'ocr':
-                lab_method = lab_method_base + '_ocr'
+            if extraction_method == "ocr":
+                lab_method = lab_method_base + "_ocr"
                 confidence = 0.85  # Lower confidence for OCR-based extraction
             else:
                 lab_method = lab_method_base
                 confidence = 0.98  # Higher confidence for native extraction
 
             return {
-                'text': formatted_text,
-                'page_count': 1,  # Not tracking pages in structured parsing
-                'char_count': len(formatted_text),
-                'method': lab_method,
-                'confidence': confidence,
-                'error': None,
-                'lab_name': lab_name,
-                'test_count': len(results),
-                'test_date': test_date
+                "text": formatted_text,
+                "page_count": 1,  # Not tracking pages in structured parsing
+                "char_count": len(formatted_text),
+                "method": lab_method,
+                "confidence": confidence,
+                "error": None,
+                "lab_name": lab_name,
+                "test_count": len(results),
+                "test_date": test_date,
             }
 
         except Exception as e:
             logger.warning(
                 f"Lab-specific parsing failed: {str(e)}",
-                extra={
-                    "component": "PDFTextExtractionService",
-                    "error": str(e)
-                }
+                extra={"component": "PDFTextExtractionService", "error": str(e)},
             )
             return None
 
@@ -677,7 +692,7 @@ class PDFTextExtractionService:
         if not text or len(text) < MIN_TEXT_LENGTH:
             logger.warning(
                 f"Text too short: {len(text)} chars",
-                extra={"component": "PDFTextExtractionService"}
+                extra={"component": "PDFTextExtractionService"},
             )
             return False
 
@@ -690,8 +705,8 @@ class PDFTextExtractionService:
                 f"Text has low digit ratio: {digit_ratio:.3f}",
                 extra={
                     "component": "PDFTextExtractionService",
-                    "digit_ratio": digit_ratio
-                }
+                    "digit_ratio": digit_ratio,
+                },
             )
             return False
 

@@ -154,7 +154,11 @@ class TestLabCorpParserOCRCorruption:
         results = parser.parse(LABCORP_SAMPLE_WITH_OCR_ERRORS)
 
         # Should have Neutrophils (Absolute), not hleutrophils
-        neutrophils_abs = [r for r in results if "Neutrophils" in r.test_name and "Absolute" in r.test_name]
+        neutrophils_abs = [
+            r
+            for r in results
+            if "Neutrophils" in r.test_name and "Absolute" in r.test_name
+        ]
         assert len(neutrophils_abs) > 0
 
     def test_parse_handles_lijn_corruption(self, parser):
@@ -162,7 +166,11 @@ class TestLabCorpParserOCRCorruption:
         results = parser.parse(LABCORP_SAMPLE_WITH_OCR_ERRORS)
 
         # Should have "Immature Granulocytes", not "lijnmature"
-        immature = [r for r in results if "Immature" in r.test_name and "Granulocytes" in r.test_name]
+        immature = [
+            r
+            for r in results
+            if "Immature" in r.test_name and "Granulocytes" in r.test_name
+        ]
         assert len(immature) > 0
 
 
@@ -199,7 +207,9 @@ class TestLabCorpParserMultiLine:
         # Count how many times each test appears
         test_name_counts = {}
         for result in results:
-            test_name_counts[result.test_name] = test_name_counts.get(result.test_name, 0) + 1
+            test_name_counts[result.test_name] = (
+                test_name_counts.get(result.test_name, 0) + 1
+            )
 
         # Each test should appear only once
         for test_name, count in test_name_counts.items():
@@ -292,7 +302,7 @@ class TestLabCorpParserConfidenceScores:
         results = parser.parse(LABCORP_CLEAN_TEXT)
 
         for result in results:
-            assert hasattr(result, 'confidence')
+            assert hasattr(result, "confidence")
             assert 0.0 <= result.confidence <= 1.0
 
     def test_clean_text_has_higher_confidence(self, parser):
@@ -348,10 +358,13 @@ class TestLabCorpParserRegressionTests:
     def test_parser_does_not_extract_patient_info(self, parser):
         """Test parser correctly filters out patient info as noise."""
         # Use full sample that includes patient headers
-        full_text = """
+        full_text = (
+            """
         Fair, Robert DOB: 09/07/1961 Patient Report labcorp
         Patient ID; 20460 Age:6 1 Account Number:3 2005300
-        """ + LABCORP_SAMPLE_WITH_OCR_ERRORS
+        """
+            + LABCORP_SAMPLE_WITH_OCR_ERRORS
+        )
 
         results = parser.parse(full_text)
 
@@ -390,6 +403,7 @@ class TestLabCorpParserPerformance:
         large_text = LABCORP_SAMPLE_WITH_OCR_ERRORS * 10
 
         import time
+
         start = time.time()
         results = parser.parse(large_text)
         duration = time.time() - start
