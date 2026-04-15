@@ -121,4 +121,6 @@ const ProgressTracking = React.memo(
   }
 );
 
+ProgressTracking.displayName = 'ProgressTracking';
+
 export default ProgressTracking;

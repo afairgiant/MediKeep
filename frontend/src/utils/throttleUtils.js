@@ -169,8 +169,6 @@ export function createRaceSafeWrapper(asyncFunc, debugName = 'async-function') {
       pendingPromise = asyncFunc.apply(this, args);
       const result = await pendingPromise;
       return result;
-    } catch (error) {
-      throw error;
     } finally {
       pendingPromise = null;
     }
@@ -275,10 +273,6 @@ export function createThrottleCleanupManager() {
 
     size() {
       return throttles.size;
-    },
-
-    isDestroyed() {
-      return isDestroyed;
     },
   };
 }

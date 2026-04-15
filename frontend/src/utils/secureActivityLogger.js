@@ -33,7 +33,7 @@ function sanitizeEventData(eventData) {
   ];
 
   safeProperties.forEach(prop => {
-    if (eventData.hasOwnProperty(prop)) {
+    if (Object.prototype.hasOwnProperty.call(eventData, prop)) {
       sanitized[prop] = eventData[prop];
     }
   });

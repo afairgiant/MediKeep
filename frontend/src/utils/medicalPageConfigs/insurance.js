@@ -47,7 +47,7 @@ export const insurancesPageConfig = {
           : null;
 
         switch (dateRange) {
-          case 'this_year':
+          case 'this_year': {
             // Show if insurance is active during this year
             // Either started this year, or started earlier but still active (no end date or ends this year or later)
             if (!effectiveDate) return false;
@@ -56,8 +56,9 @@ export const insurancesPageConfig = {
               effectiveDate.getFullYear() <= currentYear &&
               effectiveEndDateThisYear.getFullYear() >= currentYear
             );
+          }
 
-          case 'last_year':
+          case 'last_year': {
             // Show if insurance was active during last year
             if (!effectiveDate) return false;
             const lastYear = currentYear - 1;
@@ -66,20 +67,23 @@ export const insurancesPageConfig = {
               effectiveDate.getFullYear() <= lastYear &&
               effectiveEndDateLastYear.getFullYear() >= lastYear
             );
+          }
 
-          case 'previous_years':
+          case 'previous_years': {
             // Show insurance that was only active in years before current year
             if (!effectiveDate) return false;
             const effectiveEndDatePrevious = expirationDate || now;
             return effectiveEndDatePrevious.getFullYear() < currentYear;
+          }
 
-          case 'current':
+          case 'current': {
             // Currently active insurance
             const effectiveEndDate = expirationDate || now;
             return (
               (!effectiveDate || effectiveDate <= now) &&
               effectiveEndDate >= now
             );
+          }
 
           case 'expired':
             // Expired insurance

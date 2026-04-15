@@ -287,14 +287,14 @@ export const ResponsiveTestHelpers = {
    */
   beforeEach() {
     // Mock IntersectionObserver
-    global.IntersectionObserver = jest.fn(() => ({
+    global.IntersectionObserver = vi.fn(() => ({
       observe: vi.fn(),
       disconnect: vi.fn(),
       unobserve: vi.fn(),
     }));
 
     // Mock ResizeObserver
-    global.ResizeObserver = jest.fn(() => ({
+    global.ResizeObserver = vi.fn(() => ({
       observe: vi.fn(),
       disconnect: vi.fn(),
       unobserve: vi.fn(),

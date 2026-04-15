@@ -391,4 +391,6 @@ const DocumentManagerWithProgress = React.memo(
   }
 );
 
+DocumentManagerWithProgress.displayName = 'DocumentManagerWithProgress';
+
 export default DocumentManagerWithProgress;

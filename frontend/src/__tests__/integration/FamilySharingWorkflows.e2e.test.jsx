@@ -302,23 +302,19 @@ vi.mock('../../components/medical/FamilyHistorySharingModal', () => ({
         expires_hours: 168,
       };
 
-      try {
-        if (bulkMode) {
-          const bulkData = {
-            family_member_ids: familyMembers.map(m => m.id),
-            ...inviteData,
-          };
-          await mockFamilyHistoryApi.bulkSendInvitations(bulkData);
-        } else {
-          await mockFamilyHistoryApi.sendShareInvitation(
-            familyMember.id,
-            inviteData
-          );
-        }
-        onSuccess();
-      } catch (error) {
-        throw error;
+      if (bulkMode) {
+        const bulkData = {
+          family_member_ids: familyMembers.map(m => m.id),
+          ...inviteData,
+        };
+        await mockFamilyHistoryApi.bulkSendInvitations(bulkData);
+      } else {
+        await mockFamilyHistoryApi.sendShareInvitation(
+          familyMember.id,
+          inviteData
+        );
       }
+      onSuccess();
     };
 
     return opened ? (

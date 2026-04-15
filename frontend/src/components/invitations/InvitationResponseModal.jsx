@@ -192,7 +192,7 @@ const InvitationResponseModal = ({
         {invitation.message && (
           <Alert icon={<IconMessageCircle />} color="blue" variant="light">
             <Text size="sm" style={{ fontStyle: 'italic' }}>
-              "{invitation.message}"
+              &ldquo;{invitation.message}&rdquo;
             </Text>
           </Alert>
         )}

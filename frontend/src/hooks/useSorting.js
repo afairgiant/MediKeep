@@ -60,23 +60,26 @@ export const useSorting = (data = [], config = {}) => {
       const sortType = getSortType(sortBy, config.sortTypes);
 
       switch (sortType) {
-        case 'date':
+        case 'date': {
           const aDate = new Date(aValue);
           const bDate = new Date(bValue);
           return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+        }
 
-        case 'number':
+        case 'number': {
           const aNum = parseFloat(aValue) || 0;
           const bNum = parseFloat(bValue) || 0;
           return sortOrder === 'asc' ? aNum - bNum : bNum - aNum;
+        }
 
-        case 'boolean':
+        case 'boolean': {
           const aBool = Boolean(aValue);
           const bBool = Boolean(bValue);
           if (aBool === bBool) return 0;
           return sortOrder === 'asc' ? (aBool ? 1 : -1) : aBool ? -1 : 1;
+        }
 
-        case 'status':
+        case 'status': {
           // Special sorting for status with priority order
           const statusOrder = config.statusOrder || {
             active: 1,
@@ -88,8 +91,9 @@ export const useSorting = (data = [], config = {}) => {
           const aOrder = statusOrder[aValue] || 999;
           const bOrder = statusOrder[bValue] || 999;
           return sortOrder === 'asc' ? aOrder - bOrder : bOrder - aOrder;
+        }
 
-        case 'severity':
+        case 'severity': {
           // Special sorting for severity levels
           const severityOrder = config.severityOrder || {
             'life-threatening': 4,
@@ -102,14 +106,16 @@ export const useSorting = (data = [], config = {}) => {
           return sortOrder === 'asc'
             ? aSeverity - bSeverity
             : bSeverity - aSeverity;
+        }
 
         case 'string':
-        default:
+        default: {
           const aStr = String(aValue).toLowerCase();
           const bStr = String(bValue).toLowerCase();
           return sortOrder === 'asc'
             ? aStr.localeCompare(bStr)
             : bStr.localeCompare(aStr);
+        }
       }
     });
 

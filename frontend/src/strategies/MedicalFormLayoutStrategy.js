@@ -1,3 +1,11 @@
+/* eslint-disable no-dupe-class-members --
+   This file has duplicate definitions for ~8 methods (getMaxColumns,
+   getContainerPadding, getPageSize, getDefaultFormColumns, getDefaultModalSize,
+   getAccessibleSpacing, getCompactSpacing, getEmergencySpacing,
+   getComfortableSpacing). The later definitions win at runtime; the earlier
+   ones are more sophisticated but currently dead code. Intentionally left
+   as-is pending investigation — see LINT_BASELINE.md "Deferred" section.
+*/
 import LayoutStrategy from './LayoutStrategy';
 import { env } from '../config/env';
 import { RESPONSIVE_VALUES } from '../config/responsive.config';
@@ -616,7 +624,7 @@ export class MedicalFormLayoutStrategy extends LayoutStrategy {
     const padding = basePadding[breakpoint] || 'lg';
 
     if (density === 'compact') {
-      const compactMap = { sm: 'xs', md: 'sm', lg: 'md', xl: 'md', xl: 'lg' };
+      const compactMap = { sm: 'xs', md: 'sm', lg: 'md', xl: 'lg' };
       return compactMap[padding] || 'md';
     }
 

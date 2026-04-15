@@ -181,7 +181,7 @@ const GitHubLinkModal = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .github-link-content {
           padding: 1rem 0;
         }

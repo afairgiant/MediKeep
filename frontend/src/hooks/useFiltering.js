@@ -145,7 +145,7 @@ export const useFiltering = (data = [], config = {}) => {
           }
           // Fallback to single date check
           return itemDate.toDateString() === now.toDateString();
-        case 'week':
+        case 'week': {
           const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
           // If item has both start and end dates, check for overlap with this week
@@ -164,8 +164,9 @@ export const useFiltering = (data = [], config = {}) => {
           }
           // Fallback to single date check
           return itemDate >= weekAgo;
+        }
         case 'current_month':
-        case 'month':
+        case 'month': {
           // For current calendar month - check if date range overlaps with current month
           const currentMonthStart = new Date(
             now.getFullYear(),
@@ -202,14 +203,16 @@ export const useFiltering = (data = [], config = {}) => {
 
           // Fallback to single date check
           return itemDate >= currentMonthStart && itemDate <= currentMonthEnd;
-        case 'quarter':
+        }
+        case 'quarter': {
           const quarterAgo = new Date(
             now.getFullYear(),
             now.getMonth() - 3,
             now.getDate()
           );
           return itemDate >= quarterAgo;
-        case 'year':
+        }
+        case 'year': {
           // Filter by current calendar year (Jan 1 - Dec 31)
           const currentYearStart = new Date(now.getFullYear(), 0, 1);
           const currentYearEnd = new Date(
@@ -221,7 +224,8 @@ export const useFiltering = (data = [], config = {}) => {
             59
           );
           return itemDate >= currentYearStart && itemDate <= currentYearEnd;
-        case 'past_year':
+        }
+        case 'past_year': {
           // Filter by past 12 months from today
           const yearAgo = new Date(
             now.getFullYear() - 1,
@@ -229,7 +233,8 @@ export const useFiltering = (data = [], config = {}) => {
             now.getDate()
           );
           return itemDate >= yearAgo;
-        case 'last_year':
+        }
+        case 'last_year': {
           // Filter by previous calendar year (e.g., 2025 if now is 2026)
           const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
           const lastYearEnd = new Date(
@@ -241,8 +246,9 @@ export const useFiltering = (data = [], config = {}) => {
             59
           );
           return itemDate >= lastYearStart && itemDate <= lastYearEnd;
+        }
 
-        case 'past_month':
+        case 'past_month': {
           // For previous calendar month
           const lastMonthStart = new Date(
             now.getFullYear(),
@@ -251,7 +257,8 @@ export const useFiltering = (data = [], config = {}) => {
           );
           const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
           return itemDate >= lastMonthStart && itemDate <= lastMonthEnd;
-        case 'past_3_months':
+        }
+        case 'past_3_months': {
           // For past 3 months
           const threeMonthsAgo = new Date(
             now.getFullYear(),
@@ -259,7 +266,8 @@ export const useFiltering = (data = [], config = {}) => {
             now.getDate()
           );
           return itemDate >= threeMonthsAgo;
-        case 'past_6_months':
+        }
+        case 'past_6_months': {
           // For past 6 months
           const sixMonthsAgo = new Date(
             now.getFullYear(),
@@ -267,7 +275,8 @@ export const useFiltering = (data = [], config = {}) => {
             now.getDate()
           );
           return itemDate >= sixMonthsAgo;
-        case 'current':
+        }
+        case 'current': {
           // For active medications/treatments - requires item parameter
           if (!item) return true;
           const startDate = getNestedValue(
@@ -282,7 +291,8 @@ export const useFiltering = (data = [], config = {}) => {
             (!startDate || new Date(startDate) <= now) &&
             (!endDate || new Date(endDate) >= now)
           );
-        case 'past':
+        }
+        case 'past': {
           // For past medications/treatments - requires item parameter
           if (!item) return true;
           const endField = getNestedValue(
@@ -290,7 +300,8 @@ export const useFiltering = (data = [], config = {}) => {
             config.endDateField || 'end_date'
           );
           return endField && new Date(endField) < now;
-        case 'future':
+        }
+        case 'future': {
           // For future medications/treatments - requires item parameter
           if (!item) return true;
           const startField = getNestedValue(
@@ -298,6 +309,7 @@ export const useFiltering = (data = [], config = {}) => {
             config.startDateField || 'start_date'
           );
           return startField && new Date(startField) > now;
+        }
         default:
           return true;
       }

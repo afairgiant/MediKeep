@@ -484,7 +484,7 @@ const FamilyHistorySharingModal = ({
                                 size="0.8rem"
                                 style={{ marginRight: 4 }}
                               />
-                              "{share.sharing_note}"
+                              &ldquo;{share.sharing_note}&rdquo;
                             </Text>
                           )}
                         </div>

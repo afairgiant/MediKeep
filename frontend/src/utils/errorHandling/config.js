@@ -102,7 +102,7 @@ export const validateErrorConfig = config => {
 
   return required.every(
     field =>
-      config.hasOwnProperty(field) &&
+      Object.prototype.hasOwnProperty.call(config, field) &&
       config[field] !== null &&
       config[field] !== undefined
   );

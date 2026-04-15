@@ -233,7 +233,7 @@ export const parseDateTimeString = (
 
   // Try formats with separators (/, -, .)
   const dateTimeMatch = trimmed.match(
-    /^(\d{1,2})([/\-\.])(\d{1,2})\2(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+    /^(\d{1,2})([/\-.])(\d{1,2})\2(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/
   );
   if (dateTimeMatch) {
     const [, part1, , part2, year, hour, minute, second = '0'] = dateTimeMatch;

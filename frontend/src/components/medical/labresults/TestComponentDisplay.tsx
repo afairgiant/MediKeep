@@ -171,6 +171,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     );
   });
 
+  EditDeleteActions.displayName = 'EditDeleteActions';
+
   const TestComponentCard: React.FC<{ component: LabTestComponent }> =
     React.memo(({ component }) => {
       const statusColor = getStatusColor(
@@ -335,6 +337,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
         </Card>
       );
     });
+
+  TestComponentCard.displayName = 'TestComponentCard';
 
   const LoadingSkeleton: React.FC = () => (
     <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">

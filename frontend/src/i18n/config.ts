@@ -3,6 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import HttpBackend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { isDevelopment } from '../config/env';
+import logger from '../services/logger';
 
 // Bundle English translations so the fallback language is always available synchronously.
 // This eliminates the race condition where components render before HTTP-loaded translations
@@ -85,9 +86,12 @@ i18n
     saveMissing: false,
     missingKeyHandler: (lngs, ns, key) => {
       if (isDevelopment()) {
-        console.warn(
-          `Missing translation key: ${ns}:${key} for language: ${lngs[0]}`
-        );
+        logger.warn('i18n_missing_translation_key', {
+          namespace: ns,
+          key,
+          language: lngs[0],
+          component: 'i18n',
+        });
       }
     },
 

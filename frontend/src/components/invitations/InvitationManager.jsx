@@ -821,7 +821,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {shareItem.share_details?.sharing_note && (
                                 <Text size="sm" fs="italic" c="dimmed">
-                                  "{shareItem.share_details.sharing_note}"
+                                  &ldquo;{shareItem.share_details.sharing_note}&rdquo;
                                 </Text>
                               )}
 
