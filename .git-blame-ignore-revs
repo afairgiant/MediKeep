@@ -10,6 +10,5 @@
 9427b27e299e8ffde392e2fe75e81e8557b6f00b
 48a741cc1a547dc9f9c5d311092821f0025bd8fa
 
-# Mass formatting: Black on backend, Prettier on frontend
-ad20a553070201abab712626189557018078acc3
-5a419d836b2c4fef6b273b1b23ae053f409e465c
+# Mass formatting: Black on backend, Prettier on frontend, TS parser + prop-types config (#800)
+87c70bec31d5622a8bad9c79ccb7c376c81121ae
