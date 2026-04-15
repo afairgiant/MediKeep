@@ -40,6 +40,16 @@ module.exports = {
     'no-console': 'error', // Prevent all console statements - use logger instead
     // prop-types disabled: project is migrating to TypeScript, which provides stronger guarantees
     'react/prop-types': 'off',
+    // React Compiler / React 19 prep rules (eslint-plugin-react-hooks v7).
+    // The project is on React 18 without the Compiler; re-enable these rules
+    // as part of the React 19 upgrade. Tracked in TECHNICAL_DEBT.md.
+    'react-hooks/error-boundaries': 'off',
+    'react-hooks/static-components': 'off',
+    'react-hooks/refs': 'off',
+    'react-hooks/set-state-in-effect': 'off',
+    'react-hooks/preserve-manual-memoization': 'off',
+    'react-hooks/purity': 'off',
+    'react-hooks/immutability': 'off',
     'i18next/no-literal-string': ['warn', {
       markupOnly: true,
       ignoreCallee: [
@@ -74,8 +84,17 @@ module.exports = {
   },
   overrides: [
     {
-      // Vitest test files: declare test runner globals so ESLint doesn't flag them as undefined
-      files: ['**/*.test.js', '**/*.test.jsx', '**/*.test.ts', '**/*.test.tsx', '**/*.spec.js', '**/*.spec.jsx', '**/*.spec.ts', '**/*.spec.tsx'],
+      // Vitest test files and test-adjacent helpers: declare test runner globals
+      // so ESLint doesn't flag them as undefined. Covers:
+      //   - *.test.* / *.spec.*
+      //   - anything under __tests__/, test-utils/, or testing/ (helpers, fixtures)
+      files: [
+        '**/*.test.js', '**/*.test.jsx', '**/*.test.ts', '**/*.test.tsx',
+        '**/*.spec.js', '**/*.spec.jsx', '**/*.spec.ts', '**/*.spec.tsx',
+        '**/__tests__/**/*.{js,jsx,ts,tsx}',
+        '**/test-utils/**/*.{js,jsx,ts,tsx}',
+        '**/testing/**/*.{js,jsx,ts,tsx}',
+      ],
       globals: {
         describe: 'readonly',
         test: 'readonly',
