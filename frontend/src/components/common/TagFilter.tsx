@@ -24,9 +24,9 @@ interface TagFilterProps {
     | 'encounter'
     | 'allergy';
   selectedTags: string[];
-  onTagsChange: (tags: string[]) => void;
+  onTagsChange: (_tags: string[]) => void;
   matchAll: boolean;
-  onMatchAllChange: (matchAll: boolean) => void;
+  onMatchAllChange: (_matchAll: boolean) => void;
 }
 
 export function TagFilter({

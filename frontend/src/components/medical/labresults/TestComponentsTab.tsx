@@ -49,7 +49,7 @@ import logger from '../../../services/logger';
 interface TestComponentsTabProps {
   labResultId: number;
   isViewMode?: boolean;
-  onError?: (error: Error) => void;
+  onError?: (_error: Error) => void;
   onLabResultUpdated?: () => void;
 }
 
@@ -65,7 +65,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [filters, setFilters] = useState<LabTestComponentFilters>({});
+  const [filters] = useState<LabTestComponentFilters>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [addModalTab, setAddModalTab] = useState<string>('templates');
 

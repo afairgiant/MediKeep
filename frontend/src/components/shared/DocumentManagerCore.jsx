@@ -113,7 +113,7 @@ const useDocumentManagerCore = ({
   updateFileProgress,
   startUpload,
   completeUpload,
-  resetUpload,
+  resetUpload: _resetUpload,
 }) => {
   // Performance monitoring: Track component renders (throttled in view mode)
   const performanceMonitor = createPerformanceMonitor();
@@ -212,10 +212,6 @@ const useDocumentManagerCore = ({
       updateFileProgress(fileId, progress, status, error);
     }, 150); // Increased debounce for better performance
   }, [mode, uploadState.isUploading, updateFileProgress]);
-
-  // Rate limiting for logging
-  const lastLogTimeRef = useRef(0);
-  const LOG_THROTTLE_MS = 1000; // 1 second throttle
 
   // Refs for stable callbacks
   const filesRef = useRef(files);

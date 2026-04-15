@@ -65,17 +65,13 @@ const VitalsForm = ({
   onSave,
   onCancel,
   isEdit = false,
-  createItem,
-  updateItem,
-  error,
-  clearError,
 }) => {
   const { t } = useTranslation(['common', 'errors', 'shared']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
   const lockedFields = vitals?._lockedFields || [];
-  const { getCurrentTime } = useTimezone();
+  useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
-  const { unitSystem, loading: preferencesLoading } = useUserPreferences();
+  const { unitSystem } = useUserPreferences();
   const {
     formatDateTimeInput,
     dateFormat,
@@ -463,7 +459,7 @@ const VitalsForm = ({
   });
 
   const [errors, setErrors] = useState({});
-  const [warnings, setWarnings] = useState([]);
+  const [warnings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState(new Set());
   // State for manual datetime text input (for copy-paste support)

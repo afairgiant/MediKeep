@@ -73,11 +73,7 @@ const Dashboard = () => {
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const { isMobile } = useViewport();
-  const {
-    user: authUser,
-    shouldShowProfilePrompts,
-    checkIsFirstLogin,
-  } = useAuth();
+  const { user: authUser } = useAuth();
 
   // Using global state for patient data
   const { patient: currentPatient, loading: patientLoading } =
@@ -440,7 +436,7 @@ const Dashboard = () => {
   const ModuleCard = ({ module }) => {
     const Icon = module.icon;
 
-    const handleClick = e => {
+    const handleClick = _e => {
       logger.info('ModuleCard clicked:', module.link);
       try {
         navigate(module.link);
@@ -488,7 +484,7 @@ const Dashboard = () => {
     );
   };
 
-  const ActivityItem = ({ activity, index }) => {
+  const ActivityItem = ({ activity, index: _index }) => {
     const isClickable = isActivityClickable(activity);
     const navigationUrl = getActivityNavigationUrl(activity);
     const ActivityIcon = getActivityIcon(activity.model_name);
@@ -501,7 +497,7 @@ const Dashboard = () => {
       activity.action
     );
 
-    const handleClick = e => {
+    const handleClick = _e => {
       if (isClickable && navigationUrl) {
         navigate(navigationUrl);
         frontendLogger.logInfo('Activity item clicked', {
@@ -914,7 +910,7 @@ const Dashboard = () => {
                         className="dashboard-resource-item"
                         p="8px 10px"
                         radius="sm"
-                        onClick={e => {
+                        onClick={_e => {
                           logger.info(
                             'Additional resource clicked:',
                             module.link

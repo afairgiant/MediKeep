@@ -1029,7 +1029,7 @@ const PatientSelector = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
-                  styles={theme => ({
+                  styles={_theme => ({
                     root: {
                       backgroundColor:
                         colorScheme === 'dark'

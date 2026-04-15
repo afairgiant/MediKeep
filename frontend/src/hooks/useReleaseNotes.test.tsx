@@ -57,7 +57,7 @@ function mockLocalStorageGetItem(
 
 // Capture what value was stored via setItem for a given key.
 function captureLocalStorageSetItem(): {
-  getLastCall: (key: string) => string | undefined;
+  getLastCall: (_key: string) => string | undefined;
 } {
   const calls: Map<string, string> = new Map();
   vi.mocked(localStorage.setItem).mockImplementation((k: string, v: string) => {

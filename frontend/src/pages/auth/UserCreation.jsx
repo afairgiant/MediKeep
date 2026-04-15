@@ -18,7 +18,7 @@ const UserCreation = () => {
   const { login } = useAuth();
   const { t } = useTranslation('auth');
 
-  const handleSuccess = async ({ userData, formData }) => {
+  const handleSuccess = async ({ userData: _userData, formData }) => {
     // Public context success - auto-login and redirect to dashboard
     try {
       const result = await login({

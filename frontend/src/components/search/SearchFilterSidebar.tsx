@@ -115,22 +115,22 @@ export interface PopularTag {
 
 export interface SearchFilterSidebarProps {
   selectedTypes: string[];
-  onTypeToggle: (type: string) => void;
+  onTypeToggle: (_type: string) => void;
   sortBy: string;
-  onSortChange: (sort: string) => void;
+  onSortChange: (_sort: string) => void;
   selectedTags: string[];
-  onTagChange: (tags: string[]) => void;
+  onTagChange: (_tags: string[]) => void;
   matchMode: string;
-  onMatchModeChange: (mode: string) => void;
+  onMatchModeChange: (_mode: string) => void;
   popularTags: PopularTag[];
   isLoadingTags: boolean;
-  onTagClick: (tag: string) => void;
+  onTagClick: (_tag: string) => void;
   hasActiveFilters: boolean;
   query: string;
   onClearFilters: () => void;
-  getTagColor: (tag: string) => string | null;
+  getTagColor: (_tag: string) => string | null;
   dateRange: [Date | null, Date | null];
-  onDateRangeChange: (range: [Date | null, Date | null]) => void;
+  onDateRangeChange: (_range: [Date | null, Date | null]) => void;
 }
 
 // ---------------------------------------------------------------------------

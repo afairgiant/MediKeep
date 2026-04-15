@@ -95,18 +95,13 @@ RelationshipEmptyState.propTypes = {
  */
 export function RelationshipAddFooter({
   availableCount,
-  entityName,
-  entityNamePlural,
+  entityName: _entityName,
+  entityNamePlural: _entityNamePlural,
   buttonLabel,
   onAdd,
   loading,
 }) {
   const { t } = useTranslation(['common', 'shared']);
-  const plural = availableCount !== 1;
-  const displayName = plural
-    ? entityNamePlural || `${entityName}s`
-    : entityName;
-
   return (
     <Group justify="space-between" align="center">
       <Text size="sm" c="dimmed">

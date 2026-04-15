@@ -194,7 +194,7 @@ export const isNavigationFromRelated = (
  * @param {string} currentEntity - The current entity type
  * @returns {Object|null} Source entity info or null if not found
  */
-export const getSourceEntityFromNavigation = (searchParams, currentEntity) => {
+export const getSourceEntityFromNavigation = (_searchParams, _currentEntity) => {
   // This would need to be implemented based on your specific navigation patterns
   // For now, return null as this is a more complex reverse lookup
   return null;

@@ -24,7 +24,7 @@ const TreatmentRelationshipsManager = ({
   onLabResultClick,
   onEquipmentClick,
 }) => {
-  const { t } = useTranslation('common');
+  useTranslation('common');
 
   // Relationship counts for badges
   const [medicationCount, setMedicationCount] = useState(0);

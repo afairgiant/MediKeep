@@ -138,7 +138,6 @@ export class MedicalFormLayoutStrategy extends LayoutStrategy {
       formType = 'standard',
       complexity = 'medium',
       sectionCount = 1,
-      priorityFields = [],
       forceColumns = null,
     } = context;
 
@@ -391,11 +390,7 @@ export class MedicalFormLayoutStrategy extends LayoutStrategy {
    * @returns {Object} Container configuration
    */
   getContainer(breakpoint, context = {}) {
-    const {
-      formType = 'standard',
-      isModal = true,
-      fullScreen = false,
-    } = context;
+    const { isModal = true, fullScreen = false } = context;
 
     const config = {
       // Medical forms are typically centered and contained
@@ -758,7 +753,7 @@ export class MedicalFormLayoutStrategy extends LayoutStrategy {
    * @param {string} breakpoint - Current breakpoint
    * @returns {Object} Priority-based grouping
    */
-  getPriorityGrouping(fields, columns, breakpoint) {
+  getPriorityGrouping(fields, columns, _breakpoint) {
     const priorityGroups = {};
 
     // Initialize priority groups
@@ -1172,7 +1167,7 @@ export class MedicalFormLayoutStrategy extends LayoutStrategy {
    * @returns {string} Padding value
    */
   getContainerPadding(breakpoint, context = {}) {
-    const { density = 'comfortable', isModal = true } = context;
+    const { isModal = true } = context;
 
     if (isModal) {
       // Modal forms need less padding since modal provides container

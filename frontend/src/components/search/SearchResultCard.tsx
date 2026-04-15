@@ -30,11 +30,11 @@ interface SearchResultCardProps {
   row: SearchResultRow;
   query?: string;
   selectedTags?: string[];
-  getTagColor: (tag: string) => string | null;
-  onTagClick: (tag: string) => void;
-  onClick: (row: SearchResultRow) => void;
+  getTagColor: (_tag: string) => string | null;
+  onTagClick: (_tag: string) => void;
+  onClick: (_row: SearchResultRow) => void;
   isSelected?: boolean;
-  formatDate: (date: string) => string;
+  formatDate: (_date: string) => string;
 }
 
 // ---------------------------------------------------------------------------

@@ -8,7 +8,7 @@ import ThemeToggle from '../ui/ThemeToggle';
 const MobileNavigation = ({
   isOpen,
   onClose,
-  user,
+  user: _user,
   isAdmin,
   onLogout,
   showBackButton,

@@ -40,7 +40,7 @@ function renderWithResponsive(
     // Whether to use mock context or real provider
     useMockContext = true,
     // Router options
-    initialEntries = ['/'],
+    initialEntries: _initialEntries = ['/'],
     skipRouter = false,
     // Mantine theme overrides
     mantineTheme = {},

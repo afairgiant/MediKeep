@@ -48,7 +48,7 @@ const TemplateManager = ({
     useDisclosure(false);
   const [showEditModal, { open: openEditModal, close: closeEditModal }] =
     useDisclosure(false);
-  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [, setEditingTemplate] = useState(null);
   const [templateForm, setTemplateForm] = useState({
     name: '',
     description: '',

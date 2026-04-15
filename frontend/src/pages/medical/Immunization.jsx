@@ -71,7 +71,6 @@ const Immunization = () => {
     deleteItem,
     refreshData,
     clearError,
-    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'immunization',
@@ -135,7 +134,6 @@ const Immunization = () => {
   const needsRefreshAfterSubmissionRef = useRef(false);
 
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -412,7 +410,7 @@ const Immunization = () => {
           isLoading={isBlocking}
           statusMessage={statusMessage}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onFileUploadComplete={(success, completedCount, failedCount) => {
+          onFileUploadComplete={(success, _completedCount, _failedCount) => {
             if (success && editingImmunization?.id) {
               refreshFileCount(editingImmunization.id);
             }

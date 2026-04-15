@@ -89,7 +89,6 @@ const Visits = () => {
 
   // Form submission with uploads hook
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -484,51 +483,6 @@ const Visits = () => {
       });
 
       handleSubmissionFailure(error, 'form');
-    }
-  };
-
-  // Helper function to get practitioner display name
-  const getPractitionerDisplay = practitionerId => {
-    if (!practitionerId) return 'No practitioner assigned';
-
-    const practitioner = practitioners.find(
-      p => p.id === parseInt(practitionerId)
-    );
-    if (practitioner) {
-      return `${practitioner.name} - ${practitioner.specialty}`;
-    }
-    return `Practitioner ID: ${practitionerId}`;
-  };
-
-  const getPriorityColor = priority => {
-    switch (priority) {
-      case 'urgent':
-        return 'red';
-      case 'high':
-        return 'orange';
-      case 'medium':
-        return 'yellow';
-      case 'low':
-        return 'blue';
-      default:
-        return 'gray';
-    }
-  };
-
-  const getVisitTypeColor = visitType => {
-    switch (visitType?.toLowerCase()) {
-      case 'emergency':
-        return 'red';
-      case 'urgent care':
-        return 'orange';
-      case 'follow-up':
-        return 'blue';
-      case 'routine':
-        return 'green';
-      case 'consultation':
-        return 'purple';
-      default:
-        return 'gray';
     }
   };
 

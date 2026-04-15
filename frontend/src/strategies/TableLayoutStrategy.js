@@ -218,9 +218,7 @@ export class TableLayoutStrategy extends LayoutStrategy {
    */
   getColumns(breakpoint, context = {}) {
     const {
-      dataType = 'general',
       totalColumns = 0,
-      availableColumns = [],
       forceColumns = null,
       displayStrategy = null,
     } = context;
@@ -815,9 +813,8 @@ export class TableLayoutStrategy extends LayoutStrategy {
    * @returns {Object} Column ARIA labels
    */
   getColumnAriaLabels(context) {
-    const { availableColumns = [], dataType = 'general' } = context;
+    const { availableColumns = [] } = context;
 
-    const medicalConfig = this.tableConfig.medicalDataTypes[dataType];
     const labels = {};
 
     availableColumns.forEach(column => {

@@ -55,7 +55,7 @@ const ResponsiveNavigation = ({
 
   // Handle navigation link click
   const handleLinkClick = useCallback(
-    path => {
+    _path => {
       // Close navigation on mobile/tablet after link click
       if (responsive.isBelow('lg')) {
         if (controlledOnToggle) {

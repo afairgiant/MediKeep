@@ -239,8 +239,9 @@ function ThemedToastContainer() {
 }
 
 // Component to initialize global activity tracking with enhanced error handling
+// eslint-disable-next-line unused-imports/no-unused-vars -- Reserved for future use, referenced in commented JSX
 function ActivityTracker() {
-  const { isTracking, isEnabled, getStats } = useActivityTracker({
+  const { isTracking, getStats } = useActivityTracker({
     trackMouseMove: false,
     trackKeyboard: true,
     trackClicks: true,

@@ -80,8 +80,8 @@ interface TestTemplate {
 
 interface TestComponentTemplatesProps {
   labResultId: number;
-  onComponentsAdded?: (components: LabTestComponent[]) => void;
-  onError?: (error: Error) => void;
+  onComponentsAdded?: (_components: LabTestComponent[]) => void;
+  onError?: (_error: Error) => void;
   disabled?: boolean;
 }
 

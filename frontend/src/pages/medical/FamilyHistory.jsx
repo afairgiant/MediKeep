@@ -59,7 +59,7 @@ const FamilyHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
-  const { colorScheme } = useMantineColorScheme();
+  useMantineColorScheme();
   const [viewMode, setViewMode] = usePersistedViewMode('family-history');
   const [activeTab, setActiveTab] = useState('my-family');
   const [expandedMembers, setExpandedMembers] = useState(new Set());
@@ -102,12 +102,11 @@ const FamilyHistory = () => {
     updateItem,
     deleteItem,
     refreshData,
-    clearError,
     setError,
   } = useMedicalData({
     entityName: 'family_member',
     apiMethodsConfig: {
-      getAll: async signal => {
+      getAll: async _signal => {
         logger.debug('Getting organized family history (owned + shared)', {
           component: 'FamilyHistory',
         });

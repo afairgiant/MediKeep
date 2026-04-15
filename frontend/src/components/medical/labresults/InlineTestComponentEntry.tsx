@@ -55,7 +55,7 @@ export interface InlineTestComponentMethods {
 }
 
 interface InlineTestComponentEntryProps {
-  onRef?: (methods: InlineTestComponentMethods | null) => void;
+  onRef?: (_methods: InlineTestComponentMethods | null) => void;
   disabled?: boolean;
 }
 

@@ -38,7 +38,7 @@ const InjuryFormWrapper = ({
   onInputChange,
   onSubmit,
   practitionersOptions = [],
-  practitionersLoading = false,
+  practitionersLoading: _practitionersLoading = false,
   injuryTypes = [],
   injuryTypesLoading = false,
   isLoading = false,

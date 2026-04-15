@@ -20,7 +20,7 @@ const InsuranceCard = ({
   insurance,
   onEdit,
   onDelete,
-  onSetPrimary,
+  onSetPrimary: _onSetPrimary,
   onView,
   fileCount = 0,
   fileCountLoading = false,

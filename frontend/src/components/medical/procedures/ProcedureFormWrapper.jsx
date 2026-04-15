@@ -27,7 +27,6 @@ import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import {
   parseDateInput,
-  getTodayEndOfDay,
   formatDateInputChange,
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
@@ -58,9 +57,6 @@ const ProcedureFormWrapper = ({
 
   // Form handlers
   const { handleTextInputChange } = useFormHandlers(onInputChange);
-
-  // Get today's date for date picker constraints
-  const today = getTodayEndOfDay();
 
   // Reset tab when modal opens/closes
   useEffect(() => {

@@ -119,12 +119,6 @@ const GlobalSearch = ({
     }
   };
 
-  const handleClearSearch = () => {
-    setQuery('');
-    setResults([]);
-    setShowResults(false);
-  };
-
   return (
     <Box
       ref={searchRef}

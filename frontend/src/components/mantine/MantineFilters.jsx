@@ -49,8 +49,6 @@ const MantineFilters = ({
   const { t } = useTranslation(['common', 'shared']);
   const {
     searchPlaceholder = 'searchPlaceholders.generic',
-    title = 'Filters & Search',
-    description,
     showStatus = true,
     showCategory = false,
     showMedicationType = false,

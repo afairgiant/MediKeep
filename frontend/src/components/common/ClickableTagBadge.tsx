@@ -34,7 +34,7 @@ interface ClickableTagBadgeProps {
   tag: string;
   color?: string | null;
   size?: 'xs' | 'sm' | 'md';
-  onClick?: (e: React.MouseEvent) => void;
+  onClick?: (_e: React.MouseEvent) => void;
   compact?: boolean;
   highlighted?: boolean;
 }

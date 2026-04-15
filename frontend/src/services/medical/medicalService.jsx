@@ -47,7 +47,7 @@ class MedicalService {
    * @param {number} patientId
    * @returns {Promise<Array>}
    */
-  async getLabResults(patientId) {
+  async getLabResults(_patientId) {
     return await apiService.getLabResults();
   }
 

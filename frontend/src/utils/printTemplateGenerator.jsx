@@ -368,7 +368,7 @@ export const generateInsurancePrint = (
  * @param {string} html - The HTML content to print
  * @param {string} windowTitle - Title for the print window
  */
-export const openPrintWindow = (html, windowTitle = 'Medical Record') => {
+export const openPrintWindow = (html, _windowTitle = 'Medical Record') => {
   const printWindow = window.open('', '_blank');
   printWindow.document.write(html);
   printWindow.document.close();

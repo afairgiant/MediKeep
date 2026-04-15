@@ -66,7 +66,7 @@ describe('EmptyState', () => {
     });
 
     it('does not render message when none provided', () => {
-      const { container } = renderWithMantine(<EmptyState title="No items" />);
+      renderWithMantine(<EmptyState title="No items" />);
 
       // Should only have the title, no additional Text for message
       expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(

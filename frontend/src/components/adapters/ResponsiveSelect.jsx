@@ -54,7 +54,7 @@ export const ResponsiveSelect = memo(
     // Styling
     className = '',
     size,
-    variant,
+    variant: _variant,
 
     // Medical form specific
     medicalContext = 'general', // 'practitioners', 'pharmacies', 'medications', 'general'
@@ -62,8 +62,8 @@ export const ResponsiveSelect = memo(
 
     // Advanced features
     onSearch,
-    onCreate,
-    creatable = false,
+    onCreate: _onCreate,
+    creatable: _creatable = false,
 
     // Accessibility
     'aria-label': ariaLabel,
@@ -372,7 +372,7 @@ export const ResponsiveSelect = memo(
           }
           // Mobile-specific enhancements
           {...(isMobile && {
-            styles: theme => ({
+            styles: _theme => ({
               input: {
                 minHeight: rem(48), // Larger touch target
                 fontSize: rem(16), // Prevent zoom on iOS

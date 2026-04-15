@@ -66,9 +66,6 @@ const AsyncErrorComponent = ({ shouldThrow }) => {
   );
 };
 
-// Wrapper for Mantine provider
-const wrapper = ({ children }) => <MantineProvider>{children}</MantineProvider>;
-
 describe('UploadProgressErrorBoundary', () => {
   beforeEach(() => {
     vi.clearAllMocks();

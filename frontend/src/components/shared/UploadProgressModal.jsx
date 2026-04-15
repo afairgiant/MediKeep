@@ -12,11 +12,9 @@ import {
   Divider,
 } from '@mantine/core';
 import {
-  IconUpload,
   IconCheck,
   IconX,
   IconExclamationMark,
-  IconFile,
   IconRefresh,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -38,35 +36,6 @@ const UploadProgressModal = ({
   uploadSpeed,
 }) => {
   const { t } = useTranslation('documents');
-  const getFileStatusIcon = status => {
-    switch (status) {
-      case 'completed':
-        return <IconCheck size={16} />;
-      case 'failed':
-        return <IconX size={16} />;
-      case 'uploading':
-        return <IconUpload size={16} />;
-      case 'pending':
-        return <IconFile size={16} />;
-      default:
-        return <IconFile size={16} />;
-    }
-  };
-
-  const getFileStatusColor = status => {
-    switch (status) {
-      case 'completed':
-        return 'green';
-      case 'failed':
-        return 'red';
-      case 'uploading':
-        return 'blue';
-      case 'pending':
-        return 'gray';
-      default:
-        return 'gray';
-    }
-  };
 
   const getOverallStatusIcon = () => {
     if (isCompleted && !hasErrors) {

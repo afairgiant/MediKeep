@@ -79,7 +79,7 @@ const SearchResults = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [totalCount, setTotalCount] = useState(0);
+  const [, setTotalCount] = useState(0);
 
   // Tag search state
   const [selectedTags, setSelectedTags] = useState([]);

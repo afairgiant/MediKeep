@@ -44,7 +44,7 @@ export const handlers = [
   }),
 
   rest.post(`${API_BASE}/auth/register/`, (req, res, ctx) => {
-    const { username, email, password, full_name } = req.body;
+    const { username, email, password: _password, full_name } = req.body;
 
     return res(
       ctx.status(201),

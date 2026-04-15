@@ -71,7 +71,6 @@ const EmergencyContacts = () => {
     deleteItem,
     refreshData,
     clearError,
-    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'emergency_contact',

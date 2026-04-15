@@ -199,7 +199,7 @@ export const validatePatientSelection = (currentPatient, setError) => {
  * @param {string} fieldName - Name of the field for context
  * @returns {boolean} True if date is valid, false otherwise
  */
-export const validateDate = (dateValue, setError, fieldName = 'date') => {
+export const validateDate = (dateValue, setError, _fieldName = 'date') => {
   if (!dateValue) {
     setError(ERROR_MESSAGES.INVALID_DATE);
     return false;

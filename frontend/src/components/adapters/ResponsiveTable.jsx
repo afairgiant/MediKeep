@@ -69,8 +69,8 @@ export const ResponsiveTable = memo(
     sortBy = null,
     sortDirection = 'asc',
     onSort,
-    filterable = false,
-    onFilter,
+    filterable: _filterable = false,
+    onFilter: _onFilter,
 
     // Pagination
     pagination = true,
@@ -83,7 +83,7 @@ export const ResponsiveTable = memo(
     selectable = false,
     selectedRows = [],
     onRowSelect,
-    onRowsSelect,
+    onRowsSelect: _onRowsSelect,
 
     // Row actions
     onRowClick,
@@ -105,12 +105,12 @@ export const ResponsiveTable = memo(
 
     // Virtualization
     virtualization = 'auto',
-    rowHeight,
+    rowHeight: _rowHeight,
 
     // Medical context specific
     medicalContext = 'general',
     showSecondaryInfo = true,
-    compactCards = false,
+    compactCards: _compactCards = false,
 
     // Data formatting
     formatters = {},
@@ -120,7 +120,7 @@ export const ResponsiveTable = memo(
     fullWidth = false,
 
     // Loading states
-    loadingText = 'Loading data...',
+    loadingText: _loadingText = 'Loading data...',
     emptyText = 'No data available',
     errorText = 'Error loading data',
 
@@ -133,8 +133,7 @@ export const ResponsiveTable = memo(
 
     ...props
   }) => {
-    const { breakpoint, deviceType, isMobile, isTablet, isDesktop } =
-      useResponsive();
+    const { breakpoint, deviceType, isMobile } = useResponsive();
     const { t } = useTranslation(['common', 'shared']);
     const hasActions = Boolean(onView || onEdit || onDelete);
 

@@ -19,7 +19,7 @@ const ResponsiveGrid = ({
   spacing = { xs: 'xs', sm: 'sm', md: 'md', lg: 'lg' },
   verticalSpacing,
   minChildWidth,
-  maxChildWidth,
+  maxChildWidth: _maxChildWidth,
   strategy = 'default',
   className = '',
   ...props

@@ -23,7 +23,7 @@ const PractitionerFormWrapper = ({
   onSubmit,
   editingItem,
   isLoading,
-  statusMessage,
+  statusMessage: _statusMessage,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
 

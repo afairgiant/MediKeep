@@ -446,7 +446,7 @@ describe('InvitationManager Component', () => {
         expect(screen.getByText('manager.sharedBy')).toBeInTheDocument();
         expect(screen.getByText('view')).toBeInTheDocument();
         expect(
-          screen.getByText('"Shared for consultation"')
+          screen.getByText('\u201CShared for consultation\u201D')
         ).toBeInTheDocument();
         expect(screen.getByText('manager.conditionsCount')).toBeInTheDocument();
       });

@@ -38,19 +38,19 @@ interface TrendChartSelectorProps {
       date_to: string | null;
     }>;
   };
-  addVitalChart: (vitalType: string) => void;
-  removeVitalChart: (vitalType: string) => void;
+  addVitalChart: (_vitalType: string) => void;
+  removeVitalChart: (_vitalType: string) => void;
   updateVitalChartDates: (
-    vitalType: string,
-    dateFrom: string | null,
-    dateTo: string | null
+    _vitalType: string,
+    _dateFrom: string | null,
+    _dateTo: string | null
   ) => void;
-  addLabTestChart: (testName: string) => void;
-  removeLabTestChart: (testName: string) => void;
+  addLabTestChart: (_testName: string) => void;
+  removeLabTestChart: (_testName: string) => void;
   updateLabTestChartDates: (
-    testName: string,
-    dateFrom: string | null,
-    dateTo: string | null
+    _testName: string,
+    _dateFrom: string | null,
+    _dateTo: string | null
   ) => void;
   trendChartCount: number;
 }

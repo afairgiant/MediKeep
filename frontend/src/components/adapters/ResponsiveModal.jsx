@@ -45,7 +45,7 @@ export const ResponsiveModal = memo(
     // Responsive behavior
     responsiveSize = 'auto',
     forceFullScreen = false,
-    adaptToContent = true,
+    adaptToContent: _adaptToContent = true,
 
     // Scroll behavior
     scrollAreaComponent: ScrollAreaComponent = ScrollArea,

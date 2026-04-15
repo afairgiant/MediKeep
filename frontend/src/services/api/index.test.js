@@ -236,7 +236,7 @@ describe('API Service', () => {
     test('handles network errors', async () => {
       // Override handler to simulate network error
       server.use(
-        rest.get('*/api/v1/patients/recent-activity/', (req, res, ctx) => {
+        rest.get('*/api/v1/patients/recent-activity/', (req, res, _ctx) => {
           return res.networkError('Failed to connect');
         })
       );

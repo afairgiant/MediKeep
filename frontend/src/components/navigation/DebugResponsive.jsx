@@ -5,7 +5,7 @@
 
 import { useResponsive } from '../../hooks/useResponsive';
 
-const DebugResponsive = ({ currentPath, userInfo }) => {
+const DebugResponsive = ({ currentPath: _currentPath, userInfo: _userInfo }) => {
   const responsive = useResponsive();
 
   // Get actual window dimensions

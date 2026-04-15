@@ -32,14 +32,14 @@ vi.mock('../hooks/useGlobalData', () => ({
   })),
 }));
 vi.mock('../components/medical', () => ({
-  PatientSelector: ({ onPatientChange, currentPatientId }) => (
+  PatientSelector: ({ onPatientChange: _onPatientChange, currentPatientId }) => (
     <div data-testid="patient-selector">
       <span data-testid="current-patient-id">{currentPatientId}</span>
     </div>
   ),
 }));
 vi.mock('../components/common', () => ({
-  GlobalSearch: ({ patientId, placeholder }) => (
+  GlobalSearch: ({ patientId: _patientId, placeholder }) => (
     <input data-testid="global-search" placeholder={placeholder} />
   ),
 }));

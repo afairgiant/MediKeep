@@ -9,7 +9,7 @@ const PractitionerCard = ({
   onEdit,
   onDelete,
   onView,
-  navigate,
+  navigate: _navigate,
   onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);

@@ -778,8 +778,6 @@ class ApiService {
       // Get user-friendly error message based on error type
       const getUserFriendlyErrorMessage = (taskResult, fileName) => {
         const errorType = taskResult?.error_type;
-        const originalError = taskResult?.result || 'Upload failed';
-
         switch (errorType) {
           case 'duplicate':
             return `"${fileName}" already exists in Paperless. This document appears to be a duplicate.`;
@@ -945,7 +943,7 @@ class ApiService {
   }
 
   // View file in new tab (generic - file ID is enough)
-  async viewEntityFile(fileId, fileName, signal) {
+  async viewEntityFile(fileId, fileName, _signal) {
     try {
       logger.info('api_view_entity_file', 'Opening entity file for viewing', {
         fileId,

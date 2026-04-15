@@ -107,7 +107,7 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           const deviceList = response?.devices ?? response ?? [];
           setDevices(deviceList);
         })
-        .catch((err: any) => {
+        .catch((_err: any) => {
           logger.error('vitals_import_load_devices_failed', {
             description: 'Failed to load import devices',
             component: 'VitalsImportModal',

@@ -22,7 +22,6 @@ export const useErrorHandler = (componentName, options = {}) => {
     showNotifications = true,
     logErrors = true,
     autoCloseNotifications = true,
-    defaultSeverity = 'medium',
   } = options;
 
   /**

@@ -57,7 +57,7 @@ vi.mock('../../services/api/adminApi', () => ({
 
 // Mock @mantine/dates (DatePickerInput uses complex internals)
 vi.mock('@mantine/dates', () => ({
-  DatePickerInput: ({ value, onChange, placeholder, ...props }) => (
+  DatePickerInput: ({ value: _value, onChange: _onChange, placeholder, ...props }) => (
     <input
       data-testid="date-range-input"
       placeholder={placeholder}

@@ -12,7 +12,7 @@ const TreatmentCard = ({
   onView,
   conditions = [],
   onConditionClick,
-  navigate,
+  navigate: _navigate,
   fileCount = 0,
   fileCountLoading = false,
   disableActions = false,

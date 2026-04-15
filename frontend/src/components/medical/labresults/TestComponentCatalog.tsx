@@ -53,7 +53,7 @@ interface TestComponentCatalogProps {
   patientId: number;
 }
 
-function getStatusOptions(t: (key: string, fallback: string) => string) {
+function getStatusOptions(t: (_key: string, _fallback: string) => string) {
   return [
     {
       value: 'critical',

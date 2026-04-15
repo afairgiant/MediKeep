@@ -43,7 +43,7 @@ import logger from '../../../services/logger';
 interface TestComponentStatsProps {
   components: LabTestComponent[];
   loading?: boolean;
-  onError?: (error: Error) => void;
+  onError?: (_error: Error) => void;
 }
 
 interface StatsData {

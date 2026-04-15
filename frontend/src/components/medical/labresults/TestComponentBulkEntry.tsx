@@ -178,10 +178,10 @@ interface ParsedTestComponent {
 
 interface TestComponentBulkEntryProps {
   labResultId: number;
-  onComponentsAdded?: (components: LabTestComponent[]) => void;
-  onComponentsParsed?: (componentCount: number) => void; // Callback when components are parsed but not yet added
+  onComponentsAdded?: (_components: LabTestComponent[]) => void;
+  onComponentsParsed?: (_componentCount: number) => void; // Callback when components are parsed but not yet added
   onLabResultUpdated?: () => void; // Callback to refresh lab result after updating completed_date
-  onError?: (error: Error) => void;
+  onError?: (_error: Error) => void;
   disabled?: boolean;
 }
 
@@ -189,9 +189,9 @@ interface TestComponentBulkEntryProps {
 const TableRow = React.memo<{
   index: number;
   component: ParsedTestComponent;
-  onEdit: (index: number, field: keyof ParsedTestComponent, value: any) => void;
-  onRemove: (index: number) => void;
-  getConfidenceColor: (confidence: number) => string;
+  onEdit: (_index: number, _field: keyof ParsedTestComponent, _value: any) => void;
+  onRemove: (_index: number) => void;
+  getConfidenceColor: (_confidence: number) => string;
 }>(({ index, component, onEdit, onRemove, getConfidenceColor }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
@@ -423,7 +423,6 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   onComponentsParsed,
   onLabResultUpdated,
   onError,
-  disabled = false,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat } = useDateFormat();
@@ -446,7 +445,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   });
 
   // PDF Upload state
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [, setPdfFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingMessage, setProcessingMessage] = useState('');

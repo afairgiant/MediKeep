@@ -30,7 +30,7 @@ import logger from '../../../services/logger';
 interface TestComponentSummaryProps {
   labResultId: number;
   compact?: boolean;
-  onError?: (error: Error) => void;
+  onError?: (_error: Error) => void;
 }
 
 interface SummaryStats {

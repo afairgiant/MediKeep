@@ -410,7 +410,7 @@ describe('FamilyHistorySharingModal Component', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('"Shared for medical consultation"')
+          screen.getByText('\u201CShared for medical consultation\u201D')
         ).toBeInTheDocument();
       });
     });
@@ -981,7 +981,7 @@ describe('FamilyHistorySharingModal Component', () => {
       });
 
       expect(
-        screen.queryByText('"Shared for medical consultation"')
+        screen.queryByText('\u201CShared for medical consultation\u201D')
       ).not.toBeInTheDocument();
     });
 

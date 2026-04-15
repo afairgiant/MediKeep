@@ -12,8 +12,8 @@ export interface SearchHistoryEntry {
 
 interface UseSearchHistoryReturn {
   entries: SearchHistoryEntry[];
-  addEntry: (query: string, tags: string[], matchMode: string) => void;
-  removeEntry: (index: number) => void;
+  addEntry: (_query: string, _tags: string[], _matchMode: string) => void;
+  removeEntry: (_index: number) => void;
   clearHistory: () => void;
 }
 

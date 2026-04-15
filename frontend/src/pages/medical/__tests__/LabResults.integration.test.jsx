@@ -151,7 +151,7 @@ vi.mock('../../../components/shared/MedicalPageActions', () => ({
   default: ({
     primaryAction,
     secondaryActions,
-    viewMode,
+    viewMode: _viewMode,
     onViewModeChange,
   }) => (
     <div data-testid="page-actions">

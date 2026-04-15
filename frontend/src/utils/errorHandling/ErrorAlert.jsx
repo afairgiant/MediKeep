@@ -198,7 +198,7 @@ export const ErrorQueueAlert = ({
  * @param {Function} props.resetError - Function to reset the error boundary
  * @returns {JSX.Element} Error boundary fallback UI
  */
-export const ErrorBoundaryFallback = ({ error, resetError }) => {
+export const ErrorBoundaryFallback = ({ error: _error, resetError }) => {
   const { t } = useTranslation('errors');
   const formattedError = {
     title: 'Something Went Wrong',

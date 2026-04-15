@@ -105,7 +105,7 @@ vi.mock('../../../components', () => ({
   PageHeader: ({ title }) => <div data-testid="page-header">{title}</div>,
 }));
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, viewMode, onViewModeChange }) => (
+  default: ({ primaryAction, viewMode: _viewMode, onViewModeChange }) => (
     <div data-testid="page-actions">
       {primaryAction && (
         <button onClick={primaryAction.onClick} data-testid="add-button">
@@ -199,7 +199,7 @@ vi.mock('../../../components/medical/MantineEmergencyContactForm', () => ({
     formData,
     onInputChange,
     onSubmit,
-    editingContact,
+    editingContact: _editingContact,
   }) => {
     if (!isOpen) return null;
     return (

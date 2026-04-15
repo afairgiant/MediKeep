@@ -145,15 +145,12 @@ const Procedures = () => {
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] =
-    useState(null);
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
 
   // Form submission with uploads hook
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -570,7 +567,7 @@ const Procedures = () => {
         isLoading={isBlocking}
         statusMessage={statusMessage}
         onDocumentManagerRef={setDocumentManagerMethods}
-        onFileUploadComplete={(success, completedCount, failedCount) => {
+        onFileUploadComplete={(success, _completedCount, _failedCount) => {
           if (success && editingProcedure?.id) {
             refreshFileCount(editingProcedure.id);
           }

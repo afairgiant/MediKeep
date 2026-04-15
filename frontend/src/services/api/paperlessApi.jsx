@@ -415,10 +415,6 @@ export const searchDocumentByFilenameAndTime = async (
     const searchStart = new Date(searchTime.getTime() - 30 * 60 * 1000); // 30 minutes ago
     const searchEnd = new Date(searchTime.getTime() + 30 * 60 * 1000); // 30 minutes from now
 
-    // Format dates for API
-    const startDate = searchStart.toISOString().split('T')[0];
-    const endDate = searchEnd.toISOString().split('T')[0];
-
     // Try searching by title first
     try {
       const titleSearchResults = await apiService.get(
