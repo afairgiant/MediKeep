@@ -155,7 +155,9 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [trendPanelOpen, setTrendPanelOpen] = useState(false);
   const [selectedTestName, setSelectedTestName] = useState<string | null>(null);
-  const trendClickDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const trendClickDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
   const handleComponentEdit = useCallback((component: LabTestComponent) => {
     logger.info('test_component_edit_requested', {

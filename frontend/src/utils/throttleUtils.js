@@ -274,9 +274,5 @@ export function createThrottleCleanupManager() {
     size() {
       return throttles.size;
     },
-
-    isDestroyed() {
-      return isDestroyed;
-    },
   };
 }

@@ -2,6 +2,7 @@
 // Vitest setup file for responsive tests
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import React from 'react';
 import { vi } from 'vitest';
 
 // Polyfills for jsdom environment

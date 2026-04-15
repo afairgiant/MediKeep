@@ -1,3 +1,5 @@
+import type { FC } from 'react';
+
 export interface FormLoadingOverlayProps {
   visible: boolean;
   message?: string;
@@ -9,5 +11,5 @@ export interface FormLoadingOverlayProps {
   zIndex?: number;
 }
 
-declare const FormLoadingOverlay: React.FC<FormLoadingOverlayProps>;
+declare const FormLoadingOverlay: FC<FormLoadingOverlayProps>;
 export default FormLoadingOverlay;

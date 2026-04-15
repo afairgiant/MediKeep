@@ -532,8 +532,7 @@ const DocumentManager = ({
           errorMessage =
             'Paperless configuration is incomplete. Please check your settings.';
         } else if (errorMessage.includes('appears to be a duplicate')) {
-          // Duplicate error - use the detailed message from backend
-          errorMessage = errorMessage;
+          // Duplicate error: use the detailed backend message as-is.
         } else if (errorMessage.includes('Failed to upload to paperless')) {
           errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
         } else if (
@@ -1000,6 +999,8 @@ const DocumentManager = ({
             });
           } catch (error) {
             // Enhanced error message handling with improved context
+            // Re-read the ref here because the try-block's local copy is out of scope.
+            const currentStorageBackend = selectedStorageBackendRef.current;
             let errorMessage = error.message || 'Failed to upload file';
             let enhancedError = error;
 
@@ -1023,7 +1024,7 @@ const DocumentManager = ({
                   errorMessage =
                     'Paperless configuration is incomplete. Please check your settings.';
                 } else if (errorMessage.includes('appears to be a duplicate')) {
-                  errorMessage = errorMessage;
+                  // Duplicate error: use the detailed backend message as-is.
                 } else if (
                   errorMessage.includes('Failed to upload to paperless')
                 ) {
