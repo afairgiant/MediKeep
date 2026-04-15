@@ -1,3 +1,10 @@
+# Commits listed here are ignored by `git blame` so mechanical changes
+# (mass reformatting, rename refactors, etc.) don't bury real authorship.
+#
+# Format: one SHA per line; blank lines and `#` comments allowed.
+# Enable locally: `git config blame.ignoreRevsFile .git-blame-ignore-revs`
+# GitHub honors this file automatically.
+
 # i18n translation key refactoring
 82b9652914009826283eaff0be2fe80392bd110d
 9427b27e299e8ffde392e2fe75e81e8557b6f00b

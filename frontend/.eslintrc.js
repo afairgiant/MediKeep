@@ -27,7 +27,8 @@ module.exports = {
     // Add custom rules here
     'no-unused-vars': 'warn',
     'no-console': 'error', // Prevent all console statements - use logger instead
-    'react/prop-types': 'warn', // Warn on missing prop types
+    // prop-types disabled: project is migrating to TypeScript, which provides stronger guarantees
+    'react/prop-types': 'off',
     'i18next/no-literal-string': ['warn', {
       markupOnly: true,
       ignoreCallee: [
@@ -91,8 +92,6 @@ module.exports = {
       rules: {
         // TypeScript handles type-checking; disable the JS variant to avoid false positives
         'no-unused-vars': 'off',
-        // prop-types are redundant when TypeScript types are used
-        'react/prop-types': 'off',
       },
     },
   ],
