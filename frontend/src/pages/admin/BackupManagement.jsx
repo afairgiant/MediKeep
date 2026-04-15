@@ -191,13 +191,8 @@ const BackupManagement = () => {
   });
 
   // Wrap executeAction to suppress default success messages
-  const executeAction = async (actionName, actionData = null) => {
-    try {
-      return await rawExecuteAction(actionName, actionData);
-    } catch (err) {
-      throw err;
-    }
-  };
+  const executeAction = (actionName, actionData = null) =>
+    rawExecuteAction(actionName, actionData);
 
   const backups = backupData?.backups || [];
 

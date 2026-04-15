@@ -444,7 +444,7 @@ const BaseMedicalForm = ({
         case 'time':
           return renderTimeField(fieldConfig, baseProps);
 
-        case 'autocomplete':
+        case 'autocomplete': {
           // Convert options to simple string array for Autocomplete
           const autocompleteOptions = selectOptions.map(option =>
             typeof option === 'object' ? option.value : option
@@ -472,8 +472,9 @@ const BaseMedicalForm = ({
               comboboxProps={{ withinPortal: true, zIndex: 3000 }}
             />
           );
+        }
 
-        case 'combobox':
+        case 'combobox': {
           // Enhanced combobox for specialty selection with custom input capability
           const ComboboxField = () => {
             const combobox = useCombobox({
@@ -614,6 +615,7 @@ const BaseMedicalForm = ({
           };
 
           return <ComboboxField />;
+        }
 
         case 'rating':
           return (

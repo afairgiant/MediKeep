@@ -287,15 +287,10 @@ class ApiService {
         ? { patient_id: patientId }
         : {};
 
-    try {
-      const result = await this.get('/patients/recent-activity/', {
-        params,
-        signal,
-      });
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return this.get('/patients/recent-activity/', {
+      params,
+      signal,
+    });
   }
 
   getDashboardStats(patientId, signal) {

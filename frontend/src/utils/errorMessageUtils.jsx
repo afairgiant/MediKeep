@@ -242,7 +242,7 @@ export const validatePhone = (phone, setError) => {
   if (!phone) return true; // Phone might be optional
 
   // Basic phone validation - digits, spaces, dashes, parentheses
-  const phoneRegex = /^[\d\s\-\(\)\+\.]+$/;
+  const phoneRegex = /^[\d\s\-()+.]+$/;
   if (!phoneRegex.test(phone) || phone.replace(/\D/g, '').length < 10) {
     setError(ERROR_MESSAGES.INVALID_PHONE);
     return false;
