@@ -1,6 +1,10 @@
 import { vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useActivityTracker, useApiActivityTracker, useNavigationActivityTracker } from './useActivityTracker';
+import {
+  useActivityTracker,
+  useApiActivityTracker,
+  useNavigationActivityTracker,
+} from './useActivityTracker';
 import { AuthProvider } from '../contexts/AuthContext';
 import React from 'react';
 
@@ -39,10 +43,10 @@ vi.mock('../config/activityConfig', () => ({
       KEYBOARD: ['keydown', 'keypress'],
       TOUCH: ['touchstart', 'touchmove', 'touchend'],
       SCROLL: ['scroll', 'wheel'],
-      FOCUS: ['focus', 'blur']
+      FOCUS: ['focus', 'blur'],
     },
-    IGNORED_SELECTORS: ['.login-form', '.logout-button']
-  })
+    IGNORED_SELECTORS: ['.login-form', '.logout-button'],
+  }),
 }));
 
 // Mock secure activity logger
@@ -57,7 +61,7 @@ vi.mock('../utils/secureActivityLogger', () => ({
 
 // Mock throttle utils
 vi.mock('../utils/throttleUtils', () => ({
-  createActivityThrottle: vi.fn((func) => {
+  createActivityThrottle: vi.fn(func => {
     const throttled = vi.fn(func);
     throttled.cleanup = vi.fn();
     throttled.isPending = vi.fn(() => false);
@@ -68,8 +72,8 @@ vi.mock('../utils/throttleUtils', () => ({
     add: vi.fn(),
     cleanupAll: vi.fn(),
   })),
-  createRetryWrapper: vi.fn((func) => func),
-  createRaceSafeWrapper: vi.fn((func) => {
+  createRetryWrapper: vi.fn(func => func),
+  createRaceSafeWrapper: vi.fn(func => {
     const wrapped = vi.fn(func);
     wrapped.cleanup = vi.fn();
     wrapped.isPending = vi.fn(() => false);
@@ -134,9 +138,12 @@ describe('useActivityTracker', () => {
   });
 
   it('should handle disabled state', () => {
-    const { result } = renderHook(() => useActivityTracker({ enabled: false }), {
-      wrapper: ({ children }) => <AuthProvider>{children}</AuthProvider>,
-    });
+    const { result } = renderHook(
+      () => useActivityTracker({ enabled: false }),
+      {
+        wrapper: ({ children }) => <AuthProvider>{children}</AuthProvider>,
+      }
+    );
 
     expect(result.current.isEnabled).toBe(false);
   });

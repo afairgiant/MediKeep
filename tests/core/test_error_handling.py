@@ -71,7 +71,10 @@ class TestAPIException:
         assert payload["status"] == "FAIL"
         assert payload["error_code"] == "AUTH-401"
         assert payload["message"] == "Unauthorized"
-        assert payload["description"] == "Authentication is required to access this resource"
+        assert (
+            payload["description"]
+            == "Authentication is required to access this resource"
+        )
         assert payload["data"] is None
         assert payload["detail"] is None
 
@@ -143,9 +146,7 @@ class TestMedicalRecordsAPIExceptionHeaders:
     """Verify custom headers are stored and accessible."""
 
     def test_custom_headers(self):
-        exc = UnauthorizedException(
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+        exc = UnauthorizedException(headers={"WWW-Authenticate": "Bearer"})
         assert exc.headers == {"WWW-Authenticate": "Bearer"}
 
     def test_default_empty_headers(self):
@@ -246,5 +247,12 @@ class TestErrorHandlerIntegration:
         resp = error_client.get("/raise-not-found")
         body = resp.json()
 
-        required_fields = {"status", "error_code", "message", "description", "data", "detail"}
+        required_fields = {
+            "status",
+            "error_code",
+            "message",
+            "description",
+            "data",
+            "detail",
+        }
         assert required_fields == set(body.keys())

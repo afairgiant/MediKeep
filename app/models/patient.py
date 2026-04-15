@@ -19,6 +19,7 @@ from .base import Base, get_utc_now
 
 class Patient(Base):
     """Represents a patient record with demographics, ownership, and sharing controls."""
+
     __tablename__ = "patients"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -125,7 +126,7 @@ class Patient(Base):
         "PatientPhoto",
         back_populates="patient",
         cascade="all, delete-orphan",
-        uselist=False
+        uselist=False,
     )
 
     # Indexes for performance
@@ -137,10 +138,16 @@ class PatientPhoto(Base):
     Standalone table for patient profile photos.
     One photo per patient with automatic cleanup on replacement.
     """
+
     __tablename__ = "patient_photos"
 
     id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey("patients.id", ondelete="CASCADE"), nullable=False, unique=True)
+    patient_id = Column(
+        Integer,
+        ForeignKey("patients.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
     file_name = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)
     file_size = Column(Integer, nullable=True)
@@ -150,7 +157,9 @@ class PatientPhoto(Base):
     height = Column(Integer, nullable=True)
     uploaded_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     uploaded_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Relationships
     patient = orm_relationship("Patient", back_populates="photo")
@@ -165,6 +174,7 @@ class PatientPhoto(Base):
 
 class EmergencyContact(Base):
     """Represents an emergency contact for a patient."""
+
     __tablename__ = "emergency_contacts"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)

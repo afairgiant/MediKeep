@@ -96,13 +96,9 @@ class TrendDataFetcher:
         )
 
         if date_from:
-            query = query.filter(
-                func.date(Vitals.recorded_date) >= date_from
-            )
+            query = query.filter(func.date(Vitals.recorded_date) >= date_from)
         if date_to:
-            query = query.filter(
-                func.date(Vitals.recorded_date) <= date_to
-            )
+            query = query.filter(func.date(Vitals.recorded_date) <= date_to)
 
         rows = query.all()
 
@@ -148,13 +144,9 @@ class TrendDataFetcher:
         )
 
         if date_from:
-            query = query.filter(
-                func.date(Vitals.recorded_date) >= date_from
-            )
+            query = query.filter(func.date(Vitals.recorded_date) >= date_from)
         if date_to:
-            query = query.filter(
-                func.date(Vitals.recorded_date) <= date_to
-            )
+            query = query.filter(func.date(Vitals.recorded_date) <= date_to)
 
         rows = query.all()
 
@@ -213,6 +205,7 @@ class TrendDataFetcher:
 
         # Inline import to avoid circular dependency with lab_test_component endpoint
         from app.api.v1.endpoints.lab_test_component import calculate_trend_statistics
+
         statistics = calculate_trend_statistics(components)
 
         # Components are returned newest-first; reverse for chronological order
@@ -278,12 +271,14 @@ class TrendDataFetcher:
         for vital_type in SUPPORTED_VITAL_TYPES:
             count = self._vital_count_query(patient_id, vital_type).scalar()
             if count:
-                available.append({
-                    "vital_type": vital_type,
-                    "display_name": VITAL_TYPE_DISPLAY.get(vital_type, vital_type),
-                    "unit": VITAL_TYPE_UNITS.get(vital_type, ""),
-                    "count": count,
-                })
+                available.append(
+                    {
+                        "vital_type": vital_type,
+                        "display_name": VITAL_TYPE_DISPLAY.get(vital_type, vital_type),
+                        "unit": VITAL_TYPE_UNITS.get(vital_type, ""),
+                        "count": count,
+                    }
+                )
         return available
 
     def get_available_lab_test_names(self, patient_id: int) -> List[Dict[str, Any]]:
@@ -356,11 +351,13 @@ class TrendDataFetcher:
                     or_(
                         and_(
                             LabTestComponent.canonical_test_name.isnot(None),
-                            func.lower(LabTestComponent.canonical_test_name) == func.lower(test_name),
+                            func.lower(LabTestComponent.canonical_test_name)
+                            == func.lower(test_name),
                         ),
                         and_(
                             LabTestComponent.canonical_test_name.is_(None),
-                            func.lower(func.rtrim(LabTestComponent.test_name, ',;: ')) == func.lower(test_name),
+                            func.lower(func.rtrim(LabTestComponent.test_name, ",;: "))
+                            == func.lower(test_name),
                         ),
                     ),
                 )

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MantineProvider } from '@mantine/core';
 import DirectoryCard from '../DirectoryCard';
 
-const renderDirectoryCard = (props) => {
+const renderDirectoryCard = props => {
   return render(
     <MantineProvider>
       <DirectoryCard {...props} />

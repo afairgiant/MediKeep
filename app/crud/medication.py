@@ -8,7 +8,9 @@ from app.models.models import Medication
 from app.schemas.medication import MedicationCreate, MedicationUpdate
 
 
-class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate], TagFilterMixin):
+class CRUDMedication(
+    CRUDBase[Medication, MedicationCreate, MedicationUpdate], TagFilterMixin
+):
     """
     CRUD operations for Medication model.
 
@@ -36,7 +38,13 @@ class CRUDMedication(CRUDBase[Medication, MedicationCreate, MedicationUpdate], T
         )
 
     def get_by_name(
-        self, db: Session, *, name: str, patient_id: Optional[int] = None, skip: int = 0, limit: int = 100
+        self,
+        db: Session,
+        *,
+        name: str,
+        patient_id: Optional[int] = None,
+        skip: int = 0,
+        limit: int = 100
     ) -> List[Medication]:
         """
         Get medications by name (partial match), optionally filtered by patient.

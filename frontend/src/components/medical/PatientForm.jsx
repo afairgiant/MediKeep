@@ -34,7 +34,10 @@ import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import patientApi from '../../services/api/patientApi';
 import logger from '../../services/logger';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
-import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../../utils/constants';
+import {
+  DATE_FORMAT_OPTIONS,
+  DEFAULT_DATE_FORMAT,
+} from '../../utils/constants';
 import {
   unitLabels,
   validationRanges,
@@ -75,7 +78,9 @@ const PatientForm = ({
   const labels = unitLabels[unitSystem];
   const ranges = validationRanges[unitSystem];
 
-  const dateInputFormat = DATE_FORMAT_OPTIONS[dateFormat]?.pattern || DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT].pattern;
+  const dateInputFormat =
+    DATE_FORMAT_OPTIONS[dateFormat]?.pattern ||
+    DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT].pattern;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -101,7 +106,9 @@ const PatientForm = ({
       setFormData({
         first_name: patient.first_name || '',
         last_name: patient.last_name || '',
-        birth_date: patient.birth_date ? parseBirthDateAsLocal(patient.birth_date) : null,
+        birth_date: patient.birth_date
+          ? parseBirthDateAsLocal(patient.birth_date)
+          : null,
         gender: patient.gender || '',
         blood_type: patient.blood_type || '',
         // Convert stored imperial values to display format
@@ -153,7 +160,7 @@ const PatientForm = ({
         notifySuccess(
           t('patients.form.messages.updateSuccess', {
             firstName: result.first_name,
-            lastName: result.last_name
+            lastName: result.last_name,
           })
         );
 
@@ -167,7 +174,7 @@ const PatientForm = ({
         notifySuccess(
           t('patients.form.messages.createSuccess', {
             firstName: result.first_name,
-            lastName: result.last_name
+            lastName: result.last_name,
           })
         );
 
@@ -191,9 +198,14 @@ const PatientForm = ({
 
       setError(error.message);
       notifyError(
-        t(isEditing ? 'errors:patientForm.updateFailed' : 'errors:patientForm.createFailed', {
-          message: error.message
-        })
+        t(
+          isEditing
+            ? 'errors:patientForm.updateFailed'
+            : 'errors:patientForm.createFailed',
+          {
+            message: error.message,
+          }
+        )
       );
     } finally {
       setLoading(false);
@@ -241,26 +253,50 @@ const PatientForm = ({
     { value: 'Male', label: t('shared:fields.male') },
     { value: 'Female', label: t('shared:fields.female') },
     { value: 'Other', label: t('shared:fields.other') },
-    { value: 'Prefer not to say', label: t('patients.form.gender.options.preferNotToSay') },
+    {
+      value: 'Prefer not to say',
+      label: t('patients.form.gender.options.preferNotToSay'),
+    },
   ];
 
   const relationshipOptions = [
     { value: '', label: t('patients.form.relationship.options.select') },
     { value: 'self', label: t('shared:fields.self') },
     { value: 'spouse', label: t('patients.form.relationship.options.spouse') },
-    { value: 'partner', label: t('patients.form.relationship.options.partner') },
+    {
+      value: 'partner',
+      label: t('patients.form.relationship.options.partner'),
+    },
     { value: 'child', label: t('patients.form.relationship.options.child') },
     { value: 'son', label: t('patients.form.relationship.options.son') },
-    { value: 'daughter', label: t('patients.form.relationship.options.daughter') },
+    {
+      value: 'daughter',
+      label: t('patients.form.relationship.options.daughter'),
+    },
     { value: 'parent', label: t('patients.form.relationship.options.parent') },
     { value: 'father', label: t('patients.form.relationship.options.father') },
     { value: 'mother', label: t('patients.form.relationship.options.mother') },
-    { value: 'sibling', label: t('patients.form.relationship.options.sibling') },
-    { value: 'brother', label: t('patients.form.relationship.options.brother') },
+    {
+      value: 'sibling',
+      label: t('patients.form.relationship.options.sibling'),
+    },
+    {
+      value: 'brother',
+      label: t('patients.form.relationship.options.brother'),
+    },
     { value: 'sister', label: t('patients.form.relationship.options.sister') },
-    { value: 'grandparent', label: t('patients.form.relationship.options.grandparent') },
-    { value: 'grandchild', label: t('patients.form.relationship.options.grandchild') },
-    { value: 'other_family', label: t('patients.form.relationship.options.otherFamily') },
+    {
+      value: 'grandparent',
+      label: t('patients.form.relationship.options.grandparent'),
+    },
+    {
+      value: 'grandchild',
+      label: t('patients.form.relationship.options.grandchild'),
+    },
+    {
+      value: 'other_family',
+      label: t('patients.form.relationship.options.otherFamily'),
+    },
     { value: 'friend', label: t('patients.form.relationship.options.friend') },
     { value: 'other', label: t('shared:fields.other') },
   ];
@@ -272,7 +308,11 @@ const PatientForm = ({
         <Group justify="space-between" align="center">
           <Title order={isModal ? 4 : 3}>
             <IconUser size="1.2rem" style={{ marginRight: 8 }} />
-            {t(isEditing ? 'patients.form.editTitle' : 'patients.form.createTitle')}
+            {t(
+              isEditing
+                ? 'patients.form.editTitle'
+                : 'patients.form.createTitle'
+            )}
           </Title>
         </Group>
 
@@ -470,7 +510,11 @@ const PatientForm = ({
             leftSection={<IconDeviceFloppy size="1rem" />}
             loading={loading}
           >
-            {t(isEditing ? 'patients.form.buttons.updatePatient' : 'patients.form.buttons.createPatient')}
+            {t(
+              isEditing
+                ? 'patients.form.buttons.updatePatient'
+                : 'patients.form.buttons.createPatient'
+            )}
           </Button>
         </Group>
       </Stack>

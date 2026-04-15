@@ -25,7 +25,11 @@ export type TestCategory =
   | 'other';
 
 export type ResultType = 'quantitative' | 'qualitative';
-export type QualitativeValue = 'positive' | 'negative' | 'detected' | 'undetected';
+export type QualitativeValue =
+  | 'positive'
+  | 'negative'
+  | 'detected'
+  | 'undetected';
 
 export interface TestLibraryItem {
   test_name: string;

@@ -45,9 +45,18 @@ const InvitationNotifications = () => {
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
-  const [invitationManagerOpened, { open: openInvitationManager, close: closeInvitationManager }] = useDisclosure(false);
-  const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
-  const [patientSharingOpened, { open: openPatientSharing, close: closePatientSharing }] = useDisclosure(false);
+  const [
+    invitationManagerOpened,
+    { open: openInvitationManager, close: closeInvitationManager },
+  ] = useDisclosure(false);
+  const [
+    confirmModalOpened,
+    { open: openConfirmModal, close: closeConfirmModal },
+  ] = useDisclosure(false);
+  const [
+    patientSharingOpened,
+    { open: openPatientSharing, close: closePatientSharing },
+  ] = useDisclosure(false);
   const [selectedInvitation, setSelectedInvitation] = useState(null);
 
   const loadPendingInvitations = async () => {
@@ -65,7 +74,7 @@ const InvitationNotifications = () => {
 
   useEffect(() => {
     loadPendingInvitations();
-    
+
     // Auto-refresh every 2 minutes
     const interval = setInterval(loadPendingInvitations, 120000);
     return () => clearInterval(interval);
@@ -82,14 +91,25 @@ const InvitationNotifications = () => {
     // Direct processing for rejected responses
     try {
       await invitationApi.respondToInvitation(invitation.id, response);
-      
+
       notifications.show({
-        title: t(`invitations.notification.${response}Title`, `Invitation ${response}`),
-        message: t(`invitations.notification.${response}Message`, `Successfully ${response} the invitation`),
+        title: t(
+          `invitations.notification.${response}Title`,
+          `Invitation ${response}`
+        ),
+        message: t(
+          `invitations.notification.${response}Message`,
+          `Successfully ${response} the invitation`
+        ),
         color: response === 'accepted' ? 'green' : 'orange',
-        icon: response === 'accepted' ? <IconCheck size="1rem" /> : <IconX size="1rem" />
+        icon:
+          response === 'accepted' ? (
+            <IconCheck size="1rem" />
+          ) : (
+            <IconX size="1rem" />
+          ),
       });
-      
+
       // Refresh the list
       loadPendingInvitations();
     } catch (error) {
@@ -97,7 +117,7 @@ const InvitationNotifications = () => {
         title: 'Error',
         message: `Failed to ${response} invitation`,
         color: 'red',
-        icon: <IconX size="1rem" />
+        icon: <IconX size="1rem" />,
       });
     }
   };
@@ -106,7 +126,10 @@ const InvitationNotifications = () => {
     if (!selectedInvitation) return;
 
     try {
-      await invitationApi.respondToInvitation(selectedInvitation.id, 'accepted');
+      await invitationApi.respondToInvitation(
+        selectedInvitation.id,
+        'accepted'
+      );
 
       // Invalidate patient list cache if this was a patient share invitation
       if (selectedInvitation.invitation_type === 'patient_share') {
@@ -117,7 +140,7 @@ const InvitationNotifications = () => {
         title: 'Invitation accepted',
         message: 'Successfully accepted the invitation',
         color: 'green',
-        icon: <IconCheck size="1rem" />
+        icon: <IconCheck size="1rem" />,
       });
 
       // Refresh the list
@@ -129,12 +152,12 @@ const InvitationNotifications = () => {
         title: 'Error',
         message: 'Failed to accept invitation',
         color: 'red',
-        icon: <IconX size="1rem" />
+        icon: <IconX size="1rem" />,
       });
     }
   };
 
-  const getInvitationTypeDisplay = (type) => {
+  const getInvitationTypeDisplay = type => {
     switch (type) {
       case 'family_history_share':
         return t('shared:categories.family_history', 'Family History');
@@ -145,7 +168,7 @@ const InvitationNotifications = () => {
     }
   };
 
-  const getInvitationIcon = (type) => {
+  const getInvitationIcon = type => {
     switch (type) {
       case 'family_history_share':
         return <IconUsers size="1rem" />;
@@ -210,24 +233,28 @@ const InvitationNotifications = () => {
 
         {lastUpdate && (
           <Text size="xs" c="dimmed" mb="sm">
-            {t('invitations.lastUpdated', 'Last updated')}: {lastUpdate.toLocaleTimeString([], { timeZone: timezoneService.getTimezone() })}
+            {t('invitations.lastUpdated', 'Last updated')}:{' '}
+            {lastUpdate.toLocaleTimeString([], {
+              timeZone: timezoneService.getTimezone(),
+            })}
           </Text>
         )}
 
         {pendingInvitations.length > 0 ? (
           <Stack gap={8}>
-            {pendingInvitations.slice(0, 3).map((invitation) => (
+            {pendingInvitations.slice(0, 3).map(invitation => (
               <Paper
                 key={invitation.id}
                 p="10px"
                 radius="md"
                 withBorder
-                styles={(theme) => ({
+                styles={theme => ({
                   root: {
-                    backgroundColor: colorScheme === 'dark' 
-                      ? theme.colors.dark[6] 
-                      : theme.colors.blue[0]
-                  }
+                    backgroundColor:
+                      colorScheme === 'dark'
+                        ? theme.colors.dark[6]
+                        : theme.colors.blue[0],
+                  },
                 })}
               >
                 <Stack gap="xs">
@@ -246,7 +273,8 @@ const InvitationNotifications = () => {
                           {invitation.title}
                         </Text>
                         <Text size="xs" c="dimmed">
-                          {t('invitations.from', 'From')}: {invitation.sent_by?.name}
+                          {t('invitations.from', 'From')}:{' '}
+                          {invitation.sent_by?.name}
                         </Text>
                       </div>
                     </Group>
@@ -264,7 +292,9 @@ const InvitationNotifications = () => {
                         size="xs"
                         color="red"
                         variant="light"
-                        onClick={() => handleQuickResponse(invitation, 'rejected')}
+                        onClick={() =>
+                          handleQuickResponse(invitation, 'rejected')
+                        }
                       >
                         <IconX size="0.7rem" />
                       </ActionIcon>
@@ -272,7 +302,9 @@ const InvitationNotifications = () => {
                         size="xs"
                         color="green"
                         variant="light"
-                        onClick={() => handleQuickResponse(invitation, 'accepted')}
+                        onClick={() =>
+                          handleQuickResponse(invitation, 'accepted')
+                        }
                       >
                         <IconCheck size="0.7rem" />
                       </ActionIcon>
@@ -281,7 +313,7 @@ const InvitationNotifications = () => {
                 </Stack>
               </Paper>
             ))}
-            
+
             {pendingInvitations.length > 3 && (
               <Button
                 variant="light"
@@ -289,7 +321,11 @@ const InvitationNotifications = () => {
                 onClick={openInvitationManager}
                 rightSection={<IconChevronRight size="0.8rem" />}
               >
-                {t('shared:labels.viewAllCountInvitations', 'View all {{count}} invitations', { count: pendingInvitations.length })}
+                {t(
+                  'shared:labels.viewAllCountInvitations',
+                  'View all {{count}} invitations',
+                  { count: pendingInvitations.length }
+                )}
               </Button>
             )}
           </Stack>
@@ -303,7 +339,10 @@ const InvitationNotifications = () => {
                 {t('invitations.noPending', 'No pending invitations')}
               </Text>
               <Text size="xs" c="dimmed" ta="center">
-                {t('invitations.noPendingDescription', 'New sharing invitations will appear here')}
+                {t(
+                  'invitations.noPendingDescription',
+                  'New sharing invitations will appear here'
+                )}
               </Text>
             </Stack>
           </Paper>
@@ -362,11 +401,19 @@ const InvitationNotifications = () => {
       >
         <Stack gap="md">
           <Text size="sm">
-            {t('invitations.confirmQuestion', 'Are you sure you want to accept this invitation?')}
+            {t(
+              'invitations.confirmQuestion',
+              'Are you sure you want to accept this invitation?'
+            )}
           </Text>
-          
+
           {selectedInvitation && (
-            <Paper p="sm" withBorder radius="md" bg={colorScheme === 'dark' ? 'dark.6' : 'gray.0'}>
+            <Paper
+              p="sm"
+              withBorder
+              radius="md"
+              bg={colorScheme === 'dark' ? 'dark.6' : 'gray.0'}
+            >
               <Stack gap="xs">
                 <Group gap="xs">
                   <ThemeIcon color="blue" variant="light" size="sm">
@@ -377,7 +424,9 @@ const InvitationNotifications = () => {
                   </Text>
                 </Group>
                 <Text size="xs" c="dimmed">
-                  {t('invitations:card.from', { name: selectedInvitation.sent_by?.name })}
+                  {t('invitations:card.from', {
+                    name: selectedInvitation.sent_by?.name,
+                  })}
                 </Text>
                 <Badge size="xs" variant="light" color="blue">
                   {getInvitationTypeDisplay(selectedInvitation.invitation_type)}
@@ -387,7 +436,10 @@ const InvitationNotifications = () => {
           )}
 
           <Text size="xs" c="dimmed">
-            {t('invitations.confirmDescription', 'By accepting, you will gain access to view the shared medical information.')}
+            {t(
+              'invitations.confirmDescription',
+              'By accepting, you will gain access to view the shared medical information.'
+            )}
           </Text>
 
           <Group justify="flex-end" gap="sm">

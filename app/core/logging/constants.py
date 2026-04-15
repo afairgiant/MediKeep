@@ -165,7 +165,9 @@ LOG_FILE_BACKUP_COUNT: int = 10  # Keep 10 backup files
 LOG_FILE_ENCODING: str = "utf-8"  # UTF-8 encoding
 
 # Console log format for docker logs (human readable with optional request ID)
-CONSOLE_LOG_FORMAT: str = "%(asctime)s %(levelname)s [%(name)s] %(request_id_display)s%(message)s"
+CONSOLE_LOG_FORMAT: str = (
+    "%(asctime)s %(levelname)s [%(name)s] %(request_id_display)s%(message)s"
+)
 
 # Container detection path
 CONTAINER_APP_PATH: str = "/app"

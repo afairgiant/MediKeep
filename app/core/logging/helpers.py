@@ -26,7 +26,7 @@ def log_endpoint_access(
     *,
     patient_id: Optional[int] = None,
     message: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Log successful endpoint access with standard fields.
@@ -77,7 +77,7 @@ def log_endpoint_error(
     *,
     user_id: Optional[int] = None,
     patient_id: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Log endpoint errors with standard fields.
@@ -134,7 +134,7 @@ def log_security_event(
     *,
     user_id: Optional[int] = None,
     username: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Log security-related events.
@@ -186,7 +186,7 @@ def log_data_access(
     record_id: Optional[int] = None,
     patient_id: Optional[int] = None,
     count: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Log data access operations (CRUD).
@@ -253,7 +253,7 @@ def log_performance(
     *,
     threshold_ms: int = 1000,
     user_id: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Log performance metrics for slow operations.
@@ -296,7 +296,7 @@ def log_performance(
 
     logger.warning(
         f"Slow operation: {operation} took {duration_ms}ms (threshold: {threshold_ms}ms)",
-        extra=extra
+        extra=extra,
     )
 
 
@@ -306,7 +306,7 @@ def log_validation_error(
     error_details: Any,
     *,
     user_id: Optional[int] = None,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Log validation errors from user input.
@@ -352,7 +352,7 @@ def log_external_service(
     *,
     duration_ms: Optional[int] = None,
     error: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ) -> None:
     """
     Log external service interactions (Paperless, etc.).
@@ -398,11 +398,7 @@ def log_external_service(
     logger.log(level, message, extra=extra)
 
 
-def log_debug(
-    logger: logging.Logger,
-    message: str,
-    **kwargs
-) -> None:
+def log_debug(logger: logging.Logger, message: str, **kwargs) -> None:
     """
     Log debug information with consistent format.
 

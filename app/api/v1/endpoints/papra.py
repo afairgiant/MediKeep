@@ -27,7 +27,11 @@ from app.services.credential_encryption import (
     encrypt_papra_token,
 )
 from app.services.papra_auth import PapraAuth
-from app.services.papra_client import PapraClientError, PapraConnectionError, create_papra_client
+from app.services.papra_client import (
+    PapraClientError,
+    PapraConnectionError,
+    create_papra_client,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -49,6 +53,7 @@ class PapraSettingsUpdate(BaseModel):
         if v is None or v == "":
             return v
         from app.schemas.user_preferences import _validate_integration_url
+
         return _validate_integration_url(v)
 
     @field_validator("papra_api_token")
@@ -124,7 +129,9 @@ async def test_papra_connection(
         token = connection_data.papra_api_token
 
         if use_saved:
-            logger.debug(f"Using saved credentials for Papra connection test, user {current_user_id}")
+            logger.debug(
+                f"Using saved credentials for Papra connection test, user {current_user_id}"
+            )
             prefs = (
                 db.query(UserPreferences)
                 .filter(UserPreferences.user_id == current_user_id)
@@ -158,7 +165,9 @@ async def test_papra_connection(
             # Mark connection as verified in the database
             prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
             if prefs:
-                user_preferences.update(db, db_obj=prefs, obj_in={"papra_connection_verified": True})
+                user_preferences.update(
+                    db, db_obj=prefs, obj_in={"papra_connection_verified": True}
+                )
 
             log_endpoint_access(
                 logger,
@@ -490,7 +499,9 @@ async def update_papra_settings(
             update_data["papra_api_token_encrypted"] = encrypted
 
         # Reset connection verified only if URL changed (new server = must re-verify)
-        if "papra_url" in update_data and update_data["papra_url"] != (prefs.papra_url or ""):
+        if "papra_url" in update_data and update_data["papra_url"] != (
+            prefs.papra_url or ""
+        ):
             update_data["papra_connection_verified"] = False
 
         updated_prefs = user_preferences.update(db, db_obj=prefs, obj_in=update_data)

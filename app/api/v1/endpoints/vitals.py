@@ -462,7 +462,13 @@ def read_vitals_by_id(
             db=db, record_id=vitals_id, relations=["patient", "practitioner"]
         )
         handle_not_found(vitals_obj, "Vitals reading", request)
-        verify_patient_ownership(vitals_obj, current_user_patient_id, "vitals", db=db, current_user=current_user)
+        verify_patient_ownership(
+            vitals_obj,
+            current_user_patient_id,
+            "vitals",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,

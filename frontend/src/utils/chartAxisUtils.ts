@@ -20,7 +20,10 @@ const DEFAULT_DOMAIN: YAxisConfig = {
  * Select a human-friendly tick interval from the set {1, 2, 2.5, 5, 10}
  * scaled to the appropriate order of magnitude for the given range.
  */
-export function calculateNiceInterval(range: number, targetTickCount: number = 5): number {
+export function calculateNiceInterval(
+  range: number,
+  targetTickCount: number = 5
+): number {
   const roughInterval = range / targetTickCount;
   const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
   const normalized = roughInterval / magnitude;
@@ -87,7 +90,10 @@ export function generateYAxisConfig(allValues: number[]): YAxisConfig {
     const interval = calculateNiceInterval(padding * 2);
     const niceMin = floorToInterval(dataMin - padding, interval);
     const niceMax = ceilToInterval(dataMax + padding, interval);
-    return { domain: [niceMin, niceMax], ticks: buildTicks(niceMin, niceMax, interval) };
+    return {
+      domain: [niceMin, niceMax],
+      ticks: buildTicks(niceMin, niceMax, interval),
+    };
   }
 
   const range = dataMax - dataMin;
@@ -97,5 +103,8 @@ export function generateYAxisConfig(allValues: number[]): YAxisConfig {
   const niceMin = floorToInterval(dataMin - range * 0.05, interval);
   const niceMax = ceilToInterval(dataMax + range * 0.05, interval);
 
-  return { domain: [niceMin, niceMax], ticks: buildTicks(niceMin, niceMax, interval) };
+  return {
+    domain: [niceMin, niceMax],
+    ticks: buildTicks(niceMin, niceMax, interval),
+  };
 }

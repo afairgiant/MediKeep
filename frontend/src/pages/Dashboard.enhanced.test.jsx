@@ -83,7 +83,7 @@ vi.mock('../utils/activityNavigation', () => ({
 }));
 
 // Helper to render with all providers
-const renderWithProviders = (ui) => {
+const renderWithProviders = ui => {
   const authUser = {
     id: 1,
     username: 'testuser',
@@ -163,12 +163,20 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
     // Setup default mock returns
     activityNavigation.getActivityNavigationUrl.mockReturnValue('/medications');
-    activityNavigation.getActivityIcon.mockReturnValue(() => <div>MockIcon</div>);
+    activityNavigation.getActivityIcon.mockReturnValue(() => (
+      <div>MockIcon</div>
+    ));
     activityNavigation.getActionBadgeColor.mockReturnValue('blue');
-    activityNavigation.getActionIcon.mockReturnValue(() => <div>ActionIcon</div>);
-    activityNavigation.formatActivityDescription.mockImplementation((activity) => activity.description);
+    activityNavigation.getActionIcon.mockReturnValue(() => (
+      <div>ActionIcon</div>
+    ));
+    activityNavigation.formatActivityDescription.mockImplementation(
+      activity => activity.description
+    );
     activityNavigation.isActivityClickable.mockReturnValue(true);
-    activityNavigation.getActivityTooltip.mockReturnValue('Click to view medication');
+    activityNavigation.getActivityTooltip.mockReturnValue(
+      'Click to view medication'
+    );
 
     // Mock apiService responses
     apiService.getRecentActivity.mockResolvedValue(mockRecentActivity);
@@ -192,9 +200,15 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
       // Check that activities are rendered
       await waitFor(() => {
-        expect(screen.getByText('Added new medication: Aspirin 81mg')).toBeInTheDocument();
-        expect(screen.getByText('Updated lab result: Complete Blood Count')).toBeInTheDocument();
-        expect(screen.getByText('Removed procedure: Routine Checkup')).toBeInTheDocument();
+        expect(
+          screen.getByText('Added new medication: Aspirin 81mg')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Updated lab result: Complete Blood Count')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Removed procedure: Routine Checkup')
+        ).toBeInTheDocument();
       });
 
       // Verify our utility functions were called
@@ -208,7 +222,7 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
     test('activity items are clickable when isActivityClickable returns true', async () => {
       const mockNavigate = vi.fn();
-      
+
       // Mock useNavigate
       vi.doMock('react-router-dom', async () => ({
         ...(await vi.importActual('react-router-dom')),
@@ -216,23 +230,31 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
       }));
 
       activityNavigation.isActivityClickable.mockReturnValue(true);
-      activityNavigation.getActivityNavigationUrl.mockReturnValue('/medications');
+      activityNavigation.getActivityNavigationUrl.mockReturnValue(
+        '/medications'
+      );
 
       renderWithProviders(<Dashboard />);
 
       // Wait for activities to load
       await waitFor(() => {
-        expect(screen.getByText('Added new medication: Aspirin 81mg')).toBeInTheDocument();
+        expect(
+          screen.getByText('Added new medication: Aspirin 81mg')
+        ).toBeInTheDocument();
       });
 
       // Find and click the first activity item
-      const activityItem = screen.getByText('Added new medication: Aspirin 81mg').closest('[role="button"], .mantine-Paper-root');
-      
+      const activityItem = screen
+        .getByText('Added new medication: Aspirin 81mg')
+        .closest('[role="button"], .mantine-Paper-root');
+
       if (activityItem) {
         await userEvent.click(activityItem);
-        
+
         // Verify navigation was attempted
-        expect(activityNavigation.getActivityNavigationUrl).toHaveBeenCalledWith(
+        expect(
+          activityNavigation.getActivityNavigationUrl
+        ).toHaveBeenCalledWith(
           expect.objectContaining({ model_name: 'medication' })
         );
       }
@@ -240,14 +262,16 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
     test('non-clickable activities do not trigger navigation', async () => {
       activityNavigation.isActivityClickable
-        .mockReturnValueOnce(true)  // First activity clickable
-        .mockReturnValueOnce(true)  // Second activity clickable  
+        .mockReturnValueOnce(true) // First activity clickable
+        .mockReturnValueOnce(true) // Second activity clickable
         .mockReturnValueOnce(false); // Third activity (deleted) not clickable
 
       renderWithProviders(<Dashboard />);
 
       await waitFor(() => {
-        expect(screen.getByText('Removed procedure: Routine Checkup')).toBeInTheDocument();
+        expect(
+          screen.getByText('Removed procedure: Routine Checkup')
+        ).toBeInTheDocument();
       });
 
       // The deleted activity should be styled differently
@@ -258,9 +282,9 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
     test('displays action badges with correct colors', async () => {
       activityNavigation.getActionBadgeColor
-        .mockReturnValueOnce('green')   // created
-        .mockReturnValueOnce('blue')    // updated
-        .mockReturnValueOnce('red');    // deleted
+        .mockReturnValueOnce('green') // created
+        .mockReturnValueOnce('blue') // updated
+        .mockReturnValueOnce('red'); // deleted
 
       renderWithProviders(<Dashboard />);
 
@@ -269,9 +293,15 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
       });
 
       // Verify badge color functions were called
-      expect(activityNavigation.getActionBadgeColor).toHaveBeenCalledWith('created');
-      expect(activityNavigation.getActionBadgeColor).toHaveBeenCalledWith('updated');
-      expect(activityNavigation.getActionBadgeColor).toHaveBeenCalledWith('deleted');
+      expect(activityNavigation.getActionBadgeColor).toHaveBeenCalledWith(
+        'created'
+      );
+      expect(activityNavigation.getActionBadgeColor).toHaveBeenCalledWith(
+        'updated'
+      );
+      expect(activityNavigation.getActionBadgeColor).toHaveBeenCalledWith(
+        'deleted'
+      );
     });
 
     test('shows only first 4 activities when more than 4 available', async () => {
@@ -285,7 +315,9 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
       apiService.getRecentActivity.mockResolvedValue(manyActivities);
 
-      activityNavigation.formatActivityDescription.mockImplementation((activity) => activity.description);
+      activityNavigation.formatActivityDescription.mockImplementation(
+        activity => activity.description
+      );
 
       renderWithProviders(<Dashboard />);
 
@@ -303,7 +335,9 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
 
       await waitFor(() => {
         expect(screen.getByText('No recent activity')).toBeInTheDocument();
-        expect(screen.getByText('Your medical record activities will appear here')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your medical record activities will appear here')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -317,7 +351,9 @@ describe('Enhanced Dashboard with Clickable Activity', () => {
       renderWithProviders(<Dashboard />);
 
       await waitFor(() => {
-        expect(screen.getByText('Added new medication: Aspirin 81mg')).toBeInTheDocument();
+        expect(
+          screen.getByText('Added new medication: Aspirin 81mg')
+        ).toBeInTheDocument();
       });
 
       // The component should still render without crashing

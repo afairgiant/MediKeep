@@ -75,9 +75,7 @@ class EpicMyChartParser(BaseLabParser):
             score += 1
 
         # Epic-specific date format: "Collected on Apr 10, 2025"
-        if re.search(
-            r"(?i)collected on\s+[A-Z][a-z]{2}\s+\d{1,2},\s+\d{4}", text
-        ):
+        if re.search(r"(?i)collected on\s+[A-Z][a-z]{2}\s+\d{1,2},\s+\d{4}", text):
             score += 1
 
         # "Normal range:" is the key anchor appearing multiple times
@@ -157,7 +155,9 @@ class EpicMyChartParser(BaseLabParser):
             results.append(result)
 
             flag_str = f" [{flag}]" if flag else ""
-            logger.info(f"PARSED: {test_name} = {value} {unit}{flag_str} (Ref: {ref_range})")
+            logger.info(
+                f"PARSED: {test_name} = {value} {unit}{flag_str} (Ref: {ref_range})"
+            )
 
         # Deduplicate by test name (card layout can cause double parsing)
         results = self._deduplicate(results)
@@ -192,27 +192,21 @@ class EpicMyChartParser(BaseLabParser):
             return ("", "")
 
         # Pattern: "above >=N unit" or "above >= N unit"
-        above_match = re.match(
-            r"(?i)above\s*>=?\s*(\d+\.?\d*)\s*(.*)", content
-        )
+        above_match = re.match(r"(?i)above\s*>=?\s*(\d+\.?\d*)\s*(.*)", content)
         if above_match:
             num = above_match.group(1)
             unit = above_match.group(2).strip()
             return (f">={num}", unit)
 
         # Pattern: "<N unit" or ">N unit"
-        ineq_match = re.match(
-            r"([<>]=?\s*\d+\.?\d*)\s*(.*)", content
-        )
+        ineq_match = re.match(r"([<>]=?\s*\d+\.?\d*)\s*(.*)", content)
         if ineq_match:
             ref_range = ineq_match.group(1).replace(" ", "")
             unit = ineq_match.group(2).strip()
             return (ref_range, unit)
 
         # Pattern: "X - Y unit" (the most common)
-        range_match = re.match(
-            r"(\d+\.?\d*)\s*-\s*(\d+\.?\d*)\s*(.*)", content
-        )
+        range_match = re.match(r"(\d+\.?\d*)\s*-\s*(\d+\.?\d*)\s*(.*)", content)
         if range_match:
             low = range_match.group(1)
             high = range_match.group(2)

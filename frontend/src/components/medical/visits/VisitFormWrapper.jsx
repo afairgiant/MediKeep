@@ -23,7 +23,7 @@ const VisitFormWrapper = ({
   navigate,
   children,
 }) => {
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in visits ${editingItem ? 'edit' : 'create'}`,
       visitId: editingItem?.id,
@@ -33,7 +33,11 @@ const VisitFormWrapper = ({
     onError?.(error);
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('visits_upload_completed', {
       message: 'File upload completed in visits form',
       visitId: editingItem?.id,

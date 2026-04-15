@@ -4,6 +4,7 @@ Tests for admin user management features:
 - Inactive user login blocking
 - is_active and last_login_at fields
 """
+
 import pytest
 from datetime import datetime, timezone
 
@@ -102,8 +103,12 @@ class TestLoginHistoryEndpoint:
         self, client, admin_token_headers, db_session, test_admin_user, test_user
     ):
         """Login history endpoint returns login events for a user."""
-        self._create_login_activity(db_session, test_user.id, "User logged in: testuser")
-        self._create_login_activity(db_session, test_user.id, "User logged in: testuser again")
+        self._create_login_activity(
+            db_session, test_user.id, "User logged in: testuser"
+        )
+        self._create_login_activity(
+            db_session, test_user.id, "User logged in: testuser again"
+        )
 
         response = client.get(
             f"/api/v1/admin/user-management/users/{test_user.id}/login-history",
@@ -123,7 +128,9 @@ class TestLoginHistoryEndpoint:
         )
         assert response.status_code in (401, 403)
 
-    def test_login_history_user_not_found(self, client, admin_token_headers, test_admin_user):
+    def test_login_history_user_not_found(
+        self, client, admin_token_headers, test_admin_user
+    ):
         """Login history for a nonexistent user returns 404."""
         response = client.get(
             "/api/v1/admin/user-management/users/99999/login-history",

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import {
   getUserPreferences,
   updateUserPreferences,
@@ -11,7 +17,19 @@ import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
 import i18n from '../i18n';
 
 // Supported languages - must match backend validation
-const SUPPORTED_LANGUAGES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'ru', 'sv', 'nl', 'pl', 'zh'];
+const SUPPORTED_LANGUAGES = [
+  'en',
+  'fr',
+  'de',
+  'es',
+  'it',
+  'pt',
+  'ru',
+  'sv',
+  'nl',
+  'pl',
+  'zh',
+];
 
 /**
  * User Preferences Context
@@ -56,11 +74,14 @@ export const UserPreferencesProvider = ({ children }) => {
           try {
             await i18n.changeLanguage(userPrefs.language);
           } catch (langErr) {
-            frontendLogger.logError('Failed to apply saved language preference', {
-              language: userPrefs.language,
-              error: langErr.message,
-              component: 'UserPreferencesContext',
-            });
+            frontendLogger.logError(
+              'Failed to apply saved language preference',
+              {
+                language: userPrefs.language,
+                error: langErr.message,
+                component: 'UserPreferencesContext',
+              }
+            );
           }
         }
 
@@ -150,7 +171,9 @@ export const UserPreferencesProvider = ({ children }) => {
   useEffect(() => {
     const syncAutoDetectedLanguage = async () => {
       if (isAuthenticated && user && preferences && !loading) {
-        const currentLanguage = (i18n.language || 'en').split('-')[0].toLowerCase();
+        const currentLanguage = (i18n.language || 'en')
+          .split('-')[0]
+          .toLowerCase();
         const savedLanguage = preferences.language;
 
         // Only save if user has no language preference yet (still on default 'en')
@@ -177,12 +200,15 @@ export const UserPreferencesProvider = ({ children }) => {
           }
         } else if (savedLanguage === 'en' && currentLanguage !== 'en') {
           // Log when browser language is not supported
-          frontendLogger.logInfo('Browser language not supported, keeping default', {
-            browserLanguage: currentLanguage,
-            supportedLanguages: SUPPORTED_LANGUAGES,
-            userId: user.id,
-            component: 'UserPreferencesContext',
-          });
+          frontendLogger.logInfo(
+            'Browser language not supported, keeping default',
+            {
+              browserLanguage: currentLanguage,
+              supportedLanguages: SUPPORTED_LANGUAGES,
+              userId: user.id,
+              component: 'UserPreferencesContext',
+            }
+          );
         }
       }
     };
@@ -193,7 +219,9 @@ export const UserPreferencesProvider = ({ children }) => {
   // Sync date format locale to timezoneService when preferences change
   useEffect(() => {
     const formatCode = preferences?.date_format || DEFAULT_DATE_FORMAT;
-    const config = DATE_FORMAT_OPTIONS[formatCode] || DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT];
+    const config =
+      DATE_FORMAT_OPTIONS[formatCode] ||
+      DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT];
     timezoneService.setDateLocale(config.locale, formatCode);
   }, [preferences?.date_format]);
 
@@ -239,7 +267,8 @@ export const UserPreferencesProvider = ({ children }) => {
     isImperial: preferences?.unit_system === 'imperial',
     // Convenience getters for date format
     dateFormat: preferences?.date_format || 'mdy',
-    isUSDateFormat: preferences?.date_format === 'mdy' || !preferences?.date_format,
+    isUSDateFormat:
+      preferences?.date_format === 'mdy' || !preferences?.date_format,
     isEuropeanDateFormat: preferences?.date_format === 'dmy',
     isISODateFormat: preferences?.date_format === 'ymd',
   };

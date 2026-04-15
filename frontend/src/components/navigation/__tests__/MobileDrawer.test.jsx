@@ -13,15 +13,13 @@ vi.mock('../../../hooks/useResponsive', () => ({
     height: 667,
     isMobile: true,
     isTablet: false,
-    isDesktop: false
-  })
+    isDesktop: false,
+  }),
 }));
 
 const TestWrapper = ({ children }) => (
   <BrowserRouter>
-    <MantineProvider>
-      {children}
-    </MantineProvider>
+    <MantineProvider>{children}</MantineProvider>
   </BrowserRouter>
 );
 
@@ -37,16 +35,16 @@ describe('MobileDrawer', () => {
         section: 'Main',
         items: [
           { path: '/dashboard', label: 'Dashboard', icon: '📊', exact: true },
-          { path: '/patients', label: 'Patients', icon: '👤' }
-        ]
-      }
+          { path: '/patients', label: 'Patients', icon: '👤' },
+        ],
+      },
     ],
     userInfo: {
       username: 'testuser',
       fullName: 'Test User',
-      role: 'User'
+      role: 'User',
     },
-    onLogout: vi.fn()
+    onLogout: vi.fn(),
   };
 
   test('renders without crashing', () => {
@@ -56,7 +54,9 @@ describe('MobileDrawer', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByRole('button', { name: /navigation menu/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /navigation menu/i })
+    ).toBeInTheDocument();
   });
 
   test('renders navigation toggle', () => {

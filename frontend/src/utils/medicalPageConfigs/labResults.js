@@ -359,24 +359,46 @@ export const labresultsPageConfig = {
     // Custom sort functions for complex sorting
     customSortFunctions: {
       test_type: (a, b, sortOrder) => {
-        const priorityOrder = ['emergency', 'urgent', 'follow-up', 'screening', 'routine'];
+        const priorityOrder = [
+          'emergency',
+          'urgent',
+          'follow-up',
+          'screening',
+          'routine',
+        ];
         const aIndex = priorityOrder.indexOf(a.test_type);
         const bIndex = priorityOrder.indexOf(b.test_type);
-        const diff = (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+        const diff =
+          (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
         return sortOrder === 'asc' ? diff : -diff;
       },
       labs_result: (a, b, sortOrder) => {
-        const resultOrder = ['critical', 'abnormal', 'high', 'low', 'borderline', 'normal', 'inconclusive'];
+        const resultOrder = [
+          'critical',
+          'abnormal',
+          'high',
+          'low',
+          'borderline',
+          'normal',
+          'inconclusive',
+        ];
         const aIndex = resultOrder.indexOf(a.labs_result || 'pending');
         const bIndex = resultOrder.indexOf(b.labs_result || 'pending');
-        const diff = (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+        const diff =
+          (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
         return sortOrder === 'asc' ? diff : -diff;
       },
       status: (a, b, sortOrder) => {
-        const statusOrder = ['in-progress', 'ordered', 'completed', 'cancelled'];
+        const statusOrder = [
+          'in-progress',
+          'ordered',
+          'completed',
+          'cancelled',
+        ];
         const aIndex = statusOrder.indexOf(a.status);
         const bIndex = statusOrder.indexOf(b.status);
-        const diff = (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+        const diff =
+          (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
         return sortOrder === 'asc' ? diff : -diff;
       },
     },

@@ -4,6 +4,7 @@ External binary management for Windows EXE deployment.
 Handles Poppler and Tesseract OCR binaries that are bundled with the
 Windows executable for PDF text extraction functionality.
 """
+
 import os
 import sys
 from pathlib import Path
@@ -35,7 +36,7 @@ def get_poppler_path() -> Optional[Path]:
     """
     if is_windows_exe():
         # PyInstaller onedir mode: binaries in _internal directory next to EXE
-        if hasattr(sys, '_MEIPASS'):
+        if hasattr(sys, "_MEIPASS"):
             # Running from temporary extraction directory (onefile mode or debug)
             base_path = Path(sys._MEIPASS)
         else:
@@ -52,25 +53,31 @@ def get_poppler_path() -> Optional[Path]:
         poppler_bin = base_path / "poppler" / "bin"
 
         if poppler_bin.exists():
-            logger.info(f"Using bundled Poppler from: {poppler_bin}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "poppler_path_found",
-                "path": str(poppler_bin)
-            })
+            logger.info(
+                f"Using bundled Poppler from: {poppler_bin}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "poppler_path_found",
+                    "path": str(poppler_bin),
+                },
+            )
             return poppler_bin
         else:
-            logger.warning(f"Poppler not found at expected path: {poppler_bin}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "poppler_not_found",
-                "expected_path": str(poppler_bin)
-            })
+            logger.warning(
+                f"Poppler not found at expected path: {poppler_bin}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "poppler_not_found",
+                    "expected_path": str(poppler_bin),
+                },
+            )
             return None
     else:
         # Development mode - return None (will use system PATH)
-        logger.debug("Development mode - using system Poppler from PATH", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "poppler_system_path"
-        })
+        logger.debug(
+            "Development mode - using system Poppler from PATH",
+            extra={LogFields.CATEGORY: "app", LogFields.EVENT: "poppler_system_path"},
+        )
         return None
 
 
@@ -94,7 +101,7 @@ def get_tesseract_path() -> Optional[Path]:
     """
     if is_windows_exe():
         # PyInstaller onedir mode: binaries in _internal directory next to EXE
-        if hasattr(sys, '_MEIPASS'):
+        if hasattr(sys, "_MEIPASS"):
             # Running from temporary extraction directory (onefile mode or debug)
             base_path = Path(sys._MEIPASS)
         else:
@@ -111,25 +118,31 @@ def get_tesseract_path() -> Optional[Path]:
         tesseract_exe = base_path / "tesseract" / "tesseract.exe"
 
         if tesseract_exe.exists():
-            logger.info(f"Using bundled Tesseract from: {tesseract_exe}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "tesseract_path_found",
-                "path": str(tesseract_exe)
-            })
+            logger.info(
+                f"Using bundled Tesseract from: {tesseract_exe}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "tesseract_path_found",
+                    "path": str(tesseract_exe),
+                },
+            )
             return tesseract_exe
         else:
-            logger.warning(f"Tesseract not found at expected path: {tesseract_exe}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "tesseract_not_found",
-                "expected_path": str(tesseract_exe)
-            })
+            logger.warning(
+                f"Tesseract not found at expected path: {tesseract_exe}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "tesseract_not_found",
+                    "expected_path": str(tesseract_exe),
+                },
+            )
             return None
     else:
         # Development mode - return None (will use system PATH)
-        logger.debug("Development mode - using system Tesseract from PATH", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "tesseract_system_path"
-        })
+        logger.debug(
+            "Development mode - using system Tesseract from PATH",
+            extra={LogFields.CATEGORY: "app", LogFields.EVENT: "tesseract_system_path"},
+        )
         return None
 
 
@@ -152,18 +165,24 @@ def get_tessdata_path() -> Optional[Path]:
         if tesseract_exe:
             tessdata_dir = tesseract_exe.parent / "tessdata"
             if tessdata_dir.exists():
-                logger.info(f"Using bundled tessdata from: {tessdata_dir}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "tessdata_path_found",
-                    "path": str(tessdata_dir)
-                })
+                logger.info(
+                    f"Using bundled tessdata from: {tessdata_dir}",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "tessdata_path_found",
+                        "path": str(tessdata_dir),
+                    },
+                )
                 return tessdata_dir
             else:
-                logger.warning(f"Tessdata not found at expected path: {tessdata_dir}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "tessdata_not_found",
-                    "expected_path": str(tessdata_dir)
-                })
+                logger.warning(
+                    f"Tessdata not found at expected path: {tessdata_dir}",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "tessdata_not_found",
+                        "expected_path": str(tessdata_dir),
+                    },
+                )
                 return None
         else:
             return None
@@ -189,38 +208,41 @@ def verify_external_binaries() -> dict:
 
     # Check Poppler
     poppler_path = get_poppler_path()
-    results['poppler'] = {
-        'available': poppler_path is not None and poppler_path.exists(),
-        'path': str(poppler_path) if poppler_path else None
+    results["poppler"] = {
+        "available": poppler_path is not None and poppler_path.exists(),
+        "path": str(poppler_path) if poppler_path else None,
     }
 
     # Check Tesseract
     tesseract_path = get_tesseract_path()
-    results['tesseract'] = {
-        'available': tesseract_path is not None and tesseract_path.exists(),
-        'path': str(tesseract_path) if tesseract_path else None
+    results["tesseract"] = {
+        "available": tesseract_path is not None and tesseract_path.exists(),
+        "path": str(tesseract_path) if tesseract_path else None,
     }
 
     # Check Tessdata
     tessdata_path = get_tessdata_path()
-    results['tessdata'] = {
-        'available': tessdata_path is not None and tessdata_path.exists(),
-        'path': str(tessdata_path) if tessdata_path else None
+    results["tessdata"] = {
+        "available": tessdata_path is not None and tessdata_path.exists(),
+        "path": str(tessdata_path) if tessdata_path else None,
     }
 
     # Overall availability
-    results['all_available'] = all(
-        results[key]['available'] for key in ['poppler', 'tesseract', 'tessdata']
+    results["all_available"] = all(
+        results[key]["available"] for key in ["poppler", "tesseract", "tessdata"]
     )
 
-    logger.info("External binaries verification complete", extra={
-        LogFields.CATEGORY: "app",
-        LogFields.EVENT: "external_binaries_verified",
-        "poppler_available": results['poppler']['available'],
-        "tesseract_available": results['tesseract']['available'],
-        "tessdata_available": results['tessdata']['available'],
-        "all_available": results['all_available']
-    })
+    logger.info(
+        "External binaries verification complete",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "external_binaries_verified",
+            "poppler_available": results["poppler"]["available"],
+            "tesseract_available": results["tesseract"]["available"],
+            "tessdata_available": results["tessdata"]["available"],
+            "all_available": results["all_available"],
+        },
+    )
 
     return results
 
@@ -233,35 +255,44 @@ def configure_environment_for_binaries() -> None:
     Poppler and Tesseract to work correctly.
     """
     if not is_windows_exe():
-        logger.debug("Not Windows EXE - skipping binary environment configuration", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "skip_binary_env_config"
-        })
+        logger.debug(
+            "Not Windows EXE - skipping binary environment configuration",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "skip_binary_env_config",
+            },
+        )
         return
 
     # Add Poppler to PATH
     poppler_path = get_poppler_path()
     if poppler_path:
-        current_path = os.environ.get('PATH', '')
+        current_path = os.environ.get("PATH", "")
         if str(poppler_path) not in current_path:
-            os.environ['PATH'] = f"{poppler_path}{os.pathsep}{current_path}"
-            logger.info(f"Added Poppler to PATH: {poppler_path}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "poppler_added_to_path",
-                "path": str(poppler_path)
-            })
+            os.environ["PATH"] = f"{poppler_path}{os.pathsep}{current_path}"
+            logger.info(
+                f"Added Poppler to PATH: {poppler_path}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "poppler_added_to_path",
+                    "path": str(poppler_path),
+                },
+            )
 
     # Set TESSDATA_PREFIX for Tesseract
     tessdata_path = get_tessdata_path()
     if tessdata_path:
-        os.environ['TESSDATA_PREFIX'] = str(tessdata_path.parent)
-        logger.info(f"Set TESSDATA_PREFIX: {tessdata_path.parent}", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "tessdata_prefix_set",
-            "path": str(tessdata_path.parent)
-        })
+        os.environ["TESSDATA_PREFIX"] = str(tessdata_path.parent)
+        logger.info(
+            f"Set TESSDATA_PREFIX: {tessdata_path.parent}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "tessdata_prefix_set",
+                "path": str(tessdata_path.parent),
+            },
+        )
 
-    logger.info("External binary environment configured", extra={
-        LogFields.CATEGORY: "app",
-        LogFields.EVENT: "binary_env_configured"
-    })
+    logger.info(
+        "External binary environment configured",
+        extra={LogFields.CATEGORY: "app", LogFields.EVENT: "binary_env_configured"},
+    )

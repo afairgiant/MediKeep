@@ -1,11 +1,4 @@
-import {
-  Modal,
-  Stack,
-  Alert,
-  Text,
-  Group,
-  ThemeIcon,
-} from '@mantine/core';
+import { Modal, Stack, Alert, Text, Group, ThemeIcon } from '@mantine/core';
 import { IconUserEdit, IconUserPlus } from '@tabler/icons-react';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import MantinePatientForm from '../MantinePatientForm';
@@ -26,7 +19,7 @@ const PatientFormWrapper = ({
   error = '',
   onPhotoChange,
 }) => {
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     if (e && e.preventDefault) {
       e.preventDefault();
     }
@@ -37,10 +30,17 @@ const PatientFormWrapper = ({
 
   const modalTitle = (
     <Group gap="sm">
-      <ThemeIcon variant="light" size="md" radius="md" color={isCreating ? 'teal' : 'blue'}>
+      <ThemeIcon
+        variant="light"
+        size="md"
+        radius="md"
+        color={isCreating ? 'teal' : 'blue'}
+      >
         {isCreating ? <IconUserPlus size={16} /> : <IconUserEdit size={16} />}
       </ThemeIcon>
-      <Text fw={600} size="lg">{title}</Text>
+      <Text fw={600} size="lg">
+        {title}
+      </Text>
     </Group>
   );
 

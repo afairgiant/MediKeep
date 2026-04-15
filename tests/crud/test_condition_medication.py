@@ -1,6 +1,7 @@
 """
 Tests for CRUDConditionMedication operations added in commit 3e0dcd3.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -87,7 +88,9 @@ class TestCRUDConditionMedication:
 
     # --- create ---
 
-    def test_create_relationship(self, db_session: Session, test_condition, test_medication):
+    def test_create_relationship(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test creating a condition-medication relationship."""
         create_data = ConditionMedicationCreate(
             medication_id=test_medication.id,
@@ -103,7 +106,9 @@ class TestCRUDConditionMedication:
         assert rel.relevance_note == "Used to treat hypertension"
         assert rel.id is not None
 
-    def test_create_relationship_without_note(self, db_session: Session, test_condition, test_medication):
+    def test_create_relationship_without_note(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test creating a relationship with no relevance note."""
         create_data = ConditionMedicationCreate(
             medication_id=test_medication.id,
@@ -117,7 +122,9 @@ class TestCRUDConditionMedication:
 
     # --- get_by_condition ---
 
-    def test_get_by_condition_returns_relationships(self, db_session: Session, test_condition, test_medication, second_medication):
+    def test_get_by_condition_returns_relationships(
+        self, db_session: Session, test_condition, test_medication, second_medication
+    ):
         """Test get_by_condition returns all relationships for a condition."""
         condition_medication.create(
             db_session,
@@ -134,21 +141,29 @@ class TestCRUDConditionMedication:
             ),
         )
 
-        rels = condition_medication.get_by_condition(db_session, condition_id=test_condition.id)
+        rels = condition_medication.get_by_condition(
+            db_session, condition_id=test_condition.id
+        )
 
         assert len(rels) == 2
         medication_ids = {r.medication_id for r in rels}
         assert test_medication.id in medication_ids
         assert second_medication.id in medication_ids
 
-    def test_get_by_condition_returns_empty_when_none(self, db_session: Session, test_condition):
+    def test_get_by_condition_returns_empty_when_none(
+        self, db_session: Session, test_condition
+    ):
         """Test get_by_condition returns empty list when no relationships exist."""
-        rels = condition_medication.get_by_condition(db_session, condition_id=test_condition.id)
+        rels = condition_medication.get_by_condition(
+            db_session, condition_id=test_condition.id
+        )
         assert rels == []
 
     # --- get_by_medication ---
 
-    def test_get_by_medication_returns_relationships(self, db_session: Session, test_condition, second_condition, test_medication):
+    def test_get_by_medication_returns_relationships(
+        self, db_session: Session, test_condition, second_condition, test_medication
+    ):
         """Test get_by_medication returns all relationships for a medication."""
         condition_medication.create(
             db_session,
@@ -165,21 +180,29 @@ class TestCRUDConditionMedication:
             ),
         )
 
-        rels = condition_medication.get_by_medication(db_session, medication_id=test_medication.id)
+        rels = condition_medication.get_by_medication(
+            db_session, medication_id=test_medication.id
+        )
 
         assert len(rels) == 2
         condition_ids = {r.condition_id for r in rels}
         assert test_condition.id in condition_ids
         assert second_condition.id in condition_ids
 
-    def test_get_by_medication_returns_empty_when_none(self, db_session: Session, test_medication):
+    def test_get_by_medication_returns_empty_when_none(
+        self, db_session: Session, test_medication
+    ):
         """Test get_by_medication returns empty list when no relationships exist."""
-        rels = condition_medication.get_by_medication(db_session, medication_id=test_medication.id)
+        rels = condition_medication.get_by_medication(
+            db_session, medication_id=test_medication.id
+        )
         assert rels == []
 
     # --- get_by_condition_and_medication ---
 
-    def test_get_by_condition_and_medication_found(self, db_session: Session, test_condition, test_medication):
+    def test_get_by_condition_and_medication_found(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test get_by_condition_and_medication returns the relationship when it exists."""
         condition_medication.create(
             db_session,
@@ -201,7 +224,9 @@ class TestCRUDConditionMedication:
         assert rel.medication_id == test_medication.id
         assert rel.relevance_note == "Primary treatment"
 
-    def test_get_by_condition_and_medication_not_found(self, db_session: Session, test_condition, test_medication):
+    def test_get_by_condition_and_medication_not_found(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test get_by_condition_and_medication returns None when no relationship exists."""
         rel = condition_medication.get_by_condition_and_medication(
             db_session,
@@ -212,7 +237,9 @@ class TestCRUDConditionMedication:
 
     # --- delete ---
 
-    def test_delete_relationship(self, db_session: Session, test_condition, test_medication):
+    def test_delete_relationship(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test deleting a condition-medication relationship."""
         rel = condition_medication.create(
             db_session,
@@ -231,7 +258,9 @@ class TestCRUDConditionMedication:
 
     # --- delete_by_condition_and_medication ---
 
-    def test_delete_by_condition_and_medication_success(self, db_session: Session, test_condition, test_medication):
+    def test_delete_by_condition_and_medication_success(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test delete_by_condition_and_medication removes the relationship."""
         condition_medication.create(
             db_session,
@@ -255,7 +284,9 @@ class TestCRUDConditionMedication:
         )
         assert rel is None
 
-    def test_delete_by_condition_and_medication_not_found(self, db_session: Session, test_condition, test_medication):
+    def test_delete_by_condition_and_medication_not_found(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test delete_by_condition_and_medication returns False when no relationship exists."""
         result = condition_medication.delete_by_condition_and_medication(
             db_session,
@@ -266,7 +297,9 @@ class TestCRUDConditionMedication:
 
     # --- update ---
 
-    def test_update_relevance_note(self, db_session: Session, test_condition, test_medication):
+    def test_update_relevance_note(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test updating the relevance note of a relationship."""
         rel = condition_medication.create(
             db_session,
@@ -288,7 +321,9 @@ class TestCRUDConditionMedication:
 
     # --- create_bulk ---
 
-    def test_create_bulk_creates_all_new(self, db_session: Session, test_condition, test_medication, second_medication):
+    def test_create_bulk_creates_all_new(
+        self, db_session: Session, test_condition, test_medication, second_medication
+    ):
         """Test create_bulk creates all relationships when none exist."""
         bulk_data = ConditionMedicationBulkCreate(
             medication_ids=[test_medication.id, second_medication.id],
@@ -309,7 +344,9 @@ class TestCRUDConditionMedication:
         for rel in created:
             assert rel.relevance_note == "Bulk linked"
 
-    def test_create_bulk_skips_existing(self, db_session: Session, test_condition, test_medication, second_medication):
+    def test_create_bulk_skips_existing(
+        self, db_session: Session, test_condition, test_medication, second_medication
+    ):
         """Test create_bulk skips already-linked medications."""
         # Pre-create one relationship
         condition_medication.create(
@@ -335,7 +372,9 @@ class TestCRUDConditionMedication:
         assert skipped[0] == test_medication.id
         assert created[0].medication_id == second_medication.id
 
-    def test_create_bulk_all_skipped(self, db_session: Session, test_condition, test_medication):
+    def test_create_bulk_all_skipped(
+        self, db_session: Session, test_condition, test_medication
+    ):
         """Test create_bulk when all medications are already linked."""
         condition_medication.create(
             db_session,
@@ -360,7 +399,9 @@ class TestCRUDConditionMedication:
 
     # --- isolation: relationships don't bleed across conditions ---
 
-    def test_relationships_isolated_by_condition(self, db_session: Session, test_condition, second_condition, test_medication):
+    def test_relationships_isolated_by_condition(
+        self, db_session: Session, test_condition, second_condition, test_medication
+    ):
         """Test that relationships are isolated per condition."""
         condition_medication.create(
             db_session,

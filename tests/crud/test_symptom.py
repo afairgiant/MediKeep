@@ -3,6 +3,7 @@ Tests for Symptom CRUD operations.
 
 Tests both symptom_parent (symptom definitions) and symptom_occurrence (individual episodes).
 """
+
 import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
@@ -14,7 +15,7 @@ from app.schemas.symptom import (
     SymptomCreate,
     SymptomUpdate,
     SymptomOccurrenceCreate,
-    SymptomOccurrenceUpdate
+    SymptomOccurrenceUpdate,
 )
 from app.schemas.patient import PatientCreate
 
@@ -30,7 +31,7 @@ class TestSymptomParentCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -44,7 +45,7 @@ class TestSymptomParentCRUD:
             status="active",
             is_chronic=True,
             first_occurrence_date=date(2023, 1, 1),
-            notes="Recurring migraines"
+            notes="Recurring migraines",
         )
 
         symptom = symptom_parent.create(db_session, obj_in=symptom_data)
@@ -63,28 +64,26 @@ class TestSymptomParentCRUD:
                 patient_id=test_patient.id,
                 symptom_name="Headache",
                 status="active",
-                first_occurrence_date=today - timedelta(days=30)
+                first_occurrence_date=today - timedelta(days=30),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Back Pain",
                 status="active",
-                first_occurrence_date=today - timedelta(days=60)
+                first_occurrence_date=today - timedelta(days=60),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Fatigue",
                 status="resolved",
-                first_occurrence_date=today - timedelta(days=90)
-            )
+                first_occurrence_date=today - timedelta(days=90),
+            ),
         ]
 
         for symp_data in symptoms_data:
             symptom_parent.create(db_session, obj_in=symp_data)
 
-        symptoms = symptom_parent.get_by_patient(
-            db_session, patient_id=test_patient.id
-        )
+        symptoms = symptom_parent.get_by_patient(db_session, patient_id=test_patient.id)
 
         assert len(symptoms) == 3
 
@@ -96,20 +95,20 @@ class TestSymptomParentCRUD:
                 patient_id=test_patient.id,
                 symptom_name="Active Symptom 1",
                 status="active",
-                first_occurrence_date=today - timedelta(days=10)
+                first_occurrence_date=today - timedelta(days=10),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Active Symptom 2",
                 status="active",
-                first_occurrence_date=today - timedelta(days=20)
+                first_occurrence_date=today - timedelta(days=20),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Resolved Symptom",
                 status="resolved",
-                first_occurrence_date=today - timedelta(days=30)
-            )
+                first_occurrence_date=today - timedelta(days=30),
+            ),
         ]
 
         for symp_data in symptoms_data:
@@ -130,14 +129,14 @@ class TestSymptomParentCRUD:
                 patient_id=test_patient.id,
                 symptom_name="Active 1",
                 status="active",
-                first_occurrence_date=today - timedelta(days=10)
+                first_occurrence_date=today - timedelta(days=10),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Resolved",
                 status="resolved",
-                first_occurrence_date=today - timedelta(days=30)
-            )
+                first_occurrence_date=today - timedelta(days=30),
+            ),
         ]
 
         for symp_data in symptoms_data:
@@ -159,15 +158,15 @@ class TestSymptomParentCRUD:
                 symptom_name="Chronic Migraine",
                 is_chronic=True,
                 status="active",
-                first_occurrence_date=today - timedelta(days=365)
+                first_occurrence_date=today - timedelta(days=365),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Acute Pain",
                 is_chronic=False,
                 status="active",
-                first_occurrence_date=today - timedelta(days=5)
-            )
+                first_occurrence_date=today - timedelta(days=5),
+            ),
         ]
 
         for symp_data in symptoms_data:
@@ -189,20 +188,20 @@ class TestSymptomParentCRUD:
                 patient_id=test_patient.id,
                 symptom_name="Migraine Headache",
                 status="active",
-                first_occurrence_date=today - timedelta(days=30)
+                first_occurrence_date=today - timedelta(days=30),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Tension Headache",
                 status="active",
-                first_occurrence_date=today - timedelta(days=60)
+                first_occurrence_date=today - timedelta(days=60),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Back Pain",
                 status="active",
-                first_occurrence_date=today - timedelta(days=90)
-            )
+                first_occurrence_date=today - timedelta(days=90),
+            ),
         ]
 
         for symp_data in symptoms_data:
@@ -223,7 +222,7 @@ class TestSymptomParentCRUD:
             patient_id=test_patient.id,
             symptom_name="Test Symptom",
             status="active",
-            first_occurrence_date=today - timedelta(days=30)
+            first_occurrence_date=today - timedelta(days=30),
         )
         symptom = symptom_parent.create(db_session, obj_in=symptom_data)
 
@@ -231,9 +230,9 @@ class TestSymptomParentCRUD:
         for i in range(3):
             occurrence_data = SymptomOccurrenceCreate(
                 symptom_id=symptom.id,
-                occurrence_date=date.today() - timedelta(days=i*7),
+                occurrence_date=date.today() - timedelta(days=i * 7),
                 severity="moderate",
-                pain_scale=5
+                pain_scale=5,
             )
             symptom_occurrence.create(db_session, obj_in=occurrence_data)
 
@@ -245,7 +244,9 @@ class TestSymptomParentCRUD:
         assert loaded_symptom is not None
         assert len(loaded_symptom.occurrences) == 3
 
-    @pytest.mark.skip(reason="CRUD implementation has SQLAlchemy compatibility issue with func.Integer()")
+    @pytest.mark.skip(
+        reason="CRUD implementation has SQLAlchemy compatibility issue with func.Integer()"
+    )
     def test_get_symptom_stats(self, db_session: Session, test_patient):
         """Test getting symptom statistics for a patient.
 
@@ -261,30 +262,28 @@ class TestSymptomParentCRUD:
                 symptom_name="Active Chronic",
                 status="active",
                 is_chronic=True,
-                first_occurrence_date=today - timedelta(days=365)
+                first_occurrence_date=today - timedelta(days=365),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Active Regular",
                 status="active",
                 is_chronic=False,
-                first_occurrence_date=today - timedelta(days=30)
+                first_occurrence_date=today - timedelta(days=30),
             ),
             SymptomCreate(
                 patient_id=test_patient.id,
                 symptom_name="Resolved",
                 status="resolved",
                 is_chronic=False,
-                first_occurrence_date=today - timedelta(days=60)
-            )
+                first_occurrence_date=today - timedelta(days=60),
+            ),
         ]
 
         for symp_data in symptoms_data:
             symptom_parent.create(db_session, obj_in=symp_data)
 
-        stats = symptom_parent.get_symptom_stats(
-            db_session, patient_id=test_patient.id
-        )
+        stats = symptom_parent.get_symptom_stats(db_session, patient_id=test_patient.id)
 
         assert stats["total_symptoms"] == 3
         assert stats["active_symptoms"] == 2
@@ -298,18 +297,15 @@ class TestSymptomParentCRUD:
             patient_id=test_patient.id,
             symptom_name="Original Name",
             status="active",
-            first_occurrence_date=today - timedelta(days=30)
+            first_occurrence_date=today - timedelta(days=30),
         )
         created = symptom_parent.create(db_session, obj_in=symptom_data)
 
         update_data = SymptomUpdate(
-            status="resolved",
-            general_notes="Resolved after treatment"
+            status="resolved", general_notes="Resolved after treatment"
         )
 
-        updated = symptom_parent.update(
-            db_session, db_obj=created, obj_in=update_data
-        )
+        updated = symptom_parent.update(db_session, db_obj=created, obj_in=update_data)
 
         assert updated.status == "resolved"
         assert updated.general_notes == "Resolved after treatment"
@@ -326,7 +322,7 @@ class TestSymptomOccurrenceCRUD:
             last_name="Doe",
             birth_date=date(1985, 6, 15),
             gender="F",
-            address="456 Oak Ave"
+            address="456 Oak Ave",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -339,7 +335,7 @@ class TestSymptomOccurrenceCRUD:
             patient_id=test_patient.id,
             symptom_name="Test Symptom",
             status="active",
-            first_occurrence_date=date.today() - timedelta(days=30)
+            first_occurrence_date=date.today() - timedelta(days=30),
         )
         return symptom_parent.create(db_session, obj_in=symptom_data)
 
@@ -353,7 +349,7 @@ class TestSymptomOccurrenceCRUD:
             duration="2 hours",
             location="Left temple",
             time_of_day="morning",
-            notes="Triggered by stress"
+            notes="Triggered by stress",
         )
 
         occurrence = symptom_occurrence.create(db_session, obj_in=occurrence_data)
@@ -369,8 +365,8 @@ class TestSymptomOccurrenceCRUD:
         for i in range(5):
             occurrence_data = SymptomOccurrenceCreate(
                 symptom_id=test_symptom.id,
-                occurrence_date=date.today() - timedelta(days=i*3),
-                severity="moderate"
+                occurrence_date=date.today() - timedelta(days=i * 3),
+                severity="moderate",
             )
             symptom_occurrence.create(db_session, obj_in=occurrence_data)
 
@@ -395,7 +391,7 @@ class TestSymptomOccurrenceCRUD:
             occurrence_data = SymptomOccurrenceCreate(
                 symptom_id=test_symptom.id,
                 occurrence_date=occ_date,
-                severity="moderate"
+                severity="moderate",
             )
             symptom_occurrence.create(db_session, obj_in=occurrence_data)
 
@@ -404,7 +400,7 @@ class TestSymptomOccurrenceCRUD:
             db_session,
             symptom_id=test_symptom.id,
             start_date=today - timedelta(days=20),
-            end_date=today
+            end_date=today,
         )
 
         assert len(results) == 2
@@ -417,7 +413,7 @@ class TestSymptomOccurrenceCRUD:
             occurrence_data = SymptomOccurrenceCreate(
                 symptom_id=test_symptom.id,
                 occurrence_date=date.today(),
-                severity=severity
+                severity=severity,
             )
             symptom_occurrence.create(db_session, obj_in=occurrence_data)
 
@@ -435,8 +431,8 @@ class TestSymptomOccurrenceCRUD:
         for i in range(3):
             occurrence_data = SymptomOccurrenceCreate(
                 symptom_id=test_symptom.id,
-                occurrence_date=today - timedelta(days=i*5),
-                severity="moderate"
+                occurrence_date=today - timedelta(days=i * 5),
+                severity="moderate",
             )
             symptom_occurrence.create(db_session, obj_in=occurrence_data)
 
@@ -455,20 +451,20 @@ class TestSymptomOccurrenceCRUD:
                 symptom_id=test_symptom.id,
                 occurrence_date=date.today(),
                 severity="mild",
-                pain_scale=3
+                pain_scale=3,
             ),
             SymptomOccurrenceCreate(
                 symptom_id=test_symptom.id,
                 occurrence_date=date.today() - timedelta(days=1),
                 severity="moderate",
-                pain_scale=5
+                pain_scale=5,
             ),
             SymptomOccurrenceCreate(
                 symptom_id=test_symptom.id,
                 occurrence_date=date.today() - timedelta(days=2),
                 severity="severe",
-                pain_scale=8
-            )
+                pain_scale=8,
+            ),
         ]
 
         for occ_data in occurrences_data:
@@ -490,14 +486,12 @@ class TestSymptomOccurrenceCRUD:
             symptom_id=test_symptom.id,
             occurrence_date=date.today(),
             severity="mild",
-            pain_scale=3
+            pain_scale=3,
         )
         created = symptom_occurrence.create(db_session, obj_in=occurrence_data)
 
         update_data = SymptomOccurrenceUpdate(
-            severity="moderate",
-            pain_scale=5,
-            notes="Updated severity"
+            severity="moderate", pain_scale=5, notes="Updated severity"
         )
 
         updated = symptom_occurrence.update(
@@ -511,9 +505,7 @@ class TestSymptomOccurrenceCRUD:
     def test_delete_occurrence(self, db_session: Session, test_symptom):
         """Test deleting an occurrence."""
         occurrence_data = SymptomOccurrenceCreate(
-            symptom_id=test_symptom.id,
-            occurrence_date=date.today(),
-            severity="mild"
+            symptom_id=test_symptom.id, occurrence_date=date.today(), severity="mild"
         )
         created = symptom_occurrence.create(db_session, obj_in=occurrence_data)
         occurrence_id = created.id
@@ -532,7 +524,7 @@ class TestSymptomOccurrenceCRUD:
         first_occurrence = SymptomOccurrenceCreate(
             symptom_id=test_symptom.id,
             occurrence_date=date.today() - timedelta(days=30),
-            severity="mild"
+            severity="mild",
         )
         symptom_occurrence.create(db_session, obj_in=first_occurrence)
 
@@ -540,7 +532,7 @@ class TestSymptomOccurrenceCRUD:
         recent_occurrence = SymptomOccurrenceCreate(
             symptom_id=test_symptom.id,
             occurrence_date=date.today(),
-            severity="moderate"
+            severity="moderate",
         )
         symptom_occurrence.create(db_session, obj_in=recent_occurrence)
 

@@ -95,7 +95,11 @@ const ConditionRelationships = ({
     setError(null);
 
     try {
-      await apiService.updateLabResultCondition(labResultId, relationshipId, updates);
+      await apiService.updateLabResultCondition(
+        labResultId,
+        relationshipId,
+        updates
+      );
 
       // Refresh relationships
       if (fetchLabResultConditions) {
@@ -110,7 +114,7 @@ const ConditionRelationships = ({
     }
   };
 
-  const handleDeleteRelationship = async (relationshipId) => {
+  const handleDeleteRelationship = async relationshipId => {
     if (!window.confirm(t('messages.confirmRemoveConditionRelationship'))) {
       return;
     }
@@ -132,7 +136,7 @@ const ConditionRelationships = ({
     }
   };
 
-  const getConditionById = (conditionId) => {
+  const getConditionById = conditionId => {
     return conditions.find(condition => condition.id === conditionId);
   };
 
@@ -143,7 +147,9 @@ const ConditionRelationships = ({
   }));
 
   // Filter out already linked conditions
-  const linkedConditionIds = relationships.map(rel => rel.condition_id.toString());
+  const linkedConditionIds = relationships.map(rel =>
+    rel.condition_id.toString()
+  );
   const availableConditionOptions = conditionOptions.filter(
     option => !linkedConditionIds.includes(option.value)
   );
@@ -160,7 +166,9 @@ const ConditionRelationships = ({
       {relationships.length > 0 ? (
         <Stack gap="sm">
           {relationships.map(relationship => {
-            const condition = relationship.condition || getConditionById(relationship.condition_id);
+            const condition =
+              relationship.condition ||
+              getConditionById(relationship.condition_id);
             const isEditing = editingRelationship?.id === relationship.id;
 
             return (
@@ -173,10 +181,20 @@ const ConditionRelationships = ({
                           size="sm"
                           fw={500}
                           c="blue"
-                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                          onClick={() => navigateToEntity('condition', condition?.id, navigate)}
+                          style={{
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                          }}
+                          onClick={() =>
+                            navigateToEntity(
+                              'condition',
+                              condition?.id,
+                              navigate
+                            )
+                          }
                         >
-                          {condition?.diagnosis || `Condition ID: ${relationship.condition_id}`}
+                          {condition?.diagnosis ||
+                            `Condition ID: ${relationship.condition_id}`}
                         </Text>
                       ) : (
                         <Badge
@@ -184,9 +202,16 @@ const ConditionRelationships = ({
                           color="blue"
                           leftSection={<IconStethoscope size={12} />}
                           style={{ cursor: 'pointer' }}
-                          onClick={() => navigateToEntity('condition', condition?.id, navigate)}
+                          onClick={() =>
+                            navigateToEntity(
+                              'condition',
+                              condition?.id,
+                              navigate
+                            )
+                          }
                         >
-                          {condition?.diagnosis || `Condition ID: ${relationship.condition_id}`}
+                          {condition?.diagnosis ||
+                            `Condition ID: ${relationship.condition_id}`}
                         </Badge>
                       )}
                       {condition?.status && (
@@ -204,11 +229,17 @@ const ConditionRelationships = ({
                     {!isViewMode && isEditing ? (
                       <Textarea
                         placeholder={t('modals.relevanceNoteOptional')}
-                        value={editingRelationship?.relevance_note || relationship.relevance_note || ''}
-                        onChange={(e) => setEditingRelationship({
-                          ...editingRelationship,
-                          relevance_note: e.target.value
-                        })}
+                        value={
+                          editingRelationship?.relevance_note ||
+                          relationship.relevance_note ||
+                          ''
+                        }
+                        onChange={e =>
+                          setEditingRelationship({
+                            ...editingRelationship,
+                            relevance_note: e.target.value,
+                          })
+                        }
                         size="sm"
                         autosize
                         minRows={2}
@@ -232,9 +263,13 @@ const ConditionRelationships = ({
                             variant="light"
                             color="green"
                             size="sm"
-                            onClick={() => handleEditRelationship(relationship.id, {
-                              relevance_note: editingRelationship?.relevance_note || relationship.relevance_note
-                            })}
+                            onClick={() =>
+                              handleEditRelationship(relationship.id, {
+                                relevance_note:
+                                  editingRelationship?.relevance_note ||
+                                  relationship.relevance_note,
+                              })
+                            }
                             loading={loading}
                           >
                             <IconCheck size={14} />
@@ -254,10 +289,13 @@ const ConditionRelationships = ({
                             variant="light"
                             color="blue"
                             size="sm"
-                            onClick={() => setEditingRelationship({
-                              id: relationship.id,
-                              relevance_note: relationship.relevance_note || ''
-                            })}
+                            onClick={() =>
+                              setEditingRelationship({
+                                id: relationship.id,
+                                relevance_note:
+                                  relationship.relevance_note || '',
+                              })
+                            }
                           >
                             <IconEdit size={14} />
                           </ActionIcon>
@@ -265,7 +303,9 @@ const ConditionRelationships = ({
                             variant="light"
                             color="red"
                             size="sm"
-                            onClick={() => handleDeleteRelationship(relationship.id)}
+                            onClick={() =>
+                              handleDeleteRelationship(relationship.id)
+                            }
                             loading={loading}
                           >
                             <IconTrash size={14} />
@@ -315,11 +355,15 @@ const ConditionRelationships = ({
             label={t('modals.selectCondition')}
             placeholder={t('modals.chooseConditionToLink')}
             data={availableConditionOptions}
-            value={newRelationship.condition_id ? [newRelationship.condition_id] : []}
-            onChange={(values) => setNewRelationship(prev => ({
-              ...prev,
-              condition_id: values[0] || ''
-            }))}
+            value={
+              newRelationship.condition_id ? [newRelationship.condition_id] : []
+            }
+            onChange={values =>
+              setNewRelationship(prev => ({
+                ...prev,
+                condition_id: values[0] || '',
+              }))
+            }
             searchable
             clearable
             comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -330,10 +374,12 @@ const ConditionRelationships = ({
             label={t('modals.relevanceNote')}
             placeholder={t('modals.describeConditionRelevance')}
             value={newRelationship.relevance_note}
-            onChange={(e) => setNewRelationship(prev => ({
-              ...prev,
-              relevance_note: e.target.value
-            }))}
+            onChange={e =>
+              setNewRelationship(prev => ({
+                ...prev,
+                relevance_note: e.target.value,
+              }))
+            }
             autosize
             minRows={3}
           />

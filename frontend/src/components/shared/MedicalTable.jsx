@@ -1,5 +1,14 @@
 import React from 'react';
-import { Table, ScrollArea, ActionIcon, Group, Text, Title, Stack, Card } from '@mantine/core';
+import {
+  Table,
+  ScrollArea,
+  ActionIcon,
+  Group,
+  Text,
+  Title,
+  Stack,
+  Card,
+} from '@mantine/core';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { IconEye, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -26,26 +35,29 @@ const MedicalTable = ({
   }
 
   // Get responsive table configuration
-  const tableConfig = MantineResponsiveAdapter.createTableProps(responsive.breakpoint, {
-    enableHorizontalScroll: true,
-    priorityColumns: columns.slice(0, 2).map(col => col.accessor), // First 2 columns are priority
-    compactOnMobile: true
-  });
+  const tableConfig = MantineResponsiveAdapter.createTableProps(
+    responsive.breakpoint,
+    {
+      enableHorizontalScroll: true,
+      priorityColumns: columns.slice(0, 2).map(col => col.accessor), // First 2 columns are priority
+      compactOnMobile: true,
+    }
+  );
 
   // Create responsive components
   const ResponsiveCard = ResponsiveComponentFactory.createMantine(Card, {
     padding: { xs: 'xs', md: 'sm', lg: 'md' },
     shadow: { xs: 'xs', md: 'sm' },
-    radius: { xs: 'xs', md: 'sm' }
+    radius: { xs: 'xs', md: 'sm' },
   });
 
   const ResponsiveTitle = ResponsiveComponentFactory.createMantine(Title, {
     order: { xs: 4, md: 3, lg: 2 },
-    size: { xs: 'h4', md: 'h3' }
+    size: { xs: 'h4', md: 'h3' },
   });
 
   const ResponsiveText = ResponsiveComponentFactory.createMantine(Text, {
-    size: { xs: 'xs', md: 'sm' }
+    size: { xs: 'xs', md: 'sm' },
   });
 
   // Mobile card view for very small screens
@@ -57,26 +69,36 @@ const MedicalTable = ({
             {tableName} - {patientData?.first_name} {patientData?.last_name}
           </ResponsiveTitle>
           <ResponsiveText color="dimmed">
-            {t('labels.generatedOn', { date: formatDate(new Date().toISOString()) })}
+            {t('labels.generatedOn', {
+              date: formatDate(new Date().toISOString()),
+            })}
           </ResponsiveText>
         </Stack>
 
         {data.map(item => (
           <ResponsiveCard key={item.id}>
             <Stack spacing="xs">
-              {columns.slice(0, 3).map((column, index) => ( // Show only first 3 columns on mobile
-                <Group position="apart" noWrap>
-                  <Text size="xs" weight={500} color="dimmed">
-                    {column.header}:
-                  </Text>
-                  <Text size="sm">
-                    {formatters[column.accessor]
-                      ? formatters[column.accessor](item[column.accessor], item)
-                      : item[column.accessor] || '-'}
-                  </Text>
-                </Group>
-              ))}
-              
+              {columns.slice(0, 3).map(
+                (
+                  column,
+                  index // Show only first 3 columns on mobile
+                ) => (
+                  <Group position="apart" noWrap>
+                    <Text size="xs" weight={500} color="dimmed">
+                      {column.header}:
+                    </Text>
+                    <Text size="sm">
+                      {formatters[column.accessor]
+                        ? formatters[column.accessor](
+                            item[column.accessor],
+                            item
+                          )
+                        : item[column.accessor] || '-'}
+                    </Text>
+                  </Group>
+                )
+              )}
+
               <Group spacing="xs" mt="xs" className="no-print">
                 {onView && (
                   <ActionIcon
@@ -125,7 +147,9 @@ const MedicalTable = ({
           {tableName} - {patientData?.first_name} {patientData?.last_name}
         </ResponsiveTitle>
         <ResponsiveText color="dimmed">
-          {t('labels.generatedOn', { date: formatDate(new Date().toISOString()) })}
+          {t('labels.generatedOn', {
+            date: formatDate(new Date().toISOString()),
+          })}
         </ResponsiveText>
       </Stack>
 
@@ -134,7 +158,11 @@ const MedicalTable = ({
           {...tableConfig.props}
           striped
           highlightOnHover
-          style={{ minWidth: tableConfig.config.enableScroll ? tableConfig.config.minWidth : 'auto' }}
+          style={{
+            minWidth: tableConfig.config.enableScroll
+              ? tableConfig.config.minWidth
+              : 'auto',
+          }}
         >
           <thead>
             <tr>

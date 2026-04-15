@@ -22,7 +22,10 @@ import {
 // ---------------------------------------------------------------------------
 
 /** Translation function type accepted by helper functions. */
-export type TFunc = (key: string, defaultValueOrOptions?: string | Record<string, unknown>) => string;
+export type TFunc = (
+  key: string,
+  defaultValueOrOptions?: string | Record<string, unknown>
+) => string;
 
 export interface SearchResultRow {
   type: string;
@@ -52,14 +55,54 @@ interface EntityConfig {
 
 /** Entity config for tag search results (keyed by singular backend response keys). */
 export const TAG_ENTITY_CONFIG: Record<string, EntityConfig> = {
-  lab_result: { icon: IconFlask, color: 'indigo', labelKey: 'shared:categories.lab_results', route: '/lab-results' },
-  medication: { icon: IconPill, color: 'green', labelKey: 'shared:categories.medications', route: '/medications' },
-  condition: { icon: IconStethoscope, color: 'blue', labelKey: 'shared:categories.conditions', route: '/conditions' },
-  procedure: { icon: IconMedicalCross, color: 'violet', labelKey: 'shared:categories.procedures', route: '/procedures' },
-  immunization: { icon: IconVaccine, color: 'orange', labelKey: 'shared:categories.immunizations', route: '/immunizations' },
-  treatment: { icon: IconHeartbeat, color: 'pink', labelKey: 'shared:categories.treatments', route: '/treatments' },
-  encounter: { icon: IconCalendarEvent, color: 'teal', labelKey: 'search.types.encounters', route: '/encounters' },
-  allergy: { icon: IconAlertTriangle, color: 'red', labelKey: 'shared:categories.allergies', route: '/allergies' },
+  lab_result: {
+    icon: IconFlask,
+    color: 'indigo',
+    labelKey: 'shared:categories.lab_results',
+    route: '/lab-results',
+  },
+  medication: {
+    icon: IconPill,
+    color: 'green',
+    labelKey: 'shared:categories.medications',
+    route: '/medications',
+  },
+  condition: {
+    icon: IconStethoscope,
+    color: 'blue',
+    labelKey: 'shared:categories.conditions',
+    route: '/conditions',
+  },
+  procedure: {
+    icon: IconMedicalCross,
+    color: 'violet',
+    labelKey: 'shared:categories.procedures',
+    route: '/procedures',
+  },
+  immunization: {
+    icon: IconVaccine,
+    color: 'orange',
+    labelKey: 'shared:categories.immunizations',
+    route: '/immunizations',
+  },
+  treatment: {
+    icon: IconHeartbeat,
+    color: 'pink',
+    labelKey: 'shared:categories.treatments',
+    route: '/treatments',
+  },
+  encounter: {
+    icon: IconCalendarEvent,
+    color: 'teal',
+    labelKey: 'search.types.encounters',
+    route: '/encounters',
+  },
+  allergy: {
+    icon: IconAlertTriangle,
+    color: 'red',
+    labelKey: 'shared:categories.allergies',
+    route: '/allergies',
+  },
 };
 
 /** Map sidebar record type values (plural) to tag entity keys (singular). */
@@ -76,7 +119,10 @@ export const RECORD_TYPE_TO_TAG_ENTITY: Record<string, string> = {
 };
 
 /** Icon mapping for text search result icon strings from backend. */
-export const ICON_MAP: Record<string, React.ComponentType<{ size?: string | number }>> = {
+export const ICON_MAP: Record<
+  string,
+  React.ComponentType<{ size?: string | number }>
+> = {
   IconAlertTriangle,
   IconStethoscope,
   IconPill,
@@ -114,31 +160,78 @@ export function getTypeLabel(t: TFunc, typeKey: string): string {
 // Helper functions
 // ---------------------------------------------------------------------------
 
-export function getItemTitle(entityType: string, item: Record<string, unknown>, t: TFunc): string {
+export function getItemTitle(
+  entityType: string,
+  item: Record<string, unknown>,
+  t: TFunc
+): string {
   switch (entityType) {
-    case 'lab_result': return (item.test_name as string) || t('shared:labels.labResult');
-    case 'medication': return (item.medication_name as string) || t('search.fallbacks.medication');
-    case 'condition': return (item.condition_name as string) || (item.diagnosis as string) || t('shared:labels.condition');
-    case 'procedure': return (item.name as string) || (item.procedure_name as string) || t('search.fallbacks.procedure');
-    case 'immunization': return (item.vaccine_name as string) || t('search.fallbacks.immunization');
-    case 'treatment': return (item.treatment_name as string) || t('shared:labels.treatment');
-    case 'encounter': return (item.visit_type as string) || (item.encounter_type as string) || (item.reason as string) || t('search.fallbacks.encounter');
-    case 'allergy': return (item.allergen as string) || t('search.fallbacks.allergy');
-    default: return t('search.fallbacks.record');
+    case 'lab_result':
+      return (item.test_name as string) || t('shared:labels.labResult');
+    case 'medication':
+      return (
+        (item.medication_name as string) || t('search.fallbacks.medication')
+      );
+    case 'condition':
+      return (
+        (item.condition_name as string) ||
+        (item.diagnosis as string) ||
+        t('shared:labels.condition')
+      );
+    case 'procedure':
+      return (
+        (item.name as string) ||
+        (item.procedure_name as string) ||
+        t('search.fallbacks.procedure')
+      );
+    case 'immunization':
+      return (
+        (item.vaccine_name as string) || t('search.fallbacks.immunization')
+      );
+    case 'treatment':
+      return (item.treatment_name as string) || t('shared:labels.treatment');
+    case 'encounter':
+      return (
+        (item.visit_type as string) ||
+        (item.encounter_type as string) ||
+        (item.reason as string) ||
+        t('search.fallbacks.encounter')
+      );
+    case 'allergy':
+      return (item.allergen as string) || t('search.fallbacks.allergy');
+    default:
+      return t('search.fallbacks.record');
   }
 }
 
-export function getItemSubtitle(entityType: string, item: Record<string, unknown>, t: TFunc): string {
+export function getItemSubtitle(
+  entityType: string,
+  item: Record<string, unknown>,
+  t: TFunc
+): string {
   switch (entityType) {
-    case 'lab_result': return item.result ? t('search.subtitles.result', { value: item.result }) : (item.status as string) || '';
-    case 'medication': return [item.dosage, item.status].filter(Boolean).join(' - ');
-    case 'condition': return [item.diagnosis, item.status].filter(Boolean).join(' - ');
-    case 'procedure': return (item.description as string) || (item.status as string) || '';
-    case 'immunization': return item.dose_number ? t('shared:labels.doseNumber', { number: item.dose_number }) : '';
-    case 'treatment': return [item.treatment_type, item.status].filter(Boolean).join(' - ');
-    case 'encounter': return (item.reason as string) || (item.chief_complaint as string) || '';
-    case 'allergy': return [item.severity, item.reaction].filter(Boolean).join(' - ');
-    default: return (item.status as string) || '';
+    case 'lab_result':
+      return item.result
+        ? t('search.subtitles.result', { value: item.result })
+        : (item.status as string) || '';
+    case 'medication':
+      return [item.dosage, item.status].filter(Boolean).join(' - ');
+    case 'condition':
+      return [item.diagnosis, item.status].filter(Boolean).join(' - ');
+    case 'procedure':
+      return (item.description as string) || (item.status as string) || '';
+    case 'immunization':
+      return item.dose_number
+        ? t('shared:labels.doseNumber', { number: item.dose_number })
+        : '';
+    case 'treatment':
+      return [item.treatment_type, item.status].filter(Boolean).join(' - ');
+    case 'encounter':
+      return (item.reason as string) || (item.chief_complaint as string) || '';
+    case 'allergy':
+      return [item.severity, item.reaction].filter(Boolean).join(' - ');
+    default:
+      return (item.status as string) || '';
   }
 }
 
@@ -149,16 +242,55 @@ export function getItemDateWithLabel(
   t: TFunc
 ): { label: string; value: string | undefined } {
   switch (entityType) {
-    case 'lab_result': return { label: t('search.dateLabels.tested'), value: (item.test_date || item.created_at) as string | undefined };
-    case 'medication': return { label: t('search.dateLabels.started'), value: (item.start_date || item.created_at) as string | undefined };
-    case 'condition': return { label: t('search.dateLabels.diagnosed'), value: (item.diagnosed_date || item.created_at) as string | undefined };
-    case 'procedure': return { label: t('search.dateLabels.performed'), value: (item.procedure_date || item.created_at) as string | undefined };
-    case 'immunization': return { label: t('search.dateLabels.given'), value: (item.administered_date || item.created_at) as string | undefined };
-    case 'treatment': return { label: t('search.dateLabels.started'), value: (item.start_date || item.created_at) as string | undefined };
-    case 'encounter': return { label: t('search.dateLabels.visited'), value: (item.encounter_date || item.created_at) as string | undefined };
-    case 'allergy': return { label: t('search.dateLabels.identified'), value: (item.identified_date || item.created_at) as string | undefined };
-    case 'vital': return { label: t('search.dateLabels.recorded'), value: (item.recorded_date || item.created_at) as string | undefined };
-    default: return { label: '', value: item.created_at as string | undefined };
+    case 'lab_result':
+      return {
+        label: t('search.dateLabels.tested'),
+        value: (item.test_date || item.created_at) as string | undefined,
+      };
+    case 'medication':
+      return {
+        label: t('search.dateLabels.started'),
+        value: (item.start_date || item.created_at) as string | undefined,
+      };
+    case 'condition':
+      return {
+        label: t('search.dateLabels.diagnosed'),
+        value: (item.diagnosed_date || item.created_at) as string | undefined,
+      };
+    case 'procedure':
+      return {
+        label: t('search.dateLabels.performed'),
+        value: (item.procedure_date || item.created_at) as string | undefined,
+      };
+    case 'immunization':
+      return {
+        label: t('search.dateLabels.given'),
+        value: (item.administered_date || item.created_at) as
+          | string
+          | undefined,
+      };
+    case 'treatment':
+      return {
+        label: t('search.dateLabels.started'),
+        value: (item.start_date || item.created_at) as string | undefined,
+      };
+    case 'encounter':
+      return {
+        label: t('search.dateLabels.visited'),
+        value: (item.encounter_date || item.created_at) as string | undefined,
+      };
+    case 'allergy':
+      return {
+        label: t('search.dateLabels.identified'),
+        value: (item.identified_date || item.created_at) as string | undefined,
+      };
+    case 'vital':
+      return {
+        label: t('search.dateLabels.recorded'),
+        value: (item.recorded_date || item.created_at) as string | undefined,
+      };
+    default:
+      return { label: '', value: item.created_at as string | undefined };
   }
 }
 

@@ -50,7 +50,8 @@ function EmptyState({
   actionButton,
 }) {
   // Determine which message to display
-  const displayMessage = message || (hasActiveFilters ? filteredMessage : noDataMessage);
+  const displayMessage =
+    message || (hasActiveFilters ? filteredMessage : noDataMessage);
 
   // Use emoji variant if emoji is provided, otherwise use icon variant
   const isEmojiVariant = Boolean(emoji);
@@ -66,11 +67,7 @@ function EmptyState({
     }
     const IconComponent = Icon || IconAlertTriangle;
     return (
-      <IconComponent
-        size={64}
-        stroke={1}
-        color="var(--mantine-color-gray-5)"
-      />
+      <IconComponent size={64} stroke={1} color="var(--mantine-color-gray-5)" />
     );
   };
 

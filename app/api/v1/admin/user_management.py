@@ -56,13 +56,14 @@ def search_patients(
     admin_id = getattr(admin_user, "id", None)
 
     log_endpoint_access(
-        logger, request, admin_id, "admin_patient_search",
+        logger,
+        request,
+        admin_id,
+        "admin_patient_search",
         message=f"Admin {admin_id} listing/searching patients",
     )
 
-    query = db.query(Patient, User).outerjoin(
-        User, Patient.owner_user_id == User.id
-    )
+    query = db.query(Patient, User).outerjoin(User, Patient.owner_user_id == User.id)
 
     if q and q.strip():
         search_term = q.strip()
@@ -82,9 +83,9 @@ def search_patients(
                 or_(
                     func.lower(Patient.first_name).contains(search_term.lower()),
                     func.lower(Patient.last_name).contains(search_term.lower()),
-                    func.lower(
-                        Patient.first_name + " " + Patient.last_name
-                    ).contains(search_term.lower()),
+                    func.lower(Patient.first_name + " " + Patient.last_name).contains(
+                        search_term.lower()
+                    ),
                 )
             )
 
@@ -127,7 +128,10 @@ def create_user_with_optional_link(
     admin_id = getattr(admin_user, "id", None)
 
     log_endpoint_access(
-        logger, request, admin_id, "admin_user_create_attempt",
+        logger,
+        request,
+        admin_id,
+        "admin_user_create_attempt",
         message=f"Admin {admin_id} creating user: {user_data.username}",
     )
 
@@ -147,9 +151,9 @@ def create_user_with_optional_link(
 
     # If linking to a patient, validate the patient exists before creating user
     if user_data.link_patient_id:
-        target_patient = db.query(Patient).filter(
-            Patient.id == user_data.link_patient_id
-        ).first()
+        target_patient = (
+            db.query(Patient).filter(Patient.id == user_data.link_patient_id).first()
+        )
         if not target_patient:
             raise NotFoundException(
                 message=f"Patient with ID {user_data.link_patient_id} not found.",
@@ -190,7 +194,9 @@ def create_user_with_optional_link(
             )
 
             log_security_event(
-                logger, "admin_user_created_with_patient_link", request,
+                logger,
+                "admin_user_created_with_patient_link",
+                request,
                 f"Admin {admin_id} created user {new_user.id} and linked patient "
                 f"{user_data.link_patient_id}",
                 user_id=admin_id,
@@ -209,9 +215,11 @@ def create_user_with_optional_link(
 
         except ValueError as e:
             log_endpoint_error(
-                logger, request,
+                logger,
+                request,
                 "Failed to link patient during user creation",
-                e, user_id=admin_id,
+                e,
+                user_id=admin_id,
             )
             # User was created but linking failed - report the issue
             # Log full error server-side but return generic message to client
@@ -273,7 +281,9 @@ def create_user_with_optional_link(
             )
 
         log_security_event(
-            logger, "admin_user_created", request,
+            logger,
+            "admin_user_created",
+            request,
             f"Admin {admin_id} created user {new_user.id} (standard flow)",
             user_id=admin_id,
         )
@@ -316,10 +326,14 @@ def get_user_login_history(
     if not target_user:
         raise NotFoundException(message="User not found", request=request)
 
-    query = db.query(ActivityLog).filter(
-        ActivityLog.user_id == user_id,
-        ActivityLog.action == ActionType.LOGIN,
-    ).order_by(ActivityLog.timestamp.desc())
+    query = (
+        db.query(ActivityLog)
+        .filter(
+            ActivityLog.user_id == user_id,
+            ActivityLog.action == ActionType.LOGIN,
+        )
+        .order_by(ActivityLog.timestamp.desc())
+    )
 
     total = query.count()
     items = query.offset((page - 1) * per_page).limit(per_page).all()

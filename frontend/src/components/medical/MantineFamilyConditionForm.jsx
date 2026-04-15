@@ -20,7 +20,7 @@ const MantineFamilyConditionForm = ({
   React.useEffect(() => {
     logger.debug('Family condition form fields loaded', {
       fieldCount: familyConditionFormFields?.length,
-      component: 'MantineFamilyConditionForm'
+      component: 'MantineFamilyConditionForm',
     });
   }, []);
 
@@ -29,7 +29,7 @@ const MantineFamilyConditionForm = ({
     logger.error('Family condition form fields are not properly defined', {
       component: 'MantineFamilyConditionForm',
       fieldsType: typeof familyConditionFormFields,
-      fieldsValue: familyConditionFormFields
+      fieldsValue: familyConditionFormFields,
     });
     return null;
   }

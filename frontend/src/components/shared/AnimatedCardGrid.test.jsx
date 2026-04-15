@@ -5,7 +5,11 @@ import AnimatedCardGrid from './AnimatedCardGrid';
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }) => <div data-testid="motion-div" {...props}>{children}</div>,
+    div: ({ children, ...props }) => (
+      <div data-testid="motion-div" {...props}>
+        {children}
+      </div>
+    ),
   },
   AnimatePresence: ({ children }) => <>{children}</>,
 }));
@@ -17,7 +21,7 @@ describe('AnimatedCardGrid', () => {
     { id: 3, name: 'Item 3' },
   ];
 
-  const mockRenderCard = (item) => (
+  const mockRenderCard = item => (
     <div data-testid={`card-${item.id}`}>{item.name}</div>
   );
 
@@ -83,7 +87,7 @@ describe('AnimatedCardGrid', () => {
         { customId: 'b', name: 'Item B' },
       ];
 
-      const customRenderCard = (item) => (
+      const customRenderCard = item => (
         <div data-testid={`card-${item.customId}`}>{item.name}</div>
       );
 
@@ -91,7 +95,7 @@ describe('AnimatedCardGrid', () => {
         <AnimatedCardGrid
           items={itemsWithCustomKey}
           renderCard={customRenderCard}
-          keyExtractor={(item) => item.customId}
+          keyExtractor={item => item.customId}
         />
       );
 
@@ -191,13 +195,11 @@ describe('AnimatedCardGrid', () => {
 
   describe('renderCard function', () => {
     it('passes the correct item to renderCard', () => {
-      const renderCardSpy = vi.fn((item) => (
+      const renderCardSpy = vi.fn(item => (
         <div data-testid={`card-${item.id}`}>{item.name}</div>
       ));
 
-      render(
-        <AnimatedCardGrid items={mockItems} renderCard={renderCardSpy} />
-      );
+      render(<AnimatedCardGrid items={mockItems} renderCard={renderCardSpy} />);
 
       expect(renderCardSpy).toHaveBeenCalledTimes(3);
       expect(renderCardSpy).toHaveBeenCalledWith(mockItems[0]);

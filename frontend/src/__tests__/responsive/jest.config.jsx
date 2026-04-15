@@ -1,17 +1,15 @@
 module.exports = {
   displayName: 'Responsive Tests',
   testEnvironment: 'jsdom',
-  
+
   // Test file patterns
   testMatch: [
     '<rootDir>/src/__tests__/responsive/**/*.test.js',
-    '<rootDir>/src/__tests__/responsive/**/*.test.jsx'
+    '<rootDir>/src/__tests__/responsive/**/*.test.jsx',
   ],
 
   // Setup files
-  setupFilesAfterEnv: [
-    '<rootDir>/src/__tests__/responsive/setup.js'
-  ],
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/responsive/setup.js'],
 
   // Module paths and aliases
   moduleNameMapping: {
@@ -21,17 +19,20 @@ module.exports = {
     '^services/(.*)$': '<rootDir>/src/services/$1',
     '^utils/(.*)$': '<rootDir>/src/utils/$1',
     '^strategies/(.*)$': '<rootDir>/src/strategies/$1',
-    '^contexts/(.*)$': '<rootDir>/src/contexts/$1'
+    '^contexts/(.*)$': '<rootDir>/src/contexts/$1',
   },
 
   // Transform configuration
   transform: {
-    '^.+\\.(js|jsx)$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { targets: { node: 'current' } }],
-        ['@babel/preset-react', { runtime: 'automatic' }]
-      ]
-    }]
+    '^.+\\.(js|jsx)$': [
+      'babel-jest',
+      {
+        presets: [
+          ['@babel/preset-env', { targets: { node: 'current' } }],
+          ['@babel/preset-react', { runtime: 'automatic' }],
+        ],
+      },
+    ],
   },
 
   // Coverage configuration
@@ -42,7 +43,7 @@ module.exports = {
     'src/strategies/**/*.{js,jsx}',
     '!src/**/*.test.{js,jsx}',
     '!src/**/__tests__/**',
-    '!src/**/node_modules/**'
+    '!src/**/node_modules/**',
   ],
 
   coverageThreshold: {
@@ -50,14 +51,14 @@ module.exports = {
       branches: 80,
       functions: 80,
       lines: 80,
-      statements: 80
+      statements: 80,
     },
     'src/components/adapters/': {
       branches: 90,
       functions: 90,
       lines: 90,
-      statements: 90
-    }
+      statements: 90,
+    },
   },
 
   // Test timeout for async operations
@@ -65,17 +66,17 @@ module.exports = {
 
   // Globals for performance testing
   globals: {
-    'performance': true
+    performance: true,
   },
 
   // Mock configuration
   moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
-  
+
   // Ignore patterns
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
     '<rootDir>/build/',
-    '<rootDir>/dist/'
+    '<rootDir>/dist/',
   ],
 
   // Performance and memory settings
@@ -85,11 +86,14 @@ module.exports = {
   // Reporter configuration
   reporters: [
     'default',
-    ['jest-junit', {
-      outputDirectory: '<rootDir>/test-reports/responsive',
-      outputName: 'junit.xml',
-      suiteName: 'Responsive Component Tests'
-    }]
+    [
+      'jest-junit',
+      {
+        outputDirectory: '<rootDir>/test-reports/responsive',
+        outputName: 'junit.xml',
+        suiteName: 'Responsive Component Tests',
+      },
+    ],
   ],
 
   // Verbose output for debugging
@@ -101,9 +105,7 @@ module.exports = {
 
   // Error handling
   errorOnDeprecated: true,
-  
+
   // Snapshot configuration
-  snapshotSerializers: [
-    '@emotion/jest/serializer'
-  ]
+  snapshotSerializers: ['@emotion/jest/serializer'],
 };

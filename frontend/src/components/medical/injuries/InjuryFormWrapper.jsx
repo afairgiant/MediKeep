@@ -23,10 +23,7 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import {
-  parseDateInput,
-  getTodayEndOfDay,
-} from '../../../utils/dateUtils';
+import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import InjuryTypeSelect from './InjuryTypeSelect';
@@ -59,18 +56,19 @@ const InjuryFormWrapper = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form handlers
-  const { handleTextInputChange, handleSelectChange, handleDateChange } = useFormHandlers(onInputChange);
+  const { handleTextInputChange, handleSelectChange, handleDateChange } =
+    useFormHandlers(onInputChange);
 
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
 
-  const handleDocumentManagerRef = (methods) => {
+  const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {
       onDocumentManagerRef(methods);
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in injuries ${editingInjury ? 'edit' : 'create'}`,
       injuryId: editingInjury?.id,
@@ -83,7 +81,11 @@ const InjuryFormWrapper = ({
     }
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('injuries_upload_completed', {
       message: 'File upload completed in injuries form',
       injuryId: editingInjury?.id,
@@ -109,7 +111,7 @@ const InjuryFormWrapper = ({
   }, [isOpen]);
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -130,7 +132,7 @@ const InjuryFormWrapper = ({
   if (!isOpen) return null;
 
   // Prepare practitioners options
-  const practitionerSelectData = practitionersOptions.map((prac) => ({
+  const practitionerSelectData = practitionersOptions.map(prac => ({
     value: String(prac.id),
     label: prac.name,
   }));
@@ -148,7 +150,10 @@ const InjuryFormWrapper = ({
     >
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
-        message={statusMessage?.title || t('injuries.messages.saving', 'Saving injury...')}
+        message={
+          statusMessage?.title ||
+          t('injuries.messages.saving', 'Saving injury...')
+        }
         submessage={statusMessage?.message}
         type={statusMessage?.type || 'loading'}
       />
@@ -158,13 +163,22 @@ const InjuryFormWrapper = ({
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="basic"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
-              <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
+              <Tabs.Tab
+                value="treatment"
+                leftSection={<IconBandage size={16} />}
+              >
                 {t('shared:labels.treatment', 'Treatment')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {editingInjury
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
@@ -197,9 +211,12 @@ const InjuryFormWrapper = ({
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <InjuryTypeSelect
                       value={formData.injury_type_id}
-                      onChange={(value) => {
+                      onChange={value => {
                         onInputChange({
-                          target: { name: 'injury_type_id', value: value || null },
+                          target: {
+                            name: 'injury_type_id',
+                            value: value || null,
+                          },
                         });
                       }}
                       injuryTypes={injuryTypes}
@@ -227,19 +244,37 @@ const InjuryFormWrapper = ({
                       label={t('injuries.laterality.label', 'Side')}
                       value={formData.laterality || null}
                       data={[
-                        { value: 'left', label: t('injuries.laterality.options.left', 'Left') },
-                        { value: 'right', label: t('injuries.laterality.options.right', 'Right') },
+                        {
+                          value: 'left',
+                          label: t('injuries.laterality.options.left', 'Left'),
+                        },
+                        {
+                          value: 'right',
+                          label: t(
+                            'injuries.laterality.options.right',
+                            'Right'
+                          ),
+                        },
                         {
                           value: 'bilateral',
-                          label: t('injuries.laterality.options.bilateral', 'Both Sides'),
+                          label: t(
+                            'injuries.laterality.options.bilateral',
+                            'Both Sides'
+                          ),
                         },
                         {
                           value: 'not_applicable',
-                          label: t('injuries.laterality.options.notApplicable', 'Not Applicable'),
+                          label: t(
+                            'injuries.laterality.options.notApplicable',
+                            'Not Applicable'
+                          ),
                         },
                       ]}
                       onChange={handleSelectChange('laterality')}
-                      placeholder={t('injuries.laterality.placeholder', 'Select side')}
+                      placeholder={t(
+                        'injuries.laterality.placeholder',
+                        'Select side'
+                      )}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                       description={t(
@@ -272,15 +307,24 @@ const InjuryFormWrapper = ({
                       data={[
                         {
                           value: 'mild',
-                          label: t('injuries.severity.options.mild', 'Mild - Minor discomfort'),
+                          label: t(
+                            'injuries.severity.options.mild',
+                            'Mild - Minor discomfort'
+                          ),
                         },
                         {
                           value: 'moderate',
-                          label: t('injuries.severity.options.moderate', 'Moderate - Noticeable impact'),
+                          label: t(
+                            'injuries.severity.options.moderate',
+                            'Moderate - Noticeable impact'
+                          ),
                         },
                         {
                           value: 'severe',
-                          label: t('injuries.severity.options.severe', 'Severe - Significant impact'),
+                          label: t(
+                            'injuries.severity.options.severe',
+                            'Severe - Significant impact'
+                          ),
                         },
                         {
                           value: 'life-threatening',
@@ -291,7 +335,10 @@ const InjuryFormWrapper = ({
                         },
                       ]}
                       onChange={handleSelectChange('severity')}
-                      placeholder={t('injuries.severity.placeholder', 'Select severity')}
+                      placeholder={t(
+                        'injuries.severity.placeholder',
+                        'Select severity'
+                      )}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                       description={t(
@@ -307,15 +354,24 @@ const InjuryFormWrapper = ({
                       data={[
                         {
                           value: 'active',
-                          label: t('injuries.status.options.active', 'Active - Currently being treated'),
+                          label: t(
+                            'injuries.status.options.active',
+                            'Active - Currently being treated'
+                          ),
                         },
                         {
                           value: 'healing',
-                          label: t('injuries.status.options.healing', 'Healing - In recovery'),
+                          label: t(
+                            'injuries.status.options.healing',
+                            'Healing - In recovery'
+                          ),
                         },
                         {
                           value: 'resolved',
-                          label: t('injuries.status.options.resolved', 'Resolved - Fully healed'),
+                          label: t(
+                            'injuries.status.options.resolved',
+                            'Resolved - Fully healed'
+                          ),
                         },
                         {
                           value: 'chronic',
@@ -336,12 +392,17 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('injuries.practitioner.label', 'Treating Practitioner')}
+                      label={t(
+                        'injuries.practitioner.label',
+                        'Treating Practitioner'
+                      )}
                       value={
-                        formData.practitioner_id ? String(formData.practitioner_id) : null
+                        formData.practitioner_id
+                          ? String(formData.practitioner_id)
+                          : null
                       }
                       data={practitionerSelectData}
-                      onChange={(value) => {
+                      onChange={value => {
                         onInputChange({
                           target: {
                             name: 'practitioner_id',
@@ -356,7 +417,10 @@ const InjuryFormWrapper = ({
                       clearable
                       searchable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                      nothingFoundMessage={t('common:noResults', 'No practitioners found')}
+                      nothingFoundMessage={t(
+                        'common:noResults',
+                        'No practitioners found'
+                      )}
                       description={t(
                         'injuries.practitioner.description',
                         'The healthcare provider treating this injury'
@@ -390,7 +454,10 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('shared:fields.treatmentReceived', 'Treatment Received')}
+                      label={t(
+                        'shared:fields.treatmentReceived',
+                        'Treatment Received'
+                      )}
                       value={formData.treatment_received || ''}
                       onChange={handleTextInputChange('treatment_received')}
                       placeholder={t(
@@ -407,7 +474,10 @@ const InjuryFormWrapper = ({
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('injuries.recoveryNotes.label', 'Recovery Notes')}
+                      label={t(
+                        'injuries.recoveryNotes.label',
+                        'Recovery Notes'
+                      )}
                       value={formData.recovery_notes || ''}
                       onChange={handleTextInputChange('recovery_notes')}
                       placeholder={t(
@@ -447,7 +517,10 @@ const InjuryFormWrapper = ({
                 <Grid>
                   <Grid.Col span={12}>
                     <Textarea
-                      label={t('shared:fields.additionalNotes', 'Additional Notes')}
+                      label={t(
+                        'shared:fields.additionalNotes',
+                        'Additional Notes'
+                      )}
                       value={formData.notes || ''}
                       onChange={handleTextInputChange('notes')}
                       placeholder={t(
@@ -466,7 +539,7 @@ const InjuryFormWrapper = ({
                     <TagInput
                       label={t('shared:labels.tags', 'Tags')}
                       value={formData.tags || []}
-                      onChange={(tags) => {
+                      onChange={tags => {
                         onInputChange({
                           target: { name: 'tags', value: tags },
                         });

@@ -25,7 +25,11 @@ import {
   IconInfoCircle,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { PURPOSE_OPTIONS, getPurposeLabel, getPurposeColor } from '../../../constants/encounterLabResultConstants';
+import {
+  PURPOSE_OPTIONS,
+  getPurposeLabel,
+  getPurposeColor,
+} from '../../../constants/encounterLabResultConstants';
 
 const LabResultEncounterRelationships = ({
   labResultId,
@@ -82,7 +86,10 @@ const LabResultEncounterRelationships = ({
       setNewRelationship({ encounter_id: '', purpose: '', relevance_note: '' });
       setShowAddModal(false);
     } catch (err) {
-      setError(err.message || t('common:messages.failedToLinkVisit', 'Failed to link visit'));
+      setError(
+        err.message ||
+          t('common:messages.failedToLinkVisit', 'Failed to link visit')
+      );
     } finally {
       setLoading(false);
     }
@@ -93,7 +100,11 @@ const LabResultEncounterRelationships = ({
     setError(null);
 
     try {
-      await apiService.updateLabResultEncounter(labResultId, relationshipId, updates);
+      await apiService.updateLabResultEncounter(
+        labResultId,
+        relationshipId,
+        updates
+      );
 
       if (fetchLabResultEncounters) {
         await fetchLabResultEncounters(labResultId);
@@ -101,14 +112,24 @@ const LabResultEncounterRelationships = ({
 
       setEditingRelationship(null);
     } catch (err) {
-      setError(err.message || t('common:messages.failedToUpdateRelationship', 'Failed to update relationship'));
+      setError(
+        err.message ||
+          t(
+            'common:messages.failedToUpdateRelationship',
+            'Failed to update relationship'
+          )
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteRelationship = async (relationshipId) => {
-    if (!window.confirm(t('common:messages.confirmRemoveVisitLink', 'Remove this visit link?'))) {
+  const handleDeleteRelationship = async relationshipId => {
+    if (
+      !window.confirm(
+        t('common:messages.confirmRemoveVisitLink', 'Remove this visit link?')
+      )
+    ) {
       return;
     }
 
@@ -122,7 +143,10 @@ const LabResultEncounterRelationships = ({
         await fetchLabResultEncounters(labResultId);
       }
     } catch (err) {
-      setError(err.message || t('common:messages.failedToUnlinkVisit', 'Failed to unlink visit'));
+      setError(
+        err.message ||
+          t('common:messages.failedToUnlinkVisit', 'Failed to unlink visit')
+      );
     } finally {
       setLoading(false);
     }
@@ -133,7 +157,9 @@ const LabResultEncounterRelationships = ({
     label: `${enc.reason}${enc.date ? ` (${enc.date})` : ''}${enc.visit_type ? ` - ${enc.visit_type}` : ''}`,
   }));
 
-  const linkedEncounterIds = relationships.map(rel => rel.encounter_id.toString());
+  const linkedEncounterIds = relationships.map(rel =>
+    rel.encounter_id.toString()
+  );
   const availableEncounterOptions = encounterOptions.filter(
     option => !linkedEncounterIds.includes(option.value)
   );
@@ -161,10 +187,20 @@ const LabResultEncounterRelationships = ({
                           size="sm"
                           fw={500}
                           c="blue"
-                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                          onClick={() => navigateToEntity('encounter', relationship.encounter_id, navigate)}
+                          style={{
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                          }}
+                          onClick={() =>
+                            navigateToEntity(
+                              'encounter',
+                              relationship.encounter_id,
+                              navigate
+                            )
+                          }
                         >
-                          {relationship.encounter_reason || `Visit #${relationship.encounter_id}`}
+                          {relationship.encounter_reason ||
+                            `Visit #${relationship.encounter_id}`}
                         </Text>
                       ) : (
                         <Badge
@@ -172,13 +208,24 @@ const LabResultEncounterRelationships = ({
                           color="indigo"
                           leftSection={<IconStethoscope size={12} />}
                           style={{ cursor: 'pointer' }}
-                          onClick={() => navigateToEntity('encounter', relationship.encounter_id, navigate)}
+                          onClick={() =>
+                            navigateToEntity(
+                              'encounter',
+                              relationship.encounter_id,
+                              navigate
+                            )
+                          }
                         >
-                          {relationship.encounter_reason || `Visit #${relationship.encounter_id}`}
+                          {relationship.encounter_reason ||
+                            `Visit #${relationship.encounter_id}`}
                         </Badge>
                       )}
                       {relationship.purpose && (
-                        <Badge variant="light" size="sm" color={getPurposeColor(relationship.purpose)}>
+                        <Badge
+                          variant="light"
+                          size="sm"
+                          color={getPurposeColor(relationship.purpose)}
+                        >
                           {getPurposeLabel(relationship.purpose)}
                         </Badge>
                       )}
@@ -186,7 +233,8 @@ const LabResultEncounterRelationships = ({
 
                     {relationship.encounter_date && (
                       <Text size="xs" c="dimmed">
-                        {t('common:labels.visitDate', 'Visit date')}: {formatDate(relationship.encounter_date)}
+                        {t('common:labels.visitDate', 'Visit date')}:{' '}
+                        {formatDate(relationship.encounter_date)}
                       </Text>
                     )}
 
@@ -194,23 +242,33 @@ const LabResultEncounterRelationships = ({
                       <Stack gap="xs">
                         <Select
                           size="xs"
-                          placeholder={t('common:labels.selectPurpose', 'Select purpose')}
+                          placeholder={t(
+                            'common:labels.selectPurpose',
+                            'Select purpose'
+                          )}
                           data={PURPOSE_OPTIONS}
                           value={editingRelationship?.purpose || ''}
-                          onChange={(val) => setEditingRelationship({
-                            ...editingRelationship,
-                            purpose: val,
-                          })}
+                          onChange={val =>
+                            setEditingRelationship({
+                              ...editingRelationship,
+                              purpose: val,
+                            })
+                          }
                           clearable
                           comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                         />
                         <Textarea
-                          placeholder={t('common:modals.relevanceNoteOptional', 'Relevance note (optional)')}
+                          placeholder={t(
+                            'common:modals.relevanceNoteOptional',
+                            'Relevance note (optional)'
+                          )}
                           value={editingRelationship?.relevance_note || ''}
-                          onChange={(e) => setEditingRelationship({
-                            ...editingRelationship,
-                            relevance_note: e.target.value,
-                          })}
+                          onChange={e =>
+                            setEditingRelationship({
+                              ...editingRelationship,
+                              relevance_note: e.target.value,
+                            })
+                          }
                           size="sm"
                           autosize
                           minRows={2}
@@ -222,7 +280,10 @@ const LabResultEncounterRelationships = ({
                       </Text>
                     ) : !isViewMode ? (
                       <Text size="sm" c="dimmed">
-                        {t('common:modals.noRelevanceNoteProvided', 'No relevance note provided')}
+                        {t(
+                          'common:modals.noRelevanceNoteProvided',
+                          'No relevance note provided'
+                        )}
                       </Text>
                     ) : null}
                   </Stack>
@@ -235,10 +296,13 @@ const LabResultEncounterRelationships = ({
                             variant="light"
                             color="green"
                             size="sm"
-                            onClick={() => handleEditRelationship(relationship.id, {
-                              purpose: editingRelationship?.purpose || null,
-                              relevance_note: editingRelationship?.relevance_note || null,
-                            })}
+                            onClick={() =>
+                              handleEditRelationship(relationship.id, {
+                                purpose: editingRelationship?.purpose || null,
+                                relevance_note:
+                                  editingRelationship?.relevance_note || null,
+                              })
+                            }
                             loading={loading}
                           >
                             <IconCheck size={14} />
@@ -258,11 +322,14 @@ const LabResultEncounterRelationships = ({
                             variant="light"
                             color="blue"
                             size="sm"
-                            onClick={() => setEditingRelationship({
-                              id: relationship.id,
-                              purpose: relationship.purpose || '',
-                              relevance_note: relationship.relevance_note || '',
-                            })}
+                            onClick={() =>
+                              setEditingRelationship({
+                                id: relationship.id,
+                                purpose: relationship.purpose || '',
+                                relevance_note:
+                                  relationship.relevance_note || '',
+                              })
+                            }
                           >
                             <IconEdit size={14} />
                           </ActionIcon>
@@ -270,7 +337,9 @@ const LabResultEncounterRelationships = ({
                             variant="light"
                             color="red"
                             size="sm"
-                            onClick={() => handleDeleteRelationship(relationship.id)}
+                            onClick={() =>
+                              handleDeleteRelationship(relationship.id)
+                            }
                             loading={loading}
                           >
                             <IconTrash size={14} />
@@ -286,7 +355,12 @@ const LabResultEncounterRelationships = ({
         </Stack>
       ) : (
         <Paper withBorder p="md" ta="center">
-          <Text c="dimmed">{t('common:labels.noVisitsLinked', 'No visits linked to this lab result')}</Text>
+          <Text c="dimmed">
+            {t(
+              'common:labels.noVisitsLinked',
+              'No visits linked to this lab result'
+            )}
+          </Text>
         </Paper>
       )}
 
@@ -305,10 +379,17 @@ const LabResultEncounterRelationships = ({
         opened={showAddModal}
         onClose={() => {
           setShowAddModal(false);
-          setNewRelationship({ encounter_id: '', purpose: '', relevance_note: '' });
+          setNewRelationship({
+            encounter_id: '',
+            purpose: '',
+            relevance_note: '',
+          });
           setError(null);
         }}
-        title={t('common:modals.linkVisitToLabResult', 'Link Visit to Lab Result')}
+        title={t(
+          'common:modals.linkVisitToLabResult',
+          'Link Visit to Lab Result'
+        )}
         size="md"
         centered
         zIndex={2100}
@@ -316,13 +397,18 @@ const LabResultEncounterRelationships = ({
         <Stack gap="md">
           <Select
             label={t('common:modals.selectVisit', 'Select Visit')}
-            placeholder={t('common:modals.chooseVisitToLink', 'Choose a visit to link')}
+            placeholder={t(
+              'common:modals.chooseVisitToLink',
+              'Choose a visit to link'
+            )}
             data={availableEncounterOptions}
             value={newRelationship.encounter_id}
-            onChange={(val) => setNewRelationship(prev => ({
-              ...prev,
-              encounter_id: val || '',
-            }))}
+            onChange={val =>
+              setNewRelationship(prev => ({
+                ...prev,
+                encounter_id: val || '',
+              }))
+            }
             searchable
             clearable
             required
@@ -334,22 +420,29 @@ const LabResultEncounterRelationships = ({
             placeholder={t('common:modals.selectPurpose', 'Select purpose')}
             data={PURPOSE_OPTIONS}
             value={newRelationship.purpose}
-            onChange={(val) => setNewRelationship(prev => ({
-              ...prev,
-              purpose: val || '',
-            }))}
+            onChange={val =>
+              setNewRelationship(prev => ({
+                ...prev,
+                purpose: val || '',
+              }))
+            }
             clearable
             comboboxProps={{ withinPortal: true, zIndex: 3000 }}
           />
 
           <Textarea
             label={t('common:modals.relevanceNote', 'Relevance Note')}
-            placeholder={t('common:modals.describeVisitRelevance', 'Describe how this visit relates to this lab result')}
+            placeholder={t(
+              'common:modals.describeVisitRelevance',
+              'Describe how this visit relates to this lab result'
+            )}
             value={newRelationship.relevance_note}
-            onChange={(e) => setNewRelationship(prev => ({
-              ...prev,
-              relevance_note: e.target.value,
-            }))}
+            onChange={e =>
+              setNewRelationship(prev => ({
+                ...prev,
+                relevance_note: e.target.value,
+              }))
+            }
             autosize
             minRows={3}
           />
@@ -359,7 +452,11 @@ const LabResultEncounterRelationships = ({
               variant="light"
               onClick={() => {
                 setShowAddModal(false);
-                setNewRelationship({ encounter_id: '', purpose: '', relevance_note: '' });
+                setNewRelationship({
+                  encounter_id: '',
+                  purpose: '',
+                  relevance_note: '',
+                });
                 setError(null);
               }}
             >

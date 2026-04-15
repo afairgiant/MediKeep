@@ -27,7 +27,7 @@ const defaultResponsiveContext = {
   isPortrait: false,
   isTouch: false,
   lastUpdate: Date.now(),
-  updateCount: 0
+  updateCount: 0,
 };
 
 /**
@@ -49,7 +49,10 @@ function renderWithResponsive(
     ...renderOptions
   } = {}
 ) {
-  const mergedResponsiveContext = { ...defaultResponsiveContext, ...responsiveValue };
+  const mergedResponsiveContext = {
+    ...defaultResponsiveContext,
+    ...responsiveValue,
+  };
 
   function Wrapper({ children }) {
     const content = (
@@ -70,11 +73,7 @@ function renderWithResponsive(
       return content;
     }
 
-    return (
-      <BrowserRouter>
-        {content}
-      </BrowserRouter>
-    );
+    return <BrowserRouter>{content}</BrowserRouter>;
   }
 
   return rtlRender(ui, { wrapper: Wrapper, ...renderOptions });
@@ -90,16 +89,16 @@ export function renderMobile(ui, options = {}) {
       width: 375,
       height: 667,
       deviceType: 'mobile',
-      matches: vi.fn((bp) => bp === 'xs'),
+      matches: vi.fn(bp => bp === 'xs'),
       isAbove: vi.fn(() => false),
-      isBelow: vi.fn((bp) => ['sm', 'md', 'lg', 'xl'].includes(bp)),
+      isBelow: vi.fn(bp => ['sm', 'md', 'lg', 'xl'].includes(bp)),
       isMobile: true,
       isTablet: false,
       isDesktop: false,
       isLandscape: false,
-      isPortrait: true
+      isPortrait: true,
     },
-    ...options
+    ...options,
   });
 }
 
@@ -113,16 +112,16 @@ export function renderTablet(ui, options = {}) {
       width: 768,
       height: 1024,
       deviceType: 'tablet',
-      matches: vi.fn((bp) => bp === 'md'),
-      isAbove: vi.fn((bp) => ['xs', 'sm'].includes(bp)),
-      isBelow: vi.fn((bp) => ['lg', 'xl'].includes(bp)),
+      matches: vi.fn(bp => bp === 'md'),
+      isAbove: vi.fn(bp => ['xs', 'sm'].includes(bp)),
+      isBelow: vi.fn(bp => ['lg', 'xl'].includes(bp)),
       isMobile: false,
       isTablet: true,
       isDesktop: false,
       isLandscape: false,
-      isPortrait: true
+      isPortrait: true,
     },
-    ...options
+    ...options,
   });
 }
 
@@ -136,16 +135,16 @@ export function renderDesktop(ui, options = {}) {
       width: 1200,
       height: 800,
       deviceType: 'desktop',
-      matches: vi.fn((bp) => bp === 'lg'),
-      isAbove: vi.fn((bp) => ['xs', 'sm', 'md'].includes(bp)),
-      isBelow: vi.fn((bp) => bp === 'xl'),
+      matches: vi.fn(bp => bp === 'lg'),
+      isAbove: vi.fn(bp => ['xs', 'sm', 'md'].includes(bp)),
+      isBelow: vi.fn(bp => bp === 'xl'),
       isMobile: false,
       isTablet: false,
       isDesktop: true,
       isLandscape: true,
-      isPortrait: false
+      isPortrait: false,
     },
-    ...options
+    ...options,
   });
 }
 
@@ -162,7 +161,7 @@ export function createMockResponsive(breakpoint = 'lg', overrides = {}) {
       isTablet: false,
       isDesktop: false,
       isLandscape: false,
-      isPortrait: true
+      isPortrait: true,
     },
     sm: {
       width: 576,
@@ -172,7 +171,7 @@ export function createMockResponsive(breakpoint = 'lg', overrides = {}) {
       isTablet: false,
       isDesktop: false,
       isLandscape: false,
-      isPortrait: true
+      isPortrait: true,
     },
     md: {
       width: 768,
@@ -182,7 +181,7 @@ export function createMockResponsive(breakpoint = 'lg', overrides = {}) {
       isTablet: true,
       isDesktop: false,
       isLandscape: false,
-      isPortrait: true
+      isPortrait: true,
     },
     lg: {
       width: 1200,
@@ -192,7 +191,7 @@ export function createMockResponsive(breakpoint = 'lg', overrides = {}) {
       isTablet: false,
       isDesktop: true,
       isLandscape: true,
-      isPortrait: false
+      isPortrait: false,
     },
     xl: {
       width: 1400,
@@ -202,8 +201,8 @@ export function createMockResponsive(breakpoint = 'lg', overrides = {}) {
       isTablet: false,
       isDesktop: true,
       isLandscape: true,
-      isPortrait: false
-    }
+      isPortrait: false,
+    },
   };
 
   const settings = breakpointSettings[breakpoint] || breakpointSettings.lg;
@@ -214,16 +213,16 @@ export function createMockResponsive(breakpoint = 'lg', overrides = {}) {
     ...defaultResponsiveContext,
     breakpoint,
     ...settings,
-    matches: vi.fn((bp) => bp === breakpoint),
-    isAbove: vi.fn((bp) => {
+    matches: vi.fn(bp => bp === breakpoint),
+    isAbove: vi.fn(bp => {
       const targetIndex = breakpointOrder.indexOf(bp);
       return currentIndex > targetIndex;
     }),
-    isBelow: vi.fn((bp) => {
+    isBelow: vi.fn(bp => {
       const targetIndex = breakpointOrder.indexOf(bp);
       return currentIndex < targetIndex;
     }),
-    ...overrides
+    ...overrides,
   };
 }
 

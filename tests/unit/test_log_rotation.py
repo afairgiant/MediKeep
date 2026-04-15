@@ -144,6 +144,7 @@ class TestGetRotationMethod:
     def test_auto_with_logrotate_available(self, mock_logrotate_check):
         """Test auto method selection when logrotate is available."""
         from app.core.config import settings
+
         original_method = settings.LOG_ROTATION_METHOD
         try:
             settings.LOG_ROTATION_METHOD = "auto"
@@ -156,6 +157,7 @@ class TestGetRotationMethod:
     def test_auto_with_logrotate_unavailable(self, mock_logrotate_check):
         """Test auto method selection when logrotate is not available."""
         from app.core.config import settings
+
         original_method = settings.LOG_ROTATION_METHOD
         try:
             settings.LOG_ROTATION_METHOD = "auto"
@@ -167,6 +169,7 @@ class TestGetRotationMethod:
     def test_explicit_logrotate_method(self):
         """Test explicit logrotate method selection."""
         from app.core.config import settings
+
         original_method = settings.LOG_ROTATION_METHOD
         try:
             settings.LOG_ROTATION_METHOD = "logrotate"
@@ -177,6 +180,7 @@ class TestGetRotationMethod:
     def test_explicit_python_method(self):
         """Test explicit Python method selection."""
         from app.core.config import settings
+
         original_method = settings.LOG_ROTATION_METHOD
         try:
             settings.LOG_ROTATION_METHOD = "python"
@@ -188,6 +192,7 @@ class TestGetRotationMethod:
     def test_invalid_method_fallback(self, mock_logrotate_check):
         """Test that invalid method falls back to auto detection."""
         from app.core.config import settings
+
         original_method = settings.LOG_ROTATION_METHOD
         try:
             settings.LOG_ROTATION_METHOD = "invalid_method"
@@ -200,6 +205,7 @@ class TestGetRotationMethod:
     def test_case_insensitive_method(self, mock_logrotate_check):
         """Test that method names are case-insensitive."""
         from app.core.config import settings
+
         original_method = settings.LOG_ROTATION_METHOD
         try:
             settings.LOG_ROTATION_METHOD = "AUTO"
@@ -226,8 +232,8 @@ class TestLoggingConfigSetup:
 
         # logging_config is already initialized at module import
         # Just verify it has expected attributes
-        assert hasattr(logging_config, 'log_dir')
-        assert hasattr(logging_config, 'log_level')
+        assert hasattr(logging_config, "log_dir")
+        assert hasattr(logging_config, "log_level")
         assert logging_config.log_dir is not None
 
 
@@ -251,6 +257,7 @@ class TestEdgeCases:
     def test_empty_rotation_method(self):
         """Test handling of empty rotation method string."""
         from app.core.config import settings
+
         original_method = settings.LOG_ROTATION_METHOD
         try:
             settings.LOG_ROTATION_METHOD = ""

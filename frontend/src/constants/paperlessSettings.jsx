@@ -7,18 +7,18 @@
 /**
  * Array of all Paperless setting keys that require special handling
  * (e.g., encryption for credentials, specific API endpoints)
- * 
+ *
  * @type {string[]}
  */
 export const PAPERLESS_SETTING_KEYS = [
-  'paperless_enabled',      // Boolean: Enable/disable Paperless integration
-  'paperless_url',          // String: URL to Paperless-ngx instance
-  'paperless_api_token',    // String: API token for authentication (encrypted)
-  'paperless_username',     // String: Username for authentication (encrypted)
-  'paperless_password',     // String: Password for authentication (encrypted)
+  'paperless_enabled', // Boolean: Enable/disable Paperless integration
+  'paperless_url', // String: URL to Paperless-ngx instance
+  'paperless_api_token', // String: API token for authentication (encrypted)
+  'paperless_username', // String: Username for authentication (encrypted)
+  'paperless_password', // String: Password for authentication (encrypted)
   'default_storage_backend', // String: Default storage backend for documents
-  'paperless_auto_sync',    // Boolean: Enable automatic synchronization
-  'paperless_sync_tags',    // String/Array: Tags to use for syncing
+  'paperless_auto_sync', // Boolean: Enable automatic synchronization
+  'paperless_sync_tags', // String/Array: Tags to use for syncing
 ];
 
 /**
@@ -66,7 +66,7 @@ export const PAPERLESS_SENSITIVE_SETTINGS = [
  * @param {string} key - The setting key to check
  * @returns {boolean} True if the key is a Paperless setting
  */
-export const isPaperlessSetting = (key) => {
+export const isPaperlessSetting = key => {
   return PAPERLESS_SETTING_KEYS.includes(key);
 };
 
@@ -75,7 +75,7 @@ export const isPaperlessSetting = (key) => {
  * @param {string} key - The setting key to check
  * @returns {boolean} True if the setting is sensitive
  */
-export const isPaperlessSensitiveSetting = (key) => {
+export const isPaperlessSensitiveSetting = key => {
   return PAPERLESS_SENSITIVE_SETTINGS.includes(key);
 };
 
@@ -84,7 +84,7 @@ export const isPaperlessSensitiveSetting = (key) => {
  * @param {string} key - The setting key
  * @returns {string} The type of the setting
  */
-export const getPaperlessSettingType = (key) => {
+export const getPaperlessSettingType = key => {
   return PAPERLESS_SETTING_TYPES[key] || 'string';
 };
 
@@ -93,6 +93,6 @@ export const getPaperlessSettingType = (key) => {
  * @param {string} key - The setting key
  * @returns {any} The default value for the setting
  */
-export const getPaperlessSettingDefault = (key) => {
+export const getPaperlessSettingDefault = key => {
   return PAPERLESS_SETTING_DEFAULTS[key] || '';
 };

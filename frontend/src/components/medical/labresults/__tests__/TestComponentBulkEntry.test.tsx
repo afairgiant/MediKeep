@@ -70,7 +70,10 @@ function parseLine(line: string) {
 
     // Auto-calculate status
     if (result.value !== null) {
-      if (typeof result.ref_range_min === 'number' && typeof result.ref_range_max === 'number') {
+      if (
+        typeof result.ref_range_min === 'number' &&
+        typeof result.ref_range_max === 'number'
+      ) {
         if (result.value > result.ref_range_max) result.status = 'high';
         else if (result.value < result.ref_range_min) result.status = 'low';
         else result.status = 'normal';

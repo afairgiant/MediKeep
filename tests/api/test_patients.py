@@ -1,6 +1,7 @@
 """
 Test patient endpoints.
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -12,7 +13,9 @@ from tests.utils.user import create_random_user
 class TestPatientEndpoints:
     """Test patient-related endpoints."""
 
-    def test_get_current_patient_success(self, authenticated_client: TestClient, test_patient: Patient):
+    def test_get_current_patient_success(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
         """Test successfully getting current patient info."""
         response = authenticated_client.get("/api/v1/patients/me")
 
@@ -29,7 +32,9 @@ class TestPatientEndpoints:
 
         assert response.status_code == 401
 
-    def test_update_current_patient_success(self, authenticated_client: TestClient, test_patient: Patient):
+    def test_update_current_patient_success(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
         """Test successfully updating current patient info."""
         update_data = {
             "first_name": "Updated",
@@ -37,7 +42,7 @@ class TestPatientEndpoints:
             "address": "123 Updated Street",
             "blood_type": "B+",
             "height": 72,
-            "weight": 200
+            "weight": 200,
         }
 
         response = authenticated_client.put("/api/v1/patients/me", json=update_data)
@@ -51,11 +56,11 @@ class TestPatientEndpoints:
         assert data["height"] == update_data["height"]
         assert data["weight"] == update_data["weight"]
 
-    def test_update_current_patient_partial(self, authenticated_client: TestClient, test_patient: Patient):
+    def test_update_current_patient_partial(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
         """Test partial update of patient info."""
-        update_data = {
-            "first_name": "PartialUpdate"
-        }
+        update_data = {"first_name": "PartialUpdate"}
 
         response = authenticated_client.put("/api/v1/patients/me", json=update_data)
 
@@ -65,13 +70,15 @@ class TestPatientEndpoints:
         assert data["first_name"] == "Partialupdate"
         # Other fields should remain unchanged
 
-    def test_update_current_patient_invalid_data(self, authenticated_client: TestClient, test_patient: Patient):
+    def test_update_current_patient_invalid_data(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
         """Test updating patient with invalid data."""
         invalid_data = {
             "birth_date": "invalid-date-format",
             "height": -10,  # Invalid height
             "weight": 1000,  # Invalid weight
-            "blood_type": "INVALID"  # Invalid blood type
+            "blood_type": "INVALID",  # Invalid blood type
         }
 
         response = authenticated_client.put("/api/v1/patients/me", json=invalid_data)
@@ -89,7 +96,9 @@ class TestPatientEndpoints:
 
         assert response.status_code == 401
 
-    def test_create_current_patient_success(self, client: TestClient, db_session: Session):
+    def test_create_current_patient_success(
+        self, client: TestClient, db_session: Session
+    ):
         """Test creating a patient record when none exists."""
         from app.core.utils.security import create_access_token
         from app.crud.user import user as user_crud
@@ -101,10 +110,10 @@ class TestPatientEndpoints:
             email="nopatient@example.com",
             password="password123",
             full_name="No Patient User",
-            role="user"
+            role="user",
         )
         user = user_crud.create(db_session, obj_in=user_data)
-        
+
         # Create auth headers
         token = create_access_token(data={"sub": user.username})
         headers = {"Authorization": f"Bearer {token}"}
@@ -117,23 +126,27 @@ class TestPatientEndpoints:
             "address": "456 New Street",
             "blood_type": "AB+",
             "height": 65,
-            "weight": 130
+            "weight": 130,
         }
 
-        response = client.post("/api/v1/patients/me", json=patient_data, headers=headers)
+        response = client.post(
+            "/api/v1/patients/me", json=patient_data, headers=headers
+        )
 
         assert response.status_code == 200
         data = response.json()
         assert data["first_name"] == patient_data["first_name"]
         assert data["last_name"] == patient_data["last_name"]
 
-    def test_create_patient_when_already_exists(self, authenticated_client: TestClient, test_patient: Patient):
+    def test_create_patient_when_already_exists(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
         """Test creating patient when one already exists."""
         patient_data = {
             "first_name": "Duplicate",
             "last_name": "Patient",
             "birth_date": "1995-01-01",
-            "gender": "M"
+            "gender": "M",
         }
 
         response = authenticated_client.post("/api/v1/patients/me", json=patient_data)
@@ -141,7 +154,9 @@ class TestPatientEndpoints:
         assert response.status_code == 400
         assert "already exists" in response.json()["message"].lower()
 
-    def test_patient_data_validation(self, authenticated_client: TestClient, test_patient: Patient):
+    def test_patient_data_validation(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
         """Test various validation scenarios for patient data.
 
         PatientUpdate has all optional fields, so partial payloads (e.g. only first_name)
@@ -154,9 +169,9 @@ class TestPatientEndpoints:
                     "first_name": "Test",
                     "last_name": "User",
                     "birth_date": "2030-01-01",  # Future date
-                    "gender": "M"
+                    "gender": "M",
                 },
-                "expected_status": 422
+                "expected_status": 422,
             },
             # Invalid blood type
             {
@@ -165,9 +180,9 @@ class TestPatientEndpoints:
                     "last_name": "User",
                     "birth_date": "1990-01-01",
                     "gender": "M",
-                    "blood_type": "XX+"
+                    "blood_type": "XX+",
                 },
-                "expected_status": 422
+                "expected_status": 422,
             },
             # Invalid height (> 108 inches) and weight (negative)
             {
@@ -177,23 +192,32 @@ class TestPatientEndpoints:
                     "birth_date": "1990-01-01",
                     "gender": "M",
                     "height": 200,  # Exceeds max of 108 inches
-                    "weight": -10   # Below min of 1 pound
+                    "weight": -10,  # Below min of 1 pound
                 },
-                "expected_status": 422
-            }
+                "expected_status": 422,
+            },
         ]
 
         for test_case in test_cases:
-            response = authenticated_client.put("/api/v1/patients/me", json=test_case["data"])
+            response = authenticated_client.put(
+                "/api/v1/patients/me", json=test_case["data"]
+            )
             assert response.status_code == test_case["expected_status"], (
                 f"Expected {test_case['expected_status']} for data {test_case['data']}, "
                 f"got {response.status_code}: {response.text}"
             )
 
-    def test_patient_recent_activity(self, authenticated_client: TestClient, db_session: Session, test_patient: Patient):
+    def test_patient_recent_activity(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        test_patient: Patient,
+    ):
         """Test getting patient's recent activity."""
         # First create some activity by updating patient
-        authenticated_client.put("/api/v1/patients/me", json={"first_name": "ActivityTest"})
+        authenticated_client.put(
+            "/api/v1/patients/me", json={"first_name": "ActivityTest"}
+        )
 
         response = authenticated_client.get("/api/v1/patients/recent-activity/")
 
@@ -223,17 +247,21 @@ class TestPatientEndpoints:
             db_session,
             user_id=user1_data["user"].id,
             patient_data=PatientCreate(
-                first_name="User1", last_name="Patient",
-                birth_date=date(1990, 1, 1), gender="M"
-            )
+                first_name="User1",
+                last_name="Patient",
+                birth_date=date(1990, 1, 1),
+                gender="M",
+            ),
         )
         patient2 = patient_crud.create_for_user(
             db_session,
             user_id=user2_data["user"].id,
             patient_data=PatientCreate(
-                first_name="User2", last_name="Patient",
-                birth_date=date(1991, 1, 1), gender="F"
-            )
+                first_name="User2",
+                last_name="Patient",
+                birth_date=date(1991, 1, 1),
+                gender="F",
+            ),
         )
 
         from app.core.utils.security import create_access_token
@@ -258,7 +286,12 @@ class TestPatientEndpoints:
         assert data["id"] == patient2.id
         assert data["first_name"] == "User2"
 
-    def test_patient_physician_assignment(self, authenticated_client: TestClient, db_session: Session, test_patient: Patient):
+    def test_patient_physician_assignment(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        test_patient: Patient,
+    ):
         """Test assigning a physician to a patient."""
         from tests.utils.data import create_sample_practitioner
 
@@ -266,13 +299,12 @@ class TestPatientEndpoints:
         practitioner = create_sample_practitioner(db_session)
 
         # create_sample_practitioner returns the ORM object from practitioner.create()
-        practitioner_id = practitioner.id if hasattr(practitioner, "id") else practitioner["id"]
+        practitioner_id = (
+            practitioner.id if hasattr(practitioner, "id") else practitioner["id"]
+        )
 
         # Update patient with physician assignment
-        update_data = {
-            "physician_id": practitioner_id,
-            "first_name": "Updated"
-        }
+        update_data = {"physician_id": practitioner_id, "first_name": "Updated"}
 
         response = authenticated_client.put("/api/v1/patients/me", json=update_data)
 
@@ -280,7 +312,9 @@ class TestPatientEndpoints:
         data = response.json()
         assert data["physician_id"] == practitioner_id
 
-    def test_patient_physician_invalid_assignment(self, authenticated_client: TestClient, test_patient: Patient):
+    def test_patient_physician_invalid_assignment(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
         """Test assigning a non-existent physician to a patient.
 
         The endpoint stores whatever positive integer is supplied for physician_id
@@ -288,21 +322,26 @@ class TestPatientEndpoints:
         """
         update_data = {
             "physician_id": 99999,  # Non-existent practitioner — accepted without DB check
-            "first_name": "Updated"
+            "first_name": "Updated",
         }
 
         response = authenticated_client.put("/api/v1/patients/me", json=update_data)
 
         assert response.status_code == 200
 
-    @pytest.mark.parametrize("field,value", [
-        # Empty strings are coerced to None by PatientUpdate and silently accepted;
-        # only values that exceed the declared max lengths trigger 422.
-        ("first_name", "A" * 51),   # Exceeds max of 50 characters
-        ("last_name", "A" * 51),    # Exceeds max of 50 characters
-        ("address", "A" * 201),     # Exceeds max of 200 characters
-    ])
-    def test_patient_field_validation(self, authenticated_client: TestClient, test_patient: Patient, field: str, value):
+    @pytest.mark.parametrize(
+        "field,value",
+        [
+            # Empty strings are coerced to None by PatientUpdate and silently accepted;
+            # only values that exceed the declared max lengths trigger 422.
+            ("first_name", "A" * 51),  # Exceeds max of 50 characters
+            ("last_name", "A" * 51),  # Exceeds max of 50 characters
+            ("address", "A" * 201),  # Exceeds max of 200 characters
+        ],
+    )
+    def test_patient_field_validation(
+        self, authenticated_client: TestClient, test_patient: Patient, field: str, value
+    ):
         """Test validation of individual patient fields."""
         update_data = {field: value}
 
@@ -318,8 +357,7 @@ class TestPatientEndpoints:
         # Test valid dates
         for date_str in valid_dates:
             response = authenticated_client.put(
-                "/api/v1/patients/me",
-                json={"birth_date": date_str}
+                "/api/v1/patients/me", json={"birth_date": date_str}
             )
             # Should succeed or have other validation errors, but not date format errors
             if response.status_code == 422:
@@ -329,7 +367,6 @@ class TestPatientEndpoints:
         # Test invalid dates
         for date_str in invalid_dates:
             response = authenticated_client.put(
-                "/api/v1/patients/me", 
-                json={"birth_date": date_str}
+                "/api/v1/patients/me", json={"birth_date": date_str}
             )
             assert response.status_code == 422

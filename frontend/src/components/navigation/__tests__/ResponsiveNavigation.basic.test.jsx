@@ -15,15 +15,13 @@ vi.mock('../../../hooks/useResponsive', () => ({
     isTablet: false,
     isDesktop: true,
     isAbove: () => true,
-    matches: (bp) => bp === 'lg'
-  })
+    matches: bp => bp === 'lg',
+  }),
 }));
 
 const TestWrapper = ({ children }) => (
   <BrowserRouter>
-    <MantineProvider>
-      {children}
-    </MantineProvider>
+    <MantineProvider>{children}</MantineProvider>
   </BrowserRouter>
 );
 
@@ -31,10 +29,8 @@ describe('ResponsiveNavigation (Basic)', () => {
   const menuItems = [
     {
       section: 'Main',
-      items: [
-        { path: '/dashboard', label: 'Dashboard', icon: '📊' }
-      ]
-    }
+      items: [{ path: '/dashboard', label: 'Dashboard', icon: '📊' }],
+    },
   ];
 
   test('renders basic navigation', () => {

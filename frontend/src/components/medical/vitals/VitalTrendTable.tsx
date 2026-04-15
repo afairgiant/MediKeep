@@ -17,9 +17,19 @@ import {
   Select,
   Badge,
 } from '@mantine/core';
-import { IconChevronUp, IconChevronDown, IconSelector } from '@tabler/icons-react';
+import {
+  IconChevronUp,
+  IconChevronDown,
+  IconSelector,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { VitalTrendResponse, VitalDataPoint, GlucoseContext, GLUCOSE_CONTEXT_MANTINE_COLORS, GLUCOSE_DEFAULT_MANTINE_COLOR } from './types';
+import {
+  VitalTrendResponse,
+  VitalDataPoint,
+  GlucoseContext,
+  GLUCOSE_CONTEXT_MANTINE_COLORS,
+  GLUCOSE_DEFAULT_MANTINE_COLOR,
+} from './types';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface VitalTrendTableProps {
@@ -47,7 +57,11 @@ const DEFAULT_PAGE_SIZE = 20;
 const VALID_PAGE_SIZES = [10, 20, 25, 50];
 
 function Th({ children, sorted, reversed, onSort }: ThProps) {
-  const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
+  const Icon = sorted
+    ? reversed
+      ? IconChevronUp
+      : IconChevronDown
+    : IconSelector;
 
   return (
     <Table.Th style={{ width: 'auto' }}>
@@ -91,7 +105,9 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
 
       switch (sortField) {
         case 'date':
-          comparison = new Date(a.recorded_date).getTime() - new Date(b.recorded_date).getTime();
+          comparison =
+            new Date(a.recorded_date).getTime() -
+            new Date(b.recorded_date).getTime();
           break;
         case 'value':
           comparison = a.value - b.value;
@@ -130,7 +146,11 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
   const handlePageSizeChange = (value: string | null) => {
     if (value === null) return;
     const numericValue = Number(value);
-    if (!Number.isFinite(numericValue) || !VALID_PAGE_SIZES.includes(numericValue)) return;
+    if (
+      !Number.isFinite(numericValue) ||
+      !VALID_PAGE_SIZES.includes(numericValue)
+    )
+      return;
     setPageSize(numericValue);
     setCurrentPage(1);
   };
@@ -167,7 +187,9 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
               </Th>
               {isBloodGlucose && (
                 <Table.Th>
-                  <Text fw={500} size="sm">{t('vitals:modal.glucoseContext', 'Type')}</Text>
+                  <Text fw={500} size="sm">
+                    {t('vitals:modal.glucoseContext', 'Type')}
+                  </Text>
                 </Table.Th>
               )}
             </Table.Tr>
@@ -182,11 +204,16 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
                   <Group gap="xs">
                     <Text size="sm" fw={500}>
                       {point.value}
-                      {point.secondary_value !== undefined && point.secondary_value !== null && (
-                        <Text span c="dimmed">/{point.secondary_value}</Text>
-                      )}
+                      {point.secondary_value !== undefined &&
+                        point.secondary_value !== null && (
+                          <Text span c="dimmed">
+                            /{point.secondary_value}
+                          </Text>
+                        )}
                     </Text>
-                    <Text size="xs" c="dimmed">{trendData.unit}</Text>
+                    <Text size="xs" c="dimmed">
+                      {trendData.unit}
+                    </Text>
                   </Group>
                 </Table.Td>
                 {isBloodGlucose && (
@@ -195,12 +222,23 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
                       <Badge
                         size="sm"
                         variant="light"
-                        color={GLUCOSE_CONTEXT_MANTINE_COLORS[point.glucose_context as GlucoseContext] ?? GLUCOSE_DEFAULT_MANTINE_COLOR}
+                        color={
+                          GLUCOSE_CONTEXT_MANTINE_COLORS[
+                            point.glucose_context as GlucoseContext
+                          ] ?? GLUCOSE_DEFAULT_MANTINE_COLOR
+                        }
                       >
-                        {String(t(`vitals.glucoseContext.${point.glucose_context}`, point.glucose_context))}
+                        {String(
+                          t(
+                            `vitals.glucoseContext.${point.glucose_context}`,
+                            point.glucose_context
+                          )
+                        )}
                       </Badge>
                     ) : (
-                      <Text size="xs" c="dimmed">{t('labels.none', '-')}</Text>
+                      <Text size="xs" c="dimmed">
+                        {t('labels.none', '-')}
+                      </Text>
                     )}
                   </Table.Td>
                 )}
@@ -212,15 +250,25 @@ const VitalTrendTable: React.FC<VitalTrendTableProps> = ({ trendData }) => {
 
       {/* Pagination Controls */}
       {totalRecords > 0 && (
-        <Group justify={totalPages > 1 ? 'space-between' : 'flex-end'} align="center" mt="md" px="md" pb="md">
+        <Group
+          justify={totalPages > 1 ? 'space-between' : 'flex-end'}
+          align="center"
+          mt="md"
+          px="md"
+          pb="md"
+        >
           {/* Left: Record count (only show when multiple pages) */}
           {totalPages > 1 && (
             <Text size="sm" c="dimmed">
-              {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
-                start: startIndex + 1,
-                end: endIndex,
-                total: totalRecords,
-              })}
+              {t(
+                'pagination.showingRange',
+                'Showing {{start}} to {{end}} of {{total}} results',
+                {
+                  start: startIndex + 1,
+                  end: endIndex,
+                  total: totalRecords,
+                }
+              )}
             </Text>
           )}
 

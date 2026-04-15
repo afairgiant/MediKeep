@@ -28,7 +28,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           {/* eslint-disable-next-line i18next/no-literal-string -- brand name with copyright */}
           {`© ${currentYear} MediKeep`}
         </Text>
-        <Text size="sm" c="dimmed">•</Text>
+        <Text size="sm" c="dimmed">
+          •
+        </Text>
         <Anchor
           href="https://github.com/afairgiant/MediKeep"
           target="_blank"
@@ -41,7 +43,9 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           {/* eslint-disable-next-line i18next/no-literal-string -- product name */}
           {'GitHub'}
         </Anchor>
-        <Text size="sm" c="dimmed">•</Text>
+        <Text size="sm" c="dimmed">
+          •
+        </Text>
         <Anchor
           href="https://github.com/sponsors/afairgiant"
           target="_blank"
@@ -51,7 +55,10 @@ const Footer: React.FC<FooterProps> = ({ className = '' }) => {
           style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           aria-label="Sponsor MediKeep"
         >
-          <IconHeartFilled size={14} style={{ color: 'var(--mantine-color-pink-5)' }} />
+          <IconHeartFilled
+            size={14}
+            style={{ color: 'var(--mantine-color-pink-5)' }}
+          />
           {t('sponsor.buttonShort')}
         </Anchor>
       </Group>

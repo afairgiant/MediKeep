@@ -222,26 +222,27 @@ export function AppDataProvider({ children }) {
         category: 'app_version_cache_clear',
         oldVersion: storedVersion,
         newVersion: APP_VERSION,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       // Clear all cache data
-      const cacheKeys = Object.keys(localStorage).filter(key => 
-        key.startsWith('appData_') || 
-        key.startsWith('patient_') || 
-        key.startsWith('cache_')
+      const cacheKeys = Object.keys(localStorage).filter(
+        key =>
+          key.startsWith('appData_') ||
+          key.startsWith('patient_') ||
+          key.startsWith('cache_')
       );
-      
+
       cacheKeys.forEach(key => {
         localStorage.removeItem(key);
       });
-      
+
       // Update version
       localStorage.setItem('appVersion', APP_VERSION);
-      
+
       // Clear state cache
       dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
-      
+
       return true; // Cache was cleared
     }
     return false; // No clear needed
@@ -282,22 +283,22 @@ export function AppDataProvider({ children }) {
           entityType: 'patient',
           patientId: stateRef.current.currentPatient.id,
           cacheAge: Date.now() - stateRef.current.patientLastFetch,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         return stateRef.current.currentPatient;
       }
 
       try {
         dispatch({ type: APP_DATA_ACTIONS.SET_PATIENT_LOADING, payload: true });
-        
+
         logger.info('Fetching fresh patient data', {
           category: 'app_data_fetch',
           entityType: 'patient',
           forceRefresh,
           userId: user?.id,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-        
+
         // Use Phase 1 API to get the active patient instead of just /patients/me
         try {
           const activePatientData = await patientApi.getActivePatient();
@@ -310,12 +311,16 @@ export function AppDataProvider({ children }) {
           }
         } catch (e) {
           // Fall back to old API if Phase 1 fails
-          logger.debug('active_patient_api_fallback', 'Phase 1 active patient API failed, falling back to /patients/me', {
-            error: e.message,
-            component: 'AppDataContext'
-          });
+          logger.debug(
+            'active_patient_api_fallback',
+            'Phase 1 active patient API failed, falling back to /patients/me',
+            {
+              error: e.message,
+              component: 'AppDataContext',
+            }
+          );
         }
-        
+
         // Fallback to original API
         const patient = await apiService.getCurrentPatient();
         dispatch({
@@ -330,7 +335,7 @@ export function AppDataProvider({ children }) {
           error: error.message,
           stack: error.stack,
           userId: user?.id,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         dispatch({
           type: APP_DATA_ACTIONS.SET_PATIENT_ERROR,
@@ -378,7 +383,7 @@ export function AppDataProvider({ children }) {
           error: error.message,
           stack: error.stack,
           cachedCount: stateRef.current.practitioners?.length || 0,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         dispatch({
           type: APP_DATA_ACTIONS.SET_PRACTITIONERS_ERROR,
@@ -428,7 +433,7 @@ export function AppDataProvider({ children }) {
           error: error.message,
           stack: error.stack,
           cachedCount: stateRef.current.pharmacies?.length || 0,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         dispatch({
           type: APP_DATA_ACTIONS.SET_PHARMACIES_ERROR,
@@ -467,7 +472,7 @@ export function AppDataProvider({ children }) {
           entityType: 'patientList',
           count: stateRef.current.patientList.length,
           cacheAge: Date.now() - stateRef.current.patientListLastFetch,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         return stateRef.current.patientList;
       }
@@ -477,13 +482,13 @@ export function AppDataProvider({ children }) {
           type: APP_DATA_ACTIONS.SET_PATIENT_LIST_LOADING,
           payload: true,
         });
-        
+
         logger.info('Fetching fresh patient list data', {
           category: 'app_data_fetch',
           entityType: 'patientList',
           forceRefresh,
           userId: user?.id,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
         const response = await patientApi.getAccessiblePatients('view');
@@ -502,7 +507,7 @@ export function AppDataProvider({ children }) {
           stack: error.stack,
           userId: user?.id,
           cachedCount: stateRef.current.patientList?.length || 0,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         dispatch({
           type: APP_DATA_ACTIONS.SET_PATIENT_LIST_ERROR,
@@ -521,71 +526,72 @@ export function AppDataProvider({ children }) {
   // Initialize app data when user logs in
   useEffect(() => {
     if (isAuthenticated && user && !isLoading) {
-      logger.info('User authenticated, clearing cache and fetching fresh data', {
-        category: 'app_data_init',
-        userId: user.id,
-        username: user.username,
-        isLoading,
-        timestamp: new Date().toISOString()
-      });
-      
+      logger.info(
+        'User authenticated, clearing cache and fetching fresh data',
+        {
+          category: 'app_data_init',
+          userId: user.id,
+          username: user.username,
+          isLoading,
+          timestamp: new Date().toISOString(),
+        }
+      );
+
       // Check app version and clear cache if necessary
       const versionCleared = checkAppVersion();
-      
+
       // Clear cache and fetch fresh data on login (if not already cleared by version check)
       if (!versionCleared) {
         dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
       }
-      
+
       // Add minimal delay to ensure auth state is propagated
-      const timeoutId = setTimeout(
-        () => {
-          // Double-check authentication is still valid before making API calls
-          if (isAuthenticated && user && !isLoading) {
-            logger.info('Starting data initialization after auth verification', {
-              category: 'app_data_init_start',
-              userId: user.id,
+      const timeoutId = setTimeout(() => {
+        // Double-check authentication is still valid before making API calls
+        if (isAuthenticated && user && !isLoading) {
+          logger.info('Starting data initialization after auth verification', {
+            category: 'app_data_init_start',
+            userId: user.id,
+            isAuthenticated,
+            isLoading,
+            timestamp: new Date().toISOString(),
+          });
+
+          // Ensure timezone service is initialized after auth
+          timezoneService.init();
+
+          // Fetch fresh patient data immediately on login
+          fetchCurrentPatient(true);
+
+          // Fetch fresh static lists and patient list in parallel
+          Promise.all([
+            fetchPractitioners(true),
+            fetchPharmacies(true),
+            fetchPatientList(true),
+          ]).catch(error => {
+            logger.error('Failed to initialize application data', {
+              category: 'app_data_init_error',
+              error: error.message,
+              stack: error.stack,
+              userId: user?.id,
               isAuthenticated,
               isLoading,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             });
-            
-            // Ensure timezone service is initialized after auth
-            timezoneService.init();
-
-            // Fetch fresh patient data immediately on login
-            fetchCurrentPatient(true);
-
-            // Fetch fresh static lists and patient list in parallel
-            Promise.all([
-              fetchPractitioners(true), 
-              fetchPharmacies(true), 
-              fetchPatientList(true)
-            ]).catch(
-              error => {
-                logger.error('Failed to initialize application data', {
-                  category: 'app_data_init_error',
-                  error: error.message,
-                  stack: error.stack,
-                  userId: user?.id,
-                  isAuthenticated,
-                  isLoading,
-                  timestamp: new Date().toISOString()
-                });
-              }
-            );
-          } else {
-            logger.warn('Skipping data initialization - authentication state changed', {
+          });
+        } else {
+          logger.warn(
+            'Skipping data initialization - authentication state changed',
+            {
               category: 'app_data_init_skip',
               isAuthenticated,
               hasUser: !!user,
               isLoading,
-              timestamp: new Date().toISOString()
-            });
-          }
-        },
-        100
-      ); // Minimal delay to ensure auth state is propagated
+              timestamp: new Date().toISOString(),
+            }
+          );
+        }
+      }, 100); // Minimal delay to ensure auth state is propagated
 
       return () => clearTimeout(timeoutId);
     } else if (!isAuthenticated && !isLoading) {
@@ -593,7 +599,7 @@ export function AppDataProvider({ children }) {
       logger.info('User logged out, clearing all cached data', {
         category: 'app_data_logout',
         isLoading,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
 
@@ -620,7 +626,7 @@ export function AppDataProvider({ children }) {
   }, []);
 
   // Set current patient to a specific patient (Phase 1 support)
-  const setCurrentPatient = useCallback(async (patient) => {
+  const setCurrentPatient = useCallback(async patient => {
     if (patient) {
       dispatch({
         type: APP_DATA_ACTIONS.SET_PATIENT_SUCCESS,
@@ -630,7 +636,7 @@ export function AppDataProvider({ children }) {
         category: 'app_data_patient_switch',
         patientId: patient.id,
         patientName: `${patient.first_name} ${patient.last_name}`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } else {
       dispatch({ type: APP_DATA_ACTIONS.CLEAR_PATIENT });
@@ -668,12 +674,24 @@ export function AppDataProvider({ children }) {
           logger.warn('Unknown cache type specified', {
             category: 'app_data_cache_warning',
             cacheType,
-            validTypes: ['patient', 'practitioners', 'pharmacies', 'patientList', 'all'],
-            timestamp: new Date().toISOString()
+            validTypes: [
+              'patient',
+              'practitioners',
+              'pharmacies',
+              'patientList',
+              'all',
+            ],
+            timestamp: new Date().toISOString(),
           });
       }
     },
-    [fetchCurrentPatient, fetchPractitioners, fetchPharmacies, fetchPatientList, isAuthenticated]
+    [
+      fetchCurrentPatient,
+      fetchPractitioners,
+      fetchPharmacies,
+      fetchPatientList,
+      isAuthenticated,
+    ]
   );
 
   // Update cache expiry settings
@@ -691,7 +709,7 @@ export function AppDataProvider({ children }) {
         category: 'app_data_reinit',
         isAuthenticated,
         hasUser: !!user,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -699,31 +717,38 @@ export function AppDataProvider({ children }) {
     logger.info('Force re-initializing all application data', {
       category: 'app_data_reinit',
       userId: user.id,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Clear existing data and fetch fresh
     dispatch({ type: APP_DATA_ACTIONS.CLEAR_ALL_DATA });
-    
+
     // Wait a moment for state to clear
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     // Fetch all data in parallel
     await Promise.all([
       fetchCurrentPatient(true),
       fetchPractitioners(true),
       fetchPharmacies(true),
-      fetchPatientList(true)
+      fetchPatientList(true),
     ]).catch(error => {
       logger.error('Failed to reinitialize application data', {
         category: 'app_data_reinit_error',
         error: error.message,
         stack: error.stack,
         userId: user?.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
-  }, [isAuthenticated, user, fetchCurrentPatient, fetchPractitioners, fetchPharmacies, fetchPatientList]);
+  }, [
+    isAuthenticated,
+    user,
+    fetchCurrentPatient,
+    fetchPractitioners,
+    fetchPharmacies,
+    fetchPatientList,
+  ]);
 
   // Context value
   const contextValue = {

@@ -21,7 +21,7 @@ import {
   Skeleton,
   ActionIcon,
   Tooltip,
-  Select
+  Select,
 } from '@mantine/core';
 import {
   IconTrendingUp,
@@ -33,13 +33,13 @@ import {
   IconDownload,
   IconCalendar,
   IconRefresh,
-  IconFilter
+  IconFilter,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import {
   labTestComponentApi,
-  TrendResponse
+  TrendResponse,
 } from '../../../services/api/labTestComponentApi';
 import { getQualitativeDisplayName } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
@@ -58,7 +58,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   opened,
   onClose,
   testName,
-  patientId
+  patientId,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
   const [trendData, setTrendData] = useState<TrendResponse | null>(null);
@@ -68,7 +68,9 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   const [timeRange, setTimeRange] = useState<string>('all');
   const { formatDate: formatPreferredDate } = useDateFormat();
 
-  const getDateRangeFromSelection = (range: string): { dateFrom?: string; dateTo?: string } => {
+  const getDateRangeFromSelection = (
+    range: string
+  ): { dateFrom?: string; dateTo?: string } => {
     const today = new Date();
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
@@ -120,7 +122,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         {
           dateFrom: dateRange.dateFrom,
           dateTo: dateRange.dateTo,
-          limit: 100
+          limit: 100,
         }
       );
 
@@ -132,7 +134,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         patientId,
         timeRange,
         dataPointCount: response.data_points.length,
-        component: 'TestComponentTrendsPanel'
+        component: 'TestComponentTrendsPanel',
       });
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to load trend data';
@@ -143,14 +145,14 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         testName,
         patientId,
         error: errorMessage,
-        component: 'TestComponentTrendsPanel'
+        component: 'TestComponentTrendsPanel',
       });
 
       notifications.show({
         title: 'Error Loading Trends',
         message: errorMessage,
         color: 'red',
-        autoClose: 5000
+        autoClose: 5000,
       });
     } finally {
       setLoading(false);
@@ -254,11 +256,12 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
             date,
             point.qualitative_value || '',
             point.status || '',
-            point.lab_result.test_name
+            point.lab_result.test_name,
           ];
         }
 
-        const refRange = point.ref_range_text ||
+        const refRange =
+          point.ref_range_text ||
           (point.ref_range_min !== null && point.ref_range_max !== null
             ? `${point.ref_range_min} - ${point.ref_range_max}`
             : 'Not specified');
@@ -269,7 +272,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           point.unit || '',
           point.status || '',
           refRange,
-          point.lab_result.test_name
+          point.lab_result.test_name,
         ];
       });
 
@@ -283,7 +286,9 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         ['Summary Statistics'],
         ['Count', trendData.statistics.count.toString()],
         ...(isQualitative && trendData.statistics.qualitative_summary
-          ? Object.entries(trendData.statistics.qualitative_summary).map(([val, cnt]) => [val, String(cnt)])
+          ? Object.entries(trendData.statistics.qualitative_summary).map(
+              ([val, cnt]) => [val, String(cnt)]
+            )
           : [
               ['Latest', trendData.statistics.latest?.toFixed(2) || 'N/A'],
               ['Average', trendData.statistics.average?.toFixed(2) || 'N/A'],
@@ -297,8 +302,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         [''],
         // Data table
         headers,
-        ...rows
-      ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+        ...rows,
+      ]
+        .map(row => row.map(cell => `"${cell}"`).join(','))
+        .join('\n');
 
       // Create blob and download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -306,7 +313,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
       const url = URL.createObjectURL(blob);
 
       link.setAttribute('href', url);
-      link.setAttribute('download', `trend_${trendData.test_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        'download',
+        `trend_${trendData.test_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`
+      );
       link.style.visibility = 'hidden';
 
       document.body.appendChild(link);
@@ -318,14 +328,14 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         testName,
         patientId,
         dataPointCount: trendData.data_points.length,
-        component: 'TestComponentTrendsPanel'
+        component: 'TestComponentTrendsPanel',
       });
 
       notifications.show({
         title: 'Export Successful',
         message: `Exported ${trendData.data_points.length} data points to CSV`,
         color: 'green',
-        autoClose: 3000
+        autoClose: 3000,
       });
     } catch (error: any) {
       logger.error('test_component_trends_export_error', {
@@ -333,14 +343,14 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         testName,
         patientId,
         error: error.message,
-        component: 'TestComponentTrendsPanel'
+        component: 'TestComponentTrendsPanel',
       });
 
       notifications.show({
         title: 'Export Failed',
         message: 'Failed to export data. Please try again.',
         color: 'red',
-        autoClose: 5000
+        autoClose: 5000,
       });
     }
   };
@@ -355,8 +365,14 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
         <Group gap="sm">
           <IconChartLine size={24} />
           <div>
-            <Text fw={600} size="lg">{t('labresults:trends.title')}</Text>
-            {testName && <Text size="sm" c="dimmed">{testName}</Text>}
+            <Text fw={600} size="lg">
+              {t('labresults:trends.title')}
+            </Text>
+            {testName && (
+              <Text size="sm" c="dimmed">
+                {testName}
+              </Text>
+            )}
           </div>
         </Group>
       }
@@ -386,7 +402,9 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
               <Group justify="space-between" align="center">
                 <Group gap="xs">
                   <IconFilter size={16} />
-                  <Text fw={600} size="sm">{t('labresults:trends.timeRange')}</Text>
+                  <Text fw={600} size="sm">
+                    {t('labresults:trends.timeRange')}
+                  </Text>
                 </Group>
               </Group>
 
@@ -394,14 +412,14 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                 label="Select Time Range"
                 placeholder="Choose time range"
                 value={timeRange}
-                onChange={(value) => setTimeRange(value || 'all')}
+                onChange={value => setTimeRange(value || 'all')}
                 data={[
                   { value: 'all', label: 'All Dates' },
                   { value: '3months', label: 'Past 3 Months' },
                   { value: '6months', label: 'Past 6 Months' },
                   { value: 'year', label: 'Past Year' },
                   { value: '2years', label: 'Past 2 Years' },
-                  { value: '5years', label: 'Past 5 Years' }
+                  { value: '5years', label: 'Past 5 Years' },
                 ]}
                 leftSection={<IconCalendar size={16} />}
                 size="md"
@@ -413,7 +431,9 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
               {timeRange !== 'all' && (
                 <Paper withBorder p="sm" radius="sm" bg="blue.0">
                   <Group gap="xs" justify="center">
-                    <Text size="sm" fw={600}>{t('labresults:trends.showing')}</Text>
+                    <Text size="sm" fw={600}>
+                      {t('labresults:trends.showing')}
+                    </Text>
                     <Badge size="lg" variant="filled">
                       {getTimeRangeLabel(timeRange)}
                     </Badge>
@@ -429,15 +449,25 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           <Paper withBorder p="md" radius="md">
             <Stack gap="md">
               <Group justify="space-between" align="center">
-                <Text fw={600} size="sm">{t('labresults:trends.summaryStatistics')}</Text>
+                <Text fw={600} size="sm">
+                  {t('labresults:trends.summaryStatistics')}
+                </Text>
                 <Group gap="xs">
                   <Tooltip label="Refresh data">
-                    <ActionIcon variant="subtle" onClick={loadTrendData} size="sm">
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={loadTrendData}
+                      size="sm"
+                    >
                       <IconRefresh size={16} />
                     </ActionIcon>
                   </Tooltip>
                   <Tooltip label="Export to CSV">
-                    <ActionIcon variant="subtle" onClick={handleExport} size="sm">
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={handleExport}
+                      size="sm"
+                    >
                       <IconDownload size={16} />
                     </ActionIcon>
                   </Tooltip>
@@ -446,48 +476,72 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
               <Divider />
 
-              {trendData.result_type === 'qualitative' && trendData.statistics.qualitative_summary ? (
+              {trendData.result_type === 'qualitative' &&
+              trendData.statistics.qualitative_summary ? (
                 <Group gap="xl">
-                  {Object.entries(trendData.statistics.qualitative_summary).map(([value, count]) => (
-                    <Box key={value}>
-                      <Text size="xs" c="dimmed">{getQualitativeDisplayName(value)}</Text>
-                      <Text fw={700} size="xl">{count as number}</Text>
-                    </Box>
-                  ))}
+                  {Object.entries(trendData.statistics.qualitative_summary).map(
+                    ([value, count]) => (
+                      <Box key={value}>
+                        <Text size="xs" c="dimmed">
+                          {getQualitativeDisplayName(value)}
+                        </Text>
+                        <Text fw={700} size="xl">
+                          {count as number}
+                        </Text>
+                      </Box>
+                    )
+                  )}
                   <Box>
-                    <Text size="xs" c="dimmed">{t('labresults:trends.total')}</Text>
-                    <Text fw={700} size="xl">{trendData.statistics.count}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('labresults:trends.total')}
+                    </Text>
+                    <Text fw={700} size="xl">
+                      {trendData.statistics.count}
+                    </Text>
                   </Box>
                 </Group>
               ) : (
                 <Group gap="xl">
                   <Box>
-                    <Text size="xs" c="dimmed">{t('labresults:trends.latest')}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('labresults:trends.latest')}
+                    </Text>
                     <Group gap="xs" align="baseline">
                       <Text fw={700} size="xl">
                         {trendData.statistics.latest?.toFixed(2) ?? 'N/A'}
                       </Text>
-                      <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                      <Text size="sm" c="dimmed">
+                        {trendData.unit}
+                      </Text>
                     </Group>
                   </Box>
 
                   <Box>
-                    <Text size="xs" c="dimmed">{t('labresults:trends.average')}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('labresults:trends.average')}
+                    </Text>
                     <Group gap="xs" align="baseline">
                       <Text fw={600} size="lg">
                         {trendData.statistics.average?.toFixed(2) ?? 'N/A'}
                       </Text>
-                      <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                      <Text size="sm" c="dimmed">
+                        {trendData.unit}
+                      </Text>
                     </Group>
                   </Box>
 
                   <Box>
-                    <Text size="xs" c="dimmed">{t('labresults:trends.range')}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('labresults:trends.range')}
+                    </Text>
                     <Group gap="xs" align="baseline">
                       <Text fw={600} size="sm">
-                        {trendData.statistics.min?.toFixed(2)} - {trendData.statistics.max?.toFixed(2)}
+                        {trendData.statistics.min?.toFixed(2)} -{' '}
+                        {trendData.statistics.max?.toFixed(2)}
                       </Text>
-                      <Text size="xs" c="dimmed">{trendData.unit}</Text>
+                      <Text size="xs" c="dimmed">
+                        {trendData.unit}
+                      </Text>
                     </Group>
                   </Box>
                 </Group>
@@ -504,32 +558,53 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
                 </Badge>
 
                 <Badge variant="light" color="blue" size="lg">
-                  {t('labresults:trends.dataPoints', { count: trendData.statistics.count })}
+                  {t('labresults:trends.dataPoints', {
+                    count: trendData.statistics.count,
+                  })}
                 </Badge>
 
-                {trendData.statistics.time_in_range_percent !== null && trendData.statistics.time_in_range_percent !== undefined && (
-                  <Badge variant="light" color="green" size="lg">
-                    {t('labresults:trends.inRange', { percent: trendData.statistics.time_in_range_percent.toFixed(1) })}
-                  </Badge>
-                )}
+                {trendData.statistics.time_in_range_percent !== null &&
+                  trendData.statistics.time_in_range_percent !== undefined && (
+                    <Badge variant="light" color="green" size="lg">
+                      {t('labresults:trends.inRange', {
+                        percent:
+                          trendData.statistics.time_in_range_percent.toFixed(1),
+                      })}
+                    </Badge>
+                  )}
               </Group>
 
               <Group gap="sm">
                 <Text size="xs" c="dimmed">
-                  {t('labresults:trends.normalLabel')} <Text span fw={600}>{trendData.statistics.normal_count}</Text>
+                  {t('labresults:trends.normalLabel')}{' '}
+                  <Text span fw={600}>
+                    {trendData.statistics.normal_count}
+                  </Text>
                 </Text>
-                <Text size="xs" c="dimmed">{'\u2022'}</Text>
                 <Text size="xs" c="dimmed">
-                  {t('labresults:trends.abnormalLabel')} <Text span fw={600}>{trendData.statistics.abnormal_count}</Text>
+                  {'\u2022'}
                 </Text>
-                {trendData.result_type !== 'qualitative' && trendData.statistics.std_dev !== null && trendData.statistics.std_dev !== undefined && (
-                  <>
-                    <Text size="xs" c="dimmed">{'\u2022'}</Text>
-                    <Text size="xs" c="dimmed">
-                      {t('labresults:trends.stdDevLabel')} <Text span fw={600}>{trendData.statistics.std_dev.toFixed(2)}</Text>
-                    </Text>
-                  </>
-                )}
+                <Text size="xs" c="dimmed">
+                  {t('labresults:trends.abnormalLabel')}{' '}
+                  <Text span fw={600}>
+                    {trendData.statistics.abnormal_count}
+                  </Text>
+                </Text>
+                {trendData.result_type !== 'qualitative' &&
+                  trendData.statistics.std_dev !== null &&
+                  trendData.statistics.std_dev !== undefined && (
+                    <>
+                      <Text size="xs" c="dimmed">
+                        {'\u2022'}
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        {t('labresults:trends.stdDevLabel')}{' '}
+                        <Text span fw={600}>
+                          {trendData.statistics.std_dev.toFixed(2)}
+                        </Text>
+                      </Text>
+                    </>
+                  )}
               </Group>
             </Stack>
           </Paper>
@@ -537,7 +612,10 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
         {/* Tabs for Chart and Table Views */}
         {trendData && !loading && (
-          <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'chart')}>
+          <Tabs
+            value={activeTab}
+            onChange={value => setActiveTab(value || 'chart')}
+          >
             <Tabs.List>
               <Tabs.Tab value="chart" leftSection={<IconChartLine size={16} />}>
                 {t('labresults:trends.chart')}
@@ -562,7 +640,9 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
             <Stack align="center" gap="md">
               <IconChartLine size={48} color="var(--mantine-color-gray-5)" />
-              <Title order={3} c="dimmed">{t('labresults:trends.noData')}</Title>
+              <Title order={3} c="dimmed">
+                {t('labresults:trends.noData')}
+              </Title>
               <Text size="sm" c="dimmed" ta="center">
                 {t('labresults:trends.noDataDescription')}
               </Text>

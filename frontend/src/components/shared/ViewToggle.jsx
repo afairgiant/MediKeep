@@ -2,20 +2,42 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
 const MODE_CONFIG = {
-  cards: { icon: '\uD83D\uDCCB', labelKey: 'viewToggle.cards', fallback: 'Cards' },
-  table: { icon: '\uD83D\uDCCA', labelKey: 'viewToggle.table', fallback: 'Table' },
-  components: { icon: '\uD83E\uDDEA', labelKey: 'viewToggle.components', fallback: 'Components' },
+  cards: {
+    icon: '\uD83D\uDCCB',
+    labelKey: 'viewToggle.cards',
+    fallback: 'Cards',
+  },
+  table: {
+    icon: '\uD83D\uDCCA',
+    labelKey: 'viewToggle.table',
+    fallback: 'Table',
+  },
+  components: {
+    icon: '\uD83E\uDDEA',
+    labelKey: 'viewToggle.components',
+    fallback: 'Components',
+  },
 };
 
-const ViewToggle = ({ viewMode, onViewModeChange, showPrint = false, modes = ['cards', 'table'], size }) => {
+const ViewToggle = ({
+  viewMode,
+  onViewModeChange,
+  showPrint = false,
+  modes = ['cards', 'table'],
+  size,
+}) => {
   const { t } = useTranslation('common');
 
   const sizeClass = size ? `view-toggle-${size}` : '';
 
   return (
     <div className={`view-toggle-container ${sizeClass}`.trim()}>
-      <div className="view-toggle" role="group" aria-label={t('viewToggle.label', 'View mode')}>
-        {modes.map((mode) => {
+      <div
+        className="view-toggle"
+        role="group"
+        aria-label={t('viewToggle.label', 'View mode')}
+      >
+        {modes.map(mode => {
           const cfg = MODE_CONFIG[mode];
           if (!cfg) return null;
           return (

@@ -1,7 +1,14 @@
 from datetime import date, datetime
 from typing import Optional, List
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+    ValidationInfo,
+)
 
 from app.schemas.base_tags import TaggedEntityMixin
 from app.models.enums import TreatmentStatus
@@ -29,7 +36,9 @@ class TreatmentBase(TaggedEntityMixin):
     description: Optional[str] = Field(
         None, max_length=5000, description="Detailed description of the treatment"
     )
-    start_date: Optional[date] = Field(None, description="Start date of the treatment (optional)")
+    start_date: Optional[date] = Field(
+        None, description="Start date of the treatment (optional)"
+    )
     end_date: Optional[date] = Field(None, description="End date of the treatment")
     frequency: Optional[str] = Field(
         None, max_length=100, description="Frequency of the treatment"
@@ -48,9 +57,7 @@ class TreatmentBase(TaggedEntityMixin):
     dosage: Optional[str] = Field(
         None, max_length=200, description="Dosage of the treatment"
     )
-    mode: str = Field(
-        "simple", description="Treatment mode: 'simple' or 'advanced'"
-    )
+    mode: str = Field("simple", description="Treatment mode: 'simple' or 'advanced'")
     notes: Optional[str] = Field(None, max_length=5000, description="Additional notes")
     status: Optional[str] = Field("active", description="Status of the treatment")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
@@ -68,8 +75,14 @@ class TreatmentBase(TaggedEntityMixin):
         if isinstance(values, dict):
             # Fields that should convert empty string to None
             optional_string_fields = [
-                "treatment_type", "description", "frequency", "treatment_category",
-                "outcome", "location", "dosage", "notes"
+                "treatment_type",
+                "description",
+                "frequency",
+                "treatment_category",
+                "outcome",
+                "location",
+                "dosage",
+                "notes",
             ]
             for field in optional_string_fields:
                 if field in values and values[field] == "":
@@ -110,13 +123,17 @@ class TreatmentBase(TaggedEntityMixin):
         if status in ["planned", "on_hold"]:
             max_future = date.today() + timedelta(days=3650)  # 10 years
             if start_date_value > max_future:
-                raise ValueError("Start date cannot be more than 10 years in the future")
+                raise ValueError(
+                    "Start date cannot be more than 10 years in the future"
+                )
             # Allow past dates for planned treatments (e.g., rescheduled from past)
             return values
 
         # For all other statuses (not planned/on_hold), start date should not be in future
         if start_date_value > date.today():
-            raise ValueError(f"Start date cannot be in the future for {status} treatments")
+            raise ValueError(
+                f"Start date cannot be in the future for {status} treatments"
+            )
         return values
 
     @field_validator("end_date")
@@ -151,7 +168,9 @@ class TreatmentCreate(TreatmentBase):
 
 class TreatmentUpdate(BaseModel):
     treatment_name: Optional[str] = Field(None, min_length=2, max_length=300)
-    treatment_type: Optional[str] = Field(None, max_length=300)  # No min_length - optional field
+    treatment_type: Optional[str] = Field(
+        None, max_length=300
+    )  # No min_length - optional field
     description: Optional[str] = Field(None, max_length=5000)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
@@ -173,8 +192,14 @@ class TreatmentUpdate(BaseModel):
         """Convert empty strings to None for optional fields."""
         if isinstance(values, dict):
             optional_string_fields = [
-                "treatment_type", "description", "frequency", "treatment_category",
-                "outcome", "location", "dosage", "notes"
+                "treatment_type",
+                "description",
+                "frequency",
+                "treatment_category",
+                "outcome",
+                "location",
+                "dosage",
+                "notes",
             ]
             for field in optional_string_fields:
                 if field in values and values[field] == "":
@@ -215,23 +240,23 @@ class TreatmentUpdate(BaseModel):
         if status in ["planned", "on_hold"]:
             max_future = date.today() + timedelta(days=3650)  # 10 years
             if start_date_value > max_future:
-                raise ValueError("Start date cannot be more than 10 years in the future")
+                raise ValueError(
+                    "Start date cannot be more than 10 years in the future"
+                )
             # Allow past dates for planned treatments (e.g., rescheduled from past)
             return values
 
         # For all other statuses (not planned/on_hold), start date should not be in future
         if start_date_value > date.today():
-            raise ValueError(f"Start date cannot be in the future for {status} treatments")
+            raise ValueError(
+                f"Start date cannot be in the future for {status} treatments"
+            )
         return values
 
     @field_validator("end_date")
     @classmethod
     def validate_end_date(cls, v, info: ValidationInfo):
-        if (
-            v
-            and info.data.get("start_date")
-            and v < info.data["start_date"]
-        ):
+        if v and info.data.get("start_date") and v < info.data["start_date"]:
             raise ValueError("End date cannot be before start date")
         return v
 
@@ -339,6 +364,7 @@ class TreatmentSummary(BaseModel):
 
 class TreatmentMedicationBase(BaseModel):
     """Base schema for treatment medication relationship."""
+
     treatment_id: int
     medication_id: int
     specific_dosage: Optional[str] = Field(None, max_length=200)
@@ -359,6 +385,7 @@ class TreatmentMedicationBase(BaseModel):
 
 class TreatmentMedicationCreate(BaseModel):
     """Schema for creating a treatment medication relationship."""
+
     medication_id: int
     specific_dosage: Optional[str] = Field(None, max_length=200)
     specific_frequency: Optional[str] = Field(None, max_length=100)
@@ -379,13 +406,18 @@ class TreatmentMedicationCreate(BaseModel):
     @field_validator("specific_end_date")
     @classmethod
     def validate_specific_end_date(cls, v, info: ValidationInfo):
-        if v and info.data.get("specific_start_date") and v < info.data["specific_start_date"]:
+        if (
+            v
+            and info.data.get("specific_start_date")
+            and v < info.data["specific_start_date"]
+        ):
             raise ValueError("Specific end date cannot be before specific start date")
         return v
 
 
 class TreatmentMedicationUpdate(BaseModel):
     """Schema for updating a treatment medication relationship."""
+
     specific_dosage: Optional[str] = Field(None, max_length=200)
     specific_frequency: Optional[str] = Field(None, max_length=100)
     specific_duration: Optional[str] = Field(None, max_length=100)
@@ -404,13 +436,18 @@ class TreatmentMedicationUpdate(BaseModel):
     @field_validator("specific_end_date")
     @classmethod
     def validate_specific_end_date(cls, v, info: ValidationInfo):
-        if v and info.data.get("specific_start_date") and v < info.data["specific_start_date"]:
+        if (
+            v
+            and info.data.get("specific_start_date")
+            and v < info.data["specific_start_date"]
+        ):
             raise ValueError("Specific end date cannot be before specific start date")
         return v
 
 
 class TreatmentMedicationResponse(TreatmentMedicationBase):
     """Schema for treatment medication relationship response."""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -420,6 +457,7 @@ class TreatmentMedicationResponse(TreatmentMedicationBase):
 
 class TreatmentMedicationWithDetails(TreatmentMedicationResponse):
     """Schema for treatment medication relationship with medication details and effective values."""
+
     medication: Optional[dict] = None
     specific_prescriber: Optional[dict] = None
     specific_pharmacy: Optional[dict] = None
@@ -435,6 +473,7 @@ class TreatmentMedicationWithDetails(TreatmentMedicationResponse):
 
 class TreatmentMedicationBulkCreate(BaseModel):
     """Schema for bulk creating treatment medication relationships."""
+
     medication_ids: List[int] = Field(
         ..., min_length=1, description="List of medication IDs to link"
     )
@@ -467,6 +506,7 @@ class TreatmentMedicationBulkCreate(BaseModel):
 
 class TreatmentEncounterBase(BaseModel):
     """Base schema for treatment encounter relationship."""
+
     treatment_id: int
     encounter_id: int
     visit_label: Optional[str] = Field(None, max_length=50)
@@ -479,7 +519,9 @@ class TreatmentEncounterBase(BaseModel):
         if v is not None:
             valid_labels = ["initial", "follow_up", "review", "final", "other"]
             if v.lower() not in valid_labels:
-                raise ValueError(f"Visit label must be one of: {', '.join(valid_labels)}")
+                raise ValueError(
+                    f"Visit label must be one of: {', '.join(valid_labels)}"
+                )
             return v.lower()
         return v
 
@@ -491,6 +533,7 @@ class TreatmentEncounterBase(BaseModel):
 
 class TreatmentEncounterCreate(BaseModel):
     """Schema for creating a treatment encounter relationship."""
+
     encounter_id: int
     visit_label: Optional[str] = Field(None, max_length=50)
     visit_sequence: Optional[int] = Field(None, ge=1)
@@ -503,7 +546,9 @@ class TreatmentEncounterCreate(BaseModel):
         if v is not None:
             valid_labels = ["initial", "follow_up", "review", "final", "other"]
             if v.lower() not in valid_labels:
-                raise ValueError(f"Visit label must be one of: {', '.join(valid_labels)}")
+                raise ValueError(
+                    f"Visit label must be one of: {', '.join(valid_labels)}"
+                )
             return v.lower()
         return v
 
@@ -515,6 +560,7 @@ class TreatmentEncounterCreate(BaseModel):
 
 class TreatmentEncounterUpdate(BaseModel):
     """Schema for updating a treatment encounter relationship."""
+
     visit_label: Optional[str] = Field(None, max_length=50)
     visit_sequence: Optional[int] = Field(None, ge=1)
     relevance_note: Optional[str] = None
@@ -525,7 +571,9 @@ class TreatmentEncounterUpdate(BaseModel):
         if v is not None:
             valid_labels = ["initial", "follow_up", "review", "final", "other"]
             if v.lower() not in valid_labels:
-                raise ValueError(f"Visit label must be one of: {', '.join(valid_labels)}")
+                raise ValueError(
+                    f"Visit label must be one of: {', '.join(valid_labels)}"
+                )
             return v.lower()
         return v
 
@@ -537,6 +585,7 @@ class TreatmentEncounterUpdate(BaseModel):
 
 class TreatmentEncounterResponse(TreatmentEncounterBase):
     """Schema for treatment encounter relationship response."""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -546,6 +595,7 @@ class TreatmentEncounterResponse(TreatmentEncounterBase):
 
 class TreatmentEncounterWithDetails(TreatmentEncounterResponse):
     """Schema for treatment encounter relationship with encounter details."""
+
     encounter: Optional[dict] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -553,6 +603,7 @@ class TreatmentEncounterWithDetails(TreatmentEncounterResponse):
 
 class TreatmentEncounterBulkCreate(BaseModel):
     """Schema for bulk creating treatment encounter relationships."""
+
     encounter_ids: List[int] = Field(
         ..., min_length=1, description="List of encounter IDs to link"
     )
@@ -585,6 +636,7 @@ class TreatmentEncounterBulkCreate(BaseModel):
 
 class TreatmentLabResultBase(BaseModel):
     """Base schema for treatment lab result relationship."""
+
     treatment_id: int
     lab_result_id: int
     purpose: Optional[str] = Field(None, max_length=50)
@@ -609,6 +661,7 @@ class TreatmentLabResultBase(BaseModel):
 
 class TreatmentLabResultCreate(BaseModel):
     """Schema for creating a treatment lab result relationship."""
+
     lab_result_id: int
     purpose: Optional[str] = Field(None, max_length=50)
     expected_frequency: Optional[str] = Field(None, max_length=100)
@@ -633,6 +686,7 @@ class TreatmentLabResultCreate(BaseModel):
 
 class TreatmentLabResultUpdate(BaseModel):
     """Schema for updating a treatment lab result relationship."""
+
     purpose: Optional[str] = Field(None, max_length=50)
     expected_frequency: Optional[str] = Field(None, max_length=100)
     relevance_note: Optional[str] = None
@@ -655,6 +709,7 @@ class TreatmentLabResultUpdate(BaseModel):
 
 class TreatmentLabResultResponse(TreatmentLabResultBase):
     """Schema for treatment lab result relationship response."""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -664,6 +719,7 @@ class TreatmentLabResultResponse(TreatmentLabResultBase):
 
 class TreatmentLabResultWithDetails(TreatmentLabResultResponse):
     """Schema for treatment lab result relationship with lab result details."""
+
     lab_result: Optional[dict] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -671,6 +727,7 @@ class TreatmentLabResultWithDetails(TreatmentLabResultResponse):
 
 class TreatmentLabResultBulkCreate(BaseModel):
     """Schema for bulk creating treatment lab result relationships."""
+
     lab_result_ids: List[int] = Field(
         ..., min_length=1, description="List of lab result IDs to link"
     )
@@ -716,6 +773,7 @@ class TreatmentLabResultBulkCreate(BaseModel):
 
 class TreatmentEquipmentBase(BaseModel):
     """Base schema for treatment equipment relationship."""
+
     treatment_id: int
     equipment_id: int
     usage_frequency: Optional[str] = Field(None, max_length=100)
@@ -730,6 +788,7 @@ class TreatmentEquipmentBase(BaseModel):
 
 class TreatmentEquipmentCreate(BaseModel):
     """Schema for creating a treatment equipment relationship."""
+
     equipment_id: int
     usage_frequency: Optional[str] = Field(None, max_length=100)
     specific_settings: Optional[str] = Field(None, max_length=300)
@@ -744,6 +803,7 @@ class TreatmentEquipmentCreate(BaseModel):
 
 class TreatmentEquipmentUpdate(BaseModel):
     """Schema for updating a treatment equipment relationship."""
+
     usage_frequency: Optional[str] = Field(None, max_length=100)
     specific_settings: Optional[str] = Field(None, max_length=300)
     relevance_note: Optional[str] = None
@@ -756,6 +816,7 @@ class TreatmentEquipmentUpdate(BaseModel):
 
 class TreatmentEquipmentResponse(TreatmentEquipmentBase):
     """Schema for treatment equipment relationship response."""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -765,6 +826,7 @@ class TreatmentEquipmentResponse(TreatmentEquipmentBase):
 
 class TreatmentEquipmentWithDetails(TreatmentEquipmentResponse):
     """Schema for treatment equipment relationship with equipment details."""
+
     equipment: Optional[dict] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -772,6 +834,7 @@ class TreatmentEquipmentWithDetails(TreatmentEquipmentResponse):
 
 class TreatmentEquipmentBulkCreate(BaseModel):
     """Schema for bulk creating treatment equipment relationships."""
+
     equipment_ids: List[int] = Field(
         ..., min_length=1, description="List of equipment IDs to link"
     )
@@ -804,6 +867,7 @@ class TreatmentEquipmentBulkCreate(BaseModel):
 
 class MedicationTreatmentCondition(BaseModel):
     """Condition summary nested in treatment."""
+
     id: int
     condition_name: Optional[str] = None
 
@@ -812,6 +876,7 @@ class MedicationTreatmentCondition(BaseModel):
 
 class MedicationTreatmentInfo(BaseModel):
     """Treatment summary nested in medication-treatment response."""
+
     id: int
     treatment_name: str
     treatment_type: Optional[str] = None
@@ -826,6 +891,7 @@ class MedicationTreatmentInfo(BaseModel):
 
 class MedicationTreatmentResponse(BaseModel):
     """Response schema for GET /medications/{id}/treatments."""
+
     id: int
     treatment_id: int
     medication_id: int

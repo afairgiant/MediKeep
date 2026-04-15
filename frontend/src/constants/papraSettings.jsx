@@ -37,6 +37,6 @@ export const PAPRA_DEFAULTS = {
  * @param {string} key - The setting key to check
  * @returns {boolean} True if the key is a Papra setting
  */
-export const isPapraSetting = (key) => {
+export const isPapraSetting = key => {
   return PAPRA_ALL_KEYS.includes(key);
 };

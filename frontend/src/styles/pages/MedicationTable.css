@@ -225,13 +225,11 @@
 
 /* Responsive Table */
 
-
 /* Print Styles */
 @page {
   size: landscape;
   margin: 0.5in;
 }
-
 
 /* Filtering Section Styles */
 .medical-page-filters {
@@ -250,8 +248,6 @@
   align-items: end;
   margin-bottom: 1rem;
 }
-
-
 
 .filter-group {
   display: flex;

@@ -6,6 +6,7 @@ Tests cover:
 - Delete guard: cannot delete practice with active practitioners (409)
 - Delete practice with 0 practitioners (200)
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -81,8 +82,6 @@ class TestDeletePractice:
         authenticated_client: TestClient,
         empty_practice: PracticeModel,
     ):
-        response = authenticated_client.delete(
-            f"/api/v1/practices/{empty_practice.id}"
-        )
+        response = authenticated_client.delete(f"/api/v1/practices/{empty_practice.id}")
         assert response.status_code == 200
         assert "deleted successfully" in response.json()["message"]

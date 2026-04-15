@@ -29,4 +29,7 @@ export { emergencyContactsPageConfig } from './emergencyContacts.js';
 export { familyMembersPageConfig } from './familyMembers.js';
 
 // Combined config object and accessor function
-export { medicalPageConfigs, getMedicalPageConfig } from './getMedicalPageConfig.js';
+export {
+  medicalPageConfigs,
+  getMedicalPageConfig,
+} from './getMedicalPageConfig.js';

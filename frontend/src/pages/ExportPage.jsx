@@ -93,12 +93,19 @@ const ExportPage = () => {
           return;
         }
         setError(t('export.errors.sessionExpired'));
-      } else if (error.status === 400 && error.message?.includes('No active patient')) {
+      } else if (
+        error.status === 400 &&
+        error.message?.includes('No active patient')
+      ) {
         // Handle missing active patient error
         setError(t('export.errors.noActivePatient'));
       } else {
         setError(
-          t('export.errors.loadFailed', { message: error.message || t('common:labels.pleaseTryAgain', 'Please try again.') })
+          t('export.errors.loadFailed', {
+            message:
+              error.message ||
+              t('common:labels.pleaseTryAgain', 'Please try again.'),
+          })
         );
       }
       logger.error('Export data loading failed:', error);
@@ -115,7 +122,11 @@ const ExportPage = () => {
       // Validate parameters
       const validation = exportService.validateExportParams(exportConfig);
       if (!validation.isValid) {
-        setError(t('export.errors.validationFailed', { errors: validation.errors.join(', ') }));
+        setError(
+          t('export.errors.validationFailed', {
+            errors: validation.errors.join(', '),
+          })
+        );
         return;
       }
 
@@ -136,13 +147,18 @@ const ExportPage = () => {
 
       await exportService.downloadExport(params);
       setSuccess(
-        t('export.success.exportComplete', { format: exportConfig.format.toUpperCase() })
+        t('export.success.exportComplete', {
+          format: exportConfig.format.toUpperCase(),
+        })
       );
 
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
-      if (error.status === 400 && error.message?.includes('No active patient')) {
+      if (
+        error.status === 400 &&
+        error.message?.includes('No active patient')
+      ) {
         setError(t('export.errors.noActivePatient'));
       } else if (error.status === 422) {
         setError(t('export.errors.invalidSettings'));
@@ -150,9 +166,17 @@ const ExportPage = () => {
         setError(t('export.errors.noDataFound'));
       } else if (error.data && error.data.detail) {
         // Use the detailed error message from the backend if available
-        setError(t('export.errors.exportFailed', { message: error.data.detail }));
+        setError(
+          t('export.errors.exportFailed', { message: error.data.detail })
+        );
       } else {
-        setError(t('export.errors.exportFailed', { message: error.message || t('common:labels.pleaseTryAgain', 'Please try again.') }));
+        setError(
+          t('export.errors.exportFailed', {
+            message:
+              error.message ||
+              t('common:labels.pleaseTryAgain', 'Please try again.'),
+          })
+        );
       }
     } finally {
       setLoading(false);
@@ -187,7 +211,10 @@ const ExportPage = () => {
       // Clear success message after 5 seconds
       setTimeout(() => setSuccess(null), 5000);
     } catch (error) {
-      if (error.status === 400 && error.message?.includes('No active patient')) {
+      if (
+        error.status === 400 &&
+        error.message?.includes('No active patient')
+      ) {
         setError(t('export.errors.noActivePatient'));
       } else if (error.status === 422) {
         setError(t('export.errors.bulkInvalidSettings'));
@@ -195,9 +222,17 @@ const ExportPage = () => {
         setError(t('export.errors.bulkNoDataFound'));
       } else if (error.data && error.data.detail) {
         // Use the detailed error message from the backend if available
-        setError(t('export.errors.bulkExportFailed', { message: error.data.detail }));
+        setError(
+          t('export.errors.bulkExportFailed', { message: error.data.detail })
+        );
       } else {
-        setError(t('export.errors.bulkExportFailed', { message: error.message || t('common:labels.pleaseTryAgain', 'Please try again.') }));
+        setError(
+          t('export.errors.bulkExportFailed', {
+            message:
+              error.message ||
+              t('common:labels.pleaseTryAgain', 'Please try again.'),
+          })
+        );
       }
     } finally {
       setLoading(false);
@@ -226,7 +261,7 @@ const ExportPage = () => {
   };
 
   // Translate scope labels from backend
-  const translateScopeLabel = (scopeValue) => {
+  const translateScopeLabel = scopeValue => {
     // Try to get translation, fallback to original label if translation doesn't exist
     const translationKey = `exportPage.scopes.${scopeValue}`;
     return t(translationKey);
@@ -238,7 +273,11 @@ const ExportPage = () => {
   };
 
   if (summaryLoading) {
-    return <MedicalPageLoading message={t('export.loading', 'Loading export options...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('export.loading', 'Loading export options...')}
+      />
+    );
   }
 
   return (
@@ -320,17 +359,23 @@ const ExportPage = () => {
           <Group justify="space-between" mb={{ base: 'xs', sm: 'lg' }}>
             <Group gap="xs">
               <IconChartBar size={20} />
-              <Title order={{ base: 3, sm: 2 }}>{t('export.availableData.title')}</Title>
+              <Title order={{ base: 3, sm: 2 }}>
+                {t('export.availableData.title')}
+              </Title>
             </Group>
             <ActionIcon
               variant="subtle"
               onClick={() => setSummaryExpanded(!summaryExpanded)}
               size={{ base: 'sm', sm: 'md' }}
             >
-              {summaryExpanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+              {summaryExpanded ? (
+                <IconChevronUp size={18} />
+              ) : (
+                <IconChevronDown size={18} />
+              )}
             </ActionIcon>
           </Group>
-          
+
           {/* Mobile: Show compact inline summary */}
           <Box hiddenFrom="sm">
             <Group gap="xs" wrap="wrap">
@@ -351,11 +396,17 @@ const ExportPage = () => {
                     {translateScopeLabel(scope.value)}
                   </Badge>
                 ))}
-              {!summaryExpanded && formats.scopes?.filter(scope => scope.value !== 'all').length > 3 && (
-                <Text size="xs" c="dimmed">
-                  {t('shared:labels.countMore', { count: formats.scopes.filter(scope => scope.value !== 'all').length - 3 })}
-                </Text>
-              )}
+              {!summaryExpanded &&
+                formats.scopes?.filter(scope => scope.value !== 'all').length >
+                  3 && (
+                  <Text size="xs" c="dimmed">
+                    {t('shared:labels.countMore', {
+                      count:
+                        formats.scopes.filter(scope => scope.value !== 'all')
+                          .length - 3,
+                    })}
+                  </Text>
+                )}
             </Group>
           </Box>
 
@@ -542,7 +593,9 @@ const ExportPage = () => {
             {exportConfig.format === 'pdf' && !bulkMode && (
               <Checkbox
                 label={t('export.configuration.includePatientInfo.label')}
-                description={t('export.configuration.includePatientInfo.description')}
+                description={t(
+                  'export.configuration.includePatientInfo.description'
+                )}
                 checked={exportConfig.includePatientInfo}
                 onChange={e =>
                   setExportConfig(prev => ({
@@ -567,7 +620,10 @@ const ExportPage = () => {
                 >
                   {loading
                     ? t('export.buttons.exporting')
-                    : t('export.buttons.exportAs', { scope: exportConfig.scope, format: exportConfig.format.toUpperCase() })}
+                    : t('export.buttons.exportAs', {
+                        scope: exportConfig.scope,
+                        format: exportConfig.format.toUpperCase(),
+                      })}
                 </Button>
               ) : (
                 <Button
@@ -581,7 +637,9 @@ const ExportPage = () => {
                 >
                   {loading
                     ? t('export.buttons.creatingZip')
-                    : t('export.buttons.bulkExport', { count: selectedScopes.length })}
+                    : t('export.buttons.bulkExport', {
+                        count: selectedScopes.length,
+                      })}
                 </Button>
               )}
             </Group>

@@ -6,7 +6,7 @@ import RecordSelector from './RecordSelector';
 
 /**
  * CategoryTabs Component
- * 
+ *
  * Manages navigation between different medical record categories
  * and displays the appropriate record selector for each tab
  */
@@ -26,9 +26,15 @@ const CategoryTabs = ({
     return (
       <Center py="xl">
         <Stack align="center" gap="md">
-          <IconFileDescription size={64} stroke={1} color="var(--mantine-color-gray-5)" />
+          <IconFileDescription
+            size={64}
+            stroke={1}
+            color="var(--mantine-color-gray-5)"
+          />
           <Stack align="center" gap="xs">
-            <Text fw={500} size="lg">{t('categories.noCategories')}</Text>
+            <Text fw={500} size="lg">
+              {t('categories.noCategories')}
+            </Text>
             <Text c="dimmed" ta="center">
               {t('categories.noCategoriesDescription')}
             </Text>
@@ -41,13 +47,15 @@ const CategoryTabs = ({
   return (
     <Tabs value={activeTab} onChange={onTabChange} variant="outline">
       <Tabs.List>
-        {categories.map((category) => {
+        {categories.map(category => {
           const categoryData = dataSummary?.categories?.[category];
-          const selectedInCategory = Object.keys(selectedRecords[category] || {}).length;
-          
+          const selectedInCategory = Object.keys(
+            selectedRecords[category] || {}
+          ).length;
+
           return (
-            <Tabs.Tab 
-              key={category} 
+            <Tabs.Tab
+              key={category}
               value={category}
               rightSection={
                 selectedInCategory > 0 ? (
@@ -59,10 +67,13 @@ const CategoryTabs = ({
             >
               <Stack gap={2} align="center">
                 <Text size="sm" fw={500}>
-                  {categoryDisplayNames[category] || formatCategoryName(category)}
+                  {categoryDisplayNames[category] ||
+                    formatCategoryName(category)}
                 </Text>
                 <Text size="xs" c="dimmed">
-                  {t('categories.recordCount', { count: categoryData?.count || 0 })}
+                  {t('categories.recordCount', {
+                    count: categoryData?.count || 0,
+                  })}
                 </Text>
               </Stack>
             </Tabs.Tab>
@@ -70,7 +81,7 @@ const CategoryTabs = ({
         })}
       </Tabs.List>
 
-      {categories.map((category) => (
+      {categories.map(category => (
         <Tabs.Panel key={category} value={category} pt="lg">
           <RecordSelector
             category={category}
@@ -78,7 +89,9 @@ const CategoryTabs = ({
             selectedRecords={selectedRecords[category] || {}}
             onToggleRecord={onToggleRecord}
             onToggleCategory={onToggleCategory}
-            categoryDisplayName={categoryDisplayNames[category] || formatCategoryName(category)}
+            categoryDisplayName={
+              categoryDisplayNames[category] || formatCategoryName(category)
+            }
           />
         </Tabs.Panel>
       ))}
@@ -90,7 +103,7 @@ const CategoryTabs = ({
  * Format category name for display
  * Converts snake_case and kebab-case to proper titles
  */
-const formatCategoryName = (category) => {
+const formatCategoryName = category => {
   return category
     .split(/[-_]/)
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))

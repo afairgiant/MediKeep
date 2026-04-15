@@ -14,21 +14,21 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
   const location = useLocation();
   const { t } = useTranslation(['navigation', 'shared']);
   const { viewport } = useViewport();
-  
+
   const navigationSections = getNavigationSections(viewport, isAdmin);
-  
-  const isCurrentPath = (path) => {
+
+  const isCurrentPath = path => {
     if (path === '/dashboard') {
       return location.pathname === '/dashboard' || location.pathname === '/';
     }
     return location.pathname === path;
   };
-  
-  const handleNavigation = (path) => {
+
+  const handleNavigation = path => {
     navigate(path);
   };
 
-  const isSectionActive = (section) => {
+  const isSectionActive = section => {
     return section.items.some(item => isCurrentPath(item.path));
   };
 
@@ -37,28 +37,40 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
       <div className="tablet-nav-content">
         {Object.entries(navigationSections).map(([key, section]) => {
           if (key === 'admin') return null;
-          
+
           return (
             <Menu key={key} position="bottom-start" offset={8}>
               <Menu.Target>
                 <Button
                   variant="subtle"
                   size="sm"
-                  className={isSectionActive(section) ? 'tablet-nav-trigger section-active' : ''}
+                  className={
+                    isSectionActive(section)
+                      ? 'tablet-nav-trigger section-active'
+                      : ''
+                  }
                   rightSection={<IconChevronDown size={14} />}
                 >
-                  {section.titleKey ? t(section.titleKey, section.title) : section.title}
+                  {section.titleKey
+                    ? t(section.titleKey, section.title)
+                    : section.title}
                 </Button>
               </Menu.Target>
 
               <Menu.Dropdown>
-                <Menu.Label>{section.titleKey ? t(section.titleKey, section.title) : section.title}</Menu.Label>
-                {section.items.map((item) => (
+                <Menu.Label>
+                  {section.titleKey
+                    ? t(section.titleKey, section.title)
+                    : section.title}
+                </Menu.Label>
+                {section.items.map(item => (
                   <Menu.Item
                     key={item.id}
                     leftSection={<span>{item.icon}</span>}
                     onClick={() => handleNavigation(item.path)}
-                    className={isCurrentPath(item.path) ? 'nav-item-active' : ''}
+                    className={
+                      isCurrentPath(item.path) ? 'nav-item-active' : ''
+                    }
                   >
                     {item.nameKey ? t(item.nameKey, item.name) : item.name}
                   </Menu.Item>
@@ -67,7 +79,7 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
             </Menu>
           );
         })}
-        
+
         <div className="nav-spacer" />
 
         <div className="tablet-nav-divider" />
@@ -89,13 +101,26 @@ const TabletNavigation = ({ user, isAdmin, onLogout }) => {
               {t('shared:labels.settings', 'Settings')}
             </Menu.Item>
             <Menu.Item closeMenuOnClick={false}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '12px',
+                }}
+              >
                 <span>{t('sidebarNav.items.language', 'Language')}</span>
                 <LanguageSwitcher size="xs" />
               </div>
             </Menu.Item>
             <Menu.Item>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
                 <span>{t('sidebarNav.items.theme', 'Theme')}</span>
                 <ThemeToggle />
               </div>

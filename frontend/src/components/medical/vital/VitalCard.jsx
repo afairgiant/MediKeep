@@ -6,7 +6,10 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
-import { formatMeasurement, convertForDisplay } from '../../../utils/unitConversion';
+import {
+  formatMeasurement,
+  convertForDisplay,
+} from '../../../utils/unitConversion';
 
 const VitalCard = ({
   vital,
@@ -15,13 +18,13 @@ const VitalCard = ({
   onView,
   practitioners = [],
   navigate,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
   const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('vital_card_error', {
       message: 'Error in VitalCard',
       vitalId: vital?.id,
@@ -40,16 +43,28 @@ const VitalCard = ({
 
     // Add measurement type badges
     if (vital.systolic_bp && vital.diastolic_bp) {
-      badges.push({ label: t('vitals:stats.bloodPressure', 'Blood Pressure'), color: 'red' });
+      badges.push({
+        label: t('vitals:stats.bloodPressure', 'Blood Pressure'),
+        color: 'red',
+      });
     }
     if (vital.heart_rate) {
-      badges.push({ label: t('vitals:stats.heartRate', 'Heart Rate'), color: 'blue' });
+      badges.push({
+        label: t('vitals:stats.heartRate', 'Heart Rate'),
+        color: 'blue',
+      });
     }
     if (vital.temperature) {
-      badges.push({ label: t('vitals:stats.temperature', 'Temperature'), color: 'green' });
+      badges.push({
+        label: t('vitals:stats.temperature', 'Temperature'),
+        color: 'green',
+      });
     }
     if (vital.weight) {
-      badges.push({ label: t('vitals:stats.weight', 'Weight'), color: 'violet' });
+      badges.push({
+        label: t('vitals:stats.weight', 'Weight'),
+        color: 'violet',
+      });
     }
 
     // Generate dynamic fields
@@ -57,52 +72,68 @@ const VitalCard = ({
       {
         label: t('shared:labels.recordedDate', 'Recorded Date'),
         value: vital.recorded_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value
+            ? formatLongDate(value)
+            : t('shared:labels.notSpecified', 'Not specified'),
       },
       {
         label: t('vitals:stats.bloodPressure', 'Blood Pressure'),
-        value: vital.systolic_bp && vital.diastolic_bp
-          ? `${vital.systolic_bp}/${vital.diastolic_bp} ${t('vitals:units.mmHg', 'mmHg')}`
-          : null,
-        render: (value) => value || t('vitals:card.notRecorded', 'Not recorded')
+        value:
+          vital.systolic_bp && vital.diastolic_bp
+            ? `${vital.systolic_bp}/${vital.diastolic_bp} ${t('vitals:units.mmHg', 'mmHg')}`
+            : null,
+        render: value => value || t('vitals:card.notRecorded', 'Not recorded'),
       },
       {
         label: t('vitals:stats.heartRate', 'Heart Rate'),
         value: vital.heart_rate,
-        render: (value) => value ? `${value} ${t('vitals:units.bpm', 'BPM')}` : t('vitals:card.notRecorded', 'Not recorded')
+        render: value =>
+          value
+            ? `${value} ${t('vitals:units.bpm', 'BPM')}`
+            : t('vitals:card.notRecorded', 'Not recorded'),
       },
       {
         label: t('vitals:stats.temperature', 'Temperature'),
         value: vital.temperature,
-        render: (value) => value ? formatMeasurement(
-          convertForDisplay(value, 'temperature', unitSystem),
-          'temperature',
-          unitSystem
-        ) : t('vitals:card.notRecorded', 'Not recorded')
+        render: value =>
+          value
+            ? formatMeasurement(
+                convertForDisplay(value, 'temperature', unitSystem),
+                'temperature',
+                unitSystem
+              )
+            : t('vitals:card.notRecorded', 'Not recorded'),
       },
       {
         label: t('vitals:stats.weight', 'Weight'),
         value: vital.weight,
-        render: (value) => value ? formatMeasurement(
-          convertForDisplay(value, 'weight', unitSystem),
-          'weight',
-          unitSystem
-        ) : t('vitals:card.notRecorded', 'Not recorded')
+        render: value =>
+          value
+            ? formatMeasurement(
+                convertForDisplay(value, 'weight', unitSystem),
+                'weight',
+                unitSystem
+              )
+            : t('vitals:card.notRecorded', 'Not recorded'),
       },
       {
         label: t('vitals:card.oxygenSaturation', 'Oxygen Saturation'),
         value: vital.oxygen_saturation,
-        render: (value) => value ? `${value}%` : t('vitals:card.notRecorded', 'Not recorded')
-      }
+        render: value =>
+          value ? `${value}%` : t('vitals:card.notRecorded', 'Not recorded'),
+      },
     ].filter(field => field.value !== null && field.value !== undefined);
 
     // Add practitioner field if available
     if (vital.practitioner_id) {
-      const practitioner = practitioners.find(p => p.id === vital.practitioner_id);
+      const practitioner = practitioners.find(
+        p => p.id === vital.practitioner_id
+      );
       fields.push({
         label: t('shared:labels.recordedBy', 'Recorded By'),
         value: vital.practitioner_id,
-        render: (value) => {
+        render: value => {
           if (!value) return t('shared:labels.notSpecified', 'Not specified');
           return (
             <Text
@@ -126,7 +157,11 @@ const VitalCard = ({
     return (
       <BaseMedicalCard
         title={title}
-        subtitle={vital.location ? `${t('shared:labels.location', 'Location')}: ${vital.location}` : null}
+        subtitle={
+          vital.location
+            ? `${t('shared:labels.location', 'Location')}: ${vital.location}`
+            : null
+        }
         badges={badges}
         fields={fields}
         notes={vital.notes}

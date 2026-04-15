@@ -10,7 +10,12 @@ import { renderWithPatient } from '../../../test-utils/render';
 import LabResults from '../LabResults';
 
 // --- Hoisted mock functions ---
-const { useMedicalData, useDataManagement, usePersistedViewMode, useViewModalNavigation } = vi.hoisted(() => ({
+const {
+  useMedicalData,
+  useDataManagement,
+  usePersistedViewMode,
+  useViewModalNavigation,
+} = vi.hoisted(() => ({
   useMedicalData: vi.fn(),
   useDataManagement: vi.fn(),
   usePersistedViewMode: vi.fn(),
@@ -23,8 +28,12 @@ vi.mock('../../../hooks/useDataManagement', () => ({
   useDataManagement,
   default: useDataManagement,
 }));
-vi.mock('../../../hooks/useViewModalNavigation', () => ({ useViewModalNavigation }));
-vi.mock('../../../hooks/usePersistedViewMode', () => ({ usePersistedViewMode }));
+vi.mock('../../../hooks/useViewModalNavigation', () => ({
+  useViewModalNavigation,
+}));
+vi.mock('../../../hooks/usePersistedViewMode', () => ({
+  usePersistedViewMode,
+}));
 vi.mock('../../../hooks/useEntityFileCounts', () => ({
   useEntityFileCounts: () => ({
     fileCounts: {},
@@ -37,8 +46,8 @@ vi.mock('../../../hooks/useResponsive', () => ({
 }));
 vi.mock('../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDate: (d) => d || '',
-    formatDateTime: (d) => d || '',
+    formatDate: d => d || '',
+    formatDateTime: d => d || '',
   }),
 }));
 vi.mock('../../../hooks/useGlobalData', () => ({
@@ -49,7 +58,10 @@ vi.mock('../../../hooks/useGlobalData', () => ({
     ],
     loading: false,
   }),
-  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+  useCurrentPatient: () => ({
+    patient: { id: 1, owner_user_id: 1, permission_level: 'full' },
+    loading: false,
+  }),
 }));
 vi.mock('../../../hooks/usePatientPermissions', () => ({
   usePatientPermissions: () => ({
@@ -64,7 +76,12 @@ vi.mock('../../../hooks/usePatientPermissions', () => ({
 }));
 vi.mock('../../../hooks/useFormSubmissionWithUploads', () => ({
   useFormSubmissionWithUploads: () => ({
-    submissionState: { isSubmitting: false, isUploading: false, isCompleted: false, canClose: true },
+    submissionState: {
+      isSubmitting: false,
+      isUploading: false,
+      isCompleted: false,
+      canClose: true,
+    },
     startSubmission: vi.fn(),
     completeFormSubmission: vi.fn(),
     startFileUpload: vi.fn(),
@@ -116,7 +133,7 @@ vi.mock('../../../utils/linkNavigation', () => ({
   navigateToEntity: vi.fn(),
 }));
 vi.mock('../../../utils/helpers', () => ({
-  createCardClickHandler: (handler, item) => (e) => {
+  createCardClickHandler: (handler, item) => e => {
     if (e.target.tagName === 'BUTTON') return;
     handler(item);
   },
@@ -124,7 +141,7 @@ vi.mock('../../../utils/helpers', () => ({
 
 // --- HOC mock ---
 vi.mock('../../../hoc/withResponsive', () => ({
-  withResponsive: (Component) => Component,
+  withResponsive: Component => Component,
 }));
 
 // --- Component mocks ---
@@ -132,22 +149,42 @@ vi.mock('../../../components', () => ({
   PageHeader: ({ title }) => <div data-testid="page-header">{title}</div>,
 }));
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, secondaryActions, viewMode, onViewModeChange }) => (
+  default: ({
+    primaryAction,
+    secondaryActions,
+    viewMode,
+    onViewModeChange,
+  }) => (
     <div data-testid="page-actions">
       {primaryAction && (
         <button onClick={primaryAction.onClick} data-testid="add-button">
           {primaryAction.label}
         </button>
       )}
-      {secondaryActions && secondaryActions.map((action, i) => (
-        <button key={i} onClick={action.onClick} data-testid={`secondary-action-${i}`}>
-          {action.label}
-        </button>
-      ))}
+      {secondaryActions &&
+        secondaryActions.map((action, i) => (
+          <button
+            key={i}
+            onClick={action.onClick}
+            data-testid={`secondary-action-${i}`}
+          >
+            {action.label}
+          </button>
+        ))}
       {onViewModeChange && (
         <>
-          <button onClick={() => onViewModeChange('cards')} data-testid="cards-btn">Cards</button>
-          <button onClick={() => onViewModeChange('table')} data-testid="table-btn">Table</button>
+          <button
+            onClick={() => onViewModeChange('cards')}
+            data-testid="cards-btn"
+          >
+            Cards
+          </button>
+          <button
+            onClick={() => onViewModeChange('table')}
+            data-testid="table-btn"
+          >
+            Table
+          </button>
         </>
       )}
     </div>
@@ -163,7 +200,9 @@ vi.mock('../../../components/shared/MedicalPageAlerts', () => ({
   default: ({ error, successMessage }) => (
     <div data-testid="alerts">
       {error && <span data-testid="error-alert">{error}</span>}
-      {successMessage && <span data-testid="success-alert">{successMessage}</span>}
+      {successMessage && (
+        <span data-testid="success-alert">{successMessage}</span>
+      )}
     </div>
   ),
 }));
@@ -178,7 +217,7 @@ vi.mock('../../../components/shared/EmptyState', () => ({
 vi.mock('../../../components/shared/AnimatedCardGrid', () => ({
   default: ({ items, renderCard }) => (
     <div data-testid="card-grid">
-      {items.map((item) => (
+      {items.map(item => (
         <div key={item.id} data-testid={`card-wrapper-${item.id}`}>
           {renderCard(item)}
         </div>
@@ -196,12 +235,18 @@ vi.mock('../../../components/adapters', () => ({
   ResponsiveTable: ({ data, columns, onView, onEdit, onDelete }) => (
     <table data-testid="responsive-table">
       <thead>
-        <tr>{columns.map((col) => <th key={col.accessor}>{col.header}</th>)}</tr>
+        <tr>
+          {columns.map(col => (
+            <th key={col.accessor}>{col.header}</th>
+          ))}
+        </tr>
       </thead>
       <tbody>
-        {data.map((row) => (
+        {data.map(row => (
           <tr key={row.id}>
-            {columns.map((col) => <td key={col.accessor}>{String(row[col.accessor] ?? '')}</td>)}
+            {columns.map(col => (
+              <td key={col.accessor}>{String(row[col.accessor] ?? '')}</td>
+            ))}
             <td>
               <button onClick={() => onView(row)}>View</button>
               <button onClick={() => onEdit(row)}>Edit</button>
@@ -255,36 +300,76 @@ vi.mock('../../../components/medical/labresults/LabResultFormWrapper', () => ({
         <h2>{title}</h2>
         <form onSubmit={onSubmit}>
           <label htmlFor="lr-test-name">Test Name *</label>
-          <input id="lr-test-name" name="test_name" value={formData.test_name || ''} onChange={onInputChange} />
+          <input
+            id="lr-test-name"
+            name="test_name"
+            value={formData.test_name || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="lr-test-code">Test Code</label>
-          <input id="lr-test-code" name="test_code" value={formData.test_code || ''} onChange={onInputChange} />
+          <input
+            id="lr-test-code"
+            name="test_code"
+            value={formData.test_code || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="lr-category">Test Category</label>
-          <input id="lr-category" name="test_category" value={formData.test_category || ''} onChange={onInputChange} />
+          <input
+            id="lr-category"
+            name="test_category"
+            value={formData.test_category || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="lr-facility">Facility</label>
-          <input id="lr-facility" name="facility" value={formData.facility || ''} onChange={onInputChange} />
+          <input
+            id="lr-facility"
+            name="facility"
+            value={formData.facility || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="lr-status">Status</label>
-          <input id="lr-status" name="status" value={formData.status || ''} onChange={onInputChange} />
+          <input
+            id="lr-status"
+            name="status"
+            value={formData.status || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="lr-results">Lab Results</label>
-          <textarea id="lr-results" name="labs_result" value={formData.labs_result || ''} onChange={onInputChange} />
+          <textarea
+            id="lr-results"
+            name="labs_result"
+            value={formData.labs_result || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="lr-notes">Notes</label>
-          <textarea id="lr-notes" name="notes" value={formData.notes || ''} onChange={onInputChange} />
+          <textarea
+            id="lr-notes"
+            name="notes"
+            value={formData.notes || ''}
+            onChange={onInputChange}
+          />
 
           <button type="submit">Submit</button>
-          <button type="button" onClick={onClose}>Cancel</button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
         </form>
       </div>
     );
   },
 }));
-vi.mock('../../../components/medical/labresults/LabResultQuickImportModal', () => ({
-  default: () => null,
-}));
+vi.mock(
+  '../../../components/medical/labresults/LabResultQuickImportModal',
+  () => ({
+    default: () => null,
+  })
+);
 
 // --- Framer motion mock ---
 vi.mock('framer-motion', () => ({
@@ -304,7 +389,8 @@ const mockLabResults = [
     test_type: 'Blood Test',
     facility: 'Quest Diagnostics',
     status: 'completed',
-    labs_result: 'WBC: 6.8 K/uL (Normal)\nRBC: 4.5 M/uL (Normal)\nHgb: 14.2 g/dL (Normal)\nHct: 42.1% (Normal)',
+    labs_result:
+      'WBC: 6.8 K/uL (Normal)\nRBC: 4.5 M/uL (Normal)\nHgb: 14.2 g/dL (Normal)\nHct: 42.1% (Normal)',
     ordered_date: '2024-01-15',
     completed_date: '2024-01-16',
     notes: 'All values within normal range',
@@ -319,7 +405,8 @@ const mockLabResults = [
     test_type: 'Blood Test',
     facility: 'LabCorp',
     status: 'completed',
-    labs_result: 'Total Cholesterol: 195 mg/dL (Normal)\nLDL: 115 mg/dL (Borderline High)\nHDL: 55 mg/dL (Normal)\nTriglycerides: 125 mg/dL (Normal)',
+    labs_result:
+      'Total Cholesterol: 195 mg/dL (Normal)\nLDL: 115 mg/dL (Borderline High)\nHDL: 55 mg/dL (Normal)\nTriglycerides: 125 mg/dL (Normal)',
     ordered_date: '2024-01-10',
     completed_date: '2024-01-11',
     notes: 'LDL slightly elevated, recommend diet modification',
@@ -410,7 +497,9 @@ describe('Lab Results Page Integration Tests', () => {
       expect(screen.getByTestId('page-header')).toBeInTheDocument();
 
       await waitFor(() => {
-        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+        expect(
+          screen.getByText('Complete Blood Count (CBC)')
+        ).toBeInTheDocument();
         expect(screen.getByText('Lipid Panel')).toBeInTheDocument();
         expect(screen.getByText('Thyroid Function Tests')).toBeInTheDocument();
       });
@@ -420,7 +509,9 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       await waitFor(() => {
-        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+        expect(
+          screen.getByText('Complete Blood Count (CBC)')
+        ).toBeInTheDocument();
       });
 
       expect(screen.getByText('Hematology')).toBeInTheDocument();
@@ -440,7 +531,9 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       await waitFor(() => {
-        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+        expect(
+          screen.getByText('Complete Blood Count (CBC)')
+        ).toBeInTheDocument();
       });
 
       expect(screen.getByText('2024-01-15')).toBeInTheDocument();
@@ -474,10 +567,18 @@ describe('Lab Results Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), { target: { value: 'Glucose Tolerance Test', name: 'test_name' } });
-      fireEvent.change(within(form).getByLabelText('Test Code'), { target: { value: 'GTT', name: 'test_code' } });
-      fireEvent.change(within(form).getByLabelText('Facility'), { target: { value: 'Diabetes Center Lab', name: 'facility' } });
-      fireEvent.change(within(form).getByLabelText('Notes'), { target: { value: 'Pre-diabetes screening', name: 'notes' } });
+      fireEvent.change(within(form).getByLabelText('Test Name *'), {
+        target: { value: 'Glucose Tolerance Test', name: 'test_name' },
+      });
+      fireEvent.change(within(form).getByLabelText('Test Code'), {
+        target: { value: 'GTT', name: 'test_code' },
+      });
+      fireEvent.change(within(form).getByLabelText('Facility'), {
+        target: { value: 'Diabetes Center Lab', name: 'facility' },
+      });
+      fireEvent.change(within(form).getByLabelText('Notes'), {
+        target: { value: 'Pre-diabetes screening', name: 'notes' },
+      });
 
       fireEvent.click(within(form).getByText('Submit'));
 
@@ -512,16 +613,24 @@ describe('Lab Results Page Integration Tests', () => {
       await userEvent.click(editButton);
 
       const form = screen.getByTestId('form-modal');
-      expect(within(form).getByLabelText('Test Name *')).toHaveValue('Thyroid Function Tests');
+      expect(within(form).getByLabelText('Test Name *')).toHaveValue(
+        'Thyroid Function Tests'
+      );
 
       // Update status
-      fireEvent.change(within(form).getByLabelText('Status'), { target: { value: 'completed', name: 'status' } });
+      fireEvent.change(within(form).getByLabelText('Status'), {
+        target: { value: 'completed', name: 'status' },
+      });
 
       // Add results
-      fireEvent.change(within(form).getByLabelText('Lab Results'), { target: { value: 'TSH: 2.1 mIU/L (Normal)', name: 'labs_result' } });
+      fireEvent.change(within(form).getByLabelText('Lab Results'), {
+        target: { value: 'TSH: 2.1 mIU/L (Normal)', name: 'labs_result' },
+      });
 
       // Update notes
-      fireEvent.change(within(form).getByLabelText('Notes'), { target: { value: 'Normal thyroid function.', name: 'notes' } });
+      fireEvent.change(within(form).getByLabelText('Notes'), {
+        target: { value: 'Normal thyroid function.', name: 'notes' },
+      });
 
       fireEvent.click(within(form).getByText('Submit'));
 
@@ -547,7 +656,9 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       await waitFor(() => {
-        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+        expect(
+          screen.getByText('Complete Blood Count (CBC)')
+        ).toBeInTheDocument();
       });
 
       const cbcWrapper = screen.getByTestId('card-wrapper-1');
@@ -572,7 +683,9 @@ describe('Lab Results Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), { target: { value: 'X-Ray Chest', name: 'test_name' } });
+      fireEvent.change(within(form).getByLabelText('Test Name *'), {
+        target: { value: 'X-Ray Chest', name: 'test_name' },
+      });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
@@ -592,7 +705,9 @@ describe('Lab Results Page Integration Tests', () => {
 
       const modal = screen.getByTestId('view-modal');
       expect(within(modal).getByText('Lab Result Details')).toBeInTheDocument();
-      expect(within(modal).getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+      expect(
+        within(modal).getByText('Complete Blood Count (CBC)')
+      ).toBeInTheDocument();
     });
 
     test('views lab result with results text', async () => {
@@ -621,11 +736,15 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       await waitFor(() => {
-        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+        expect(
+          screen.getByText('Complete Blood Count (CBC)')
+        ).toBeInTheDocument();
       });
 
       expect(screen.getByText('Lipid Panel')).toBeInTheDocument();
-      expect(screen.queryByText('Thyroid Function Tests')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Thyroid Function Tests')
+      ).not.toBeInTheDocument();
     });
 
     test('filters lab results by category', async () => {
@@ -638,17 +757,23 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       await waitFor(() => {
-        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+        expect(
+          screen.getByText('Complete Blood Count (CBC)')
+        ).toBeInTheDocument();
       });
 
       expect(screen.queryByText('Lipid Panel')).not.toBeInTheDocument();
-      expect(screen.queryByText('Thyroid Function Tests')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Thyroid Function Tests')
+      ).not.toBeInTheDocument();
     });
 
     test('searches lab results by test name', async () => {
       useDataManagement.mockReturnValue({
         ...mockDataManagement,
-        data: mockLabResults.filter(r => r.test_name.toLowerCase().includes('lipid')),
+        data: mockLabResults.filter(r =>
+          r.test_name.toLowerCase().includes('lipid')
+        ),
         hasActiveFilters: true,
       });
 
@@ -658,8 +783,12 @@ describe('Lab Results Page Integration Tests', () => {
         expect(screen.getByText('Lipid Panel')).toBeInTheDocument();
       });
 
-      expect(screen.queryByText('Complete Blood Count (CBC)')).not.toBeInTheDocument();
-      expect(screen.queryByText('Thyroid Function Tests')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Complete Blood Count (CBC)')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Thyroid Function Tests')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -671,7 +800,9 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       await waitFor(() => {
-        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+        expect(
+          screen.getByText('Complete Blood Count (CBC)')
+        ).toBeInTheDocument();
       });
 
       const tableButton = screen.getByTestId('table-btn');
@@ -703,8 +834,14 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       const modal = screen.getByTestId('view-modal');
-      expect(within(modal).getByText(/LDL: 115 mg\/dL \(Borderline High\)/)).toBeInTheDocument();
-      expect(within(modal).getByText('LDL slightly elevated, recommend diet modification')).toBeInTheDocument();
+      expect(
+        within(modal).getByText(/LDL: 115 mg\/dL \(Borderline High\)/)
+      ).toBeInTheDocument();
+      expect(
+        within(modal).getByText(
+          'LDL slightly elevated, recommend diet modification'
+        )
+      ).toBeInTheDocument();
     });
 
     test('manages follow-up recommendations', async () => {
@@ -720,8 +857,12 @@ describe('Lab Results Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), { target: { value: 'HbA1c Follow-up', name: 'test_name' } });
-      fireEvent.change(within(form).getByLabelText('Notes'), { target: { value: 'Follow-up in 3 months.', name: 'notes' } });
+      fireEvent.change(within(form).getByLabelText('Test Name *'), {
+        target: { value: 'HbA1c Follow-up', name: 'test_name' },
+      });
+      fireEvent.change(within(form).getByLabelText('Notes'), {
+        target: { value: 'Follow-up in 3 months.', name: 'notes' },
+      });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
@@ -749,7 +890,9 @@ describe('Lab Results Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), { target: { value: 'Test Lab', name: 'test_name' } });
+      fireEvent.change(within(form).getByLabelText('Test Name *'), {
+        target: { value: 'Test Lab', name: 'test_name' },
+      });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
@@ -761,7 +904,9 @@ describe('Lab Results Page Integration Tests', () => {
       renderWithPatient(<LabResults />);
 
       expect(screen.getByTestId('page-header')).toBeInTheDocument();
-      expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+      expect(
+        screen.getByText('Complete Blood Count (CBC)')
+      ).toBeInTheDocument();
     });
 
     test('displays empty state when no lab results exist', () => {
@@ -817,7 +962,9 @@ describe('Lab Results Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), { target: { value: 'Test', name: 'test_name' } });
+      fireEvent.change(within(form).getByLabelText('Test Name *'), {
+        target: { value: 'Test', name: 'test_name' },
+      });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {

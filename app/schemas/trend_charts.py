@@ -13,14 +13,22 @@ from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_va
 
 # Vital types that can be charted (must match Vitals model columns)
 SUPPORTED_VITAL_TYPES = [
-    "blood_pressure", "heart_rate", "temperature",
-    "weight", "oxygen_saturation", "respiratory_rate",
-    "blood_glucose", "a1c", "bmi", "pain_scale",
+    "blood_pressure",
+    "heart_rate",
+    "temperature",
+    "weight",
+    "oxygen_saturation",
+    "respiratory_rate",
+    "blood_glucose",
+    "a1c",
+    "bmi",
+    "pain_scale",
 ]
 
 
 class VitalChartRequest(BaseModel):
     """Request for a single vital sign trend chart"""
+
     vital_type: str = Field(..., description="Vital sign column name")
     date_from: Optional[date] = Field(default=None, description="Start date filter")
     date_to: Optional[date] = Field(default=None, description="End date filter")
@@ -46,7 +54,10 @@ class VitalChartRequest(BaseModel):
 
 class LabTestChartRequest(BaseModel):
     """Request for a single lab test trend chart"""
-    test_name: str = Field(..., min_length=1, max_length=500, description="Lab test name")
+
+    test_name: str = Field(
+        ..., min_length=1, max_length=500, description="Lab test name"
+    )
     date_from: Optional[date] = Field(default=None, description="Start date filter")
     date_to: Optional[date] = Field(default=None, description="End date filter")
 
@@ -61,13 +72,12 @@ class LabTestChartRequest(BaseModel):
 
 class TrendChartSelection(BaseModel):
     """Collection of trend charts to include in a report"""
+
     vital_charts: List[VitalChartRequest] = Field(
-        default_factory=list,
-        description="Vital sign charts to include"
+        default_factory=list, description="Vital sign charts to include"
     )
     lab_test_charts: List[LabTestChartRequest] = Field(
-        default_factory=list,
-        description="Lab test charts to include"
+        default_factory=list, description="Lab test charts to include"
     )
 
     @model_validator(mode="after")

@@ -12,11 +12,11 @@ class UploadProgressErrorBoundary extends React.Component {
     super(props);
     this.state = { hasError: false, error: null };
   }
-  
+
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
-  
+
   componentDidCatch(error, errorInfo) {
     logger.error('upload_progress_error_boundary', {
       error: error.message,
@@ -26,11 +26,14 @@ class UploadProgressErrorBoundary extends React.Component {
       componentStack: errorInfo.componentStack,
     });
   }
-  
+
   render() {
     if (this.state.hasError) {
       return (
-        <Alert color="red" title={i18n.t('documents:errorBoundary.uploadError')}>
+        <Alert
+          color="red"
+          title={i18n.t('documents:errorBoundary.uploadError')}
+        >
           {i18n.t('documents:errorBoundary.uploadErrorDescription')}
           <Button
             onClick={() => this.setState({ hasError: false, error: null })}
@@ -43,7 +46,7 @@ class UploadProgressErrorBoundary extends React.Component {
         </Alert>
       );
     }
-    
+
     return this.props.children;
   }
 }

@@ -93,25 +93,21 @@ describe('MedicalPageFilters', () => {
         config={mockConfig}
       />
     );
-    expect(screen.getByTestId('config-title')).toHaveTextContent('Test Filters');
+    expect(screen.getByTestId('config-title')).toHaveTextContent(
+      'Test Filters'
+    );
   });
 
   it('handles missing config gracefully', () => {
     render(
-      <MedicalPageFilters
-        dataManagement={mockDataManagement}
-        config={null}
-      />
+      <MedicalPageFilters dataManagement={mockDataManagement} config={null} />
     );
     expect(screen.getByTestId('mantine-filters')).toBeInTheDocument();
   });
 
   it('handles missing filterControls gracefully', () => {
     render(
-      <MedicalPageFilters
-        dataManagement={mockDataManagement}
-        config={{}}
-      />
+      <MedicalPageFilters dataManagement={mockDataManagement} config={{}} />
     );
     expect(screen.getByTestId('mantine-filters')).toBeInTheDocument();
   });

@@ -138,7 +138,8 @@ const MedicalCard = ({
             )}
             {dateInfo.updated && (
               <Text size="xs" c="dimmed">
-                {t('navigation:activity.actions.updated')}: {formatDateTime(dateInfo.updated)}
+                {t('navigation:activity.actions.updated')}:{' '}
+                {formatDateTime(dateInfo.updated)}
               </Text>
             )}
             {dateInfo.custom && (

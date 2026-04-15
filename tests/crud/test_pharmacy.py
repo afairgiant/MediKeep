@@ -1,6 +1,7 @@
 """
 Tests for Pharmacy CRUD operations.
 """
+
 import pytest
 from sqlalchemy.orm import Session
 
@@ -23,7 +24,7 @@ class TestPharmacyCRUD:
             state="NC",
             zip_code="27601",
             twenty_four_hour=False,
-            drive_through=True
+            drive_through=True,
         )
 
         pharmacy = pharmacy_crud.create(db_session, obj_in=pharmacy_data)
@@ -77,10 +78,7 @@ class TestPharmacyCRUD:
         Note: The query method lowercases filter values for matching.
         """
         # Use lowercase to match query behavior
-        pharmacy_data = PharmacyCreate(
-            name="walgreens - downtown",
-            brand="Walgreens"
-        )
+        pharmacy_data = PharmacyCreate(name="walgreens - downtown", brand="Walgreens")
         pharmacy_crud.create(db_session, obj_in=pharmacy_data)
 
         found = pharmacy_crud.get_by_name(db_session, name="Walgreens - Downtown")
@@ -150,10 +148,7 @@ class TestPharmacyCRUD:
         brands = ["CVS", "Walgreens", "Rite Aid", "CVS"]  # CVS duplicate
 
         for i, brand in enumerate(brands):
-            pharmacy_data = PharmacyCreate(
-                name=f"Pharmacy {i+1}",
-                brand=brand
-            )
+            pharmacy_data = PharmacyCreate(name=f"Pharmacy {i+1}", brand=brand)
             pharmacy_crud.create(db_session, obj_in=pharmacy_data)
 
         unique_brands = pharmacy_crud.get_all_brands(db_session)
@@ -169,9 +164,7 @@ class TestPharmacyCRUD:
 
         for i, city in enumerate(cities):
             pharmacy_data = PharmacyCreate(
-                name=f"Pharmacy {i+1}",
-                city=city,
-                state="NC"
+                name=f"Pharmacy {i+1}", city=city, state="NC"
             )
             pharmacy_crud.create(db_session, obj_in=pharmacy_data)
 
@@ -200,10 +193,18 @@ class TestPharmacyCRUD:
     def test_search_by_location(self, db_session: Session):
         """Test searching pharmacies by location."""
         pharmacies_data = [
-            PharmacyCreate(name="NC Store 1", city="Raleigh", state="NC", zip_code="27601"),
-            PharmacyCreate(name="NC Store 2", city="Raleigh", state="NC", zip_code="27602"),
-            PharmacyCreate(name="SC Store", city="Charleston", state="SC", zip_code="29401"),
-            PharmacyCreate(name="CA Store", city="Toronto", state="Ontario", zip_code="m5v 2t6"),
+            PharmacyCreate(
+                name="NC Store 1", city="Raleigh", state="NC", zip_code="27601"
+            ),
+            PharmacyCreate(
+                name="NC Store 2", city="Raleigh", state="NC", zip_code="27602"
+            ),
+            PharmacyCreate(
+                name="SC Store", city="Charleston", state="SC", zip_code="29401"
+            ),
+            PharmacyCreate(
+                name="CA Store", city="Toronto", state="Ontario", zip_code="m5v 2t6"
+            ),
         ]
 
         for phar_data in pharmacies_data:
@@ -223,7 +224,9 @@ class TestPharmacyCRUD:
 
         # Search by postal code (international)
         # Note: query method lowercases filter values for matching
-        postal_results = pharmacy_crud.search_by_location(db_session, zip_code="M5V 2T6")
+        postal_results = pharmacy_crud.search_by_location(
+            db_session, zip_code="M5V 2T6"
+        )
         assert len(postal_results) == 1
         assert postal_results[0].name == "CA Store"
 
@@ -234,9 +237,7 @@ class TestPharmacyCRUD:
         """
         # Use lowercase to match query behavior
         pharmacy_data = PharmacyCreate(
-            name="CVS #12345",
-            brand="cvs",
-            store_number="12345"
+            name="CVS #12345", brand="cvs", store_number="12345"
         )
         pharmacy_crud.create(db_session, obj_in=pharmacy_data)
 
@@ -310,15 +311,14 @@ class TestPharmacyCRUD:
         pharmacy_data = PharmacyCreate(name="unique pharmacy name")
         pharmacy_crud.create(db_session, obj_in=pharmacy_data)
 
-        assert pharmacy_crud.is_name_taken(db_session, name="Unique Pharmacy Name") is True
+        assert (
+            pharmacy_crud.is_name_taken(db_session, name="Unique Pharmacy Name") is True
+        )
         assert pharmacy_crud.is_name_taken(db_session, name="Different Name") is False
 
     def test_create_if_not_exists_creates(self, db_session: Session):
         """Test create_if_not_exists creates new pharmacy."""
-        pharmacy_data = PharmacyCreate(
-            name="New Pharmacy",
-            brand="Independent"
-        )
+        pharmacy_data = PharmacyCreate(name="New Pharmacy", brand="Independent")
 
         pharmacy = pharmacy_crud.create_if_not_exists(
             db_session, pharmacy_data=pharmacy_data
@@ -333,16 +333,10 @@ class TestPharmacyCRUD:
         Note: The query method lowercases filter values for matching.
         """
         # Use lowercase to match query behavior
-        initial_data = PharmacyCreate(
-            name="existing pharmacy",
-            brand="Original Brand"
-        )
+        initial_data = PharmacyCreate(name="existing pharmacy", brand="Original Brand")
         initial = pharmacy_crud.create(db_session, obj_in=initial_data)
 
-        second_data = PharmacyCreate(
-            name="existing pharmacy",
-            brand="Different Brand"
-        )
+        second_data = PharmacyCreate(name="existing pharmacy", brand="Different Brand")
         second = pharmacy_crud.create_if_not_exists(
             db_session, pharmacy_data=second_data
         )
@@ -384,20 +378,12 @@ class TestPharmacyCRUD:
 
     def test_update_pharmacy(self, db_session: Session):
         """Test updating a pharmacy."""
-        pharmacy_data = PharmacyCreate(
-            name="Original Name",
-            brand="Original Brand"
-        )
+        pharmacy_data = PharmacyCreate(name="Original Name", brand="Original Brand")
         created = pharmacy_crud.create(db_session, obj_in=pharmacy_data)
 
-        update_data = PharmacyUpdate(
-            phone_number="919-555-9999",
-            drive_through=True
-        )
+        update_data = PharmacyUpdate(phone_number="919-555-9999", drive_through=True)
 
-        updated = pharmacy_crud.update(
-            db_session, db_obj=created, obj_in=update_data
-        )
+        updated = pharmacy_crud.update(db_session, db_obj=created, obj_in=update_data)
 
         assert updated.name == "Original Name"  # Unchanged
         assert updated.drive_through is True
@@ -426,7 +412,7 @@ class TestPharmacyCRUD:
                 city="Raleigh",
                 state="NC",
                 drive_through=True,
-                twenty_four_hour=False
+                twenty_four_hour=False,
             ),
             PharmacyCreate(
                 name="CVS 24hr",
@@ -434,7 +420,7 @@ class TestPharmacyCRUD:
                 city="Durham",
                 state="NC",
                 drive_through=True,
-                twenty_four_hour=True
+                twenty_four_hour=True,
             ),
             PharmacyCreate(
                 name="Walgreens",
@@ -442,7 +428,7 @@ class TestPharmacyCRUD:
                 city="Raleigh",
                 state="NC",
                 drive_through=False,
-                twenty_four_hour=False
+                twenty_four_hour=False,
             ),
         ]
 
@@ -456,7 +442,5 @@ class TestPharmacyCRUD:
         assert len(results) == 2
 
         # Search for 24-hour pharmacies
-        results = pharmacy_crud.search_comprehensive(
-            db_session, twenty_four_hour=True
-        )
+        results = pharmacy_crud.search_comprehensive(db_session, twenty_four_hour=True)
         assert len(results) == 1

@@ -43,19 +43,43 @@
 }
 
 /* Module card color variants for left border */
-.dashboard-module-card.blue::before { background: var(--mantine-color-blue-filled); }
-.dashboard-module-card.green::before { background: var(--mantine-color-green-filled); }
-.dashboard-module-card.teal::before { background: var(--mantine-color-teal-filled); }
-.dashboard-module-card.cyan::before { background: var(--mantine-color-cyan-filled); }
-.dashboard-module-card.indigo::before { background: var(--mantine-color-indigo-filled); }
-.dashboard-module-card.red::before { background: var(--mantine-color-red-filled); }
-.dashboard-module-card.pink::before { background: var(--mantine-color-pink-filled); }
-.dashboard-module-card.orange::before { background: var(--mantine-color-orange-filled); }
+.dashboard-module-card.blue::before {
+  background: var(--mantine-color-blue-filled);
+}
+.dashboard-module-card.green::before {
+  background: var(--mantine-color-green-filled);
+}
+.dashboard-module-card.teal::before {
+  background: var(--mantine-color-teal-filled);
+}
+.dashboard-module-card.cyan::before {
+  background: var(--mantine-color-cyan-filled);
+}
+.dashboard-module-card.indigo::before {
+  background: var(--mantine-color-indigo-filled);
+}
+.dashboard-module-card.red::before {
+  background: var(--mantine-color-red-filled);
+}
+.dashboard-module-card.pink::before {
+  background: var(--mantine-color-pink-filled);
+}
+.dashboard-module-card.orange::before {
+  background: var(--mantine-color-orange-filled);
+}
 .dashboard-module-card.purple::before,
-.dashboard-module-card.violet::before { background: var(--mantine-color-violet-filled); }
-.dashboard-module-card.grape::before { background: var(--mantine-color-grape-filled); }
-.dashboard-module-card.yellow::before { background: var(--mantine-color-yellow-filled); }
-.dashboard-module-card.dark::before { background: var(--mantine-color-dark-filled); }
+.dashboard-module-card.violet::before {
+  background: var(--mantine-color-violet-filled);
+}
+.dashboard-module-card.grape::before {
+  background: var(--mantine-color-grape-filled);
+}
+.dashboard-module-card.yellow::before {
+  background: var(--mantine-color-yellow-filled);
+}
+.dashboard-module-card.dark::before {
+  background: var(--mantine-color-dark-filled);
+}
 
 /* Stat Card */
 .dashboard-stat-card {
@@ -72,10 +96,18 @@
   height: 3px;
 }
 
-.dashboard-stat-card.blue::before { background: var(--mantine-color-blue-filled); }
-.dashboard-stat-card.green::before { background: var(--mantine-color-green-filled); }
-.dashboard-stat-card.orange::before { background: var(--mantine-color-orange-filled); }
-.dashboard-stat-card.violet::before { background: var(--mantine-color-violet-filled); }
+.dashboard-stat-card.blue::before {
+  background: var(--mantine-color-blue-filled);
+}
+.dashboard-stat-card.green::before {
+  background: var(--mantine-color-green-filled);
+}
+.dashboard-stat-card.orange::before {
+  background: var(--mantine-color-orange-filled);
+}
+.dashboard-stat-card.violet::before {
+  background: var(--mantine-color-violet-filled);
+}
 
 /* Resource and Activity Item Hover */
 .dashboard-resource-item,

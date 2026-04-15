@@ -1,7 +1,16 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, File, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    File,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import desc
@@ -15,7 +24,7 @@ from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_data_access,
-    log_security_event
+    log_security_event,
 )
 from app.crud.patient import patient
 from app.models.activity_log import ActivityLog
@@ -76,15 +85,21 @@ def get_my_patient_record(
     patient_record = patient.get_by_user_id(db, user_id=user_id)
     if not patient_record:
         log_endpoint_access(
-            logger, request, user_id, "patient_record_not_found",
-            message="Patient record not found"
+            logger,
+            request,
+            user_id,
+            "patient_record_not_found",
+            message="Patient record not found",
         )
         raise HTTPException(status_code=404, detail="Patient record not found")
 
     # Log successful access using helper
     log_endpoint_access(
-        logger, request, user_id, "patient_record_accessed",
-        patient_id=patient_record.id
+        logger,
+        request,
+        user_id,
+        "patient_record_accessed",
+        patient_id=patient_record.id,
     )
 
     return patient_record
@@ -112,9 +127,11 @@ def create_my_patient_record(
     existing_patient = patient.get_by_user_id(db, user_id=user_id)
     if existing_patient:
         log_security_event(
-            logger, "duplicate_patient_record_attempt", request,
+            logger,
+            "duplicate_patient_record_attempt",
+            request,
             f"Attempt to create duplicate patient record for user {user_id}",
-            user_id=user_id
+            user_id=user_id,
         )
         raise HTTPException(status_code=400, detail="Patient record already exists")
 
@@ -126,8 +143,11 @@ def create_my_patient_record(
 
         # Log successful patient record creation using helper
         log_endpoint_access(
-            logger, request, user_id, "patient_record_created",
-            patient_id=new_patient.id
+            logger,
+            request,
+            user_id,
+            "patient_record_created",
+            patient_id=new_patient.id,
         )
 
         return new_patient
@@ -135,8 +155,7 @@ def create_my_patient_record(
     except Exception as e:
         # Log failed patient record creation using helper
         log_endpoint_error(
-            logger, request, "Failed to create patient record",
-            e, user_id=user_id
+            logger, request, "Failed to create patient record", e, user_id=user_id
         )
         raise
 
@@ -163,8 +182,11 @@ def update_my_patient_record(
     existing_patient = patient.get_by_user_id(db, user_id=user_id)
     if not existing_patient:
         log_endpoint_access(
-            logger, request, user_id, "patient_record_update_not_found",
-            message=f"Patient record not found for update by user {user_id}"
+            logger,
+            request,
+            user_id,
+            "patient_record_update_not_found",
+            message=f"Patient record not found for update by user {user_id}",
         )
         raise HTTPException(status_code=404, detail="Patient record not found")
 
@@ -173,8 +195,11 @@ def update_my_patient_record(
     try:
         # Log update attempt without sensitive data
         log_endpoint_access(
-            logger, request, user_id, "patient_record_update_attempt",
-            patient_id=patient_id
+            logger,
+            request,
+            user_id,
+            "patient_record_update_attempt",
+            patient_id=patient_id,
         )
 
         updated_patient = patient.update_for_user(
@@ -183,19 +208,26 @@ def update_my_patient_record(
 
         if not updated_patient:
             log_endpoint_error(
-                logger, request, "Patient record update returned None",
+                logger,
+                request,
+                "Patient record update returned None",
                 Exception("Update returned None"),
                 user_id=user_id,
-                patient_id=patient_id
+                patient_id=patient_id,
             )
-            raise HTTPException(status_code=500, detail="Failed to update patient record")
+            raise HTTPException(
+                status_code=500, detail="Failed to update patient record"
+            )
 
         # Log successful patient record update
         log_endpoint_access(
-            logger, request, user_id, "patient_record_updated",
+            logger,
+            request,
+            user_id,
+            "patient_record_updated",
             patient_id=patient_id,
             message=f"Patient record updated successfully for user {user_id}",
-            updated_id=updated_patient.id
+            updated_id=updated_patient.id,
         )
 
         return updated_patient
@@ -203,8 +235,12 @@ def update_my_patient_record(
     except Exception as e:
         # Log failed patient record update
         log_endpoint_error(
-            logger, request, f"Failed to update patient record for user {user_id}",
-            e, user_id=user_id, patient_id=patient_id
+            logger,
+            request,
+            f"Failed to update patient record for user {user_id}",
+            e,
+            user_id=user_id,
+            patient_id=patient_id,
         )
         raise
 
@@ -226,8 +262,11 @@ def delete_my_patient_record(
     existing_patient = patient.get_by_user_id(db, user_id=user_id)
     if not existing_patient:
         log_endpoint_access(
-            logger, request, user_id, "patient_record_delete_not_found",
-            message=f"Patient record not found for deletion by user {user_id}"
+            logger,
+            request,
+            user_id,
+            "patient_record_delete_not_found",
+            message=f"Patient record not found for deletion by user {user_id}",
         )
         raise HTTPException(status_code=404, detail="Patient record not found")
 
@@ -238,9 +277,12 @@ def delete_my_patient_record(
 
         # Log successful patient record deletion
         log_endpoint_access(
-            logger, request, user_id, "patient_record_deleted",
+            logger,
+            request,
+            user_id,
+            "patient_record_deleted",
             patient_id=patient_id,
-            message=f"Patient record deleted successfully for user {user_id}"
+            message=f"Patient record deleted successfully for user {user_id}",
         )
 
         return {
@@ -250,8 +292,12 @@ def delete_my_patient_record(
     except Exception as e:
         # Log failed patient record deletion
         log_endpoint_error(
-            logger, request, f"Failed to delete patient record for user {user_id}",
-            e, user_id=user_id, patient_id=patient_id
+            logger,
+            request,
+            f"Failed to delete patient record for user {user_id}",
+            e,
+            user_id=user_id,
+            patient_id=patient_id,
         )
         # Re-raise with more specific error message for the user
         raise HTTPException(
@@ -316,8 +362,8 @@ def create_patient_medication(
             LogFields.EVENT: "medication_created",
             LogFields.PATIENT_ID: patient_id,
             LogFields.RECORD_ID: medication_obj.id,
-            LogFields.USER_ID: current_user_id
-        }
+            LogFields.USER_ID: current_user_id,
+        },
     )
     return medication_obj
 
@@ -446,9 +492,12 @@ def get_my_recent_activity(
 
         # Log successful activity retrieval
         log_endpoint_access(
-            logger, request, user_id, "recent_activity_retrieved",
+            logger,
+            request,
+            user_id,
+            "recent_activity_retrieved",
             message=f"User {user_id} retrieved their recent activity",
-            activity_count=len(activities)
+            activity_count=len(activities),
         )
 
         return activities
@@ -456,8 +505,11 @@ def get_my_recent_activity(
     except Exception as e:
         # Log failed activity retrieval
         log_endpoint_error(
-            logger, request, f"Failed to retrieve recent activity for user {user_id}",
-            e, user_id=user_id
+            logger,
+            request,
+            f"Failed to retrieve recent activity for user {user_id}",
+            e,
+            user_id=user_id,
         )
         raise
 
@@ -557,8 +609,11 @@ async def get_my_dashboard_stats(
 
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Error fetching dashboard stats",
-            e, user_id=current_user.id
+            logger,
+            request,
+            "Error fetching dashboard stats",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=500, detail="Error fetching dashboard statistics"
@@ -752,8 +807,11 @@ def get_user_recent_activity(
 
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Error fetching user recent activity",
-            e, user_id=current_user_id
+            logger,
+            request,
+            "Error fetching user recent activity",
+            e,
+            user_id=current_user_id,
         )
         raise HTTPException(status_code=500, detail="Error fetching recent activity")
 
@@ -765,7 +823,7 @@ async def upload_patient_photo(
     patient_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user)
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Upload a photo for a patient.
@@ -776,9 +834,12 @@ async def upload_patient_photo(
     - Processes image (resize, rotate, convert to JPEG)
     """
     log_endpoint_access(
-        logger, request, current_user.id, "patient_photo_upload_request",
+        logger,
+        request,
+        current_user.id,
+        "patient_photo_upload_request",
         patient_id=patient_id,
-        file_name=file.filename
+        file_name=file.filename,
     )
 
     # Verify patient ownership
@@ -789,19 +850,17 @@ async def upload_patient_photo(
     if patient_obj.owner_user_id != current_user.id:
         # Check if user has access via sharing
         from app.crud.patient_share import patient_share as share_crud
+
         if not share_crud.user_has_access(db, patient_id, current_user.id):
             raise HTTPException(
                 status_code=403,
-                detail="You don't have permission to update this patient's photo"
+                detail="You don't have permission to update this patient's photo",
             )
 
     try:
         # Upload and process the photo
         photo = await patient_photo_service.upload_photo(
-            db=db,
-            patient_id=patient_id,
-            file=file,
-            user_id=current_user.id
+            db=db, patient_id=patient_id, file=file, user_id=current_user.id
         )
 
         # Log the activity
@@ -809,13 +868,16 @@ async def upload_patient_photo(
             db=db,
             entity_type=ActivityEntityType.PATIENT,
             entity_obj=patient_obj,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
         log_endpoint_access(
-            logger, request, current_user.id, "patient_photo_uploaded",
+            logger,
+            request,
+            current_user.id,
+            "patient_photo_uploaded",
             patient_id=patient_id,
-            photo_id=photo.id
+            photo_id=photo.id,
         )
 
         return photo
@@ -824,16 +886,17 @@ async def upload_patient_photo(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to upload patient photo",
+            logger,
+            request,
+            "Failed to upload patient photo",
             e,
             user_id=current_user.id,
             patient_id=patient_id,
-            file_name=file.filename if file else "unknown"
+            file_name=file.filename if file else "unknown",
         )
 
         raise HTTPException(
-            status_code=500,
-            detail="Failed to upload photo. Please try again."
+            status_code=500, detail="Failed to upload photo. Please try again."
         )
 
 
@@ -841,7 +904,7 @@ async def upload_patient_photo(
 async def get_patient_photo(
     patient_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user)
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Get the photo file for a patient.
@@ -854,10 +917,11 @@ async def get_patient_photo(
 
     if patient_obj.owner_user_id != current_user.id:
         from app.crud.patient_share import patient_share as share_crud
+
         if not share_crud.user_has_access(db, patient_id, current_user.id):
             raise HTTPException(
                 status_code=403,
-                detail="You don't have permission to view this patient's photo"
+                detail="You don't have permission to view this patient's photo",
             )
 
     # Get the photo file
@@ -871,7 +935,7 @@ async def get_patient_photo(
         media_type="image/jpeg",
         headers={
             "Cache-Control": "max-age=3600",  # Cache for 1 hour
-        }
+        },
     )
 
 
@@ -879,7 +943,7 @@ async def get_patient_photo(
 async def get_patient_photo_info(
     patient_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user)
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Get metadata about a patient's photo.
@@ -892,10 +956,11 @@ async def get_patient_photo_info(
 
     if patient_obj.owner_user_id != current_user.id:
         from app.crud.patient_share import patient_share as share_crud
+
         if not share_crud.user_has_access(db, patient_id, current_user.id):
             raise HTTPException(
                 status_code=403,
-                detail="You don't have permission to view this patient's photo"
+                detail="You don't have permission to view this patient's photo",
             )
 
     # Get photo metadata
@@ -908,15 +973,18 @@ async def delete_patient_photo(
     request: Request,
     patient_id: int,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_user)
+    current_user: User = Depends(deps.get_current_user),
 ) -> None:
     """
     Delete a patient's photo.
     Removes both the file and database record.
     """
     log_endpoint_access(
-        logger, request, current_user.id, "patient_photo_delete_request",
-        patient_id=patient_id
+        logger,
+        request,
+        current_user.id,
+        "patient_photo_delete_request",
+        patient_id=patient_id,
     )
 
     # Verify patient ownership (only owner can delete)
@@ -926,44 +994,47 @@ async def delete_patient_photo(
 
     if patient_obj.owner_user_id != current_user.id:
         raise HTTPException(
-            status_code=403,
-            detail="Only the patient owner can delete the photo"
+            status_code=403, detail="Only the patient owner can delete the photo"
         )
 
     try:
         # Delete the photo
         deleted = await patient_photo_service.delete_photo(
-            db=db,
-            patient_id=patient_id,
-            user_id=current_user.id
+            db=db, patient_id=patient_id, user_id=current_user.id
         )
 
         if not deleted:
-            raise HTTPException(status_code=404, detail="No photo found for this patient")
+            raise HTTPException(
+                status_code=404, detail="No photo found for this patient"
+            )
 
         # Log the activity
         log_delete(
             db=db,
             entity_type=ActivityEntityType.PATIENT,
             entity_obj=patient_obj,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
         log_endpoint_access(
-            logger, request, current_user.id, "patient_photo_deleted",
-            patient_id=patient_id
+            logger,
+            request,
+            current_user.id,
+            "patient_photo_deleted",
+            patient_id=patient_id,
         )
 
     except HTTPException:
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to delete patient photo",
+            logger,
+            request,
+            "Failed to delete patient photo",
             e,
             user_id=current_user.id,
-            patient_id=patient_id
+            patient_id=patient_id,
         )
         raise HTTPException(
-            status_code=500,
-            detail="Failed to delete photo. Please try again."
+            status_code=500, detail="Failed to delete photo. Please try again."
         )

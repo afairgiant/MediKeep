@@ -50,9 +50,7 @@ def _validate_email_value(v: Optional[str]) -> Optional[str]:
     email = v.strip().lower()
 
     # Basic email validation pattern
-    email_pattern = re.compile(
-        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    )
+    email_pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
     if not email_pattern.match(email):
         raise ValueError("Please enter a valid email address")

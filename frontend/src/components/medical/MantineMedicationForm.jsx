@@ -61,17 +61,15 @@ const MantineMedicationForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form handlers
-  const {
-    handleTextInputChange,
-  } = useFormHandlers(onInputChange);
+  const { handleTextInputChange } = useFormHandlers(onInputChange);
 
-  const handleDocumentManagerRef = (methods) => {
+  const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {
       onDocumentManagerRef(methods);
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in medications ${editingMedication ? 'edit' : 'create'}`,
       medicationId: editingMedication?.id,
@@ -84,7 +82,11 @@ const MantineMedicationForm = ({
     }
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('medications_upload_completed', {
       message: 'File upload completed in medications form',
       medicationId: editingMedication?.id,
@@ -127,7 +129,7 @@ const MantineMedicationForm = ({
   }));
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -141,7 +143,7 @@ const MantineMedicationForm = ({
   };
 
   // Render a single field
-  const renderField = (field) => {
+  const renderField = field => {
     if (field.type === 'divider') {
       return null;
     }
@@ -149,9 +151,13 @@ const MantineMedicationForm = ({
     const commonProps = {
       key: field.name,
       label: field.labelKey ? t(field.labelKey) : field.label,
-      placeholder: field.placeholderKey ? t(field.placeholderKey) : field.placeholder,
+      placeholder: field.placeholderKey
+        ? t(field.placeholderKey)
+        : field.placeholder,
       required: field.required,
-      description: field.descriptionKey ? t(field.descriptionKey) : field.description,
+      description: field.descriptionKey
+        ? t(field.descriptionKey)
+        : field.description,
       error: null,
     };
 
@@ -165,7 +171,9 @@ const MantineMedicationForm = ({
       // Translate options using optionsKey as base
       options = field.options.map(opt => ({
         value: opt.value,
-        label: opt.labelKey ? t(`${field.optionsKey}.${opt.labelKey}`) : opt.label,
+        label: opt.labelKey
+          ? t(`${field.optionsKey}.${opt.labelKey}`)
+          : opt.label,
       }));
     } else if (field.options && field.options.some(opt => opt.labelKey)) {
       // Translate options with individual labelKey
@@ -193,8 +201,10 @@ const MantineMedicationForm = ({
             {...commonProps}
             value={formData[field.name] || null}
             data={options || []}
-            onChange={(value) => {
-              onInputChange({ target: { name: field.name, value: value || '' } });
+            onChange={value => {
+              onInputChange({
+                target: { name: field.name, value: value || '' },
+              });
             }}
             searchable={field.searchable}
             clearable={field.clearable}
@@ -208,9 +218,11 @@ const MantineMedicationForm = ({
             {...commonProps}
             placeholder={dateInputFormat}
             value={parseDateInput(formData[field.name])}
-            onChange={(date) => {
+            onChange={date => {
               const formattedDate = formatDateInputChange(date);
-              onInputChange({ target: { name: field.name, value: formattedDate } });
+              onInputChange({
+                target: { name: field.name, value: formattedDate },
+              });
             }}
             valueFormat={dateInputFormat}
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
@@ -243,7 +255,7 @@ const MantineMedicationForm = ({
               )}
               <TagInput
                 value={formData[field.name] || []}
-                onChange={(tags) => {
+                onChange={tags => {
                   onInputChange({ target: { name: field.name, value: tags } });
                 }}
                 placeholder={field.placeholder}
@@ -261,7 +273,9 @@ const MantineMedicationForm = ({
 
   // Group fields by section for tabs (section is declared on each field in medication.js)
   const basicFields = medicationFormFields.filter(f => f.section === 'basic');
-  const detailsFields = medicationFormFields.filter(f => f.section === 'details');
+  const detailsFields = medicationFormFields.filter(
+    f => f.section === 'details'
+  );
   const notesFields = medicationFormFields.filter(f => f.section === 'notes');
 
   return (
@@ -277,8 +291,8 @@ const MantineMedicationForm = ({
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
-          overflowY: 'auto'
-        }
+          overflowY: 'auto',
+        },
       }}
     >
       <FormLoadingOverlay
@@ -293,19 +307,28 @@ const MantineMedicationForm = ({
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="basic"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
               <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
                 {t('shared:tabs.details')}
               </Tabs.Tab>
-              <Tabs.Tab value="conditions" leftSection={<IconStethoscope size={16} />}>
+              <Tabs.Tab
+                value="conditions"
+                leftSection={<IconStethoscope size={16} />}
+              >
                 {t('shared:categories.conditions')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {editingMedication
                   ? t('shared:tabs.documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
@@ -317,7 +340,10 @@ const MantineMedicationForm = ({
               <Box mt="md">
                 <Grid>
                   {basicFields.map(field => (
-                    <Grid.Col span={{ base: 12, sm: field.gridColumn || 6 }} key={field.name}>
+                    <Grid.Col
+                      span={{ base: 12, sm: field.gridColumn || 6 }}
+                      key={field.name}
+                    >
                       {renderField(field)}
                     </Grid.Col>
                   ))}
@@ -330,7 +356,10 @@ const MantineMedicationForm = ({
               <Box mt="md">
                 <Grid>
                   {detailsFields.map(field => (
-                    <Grid.Col span={{ base: 12, sm: field.gridColumn || 6 }} key={field.name}>
+                    <Grid.Col
+                      span={{ base: 12, sm: field.gridColumn || 6 }}
+                      key={field.name}
+                    >
                       {renderField(field)}
                     </Grid.Col>
                   ))}
@@ -352,17 +381,23 @@ const MantineMedicationForm = ({
                 ) : (
                   <MultiSelect
                     label={t('common:buttons.linkConditions')}
-                    description={t('medications.form.linkConditionsDescription')}
+                    description={t(
+                      'medications.form.linkConditionsDescription'
+                    )}
                     placeholder={t('common:modals.chooseConditionsToLink')}
                     data={conditionOptions}
                     value={formData.condition_ids || []}
-                    onChange={(values) => {
-                      onInputChange({ target: { name: 'condition_ids', value: values } });
+                    onChange={values => {
+                      onInputChange({
+                        target: { name: 'condition_ids', value: values },
+                      });
                     }}
                     searchable
                     clearable
                     comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                    nothingFoundMessage={t('medications.form.noConditionsFound')}
+                    nothingFoundMessage={t(
+                      'medications.form.noConditionsFound'
+                    )}
                   />
                 )}
               </Box>
@@ -373,7 +408,10 @@ const MantineMedicationForm = ({
               <Box mt="md">
                 <Grid>
                   {notesFields.map(field => (
-                    <Grid.Col span={{ base: 12, sm: field.gridColumn || 12 }} key={field.name}>
+                    <Grid.Col
+                      span={{ base: 12, sm: field.gridColumn || 12 }}
+                      key={field.name}
+                    >
                       {renderField(field)}
                     </Grid.Col>
                   ))}
@@ -386,7 +424,9 @@ const MantineMedicationForm = ({
               <Box mt="md">
                 <Stack gap="md">
                   {editingMedication && (
-                    <Title order={4}>{t('shared:labels.attachedDocuments')}</Title>
+                    <Title order={4}>
+                      {t('shared:labels.attachedDocuments')}
+                    </Title>
                   )}
                   <DocumentManagerWithProgress
                     entityType="medication"
@@ -407,11 +447,17 @@ const MantineMedicationForm = ({
 
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting || isLoading}>
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting || isLoading}
+            >
               {t('shared:fields.cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
-              {editingMedication ? t('medications.form.updateMedication') : t('medications.form.addMedication')}
+              {editingMedication
+                ? t('medications.form.updateMedication')
+                : t('medications.form.addMedication')}
             </Button>
           </Group>
         </Stack>

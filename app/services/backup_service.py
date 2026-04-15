@@ -145,9 +145,7 @@ class BackupService:
             event = BackupFailedEvent(
                 error=str(e),
                 backup_type="database",
-                partial_file=(
-                    str(backup_path) if "backup_path" in locals() else None
-                ),
+                partial_file=(str(backup_path) if "backup_path" in locals() else None),
             )
             await get_event_bus().publish(event)
 
@@ -400,9 +398,7 @@ class BackupService:
             event = BackupFailedEvent(
                 error=str(e),
                 backup_type="files",
-                partial_file=(
-                    str(backup_path) if "backup_path" in locals() else None
-                ),
+                partial_file=(str(backup_path) if "backup_path" in locals() else None),
             )
             await get_event_bus().publish(event)
 
@@ -973,9 +969,7 @@ class BackupService:
             event = BackupFailedEvent(
                 error=str(e),
                 backup_type="full",
-                partial_file=(
-                    str(backup_path) if "backup_path" in locals() else None
-                ),
+                partial_file=(str(backup_path) if "backup_path" in locals() else None),
             )
             await get_event_bus().publish(event)
 

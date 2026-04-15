@@ -18,7 +18,7 @@ const MantinePharmacyForm = ({
   const { t } = useTranslation('errors');
 
   // Custom handler for store number formatting
-  const handleStoreNumberChange = (event) => {
+  const handleStoreNumberChange = event => {
     let value = event.target.value;
 
     // Remove any non-alphanumeric characters except spaces and hyphens
@@ -43,7 +43,7 @@ const MantinePharmacyForm = ({
 
   // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
-  
+
   // Clear field errors when modal is closed
   useEffect(() => {
     if (!isOpen) {
@@ -52,26 +52,30 @@ const MantinePharmacyForm = ({
   }, [isOpen]);
 
   // Input change handler with phone validation
-  const handleInputChange = (event) => {
+  const handleInputChange = event => {
     const { name, value } = event.target;
-    
+
     // Clear any existing error for this field
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
         ...prev,
-        [name]: null
+        [name]: null,
       }));
     }
-    
+
     if (name === 'store_number') {
       handleStoreNumberChange(event);
       return;
     }
 
-    if (name === 'phone_number' && value.trim() !== '' && !isValidPhoneNumber(value)) {
+    if (
+      name === 'phone_number' &&
+      value.trim() !== '' &&
+      !isValidPhoneNumber(value)
+    ) {
       setFieldErrors(prev => ({
         ...prev,
-        [name]: t('form.invalidPhoneDigits')
+        [name]: t('form.invalidPhoneDigits'),
       }));
     }
 
@@ -79,7 +83,7 @@ const MantinePharmacyForm = ({
   };
 
   // Validate website URL
-  const isValidWebsite = (url) => {
+  const isValidWebsite = url => {
     if (!url) return true; // Optional field
     try {
       const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
@@ -96,7 +100,7 @@ const MantinePharmacyForm = ({
 
   // Custom validation for submit - prevent submission if website is invalid
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     if (websiteError) {
       e.preventDefault();
       return;
@@ -108,7 +112,11 @@ const MantinePharmacyForm = ({
   const customContent = (
     <>
       {websiteError && (
-        <Text size="sm" c="red" style={{ marginTop: '-16px', marginBottom: '16px' }}>
+        <Text
+          size="sm"
+          c="red"
+          style={{ marginTop: '-16px', marginBottom: '16px' }}
+        >
           {websiteError}
         </Text>
       )}
@@ -130,7 +138,6 @@ const MantinePharmacyForm = ({
     >
       {customContent}
     </BaseMedicalForm>
-
   );
 };
 

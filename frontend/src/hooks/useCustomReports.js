@@ -32,20 +32,28 @@ export const useCustomReports = () => {
 
   // Fetch data summary for record selection
   const fetchDataSummary = useCallback(async () => {
-    logger.info('custom_reports_fetch_summary', 'Fetching data summary for report builder', {
-      component: 'useCustomReports',
-    });
+    logger.info(
+      'custom_reports_fetch_summary',
+      'Fetching data summary for report builder',
+      {
+        component: 'useCustomReports',
+      }
+    );
 
     const result = await execute(
       async signal => {
         const response = await apiService.getCustomReportSummary(signal);
 
         // Log response summary
-        logger.debug('custom_reports_summary_response', 'Data summary fetched', {
-          categoriesCount: Object.keys(response?.categories || {}).length,
-          totalRecords: response?.total_records || 0,
-          component: 'useCustomReports',
-        });
+        logger.debug(
+          'custom_reports_summary_response',
+          'Data summary fetched',
+          {
+            categoriesCount: Object.keys(response?.categories || {}).length,
+            totalRecords: response?.total_records || 0,
+            component: 'useCustomReports',
+          }
+        );
 
         return response;
       },
@@ -104,11 +112,15 @@ export const useCustomReports = () => {
         // Deselect all
         const newSelected = { ...prev };
         delete newSelected[category];
-        logger.debug('custom_reports_category_deselected', 'All records in category deselected', {
-          category,
-          recordCount: records.length,
-          component: 'useCustomReports',
-        });
+        logger.debug(
+          'custom_reports_category_deselected',
+          'All records in category deselected',
+          {
+            category,
+            recordCount: records.length,
+            component: 'useCustomReports',
+          }
+        );
         return newSelected;
       } else {
         // Select all
@@ -116,11 +128,15 @@ export const useCustomReports = () => {
         records.forEach(record => {
           newCategoryRecords[record.id] = record;
         });
-        logger.debug('custom_reports_category_selected', 'All records in category selected', {
-          category,
-          recordCount: records.length,
-          component: 'useCustomReports',
-        });
+        logger.debug(
+          'custom_reports_category_selected',
+          'All records in category selected',
+          {
+            category,
+            recordCount: records.length,
+            component: 'useCustomReports',
+          }
+        );
         return { ...prev, [category]: newCategoryRecords };
       }
     });
@@ -136,7 +152,7 @@ export const useCustomReports = () => {
   }, []);
 
   // Update report settings
-  const updateReportSettings = useCallback((settings) => {
+  const updateReportSettings = useCallback(settings => {
     setReportSettings(prev => ({ ...prev, ...settings }));
     logger.debug('custom_reports_settings_updated', 'Report settings updated', {
       settings,
@@ -146,7 +162,7 @@ export const useCustomReports = () => {
 
   // --- Trend chart actions ---
 
-  const formatLocalDate = (d) => {
+  const formatLocalDate = d => {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -161,28 +177,32 @@ export const useCustomReports = () => {
 
   const getDefaultDateTo = () => formatLocalDate(new Date());
 
-  const addVitalChart = useCallback((vitalType) => {
+  const addVitalChart = useCallback(vitalType => {
     setTrendCharts(prev => {
       // Don't add duplicate
       if (prev.vital_charts.some(c => c.vital_type === vitalType)) {
         return prev;
       }
-      const totalCharts = prev.vital_charts.length + prev.lab_test_charts.length;
+      const totalCharts =
+        prev.vital_charts.length + prev.lab_test_charts.length;
       if (totalCharts >= 10) {
         return prev;
       }
       return {
         ...prev,
-        vital_charts: [...prev.vital_charts, {
-          vital_type: vitalType,
-          date_from: getDefaultDateFrom(),
-          date_to: getDefaultDateTo(),
-        }],
+        vital_charts: [
+          ...prev.vital_charts,
+          {
+            vital_type: vitalType,
+            date_from: getDefaultDateFrom(),
+            date_to: getDefaultDateTo(),
+          },
+        ],
       };
     });
   }, []);
 
-  const removeVitalChart = useCallback((vitalType) => {
+  const removeVitalChart = useCallback(vitalType => {
     setTrendCharts(prev => ({
       ...prev,
       vital_charts: prev.vital_charts.filter(c => c.vital_type !== vitalType),
@@ -193,33 +213,43 @@ export const useCustomReports = () => {
     setTrendCharts(prev => ({
       ...prev,
       vital_charts: prev.vital_charts.map(c =>
-        c.vital_type === vitalType ? { ...c, date_from: dateFrom, date_to: dateTo } : c
+        c.vital_type === vitalType
+          ? { ...c, date_from: dateFrom, date_to: dateTo }
+          : c
       ),
     }));
   }, []);
 
-  const addLabTestChart = useCallback((testName) => {
+  const addLabTestChart = useCallback(testName => {
     setTrendCharts(prev => {
       // Don't add duplicate (case-insensitive)
-      if (prev.lab_test_charts.some(c => c.test_name.toLowerCase() === testName.toLowerCase())) {
+      if (
+        prev.lab_test_charts.some(
+          c => c.test_name.toLowerCase() === testName.toLowerCase()
+        )
+      ) {
         return prev;
       }
-      const totalCharts = prev.vital_charts.length + prev.lab_test_charts.length;
+      const totalCharts =
+        prev.vital_charts.length + prev.lab_test_charts.length;
       if (totalCharts >= 10) {
         return prev;
       }
       return {
         ...prev,
-        lab_test_charts: [...prev.lab_test_charts, {
-          test_name: testName,
-          date_from: getDefaultDateFrom(),
-          date_to: getDefaultDateTo(),
-        }],
+        lab_test_charts: [
+          ...prev.lab_test_charts,
+          {
+            test_name: testName,
+            date_from: getDefaultDateFrom(),
+            date_to: getDefaultDateTo(),
+          },
+        ],
       };
     });
   }, []);
 
-  const removeLabTestChart = useCallback((testName) => {
+  const removeLabTestChart = useCallback(testName => {
     setTrendCharts(prev => ({
       ...prev,
       lab_test_charts: prev.lab_test_charts.filter(
@@ -252,7 +282,8 @@ export const useCustomReports = () => {
     }, 0);
   }, [selectedRecords]);
 
-  const trendChartCount = trendCharts.vital_charts.length + trendCharts.lab_test_charts.length;
+  const trendChartCount =
+    trendCharts.vital_charts.length + trendCharts.lab_test_charts.length;
   const hasTrendCharts = trendChartCount > 0;
 
   // Get selected records in API format
@@ -270,7 +301,11 @@ export const useCustomReports = () => {
     const hasCharts = trendChartCount > 0;
 
     if (!hasRecords && !hasCharts) {
-      return { valid: false, error: 'Please select at least one record or trend chart to include in the report.' };
+      return {
+        valid: false,
+        error:
+          'Please select at least one record or trend chart to include in the report.',
+      };
     }
 
     if (hasRecords) {
@@ -279,12 +314,19 @@ export const useCustomReports = () => {
       }, 0);
 
       if (totalRecords > 5000) {
-        return { valid: false, error: 'Cannot select more than 5000 records total across all categories.' };
+        return {
+          valid: false,
+          error:
+            'Cannot select more than 5000 records total across all categories.',
+        };
       }
 
       for (const category of selectedRecordsArray) {
         if (category.record_ids.length > 1000) {
-          return { valid: false, error: `Cannot select more than 1000 records in the ${category.category} category.` };
+          return {
+            valid: false,
+            error: `Cannot select more than 1000 records in the ${category.category} category.`,
+          };
         }
       }
     }
@@ -324,15 +366,22 @@ export const useCustomReports = () => {
         requestData.trend_charts = trendCharts;
       }
 
-      logger.info('custom_reports_generate_start', 'Starting report generation', {
-        categoriesCount: selectedRecordsArray.length,
-        totalRecords: getSelectedCount(),
-        trendChartCount,
-        reportTitle: reportSettings.report_title,
-        component: 'useCustomReports',
-      });
+      logger.info(
+        'custom_reports_generate_start',
+        'Starting report generation',
+        {
+          categoriesCount: selectedRecordsArray.length,
+          totalRecords: getSelectedCount(),
+          trendChartCount,
+          reportTitle: reportSettings.report_title,
+          component: 'useCustomReports',
+        }
+      );
 
-      const pdfBlob = await apiService.generateCustomReport(requestData, abortController.signal);
+      const pdfBlob = await apiService.generateCustomReport(
+        requestData,
+        abortController.signal
+      );
 
       if (pdfBlob instanceof Blob) {
         // Create download link
@@ -345,16 +394,21 @@ export const useCustomReports = () => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
 
-        logger.info('custom_reports_generate_success', 'Report generated and downloaded successfully', {
-          categoriesCount: selectedRecordsArray.length,
-          totalRecords: getSelectedCount(),
-          trendChartCount,
-          component: 'useCustomReports',
-        });
+        logger.info(
+          'custom_reports_generate_success',
+          'Report generated and downloaded successfully',
+          {
+            categoriesCount: selectedRecordsArray.length,
+            totalRecords: getSelectedCount(),
+            trendChartCount,
+            component: 'useCustomReports',
+          }
+        );
 
         notifications.show({
           title: 'Report Generated',
-          message: 'Your custom medical report has been downloaded successfully.',
+          message:
+            'Your custom medical report has been downloaded successfully.',
           color: 'green',
           autoClose: 5000,
         });
@@ -365,24 +419,33 @@ export const useCustomReports = () => {
       }
     } catch (error) {
       if (error.name === 'AbortError') {
-        logger.info('custom_reports_generate_cancelled', 'Report generation cancelled', {
-          component: 'useCustomReports',
-        });
+        logger.info(
+          'custom_reports_generate_cancelled',
+          'Report generation cancelled',
+          {
+            component: 'useCustomReports',
+          }
+        );
         return false;
       }
 
-      logger.error('custom_reports_generate_error', 'Failed to generate report', {
-        error: error.message,
-        categoriesCount: getSelectedRecordsForAPI().length,
-        totalRecords: getSelectedCount(),
-        component: 'useCustomReports',
-      });
+      logger.error(
+        'custom_reports_generate_error',
+        'Failed to generate report',
+        {
+          error: error.message,
+          categoriesCount: getSelectedRecordsForAPI().length,
+          totalRecords: getSelectedCount(),
+          component: 'useCustomReports',
+        }
+      );
 
       setError(`Failed to generate report: ${error.message}`);
 
       notifications.show({
         title: 'Report Generation Failed',
-        message: error.message || 'An error occurred while generating the report.',
+        message:
+          error.message || 'An error occurred while generating the report.',
         color: 'red',
         autoClose: 7000,
       });
@@ -392,15 +455,28 @@ export const useCustomReports = () => {
       setIsGenerating(false);
       abortControllerRef.current = null;
     }
-  }, [validateSelections, getSelectedRecordsForAPI, getSelectedCount, reportSettings, trendCharts, trendChartCount, setError, clearError]);
+  }, [
+    validateSelections,
+    getSelectedRecordsForAPI,
+    getSelectedCount,
+    reportSettings,
+    trendCharts,
+    trendChartCount,
+    setError,
+    clearError,
+  ]);
 
   // Cancel report generation
   const cancelGeneration = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-      logger.info('custom_reports_generation_cancelled', 'Report generation cancelled by user', {
-        component: 'useCustomReports',
-      });
+      logger.info(
+        'custom_reports_generation_cancelled',
+        'Report generation cancelled by user',
+        {
+          component: 'useCustomReports',
+        }
+      );
     }
   }, []);
 

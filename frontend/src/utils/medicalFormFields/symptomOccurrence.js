@@ -89,11 +89,26 @@ export const symptomOccurrenceFormFields = [
     gridColumn: 12,
     clearable: true,
     options: [
-      { value: 'no_impact', labelKey: 'medical:symptoms.occurrence.impactLevelOptions.noImpact' },
-      { value: 'mild', labelKey: 'medical:symptoms.occurrence.impactLevelOptions.mild' },
-      { value: 'moderate', labelKey: 'medical:symptoms.occurrence.impactLevelOptions.moderate' },
-      { value: 'severe', labelKey: 'medical:symptoms.occurrence.impactLevelOptions.severe' },
-      { value: 'debilitating', labelKey: 'medical:symptoms.occurrence.impactLevelOptions.debilitating' },
+      {
+        value: 'no_impact',
+        labelKey: 'medical:symptoms.occurrence.impactLevelOptions.noImpact',
+      },
+      {
+        value: 'mild',
+        labelKey: 'medical:symptoms.occurrence.impactLevelOptions.mild',
+      },
+      {
+        value: 'moderate',
+        labelKey: 'medical:symptoms.occurrence.impactLevelOptions.moderate',
+      },
+      {
+        value: 'severe',
+        labelKey: 'medical:symptoms.occurrence.impactLevelOptions.severe',
+      },
+      {
+        value: 'debilitating',
+        labelKey: 'medical:symptoms.occurrence.impactLevelOptions.debilitating',
+      },
     ],
   },
   {
@@ -116,8 +131,10 @@ export const symptomOccurrenceFormFields = [
     name: 'associated_symptoms',
     type: 'text',
     labelKey: 'medical:symptoms.occurrence.associatedSymptoms.label',
-    placeholderKey: 'medical:symptoms.occurrence.associatedSymptoms.placeholder',
-    descriptionKey: 'medical:symptoms.occurrence.associatedSymptoms.description',
+    placeholderKey:
+      'medical:symptoms.occurrence.associatedSymptoms.placeholder',
+    descriptionKey:
+      'medical:symptoms.occurrence.associatedSymptoms.description',
     gridColumn: 12,
   },
   {

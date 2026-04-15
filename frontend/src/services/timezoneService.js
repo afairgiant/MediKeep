@@ -31,15 +31,23 @@ class TimezoneService {
       const response = await apiClient.get('/utils/timezone-info');
       this.timezone = response.data.facility_timezone || 'UTC';
       this.initialized = true;
-      logger.debug('timezone_service_initialized', 'Timezone service initialized', {
-        timezone: this.timezone,
-        component: 'TimezoneService'
-      });
+      logger.debug(
+        'timezone_service_initialized',
+        'Timezone service initialized',
+        {
+          timezone: this.timezone,
+          component: 'TimezoneService',
+        }
+      );
     } catch (error) {
-      logger.warn('timezone_service_fallback', 'Failed to load timezone, using UTC as fallback', {
-        error: error.message,
-        component: 'TimezoneService'
-      });
+      logger.warn(
+        'timezone_service_fallback',
+        'Failed to load timezone, using UTC as fallback',
+        {
+          error: error.message,
+          component: 'TimezoneService',
+        }
+      );
       this.timezone = 'UTC';
       // Do not set initialized=true on failure, so init() retries after login
     }
@@ -80,7 +88,7 @@ class TimezoneService {
       logger.debug('timezone_service_format_error', 'Date formatting failed', {
         utcString,
         error: error.message,
-        component: 'TimezoneService'
+        component: 'TimezoneService',
       });
       return 'Invalid Date';
     }

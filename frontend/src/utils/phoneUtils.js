@@ -8,12 +8,7 @@
 /**
  * Centralized configuration for phone field identification
  */
-export const PHONE_FIELD_PATTERNS = [
-  'phone',
-  'telephone',
-  'mobile',
-  'cell'
-];
+export const PHONE_FIELD_PATTERNS = ['phone', 'telephone', 'mobile', 'cell'];
 
 /**
  * Centralized phone field detection utility.

@@ -15,7 +15,7 @@ import {
   mockViewport,
   DEVICE_TYPES,
   getBreakpointForWidth,
-  getDeviceTypeForBreakpoint
+  getDeviceTypeForBreakpoint,
 } from './ResponsiveTestUtils';
 
 import logger from '../../services/logger';
@@ -40,8 +40,8 @@ vi.mock('../../hooks/useResponsive', () => ({
     isTablet: false,
     isDesktop: true,
     width: 1280,
-    height: 720
-  }))
+    height: 720,
+  })),
 }));
 
 describe('Responsive Modal and Layout Tests', () => {
@@ -49,17 +49,13 @@ describe('Responsive Modal and Layout Tests', () => {
   const mockOnOpen = vi.fn();
 
   // Define defaultSelectProps at the top level so it's available to all tests
-  const selectOptions = [
-    'Option 1',
-    'Option 2',
-    'Option 3'
-  ];
+  const selectOptions = ['Option 1', 'Option 2', 'Option 3'];
 
   const defaultSelectProps = {
     options: selectOptions,
     placeholder: 'Select an option',
     onChange: vi.fn(),
-    value: ''
+    value: '',
   };
 
   beforeEach(() => {
@@ -71,7 +67,7 @@ describe('Responsive Modal and Layout Tests', () => {
       opened: true,
       onClose: mockOnClose,
       onOpen: mockOnOpen,
-      title: 'Test Modal'
+      title: 'Test Modal',
     };
 
     testAtAllBreakpoints(
@@ -79,7 +75,9 @@ describe('Responsive Modal and Layout Tests', () => {
         <div>Modal Content</div>
       </ResponsiveModal>,
       (breakpoint, viewport) => {
-        const deviceType = getDeviceTypeForBreakpoint(getBreakpointForWidth(viewport.width));
+        const deviceType = getDeviceTypeForBreakpoint(
+          getBreakpointForWidth(viewport.width)
+        );
 
         describe(`Modal at ${breakpoint}`, () => {
           beforeEach(() => {
@@ -90,7 +88,7 @@ describe('Responsive Modal and Layout Tests', () => {
               isTablet: deviceType === 'tablet',
               isDesktop: deviceType === 'desktop',
               width: viewport.width,
-              height: viewport.height
+              height: viewport.height,
             });
           });
 
@@ -117,7 +115,7 @@ describe('Responsive Modal and Layout Tests', () => {
 
           it('handles modal open/close correctly', async () => {
             const user = userEvent.setup();
-            
+
             const { rerender } = renderResponsive(
               <ResponsiveModal {...defaultModalProps} opened={false}>
                 <div>Modal Content</div>
@@ -170,10 +168,7 @@ describe('Responsive Modal and Layout Tests', () => {
             ));
 
             renderResponsive(
-              <ResponsiveModal 
-                {...defaultModalProps}
-                withScrollArea={true}
-              >
+              <ResponsiveModal {...defaultModalProps} withScrollArea={true}>
                 <div>{longContent}</div>
               </ResponsiveModal>,
               { viewport }
@@ -201,11 +196,10 @@ describe('Responsive Modal and Layout Tests', () => {
         medicalContext: 'medications',
         formType: 'medication',
         fieldCount: 8,
-        complexity: 'medium'
+        complexity: 'medium',
       };
 
       it('adapts size based on form complexity', () => {
-        
         // Test high complexity form on mobile
         useResponsive.mockReturnValue({
           breakpoint: 'xs',
@@ -214,11 +208,11 @@ describe('Responsive Modal and Layout Tests', () => {
           isTablet: false,
           isDesktop: false,
           width: 375,
-          height: 667
+          height: 667,
         });
 
         renderResponsive(
-          <ResponsiveModal 
+          <ResponsiveModal
             {...medicalFormProps}
             complexity="high"
             fieldCount={15}
@@ -240,7 +234,9 @@ describe('Responsive Modal and Layout Tests', () => {
           </ResponsiveModal>
         );
 
-        const modalContainer = screen.getByText('Medical Form Content').closest('[data-medical-form]');
+        const modalContainer = screen
+          .getByText('Medical Form Content')
+          .closest('[data-medical-form]');
         expect(modalContainer).toHaveAttribute('data-medical-form', 'true');
         expect(modalContainer).toHaveAttribute('data-form-type', 'medication');
         expect(modalContainer).toHaveAttribute('data-complexity', 'medium');
@@ -248,10 +244,7 @@ describe('Responsive Modal and Layout Tests', () => {
 
       it('handles emergency form type with enhanced focus', () => {
         renderResponsive(
-          <ResponsiveModal 
-            {...medicalFormProps}
-            formType="emergency"
-          >
+          <ResponsiveModal {...medicalFormProps} formType="emergency">
             <div>Emergency Form</div>
           </ResponsiveModal>
         );
@@ -291,14 +284,11 @@ describe('Responsive Modal and Layout Tests', () => {
       it('merges caller styles over internal styles per key', () => {
         const callerStyles = {
           body: { padding: '3rem', color: 'red' },
-          header: { borderBottom: '2px solid blue' }
+          header: { borderBottom: '2px solid blue' },
         };
 
         renderResponsive(
-          <ResponsiveModal
-            {...defaultModalProps}
-            styles={callerStyles}
-          >
+          <ResponsiveModal {...defaultModalProps} styles={callerStyles}>
             <div>Content</div>
           </ResponsiveModal>
         );
@@ -308,15 +298,12 @@ describe('Responsive Modal and Layout Tests', () => {
       });
 
       it('supports styles as a callback function', () => {
-        const stylesCallback = vi.fn((theme) => ({
-          body: { padding: '2rem' }
+        const stylesCallback = vi.fn(theme => ({
+          body: { padding: '2rem' },
         }));
 
         renderResponsive(
-          <ResponsiveModal
-            {...defaultModalProps}
-            styles={stylesCallback}
-          >
+          <ResponsiveModal {...defaultModalProps} styles={stylesCallback}>
             <div>Content</div>
           </ResponsiveModal>
         );
@@ -351,7 +338,7 @@ describe('Responsive Modal and Layout Tests', () => {
           isTablet: false,
           isDesktop: true,
           width: 1280,
-          height: 720
+          height: 720,
         });
 
         const longContent = Array.from({ length: 50 }, (_, i) => (
@@ -359,10 +346,7 @@ describe('Responsive Modal and Layout Tests', () => {
         ));
 
         renderResponsive(
-          <ResponsiveModal
-            {...defaultModalProps}
-            withScrollArea={true}
-          >
+          <ResponsiveModal {...defaultModalProps} withScrollArea={true}>
             <div>{longContent}</div>
           </ResponsiveModal>,
           { viewport: TEST_VIEWPORTS.desktop }
@@ -375,7 +359,9 @@ describe('Responsive Modal and Layout Tests', () => {
           expect(scrollArea).toBeInTheDocument();
         }
         // Verify no horizontal scroll area is present
-        const horizontalScroll = modal.querySelector('[data-orientation="horizontal"]');
+        const horizontalScroll = modal.querySelector(
+          '[data-orientation="horizontal"]'
+        );
         expect(horizontalScroll).not.toBeInTheDocument();
       });
 
@@ -387,14 +373,11 @@ describe('Responsive Modal and Layout Tests', () => {
           isTablet: false,
           isDesktop: false,
           width: 375,
-          height: 667
+          height: 667,
         });
 
         renderResponsive(
-          <ResponsiveModal
-            {...defaultModalProps}
-            withScrollArea="auto"
-          >
+          <ResponsiveModal {...defaultModalProps} withScrollArea="auto">
             <div>Short content</div>
           </ResponsiveModal>,
           { viewport: TEST_VIEWPORTS.mobile }
@@ -411,7 +394,7 @@ describe('Responsive Modal and Layout Tests', () => {
     describe('Modal Accessibility', () => {
       it('has correct ARIA attributes', () => {
         renderResponsive(
-          <ResponsiveModal 
+          <ResponsiveModal
             {...defaultModalProps}
             aria-labelledby="modal-title"
             aria-describedby="modal-description"
@@ -428,7 +411,7 @@ describe('Responsive Modal and Layout Tests', () => {
 
       it('manages focus correctly', async () => {
         const user = userEvent.setup();
-        
+
         renderResponsive(
           <ResponsiveModal {...defaultModalProps} trapFocus={true}>
             <button>First Button</button>
@@ -438,18 +421,18 @@ describe('Responsive Modal and Layout Tests', () => {
 
         // Focus should be trapped within modal
         await user.tab();
-        
+
         const firstButton = screen.getByText('First Button');
         expect(firstButton).toHaveFocus();
 
         await user.tab();
-        
+
         const secondButton = screen.getByText('Second Button');
         expect(secondButton).toHaveFocus();
 
         // Tab should cycle back to close button or first focusable element
         await user.tab();
-        
+
         const closeButton = screen.getByRole('button', { name: /close/i });
         expect(closeButton).toHaveFocus();
       });
@@ -460,7 +443,9 @@ describe('Responsive Modal and Layout Tests', () => {
     testAtAllBreakpoints(
       <ResponsiveSelect {...defaultSelectProps} />,
       (breakpoint, viewport) => {
-        const deviceType = getDeviceTypeForBreakpoint(getBreakpointForWidth(viewport.width));
+        const deviceType = getDeviceTypeForBreakpoint(
+          getBreakpointForWidth(viewport.width)
+        );
 
         describe(`Select at ${breakpoint}`, () => {
           beforeEach(() => {
@@ -471,15 +456,14 @@ describe('Responsive Modal and Layout Tests', () => {
               isTablet: deviceType === 'tablet',
               isDesktop: deviceType === 'desktop',
               width: viewport.width,
-              height: viewport.height
+              height: viewport.height,
             });
           });
 
           it('renders with appropriate size', () => {
-            renderResponsive(
-              <ResponsiveSelect {...defaultSelectProps} />,
-              { viewport }
-            );
+            renderResponsive(<ResponsiveSelect {...defaultSelectProps} />, {
+              viewport,
+            });
 
             const select = screen.getByRole('combobox');
             expect(select).toBeInTheDocument();
@@ -491,7 +475,10 @@ describe('Responsive Modal and Layout Tests', () => {
             renderResponsive(
               <ResponsiveSelect
                 {...defaultSelectProps}
-                options={Array.from({ length: 20 }, (_, i) => `Option ${i + 1}`)}
+                options={Array.from(
+                  { length: 20 },
+                  (_, i) => `Option ${i + 1}`
+                )}
               />,
               { viewport }
             );
@@ -520,10 +507,9 @@ describe('Responsive Modal and Layout Tests', () => {
           });
 
           it('displays dropdown with correct positioning', () => {
-            renderResponsive(
-              <ResponsiveSelect {...defaultSelectProps} />,
-              { viewport }
-            );
+            renderResponsive(<ResponsiveSelect {...defaultSelectProps} />, {
+              viewport,
+            });
 
             // Verify select renders - dropdown positioning is a Mantine v8 portal behavior
             const select = screen.getByRole('combobox');
@@ -536,12 +522,12 @@ describe('Responsive Modal and Layout Tests', () => {
     describe('Medical Context Select', () => {
       const practitionerOptions = [
         { value: '1', label: 'Dr. Smith', specialty: 'Cardiology' },
-        { value: '2', label: 'Dr. Johnson', specialty: 'Neurology' }
+        { value: '2', label: 'Dr. Johnson', specialty: 'Neurology' },
       ];
 
       it('enhances options for medical contexts', () => {
         renderResponsive(
-          <ResponsiveSelect 
+          <ResponsiveSelect
             {...defaultSelectProps}
             options={practitionerOptions}
             medicalContext="practitioners"
@@ -549,7 +535,10 @@ describe('Responsive Modal and Layout Tests', () => {
         );
 
         const select = screen.getByRole('combobox');
-        expect(select).toHaveAttribute('aria-label', expect.stringContaining('practitioners'));
+        expect(select).toHaveAttribute(
+          'aria-label',
+          expect.stringContaining('practitioners')
+        );
       });
 
       it('handles loading state correctly', () => {
@@ -564,16 +553,19 @@ describe('Responsive Modal and Layout Tests', () => {
         // Loading text is used as placeholder - verify via placeholder attribute
         const select = screen.getByRole('combobox');
         expect(select).toBeInTheDocument();
-        expect(select).toHaveAttribute('placeholder', 'Loading practitioners...');
+        expect(select).toHaveAttribute(
+          'placeholder',
+          'Loading practitioners...'
+        );
         // Select should be disabled while loading
         expect(select).toBeDisabled();
       });
 
       it('shows option count when enabled', async () => {
         const user = userEvent.setup();
-        
+
         renderResponsive(
-          <ResponsiveSelect 
+          <ResponsiveSelect
             {...defaultSelectProps}
             options={practitionerOptions}
             showCount={true}
@@ -593,27 +585,23 @@ describe('Responsive Modal and Layout Tests', () => {
       it('handles large option lists efficiently', () => {
         const largeOptionList = Array.from({ length: 500 }, (_, i) => ({
           value: i.toString(),
-          label: `Option ${i + 1}`
+          label: `Option ${i + 1}`,
         }));
 
         const startTime = performance.now();
-        
+
         const { unmount } = renderResponsive(
-          <ResponsiveSelect 
-            {...defaultSelectProps}
-            options={largeOptionList}
-          />
+          <ResponsiveSelect {...defaultSelectProps} options={largeOptionList} />
         );
-        
+
         const renderTime = performance.now() - startTime;
-        
+
         // 1000ms threshold accounts for jsdom test environment overhead
         expect(renderTime).toBeLessThan(1000);
         unmount();
       });
 
       it('applies appropriate limits based on device type', () => {
-
         // Test mobile with large dataset
         useResponsive.mockReturnValue({
           breakpoint: 'xs',
@@ -622,16 +610,16 @@ describe('Responsive Modal and Layout Tests', () => {
           isTablet: false,
           isDesktop: false,
           width: 375,
-          height: 667
+          height: 667,
         });
 
-        const largeOptions = Array.from({ length: 100 }, (_, i) => `Option ${i + 1}`);
+        const largeOptions = Array.from(
+          { length: 100 },
+          (_, i) => `Option ${i + 1}`
+        );
 
         renderResponsive(
-          <ResponsiveSelect
-            {...defaultSelectProps}
-            options={largeOptions}
-          />,
+          <ResponsiveSelect {...defaultSelectProps} options={largeOptions} />,
           { viewport: TEST_VIEWPORTS.mobile }
         );
 
@@ -652,7 +640,7 @@ describe('Responsive Modal and Layout Tests', () => {
             name="medication"
           />
           <ResponsiveSelect
-            label="Practitioner" 
+            label="Practitioner"
             options={['Dr. A', 'Dr. B']}
             name="practitioner"
           />
@@ -665,33 +653,30 @@ describe('Responsive Modal and Layout Tests', () => {
       </form>
     );
 
-    testAtAllBreakpoints(
-      <TestForm />,
-      (breakpoint, viewport) => {
-        describe(`Form Layout at ${breakpoint}`, () => {
-          it('applies correct field layout strategy', () => {
-            renderResponsive(<TestForm breakpoint={breakpoint} />, { viewport });
+    testAtAllBreakpoints(<TestForm />, (breakpoint, viewport) => {
+      describe(`Form Layout at ${breakpoint}`, () => {
+        it('applies correct field layout strategy', () => {
+          renderResponsive(<TestForm breakpoint={breakpoint} />, { viewport });
 
-            // Verify form container renders with breakpoint attribute
-            const fieldContainer = document.querySelector('[data-field-layout]');
-            expect(fieldContainer).toBeInTheDocument();
-            // Column layout is CSS-driven, not reflected as data attributes
-            const fields = screen.getAllByRole('combobox');
-            expect(fields).toHaveLength(3);
-          });
-
-          it('maintains proper spacing between fields', () => {
-            renderResponsive(<TestForm breakpoint={breakpoint} />, { viewport });
-
-            const fields = screen.getAllByRole('combobox');
-            expect(fields).toHaveLength(3);
-
-            // Spacing is applied via Mantine/CSS gap utilities
-            // getBoundingClientRect returns 0 in jsdom, so CSS spacing is not verifiable here
-          });
+          // Verify form container renders with breakpoint attribute
+          const fieldContainer = document.querySelector('[data-field-layout]');
+          expect(fieldContainer).toBeInTheDocument();
+          // Column layout is CSS-driven, not reflected as data attributes
+          const fields = screen.getAllByRole('combobox');
+          expect(fields).toHaveLength(3);
         });
-      }
-    );
+
+        it('maintains proper spacing between fields', () => {
+          renderResponsive(<TestForm breakpoint={breakpoint} />, { viewport });
+
+          const fields = screen.getAllByRole('combobox');
+          expect(fields).toHaveLength(3);
+
+          // Spacing is applied via Mantine/CSS gap utilities
+          // getBoundingClientRect returns 0 in jsdom, so CSS spacing is not verifiable here
+        });
+      });
+    });
   });
 
   describe('Touch and Keyboard Navigation', () => {
@@ -703,13 +688,13 @@ describe('Responsive Modal and Layout Tests', () => {
         isTablet: false,
         isDesktop: false,
         width: 375,
-        height: 667
+        height: 667,
       });
 
       const user = userEvent.setup();
-      
+
       renderResponsive(
-        <ResponsiveSelect 
+        <ResponsiveSelect
           {...defaultSelectProps}
           options={['Touch Option 1', 'Touch Option 2']}
         />,
@@ -717,11 +702,11 @@ describe('Responsive Modal and Layout Tests', () => {
       );
 
       const select = screen.getByRole('combobox');
-      
+
       // Simulate touch event
       fireEvent.touchStart(select);
       fireEvent.touchEnd(select);
-      
+
       await user.click(select);
 
       // Verify select renders and responds to touch events
@@ -732,10 +717,7 @@ describe('Responsive Modal and Layout Tests', () => {
 
     it('supports keyboard navigation properly', () => {
       renderResponsive(
-        <ResponsiveSelect
-          {...defaultSelectProps}
-          searchable={true}
-        />
+        <ResponsiveSelect {...defaultSelectProps} searchable={true} />
       );
 
       const select = screen.getByRole('combobox');
@@ -751,7 +733,7 @@ describe('Responsive Modal and Layout Tests', () => {
   describe('Error States and Validation', () => {
     it('displays validation errors responsively', () => {
       renderResponsive(
-        <ResponsiveSelect 
+        <ResponsiveSelect
           {...defaultSelectProps}
           error="This field is required"
           required={true}
@@ -766,10 +748,7 @@ describe('Responsive Modal and Layout Tests', () => {
 
     it('handles empty options gracefully', () => {
       renderResponsive(
-        <ResponsiveSelect 
-          {...defaultSelectProps}
-          options={[]}
-        />
+        <ResponsiveSelect {...defaultSelectProps} options={[]} />
       );
 
       const select = screen.getByRole('combobox');
@@ -784,15 +763,12 @@ describe('Responsive Modal and Layout Tests', () => {
         { label: 'Valid Option', value: '1' },
         'String Option',
         { value: '2' }, // Missing label
-        { label: 'No Value' } // Missing value
+        { label: 'No Value' }, // Missing value
       ];
 
       // Should not crash
       const { container } = renderResponsive(
-        <ResponsiveSelect 
-          {...defaultSelectProps}
-          options={malformedOptions}
-        />
+        <ResponsiveSelect {...defaultSelectProps} options={malformedOptions} />
       );
 
       expect(container.firstChild).toBeInTheDocument();

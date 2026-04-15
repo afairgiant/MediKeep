@@ -160,7 +160,10 @@ const SymptomTimeline = ({ patientId, hidden }) => {
       acc[date].occurrences.push(item);
 
       // Track highest severity for the day
-      if (SYMPTOM_SEVERITY_ORDER[item.severity] > SYMPTOM_SEVERITY_ORDER[acc[date].maxSeverity]) {
+      if (
+        SYMPTOM_SEVERITY_ORDER[item.severity] >
+        SYMPTOM_SEVERITY_ORDER[acc[date].maxSeverity]
+      ) {
         acc[date].maxSeverity = item.severity;
       }
 
@@ -190,16 +193,36 @@ const SymptomTimeline = ({ patientId, hidden }) => {
   return (
     <Paper p="md" withBorder>
       <Group justify="space-between" mb="md">
-        <Title order={3}>{t('symptoms.timeline.title', 'Symptom Timeline')}</Title>
+        <Title order={3}>
+          {t('symptoms.timeline.title', 'Symptom Timeline')}
+        </Title>
         <Select
           value={dateRange}
           onChange={setDateRange}
           data={[
-            { value: 'all', label: t('symptoms.timeline.filters.allDates', 'All Dates') },
-            { value: 'week', label: t('symptoms.timeline.filters.lastWeek', 'Last Week') },
-            { value: 'month', label: t('symptoms.timeline.filters.lastMonth', 'Last Month') },
-            { value: '3months', label: t('symptoms.timeline.filters.last3Months', 'Last 3 Months') },
-            { value: 'year', label: t('symptoms.timeline.filters.lastYear', 'Last Year') },
+            {
+              value: 'all',
+              label: t('symptoms.timeline.filters.allDates', 'All Dates'),
+            },
+            {
+              value: 'week',
+              label: t('symptoms.timeline.filters.lastWeek', 'Last Week'),
+            },
+            {
+              value: 'month',
+              label: t('symptoms.timeline.filters.lastMonth', 'Last Month'),
+            },
+            {
+              value: '3months',
+              label: t(
+                'symptoms.timeline.filters.last3Months',
+                'Last 3 Months'
+              ),
+            },
+            {
+              value: 'year',
+              label: t('symptoms.timeline.filters.lastYear', 'Last Year'),
+            },
           ]}
           style={{ width: 150 }}
         />
@@ -209,7 +232,12 @@ const SymptomTimeline = ({ patientId, hidden }) => {
         <Center p="xl">
           <Stack align="center">
             <IconStethoscope size={48} stroke={1.5} color="gray" />
-            <Text c="dimmed">{t('symptoms.timeline.noEpisodes', 'No symptom episodes recorded in this period')}</Text>
+            <Text c="dimmed">
+              {t(
+                'symptoms.timeline.noEpisodes',
+                'No symptom episodes recorded in this period'
+              )}
+            </Text>
           </Stack>
         </Center>
       ) : (
@@ -228,7 +256,10 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                       day: 'numeric',
                     })}
                   </Text>
-                  <Badge color={SYMPTOM_SEVERITY_COLORS[entry.maxSeverity]} size="sm">
+                  <Badge
+                    color={SYMPTOM_SEVERITY_COLORS[entry.maxSeverity]}
+                    size="sm"
+                  >
                     {entry.maxSeverity}
                   </Badge>
                 </Group>
@@ -237,7 +268,11 @@ const SymptomTimeline = ({ patientId, hidden }) => {
               onClick={() => handleTimelineClick(entry.date)}
             >
               <Text c="dimmed" size="sm">
-                {entry.occurrences.length} {entry.occurrences.length !== 1 ? t('symptoms.episodes', 'episodes') : t('symptoms.episode', 'episode')} {t('symptoms.timeline.recorded', 'recorded')}
+                {entry.occurrences.length}{' '}
+                {entry.occurrences.length !== 1
+                  ? t('symptoms.episodes', 'episodes')
+                  : t('symptoms.episode', 'episode')}{' '}
+                {t('symptoms.timeline.recorded', 'recorded')}
               </Text>
               {entry.occurrences.length <= 3 && (
                 <Group gap="xs" mt="xs">
@@ -250,7 +285,10 @@ const SymptomTimeline = ({ patientId, hidden }) => {
                         variant={isResolved ? 'light' : 'dot'}
                         color={isResolved ? 'green' : undefined}
                       >
-                        {occ.symptom_name}{isResolved ? ` (${t('shared:labels.resolved', 'Resolved')})` : ''}
+                        {occ.symptom_name}
+                        {isResolved
+                          ? ` (${t('shared:labels.resolved', 'Resolved')})`
+                          : ''}
                       </Badge>
                     );
                   })}
@@ -265,20 +303,29 @@ const SymptomTimeline = ({ patientId, hidden }) => {
       <Modal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={t('symptoms.calendar.episodesOn', 'Symptom Episodes on {{date}}', {
-          date: selectedDate
-            ? formatLocalDate(selectedDate, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })
-            : ''
-        })}
+        title={t(
+          'symptoms.calendar.episodesOn',
+          'Symptom Episodes on {{date}}',
+          {
+            date: selectedDate
+              ? formatLocalDate(selectedDate, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })
+              : '',
+          }
+        )}
         size="lg"
       >
         {selectedOccurrences.length === 0 ? (
-          <Text c="dimmed">{t('symptoms.calendar.noOccurrences', 'No occurrences found for this date')}</Text>
+          <Text c="dimmed">
+            {t(
+              'symptoms.calendar.noOccurrences',
+              'No occurrences found for this date'
+            )}
+          </Text>
         ) : (
           <Stack gap="md">
             {selectedOccurrences.map((occurrence, idx) => (

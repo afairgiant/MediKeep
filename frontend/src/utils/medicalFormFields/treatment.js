@@ -35,18 +35,34 @@ export const treatmentFormFields = [
     gridColumn: 5,
     searchable: true,
     options: [
-      { value: 'Surgery', labelKey: 'medical:treatments.treatmentType.options.surgery' },
-      { value: 'Medication', labelKey: 'medical:treatments.treatmentType.options.medication' },
-      { value: 'Physical Therapy', labelKey: 'medical:treatments.treatmentType.options.physicalTherapy' },
-      { value: 'Chemotherapy', labelKey: 'medical:treatments.treatmentType.options.chemotherapy' },
-      { value: 'Radiation', labelKey: 'medical:treatments.treatmentType.options.radiation' },
+      {
+        value: 'Surgery',
+        labelKey: 'medical:treatments.treatmentType.options.surgery',
+      },
+      {
+        value: 'Medication',
+        labelKey: 'medical:treatments.treatmentType.options.medication',
+      },
+      {
+        value: 'Physical Therapy',
+        labelKey: 'medical:treatments.treatmentType.options.physicalTherapy',
+      },
+      {
+        value: 'Chemotherapy',
+        labelKey: 'medical:treatments.treatmentType.options.chemotherapy',
+      },
+      {
+        value: 'Radiation',
+        labelKey: 'medical:treatments.treatmentType.options.radiation',
+      },
       {
         value: 'Immunotherapy',
         labelKey: 'medical:treatments.treatmentType.options.immunotherapy',
       },
       {
         value: 'Occupational Therapy',
-        labelKey: 'medical:treatments.treatmentType.options.occupationalTherapy',
+        labelKey:
+          'medical:treatments.treatmentType.options.occupationalTherapy',
       },
       {
         value: 'Speech Therapy',
@@ -56,8 +72,14 @@ export const treatmentFormFields = [
         value: 'Behavioral Therapy',
         labelKey: 'medical:treatments.treatmentType.options.behavioralTherapy',
       },
-      { value: 'Dialysis', labelKey: 'medical:treatments.treatmentType.options.dialysis' },
-      { value: 'Other', labelKey: 'medical:treatments.treatmentType.options.other' },
+      {
+        value: 'Dialysis',
+        labelKey: 'medical:treatments.treatmentType.options.dialysis',
+      },
+      {
+        value: 'Other',
+        labelKey: 'medical:treatments.treatmentType.options.other',
+      },
     ],
   },
   {
@@ -90,14 +112,26 @@ export const treatmentFormFields = [
     descriptionKey: 'medical:treatments.treatmentStatus.description',
     gridColumn: 12,
     options: [
-      { value: 'planned', labelKey: 'medical:treatments.treatmentStatus.options.planned' },
-      { value: 'active', labelKey: 'medical:treatments.treatmentStatus.options.active' },
-      { value: 'on-hold', labelKey: 'medical:treatments.treatmentStatus.options.onHold' },
+      {
+        value: 'planned',
+        labelKey: 'medical:treatments.treatmentStatus.options.planned',
+      },
+      {
+        value: 'active',
+        labelKey: 'medical:treatments.treatmentStatus.options.active',
+      },
+      {
+        value: 'on-hold',
+        labelKey: 'medical:treatments.treatmentStatus.options.onHold',
+      },
       {
         value: 'completed',
         labelKey: 'medical:treatments.treatmentStatus.options.completed',
       },
-      { value: 'cancelled', labelKey: 'medical:treatments.treatmentStatus.options.cancelled' },
+      {
+        value: 'cancelled',
+        labelKey: 'medical:treatments.treatmentStatus.options.cancelled',
+      },
     ],
   },
   {
@@ -135,16 +169,43 @@ export const treatmentFormFields = [
     searchable: true,
     clearable: true,
     options: [
-      { value: 'Once daily', labelKey: 'medical:treatments.frequencyOptions.onceDaily' },
-      { value: 'Twice daily', labelKey: 'medical:treatments.frequencyOptions.twiceDaily' },
-      { value: 'Three times daily', labelKey: 'medical:treatments.frequencyOptions.threeTimes' },
-      { value: 'Four times daily', labelKey: 'medical:treatments.frequencyOptions.fourTimes' },
+      {
+        value: 'Once daily',
+        labelKey: 'medical:treatments.frequencyOptions.onceDaily',
+      },
+      {
+        value: 'Twice daily',
+        labelKey: 'medical:treatments.frequencyOptions.twiceDaily',
+      },
+      {
+        value: 'Three times daily',
+        labelKey: 'medical:treatments.frequencyOptions.threeTimes',
+      },
+      {
+        value: 'Four times daily',
+        labelKey: 'medical:treatments.frequencyOptions.fourTimes',
+      },
       { value: 'Weekly', labelKey: 'shared:labels.weekly' },
-      { value: 'Bi-weekly', labelKey: 'medical:treatments.frequencyOptions.biWeekly' },
-      { value: 'Monthly', labelKey: 'medical:treatments.frequencyOptions.monthly' },
-      { value: 'As needed', labelKey: 'medical:treatments.frequencyOptions.asNeeded' },
-      { value: 'One time', labelKey: 'medical:treatments.frequencyOptions.oneTime' },
-      { value: 'Continuous', labelKey: 'medical:treatments.frequencyOptions.continuous' },
+      {
+        value: 'Bi-weekly',
+        labelKey: 'medical:treatments.frequencyOptions.biWeekly',
+      },
+      {
+        value: 'Monthly',
+        labelKey: 'medical:treatments.frequencyOptions.monthly',
+      },
+      {
+        value: 'As needed',
+        labelKey: 'medical:treatments.frequencyOptions.asNeeded',
+      },
+      {
+        value: 'One time',
+        labelKey: 'medical:treatments.frequencyOptions.oneTime',
+      },
+      {
+        value: 'Continuous',
+        labelKey: 'medical:treatments.frequencyOptions.continuous',
+      },
     ],
   },
   {

@@ -16,7 +16,6 @@ export const FormInput = ({
   helpText,
   ...props
 }) => {
-
   // Map input types to Mantine types
   const typeMap = {
     text: 'text',
@@ -32,7 +31,7 @@ export const FormInput = ({
     <TextInput
       label={label}
       name={name}
-      type={type === 'tel' ? 'text' : (typeMap[type] || 'text')}
+      type={type === 'tel' ? 'text' : typeMap[type] || 'text'}
       inputMode={type === 'tel' ? 'tel' : undefined}
       value={value}
       onChange={onChange}

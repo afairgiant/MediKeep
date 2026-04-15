@@ -1,6 +1,7 @@
 """
 Tests for Search API endpoints.
 """
+
 import pytest
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
@@ -25,8 +26,7 @@ class TestSearchAPI:
     ):
         """Test basic search query across all record types."""
         response = client.get(
-            "/api/v1/search/?q=diabetes",
-            headers=authenticated_headers
+            "/api/v1/search/?q=diabetes", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -43,7 +43,7 @@ class TestSearchAPI:
         """Test searching specifically for medications."""
         response = client.get(
             "/api/v1/search/?q=Lisinopril&types=medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -52,7 +52,11 @@ class TestSearchAPI:
         medications = data["results"]["medications"]
         assert medications["count"] >= 1
         # Verify search term is actually in results
-        found_items = [item for item in medications["items"] if "Lisinopril" in item["medication_name"]]
+        found_items = [
+            item
+            for item in medications["items"]
+            if "Lisinopril" in item["medication_name"]
+        ]
         assert len(found_items) > 0, "Search term not found in results"
 
     def test_search_conditions(
@@ -61,7 +65,7 @@ class TestSearchAPI:
         """Test searching specifically for conditions."""
         response = client.get(
             "/api/v1/search/?q=Hypertension&types=conditions",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -69,7 +73,9 @@ class TestSearchAPI:
         assert "conditions" in data["results"]
         conditions = data["results"]["conditions"]
         assert conditions["count"] >= 1
-        assert any("Hypertension" in item["condition_name"] for item in conditions["items"])
+        assert any(
+            "Hypertension" in item["condition_name"] for item in conditions["items"]
+        )
 
     def test_search_allergies(
         self, client: TestClient, populated_patient_data, authenticated_headers
@@ -77,7 +83,7 @@ class TestSearchAPI:
         """Test searching specifically for allergies."""
         response = client.get(
             "/api/v1/search/?q=Penicillin&types=allergies",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -92,8 +98,7 @@ class TestSearchAPI:
     ):
         """Test searching specifically for immunizations."""
         response = client.get(
-            "/api/v1/search/?q=COVID&types=immunizations",
-            headers=authenticated_headers
+            "/api/v1/search/?q=COVID&types=immunizations", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -109,22 +114,21 @@ class TestSearchAPI:
         """Test searching across multiple specific types."""
         response = client.get(
             "/api/v1/search/?q=diabetes&types=medications&types=conditions",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         assert len(data["results"]) <= 2
-        assert all(key in ["medications", "conditions"] for key in data["results"].keys())
+        assert all(
+            key in ["medications", "conditions"] for key in data["results"].keys()
+        )
 
     def test_search_all_types(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
         """Test searching across all record types (default behavior)."""
-        response = client.get(
-            "/api/v1/search/?q=active",
-            headers=authenticated_headers
-        )
+        response = client.get("/api/v1/search/?q=active", headers=authenticated_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -136,7 +140,7 @@ class TestSearchAPI:
         """Test search pagination."""
         response = client.get(
             "/api/v1/search/?q=a&types=medications&skip=0&limit=1",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -149,8 +153,7 @@ class TestSearchAPI:
     ):
         """Test search results sorted by date descending."""
         response = client.get(
-            "/api/v1/search/?q=active&sort=date_desc",
-            headers=authenticated_headers
+            "/api/v1/search/?q=active&sort=date_desc", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -162,8 +165,7 @@ class TestSearchAPI:
     ):
         """Test search results sorted by date ascending."""
         response = client.get(
-            "/api/v1/search/?q=active&sort=date_asc",
-            headers=authenticated_headers
+            "/api/v1/search/?q=active&sort=date_asc", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -175,8 +177,7 @@ class TestSearchAPI:
     ):
         """Test search results sorted by relevance (default)."""
         response = client.get(
-            "/api/v1/search/?q=diabetes&sort=relevance",
-            headers=authenticated_headers
+            "/api/v1/search/?q=diabetes&sort=relevance", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -188,8 +189,7 @@ class TestSearchAPI:
     ):
         """Test search with no matching results."""
         response = client.get(
-            "/api/v1/search/?q=xyznonexistent123",
-            headers=authenticated_headers
+            "/api/v1/search/?q=xyznonexistent123", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -202,41 +202,42 @@ class TestSearchAPI:
         """Test that search is case insensitive."""
         response_lower = client.get(
             "/api/v1/search/?q=lisinopril&types=medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response_upper = client.get(
             "/api/v1/search/?q=LISINOPRIL&types=medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response_lower.status_code == 200
         assert response_upper.status_code == 200
-        assert response_lower.json()["total_count"] == response_upper.json()["total_count"]
+        assert (
+            response_lower.json()["total_count"] == response_upper.json()["total_count"]
+        )
 
     def test_search_partial_match(
         self, client: TestClient, populated_patient_data, authenticated_headers
     ):
         """Test partial text matching in search."""
         response = client.get(
-            "/api/v1/search/?q=lisin&types=medications",
-            headers=authenticated_headers
+            "/api/v1/search/?q=lisin&types=medications", headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
         if data["total_count"] > 0:
             medications = data["results"].get("medications", {})
-            assert any("Lisinopril" in item["medication_name"] for item in medications.get("items", []))
+            assert any(
+                "Lisinopril" in item["medication_name"]
+                for item in medications.get("items", [])
+            )
 
     def test_search_validation_empty_query(
         self, client: TestClient, authenticated_headers
     ):
         """Test validation error for empty query."""
-        response = client.get(
-            "/api/v1/search/?q=",
-            headers=authenticated_headers
-        )
+        response = client.get("/api/v1/search/?q=", headers=authenticated_headers)
 
         assert response.status_code == 422
 
@@ -244,10 +245,7 @@ class TestSearchAPI:
         self, client: TestClient, authenticated_headers
     ):
         """Test that single character queries work."""
-        response = client.get(
-            "/api/v1/search/?q=a",
-            headers=authenticated_headers
-        )
+        response = client.get("/api/v1/search/?q=a", headers=authenticated_headers)
 
         assert response.status_code == 200
 
@@ -257,7 +255,7 @@ class TestSearchAPI:
         """Test that search response has correct structure."""
         response = client.get(
             "/api/v1/search/?q=Lisinopril&types=medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -284,7 +282,7 @@ class TestSearchAPI:
         """Test that search result items have correct structure."""
         response = client.get(
             "/api/v1/search/?q=Lisinopril&types=medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -307,10 +305,7 @@ class TestSearchAPI:
         """Test that users can only search their own records."""
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -322,10 +317,7 @@ class TestSearchAPI:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -341,14 +333,13 @@ class TestSearchAPI:
                 "medication_name": "PrivateMedication123",
                 "dosage": "100mg",
                 "status": "active",
-                "patient_id": patient1.id
+                "patient_id": patient1.id,
             },
-            headers=headers1
+            headers=headers1,
         )
 
         response = client.get(
-            "/api/v1/search/?q=PrivateMedication123&types=medications",
-            headers=headers2
+            "/api/v1/search/?q=PrivateMedication123&types=medications", headers=headers2
         )
 
         assert response.status_code == 200
@@ -369,25 +360,22 @@ class TestSearchAPI:
                 "dosage": "10mg",
                 "notes": "UniqueNoteContent123",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response = client.get(
             "/api/v1/search/?q=UniqueNoteContent123&types=medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
 
-    def test_search_limit_validation(
-        self, client: TestClient, authenticated_headers
-    ):
+    def test_search_limit_validation(self, client: TestClient, authenticated_headers):
         """Test that limit parameter is validated."""
         response = client.get(
-            "/api/v1/search/?q=test&limit=200",
-            headers=authenticated_headers
+            "/api/v1/search/?q=test&limit=200", headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -416,8 +404,7 @@ class TestSearchAPI:
 
         for malicious_query in sql_injection_queries:
             response = client.get(
-                f"/api/v1/search/?q={malicious_query}",
-                headers=authenticated_headers
+                f"/api/v1/search/?q={malicious_query}", headers=authenticated_headers
             )
 
             # Should handle gracefully - either return empty results or validation error
@@ -430,28 +417,22 @@ class TestSearchAPI:
                 assert "total_count" in data
                 assert "results" in data
 
-    def test_search_query_edge_cases(
-        self, client: TestClient, authenticated_headers
-    ):
+    def test_search_query_edge_cases(self, client: TestClient, authenticated_headers):
         """Test edge cases in search queries."""
         # Whitespace only
-        response = client.get(
-            "/api/v1/search/?q=   ",
-            headers=authenticated_headers
-        )
+        response = client.get("/api/v1/search/?q=   ", headers=authenticated_headers)
         assert response.status_code in [200, 422, 500]
 
         # Special characters
         response = client.get(
-            "/api/v1/search/?q=!@#$%^&*()",
-            headers=authenticated_headers
+            "/api/v1/search/?q=!@#$%^&*()", headers=authenticated_headers
         )
         assert response.status_code in [200, 422, 500]
 
         # HTML/Script tags
         response = client.get(
             "/api/v1/search/?q=<script>alert('xss')</script>",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code in [200, 400, 422, 500]
 
@@ -464,16 +445,20 @@ class TestSearchAPI:
                 if isinstance(category_data, dict) and "items" in category_data:
                     for item in category_data["items"]:
                         # Check that item fields don't contain script tags
-                        item_str = str(item.get("highlight", "")) + str(item.get("notes", ""))
-                        assert "<script>" not in item_str.lower(), "XSS content found in search results"
+                        item_str = str(item.get("highlight", "")) + str(
+                            item.get("notes", "")
+                        )
+                        assert (
+                            "<script>" not in item_str.lower()
+                        ), "XSS content found in search results"
 
         # Null bytes - URL encoding may fail, so wrap in try-except
         try:
             from urllib.parse import quote
+
             encoded_null_query = quote("test\x00null", safe="")
             response = client.get(
-                f"/api/v1/search/?q={encoded_null_query}",
-                headers=authenticated_headers
+                f"/api/v1/search/?q={encoded_null_query}", headers=authenticated_headers
             )
             assert response.status_code in [200, 400, 422, 500]
         except (UnicodeEncodeError, ValueError):
@@ -490,45 +475,40 @@ class TestSearchAPI:
         """
         # Zero limit - API accepts this and returns empty results
         response = client.get(
-            "/api/v1/search/?q=test&limit=0",
-            headers=authenticated_headers
+            "/api/v1/search/?q=test&limit=0", headers=authenticated_headers
         )
         # TODO: API should validate limit >= 1, currently accepts 0
         assert response.status_code in [200, 422, 500]
 
         # Negative limit - API may coerce to positive or reject
         response = client.get(
-            "/api/v1/search/?q=test&limit=-5",
-            headers=authenticated_headers
+            "/api/v1/search/?q=test&limit=-5", headers=authenticated_headers
         )
         # TODO: API should validate limit > 0
         assert response.status_code in [200, 422, 500]
 
         # Non-numeric limit - FastAPI should reject via Pydantic validation
         response = client.get(
-            "/api/v1/search/?q=test&limit=abc",
-            headers=authenticated_headers
+            "/api/v1/search/?q=test&limit=abc", headers=authenticated_headers
         )
-        assert response.status_code == 422, f"Should reject non-numeric limit, got {response.status_code}"
+        assert (
+            response.status_code == 422
+        ), f"Should reject non-numeric limit, got {response.status_code}"
 
         # Extremely large limit - API may accept or reject based on configured max
         response = client.get(
-            "/api/v1/search/?q=test&limit=999999",
-            headers=authenticated_headers
+            "/api/v1/search/?q=test&limit=999999", headers=authenticated_headers
         )
         # TODO: API should validate max limit
         assert response.status_code in [200, 422, 500]
 
-    def test_search_very_long_query(
-        self, client: TestClient, authenticated_headers
-    ):
+    def test_search_very_long_query(self, client: TestClient, authenticated_headers):
         """Test handling of very long search queries (>10,000 characters)."""
         # 10,000+ character query
         long_query = "a" * 10001
 
         response = client.get(
-            f"/api/v1/search/?q={long_query}",
-            headers=authenticated_headers
+            f"/api/v1/search/?q={long_query}", headers=authenticated_headers
         )
 
         # Should reject or handle gracefully
@@ -542,7 +522,7 @@ class TestSearchAPI:
 
         response = client.get(
             f"/api/v1/search/?q={search_term}&types=medications",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -570,7 +550,7 @@ class TestSearchAPI:
         # Get first page
         response1 = client.get(
             "/api/v1/search/?q=a&types=medications&skip=0&limit=2",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response1.status_code == 200
 
@@ -579,7 +559,7 @@ class TestSearchAPI:
         # Get second page
         response2 = client.get(
             "/api/v1/search/?q=a&types=medications&skip=2&limit=2",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response2.status_code == 200
 
@@ -617,18 +597,20 @@ class TestSearchAPI:
                 "reason": "SearchableEncounter456",
                 "date": str(date.today() - timedelta(days=7)),
                 "visit_type": "routine",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # Only test search if encounter was created successfully
         if create_response.status_code != 201:
-            pytest.skip(f"Could not create encounter for test: {create_response.status_code}")
+            pytest.skip(
+                f"Could not create encounter for test: {create_response.status_code}"
+            )
 
         response = client.get(
             "/api/v1/search/?q=SearchableEncounter456&types=encounters",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -637,7 +619,9 @@ class TestSearchAPI:
             data = response.json()
             encounters = data["results"].get("encounters", {"count": 0})
             # Encounter should be searchable by reason text
-            assert encounters["count"] >= 0  # May be 0 if search doesn't index 'reason' field
+            assert (
+                encounters["count"] >= 0
+            )  # May be 0 if search doesn't index 'reason' field
 
     def test_search_procedures(
         self, client: TestClient, user_with_patient, authenticated_headers
@@ -651,14 +635,14 @@ class TestSearchAPI:
                 "procedure_name": "UniqueSearchProcedure789",
                 "date": str(date.today() - timedelta(days=30)),
                 "status": "completed",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response = client.get(
             "/api/v1/search/?q=UniqueSearchProcedure789&types=procedures",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -679,14 +663,14 @@ class TestSearchAPI:
                 "treatment_type": "therapy",
                 "start_date": str(date.today() - timedelta(days=14)),
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response = client.get(
             "/api/v1/search/?q=UniqueSearchTreatment456&types=treatments",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200

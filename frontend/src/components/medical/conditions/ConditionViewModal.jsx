@@ -58,15 +58,18 @@ const ConditionViewModal = ({
   if (!isOpen || !condition) return null;
 
   // Helper function to get practitioner name from ID
-  const getPractitionerName = (practitionerId) => {
+  const getPractitionerName = practitionerId => {
     if (!practitionerId || !practitioners || practitioners.length === 0) {
       return null;
     }
     const practitioner = practitioners.find(p => p.id === practitionerId);
-    return practitioner ? practitioner.name || `${practitioner.first_name || ''} ${practitioner.last_name || ''}`.trim() : null;
+    return practitioner
+      ? practitioner.name ||
+          `${practitioner.first_name || ''} ${practitioner.last_name || ''}`.trim()
+      : null;
   };
 
-  const handlePractitionerClick = (practitionerId) => {
+  const handlePractitionerClick = practitionerId => {
     if (onPractitionerClick) {
       onPractitionerClick(practitionerId);
     }
@@ -77,13 +80,18 @@ const ConditionViewModal = ({
     onClose();
   };
 
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     switch (severity) {
-      case 'critical': return 'red';
-      case 'severe': return 'orange';
-      case 'moderate': return 'yellow';
-      case 'mild': return 'blue';
-      default: return 'gray';
+      case 'critical':
+        return 'red';
+      case 'severe':
+        return 'orange';
+      case 'moderate':
+        return 'yellow';
+      case 'mild':
+        return 'blue';
+      default:
+        return 'gray';
     }
   };
 
@@ -108,9 +116,13 @@ const ConditionViewModal = ({
     }
 
     if (endDate || status === 'resolved' || status === 'inactive') {
-      return t('conditions.card.durationEnded', '{{duration}} (ended)', { duration });
+      return t('conditions.card.durationEnded', '{{duration}} (ended)', {
+        duration,
+      });
     } else {
-      return t('conditions.card.durationOngoing', '{{duration}} (ongoing)', { duration });
+      return t('conditions.card.durationOngoing', '{{duration}} (ongoing)', {
+        duration,
+      });
     }
   };
 
@@ -125,10 +137,16 @@ const ConditionViewModal = ({
     >
       <Stack gap="lg">
         {/* Header Card */}
-        <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <Paper
+          withBorder
+          p="md"
+          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3} mb="xs">{condition.diagnosis || condition.condition_name}</Title>
+              <Title order={3} mb="xs">
+                {condition.diagnosis || condition.condition_name}
+              </Title>
               <Group gap="xs">
                 <StatusBadge status={condition.status} />
               </Group>
@@ -146,197 +164,295 @@ const ConditionViewModal = ({
         </Paper>
 
         <Tabs value={activeTab} onChange={setActiveTab}>
-        <Tabs.List>
-          <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-            {t('shared:tabs.overview', 'Overview')}
-          </Tabs.Tab>
-          <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-            {t('shared:tabs.clinicalDetails', 'Clinical Details')}
-          </Tabs.Tab>
-          <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-            {t('shared:tabs.notes', 'Notes')}
-          </Tabs.Tab>
-          <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-            {t('shared:tabs.documents', 'Documents')}
-          </Tabs.Tab>
-        </Tabs.List>
+          <Tabs.List>
+            <Tabs.Tab
+              value="overview"
+              leftSection={<IconInfoCircle size={16} />}
+            >
+              {t('shared:tabs.overview', 'Overview')}
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="clinical"
+              leftSection={<IconStethoscope size={16} />}
+            >
+              {t('shared:tabs.clinicalDetails', 'Clinical Details')}
+            </Tabs.Tab>
+            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+              {t('shared:tabs.notes', 'Notes')}
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="documents"
+              leftSection={<IconFileText size={16} />}
+            >
+              {t('shared:tabs.documents', 'Documents')}
+            </Tabs.Tab>
+          </Tabs.List>
 
-        {/* Overview Tab */}
-        <Tabs.Panel value="overview">
-          <Box mt="md">
-            <Stack gap="lg">
-              {/* Basic Information */}
-              <div>
-                <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('shared:labels.diagnosis', 'Diagnosis')}</Text>
-                    <Text size="sm" c={condition.diagnosis ? 'inherit' : 'dimmed'}>
-                      {condition.diagnosis || t('shared:labels.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.conditionName', 'Condition Name')}</Text>
-                    <Text size="sm" c={condition.condition_name ? 'inherit' : 'dimmed'}>
-                      {condition.condition_name || t('shared:labels.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.severity', 'Severity')}</Text>
-                    <Badge
-                      color={condition.severity ? getSeverityColor(condition.severity) : 'gray'}
-                      variant={condition.severity ? 'filled' : 'light'}
-                      size="sm"
-                    >
-                      {condition.severity || t('shared:labels.notSpecified', 'Not specified')}
-                    </Badge>
-                  </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
-                    <StatusBadge status={condition.status} />
-                  </Stack>
-                </SimpleGrid>
-              </div>
-
-              {/* Timeline */}
-              <div>
-                <Title order={4} mb="sm">{t('shared:labels.timeline', 'Timeline')}</Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.onsetDate', 'Onset Date')}</Text>
-                    <Text size="sm" c={condition.onset_date ? 'inherit' : 'dimmed'}>
-                      {condition.onset_date ? formatDate(condition.onset_date) : t('shared:labels.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('conditions.modal.labels.endDate', 'End Date')}</Text>
-                    <Text size="sm" c={condition.end_date ? 'inherit' : 'dimmed'}>
-                      {condition.end_date ? formatDate(condition.end_date) : t('shared:labels.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                  {condition.onset_date && (
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.duration', 'Duration')}</Text>
-                      <Text size="sm">{getConditionDuration(condition.onset_date, condition.end_date, condition.status)}</Text>
-                    </Stack>
-                  )}
-                </SimpleGrid>
-              </div>
-
-              {/* Practitioner */}
-              <div>
-                <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
-                <Stack gap="xs">
-                  {condition.practitioner_id ? (
-                    <Text
-                      size="sm"
-                      fw={600}
-                      style={{
-                        cursor: 'pointer',
-                        color: 'var(--mantine-color-blue-6)',
-                        textDecoration: 'underline',
-                      }}
-                      onClick={() => handlePractitionerClick(condition.practitioner_id)}
-                    >
-                      {condition.practitioner?.name ||
-                        getPractitionerName(condition.practitioner_id) ||
-                        `Practitioner #${condition.practitioner_id}`}
-                    </Text>
-                  ) : (
-                    <Text size="sm" c="dimmed">{t('shared:labels.noPractitionerAssigned', 'No practitioner assigned')}</Text>
-                  )}
-                </Stack>
-              </div>
-
-              {/* Linked Medications */}
-              <div>
-                <Title order={4} mb="sm">{t('labels.linkedMedications', 'Linked Medications')}</Title>
-                <MedicationRelationships
-                  conditionId={condition.id}
-                  conditionMedications={conditionMedications}
-                  medications={medications}
-                  fetchConditionMedications={fetchConditionMedications}
-                  navigate={navigate}
-                  isViewMode={true}
-                />
-              </div>
-
-              {/* Tags Section */}
-              {condition.tags && condition.tags.length > 0 && (
+          {/* Overview Tab */}
+          <Tabs.Panel value="overview">
+            <Box mt="md">
+              <Stack gap="lg">
+                {/* Basic Information */}
                 <div>
-                  <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
-                  <Group gap="xs">
-                    {condition.tags.map((tag, index) => (
-                      <ClickableTagBadge
-                        key={index}
-                        tag={tag}
-                        color={getTagColor(tag)}
-                      />
-                    ))}
-                  </Group>
+                  <Title order={4} mb="sm">
+                    {t('shared:labels.basicInformation', 'Basic Information')}
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('shared:labels.diagnosis', 'Diagnosis')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={condition.diagnosis ? 'inherit' : 'dimmed'}
+                      >
+                        {condition.diagnosis ||
+                          t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('shared:fields.conditionName', 'Condition Name')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={condition.condition_name ? 'inherit' : 'dimmed'}
+                      >
+                        {condition.condition_name ||
+                          t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('shared:fields.severity', 'Severity')}
+                      </Text>
+                      <Badge
+                        color={
+                          condition.severity
+                            ? getSeverityColor(condition.severity)
+                            : 'gray'
+                        }
+                        variant={condition.severity ? 'filled' : 'light'}
+                        size="sm"
+                      >
+                        {condition.severity ||
+                          t('shared:labels.notSpecified', 'Not specified')}
+                      </Badge>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('shared:fields.status', 'Status')}
+                      </Text>
+                      <StatusBadge status={condition.status} />
+                    </Stack>
+                  </SimpleGrid>
                 </div>
-              )}
-            </Stack>
-          </Box>
-        </Tabs.Panel>
 
-        {/* Clinical Details Tab */}
-        <Tabs.Panel value="clinical">
-          <Box mt="md">
-            <Stack gap="lg">
-              {/* Medical Codes */}
-              <div>
-                <Title order={4} mb="sm">{t('conditions.modal.sections.medicalCodes', 'Medical Codes')}</Title>
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                {/* Timeline */}
+                <div>
+                  <Title order={4} mb="sm">
+                    {t('shared:labels.timeline', 'Timeline')}
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('conditions.modal.labels.onsetDate', 'Onset Date')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={condition.onset_date ? 'inherit' : 'dimmed'}
+                      >
+                        {condition.onset_date
+                          ? formatDate(condition.onset_date)
+                          : t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('conditions.modal.labels.endDate', 'End Date')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={condition.end_date ? 'inherit' : 'dimmed'}
+                      >
+                        {condition.end_date
+                          ? formatDate(condition.end_date)
+                          : t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    {condition.onset_date && (
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.duration', 'Duration')}
+                        </Text>
+                        <Text size="sm">
+                          {getConditionDuration(
+                            condition.onset_date,
+                            condition.end_date,
+                            condition.status
+                          )}
+                        </Text>
+                      </Stack>
+                    )}
+                  </SimpleGrid>
+                </div>
+
+                {/* Practitioner */}
+                <div>
+                  <Title order={4} mb="sm">
+                    {t('shared:fields.practitioner', 'Practitioner')}
+                  </Title>
                   <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.icd10Code', 'ICD-10 Code')}</Text>
-                    <Text size="sm" c={condition.icd10_code ? 'inherit' : 'dimmed'}>
-                      {condition.icd10_code || t('shared:labels.notSpecified', 'Not specified')}
-                    </Text>
+                    {condition.practitioner_id ? (
+                      <Text
+                        size="sm"
+                        fw={600}
+                        style={{
+                          cursor: 'pointer',
+                          color: 'var(--mantine-color-blue-6)',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={() =>
+                          handlePractitionerClick(condition.practitioner_id)
+                        }
+                      >
+                        {condition.practitioner?.name ||
+                          getPractitionerName(condition.practitioner_id) ||
+                          `Practitioner #${condition.practitioner_id}`}
+                      </Text>
+                    ) : (
+                      <Text size="sm" c="dimmed">
+                        {t(
+                          'shared:labels.noPractitionerAssigned',
+                          'No practitioner assigned'
+                        )}
+                      </Text>
+                    )}
                   </Stack>
-                  <Stack gap="xs">
-                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.snomedCode', 'SNOMED Code')}</Text>
-                    <Text size="sm" c={condition.snomed_code ? 'inherit' : 'dimmed'}>
-                      {condition.snomed_code || t('shared:labels.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                  <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                    <Text fw={500} size="sm" c="dimmed">{t('shared:fields.codeDescription', 'Code Description')}</Text>
-                    <Text size="sm" c={condition.code_description ? 'inherit' : 'dimmed'}>
-                      {condition.code_description || t('shared:labels.notSpecified', 'Not specified')}
-                    </Text>
-                  </Stack>
-                </SimpleGrid>
-              </div>
-            </Stack>
-          </Box>
-        </Tabs.Panel>
+                </div>
 
-        {/* Notes Tab */}
-        <Tabs.Panel value="notes">
-          <Box mt="md">
-            <Stack gap="lg">
-              {/* Clinical Notes */}
-              <div>
-                <Title order={4} mb="sm">{t('shared:labels.clinicalNotes', 'Clinical Notes')}</Title>
-                <Text size="sm" c={condition.notes ? 'inherit' : 'dimmed'}>
-                  {condition.notes || t('conditions.modal.noNotesAvailable', 'No clinical notes available')}
-                </Text>
-              </div>
-            </Stack>
-          </Box>
-        </Tabs.Panel>
+                {/* Linked Medications */}
+                <div>
+                  <Title order={4} mb="sm">
+                    {t('labels.linkedMedications', 'Linked Medications')}
+                  </Title>
+                  <MedicationRelationships
+                    conditionId={condition.id}
+                    conditionMedications={conditionMedications}
+                    medications={medications}
+                    fetchConditionMedications={fetchConditionMedications}
+                    navigate={navigate}
+                    isViewMode={true}
+                  />
+                </div>
 
-        {/* Documents Tab */}
-        <Tabs.Panel value="documents">
-          <Box mt="md">
-            <DocumentManagerWithProgress
-              entityType="condition"
-              entityId={condition.id}
-              onError={onError}
-            />
-          </Box>
-        </Tabs.Panel>
+                {/* Tags Section */}
+                {condition.tags && condition.tags.length > 0 && (
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:labels.tags', 'Tags')}
+                    </Title>
+                    <Group gap="xs">
+                      {condition.tags.map((tag, index) => (
+                        <ClickableTagBadge
+                          key={index}
+                          tag={tag}
+                          color={getTagColor(tag)}
+                        />
+                      ))}
+                    </Group>
+                  </div>
+                )}
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Clinical Details Tab */}
+          <Tabs.Panel value="clinical">
+            <Box mt="md">
+              <Stack gap="lg">
+                {/* Medical Codes */}
+                <div>
+                  <Title order={4} mb="sm">
+                    {t(
+                      'conditions.modal.sections.medicalCodes',
+                      'Medical Codes'
+                    )}
+                  </Title>
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('shared:fields.icd10Code', 'ICD-10 Code')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={condition.icd10_code ? 'inherit' : 'dimmed'}
+                      >
+                        {condition.icd10_code ||
+                          t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('shared:fields.snomedCode', 'SNOMED Code')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={condition.snomed_code ? 'inherit' : 'dimmed'}
+                      >
+                        {condition.snomed_code ||
+                          t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t('shared:fields.codeDescription', 'Code Description')}
+                      </Text>
+                      <Text
+                        size="sm"
+                        c={condition.code_description ? 'inherit' : 'dimmed'}
+                      >
+                        {condition.code_description ||
+                          t('shared:labels.notSpecified', 'Not specified')}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Notes Tab */}
+          <Tabs.Panel value="notes">
+            <Box mt="md">
+              <Stack gap="lg">
+                {/* Clinical Notes */}
+                <div>
+                  <Title order={4} mb="sm">
+                    {t('shared:labels.clinicalNotes', 'Clinical Notes')}
+                  </Title>
+                  <Text size="sm" c={condition.notes ? 'inherit' : 'dimmed'}>
+                    {condition.notes ||
+                      t(
+                        'conditions.modal.noNotesAvailable',
+                        'No clinical notes available'
+                      )}
+                  </Text>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Documents Tab */}
+          <Tabs.Panel value="documents">
+            <Box mt="md">
+              <DocumentManagerWithProgress
+                entityType="condition"
+                entityId={condition.id}
+                onError={onError}
+              />
+            </Box>
+          </Tabs.Panel>
         </Tabs>
 
         {/* Action Buttons */}
@@ -344,9 +460,17 @@ const ConditionViewModal = ({
           <Button variant="default" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+          <Tooltip
+            label={disableEditTooltip}
+            disabled={!disableEdit || !disableEditTooltip}
+          >
             <span>
-              <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />} disabled={disableEdit}>
+              <Button
+                variant="filled"
+                onClick={handleEdit}
+                leftSection={<IconEdit size={16} />}
+                disabled={disableEdit}
+              >
                 {t('shared:labels.edit', 'Edit')}
               </Button>
             </span>

@@ -63,14 +63,31 @@ i18n
       },
     },
 
-    ns: ['common', 'medical', 'errors', 'navigation', 'notifications', 'admin', 'shared', 'auth', 'settings', 'reports', 'labresults', 'vitals', 'invitations', 'documents'],
+    ns: [
+      'common',
+      'medical',
+      'errors',
+      'navigation',
+      'notifications',
+      'admin',
+      'shared',
+      'auth',
+      'settings',
+      'reports',
+      'labresults',
+      'vitals',
+      'invitations',
+      'documents',
+    ],
     defaultNS: 'common',
 
     // Return key if translation is missing in development, fallback to English in production
     saveMissing: false,
     missingKeyHandler: (lngs, ns, key) => {
       if (isDevelopment()) {
-        console.warn(`Missing translation key: ${ns}:${key} for language: ${lngs[0]}`);
+        console.warn(
+          `Missing translation key: ${ns}:${key} for language: ${lngs[0]}`
+        );
       }
     },
 

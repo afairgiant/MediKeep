@@ -1,7 +1,7 @@
 /**
  * NavigationToggle - Hamburger menu toggle button
  * Used by mobile and tablet navigation components
- * 
+ *
  * Following PR #3: Navigation & Layout System specifications
  */
 
@@ -18,15 +18,20 @@ const NavigationToggle = ({
   style = {},
   size = 'md',
   variant = 'default',
-  ariaLabel
+  ariaLabel,
 }) => {
   // Create responsive ActionIcon
-  const ResponsiveActionIcon = ResponsiveComponentFactory.createMantine(ActionIcon, {
-    size: { xs: 'lg', sm: 'lg', md: size },
-    variant: { xs: 'filled', sm: 'light', md: variant }
-  });
+  const ResponsiveActionIcon = ResponsiveComponentFactory.createMantine(
+    ActionIcon,
+    {
+      size: { xs: 'lg', sm: 'lg', md: size },
+      variant: { xs: 'filled', sm: 'light', md: variant },
+    }
+  );
 
-  const defaultAriaLabel = isOpen ? 'Close navigation menu' : 'Open navigation menu';
+  const defaultAriaLabel = isOpen
+    ? 'Close navigation menu'
+    : 'Open navigation menu';
 
   return (
     <ResponsiveActionIcon

@@ -2,16 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-  Container,
-  Paper,
-  Text,
-  Stack,
-} from '@mantine/core';
-import {
-  IconAlertTriangle,
-  IconPlus,
-} from '@tabler/icons-react';
+import { Container, Paper, Text, Stack } from '@mantine/core';
+import { IconAlertTriangle, IconPlus } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
@@ -32,13 +24,16 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import PaginationControls from '../../components/shared/PaginationControls';
-import { AllergyCard, AllergyViewModal, AllergyFormWrapper } from '../../components/medical/allergies';
+import {
+  AllergyCard,
+  AllergyViewModal,
+  AllergyFormWrapper,
+} from '../../components/medical/allergies';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
-
 
 const Allergies = () => {
   const navigate = useNavigate();
@@ -47,7 +42,17 @@ const Allergies = () => {
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('allergies');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Standardized data management
   const {
@@ -86,7 +91,8 @@ const Allergies = () => {
 
   useEffect(() => {
     if (currentPatient?.id) {
-      apiService.getPatientMedications(currentPatient.id)
+      apiService
+        .getPatientMedications(currentPatient.id)
         .then(response => {
           setMedications(response || []);
         })
@@ -98,7 +104,8 @@ const Allergies = () => {
   }, [currentPatient?.id]);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('allergy', allergies);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('allergy', allergies);
 
   // View modal navigation with URL deep linking
   const {
@@ -115,7 +122,9 @@ const Allergies = () => {
   const formatters = {
     ...getEntityFormatters('allergies', [], navigate, null, formatDate),
     medication_name: (value, allergy) => {
-      const medication = medications.find(med => med.id === allergy.medication_id);
+      const medication = medications.find(
+        med => med.id === allergy.medication_id
+      );
       return medication?.medication_name || '';
     },
   };
@@ -161,7 +170,7 @@ const Allergies = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('allergies_form_error', {
         message: 'Form submission error in allergies',
         error,
@@ -217,7 +226,9 @@ const Allergies = () => {
       onset_date: allergy.onset_date || '',
       status: allergy.status || 'active',
       notes: allergy.notes || '',
-      medication_id: allergy.medication_id ? allergy.medication_id.toString() : '',
+      medication_id: allergy.medication_id
+        ? allergy.medication_id.toString()
+        : '',
       tags: allergy.tags || [],
     });
     setEditingAllergy(allergy);
@@ -242,7 +253,9 @@ const Allergies = () => {
       ...formData,
       onset_date: formData.onset_date || null,
       notes: formData.notes || null,
-      medication_id: formData.medication_id ? parseInt(formData.medication_id) : null,
+      medication_id: formData.medication_id
+        ? parseInt(formData.medication_id)
+        : null,
       patient_id: currentPatient.id,
     };
 
@@ -329,7 +342,11 @@ const Allergies = () => {
   }, [processedAllergies.length, clampPage]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('allergies.messages.loading', 'Loading allergies...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('allergies.messages.loading', 'Loading allergies...')}
+      />
+    );
   }
 
   return (
@@ -365,7 +382,11 @@ const Allergies = () => {
         <AllergyFormWrapper
           isOpen={showAddForm}
           onClose={() => !isBlocking && resetForm()}
-          title={editingAllergy ? t('allergies.editTitle', 'Edit Allergy') : t('shared:labels.addNewAllergy', 'Add New Allergy')}
+          title={
+            editingAllergy
+              ? t('allergies.editTitle', 'Edit Allergy')
+              : t('shared:labels.addNewAllergy', 'Add New Allergy')
+          }
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
@@ -393,13 +414,19 @@ const Allergies = () => {
               icon={IconAlertTriangle}
               title={t('allergies.emptyState.title', 'No allergies found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('allergies.emptyState.noData', 'Click "Add New Allergy" to get started.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'allergies.emptyState.noData',
+                'Click "Add New Allergy" to get started.'
+              )}
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
               items={paginatedAllergies}
-              renderCard={(allergy) => (
+              renderCard={allergy => (
                 <AllergyCard
                   allergy={allergy}
                   onView={handleViewAllergy}
@@ -425,13 +452,48 @@ const Allergies = () => {
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
                 columns={[
-                  { header: t('allergies.allergen.label'), accessor: 'allergen', priority: 'high', width: 150 },
-                  { header: t('allergies.reaction.label'), accessor: 'reaction', priority: 'high', width: 180 },
-                  { header: t('shared:fields.severity'), accessor: 'severity', priority: 'high', width: 100 },
-                  { header: t('shared:fields.onsetDate'), accessor: 'onset_date', priority: 'medium', width: 120 },
-                  { header: t('allergies.relatedMedication.label'), accessor: 'medication_name', priority: 'low', width: 150 },
-                  { header: t('shared:fields.status'), accessor: 'status', priority: 'medium', width: 100 },
-                  { header: t('shared:tabs.notes'), accessor: 'notes', priority: 'low', width: 200 },
+                  {
+                    header: t('allergies.allergen.label'),
+                    accessor: 'allergen',
+                    priority: 'high',
+                    width: 150,
+                  },
+                  {
+                    header: t('allergies.reaction.label'),
+                    accessor: 'reaction',
+                    priority: 'high',
+                    width: 180,
+                  },
+                  {
+                    header: t('shared:fields.severity'),
+                    accessor: 'severity',
+                    priority: 'high',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:fields.onsetDate'),
+                    accessor: 'onset_date',
+                    priority: 'medium',
+                    width: 120,
+                  },
+                  {
+                    header: t('allergies.relatedMedication.label'),
+                    accessor: 'medication_name',
+                    priority: 'low',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:fields.status'),
+                    accessor: 'status',
+                    priority: 'medium',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:tabs.notes'),
+                    accessor: 'notes',
+                    priority: 'low',
+                    width: 200,
+                  },
                 ]}
                 patientData={currentPatient}
                 tableName={t('shared:categories.allergies')}
@@ -477,5 +539,5 @@ const Allergies = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Allergies, {
   injectResponsive: true,
-  displayName: 'ResponsiveAllergies'
+  displayName: 'ResponsiveAllergies',
 });

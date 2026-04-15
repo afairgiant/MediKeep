@@ -103,7 +103,9 @@
   border: 1px solid var(--color-border-light);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .paperless-form-input:focus {
@@ -162,7 +164,7 @@
   background-color: rgba(102, 126, 234, 0.05);
 }
 
-.paperless-radio-option input[type="radio"] {
+.paperless-radio-option input[type='radio'] {
   margin: 0;
   cursor: pointer;
 }
@@ -173,16 +175,16 @@
   color: var(--color-text-primary);
 }
 
-.paperless-radio-option input[type="radio"]:disabled {
+.paperless-radio-option input[type='radio']:disabled {
   cursor: not-allowed;
 }
 
-.paperless-radio-option:has(input[type="radio"]:disabled) {
+.paperless-radio-option:has(input[type='radio']:disabled) {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.paperless-radio-option:has(input[type="radio"]:disabled):hover {
+.paperless-radio-option:has(input[type='radio']:disabled):hover {
   background-color: transparent;
 }
 
@@ -270,7 +272,9 @@
 .paperless-storage-option {
   border: 1px solid var(--color-border-light);
   border-radius: 0.5rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .paperless-storage-option:hover {
@@ -444,4 +448,3 @@
 }
 
 /* Responsive Design */
-

@@ -189,7 +189,11 @@ class TestUnitConverterLabels:
         """Test that UNIT_LABELS constant has correct structure."""
         assert "imperial" in UNIT_LABELS
         assert "metric" in UNIT_LABELS
-        assert set(UNIT_LABELS["imperial"].keys()) == {"weight", "height", "temperature"}
+        assert set(UNIT_LABELS["imperial"].keys()) == {
+            "weight",
+            "height",
+            "temperature",
+        }
         assert set(UNIT_LABELS["metric"].keys()) == {"weight", "height", "temperature"}
 
 

@@ -16,16 +16,19 @@ logger = get_logger(__name__)
 
 class PapraClientError(Exception):
     """Base exception for Papra client errors."""
+
     pass
 
 
 class PapraConnectionError(PapraClientError):
     """Connection-related errors."""
+
     pass
 
 
 class PapraUploadError(PapraClientError):
     """Upload-related errors."""
+
     pass
 
 
@@ -58,18 +61,17 @@ class PapraClient:
             headers = self.auth.get_headers()
 
             connector = aiohttp.TCPConnector(
-                limit=10,
-                limit_per_host=5,
-                ttl_dns_cache=300
+                limit=10, limit_per_host=5, ttl_dns_cache=300
             )
 
             from app.core.config import settings
-            timeout_seconds = getattr(settings, 'PAPRA_REQUEST_TIMEOUT', 30)
+
+            timeout_seconds = getattr(settings, "PAPRA_REQUEST_TIMEOUT", 30)
 
             self._session = aiohttp.ClientSession(
                 headers=headers,
                 connector=connector,
-                timeout=aiohttp.ClientTimeout(total=timeout_seconds)
+                timeout=aiohttp.ClientTimeout(total=timeout_seconds),
             )
 
             logger.debug("Created Papra session")
@@ -82,9 +84,13 @@ class PapraClient:
         """Test connection to Papra."""
         return await self.auth.test_connection()
 
-    async def upload_document(self, file_data: bytes, filename: str,
-                              title: Optional[str] = None,
-                              content_type: Optional[str] = None) -> dict:
+    async def upload_document(
+        self,
+        file_data: bytes,
+        filename: str,
+        title: Optional[str] = None,
+        content_type: Optional[str] = None,
+    ) -> dict:
         """
         Upload a document to Papra. Returns document info synchronously.
 
@@ -105,32 +111,41 @@ class PapraClient:
         try:
             form_data = aiohttp.FormData()
             form_data.add_field(
-                'file',
+                "file",
                 file_data,
                 filename=filename,
-                content_type=content_type or 'application/octet-stream'
+                content_type=content_type or "application/octet-stream",
             )
 
             if title:
-                form_data.add_field('title', title)
+                form_data.add_field("title", title)
 
             logger.debug(f"Uploading document to Papra: {filename}")
 
             from app.core.config import settings
-            upload_timeout_seconds = getattr(settings, 'PAPRA_UPLOAD_TIMEOUT', 300)
+
+            upload_timeout_seconds = getattr(settings, "PAPRA_UPLOAD_TIMEOUT", 300)
             upload_timeout = aiohttp.ClientTimeout(total=upload_timeout_seconds)
 
             url = self._org_url("/documents")
-            async with self._session.post(url, data=form_data, timeout=upload_timeout) as response:
+            async with self._session.post(
+                url, data=form_data, timeout=upload_timeout
+            ) as response:
                 if response.status not in [200, 201]:
                     error_text = await response.text()
-                    logger.error(f"Papra upload failed: {response.status} - {error_text}")
-                    raise PapraUploadError(f"Upload failed with status {response.status}: {error_text}")
+                    logger.error(
+                        f"Papra upload failed: {response.status} - {error_text}"
+                    )
+                    raise PapraUploadError(
+                        f"Upload failed with status {response.status}: {error_text}"
+                    )
 
                 result = await response.json()
 
                 # Papra returns {"document": {"id": "doc_xxx", ...}}
-                doc_data = result.get("document", {}) if isinstance(result, dict) else {}
+                doc_data = (
+                    result.get("document", {}) if isinstance(result, dict) else {}
+                )
                 doc_id = (
                     doc_data.get("id")
                     or result.get("id")
@@ -177,10 +192,14 @@ class PapraClient:
                 elif response.status == 403:
                     raise PapraClientError(f"Access denied to document {document_id}")
                 elif response.status != 200:
-                    raise PapraClientError(f"Download failed with status {response.status}")
+                    raise PapraClientError(
+                        f"Download failed with status {response.status}"
+                    )
 
                 content = await response.read()
-                logger.debug(f"Downloaded Papra document {document_id}: {len(content)} bytes")
+                logger.debug(
+                    f"Downloaded Papra document {document_id}: {len(content)} bytes"
+                )
                 return content
 
         except aiohttp.ClientError as e:
@@ -207,10 +226,14 @@ class PapraClient:
 
             async with self._session.delete(url) as response:
                 if response.status == 404:
-                    logger.warning(f"Papra document {document_id} not found for deletion")
+                    logger.warning(
+                        f"Papra document {document_id} not found for deletion"
+                    )
                     return True  # Already gone
                 elif response.status not in [200, 204]:
-                    raise PapraClientError(f"Delete failed with status {response.status}")
+                    raise PapraClientError(
+                        f"Delete failed with status {response.status}"
+                    )
 
                 logger.info(f"Papra document {document_id} deleted successfully")
                 return True
@@ -219,7 +242,9 @@ class PapraClient:
             logger.error(f"Papra delete connection error: {e}")
             raise PapraConnectionError(f"Connection error during delete: {e}")
 
-    async def search_documents(self, query: str = "", page: int = 0, page_size: int = 20) -> dict:
+    async def search_documents(
+        self, query: str = "", page: int = 0, page_size: int = 20
+    ) -> dict:
         """
         Search or list documents in the organization.
 
@@ -246,7 +271,9 @@ class PapraClient:
                 params["searchQuery"] = query
 
             url = self._org_url("/documents")
-            logger.debug(f"Searching Papra documents: query={query!r} page={page} page_size={page_size}")
+            logger.debug(
+                f"Searching Papra documents: query={query!r} page={page} page_size={page_size}"
+            )
 
             async with self._session.get(url, params=params) as response:
                 if response.status != 200:
@@ -294,7 +321,9 @@ class PapraClient:
                 if response.status == 404:
                     return None
                 elif response.status != 200:
-                    raise PapraClientError(f"Get info failed with status {response.status}")
+                    raise PapraClientError(
+                        f"Get info failed with status {response.status}"
+                    )
 
                 data = await response.json()
                 # Papra returns {"document": {...}}
@@ -307,9 +336,9 @@ class PapraClient:
             raise PapraConnectionError(f"Connection error getting document info: {e}")
 
 
-def create_papra_client(url: str, encrypted_token: str,
-                        organization_id: str,
-                        user_id: int = None) -> PapraClient:
+def create_papra_client(
+    url: str, encrypted_token: str, organization_id: str, user_id: int = None
+) -> PapraClient:
     """
     Factory function to create a PapraClient from encrypted credentials.
 
@@ -328,7 +357,7 @@ def create_papra_client(url: str, encrypted_token: str,
         url=url,
         encrypted_token=encrypted_token,
         organization_id=organization_id,
-        user_id=user_id
+        user_id=user_id,
     )
 
     return PapraClient(auth)

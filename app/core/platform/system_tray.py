@@ -15,6 +15,7 @@ from typing import Optional
 try:
     import pystray
     from PIL import Image, ImageDraw
+
     TRAY_AVAILABLE = True
 except ImportError:
     TRAY_AVAILABLE = False
@@ -50,16 +51,34 @@ class MediKeepTrayApp:
             Path to the icon file if found, None otherwise
         """
         candidates = [
-            os.path.join(os.path.dirname(__file__), '..', '..', '..', 'frontend', 'public', 'icon-64.png'),
-            os.path.join(os.path.dirname(__file__), '..', '..', '..', 'frontend', 'build', 'icon-64.png'),
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "..",
+                "frontend",
+                "public",
+                "icon-64.png",
+            ),
+            os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "..",
+                "frontend",
+                "build",
+                "icon-64.png",
+            ),
         ]
 
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             base = os.path.dirname(sys.executable)
-            candidates.extend([
-                os.path.join(base, '_internal', 'frontend', 'build', 'icon-64.png'),
-                os.path.join(base, 'frontend', 'build', 'icon-64.png'),
-            ])
+            candidates.extend(
+                [
+                    os.path.join(base, "_internal", "frontend", "build", "icon-64.png"),
+                    os.path.join(base, "frontend", "build", "icon-64.png"),
+                ]
+            )
 
         for path in candidates:
             normalized = os.path.normpath(path)
@@ -82,8 +101,8 @@ class MediKeepTrayApp:
             try:
                 image = Image.open(icon_path)
                 image = image.resize((64, 64), Image.LANCZOS)
-                if image.mode != 'RGBA':
-                    image = image.convert('RGBA')
+                if image.mode != "RGBA":
+                    image = image.convert("RGBA")
                 return image
             except Exception as e:
                 logger.warning(f"Failed to load tray icon from {icon_path}: {e}")
@@ -94,7 +113,7 @@ class MediKeepTrayApp:
         color1 = (52, 152, 219)  # Blue background
         color2 = (255, 255, 255)  # White cross
 
-        image = Image.new('RGB', (width, height), color1)
+        image = Image.new("RGB", (width, height), color1)
         draw = ImageDraw.Draw(image)
         draw.rectangle([(24, 8), (40, 56)], fill=color2)
         draw.rectangle([(8, 24), (56, 40)], fill=color2)
@@ -109,6 +128,7 @@ class MediKeepTrayApp:
     def show_logs_folder(self, icon=None, item=None):
         """Open the logs folder in Windows Explorer."""
         from app.core.platform.windows_config import get_logs_path
+
         logs_path = get_logs_path()
         if logs_path and os.path.exists(logs_path):
             os.startfile(logs_path)
@@ -119,6 +139,7 @@ class MediKeepTrayApp:
     def show_data_folder(self, icon=None, item=None):
         """Open the data folder in Windows Explorer."""
         from app.core.platform.windows_config import get_windows_appdata_path
+
         data_path = get_windows_appdata_path()
         if data_path and os.path.exists(data_path):
             os.startfile(data_path)
@@ -159,15 +180,13 @@ class MediKeepTrayApp:
         """
         return pystray.Menu(
             pystray.MenuItem(
-                "Open MediKeep",
-                self.open_browser,
-                default=True  # Double-click action
+                "Open MediKeep", self.open_browser, default=True  # Double-click action
             ),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem("Show Logs Folder", self.show_logs_folder),
             pystray.MenuItem("Show Data Folder", self.show_data_folder),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("Exit", self.quit_app)
+            pystray.MenuItem("Exit", self.quit_app),
         )
 
     def run(self):
@@ -190,14 +209,13 @@ class MediKeepTrayApp:
                 "MediKeep",
                 icon_image,
                 f"MediKeep Medical Records v{settings.VERSION}",
-                menu
+                menu,
             )
 
             # Show notification
-            if hasattr(self.icon, 'notify'):
+            if hasattr(self.icon, "notify"):
                 self.icon.notify(
-                    "MediKeep is running",
-                    f"Server available at {self.server_url}"
+                    "MediKeep is running", f"Server available at {self.server_url}"
                 )
 
             # Run the icon (this blocks until user quits from tray menu)

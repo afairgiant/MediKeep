@@ -40,7 +40,11 @@ const extractKeys = (obj, prefix = '') => {
   for (const key in obj) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
 
-    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+    if (
+      typeof obj[key] === 'object' &&
+      obj[key] !== null &&
+      !Array.isArray(obj[key])
+    ) {
       keys = keys.concat(extractKeys(obj[key], fullKey));
     } else {
       keys.push(fullKey);
@@ -57,7 +61,13 @@ const findMissingKeys = (baseKeys, compareKeys) => {
 
 describe('Translation Key Consistency', () => {
   const locales = ['en', 'de', 'es', 'fr', 'it', 'pt', 'ru', 'nl', 'pl'];
-  const namespaces = ['common', 'medical', 'errors', 'navigation', 'notifications'];
+  const namespaces = [
+    'common',
+    'medical',
+    'errors',
+    'navigation',
+    'notifications',
+  ];
 
   describe('All language files exist', () => {
     locales.forEach(locale => {
@@ -91,14 +101,26 @@ describe('Translation Key Consistency', () => {
           const extra = findMissingKeys(localeKeys, enKeys);
 
           if (missing.length > 0) {
-            console.warn(`⚠️  Missing in ${locale.toUpperCase()} (${namespace}):`, missing);
+            console.warn(
+              `⚠️  Missing in ${locale.toUpperCase()} (${namespace}):`,
+              missing
+            );
           }
           if (extra.length > 0) {
-            console.warn(`⚠️  Extra in ${locale.toUpperCase()} (${namespace}):`, extra);
+            console.warn(
+              `⚠️  Extra in ${locale.toUpperCase()} (${namespace}):`,
+              extra
+            );
           }
 
-          expect(missing, `Missing keys in ${locale.toUpperCase()}/${namespace}.json`).toEqual([]);
-          expect(extra, `Extra keys in ${locale.toUpperCase()}/${namespace}.json`).toEqual([]);
+          expect(
+            missing,
+            `Missing keys in ${locale.toUpperCase()}/${namespace}.json`
+          ).toEqual([]);
+          expect(
+            extra,
+            `Extra keys in ${locale.toUpperCase()}/${namespace}.json`
+          ).toEqual([]);
         });
       });
     });
@@ -115,7 +137,11 @@ describe('Translation Key Consistency', () => {
             for (const key in obj) {
               const currentPath = keyPath ? `${keyPath}.${key}` : key;
 
-              if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+              if (
+                typeof obj[key] === 'object' &&
+                obj[key] !== null &&
+                !Array.isArray(obj[key])
+              ) {
                 checkForEmptyValues(obj[key], currentPath);
               } else if (typeof obj[key] === 'string') {
                 expect(

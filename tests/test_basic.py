@@ -1,6 +1,7 @@
 """
 Basic tests to ensure pytest is working correctly.
 """
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -28,16 +29,17 @@ def test_app_health(client: TestClient):
 
 class TestBasicFunctionality:
     """Basic functionality tests."""
-    
+
     def test_environment_setup(self):
         """Test that environment variables are set correctly."""
         import os
+
         assert os.getenv("TESTING") == "1"
-        
+
     def test_imports(self):
         """Test that key modules can be imported."""
         from app.main import app
         from app.core.config import settings
-        
+
         assert app is not None
         assert settings is not None

@@ -10,19 +10,19 @@ import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { navigateToEntity } from '../../utils/linkNavigation';
-import { 
-  initializeFormData as initFormData, 
-  restructureFormData, 
-  insuranceFieldConfig, 
-  insuranceDefaultValues 
+import {
+  initializeFormData as initFormData,
+  restructureFormData,
+  insuranceFieldConfig,
+  insuranceDefaultValues,
 } from '../../utils/nestedFormUtils';
 import { printInsuranceRecord } from '../../utils/printTemplateGenerator';
 import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
-import { 
-  ERROR_MESSAGES, 
+import {
+  ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  getUserFriendlyError
+  getUserFriendlyError,
 } from '../../constants/errorMessages';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
@@ -66,7 +66,17 @@ const Insurance = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('insurance');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Modern data management with useMedicalData
   const {
@@ -98,7 +108,8 @@ const Insurance = () => {
   const config = getMedicalPageConfig('insurances');
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('insurance', insurances);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('insurance', insurances);
 
   // View modal navigation with URL deep linking
   const {
@@ -109,7 +120,7 @@ const Insurance = () => {
   } = useViewModalNavigation({
     items: insurances,
     loading,
-    onClose: (insurance) => {
+    onClose: insurance => {
       if (insurance) {
         refreshFileCount(insurance.id);
       }
@@ -151,7 +162,7 @@ const Insurance = () => {
       // This prevents the useEffect in the hook from firing again when form reopens
       setTimeout(() => resetSubmission(), 0);
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('insurance_form_error', {
         message: 'Form submission error in insurance',
         error,
@@ -163,7 +174,7 @@ const Insurance = () => {
 
   // Data management (filtering, sorting, pagination)
   const dataManagement = useDataManagement(insurances || [], config) || {};
-  
+
   const {
     data: processedInsurances = [],
     filters = {},
@@ -184,8 +195,12 @@ const Insurance = () => {
 
   const paginatedInsurances = paginateData(processedInsurances);
 
-  useEffect(() => { resetPage(); }, [hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(processedInsurances.length); }, [processedInsurances.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(processedInsurances.length);
+  }, [processedInsurances.length, clampPage]);
 
   // Form state management
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -194,7 +209,8 @@ const Insurance = () => {
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] =
+    useState(null);
 
   // Table formatters - consistent with medication table approach
   const formatters = {
@@ -202,39 +218,63 @@ const Insurance = () => {
       <Badge
         variant="light"
         color={
-          item.insurance_type === 'medical' ? 'blue' :
-          item.insurance_type === 'dental' ? 'green' :
-          item.insurance_type === 'vision' ? 'purple' : 'orange'
+          item.insurance_type === 'medical'
+            ? 'blue'
+            : item.insurance_type === 'dental'
+              ? 'green'
+              : item.insurance_type === 'vision'
+                ? 'purple'
+                : 'orange'
         }
         size="sm"
       >
-        {item.insurance_type?.charAt(0).toUpperCase() + item.insurance_type?.slice(1)}
+        {item.insurance_type?.charAt(0).toUpperCase() +
+          item.insurance_type?.slice(1)}
       </Badge>
     ),
-    company_name: (value) => <Text size="sm">{value || '-'}</Text>,
-    plan_name: (value) => <Text size="sm">{value || '-'}</Text>,
-    member_id: (value) => <Text size="sm" fw={600}>{value || '-'}</Text>,
-    group_number: (value) => <Text size="sm">{value || '-'}</Text>,
-    member_name: (value) => <Text size="sm">{value || '-'}</Text>,
-    effective_date: (value) => <Text size="sm">{value ? formatDate(value) : '-'}</Text>,
-    expiration_date: (value) => <Text size="sm">{value ? formatDate(value) : 'Ongoing'}</Text>,
+    company_name: value => <Text size="sm">{value || '-'}</Text>,
+    plan_name: value => <Text size="sm">{value || '-'}</Text>,
+    member_id: value => (
+      <Text size="sm" fw={600}>
+        {value || '-'}
+      </Text>
+    ),
+    group_number: value => <Text size="sm">{value || '-'}</Text>,
+    member_name: value => <Text size="sm">{value || '-'}</Text>,
+    effective_date: value => (
+      <Text size="sm">{value ? formatDate(value) : '-'}</Text>
+    ),
+    expiration_date: value => (
+      <Text size="sm">{value ? formatDate(value) : 'Ongoing'}</Text>
+    ),
     status: (value, item) => <StatusBadge status={item.status} />,
     is_primary: (value, item) => {
       if (item.is_primary) {
-        return <Badge color="green" variant="filled" size="sm">{t('labels.yes')}</Badge>;
+        return (
+          <Badge color="green" variant="filled" size="sm">
+            {t('labels.yes')}
+          </Badge>
+        );
       }
-      return <Badge color="gray" variant="light" size="sm">{t('labels.no')}</Badge>;
+      return (
+        <Badge color="gray" variant="light" size="sm">
+          {t('labels.no')}
+        </Badge>
+      );
     },
   };
 
-
   // Initialize form data using utility
   const initializeFormData = (insurance = null) => {
-    return initFormData(insurance, insuranceFieldConfig, insuranceDefaultValues);
+    return initFormData(
+      insurance,
+      insuranceFieldConfig,
+      insuranceDefaultValues
+    );
   };
 
   // Handle form input changes
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -243,7 +283,7 @@ const Insurance = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     // Start submission immediately to prevent race conditions
@@ -260,7 +300,7 @@ const Insurance = () => {
     try {
       // Use utility to restructure form data
       const submitData = restructureFormData(formData, insuranceFieldConfig);
-      
+
       // Only add patient_id for new insurance (create), not for updates
       if (!editingInsurance) {
         submitData.patient_id = currentPatient?.id;
@@ -274,7 +314,7 @@ const Insurance = () => {
         logger.info('Updating insurance', {
           insuranceId: editingInsurance.id,
           insurance_type: formData.insurance_type,
-          company: formData.company_name
+          company: formData.company_name,
         });
         success = await updateItem(editingInsurance.id, submitData);
         resultId = editingInsurance.id;
@@ -282,7 +322,7 @@ const Insurance = () => {
       } else {
         logger.info('Creating new insurance', {
           insurance_type: formData.insurance_type,
-          company: formData.company_name
+          company: formData.company_name,
         });
         const result = await createItem(submitData);
         success = !!result;
@@ -299,7 +339,7 @@ const Insurance = () => {
       if (success && resultId) {
         // Check if we have files to upload
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
-        
+
         if (hasPendingFiles) {
           logger.info('insurance_starting_file_upload', {
             message: 'Starting file upload process',
@@ -314,10 +354,14 @@ const Insurance = () => {
           try {
             // Upload files with progress tracking
             await documentManagerMethods.uploadPendingFiles(resultId);
-            
+
             // File upload completed successfully
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
-            
+            completeFileUpload(
+              true,
+              documentManagerMethods.getPendingFilesCount(),
+              0
+            );
+
             // Refresh file count
             refreshFileCount(resultId);
           } catch (uploadError) {
@@ -327,9 +371,13 @@ const Insurance = () => {
               error: uploadError.message,
               component: 'Insurance',
             });
-            
+
             // File upload failed
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
+            completeFileUpload(
+              false,
+              0,
+              documentManagerMethods.getPendingFilesCount()
+            );
           }
         } else {
           // No files to upload, complete immediately
@@ -342,7 +390,7 @@ const Insurance = () => {
         error: error.message,
         component: 'Insurance',
       });
-      
+
       // Check if it's a validation error
       if (error.validationErrors) {
         handleSubmissionFailure(error.validationErrors.join('\n'), 'form');
@@ -353,10 +401,10 @@ const Insurance = () => {
   };
 
   // Handle edit
-  const handleEdit = (insurance) => {
+  const handleEdit = insurance => {
     try {
       const initialFormData = initializeFormData(insurance);
-      
+
       setEditingInsurance(insurance);
       setFormData(initialFormData);
       setIsFormOpen(true);
@@ -371,12 +419,15 @@ const Insurance = () => {
   };
 
   // Handle delete
-  const handleDelete = async (insuranceOrId) => {
+  const handleDelete = async insuranceOrId => {
     // Handle both ID (from table) and full object (from card)
-    const insuranceId = typeof insuranceOrId === 'object' ? insuranceOrId.id : insuranceOrId;
-    const insurance = typeof insuranceOrId === 'object' ? insuranceOrId : 
-      insurances.find(i => i.id === insuranceOrId);
-    
+    const insuranceId =
+      typeof insuranceOrId === 'object' ? insuranceOrId.id : insuranceOrId;
+    const insurance =
+      typeof insuranceOrId === 'object'
+        ? insuranceOrId
+        : insurances.find(i => i.id === insuranceOrId);
+
     if (!insurance) {
       notifications.show({
         title: 'Error',
@@ -386,7 +437,11 @@ const Insurance = () => {
       return;
     }
 
-    if (window.confirm(`Are you sure you want to delete this ${insurance.insurance_type} insurance?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete this ${insurance.insurance_type} insurance?`
+      )
+    ) {
       const success = await deleteItem(insuranceId);
       if (success) {
         cleanupFileCount(insuranceId);
@@ -395,7 +450,7 @@ const Insurance = () => {
   };
 
   // Handle set primary
-  const handleSetPrimary = async (insurance) => {
+  const handleSetPrimary = async insurance => {
     try {
       logger.info('Setting insurance as primary', {
         insurance_id: insurance.id,
@@ -404,7 +459,7 @@ const Insurance = () => {
       });
 
       await apiService.setPrimaryInsurance(insurance.id);
-      
+
       notifications.show({
         title: 'Primary Insurance Set',
         message: `${insurance.company_name} is now your primary ${insurance.insurance_type} insurance`,
@@ -443,7 +498,7 @@ const Insurance = () => {
     if (isBlocking) {
       return;
     }
-    
+
     resetSubmission(); // Reset submission state
     setIsFormOpen(false);
     setEditingInsurance(null);
@@ -453,14 +508,21 @@ const Insurance = () => {
 
   // Loading state
   if (loading) {
-    return <MedicalPageLoading message={t('insurance.loading', 'Loading insurance records...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('insurance.loading', 'Loading insurance records...')}
+      />
+    );
   }
 
   return (
     <Container size="xl" py="sm">
       <PageHeader
         title={t('shared:categories.insurance', 'Insurance')}
-        description={t('insurance.description', 'Manage your insurance information and digital cards')}
+        description={t(
+          'insurance.description',
+          'Manage your insurance information and digital cards'
+        )}
       />
 
       <Stack gap="sm" mt="md">
@@ -484,79 +546,143 @@ const Insurance = () => {
           mb={0}
         />
 
-      {/* Mantine Filter Controls */}
-      <MedicalPageFilters dataManagement={dataManagement} config={config} />
+        {/* Mantine Filter Controls */}
+        <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
-      {processedInsurances.length === 0 ? (
-        <EmptyState
-          emoji="🏥"
-          title={t('insurance.empty.title', 'No Insurance Found')}
-          hasActiveFilters={hasActiveFilters}
-          filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-          noDataMessage={t('insurance.empty.noData', 'Start by adding your first insurance.')}
-          actionButton={
-            <Button variant="filled" onClick={handleAddNew}>
-              {t('insurance.empty.addFirst', 'Add Your First Insurance')}
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          {viewMode === 'cards' ? (
-            <AnimatedCardGrid
-              items={paginatedInsurances}
-              columns={{ base: 12, sm: 6, md: 4, lg: 3 }}
-              renderCard={(insurance) => (
-                <InsuranceCard
-                  insurance={insurance}
+        {processedInsurances.length === 0 ? (
+          <EmptyState
+            emoji="🏥"
+            title={t('insurance.empty.title', 'No Insurance Found')}
+            hasActiveFilters={hasActiveFilters}
+            filteredMessage={t(
+              'shared:emptyStates.adjustSearch',
+              'Try adjusting your search or filter criteria.'
+            )}
+            noDataMessage={t(
+              'insurance.empty.noData',
+              'Start by adding your first insurance.'
+            )}
+            actionButton={
+              <Button variant="filled" onClick={handleAddNew}>
+                {t('insurance.empty.addFirst', 'Add Your First Insurance')}
+              </Button>
+            }
+          />
+        ) : (
+          <>
+            {viewMode === 'cards' ? (
+              <AnimatedCardGrid
+                items={paginatedInsurances}
+                columns={{ base: 12, sm: 6, md: 4, lg: 3 }}
+                renderCard={insurance => (
+                  <InsuranceCard
+                    insurance={insurance}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onSetPrimary={handleSetPrimary}
+                    onView={handleViewInsurance}
+                    fileCount={fileCounts[insurance.id] || 0}
+                    fileCountLoading={fileCountsLoading[insurance.id] || false}
+                    disableActions={isViewOnly}
+                    disableActionsTooltip={viewOnlyTooltip}
+                  />
+                )}
+              />
+            ) : (
+              <Paper shadow="sm" radius="md" withBorder>
+                <ResponsiveTable
+                  persistKey="insurance"
+                  data={paginatedInsurances}
+                  pagination={false}
+                  disableEdit={isViewOnly}
+                  disableDelete={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
+                  columns={[
+                    {
+                      header: 'Type',
+                      accessor: 'insurance_type',
+                      priority: 'high',
+                      width: 100,
+                    },
+                    {
+                      header: 'Company',
+                      accessor: 'company_name',
+                      priority: 'high',
+                      width: 180,
+                    },
+                    {
+                      header: 'Plan',
+                      accessor: 'plan_name',
+                      priority: 'medium',
+                      width: 150,
+                    },
+                    {
+                      header: 'Member ID',
+                      accessor: 'member_id',
+                      priority: 'high',
+                      width: 120,
+                    },
+                    {
+                      header: 'Group #',
+                      accessor: 'group_number',
+                      priority: 'low',
+                      width: 120,
+                    },
+                    {
+                      header: 'Member Name',
+                      accessor: 'member_name',
+                      priority: 'medium',
+                      width: 150,
+                    },
+                    {
+                      header: 'Effective',
+                      accessor: 'effective_date',
+                      priority: 'medium',
+                      width: 100,
+                    },
+                    {
+                      header: 'Expires',
+                      accessor: 'expiration_date',
+                      priority: 'medium',
+                      width: 100,
+                    },
+                    {
+                      header: 'Status',
+                      accessor: 'status',
+                      priority: 'high',
+                      width: 90,
+                    },
+                    {
+                      header: 'Primary',
+                      accessor: 'is_primary',
+                      priority: 'high',
+                      width: 80,
+                    },
+                  ]}
+                  formatters={formatters}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
-                  onSetPrimary={handleSetPrimary}
                   onView={handleViewInsurance}
-                  fileCount={fileCounts[insurance.id] || 0}
-                  fileCountLoading={fileCountsLoading[insurance.id] || false}
-                  disableActions={isViewOnly}
-                  disableActionsTooltip={viewOnlyTooltip}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSortChange={handleSortChange}
+                  getSortIndicator={getSortIndicator}
+                  dataType="medical"
+                  responsive={responsive}
                 />
-              )}
+              </Paper>
+            )}
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(processedInsurances.length)}
+              pageSize={pageSize}
+              totalRecords={processedInsurances.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
             />
-          ) : (
-            <Paper shadow="sm" radius="md" withBorder>
-              <ResponsiveTable
-              persistKey="insurance"
-              data={paginatedInsurances}
-              pagination={false}
-              disableEdit={isViewOnly}
-              disableDelete={isViewOnly}
-              disableActionsTooltip={viewOnlyTooltip}
-              columns={[
-                { header: 'Type', accessor: 'insurance_type', priority: 'high', width: 100 },
-                { header: 'Company', accessor: 'company_name', priority: 'high', width: 180 },
-                { header: 'Plan', accessor: 'plan_name', priority: 'medium', width: 150 },
-                { header: 'Member ID', accessor: 'member_id', priority: 'high', width: 120 },
-                { header: 'Group #', accessor: 'group_number', priority: 'low', width: 120 },
-                { header: 'Member Name', accessor: 'member_name', priority: 'medium', width: 150 },
-                { header: 'Effective', accessor: 'effective_date', priority: 'medium', width: 100 },
-                { header: 'Expires', accessor: 'expiration_date', priority: 'medium', width: 100 },
-                { header: 'Status', accessor: 'status', priority: 'high', width: 90 },
-                { header: 'Primary', accessor: 'is_primary', priority: 'high', width: 80 },
-              ]}
-              formatters={formatters}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onView={handleViewInsurance}
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              onSortChange={handleSortChange}
-              getSortIndicator={getSortIndicator}
-              dataType="medical"
-              responsive={responsive}
-            />
-          </Paper>
-          )}
-          <PaginationControls page={page} totalPages={totalPages(processedInsurances.length)} pageSize={pageSize} totalRecords={processedInsurances.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
-        </>
-      )}
+          </>
+        )}
       </Stack>
 
       {/* Form Modal */}
@@ -571,7 +697,11 @@ const Insurance = () => {
             setFormData(initializeFormData());
           }
         }}
-        title={editingInsurance ? t('insurance.form.editTitle', 'Edit Insurance') : t('insurance.form.addTitle', 'Add New Insurance')}
+        title={
+          editingInsurance
+            ? t('insurance.form.editTitle', 'Edit Insurance')
+            : t('insurance.form.addTitle', 'Add New Insurance')
+        }
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
@@ -602,7 +732,7 @@ const Insurance = () => {
         onEdit={handleEdit}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onPrint={(insurance) => {
+        onPrint={insurance => {
           printInsuranceRecord(
             insurance,
             () => {
@@ -612,7 +742,7 @@ const Insurance = () => {
                 color: 'blue',
               });
             },
-            (error) => {
+            error => {
               notifications.show({
                 title: 'Print Error',
                 message: ERROR_MESSAGES.FILE_PROCESSING_FAILED,
@@ -622,7 +752,7 @@ const Insurance = () => {
           );
         }}
         onSetPrimary={handleSetPrimary}
-        onFileUploadComplete={(success) => {
+        onFileUploadComplete={success => {
           if (success && viewingInsurance) {
             refreshFileCount(viewingInsurance.id);
           }
@@ -635,5 +765,5 @@ const Insurance = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Insurance, {
   injectResponsive: true,
-  displayName: 'ResponsiveInsurance'
+  displayName: 'ResponsiveInsurance',
 });

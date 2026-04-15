@@ -42,7 +42,9 @@ class PharmacyBase(BaseModel):
     @classmethod
     def validate_name(cls, v):
         """Validate pharmacy name requirements."""
-        return validate_required_text(v, max_length=150, min_length=3, field_name="Pharmacy name")
+        return validate_required_text(
+            v, max_length=150, min_length=3, field_name="Pharmacy name"
+        )
 
     @field_validator("brand", mode="before")
     @classmethod
@@ -54,7 +56,9 @@ class PharmacyBase(BaseModel):
     @classmethod
     def validate_street_address(cls, v):
         """Validate street address field."""
-        return validate_text_field(v, max_length=200, min_length=5, field_name="Street address")
+        return validate_text_field(
+            v, max_length=200, min_length=5, field_name="Street address"
+        )
 
     @field_validator("city", mode="before")
     @classmethod
@@ -114,7 +118,9 @@ class PharmacyBase(BaseModel):
     @classmethod
     def validate_specialty_services(cls, v):
         """Validate specialty services field."""
-        return validate_text_field(v, max_length=500, field_name="Specialty services description")
+        return validate_text_field(
+            v, max_length=500, field_name="Specialty services description"
+        )
 
 
 class PharmacyCreate(PharmacyBase):
@@ -190,7 +196,9 @@ class PharmacyUpdate(BaseModel):
     @classmethod
     def validate_street_address(cls, v):
         """Validate street address if provided."""
-        return validate_text_field(v, max_length=200, min_length=5, field_name="Street address")
+        return validate_text_field(
+            v, max_length=200, min_length=5, field_name="Street address"
+        )
 
     @field_validator("city")
     @classmethod
@@ -256,7 +264,9 @@ class PharmacyUpdate(BaseModel):
     @classmethod
     def validate_specialty_services(cls, v):
         """Validate specialty services if provided."""
-        return validate_text_field(v, max_length=500, field_name="Specialty services description")
+        return validate_text_field(
+            v, max_length=500, field_name="Specialty services description"
+        )
 
 
 class Pharmacy(PharmacyBase):

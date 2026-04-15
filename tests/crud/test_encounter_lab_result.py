@@ -1,6 +1,7 @@
 """
 Tests for EncounterLabResult CRUD operations.
 """
+
 import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
@@ -114,7 +115,9 @@ class TestCRUDEncounterLabResult:
         db_session.add(EncounterLabResult(encounter_id=enc.id, lab_result_id=lr.id))
         db_session.commit()
 
-        results = encounter_lab_result.get_by_lab_result(db_session, lab_result_id=lr.id)
+        results = encounter_lab_result.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
         assert len(results) == 1
         assert results[0].encounter_id == enc.id
 
@@ -132,7 +135,9 @@ class TestCRUDEncounterLabResult:
         assert result is not None
         assert result.encounter_id == enc.id
 
-    def test_get_by_encounter_and_lab_result_not_found(self, db_session, patient_with_data):
+    def test_get_by_encounter_and_lab_result_not_found(
+        self, db_session, patient_with_data
+    ):
         """Test querying nonexistent pair returns None."""
         result = encounter_lab_result.get_by_encounter_and_lab_result(
             db_session, encounter_id=99999, lab_result_id=99999
@@ -224,7 +229,9 @@ class TestCRUDEncounterLabResult:
         db_session.commit()
 
         # Relationship should be gone
-        results = encounter_lab_result.get_by_lab_result(db_session, lab_result_id=lr.id)
+        results = encounter_lab_result.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
         assert len(results) == 0
 
     def test_cascade_delete_lab_result(self, db_session, patient_with_data):

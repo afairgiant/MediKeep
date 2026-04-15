@@ -9,7 +9,7 @@ from app.core.constants import (
     LAB_TEST_COMPONENT_STATUSES,
     LAB_TEST_COMPONENT_CATEGORIES,
     LAB_TEST_COMPONENT_RESULT_TYPES,
-    LAB_TEST_COMPONENT_QUALITATIVE_VALUES
+    LAB_TEST_COMPONENT_QUALITATIVE_VALUES,
 )
 
 
@@ -27,7 +27,9 @@ class LabTestComponentBase(BaseModel):
     status: Optional[str] = None
     category: Optional[str] = None
     display_order: Optional[int] = None
-    canonical_test_name: Optional[str] = None  # Links to standardized test name for trend matching
+    canonical_test_name: Optional[str] = (
+        None  # Links to standardized test name for trend matching
+    )
     notes: Optional[str] = None
     lab_result_id: int
     result_type: Optional[str] = "quantitative"
@@ -40,7 +42,9 @@ class LabTestComponentBase(BaseModel):
         if not v or len(v.strip()) < 1:
             raise ValueError("Test name is required")
         if len(v) > LAB_TEST_COMPONENT_LIMITS["MAX_TEST_NAME_LENGTH"]:
-            raise ValueError(f"Test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters")
+            raise ValueError(
+                f"Test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters"
+            )
         return v.strip()
 
     @field_validator("abbreviation")
@@ -48,7 +52,9 @@ class LabTestComponentBase(BaseModel):
     def validate_abbreviation(cls, v):
         """Validate test abbreviation"""
         if v and len(v.strip()) > LAB_TEST_COMPONENT_LIMITS["MAX_ABBREVIATION_LENGTH"]:
-            raise ValueError(f"Abbreviation must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_ABBREVIATION_LENGTH']} characters")
+            raise ValueError(
+                f"Abbreviation must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_ABBREVIATION_LENGTH']} characters"
+            )
         return v.strip().upper() if v else None
 
     @field_validator("test_code")
@@ -56,7 +62,9 @@ class LabTestComponentBase(BaseModel):
     def validate_test_code(cls, v):
         """Validate test code (LOINC, CPT, etc.)"""
         if v and len(v.strip()) > LAB_TEST_COMPONENT_LIMITS["MAX_TEST_CODE_LENGTH"]:
-            raise ValueError(f"Test code must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_CODE_LENGTH']} characters")
+            raise ValueError(
+                f"Test code must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_CODE_LENGTH']} characters"
+            )
         return v.strip().upper() if v else None
 
     @field_validator("value")
@@ -80,7 +88,9 @@ class LabTestComponentBase(BaseModel):
         if len(v.strip()) < 1:
             return None
         if len(v) > LAB_TEST_COMPONENT_LIMITS["MAX_UNIT_LENGTH"]:
-            raise ValueError(f"Unit must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_UNIT_LENGTH']} characters")
+            raise ValueError(
+                f"Unit must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_UNIT_LENGTH']} characters"
+            )
         return v.strip()
 
     @field_validator("ref_range_min")
@@ -109,8 +119,13 @@ class LabTestComponentBase(BaseModel):
     @classmethod
     def validate_ref_range_text(cls, v):
         """Validate reference range text"""
-        if v and len(v.strip()) > LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]:
-            raise ValueError(f"Reference range text must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_REF_RANGE_TEXT_LENGTH']} characters")
+        if (
+            v
+            and len(v.strip()) > LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+        ):
+            raise ValueError(
+                f"Reference range text must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_REF_RANGE_TEXT_LENGTH']} characters"
+            )
         return v.strip() if v else None
 
     @field_validator("status")
@@ -118,7 +133,9 @@ class LabTestComponentBase(BaseModel):
     def validate_status(cls, v):
         """Validate test status"""
         if v and v.lower() not in LAB_TEST_COMPONENT_STATUSES:
-            raise ValueError(f"Status must be one of: {', '.join(LAB_TEST_COMPONENT_STATUSES)}")
+            raise ValueError(
+                f"Status must be one of: {', '.join(LAB_TEST_COMPONENT_STATUSES)}"
+            )
         return v.lower() if v else None
 
     @field_validator("category")
@@ -126,7 +143,9 @@ class LabTestComponentBase(BaseModel):
     def validate_category(cls, v):
         """Validate test category"""
         if v and v.lower() not in LAB_TEST_COMPONENT_CATEGORIES:
-            raise ValueError(f"Category must be one of: {', '.join(LAB_TEST_COMPONENT_CATEGORIES)}")
+            raise ValueError(
+                f"Category must be one of: {', '.join(LAB_TEST_COMPONENT_CATEGORIES)}"
+            )
         return v.lower() if v else None
 
     @field_validator("display_order")
@@ -142,7 +161,9 @@ class LabTestComponentBase(BaseModel):
     def validate_notes(cls, v):
         """Validate notes"""
         if v and len(v.strip()) > LAB_TEST_COMPONENT_LIMITS["MAX_NOTES_LENGTH"]:
-            raise ValueError(f"Notes must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_NOTES_LENGTH']} characters")
+            raise ValueError(
+                f"Notes must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_NOTES_LENGTH']} characters"
+            )
         return v.strip() if v else None
 
     @field_validator("canonical_test_name")
@@ -155,7 +176,9 @@ class LabTestComponentBase(BaseModel):
         if not stripped:
             return None
         if len(stripped) > LAB_TEST_COMPONENT_LIMITS["MAX_TEST_NAME_LENGTH"]:
-            raise ValueError(f"Canonical test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters")
+            raise ValueError(
+                f"Canonical test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters"
+            )
         return stripped
 
     @field_validator("lab_result_id")
@@ -173,7 +196,9 @@ class LabTestComponentBase(BaseModel):
         if v is None:
             return "quantitative"
         if v.lower() not in LAB_TEST_COMPONENT_RESULT_TYPES:
-            raise ValueError(f"Result type must be one of: {', '.join(LAB_TEST_COMPONENT_RESULT_TYPES)}")
+            raise ValueError(
+                f"Result type must be one of: {', '.join(LAB_TEST_COMPONENT_RESULT_TYPES)}"
+            )
         return v.lower()
 
     @field_validator("qualitative_value")
@@ -187,7 +212,9 @@ class LabTestComponentBase(BaseModel):
             return None
         normalized = stripped.lower()
         if normalized not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
-            raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
+            raise ValueError(
+                f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}"
+            )
         return normalized
 
 
@@ -222,7 +249,9 @@ class LabTestComponentCreate(LabTestComponentBase):
             if self.value is not None:
                 raise ValueError("Numeric value must be empty for qualitative tests")
             if self.ref_range_min is not None or self.ref_range_max is not None:
-                raise ValueError("Reference ranges are not applicable for qualitative tests")
+                raise ValueError(
+                    "Reference ranges are not applicable for qualitative tests"
+                )
             # Note: ref_range_text is intentionally allowed for qualitative tests
             # to store expected result context (e.g., "Expected: Negative")
         return self
@@ -277,7 +306,9 @@ class LabTestComponentUpdate(BaseModel):
     status: Optional[str] = None
     category: Optional[str] = None
     display_order: Optional[int] = None
-    canonical_test_name: Optional[str] = None  # Links to standardized test name for trend matching
+    canonical_test_name: Optional[str] = (
+        None  # Links to standardized test name for trend matching
+    )
     notes: Optional[str] = None
     result_type: Optional[str] = None
     qualitative_value: Optional[str] = None
@@ -289,7 +320,9 @@ class LabTestComponentUpdate(BaseModel):
             if not v or len(v.strip()) < 1:
                 raise ValueError("Test name is required")
             if len(v) > LAB_TEST_COMPONENT_LIMITS["MAX_TEST_NAME_LENGTH"]:
-                raise ValueError(f"Test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters")
+                raise ValueError(
+                    f"Test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters"
+                )
             return v.strip()
         return v
 
@@ -307,7 +340,9 @@ class LabTestComponentUpdate(BaseModel):
             if len(v.strip()) < 1:
                 return None
             if len(v) > LAB_TEST_COMPONENT_LIMITS["MAX_UNIT_LENGTH"]:
-                raise ValueError(f"Unit must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_UNIT_LENGTH']} characters")
+                raise ValueError(
+                    f"Unit must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_UNIT_LENGTH']} characters"
+                )
             return v.strip()
         return v
 
@@ -316,7 +351,9 @@ class LabTestComponentUpdate(BaseModel):
     def validate_status(cls, v):
         if v is not None:
             if v.lower() not in LAB_TEST_COMPONENT_STATUSES:
-                raise ValueError(f"Status must be one of: {', '.join(LAB_TEST_COMPONENT_STATUSES)}")
+                raise ValueError(
+                    f"Status must be one of: {', '.join(LAB_TEST_COMPONENT_STATUSES)}"
+                )
             return v.lower()
         return v
 
@@ -325,7 +362,9 @@ class LabTestComponentUpdate(BaseModel):
     def validate_category(cls, v):
         if v is not None:
             if v.lower() not in LAB_TEST_COMPONENT_CATEGORIES:
-                raise ValueError(f"Category must be one of: {', '.join(LAB_TEST_COMPONENT_CATEGORIES)}")
+                raise ValueError(
+                    f"Category must be one of: {', '.join(LAB_TEST_COMPONENT_CATEGORIES)}"
+                )
             return v.lower()
         return v
 
@@ -334,7 +373,9 @@ class LabTestComponentUpdate(BaseModel):
     def validate_result_type(cls, v):
         if v is not None:
             if v.lower() not in LAB_TEST_COMPONENT_RESULT_TYPES:
-                raise ValueError(f"Result type must be one of: {', '.join(LAB_TEST_COMPONENT_RESULT_TYPES)}")
+                raise ValueError(
+                    f"Result type must be one of: {', '.join(LAB_TEST_COMPONENT_RESULT_TYPES)}"
+                )
             return v.lower()
         return v
 
@@ -347,7 +388,9 @@ class LabTestComponentUpdate(BaseModel):
                 return None
             normalized = stripped.lower()
             if normalized not in LAB_TEST_COMPONENT_QUALITATIVE_VALUES:
-                raise ValueError(f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}")
+                raise ValueError(
+                    f"Qualitative value must be one of: {', '.join(LAB_TEST_COMPONENT_QUALITATIVE_VALUES)}"
+                )
             return normalized
         return v
 
@@ -368,7 +411,9 @@ class LabTestComponentUpdate(BaseModel):
 
         is_clearing_value = "value" in self.model_fields_set and self.value is None
         is_clearing_unit = "unit" in self.model_fields_set and not self.unit
-        is_clearing_qual = "qualitative_value" in self.model_fields_set and not self.qualitative_value
+        is_clearing_qual = (
+            "qualitative_value" in self.model_fields_set and not self.qualitative_value
+        )
 
         rt = self.result_type  # None if not being updated
 
@@ -382,7 +427,10 @@ class LabTestComponentUpdate(BaseModel):
         # Switching result_type requires the dependent fields for the new type
         if "result_type" in self.model_fields_set:
             if rt == "quantitative":
-                if "value" not in self.model_fields_set or "unit" not in self.model_fields_set:
+                if (
+                    "value" not in self.model_fields_set
+                    or "unit" not in self.model_fields_set
+                ):
                     raise ValueError(
                         "value and unit must be provided when setting result_type to quantitative"
                     )
@@ -399,7 +447,9 @@ class LabTestComponentUpdate(BaseModel):
                 raise ValueError("Unit cannot be cleared for quantitative tests")
         elif rt == "qualitative":
             if is_clearing_qual:
-                raise ValueError("Qualitative value cannot be cleared for qualitative tests")
+                raise ValueError(
+                    "Qualitative value cannot be cleared for qualitative tests"
+                )
         return self
 
 
@@ -424,6 +474,7 @@ class LabTestComponentWithLabResult(LabTestComponentResponse):
 
 # Bulk operations schemas
 
+
 class LabTestComponentBulkCreate(BaseModel):
     """Schema for creating multiple lab test components at once"""
 
@@ -437,7 +488,9 @@ class LabTestComponentBulkCreate(BaseModel):
         if not v or len(v) == 0:
             raise ValueError("At least one component is required")
         if len(v) > LAB_TEST_COMPONENT_LIMITS["MAX_BULK_COMPONENTS"]:
-            raise ValueError(f"Maximum {LAB_TEST_COMPONENT_LIMITS['MAX_BULK_COMPONENTS']} components per bulk operation")
+            raise ValueError(
+                f"Maximum {LAB_TEST_COMPONENT_LIMITS['MAX_BULK_COMPONENTS']} components per bulk operation"
+            )
         return v
 
     @field_validator("lab_result_id")
@@ -460,6 +513,7 @@ class LabTestComponentBulkResponse(BaseModel):
 
 
 # Trend tracking schemas
+
 
 class LabResultBasicForTrend(BaseModel):
     """Minimal lab result info for trend data points"""
@@ -499,12 +553,16 @@ class LabTestComponentTrendStatistics(BaseModel):
     min: Optional[float] = None
     max: Optional[float] = None
     std_dev: Optional[float] = None
-    trend_direction: str  # "increasing", "decreasing", "stable", "worsening", "improving"
+    trend_direction: (
+        str  # "increasing", "decreasing", "stable", "worsening", "improving"
+    )
     time_in_range_percent: Optional[float] = None
     normal_count: int
     abnormal_count: int
     result_type: Optional[str] = "quantitative"
-    qualitative_summary: Optional[Dict[str, int]] = None  # e.g., {"positive": 3, "negative": 5}
+    qualitative_summary: Optional[Dict[str, int]] = (
+        None  # e.g., {"positive": 3, "negative": 5}
+    )
 
 
 class LabTestComponentTrendResponse(BaseModel):
@@ -522,11 +580,14 @@ class LabTestComponentTrendResponse(BaseModel):
 
 # Component Catalog schemas
 
+
 class ComponentCatalogEntry(BaseModel):
     """Single entry in the component catalog – one per unique test name."""
 
     test_name: str
-    trend_test_name: str  # canonical_test_name or stripped test_name – use for trend lookups
+    trend_test_name: (
+        str  # canonical_test_name or stripped test_name – use for trend lookups
+    )
     abbreviation: Optional[str] = None
     latest_value: Optional[float] = None
     latest_qualitative_value: Optional[str] = None

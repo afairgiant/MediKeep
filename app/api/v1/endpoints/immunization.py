@@ -4,9 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    handle_database_errors
-)
+from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
@@ -66,7 +64,9 @@ def read_immunizations(
     limit: int = Query(default=100, le=100),
     vaccine_name: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -85,14 +85,15 @@ def read_immunizations(
                     tag_match_all=tag_match_all,
                     skip=0,
                     limit=1000,  # Get more to filter manually
-                    **filters
+                    **filters,
                 )
                 immunizations = [
-                    imm for imm in all_immunizations
+                    imm
+                    for imm in all_immunizations
                     if vaccine_name.lower() in getattr(imm, "vaccine_name", "").lower()
                 ]
                 # Apply pagination after filtering
-                immunizations = immunizations[skip:skip + limit]
+                immunizations = immunizations[skip : skip + limit]
             else:
                 immunizations = immunization.get_multi_with_tag_filters(
                     db,
@@ -100,7 +101,7 @@ def read_immunizations(
                     tag_match_all=tag_match_all,
                     skip=skip,
                     limit=limit,
-                    **filters
+                    **filters,
                 )
         elif vaccine_name:
             immunizations = immunization.get_by_vaccine(
@@ -118,7 +119,7 @@ def read_immunizations(
             "read",
             "Immunization",
             patient_id=target_patient_id,
-            count=len(immunizations)
+            count=len(immunizations),
         )
 
         return immunizations
@@ -142,7 +143,13 @@ def read_immunization(
     with handle_database_errors(request=request):
         immunization_obj = immunization.get(db=db, id=immunization_id)
         handle_not_found(immunization_obj, "Immunization", request)
-        verify_patient_ownership(immunization_obj, current_user_patient_id, "immunization", db=db, current_user=current_user)
+        verify_patient_ownership(
+            immunization_obj,
+            current_user_patient_id,
+            "immunization",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -151,7 +158,7 @@ def read_immunization(
             "read",
             "Immunization",
             record_id=immunization_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return immunization_obj
@@ -230,7 +237,7 @@ def get_recent_immunizations(
             "Immunization",
             patient_id=patient_id,
             count=len(immunizations),
-            days=days
+            days=days,
         )
 
         return immunizations
@@ -263,7 +270,7 @@ def check_booster_due(
             "Immunization",
             patient_id=patient_id,
             vaccine_name=vaccine_name,
-            booster_due=is_due
+            booster_due=is_due,
         )
 
         return {
@@ -298,7 +305,7 @@ def get_patient_immunizations(
             "read",
             "Immunization",
             patient_id=patient_id,
-            count=len(immunizations)
+            count=len(immunizations),
         )
 
         return immunizations

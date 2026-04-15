@@ -1,6 +1,7 @@
 """
 Tests for Medication CRUD operations.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -23,7 +24,7 @@ class TestMedicationCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -38,7 +39,7 @@ class TestMedicationCRUD:
             frequency="once daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
 
         medication = medication_crud.create(db_session, obj_in=medication_data)
@@ -104,9 +105,9 @@ class TestMedicationCRUD:
             frequency="once daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
-        
+
         # Create stopped medication
         inactive_medication = MedicationCreate(
             patient_id=test_patient.id,
@@ -115,17 +116,19 @@ class TestMedicationCRUD:
             frequency="twice daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="stopped"
+            status="stopped",
         )
-        
+
         created_active = medication_crud.create(db_session, obj_in=active_medication)
-        created_inactive = medication_crud.create(db_session, obj_in=inactive_medication)
-        
+        created_inactive = medication_crud.create(
+            db_session, obj_in=inactive_medication
+        )
+
         # Get active medications
         active_medications = medication_crud.get_active_by_patient(
             db_session, patient_id=test_patient.id
         )
-        
+
         assert len(active_medications) == 1
         assert active_medications[0].id == created_active.id
         assert active_medications[0].medication_name == "Aspirin"
@@ -141,7 +144,7 @@ class TestMedicationCRUD:
                 dosage="100mg",
                 frequency="once daily",
                 route="oral",
-                effective_period_start=date(2024, 1, 1)
+                effective_period_start=date(2024, 1, 1),
             ),
             MedicationCreate(
                 patient_id=test_patient.id,
@@ -149,7 +152,7 @@ class TestMedicationCRUD:
                 dosage="200mg",
                 frequency="twice daily",
                 route="oral",
-                effective_period_start=date(2024, 1, 1)
+                effective_period_start=date(2024, 1, 1),
             ),
             MedicationCreate(
                 patient_id=test_patient.id,
@@ -157,16 +160,16 @@ class TestMedicationCRUD:
                 dosage="500mg",
                 frequency="as needed",
                 route="oral",
-                effective_period_start=date(2024, 1, 1)
-            )
+                effective_period_start=date(2024, 1, 1),
+            ),
         ]
-        
+
         for med_data in medications:
             medication_crud.create(db_session, obj_in=med_data)
-        
+
         # Search for medications containing "in"
         results = medication_crud.get_by_name(db_session, name="in")
-        
+
         assert len(results) == 2  # Aspirin and Acetaminophen
         medication_names = [med.medication_name for med in results]
         assert "Aspirin" in medication_names
@@ -182,17 +185,17 @@ class TestMedicationCRUD:
             frequency="once daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="stopped"
+            status="stopped",
         )
-        
+
         created_medication = medication_crud.create(db_session, obj_in=medication_data)
         assert created_medication.status == "stopped"
-        
+
         # Activate the medication
         activated_medication = medication_crud.activate(
             db_session, db_obj=created_medication
         )
-        
+
         assert activated_medication.status == "active"
         assert activated_medication.id == created_medication.id
 
@@ -206,17 +209,17 @@ class TestMedicationCRUD:
             frequency="once daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
-        
+
         created_medication = medication_crud.create(db_session, obj_in=medication_data)
         assert created_medication.status == "active"
-        
+
         # Deactivate the medication
         deactivated_medication = medication_crud.deactivate(
             db_session, db_obj=created_medication
         )
-        
+
         assert deactivated_medication.status == "stopped"
         assert deactivated_medication.id == created_medication.id
 
@@ -230,25 +233,28 @@ class TestMedicationCRUD:
             frequency="once daily",
             route="oral",
             effective_period_start=date(2024, 1, 1),
-            status="active"
+            status="active",
         )
-        
+
         created_medication = medication_crud.create(db_session, obj_in=medication_data)
-        
+
         # Update medication
         update_data = MedicationUpdate(
             dosage="200mg",
             frequency="twice daily",
-            indication="Increased dosage as per doctor's recommendation"
+            indication="Increased dosage as per doctor's recommendation",
         )
-        
+
         updated_medication = medication_crud.update(
             db_session, db_obj=created_medication, obj_in=update_data
         )
-        
+
         assert updated_medication.dosage == "200mg"
         assert updated_medication.frequency == "twice daily"
-        assert updated_medication.indication == "Increased dosage as per doctor's recommendation"
+        assert (
+            updated_medication.indication
+            == "Increased dosage as per doctor's recommendation"
+        )
         assert updated_medication.medication_name == "Aspirin"  # Unchanged
 
     def test_delete_medication(self, db_session: Session, test_patient):
@@ -260,18 +266,18 @@ class TestMedicationCRUD:
             dosage="100mg",
             frequency="once daily",
             route="oral",
-            start_date="2024-01-01"
+            start_date="2024-01-01",
         )
-        
+
         created_medication = medication_crud.create(db_session, obj_in=medication_data)
         medication_id = created_medication.id
-        
+
         # Delete medication
         deleted_medication = medication_crud.delete(db_session, id=medication_id)
-        
+
         assert deleted_medication is not None
         assert deleted_medication.id == medication_id
-        
+
         # Verify medication is deleted
         retrieved_medication = medication_crud.get(db_session, id=medication_id)
         assert retrieved_medication is None
@@ -286,10 +292,10 @@ class TestMedicationCRUD:
                 dosage="100mg",
                 frequency="once daily",
                 route="oral",
-                start_date="2024-01-01"
+                start_date="2024-01-01",
             )
             medication_crud.create(db_session, obj_in=medication_data)
-        
+
         # Test pagination
         first_page = medication_crud.get_by_name(
             db_session, name="Medication", skip=0, limit=3
@@ -297,17 +303,20 @@ class TestMedicationCRUD:
         second_page = medication_crud.get_by_name(
             db_session, name="Medication", skip=3, limit=3
         )
-        
+
         assert len(first_page) == 3
         assert len(second_page) == 2
-        
+
         # Verify no overlap
         first_page_ids = {med.id for med in first_page}
         second_page_ids = {med.id for med in second_page}
         assert first_page_ids.isdisjoint(second_page_ids)
+
     # --- Alternative Name Tests ---
 
-    def test_create_medication_with_alternative_name(self, db_session: Session, test_patient):
+    def test_create_medication_with_alternative_name(
+        self, db_session: Session, test_patient
+    ):
         """Test creating a medication with alternative_name and verifying it persists."""
         medication_data = MedicationCreate(
             patient_id=test_patient.id,
@@ -323,7 +332,9 @@ class TestMedicationCRUD:
         assert medication.medication_name == "Acetaminophen"
         assert medication.alternative_name == "Paracetamol"
 
-    def test_create_medication_alternative_name_optional(self, db_session: Session, test_patient):
+    def test_create_medication_alternative_name_optional(
+        self, db_session: Session, test_patient
+    ):
         """Test creating a medication without alternative_name results in None."""
         medication_data = MedicationCreate(
             patient_id=test_patient.id,

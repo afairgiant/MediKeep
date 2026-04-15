@@ -60,12 +60,34 @@ const ACTION_COLORS = {
 
 // Entity types that have admin model views (matches MODEL_REGISTRY keys)
 const LINKABLE_ENTITY_TYPES = new Set([
-  'user', 'patient', 'practitioner', 'pharmacy', 'medication',
-  'lab_result', 'lab_result_file', 'lab_test_component', 'vitals', 'condition', 'allergy',
-  'immunization', 'procedure', 'treatment', 'encounter', 'emergency_contact',
-  'insurance', 'family_member', 'family_condition', 'entity_file',
-  'injury', 'injury_type', 'symptom', 'symptom_occurrence', 'medical_equipment',
-  'patient_share', 'invitation', 'family_history_share',
+  'user',
+  'patient',
+  'practitioner',
+  'pharmacy',
+  'medication',
+  'lab_result',
+  'lab_result_file',
+  'lab_test_component',
+  'vitals',
+  'condition',
+  'allergy',
+  'immunization',
+  'procedure',
+  'treatment',
+  'encounter',
+  'emergency_contact',
+  'insurance',
+  'family_member',
+  'family_condition',
+  'entity_file',
+  'injury',
+  'injury_type',
+  'symptom',
+  'symptom_occurrence',
+  'medical_equipment',
+  'patient_share',
+  'invitation',
+  'family_history_share',
 ]);
 
 function getEntityLink(entry) {
@@ -203,14 +225,20 @@ const AuditLog = () => {
   };
 
   const hasActiveFilters =
-    debouncedSearch || actionFilter || entityTypeFilter || userFilter || dateRange[0] || dateRange[1];
+    debouncedSearch ||
+    actionFilter ||
+    entityTypeFilter ||
+    userFilter ||
+    dateRange[0] ||
+    dateRange[1];
 
   const actionOptions = filters?.actions || [];
   const entityTypeOptions = filters?.entity_types || [];
-  const userOptions = filters?.users?.map((u) => ({
-    value: String(u.value),
-    label: u.label,
-  })) || [];
+  const userOptions =
+    filters?.users?.map(u => ({
+      value: String(u.value),
+      label: u.label,
+    })) || [];
 
   return (
     <AdminLayout>
@@ -220,13 +248,23 @@ const AuditLog = () => {
           <Group justify="space-between" align="flex-start">
             <div>
               <Group align="center" mb="xs">
-                <ThemeIcon size="xl" variant="light" color="blue" aria-hidden="true">
+                <ThemeIcon
+                  size="xl"
+                  variant="light"
+                  color="blue"
+                  aria-hidden="true"
+                >
                   <IconFileText size={24} />
                 </ThemeIcon>
-                <Title order={2}>{t('shared:labels.auditLog', 'Audit Log')}</Title>
+                <Title order={2}>
+                  {t('shared:labels.auditLog', 'Audit Log')}
+                </Title>
               </Group>
               <Text c="dimmed" size="md">
-                {t('auditLog.subtitle', 'Complete activity trail for compliance and auditing')}
+                {t(
+                  'auditLog.subtitle',
+                  'Complete activity trail for compliance and auditing'
+                )}
               </Text>
             </div>
             <Group>
@@ -254,11 +292,17 @@ const AuditLog = () => {
           <Stack gap="sm">
             <Group grow align="flex-end">
               <TextInput
-                placeholder={t('auditLog.searchPlaceholder', 'Search descriptions...')}
+                placeholder={t(
+                  'auditLog.searchPlaceholder',
+                  'Search descriptions...'
+                )}
                 leftSection={<IconSearch size={16} />}
                 value={search}
-                onChange={(e) => setSearch(e.currentTarget.value)}
-                aria-label={t('auditLog.searchAriaLabel', 'Search activity log')}
+                onChange={e => setSearch(e.currentTarget.value)}
+                aria-label={t(
+                  'auditLog.searchAriaLabel',
+                  'Search activity log'
+                )}
               />
               <DatePickerInput
                 type="range"
@@ -266,7 +310,10 @@ const AuditLog = () => {
                 value={dateRange}
                 onChange={setDateRange}
                 clearable
-                aria-label={t('auditLog.filterByDateRange', 'Filter by date range')}
+                aria-label={t(
+                  'auditLog.filterByDateRange',
+                  'Filter by date range'
+                )}
               />
             </Group>
             <Group grow align="flex-end">
@@ -286,7 +333,10 @@ const AuditLog = () => {
                 onChange={setEntityTypeFilter}
                 clearable
                 searchable
-                aria-label={t('auditLog.filterByEntityType', 'Filter by entity type')}
+                aria-label={t(
+                  'auditLog.filterByEntityType',
+                  'Filter by entity type'
+                )}
               />
               <Select
                 placeholder={t('shared:labels.user', 'User')}
@@ -314,8 +364,13 @@ const AuditLog = () => {
         {/* Results Info */}
         {data && !loading && (
           <Text size="sm" c="dimmed">
-            {t('auditLog.showingResults', 'Showing {{shown}} of {{total}} results', { shown: data.items?.length || 0, total: data.total || 0 })}
-            {data.total_pages > 1 && ` (${t('auditLog.pageInfo', 'page {{page}} of {{totalPages}}', { page: data.page, totalPages: data.total_pages })})`}
+            {t(
+              'auditLog.showingResults',
+              'Showing {{shown}} of {{total}} results',
+              { shown: data.items?.length || 0, total: data.total || 0 }
+            )}
+            {data.total_pages > 1 &&
+              ` (${t('auditLog.pageInfo', 'page {{page}} of {{totalPages}}', { page: data.page, totalPages: data.total_pages })})`}
           </Text>
         )}
 
@@ -338,7 +393,9 @@ const AuditLog = () => {
           <Center py="xl">
             <Stack align="center">
               <Loader size="lg" />
-              <Text c="dimmed">{t('auditLog.loading', 'Loading audit log...')}</Text>
+              <Text c="dimmed">
+                {t('auditLog.loading', 'Loading audit log...')}
+              </Text>
             </Stack>
           </Center>
         )}
@@ -365,38 +422,56 @@ const AuditLog = () => {
               <Table striped highlightOnHover aria-label="Activity log entries">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{t('auditLog.tableHeaders.timestamp', 'Timestamp')}</Table.Th>
+                    <Table.Th>
+                      {t('auditLog.tableHeaders.timestamp', 'Timestamp')}
+                    </Table.Th>
                     <Table.Th>{t('shared:labels.user', 'User')}</Table.Th>
-                    <Table.Th>{t('auditLog.tableHeaders.action', 'Action')}</Table.Th>
-                    <Table.Th>{t('auditLog.tableHeaders.entityType', 'Entity Type')}</Table.Th>
-                    <Table.Th>{t('shared:labels.description', 'Description')}</Table.Th>
-                    <Table.Th>{t('auditLog.tableHeaders.recordId', 'Record ID')}</Table.Th>
+                    <Table.Th>
+                      {t('auditLog.tableHeaders.action', 'Action')}
+                    </Table.Th>
+                    <Table.Th>
+                      {t('auditLog.tableHeaders.entityType', 'Entity Type')}
+                    </Table.Th>
+                    <Table.Th>
+                      {t('shared:labels.description', 'Description')}
+                    </Table.Th>
+                    <Table.Th>
+                      {t('auditLog.tableHeaders.recordId', 'Record ID')}
+                    </Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {data.items?.length > 0 ? (
-                    data.items.map((entry) => {
+                    data.items.map(entry => {
                       const link = getEntityLink(entry);
                       return (
                         <Table.Tr
                           key={entry.id}
                           style={link ? { cursor: 'pointer' } : undefined}
                           onClick={link ? () => navigate(link) : undefined}
-                          onKeyDown={link ? (e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              navigate(link);
-                            }
-                          } : undefined}
+                          onKeyDown={
+                            link
+                              ? e => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    navigate(link);
+                                  }
+                                }
+                              : undefined
+                          }
                           tabIndex={link ? 0 : undefined}
                         >
                           <Table.Td style={{ whiteSpace: 'nowrap' }}>
                             <Text size="sm">
-                              {entry.timestamp ? formatDateTime(entry.timestamp) : '-'}
+                              {entry.timestamp
+                                ? formatDateTime(entry.timestamp)
+                                : '-'}
                             </Text>
                           </Table.Td>
                           <Table.Td>
-                            <Text size="sm">{entry.username || t('auditLog.system', 'System')}</Text>
+                            <Text size="sm">
+                              {entry.username || t('auditLog.system', 'System')}
+                            </Text>
                           </Table.Td>
                           <Table.Td>
                             <Badge
@@ -424,16 +499,29 @@ const AuditLog = () => {
                           </Table.Td>
                           <Table.Td>
                             {link ? (
-                              <Tooltip label={t('auditLog.viewRecord', 'View {{type}} record', { type: entry.entity_type_display })}>
+                              <Tooltip
+                                label={t(
+                                  'auditLog.viewRecord',
+                                  'View {{type}} record',
+                                  { type: entry.entity_type_display }
+                                )}
+                              >
                                 <ActionIcon
                                   variant="subtle"
                                   size="sm"
                                   color="blue"
-                                  onClick={(e) => {
+                                  onClick={e => {
                                     e.stopPropagation();
                                     navigate(link);
                                   }}
-                                  aria-label={t('auditLog.viewRecordAriaLabel', 'View {{type}} #{{id}}', { type: entry.entity_type_display, id: entry.entity_id })}
+                                  aria-label={t(
+                                    'auditLog.viewRecordAriaLabel',
+                                    'View {{type}} #{{id}}',
+                                    {
+                                      type: entry.entity_type_display,
+                                      id: entry.entity_id,
+                                    }
+                                  )}
                                 >
                                   <IconExternalLink size={14} />
                                 </ActionIcon>
@@ -446,8 +534,8 @@ const AuditLog = () => {
                           </Table.Td>
                         </Table.Tr>
                       );
-                    }))
-                  : (
+                    })
+                  ) : (
                     <Table.Tr>
                       <Table.Td colSpan={6}>
                         <Center py="xl">

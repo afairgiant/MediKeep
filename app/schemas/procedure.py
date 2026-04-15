@@ -18,7 +18,9 @@ def _validate_procedure_outcome(v: Optional[str]) -> Optional[str]:
         return None
     lower_v = v.lower()
     if lower_v not in VALID_PROCEDURE_OUTCOMES:
-        raise ValueError(f"Outcome must be one of: {', '.join(VALID_PROCEDURE_OUTCOMES)}")
+        raise ValueError(
+            f"Outcome must be one of: {', '.join(VALID_PROCEDURE_OUTCOMES)}"
+        )
     return lower_v
 
 
@@ -54,13 +56,17 @@ def _validate_date_with_status(values: dict) -> dict:
     if status in ["scheduled", "postponed"]:
         max_future = DateType.today() + timedelta(days=3650)  # 10 years
         if date_value > max_future:
-            raise ValueError("Procedure date cannot be more than 10 years in the future")
+            raise ValueError(
+                "Procedure date cannot be more than 10 years in the future"
+            )
         # Allow past dates for scheduled procedures (e.g., rescheduled from past)
         return values
 
     # For all other statuses (completed, in_progress, cancelled), date should not be in future
     if date_value > DateType.today():
-        raise ValueError(f"Procedure date cannot be in the future for {status} procedures")
+        raise ValueError(
+            f"Procedure date cannot be in the future for {status} procedures"
+        )
     return values
 
 
@@ -124,7 +130,9 @@ class ProcedureBase(TaggedEntityMixin):
     @classmethod
     def validate_status(cls, v):
         if v.lower() not in VALID_PROCEDURE_STATUSES:
-            raise ValueError(f"Status must be one of: {', '.join(VALID_PROCEDURE_STATUSES)}")
+            raise ValueError(
+                f"Status must be one of: {', '.join(VALID_PROCEDURE_STATUSES)}"
+            )
         return v.lower()
 
     @field_validator("outcome")
@@ -165,7 +173,9 @@ class ProcedureUpdate(BaseModel):
     def validate_status(cls, v):
         if v is not None:
             if v.lower() not in VALID_PROCEDURE_STATUSES:
-                raise ValueError(f"Status must be one of: {', '.join(VALID_PROCEDURE_STATUSES)}")
+                raise ValueError(
+                    f"Status must be one of: {', '.join(VALID_PROCEDURE_STATUSES)}"
+                )
             return v.lower()
         return v
 

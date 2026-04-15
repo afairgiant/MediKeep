@@ -6,7 +6,16 @@ Supports lab-results, insurance, visits, procedures, and future entity types.
 import os
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -24,7 +33,19 @@ from app.core.logging.helpers import (
     log_security_event,
     log_debug,
 )
-from app.crud import lab_result, insurance, encounter, procedure, medication, immunization, allergy, condition, treatment, symptom_parent, injury
+from app.crud import (
+    lab_result,
+    insurance,
+    encounter,
+    procedure,
+    medication,
+    immunization,
+    allergy,
+    condition,
+    treatment,
+    symptom_parent,
+    injury,
+)
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
 from app.schemas.entity_file import (
@@ -62,10 +83,10 @@ logger = get_logger(__name__, "app")
 
 def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
     """Get entity by type and ID for authorization checks
-    
+
     Returns:
         Entity object if found, None if not found
-        
+
     Raises:
         HTTPException: For database errors or unsupported entity types
     """
@@ -85,8 +106,10 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
     }
     crud_func = entity_map.get(entity_type)
     if not crud_func:
-        raise HTTPException(status_code=400, detail=f"Unsupported entity type: {entity_type}")
-    
+        raise HTTPException(
+            status_code=400, detail=f"Unsupported entity type: {entity_type}"
+        )
+
     try:
         entity = crud_func(db, id=entity_id)
         if not entity:
@@ -94,7 +117,7 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
                 logger,
                 f"Entity not found: {entity_type} with ID {entity_id}",
                 entity_type=entity_type,
-                entity_id=entity_id
+                entity_id=entity_id,
             )
             return None
         return entity
@@ -107,12 +130,11 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
                 LogFields.EVENT: "database_error",
                 LogFields.ERROR: str(e),
                 "entity_type": entity_type,
-                "entity_id": entity_id
-            }
+                "entity_id": entity_id,
+            },
         )
         raise HTTPException(
-            status_code=500,
-            detail="Database error occurred while accessing entity"
+            status_code=500, detail="Database error occurred while accessing entity"
         )
     except Exception as e:
         # Unexpected errors should be logged with full details
@@ -123,39 +145,39 @@ def get_entity_by_type_and_id(db: Session, entity_type: str, entity_id: int):
                 LogFields.EVENT: "unexpected_error",
                 LogFields.ERROR: str(e),
                 "entity_type": entity_type,
-                "entity_id": entity_id
+                "entity_id": entity_id,
             },
-            exc_info=True
+            exc_info=True,
         )
         raise HTTPException(
             status_code=500,
-            detail="An unexpected error occurred while accessing entity"
+            detail="An unexpected error occurred while accessing entity",
         )
 
 
 def fix_filename_for_paperless_content(filename: str, content: bytes) -> str:
     """
     Fix filename extension based on actual file content from Paperless.
-    
+
     Paperless-NGX often converts images to PDFs during processing,
     but the original filename is preserved, causing extension/content mismatches.
-    
+
     Args:
         filename: Original filename
         content: Actual file content bytes
-        
+
     Returns:
         Corrected filename with proper extension
     """
     # Check if content is actually a PDF (Paperless converts images to PDF)
-    if content.startswith(b'%PDF-'):
+    if content.startswith(b"%PDF-"):
         base_name = os.path.splitext(filename)[0]
         corrected_filename = f"{base_name}.pdf"
         log_debug(
             logger,
             f"Paperless file conversion detected: {filename} -> {corrected_filename}",
             original_file_name=filename,
-            corrected_file_name=corrected_filename
+            corrected_file_name=corrected_filename,
         )
         return corrected_filename
 
@@ -188,7 +210,7 @@ def get_entity_files(
         if not parent_entity:
             # If entity doesn't exist, return empty list (matches original behavior)
             return []
-        
+
         # Verify user has access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
@@ -198,7 +220,7 @@ def get_entity_files(
             except (HTTPException, NotFoundException, MedicalRecordsAPIException):
                 # Entity exists but user doesn't have access - return empty list
                 return []
-        
+
         return file_service.get_entity_files(db, entity_type, entity_id)
 
     except (HTTPException, NotFoundException, MedicalRecordsAPIException):
@@ -211,7 +233,7 @@ def get_entity_files(
             e,
             user_id=current_user.id,
             entity_type=entity_type,
-            entity_id=entity_id
+            entity_id=entity_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -261,7 +283,14 @@ async def create_pending_file_record(
         # Get the parent entity (lab-result, procedure, etc.) and verify ownership
         parent_entity = get_entity_by_type_and_id(db, entity_type, entity_id)
         handle_not_found(parent_entity, entity_type)
-        verify_patient_ownership(parent_entity, current_user_patient_id, entity_type, db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            parent_entity,
+            current_user_patient_id,
+            entity_type,
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         log_endpoint_access(
             logger,
@@ -273,7 +302,7 @@ async def create_pending_file_record(
             entity_id=entity_id,
             file_name=file_name,
             file_size=file_size,
-            storage_backend=storage_backend
+            storage_backend=storage_backend,
         )
 
         # Create pending file record
@@ -317,7 +346,7 @@ async def create_pending_file_record(
             user_id=current_user_id,
             entity_type=entity_type,
             entity_id=entity_id,
-            file_name=file_name
+            file_name=file_name,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -359,9 +388,18 @@ async def update_file_upload_status(
         handle_not_found(file_record, "File")
 
         # Get the parent entity and verify ownership
-        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        parent_entity = get_entity_by_type_and_id(
+            db, file_record.entity_type, file_record.entity_id
+        )
         handle_not_found(parent_entity, file_record.entity_type)
-        verify_patient_ownership(parent_entity, current_user_patient_id, file_record.entity_type, db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            parent_entity,
+            current_user_patient_id,
+            file_record.entity_type,
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         log_endpoint_access(
             logger,
@@ -371,7 +409,7 @@ async def update_file_upload_status(
             message=f"Updating file {file_id} status to {sync_status}",
             file_id=file_id,
             sync_status=sync_status,
-            actual_file_path=actual_file_path
+            actual_file_path=actual_file_path,
         )
 
         result = await file_service.update_file_upload_status(
@@ -408,7 +446,7 @@ async def update_file_upload_status(
             e,
             user_id=current_user_id,
             file_id=file_id,
-            sync_status=sync_status
+            sync_status=sync_status,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -458,7 +496,7 @@ async def upload_entity_file(
             entity_type=entity_type,
             entity_id=entity_id,
             storage_backend=storage_backend,
-            file_name=file.filename
+            file_name=file.filename,
         )
 
         # Get the parent entity (lab-result, procedure, etc.) and verify access
@@ -466,9 +504,9 @@ async def upload_entity_file(
         if not parent_entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"{entity_type.title()} not found"
+                detail=f"{entity_type.title()} not found",
             )
-        
+
         # Verify user has access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
@@ -505,11 +543,14 @@ async def upload_entity_file(
                 )
         except Exception as log_error:
             # Don't fail the request if logging fails
-            logger.error(f"Failed to log file creation: {log_error}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "logging_failure",
-                LogFields.ERROR: str(log_error)
-            })
+            logger.error(
+                f"Failed to log file creation: {log_error}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "logging_failure",
+                    LogFields.ERROR: str(log_error),
+                },
+            )
 
         return result
 
@@ -524,7 +565,7 @@ async def upload_entity_file(
             user_id=current_user_id,
             entity_type=entity_type,
             entity_id=entity_id,
-            file_name=file.filename if file else None
+            file_name=file.filename if file else None,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -574,7 +615,7 @@ async def link_paperless_document(
             message=f"Paperless document link request for {entity_type} {entity_id}",
             entity_type=entity_type,
             entity_id=entity_id,
-            paperless_document_id=link_request.paperless_document_id
+            paperless_document_id=link_request.paperless_document_id,
         )
 
         # Get the parent entity and verify access
@@ -582,7 +623,7 @@ async def link_paperless_document(
         if not parent_entity:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"{entity_type.title()} not found"
+                detail=f"{entity_type.title()} not found",
             )
 
         # Verify user has access to the patient that owns this entity
@@ -596,18 +637,19 @@ async def link_paperless_document(
         if not user_prefs or not user_prefs.paperless_enabled:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Paperless integration is not enabled"
+                detail="Paperless integration is not enabled",
             )
 
         # Check if credentials exist
-        has_auth = (user_prefs.paperless_api_token_encrypted or
-                   (user_prefs.paperless_username_encrypted and
-                    user_prefs.paperless_password_encrypted))
+        has_auth = user_prefs.paperless_api_token_encrypted or (
+            user_prefs.paperless_username_encrypted
+            and user_prefs.paperless_password_encrypted
+        )
 
         if not user_prefs.paperless_url or not has_auth:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Paperless configuration is incomplete"
+                detail="Paperless configuration is incomplete",
             )
 
         # Create Paperless client and verify document exists
@@ -616,47 +658,55 @@ async def link_paperless_document(
             encrypted_token=user_prefs.paperless_api_token_encrypted,
             encrypted_username=user_prefs.paperless_username_encrypted,
             encrypted_password=user_prefs.paperless_password_encrypted,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
 
         # Verify document exists in Paperless
         async with paperless_client:
-            doc_info = await paperless_client.get_document_info(link_request.paperless_document_id)
+            doc_info = await paperless_client.get_document_info(
+                link_request.paperless_document_id
+            )
 
             if not doc_info:
                 log_endpoint_error(
                     logger,
                     request,
                     "Document not found in Paperless",
-                    Exception(f"Document {link_request.paperless_document_id} not found"),
+                    Exception(
+                        f"Document {link_request.paperless_document_id} not found"
+                    ),
                     user_id=current_user_id,
-                    paperless_document_id=link_request.paperless_document_id
+                    paperless_document_id=link_request.paperless_document_id,
                 )
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Document {link_request.paperless_document_id} not found in Paperless"
+                    detail=f"Document {link_request.paperless_document_id} not found in Paperless",
                 )
 
             # Extract metadata from Paperless
-            file_type = doc_info.get('mime_type') or 'application/pdf'
+            file_type = doc_info.get("mime_type") or "application/pdf"
 
             # Determine file extension from mime type
             mime_to_ext = {
-                'application/pdf': '.pdf',
-                'image/jpeg': '.jpg',
-                'image/png': '.png',
-                'image/tiff': '.tiff',
-                'text/plain': '.txt',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-                'application/msword': '.doc',
+                "application/pdf": ".pdf",
+                "image/jpeg": ".jpg",
+                "image/png": ".png",
+                "image/tiff": ".tiff",
+                "text/plain": ".txt",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+                "application/msword": ".doc",
             }
-            extension = mime_to_ext.get(file_type, '')
+            extension = mime_to_ext.get(file_type, "")
 
             # Get filename with appropriate fallback
-            file_name = doc_info.get('original_file_name') or doc_info.get('title') or f'document_{link_request.paperless_document_id}{extension}'
+            file_name = (
+                doc_info.get("original_file_name")
+                or doc_info.get("title")
+                or f"document_{link_request.paperless_document_id}{extension}"
+            )
 
             # Get file size from Paperless metadata if available
-            file_size = doc_info.get('archive_size') or doc_info.get('size')
+            file_size = doc_info.get("archive_size") or doc_info.get("size")
 
             # Create placeholder file_path
             file_path = f"paperless://document/{link_request.paperless_document_id}"
@@ -669,11 +719,12 @@ async def link_paperless_document(
                 file_path=file_path,  # Placeholder path
                 file_type=file_type,
                 file_size=file_size,  # File size from Paperless metadata
-                description=link_request.description or f"Linked from Paperless (ID: {link_request.paperless_document_id})",
+                description=link_request.description
+                or f"Linked from Paperless (ID: {link_request.paperless_document_id})",
                 category=link_request.category,
-                storage_backend='paperless',
+                storage_backend="paperless",
                 paperless_document_id=link_request.paperless_document_id,
-                sync_status='synced',  # Already in Paperless
+                sync_status="synced",  # Already in Paperless
                 uploaded_at=get_utc_now(),
                 created_at=get_utc_now(),
                 updated_at=get_utc_now(),
@@ -693,11 +744,14 @@ async def link_paperless_document(
                 )
             except Exception as log_error:
                 # Don't fail the request if logging fails
-                logger.error(f"Failed to log file link: {log_error}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "logging_failure",
-                    LogFields.ERROR: str(log_error)
-                })
+                logger.error(
+                    f"Failed to log file link: {log_error}",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "logging_failure",
+                        LogFields.ERROR: str(log_error),
+                    },
+                )
 
             log_data_access(
                 logger,
@@ -709,7 +763,7 @@ async def link_paperless_document(
                 entity_type=entity_type,
                 entity_id=entity_id,
                 paperless_document_id=link_request.paperless_document_id,
-                link_type="existing_document"
+                link_type="existing_document",
             )
 
             return EntityFileResponse.from_orm(entity_file)
@@ -725,11 +779,11 @@ async def link_paperless_document(
             e,
             user_id=current_user_id,
             entity_type=entity_type,
-            paperless_document_id=link_request.paperless_document_id
+            paperless_document_id=link_request.paperless_document_id,
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unable to connect to Paperless: {str(e)}"
+            detail=f"Unable to connect to Paperless: {str(e)}",
         )
 
     except PaperlessClientError as e:
@@ -740,11 +794,10 @@ async def link_paperless_document(
             e,
             user_id=current_user_id,
             entity_type=entity_type,
-            paperless_document_id=link_request.paperless_document_id
+            paperless_document_id=link_request.paperless_document_id,
         )
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Paperless error: {str(e)}"
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Paperless error: {str(e)}"
         )
 
     except Exception as e:
@@ -756,7 +809,7 @@ async def link_paperless_document(
             user_id=current_user_id,
             entity_type=entity_type,
             entity_id=entity_id,
-            paperless_document_id=link_request.paperless_document_id
+            paperless_document_id=link_request.paperless_document_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -854,7 +907,9 @@ async def link_papra_document(
         )
 
         async with papra_client:
-            doc_info = await papra_client.get_document_info(link_request.papra_document_id)
+            doc_info = await papra_client.get_document_info(
+                link_request.papra_document_id
+            )
 
             if not doc_info:
                 log_endpoint_error(
@@ -901,7 +956,8 @@ async def link_papra_document(
                 file_path=file_path,
                 file_type=file_type,
                 file_size=file_size,
-                description=link_request.description or f"Linked from Papra (ID: {doc_id})",
+                description=link_request.description
+                or f"Linked from Papra (ID: {doc_id})",
                 category=link_request.category,
                 storage_backend="papra",
                 papra_document_id=doc_id,
@@ -926,11 +982,14 @@ async def link_papra_document(
                 )
             except Exception as log_error:
                 # Don't fail the request if activity logging fails
-                logger.error(f"Failed to log Papra file link: {log_error}", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "logging_failure",
-                    LogFields.ERROR: str(log_error),
-                })
+                logger.error(
+                    f"Failed to log Papra file link: {log_error}",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "logging_failure",
+                        LogFields.ERROR: str(log_error),
+                    },
+                )
 
             log_data_access(
                 logger,
@@ -1018,11 +1077,13 @@ async def download_file(
         # Get file record first to check authorization
         file_record = file_service.get_file_by_id(db, file_id)
         handle_not_found(file_record, "File")
-        
+
         # Get the parent entity and verify access
-        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        parent_entity = get_entity_by_type_and_id(
+            db, file_record.entity_type, file_record.entity_id
+        )
         handle_not_found(parent_entity, file_record.entity_type)
-        
+
         # Verify user has access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
@@ -1043,7 +1104,7 @@ async def download_file(
                 original_file_name=filename,
                 corrected_file_name=corrected_filename,
                 content_size=len(file_info),
-                file_id=file_id
+                file_id=file_id,
             )
 
             # Paperless file - return as StreamingResponse with proper binary handling
@@ -1051,7 +1112,7 @@ async def download_file(
             import mimetypes
 
             # Ensure proper content type - use corrected filename for guessing
-            if not content_type or content_type == 'application/octet-stream':
+            if not content_type or content_type == "application/octet-stream":
                 # Try to guess content type from corrected filename
                 guessed_type, _ = mimetypes.guess_type(corrected_filename)
                 if guessed_type:
@@ -1061,17 +1122,17 @@ async def download_file(
                         "Guessed content type from filename",
                         file_name=corrected_filename,
                         content_type=content_type,
-                        file_id=file_id
+                        file_id=file_id,
                     )
 
             # Override content type for PDF files to ensure proper handling
-            if corrected_filename.endswith('.pdf'):
-                content_type = 'application/pdf'
+            if corrected_filename.endswith(".pdf"):
+                content_type = "application/pdf"
                 log_debug(
                     logger,
                     "Forced content type for PDF file",
                     file_id=file_id,
-                    file_name=corrected_filename
+                    file_name=corrected_filename,
                 )
 
             # Set proper headers for binary content
@@ -1083,7 +1144,7 @@ async def download_file(
 
             return Response(
                 content=file_info,
-                media_type=content_type or 'application/octet-stream',
+                media_type=content_type or "application/octet-stream",
                 headers=headers,
             )
         else:
@@ -1111,7 +1172,7 @@ async def view_file(
 ):
     """
     View a file by its ID in browser (inline display).
-    
+
     Supports authentication via both Authorization header and query parameter.
     This enables opening files in new browser tabs where Authorization headers
     are not automatically included.
@@ -1122,7 +1183,7 @@ async def view_file(
 
     Returns:
         File response for inline viewing in browser with Content-Disposition: inline
-        
+
     Example URLs:
         - With Authorization header: GET /api/v1/entity-files/files/123/view
         - With query token: GET /api/v1/entity-files/files/123/view?token=<jwt_token>
@@ -1134,11 +1195,12 @@ async def view_file(
             current_user_id,
             "file_view_requested",
             message=f"Viewing file {file_id}",
-            file_id=file_id
+            file_id=file_id,
         )
 
         # Get current user object for multi-patient access verification
         from app.crud.user import user
+
         current_user = user.get(db, id=current_user_id)
         if not current_user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -1146,16 +1208,18 @@ async def view_file(
         # Get file record first to check authorization
         file_record = file_service.get_file_by_id(db, file_id)
         handle_not_found(file_record, "File")
-        
+
         # Get the parent entity and verify access
-        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        parent_entity = get_entity_by_type_and_id(
+            db, file_record.entity_type, file_record.entity_id
+        )
         handle_not_found(parent_entity, file_record.entity_type)
-        
+
         # Verify user has access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
             deps.verify_patient_access(entity_patient_id, db, current_user)
-        
+
         # Get file information
         file_info, filename, content_type = await file_service.get_file_view_info(
             db, file_id, current_user_id
@@ -1171,7 +1235,7 @@ async def view_file(
                 original_file_name=filename,
                 corrected_file_name=corrected_filename,
                 content_size=len(file_info),
-                file_id=file_id
+                file_id=file_id,
             )
 
             # Paperless file - return as StreamingResponse with proper binary handling
@@ -1179,7 +1243,7 @@ async def view_file(
             import mimetypes
 
             # Ensure proper content type - use corrected filename for guessing
-            if not content_type or content_type == 'application/octet-stream':
+            if not content_type or content_type == "application/octet-stream":
                 # Try to guess content type from corrected filename
                 guessed_type, _ = mimetypes.guess_type(corrected_filename)
                 if guessed_type:
@@ -1189,17 +1253,17 @@ async def view_file(
                         "Guessed content type for view",
                         file_name=corrected_filename,
                         content_type=content_type,
-                        file_id=file_id
+                        file_id=file_id,
                     )
 
             # Override content type for PDF files to ensure proper handling
-            if corrected_filename.endswith('.pdf'):
-                content_type = 'application/pdf'
+            if corrected_filename.endswith(".pdf"):
+                content_type = "application/pdf"
                 log_debug(
                     logger,
                     "Forced content type for PDF view",
                     file_id=file_id,
-                    file_name=corrected_filename
+                    file_name=corrected_filename,
                 )
 
             # Set secure headers for inline file viewing with proper binary handling
@@ -1207,13 +1271,13 @@ async def view_file(
                 "Content-Disposition": f"inline; filename={corrected_filename}",
                 "Content-Length": str(len(file_info)),
                 "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
-                "X-Frame-Options": "SAMEORIGIN",     # Prevent embedding in frames from other domains
+                "X-Frame-Options": "SAMEORIGIN",  # Prevent embedding in frames from other domains
                 "Cache-Control": "no-cache",
             }
-            
+
             return Response(
                 content=file_info,
-                media_type=content_type or 'application/octet-stream',
+                media_type=content_type or "application/octet-stream",
                 headers=headers,
             )
         else:
@@ -1221,14 +1285,14 @@ async def view_file(
             headers = {
                 "Content-Disposition": f"inline; filename={filename}",
                 "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
-                "X-Frame-Options": "SAMEORIGIN",     # Prevent embedding in frames from other domains
+                "X-Frame-Options": "SAMEORIGIN",  # Prevent embedding in frames from other domains
             }
-            
+
             return FileResponse(
-                path=file_info, 
-                filename=filename, 
+                path=file_info,
+                filename=filename,
                 media_type=content_type,
-                headers=headers
+                headers=headers,
             )
 
     except HTTPException:
@@ -1240,7 +1304,7 @@ async def view_file(
             f"Failed to view file {file_id}",
             e,
             user_id=current_user_id,
-            file_id=file_id
+            file_id=file_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1270,11 +1334,13 @@ async def delete_file(
         # Get file record before deletion for logging and authorization
         file_record = file_service.get_file_by_id(db, file_id)
         handle_not_found(file_record, "File")
-        
+
         # Get the parent entity and verify access
-        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        parent_entity = get_entity_by_type_and_id(
+            db, file_record.entity_type, file_record.entity_id
+        )
         handle_not_found(parent_entity, file_record.entity_type)
-        
+
         # Verify user has access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
@@ -1293,11 +1359,14 @@ async def delete_file(
             )
         except Exception as log_error:
             # Don't fail the request if logging fails
-            logger.error(f"Failed to log file deletion: {log_error}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "logging_failure",
-                LogFields.ERROR: str(log_error)
-            })
+            logger.error(
+                f"Failed to log file deletion: {log_error}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "logging_failure",
+                    LogFields.ERROR: str(log_error),
+                },
+            )
 
         return result
 
@@ -1336,11 +1405,13 @@ def update_file_metadata(
         # Get original file record for logging and authorization
         original_file = file_service.get_file_by_id(db, file_id)
         handle_not_found(original_file, "File")
-        
+
         # Get the parent entity and verify access
-        parent_entity = get_entity_by_type_and_id(db, original_file.entity_type, original_file.entity_id)
+        parent_entity = get_entity_by_type_and_id(
+            db, original_file.entity_type, original_file.entity_id
+        )
         handle_not_found(parent_entity, original_file.entity_type)
-        
+
         # Verify user has access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
@@ -1364,11 +1435,14 @@ def update_file_metadata(
                 )
         except Exception as log_error:
             # Don't fail the request if logging fails
-            logger.error(f"Failed to log file update: {log_error}", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "logging_failure",
-                LogFields.ERROR: str(log_error)
-            })
+            logger.error(
+                f"Failed to log file update: {log_error}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "logging_failure",
+                    LogFields.ERROR: str(log_error),
+                },
+            )
 
         return result
 
@@ -1410,7 +1484,7 @@ def get_batch_file_counts(
             f"Processing batch file count request for {len(batch_request.entity_ids)} entities",
             user_id=current_user.id,
             entity_type=entity_type,
-            requested_count=len(batch_request.entity_ids)
+            requested_count=len(batch_request.entity_ids),
         )
 
         for entity_id in batch_request.entity_ids:
@@ -1421,7 +1495,7 @@ def get_batch_file_counts(
                     entity_patient_id = getattr(parent_entity, "patient_id", None)
                     if entity_patient_id:
                         deps.verify_patient_access(entity_patient_id, db, current_user)
-                    
+
                     authorized_entity_ids.append(entity_id)
                     log_debug(
                         logger,
@@ -1429,7 +1503,7 @@ def get_batch_file_counts(
                         user_id=current_user.id,
                         entity_type=entity_type,
                         entity_id=entity_id,
-                        patient_id=entity_patient_id
+                        patient_id=entity_patient_id,
                     )
                 else:
                     not_found_count += 1
@@ -1439,7 +1513,7 @@ def get_batch_file_counts(
                         user_id=current_user.id,
                         entity_type=entity_type,
                         entity_id=entity_id,
-                        reason="not_found"
+                        reason="not_found",
                     )
             except (HTTPException, NotFoundException, MedicalRecordsAPIException) as e:
                 # Log when entities are skipped due to authorization
@@ -1451,7 +1525,7 @@ def get_batch_file_counts(
                     entity_type=entity_type,
                     entity_id=entity_id,
                     reason="access_denied",
-                    error=str(e)
+                    error=str(e),
                 )
                 continue
 
@@ -1471,7 +1545,7 @@ def get_batch_file_counts(
             requested_count=len(batch_request.entity_ids),
             authorized_count=len(authorized_entity_ids),
             skipped_count=skipped_count,
-            not_found_count=not_found_count
+            not_found_count=not_found_count,
         )
 
         # Convert to response format
@@ -1510,11 +1584,13 @@ def get_file_details(
         # Get file record and check authorization
         file_record = file_service.get_file_by_id(db, file_id)
         handle_not_found(file_record, "File")
-        
+
         # Get the parent entity and verify access
-        parent_entity = get_entity_by_type_and_id(db, file_record.entity_type, file_record.entity_id)
+        parent_entity = get_entity_by_type_and_id(
+            db, file_record.entity_type, file_record.entity_id
+        )
         handle_not_found(parent_entity, file_record.entity_type)
-        
+
         # Verify user has access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
@@ -1550,10 +1626,12 @@ async def check_paperless_sync_status(
         request,
         current_user_id,
         "paperless_sync_check_started",
-        message=f"Starting paperless sync check for user {current_user_id}"
+        message=f"Starting paperless sync check for user {current_user_id}",
     )
     try:
-        sync_status = await file_service.check_paperless_sync_status(db, current_user_id)
+        sync_status = await file_service.check_paperless_sync_status(
+            db, current_user_id
+        )
 
         log_endpoint_access(
             logger,
@@ -1561,7 +1639,7 @@ async def check_paperless_sync_status(
             current_user_id,
             "paperless_sync_check_completed",
             message=f"Checked paperless sync status for user {current_user_id}",
-            files_checked=len(sync_status)
+            files_checked=len(sync_status),
         )
 
         return sync_status
@@ -1572,7 +1650,7 @@ async def check_paperless_sync_status(
             request,
             "Failed to check paperless sync status",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1599,7 +1677,7 @@ async def check_papra_sync_status(
         request,
         current_user_id,
         "papra_sync_check_started",
-        message=f"Starting Papra sync check for user {current_user_id}"
+        message=f"Starting Papra sync check for user {current_user_id}",
     )
     try:
         sync_status = await file_service.check_papra_sync_status(db, current_user_id)
@@ -1610,7 +1688,7 @@ async def check_papra_sync_status(
             current_user_id,
             "papra_sync_check_completed",
             message=f"Checked Papra sync status for user {current_user_id}",
-            files_checked=len(sync_status)
+            files_checked=len(sync_status),
         )
 
         return sync_status
@@ -1621,7 +1699,7 @@ async def check_papra_sync_status(
             request,
             "Failed to check Papra sync status",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1652,7 +1730,7 @@ async def update_processing_files(
             current_user_id,
             "processing_files_updated",
             message=f"Updated processing files for user {current_user_id}",
-            files_updated=len(status_updates)
+            files_updated=len(status_updates),
         )
 
         return status_updates
@@ -1663,7 +1741,7 @@ async def update_processing_files(
             request,
             "Failed to update processing files",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -1684,16 +1762,16 @@ async def cleanup_entity_files_on_deletion(
     """
     Clean up EntityFiles when an entity is deleted.
     Preserves Paperless documents by default, deletes local files.
-    
+
     IMPORTANT: This endpoint assumes authorization has already been performed
-    by the calling endpoint that is deleting the entity. No additional 
+    by the calling endpoint that is deleting the entity. No additional
     authorization checks are performed here.
-    
+
     Args:
         entity_type: Type of entity being deleted
-        entity_id: ID of the entity being deleted  
+        entity_id: ID of the entity being deleted
         preserve_paperless: If True, preserve Paperless documents (default: True)
-    
+
     Returns:
         Dictionary with cleanup statistics
     """
@@ -1704,14 +1782,14 @@ async def cleanup_entity_files_on_deletion(
             entity_type=entity_type,
             entity_id=entity_id,
             preserve_paperless=preserve_paperless,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
 
         cleanup_stats = file_service.cleanup_entity_files_on_deletion(
             db=db,
             entity_type=entity_type,
             entity_id=entity_id,
-            preserve_paperless=preserve_paperless
+            preserve_paperless=preserve_paperless,
         )
 
         log_endpoint_access(
@@ -1723,7 +1801,7 @@ async def cleanup_entity_files_on_deletion(
             entity_type=entity_type,
             entity_id=entity_id,
             files_deleted=cleanup_stats.get("files_deleted", 0),
-            paperless_preserved=cleanup_stats.get("paperless_preserved", 0)
+            paperless_preserved=cleanup_stats.get("paperless_preserved", 0),
         )
 
         return cleanup_stats
@@ -1736,7 +1814,7 @@ async def cleanup_entity_files_on_deletion(
             e,
             user_id=current_user_id,
             entity_type=entity_type,
-            entity_id=entity_id
+            entity_id=entity_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

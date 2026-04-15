@@ -4,12 +4,17 @@ Pydantic schemas for Injury entity.
 Injury represents a physical injury record for a patient,
 tracking injuries like sprains, fractures, burns, etc.
 """
+
 from datetime import date, datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.models.enums import get_all_injury_statuses, get_all_severity_levels, get_all_laterality_values
+from app.models.enums import (
+    get_all_injury_statuses,
+    get_all_severity_levels,
+    get_all_laterality_values,
+)
 from app.schemas.base_tags import TaggedEntityMixin
 from app.schemas.validators import validate_date_not_future, validate_text_field
 from app.schemas.injury_type import InjuryTypeResponse
@@ -49,7 +54,9 @@ def _validate_laterality(v: Optional[str]) -> Optional[str]:
         return None
     lower_v = v.lower()
     if lower_v not in VALID_LATERALITY_VALUES:
-        raise ValueError(f"Laterality must be one of: {', '.join(VALID_LATERALITY_VALUES)}")
+        raise ValueError(
+            f"Laterality must be one of: {', '.join(VALID_LATERALITY_VALUES)}"
+        )
     return lower_v
 
 
@@ -60,8 +67,12 @@ def _validate_relevance_note(v: Optional[str]) -> Optional[str]:
 
 class InjuryBase(TaggedEntityMixin):
     """Base schema for Injury"""
+
     injury_name: str = Field(
-        ..., min_length=2, max_length=300, description="User-friendly name for the injury"
+        ...,
+        min_length=2,
+        max_length=300,
+        description="User-friendly name for the injury",
     )
     injury_type_id: Optional[int] = Field(
         None, gt=0, description="Link to InjuryType table"
@@ -72,7 +83,9 @@ class InjuryBase(TaggedEntityMixin):
     laterality: Optional[str] = Field(
         None, description="Side of body affected (left/right/bilateral/not_applicable)"
     )
-    date_of_injury: Optional[date] = Field(None, description="When the injury occurred (optional if unknown)")
+    date_of_injury: Optional[date] = Field(
+        None, description="When the injury occurred (optional if unknown)"
+    )
     mechanism: Optional[str] = Field(
         None, max_length=500, description="How the injury happened"
     )
@@ -138,11 +151,13 @@ class InjuryBase(TaggedEntityMixin):
 
 class InjuryCreate(InjuryBase):
     """Schema for creating a new Injury"""
+
     patient_id: int = Field(..., gt=0, description="ID of the patient")
 
 
 class InjuryUpdate(BaseModel):
     """Schema for updating an existing Injury"""
+
     injury_name: Optional[str] = Field(None, min_length=2, max_length=300)
     injury_type_id: Optional[int] = Field(None, gt=0)
     body_part: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -202,6 +217,7 @@ class InjuryUpdate(BaseModel):
 
 class InjuryResponse(InjuryBase):
     """Schema for Injury response"""
+
     id: int
     patient_id: int
     created_at: datetime
@@ -212,6 +228,7 @@ class InjuryResponse(InjuryBase):
 
 class InjuryWithRelations(InjuryResponse):
     """Schema for Injury with related data"""
+
     injury_type: Optional[InjuryTypeResponse] = None
     practitioner: Optional[dict] = None
 
@@ -252,6 +269,7 @@ class InjuryWithRelations(InjuryResponse):
 
 class InjurySummary(BaseModel):
     """Minimal Injury data for list views"""
+
     id: int
     injury_name: str
     body_part: str
@@ -267,6 +285,7 @@ class InjurySummary(BaseModel):
 
 class InjuryDropdownOption(BaseModel):
     """Minimal Injury data for dropdown selections"""
+
     id: int
     injury_name: str
     body_part: str
@@ -278,8 +297,10 @@ class InjuryDropdownOption(BaseModel):
 
 # Junction Table Schemas
 
+
 class InjuryMedicationBase(BaseModel):
     """Base schema for injury medication relationship"""
+
     injury_id: int
     medication_id: int
     relevance_note: Optional[str] = None
@@ -292,6 +313,7 @@ class InjuryMedicationBase(BaseModel):
 
 class InjuryMedicationCreate(BaseModel):
     """Schema for creating an injury medication relationship"""
+
     medication_id: int
     relevance_note: Optional[str] = None
     injury_id: Optional[int] = None  # Will be set from URL path parameter
@@ -304,6 +326,7 @@ class InjuryMedicationCreate(BaseModel):
 
 class InjuryMedicationUpdate(BaseModel):
     """Schema for updating an injury medication relationship"""
+
     relevance_note: Optional[str] = None
 
     @field_validator("relevance_note")
@@ -314,6 +337,7 @@ class InjuryMedicationUpdate(BaseModel):
 
 class InjuryMedicationResponse(InjuryMedicationBase):
     """Schema for injury medication relationship response"""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -323,6 +347,7 @@ class InjuryMedicationResponse(InjuryMedicationBase):
 
 class InjuryMedicationWithDetails(InjuryMedicationResponse):
     """Schema for injury medication relationship with medication details"""
+
     medication: Optional[dict] = None
 
     model_config = {"from_attributes": True}
@@ -330,6 +355,7 @@ class InjuryMedicationWithDetails(InjuryMedicationResponse):
 
 class InjuryConditionBase(BaseModel):
     """Base schema for injury condition relationship"""
+
     injury_id: int
     condition_id: int
     relevance_note: Optional[str] = None
@@ -342,6 +368,7 @@ class InjuryConditionBase(BaseModel):
 
 class InjuryConditionCreate(BaseModel):
     """Schema for creating an injury condition relationship"""
+
     condition_id: int
     relevance_note: Optional[str] = None
     injury_id: Optional[int] = None
@@ -354,6 +381,7 @@ class InjuryConditionCreate(BaseModel):
 
 class InjuryConditionResponse(InjuryConditionBase):
     """Schema for injury condition relationship response"""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -363,6 +391,7 @@ class InjuryConditionResponse(InjuryConditionBase):
 
 class InjuryConditionWithDetails(InjuryConditionResponse):
     """Schema for injury condition relationship with condition details"""
+
     condition: Optional[dict] = None
 
     model_config = {"from_attributes": True}
@@ -370,6 +399,7 @@ class InjuryConditionWithDetails(InjuryConditionResponse):
 
 class InjuryTreatmentBase(BaseModel):
     """Base schema for injury treatment relationship"""
+
     injury_id: int
     treatment_id: int
     relevance_note: Optional[str] = None
@@ -382,6 +412,7 @@ class InjuryTreatmentBase(BaseModel):
 
 class InjuryTreatmentCreate(BaseModel):
     """Schema for creating an injury treatment relationship"""
+
     treatment_id: int
     relevance_note: Optional[str] = None
     injury_id: Optional[int] = None
@@ -394,6 +425,7 @@ class InjuryTreatmentCreate(BaseModel):
 
 class InjuryTreatmentResponse(InjuryTreatmentBase):
     """Schema for injury treatment relationship response"""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -403,6 +435,7 @@ class InjuryTreatmentResponse(InjuryTreatmentBase):
 
 class InjuryTreatmentWithDetails(InjuryTreatmentResponse):
     """Schema for injury treatment relationship with treatment details"""
+
     treatment: Optional[dict] = None
 
     model_config = {"from_attributes": True}
@@ -410,6 +443,7 @@ class InjuryTreatmentWithDetails(InjuryTreatmentResponse):
 
 class InjuryProcedureBase(BaseModel):
     """Base schema for injury procedure relationship"""
+
     injury_id: int
     procedure_id: int
     relevance_note: Optional[str] = None
@@ -422,6 +456,7 @@ class InjuryProcedureBase(BaseModel):
 
 class InjuryProcedureCreate(BaseModel):
     """Schema for creating an injury procedure relationship"""
+
     procedure_id: int
     relevance_note: Optional[str] = None
     injury_id: Optional[int] = None
@@ -434,6 +469,7 @@ class InjuryProcedureCreate(BaseModel):
 
 class InjuryProcedureResponse(InjuryProcedureBase):
     """Schema for injury procedure relationship response"""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -443,6 +479,7 @@ class InjuryProcedureResponse(InjuryProcedureBase):
 
 class InjuryProcedureWithDetails(InjuryProcedureResponse):
     """Schema for injury procedure relationship with procedure details"""
+
     procedure: Optional[dict] = None
 
     model_config = {"from_attributes": True}

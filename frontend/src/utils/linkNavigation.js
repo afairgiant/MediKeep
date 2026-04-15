@@ -4,7 +4,6 @@
  */
 import logger from '../services/logger';
 
-
 export const ENTITY_ROUTES = {
   condition: '/conditions',
   medication: '/medications',
@@ -17,9 +16,8 @@ export const ENTITY_ROUTES = {
   lab_result: '/lab-results',
   immunization: '/immunizations',
   vitals: '/vitals',
-  patient: '/patients'
+  patient: '/patients',
 };
-
 
 /**
  * Navigate to a related entity and automatically open it
@@ -30,21 +28,21 @@ export const ENTITY_ROUTES = {
  */
 export const navigateToEntity = (entityType, entityId, navigate) => {
   if (!entityId || !entityType) return;
-  
+
   const route = ENTITY_ROUTES[entityType];
-  
+
   if (!route) {
     logger.error(`Unknown entity type: ${entityType}`);
     return;
   }
-  
+
   // Sanitize entity ID
   const sanitizedId = parseInt(entityId, 10);
   if (isNaN(sanitizedId)) {
     logger.error('Invalid entity ID');
     return;
   }
-  
+
   // SECURE: Navigate using URL parameters only
   navigate(`${route}?view=${sanitizedId}`);
 };
@@ -55,7 +53,7 @@ export const navigateToEntity = (entityType, entityId, navigate) => {
  * @param {object} location - React Router location object
  * @returns {string|null} - The entity ID from URL or null
  */
-export const getEntityIdFromUrl = (location) => {
+export const getEntityIdFromUrl = location => {
   const searchParams = new URLSearchParams(location.search);
   return searchParams.get('view');
 };
@@ -68,7 +66,7 @@ export const getEntityIdFromUrl = (location) => {
  * @returns {function} - Click handler function
  */
 export const createEntityNavigationHandler = (entityType, navigate) => {
-  return (entityId) => {
+  return entityId => {
     navigateToEntity(entityType, entityId, navigate);
   };
 };
@@ -80,9 +78,13 @@ export const createEntityNavigationHandler = (entityType, navigate) => {
  * @param {function} getEntityName - Optional function to get entity name by ID
  * @returns {string} - Display name for the entity
  */
-export const getEntityDisplayName = (entityType, entityData, getEntityName = null) => {
+export const getEntityDisplayName = (
+  entityType,
+  entityData,
+  getEntityName = null
+) => {
   if (!entityData) return null;
-  
+
   // If it's just an ID
   if (typeof entityData === 'number' || typeof entityData === 'string') {
     if (getEntityName) {
@@ -90,13 +92,17 @@ export const getEntityDisplayName = (entityType, entityData, getEntityName = nul
     }
     return `${entityType} #${entityData}`;
   }
-  
+
   // If it's an object, extract the appropriate display field
   switch (entityType) {
     case 'condition':
       return entityData.diagnosis || `Condition #${entityData.id}`;
     case 'practitioner':
-      return entityData.name || `${entityData.first_name} ${entityData.last_name}` || `Practitioner #${entityData.id}`;
+      return (
+        entityData.name ||
+        `${entityData.first_name} ${entityData.last_name}` ||
+        `Practitioner #${entityData.id}`
+      );
     case 'pharmacy':
       return entityData.name || `Pharmacy #${entityData.id}`;
     case 'medication':
@@ -120,16 +126,25 @@ export const getEntityDisplayName = (entityType, entityData, getEntityName = nul
  * @param {function} getEntityName - Optional function to get entity name by ID
  * @returns {object} - Props for entity link component
  */
-export const createEntityLinkProps = (entityType, entityData, navigate, getEntityName = null) => {
+export const createEntityLinkProps = (
+  entityType,
+  entityData,
+  navigate,
+  getEntityName = null
+) => {
   if (!entityData) return null;
-  
-  const displayName = getEntityDisplayName(entityType, entityData, getEntityName);
+
+  const displayName = getEntityDisplayName(
+    entityType,
+    entityData,
+    getEntityName
+  );
   const entityId = typeof entityData === 'object' ? entityData.id : entityData;
-  
+
   return {
     text: displayName,
     onClick: () => navigateToEntity(entityType, entityId, navigate),
     style: { cursor: 'pointer', textDecoration: 'underline' },
-    c: 'blue'
+    c: 'blue',
   };
 };

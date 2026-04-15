@@ -97,7 +97,9 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
             [channelId]: currentValue,
           },
         }));
-        notifyError(t('preferences.updateError', 'Failed to update preference'));
+        notifyError(
+          t('preferences.updateError', 'Failed to update preference')
+        );
         frontendLogger.logError('Failed to update preference', {
           component: 'NotificationPreferences',
           eventType,
@@ -114,7 +116,9 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
   if (loading) {
     return (
       <Card className="notification-preferences-card">
-        <div className="notification-preferences-loading">{t('common:labels.loading', 'Loading...')}</div>
+        <div className="notification-preferences-loading">
+          {t('common:labels.loading', 'Loading...')}
+        </div>
       </Card>
     );
   }
@@ -128,18 +132,27 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
       <div className="notification-preferences">
         <div className="notification-preferences-header">
           <h3>{t('preferences.title', 'Event Notifications')}</h3>
-          <p className="notification-preferences-description">{t('preferences.description', 'Choose which events trigger notifications on each channel.')}</p>
+          <p className="notification-preferences-description">
+            {t(
+              'preferences.description',
+              'Choose which events trigger notifications on each channel.'
+            )}
+          </p>
         </div>
 
         <div className="preferences-matrix-container">
           <table className="preferences-matrix">
             <thead>
               <tr>
-                <th className="event-header">{t('shared:labels.event', 'Event')}</th>
+                <th className="event-header">
+                  {t('shared:labels.event', 'Event')}
+                </th>
                 {channels.map(channel => (
                   <th key={channel.id} className="channel-header">
                     <span className="channel-name">{channel.name}</span>
-                    <span className={`channel-type ${channel.channel_type}`}>{channel.channel_type}</span>
+                    <span className={`channel-type ${channel.channel_type}`}>
+                      {channel.channel_type}
+                    </span>
                   </th>
                 ))}
               </tr>
@@ -154,15 +167,27 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
                     <tr
                       className={`category-row ${isExpanded ? 'expanded' : 'collapsed'}`}
                       onClick={() => toggleCategory(category)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCategory(category); } }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleCategory(category);
+                        }
+                      }}
                       tabIndex={0}
                       role="button"
                       aria-expanded={isExpanded}
                     >
-                      <td colSpan={channels.length + 1} className="category-cell">
-                        <span className="category-expand-icon">{isExpanded ? '−' : '+'}</span>
+                      <td
+                        colSpan={channels.length + 1}
+                        className="category-cell"
+                      >
+                        <span className="category-expand-icon">
+                          {isExpanded ? '−' : '+'}
+                        </span>
                         {categoryLabel}
-                        <span className="category-count">({events.length})</span>
+                        <span className="category-count">
+                          ({events.length})
+                        </span>
                       </td>
                     </tr>
                     {isExpanded &&
@@ -170,29 +195,51 @@ const NotificationPreferences = ({ channels, eventTypes }) => {
                         const isImplemented = event.is_implemented !== false;
 
                         return (
-                          <tr key={event.value} className={`event-row ${!isImplemented ? 'not-implemented' : ''}`}>
+                          <tr
+                            key={event.value}
+                            className={`event-row ${!isImplemented ? 'not-implemented' : ''}`}
+                          >
                             <td className="event-cell">
                               <div className="event-name">
                                 {event.label}
                                 {!isImplemented && (
-                                  <span className="coming-soon-badge">{t('preferences.comingSoon', 'Coming Soon')}</span>
+                                  <span className="coming-soon-badge">
+                                    {t('preferences.comingSoon', 'Coming Soon')}
+                                  </span>
                                 )}
                               </div>
-                              <div className="event-description">{event.description}</div>
+                              <div className="event-description">
+                                {event.description}
+                              </div>
                             </td>
                             {channels.map(channel => {
-                              const isEnabled = preferences[event.value]?.[channel.id] ?? false;
+                              const isEnabled =
+                                preferences[event.value]?.[channel.id] ?? false;
                               const cellKey = `${event.value}-${channel.id}`;
                               const isSaving = savingCell === cellKey;
-                              const isDisabled = isSaving || !channel.is_enabled || !isImplemented;
+                              const isDisabled =
+                                isSaving ||
+                                !channel.is_enabled ||
+                                !isImplemented;
 
                               return (
-                                <td key={channel.id} className="preference-cell">
-                                  <label className={`preference-toggle ${isSaving ? 'saving' : ''} ${!isImplemented ? 'not-implemented' : ''}`}>
+                                <td
+                                  key={channel.id}
+                                  className="preference-cell"
+                                >
+                                  <label
+                                    className={`preference-toggle ${isSaving ? 'saving' : ''} ${!isImplemented ? 'not-implemented' : ''}`}
+                                  >
                                     <input
                                       type="checkbox"
                                       checked={isEnabled}
-                                      onChange={() => handlePreferenceToggle(event.value, channel.id, isEnabled)}
+                                      onChange={() =>
+                                        handlePreferenceToggle(
+                                          event.value,
+                                          channel.id,
+                                          isEnabled
+                                        )
+                                      }
                                       disabled={isDisabled}
                                       aria-label={`${event.label} - ${channel.name}`}
                                     />

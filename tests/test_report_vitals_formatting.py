@@ -115,7 +115,10 @@ class TestVitalsFormatting:
         generator.unit_system = "imperial"
         generator.translator = get_translator("en", "mdy")
 
-        records = [sample_vital_record, {**sample_vital_record, "recorded_date": "2024-04-15"}]
+        records = [
+            sample_vital_record,
+            {**sample_vital_record, "recorded_date": "2024-04-15"},
+        ]
         story = generator._format_vitals(records)
 
         # Should have content for both records
@@ -127,10 +130,10 @@ def _extract_table_text(story) -> str:
     texts = []
     for element in story:
         # Extract from Paragraph elements
-        if hasattr(element, 'text'):
+        if hasattr(element, "text"):
             texts.append(str(element.text))
         # Extract from Table elements
-        if hasattr(element, '_cellvalues'):
+        if hasattr(element, "_cellvalues"):
             for row in element._cellvalues:
                 for cell in row:
                     texts.append(str(cell))

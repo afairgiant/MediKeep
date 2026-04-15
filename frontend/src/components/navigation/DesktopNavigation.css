@@ -61,7 +61,7 @@
 }
 
 /* Dark mode: blue-1 text (#d0ebff) on blue-9 bg (#0c2d48) = ~10:1 contrast ratio */
-[data-mantine-color-scheme="dark"] .desktop-nav-dropdown .nav-item-active {
+[data-mantine-color-scheme='dark'] .desktop-nav-dropdown .nav-item-active {
   color: var(--mantine-color-blue-1) !important;
   background-color: var(--mantine-color-blue-9) !important;
 }

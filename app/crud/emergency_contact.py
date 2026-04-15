@@ -133,10 +133,7 @@ class CRUDEmergencyContact(
         """
         return (
             db.query(self.model)
-            .filter(
-                self.model.patient_id == patient_id,
-                self.model.is_active == True
-            )
+            .filter(self.model.patient_id == patient_id, self.model.is_active == True)
             .order_by(desc(self.model.is_primary), self.model.name)
             .all()
         )

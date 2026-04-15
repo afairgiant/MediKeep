@@ -29,7 +29,10 @@ const ModelCreate = () => {
   const [validationErrors, setValidationErrors] = useState({});
 
   // Use the shared field handlers hook
-  const { handleFieldChange } = useFieldHandlers(setFormData, setValidationErrors);
+  const { handleFieldChange } = useFieldHandlers(
+    setFormData,
+    setValidationErrors
+  );
 
   useEffect(() => {
     const loadMetadata = async () => {
@@ -91,7 +94,11 @@ const ModelCreate = () => {
       const submitData = {};
       metadata.fields.forEach(field => {
         // Exclude primary keys and system-generated timestamp fields
-        if (!field.primary_key && field.name !== 'created_at' && field.name !== 'updated_at') {
+        if (
+          !field.primary_key &&
+          field.name !== 'created_at' &&
+          field.name !== 'updated_at'
+        ) {
           const value = formData[field.name];
 
           // Special handling for medication_type - always include with default
@@ -125,7 +132,10 @@ const ModelCreate = () => {
           }
         } catch (patientError) {
           setError(
-            t('models.failedToGetPatient', 'Failed to get patient information. Please ensure you have a patient record.')
+            t(
+              'models.failedToGetPatient',
+              'Failed to get patient information. Please ensure you have a patient record.'
+            )
           );
           setSaving(false);
           return;
@@ -153,7 +163,9 @@ const ModelCreate = () => {
     return (
       <AdminLayout>
         <div className="admin-page-loading">
-          <Loading message={t('models.loadingForm', 'Loading model creation form...')} />
+          <Loading
+            message={t('models.loadingForm', 'Loading model creation form...')}
+          />
         </div>
       </AdminLayout>
     );
@@ -178,8 +190,18 @@ const ModelCreate = () => {
       <div className="model-edit">
         <div className="model-edit-header">
           <div className="edit-title">
-            <h1>{t('models.createNew', { modelName: metadata?.display_name || modelName, defaultValue: `Create New ${metadata?.display_name || modelName}` })}</h1>
-            <p>{t('models.fillForm', 'Fill in the form below to create a new record')}</p>
+            <h1>
+              {t('models.createNew', {
+                modelName: metadata?.display_name || modelName,
+                defaultValue: `Create New ${metadata?.display_name || modelName}`,
+              })}
+            </h1>
+            <p>
+              {t(
+                'models.fillForm',
+                'Fill in the form below to create a new record'
+              )}
+            </p>
           </div>
 
           <div className="edit-actions">
@@ -237,8 +259,12 @@ const ModelCreate = () => {
                   <div key={field.name} className="field-group">
                     <label className="field-label">
                       {formatFieldLabel(field.name)}
-                      {field.primary_key && <span className="pk-badge">PK</span>}
-                      {field.foreign_key && <span className="fk-badge">FK</span>}
+                      {field.primary_key && (
+                        <span className="pk-badge">PK</span>
+                      )}
+                      {field.foreign_key && (
+                        <span className="fk-badge">FK</span>
+                      )}
                       {!field.nullable && !field.primary_key && (
                         <span className="required">*</span>
                       )}
@@ -257,10 +283,16 @@ const ModelCreate = () => {
                     )}
 
                     <div className="field-meta">
-                      {t('models.fieldType', { type: field.type, defaultValue: `Type: ${field.type}` })}
-                      {field.max_length && ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
-                      {field.foreign_key && ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
-                      {!field.nullable && ` | ${t('models.fieldRequired', 'Required')}`}
+                      {t('models.fieldType', {
+                        type: field.type,
+                        defaultValue: `Type: ${field.type}`,
+                      })}
+                      {field.max_length &&
+                        ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
+                      {field.foreign_key &&
+                        ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
+                      {!field.nullable &&
+                        ` | ${t('models.fieldRequired', 'Required')}`}
                     </div>
                   </div>
                 );

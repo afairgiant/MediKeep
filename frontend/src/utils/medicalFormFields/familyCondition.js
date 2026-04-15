@@ -7,40 +7,69 @@ export const familyConditionFormFields = [
     name: 'condition_name',
     type: 'text',
     labelKey: 'shared:fields.conditionName',
-    placeholderKey: 'medical:familyHistory.form.condition.conditionName.placeholder',
+    placeholderKey:
+      'medical:familyHistory.form.condition.conditionName.placeholder',
     required: true,
-    descriptionKey: 'medical:familyHistory.form.condition.conditionName.description',
+    descriptionKey:
+      'medical:familyHistory.form.condition.conditionName.description',
     gridColumn: 6,
   },
   {
     name: 'condition_type',
     type: 'select',
     labelKey: 'medical:familyHistory.form.condition.conditionType.label',
-    placeholderKey: 'medical:familyHistory.form.condition.conditionType.placeholder',
-    descriptionKey: 'medical:familyHistory.form.condition.conditionType.description',
+    placeholderKey:
+      'medical:familyHistory.form.condition.conditionType.placeholder',
+    descriptionKey:
+      'medical:familyHistory.form.condition.conditionType.description',
     gridColumn: 6,
     searchable: true,
     clearable: true,
     options: [
       {
         value: 'cardiovascular',
-        labelKey: 'medical:familyHistory.form.condition.typeOptions.cardiovascular',
+        labelKey:
+          'medical:familyHistory.form.condition.typeOptions.cardiovascular',
       },
-      { value: 'diabetes', labelKey: 'medical:familyHistory.form.condition.typeOptions.diabetes' },
-      { value: 'cancer', labelKey: 'medical:familyHistory.form.condition.typeOptions.cancer' },
+      {
+        value: 'diabetes',
+        labelKey: 'medical:familyHistory.form.condition.typeOptions.diabetes',
+      },
+      {
+        value: 'cancer',
+        labelKey: 'medical:familyHistory.form.condition.typeOptions.cancer',
+      },
       {
         value: 'mental_health',
-        labelKey: 'medical:familyHistory.form.condition.typeOptions.mentalHealth',
+        labelKey:
+          'medical:familyHistory.form.condition.typeOptions.mentalHealth',
       },
-      { value: 'neurological', labelKey: 'medical:familyHistory.form.condition.typeOptions.neurological' },
-      { value: 'autoimmune', labelKey: 'medical:familyHistory.form.condition.typeOptions.autoimmune' },
-      { value: 'genetic', labelKey: 'medical:familyHistory.form.condition.typeOptions.genetic' },
+      {
+        value: 'neurological',
+        labelKey:
+          'medical:familyHistory.form.condition.typeOptions.neurological',
+      },
+      {
+        value: 'autoimmune',
+        labelKey: 'medical:familyHistory.form.condition.typeOptions.autoimmune',
+      },
+      {
+        value: 'genetic',
+        labelKey: 'medical:familyHistory.form.condition.typeOptions.genetic',
+      },
       {
         value: 'respiratory',
-        labelKey: 'medical:familyHistory.form.condition.typeOptions.respiratory',
+        labelKey:
+          'medical:familyHistory.form.condition.typeOptions.respiratory',
       },
-      { value: 'endocrine', labelKey: 'medical:familyHistory.form.condition.typeOptions.endocrine' },
-      { value: 'other', labelKey: 'medical:familyHistory.form.condition.typeOptions.other' },
+      {
+        value: 'endocrine',
+        labelKey: 'medical:familyHistory.form.condition.typeOptions.endocrine',
+      },
+      {
+        value: 'other',
+        labelKey: 'medical:familyHistory.form.condition.typeOptions.other',
+      },
     ],
   },
   {
@@ -52,18 +81,34 @@ export const familyConditionFormFields = [
     gridColumn: 4,
     clearable: true,
     options: [
-      { value: 'mild', labelKey: 'medical:familyHistory.form.condition.severityOptions.mild' },
-      { value: 'moderate', labelKey: 'medical:familyHistory.form.condition.severityOptions.moderate' },
-      { value: 'severe', labelKey: 'medical:familyHistory.form.condition.severityOptions.severe' },
-      { value: 'critical', labelKey: 'medical:familyHistory.form.condition.severityOptions.critical' },
+      {
+        value: 'mild',
+        labelKey: 'medical:familyHistory.form.condition.severityOptions.mild',
+      },
+      {
+        value: 'moderate',
+        labelKey:
+          'medical:familyHistory.form.condition.severityOptions.moderate',
+      },
+      {
+        value: 'severe',
+        labelKey: 'medical:familyHistory.form.condition.severityOptions.severe',
+      },
+      {
+        value: 'critical',
+        labelKey:
+          'medical:familyHistory.form.condition.severityOptions.critical',
+      },
     ],
   },
   {
     name: 'diagnosis_age',
     type: 'number',
     labelKey: 'medical:familyHistory.form.condition.diagnosisAge.label',
-    placeholderKey: 'medical:familyHistory.form.condition.diagnosisAge.placeholder',
-    descriptionKey: 'medical:familyHistory.form.condition.diagnosisAge.description',
+    placeholderKey:
+      'medical:familyHistory.form.condition.diagnosisAge.placeholder',
+    descriptionKey:
+      'medical:familyHistory.form.condition.diagnosisAge.description',
     gridColumn: 4,
     min: 0,
     max: 120,
@@ -77,17 +122,28 @@ export const familyConditionFormFields = [
     gridColumn: 4,
     clearable: true,
     options: [
-      { value: 'active', labelKey: 'medical:familyHistory.form.condition.statusOptions.active' },
-      { value: 'resolved', labelKey: 'medical:familyHistory.form.condition.statusOptions.resolved' },
-      { value: 'chronic', labelKey: 'medical:familyHistory.form.condition.statusOptions.chronic' },
+      {
+        value: 'active',
+        labelKey: 'medical:familyHistory.form.condition.statusOptions.active',
+      },
+      {
+        value: 'resolved',
+        labelKey: 'medical:familyHistory.form.condition.statusOptions.resolved',
+      },
+      {
+        value: 'chronic',
+        labelKey: 'medical:familyHistory.form.condition.statusOptions.chronic',
+      },
     ],
   },
   {
     name: 'icd10_code',
     type: 'text',
     labelKey: 'shared:fields.icd10Code',
-    placeholderKey: 'medical:familyHistory.form.condition.icd10Code.placeholder',
-    descriptionKey: 'medical:familyHistory.form.condition.icd10Code.description',
+    placeholderKey:
+      'medical:familyHistory.form.condition.icd10Code.placeholder',
+    descriptionKey:
+      'medical:familyHistory.form.condition.icd10Code.description',
     gridColumn: 6,
     maxLength: 10,
   },

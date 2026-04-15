@@ -82,7 +82,9 @@ const StatusBadge = ({
       {...props}
     >
       {showIcon && statusConfig.icon && (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        <span
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+        >
           <span>{statusConfig.icon}</span>
           <span>{statusConfig.label}</span>
         </span>

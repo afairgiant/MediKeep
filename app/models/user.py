@@ -17,6 +17,7 @@ from .base import Base, get_utc_now
 
 class User(Base):
     """Represents an application user with authentication and patient access controls."""
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
@@ -94,9 +95,7 @@ class User(Base):
 
     # Notification channels relationship with cascade delete
     notification_channels = orm_relationship(
-        "NotificationChannel",
-        back_populates="user",
-        cascade="all, delete-orphan"
+        "NotificationChannel", back_populates="user", cascade="all, delete-orphan"
     )
 
     # Indexes for performance
@@ -105,6 +104,7 @@ class User(Base):
 
 class UserPreferences(Base):
     """Stores per-user settings including units, language, session timeout, and integrations."""
+
     __tablename__ = "user_preferences"
 
     id = Column(Integer, primary_key=True)
@@ -139,7 +139,9 @@ class UserPreferences(Base):
     papra_enabled = Column(Boolean, default=False, nullable=False)
     papra_url = Column(String(500), nullable=True)
     papra_api_token_encrypted = Column(Text, nullable=True)  # Encrypted API token
-    papra_organization_id = Column(String(255), nullable=True)  # Default organization ID
+    papra_organization_id = Column(
+        String(255), nullable=True
+    )  # Default organization ID
     papra_connection_verified = Column(Boolean, default=False, nullable=False)
 
     # Audit fields
@@ -186,6 +188,7 @@ class SystemSetting(Base):
     - canonical_name_migration_complete: "true"
     - last_sync_timestamp: "2026-01-31T12:00:00Z"
     """
+
     __tablename__ = "system_settings"
 
     key = Column(String(100), primary_key=True)
@@ -193,4 +196,6 @@ class SystemSetting(Base):
 
     # Timestamps
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )

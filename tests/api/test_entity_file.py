@@ -1,6 +1,7 @@
 """
 Tests for Entity File API endpoints.
 """
+
 import io
 import pytest
 from datetime import date
@@ -29,7 +30,7 @@ class TestEntityFileAPI:
             test_name="Complete Blood Count",
             completed_date=date.today(),
             status="completed",
-            patient_id=user_with_patient["patient"].id
+            patient_id=user_with_patient["patient"].id,
         )
         return lab_result_crud.create(db_session, obj_in=lab_result_data)
 
@@ -39,7 +40,7 @@ class TestEntityFileAPI:
         """Test getting files for an entity with no files."""
         response = client.get(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -52,8 +53,7 @@ class TestEntityFileAPI:
     ):
         """Test getting files for a nonexistent entity returns empty list."""
         response = client.get(
-            "/api/v1/entity-files/lab-result/99999/files",
-            headers=authenticated_headers
+            "/api/v1/entity-files/lab-result/99999/files", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -65,8 +65,7 @@ class TestEntityFileAPI:
     ):
         """Test getting files with invalid entity type."""
         response = client.get(
-            "/api/v1/entity-files/invalid-type/1/files",
-            headers=authenticated_headers
+            "/api/v1/entity-files/invalid-type/1/files", headers=authenticated_headers
         )
 
         assert response.status_code == 400
@@ -79,16 +78,13 @@ class TestEntityFileAPI:
         files = {
             "file": ("test_lab_report.txt", io.BytesIO(file_content), "text/plain")
         }
-        data = {
-            "description": "Lab report document",
-            "category": "report"
-        }
+        data = {"description": "Lab report document", "category": "report"}
 
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
             files=files,
-            data=data
+            data=data,
         )
 
         assert response.status_code == 201
@@ -103,14 +99,12 @@ class TestEntityFileAPI:
     ):
         """Test uploading a file without optional fields."""
         file_content = b"Test file content"
-        files = {
-            "file": ("simple_file.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("simple_file.txt", io.BytesIO(file_content), "text/plain")}
 
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         assert response.status_code == 201
@@ -120,14 +114,12 @@ class TestEntityFileAPI:
     ):
         """Test uploading a file to a nonexistent entity."""
         file_content = b"Test file content"
-        files = {
-            "file": ("test.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("test.txt", io.BytesIO(file_content), "text/plain")}
 
         response = client.post(
             "/api/v1/entity-files/lab-result/99999/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         assert response.status_code == 404
@@ -138,7 +130,7 @@ class TestEntityFileAPI:
         """Test uploading without a file."""
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
@@ -148,22 +140,19 @@ class TestEntityFileAPI:
     ):
         """Test getting details of a specific file."""
         file_content = b"Test file content for details"
-        files = {
-            "file": ("details_test.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("details_test.txt", io.BytesIO(file_content), "text/plain")}
         data = {"description": "Test description"}
 
         upload_response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
             files=files,
-            data=data
+            data=data,
         )
         file_id = upload_response.json()["id"]
 
         response = client.get(
-            f"/api/v1/entity-files/files/{file_id}",
-            headers=authenticated_headers
+            f"/api/v1/entity-files/files/{file_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -177,8 +166,7 @@ class TestEntityFileAPI:
     ):
         """Test getting details of nonexistent file."""
         response = client.get(
-            "/api/v1/entity-files/files/99999",
-            headers=authenticated_headers
+            "/api/v1/entity-files/files/99999", headers=authenticated_headers
         )
 
         # API may return 404 or 500 for nonexistent file
@@ -189,28 +177,26 @@ class TestEntityFileAPI:
     ):
         """Test updating file metadata."""
         file_content = b"Test file for metadata update"
-        files = {
-            "file": ("metadata_test.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("metadata_test.txt", io.BytesIO(file_content), "text/plain")}
         data = {"description": "Original description"}
 
         upload_response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
             files=files,
-            data=data
+            data=data,
         )
         file_id = upload_response.json()["id"]
 
         update_data = {
             "description": "Updated description",
-            "category": "updated-category"
+            "category": "updated-category",
         }
 
         response = client.put(
             f"/api/v1/entity-files/files/{file_id}/metadata",
             headers=authenticated_headers,
-            data=update_data
+            data=update_data,
         )
 
         assert response.status_code == 200
@@ -223,39 +209,32 @@ class TestEntityFileAPI:
     ):
         """Test deleting a file."""
         file_content = b"Test file to delete"
-        files = {
-            "file": ("delete_test.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("delete_test.txt", io.BytesIO(file_content), "text/plain")}
 
         upload_response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
         file_id = upload_response.json()["id"]
 
         response = client.delete(
-            f"/api/v1/entity-files/files/{file_id}",
-            headers=authenticated_headers
+            f"/api/v1/entity-files/files/{file_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
 
         # Verify file is deleted
         get_response = client.get(
-            f"/api/v1/entity-files/files/{file_id}",
-            headers=authenticated_headers
+            f"/api/v1/entity-files/files/{file_id}", headers=authenticated_headers
         )
         # TODO: API returns 500 error after deletion instead of 404 - needs investigation
         assert get_response.status_code in [404, 500]
 
-    def test_delete_file_nonexistent(
-        self, client: TestClient, authenticated_headers
-    ):
+    def test_delete_file_nonexistent(self, client: TestClient, authenticated_headers):
         """Test deleting nonexistent file."""
         response = client.delete(
-            "/api/v1/entity-files/files/99999",
-            headers=authenticated_headers
+            "/api/v1/entity-files/files/99999", headers=authenticated_headers
         )
 
         # API may return 404 or 500 for nonexistent file
@@ -266,20 +245,18 @@ class TestEntityFileAPI:
     ):
         """Test downloading a file."""
         file_content = b"Test file content for download"
-        files = {
-            "file": ("download_test.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("download_test.txt", io.BytesIO(file_content), "text/plain")}
 
         upload_response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
         file_id = upload_response.json()["id"]
 
         response = client.get(
             f"/api/v1/entity-files/files/{file_id}/download",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -290,56 +267,56 @@ class TestEntityFileAPI:
     ):
         """Test viewing a file inline."""
         file_content = b"Test file content for viewing"
-        files = {
-            "file": ("view_test.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("view_test.txt", io.BytesIO(file_content), "text/plain")}
 
         upload_response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
         file_id = upload_response.json()["id"]
 
         response = client.get(
-            f"/api/v1/entity-files/files/{file_id}/view",
-            headers=authenticated_headers
+            f"/api/v1/entity-files/files/{file_id}/view", headers=authenticated_headers
         )
 
         assert response.status_code == 200
         assert "inline" in response.headers.get("content-disposition", "")
 
     def test_batch_file_counts(
-        self, client: TestClient, authenticated_headers, test_lab_result, db_session: Session, user_with_patient
+        self,
+        client: TestClient,
+        authenticated_headers,
+        test_lab_result,
+        db_session: Session,
+        user_with_patient,
     ):
         """Test getting batch file counts."""
         lab_result_data2 = LabResultCreate(
             test_name="Lipid Panel",
             completed_date=date.today(),
             status="completed",
-            patient_id=user_with_patient["patient"].id
+            patient_id=user_with_patient["patient"].id,
         )
         lab_result2 = lab_result_crud.create(db_session, obj_in=lab_result_data2)
 
         file_content = b"Test file content"
-        files = {
-            "file": ("batch_test.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("batch_test.txt", io.BytesIO(file_content), "text/plain")}
         client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         batch_request = {
             "entity_type": "lab-result",
-            "entity_ids": [test_lab_result.id, lab_result2.id]
+            "entity_ids": [test_lab_result.id, lab_result2.id],
         }
 
         response = client.post(
             "/api/v1/entity-files/files/batch-counts",
             headers=authenticated_headers,
-            json=batch_request
+            json=batch_request,
         )
 
         assert response.status_code == 200
@@ -350,10 +327,7 @@ class TestEntityFileAPI:
         """Test that users can only access their own files."""
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -367,27 +341,22 @@ class TestEntityFileAPI:
             test_name="Private Lab Result",
             completed_date=date.today(),
             status="completed",
-            patient_id=patient1.id
+            patient_id=patient1.id,
         )
         lab_result = lab_result_crud.create(db_session, obj_in=lab_result_data)
 
         file_content = b"Private file content"
-        files = {
-            "file": ("private.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("private.txt", io.BytesIO(file_content), "text/plain")}
         upload_response = client.post(
             f"/api/v1/entity-files/lab-result/{lab_result.id}/files",
             headers=headers1,
-            files=files
+            files=files,
         )
         file_id = upload_response.json()["id"]
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -398,17 +367,13 @@ class TestEntityFileAPI:
         headers2 = create_user_token_headers(user2_data["user"].username)
 
         # User2 tries to access user1's file
-        response = client.get(
-            f"/api/v1/entity-files/files/{file_id}",
-            headers=headers2
-        )
+        response = client.get(f"/api/v1/entity-files/files/{file_id}", headers=headers2)
         # API may return 404 or 500 for unauthorized file access
         assert response.status_code in [404, 500]
 
         # User2 tries to delete user1's file
         response = client.delete(
-            f"/api/v1/entity-files/files/{file_id}",
-            headers=headers2
+            f"/api/v1/entity-files/files/{file_id}", headers=headers2
         )
         # API may return 404 or 500 for unauthorized file deletion
         assert response.status_code in [404, 500]
@@ -421,13 +386,8 @@ class TestEntityFileAPI:
     def test_upload_requires_authentication(self, client: TestClient):
         """Test that uploading requires authentication."""
         file_content = b"Test content"
-        files = {
-            "file": ("test.txt", io.BytesIO(file_content), "text/plain")
-        }
-        response = client.post(
-            "/api/v1/entity-files/lab-result/1/files",
-            files=files
-        )
+        files = {"file": ("test.txt", io.BytesIO(file_content), "text/plain")}
+        response = client.post("/api/v1/entity-files/lab-result/1/files", files=files)
         assert response.status_code == 401
 
     def test_upload_file_size_limit(
@@ -445,12 +405,18 @@ class TestEntityFileAPI:
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         # Should reject files > 15MB
         # TODO: API may not currently enforce file size limits
-        assert response.status_code in [201, 400, 413, 422, 500], f"Got status {response.status_code}"
+        assert response.status_code in [
+            201,
+            400,
+            413,
+            422,
+            500,
+        ], f"Got status {response.status_code}"
 
     def test_upload_file_type_validation(
         self, client: TestClient, authenticated_headers, test_lab_result
@@ -459,34 +425,48 @@ class TestEntityFileAPI:
         # Test executable file
         exe_content = b"MZ\x90\x00"  # PE header
         files = {
-            "file": ("malicious.exe", io.BytesIO(exe_content), "application/x-msdownload")
+            "file": (
+                "malicious.exe",
+                io.BytesIO(exe_content),
+                "application/x-msdownload",
+            )
         }
 
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         # TODO: API may not currently validate file types - accepts all files
         # This test documents the current behavior - ideally should reject dangerous file types
-        assert response.status_code in [201, 400, 415, 422, 500], f"Executable file got {response.status_code}"
+        assert response.status_code in [
+            201,
+            400,
+            415,
+            422,
+            500,
+        ], f"Executable file got {response.status_code}"
 
         # Test script file
         script_content = b"#!/bin/bash\nrm -rf /"
-        files = {
-            "file": ("script.sh", io.BytesIO(script_content), "application/x-sh")
-        }
+        files = {"file": ("script.sh", io.BytesIO(script_content), "application/x-sh")}
 
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         # TODO: API may not currently validate file types - accepts all files
         # This test documents the current behavior - ideally should reject dangerous file types
-        assert response.status_code in [201, 400, 415, 422, 500], f"Script file got {response.status_code}"
+        assert response.status_code in [
+            201,
+            400,
+            415,
+            422,
+            500,
+        ], f"Script file got {response.status_code}"
 
     def test_upload_file_type_spoofing(
         self, client: TestClient, authenticated_headers, test_lab_result
@@ -494,14 +474,12 @@ class TestEntityFileAPI:
         """Test detection of file type spoofing (exe with image content-type)."""
         # Executable content with image mime type
         exe_content = b"MZ\x90\x00" + b"\x00" * 100  # PE header with padding
-        files = {
-            "file": ("fake_image.jpg", io.BytesIO(exe_content), "image/jpeg")
-        }
+        files = {"file": ("fake_image.jpg", io.BytesIO(exe_content), "image/jpeg")}
 
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         # Should either accept (if only checking mime type) or reject (if checking magic bytes)
@@ -522,14 +500,12 @@ class TestEntityFileAPI:
 
         for filename in malicious_filenames:
             file_content = b"malicious content"
-            files = {
-                "file": (filename, io.BytesIO(file_content), "text/plain")
-            }
+            files = {"file": (filename, io.BytesIO(file_content), "text/plain")}
 
             response = client.post(
                 f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
                 headers=authenticated_headers,
-                files=files
+                files=files,
             )
 
             # Should either sanitize filename or reject
@@ -542,7 +518,11 @@ class TestEntityFileAPI:
                 saved_filename = data.get("file_name", "")
                 # Basic check - may need improvement
                 # API may allow some edge cases through
-                if ".." in saved_filename or "/" in saved_filename or "\\" in saved_filename:
+                if (
+                    ".." in saved_filename
+                    or "/" in saved_filename
+                    or "\\" in saved_filename
+                ):
                     # TODO: Path traversal not properly prevented for all cases
                     pass
 
@@ -551,14 +531,12 @@ class TestEntityFileAPI:
     ):
         """Test uploading a file with 0 bytes."""
         empty_content = b""
-        files = {
-            "file": ("empty.txt", io.BytesIO(empty_content), "text/plain")
-        }
+        files = {"file": ("empty.txt", io.BytesIO(empty_content), "text/plain")}
 
         response = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
 
         # Should reject empty files or handle gracefully
@@ -572,7 +550,7 @@ class TestEntityFileAPI:
             "file with spaces.txt",
             "file@#$%.txt",
             "file'with'quotes.txt",
-            "file\"with\"doublequotes.txt",
+            'file"with"doublequotes.txt',
             "file<with>brackets.txt",
             "file|with|pipes.txt",
             "файл.txt",  # Unicode characters
@@ -581,14 +559,12 @@ class TestEntityFileAPI:
 
         for filename in special_filenames:
             file_content = b"test content"
-            files = {
-                "file": (filename, io.BytesIO(file_content), "text/plain")
-            }
+            files = {"file": (filename, io.BytesIO(file_content), "text/plain")}
 
             response = client.post(
                 f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
                 headers=authenticated_headers,
-                files=files
+                files=files,
             )
 
             # Should either accept with sanitized name or reject
@@ -602,7 +578,11 @@ class TestEntityFileAPI:
                 # Should not contain dangerous characters
                 # TODO: API may not sanitize all special characters
                 # These assertions may fail for some filenames
-                if "<" in saved_filename or ">" in saved_filename or "|" in saved_filename:
+                if (
+                    "<" in saved_filename
+                    or ">" in saved_filename
+                    or "|" in saved_filename
+                ):
                     pass  # Known issue - not all special chars sanitized
 
     def test_upload_duplicate_filename(
@@ -610,29 +590,25 @@ class TestEntityFileAPI:
     ):
         """Test handling of duplicate filenames."""
         file_content = b"first upload"
-        files = {
-            "file": ("duplicate.txt", io.BytesIO(file_content), "text/plain")
-        }
+        files = {"file": ("duplicate.txt", io.BytesIO(file_content), "text/plain")}
 
         # First upload
         response1 = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files
+            files=files,
         )
         assert response1.status_code == 201
         file1_data = response1.json()
 
         # Second upload with same filename
         file_content2 = b"second upload"
-        files2 = {
-            "file": ("duplicate.txt", io.BytesIO(file_content2), "text/plain")
-        }
+        files2 = {"file": ("duplicate.txt", io.BytesIO(file_content2), "text/plain")}
 
         response2 = client.post(
             f"/api/v1/entity-files/lab-result/{test_lab_result.id}/files",
             headers=authenticated_headers,
-            files=files2
+            files=files2,
         )
 
         # Should either:
@@ -645,7 +621,10 @@ class TestEntityFileAPI:
             file2_data = response2.json()
             # Verify both files exist or second has different name
             # Either different IDs or different filenames
-            assert file1_data["id"] != file2_data["id"] or file1_data["file_name"] != file2_data["file_name"]
+            assert (
+                file1_data["id"] != file2_data["id"]
+                or file1_data["file_name"] != file2_data["file_name"]
+            )
 
 
 class TestEntityFileSupportedTypes:
@@ -664,18 +643,16 @@ class TestEntityFileSupportedTypes:
             "procedure_name": "Test Procedure",
             "date": str(date.today()),
             "status": "completed",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
         procedure_response = client.post(
-            "/api/v1/procedures/",
-            json=procedure_data,
-            headers=authenticated_headers
+            "/api/v1/procedures/", json=procedure_data, headers=authenticated_headers
         )
         procedure_id = procedure_response.json()["id"]
 
         response = client.get(
             f"/api/v1/entity-files/procedure/{procedure_id}/files",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 200
 
@@ -690,18 +667,16 @@ class TestEntityFileSupportedTypes:
             "member_id": "INS123",
             "effective_date": str(date.today()),
             "status": "active",
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
         insurance_response = client.post(
-            "/api/v1/insurances/",
-            json=insurance_data,
-            headers=authenticated_headers
+            "/api/v1/insurances/", json=insurance_data, headers=authenticated_headers
         )
         insurance_id = insurance_response.json()["id"]
 
         response = client.get(
             f"/api/v1/entity-files/insurance/{insurance_id}/files",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 200
 
@@ -712,23 +687,21 @@ class TestEntityFileSupportedTypes:
         encounter_data = {
             "reason": "Test Visit",
             "date": str(date.today()),
-            "patient_id": user_with_patient["patient"].id
+            "patient_id": user_with_patient["patient"].id,
         }
         encounter_response = client.post(
-            "/api/v1/encounters/",
-            json=encounter_data,
-            headers=authenticated_headers
+            "/api/v1/encounters/", json=encounter_data, headers=authenticated_headers
         )
         encounter_id = encounter_response.json()["id"]
 
         response = client.get(
             f"/api/v1/entity-files/encounter/{encounter_id}/files",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response.status_code == 200
 
         response_visit = client.get(
             f"/api/v1/entity-files/visit/{encounter_id}/files",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert response_visit.status_code == 200

@@ -18,6 +18,7 @@ from .base import Base, get_utc_now
 
 class LabResult(Base):
     """Represents a lab test order and its results for a patient."""
+
     __tablename__ = "lab_results"
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
@@ -90,6 +91,7 @@ class LabResult(Base):
 
 class LabResultFile(Base):
     """Represents a file attachment (PDF, image) associated with a lab result."""
+
     __tablename__ = "lab_result_files"
     id = Column(Integer, primary_key=True)
 
@@ -112,6 +114,7 @@ class LabTestComponent(Base):
     Individual test components/values within a lab result.
     Each LabResult can have multiple test components (WBC, RBC, Glucose, etc.).
     """
+
     __tablename__ = "lab_test_components"
 
     id = Column(Integer, primary_key=True)
@@ -123,14 +126,20 @@ class LabTestComponent(Base):
     test_code = Column(String, nullable=True)  # LOINC code
 
     # Result type discriminator
-    result_type = Column(String, nullable=True, default="quantitative")  # "quantitative" or "qualitative"
+    result_type = Column(
+        String, nullable=True, default="quantitative"
+    )  # "quantitative" or "qualitative"
 
     # Test values (nullable for qualitative tests)
     value = Column(Float, nullable=True)  # Numeric result (required for quantitative)
-    unit = Column(String, nullable=True)  # e.g., "K/uL", "mg/dL" (required for quantitative)
+    unit = Column(
+        String, nullable=True
+    )  # e.g., "K/uL", "mg/dL" (required for quantitative)
 
     # Qualitative result value (for immunology/microbiology tests)
-    qualitative_value = Column(String, nullable=True)  # "positive", "negative", "detected", "undetected"
+    qualitative_value = Column(
+        String, nullable=True
+    )  # "positive", "negative", "detected", "undetected"
 
     # Reference ranges
     ref_range_min = Column(Float, nullable=True)
@@ -150,7 +159,9 @@ class LabTestComponent(Base):
 
     # Audit fields
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Table Relationships
     lab_result = orm_relationship("LabResult", back_populates="test_components")
@@ -164,7 +175,9 @@ class LabTestComponent(Base):
         Index("idx_lab_test_components_result_type", "result_type"),
         # Compound indexes for common query patterns
         Index("idx_lab_test_components_lab_result_status", "lab_result_id", "status"),
-        Index("idx_lab_test_components_lab_result_category", "lab_result_id", "category"),
+        Index(
+            "idx_lab_test_components_lab_result_category", "lab_result_id", "category"
+        ),
         Index("idx_lab_test_components_test_name_text", "test_name"),
         Index("idx_lab_test_components_abbreviation_text", "abbreviation"),
     )
@@ -175,6 +188,7 @@ class StandardizedTest(Base):
     Standardized test definitions from LOINC database.
     Used for autocomplete, validation, and ensuring consistent test naming.
     """
+
     __tablename__ = "standardized_tests"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -183,13 +197,17 @@ class StandardizedTest(Base):
     short_name = Column(String(100), nullable=True, index=True)
     default_unit = Column(String(50), nullable=True)
     category = Column(String(50), nullable=True, index=True)
-    common_names = Column(JSON, nullable=True)  # Alternative test names (stored as JSON for SQLite compatibility)
+    common_names = Column(
+        JSON, nullable=True
+    )  # Alternative test names (stored as JSON for SQLite compatibility)
     is_common = Column(Boolean, default=False, nullable=False, index=True)
     system = Column(String(100), nullable=True)
     loinc_class = Column(String(100), nullable=True)
     display_order = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
 
     # Indexes for performance
     __table_args__ = (

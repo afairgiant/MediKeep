@@ -8,6 +8,7 @@ Covers:
 - POST /api/v1/conditions/{condition_id}/medications/bulk
 - GET /api/v1/conditions/medication/{medication_id}/conditions
 """
+
 import pytest
 from datetime import date
 from fastapi.testclient import TestClient
@@ -49,7 +50,9 @@ class TestConditionMedicationLinkageAPI:
         return create_user_token_headers(user_with_patient["user"].username)
 
     @pytest.fixture
-    def condition_and_medication(self, client: TestClient, user_with_patient, auth_headers):
+    def condition_and_medication(
+        self, client: TestClient, user_with_patient, auth_headers
+    ):
         """Create a condition and medication belonging to the same patient."""
         patient_id = user_with_patient["patient"].id
 
@@ -82,14 +85,19 @@ class TestConditionMedicationLinkageAPI:
 
     # --- POST /{condition_id}/medications ---
 
-    def test_create_link_success(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_create_link_success(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Creating a condition-medication link succeeds with valid IDs."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
 
         response = client.post(
             f"/api/v1/conditions/{condition_id}/medications",
-            json={"medication_id": medication_id, "relevance_note": "First-line therapy"},
+            json={
+                "medication_id": medication_id,
+                "relevance_note": "First-line therapy",
+            },
             headers=auth_headers,
         )
 
@@ -100,7 +108,9 @@ class TestConditionMedicationLinkageAPI:
         assert data["relevance_note"] == "First-line therapy"
         assert "id" in data
 
-    def test_create_link_without_relevance_note(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_create_link_without_relevance_note(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Creating a link without a relevance note is allowed."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
@@ -115,7 +125,9 @@ class TestConditionMedicationLinkageAPI:
         data = response.json()
         assert data["relevance_note"] is None
 
-    def test_create_link_duplicate_rejected(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_create_link_duplicate_rejected(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Creating a duplicate link between the same condition and medication is rejected."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
@@ -135,7 +147,9 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 400, response.text
 
-    def test_create_link_nonexistent_condition(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_create_link_nonexistent_condition(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Linking to a non-existent condition returns 404."""
         medication_id = condition_and_medication["medication"]["id"]
 
@@ -147,7 +161,9 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 404, response.text
 
-    def test_create_link_nonexistent_medication(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_create_link_nonexistent_medication(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Linking to a non-existent medication returns 404."""
         condition_id = condition_and_medication["condition"]["id"]
 
@@ -159,7 +175,9 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 404, response.text
 
-    def test_create_link_unauthorized(self, client: TestClient, condition_and_medication):
+    def test_create_link_unauthorized(
+        self, client: TestClient, condition_and_medication
+    ):
         """Creating a link without authentication is rejected."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
@@ -171,7 +189,13 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 401, response.text
 
-    def test_create_link_cross_patient_rejected(self, client: TestClient, db_session: Session, condition_and_medication, auth_headers):
+    def test_create_link_cross_patient_rejected(
+        self,
+        client: TestClient,
+        db_session: Session,
+        condition_and_medication,
+        auth_headers,
+    ):
         """Linking a medication belonging to a different patient is rejected."""
         condition_id = condition_and_medication["condition"]["id"]
 
@@ -218,7 +242,9 @@ class TestConditionMedicationLinkageAPI:
 
     # --- DELETE /{condition_id}/medications/{relationship_id} ---
 
-    def test_delete_link_success(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_delete_link_success(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Deleting an existing condition-medication link succeeds."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
@@ -246,7 +272,9 @@ class TestConditionMedicationLinkageAPI:
         assert rels.status_code == 200
         assert len(rels.json()) == 0
 
-    def test_delete_link_nonexistent(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_delete_link_nonexistent(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Deleting a non-existent relationship returns 404."""
         condition_id = condition_and_medication["condition"]["id"]
 
@@ -257,7 +285,9 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 404, response.text
 
-    def test_delete_link_unauthorized(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_delete_link_unauthorized(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Deleting without authentication is rejected."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
@@ -275,7 +305,9 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 401, response.text
 
-    def test_delete_link_wrong_condition(self, client: TestClient, user_with_patient, auth_headers):
+    def test_delete_link_wrong_condition(
+        self, client: TestClient, user_with_patient, auth_headers
+    ):
         """Deleting a relationship using a mismatched condition_id returns an error."""
         patient_id = user_with_patient["patient"].id
 
@@ -292,7 +324,12 @@ class TestConditionMedicationLinkageAPI:
         )
         med_resp = client.post(
             "/api/v1/medications/",
-            json={"patient_id": patient_id, "medication_name": "Drug X", "dosage": "5mg", "status": "active"},
+            json={
+                "patient_id": patient_id,
+                "medication_name": "Drug X",
+                "dosage": "5mg",
+                "status": "active",
+            },
             headers=auth_headers,
         )
 
@@ -318,7 +355,9 @@ class TestConditionMedicationLinkageAPI:
 
     # --- PUT /{condition_id}/medications/{relationship_id} ---
 
-    def test_update_relevance_note(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_update_relevance_note(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Updating the relevance note of a relationship succeeds."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
@@ -343,13 +382,19 @@ class TestConditionMedicationLinkageAPI:
 
     # --- POST /{condition_id}/medications/bulk ---
 
-    def test_bulk_create_links(self, client: TestClient, user_with_patient, auth_headers):
+    def test_bulk_create_links(
+        self, client: TestClient, user_with_patient, auth_headers
+    ):
         """Bulk creating condition-medication links creates all requested relationships."""
         patient_id = user_with_patient["patient"].id
 
         cond_resp = client.post(
             "/api/v1/conditions/",
-            json={"patient_id": patient_id, "diagnosis": "Diabetes", "status": "active"},
+            json={
+                "patient_id": patient_id,
+                "diagnosis": "Diabetes",
+                "status": "active",
+            },
             headers=auth_headers,
         )
         condition_id = cond_resp.json()["id"]
@@ -357,12 +402,22 @@ class TestConditionMedicationLinkageAPI:
         # Create two medications
         med1_resp = client.post(
             "/api/v1/medications/",
-            json={"patient_id": patient_id, "medication_name": "Metformin", "dosage": "500mg", "status": "active"},
+            json={
+                "patient_id": patient_id,
+                "medication_name": "Metformin",
+                "dosage": "500mg",
+                "status": "active",
+            },
             headers=auth_headers,
         )
         med2_resp = client.post(
             "/api/v1/medications/",
-            json={"patient_id": patient_id, "medication_name": "Glipizide", "dosage": "5mg", "status": "active"},
+            json={
+                "patient_id": patient_id,
+                "medication_name": "Glipizide",
+                "dosage": "5mg",
+                "status": "active",
+            },
             headers=auth_headers,
         )
         med1_id = med1_resp.json()["id"]
@@ -370,7 +425,10 @@ class TestConditionMedicationLinkageAPI:
 
         response = client.post(
             f"/api/v1/conditions/{condition_id}/medications/bulk",
-            json={"medication_ids": [med1_id, med2_id], "relevance_note": "Bulk linked"},
+            json={
+                "medication_ids": [med1_id, med2_id],
+                "relevance_note": "Bulk linked",
+            },
             headers=auth_headers,
         )
 
@@ -381,7 +439,13 @@ class TestConditionMedicationLinkageAPI:
             assert rel["condition_id"] == condition_id
             assert rel["relevance_note"] == "Bulk linked"
 
-    def test_bulk_create_skips_existing(self, client: TestClient, condition_and_medication, auth_headers, user_with_patient):
+    def test_bulk_create_skips_existing(
+        self,
+        client: TestClient,
+        condition_and_medication,
+        auth_headers,
+        user_with_patient,
+    ):
         """Bulk create silently skips medications already linked to the condition."""
         patient_id = user_with_patient["patient"].id
         condition_id = condition_and_medication["condition"]["id"]
@@ -397,7 +461,12 @@ class TestConditionMedicationLinkageAPI:
         # Create a second medication
         med2_resp = client.post(
             "/api/v1/medications/",
-            json={"patient_id": patient_id, "medication_name": "Amlodipine", "dosage": "5mg", "status": "active"},
+            json={
+                "patient_id": patient_id,
+                "medication_name": "Amlodipine",
+                "dosage": "5mg",
+                "status": "active",
+            },
             headers=auth_headers,
         )
         med2_id = med2_resp.json()["id"]
@@ -414,7 +483,9 @@ class TestConditionMedicationLinkageAPI:
         assert len(data) == 1
         assert data[0]["medication_id"] == med2_id
 
-    def test_bulk_create_empty_ids_rejected(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_bulk_create_empty_ids_rejected(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Bulk create with empty medication_ids is rejected."""
         condition_id = condition_and_medication["condition"]["id"]
 
@@ -428,7 +499,9 @@ class TestConditionMedicationLinkageAPI:
 
     # --- GET /medication/{medication_id}/conditions ---
 
-    def test_get_medication_conditions_empty(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_get_medication_conditions_empty(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Getting conditions for a medication with no links returns an empty list."""
         medication_id = condition_and_medication["medication"]["id"]
 
@@ -440,7 +513,9 @@ class TestConditionMedicationLinkageAPI:
         assert response.status_code == 200, response.text
         assert response.json() == []
 
-    def test_get_medication_conditions_with_links(self, client: TestClient, condition_and_medication, auth_headers):
+    def test_get_medication_conditions_with_links(
+        self, client: TestClient, condition_and_medication, auth_headers
+    ):
         """Getting conditions for a linked medication returns the condition details."""
         condition_id = condition_and_medication["condition"]["id"]
         medication_id = condition_and_medication["medication"]["id"]
@@ -464,7 +539,9 @@ class TestConditionMedicationLinkageAPI:
         assert data[0]["relevance_note"] == "Test note"
         assert "id" in data[0]
 
-    def test_get_medication_conditions_nonexistent_medication(self, client: TestClient, auth_headers):
+    def test_get_medication_conditions_nonexistent_medication(
+        self, client: TestClient, auth_headers
+    ):
         """Getting conditions for a non-existent medication returns 404."""
         response = client.get(
             "/api/v1/conditions/medication/99999/conditions",
@@ -473,7 +550,9 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 404, response.text
 
-    def test_get_medication_conditions_unauthorized(self, client: TestClient, condition_and_medication):
+    def test_get_medication_conditions_unauthorized(
+        self, client: TestClient, condition_and_medication
+    ):
         """Getting medication conditions without auth returns 401."""
         medication_id = condition_and_medication["medication"]["id"]
 
@@ -483,7 +562,9 @@ class TestConditionMedicationLinkageAPI:
 
         assert response.status_code == 401, response.text
 
-    def test_get_medication_conditions_other_user_rejected(self, client: TestClient, db_session: Session, condition_and_medication):
+    def test_get_medication_conditions_other_user_rejected(
+        self, client: TestClient, db_session: Session, condition_and_medication
+    ):
         """A different user cannot see another user's medication conditions."""
         medication_id = condition_and_medication["medication"]["id"]
 

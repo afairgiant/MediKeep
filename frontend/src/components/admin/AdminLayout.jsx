@@ -13,12 +13,7 @@ const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    user,
-    isAuthenticated,
-    isLoading: authLoading,
-    logout,
-  } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
 
   // Gate admin access on AuthContext user state (populated from /users/me),
   // not client-side JWT decoding — the cookie-auth flow stores the token in
@@ -57,7 +52,7 @@ const AdminLayout = ({ children }) => {
     }
   };
 
-  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
 
   // While auth context is still resolving the session (or while we're in the
   // middle of a navigate-away decision), render the loader instead of the

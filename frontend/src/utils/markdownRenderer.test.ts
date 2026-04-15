@@ -10,12 +10,24 @@ vi.mock('sanitize-html', () => ({
 
 // Capture the real sanitize-html for use in the XSS suite.
 // vi.importActual is called at module scope so it resolves before tests run.
-const realSanitizeHtmlPromise = vi.importActual<{ default: typeof import('sanitize-html')['default'] }>('sanitize-html');
+const realSanitizeHtmlPromise = vi.importActual<{
+  default: (typeof import('sanitize-html'))['default'];
+}>('sanitize-html');
 
 // The config used by renderReleaseMarkdown — mirrored here so the XSS tests
 // exercise exactly the same sanitizer call the production function makes.
 const SANITIZE_CONFIG = {
-  allowedTags: ['h3', 'h4', 'ul', 'li', 'strong', 'em', 'a', 'p', 'br'] as string[],
+  allowedTags: [
+    'h3',
+    'h4',
+    'ul',
+    'li',
+    'strong',
+    'em',
+    'a',
+    'p',
+    'br',
+  ] as string[],
   allowedAttributes: {
     a: ['href', 'target', 'rel'],
   },
@@ -53,8 +65,8 @@ describe('renderReleaseMarkdown', () => {
     });
 
     it('preserves heading text with special characters', () => {
-      const result = renderReleaseMarkdown('## What\'s New in v0.58.0');
-      expect(result).toContain('<h4>What\'s New in v0.58.0</h4>');
+      const result = renderReleaseMarkdown("## What's New in v0.58.0");
+      expect(result).toContain("<h4>What's New in v0.58.0</h4>");
     });
 
     it('does not convert # single-hash headings to h4', () => {
@@ -117,7 +129,9 @@ describe('renderReleaseMarkdown', () => {
 
   describe('link conversion', () => {
     it('converts [text](url) to an anchor tag', () => {
-      const result = renderReleaseMarkdown('[Release](https://github.com/example/releases)');
+      const result = renderReleaseMarkdown(
+        '[Release](https://github.com/example/releases)'
+      );
       expect(result).toContain(
         '<a href="https://github.com/example/releases" target="_blank" rel="noopener noreferrer">Release</a>'
       );
@@ -130,7 +144,9 @@ describe('renderReleaseMarkdown', () => {
     });
 
     it('converts multiple links in one block', () => {
-      const result = renderReleaseMarkdown('[first](https://a.com) and [second](https://b.com)');
+      const result = renderReleaseMarkdown(
+        '[first](https://a.com) and [second](https://b.com)'
+      );
       expect(result).toContain('href="https://a.com"');
       expect(result).toContain('href="https://b.com"');
     });
@@ -200,26 +216,36 @@ describe('renderReleaseMarkdown', () => {
 
     it('strips <script> tags with the production sanitizer config', async () => {
       const { default: sanitizeHtml } = await realSanitizeHtmlPromise;
-      const output = sanitizeHtml('<script>alert("xss")</script>', SANITIZE_CONFIG);
+      const output = sanitizeHtml(
+        '<script>alert("xss")</script>',
+        SANITIZE_CONFIG
+      );
       expect(output).not.toContain('<script>');
       expect(output).not.toContain('alert');
     });
 
     it('strips <style> tags with the production sanitizer config', async () => {
       const { default: sanitizeHtml } = await realSanitizeHtmlPromise;
-      const output = sanitizeHtml('<style>body{display:none}</style>', SANITIZE_CONFIG);
+      const output = sanitizeHtml(
+        '<style>body{display:none}</style>',
+        SANITIZE_CONFIG
+      );
       expect(output).not.toContain('<style>');
     });
 
     it('strips onclick attributes with the production sanitizer config', async () => {
       const { default: sanitizeHtml } = await realSanitizeHtmlPromise;
-      const output = sanitizeHtml('<p onclick="evil()">text</p>', SANITIZE_CONFIG);
+      const output = sanitizeHtml(
+        '<p onclick="evil()">text</p>',
+        SANITIZE_CONFIG
+      );
       expect(output).not.toContain('onclick');
     });
 
     it('preserves allowed tags (h4, ul, li, strong, em, a, p, br) with the production config', async () => {
       const { default: sanitizeHtml } = await realSanitizeHtmlPromise;
-      const safe = '<h4>Heading</h4><ul><li>item</li></ul><p><strong>bold</strong> and <em>italic</em></p>';
+      const safe =
+        '<h4>Heading</h4><ul><li>item</li></ul><p><strong>bold</strong> and <em>italic</em></p>';
       const output = sanitizeHtml(safe, SANITIZE_CONFIG);
       expect(output).toContain('<h4>Heading</h4>');
       expect(output).toContain('<ul><li>item</li></ul>');
@@ -229,7 +255,8 @@ describe('renderReleaseMarkdown', () => {
 
     it('preserves href, target, and rel attributes on anchor tags', async () => {
       const { default: sanitizeHtml } = await realSanitizeHtmlPromise;
-      const safe = '<a href="https://example.com" target="_blank" rel="noopener noreferrer">link</a>';
+      const safe =
+        '<a href="https://example.com" target="_blank" rel="noopener noreferrer">link</a>';
       const output = sanitizeHtml(safe, SANITIZE_CONFIG);
       expect(output).toContain('href="https://example.com"');
       expect(output).toContain('target="_blank"');

@@ -21,7 +21,7 @@ import {
   Box,
   LoadingOverlay,
   Menu,
-  Tooltip
+  Tooltip,
 } from '@mantine/core';
 import {
   IconFlask,
@@ -34,7 +34,7 @@ import {
   IconAlertCircle,
   IconEye,
   IconEdit,
-  IconChevronDown
+  IconChevronDown,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import TestComponentDisplay from './TestComponentDisplay';
@@ -46,7 +46,7 @@ import TestComponentTrendsPanel from './TestComponentTrendsPanel';
 import {
   LabTestComponent,
   labTestComponentApi,
-  LabTestComponentFilters
+  LabTestComponentFilters,
 } from '../../../services/api/labTestComponentApi';
 import { useCurrentPatient } from '../../../hooks/useGlobalData';
 import logger from '../../../services/logger';
@@ -62,7 +62,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   labResultId,
   isViewMode = false,
   onError,
-  onLabResultUpdated
+  onLabResultUpdated,
 }) => {
   const { t } = useTranslation(['labresults', 'common', 'shared']);
   const [activeTab, setActiveTab] = useState<string>('display');
@@ -77,76 +77,86 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const { patient: currentPatient } = useCurrentPatient() as any;
   const loadingRef = useRef(false);
 
-  const handleError = useCallback((error: Error, context: string) => {
-    logger.error('test_components_tab_error', {
-      message: `Error in TestComponentsTab: ${context}`,
-      labResultId,
-      error: error.message,
-      component: 'TestComponentsTab',
-    });
-
-    const errorMessage = error.message || 'An unexpected error occurred';
-    setError(errorMessage);
-
-    if (onError) {
-      onError(error);
-    }
-
-    notifications.show({
-      title: 'Error',
-      message: errorMessage,
-      color: 'red'
-    });
-  }, [labResultId, onError]);
-
-  const loadComponents = useCallback(async (showLoading = true) => {
-    // Skip if already loading to prevent duplicate fetches
-    if (loadingRef.current) return;
-
-    loadingRef.current = true;
-
-    if (showLoading) {
-      setLoading(true);
-    } else {
-      setRefreshing(true);
-    }
-
-    setError(null);
-
-    try {
-      const response = await labTestComponentApi.getByLabResult(
+  const handleError = useCallback(
+    (error: Error, context: string) => {
+      logger.error('test_components_tab_error', {
+        message: `Error in TestComponentsTab: ${context}`,
         labResultId,
-        filters,
-        currentPatient?.id
-      );
+        error: error.message,
+        component: 'TestComponentsTab',
+      });
 
-      setComponents(response.data || []);
-    } catch (error) {
-      handleError(error as Error, 'load_components');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-      loadingRef.current = false;
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [labResultId, currentPatient?.id, handleError]);
+      const errorMessage = error.message || 'An unexpected error occurred';
+      setError(errorMessage);
 
-  const handleComponentsAdded = useCallback((newComponents: LabTestComponent[]) => {
-    setComponents(prev => [...prev, ...newComponents]);
+      if (onError) {
+        onError(error);
+      }
 
-    // Close the add modal and switch to display tab to show the new components
-    setShowAddModal(false);
-    setActiveTab('display');
+      notifications.show({
+        title: 'Error',
+        message: errorMessage,
+        color: 'red',
+      });
+    },
+    [labResultId, onError]
+  );
 
-    logger.info('test_components_added', {
-      message: 'Test components added successfully',
-      labResultId,
-      count: newComponents.length,
-      component: 'TestComponentsTab',
-    });
-  }, [labResultId]);
+  const loadComponents = useCallback(
+    async (showLoading = true) => {
+      // Skip if already loading to prevent duplicate fetches
+      if (loadingRef.current) return;
 
-  const [editingComponent, setEditingComponent] = useState<LabTestComponent | null>(null);
+      loadingRef.current = true;
+
+      if (showLoading) {
+        setLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+
+      setError(null);
+
+      try {
+        const response = await labTestComponentApi.getByLabResult(
+          labResultId,
+          filters,
+          currentPatient?.id
+        );
+
+        setComponents(response.data || []);
+      } catch (error) {
+        handleError(error as Error, 'load_components');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+        loadingRef.current = false;
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [labResultId, currentPatient?.id, handleError]
+  );
+
+  const handleComponentsAdded = useCallback(
+    (newComponents: LabTestComponent[]) => {
+      setComponents(prev => [...prev, ...newComponents]);
+
+      // Close the add modal and switch to display tab to show the new components
+      setShowAddModal(false);
+      setActiveTab('display');
+
+      logger.info('test_components_added', {
+        message: 'Test components added successfully',
+        labResultId,
+        count: newComponents.length,
+        component: 'TestComponentsTab',
+      });
+    },
+    [labResultId]
+  );
+
+  const [editingComponent, setEditingComponent] =
+    useState<LabTestComponent | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [trendPanelOpen, setTrendPanelOpen] = useState(false);
   const [selectedTestName, setSelectedTestName] = useState<string | null>(null);
@@ -164,102 +174,120 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
     setIsEditModalOpen(true);
   }, []);
 
-  const handleEditSubmit = useCallback(async (updatedData: Partial<LabTestComponent>) => {
-    if (!editingComponent?.id) return;
+  const handleEditSubmit = useCallback(
+    async (updatedData: Partial<LabTestComponent>) => {
+      if (!editingComponent?.id) return;
 
-    try {
-      const updated = await labTestComponentApi.update(
-        editingComponent.id,
-        updatedData,
-        currentPatient?.id
-      );
+      try {
+        const updated = await labTestComponentApi.update(
+          editingComponent.id,
+          updatedData,
+          currentPatient?.id
+        );
 
-      setComponents(prev => prev.map(c => c.id === updated.id ? updated : c));
+        setComponents(prev =>
+          prev.map(c => (c.id === updated.id ? updated : c))
+        );
 
-      notifications.show({
-        title: 'Component Updated',
-        message: `${updated.test_name} has been updated successfully`,
-        color: 'green',
-        autoClose: 3000
-      });
+        notifications.show({
+          title: 'Component Updated',
+          message: `${updated.test_name} has been updated successfully`,
+          color: 'green',
+          autoClose: 3000,
+        });
 
-      setIsEditModalOpen(false);
-      setEditingComponent(null);
+        setIsEditModalOpen(false);
+        setEditingComponent(null);
 
-      logger.info('test_component_updated', {
-        message: 'Test component updated successfully',
-        componentId: updated.id,
-        testName: updated.test_name,
-        component: 'TestComponentsTab',
-      });
-    } catch (error) {
-      handleError(error as Error, 'update_component');
-      notifications.show({
-        title: 'Update Failed',
-        message: 'Failed to update test component. Please try again.',
-        color: 'red',
-        autoClose: 5000
-      });
-    }
-  }, [editingComponent, currentPatient?.id, handleError]);
+        logger.info('test_component_updated', {
+          message: 'Test component updated successfully',
+          componentId: updated.id,
+          testName: updated.test_name,
+          component: 'TestComponentsTab',
+        });
+      } catch (error) {
+        handleError(error as Error, 'update_component');
+        notifications.show({
+          title: 'Update Failed',
+          message: 'Failed to update test component. Please try again.',
+          color: 'red',
+          autoClose: 5000,
+        });
+      }
+    },
+    [editingComponent, currentPatient?.id, handleError]
+  );
 
-  const handleComponentDelete = useCallback(async (component: LabTestComponent) => {
-    try {
-      await labTestComponentApi.delete(component.id!, currentPatient?.id);
+  const handleComponentDelete = useCallback(
+    async (component: LabTestComponent) => {
+      try {
+        await labTestComponentApi.delete(component.id!, currentPatient?.id);
 
-      setComponents(prev => prev.filter(c => c.id !== component.id));
+        setComponents(prev => prev.filter(c => c.id !== component.id));
 
-      notifications.show({
-        title: t('labresults:testComponents.notifications.componentDeleted', 'Component Deleted'),
-        message: t('labresults:testComponents.notifications.hasBeenDeleted', '{{name}} has been deleted', { name: component.test_name }),
-        color: 'green'
-      });
+        notifications.show({
+          title: t(
+            'labresults:testComponents.notifications.componentDeleted',
+            'Component Deleted'
+          ),
+          message: t(
+            'labresults:testComponents.notifications.hasBeenDeleted',
+            '{{name}} has been deleted',
+            { name: component.test_name }
+          ),
+          color: 'green',
+        });
 
-      logger.info('test_component_deleted', {
-        message: 'Test component deleted successfully',
-        componentId: component.id,
-        testName: component.test_name,
-        component: 'TestComponentsTab',
-      });
-    } catch (error) {
-      handleError(error as Error, 'delete_component');
-    }
-  }, [currentPatient?.id, handleError]);
+        logger.info('test_component_deleted', {
+          message: 'Test component deleted successfully',
+          componentId: component.id,
+          testName: component.test_name,
+          component: 'TestComponentsTab',
+        });
+      } catch (error) {
+        handleError(error as Error, 'delete_component');
+      }
+    },
+    [currentPatient?.id, handleError]
+  );
 
   const handleRefresh = useCallback(() => {
     loadComponents(false);
   }, [loadComponents]);
 
-  const handleTrendClick = useCallback((testName: string) => {
-    // Prevent opening if already opening or open with same test
-    if (trendPanelOpen && selectedTestName === testName) {
-      return;
-    }
+  const handleTrendClick = useCallback(
+    (testName: string) => {
+      // Prevent opening if already opening or open with same test
+      if (trendPanelOpen && selectedTestName === testName) {
+        return;
+      }
 
-    // Clear any pending debounced calls
-    if (trendClickDebounceRef.current) {
-      clearTimeout(trendClickDebounceRef.current);
-      trendClickDebounceRef.current = null;
-    }
+      // Clear any pending debounced calls
+      if (trendClickDebounceRef.current) {
+        clearTimeout(trendClickDebounceRef.current);
+        trendClickDebounceRef.current = null;
+      }
 
-    // Immediately update state to ensure responsive UI
-    setSelectedTestName(testName);
-    setTrendPanelOpen(true);
+      // Immediately update state to ensure responsive UI
+      setSelectedTestName(testName);
+      setTrendPanelOpen(true);
 
-    // Log after state update to not block UI
-    requestAnimationFrame(() => {
-      logger.info('test_component_trend_requested', {
-        message: 'Test component trend view requested',
-        testName,
-        component: 'TestComponentsTab',
+      // Log after state update to not block UI
+      requestAnimationFrame(() => {
+        logger.info('test_component_trend_requested', {
+          message: 'Test component trend view requested',
+          testName,
+          component: 'TestComponentsTab',
+        });
       });
-    });
-  }, [trendPanelOpen, selectedTestName]);
+    },
+    [trendPanelOpen, selectedTestName]
+  );
 
   // Load components on mount and when labResultId changes
   useEffect(() => {
     loadComponents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [labResultId]);
 
   // Note: Removed auto-refresh on tab switch to prevent unnecessary API calls
@@ -267,11 +295,16 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
   const getTabIcon = (tabValue: string) => {
     switch (tabValue) {
-      case 'display': return <IconEye size={16} />;
-      case 'templates': return <IconTemplate size={16} />;
-      case 'bulk': return <IconUpload size={16} />;
-      case 'stats': return <IconChartBar size={16} />;
-      default: return null;
+      case 'display':
+        return <IconEye size={16} />;
+      case 'templates':
+        return <IconTemplate size={16} />;
+      case 'bulk':
+        return <IconUpload size={16} />;
+      case 'stats':
+        return <IconChartBar size={16} />;
+      default:
+        return null;
     }
   };
 
@@ -290,12 +323,22 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
   if (loading) {
     return (
-      <Paper withBorder p="md" radius="md" style={{ position: 'relative', minHeight: 200 }}>
-        <LoadingOverlay visible={loading} overlayProps={{ radius: 'sm', blur: 2 }} />
+      <Paper
+        withBorder
+        p="md"
+        radius="md"
+        style={{ position: 'relative', minHeight: 200 }}
+      >
+        <LoadingOverlay
+          visible={loading}
+          overlayProps={{ radius: 'sm', blur: 2 }}
+        />
         <Center h={200}>
           <Stack align="center" gap="md">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
-            <Text size="lg" c="dimmed">Loading test components...</Text>
+            <Text size="lg" c="dimmed">
+              Loading test components...
+            </Text>
           </Stack>
         </Center>
       </Paper>
@@ -308,10 +351,14 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       <Group justify="space-between" align="center">
         <Group gap="xs">
           <IconFlask size={20} />
-          <Title order={4}>{t('labresults:testComponents.title', 'Test Components')}</Title>
+          <Title order={4}>
+            {t('labresults:testComponents.title', 'Test Components')}
+          </Title>
           {components.length > 0 && (
             <Badge variant="light" color="blue">
-              {t('shared:labels.countTest', '{{count}} test', { count: components.length })}
+              {t('shared:labels.countTest', '{{count}} test', {
+                count: components.length,
+              })}
             </Badge>
           )}
         </Group>
@@ -330,7 +377,10 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             variant="subtle"
             onClick={handleRefresh}
             loading={refreshing}
-            title={t('labresults:testComponents.refreshComponents', 'Refresh components')}
+            title={t(
+              'labresults:testComponents.refreshComponents',
+              'Refresh components'
+            )}
           >
             <IconRefresh size={16} />
           </ActionIcon>
@@ -341,7 +391,10 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       {error && (
         <Alert
           icon={<IconAlertCircle size={16} />}
-          title={t('labresults:testComponents.errorLoading', 'Error loading test components')}
+          title={t(
+            'labresults:testComponents.errorLoading',
+            'Error loading test components'
+          )}
           color="red"
           onClose={() => setError(null)}
         >
@@ -350,7 +403,10 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       )}
 
       {/* Main Tabs Interface */}
-      <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'display')}>
+      <Tabs
+        value={activeTab}
+        onChange={value => setActiveTab(value || 'display')}
+      >
         <Tabs.List>
           <Tabs.Tab
             value="display"
@@ -360,10 +416,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             {t('labresults:testComponents.tabs.testResults', 'Test Results')}
           </Tabs.Tab>
 
-          <Tabs.Tab
-            value="stats"
-            leftSection={getTabIcon('stats')}
-          >
+          <Tabs.Tab value="stats" leftSection={getTabIcon('stats')}>
             {t('labresults:testComponents.tabs.statistics', 'Statistics')}
           </Tabs.Tab>
         </Tabs.List>
@@ -380,7 +433,9 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
               onEdit={handleComponentEdit}
               onDelete={handleComponentDelete}
               onTrendClick={handleTrendClick}
-              onError={(error: Error) => handleError(error, 'component_display')}
+              onError={(error: Error) =>
+                handleError(error, 'component_display')
+              }
             />
           </Box>
         </Tabs.Panel>
@@ -403,7 +458,9 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           <Stack align="center" gap="lg">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
             <Stack align="center" gap="md">
-              <Title order={3} c="dimmed">{t('tabs.noComponentsYet')}</Title>
+              <Title order={3} c="dimmed">
+                {t('tabs.noComponentsYet')}
+              </Title>
               <Text size="sm" c="dimmed" ta="center" maw={400}>
                 {t('tabs.noComponentsDescription')}
               </Text>
@@ -418,12 +475,18 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
                 }}
                 variant="filled"
               >
-                {t('labresults:testComponents.addTestComponents', 'Add Test Components')}
+                {t(
+                  'labresults:testComponents.addTestComponents',
+                  'Add Test Components'
+                )}
               </Button>
             </Group>
 
             <Text size="xs" c="dimmed" ta="center" maw={500}>
-              {t('labresults:testComponents.emptyState.description', 'Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges. Bulk import allows you to copy/paste results from lab reports for automatic parsing.')}
+              {t(
+                'labresults:testComponents.emptyState.description',
+                'Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges. Bulk import allows you to copy/paste results from lab reports for automatic parsing.'
+              )}
             </Text>
           </Stack>
         </Paper>
@@ -434,9 +497,17 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
           <Stack align="center" gap="md">
             <IconFlask size={48} color="var(--mantine-color-gray-5)" />
-            <Title order={3} c="dimmed">{t('labresults:testComponents.noComponents', 'No test components')}</Title>
+            <Title order={3} c="dimmed">
+              {t(
+                'labresults:testComponents.noComponents',
+                'No test components'
+              )}
+            </Title>
             <Text size="sm" c="dimmed" ta="center">
-              {t('labresults:testComponents.noComponentsDescription', "This lab result doesn't have any individual test components added yet.")}
+              {t(
+                'labresults:testComponents.noComponentsDescription',
+                "This lab result doesn't have any individual test components added yet."
+              )}
             </Text>
           </Stack>
         </Paper>
@@ -460,16 +531,27 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         title={
           <Group gap="xs">
             <IconPlus size={20} />
-            <Text fw={600}>{t('labresults:testComponents.addTestComponents', 'Add Test Components')}</Text>
+            <Text fw={600}>
+              {t(
+                'labresults:testComponents.addTestComponents',
+                'Add Test Components'
+              )}
+            </Text>
           </Group>
         }
         size="calc(100vw - 40px)"
         centered
         zIndex={3001}
       >
-        <Tabs value={addModalTab} onChange={(value) => setAddModalTab(value || 'templates')}>
+        <Tabs
+          value={addModalTab}
+          onChange={value => setAddModalTab(value || 'templates')}
+        >
           <Tabs.List>
-            <Tabs.Tab value="templates" leftSection={<IconTemplate size={16} />}>
+            <Tabs.Tab
+              value="templates"
+              leftSection={<IconTemplate size={16} />}
+            >
               {t('tabs.templates')}
             </Tabs.Tab>
             <Tabs.Tab value="bulk" leftSection={<IconUpload size={16} />}>

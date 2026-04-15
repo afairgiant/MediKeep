@@ -15,66 +15,65 @@ from app.schemas.trend_charts import TrendChartSelection
 
 class DateRange(BaseModel):
     """Date range filter for report generation"""
+
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
-    @field_validator('end_date')
+    @field_validator("end_date")
     @classmethod
     def validate_date_range(cls, v, info: ValidationInfo):
-        if v and info.data.get('start_date'):
-            if v < info.data['start_date']:
-                raise ValueError('End date must be after start date')
+        if v and info.data.get("start_date"):
+            if v < info.data["start_date"]:
+                raise ValueError("End date must be after start date")
         return v
 
 
 class SelectiveRecordRequest(BaseModel):
     """Request model for selecting specific records from a category"""
-    category: str = Field(..., description="Medical record category (medications, treatments, etc.)")
+
+    category: str = Field(
+        ..., description="Medical record category (medications, treatments, etc.)"
+    )
     record_ids: List[int] = Field(..., description="List of record IDs to include")
 
-    @field_validator('record_ids')
+    @field_validator("record_ids")
     @classmethod
     def validate_record_ids(cls, v):
         if not v:
-            raise ValueError('At least one record ID must be provided')
+            raise ValueError("At least one record ID must be provided")
         if len(v) > 1000:
-            raise ValueError('Cannot select more than 1000 records per category')
+            raise ValueError("Cannot select more than 1000 records per category")
         return v
 
 
 class CustomReportRequest(BaseModel):
     """Request model for generating custom medical reports"""
+
     selected_records: List[SelectiveRecordRequest] = Field(
-        default_factory=list,
-        description="List of categories with selected record IDs"
+        default_factory=list, description="List of categories with selected record IDs"
     )
     trend_charts: Optional[TrendChartSelection] = Field(
-        default=None,
-        description="Trend charts to include in the report"
+        default=None, description="Trend charts to include in the report"
     )
     report_title: Optional[str] = Field(
         default="Custom Medical Report",
         max_length=255,
-        description="Title for the generated report"
+        description="Title for the generated report",
     )
     include_patient_info: bool = Field(
-        default=True,
-        description="Include patient demographic information"
+        default=True, description="Include patient demographic information"
     )
     include_profile_picture: bool = Field(
-        default=True,
-        description="Include patient profile picture in report header"
+        default=True, description="Include patient profile picture in report header"
     )
     include_summary: bool = Field(
-        default=True,
-        description="Include summary statistics"
+        default=True, description="Include summary statistics"
     )
     date_range: Optional[DateRange] = Field(
-        default=None,
-        description="Optional date range filter"
+        default=None, description="Optional date range filter"
     )
 
-    @field_validator('selected_records')
+    @field_validator("selected_records")
     @classmethod
     def validate_selected_records(cls, v):
         if not v:
@@ -83,49 +82,50 @@ class CustomReportRequest(BaseModel):
         # Check for duplicate categories
         categories = [req.category for req in v]
         if len(categories) != len(set(categories)):
-            raise ValueError('Duplicate categories are not allowed')
+            raise ValueError("Duplicate categories are not allowed")
 
         # Validate total record count
         total_records = sum(len(req.record_ids) for req in v)
         if total_records > 5000:
-            raise ValueError('Total selected records cannot exceed 5000')
+            raise ValueError("Total selected records cannot exceed 5000")
 
         return v
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_has_content(self):
         has_records = bool(self.selected_records)
         has_charts = bool(self.trend_charts)
         if not has_records and not has_charts:
-            raise ValueError('Report must include at least records or trend charts')
+            raise ValueError("Report must include at least records or trend charts")
         return self
 
 
 class ReportTemplate(BaseModel):
     """Model for saving and managing report templates"""
+
     name: str = Field(..., max_length=255, description="Template name")
-    description: Optional[str] = Field(None, max_length=5000, description="Template description")
+    description: Optional[str] = Field(
+        None, max_length=5000, description="Template description"
+    )
     selected_records: List[SelectiveRecordRequest] = Field(
-        default_factory=list,
-        description="Saved record selections"
+        default_factory=list, description="Saved record selections"
     )
     trend_charts: Optional[TrendChartSelection] = Field(
-        default=None,
-        description="Trend chart selections for the template"
+        default=None, description="Trend chart selections for the template"
     )
     is_public: bool = Field(default=False, description="Whether template is public")
     shared_with_family: bool = Field(
-        default=False,
-        description="Share template with family members"
+        default=False, description="Share template with family members"
     )
     report_settings: Optional[Dict[str, Any]] = Field(
         default_factory=dict,
-        description="Additional report settings (sorting, grouping, etc.)"
+        description="Additional report settings (sorting, grouping, etc.)",
     )
 
 
 class ReportTemplateResponse(ReportTemplate):
     """Response model for report templates with metadata"""
+
     id: int
     user_id: int
     created_at: datetime
@@ -135,6 +135,7 @@ class ReportTemplateResponse(ReportTemplate):
 
 class RecordSummary(BaseModel):
     """Summary of a medical record for selection UI"""
+
     id: int
     title: str
     date: Optional[Union[date, datetime]] = None
@@ -145,32 +146,31 @@ class RecordSummary(BaseModel):
 
 class CategorySummary(BaseModel):
     """Summary of records in a category"""
+
     count: int = Field(..., description="Total number of records")
     records: List[RecordSummary] = Field(
-        default_factory=list,
-        description="List of record summaries"
+        default_factory=list, description="List of record summaries"
     )
     has_more: bool = Field(
-        default=False,
-        description="Indicates if there are more records than returned"
+        default=False, description="Indicates if there are more records than returned"
     )
 
 
 class DataSummaryResponse(BaseModel):
     """Response model for data summary endpoint"""
+
     categories: Dict[str, CategorySummary] = Field(
-        ...,
-        description="Summary of each category"
+        ..., description="Summary of each category"
     )
     total_records: int = Field(..., description="Total number of all records")
     last_updated: Optional[datetime] = Field(
-        None,
-        description="Last data modification timestamp"
+        None, description="Last data modification timestamp"
     )
 
 
 class CustomReportError(Exception):
     """Custom exception for report generation errors"""
+
     def __init__(self, message: str, category: str = None, details: dict = None):
         self.message = message
         self.category = category
@@ -180,23 +180,23 @@ class CustomReportError(Exception):
 
 class ReportGenerationResponse(BaseModel):
     """Response model for report generation status"""
+
     success: bool
     message: str
     filename: Optional[str] = None
     file_size: Optional[int] = None
     generation_time_ms: Optional[int] = None
     partial_failure: bool = Field(
-        default=False,
-        description="Indicates if some categories failed"
+        default=False, description="Indicates if some categories failed"
     )
     failed_categories: List[str] = Field(
-        default_factory=list,
-        description="List of categories that failed to export"
+        default_factory=list, description="List of categories that failed to export"
     )
 
 
 class TemplateActionResponse(BaseModel):
     """Generic response for template CRUD operations"""
+
     success: bool
     message: str
     template_id: Optional[int] = None

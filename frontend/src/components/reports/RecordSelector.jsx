@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 
 /**
  * RecordSelector Component
- * 
+ *
  * Displays and manages selection of records within a category
  * Follows existing patterns from medical components
  */
@@ -32,13 +32,19 @@ const RecordSelector = ({
   if (!categoryData || !categoryData.records) {
     return (
       <Paper p="md" withBorder radius="md">
-        <Text c="dimmed" ta="center">{t('categories.noRecords')}</Text>
+        <Text c="dimmed" ta="center">
+          {t('categories.noRecords')}
+        </Text>
       </Paper>
     );
   }
 
-  const allSelected = categoryData.records.every(record => selectedRecords[record.id]);
-  const selectedCount = categoryData.records.filter(record => selectedRecords[record.id]).length;
+  const allSelected = categoryData.records.every(
+    record => selectedRecords[record.id]
+  );
+  const selectedCount = categoryData.records.filter(
+    record => selectedRecords[record.id]
+  ).length;
 
   return (
     <Stack gap="sm">
@@ -46,7 +52,9 @@ const RecordSelector = ({
       <Paper p="md" withBorder radius="md" bg="var(--color-bg-secondary)">
         <Group justify="space-between">
           <Group>
-            <Text fw={500} size="lg">{categoryDisplayName}</Text>
+            <Text fw={500} size="lg">
+              {categoryDisplayName}
+            </Text>
             <Badge color="blue" variant="light">
               {t('categories.totalCount', { count: categoryData.count })}
             </Badge>
@@ -58,8 +66,8 @@ const RecordSelector = ({
           </Group>
           <Button
             size="sm"
-            variant={allSelected ? "filled" : "outline"}
-            color={allSelected ? "red" : "blue"}
+            variant={allSelected ? 'filled' : 'outline'}
+            color={allSelected ? 'red' : 'blue'}
             onClick={() => onToggleCategory(category, categoryData.records)}
           >
             {allSelected ? 'Deselect Tab' : 'Select Tab'}
@@ -69,7 +77,7 @@ const RecordSelector = ({
 
       {/* Records list */}
       <Stack gap="xs">
-        {categoryData.records.map((record) => (
+        {categoryData.records.map(record => (
           <RecordItem
             key={record.id}
             record={record}
@@ -84,7 +92,9 @@ const RecordSelector = ({
       {categoryData.has_more && (
         <Alert color="blue" variant="light">
           <Text size="sm">
-            {t('categories.showingFirst', { count: categoryData.records.length })}
+            {t('categories.showingFirst', {
+              count: categoryData.records.length,
+            })}
           </Text>
         </Alert>
       )}
@@ -108,11 +118,16 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
       style={{
         cursor: 'pointer',
         borderColor: selected ? 'var(--mantine-color-blue-5)' : undefined,
-        backgroundColor: selected ? 'var(--mantine-color-blue-light)' : undefined,
+        backgroundColor: selected
+          ? 'var(--mantine-color-blue-light)'
+          : undefined,
       }}
       onClick={onToggle}
-      onKeyDown={(e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+      onKeyDown={e => {
+        if (
+          (e.key === 'Enter' || e.key === ' ') &&
+          e.target === e.currentTarget
+        ) {
           e.preventDefault();
           onToggle();
         }
@@ -120,7 +135,9 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
     >
       <Group justify="space-between" align="flex-start">
         <Stack gap={4} style={{ flex: 1 }}>
-          <Text fw={500} size="sm">{record.title}</Text>
+          <Text fw={500} size="sm">
+            {record.title}
+          </Text>
           <Text size="xs" c="dimmed" lineClamp={2}>
             {record.key_info}
           </Text>
@@ -129,13 +146,17 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
           <Group gap="xs" wrap="wrap">
             {record.date && (
               <Text size="xs" c="dimmed">
-                <span aria-hidden="true">📅 </span>{formatDate(record.date)}
+                <span aria-hidden="true">📅 </span>
+                {formatDate(record.date)}
               </Text>
             )}
             {record.practitioner && (
               <Text size="xs" c="dimmed">
                 {/* eslint-disable-next-line i18next/no-literal-string -- decorative emoji */}
-                <span aria-hidden="true">{'\uD83D\uDC68\u200D\u2695\uFE0F '}</span>{record.practitioner}
+                <span aria-hidden="true">
+                  {'\uD83D\uDC68\u200D\u2695\uFE0F '}
+                </span>
+                {record.practitioner}
               </Text>
             )}
             {record.status && (
@@ -156,7 +177,7 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
           color="blue"
           size="md"
           aria-label={`Select ${record.title}`}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         />
       </Group>
     </Paper>
@@ -166,7 +187,7 @@ const RecordItem = ({ record, selected, onToggle, formatDate }) => {
 /**
  * Get color for status badge
  */
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   switch (status?.toLowerCase()) {
     case 'active':
     case 'current':

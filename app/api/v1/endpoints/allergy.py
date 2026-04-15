@@ -68,7 +68,9 @@ def read_allergies(
     allergen: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -91,12 +93,13 @@ def read_allergies(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
             # Apply allergen filter manually if both tags and allergen are specified
             if allergen:
                 allergies = [
-                    allrg for allrg in allergies
+                    allrg
+                    for allrg in allergies
                     if allergen.lower() in getattr(allrg, "allergen", "").lower()
                 ]
         elif status and status == "active":
@@ -108,7 +111,11 @@ def read_allergies(
             # Combined severity and status filtering
             allergies = allergy.query(
                 db=db,
-                filters={"patient_id": target_patient_id, "severity": severity.lower(), "status": status},
+                filters={
+                    "patient_id": target_patient_id,
+                    "severity": severity.lower(),
+                    "status": status,
+                },
                 order_by="onset_date",
                 order_desc=True,
             )
@@ -149,7 +156,7 @@ def read_allergies(
             "read",
             "Allergy",
             patient_id=target_patient_id,
-            count=len(allergies)
+            count=len(allergies),
         )
 
         return allergies
@@ -174,7 +181,13 @@ def read_allergy(
             db=db, record_id=allergy_id, relations=["patient", "medication"]
         )
         handle_not_found(allergy_obj, "Allergy", request)
-        verify_patient_ownership(allergy_obj, current_user_patient_id, "allergy", db=db, current_user=current_user)
+        verify_patient_ownership(
+            allergy_obj,
+            current_user_patient_id,
+            "allergy",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -183,7 +196,7 @@ def read_allergy(
             "read",
             "Allergy",
             record_id=allergy_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return allergy_obj
@@ -264,7 +277,7 @@ def get_active_allergies(
             "read",
             "Allergy",
             patient_id=patient_id,
-            count=len(allergies)
+            count=len(allergies),
         )
 
         return allergies
@@ -291,7 +304,7 @@ def get_critical_allergies(
             "read",
             "Allergy",
             patient_id=patient_id,
-            count=len(allergies)
+            count=len(allergies),
         )
 
         return allergies
@@ -322,10 +335,14 @@ def check_allergen_conflict(
             "Allergy",
             patient_id=patient_id,
             allergen=allergen,
-            has_conflict=has_allergy
+            has_conflict=has_allergy,
         )
 
-        return {"patient_id": patient_id, "allergen": allergen, "has_allergy": has_allergy}
+        return {
+            "patient_id": patient_id,
+            "allergen": allergen,
+            "has_allergy": has_allergy,
+        }
 
 
 @router.get("/patients/{patient_id}/allergies/", response_model=List[AllergyResponse])
@@ -353,7 +370,7 @@ def get_patient_allergies(
             "read",
             "Allergy",
             patient_id=patient_id,
-            count=len(allergies)
+            count=len(allergies),
         )
 
         return allergies

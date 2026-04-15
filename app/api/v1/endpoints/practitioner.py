@@ -4,9 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    handle_database_errors
-)
+from app.core.http.error_handling import handle_database_errors
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -59,17 +57,26 @@ def read_practitioners(
     with handle_database_errors(request=request):
         if practice_id:
             practitioners_list = practitioner.query(
-                db, filters={"practice_id": practice_id},
-                skip=skip, limit=limit, load_relations=["practice_rel"],
+                db,
+                filters={"practice_id": practice_id},
+                skip=skip,
+                limit=limit,
+                load_relations=["practice_rel"],
             )
         elif specialty:
             practitioners_list = practitioner.query(
-                db, filters={"specialty": specialty},
-                skip=skip, limit=limit, load_relations=["practice_rel"],
+                db,
+                filters={"specialty": specialty},
+                skip=skip,
+                limit=limit,
+                load_relations=["practice_rel"],
             )
         else:
             practitioners_list = practitioner.query(
-                db, skip=skip, limit=limit, load_relations=["practice_rel"],
+                db,
+                skip=skip,
+                limit=limit,
+                load_relations=["practice_rel"],
             )
 
         # Populate practice_name from eagerly-loaded relationship
@@ -91,7 +98,20 @@ def read_practitioner(
     """Get practitioner by ID with related information."""
     with handle_database_errors(request=request):
         practitioner_obj = practitioner.get_with_relations(
-            db=db, record_id=practitioner_id, relations=["patients", "conditions", "treatments", "medications", "procedures", "encounters", "lab_results", "immunizations", "vitals", "practice_rel"]
+            db=db,
+            record_id=practitioner_id,
+            relations=[
+                "patients",
+                "conditions",
+                "treatments",
+                "medications",
+                "procedures",
+                "encounters",
+                "lab_results",
+                "immunizations",
+                "vitals",
+                "practice_rel",
+            ],
         )
         handle_not_found(practitioner_obj, "Practitioner", request)
 

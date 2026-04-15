@@ -3,6 +3,7 @@ CRUD operations for InjuryType entity.
 
 InjuryType represents reusable injury types that populate the dropdown.
 """
+
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -27,11 +28,7 @@ class CRUDInjuryType(CRUDBase[InjuryType, InjuryTypeCreate, InjuryTypeUpdate]):
         Returns:
             List of all injury types, ordered by name
         """
-        return (
-            db.query(self.model)
-            .order_by(self.model.name)
-            .all()
-        )
+        return db.query(self.model).order_by(self.model.name).all()
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[InjuryType]:
         """
@@ -44,11 +41,7 @@ class CRUDInjuryType(CRUDBase[InjuryType, InjuryTypeCreate, InjuryTypeUpdate]):
         Returns:
             InjuryType if found, None otherwise
         """
-        return (
-            db.query(self.model)
-            .filter(self.model.name.ilike(name))
-            .first()
-        )
+        return db.query(self.model).filter(self.model.name.ilike(name)).first()
 
     def get_system_types(self, db: Session) -> List[InjuryType]:
         """

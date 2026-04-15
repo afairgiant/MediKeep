@@ -18,7 +18,7 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 vi.mock('../../../utils/helpers', () => ({
-  formatDateTime: (date) => new Date(date).toLocaleDateString(),
+  formatDateTime: date => new Date(date).toLocaleDateString(),
 }));
 
 const { mockInvitationApi } = vi.hoisted(() => ({
@@ -35,10 +35,10 @@ vi.mock('../../../services/api/invitationApi', () => ({
 // Mock useDateFormat to return predictable dates
 vi.mock('../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDateTime: (date) => new Date(date).toLocaleDateString(),
+    formatDateTime: date => new Date(date).toLocaleDateString(),
   }),
   default: () => ({
-    formatDateTime: (date) => new Date(date).toLocaleDateString(),
+    formatDateTime: date => new Date(date).toLocaleDateString(),
   }),
 }));
 
@@ -106,7 +106,9 @@ describe('InvitationResponseModal Component', () => {
   const renderResponseModal = (invitation, props = {}) => {
     const defaultProps = { ...mockProps, ...props };
 
-    return render(<InvitationResponseModal invitation={invitation} {...defaultProps} />);
+    return render(
+      <InvitationResponseModal invitation={invitation} {...defaultProps} />
+    );
   };
 
   describe('Modal Display and Basic Rendering', () => {
@@ -114,8 +116,12 @@ describe('InvitationResponseModal Component', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
       expect(screen.getByText('response.title')).toBeInTheDocument();
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
-      expect(screen.getByText('response.familyHistoryShare')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('response.familyHistoryShare')
+      ).toBeInTheDocument();
       expect(screen.getByText('pending')).toBeInTheDocument();
     });
 
@@ -153,7 +159,11 @@ describe('InvitationResponseModal Component', () => {
     it('should display invitation message when present', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      expect(screen.getByText('"Please review this family medical history for consultation."')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          '"Please review this family medical history for consultation."'
+        )
+      ).toBeInTheDocument();
     });
 
     it('should not display message section when message is absent', () => {
@@ -167,15 +177,25 @@ describe('InvitationResponseModal Component', () => {
     it('should display family history sharing context details', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      expect(screen.getByText('invitations:response.sharingDetails')).toBeInTheDocument();
-      expect(screen.getByText('invitations:response.familyMember')).toBeInTheDocument();
+      expect(
+        screen.getByText('invitations:response.sharingDetails')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('invitations:response.familyMember')
+      ).toBeInTheDocument();
       expect(screen.getByText(/John Doe/)).toBeInTheDocument();
-      expect(screen.getByText('invitations:response.relationship')).toBeInTheDocument();
+      expect(
+        screen.getByText('invitations:response.relationship')
+      ).toBeInTheDocument();
       expect(screen.getByText(/father/)).toBeInTheDocument();
-      expect(screen.getByText('invitations:response.accessLevel')).toBeInTheDocument();
+      expect(
+        screen.getByText('invitations:response.accessLevel')
+      ).toBeInTheDocument();
       expect(screen.getAllByText(/view/).length).toBeGreaterThan(0);
       expect(screen.getByText('invitations:response.note')).toBeInTheDocument();
-      expect(screen.getByText(/Shared for medical consultation review/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Shared for medical consultation review/)
+      ).toBeInTheDocument();
     });
 
     it('should not display sharing note when not present in context', () => {
@@ -189,15 +209,23 @@ describe('InvitationResponseModal Component', () => {
 
       renderResponseModal(invitationWithoutNote);
 
-      expect(screen.getByText('invitations:response.sharingDetails')).toBeInTheDocument();
-      expect(screen.queryByText('invitations:response.note')).not.toBeInTheDocument();
+      expect(
+        screen.getByText('invitations:response.sharingDetails')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText('invitations:response.note')
+      ).not.toBeInTheDocument();
     });
 
     it('should display default context details for non-family-history invitations', () => {
       renderResponseModal(patientShareInvitation);
 
-      expect(screen.getByText('response.additionalDetails')).toBeInTheDocument();
-      expect(screen.queryByText('invitations:response.sharingDetails')).not.toBeInTheDocument();
+      expect(
+        screen.getByText('response.additionalDetails')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText('invitations:response.sharingDetails')
+      ).not.toBeInTheDocument();
     });
 
     it('should handle invitations without context data', () => {
@@ -205,8 +233,12 @@ describe('InvitationResponseModal Component', () => {
       // The component shows the fallback text for any non-family-history invitation type
       renderResponseModal(invitationWithoutOptionalFields);
 
-      expect(screen.queryByText('invitations:response.sharingDetails')).not.toBeInTheDocument();
-      expect(screen.getByText('response.additionalDetails')).toBeInTheDocument();
+      expect(
+        screen.queryByText('invitations:response.sharingDetails')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText('response.additionalDetails')
+      ).toBeInTheDocument();
     });
   });
 
@@ -216,7 +248,10 @@ describe('InvitationResponseModal Component', () => {
 
       const textarea = screen.getByLabelText('response.responseNote');
       expect(textarea).toBeInTheDocument();
-      expect(textarea).toHaveAttribute('placeholder', 'response.notePlaceholder');
+      expect(textarea).toHaveAttribute(
+        'placeholder',
+        'response.notePlaceholder'
+      );
       expect(screen.getByText('response.noteVisible')).toBeInTheDocument();
     });
 
@@ -224,7 +259,8 @@ describe('InvitationResponseModal Component', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
       const textarea = screen.getByLabelText('response.responseNote');
-      const testNote = 'Thank you for sharing this information. I will review it carefully.';
+      const testNote =
+        'Thank you for sharing this information. I will review it carefully.';
 
       fireEvent.change(textarea, { target: { value: testNote } });
 
@@ -239,7 +275,9 @@ describe('InvitationResponseModal Component', () => {
 
       expect(textarea).toHaveValue('Test note');
 
-      await userEvent.click(screen.getByRole('button', { name: 'shared:fields.cancel' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'shared:fields.cancel' })
+      );
 
       expect(mockProps.onClose).toHaveBeenCalled();
     });
@@ -249,15 +287,23 @@ describe('InvitationResponseModal Component', () => {
     it('should render all action buttons', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      expect(screen.getByRole('button', { name: 'shared:fields.cancel' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'response.reject' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'response.accept' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'shared:fields.cancel' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'response.reject' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'response.accept' })
+      ).toBeInTheDocument();
     });
 
     it('should handle cancel button click', async () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      await userEvent.click(screen.getByRole('button', { name: 'shared:fields.cancel' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'shared:fields.cancel' })
+      );
 
       expect(mockProps.onClose).toHaveBeenCalled();
     });
@@ -266,9 +312,15 @@ describe('InvitationResponseModal Component', () => {
       // This test would require mocking a slow API response to see the loading state
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      const cancelButton = screen.getByRole('button', { name: 'shared:fields.cancel' });
-      const rejectButton = screen.getByRole('button', { name: 'response.reject' });
-      const acceptButton = screen.getByRole('button', { name: 'response.accept' });
+      const cancelButton = screen.getByRole('button', {
+        name: 'shared:fields.cancel',
+      });
+      const rejectButton = screen.getByRole('button', {
+        name: 'response.reject',
+      });
+      const acceptButton = screen.getByRole('button', {
+        name: 'response.accept',
+      });
 
       // Initially, buttons should be enabled
       expect(cancelButton).not.toBeDisabled();
@@ -281,7 +333,9 @@ describe('InvitationResponseModal Component', () => {
     it('should handle accept response without note', async () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(mockInvitationApi.respondToInvitation).toHaveBeenCalledWith(
@@ -306,10 +360,13 @@ describe('InvitationResponseModal Component', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
       const textarea = screen.getByLabelText('response.responseNote');
-      const responseNote = 'I accept this invitation and will review the information promptly.';
+      const responseNote =
+        'I accept this invitation and will review the information promptly.';
 
       fireEvent.change(textarea, { target: { value: responseNote } });
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(mockInvitationApi.respondToInvitation).toHaveBeenCalledWith(
@@ -332,7 +389,9 @@ describe('InvitationResponseModal Component', () => {
 
       const textarea = screen.getByLabelText('response.responseNote');
       fireEvent.change(textarea, { target: { value: '   Trimmed note   ' } });
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(mockInvitationApi.respondToInvitation).toHaveBeenCalledWith(
@@ -348,7 +407,9 @@ describe('InvitationResponseModal Component', () => {
 
       const textarea = screen.getByLabelText('response.responseNote');
       fireEvent.change(textarea, { target: { value: '   ' } }); // Only whitespace
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(mockInvitationApi.respondToInvitation).toHaveBeenCalledWith(
@@ -364,7 +425,9 @@ describe('InvitationResponseModal Component', () => {
     it('should handle reject response', async () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.reject' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.reject' })
+      );
 
       await waitFor(() => {
         expect(mockInvitationApi.respondToInvitation).toHaveBeenCalledWith(
@@ -389,10 +452,13 @@ describe('InvitationResponseModal Component', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
       const textarea = screen.getByLabelText('response.responseNote');
-      const responseNote = 'I cannot accept this invitation at this time due to policy restrictions.';
+      const responseNote =
+        'I cannot accept this invitation at this time due to policy restrictions.';
 
       fireEvent.change(textarea, { target: { value: responseNote } });
-      await userEvent.click(screen.getByRole('button', { name: 'response.reject' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.reject' })
+      );
 
       await waitFor(() => {
         expect(mockInvitationApi.respondToInvitation).toHaveBeenCalledWith(
@@ -424,7 +490,9 @@ describe('InvitationResponseModal Component', () => {
 
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith({
@@ -446,7 +514,9 @@ describe('InvitationResponseModal Component', () => {
 
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.reject' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.reject' })
+      );
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith({
@@ -462,7 +532,9 @@ describe('InvitationResponseModal Component', () => {
       renderResponseModal(null);
 
       // Modal should not render, so no buttons to click
-      expect(screen.queryByRole('button', { name: 'response.accept' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'response.accept' })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -477,13 +549,16 @@ describe('InvitationResponseModal Component', () => {
 
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       // Loading overlay should be visible - Mantine renders it in the DOM when visible=true
-      expect(document.querySelector('.mantine-LoadingOverlay-root') ||
-        document.querySelector('[data-visible]') ||
-        document.querySelector('[class*="LoadingOverlay"]') ||
-        screen.queryByRole('presentation')
+      expect(
+        document.querySelector('.mantine-LoadingOverlay-root') ||
+          document.querySelector('[data-visible]') ||
+          document.querySelector('[class*="LoadingOverlay"]') ||
+          screen.queryByRole('presentation')
       ).toBeTruthy();
 
       // Resolve the promise
@@ -503,12 +578,20 @@ describe('InvitationResponseModal Component', () => {
 
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       // Buttons should be disabled
-      expect(screen.getByRole('button', { name: 'shared:fields.cancel' })).toBeDisabled();
-      expect(screen.getByRole('button', { name: 'response.reject' })).toBeDisabled();
-      expect(screen.getByRole('button', { name: 'response.accept' })).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: 'shared:fields.cancel' })
+      ).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: 'response.reject' })
+      ).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: 'response.accept' })
+      ).toBeDisabled();
 
       // Resolve the promise
       resolveResponse({ message: 'Success' });
@@ -523,13 +606,17 @@ describe('InvitationResponseModal Component', () => {
     it('should display correct type label for family history invitations', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      expect(screen.getByText('response.familyHistoryShare')).toBeInTheDocument();
+      expect(
+        screen.getByText('response.familyHistoryShare')
+      ).toBeInTheDocument();
     });
 
     it('should display correct type label for patient share invitations', () => {
       renderResponseModal(patientShareInvitation);
 
-      expect(screen.getByText('response.patientRecordShare')).toBeInTheDocument();
+      expect(
+        screen.getByText('response.patientRecordShare')
+      ).toBeInTheDocument();
     });
 
     it('should handle unknown invitation types gracefully', () => {
@@ -563,7 +650,9 @@ describe('InvitationResponseModal Component', () => {
 
       expect(textarea).toHaveValue('Test note');
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(mockProps.onClose).toHaveBeenCalled();
@@ -573,14 +662,18 @@ describe('InvitationResponseModal Component', () => {
     });
 
     it('should preserve form state after API error', async () => {
-      mockInvitationApi.respondToInvitation.mockRejectedValue(new Error('API Error'));
+      mockInvitationApi.respondToInvitation.mockRejectedValue(
+        new Error('API Error')
+      );
 
       renderResponseModal(baseFamilyHistoryInvitation);
 
       const textarea = screen.getByLabelText('response.responseNote');
       fireEvent.change(textarea, { target: { value: 'Test note' } });
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith(
@@ -598,15 +691,23 @@ describe('InvitationResponseModal Component', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
       // Modal should be properly labeled
-      expect(screen.getByRole('dialog', { name: 'response.title' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('dialog', { name: 'response.title' })
+      ).toBeInTheDocument();
     });
 
     it('should provide clear action button labels', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
-      const acceptButton = screen.getByRole('button', { name: 'response.accept' });
-      const rejectButton = screen.getByRole('button', { name: 'response.reject' });
-      const cancelButton = screen.getByRole('button', { name: 'shared:fields.cancel' });
+      const acceptButton = screen.getByRole('button', {
+        name: 'response.accept',
+      });
+      const rejectButton = screen.getByRole('button', {
+        name: 'response.reject',
+      });
+      const cancelButton = screen.getByRole('button', {
+        name: 'shared:fields.cancel',
+      });
 
       expect(acceptButton).toBeInTheDocument();
       expect(rejectButton).toBeInTheDocument();
@@ -623,7 +724,9 @@ describe('InvitationResponseModal Component', () => {
       renderResponseModal(baseFamilyHistoryInvitation);
 
       const textarea = screen.getByLabelText('response.responseNote');
-      const acceptButton = screen.getByRole('button', { name: 'response.accept' });
+      const acceptButton = screen.getByRole('button', {
+        name: 'response.accept',
+      });
 
       textarea.focus();
       expect(textarea).toHaveFocus();
@@ -683,9 +786,13 @@ describe('InvitationResponseModal Component', () => {
     });
 
     it('should not call onSuccess if not provided', async () => {
-      renderResponseModal(baseFamilyHistoryInvitation, { onSuccess: undefined });
+      renderResponseModal(baseFamilyHistoryInvitation, {
+        onSuccess: undefined,
+      });
 
-      await userEvent.click(screen.getByRole('button', { name: 'response.accept' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'response.accept' })
+      );
 
       await waitFor(() => {
         expect(mockInvitationApi.respondToInvitation).toHaveBeenCalled();

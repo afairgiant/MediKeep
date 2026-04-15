@@ -1,4 +1,8 @@
-import { PASSWORD_VALIDATION, EMAIL_REGEX, EDIT_EXCLUDED_FIELDS } from '../constants/validationConstants';
+import {
+  PASSWORD_VALIDATION,
+  EMAIL_REGEX,
+  EDIT_EXCLUDED_FIELDS,
+} from '../constants/validationConstants';
 import { MEDICAL_MODELS } from '../constants/modelConstants';
 
 /**
@@ -48,9 +52,7 @@ export const validateField = (field, value, options = {}) => {
     typeof value === 'string' &&
     value.length > field.max_length
   ) {
-    errors.push(
-      `${field.name} must be ${field.max_length} characters or less`
-    );
+    errors.push(`${field.name} must be ${field.max_length} characters or less`);
   }
 
   // Type validation
@@ -100,7 +102,10 @@ export const validateForm = (metadata, formData, options = {}) => {
     }
 
     // Skip password fields if requested (edit mode)
-    if (skipPasswordFields && EDIT_EXCLUDED_FIELDS.some(excluded => field.name.includes(excluded))) {
+    if (
+      skipPasswordFields &&
+      EDIT_EXCLUDED_FIELDS.some(excluded => field.name.includes(excluded))
+    ) {
       return;
     }
 

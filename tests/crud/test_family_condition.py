@@ -1,6 +1,7 @@
 """
 Tests for FamilyCondition CRUD operations.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -25,7 +26,7 @@ class TestFamilyConditionCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -39,7 +40,7 @@ class TestFamilyConditionCRUD:
             name="Father Doe",
             relationship="father",
             gender="male",
-            birth_year=1955
+            birth_year=1955,
         )
         return family_member_crud.create(db_session, obj_in=member_data)
 
@@ -52,7 +53,7 @@ class TestFamilyConditionCRUD:
             severity="moderate",
             diagnosis_age=50,
             status="active",
-            notes="Managed with diet and medication"
+            notes="Managed with diet and medication",
         )
 
         condition = family_condition_crud.create(db_session, obj_in=condition_data)
@@ -71,20 +72,20 @@ class TestFamilyConditionCRUD:
                 family_member_id=test_family_member.id,
                 condition_name="Diabetes",
                 condition_type="endocrine",
-                severity="moderate"
+                severity="moderate",
             ),
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Heart Disease",
                 condition_type="cardiovascular",
-                severity="severe"
+                severity="severe",
             ),
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Arthritis",
                 condition_type="other",
-                severity="mild"
-            )
+                severity="mild",
+            ),
         ]
 
         for cond_data in conditions_data:
@@ -103,25 +104,27 @@ class TestFamilyConditionCRUD:
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Coronary Artery Disease",
-                condition_type="cardiovascular"
+                condition_type="cardiovascular",
             ),
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Diabetes",
-                condition_type="endocrine"
+                condition_type="endocrine",
             ),
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Hypertension",
-                condition_type="cardiovascular"
-            )
+                condition_type="cardiovascular",
+            ),
         ]
 
         for cond_data in conditions_data:
             family_condition_crud.create(db_session, obj_in=cond_data)
 
         cardiovascular = family_condition_crud.get_by_condition_type(
-            db_session, family_member_id=test_family_member.id, condition_type="cardiovascular"
+            db_session,
+            family_member_id=test_family_member.id,
+            condition_type="cardiovascular",
         )
 
         assert len(cardiovascular) == 2
@@ -133,18 +136,18 @@ class TestFamilyConditionCRUD:
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Condition 1",
-                severity="mild"
+                severity="mild",
             ),
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Condition 2",
-                severity="severe"
+                severity="severe",
             ),
             FamilyConditionCreate(
                 family_member_id=test_family_member.id,
                 condition_name="Condition 3",
-                severity="mild"
-            )
+                severity="mild",
+            ),
         ]
 
         for cond_data in conditions_data:
@@ -161,24 +164,23 @@ class TestFamilyConditionCRUD:
         """Test searching conditions by name."""
         conditions_data = [
             FamilyConditionCreate(
-                family_member_id=test_family_member.id,
-                condition_name="Diabetes Type 1"
+                family_member_id=test_family_member.id, condition_name="Diabetes Type 1"
             ),
             FamilyConditionCreate(
-                family_member_id=test_family_member.id,
-                condition_name="Diabetes Type 2"
+                family_member_id=test_family_member.id, condition_name="Diabetes Type 2"
             ),
             FamilyConditionCreate(
-                family_member_id=test_family_member.id,
-                condition_name="Heart Disease"
-            )
+                family_member_id=test_family_member.id, condition_name="Heart Disease"
+            ),
         ]
 
         for cond_data in conditions_data:
             family_condition_crud.create(db_session, obj_in=cond_data)
 
         results = family_condition_crud.search_by_condition_name(
-            db_session, family_member_id=test_family_member.id, condition_term="Diabetes"
+            db_session,
+            family_member_id=test_family_member.id,
+            condition_term="Diabetes",
         )
 
         assert len(results) == 2
@@ -188,14 +190,10 @@ class TestFamilyConditionCRUD:
         """Test getting conditions of a type across all family members."""
         # Create multiple family members
         father_data = FamilyMemberCreate(
-            patient_id=test_patient.id,
-            name="Father",
-            relationship="father"
+            patient_id=test_patient.id, name="Father", relationship="father"
         )
         mother_data = FamilyMemberCreate(
-            patient_id=test_patient.id,
-            name="Mother",
-            relationship="mother"
+            patient_id=test_patient.id, name="Mother", relationship="mother"
         )
 
         father = family_member_crud.create(db_session, obj_in=father_data)
@@ -207,19 +205,19 @@ class TestFamilyConditionCRUD:
                 family_member_id=father.id,
                 condition_name="Heart Attack",
                 condition_type="cardiovascular",
-                diagnosis_age=55
+                diagnosis_age=55,
             ),
             FamilyConditionCreate(
                 family_member_id=mother.id,
                 condition_name="Hypertension",
                 condition_type="cardiovascular",
-                diagnosis_age=50
+                diagnosis_age=50,
             ),
             FamilyConditionCreate(
                 family_member_id=father.id,
                 condition_name="Diabetes",
-                condition_type="endocrine"
-            )
+                condition_type="endocrine",
+            ),
         ]
 
         for cond_data in conditions_data:
@@ -241,13 +239,12 @@ class TestFamilyConditionCRUD:
             family_member_id=test_family_member.id,
             condition_name="Original Condition",
             severity="mild",
-            status="active"
+            status="active",
         )
         condition = family_condition_crud.create(db_session, obj_in=condition_data)
 
         update_data = FamilyConditionUpdate(
-            severity="moderate",
-            notes="Condition worsened"
+            severity="moderate", notes="Condition worsened"
         )
 
         updated = family_condition_crud.update(
@@ -261,8 +258,7 @@ class TestFamilyConditionCRUD:
     def test_delete_family_condition(self, db_session: Session, test_family_member):
         """Test deleting a family condition."""
         condition_data = FamilyConditionCreate(
-            family_member_id=test_family_member.id,
-            condition_name="To Delete"
+            family_member_id=test_family_member.id, condition_name="To Delete"
         )
         condition = family_condition_crud.create(db_session, obj_in=condition_data)
         condition_id = condition.id
@@ -282,7 +278,7 @@ class TestFamilyConditionCRUD:
             family_member_id=test_family_member.id,
             condition_name="Type 2 Diabetes Mellitus",
             condition_type="endocrine",
-            icd10_code="E11.9"
+            icd10_code="E11.9",
         )
 
         condition = family_condition_crud.create(db_session, obj_in=condition_data)
@@ -293,17 +289,14 @@ class TestFamilyConditionCRUD:
         """Test that conditions are ordered by name."""
         conditions_data = [
             FamilyConditionCreate(
-                family_member_id=test_family_member.id,
-                condition_name="Zebra Syndrome"
+                family_member_id=test_family_member.id, condition_name="Zebra Syndrome"
             ),
             FamilyConditionCreate(
-                family_member_id=test_family_member.id,
-                condition_name="Alpha Disease"
+                family_member_id=test_family_member.id, condition_name="Alpha Disease"
             ),
             FamilyConditionCreate(
-                family_member_id=test_family_member.id,
-                condition_name="Beta Condition"
-            )
+                family_member_id=test_family_member.id, condition_name="Beta Condition"
+            ),
         ]
 
         for cond_data in conditions_data:
@@ -322,14 +315,10 @@ class TestFamilyConditionCRUD:
         """Test that conditions are properly isolated per family member."""
         # Create two family members
         member1_data = FamilyMemberCreate(
-            patient_id=test_patient.id,
-            name="Member 1",
-            relationship="father"
+            patient_id=test_patient.id, name="Member 1", relationship="father"
         )
         member2_data = FamilyMemberCreate(
-            patient_id=test_patient.id,
-            name="Member 2",
-            relationship="mother"
+            patient_id=test_patient.id, name="Member 2", relationship="mother"
         )
 
         member1 = family_member_crud.create(db_session, obj_in=member1_data)
@@ -338,15 +327,13 @@ class TestFamilyConditionCRUD:
         # Create conditions for each member
         for i in range(3):
             cond_data = FamilyConditionCreate(
-                family_member_id=member1.id,
-                condition_name=f"Member1 Condition {i+1}"
+                family_member_id=member1.id, condition_name=f"Member1 Condition {i+1}"
             )
             family_condition_crud.create(db_session, obj_in=cond_data)
 
         for i in range(2):
             cond_data = FamilyConditionCreate(
-                family_member_id=member2.id,
-                condition_name=f"Member2 Condition {i+1}"
+                family_member_id=member2.id, condition_name=f"Member2 Condition {i+1}"
             )
             family_condition_crud.create(db_session, obj_in=cond_data)
 

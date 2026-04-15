@@ -21,7 +21,7 @@ import {
   Skeleton,
   ActionIcon,
   Tooltip,
-  Select
+  Select,
 } from '@mantine/core';
 import {
   IconChartLine,
@@ -30,14 +30,20 @@ import {
   IconDownload,
   IconCalendar,
   IconRefresh,
-  IconFilter
+  IconFilter,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import logger from '../../../services/logger';
 import VitalTrendChart from './VitalTrendChart';
 import VitalTrendTable from './VitalTrendTable';
-import { VitalType, VitalTrendResponse, VitalDataPoint, VITAL_TYPE_CONFIGS, AggregationPeriod } from './types';
+import {
+  VitalType,
+  VitalTrendResponse,
+  VitalDataPoint,
+  VITAL_TYPE_CONFIGS,
+  AggregationPeriod,
+} from './types';
 import { vitalsService } from '../../../services/medical/vitalsService';
 import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -45,13 +51,15 @@ import { convertForDisplay, unitLabels } from '../../../utils/unitConversion';
 import {
   smartAggregateVitalData,
   getAggregationDescription,
-  AggregatedDataPoint
+  AggregatedDataPoint,
 } from '../../../utils/vitalDataAggregation';
 
 // Maps vital types to their corresponding measurement types for unit conversion
-const CONVERTIBLE_VITAL_TYPES: Partial<Record<VitalType, 'weight' | 'temperature'>> = {
+const CONVERTIBLE_VITAL_TYPES: Partial<
+  Record<VitalType, 'weight' | 'temperature'>
+> = {
   weight: 'weight',
-  temperature: 'temperature'
+  temperature: 'temperature',
 };
 
 interface VitalTrendsPanelProps {
@@ -80,7 +88,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   onClose,
   vitalType,
   patientId,
-  patientHeight
+  patientHeight,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { unitSystem } = useUserPreferences();
@@ -91,12 +99,18 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('chart');
   const [timeRange, setTimeRange] = useState<string>('all');
-  const [glucoseContextFilter, setGlucoseContextFilter] = useState<string>('all');
+  const [glucoseContextFilter, setGlucoseContextFilter] =
+    useState<string>('all');
   // Aggregation state
-  const [aggregationPeriod, setAggregationPeriod] = useState<AggregationPeriod | null>(null);
-  const [aggregatedDataPoints, setAggregatedDataPoints] = useState<AggregatedDataPoint[]>([]);
+  const [aggregationPeriod, setAggregationPeriod] =
+    useState<AggregationPeriod | null>(null);
+  const [aggregatedDataPoints, setAggregatedDataPoints] = useState<
+    AggregatedDataPoint[]
+  >([]);
 
-  const getDateRangeFromSelection = (range: string): { startDate?: string; endDate?: string } => {
+  const getDateRangeFromSelection = (
+    range: string
+  ): { startDate?: string; endDate?: string } => {
     const today = new Date();
     const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
@@ -137,74 +151,92 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
    * Fetch all vitals for a specific type using pagination
    * This ensures we get complete historical data even for users with 1000+ records
    */
-  const fetchAllVitalsForType = useCallback(async (
-    targetPatientId: number,
-    targetVitalType: VitalType,
-    dateRange?: { startDate?: string; endDate?: string }
-  ): Promise<any[]> => {
-    const allRecords: any[] = [];
-    const seenIds = new Set<number>();
-    let skip = 0;
-    let hasMore = true;
+  const fetchAllVitalsForType = useCallback(
+    async (
+      targetPatientId: number,
+      targetVitalType: VitalType,
+      dateRange?: { startDate?: string; endDate?: string }
+    ): Promise<any[]> => {
+      const allRecords: any[] = [];
+      const seenIds = new Set<number>();
+      let skip = 0;
+      let hasMore = true;
 
-    // Map vital type to backend field name for filtering
-    // BMI requires fetching weight records
-    const backendVitalType = targetVitalType === 'bmi' ? 'weight' : targetVitalType;
+      // Map vital type to backend field name for filtering
+      // BMI requires fetching weight records
+      const backendVitalType =
+        targetVitalType === 'bmi' ? 'weight' : targetVitalType;
 
-    while (hasMore && allRecords.length < MAX_PAGINATION_RECORDS) {
-      const params: Record<string, any> = {
-        skip: String(skip),
-        limit: String(PAGE_SIZE),
-        vital_type: backendVitalType
-      };
+      while (hasMore && allRecords.length < MAX_PAGINATION_RECORDS) {
+        const params: Record<string, any> = {
+          skip: String(skip),
+          limit: String(PAGE_SIZE),
+          vital_type: backendVitalType,
+        };
 
-      // Add glucose context filter for blood glucose queries
-      if (glucoseContextFilter && glucoseContextFilter !== 'all' && backendVitalType === 'blood_glucose') {
-        params.glucose_context = glucoseContextFilter;
-      }
+        // Add glucose context filter for blood glucose queries
+        if (
+          glucoseContextFilter &&
+          glucoseContextFilter !== 'all' &&
+          backendVitalType === 'blood_glucose'
+        ) {
+          params.glucose_context = glucoseContextFilter;
+        }
 
-      let records;
-      if (dateRange?.startDate && dateRange?.endDate) {
-        records = await vitalsService.getPatientVitalsDateRange(
-          targetPatientId,
-          dateRange.startDate,
-          dateRange.endDate,
-          params
-        );
-      } else {
-        records = await vitalsService.getPatientVitals(targetPatientId, params);
-      }
+        let records;
+        if (dateRange?.startDate && dateRange?.endDate) {
+          records = await vitalsService.getPatientVitalsDateRange(
+            targetPatientId,
+            dateRange.startDate,
+            dateRange.endDate,
+            params
+          );
+        } else {
+          records = await vitalsService.getPatientVitals(
+            targetPatientId,
+            params
+          );
+        }
 
-      const recordsArray = Array.isArray(records) ? records : records?.data || [];
+        const recordsArray = Array.isArray(records)
+          ? records
+          : records?.data || [];
 
-      // Check for duplicates to detect pagination issues
-      let newRecordsCount = 0;
-      for (const record of recordsArray) {
-        if (!seenIds.has(record.id)) {
-          seenIds.add(record.id);
-          allRecords.push(record);
-          newRecordsCount++;
+        // Check for duplicates to detect pagination issues
+        let newRecordsCount = 0;
+        for (const record of recordsArray) {
+          if (!seenIds.has(record.id)) {
+            seenIds.add(record.id);
+            allRecords.push(record);
+            newRecordsCount++;
+          }
+        }
+
+        // Stop if we got fewer records than requested (no more pages)
+        // or if all records were duplicates (pagination issue)
+        if (recordsArray.length < PAGE_SIZE || newRecordsCount === 0) {
+          hasMore = false;
+        } else {
+          skip += PAGE_SIZE;
         }
       }
 
-      // Stop if we got fewer records than requested (no more pages)
-      // or if all records were duplicates (pagination issue)
-      if (recordsArray.length < PAGE_SIZE || newRecordsCount === 0) {
-        hasMore = false;
-      } else {
-        skip += PAGE_SIZE;
-      }
-    }
-
-    return allRecords;
-  }, [glucoseContextFilter]);
+      return allRecords;
+    },
+    [glucoseContextFilter]
+  );
 
   const loadTrendData = useCallback(async () => {
     if (!vitalType || !patientId) return;
 
     // For BMI, we need patient height
     if (vitalType === 'bmi' && !patientHeight) {
-      setError(t('vitals:trends.noHeightForBMI', 'Patient height is required to calculate BMI trends. Please update the patient profile with their height.'));
+      setError(
+        t(
+          'vitals:trends.noHeightForBMI',
+          'Patient height is required to calculate BMI trends. Please update the patient profile with their height.'
+        )
+      );
       setLoading(false);
       return;
     }
@@ -219,10 +251,17 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       const config = VITAL_TYPE_CONFIGS[vitalType];
 
       // Fetch ALL vitals for this type using pagination
-      const vitalsData = await fetchAllVitalsForType(patientId, vitalType, dateRange);
+      const vitalsData = await fetchAllVitalsForType(
+        patientId,
+        vitalType,
+        dateRange
+      );
 
       // Helper function to calculate BMI from weight (lbs) and height (inches)
-      const calculateBMI = (weightLbs: number, heightInches: number): number => {
+      const calculateBMI = (
+        weightLbs: number,
+        heightInches: number
+      ): number => {
         const bmi = (weightLbs / (heightInches * heightInches)) * 703;
         return Math.round(bmi * 10) / 10; // Round to 1 decimal place
       };
@@ -235,9 +274,16 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         .filter((vital: any) => {
           if (isBMI) {
             // For BMI, we need weight and patient height
-            return vital.weight !== null && vital.weight !== undefined && patientHeight;
+            return (
+              vital.weight !== null &&
+              vital.weight !== undefined &&
+              patientHeight
+            );
           }
-          return config.getValue(vital) !== null && config.getValue(vital) !== undefined;
+          return (
+            config.getValue(vital) !== null &&
+            config.getValue(vital) !== undefined
+          );
         })
         .map((vital: any) => {
           let value: number;
@@ -247,7 +293,9 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
           } else {
             value = config.getValue(vital);
           }
-          const secondaryValue = config.getSecondaryValue ? config.getSecondaryValue(vital) : null;
+          const secondaryValue = config.getSecondaryValue
+            ? config.getSecondaryValue(vital)
+            : null;
 
           // Store raw values - conversion happens in useMemo based on unitSystem
           return {
@@ -255,11 +303,13 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
             value: value,
             secondary_value: secondaryValue,
             recorded_date: vital.recorded_date,
-            glucose_context: vital.glucose_context || null
+            glucose_context: vital.glucose_context || null,
           };
         })
-        .sort((a: VitalDataPoint, b: VitalDataPoint) =>
-          new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime()
+        .sort(
+          (a: VitalDataPoint, b: VitalDataPoint) =>
+            new Date(b.recorded_date).getTime() -
+            new Date(a.recorded_date).getTime()
         );
 
       // Apply smart aggregation for large datasets
@@ -273,7 +323,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         vital_type_label: config.label,
         base_unit: config.unit,
         data_points: dataPoints,
-        reference_range: config.referenceRange
+        reference_range: config.referenceRange,
       };
 
       setRawTrendData(rawData);
@@ -286,7 +336,7 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         dataPointCount: dataPoints.length,
         aggregationPeriod: aggregationResult.period,
         aggregatedPointCount: aggregationResult.aggregatedPoints.length,
-        component: 'VitalTrendsPanel'
+        component: 'VitalTrendsPanel',
       });
     } catch (err: any) {
       const errorMessage = err?.message || 'Failed to load trend data';
@@ -297,19 +347,26 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         vitalType,
         patientId,
         error: errorMessage,
-        component: 'VitalTrendsPanel'
+        component: 'VitalTrendsPanel',
       });
 
       notifications.show({
         title: t('shared:labels.error', 'Error'),
         message: errorMessage,
         color: 'red',
-        autoClose: 5000
+        autoClose: 5000,
       });
     } finally {
       setLoading(false);
     }
-  }, [vitalType, patientId, timeRange, patientHeight, t, fetchAllVitalsForType]);
+  }, [
+    vitalType,
+    patientId,
+    timeRange,
+    patientHeight,
+    t,
+    fetchAllVitalsForType,
+  ]);
 
   useEffect(() => {
     if (opened && vitalType) {
@@ -335,7 +392,10 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
   // Get measurement type for the current vital (for unit conversion)
   const measurementType = useMemo(
-    () => rawTrendData ? CONVERTIBLE_VITAL_TYPES[rawTrendData.vital_type] : undefined,
+    () =>
+      rawTrendData
+        ? CONVERTIBLE_VITAL_TYPES[rawTrendData.vital_type]
+        : undefined,
     [rawTrendData]
   );
 
@@ -351,8 +411,9 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       convertForDisplay(value, measurementType, unitSystem) ?? value;
 
     // Helper for optional values (returns undefined if input is null/undefined)
-    const convertOptional = (value: number | null | undefined): number | null | undefined =>
-      value != null ? convert(value) : value;
+    const convertOptional = (
+      value: number | null | undefined
+    ): number | null | undefined => (value != null ? convert(value) : value);
 
     return aggregatedDataPoints.map(point => ({
       ...point,
@@ -374,8 +435,9 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     const convertedDataPoints = rawTrendData.data_points.map(point => ({
       ...point,
       value: measurementType
-        ? convertForDisplay(point.value, measurementType, unitSystem) ?? point.value
-        : point.value
+        ? (convertForDisplay(point.value, measurementType, unitSystem) ??
+          point.value)
+        : point.value,
     }));
 
     // Determine display unit based on user preference
@@ -394,15 +456,20 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
     if (values.length > 1) {
       const mean = values.reduce((a, b) => a + b, 0) / values.length;
       const squareDiffs = values.map(v => Math.pow(v - mean, 2));
-      stdDev = Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / values.length);
+      stdDev = Math.sqrt(
+        squareDiffs.reduce((a, b) => a + b, 0) / values.length
+      );
     }
 
     // Calculate secondary statistics (for blood pressure diastolic)
     let secondaryStdDev: number | null = null;
     if (secondaryValues.length > 1) {
-      const mean = secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length;
+      const mean =
+        secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length;
       const squareDiffs = secondaryValues.map(v => Math.pow(v - mean, 2));
-      secondaryStdDev = Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / secondaryValues.length);
+      secondaryStdDev = Math.sqrt(
+        squareDiffs.reduce((a, b) => a + b, 0) / secondaryValues.length
+      );
     }
 
     return {
@@ -413,17 +480,27 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       statistics: {
         count: convertedDataPoints.length,
         latest: values.length > 0 ? values[0] : null,
-        average: values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : null,
+        average:
+          values.length > 0
+            ? values.reduce((a, b) => a + b, 0) / values.length
+            : null,
         min: values.length > 0 ? Math.min(...values) : null,
         max: values.length > 0 ? Math.max(...values) : null,
         std_dev: stdDev,
-        secondary_latest: secondaryValues.length > 0 ? secondaryValues[0] : null,
-        secondary_average: secondaryValues.length > 0 ? secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length : null,
-        secondary_min: secondaryValues.length > 0 ? Math.min(...secondaryValues) : null,
-        secondary_max: secondaryValues.length > 0 ? Math.max(...secondaryValues) : null,
-        secondary_std_dev: secondaryStdDev
+        secondary_latest:
+          secondaryValues.length > 0 ? secondaryValues[0] : null,
+        secondary_average:
+          secondaryValues.length > 0
+            ? secondaryValues.reduce((a, b) => a + b, 0) /
+              secondaryValues.length
+            : null,
+        secondary_min:
+          secondaryValues.length > 0 ? Math.min(...secondaryValues) : null,
+        secondary_max:
+          secondaryValues.length > 0 ? Math.max(...secondaryValues) : null,
+        secondary_std_dev: secondaryStdDev,
       },
-      reference_range: rawTrendData.reference_range
+      reference_range: rawTrendData.reference_range,
     };
   }, [rawTrendData, unitSystem, measurementType]);
 
@@ -453,15 +530,12 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
       const headers = ['Date', 'Value', 'Unit'];
       const rows = trendData.data_points.map(point => {
         const date = point.recorded_date.split('T')[0];
-        const valueStr = point.secondary_value !== null && point.secondary_value !== undefined
-          ? `${point.value}/${point.secondary_value}`
-          : point.value.toString();
+        const valueStr =
+          point.secondary_value !== null && point.secondary_value !== undefined
+            ? `${point.value}/${point.secondary_value}`
+            : point.value.toString();
 
-        return [
-          date,
-          valueStr,
-          trendData.unit
-        ];
+        return [date, valueStr, trendData.unit];
       });
 
       const csvContent = [
@@ -477,15 +551,20 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         ['Std Dev', trendData.statistics.std_dev?.toFixed(2) || 'N/A'],
         [''],
         headers,
-        ...rows
-      ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+        ...rows,
+      ]
+        .map(row => row.map(cell => `"${cell}"`).join(','))
+        .join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
 
       link.setAttribute('href', url);
-      link.setAttribute('download', `vitals_trend_${trendData.vital_type}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        'download',
+        `vitals_trend_${trendData.vital_type}_${new Date().toISOString().split('T')[0]}.csv`
+      );
       link.style.visibility = 'hidden';
 
       document.body.appendChild(link);
@@ -497,14 +576,17 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         vitalType,
         patientId,
         dataPointCount: trendData.data_points.length,
-        component: 'VitalTrendsPanel'
+        component: 'VitalTrendsPanel',
       });
 
       notifications.show({
         title: t('shared:labels.success', 'Success'),
-        message: t('vitals:trends.exportSuccess', `Exported ${trendData.data_points.length} data points to CSV`),
+        message: t(
+          'vitals:trends.exportSuccess',
+          `Exported ${trendData.data_points.length} data points to CSV`
+        ),
         color: 'green',
-        autoClose: 3000
+        autoClose: 3000,
       });
     } catch (err: any) {
       logger.error('vital_trends_export_error', {
@@ -512,14 +594,17 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         vitalType,
         patientId,
         error: err.message,
-        component: 'VitalTrendsPanel'
+        component: 'VitalTrendsPanel',
       });
 
       notifications.show({
         title: t('shared:labels.error', 'Error'),
-        message: t('vitals:trends.exportError', 'Failed to export data. Please try again.'),
+        message: t(
+          'vitals:trends.exportError',
+          'Failed to export data. Please try again.'
+        ),
         color: 'red',
-        autoClose: 5000
+        autoClose: 5000,
       });
     }
   };
@@ -536,8 +621,14 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
         <Group gap="sm">
           <IconChartLine size={24} />
           <div>
-            <Text fw={600} size="lg">{t('vitals:trends.title', 'Trend Analysis')}</Text>
-            {vitalConfig && <Text size="sm" c="dimmed">{vitalConfig.label}</Text>}
+            <Text fw={600} size="lg">
+              {t('vitals:trends.title', 'Trend Analysis')}
+            </Text>
+            {vitalConfig && (
+              <Text size="sm" c="dimmed">
+                {vitalConfig.label}
+              </Text>
+            )}
           </div>
         </Group>
       }
@@ -567,22 +658,45 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
               <Group justify="space-between" align="center">
                 <Group gap="xs">
                   <IconFilter size={16} />
-                  <Text fw={600} size="sm">{t('vitals:trends.timeRange', 'Time Range')}</Text>
+                  <Text fw={600} size="sm">
+                    {t('vitals:trends.timeRange', 'Time Range')}
+                  </Text>
                 </Group>
               </Group>
 
               <Select
                 label={t('vitals:trends.selectTimeRange', 'Select Time Range')}
-                placeholder={t('vitals:trends.chooseTimeRange', 'Choose time range')}
+                placeholder={t(
+                  'vitals:trends.chooseTimeRange',
+                  'Choose time range'
+                )}
                 value={timeRange}
-                onChange={(value) => setTimeRange(value || 'all')}
+                onChange={value => setTimeRange(value || 'all')}
                 data={[
-                  { value: 'all', label: t('vitals:trends.allDates', 'All Dates') },
-                  { value: '3months', label: t('vitals:trends.past3Months', 'Past 3 Months') },
-                  { value: '6months', label: t('vitals:trends.past6Months', 'Past 6 Months') },
-                  { value: 'year', label: t('vitals:trends.pastYear', 'Past Year') },
-                  { value: '2years', label: t('vitals:trends.past2Years', 'Past 2 Years') },
-                  { value: '5years', label: t('vitals:trends.past5Years', 'Past 5 Years') }
+                  {
+                    value: 'all',
+                    label: t('vitals:trends.allDates', 'All Dates'),
+                  },
+                  {
+                    value: '3months',
+                    label: t('vitals:trends.past3Months', 'Past 3 Months'),
+                  },
+                  {
+                    value: '6months',
+                    label: t('vitals:trends.past6Months', 'Past 6 Months'),
+                  },
+                  {
+                    value: 'year',
+                    label: t('vitals:trends.pastYear', 'Past Year'),
+                  },
+                  {
+                    value: '2years',
+                    label: t('vitals:trends.past2Years', 'Past 2 Years'),
+                  },
+                  {
+                    value: '5years',
+                    label: t('vitals:trends.past5Years', 'Past 5 Years'),
+                  },
                 ]}
                 leftSection={<IconCalendar size={16} />}
                 size="md"
@@ -592,16 +706,40 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
               {vitalType === 'blood_glucose' && (
                 <Select
-                  label={t('vitals:trends.glucoseContextFilter', 'Blood Sugar Type')}
+                  label={t(
+                    'vitals:trends.glucoseContextFilter',
+                    'Blood Sugar Type'
+                  )}
                   placeholder={t('vitals:trends.allContexts', 'All Types')}
                   value={glucoseContextFilter}
-                  onChange={(value) => setGlucoseContextFilter(value || 'all')}
+                  onChange={value => setGlucoseContextFilter(value || 'all')}
                   data={[
-                    { value: 'all', label: t('vitals:trends.allContexts', 'All Types') },
-                    { value: 'fasting', label: t('vitals:glucoseContext.fasting', 'Fasting') },
-                    { value: 'before_meal', label: t('vitals:glucoseContext.before_meal', 'Before Meal') },
-                    { value: 'after_meal', label: t('vitals:glucoseContext.after_meal', 'After Meal') },
-                    { value: 'random', label: t('vitals:glucoseContext.random', 'Random') },
+                    {
+                      value: 'all',
+                      label: t('vitals:trends.allContexts', 'All Types'),
+                    },
+                    {
+                      value: 'fasting',
+                      label: t('vitals:glucoseContext.fasting', 'Fasting'),
+                    },
+                    {
+                      value: 'before_meal',
+                      label: t(
+                        'vitals:glucoseContext.before_meal',
+                        'Before Meal'
+                      ),
+                    },
+                    {
+                      value: 'after_meal',
+                      label: t(
+                        'vitals:glucoseContext.after_meal',
+                        'After Meal'
+                      ),
+                    },
+                    {
+                      value: 'random',
+                      label: t('vitals:glucoseContext.random', 'Random'),
+                    },
                   ]}
                   leftSection={<IconFilter size={16} />}
                   size="md"
@@ -613,7 +751,9 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
               {timeRange !== 'all' && (
                 <Paper withBorder p="sm" radius="sm" bg="blue.0">
                   <Group gap="xs" justify="center">
-                    <Text size="sm" fw={600}>{t('vitals:trends.showing', 'Showing')}:</Text>
+                    <Text size="sm" fw={600}>
+                      {t('vitals:trends.showing', 'Showing')}:
+                    </Text>
                     <Badge size="lg" variant="filled">
                       {getTimeRangeLabel(timeRange)}
                     </Badge>
@@ -629,15 +769,27 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
           <Paper withBorder p="md" radius="md">
             <Stack gap="md">
               <Group justify="space-between" align="center">
-                <Text fw={600} size="sm">{t('vitals:trends.summaryStatistics', 'Summary Statistics')}</Text>
+                <Text fw={600} size="sm">
+                  {t('vitals:trends.summaryStatistics', 'Summary Statistics')}
+                </Text>
                 <Group gap="xs">
                   <Tooltip label={t('buttons.refresh', 'Refresh')}>
-                    <ActionIcon variant="subtle" onClick={loadTrendData} size="sm">
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={loadTrendData}
+                      size="sm"
+                    >
                       <IconRefresh size={16} />
                     </ActionIcon>
                   </Tooltip>
-                  <Tooltip label={t('vitals:trends.exportCsv', 'Export to CSV')}>
-                    <ActionIcon variant="subtle" onClick={handleExport} size="sm">
+                  <Tooltip
+                    label={t('vitals:trends.exportCsv', 'Export to CSV')}
+                  >
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={handleExport}
+                      size="sm"
+                    >
                       <IconDownload size={16} />
                     </ActionIcon>
                   </Tooltip>
@@ -648,51 +800,74 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
               <Group gap="xl">
                 <Box>
-                  <Text size="xs" c="dimmed">{t('vitals:trends.latest', 'Latest')}</Text>
+                  <Text size="xs" c="dimmed">
+                    {t('vitals:trends.latest', 'Latest')}
+                  </Text>
                   <Group gap="xs" align="baseline">
                     <Text fw={700} size="xl">
                       {trendData.statistics.latest?.toFixed(0) ?? 'N/A'}
                       {trendData.statistics.secondary_latest != null && (
-                        <Text span c="dimmed">/{trendData.statistics.secondary_latest.toFixed(0)}</Text>
+                        <Text span c="dimmed">
+                          /{trendData.statistics.secondary_latest.toFixed(0)}
+                        </Text>
                       )}
                     </Text>
-                    <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                    <Text size="sm" c="dimmed">
+                      {trendData.unit}
+                    </Text>
                   </Group>
                 </Box>
 
                 <Box>
-                  <Text size="xs" c="dimmed">{t('vitals:trends.average', 'Average')}</Text>
+                  <Text size="xs" c="dimmed">
+                    {t('vitals:trends.average', 'Average')}
+                  </Text>
                   <Group gap="xs" align="baseline">
                     <Text fw={600} size="lg">
                       {trendData.statistics.average?.toFixed(0) ?? 'N/A'}
                       {trendData.statistics.secondary_average != null && (
-                        <Text span c="dimmed">/{trendData.statistics.secondary_average.toFixed(0)}</Text>
+                        <Text span c="dimmed">
+                          /{trendData.statistics.secondary_average.toFixed(0)}
+                        </Text>
                       )}
                     </Text>
-                    <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                    <Text size="sm" c="dimmed">
+                      {trendData.unit}
+                    </Text>
                   </Group>
                 </Box>
 
                 <Box>
-                  <Text size="xs" c="dimmed">{t('vitals:trends.range', 'Range')}</Text>
+                  <Text size="xs" c="dimmed">
+                    {t('vitals:trends.range', 'Range')}
+                  </Text>
                   <Group gap="xs" align="baseline">
-                    {trendData.statistics.min != null && trendData.statistics.max != null ? (
+                    {trendData.statistics.min != null &&
+                    trendData.statistics.max != null ? (
                       <>
                         <Text fw={600} size="sm">
                           {trendData.statistics.min.toFixed(0)}
                           {trendData.statistics.secondary_min != null && (
-                            <Text span c="dimmed">/{trendData.statistics.secondary_min.toFixed(0)}</Text>
+                            <Text span c="dimmed">
+                              /{trendData.statistics.secondary_min.toFixed(0)}
+                            </Text>
                           )}
                           {' - '}
                           {trendData.statistics.max.toFixed(0)}
                           {trendData.statistics.secondary_max != null && (
-                            <Text span c="dimmed">/{trendData.statistics.secondary_max.toFixed(0)}</Text>
+                            <Text span c="dimmed">
+                              /{trendData.statistics.secondary_max.toFixed(0)}
+                            </Text>
                           )}
                         </Text>
-                        <Text size="xs" c="dimmed">{trendData.unit}</Text>
+                        <Text size="xs" c="dimmed">
+                          {trendData.unit}
+                        </Text>
                       </>
                     ) : (
-                      <Text fw={600} size="sm">{t('labels.notAvailable', 'N/A')}</Text>
+                      <Text fw={600} size="sm">
+                        {t('labels.notAvailable', 'N/A')}
+                      </Text>
                     )}
                   </Group>
                 </Box>
@@ -701,16 +876,22 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
               <Group gap="md">
                 <Badge variant="light" color="blue" size="lg">
                   {aggregationPeriod
-                    ? getAggregationDescription(aggregationPeriod, trendData.statistics.count, aggregatedDataPoints.length)
-                    : `${trendData.statistics.count} ${t('vitals:trends.dataPoints', 'data points')}`
-                  }
+                    ? getAggregationDescription(
+                        aggregationPeriod,
+                        trendData.statistics.count,
+                        aggregatedDataPoints.length
+                      )
+                    : `${trendData.statistics.count} ${t('vitals:trends.dataPoints', 'data points')}`}
                 </Badge>
 
                 {trendData.statistics.std_dev !== null && (
                   <Badge variant="light" color="gray" size="lg">
-                    {t('vitals:trends.stdDev', 'Std Dev')}: {trendData.statistics.std_dev.toFixed(1)}
+                    {t('vitals:trends.stdDev', 'Std Dev')}:{' '}
+                    {trendData.statistics.std_dev.toFixed(1)}
                     {trendData.statistics.secondary_std_dev != null && (
-                      <Text span>/{trendData.statistics.secondary_std_dev.toFixed(1)}</Text>
+                      <Text span>
+                        /{trendData.statistics.secondary_std_dev.toFixed(1)}
+                      </Text>
                     )}
                   </Badge>
                 )}
@@ -721,7 +902,10 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
 
         {/* Tabs for Chart and Table Views */}
         {trendData && !loading && (
-          <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'chart')}>
+          <Tabs
+            value={activeTab}
+            onChange={value => setActiveTab(value || 'chart')}
+          >
             <Tabs.List>
               <Tabs.Tab value="chart" leftSection={<IconChartLine size={16} />}>
                 {t('vitals:trends.chart', 'Chart')}
@@ -751,9 +935,14 @@ const VitalTrendsPanel: React.FC<VitalTrendsPanelProps> = ({
           <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
             <Stack align="center" gap="md">
               <IconChartLine size={48} color="var(--mantine-color-gray-5)" />
-              <Title order={3} c="dimmed">{t('vitals:trends.noData', 'No trend data available')}</Title>
+              <Title order={3} c="dimmed">
+                {t('vitals:trends.noData', 'No trend data available')}
+              </Title>
               <Text size="sm" c="dimmed" ta="center">
-                {t('vitals:trends.noDataDesc', 'There are no historical data points for this vital sign.')}
+                {t(
+                  'vitals:trends.noDataDesc',
+                  'There are no historical data points for this vital sign.'
+                )}
               </Text>
             </Stack>
           </Paper>

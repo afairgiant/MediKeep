@@ -126,7 +126,9 @@ def read_treatments(
     condition_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -147,7 +149,7 @@ def read_treatments(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
         elif status:
             treatments = treatment.get_by_status(
@@ -178,7 +180,7 @@ def read_treatments(
             "read",
             "Treatment",
             patient_id=target_patient_id,
-            count=len(treatments)
+            count=len(treatments),
         )
 
         return treatments
@@ -202,7 +204,13 @@ def read_treatment(
             relations=["patient", "practitioner", "condition"],
         )
         handle_not_found(treatment_obj, "Treatment", request)
-        verify_patient_ownership(treatment_obj, current_user_patient_id, "treatment", db=db, current_user=current_user)
+        verify_patient_ownership(
+            treatment_obj,
+            current_user_patient_id,
+            "treatment",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -211,7 +219,7 @@ def read_treatment(
             "read",
             "Treatment",
             record_id=treatment_id,
-            patient_id=treatment_obj.patient_id
+            patient_id=treatment_obj.patient_id,
         )
 
         return treatment_obj
@@ -287,7 +295,7 @@ def get_active_treatments(
             "Treatment",
             patient_id=patient_id,
             count=len(treatments),
-            status="active"
+            status="active",
         )
 
         return treatments
@@ -313,7 +321,7 @@ def get_ongoing_treatments(
             "Treatment",
             patient_id=patient_id,
             count=len(treatments),
-            status="ongoing"
+            status="ongoing",
         )
 
         return treatments
@@ -344,7 +352,7 @@ def get_patient_treatments(
             "read",
             "Treatment",
             patient_id=patient_id,
-            count=len(treatments)
+            count=len(treatments),
         )
 
         return treatments
@@ -362,7 +370,7 @@ def _verify_treatment_access(
     current_user_id: int,
     request: Request,
     current_user: User = None,
-    permission: str = 'view',
+    permission: str = "view",
 ):
     """Helper to verify treatment exists and user has access."""
     db_treatment = treatment.get(db, id=treatment_id)
@@ -372,21 +380,27 @@ def _verify_treatment_access(
             "treatment_not_found",
             request,
             f"Treatment with ID {treatment_id} not found",
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise NotFoundException(
             resource="Treatment",
             message=f"Treatment with ID {treatment_id} not found",
-            request=request
+            request=request,
         )
     verify_patient_ownership(
-        db_treatment, current_user_patient_id, "treatment",
-        db=db, current_user=current_user, permission=permission
+        db_treatment,
+        current_user_patient_id,
+        "treatment",
+        db=db,
+        current_user=current_user,
+        permission=permission,
     )
     return db_treatment
 
 
-@router.get("/{treatment_id}/medications", response_model=List[TreatmentMedicationWithDetails])
+@router.get(
+    "/{treatment_id}/medications", response_model=List[TreatmentMedicationWithDetails]
+)
 def get_treatment_medications(
     *,
     treatment_id: int,
@@ -398,9 +412,18 @@ def get_treatment_medications(
 ) -> Any:
     """Get all medications linked to a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user)
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+        )
 
-        relationships = treatment_medication.get_by_treatment(db, treatment_id=treatment_id)
+        relationships = treatment_medication.get_by_treatment(
+            db, treatment_id=treatment_id
+        )
 
         # Enrich with medication details and compute effective values
         result = []
@@ -448,17 +471,25 @@ def get_treatment_medications(
 
                 # Compute effective values (specific overrides fall back to medication defaults)
                 rel_dict["effective_dosage"] = rel.specific_dosage or med.dosage
-                rel_dict["effective_frequency"] = rel.specific_frequency or med.frequency
+                rel_dict["effective_frequency"] = (
+                    rel.specific_frequency or med.frequency
+                )
                 effective_start = rel.specific_start_date or med.effective_period_start
                 rel_dict["effective_start_date"] = effective_start
                 # Discard fallback end date that falls before the overridden start
                 if rel.specific_end_date:
                     rel_dict["effective_end_date"] = rel.specific_end_date
-                elif med.effective_period_end and effective_start and med.effective_period_end < effective_start:
+                elif (
+                    med.effective_period_end
+                    and effective_start
+                    and med.effective_period_end < effective_start
+                ):
                     rel_dict["effective_end_date"] = None
                 else:
                     rel_dict["effective_end_date"] = med.effective_period_end
-                rel_dict["effective_prescriber"] = specific_prescriber or med_practitioner
+                rel_dict["effective_prescriber"] = (
+                    specific_prescriber or med_practitioner
+                )
                 rel_dict["effective_pharmacy"] = specific_pharmacy or med_pharmacy
             else:
                 rel_dict["effective_dosage"] = rel.specific_dosage
@@ -477,7 +508,7 @@ def get_treatment_medications(
             "read",
             "TreatmentMedication",
             treatment_id=treatment_id,
-            count=len(result)
+            count=len(result),
         )
 
         return result
@@ -496,7 +527,15 @@ def create_treatment_medication(
 ) -> Any:
     """Link a medication to a treatment."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify medication exists and belongs to same patient
         db_medication = medication_crud.get(db, id=medication_in.medication_id)
@@ -504,12 +543,12 @@ def create_treatment_medication(
             raise NotFoundException(
                 resource="Medication",
                 message=f"Medication with ID {medication_in.medication_id} not found",
-                request=request
+                request=request,
             )
         if db_medication.patient_id != db_treatment.patient_id:
             raise BusinessLogicException(
                 message="Cannot link medication from a different patient",
-                request=request
+                request=request,
             )
 
         medication_in.treatment_id = treatment_id
@@ -523,13 +562,15 @@ def create_treatment_medication(
             "TreatmentMedication",
             record_id=relationship.id,
             treatment_id=treatment_id,
-            medication_id=medication_in.medication_id
+            medication_id=medication_in.medication_id,
         )
 
         return relationship
 
 
-@router.post("/{treatment_id}/medications/bulk", response_model=List[TreatmentMedicationResponse])
+@router.post(
+    "/{treatment_id}/medications/bulk", response_model=List[TreatmentMedicationResponse]
+)
 def create_treatment_medications_bulk(
     *,
     treatment_id: int,
@@ -542,7 +583,15 @@ def create_treatment_medications_bulk(
 ) -> Any:
     """Link multiple medications to a treatment at once."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify all medications exist and belong to same patient
         for med_id in bulk_data.medication_ids:
@@ -551,12 +600,12 @@ def create_treatment_medications_bulk(
                 raise NotFoundException(
                     resource="Medication",
                     message=f"Medication with ID {med_id} not found",
-                    request=request
+                    request=request,
                 )
             if db_medication.patient_id != db_treatment.patient_id:
                 raise BusinessLogicException(
                     message="Cannot link medication from a different patient",
-                    request=request
+                    request=request,
                 )
 
         created, skipped = treatment_medication.create_bulk(
@@ -571,13 +620,16 @@ def create_treatment_medications_bulk(
             "TreatmentMedication",
             treatment_id=treatment_id,
             created_count=len(created),
-            skipped_count=len(skipped)
+            skipped_count=len(skipped),
         )
 
         return created
 
 
-@router.put("/{treatment_id}/medications/{relationship_id}", response_model=TreatmentMedicationResponse)
+@router.put(
+    "/{treatment_id}/medications/{relationship_id}",
+    response_model=TreatmentMedicationResponse,
+)
 def update_treatment_medication(
     *,
     treatment_id: int,
@@ -591,17 +643,27 @@ def update_treatment_medication(
 ) -> Any:
     """Update a treatment medication relationship."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_medication.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentMedication",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
-        updated = treatment_medication.update(db, db_obj=relationship, obj_in=medication_in)
+        updated = treatment_medication.update(
+            db, db_obj=relationship, obj_in=medication_in
+        )
 
         log_data_access(
             logger,
@@ -610,7 +672,7 @@ def update_treatment_medication(
             "update",
             "TreatmentMedication",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return updated
@@ -629,14 +691,22 @@ def delete_treatment_medication(
 ) -> Any:
     """Remove a medication link from a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_medication.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentMedication",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
         treatment_medication.delete(db, id=relationship_id)
@@ -648,7 +718,7 @@ def delete_treatment_medication(
             "delete",
             "TreatmentMedication",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return {"status": "success", "message": "Medication link removed"}
@@ -659,7 +729,9 @@ def delete_treatment_medication(
 # =============================================================================
 
 
-@router.get("/{treatment_id}/encounters", response_model=List[TreatmentEncounterWithDetails])
+@router.get(
+    "/{treatment_id}/encounters", response_model=List[TreatmentEncounterWithDetails]
+)
 def get_treatment_encounters(
     *,
     treatment_id: int,
@@ -671,9 +743,18 @@ def get_treatment_encounters(
 ) -> Any:
     """Get all encounters linked to a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user)
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+        )
 
-        relationships = treatment_encounter.get_by_treatment(db, treatment_id=treatment_id)
+        relationships = treatment_encounter.get_by_treatment(
+            db, treatment_id=treatment_id
+        )
 
         # Enrich with encounter details
         result = []
@@ -693,7 +774,9 @@ def get_treatment_encounters(
                 rel_dict["encounter"] = {
                     "id": rel.encounter.id,
                     "reason": rel.encounter.reason,
-                    "date": rel.encounter.date.isoformat() if rel.encounter.date else None,
+                    "date": (
+                        rel.encounter.date.isoformat() if rel.encounter.date else None
+                    ),
                     "visit_type": rel.encounter.visit_type,
                 }
             result.append(rel_dict)
@@ -705,7 +788,7 @@ def get_treatment_encounters(
             "read",
             "TreatmentEncounter",
             treatment_id=treatment_id,
-            count=len(result)
+            count=len(result),
         )
 
         return result
@@ -724,7 +807,15 @@ def create_treatment_encounter(
 ) -> Any:
     """Link an encounter to a treatment."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify encounter exists and belongs to same patient
         db_encounter = encounter_crud.get(db, id=encounter_in.encounter_id)
@@ -732,12 +823,12 @@ def create_treatment_encounter(
             raise NotFoundException(
                 resource="Encounter",
                 message=f"Encounter with ID {encounter_in.encounter_id} not found",
-                request=request
+                request=request,
             )
         if db_encounter.patient_id != db_treatment.patient_id:
             raise BusinessLogicException(
                 message="Cannot link encounter from a different patient",
-                request=request
+                request=request,
             )
 
         encounter_in.treatment_id = treatment_id
@@ -751,13 +842,15 @@ def create_treatment_encounter(
             "TreatmentEncounter",
             record_id=relationship.id,
             treatment_id=treatment_id,
-            encounter_id=encounter_in.encounter_id
+            encounter_id=encounter_in.encounter_id,
         )
 
         return relationship
 
 
-@router.post("/{treatment_id}/encounters/bulk", response_model=List[TreatmentEncounterResponse])
+@router.post(
+    "/{treatment_id}/encounters/bulk", response_model=List[TreatmentEncounterResponse]
+)
 def create_treatment_encounters_bulk(
     *,
     treatment_id: int,
@@ -770,7 +863,15 @@ def create_treatment_encounters_bulk(
 ) -> Any:
     """Link multiple encounters to a treatment at once."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify all encounters exist and belong to same patient
         for enc_id in bulk_data.encounter_ids:
@@ -779,12 +880,12 @@ def create_treatment_encounters_bulk(
                 raise NotFoundException(
                     resource="Encounter",
                     message=f"Encounter with ID {enc_id} not found",
-                    request=request
+                    request=request,
                 )
             if db_encounter.patient_id != db_treatment.patient_id:
                 raise BusinessLogicException(
                     message="Cannot link encounter from a different patient",
-                    request=request
+                    request=request,
                 )
 
         created, skipped = treatment_encounter.create_bulk(
@@ -799,13 +900,16 @@ def create_treatment_encounters_bulk(
             "TreatmentEncounter",
             treatment_id=treatment_id,
             created_count=len(created),
-            skipped_count=len(skipped)
+            skipped_count=len(skipped),
         )
 
         return created
 
 
-@router.put("/{treatment_id}/encounters/{relationship_id}", response_model=TreatmentEncounterResponse)
+@router.put(
+    "/{treatment_id}/encounters/{relationship_id}",
+    response_model=TreatmentEncounterResponse,
+)
 def update_treatment_encounter(
     *,
     treatment_id: int,
@@ -819,17 +923,27 @@ def update_treatment_encounter(
 ) -> Any:
     """Update a treatment encounter relationship."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_encounter.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentEncounter",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
-        updated = treatment_encounter.update(db, db_obj=relationship, obj_in=encounter_in)
+        updated = treatment_encounter.update(
+            db, db_obj=relationship, obj_in=encounter_in
+        )
 
         log_data_access(
             logger,
@@ -838,7 +952,7 @@ def update_treatment_encounter(
             "update",
             "TreatmentEncounter",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return updated
@@ -857,14 +971,22 @@ def delete_treatment_encounter(
 ) -> Any:
     """Remove an encounter link from a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_encounter.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentEncounter",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
         treatment_encounter.delete(db, id=relationship_id)
@@ -876,7 +998,7 @@ def delete_treatment_encounter(
             "delete",
             "TreatmentEncounter",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return {"status": "success", "message": "Encounter link removed"}
@@ -887,7 +1009,9 @@ def delete_treatment_encounter(
 # =============================================================================
 
 
-@router.get("/{treatment_id}/lab-results", response_model=List[TreatmentLabResultWithDetails])
+@router.get(
+    "/{treatment_id}/lab-results", response_model=List[TreatmentLabResultWithDetails]
+)
 def get_treatment_lab_results(
     *,
     treatment_id: int,
@@ -899,9 +1023,18 @@ def get_treatment_lab_results(
 ) -> Any:
     """Get all lab results linked to a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user)
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+        )
 
-        relationships = treatment_lab_result.get_by_treatment(db, treatment_id=treatment_id)
+        relationships = treatment_lab_result.get_by_treatment(
+            db, treatment_id=treatment_id
+        )
 
         # Enrich with lab result details
         result = []
@@ -922,7 +1055,11 @@ def get_treatment_lab_results(
                     "id": rel.lab_result.id,
                     "test_name": rel.lab_result.test_name,
                     "status": rel.lab_result.status,
-                    "completed_date": rel.lab_result.completed_date.isoformat() if rel.lab_result.completed_date else None,
+                    "completed_date": (
+                        rel.lab_result.completed_date.isoformat()
+                        if rel.lab_result.completed_date
+                        else None
+                    ),
                     "labs_result": rel.lab_result.labs_result,
                 }
             result.append(rel_dict)
@@ -934,7 +1071,7 @@ def get_treatment_lab_results(
             "read",
             "TreatmentLabResult",
             treatment_id=treatment_id,
-            count=len(result)
+            count=len(result),
         )
 
         return result
@@ -953,7 +1090,15 @@ def create_treatment_lab_result(
 ) -> Any:
     """Link a lab result to a treatment."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify lab result exists and belongs to same patient
         db_lab_result = lab_result_crud.get(db, id=lab_result_in.lab_result_id)
@@ -961,12 +1106,12 @@ def create_treatment_lab_result(
             raise NotFoundException(
                 resource="LabResult",
                 message=f"Lab result with ID {lab_result_in.lab_result_id} not found",
-                request=request
+                request=request,
             )
         if db_lab_result.patient_id != db_treatment.patient_id:
             raise BusinessLogicException(
                 message="Cannot link lab result from a different patient",
-                request=request
+                request=request,
             )
 
         lab_result_in.treatment_id = treatment_id
@@ -980,13 +1125,15 @@ def create_treatment_lab_result(
             "TreatmentLabResult",
             record_id=relationship.id,
             treatment_id=treatment_id,
-            lab_result_id=lab_result_in.lab_result_id
+            lab_result_id=lab_result_in.lab_result_id,
         )
 
         return relationship
 
 
-@router.post("/{treatment_id}/lab-results/bulk", response_model=List[TreatmentLabResultResponse])
+@router.post(
+    "/{treatment_id}/lab-results/bulk", response_model=List[TreatmentLabResultResponse]
+)
 def create_treatment_lab_results_bulk(
     *,
     treatment_id: int,
@@ -999,7 +1146,15 @@ def create_treatment_lab_results_bulk(
 ) -> Any:
     """Link multiple lab results to a treatment at once."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify all lab results exist and belong to same patient
         for lab_id in bulk_data.lab_result_ids:
@@ -1008,12 +1163,12 @@ def create_treatment_lab_results_bulk(
                 raise NotFoundException(
                     resource="LabResult",
                     message=f"Lab result with ID {lab_id} not found",
-                    request=request
+                    request=request,
                 )
             if db_lab_result.patient_id != db_treatment.patient_id:
                 raise BusinessLogicException(
                     message="Cannot link lab result from a different patient",
-                    request=request
+                    request=request,
                 )
 
         created, skipped = treatment_lab_result.create_bulk(
@@ -1028,13 +1183,16 @@ def create_treatment_lab_results_bulk(
             "TreatmentLabResult",
             treatment_id=treatment_id,
             created_count=len(created),
-            skipped_count=len(skipped)
+            skipped_count=len(skipped),
         )
 
         return created
 
 
-@router.put("/{treatment_id}/lab-results/{relationship_id}", response_model=TreatmentLabResultResponse)
+@router.put(
+    "/{treatment_id}/lab-results/{relationship_id}",
+    response_model=TreatmentLabResultResponse,
+)
 def update_treatment_lab_result(
     *,
     treatment_id: int,
@@ -1048,17 +1206,27 @@ def update_treatment_lab_result(
 ) -> Any:
     """Update a treatment lab result relationship."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_lab_result.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentLabResult",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
-        updated = treatment_lab_result.update(db, db_obj=relationship, obj_in=lab_result_in)
+        updated = treatment_lab_result.update(
+            db, db_obj=relationship, obj_in=lab_result_in
+        )
 
         log_data_access(
             logger,
@@ -1067,7 +1235,7 @@ def update_treatment_lab_result(
             "update",
             "TreatmentLabResult",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return updated
@@ -1086,14 +1254,22 @@ def delete_treatment_lab_result(
 ) -> Any:
     """Remove a lab result link from a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_lab_result.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentLabResult",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
         treatment_lab_result.delete(db, id=relationship_id)
@@ -1105,7 +1281,7 @@ def delete_treatment_lab_result(
             "delete",
             "TreatmentLabResult",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return {"status": "success", "message": "Lab result link removed"}
@@ -1116,7 +1292,9 @@ def delete_treatment_lab_result(
 # =============================================================================
 
 
-@router.get("/{treatment_id}/equipment", response_model=List[TreatmentEquipmentWithDetails])
+@router.get(
+    "/{treatment_id}/equipment", response_model=List[TreatmentEquipmentWithDetails]
+)
 def get_treatment_equipment(
     *,
     treatment_id: int,
@@ -1128,9 +1306,18 @@ def get_treatment_equipment(
 ) -> Any:
     """Get all equipment linked to a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user)
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+        )
 
-        relationships = treatment_equipment.get_by_treatment(db, treatment_id=treatment_id)
+        relationships = treatment_equipment.get_by_treatment(
+            db, treatment_id=treatment_id
+        )
 
         # Enrich with equipment details
         result = []
@@ -1163,7 +1350,7 @@ def get_treatment_equipment(
             "read",
             "TreatmentEquipment",
             treatment_id=treatment_id,
-            count=len(result)
+            count=len(result),
         )
 
         return result
@@ -1182,7 +1369,15 @@ def create_treatment_equipment_link(
 ) -> Any:
     """Link equipment to a treatment."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify equipment exists and belongs to same patient
         db_equipment = equipment_crud.get(db, id=equipment_in.equipment_id)
@@ -1190,12 +1385,12 @@ def create_treatment_equipment_link(
             raise NotFoundException(
                 resource="MedicalEquipment",
                 message=f"Equipment with ID {equipment_in.equipment_id} not found",
-                request=request
+                request=request,
             )
         if db_equipment.patient_id != db_treatment.patient_id:
             raise BusinessLogicException(
                 message="Cannot link equipment from a different patient",
-                request=request
+                request=request,
             )
 
         equipment_in.treatment_id = treatment_id
@@ -1209,13 +1404,15 @@ def create_treatment_equipment_link(
             "TreatmentEquipment",
             record_id=relationship.id,
             treatment_id=treatment_id,
-            equipment_id=equipment_in.equipment_id
+            equipment_id=equipment_in.equipment_id,
         )
 
         return relationship
 
 
-@router.post("/{treatment_id}/equipment/bulk", response_model=List[TreatmentEquipmentResponse])
+@router.post(
+    "/{treatment_id}/equipment/bulk", response_model=List[TreatmentEquipmentResponse]
+)
 def create_treatment_equipment_bulk(
     *,
     treatment_id: int,
@@ -1228,7 +1425,15 @@ def create_treatment_equipment_bulk(
 ) -> Any:
     """Link multiple equipment to a treatment at once."""
     with handle_database_errors(request=request):
-        db_treatment = _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        db_treatment = _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify all equipment exists and belongs to same patient
         for eq_id in bulk_data.equipment_ids:
@@ -1237,12 +1442,12 @@ def create_treatment_equipment_bulk(
                 raise NotFoundException(
                     resource="MedicalEquipment",
                     message=f"Equipment with ID {eq_id} not found",
-                    request=request
+                    request=request,
                 )
             if db_equipment.patient_id != db_treatment.patient_id:
                 raise BusinessLogicException(
                     message="Cannot link equipment from a different patient",
-                    request=request
+                    request=request,
                 )
 
         created, skipped = treatment_equipment.create_bulk(
@@ -1257,13 +1462,16 @@ def create_treatment_equipment_bulk(
             "TreatmentEquipment",
             treatment_id=treatment_id,
             created_count=len(created),
-            skipped_count=len(skipped)
+            skipped_count=len(skipped),
         )
 
         return created
 
 
-@router.put("/{treatment_id}/equipment/{relationship_id}", response_model=TreatmentEquipmentResponse)
+@router.put(
+    "/{treatment_id}/equipment/{relationship_id}",
+    response_model=TreatmentEquipmentResponse,
+)
 def update_treatment_equipment_link(
     *,
     treatment_id: int,
@@ -1277,17 +1485,27 @@ def update_treatment_equipment_link(
 ) -> Any:
     """Update a treatment equipment relationship."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_equipment.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentEquipment",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
-        updated = treatment_equipment.update(db, db_obj=relationship, obj_in=equipment_in)
+        updated = treatment_equipment.update(
+            db, db_obj=relationship, obj_in=equipment_in
+        )
 
         log_data_access(
             logger,
@@ -1296,7 +1514,7 @@ def update_treatment_equipment_link(
             "update",
             "TreatmentEquipment",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return updated
@@ -1315,14 +1533,22 @@ def delete_treatment_equipment_link(
 ) -> Any:
     """Remove an equipment link from a treatment."""
     with handle_database_errors(request=request):
-        _verify_treatment_access(db, treatment_id, current_user_patient_id, current_user_id, request, current_user=current_user, permission='edit')
+        _verify_treatment_access(
+            db,
+            treatment_id,
+            current_user_patient_id,
+            current_user_id,
+            request,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = treatment_equipment.get(db, id=relationship_id)
         if not relationship or relationship.treatment_id != treatment_id:
             raise NotFoundException(
                 resource="TreatmentEquipment",
                 message="Relationship not found",
-                request=request
+                request=request,
             )
 
         treatment_equipment.delete(db, id=relationship_id)
@@ -1334,7 +1560,7 @@ def delete_treatment_equipment_link(
             "delete",
             "TreatmentEquipment",
             record_id=relationship_id,
-            treatment_id=treatment_id
+            treatment_id=treatment_id,
         )
 
         return {"status": "success", "message": "Equipment link removed"}

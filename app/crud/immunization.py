@@ -8,7 +8,9 @@ from app.models.models import Immunization
 from app.schemas.immunization import ImmunizationCreate, ImmunizationUpdate
 
 
-class CRUDImmunization(CRUDBase[Immunization, ImmunizationCreate, ImmunizationUpdate], TagFilterMixin):
+class CRUDImmunization(
+    CRUDBase[Immunization, ImmunizationCreate, ImmunizationUpdate], TagFilterMixin
+):
     """
     Immunization-specific CRUD operations for vaccine records.
 

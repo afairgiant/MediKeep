@@ -1,6 +1,7 @@
 """
 Tests for FamilyMember CRUD operations.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -25,7 +26,7 @@ class TestFamilyMemberCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -40,7 +41,7 @@ class TestFamilyMemberCRUD:
             gender="female",
             birth_year=1960,
             is_deceased=False,
-            notes="Patient's biological mother"
+            notes="Patient's biological mother",
         )
 
         member = family_member_crud.create(db_session, obj_in=member_data)
@@ -61,22 +62,22 @@ class TestFamilyMemberCRUD:
                 name="Father Doe",
                 relationship="father",
                 gender="male",
-                birth_year=1958
+                birth_year=1958,
             ),
             FamilyMemberCreate(
                 patient_id=test_patient.id,
                 name="Mother Doe",
                 relationship="mother",
                 gender="female",
-                birth_year=1960
+                birth_year=1960,
             ),
             FamilyMemberCreate(
                 patient_id=test_patient.id,
                 name="Sister Doe",
                 relationship="brother",
                 gender="female",
-                birth_year=1992
-            )
+                birth_year=1992,
+            ),
         ]
 
         for member_data in members_data:
@@ -96,7 +97,7 @@ class TestFamilyMemberCRUD:
             name="Father Doe",
             relationship="father",
             gender="male",
-            birth_year=1955
+            birth_year=1955,
         )
         member = family_member_crud.create(db_session, obj_in=member_data)
 
@@ -106,14 +107,14 @@ class TestFamilyMemberCRUD:
             condition_name="Diabetes Type 2",
             condition_type="endocrine",
             severity="moderate",
-            diagnosis_age=50
+            diagnosis_age=50,
         )
         condition2 = FamilyConditionCreate(
             family_member_id=member.id,
             condition_name="Hypertension",
             condition_type="cardiovascular",
             severity="mild",
-            diagnosis_age=45
+            diagnosis_age=45,
         )
 
         family_condition_crud.create(db_session, obj_in=condition1)
@@ -135,7 +136,7 @@ class TestFamilyMemberCRUD:
                 patient_id=test_patient.id,
                 name=f"Sibling {i+1}",
                 relationship="brother",
-                gender="male" if i % 2 == 0 else "female"
+                gender="male" if i % 2 == 0 else "female",
             )
             family_member_crud.create(db_session, obj_in=member_data)
 
@@ -144,7 +145,7 @@ class TestFamilyMemberCRUD:
             patient_id=test_patient.id,
             name="Parent",
             relationship="father",
-            gender="male"
+            gender="male",
         )
         family_member_crud.create(db_session, obj_in=parent_data)
 
@@ -159,20 +160,16 @@ class TestFamilyMemberCRUD:
         """Test searching family members by name."""
         members_data = [
             FamilyMemberCreate(
-                patient_id=test_patient.id,
-                name="John Smith",
-                relationship="uncle"
+                patient_id=test_patient.id, name="John Smith", relationship="uncle"
             ),
             FamilyMemberCreate(
-                patient_id=test_patient.id,
-                name="Jane Johnson",
-                relationship="aunt"
+                patient_id=test_patient.id, name="Jane Johnson", relationship="aunt"
             ),
             FamilyMemberCreate(
                 patient_id=test_patient.id,
                 name="Mary Smith",
-                relationship="maternal_grandmother"
-            )
+                relationship="maternal_grandmother",
+            ),
         ]
 
         for member_data in members_data:
@@ -198,7 +195,7 @@ class TestFamilyMemberCRUD:
             gender="male",
             birth_year=1930,
             death_year=2010,
-            is_deceased=True
+            is_deceased=True,
         )
         member = family_member_crud.create(db_session, obj_in=member_data)
 
@@ -224,14 +221,11 @@ class TestFamilyMemberCRUD:
             name="Original Name",
             relationship="father",
             gender="male",
-            birth_year=1960
+            birth_year=1960,
         )
         member = family_member_crud.create(db_session, obj_in=member_data)
 
-        update_data = FamilyMemberUpdate(
-            name="Updated Name",
-            notes="Added some notes"
-        )
+        update_data = FamilyMemberUpdate(name="Updated Name", notes="Added some notes")
 
         updated = family_member_crud.update(
             db_session, db_obj=member, obj_in=update_data
@@ -244,9 +238,7 @@ class TestFamilyMemberCRUD:
     def test_delete_family_member(self, db_session: Session, test_patient):
         """Test deleting a family member."""
         member_data = FamilyMemberCreate(
-            patient_id=test_patient.id,
-            name="To Delete",
-            relationship="uncle"
+            patient_id=test_patient.id, name="To Delete", relationship="uncle"
         )
         member = family_member_crud.create(db_session, obj_in=member_data)
         member_id = member.id
@@ -264,20 +256,14 @@ class TestFamilyMemberCRUD:
         """Test that family members are ordered by relationship and name."""
         members_data = [
             FamilyMemberCreate(
-                patient_id=test_patient.id,
-                name="Zack",
-                relationship="brother"
+                patient_id=test_patient.id, name="Zack", relationship="brother"
             ),
             FamilyMemberCreate(
-                patient_id=test_patient.id,
-                name="Alice",
-                relationship="brother"
+                patient_id=test_patient.id, name="Alice", relationship="brother"
             ),
             FamilyMemberCreate(
-                patient_id=test_patient.id,
-                name="Bob",
-                relationship="father"
-            )
+                patient_id=test_patient.id, name="Bob", relationship="father"
+            ),
         ]
 
         for member_data in members_data:
@@ -290,16 +276,24 @@ class TestFamilyMemberCRUD:
         # Should be ordered by relationship then by name
         assert len(members) == 3
 
-    def test_multiple_patients_isolation(self, db_session: Session, test_user, test_admin_user):
+    def test_multiple_patients_isolation(
+        self, db_session: Session, test_user, test_admin_user
+    ):
         """Test that family members are properly isolated per patient."""
         # Create two patients (each under a different user)
         patient1_data = PatientCreate(
-            first_name="Patient", last_name="One",
-            birth_date=date(1990, 1, 1), gender="M", address="123 St"
+            first_name="Patient",
+            last_name="One",
+            birth_date=date(1990, 1, 1),
+            gender="M",
+            address="123 St",
         )
         patient2_data = PatientCreate(
-            first_name="Patient", last_name="Two",
-            birth_date=date(1985, 1, 1), gender="F", address="456 Ave"
+            first_name="Patient",
+            last_name="Two",
+            birth_date=date(1985, 1, 1),
+            gender="F",
+            address="456 Ave",
         )
 
         patient1 = patient_crud.create_for_user(
@@ -314,7 +308,7 @@ class TestFamilyMemberCRUD:
             member_data = FamilyMemberCreate(
                 patient_id=patient1.id,
                 name=f"Patient1 Family {i+1}",
-                relationship="brother"
+                relationship="brother",
             )
             family_member_crud.create(db_session, obj_in=member_data)
 
@@ -322,7 +316,7 @@ class TestFamilyMemberCRUD:
             member_data = FamilyMemberCreate(
                 patient_id=patient2.id,
                 name=f"Patient2 Family {i+1}",
-                relationship="father"
+                relationship="father",
             )
             family_member_crud.create(db_session, obj_in=member_data)
 

@@ -93,38 +93,43 @@ export function useTreatmentRelationships({
     setError(null);
   }, [initialState]);
 
-  const fetchRelationships = useCallback(async (signal) => {
-    if (!treatmentId) return;
+  const fetchRelationships = useCallback(
+    async signal => {
+      if (!treatmentId) return;
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      const data = await apiService[config.fetchMethod](treatmentId, signal);
+      try {
+        const data = await apiService[config.fetchMethod](treatmentId, signal);
 
-      // Check if aborted before updating state
-      if (signal?.aborted) return;
+        // Check if aborted before updating state
+        if (signal?.aborted) return;
 
-      setRelationships(data || []);
-      if (onRelationshipsChangeRef.current) {
-        onRelationshipsChangeRef.current(data || []);
+        setRelationships(data || []);
+        if (onRelationshipsChangeRef.current) {
+          onRelationshipsChangeRef.current(data || []);
+        }
+      } catch (err) {
+        // Don't update state or log if request was aborted
+        if (err.name === 'AbortError' || signal?.aborted) return;
+
+        logger.error(`${config.logPrefix}_fetch_error`, {
+          treatmentId,
+          error: err.message,
+          component: config.componentName,
+        });
+        setError(
+          err.message || `Failed to load ${config.entityName} relationships`
+        );
+      } finally {
+        if (!signal?.aborted) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      // Don't update state or log if request was aborted
-      if (err.name === 'AbortError' || signal?.aborted) return;
-
-      logger.error(`${config.logPrefix}_fetch_error`, {
-        treatmentId,
-        error: err.message,
-        component: config.componentName,
-      });
-      setError(err.message || `Failed to load ${config.entityName} relationships`);
-    } finally {
-      if (!signal?.aborted) {
-        setLoading(false);
-      }
-    }
-  }, [treatmentId, config]);
+    },
+    [treatmentId, config]
+  );
 
   // Effect with proper cleanup using AbortController
   useEffect(() => {
@@ -139,7 +144,12 @@ export function useTreatmentRelationships({
   const handleAddRelationship = useCallback(async () => {
     const ids = newRelationship[config.idsField];
     if (!ids || ids.length === 0) {
-      setError(t(`errors:form.${config.entityName.replace(' ', '')}NotSelected`, `Please select at least one ${config.entityName}`));
+      setError(
+        t(
+          `errors:form.${config.entityName.replace(' ', '')}NotSelected`,
+          `Please select at least one ${config.entityName}`
+        )
+      );
       return;
     }
 
@@ -163,7 +173,11 @@ export function useTreatmentRelationships({
         error: err.message,
         component: config.componentName,
       });
-      setError(err.response?.data?.detail || err.message || `Failed to add ${config.entityName} relationship`);
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          `Failed to add ${config.entityName} relationship`
+      );
     } finally {
       setLoading(false);
     }
@@ -178,62 +192,80 @@ export function useTreatmentRelationships({
     t,
   ]);
 
-  const handleEditRelationship = useCallback(async (relationshipId, updates) => {
-    setLoading(true);
-    setError(null);
+  const handleEditRelationship = useCallback(
+    async (relationshipId, updates) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      await apiService[config.updateMethod](treatmentId, relationshipId, updates);
-      await fetchRelationships();
-      setEditingRelationship(null);
-    } catch (err) {
-      logger.error(`${config.logPrefix}_update_error`, {
-        treatmentId,
-        relationshipId,
-        error: err.message,
-        component: config.componentName,
-      });
-      setError(err.response?.data?.detail || err.message || `Failed to update ${config.entityName} relationship`);
-    } finally {
-      setLoading(false);
-    }
-  }, [treatmentId, fetchRelationships, config]);
+      try {
+        await apiService[config.updateMethod](
+          treatmentId,
+          relationshipId,
+          updates
+        );
+        await fetchRelationships();
+        setEditingRelationship(null);
+      } catch (err) {
+        logger.error(`${config.logPrefix}_update_error`, {
+          treatmentId,
+          relationshipId,
+          error: err.message,
+          component: config.componentName,
+        });
+        setError(
+          err.response?.data?.detail ||
+            err.message ||
+            `Failed to update ${config.entityName} relationship`
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [treatmentId, fetchRelationships, config]
+  );
 
-  const handleDeleteRelationship = useCallback(async (relationshipId, confirmMessage) => {
-    const defaultMessage = t(
-      `messages.confirmRemove${type.charAt(0).toUpperCase() + type.slice(1)}Relationship`,
-      `Are you sure you want to remove this ${config.entityName} link?`
-    );
+  const handleDeleteRelationship = useCallback(
+    async (relationshipId, confirmMessage) => {
+      const defaultMessage = t(
+        `messages.confirmRemove${type.charAt(0).toUpperCase() + type.slice(1)}Relationship`,
+        `Are you sure you want to remove this ${config.entityName} link?`
+      );
 
-    if (!window.confirm(confirmMessage || defaultMessage)) {
-      return;
-    }
+      if (!window.confirm(confirmMessage || defaultMessage)) {
+        return;
+      }
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      await apiService[config.unlinkMethod](treatmentId, relationshipId);
-      await fetchRelationships();
-    } catch (err) {
-      logger.error(`${config.logPrefix}_delete_error`, {
-        treatmentId,
-        relationshipId,
-        error: err.message,
-        component: config.componentName,
-      });
-      setError(err.response?.data?.detail || err.message || `Failed to delete ${config.entityName} relationship`);
-    } finally {
-      setLoading(false);
-    }
-  }, [treatmentId, fetchRelationships, config, type, t]);
+      try {
+        await apiService[config.unlinkMethod](treatmentId, relationshipId);
+        await fetchRelationships();
+      } catch (err) {
+        logger.error(`${config.logPrefix}_delete_error`, {
+          treatmentId,
+          relationshipId,
+          error: err.message,
+          component: config.componentName,
+        });
+        setError(
+          err.response?.data?.detail ||
+            err.message ||
+            `Failed to delete ${config.entityName} relationship`
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [treatmentId, fetchRelationships, config, type, t]
+  );
 
   const updateNewRelationship = useCallback((field, value) => {
     setNewRelationship(prev => ({ ...prev, [field]: value }));
   }, []);
 
   const updateEditingRelationship = useCallback((field, value) => {
-    setEditingRelationship(prev => prev ? { ...prev, [field]: value } : null);
+    setEditingRelationship(prev => (prev ? { ...prev, [field]: value } : null));
   }, []);
 
   const startEditing = useCallback((relationship, editFields) => {

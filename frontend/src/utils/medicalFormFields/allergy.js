@@ -26,7 +26,10 @@ export const allergyFormFields = [
       { value: 'mild', labelKey: 'common:severity.mild' },
       { value: 'moderate', labelKey: 'common:severity.moderate' },
       { value: 'severe', labelKey: 'common:severity.severe' },
-      { value: 'life-threatening', labelKey: 'common:severity.lifeThreatening' },
+      {
+        value: 'life-threatening',
+        labelKey: 'common:severity.lifeThreatening',
+      },
     ],
   },
   {

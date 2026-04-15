@@ -49,10 +49,10 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
     >
       <div className="profile-completion-content">
         <div className="completion-header">
-          <div className="completion-icon"><img src="/medikeep-icon.svg" alt="" width={48} height={48} /></div>
-          <p className="completion-message">
-            {message}
-          </p>
+          <div className="completion-icon">
+            <img src="/medikeep-icon.svg" alt="" width={48} height={48} />
+          </div>
+          <p className="completion-message">{message}</p>
         </div>
 
         <div className="completion-progress">
@@ -63,7 +63,9 @@ const ProfileCompletionModal = ({ isOpen, onClose, onComplete }) => {
             ></div>
           </div>
           <span className="progress-text">
-            {t('profile.medicalProfile', { percentage: completion.completionPercentage })}
+            {t('profile.medicalProfile', {
+              percentage: completion.completionPercentage,
+            })}
           </span>
         </div>
 

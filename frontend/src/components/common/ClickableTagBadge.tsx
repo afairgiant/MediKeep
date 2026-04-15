@@ -79,7 +79,9 @@ export function ClickableTagBadge({
       style={{
         cursor: 'pointer',
         transition: 'filter 0.15s ease, background-color 0.15s ease',
-        backgroundColor: highlighted ? `${resolvedColor}40` : `${resolvedColor}20`,
+        backgroundColor: highlighted
+          ? `${resolvedColor}40`
+          : `${resolvedColor}20`,
         color: resolvedColor,
         border: `1px solid ${highlighted ? resolvedColor : `${resolvedColor}40`}`,
         fontWeight: highlighted ? 700 : undefined,

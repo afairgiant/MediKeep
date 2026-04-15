@@ -33,7 +33,7 @@ export const RELATIONSHIP_OPTIONS = [
  * @param {string} relationship - The relationship value (e.g., 'other_family')
  * @returns {string|null} - Formatted label (e.g., 'Other Family') or null if empty
  */
-export const formatRelationshipLabel = (relationship) => {
+export const formatRelationshipLabel = relationship => {
   if (!relationship) return null;
 
   // Convert snake_case to Title Case
@@ -51,7 +51,7 @@ export const formatRelationshipLabel = (relationship) => {
  * @param {string} value - The relationship value
  * @returns {string|null} - The display label or null if not found
  */
-export const getRelationshipLabel = (value) => {
+export const getRelationshipLabel = value => {
   if (!value) return null;
 
   const option = RELATIONSHIP_OPTIONS.find(opt => opt.value === value);

@@ -152,7 +152,9 @@ def _log_to_entry(log: ActivityLog) -> ActivityLogEntry:
         username=username or "System",
         action=log.action,
         entity_type=entity_type,
-        entity_type_display=ENTITY_TYPE_DISPLAY.get(entity_type, entity_type.replace("_", " ").title()),
+        entity_type_display=ENTITY_TYPE_DISPLAY.get(
+            entity_type, entity_type.replace("_", " ").title()
+        ),
         entity_id=log.entity_id,
         patient_id=log.patient_id,
         description=log.description,
@@ -250,7 +252,15 @@ def export_activity_log(
             writer = csv.writer(output)
 
             writer.writerow(
-                ["Timestamp", "User", "Action", "Entity Type", "Entity ID", "Description", "IP Address"]
+                [
+                    "Timestamp",
+                    "User",
+                    "Action",
+                    "Entity Type",
+                    "Entity ID",
+                    "Description",
+                    "IP Address",
+                ]
             )
             yield output.getvalue()
             output.seek(0)
@@ -264,7 +274,8 @@ def export_activity_log(
                         username,
                         log.action,
                         ENTITY_TYPE_DISPLAY.get(
-                            log.entity_type or "", (log.entity_type or "").replace("_", " ").title()
+                            log.entity_type or "",
+                            (log.entity_type or "").replace("_", " ").title(),
                         ),
                         log.entity_id or "",
                         log.description,
@@ -278,7 +289,9 @@ def export_activity_log(
         return StreamingResponse(
             iter_csv(),
             media_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename=audit_log_export.csv"},
+            headers={
+                "Content-Disposition": "attachment; filename=audit_log_export.csv"
+            },
         )
 
     except Exception as e:
@@ -293,7 +306,9 @@ def get_activity_log_filters(
     current_user: User = Depends(deps.get_current_admin_user),
 ):
     """Get available filter options for the activity log."""
-    log_endpoint_access(logger, request, current_user.id, "activity_log_filters_accessed")
+    log_endpoint_access(
+        logger, request, current_user.id, "activity_log_filters_accessed"
+    )
 
     try:
         actions = [
@@ -318,7 +333,9 @@ def get_activity_log_filters(
             .all()
         )
 
-        users = [UserFilterOption(value=row.id, label=row.username) for row in user_rows]
+        users = [
+            UserFilterOption(value=row.id, label=row.username) for row in user_rows
+        ]
 
         return ActivityLogFilters(
             actions=actions,

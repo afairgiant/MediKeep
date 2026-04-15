@@ -549,7 +549,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         except IntegrityError as e:
             db.rollback()
             error_msg = str(e.orig)
-            self.logger.error(f"Integrity error creating {self.model_name}: {error_msg}")
+            self.logger.error(
+                f"Integrity error creating {self.model_name}: {error_msg}"
+            )
 
             # Try sequence fix for duplicate key errors
             if "duplicate key" in error_msg.lower():
@@ -567,15 +569,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                     return db_obj
                 # If sequence fix didn't help, it's a real duplicate
                 raise IntegrityError(
-                    f"Duplicate {self.model_name} record",
-                    orig=e.orig,
-                    params=None
+                    f"Duplicate {self.model_name} record", orig=e.orig, params=None
                 )
             elif "foreign key" in error_msg.lower():
                 raise IntegrityError(
-                    f"Invalid reference in {self.model_name}",
-                    orig=e.orig,
-                    params=None
+                    f"Invalid reference in {self.model_name}", orig=e.orig, params=None
                 )
             else:
                 raise
@@ -583,9 +581,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
             db.rollback()
             self.logger.error(f"Data error creating {self.model_name}: {str(e)}")
             raise DataError(
-                f"Invalid data for {self.model_name}",
-                params=None,
-                orig=e.orig
+                f"Invalid data for {self.model_name}", params=None, orig=e.orig
             )
         except Exception as e:
             db.rollback()
@@ -692,29 +688,31 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
         except IntegrityError as e:
             db.rollback()
             error_msg = str(e.orig)
-            self.logger.error(f"Integrity error updating {self.model_name} {record_id}: {error_msg}")
-            
+            self.logger.error(
+                f"Integrity error updating {self.model_name} {record_id}: {error_msg}"
+            )
+
             if "foreign key" in error_msg.lower():
                 raise IntegrityError(
                     f"Invalid reference in {self.model_name} update",
                     orig=e.orig,
-                    params=None
+                    params=None,
                 )
             elif "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 raise IntegrityError(
                     f"Duplicate value in {self.model_name} update",
                     orig=e.orig,
-                    params=None
+                    params=None,
                 )
             else:
                 raise
         except DataError as e:
             db.rollback()
-            self.logger.error(f"Data error updating {self.model_name} {record_id}: {str(e)}")
+            self.logger.error(
+                f"Data error updating {self.model_name} {record_id}: {str(e)}"
+            )
             raise DataError(
-                f"Invalid data for {self.model_name} update",
-                params=None,
-                orig=e.orig
+                f"Invalid data for {self.model_name} update", params=None, orig=e.orig
             )
         except Exception as e:
             db.rollback()
@@ -799,7 +797,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 raise IntegrityError(
                     f"Cannot delete {self.model_name}: record is referenced by other data",
                     orig=e.orig,
-                    params=None
+                    params=None,
                 )
             else:
                 raise

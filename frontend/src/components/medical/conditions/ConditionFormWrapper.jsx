@@ -60,22 +60,19 @@ const ConditionFormWrapper = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use the standardized form handlers hook
-  const {
-    handleTextInputChange,
-    handleSelectChange,
-    handleDateChange,
-  } = useFormHandlers(onInputChange);
+  const { handleTextInputChange, handleSelectChange, handleDateChange } =
+    useFormHandlers(onInputChange);
 
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
 
-  const handleDocumentManagerRef = (methods) => {
+  const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {
       onDocumentManagerRef(methods);
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in conditions ${editingCondition ? 'edit' : 'create'}`,
       conditionId: editingCondition?.id,
@@ -88,7 +85,11 @@ const ConditionFormWrapper = ({
     }
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('conditions_upload_completed', {
       message: 'File upload completed in conditions form',
       conditionId: editingCondition?.id,
@@ -115,11 +116,14 @@ const ConditionFormWrapper = ({
   // Convert practitioners to options
   const practitionerOptions = practitioners.map(prac => ({
     value: prac.id.toString(),
-    label: prac.name || `Dr. ${prac.first_name || ''} ${prac.last_name || ''}`.trim() || `Practitioner #${prac.id}`,
+    label:
+      prac.name ||
+      `Dr. ${prac.first_name || ''} ${prac.last_name || ''}`.trim() ||
+      `Practitioner #${prac.id}`,
   }));
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -145,7 +149,10 @@ const ConditionFormWrapper = ({
     >
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
-        message={statusMessage?.title || t('conditions.form.saving', 'Saving condition...')}
+        message={
+          statusMessage?.title ||
+          t('conditions.form.saving', 'Saving condition...')
+        }
         submessage={statusMessage?.message}
         type={statusMessage?.type || 'loading'}
       />
@@ -155,19 +162,31 @@ const ConditionFormWrapper = ({
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="basic"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('shared:labels.basicInformation', 'Basic Info')}
               </Tabs.Tab>
-              <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
+              <Tabs.Tab
+                value="clinical"
+                leftSection={<IconStethoscope size={16} />}
+              >
                 {t('shared:tabs.clinicalDetails', 'Clinical Details')}
               </Tabs.Tab>
-              <Tabs.Tab value="medications" leftSection={<IconPill size={16} />}>
+              <Tabs.Tab
+                value="medications"
+                leftSection={<IconPill size={16} />}
+              >
                 {t('shared:categories.medications', 'Medications')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {editingCondition
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
@@ -183,9 +202,15 @@ const ConditionFormWrapper = ({
                       label={t('shared:labels.diagnosis', 'Diagnosis')}
                       value={formData.diagnosis || ''}
                       onChange={handleTextInputChange('diagnosis')}
-                      placeholder={t('conditions.form.placeholders.diagnosis', 'Enter diagnosis')}
+                      placeholder={t(
+                        'conditions.form.placeholders.diagnosis',
+                        'Enter diagnosis'
+                      )}
                       required
-                      description={t('conditions.form.descriptions.diagnosis', 'Primary diagnosis or condition')}
+                      description={t(
+                        'conditions.form.descriptions.diagnosis',
+                        'Primary diagnosis or condition'
+                      )}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -193,8 +218,14 @@ const ConditionFormWrapper = ({
                       label={t('shared:fields.conditionName', 'Condition Name')}
                       value={formData.condition_name || ''}
                       onChange={handleTextInputChange('condition_name')}
-                      placeholder={t('conditions.form.placeholders.conditionName', 'Enter condition name')}
-                      description={t('conditions.form.descriptions.conditionName', 'Optional alternative name')}
+                      placeholder={t(
+                        'conditions.form.placeholders.conditionName',
+                        'Enter condition name'
+                      )}
+                      description={t(
+                        'conditions.form.descriptions.conditionName',
+                        'Optional alternative name'
+                      )}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -202,13 +233,34 @@ const ConditionFormWrapper = ({
                       label={t('shared:fields.severity', 'Severity')}
                       value={formData.severity || null}
                       data={[
-                        { value: 'mild', label: t('conditions.form.severity.mild', 'Mild') },
-                        { value: 'moderate', label: t('conditions.form.severity.moderate', 'Moderate') },
-                        { value: 'severe', label: t('conditions.form.severity.severe', 'Severe') },
-                        { value: 'critical', label: t('conditions.form.severity.critical', 'Critical') },
+                        {
+                          value: 'mild',
+                          label: t('conditions.form.severity.mild', 'Mild'),
+                        },
+                        {
+                          value: 'moderate',
+                          label: t(
+                            'conditions.form.severity.moderate',
+                            'Moderate'
+                          ),
+                        },
+                        {
+                          value: 'severe',
+                          label: t('conditions.form.severity.severe', 'Severe'),
+                        },
+                        {
+                          value: 'critical',
+                          label: t(
+                            'conditions.form.severity.critical',
+                            'Critical'
+                          ),
+                        },
                       ]}
                       onChange={handleSelectChange('severity')}
-                      placeholder={t('conditions.form.placeholders.severity', 'Select severity')}
+                      placeholder={t(
+                        'conditions.form.placeholders.severity',
+                        'Select severity'
+                      )}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -218,13 +270,28 @@ const ConditionFormWrapper = ({
                       label={t('shared:fields.status', 'Status')}
                       value={formData.status || null}
                       data={[
-                        { value: 'active', label: t('shared:labels.active', 'Active') },
-                        { value: 'inactive', label: t('shared:labels.inactive', 'Inactive') },
-                        { value: 'resolved', label: t('shared:labels.resolved', 'Resolved') },
-                        { value: 'chronic', label: t('conditions.form.status.chronic', 'Chronic') },
+                        {
+                          value: 'active',
+                          label: t('shared:labels.active', 'Active'),
+                        },
+                        {
+                          value: 'inactive',
+                          label: t('shared:labels.inactive', 'Inactive'),
+                        },
+                        {
+                          value: 'resolved',
+                          label: t('shared:labels.resolved', 'Resolved'),
+                        },
+                        {
+                          value: 'chronic',
+                          label: t('conditions.form.status.chronic', 'Chronic'),
+                        },
                       ]}
                       onChange={handleSelectChange('status')}
-                      placeholder={t('shared:fields.selectStatus', 'Select status')}
+                      placeholder={t(
+                        'shared:fields.selectStatus',
+                        'Select status'
+                      )}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -236,7 +303,10 @@ const ConditionFormWrapper = ({
                       onChange={handleDateChange('onset_date')}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
-                      description={t('conditions.form.descriptions.onsetDate', 'When the condition started')}
+                      description={t(
+                        'conditions.form.descriptions.onsetDate',
+                        'When the condition started'
+                      )}
                       clearable
                       firstDayOfWeek={0}
                       maxDate={today}
@@ -250,7 +320,10 @@ const ConditionFormWrapper = ({
                       onChange={handleDateChange('end_date')}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
-                      description={t('conditions.form.descriptions.endDate', 'When the condition ended (if applicable)')}
+                      description={t(
+                        'conditions.form.descriptions.endDate',
+                        'When the condition ended (if applicable)'
+                      )}
                       clearable
                       firstDayOfWeek={0}
                       minDate={parseDateInput(formData.onset_date) || undefined}
@@ -264,8 +337,14 @@ const ConditionFormWrapper = ({
                       value={formData.practitioner_id || null}
                       data={practitionerOptions}
                       onChange={handleSelectChange('practitioner_id')}
-                      placeholder={t('shared:fields.selectPractitioner', 'Select practitioner')}
-                      description={t('conditions.form.descriptions.practitioner', 'Associated healthcare provider')}
+                      placeholder={t(
+                        'shared:fields.selectPractitioner',
+                        'Select practitioner'
+                      )}
+                      description={t(
+                        'conditions.form.descriptions.practitioner',
+                        'Associated healthcare provider'
+                      )}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -277,12 +356,17 @@ const ConditionFormWrapper = ({
                         {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
-                        {t('conditions.form.descriptions.tags', 'Add tags to categorize and organize conditions')}
+                        {t(
+                          'conditions.form.descriptions.tags',
+                          'Add tags to categorize and organize conditions'
+                        )}
                       </Text>
                       <TagInput
                         value={formData.tags || []}
-                        onChange={(tags) => {
-                          onInputChange({ target: { name: 'tags', value: tags } });
+                        onChange={tags => {
+                          onInputChange({
+                            target: { name: 'tags', value: tags },
+                          });
                         }}
                         placeholder={t('shared:fields.addTags', 'Add tags...')}
                       />
@@ -301,8 +385,14 @@ const ConditionFormWrapper = ({
                       label={t('shared:fields.icd10Code', 'ICD-10 Code')}
                       value={formData.icd10_code || ''}
                       onChange={handleTextInputChange('icd10_code')}
-                      placeholder={t('conditions.form.placeholders.icd10Code', 'e.g., E11.9')}
-                      description={t('conditions.form.descriptions.icd10Code', 'International Classification of Diseases code')}
+                      placeholder={t(
+                        'conditions.form.placeholders.icd10Code',
+                        'e.g., E11.9'
+                      )}
+                      description={t(
+                        'conditions.form.descriptions.icd10Code',
+                        'International Classification of Diseases code'
+                      )}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -310,17 +400,32 @@ const ConditionFormWrapper = ({
                       label={t('shared:fields.snomedCode', 'SNOMED Code')}
                       value={formData.snomed_code || ''}
                       onChange={handleTextInputChange('snomed_code')}
-                      placeholder={t('conditions.form.placeholders.snomedCode', 'e.g., 44054006')}
-                      description={t('conditions.form.descriptions.snomedCode', 'SNOMED CT code')}
+                      placeholder={t(
+                        'conditions.form.placeholders.snomedCode',
+                        'e.g., 44054006'
+                      )}
+                      description={t(
+                        'conditions.form.descriptions.snomedCode',
+                        'SNOMED CT code'
+                      )}
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>
                     <TextInput
-                      label={t('shared:fields.codeDescription', 'Code Description')}
+                      label={t(
+                        'shared:fields.codeDescription',
+                        'Code Description'
+                      )}
                       value={formData.code_description || ''}
                       onChange={handleTextInputChange('code_description')}
-                      placeholder={t('conditions.form.placeholders.codeDescription', 'Description of the medical code')}
-                      description={t('conditions.form.descriptions.codeDescription', 'Human-readable description of the medical codes')}
+                      placeholder={t(
+                        'conditions.form.placeholders.codeDescription',
+                        'Description of the medical code'
+                      )}
+                      description={t(
+                        'conditions.form.descriptions.codeDescription',
+                        'Human-readable description of the medical codes'
+                      )}
                     />
                   </Grid.Col>
                 </Grid>
@@ -331,7 +436,10 @@ const ConditionFormWrapper = ({
             <Tabs.Panel value="medications">
               <Box mt="md">
                 <Text size="sm" c="dimmed" mb="md">
-                  {t('conditions.form.medicationsDescription', 'Link medications used to treat or manage this condition.')}
+                  {t(
+                    'conditions.form.medicationsDescription',
+                    'Link medications used to treat or manage this condition.'
+                  )}
                 </Text>
                 {editingCondition ? (
                   <MedicationRelationships
@@ -345,14 +453,22 @@ const ConditionFormWrapper = ({
                 ) : (
                   <MultiSelect
                     label={t('modals.selectMedications', 'Select Medications')}
-                    placeholder={t('modals.chooseMedicationToLink', 'Choose medications to link')}
+                    placeholder={t(
+                      'modals.chooseMedicationToLink',
+                      'Choose medications to link'
+                    )}
                     data={medications.map(med => ({
                       value: med.id.toString(),
                       label: `${med.medication_name}${med.dosage ? ` (${med.dosage})` : ''}${med.status ? ` - ${med.status}` : ''}`,
                     }))}
                     value={formData.pending_medication_ids || []}
-                    onChange={(values) => {
-                      onInputChange({ target: { name: 'pending_medication_ids', value: values } });
+                    onChange={values => {
+                      onInputChange({
+                        target: {
+                          name: 'pending_medication_ids',
+                          value: values,
+                        },
+                      });
                     }}
                     searchable
                     clearable
@@ -369,8 +485,14 @@ const ConditionFormWrapper = ({
                   label={t('shared:labels.clinicalNotes', 'Clinical Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
-                  placeholder={t('conditions.form.placeholders.notes', 'Enter clinical notes, observations, or additional details')}
-                  description={t('conditions.form.descriptions.notes', 'Additional information about this condition')}
+                  placeholder={t(
+                    'conditions.form.placeholders.notes',
+                    'Enter clinical notes, observations, or additional details'
+                  )}
+                  description={t(
+                    'conditions.form.descriptions.notes',
+                    'Additional information about this condition'
+                  )}
                   rows={5}
                   minRows={3}
                   autosize
@@ -396,14 +518,20 @@ const ConditionFormWrapper = ({
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
+            <Button
+              variant="default"
+              onClick={onClose}
+              disabled={isLoading || isSubmitting}
+            >
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.diagnosis?.trim()}
             >
-              {editingCondition ? t('conditions.form.updateCondition', 'Update Condition') : t('conditions.form.createCondition', 'Create Condition')}
+              {editingCondition
+                ? t('conditions.form.updateCondition', 'Update Condition')
+                : t('conditions.form.createCondition', 'Create Condition')}
             </SubmitButton>
           </Group>
         </Stack>

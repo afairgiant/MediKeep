@@ -136,14 +136,11 @@ def password_changed_template(data: Dict) -> Tuple[str, str]:
     Returns:
         Tuple of (title, message) for the notification
     """
-    change_time = data.get(
-        "change_time", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    )
+    change_time = data.get("change_time", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     return (
         "Password Changed",
-        f"Your MediKeep password was successfully changed.\n\n"
-        f"Time: {change_time}",
+        f"Your MediKeep password was successfully changed.\n\n" f"Time: {change_time}",
     )
 
 

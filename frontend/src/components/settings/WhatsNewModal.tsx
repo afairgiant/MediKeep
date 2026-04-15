@@ -13,7 +13,10 @@ import {
 import { ResponsiveModal } from '../adapters/ResponsiveModal';
 import { Button } from '../ui';
 import type { Release } from '../../types/releaseNotes';
-import { formatReleaseDate, isCurrentRelease } from '../../utils/releaseNoteHelpers';
+import {
+  formatReleaseDate,
+  isCurrentRelease,
+} from '../../utils/releaseNoteHelpers';
 import { renderReleaseMarkdown } from '../../utils/markdownRenderer';
 import '../../styles/components/ReleaseNotes.css';
 
@@ -64,13 +67,8 @@ function WhatsNewModal({
             scrollbarSize={6}
           >
             <Stack gap="sm">
-              {releases.map((release) => (
-                <Paper
-                  key={release.tag_name}
-                  p="md"
-                  radius="sm"
-                  withBorder
-                >
+              {releases.map(release => (
+                <Paper key={release.tag_name} p="md" radius="sm" withBorder>
                   <Group justify="space-between" mb="xs" wrap="nowrap">
                     <Group gap="xs">
                       <Text fw={600} size="md">

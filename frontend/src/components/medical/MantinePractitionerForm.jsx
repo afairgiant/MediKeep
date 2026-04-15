@@ -4,7 +4,10 @@ import { Text, Anchor } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import { practitionerFormFields } from '../../utils/medicalFormFields';
 import { isValidPhoneNumber } from '../../utils/phoneUtils';
-import { fetchMedicalSpecialties, clearSpecialtiesCache } from '../../config/medicalSpecialties';
+import {
+  fetchMedicalSpecialties,
+  clearSpecialtiesCache,
+} from '../../config/medicalSpecialties';
 import logger from '../../services/logger';
 
 const MantinePractitionerForm = ({
@@ -21,7 +24,7 @@ const MantinePractitionerForm = ({
   // State for dynamic specialties
   const [specialtyOptions, setSpecialtyOptions] = useState([]);
   const [isLoadingSpecialties, setIsLoadingSpecialties] = useState(true);
-  
+
   // Load specialties on component mount
   useEffect(() => {
     const loadSpecialties = async () => {
@@ -29,18 +32,24 @@ const MantinePractitionerForm = ({
         setIsLoadingSpecialties(true);
         const specialties = await fetchMedicalSpecialties();
         // Remove the "Other" option as we'll allow custom input directly
-        const filteredSpecialties = specialties.filter(s => s.value !== 'Other');
+        const filteredSpecialties = specialties.filter(
+          s => s.value !== 'Other'
+        );
         setSpecialtyOptions(filteredSpecialties);
       } catch (error) {
-        logger.error('load_specialties_failed', 'Failed to load medical specialties', {
-          component: 'MantinePractitionerForm',
-          error: error.message
-        });
+        logger.error(
+          'load_specialties_failed',
+          'Failed to load medical specialties',
+          {
+            component: 'MantinePractitionerForm',
+            error: error.message,
+          }
+        );
       } finally {
         setIsLoadingSpecialties(false);
       }
     };
-    
+
     if (isOpen) {
       // Clear cache to get fresh data including any newly added specialties
       clearSpecialtiesCache();
@@ -65,7 +74,7 @@ const MantinePractitionerForm = ({
 
   // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
-  
+
   // Clear field errors when modal is closed
   useEffect(() => {
     if (!isOpen) {
@@ -74,29 +83,31 @@ const MantinePractitionerForm = ({
   }, [isOpen]);
 
   // Input change handler with phone validation
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
-    
+
     // Clear any existing error for this field
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
         ...prev,
-        [name]: null
+        [name]: null,
       }));
     }
-    
+
     // Handle phone number validation
-    if (name === 'phone_number' && value.trim() !== '' && !isValidPhoneNumber(value)) {
+    if (
+      name === 'phone_number' &&
+      value.trim() !== '' &&
+      !isValidPhoneNumber(value)
+    ) {
       setFieldErrors(prev => ({
         ...prev,
-        [name]: t('form.invalidPhoneDigits')
+        [name]: t('form.invalidPhoneDigits'),
       }));
     }
 
     onInputChange(e);
   };
-
-
 
   const websiteError =
     formData.website && !isValidWebsite(formData.website)
@@ -104,7 +115,7 @@ const MantinePractitionerForm = ({
       : null;
 
   // Custom validation for submit - prevent submission if website is invalid
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     if (websiteError) {
       e.preventDefault();
       return;
@@ -116,7 +127,13 @@ const MantinePractitionerForm = ({
   const customContent = (
     <>
       {formData.website && isValidWebsite(formData.website) && (
-        <div style={{ marginTop: '-16px', marginBottom: '16px', textAlign: 'right' }}>
+        <div
+          style={{
+            marginTop: '-16px',
+            marginBottom: '16px',
+            textAlign: 'right',
+          }}
+        >
           <Anchor
             href={
               formData.website.startsWith('http')
@@ -132,7 +149,11 @@ const MantinePractitionerForm = ({
         </div>
       )}
       {websiteError && (
-        <Text size="sm" c="red" style={{ marginTop: '-16px', marginBottom: '16px' }}>
+        <Text
+          size="sm"
+          c="red"
+          style={{ marginTop: '-16px', marginBottom: '16px' }}
+        >
           {websiteError}
         </Text>
       )}

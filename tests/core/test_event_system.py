@@ -45,11 +45,27 @@ class TestDomainEvent:
     def test_event_type_from_class_name(self):
         """Event type should be derived from class name."""
         # event_type() is an instance method, so we need to create instances
-        assert PasswordChangedEvent(user_id=1, change_time="").event_type() == "password_changed"
-        assert BackupCompletedEvent(user_id=1, filename="", size_mb=0).event_type() == "backup_completed"
+        assert (
+            PasswordChangedEvent(user_id=1, change_time="").event_type()
+            == "password_changed"
+        )
+        assert (
+            BackupCompletedEvent(user_id=1, filename="", size_mb=0).event_type()
+            == "backup_completed"
+        )
         assert BackupFailedEvent(user_id=1, error="").event_type() == "backup_failed"
-        assert InvitationReceivedEvent(user_id=1, from_user="", invitation_type="", title="").event_type() == "invitation_received"
-        assert InvitationAcceptedEvent(user_id=1, by_user="", invitation_type="", title="").event_type() == "invitation_accepted"
+        assert (
+            InvitationReceivedEvent(
+                user_id=1, from_user="", invitation_type="", title=""
+            ).event_type()
+            == "invitation_received"
+        )
+        assert (
+            InvitationAcceptedEvent(
+                user_id=1, by_user="", invitation_type="", title=""
+            ).event_type()
+            == "invitation_accepted"
+        )
         assert ShareRevokedEvent(user_id=1, by_user="").event_type() == "share_revoked"
 
     def test_to_notification_data(self):
@@ -59,7 +75,7 @@ class TestDomainEvent:
             filename="backup.zip",
             size_mb=50.5,
             backup_type="full",
-            checksum="abc123"
+            checksum="abc123",
         )
         data = event.to_notification_data()
 
@@ -108,9 +124,7 @@ class TestEventBus:
         bus.subscribe("backup_completed", handler1)
         bus.subscribe("backup_completed", handler2)
 
-        event = BackupCompletedEvent(
-            user_id=1, filename="test.zip", size_mb=10
-        )
+        event = BackupCompletedEvent(user_id=1, filename="test.zip", size_mb=10)
         await bus.publish(event)
 
         assert len(received1) == 1
@@ -131,9 +145,7 @@ class TestEventBus:
         bus.subscribe("backup_completed", failing_handler)
         bus.subscribe("backup_completed", working_handler)
 
-        event = BackupCompletedEvent(
-            user_id=1, filename="test.zip", size_mb=10
-        )
+        event = BackupCompletedEvent(user_id=1, filename="test.zip", size_mb=10)
         # Should not raise
         await bus.publish(event)
 
@@ -290,7 +302,10 @@ class TestIntegration:
             ),
             PasswordChangedEvent(user_id=2, change_time="2026-01-29 10:00:00"),
             InvitationReceivedEvent(
-                user_id=3, from_user="Alice", invitation_type="patient_share", title="Share"
+                user_id=3,
+                from_user="Alice",
+                invitation_type="patient_share",
+                title="Share",
             ),
         ]
 

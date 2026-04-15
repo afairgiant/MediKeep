@@ -6,7 +6,7 @@ import FamilyHistoryViewModal from '../FamilyHistoryViewModal';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key) => key,
+    t: key => key,
   }),
 }));
 
@@ -23,9 +23,9 @@ const mockMember = {
       severity: 'moderate',
       condition_type: 'cardiovascular',
       diagnosis_age: 45,
-      notes: 'Controlled with medication'
-    }
-  ]
+      notes: 'Controlled with medication',
+    },
+  ],
 };
 
 const renderModal = (props = {}) => {
@@ -46,7 +46,7 @@ const renderModal = (props = {}) => {
 describe('FamilyHistoryViewModal Display', () => {
   it('renders status badge and ICD-10 code for conditions', () => {
     renderModal();
-    
+
     expect(screen.getByText('Hypertension')).toBeInTheDocument();
     expect(screen.getByText(/Active/i)).toBeInTheDocument();
     expect(screen.getByText(/ICD-10:/i)).toBeInTheDocument();
@@ -55,6 +55,8 @@ describe('FamilyHistoryViewModal Display', () => {
 
   it('renders "No medical conditions recorded" when member has no conditions', () => {
     renderModal({ member: { ...mockMember, family_conditions: [] } });
-    expect(screen.getByText('familyHistory.card.noConditionsRecorded')).toBeInTheDocument();
+    expect(
+      screen.getByText('familyHistory.card.noConditionsRecorded')
+    ).toBeInTheDocument();
   });
 });

@@ -17,9 +17,7 @@ class TestCustomReportRequestWithCharts:
     def test_records_only(self):
         """Original behavior: records without charts still works."""
         req = CustomReportRequest(
-            selected_records=[
-                {"category": "medications", "record_ids": [1, 2, 3]}
-            ]
+            selected_records=[{"category": "medications", "record_ids": [1, 2, 3]}]
         )
         assert len(req.selected_records) == 1
         assert req.trend_charts is None
@@ -38,12 +36,10 @@ class TestCustomReportRequestWithCharts:
     def test_records_and_charts(self):
         """Both records and charts together."""
         req = CustomReportRequest(
-            selected_records=[
-                {"category": "vitals", "record_ids": [1]}
-            ],
+            selected_records=[{"category": "vitals", "record_ids": [1]}],
             trend_charts=TrendChartSelection(
                 lab_test_charts=[LabTestChartRequest(test_name="Glucose")]
-            )
+            ),
         )
         assert len(req.selected_records) == 1
         assert len(req.trend_charts.lab_test_charts) == 1
@@ -103,9 +99,7 @@ class TestReportTemplateWithCharts:
     def test_template_without_charts(self):
         tmpl = ReportTemplate(
             name="My Template",
-            selected_records=[
-                {"category": "medications", "record_ids": [1]}
-            ],
+            selected_records=[{"category": "medications", "record_ids": [1]}],
         )
         assert tmpl.trend_charts is None
 

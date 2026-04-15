@@ -28,8 +28,10 @@ export const visitFormFields = [
     name: 'practitioner_id',
     type: 'select',
     labelKey: 'medical:visits.form.fields.attendingPractitioner.label',
-    placeholderKey: 'medical:visits.form.fields.attendingPractitioner.placeholder',
-    descriptionKey: 'medical:visits.form.fields.attendingPractitioner.description',
+    placeholderKey:
+      'medical:visits.form.fields.attendingPractitioner.placeholder',
+    descriptionKey:
+      'medical:visits.form.fields.attendingPractitioner.description',
     gridColumn: 6,
     searchable: true,
     clearable: true,
@@ -45,13 +47,34 @@ export const visitFormFields = [
     searchable: true,
     clearable: true,
     options: [
-      { value: 'annual checkup', labelKey: 'medical:visits.form.visitTypeOptions.annualCheckup' },
-      { value: 'follow-up', labelKey: 'medical:visits.form.visitTypeOptions.followUp' },
-      { value: 'consultation', labelKey: 'medical:visits.form.visitTypeOptions.consultation' },
-      { value: 'emergency', labelKey: 'medical:visits.form.visitTypeOptions.emergency' },
-      { value: 'preventive care', labelKey: 'medical:visits.form.visitTypeOptions.preventiveCare' },
-      { value: 'routine visit', labelKey: 'medical:visits.form.visitTypeOptions.routineVisit' },
-      { value: 'specialist referral', labelKey: 'medical:visits.form.visitTypeOptions.specialistReferral' },
+      {
+        value: 'annual checkup',
+        labelKey: 'medical:visits.form.visitTypeOptions.annualCheckup',
+      },
+      {
+        value: 'follow-up',
+        labelKey: 'medical:visits.form.visitTypeOptions.followUp',
+      },
+      {
+        value: 'consultation',
+        labelKey: 'medical:visits.form.visitTypeOptions.consultation',
+      },
+      {
+        value: 'emergency',
+        labelKey: 'medical:visits.form.visitTypeOptions.emergency',
+      },
+      {
+        value: 'preventive care',
+        labelKey: 'medical:visits.form.visitTypeOptions.preventiveCare',
+      },
+      {
+        value: 'routine visit',
+        labelKey: 'medical:visits.form.visitTypeOptions.routineVisit',
+      },
+      {
+        value: 'specialist referral',
+        labelKey: 'medical:visits.form.visitTypeOptions.specialistReferral',
+      },
     ],
   },
   {
@@ -63,8 +86,14 @@ export const visitFormFields = [
     gridColumn: 6,
     clearable: true,
     options: [
-      { value: 'routine', labelKey: 'medical:visits.form.priorityOptions.routine' },
-      { value: 'urgent', labelKey: 'medical:visits.form.priorityOptions.urgent' },
+      {
+        value: 'routine',
+        labelKey: 'medical:visits.form.priorityOptions.routine',
+      },
+      {
+        value: 'urgent',
+        labelKey: 'medical:visits.form.priorityOptions.urgent',
+      },
     ],
   },
   {
@@ -106,13 +135,34 @@ export const visitFormFields = [
     searchable: true,
     clearable: true,
     options: [
-      { value: 'office', labelKey: 'medical:visits.form.locationOptions.doctorsOffice' },
-      { value: 'hospital', labelKey: 'medical:visits.form.locationOptions.hospital' },
-      { value: 'clinic', labelKey: 'medical:visits.form.locationOptions.clinic' },
-      { value: 'telehealth', labelKey: 'medical:visits.form.locationOptions.telehealth' },
-      { value: 'urgent care', labelKey: 'medical:visits.form.locationOptions.urgentCare' },
-      { value: 'emergency room', labelKey: 'medical:visits.form.locationOptions.emergencyRoom' },
-      { value: 'home', labelKey: 'medical:visits.form.locationOptions.homeVisit' },
+      {
+        value: 'office',
+        labelKey: 'medical:visits.form.locationOptions.doctorsOffice',
+      },
+      {
+        value: 'hospital',
+        labelKey: 'medical:visits.form.locationOptions.hospital',
+      },
+      {
+        value: 'clinic',
+        labelKey: 'medical:visits.form.locationOptions.clinic',
+      },
+      {
+        value: 'telehealth',
+        labelKey: 'medical:visits.form.locationOptions.telehealth',
+      },
+      {
+        value: 'urgent care',
+        labelKey: 'medical:visits.form.locationOptions.urgentCare',
+      },
+      {
+        value: 'emergency room',
+        labelKey: 'medical:visits.form.locationOptions.emergencyRoom',
+      },
+      {
+        value: 'home',
+        labelKey: 'medical:visits.form.locationOptions.homeVisit',
+      },
     ],
   },
   {
@@ -125,8 +175,10 @@ export const visitFormFields = [
     name: 'diagnosis',
     type: 'textarea',
     labelKey: 'medical:visits.form.fields.diagnosisAssessment.label',
-    placeholderKey: 'medical:visits.form.fields.diagnosisAssessment.placeholder',
-    descriptionKey: 'medical:visits.form.fields.diagnosisAssessment.description',
+    placeholderKey:
+      'medical:visits.form.fields.diagnosisAssessment.placeholder',
+    descriptionKey:
+      'medical:visits.form.fields.diagnosisAssessment.description',
     gridColumn: 12,
     minRows: 2,
     maxRows: 4,
@@ -145,8 +197,10 @@ export const visitFormFields = [
     name: 'follow_up_instructions',
     type: 'textarea',
     labelKey: 'medical:visits.viewModal.followUpInstructions',
-    placeholderKey: 'medical:visits.form.fields.followUpInstructions.placeholder',
-    descriptionKey: 'medical:visits.form.fields.followUpInstructions.description',
+    placeholderKey:
+      'medical:visits.form.fields.followUpInstructions.placeholder',
+    descriptionKey:
+      'medical:visits.form.fields.followUpInstructions.description',
     gridColumn: 12,
     minRows: 2,
     maxRows: 4,

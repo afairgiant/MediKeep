@@ -11,12 +11,17 @@ LAB_TEST_COMPONENT_LIMITS = {
     "MAX_REF_RANGE_TEXT_LENGTH": 100,
     "MAX_NOTES_LENGTH": 500,
     "MAX_SEARCH_QUERY_LENGTH": 100,
-    "MAX_BULK_COMPONENTS": 100
+    "MAX_BULK_COMPONENTS": 100,
 }
 
 # Lab Test Component valid statuses
 LAB_TEST_COMPONENT_STATUSES = [
-    "normal", "abnormal", "critical", "high", "low", "borderline"
+    "normal",
+    "abnormal",
+    "critical",
+    "high",
+    "low",
+    "borderline",
 ]
 
 # Lab Test Component result types (quantitative = numeric, qualitative = positive/negative)
@@ -24,18 +29,34 @@ LAB_TEST_COMPONENT_RESULT_TYPES = ["quantitative", "qualitative"]
 
 # Valid qualitative result values
 LAB_TEST_COMPONENT_QUALITATIVE_VALUES = [
-    "positive", "negative", "detected", "undetected"
+    "positive",
+    "negative",
+    "detected",
+    "undetected",
 ]
 
 # Lab Test Component valid categories
 LAB_TEST_COMPONENT_CATEGORIES = [
-    "chemistry", "hematology", "hepatology", "immunology", "microbiology",
-    "endocrinology", "cardiology", "toxicology", "genetics", "molecular",
-    "pathology", "lipids", "hearing", "stomatology", "other"
+    "chemistry",
+    "hematology",
+    "hepatology",
+    "immunology",
+    "microbiology",
+    "endocrinology",
+    "cardiology",
+    "toxicology",
+    "genetics",
+    "molecular",
+    "pathology",
+    "lipids",
+    "hearing",
+    "stomatology",
+    "other",
 ]
 
 # User roles
 ADMIN_ROLES = ["admin", "administrator"]
+
 
 def is_admin_role(role: str) -> bool:
     """
@@ -50,6 +71,7 @@ def is_admin_role(role: str) -> bool:
     if not role:
         return False
     return role.lower() in ADMIN_ROLES
+
 
 def get_admin_roles_filter():
     """

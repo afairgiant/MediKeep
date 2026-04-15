@@ -6,7 +6,6 @@
  */
 import logger from '../services/logger';
 
-
 import {
   getRelationship,
   getRelationshipEndpoint,
@@ -53,9 +52,7 @@ export const buildNavigationUrl = (
 ) => {
   const relationship = getRelationship(sourceEntity, relationshipKey);
   if (!relationship) {
-    logger.warn(
-      `No relationship found for ${sourceEntity}.${relationshipKey}`
-    );
+    logger.warn(`No relationship found for ${sourceEntity}.${relationshipKey}`);
     return null;
   }
 
@@ -81,7 +78,7 @@ export const buildNavigationUrl = (
 
   // Get the correct route path for the target entity type
   const routePath = ENTITY_TO_ROUTE_MAP[targetEntity] || `/${targetEntity}`;
-  
+
   return `${routePath}?${searchParams.toString()}`;
 };
 
@@ -123,7 +120,7 @@ export const buildEntityUrl = (entityType, entityId, options = {}) => {
 
   // Get the correct route path for the entity type
   const routePath = ENTITY_TO_ROUTE_MAP[entityType] || `/${entityType}`;
-  
+
   // Handle special cases for specific entity IDs
   if (entityId && entityId !== 'undefined') {
     if (entityType === ENTITY_TYPES.PATIENT && entityId === 'me') {

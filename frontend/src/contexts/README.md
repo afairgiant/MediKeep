@@ -11,6 +11,7 @@ This implementation solves the performance issue where the app was making redund
 The main context that manages global application data with smart caching capabilities.
 
 **Features:**
+
 - **Smart Caching**: Data is cached with configurable expiry times
 - **Automatic Cache Validation**: Checks if cached data is still valid before making API calls
 - **Loading State Management**: Centralized loading states for all data types
@@ -18,6 +19,7 @@ The main context that manages global application data with smart caching capabil
 - **Cache Invalidation**: Ability to force refresh or clear specific cache entries
 
 **Cached Data Types:**
+
 - Patient data (expires after 15 minutes)
 - Practitioners list (expires after 60 minutes)
 - Pharmacies list (expires after 60 minutes)
@@ -42,9 +44,7 @@ The `AppDataProvider` must be placed inside `AuthProvider` but outside `ThemePro
 ```jsx
 <AuthProvider>
   <AppDataProvider>
-    <ThemeProvider>
-      {/* Your app components */}
-    </ThemeProvider>
+    <ThemeProvider>{/* Your app components */}</ThemeProvider>
   </AppDataProvider>
 </AuthProvider>
 ```
@@ -52,6 +52,7 @@ The `AppDataProvider` must be placed inside `AuthProvider` but outside `ThemePro
 ### 2. Automatic Data Loading
 
 Data is automatically loaded when the user logs in:
+
 - Patient data is fetched immediately
 - Static lists (practitioners, pharmacies) are fetched in parallel
 - All data is cached with appropriate expiry times
@@ -65,10 +66,10 @@ import { useCurrentPatient } from '../hooks/useGlobalData';
 
 function MyComponent() {
   const { patient, loading, error, refresh } = useCurrentPatient();
-  
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  
+
   return (
     <div>
       <h1>{patient?.name}</h1>
@@ -84,20 +85,17 @@ function MyComponent() {
 import { usePatientWithStaticData } from '../hooks/useGlobalData';
 
 function MedicalForm() {
-  const { 
-    patient, 
-    practitioners, 
-    pharmacies, 
-    loading, 
-    refreshAll 
-  } = usePatientWithStaticData();
-  
+  const { patient, practitioners, pharmacies, loading, refreshAll } =
+    usePatientWithStaticData();
+
   // All data is available without individual API calls
   return (
     <form>
       <select>
         {practitioners.practitioners.map(p => (
-          <option key={p.id} value={p.id}>{p.name}</option>
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
         ))}
       </select>
     </form>
@@ -111,12 +109,9 @@ function MedicalForm() {
 import { useCacheManager } from '../hooks/useGlobalData';
 
 function AdminPanel() {
-  const { 
-    invalidateAll, 
-    invalidatePatient, 
-    updateCacheExpiry 
-  } = useCacheManager();
-  
+  const { invalidateAll, invalidatePatient, updateCacheExpiry } =
+    useCacheManager();
+
   return (
     <div>
       <button onClick={invalidateAll}>Clear All Caches</button>
@@ -138,13 +133,13 @@ function AdminPanel() {
 function LabResults() {
   const [patient, setPatient] = useState(null);
   const [practitioners, setPractitioners] = useState([]);
-  
+
   useEffect(() => {
     // These calls happen on every page mount
     apiService.getCurrentPatient().then(setPatient);
     apiService.getPractitioners().then(setPractitioners);
   }, []);
-  
+
   // Component logic...
 }
 ```
@@ -156,10 +151,10 @@ function LabResults() {
 function LabResults() {
   const { patient } = useCurrentPatient();
   const { practitioners } = usePractitioners();
-  
+
   // Data is automatically available from cache
   // No redundant API calls!
-  
+
   // Component logic...
 }
 ```
@@ -167,6 +162,7 @@ function LabResults() {
 ## Performance Benefits
 
 ### Before Implementation
+
 - ✗ Each page made 2-3 API calls on mount
 - ✗ Same data fetched multiple times during navigation
 - ✗ Slower page transitions
@@ -174,6 +170,7 @@ function LabResults() {
 - ✗ Poor user experience on slow connections
 
 ### After Implementation
+
 - ✅ Data fetched once and cached globally
 - ✅ Instant access to cached data
 - ✅ Faster page transitions
@@ -185,6 +182,7 @@ function LabResults() {
 ## Cache Configuration
 
 ### Default Settings
+
 ```javascript
 {
   patient: 15,      // 15 minutes
@@ -194,14 +192,15 @@ function LabResults() {
 ```
 
 ### Customizing Cache Expiry
+
 ```jsx
 const { updateCacheExpiry } = useCacheManager();
 
 // Set shorter cache for development
 updateCacheExpiry({
-  patient: 1,       // 1 minute
+  patient: 1, // 1 minute
   practitioners: 5, // 5 minutes
-  pharmacies: 5     // 5 minutes
+  pharmacies: 5, // 5 minutes
 });
 ```
 
@@ -210,6 +209,7 @@ updateCacheExpiry({
 ### Global State Demo
 
 Visit `/global-state-demo` to see the cache in action:
+
 - Real-time cache status
 - Cache expiry timers
 - Manual cache controls
@@ -226,6 +226,7 @@ Visit `/global-state-demo` to see the cache in action:
 ## Error Handling
 
 The system gracefully handles errors:
+
 - Network failures don't crash the app
 - Stale data is better than no data
 - Individual cache failures don't affect other data
@@ -251,6 +252,7 @@ The system gracefully handles errors:
 ### Debug Tools
 
 Use the GlobalStateDemo component to debug cache issues:
+
 ```jsx
 import GlobalStateDemo from '../components/common/GlobalStateDemo';
 ```
@@ -261,4 +263,4 @@ import GlobalStateDemo from '../components/common/GlobalStateDemo';
 2. **Handle loading states**: Always check loading state before rendering data
 3. **Refresh when needed**: Use refresh functions after data mutations
 4. **Invalidate carefully**: Don't over-invalidate caches
-5. **Monitor performance**: Use browser dev tools to verify reduced API calls 
+5. **Monitor performance**: Use browser dev tools to verify reduced API calls

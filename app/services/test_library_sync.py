@@ -69,7 +69,9 @@ class TestLibrarySyncService:
                         LogFields.RECORD_ID: component.id,
                         "original_name": component.test_name,
                         "canonical_name": canonical_name,
-                        "test_category": test_info.get("category") if test_info else None,
+                        "test_category": (
+                            test_info.get("category") if test_info else None
+                        ),
                     },
                 )
 
@@ -164,10 +166,13 @@ class TestLibrarySyncService:
             migration_status = system_setting.get_setting(db, self.MIGRATION_KEY)
 
             if migration_status and migration_status.startswith("true"):
-                logger.debug("Canonical test migration already completed", extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "canonical_migration_skipped",
-                })
+                logger.debug(
+                    "Canonical test migration already completed",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "canonical_migration_skipped",
+                    },
+                )
                 return {"skipped": True, "reason": "already_completed"}
 
             total_components = (

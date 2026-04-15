@@ -4,6 +4,7 @@ Tests for Encounter-Lab Result relationship API endpoints.
 Tests both encounter-side (/encounters/{id}/lab-results) and
 lab-result-side (/lab-results/{id}/encounters) endpoints.
 """
+
 import pytest
 from datetime import date, timedelta
 
@@ -307,7 +308,12 @@ class TestEncounterLabResultAPI:
         assert response.status_code == 404
 
     def test_update_wrong_encounter(
-        self, client, authenticated_headers, test_encounter, second_encounter, test_lab_result
+        self,
+        client,
+        authenticated_headers,
+        test_encounter,
+        second_encounter,
+        test_lab_result,
     ):
         """Test updating relationship from wrong encounter fails."""
         # Link to first encounter
@@ -327,7 +333,12 @@ class TestEncounterLabResultAPI:
         assert response.status_code == 400
 
     def test_delete_wrong_encounter(
-        self, client, authenticated_headers, test_encounter, second_encounter, test_lab_result
+        self,
+        client,
+        authenticated_headers,
+        test_encounter,
+        second_encounter,
+        test_lab_result,
     ):
         """Test deleting relationship from wrong encounter fails."""
         link_resp = client.post(
@@ -472,7 +483,12 @@ class TestEncounterLabResultAPI:
         assert response.status_code == 400
 
     def test_update_wrong_lab_result(
-        self, client, authenticated_headers, test_encounter, test_lab_result, second_lab_result
+        self,
+        client,
+        authenticated_headers,
+        test_encounter,
+        test_lab_result,
+        second_lab_result,
     ):
         """Test updating relationship from wrong lab result fails."""
         link_resp = client.post(
@@ -521,7 +537,12 @@ class TestEncounterLabResultAPI:
     # ---- Cross-patient rejection tests ----
 
     def test_cross_patient_link_rejected(
-        self, client, db_session, user_with_patient, authenticated_headers, test_encounter
+        self,
+        client,
+        db_session,
+        user_with_patient,
+        authenticated_headers,
+        test_encounter,
     ):
         """Test that linking entities from different patients is rejected."""
         # Create a second user with patient
@@ -542,6 +563,7 @@ class TestEncounterLabResultAPI:
 
         # Create lab result for the other patient directly in DB
         from app.models.models import LabResult
+
         other_lab = LabResult(
             test_name="Other Patient Lab",
             ordered_date=date.today(),
@@ -564,7 +586,13 @@ class TestEncounterLabResultAPI:
     # ---- Patient isolation test ----
 
     def test_patient_isolation(
-        self, client, db_session, user_with_patient, authenticated_headers, test_encounter, test_lab_result
+        self,
+        client,
+        db_session,
+        user_with_patient,
+        authenticated_headers,
+        test_encounter,
+        test_lab_result,
     ):
         """Test that a second user cannot access another user's encounter relationships."""
         # Link for first user

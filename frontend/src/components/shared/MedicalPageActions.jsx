@@ -73,7 +73,12 @@ function MedicalPageActions({
 
   // Don't render if no visible primary action, no visible secondary actions, no toggle, and no children
   const primaryVisible = !!primaryAction && primaryAction.visible !== false;
-  if (!primaryVisible && visibleSecondaryActions.length === 0 && !shouldShowViewToggle && !children) {
+  if (
+    !primaryVisible &&
+    visibleSecondaryActions.length === 0 &&
+    !shouldShowViewToggle &&
+    !children
+  ) {
     return null;
   }
 
@@ -81,7 +86,10 @@ function MedicalPageActions({
     <Group justify="space-between" align={align} mb={mb}>
       <Group gap={buttonGap}>
         {primaryVisible && primaryAction && (
-          <Tooltip label={primaryAction.tooltip} disabled={!primaryAction.disabled || !primaryAction.tooltip}>
+          <Tooltip
+            label={primaryAction.tooltip}
+            disabled={!primaryAction.disabled || !primaryAction.tooltip}
+          >
             <span>
               <Button
                 variant={primaryAction.variant || 'filled'}
@@ -98,7 +106,11 @@ function MedicalPageActions({
         )}
 
         {visibleSecondaryActions.map((action, index) => (
-          <Tooltip key={action.key || `secondary-${index}`} label={action.tooltip} disabled={!action.disabled || !action.tooltip}>
+          <Tooltip
+            key={action.key || `secondary-${index}`}
+            label={action.tooltip}
+            disabled={!action.disabled || !action.tooltip}
+          >
             <span>
               <Button
                 variant={action.variant || 'light'}

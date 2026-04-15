@@ -73,13 +73,24 @@ vi.mock('../../../hooks', () => ({
   useFormSubmissionWithUploads,
 }));
 vi.mock('../../../hooks/useMedicalData', () => ({ useMedicalData }));
-vi.mock('../../../hooks/useDataManagement', () => ({ useDataManagement, default: useDataManagement }));
+vi.mock('../../../hooks/useDataManagement', () => ({
+  useDataManagement,
+  default: useDataManagement,
+}));
 vi.mock('../../../hooks/useEntityFileCounts', () => ({ useEntityFileCounts }));
-vi.mock('../../../hooks/useViewModalNavigation', () => ({ useViewModalNavigation, default: useViewModalNavigation }));
-vi.mock('../../../hooks/usePersistedViewMode', () => ({ usePersistedViewMode }));
+vi.mock('../../../hooks/useViewModalNavigation', () => ({
+  useViewModalNavigation,
+  default: useViewModalNavigation,
+}));
+vi.mock('../../../hooks/usePersistedViewMode', () => ({
+  usePersistedViewMode,
+}));
 vi.mock('../../../hooks/useGlobalData', () => ({
   usePractitioners,
-  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+  useCurrentPatient: () => ({
+    patient: { id: 1, owner_user_id: 1, permission_level: 'full' },
+    loading: false,
+  }),
 }));
 vi.mock('../../../hooks/usePatientPermissions', () => ({
   usePatientPermissions: () => ({
@@ -93,8 +104,13 @@ vi.mock('../../../hooks/usePatientPermissions', () => ({
   }),
 }));
 vi.mock('../../../hooks/useDateFormat', () => ({ useDateFormat }));
-vi.mock('../../../hooks/useResponsive', () => ({ useResponsive, default: useResponsive }));
-vi.mock('../../../hooks/useFormSubmissionWithUploads', () => ({ useFormSubmissionWithUploads }));
+vi.mock('../../../hooks/useResponsive', () => ({
+  useResponsive,
+  default: useResponsive,
+}));
+vi.mock('../../../hooks/useFormSubmissionWithUploads', () => ({
+  useFormSubmissionWithUploads,
+}));
 
 // Services
 vi.mock('../../../services/api', () => ({
@@ -123,7 +139,10 @@ vi.mock('react-router-dom', async () => {
 
 // i18n
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key, fallback) => key, i18n: { language: 'en' } }),
+  useTranslation: () => ({
+    t: (key, fallback) => key,
+    i18n: { language: 'en' },
+  }),
 }));
 
 // Utilities
@@ -148,19 +167,21 @@ vi.mock('../../../constants/errorMessages', () => ({
     FORM_SUBMISSION_FAILED: 'Form submission failed',
   },
   SUCCESS_MESSAGES: {},
-  getUserFriendlyError: vi.fn((e) => e?.message || 'Error'),
+  getUserFriendlyError: vi.fn(e => e?.message || 'Error'),
 }));
 
 // HOC – just render the component as-is
 vi.mock('../../../hoc/withResponsive', () => ({
-  withResponsive: (Component) => Component,
+  withResponsive: Component => Component,
 }));
 
 // Mantine core – lightweight stubs
 vi.mock('@mantine/core', () => ({
   MantineProvider: ({ children }) => <div>{children}</div>,
   Button: ({ children, onClick, disabled, ...rest }) => (
-    <button onClick={onClick} disabled={disabled} {...rest}>{children}</button>
+    <button onClick={onClick} disabled={disabled} {...rest}>
+      {children}
+    </button>
   ),
   Stack: ({ children }) => <div>{children}</div>,
   Text: ({ children }) => <span>{children}</span>,
@@ -168,7 +189,10 @@ vi.mock('@mantine/core', () => ({
   Card: ({ children }) => <div>{children}</div>,
   Paper: ({ children }) => <div>{children}</div>,
   createTheme: () => ({}),
-  useMantineColorScheme: () => ({ colorScheme: 'light', setColorScheme: vi.fn() }),
+  useMantineColorScheme: () => ({
+    colorScheme: 'light',
+    setColorScheme: vi.fn(),
+  }),
 }));
 
 // usePagination – stub that passes data through without slicing
@@ -178,7 +202,7 @@ vi.mock('../../../hooks/usePagination', () => ({
     setPage: vi.fn(),
     pageSize: 20,
     handlePageSizeChange: vi.fn(),
-    paginateData: (data) => data,
+    paginateData: data => data,
     totalPages: () => 1,
     resetPage: vi.fn(),
     clampPage: vi.fn(),
@@ -221,7 +245,9 @@ vi.mock('../../../components/shared/MedicalPageAlerts', () => ({
   default: ({ error, successMessage, onClearError }) => (
     <div data-testid="alerts">
       {error && <span data-testid="error-alert">{error}</span>}
-      {successMessage && <span data-testid="success-alert">{successMessage}</span>}
+      {successMessage && (
+        <span data-testid="success-alert">{successMessage}</span>
+      )}
     </div>
   ),
 }));
@@ -250,18 +276,34 @@ vi.mock('../../../components/adapters', () => ({
 // ProcedureCard
 vi.mock('../../../components/medical/procedures/ProcedureCard', () => ({
   default: ({ procedure, onEdit, onDelete, onView, practitioners }) => {
-    const practitioner = practitioners?.find(p => p.id === procedure.practitioner_id);
+    const practitioner = practitioners?.find(
+      p => p.id === procedure.practitioner_id
+    );
     return (
       <div data-testid={`procedure-card-${procedure.id}`}>
         <span>{procedure.procedure_name}</span>
-        <span data-testid={`type-${procedure.id}`}>{procedure.procedure_type}</span>
+        <span data-testid={`type-${procedure.id}`}>
+          {procedure.procedure_type}
+        </span>
         <span data-testid={`status-${procedure.id}`}>{procedure.status}</span>
-        <span data-testid={`facility-${procedure.id}`}>{procedure.facility}</span>
+        <span data-testid={`facility-${procedure.id}`}>
+          {procedure.facility}
+        </span>
         {procedure.procedure_code && <span>{procedure.procedure_code}</span>}
-        {procedure.procedure_duration && <span>{procedure.procedure_duration} min</span>}
-        {procedure.anesthesia_type && <span data-testid={`anesthesia-${procedure.id}`}>{procedure.anesthesia_type}</span>}
+        {procedure.procedure_duration && (
+          <span>{procedure.procedure_duration} min</span>
+        )}
+        {procedure.anesthesia_type && (
+          <span data-testid={`anesthesia-${procedure.id}`}>
+            {procedure.anesthesia_type}
+          </span>
+        )}
         {practitioner && <span>{practitioner.name}</span>}
-        {procedure.procedure_complications && <span data-testid={`complications-${procedure.id}`}>{procedure.procedure_complications}</span>}
+        {procedure.procedure_complications && (
+          <span data-testid={`complications-${procedure.id}`}>
+            {procedure.procedure_complications}
+          </span>
+        )}
         <button onClick={() => onView(procedure)}>buttons.view</button>
         <button onClick={() => onEdit(procedure)}>buttons.edit</button>
         <button onClick={() => onDelete(procedure.id)}>buttons.delete</button>
@@ -274,15 +316,21 @@ vi.mock('../../../components/medical/procedures/ProcedureCard', () => ({
 vi.mock('../../../components/medical/procedures/ProcedureViewModal', () => ({
   default: ({ isOpen, onClose, procedure, onEdit, practitioners }) => {
     if (!isOpen || !procedure) return null;
-    const practitioner = practitioners?.find(p => p.id === procedure.practitioner_id);
+    const practitioner = practitioners?.find(
+      p => p.id === procedure.practitioner_id
+    );
     return (
       <div data-testid="view-modal">
         <h2>procedures.viewTitle</h2>
         <span>{procedure.procedure_name}</span>
         <span>{procedure.description}</span>
         {procedure.notes && <span>{procedure.notes}</span>}
-        {procedure.procedure_complications && <span>{procedure.procedure_complications}</span>}
-        {procedure.anesthesia_notes && <span>{procedure.anesthesia_notes}</span>}
+        {procedure.procedure_complications && (
+          <span>{procedure.procedure_complications}</span>
+        )}
+        {procedure.anesthesia_notes && (
+          <span>{procedure.anesthesia_notes}</span>
+        )}
         {practitioner && <span>{practitioner.name}</span>}
         <button onClick={onClose}>buttons.close</button>
         <button onClick={() => onEdit(procedure)}>buttons.edit</button>
@@ -293,7 +341,17 @@ vi.mock('../../../components/medical/procedures/ProcedureViewModal', () => ({
 
 // ProcedureFormWrapper – controlled form mock
 vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
-  default: ({ isOpen, onClose, title, formData, onInputChange, onSubmit, editingItem, practitioners, children }) => {
+  default: ({
+    isOpen,
+    onClose,
+    title,
+    formData,
+    onInputChange,
+    onSubmit,
+    editingItem,
+    practitioners,
+    children,
+  }) => {
     if (!isOpen) return null;
     const handleChange = (name, value) => {
       onInputChange({ target: { name, value } });
@@ -403,7 +461,9 @@ vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
             >
               <option value="">--</option>
               {(practitioners || []).map(p => (
-                <option key={p.id} value={String(p.id)}>{p.name}</option>
+                <option key={p.id} value={String(p.id)}>
+                  {p.name}
+                </option>
               ))}
             </select>
           </label>
@@ -412,7 +472,9 @@ vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
             <textarea
               name="procedure_complications"
               value={formData.procedure_complications}
-              onChange={e => handleChange('procedure_complications', e.target.value)}
+              onChange={e =>
+                handleChange('procedure_complications', e.target.value)
+              }
             />
           </label>
           <label>
@@ -448,7 +510,9 @@ vi.mock('../../../components/medical/procedures/ProcedureFormWrapper', () => ({
           <button type="submit">
             {editingItem ? 'buttons.update' : 'buttons.submit'}
           </button>
-          <button type="button" onClick={onClose}>buttons.cancel</button>
+          <button type="button" onClick={onClose}>
+            buttons.cancel
+          </button>
         </form>
       </div>
     );
@@ -578,12 +642,21 @@ function setupDefaults(overrides = {}) {
 
   usePractitioners.mockReturnValue({ practitioners: mockPractitioners });
 
-  useDateFormat.mockReturnValue({ formatDate: (d) => d || '' });
+  useDateFormat.mockReturnValue({ formatDate: d => d || '' });
 
-  useResponsive.mockReturnValue({ isMobile: false, isTablet: false, isDesktop: true });
+  useResponsive.mockReturnValue({
+    isMobile: false,
+    isTablet: false,
+    isDesktop: true,
+  });
 
   useFormSubmissionWithUploads.mockReturnValue({
-    submissionState: { isSubmitting: false, isUploading: false, isCompleted: false, canClose: true },
+    submissionState: {
+      isSubmitting: false,
+      isUploading: false,
+      isCompleted: false,
+      canClose: true,
+    },
     startSubmission: mockStartSubmission,
     completeFormSubmission: mockCompleteFormSubmission,
     startFileUpload: mockStartFileUpload,
@@ -615,7 +688,9 @@ describe('Procedures Page Integration Tests', () => {
       render(<Procedures />);
 
       // Page header
-      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.procedures');
+      expect(screen.getByTestId('page-header')).toHaveTextContent(
+        'shared:categories.procedures'
+      );
 
       // All three procedures displayed in cards
       expect(screen.getByText('Colonoscopy')).toBeInTheDocument();
@@ -638,9 +713,15 @@ describe('Procedures Page Integration Tests', () => {
     it('shows procedure facilities', () => {
       render(<Procedures />);
 
-      expect(screen.getByTestId('facility-1')).toHaveTextContent('Endoscopy Center');
-      expect(screen.getByTestId('facility-2')).toHaveTextContent('Imaging Center');
-      expect(screen.getByTestId('facility-3')).toHaveTextContent('General Hospital');
+      expect(screen.getByTestId('facility-1')).toHaveTextContent(
+        'Endoscopy Center'
+      );
+      expect(screen.getByTestId('facility-2')).toHaveTextContent(
+        'Imaging Center'
+      );
+      expect(screen.getByTestId('facility-3')).toHaveTextContent(
+        'General Hospital'
+      );
     });
   });
 
@@ -658,20 +739,40 @@ describe('Procedures Page Integration Tests', () => {
 
       // Fill form fields
       const form = screen.getByTestId('form-modal');
-      const nameInput = within(form).getByRole('textbox', { name: /procedures\.form\.procedureName/i });
-      fireEvent.change(nameInput, { target: { name: 'procedure_name', value: 'Blood Test' } });
+      const nameInput = within(form).getByRole('textbox', {
+        name: /procedures\.form\.procedureName/i,
+      });
+      fireEvent.change(nameInput, {
+        target: { name: 'procedure_name', value: 'Blood Test' },
+      });
 
-      const typeSelect = within(form).getByRole('combobox', { name: /procedures\.form\.procedureType/i });
-      fireEvent.change(typeSelect, { target: { name: 'procedure_type', value: 'diagnostic' } });
+      const typeSelect = within(form).getByRole('combobox', {
+        name: /procedures\.form\.procedureType/i,
+      });
+      fireEvent.change(typeSelect, {
+        target: { name: 'procedure_type', value: 'diagnostic' },
+      });
 
-      const codeInput = within(form).getByRole('textbox', { name: /procedures\.form\.procedureCode/i });
-      fireEvent.change(codeInput, { target: { name: 'procedure_code', value: 'CPT-80053' } });
+      const codeInput = within(form).getByRole('textbox', {
+        name: /procedures\.form\.procedureCode/i,
+      });
+      fireEvent.change(codeInput, {
+        target: { name: 'procedure_code', value: 'CPT-80053' },
+      });
 
-      const dateInput = within(form).getByLabelText(/procedures\.form\.procedureDate/i);
-      fireEvent.change(dateInput, { target: { name: 'procedure_date', value: '2024-02-15' } });
+      const dateInput = within(form).getByLabelText(
+        /procedures\.form\.procedureDate/i
+      );
+      fireEvent.change(dateInput, {
+        target: { name: 'procedure_date', value: '2024-02-15' },
+      });
 
-      const facilityInput = within(form).getByRole('textbox', { name: /procedures\.form\.facility/i });
-      fireEvent.change(facilityInput, { target: { name: 'facility', value: 'Lab Services' } });
+      const facilityInput = within(form).getByRole('textbox', {
+        name: /procedures\.form\.facility/i,
+      });
+      fireEvent.change(facilityInput, {
+        target: { name: 'facility', value: 'Lab Services' },
+      });
 
       // Submit
       const submitButton = within(form).getByText('buttons.submit');
@@ -721,7 +822,9 @@ describe('Procedures Page Integration Tests', () => {
       expect(screen.getByText('45 min')).toBeInTheDocument();
 
       // Practitioner name
-      expect(screen.getAllByText('Dr. Wilson').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('Dr. Wilson').length).toBeGreaterThanOrEqual(
+        1
+      );
 
       // Anesthesia type
       expect(screen.getByTestId('anesthesia-1')).toHaveTextContent('sedation');
@@ -750,9 +853,15 @@ describe('Procedures Page Integration Tests', () => {
       const modal = screen.getByTestId('view-modal');
       expect(modal).toBeInTheDocument();
       expect(within(modal).getByText('Colonoscopy')).toBeInTheDocument();
-      expect(within(modal).getByText('Routine screening colonoscopy')).toBeInTheDocument();
-      expect(within(modal).getByText('No abnormalities found')).toBeInTheDocument();
-      expect(within(modal).getByText('Light sedation administered')).toBeInTheDocument();
+      expect(
+        within(modal).getByText('Routine screening colonoscopy')
+      ).toBeInTheDocument();
+      expect(
+        within(modal).getByText('No abnormalities found')
+      ).toBeInTheDocument();
+      expect(
+        within(modal).getByText('Light sedation administered')
+      ).toBeInTheDocument();
     });
 
     it('shows surgical procedure with complications in view modal', () => {
@@ -767,9 +876,15 @@ describe('Procedures Page Integration Tests', () => {
 
       const modal = screen.getByTestId('view-modal');
       expect(within(modal).getByText('Appendectomy')).toBeInTheDocument();
-      expect(within(modal).getByText('Laparoscopic appendectomy')).toBeInTheDocument();
-      expect(within(modal).getByText('Minor bleeding controlled')).toBeInTheDocument();
-      expect(within(modal).getByText('General anesthesia, patient tolerated well')).toBeInTheDocument();
+      expect(
+        within(modal).getByText('Laparoscopic appendectomy')
+      ).toBeInTheDocument();
+      expect(
+        within(modal).getByText('Minor bleeding controlled')
+      ).toBeInTheDocument();
+      expect(
+        within(modal).getByText('General anesthesia, patient tolerated well')
+      ).toBeInTheDocument();
     });
   });
 
@@ -815,7 +930,9 @@ describe('Procedures Page Integration Tests', () => {
 
       render(<Procedures />);
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-      expect(screen.getByText('procedures.noProceduresFound')).toBeInTheDocument();
+      expect(
+        screen.getByText('procedures.noProceduresFound')
+      ).toBeInTheDocument();
     });
 
     it('shows error alert when error exists', () => {
@@ -835,7 +952,9 @@ describe('Procedures Page Integration Tests', () => {
       });
 
       render(<Procedures />);
-      expect(screen.getByTestId('error-alert')).toHaveTextContent('Something went wrong');
+      expect(screen.getByTestId('error-alert')).toHaveTextContent(
+        'Something went wrong'
+      );
     });
 
     it('shows success message when present', () => {
@@ -854,7 +973,9 @@ describe('Procedures Page Integration Tests', () => {
       });
 
       render(<Procedures />);
-      expect(screen.getByTestId('success-alert')).toHaveTextContent('Procedure saved');
+      expect(screen.getByTestId('success-alert')).toHaveTextContent(
+        'Procedure saved'
+      );
     });
   });
 
@@ -883,8 +1004,12 @@ describe('Procedures Page Integration Tests', () => {
       await userEvent.click(addBtn);
 
       // Fill only the name
-      const nameInput = screen.getByRole('textbox', { name: /procedures\.form\.procedureName/i });
-      fireEvent.change(nameInput, { target: { name: 'procedure_name', value: 'Test Procedure' } });
+      const nameInput = screen.getByRole('textbox', {
+        name: /procedures\.form\.procedureName/i,
+      });
+      fireEvent.change(nameInput, {
+        target: { name: 'procedure_name', value: 'Test Procedure' },
+      });
 
       // Submit without date
       const submitBtn = screen.getByText('buttons.submit');
@@ -904,7 +1029,9 @@ describe('Procedures Page Integration Tests', () => {
         render(<Procedures />);
       }).not.toThrow();
 
-      expect(screen.getByTestId('page-header')).toHaveTextContent('shared:categories.procedures');
+      expect(screen.getByTestId('page-header')).toHaveTextContent(
+        'shared:categories.procedures'
+      );
     });
 
     it('displays practitioner names on cards', () => {
@@ -932,7 +1059,12 @@ describe('Procedures Page Integration Tests', () => {
 
     it('shows form loading overlay when isBlocking is true', () => {
       useFormSubmissionWithUploads.mockReturnValue({
-        submissionState: { isSubmitting: true, isUploading: false, isCompleted: false, canClose: false },
+        submissionState: {
+          isSubmitting: true,
+          isUploading: false,
+          isCompleted: false,
+          canClose: false,
+        },
         startSubmission: mockStartSubmission,
         completeFormSubmission: mockCompleteFormSubmission,
         startFileUpload: mockStartFileUpload,
@@ -941,7 +1073,11 @@ describe('Procedures Page Integration Tests', () => {
         resetSubmission: mockResetSubmission,
         isBlocking: true,
         canSubmit: false,
-        statusMessage: { title: 'Saving...', message: 'Please wait', type: 'loading' },
+        statusMessage: {
+          title: 'Saving...',
+          message: 'Please wait',
+          type: 'loading',
+        },
         isSubmitting: true,
         isUploading: false,
         isCompleted: false,

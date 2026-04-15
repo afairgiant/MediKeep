@@ -13,12 +13,23 @@ import MantineImmunizationForm from '../MantineImmunizationForm';
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => (
     <div>
-      <label htmlFor={`date-${label}`}>{label}{required && ' *'}</label>
+      <label htmlFor={`date-${label}`}>
+        {label}
+        {required && ' *'}
+      </label>
       <input
         id={`date-${label}`}
         type="date"
-        value={value ? (value instanceof Date ? value.toISOString().split('T')[0] : value) : ''}
-        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={
+          value
+            ? value instanceof Date
+              ? value.toISOString().split('T')[0]
+              : value
+            : ''
+        }
+        onChange={e =>
+          onChange(e.target.value ? new Date(e.target.value) : null)
+        }
         data-testid={`date-${label.toLowerCase().replace(/\s+/g, '-')}`}
         {...props}
       />
@@ -64,36 +75,61 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Title and button both show 'Add New Immunization'
-      expect(screen.getAllByText('Add New Immunization').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Add New Immunization').length
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)
+      ).toBeInTheDocument();
       // Date field from mock
-      expect(screen.getByLabelText(/shared:fields\.dateAdministered/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.dateAdministered/)
+      ).toBeInTheDocument();
     });
 
     test('does not render when closed', () => {
       render(<MantineImmunizationForm {...defaultProps} isOpen={false} />);
 
-      expect(screen.queryByText('Add New Immunization')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Add New Immunization')
+      ).not.toBeInTheDocument();
     });
 
     test('renders all form fields', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Required fields
-      expect(screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:fields\.dateAdministered/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.dateAdministered/)
+      ).toBeInTheDocument();
 
       // Optional fields
-      expect(screen.getByLabelText(/medical:immunizations\.doseNumber\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:immunizations\.lotNumber\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:immunizations\.doseNumber\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:immunizations\.lotNumber\.label/)
+      ).toBeInTheDocument();
       // Manufacturer is a Select
-      expect(screen.getAllByLabelText(/medical:immunizations\.manufacturer\.label/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/medical:immunizations\.manufacturer\.label/)
+          .length
+      ).toBeGreaterThan(0);
       // Site is a Select
-      expect(screen.getAllByLabelText(/medical:immunizations\.site\.label/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/medical:immunizations\.site\.label/).length
+      ).toBeGreaterThan(0);
       // Route is a Select
-      expect(screen.getAllByLabelText(/medical:immunizations\.route\.label/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/medical:immunizations\.route\.label/).length
+      ).toBeGreaterThan(0);
       // Expiration date from mock
-      expect(screen.getByLabelText(/medical:immunizations\.expirationDate\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:immunizations\.expirationDate\.label/)
+      ).toBeInTheDocument();
       // Notes
       expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
     });
@@ -118,8 +154,12 @@ describe('MantineImmunizationForm', () => {
     test('handles vaccine name input changes', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const vaccineNameInput = screen.getByLabelText(/medical:immunizations\.vaccineName\.label/);
-      fireEvent.change(vaccineNameInput, { target: { value: 'COVID-19 Vaccine' } });
+      const vaccineNameInput = screen.getByLabelText(
+        /medical:immunizations\.vaccineName\.label/
+      );
+      fireEvent.change(vaccineNameInput, {
+        target: { value: 'COVID-19 Vaccine' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -128,7 +168,9 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Date mock testid: date-{label.toLowerCase().replace(/\s+/g, '-')}
-      const dateInput = screen.getByTestId('date-shared:fields.dateadministered');
+      const dateInput = screen.getByTestId(
+        'date-shared:fields.dateadministered'
+      );
       fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
       // Date value may shift by timezone due to mock's new Date() UTC parsing
@@ -142,7 +184,9 @@ describe('MantineImmunizationForm', () => {
     test('handles dose number input changes', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const doseInput = screen.getByLabelText(/medical:immunizations\.doseNumber\.label/);
+      const doseInput = screen.getByLabelText(
+        /medical:immunizations\.doseNumber\.label/
+      );
       fireEvent.change(doseInput, { target: { value: '2' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -152,11 +196,15 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Manufacturer is a searchable Select with dynamicOptions
-      const manufacturerInput = getSelectInput(/medical:immunizations\.manufacturer\.label/);
+      const manufacturerInput = getSelectInput(
+        /medical:immunizations\.manufacturer\.label/
+      );
       await userEvent.click(manufacturerInput);
 
       // Options use t() so labels are i18n keys
-      const option = await screen.findByText('immunizations.manufacturerOptions.pfizerBioNTech');
+      const option = await screen.findByText(
+        'immunizations.manufacturerOptions.pfizerBioNTech'
+      );
       await userEvent.click(option);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -171,7 +219,9 @@ describe('MantineImmunizationForm', () => {
       await userEvent.click(routeInput);
 
       // Options use t() so labels are i18n keys
-      const option = await screen.findByText('immunizations.routeOptions.intramuscular');
+      const option = await screen.findByText(
+        'immunizations.routeOptions.intramuscular'
+      );
       await userEvent.click(option);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -185,7 +235,9 @@ describe('MantineImmunizationForm', () => {
       const siteInput = getSelectInput(/medical:immunizations\.site\.label/);
       await userEvent.click(siteInput);
 
-      const option = await screen.findByText('immunizations.siteOptions.leftArm');
+      const option = await screen.findByText(
+        'immunizations.siteOptions.leftArm'
+      );
       await userEvent.click(option);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -197,7 +249,9 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
-      fireEvent.change(notesTextarea, { target: { value: 'Patient tolerated vaccine well' } });
+      fireEvent.change(notesTextarea, {
+        target: { value: 'Patient tolerated vaccine well' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -271,8 +325,12 @@ describe('MantineImmunizationForm', () => {
 
       render(<MantineImmunizationForm {...propsWithDates} />);
 
-      const adminDateInput = screen.getByTestId('date-shared:fields.dateadministered');
-      const expDateInput = screen.getByTestId('date-medical:immunizations.expirationdate.label');
+      const adminDateInput = screen.getByTestId(
+        'date-shared:fields.dateadministered'
+      );
+      const expDateInput = screen.getByTestId(
+        'date-medical:immunizations.expirationdate.label'
+      );
 
       expect(adminDateInput).toHaveValue('2024-01-15');
       expect(expDateInput).toHaveValue('2024-12-31');
@@ -287,9 +345,15 @@ describe('MantineImmunizationForm', () => {
       await userEvent.click(routeInput);
 
       // Options use t() - show as i18n keys
-      expect(screen.getByText('immunizations.routeOptions.intramuscular')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.routeOptions.subcutaneous')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.routeOptions.intradermal')).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.routeOptions.intramuscular')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.routeOptions.subcutaneous')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.routeOptions.intradermal')
+      ).toBeInTheDocument();
       expect(screen.getByText('shared:fields.oral')).toBeInTheDocument();
       expect(screen.getByText('shared:fields.nasal')).toBeInTheDocument();
     });
@@ -300,20 +364,34 @@ describe('MantineImmunizationForm', () => {
       const siteInput = getSelectInput(/medical:immunizations\.site\.label/);
       await userEvent.click(siteInput);
 
-      expect(screen.getByText('immunizations.siteOptions.leftArm')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.siteOptions.rightArm')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.siteOptions.leftThigh')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.siteOptions.rightThigh')).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.siteOptions.leftArm')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.siteOptions.rightArm')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.siteOptions.leftThigh')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.siteOptions.rightThigh')
+      ).toBeInTheDocument();
     });
 
     test('displays manufacturer options correctly', async () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const manufacturerInput = getSelectInput(/medical:immunizations\.manufacturer\.label/);
+      const manufacturerInput = getSelectInput(
+        /medical:immunizations\.manufacturer\.label/
+      );
       await userEvent.click(manufacturerInput);
 
-      expect(screen.getByText('immunizations.manufacturerOptions.pfizerBioNTech')).toBeInTheDocument();
-      expect(screen.getByText('immunizations.manufacturerOptions.moderna')).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.manufacturerOptions.pfizerBioNTech')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('immunizations.manufacturerOptions.moderna')
+      ).toBeInTheDocument();
     });
   });
 
@@ -321,7 +399,9 @@ describe('MantineImmunizationForm', () => {
     test('validates required vaccine name field', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const vaccineNameInput = screen.getByLabelText(/medical:immunizations\.vaccineName\.label/);
+      const vaccineNameInput = screen.getByLabelText(
+        /medical:immunizations\.vaccineName\.label/
+      );
       expect(vaccineNameInput).toBeRequired();
     });
 
@@ -329,14 +409,18 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Date field from mock
-      const dateInput = screen.getByTestId('date-shared:fields.dateadministered');
+      const dateInput = screen.getByTestId(
+        'date-shared:fields.dateadministered'
+      );
       expect(dateInput).toBeInTheDocument();
     });
 
     test('accepts common vaccine names', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const vaccineNameInput = screen.getByLabelText(/medical:immunizations\.vaccineName\.label/);
+      const vaccineNameInput = screen.getByLabelText(
+        /medical:immunizations\.vaccineName\.label/
+      );
 
       const commonVaccines = [
         'COVID-19 Vaccine',
@@ -344,7 +428,7 @@ describe('MantineImmunizationForm', () => {
         'Tetanus-Diphtheria-Pertussis (Tdap)',
         'Measles, Mumps, Rubella (MMR)',
         'Hepatitis B',
-        'Pneumococcal Vaccine'
+        'Pneumococcal Vaccine',
       ];
 
       for (const vaccine of commonVaccines) {
@@ -356,7 +440,9 @@ describe('MantineImmunizationForm', () => {
     test('handles dose number validation', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const doseInput = screen.getByLabelText(/medical:immunizations\.doseNumber\.label/);
+      const doseInput = screen.getByLabelText(
+        /medical:immunizations\.doseNumber\.label/
+      );
       // NumberInput from Mantine renders as input
       expect(doseInput).toBeInTheDocument();
 
@@ -375,11 +461,17 @@ describe('MantineImmunizationForm', () => {
         notes: 'Second dose in series, patient completed primary series',
       };
 
-      render(<MantineImmunizationForm {...defaultProps} formData={seriesData} />);
+      render(
+        <MantineImmunizationForm {...defaultProps} formData={seriesData} />
+      );
 
       expect(screen.getByDisplayValue('COVID-19 Vaccine')).toBeInTheDocument();
       expect(screen.getByDisplayValue('2')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Second dose in series, patient completed primary series')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue(
+          'Second dose in series, patient completed primary series'
+        )
+      ).toBeInTheDocument();
     });
 
     test('supports booster shot documentation', () => {
@@ -391,11 +483,17 @@ describe('MantineImmunizationForm', () => {
         notes: 'First booster shot, 6 months after primary series',
       };
 
-      render(<MantineImmunizationForm {...defaultProps} formData={boosterData} />);
+      render(
+        <MantineImmunizationForm {...defaultProps} formData={boosterData} />
+      );
 
       expect(screen.getByDisplayValue('COVID-19 Booster')).toBeInTheDocument();
       expect(screen.getByDisplayValue('3')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('First booster shot, 6 months after primary series')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue(
+          'First booster shot, 6 months after primary series'
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -403,7 +501,9 @@ describe('MantineImmunizationForm', () => {
     test('handles lot number input for vaccine tracking', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const lotInput = screen.getByLabelText(/medical:immunizations\.lotNumber\.label/);
+      const lotInput = screen.getByLabelText(
+        /medical:immunizations\.lotNumber\.label/
+      );
       fireEvent.change(lotInput, { target: { value: 'FL4157' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -412,7 +512,9 @@ describe('MantineImmunizationForm', () => {
     test('handles expiration date tracking', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const expDateInput = screen.getByTestId('date-medical:immunizations.expirationdate.label');
+      const expDateInput = screen.getByTestId(
+        'date-medical:immunizations.expirationdate.label'
+      );
       fireEvent.change(expDateInput, { target: { value: '2025-06-30' } });
 
       // Date value may shift by timezone due to mock's new Date() UTC parsing
@@ -429,13 +531,23 @@ describe('MantineImmunizationForm', () => {
         lot_number: 'LOT2024FLU001',
         manufacturer: 'Sanofi',
         expiration_date: '2024-12-31',
-        notes: 'Vaccine stored at proper temperature, no adverse reactions reported',
+        notes:
+          'Vaccine stored at proper temperature, no adverse reactions reported',
       };
 
-      render(<MantineImmunizationForm {...defaultProps} formData={safetyTrackingData} />);
+      render(
+        <MantineImmunizationForm
+          {...defaultProps}
+          formData={safetyTrackingData}
+        />
+      );
 
       expect(screen.getByDisplayValue('LOT2024FLU001')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Vaccine stored at proper temperature, no adverse reactions reported')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue(
+          'Vaccine stored at proper temperature, no adverse reactions reported'
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -459,7 +571,9 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Manufacturer select should still render even without pre-selected value
-      const manufacturerInputs = screen.getAllByLabelText(/medical:immunizations\.manufacturer\.label/);
+      const manufacturerInputs = screen.getAllByLabelText(
+        /medical:immunizations\.manufacturer\.label/
+      );
       expect(manufacturerInputs.length).toBeGreaterThan(0);
     });
   });
@@ -469,20 +583,33 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Check required fields exist
-      expect(screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:fields\.dateAdministered/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.dateAdministered/)
+      ).toBeInTheDocument();
 
       // Check optional fields exist
-      expect(screen.getByLabelText(/medical:immunizations\.doseNumber\.label/)).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/medical:immunizations\.manufacturer\.label/).length).toBeGreaterThan(0);
+      expect(
+        screen.getByLabelText(/medical:immunizations\.doseNumber\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByLabelText(/medical:immunizations\.manufacturer\.label/)
+          .length
+      ).toBeGreaterThan(0);
     });
 
     test('has proper descriptions for vaccine fields', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Descriptions use i18n keys
-      expect(screen.getByText('medical:immunizations.vaccineName.description')).toBeInTheDocument();
-      expect(screen.getByText('medical:immunizations.doseNumber.description')).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:immunizations.vaccineName.description')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:immunizations.doseNumber.description')
+      ).toBeInTheDocument();
     });
 
     test('has proper button attributes', () => {
@@ -502,22 +629,34 @@ describe('MantineImmunizationForm', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
       // Fill text fields
-      const vaccineInput = screen.getByLabelText(/medical:immunizations\.vaccineName\.label/);
-      fireEvent.change(vaccineInput, { target: { value: 'Tetanus-Diphtheria-Pertussis (Tdap)' } });
+      const vaccineInput = screen.getByLabelText(
+        /medical:immunizations\.vaccineName\.label/
+      );
+      fireEvent.change(vaccineInput, {
+        target: { value: 'Tetanus-Diphtheria-Pertussis (Tdap)' },
+      });
 
-      const dateInput = screen.getByTestId('date-shared:fields.dateadministered');
+      const dateInput = screen.getByTestId(
+        'date-shared:fields.dateadministered'
+      );
       fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
-      const doseInput = screen.getByLabelText(/medical:immunizations\.doseNumber\.label/);
+      const doseInput = screen.getByLabelText(
+        /medical:immunizations\.doseNumber\.label/
+      );
       fireEvent.change(doseInput, { target: { value: '1' } });
 
-      const lotInput = screen.getByLabelText(/medical:immunizations\.lotNumber\.label/);
+      const lotInput = screen.getByLabelText(
+        /medical:immunizations\.lotNumber\.label/
+      );
       fireEvent.change(lotInput, { target: { value: 'TDP123456' } });
 
       // Select injection site
       const siteInput = getSelectInput(/medical:immunizations\.site\.label/);
       await userEvent.click(siteInput);
-      const siteOption = await screen.findByText('immunizations.siteOptions.leftArm');
+      const siteOption = await screen.findByText(
+        'immunizations.siteOptions.leftArm'
+      );
       await userEvent.click(siteOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -537,11 +676,19 @@ describe('MantineImmunizationForm', () => {
         notes: 'Fourth dose in DTaP series, child age 18 months',
       };
 
-      render(<MantineImmunizationForm {...defaultProps} formData={pediatricData} />);
+      render(
+        <MantineImmunizationForm {...defaultProps} formData={pediatricData} />
+      );
 
-      expect(screen.getByDisplayValue('DTaP (Diphtheria, Tetanus, Pertussis)')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('DTaP (Diphtheria, Tetanus, Pertussis)')
+      ).toBeInTheDocument();
       expect(screen.getByDisplayValue('4')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Fourth dose in DTaP series, child age 18 months')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue(
+          'Fourth dose in DTaP series, child age 18 months'
+        )
+      ).toBeInTheDocument();
     });
 
     test('supports travel immunization documentation', () => {
@@ -550,13 +697,20 @@ describe('MantineImmunizationForm', () => {
         date_administered: '2024-01-20',
         dose_number: '1',
         manufacturer: 'Merck',
-        notes: 'Travel immunization for trip to South America, second dose due in 6-12 months',
+        notes:
+          'Travel immunization for trip to South America, second dose due in 6-12 months',
       };
 
-      render(<MantineImmunizationForm {...defaultProps} formData={travelData} />);
+      render(
+        <MantineImmunizationForm {...defaultProps} formData={travelData} />
+      );
 
       expect(screen.getByDisplayValue('Hepatitis A')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Travel immunization for trip to South America, second dose due in 6-12 months')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue(
+          'Travel immunization for trip to South America, second dose due in 6-12 months'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

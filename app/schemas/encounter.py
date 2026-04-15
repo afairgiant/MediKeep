@@ -33,7 +33,9 @@ class EncounterBase(TaggedEntityMixin):
     @classmethod
     def validate_reason(cls, v):
         """Validate encounter reason"""
-        return validate_required_text(v, max_length=200, min_length=2, field_name="Encounter reason")
+        return validate_required_text(
+            v, max_length=200, min_length=2, field_name="Encounter reason"
+        )
 
     @field_validator("notes")
     @classmethod
@@ -75,7 +77,9 @@ class EncounterBase(TaggedEntityMixin):
     @classmethod
     def validate_follow_up_instructions(cls, v):
         """Validate follow-up instructions"""
-        return validate_text_field(v, max_length=5000, field_name="Follow-up instructions")
+        return validate_text_field(
+            v, max_length=5000, field_name="Follow-up instructions"
+        )
 
     @field_validator("duration_minutes")
     @classmethod
@@ -202,7 +206,9 @@ class EncounterUpdate(BaseModel):
     @classmethod
     def validate_follow_up_instructions(cls, v):
         """Validate follow-up instructions if provided"""
-        return validate_text_field(v, max_length=5000, field_name="Follow-up instructions")
+        return validate_text_field(
+            v, max_length=5000, field_name="Follow-up instructions"
+        )
 
     @field_validator("duration_minutes")
     @classmethod

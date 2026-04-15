@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 /**
  * Reusable hook for handling form input changes in Mantine forms
  * Provides standardized handlers for TextInput, Select, and DateInput components
- * 
+ *
  * @param {Function} onInputChange - Callback function to handle form data changes
  * @returns {Object} - Object containing form handler functions
  */
@@ -40,7 +40,7 @@ export function useFormHandlers(onInputChange) {
   const handleDateChange = useCallback(
     field => date => {
       let formattedDate = '';
-      
+
       if (date) {
         // Check if it's already a Date object, if not try to create one
         let dateObj;
@@ -68,7 +68,7 @@ export function useFormHandlers(onInputChange) {
         } else {
           dateObj = new Date(date);
         }
-        
+
         // Verify we have a valid date before formatting
         if (!isNaN(dateObj.getTime())) {
           // Use local date formatting to avoid timezone issues with toISOString()
@@ -78,7 +78,7 @@ export function useFormHandlers(onInputChange) {
           formattedDate = `${year}-${month}-${day}`;
         }
       }
-      
+
       const syntheticEvent = {
         target: {
           name: field,

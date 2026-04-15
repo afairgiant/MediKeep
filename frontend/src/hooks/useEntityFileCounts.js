@@ -37,7 +37,10 @@ export function useEntityFileCounts(entityType, entities) {
           const count = Array.isArray(files) ? files.length : 0;
           setFileCounts(prev => ({ ...prev, [entity.id]: count }));
         } catch (error) {
-          logger.error(`Error loading file count for ${entityType} ${entity.id}:`, error);
+          logger.error(
+            `Error loading file count for ${entityType} ${entity.id}:`,
+            error
+          );
           setFileCounts(prev => ({ ...prev, [entity.id]: 0 }));
         } finally {
           setFileCountsLoading(prev => ({ ...prev, [entity.id]: false }));
@@ -76,25 +79,31 @@ export function useEntityFileCounts(entityType, entities) {
    *
    * @param {number|string} entityId - The ID of the entity to refresh
    */
-  const refreshFileCount = useCallback(async entityId => {
-    try {
-      // Force reload by removing from loaded set
-      loadedFileCountsRef.current.delete(entityId);
-      setFileCountsLoading(prev => ({ ...prev, [entityId]: true }));
+  const refreshFileCount = useCallback(
+    async entityId => {
+      try {
+        // Force reload by removing from loaded set
+        loadedFileCountsRef.current.delete(entityId);
+        setFileCountsLoading(prev => ({ ...prev, [entityId]: true }));
 
-      const files = await apiService.getEntityFiles(entityType, entityId);
-      const count = Array.isArray(files) ? files.length : 0;
+        const files = await apiService.getEntityFiles(entityType, entityId);
+        const count = Array.isArray(files) ? files.length : 0;
 
-      setFileCounts(prev => ({ ...prev, [entityId]: count }));
-      loadedFileCountsRef.current.add(entityId);
-    } catch (error) {
-      logger.error(`Error refreshing file count for ${entityType} ${entityId}:`, error);
-      setFileCounts(prev => ({ ...prev, [entityId]: 0 }));
-      loadedFileCountsRef.current.add(entityId);
-    } finally {
-      setFileCountsLoading(prev => ({ ...prev, [entityId]: false }));
-    }
-  }, [entityType]);
+        setFileCounts(prev => ({ ...prev, [entityId]: count }));
+        loadedFileCountsRef.current.add(entityId);
+      } catch (error) {
+        logger.error(
+          `Error refreshing file count for ${entityType} ${entityId}:`,
+          error
+        );
+        setFileCounts(prev => ({ ...prev, [entityId]: 0 }));
+        loadedFileCountsRef.current.add(entityId);
+      } finally {
+        setFileCountsLoading(prev => ({ ...prev, [entityId]: false }));
+      }
+    },
+    [entityType]
+  );
 
   return {
     fileCounts,

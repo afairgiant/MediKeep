@@ -20,7 +20,7 @@ import {
   Table,
   Tooltip,
   Box,
-  ThemeIcon
+  ThemeIcon,
 } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import {
@@ -32,10 +32,13 @@ import {
   IconCheck,
   IconX,
   IconFlask,
-  IconCategory
+  IconCategory,
 } from '@tabler/icons-react';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
-import { getCategoryDisplayName, getCategoryColor } from '../../../constants/labCategories';
+import {
+  getCategoryDisplayName,
+  getCategoryColor,
+} from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 
 interface TestComponentStatsProps {
@@ -67,20 +70,23 @@ interface CategoryStats {
 const TestComponentStats: React.FC<TestComponentStatsProps> = ({
   components,
   loading = false,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
-  const handleError = useCallback((error: Error, context: string) => {
-    logger.error('test_component_stats_error', {
-      message: `Error in TestComponentStats: ${context}`,
-      error: error.message,
-      component: 'TestComponentStats',
-    });
+  const handleError = useCallback(
+    (error: Error, context: string) => {
+      logger.error('test_component_stats_error', {
+        message: `Error in TestComponentStats: ${context}`,
+        error: error.message,
+        component: 'TestComponentStats',
+      });
 
-    if (onError) {
-      onError(error);
-    }
-  }, [onError]);
+      if (onError) {
+        onError(error);
+      }
+    },
+    [onError]
+  );
 
   const stats = useMemo<StatsData>(() => {
     try {
@@ -103,12 +109,23 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         byCategory[category] = (byCategory[category] || 0) + 1;
 
         // Count components with reference ranges
-        if (component.ref_range_min != null || component.ref_range_max != null || component.ref_range_text) {
+        if (
+          component.ref_range_min != null ||
+          component.ref_range_max != null ||
+          component.ref_range_text
+        ) {
           withRanges++;
 
           // Check if out of range
-          if (component.ref_range_min != null && component.ref_range_max != null && component.value != null) {
-            if (component.value < component.ref_range_min || component.value > component.ref_range_max) {
+          if (
+            component.ref_range_min != null &&
+            component.ref_range_max != null &&
+            component.value != null
+          ) {
+            if (
+              component.value < component.ref_range_min ||
+              component.value > component.ref_range_max
+            ) {
               outOfRange++;
             }
           }
@@ -139,7 +156,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         withRanges,
         criticalCount,
         abnormalCount,
-        normalCount
+        normalCount,
       };
     } catch (error) {
       handleError(error as Error, 'calculate_stats');
@@ -151,30 +168,40 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         withRanges: 0,
         criticalCount: 0,
         abnormalCount: 0,
-        normalCount: 0
+        normalCount: 0,
       };
     }
   }, [components, handleError]);
 
   const categoryStats = useMemo<CategoryStats[]>(() => {
     try {
-      return Object.entries(stats.byCategory).map(([category, count]) => {
-        const categoryComponents = components.filter(c => (c.category || 'other') === category);
-        const normalCount = categoryComponents.filter(c => c.status?.toLowerCase() === 'normal').length;
-        const abnormalCount = categoryComponents.filter(c =>
-          ['abnormal', 'high', 'low', 'borderline'].includes(c.status?.toLowerCase() || '')
-        ).length;
-        const criticalCount = categoryComponents.filter(c => c.status?.toLowerCase() === 'critical').length;
+      return Object.entries(stats.byCategory)
+        .map(([category, count]) => {
+          const categoryComponents = components.filter(
+            c => (c.category || 'other') === category
+          );
+          const normalCount = categoryComponents.filter(
+            c => c.status?.toLowerCase() === 'normal'
+          ).length;
+          const abnormalCount = categoryComponents.filter(c =>
+            ['abnormal', 'high', 'low', 'borderline'].includes(
+              c.status?.toLowerCase() || ''
+            )
+          ).length;
+          const criticalCount = categoryComponents.filter(
+            c => c.status?.toLowerCase() === 'critical'
+          ).length;
 
-        return {
-          category,
-          count,
-          normalCount,
-          abnormalCount,
-          criticalCount,
-          percentage: stats.total > 0 ? (count / stats.total) * 100 : 0
-        };
-      }).sort((a, b) => b.count - a.count);
+          return {
+            category,
+            count,
+            normalCount,
+            abnormalCount,
+            criticalCount,
+            percentage: stats.total > 0 ? (count / stats.total) * 100 : 0,
+          };
+        })
+        .sort((a, b) => b.count - a.count);
     } catch (error) {
       handleError(error as Error, 'calculate_category_stats');
       return [];
@@ -188,7 +215,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
     critical: 'red',
     abnormal: 'yellow',
     borderline: 'yellow',
-    unknown: 'gray'
+    unknown: 'gray',
   };
 
   const getStatusIcon = (status: string) => {
@@ -211,10 +238,14 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
 
   const overallHealthScore = useMemo(() => {
     // Only count quantitative components for the health score
-    const quantitativeComponents = components.filter(c => c.result_type !== 'qualitative');
+    const quantitativeComponents = components.filter(
+      c => c.result_type !== 'qualitative'
+    );
     const quantTotal = quantitativeComponents.length;
     if (quantTotal === 0) return 0;
-    const quantNormal = quantitativeComponents.filter(c => c.status?.toLowerCase() === 'normal').length;
+    const quantNormal = quantitativeComponents.filter(
+      c => c.status?.toLowerCase() === 'normal'
+    ).length;
     return Math.round((quantNormal / quantTotal) * 100);
   }, [components]);
 
@@ -231,7 +262,9 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Center h={200}>
           <Stack align="center" gap="md">
             <IconChartBar size={48} color="var(--mantine-color-gray-5)" />
-            <Text size="lg" c="dimmed">Loading statistics...</Text>
+            <Text size="lg" c="dimmed">
+              Loading statistics...
+            </Text>
           </Stack>
         </Center>
       </Card>
@@ -244,7 +277,9 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Center h={200}>
           <Stack align="center" gap="md">
             <IconChartBar size={48} color="var(--mantine-color-gray-5)" />
-            <Text size="lg" c="dimmed">{t('labresults:stats.noData')}</Text>
+            <Text size="lg" c="dimmed">
+              {t('labresults:stats.noData')}
+            </Text>
             <Text size="sm" c="dimmed" ta="center">
               {t('labresults:stats.noDataDescription')}
             </Text>
@@ -262,8 +297,12 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Card withBorder p="md" radius="md">
           <Group justify="space-between">
             <div>
-              <Text size="lg" fw={700}>{stats.total}</Text>
-              <Text size="sm" c="dimmed">{t('labresults:stats.totalTests')}</Text>
+              <Text size="lg" fw={700}>
+                {stats.total}
+              </Text>
+              <Text size="sm" c="dimmed">
+                {t('labresults:stats.totalTests')}
+              </Text>
             </div>
             <ThemeIcon color="blue" variant="light" size="lg">
               <IconFlask size={20} />
@@ -275,8 +314,12 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Card withBorder p="md" radius="md">
           <Group justify="space-between">
             <div>
-              <Text size="lg" fw={700} c="red">{stats.criticalCount}</Text>
-              <Text size="sm" c="dimmed">{t('labresults:stats.critical')}</Text>
+              <Text size="lg" fw={700} c="red">
+                {stats.criticalCount}
+              </Text>
+              <Text size="sm" c="dimmed">
+                {t('labresults:stats.critical')}
+              </Text>
             </div>
             <ThemeIcon color="red" variant="light" size="lg">
               <IconAlertTriangle size={20} />
@@ -288,8 +331,12 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Card withBorder p="md" radius="md">
           <Group justify="space-between">
             <div>
-              <Text size="lg" fw={700} c="orange">{stats.abnormalCount}</Text>
-              <Text size="sm" c="dimmed">{t('labresults:stats.abnormal')}</Text>
+              <Text size="lg" fw={700} c="orange">
+                {stats.abnormalCount}
+              </Text>
+              <Text size="sm" c="dimmed">
+                {t('labresults:stats.abnormal')}
+              </Text>
             </div>
             <ThemeIcon color="orange" variant="light" size="lg">
               <IconTrendingUp size={20} />
@@ -301,8 +348,12 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
         <Card withBorder p="md" radius="md">
           <Group justify="space-between">
             <div>
-              <Text size="lg" fw={700} c="green">{stats.normalCount}</Text>
-              <Text size="sm" c="dimmed">{t('labresults:stats.normal')}</Text>
+              <Text size="lg" fw={700} c="green">
+                {stats.normalCount}
+              </Text>
+              <Text size="sm" c="dimmed">
+                {t('labresults:stats.normal')}
+              </Text>
             </div>
             <ThemeIcon color="green" variant="light" size="lg">
               <IconCheck size={20} />
@@ -327,7 +378,10 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
                 size={120}
                 thickness={12}
                 sections={[
-                  { value: overallHealthScore, color: getHealthScoreColor(overallHealthScore) }
+                  {
+                    value: overallHealthScore,
+                    color: getHealthScoreColor(overallHealthScore),
+                  },
                 ]}
                 label={
                   <Center>
@@ -340,12 +394,16 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
             </Center>
 
             <Text size="sm" c="dimmed" ta="center">
-              {t('labresults:stats.basedOn', { count: stats.withRanges || stats.total })}
+              {t('labresults:stats.basedOn', {
+                count: stats.withRanges || stats.total,
+              })}
             </Text>
 
             {stats.criticalCount > 0 && (
               <Alert color="red" icon={<IconAlertTriangle size={16} />}>
-                {t('labresults:stats.criticalResultsWarning', { count: stats.criticalCount })}
+                {t('labresults:stats.criticalResultsWarning', {
+                  count: stats.criticalCount,
+                })}
               </Alert>
             )}
           </Stack>
@@ -358,14 +416,16 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
 
             <Stack gap="sm">
               {Object.entries(stats.byStatus)
-                .sort(([,a], [,b]) => b - a)
+                .sort(([, a], [, b]) => b - a)
                 .map(([status, count]) => {
                   const percentage = (count / stats.total) * 100;
                   return (
                     <Group key={status} justify="space-between">
                       <Group gap="xs">
                         {getStatusIcon(status)}
-                        <Text size="sm" tt="capitalize">{status}</Text>
+                        <Text size="sm" tt="capitalize">
+                          {status}
+                        </Text>
                       </Group>
                       <Group gap="xs">
                         <Text size="sm">{count}</Text>
@@ -397,22 +457,34 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
               <Paper withBorder p="sm" radius="sm">
                 <Stack gap={4} align="center">
-                  <Text size="lg" fw={700}>{stats.withRanges}</Text>
-                  <Text size="xs" c="dimmed" ta="center">{t('labresults:stats.testsWithRanges')}</Text>
+                  <Text size="lg" fw={700}>
+                    {stats.withRanges}
+                  </Text>
+                  <Text size="xs" c="dimmed" ta="center">
+                    {t('labresults:stats.testsWithRanges')}
+                  </Text>
                 </Stack>
               </Paper>
 
               <Paper withBorder p="sm" radius="sm">
                 <Stack gap={4} align="center">
-                  <Text size="lg" fw={700} c="orange">{stats.outOfRange}</Text>
-                  <Text size="xs" c="dimmed" ta="center">{t('labresults:stats.outOfRange')}</Text>
+                  <Text size="lg" fw={700} c="orange">
+                    {stats.outOfRange}
+                  </Text>
+                  <Text size="xs" c="dimmed" ta="center">
+                    {t('labresults:stats.outOfRange')}
+                  </Text>
                 </Stack>
               </Paper>
 
               <Paper withBorder p="sm" radius="sm">
                 <Stack gap={4} align="center">
-                  <Text size="lg" fw={700} c="green">{stats.withRanges - stats.outOfRange}</Text>
-                  <Text size="xs" c="dimmed" ta="center">{t('labresults:stats.withinRange')}</Text>
+                  <Text size="lg" fw={700} c="green">
+                    {stats.withRanges - stats.outOfRange}
+                  </Text>
+                  <Text size="xs" c="dimmed" ta="center">
+                    {t('labresults:stats.withinRange')}
+                  </Text>
                 </Stack>
               </Paper>
             </SimpleGrid>
@@ -425,7 +497,10 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
                   size="lg"
                 />
                 <Text size="sm" ta="center" mt="xs">
-                  {t('labresults:stats.outOfRangeCount', { count: stats.outOfRange, total: stats.withRanges })}
+                  {t('labresults:stats.outOfRangeCount', {
+                    count: stats.outOfRange,
+                    total: stats.withRanges,
+                  })}
                 </Text>
               </>
             )}
@@ -440,7 +515,9 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
             <Group justify="space-between" align="center">
               <Title order={5}>{t('labresults:stats.categories')}</Title>
               <Badge variant="light" color="blue">
-                {t('labresults:stats.categoriesCount', { count: categoryStats.length })}
+                {t('labresults:stats.categoriesCount', {
+                  count: categoryStats.length,
+                })}
               </Badge>
             </Group>
 
@@ -512,14 +589,22 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
 
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
             <Stack gap="xs">
-              <Text size="sm" fw={500}>{t('labresults:stats.testCoverage')}</Text>
+              <Text size="sm" fw={500}>
+                {t('labresults:stats.testCoverage')}
+              </Text>
               <Text size="xs" c="dimmed">
-                {t('labresults:stats.coverageDetail', { withRanges: stats.withRanges, total: stats.total, percent: ((stats.withRanges / stats.total) * 100).toFixed(0) })}
+                {t('labresults:stats.coverageDetail', {
+                  withRanges: stats.withRanges,
+                  total: stats.total,
+                  percent: ((stats.withRanges / stats.total) * 100).toFixed(0),
+                })}
               </Text>
             </Stack>
 
             <Stack gap="xs">
-              <Text size="sm" fw={500}>{t('labresults:stats.resultsQuality')}</Text>
+              <Text size="sm" fw={500}>
+                {t('labresults:stats.resultsQuality')}
+              </Text>
               <Text size="xs" c="dimmed">
                 {stats.normalCount > stats.abnormalCount + stats.criticalCount
                   ? t('labresults:stats.resultsGood')
@@ -531,7 +616,13 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
           {stats.criticalCount > 0 && (
             <Alert color="red" variant="light">
               <Text size="sm">
-                <span dangerouslySetInnerHTML={{ __html: t('labresults:stats.criticalAction', { count: stats.criticalCount }) }} />
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: t('labresults:stats.criticalAction', {
+                      count: stats.criticalCount,
+                    }),
+                  }}
+                />
               </Text>
             </Alert>
           )}

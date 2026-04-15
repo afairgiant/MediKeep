@@ -105,7 +105,13 @@ router = APIRouter()
 
 # Centralized field mapping configuration to eliminate DRY violations
 DATETIME_FIELD_MAP = {
-    "user": ["created_at", "updated_at", "last_login", "last_sso_login", "account_linked_at"],
+    "user": [
+        "created_at",
+        "updated_at",
+        "last_login",
+        "last_sso_login",
+        "account_linked_at",
+    ],
     "patient": ["created_at", "updated_at"],
     "practitioner": ["created_at", "updated_at"],
     "pharmacy": ["created_at", "updated_at"],
@@ -207,7 +213,7 @@ FIELD_DISPLAY_CONFIG = {
         "list_fields": [
             "id",
             "first_name",
-            "last_name", 
+            "last_name",
             "birth_date",
             "gender",
             "owner_user_id",
@@ -811,7 +817,13 @@ FIELD_DISPLAY_CONFIG = {
             "created_at",
             "updated_at",
         ],
-        "search_fields": ["injury_name", "body_part", "mechanism", "severity", "status"],
+        "search_fields": [
+            "injury_name",
+            "body_part",
+            "mechanism",
+            "severity",
+            "status",
+        ],
     },
     "injury_type": {
         "list_fields": [
@@ -919,9 +931,15 @@ FIELD_DISPLAY_CONFIG = {
             "created_at",
             "updated_at",
         ],
-        "search_fields": ["equipment_name", "equipment_type", "manufacturer", "supplier"],
+        "search_fields": [
+            "equipment_name",
+            "equipment_type",
+            "manufacturer",
+            "supplier",
+        ],
     },
 }
+
 
 # Create basic schemas for sharing models (minimal for admin interface)
 class PatientShareCreate(BaseModel):
@@ -930,11 +948,13 @@ class PatientShareCreate(BaseModel):
     permission_level: str = "view"
     is_active: bool = True
 
+
 class InvitationCreate(BaseModel):
     sent_to_user_id: int
     invitation_type: str
     title: str
     message: Optional[str] = None
+
 
 class FamilyHistoryShareCreate(BaseModel):
     family_member_id: int
@@ -942,10 +962,13 @@ class FamilyHistoryShareCreate(BaseModel):
     permission_level: str = "view"
     is_active: bool = True
 
+
 # Create simple CRUD instances for sharing models
 patient_share_crud = CRUDBase[PatientShare, PatientShareCreate, dict](PatientShare)
 invitation_crud = CRUDBase[Invitation, InvitationCreate, dict](Invitation)
-family_history_share_crud = CRUDBase[FamilyHistoryShare, FamilyHistoryShareCreate, dict](FamilyHistoryShare)
+family_history_share_crud = CRUDBase[
+    FamilyHistoryShare, FamilyHistoryShareCreate, dict
+](FamilyHistoryShare)
 
 # Model registry mapping model names to their classes and CRUD instances
 MODEL_REGISTRY = {
@@ -1282,13 +1305,23 @@ def _resolve_search_field(model_name: str, model_class) -> Optional[str]:
         return search_fields[0]
 
     all_columns = [col.name for col in model_class.__table__.columns]
-    for field in ["name", "username", "title", "medication_name", "test_name", "allergen", "diagnosis"]:
+    for field in [
+        "name",
+        "username",
+        "title",
+        "medication_name",
+        "test_name",
+        "allergen",
+        "diagnosis",
+    ]:
         if field in all_columns:
             return field
     return None
 
 
-def _fetch_records(db: Session, model_info: dict, crud_instance, skip: int = None, limit: int = None):
+def _fetch_records(
+    db: Session, model_info: dict, crud_instance, skip: int = None, limit: int = None
+):
     """Fetch records using get_multi or a raw query, with optional pagination."""
     if hasattr(crud_instance, "get_multi"):
         effective_skip = skip if skip is not None else 0
@@ -1303,7 +1336,13 @@ def _fetch_records(db: Session, model_info: dict, crud_instance, skip: int = Non
     return q.all()
 
 
-def _get_model_records(db: Session, model_name: str, search: str = None, skip: int = None, limit: int = None):
+def _get_model_records(
+    db: Session,
+    model_name: str,
+    search: str = None,
+    skip: int = None,
+    limit: int = None,
+):
     """Fetch model records with optional search and pagination.
 
     Returns:
@@ -1317,7 +1356,9 @@ def _get_model_records(db: Session, model_name: str, search: str = None, skip: i
         search_field = _resolve_search_field(model_name, model_info["model"])
         if search_field:
             search_param = {"field": search_field, "term": search.strip()}
-            records = crud_instance.query(db=db, search=search_param, skip=skip, limit=limit)
+            records = crud_instance.query(
+                db=db, search=search_param, skip=skip, limit=limit
+            )
             all_matched = crud_instance.query(db=db, search=search_param)
             return records, len(all_matched)
 
@@ -1403,7 +1444,9 @@ def list_model_records(
 
     try:
         skip = (page - 1) * per_page
-        records, total = _get_model_records(db, model_name, search=search, skip=skip, limit=per_page)
+        records, total = _get_model_records(
+            db, model_name, search=search, skip=skip, limit=per_page
+        )
         fields_to_show = _get_fields_for_model(model_name)
 
         items = [
@@ -1472,7 +1515,10 @@ def export_model_records(
         raise
     except Exception as e:
         log_endpoint_error(
-            logger, request, f"Failed to export {model_name}", e,
+            logger,
+            request,
+            f"Failed to export {model_name}",
+            e,
             user_id=current_user.id,
         )
         raise HTTPException(

@@ -64,8 +64,10 @@ describe('Date and Time Utilities', () => {
     test('calls timezone service with correct parameters', () => {
       const date = '2023-12-01T10:30:00Z';
       formatDate(date);
-      
-      expect(timezoneService.formatDateTime).toHaveBeenCalledWith(date, { dateOnly: true });
+
+      expect(timezoneService.formatDateTime).toHaveBeenCalledWith(date, {
+        dateOnly: true,
+      });
     });
   });
 
@@ -73,22 +75,26 @@ describe('Date and Time Utilities', () => {
     test('calls timezone service with timezone by default', () => {
       const date = '2023-12-01T10:30:00Z';
       formatDateTime(date);
-      
-      expect(timezoneService.formatDateTime).toHaveBeenCalledWith(date, { includeTimezone: true });
+
+      expect(timezoneService.formatDateTime).toHaveBeenCalledWith(date, {
+        includeTimezone: true,
+      });
     });
 
     test('calls timezone service without timezone when requested', () => {
       const date = '2023-12-01T10:30:00Z';
       formatDateTime(date, false);
-      
-      expect(timezoneService.formatDateTime).toHaveBeenCalledWith(date, { includeTimezone: false });
+
+      expect(timezoneService.formatDateTime).toHaveBeenCalledWith(date, {
+        includeTimezone: false,
+      });
     });
   });
 
   describe('getCurrentTime', () => {
     test('calls timezone service getCurrentTime', () => {
       getCurrentTime();
-      
+
       expect(timezoneService.getCurrentTime).toHaveBeenCalled();
     });
   });
@@ -96,7 +102,7 @@ describe('Date and Time Utilities', () => {
   describe('parseDateSafely', () => {
     test('parses valid date strings', () => {
       const result = parseDateSafely('2023-12-01');
-      
+
       expect(result).toBeInstanceOf(Date);
       expect(result.getFullYear()).toBe(2023);
       expect(result.getMonth()).toBe(11); // December is month 11
@@ -106,7 +112,7 @@ describe('Date and Time Utilities', () => {
     test('parses Date objects', () => {
       const inputDate = new Date('2023-12-01');
       const result = parseDateSafely(inputDate);
-      
+
       expect(result).toBeInstanceOf(Date);
       expect(result.getTime()).toBe(inputDate.getTime());
     });
@@ -120,7 +126,7 @@ describe('Date and Time Utilities', () => {
 
     test('handles date-only format specifically', () => {
       const result = parseDateSafely('2023-01-15');
-      
+
       expect(result.getFullYear()).toBe(2023);
       expect(result.getMonth()).toBe(0); // January is month 0
       expect(result.getDate()).toBe(15);
@@ -130,21 +136,21 @@ describe('Date and Time Utilities', () => {
   describe('validateDateTime', () => {
     test('validates correct datetime strings', () => {
       const result = validateDateTime('2023-12-01T10:30:00');
-      
+
       expect(result.isValid).toBe(true);
       expect(result.error).toBeUndefined();
     });
 
     test('rejects empty values', () => {
       const result = validateDateTime('');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.error).toBe('datetime is required');
     });
 
     test('rejects invalid date formats', () => {
       const result = validateDateTime('invalid-date');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.error).toBe('Invalid datetime format');
     });
@@ -152,17 +158,17 @@ describe('Date and Time Utilities', () => {
     test('rejects dates outside reasonable range', () => {
       const result1 = validateDateTime('1800-01-01T00:00:00');
       const result2 = validateDateTime('2200-01-01T00:00:00');
-      
+
       expect(result1.isValid).toBe(false);
       expect(result1.error).toContain('between 1900 and 2100');
-      
+
       expect(result2.isValid).toBe(false);
       expect(result2.error).toContain('between 1900 and 2100');
     });
 
     test('uses custom field name in error messages', () => {
       const result = validateDateTime('', 'Birth Date');
-      
+
       expect(result.error).toBe('Birth Date is required');
     });
   });
@@ -237,7 +243,7 @@ describe('Utility Functions', () => {
     test('generates unique IDs', () => {
       const id1 = generateId();
       const id2 = generateId();
-      
+
       expect(id1).not.toBe(id2);
       expect(typeof id1).toBe('string');
       expect(id1.length).toBeGreaterThan(10);
@@ -249,7 +255,9 @@ describe('Utility Functions', () => {
     test('capitalizes first letter of each word', () => {
       expect(capitalizeWords('hello world')).toBe('Hello World');
       expect(capitalizeWords('john doe')).toBe('John Doe');
-      expect(capitalizeWords('the quick brown fox')).toBe('The Quick Brown Fox');
+      expect(capitalizeWords('the quick brown fox')).toBe(
+        'The Quick Brown Fox'
+      );
     });
 
     test('handles edge cases', () => {
@@ -294,7 +302,7 @@ describe('File Utilities', () => {
   describe('isFileTypeAllowed', () => {
     test('checks if file type is in allowed list', () => {
       const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-      
+
       expect(isFileTypeAllowed('image/jpeg', allowedTypes)).toBe(true);
       expect(isFileTypeAllowed('application/pdf', allowedTypes)).toBe(true);
       expect(isFileTypeAllowed('text/plain', allowedTypes)).toBe(false);
@@ -314,7 +322,7 @@ describe('Array Utilities', () => {
   describe('sortByProperty', () => {
     test('sorts array by property in ascending order', () => {
       const sorted = sortByProperty(testData, 'age');
-      
+
       expect(sorted[0].age).toBe(25);
       expect(sorted[1].age).toBe(28);
       expect(sorted[2].age).toBe(30);
@@ -323,7 +331,7 @@ describe('Array Utilities', () => {
 
     test('sorts array by property in descending order', () => {
       const sorted = sortByProperty(testData, 'age', 'desc');
-      
+
       expect(sorted[0].age).toBe(35);
       expect(sorted[1].age).toBe(30);
       expect(sorted[2].age).toBe(28);
@@ -332,7 +340,7 @@ describe('Array Utilities', () => {
 
     test('sorts by string properties', () => {
       const sorted = sortByProperty(testData, 'name');
-      
+
       expect(sorted[0].name).toBe('Alice');
       expect(sorted[1].name).toBe('Bob');
       expect(sorted[2].name).toBe('Jane');
@@ -342,7 +350,7 @@ describe('Array Utilities', () => {
     test('does not modify original array', () => {
       const originalLength = testData.length;
       const sorted = sortByProperty(testData, 'age');
-      
+
       expect(testData.length).toBe(originalLength);
       expect(sorted).not.toBe(testData);
     });
@@ -351,32 +359,32 @@ describe('Array Utilities', () => {
   describe('filterBySearch', () => {
     test('filters array by search term across multiple fields', () => {
       const results = filterBySearch(testData, 'john', ['name', 'role']);
-      
+
       expect(results).toHaveLength(1);
       expect(results[0].name).toBe('John');
     });
 
     test('returns all items when search term is empty', () => {
       const results = filterBySearch(testData, '', ['name']);
-      
+
       expect(results).toHaveLength(testData.length);
     });
 
     test('returns empty array when no matches found', () => {
       const results = filterBySearch(testData, 'xyz', ['name', 'role']);
-      
+
       expect(results).toHaveLength(0);
     });
 
     test('is case insensitive', () => {
       const results = filterBySearch(testData, 'DEVELOPER', ['role']);
-      
+
       expect(results).toHaveLength(2);
     });
 
     test('searches across multiple fields', () => {
       const results = filterBySearch(testData, 'dev', ['name', 'role']);
-      
+
       expect(results).toHaveLength(2); // John and Alice are developers
     });
   });
@@ -394,7 +402,7 @@ describe('Object Utilities', () => {
       };
 
       const cloned = deepClone(original);
-      
+
       expect(cloned).toEqual(original);
       expect(cloned).not.toBe(original);
       expect(cloned.details).not.toBe(original.details);
@@ -404,7 +412,7 @@ describe('Object Utilities', () => {
     test('handles arrays', () => {
       const original = [1, 2, { a: 3, b: [4, 5] }];
       const cloned = deepClone(original);
-      
+
       expect(cloned).toEqual(original);
       expect(cloned).not.toBe(original);
       expect(cloned[2]).not.toBe(original[2]);

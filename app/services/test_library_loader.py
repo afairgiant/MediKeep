@@ -67,23 +67,29 @@ def load_test_library() -> Dict[str, Any]:
         if _test_library_cache is not None:
             return _test_library_cache
 
-        logger.info("Loading test library from JSON", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "test_library_loading",
-            LogFields.FILE: str(TEST_LIBRARY_PATH),
-        })
+        logger.info(
+            "Loading test library from JSON",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "test_library_loading",
+                LogFields.FILE: str(TEST_LIBRARY_PATH),
+            },
+        )
 
         _validate_path(TEST_LIBRARY_PATH)
 
         with open(TEST_LIBRARY_PATH, "r", encoding="utf-8") as f:
             _test_library_cache = json.load(f)
 
-        logger.info("Test library loaded successfully", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "test_library_loaded",
-            "version": _test_library_cache.get("version"),
-            LogFields.COUNT: len(_test_library_cache.get("tests", [])),
-        })
+        logger.info(
+            "Test library loaded successfully",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "test_library_loaded",
+                "version": _test_library_cache.get("version"),
+                LogFields.COUNT: len(_test_library_cache.get("tests", [])),
+            },
+        )
 
         return _test_library_cache
 

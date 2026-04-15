@@ -9,7 +9,7 @@ import {
   convertForStorage,
   formatMeasurement,
   validationRanges,
-  unitLabels
+  unitLabels,
 } from '../unitConversion';
 
 describe('Weight Conversion', () => {
@@ -211,7 +211,7 @@ describe('Integration Tests - Real World Scenarios', () => {
     // Display in metric mode
     const displayHeight = convertForDisplay(storedHeight, 'height', 'metric');
     const displayWeight = convertForDisplay(storedWeight, 'weight', 'metric');
-    
+
     expect(displayHeight).toBeCloseTo(175.0, 1);
     expect(displayWeight).toBeCloseTo(83.0, 1);
 
@@ -281,7 +281,7 @@ describe('Edge Cases and Error Conditions', () => {
     const originalHeight = 68.897637795; // Very precise value
     const cm = convertHeight.inchesToCm(originalHeight);
     const backToInches = convertHeight.cmToInches(cm);
-    
+
     // Should maintain reasonable precision
     expect(Math.abs(backToInches - originalHeight)).toBeLessThan(0.01);
   });

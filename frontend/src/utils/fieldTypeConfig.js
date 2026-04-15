@@ -11,40 +11,31 @@
 // Currency-related fields (formatted with $ prefix)
 export const CURRENCY_FIELDS = [
   'deductible',
-  'copay', 
+  'copay',
   'allowance',
   'maximum',
   'cost',
   'price',
   'amount',
-  'fee'
+  'fee',
 ];
 
 // Percentage-related fields (formatted with % suffix)
-export const PERCENTAGE_FIELDS = [
-  'coverage',
-  'percent',
-  'rate'
-];
+export const PERCENTAGE_FIELDS = ['coverage', 'percent', 'rate'];
 
 // Fields that should be excluded from percentage formatting
 export const PERCENTAGE_EXCLUDE_FIELDS = [
-  'lens_coverage' // This field contains text, not percentages
+  'lens_coverage', // This field contains text, not percentages
 ];
 
 // Phone number fields (already defined in phoneUtils.js, imported here for consistency)
-export const PHONE_FIELDS = [
-  'phone',
-  'telephone',
-  'mobile',
-  'cell'
-];
+export const PHONE_FIELDS = ['phone', 'telephone', 'mobile', 'cell'];
 
 // Date-related fields (formatted as dates)
 export const DATE_FIELDS = [
   'date',
   '_at', // created_at, updated_at, etc.
-  '_on'  // scheduled_on, etc.
+  '_on', // scheduled_on, etc.
 ];
 
 // Boolean fields (formatted as Yes/No)
@@ -55,7 +46,7 @@ export const BOOLEAN_FIELDS = [
   'should_',
   'enabled',
   'active',
-  'primary'
+  'primary',
 ];
 
 /**
@@ -67,7 +58,7 @@ export const FIELD_TYPE_MAPPINGS = {
   percentage: PERCENTAGE_FIELDS,
   phone: PHONE_FIELDS,
   date: DATE_FIELDS,
-  boolean: BOOLEAN_FIELDS
+  boolean: BOOLEAN_FIELDS,
 };
 
 /**
@@ -75,7 +66,7 @@ export const FIELD_TYPE_MAPPINGS = {
  * Fields that should be excluded from certain formatting rules
  */
 export const FIELD_EXCLUSIONS = {
-  percentage: PERCENTAGE_EXCLUDE_FIELDS
+  percentage: PERCENTAGE_EXCLUDE_FIELDS,
 };
 
 /**
@@ -83,26 +74,28 @@ export const FIELD_EXCLUSIONS = {
  * @param {string} fieldName - The field name to check
  * @returns {string|null} The field type or null if no match
  */
-export const getFieldType = (fieldName) => {
+export const getFieldType = fieldName => {
   if (!fieldName || typeof fieldName !== 'string') return null;
-  
+
   const lowercaseFieldName = fieldName.toLowerCase();
-  
+
   // Check each field type
   for (const [typeName, patterns] of Object.entries(FIELD_TYPE_MAPPINGS)) {
-    const hasMatch = patterns.some(pattern => lowercaseFieldName.includes(pattern));
-    
+    const hasMatch = patterns.some(pattern =>
+      lowercaseFieldName.includes(pattern)
+    );
+
     // Check for exclusions
     if (hasMatch && FIELD_EXCLUSIONS[typeName]) {
-      const isExcluded = FIELD_EXCLUSIONS[typeName].some(excludePattern => 
+      const isExcluded = FIELD_EXCLUSIONS[typeName].some(excludePattern =>
         lowercaseFieldName.includes(excludePattern)
       );
       if (isExcluded) continue;
     }
-    
+
     if (hasMatch) return typeName;
   }
-  
+
   return null;
 };
 
@@ -114,21 +107,23 @@ export const getFieldType = (fieldName) => {
  */
 export const isFieldType = (fieldName, fieldType) => {
   if (!fieldName || !fieldType) return false;
-  
+
   const patterns = FIELD_TYPE_MAPPINGS[fieldType];
   if (!patterns) return false;
-  
+
   const lowercaseFieldName = fieldName.toLowerCase();
-  const hasMatch = patterns.some(pattern => lowercaseFieldName.includes(pattern));
-  
+  const hasMatch = patterns.some(pattern =>
+    lowercaseFieldName.includes(pattern)
+  );
+
   // Check for exclusions
   if (hasMatch && FIELD_EXCLUSIONS[fieldType]) {
-    const isExcluded = FIELD_EXCLUSIONS[fieldType].some(excludePattern => 
+    const isExcluded = FIELD_EXCLUSIONS[fieldType].some(excludePattern =>
       lowercaseFieldName.includes(excludePattern)
     );
     return !isExcluded;
   }
-  
+
   return hasMatch;
 };
 
@@ -140,28 +135,44 @@ export const INSURANCE_FIELD_CONFIG = {
   medical: {
     required: ['company_name', 'member_name', 'member_id'],
     coverage_fields: [
-      'primary_care_physician', 'deductible_individual', 'deductible_family',
-      'copay_primary_care', 'copay_specialist', 'copay_emergency_room', 'copay_urgent_care'
-    ]
+      'primary_care_physician',
+      'deductible_individual',
+      'deductible_family',
+      'copay_primary_care',
+      'copay_specialist',
+      'copay_emergency_room',
+      'copay_urgent_care',
+    ],
   },
   dental: {
     required: ['company_name', 'member_name', 'member_id'],
     coverage_fields: [
-      'annual_maximum', 'preventive_coverage', 'basic_coverage', 'major_coverage'
-    ]
+      'annual_maximum',
+      'preventive_coverage',
+      'basic_coverage',
+      'major_coverage',
+    ],
   },
   vision: {
     required: ['company_name', 'member_name', 'member_id'],
     coverage_fields: [
-      'exam_copay', 'frame_allowance', 'lens_coverage', 'contact_allowance'
-    ]
+      'exam_copay',
+      'frame_allowance',
+      'lens_coverage',
+      'contact_allowance',
+    ],
   },
   prescription: {
     required: ['company_name', 'member_name', 'member_id'],
     coverage_fields: [
-      'bin_number', 'pcn_number', 'rxgroup', 'copay_generic', 'copay_brand', 'copay_specialty'
-    ]
-  }
+      'bin_number',
+      'pcn_number',
+      'rxgroup',
+      'copay_generic',
+      'copay_brand',
+      'copay_specialty',
+    ],
+  },
 };
 
 /**
@@ -169,6 +180,8 @@ export const INSURANCE_FIELD_CONFIG = {
  * @param {string} insuranceType - The insurance type
  * @returns {Object} Configuration object for the insurance type
  */
-export const getInsuranceFieldConfig = (insuranceType) => {
-  return INSURANCE_FIELD_CONFIG[insuranceType] || INSURANCE_FIELD_CONFIG.medical;
+export const getInsuranceFieldConfig = insuranceType => {
+  return (
+    INSURANCE_FIELD_CONFIG[insuranceType] || INSURANCE_FIELD_CONFIG.medical
+  );
 };

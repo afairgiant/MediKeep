@@ -1,6 +1,7 @@
 """
 Test authentication endpoints.
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -22,8 +23,7 @@ class TestAuthEndpoints:
 
         # Attempt login
         response = client.post(
-            "/api/v1/auth/login",
-            data={"username": username, "password": password}
+            "/api/v1/auth/login", data={"username": username, "password": password}
         )
 
         assert response.status_code == 200
@@ -32,7 +32,9 @@ class TestAuthEndpoints:
         assert data["token_type"] == "bearer"
         # Token response doesn't include user data, just the token
 
-    def test_login_token_contains_iat_claim(self, client: TestClient, db_session: Session):
+    def test_login_token_contains_iat_claim(
+        self, client: TestClient, db_session: Session
+    ):
         """Test that JWT tokens include an iat (issued-at) claim for clock skew detection."""
         import base64
         import json
@@ -40,7 +42,7 @@ class TestAuthEndpoints:
         user_data = create_random_user(db_session)
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
 
         assert response.status_code == 200
@@ -54,8 +56,12 @@ class TestAuthEndpoints:
             payload_b64 += "=" * padding_len
         payload = json.loads(base64.urlsafe_b64decode(payload_b64))
 
-        assert "iat" in payload, "JWT must include 'iat' claim for client clock skew handling"
-        assert isinstance(payload["iat"], (int, float)), "'iat' must be a numeric timestamp"
+        assert (
+            "iat" in payload
+        ), "JWT must include 'iat' claim for client clock skew handling"
+        assert isinstance(
+            payload["iat"], (int, float)
+        ), "'iat' must be a numeric timestamp"
         assert "exp" in payload
         assert payload["iat"] <= payload["exp"], "'iat' must not be after 'exp'"
 
@@ -63,7 +69,7 @@ class TestAuthEndpoints:
         """Test login with invalid credentials."""
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": "nonexistent", "password": "wrongpassword"}
+            data={"username": "nonexistent", "password": "wrongpassword"},
         )
 
         assert response.status_code == 401
@@ -74,8 +80,7 @@ class TestAuthEndpoints:
     def test_login_missing_fields(self, client: TestClient):
         """Test login with missing fields."""
         response = client.post(
-            "/api/v1/auth/login",
-            data={"username": "testuser"}  # Missing password
+            "/api/v1/auth/login", data={"username": "testuser"}  # Missing password
         )
 
         assert response.status_code == 422
@@ -175,7 +180,7 @@ class TestAuthEndpoints:
             "username": "testuser",
             "email": "test@example.com",
             "password": "123",  # Too short
-            "full_name": "Test User"
+            "full_name": "Test User",
         }
 
         response = client.post("/api/v1/auth/register", json=user_data)
@@ -193,7 +198,9 @@ class TestAuthEndpoints:
 
         assert response.status_code == 422
 
-    def test_register_creates_patient_record(self, client: TestClient, db_session: Session):
+    def test_register_creates_patient_record(
+        self, client: TestClient, db_session: Session
+    ):
         """Test that registration automatically creates a patient record."""
         from app.crud.patient import patient as patient_crud
 
@@ -230,16 +237,14 @@ class TestAuthEndpoints:
 
         assert response.status_code == 401
 
-    @pytest.mark.parametrize("invalid_token", [
+    @pytest.mark.parametrize(
         "invalid_token",
-        "Bearer invalid_token",
-        "",
-        "NotBearer valid_looking_token"
-    ])
+        ["invalid_token", "Bearer invalid_token", "", "NotBearer valid_looking_token"],
+    )
     def test_invalid_auth_tokens(self, client: TestClient, invalid_token: str):
         """Test various invalid authentication tokens."""
         headers = {"Authorization": invalid_token} if invalid_token else {}
-        
+
         response = client.get("/api/v1/patients/me", headers=headers)
 
         assert response.status_code == 401
@@ -249,7 +254,7 @@ class TestAuthEndpoints:
         # This would require mocking time or creating an expired token
         # For now, we'll test with an invalid token format
         headers = {"Authorization": "Bearer expired.token.here"}
-        
+
         response = client.get("/api/v1/patients/me", headers=headers)
 
         assert response.status_code == 401
@@ -265,7 +270,7 @@ class TestAuthEndpoints:
     def test_concurrent_logins(self, client: TestClient, db_session: Session):
         """Test multiple concurrent login attempts."""
         import concurrent.futures
-        
+
         # Create a test user
         user_data = create_random_user(db_session)
         username = user_data["username"]
@@ -273,21 +278,24 @@ class TestAuthEndpoints:
 
         def attempt_login():
             return client.post(
-                "/api/v1/auth/login",
-                data={"username": username, "password": password}
+                "/api/v1/auth/login", data={"username": username, "password": password}
             )
 
         # Attempt multiple concurrent logins
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(attempt_login) for _ in range(5)]
-            responses = [future.result() for future in concurrent.futures.as_completed(futures)]
+            responses = [
+                future.result() for future in concurrent.futures.as_completed(futures)
+            ]
 
         # All should succeed
         for response in responses:
             assert response.status_code == 200
             assert "access_token" in response.json()
 
-    def test_register_auto_redirect_integration(self, client: TestClient, db_session: Session):
+    def test_register_auto_redirect_integration(
+        self, client: TestClient, db_session: Session
+    ):
         """Test that registration sets up user for patient info redirect."""
         user_data = {
             "username": "redirectuser",
@@ -303,17 +311,17 @@ class TestAuthEndpoints:
         # Login and verify patient record exists with placeholder data
         login_response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
         assert login_response.status_code == 200
-        
+
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
         # Check patient record
         patient_response = client.get("/api/v1/patients/me", headers=headers)
         assert patient_response.status_code == 200
-        
+
         patient_data = patient_response.json()
         # first_name and last_name are parsed from full_name ("Redirect User")
         assert patient_data["first_name"] == "Redirect"
@@ -411,7 +419,7 @@ class TestAuthEndpoints:
         user_data = create_random_user(db_session)
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
 
         assert response.status_code == 200
@@ -430,7 +438,7 @@ class TestAuthEndpoints:
         # Login -- TestClient automatically stores cookies
         login_response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
         assert login_response.status_code == 200
 
@@ -444,15 +452,14 @@ class TestAuthEndpoints:
         user_data = create_random_user(db_session)
         login_response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
         assert login_response.status_code == 200
         token = login_response.json()["access_token"]
 
         # Logout (use header auth to authenticate the logout request)
         logout_response = client.post(
-            "/api/v1/auth/logout",
-            headers={"Authorization": f"Bearer {token}"}
+            "/api/v1/auth/logout", headers={"Authorization": f"Bearer {token}"}
         )
         assert logout_response.status_code == 200
 
@@ -467,7 +474,7 @@ class TestAuthEndpoints:
         user_data = create_random_user(db_session)
         login_response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
         assert login_response.status_code == 200
         token = login_response.json()["access_token"]
@@ -476,13 +483,14 @@ class TestAuthEndpoints:
         client.cookies.clear()
 
         me_response = client.get(
-            "/api/v1/users/me",
-            headers={"Authorization": f"Bearer {token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {token}"}
         )
         assert me_response.status_code == 200
         assert me_response.json()["username"] == user_data["username"]
 
-    def test_header_takes_precedence_over_cookie(self, client: TestClient, db_session: Session):
+    def test_header_takes_precedence_over_cookie(
+        self, client: TestClient, db_session: Session
+    ):
         """Test that when both header and cookie are present, the header token is used."""
         from app.core.config import settings
 
@@ -492,7 +500,7 @@ class TestAuthEndpoints:
         # Login as user A to get a cookie
         login_a = client.post(
             "/api/v1/auth/login",
-            data={"username": user_a["username"], "password": user_a["password"]}
+            data={"username": user_a["username"], "password": user_a["password"]},
         )
         assert login_a.status_code == 200
         cookie_a = login_a.cookies[settings.AUTH_COOKIE_NAME]
@@ -500,7 +508,7 @@ class TestAuthEndpoints:
         # Login as user B to get a header token (this overwrites the cookie to user B)
         login_b = client.post(
             "/api/v1/auth/login",
-            data={"username": user_b["username"], "password": user_b["password"]}
+            data={"username": user_b["username"], "password": user_b["password"]},
         )
         token_b = login_b.json()["access_token"]
 
@@ -509,13 +517,14 @@ class TestAuthEndpoints:
 
         # Header should win -- response should identify as user B
         me_response = client.get(
-            "/api/v1/users/me",
-            headers={"Authorization": f"Bearer {token_b}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {token_b}"}
         )
         assert me_response.status_code == 200
         assert me_response.json()["username"] == user_b["username"]
 
-    def test_jwt_lifetime_uses_server_default_when_user_timeout_is_lower(self, client: TestClient, db_session: Session):
+    def test_jwt_lifetime_uses_server_default_when_user_timeout_is_lower(
+        self, client: TestClient, db_session: Session
+    ):
         """JWT lifetime = max(ACCESS_TOKEN_EXPIRE_MINUTES, user timeout). When user timeout < server default, JWT uses server default."""
         import base64
         import json
@@ -525,17 +534,18 @@ class TestAuthEndpoints:
 
         from app.crud.user_preferences import user_preferences
         from app.schemas.user_preferences import UserPreferencesUpdate
+
         db_user = user_crud.get_by_username(db_session, username=user_data["username"])
         user_preferences.get_or_create_by_user_id(db_session, user_id=db_user.id)
         user_preferences.update_by_user_id(
             db_session,
             user_id=db_user.id,
-            obj_in=UserPreferencesUpdate(session_timeout_minutes=15)
+            obj_in=UserPreferencesUpdate(session_timeout_minutes=15),
         )
 
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
 
         assert response.status_code == 200
@@ -548,12 +558,15 @@ class TestAuthEndpoints:
         payload = json.loads(base64.urlsafe_b64decode(payload_b64))
 
         token_lifetime_minutes = (payload["exp"] - payload["iat"]) / 60
-        assert token_lifetime_minutes == pytest.approx(settings.ACCESS_TOKEN_EXPIRE_MINUTES, abs=1), \
-            f"JWT lifetime should be {settings.ACCESS_TOKEN_EXPIRE_MINUTES} min (server default), got {token_lifetime_minutes:.0f} min"
+        assert token_lifetime_minutes == pytest.approx(
+            settings.ACCESS_TOKEN_EXPIRE_MINUTES, abs=1
+        ), f"JWT lifetime should be {settings.ACCESS_TOKEN_EXPIRE_MINUTES} min (server default), got {token_lifetime_minutes:.0f} min"
 
         assert response.json()["session_timeout_minutes"] == 15
 
-    def test_jwt_lifetime_extends_when_user_timeout_exceeds_server_default(self, client: TestClient, db_session: Session):
+    def test_jwt_lifetime_extends_when_user_timeout_exceeds_server_default(
+        self, client: TestClient, db_session: Session
+    ):
         """JWT lifetime = max(ACCESS_TOKEN_EXPIRE_MINUTES, user timeout). When user timeout > server default, JWT extends to match."""
         import base64
         import json
@@ -563,18 +576,19 @@ class TestAuthEndpoints:
 
         from app.crud.user_preferences import user_preferences
         from app.schemas.user_preferences import UserPreferencesUpdate
+
         db_user = user_crud.get_by_username(db_session, username=user_data["username"])
         user_preferences.get_or_create_by_user_id(db_session, user_id=db_user.id)
         user_timeout = settings.ACCESS_TOKEN_EXPIRE_MINUTES + 120  # e.g. 600 min
         user_preferences.update_by_user_id(
             db_session,
             user_id=db_user.id,
-            obj_in=UserPreferencesUpdate(session_timeout_minutes=user_timeout)
+            obj_in=UserPreferencesUpdate(session_timeout_minutes=user_timeout),
         )
 
         response = client.post(
             "/api/v1/auth/login",
-            data={"username": user_data["username"], "password": user_data["password"]}
+            data={"username": user_data["username"], "password": user_data["password"]},
         )
 
         assert response.status_code == 200
@@ -587,7 +601,8 @@ class TestAuthEndpoints:
         payload = json.loads(base64.urlsafe_b64decode(payload_b64))
 
         token_lifetime_minutes = (payload["exp"] - payload["iat"]) / 60
-        assert token_lifetime_minutes == pytest.approx(user_timeout, abs=1), \
-            f"JWT lifetime should extend to {user_timeout} min (user timeout), got {token_lifetime_minutes:.0f} min"
+        assert token_lifetime_minutes == pytest.approx(
+            user_timeout, abs=1
+        ), f"JWT lifetime should extend to {user_timeout} min (user timeout), got {token_lifetime_minutes:.0f} min"
 
         assert response.json()["session_timeout_minutes"] == user_timeout

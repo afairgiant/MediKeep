@@ -49,7 +49,9 @@ describe('API Service', () => {
     });
 
     test('login handles invalid credentials', async () => {
-      await expect(apiService.login('wronguser', 'wrongpassword')).rejects.toThrow();
+      await expect(
+        apiService.login('wronguser', 'wrongpassword')
+      ).rejects.toThrow();
     });
 
     test('localStorage can be cleared manually', () => {
@@ -212,14 +214,19 @@ describe('API Service', () => {
         })
       );
 
-      await expect(apiService.getCurrentPatient()).rejects.toThrow('Unauthorized');
+      await expect(apiService.getCurrentPatient()).rejects.toThrow(
+        'Unauthorized'
+      );
     });
 
     test('handles 500 server errors', async () => {
       // Override handler to return 500
       server.use(
         rest.get('*/api/v1/patients/recent-activity/', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ detail: 'Internal server error' }));
+          return res(
+            ctx.status(500),
+            ctx.json({ detail: 'Internal server error' })
+          );
         })
       );
 
@@ -245,7 +252,9 @@ describe('API Service', () => {
         )
       );
 
-      await expect(apiService.getCurrentPatient()).rejects.toThrow('Not authenticated');
+      await expect(apiService.getCurrentPatient()).rejects.toThrow(
+        'Not authenticated'
+      );
     });
   });
 
@@ -268,7 +277,7 @@ describe('API Service', () => {
 
     test('includes content-type header for POST requests', async () => {
       let capturedHeaders;
-      
+
       server.use(
         rest.post('*/api/v1/medications', (req, res, ctx) => {
           capturedHeaders = req.headers.get('Content-Type');
@@ -289,7 +298,7 @@ describe('API Service', () => {
   describe('Data Transformation', () => {
     test('correctly serializes request data', async () => {
       let capturedBody;
-      
+
       server.use(
         rest.post('*/api/v1/medications', (req, res, ctx) => {
           capturedBody = req.body;

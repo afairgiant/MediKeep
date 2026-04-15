@@ -1,6 +1,14 @@
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { Paper, Group, Text, Badge, ThemeIcon, Alert, Stack } from '@mantine/core';
+import {
+  Paper,
+  Group,
+  Text,
+  Badge,
+  ThemeIcon,
+  Alert,
+  Stack,
+} from '@mantine/core';
 import {
   IconFolder,
   IconDeviceFloppy,
@@ -33,12 +41,10 @@ const DirectoryCard = ({ name, info }) => {
               {capitalizeFirst(name)}
             </Text>
           </Group>
-          <Badge
-            variant="light"
-            color={isHealthy ? 'green' : 'red'}
-            size="sm"
-          >
-            {isHealthy ? t('directoryCard.ok', 'OK') : t('shared:labels.error', 'Error')}
+          <Badge variant="light" color={isHealthy ? 'green' : 'red'} size="sm">
+            {isHealthy
+              ? t('directoryCard.ok', 'OK')
+              : t('shared:labels.error', 'Error')}
           </Badge>
         </Group>
 

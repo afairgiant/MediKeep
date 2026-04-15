@@ -74,7 +74,8 @@ const SubmitButton = ({
 
   const { text, icon, color: buttonColor, loading } = getButtonContent();
 
-  const isButtonDisabled = disabled || isSubmitting || isUploading || (isCompleted && !hasErrors);
+  const isButtonDisabled =
+    disabled || isSubmitting || isUploading || (isCompleted && !hasErrors);
 
   return (
     <Button

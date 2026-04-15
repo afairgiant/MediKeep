@@ -156,15 +156,22 @@ const PageHeader = ({
   };
 
   const handleLogout = async () => {
-    logger.info('🚪 PAGEHEADER_LOGOUT: Logout button clicked, starting logout process');
+    logger.info(
+      '🚪 PAGEHEADER_LOGOUT: Logout button clicked, starting logout process'
+    );
     try {
       logger.info('🚪 PAGEHEADER_LOGOUT: Calling AuthContext logout function');
       // Use AuthContext logout for proper state management
       await logout();
-      logger.info('🚪 PAGEHEADER_LOGOUT: AuthContext logout completed successfully');
+      logger.info(
+        '🚪 PAGEHEADER_LOGOUT: AuthContext logout completed successfully'
+      );
       // Navigation will be handled by AuthContext/ProtectedRoute
     } catch (error) {
-      logger.info('🚪 PAGEHEADER_LOGOUT: Logout failed with error', error.message);
+      logger.info(
+        '🚪 PAGEHEADER_LOGOUT: Logout failed with error',
+        error.message
+      );
       // Fallback navigation if logout fails
       window.location.href = '/login';
     }
@@ -209,33 +216,33 @@ const PageHeader = ({
 
             {/* Center - Title */}
             {showTitle && (
-            <Group
-              gap="xs"
-              align="center"
-              wrap="nowrap"
-              justify="center"
-              style={{ flex: 1 }}
-            >
-              {icon && (
-                <Text size="xl" style={{ lineHeight: 1, flexShrink: 0 }}>
-                  {icon}
-                </Text>
-              )}
-              <Title
-                order={2}
-                size="h2"
-                ta="center"
-                style={{
-                  margin: 0,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  flexShrink: 1,
-                }}
+              <Group
+                gap="xs"
+                align="center"
+                wrap="nowrap"
+                justify="center"
+                style={{ flex: 1 }}
               >
-                {title}
-              </Title>
-            </Group>
+                {icon && (
+                  <Text size="xl" style={{ lineHeight: 1, flexShrink: 0 }}>
+                    {icon}
+                  </Text>
+                )}
+                <Title
+                  order={2}
+                  size="h2"
+                  ta="center"
+                  style={{
+                    margin: 0,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    flexShrink: 1,
+                  }}
+                >
+                  {title}
+                </Title>
+              </Group>
             )}
 
             {/* Right Section - Actions and Global Nav */}
@@ -328,7 +335,9 @@ const PageHeader = ({
                         closeMenuOnClick={false}
                       >
                         <Group gap="xs">
-                          <Text size="sm">{t('sidebarNav.items.language')}:</Text>
+                          <Text size="sm">
+                            {t('sidebarNav.items.language')}:
+                          </Text>
                           <LanguageSwitcher size="xs" />
                         </Group>
                       </Menu.Item>
@@ -342,7 +351,9 @@ const PageHeader = ({
                         }
                         onClick={toggleTheme}
                       >
-                        {theme === 'dark' ? t('menu.lightMode') : t('menu.darkMode')}
+                        {theme === 'dark'
+                          ? t('menu.lightMode')
+                          : t('menu.darkMode')}
                       </Menu.Item>
                       <Menu.Divider />
                       <Menu.Item

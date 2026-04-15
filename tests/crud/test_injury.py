@@ -1,6 +1,7 @@
 """
 Tests for Injury CRUD operations.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -22,7 +23,7 @@ class TestInjuryCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -40,7 +41,7 @@ class TestInjuryCRUD:
             severity="moderate",
             status="active",
             treatment_received="RICE protocol",
-            notes="Follow up in 2 weeks"
+            notes="Follow up in 2 weeks",
         )
 
         injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -62,15 +63,15 @@ class TestInjuryCRUD:
                 injury_name="Wrist Sprain",
                 body_part="Wrist",
                 severity="mild",
-                status="resolved"
+                status="resolved",
             ),
             InjuryCreate(
                 patient_id=test_patient.id,
                 injury_name="Knee Injury",
                 body_part="Knee",
                 severity="moderate",
-                status="active"
-            )
+                status="active",
+            ),
         ]
 
         for injury_data in injuries_data:
@@ -92,7 +93,7 @@ class TestInjuryCRUD:
             injury_name="Active Back Strain",
             body_part="Back",
             severity="moderate",
-            status="active"
+            status="active",
         )
 
         # Create resolved injury
@@ -101,7 +102,7 @@ class TestInjuryCRUD:
             injury_name="Old Ankle Sprain",
             body_part="Ankle",
             severity="mild",
-            status="resolved"
+            status="resolved",
         )
 
         created_active = injury_crud.create(db_session, obj_in=active_injury)
@@ -126,22 +127,22 @@ class TestInjuryCRUD:
                 injury_name="Active Injury",
                 body_part="Arm",
                 severity="moderate",
-                status="active"
+                status="active",
             ),
             InjuryCreate(
                 patient_id=test_patient.id,
                 injury_name="Healing Injury",
                 body_part="Leg",
                 severity="mild",
-                status="healing"
+                status="healing",
             ),
             InjuryCreate(
                 patient_id=test_patient.id,
                 injury_name="Resolved Injury",
                 body_part="Wrist",
                 severity="mild",
-                status="resolved"
-            )
+                status="resolved",
+            ),
         ]
 
         for injury_data in injuries_data:
@@ -166,7 +167,7 @@ class TestInjuryCRUD:
                 body_part="Knee",
                 laterality="right",
                 severity="moderate",
-                status="active"
+                status="active",
             ),
             InjuryCreate(
                 patient_id=test_patient.id,
@@ -174,15 +175,15 @@ class TestInjuryCRUD:
                 body_part="Knee",
                 laterality="left",
                 severity="mild",
-                status="active"
+                status="active",
             ),
             InjuryCreate(
                 patient_id=test_patient.id,
                 injury_name="Wrist Fracture",
                 body_part="Wrist",
                 severity="severe",
-                status="active"
-            )
+                status="active",
+            ),
         ]
 
         for injury_data in injuries_data:
@@ -207,7 +208,7 @@ class TestInjuryCRUD:
             body_part="Shoulder",
             laterality="right",
             severity="mild",
-            status="active"
+            status="active",
         )
 
         created_injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -217,7 +218,7 @@ class TestInjuryCRUD:
             severity="moderate",
             status="healing",
             treatment_received="Physical therapy started",
-            recovery_notes="Showing improvement after 2 weeks"
+            recovery_notes="Showing improvement after 2 weeks",
         )
 
         updated_injury = injury_crud.update(
@@ -238,7 +239,7 @@ class TestInjuryCRUD:
             injury_name="Injury to Delete",
             body_part="Finger",
             severity="mild",
-            status="resolved"
+            status="resolved",
         )
 
         created_injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -268,7 +269,7 @@ class TestInjuryCRUD:
             treatment_received="Rest, ice, physical therapy",
             recovery_notes="Initial assessment shows muscle strain",
             notes="Patient works in warehouse, may need work restrictions",
-            tags=["work-related", "lifting", "back"]
+            tags=["work-related", "lifting", "back"],
         )
 
         injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -295,7 +296,7 @@ class TestInjuryCRUD:
                 injury_name=f"Injury with status {status}",
                 body_part="Arm",
                 severity="mild",
-                status=status
+                status=status,
             )
 
             injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -311,7 +312,7 @@ class TestInjuryCRUD:
                 injury_name=f"Injury with severity {severity}",
                 body_part="Leg",
                 severity=severity,
-                status="active"
+                status="active",
             )
 
             injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -328,7 +329,7 @@ class TestInjuryCRUD:
                 body_part="Arm",
                 laterality=laterality,
                 severity="mild",
-                status="active"
+                status="active",
             )
 
             injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -341,7 +342,7 @@ class TestInjuryCRUD:
             injury_name="Injury with Relations",
             body_part="Knee",
             severity="moderate",
-            status="active"
+            status="active",
         )
 
         created_injury = injury_crud.create(db_session, obj_in=injury_data)
@@ -368,7 +369,7 @@ class TestInjuryCRUD:
             status="chronic",
             treatment_received="Ongoing physical therapy, pain management",
             recovery_notes="Managing symptoms, full recovery not expected",
-            notes="Requires regular follow-up appointments"
+            notes="Requires regular follow-up appointments",
         )
 
         injury = injury_crud.create(db_session, obj_in=injury_data)

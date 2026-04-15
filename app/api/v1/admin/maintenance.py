@@ -10,10 +10,18 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event
+from app.core.logging.helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+)
 from app.models.models import LabTestComponent, User
 from app.services.canonical_test_matching import canonical_test_matching
-from app.services.test_library_loader import get_tests, get_library_version, reload_test_library
+from app.services.test_library_loader import (
+    get_tests,
+    get_library_version,
+    reload_test_library,
+)
 
 logger = get_logger(__name__, "app")
 
@@ -69,7 +77,11 @@ async def get_test_library_info(
 
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to get test library info", e, user_id=current_user.id
+            logger,
+            request,
+            "Failed to get test library info",
+            e,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

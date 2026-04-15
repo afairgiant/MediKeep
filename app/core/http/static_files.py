@@ -56,15 +56,20 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
     # Windows EXE: Check for bundled frontend
     try:
         import sys
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
             # Running as PyInstaller bundle
-            exe_frontend_build = os.path.join(sys._MEIPASS, 'frontend', 'build')
+            exe_frontend_build = os.path.join(sys._MEIPASS, "frontend", "build")
             static_dirs.insert(0, exe_frontend_build)  # Highest priority
-            logger.info(f"Windows EXE mode: Checking frontend path: {exe_frontend_build}")
+            logger.info(
+                f"Windows EXE mode: Checking frontend path: {exe_frontend_build}"
+            )
             logger.info(f"sys._MEIPASS = {sys._MEIPASS}")
             logger.info(f"Frontend path exists: {os.path.exists(exe_frontend_build)}")
             if os.path.exists(exe_frontend_build):
-                logger.info(f"Frontend directory contents: {os.listdir(exe_frontend_build)}")
+                logger.info(
+                    f"Frontend directory contents: {os.listdir(exe_frontend_build)}"
+                )
     except Exception as e:
         logger.error(f"Error checking Windows EXE frontend: {e}")
 
@@ -109,7 +114,6 @@ def setup_static_files(app: FastAPI) -> tuple[str | None, str | None]:
         app.mount("/static", StaticFiles(directory=static_dir), name="static")
         logger.info(f"Serving static files from: {static_dir}")
         html_dir = static_dir
-
 
         @app.get("/")
         async def read_index():

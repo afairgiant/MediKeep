@@ -25,7 +25,12 @@ export interface AuthContextType {
   login: (
     credentialsOrUser: { username: string; password: string } | AuthUser,
     tokenFromSSO?: string | null
-  ) => Promise<{ success: boolean; isFirstLogin?: boolean; mustChangePassword?: boolean; error?: string }>;
+  ) => Promise<{
+    success: boolean;
+    isFirstLogin?: boolean;
+    mustChangePassword?: boolean;
+    error?: string;
+  }>;
   logout: () => Promise<void>;
   updateActivity: () => void;
   clearError: () => void;

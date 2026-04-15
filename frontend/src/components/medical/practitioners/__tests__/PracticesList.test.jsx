@@ -32,7 +32,8 @@ vi.mock('react-i18next', () => ({
     t: (key, opts) => {
       if (typeof opts === 'string') return opts;
       if (opts?.name) return key.replace('{{name}}', opts.name);
-      if (opts?.count !== undefined) return key.replace('{{count}}', opts.count);
+      if (opts?.count !== undefined)
+        return key.replace('{{count}}', opts.count);
       return key;
     },
   }),
@@ -71,9 +72,27 @@ const MantineWrapper = ({ children }) => (
 );
 
 const samplePractices = [
-  { id: 1, name: 'City Clinic', phone_number: '555-0100', website: 'https://city.example.com', practitioner_count: 3 },
-  { id: 2, name: 'Downtown Health', phone_number: '555-0200', website: null, practitioner_count: 0 },
-  { id: 3, name: 'Rural Practice', phone_number: null, website: null, practitioner_count: 1 },
+  {
+    id: 1,
+    name: 'City Clinic',
+    phone_number: '555-0100',
+    website: 'https://city.example.com',
+    practitioner_count: 3,
+  },
+  {
+    id: 2,
+    name: 'Downtown Health',
+    phone_number: '555-0200',
+    website: null,
+    practitioner_count: 0,
+  },
+  {
+    id: 3,
+    name: 'Rural Practice',
+    phone_number: null,
+    website: null,
+    practitioner_count: 1,
+  },
 ];
 
 describe('PracticesList', () => {
@@ -142,8 +161,12 @@ describe('PracticesList', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getByText('practitioners.practices.totalCount')).toBeInTheDocument();
-      expect(screen.getByText('practitioners.practices.unusedCount')).toBeInTheDocument();
+      expect(
+        screen.getByText('practitioners.practices.totalCount')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('practitioners.practices.unusedCount')
+      ).toBeInTheDocument();
     });
   });
 
@@ -157,7 +180,9 @@ describe('PracticesList', () => {
         </MantineWrapper>
       );
 
-      const searchInput = screen.getByPlaceholderText('practitioners.practices.searchPlaceholder');
+      const searchInput = screen.getByPlaceholderText(
+        'practitioners.practices.searchPlaceholder'
+      );
       await user.type(searchInput, 'City');
 
       expect(screen.getAllByText('City Clinic').length).toBeGreaterThan(0);
@@ -174,10 +199,14 @@ describe('PracticesList', () => {
         </MantineWrapper>
       );
 
-      const searchInput = screen.getByPlaceholderText('practitioners.practices.searchPlaceholder');
+      const searchInput = screen.getByPlaceholderText(
+        'practitioners.practices.searchPlaceholder'
+      );
       await user.type(searchInput, 'nonexistent');
 
-      expect(screen.getByText('practitioners.practices.emptyTitle')).toBeInTheDocument();
+      expect(
+        screen.getByText('practitioners.practices.emptyTitle')
+      ).toBeInTheDocument();
     });
   });
 
@@ -196,7 +225,9 @@ describe('PracticesList', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getByText('practitioners.practices.emptyTitle')).toBeInTheDocument();
+      expect(
+        screen.getByText('practitioners.practices.emptyTitle')
+      ).toBeInTheDocument();
     });
   });
 
@@ -266,7 +297,11 @@ describe('PracticesList', () => {
 
   describe('Edit', () => {
     test('fetches practice and opens edit modal', async () => {
-      const practiceData = { id: 1, name: 'City Clinic', phone_number: '555-0100' };
+      const practiceData = {
+        id: 1,
+        name: 'City Clinic',
+        phone_number: '555-0100',
+      };
       mockGetPractice.mockResolvedValue(practiceData);
 
       render(

@@ -22,10 +22,10 @@ export { default as useSorting } from './useSorting';
 export { default as useDataManagement } from './useDataManagement';
 
 // Activity tracking hooks
-export { 
-  useActivityTracker, 
-  useApiActivityTracker, 
-  useNavigationActivityTracker 
+export {
+  useActivityTracker,
+  useApiActivityTracker,
+  useNavigationActivityTracker,
 } from './useActivityTracker';
 
 // Custom reports hooks

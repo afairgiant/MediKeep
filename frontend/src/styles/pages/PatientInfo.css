@@ -86,7 +86,11 @@
 }
 
 .patient-hero {
-  background: linear-gradient(135deg, var(--color-primary, #667eea) 0%, var(--color-primary-dark, #764ba2) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #667eea) 0%,
+    var(--color-primary-dark, #764ba2) 100%
+  );
   border-radius: 12px 12px 0 0;
   padding: 28px 32px 48px 32px;
   position: relative;
@@ -100,7 +104,11 @@
   right: -20%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   pointer-events: none;
 }
@@ -112,7 +120,11 @@
   left: -10%;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   pointer-events: none;
 }
@@ -241,7 +253,11 @@
 
 /* Dark mode support for hero */
 [data-mantine-color-scheme='dark'] .patient-hero {
-  background: linear-gradient(135deg, var(--mantine-color-violet-9) 0%, var(--mantine-color-indigo-9) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-violet-9) 0%,
+    var(--mantine-color-indigo-9) 100%
+  );
 }
 
 [data-mantine-color-scheme='dark'] .patient-hero-profile {

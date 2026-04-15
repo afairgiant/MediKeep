@@ -27,7 +27,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
-import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import {
+  parseDateInput,
+  formatDateInputChange,
+} from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
   createDateSortedOptions,
@@ -54,19 +57,37 @@ const PURPOSE_OPTIONS = [
 /**
  * Collapsible item card for showing/editing relationship details
  */
-const ItemDetailsCard = ({ label, color, icon: Icon, children, defaultOpen = false }) => {
+const ItemDetailsCard = ({
+  label,
+  color,
+  icon: Icon,
+  children,
+  defaultOpen = false,
+}) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <Paper withBorder p="xs">
-      <UnstyledButton onClick={() => setIsOpen(!isOpen)} style={{ width: '100%' }}>
+      <UnstyledButton
+        onClick={() => setIsOpen(!isOpen)}
+        style={{ width: '100%' }}
+      >
         <Group justify="space-between">
           <Group gap="xs">
-            <Badge size="sm" variant="light" color={color} leftSection={<Icon size={12} />}>
+            <Badge
+              size="sm"
+              variant="light"
+              color={color}
+              leftSection={<Icon size={12} />}
+            >
               {label}
             </Badge>
           </Group>
-          {isOpen ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+          {isOpen ? (
+            <IconChevronDown size={14} />
+          ) : (
+            <IconChevronRight size={14} />
+          )}
         </Group>
       </UnstyledButton>
       <Collapse in={isOpen}>
@@ -111,10 +132,17 @@ const TreatmentPlanSetup = ({
   const isMountedRef = useRef(true);
 
   // Fetch available entities
-  const fetchEntities = useCallback(async (signal) => {
+  const fetchEntities = useCallback(async signal => {
     setLoading(true);
     try {
-      const [medsData, encountersData, labsData, equipmentData, practitionersData, pharmaciesData] = await Promise.all([
+      const [
+        medsData,
+        encountersData,
+        labsData,
+        equipmentData,
+        practitionersData,
+        pharmaciesData,
+      ] = await Promise.all([
         apiService.getMedications(signal).catch(() => []),
         apiService.getEncounters(signal).catch(() => []),
         apiService.getLabResults(signal).catch(() => []),
@@ -128,13 +156,17 @@ const TreatmentPlanSetup = ({
         setEncounters(Array.isArray(encountersData) ? encountersData : []);
         setLabResults(Array.isArray(labsData) ? labsData : []);
         setEquipment(Array.isArray(equipmentData) ? equipmentData : []);
-        setPractitioners(Array.isArray(practitionersData) ? practitionersData : []);
+        setPractitioners(
+          Array.isArray(practitionersData) ? practitionersData : []
+        );
         setPharmacies(Array.isArray(pharmaciesData) ? pharmaciesData : []);
         setLoading(false);
       }
     } catch (err) {
       if (err.name !== 'AbortError' && isMountedRef.current) {
-        logger.error('treatment_plan_setup_fetch_error', { error: err.message });
+        logger.error('treatment_plan_setup_fetch_error', {
+          error: err.message,
+        });
         setLoading(false);
       }
     }
@@ -152,14 +184,14 @@ const TreatmentPlanSetup = ({
   }, [fetchEntities]);
 
   // Format functions for select options
-  const formatMedicationLabel = (med) => {
+  const formatMedicationLabel = med => {
     let label = med.medication_name;
     if (med.dosage) label += ` (${med.dosage})`;
     if (med.status) label += ` - ${med.status}`;
     return label;
   };
 
-  const formatEncounterLabel = (enc) => {
+  const formatEncounterLabel = enc => {
     const date = formatDateDisplay(enc.date);
     const type = enc.visit_type || 'Visit';
     let label = `${date} - ${type}`;
@@ -167,7 +199,7 @@ const TreatmentPlanSetup = ({
     return label;
   };
 
-  const formatLabResultLabel = (lab) => {
+  const formatLabResultLabel = lab => {
     const dateValue = lab.completed_date || lab.ordered_date;
     const date = dateValue ? formatDateDisplay(dateValue) : null;
     let label = date ? `${date} - ${lab.test_name}` : lab.test_name;
@@ -175,7 +207,7 @@ const TreatmentPlanSetup = ({
     return label;
   };
 
-  const formatEquipmentLabel = (eq) => {
+  const formatEquipmentLabel = eq => {
     let label = eq.equipment_name;
     if (eq.equipment_type) label += ` (${eq.equipment_type})`;
     if (eq.status) label += ` - ${eq.status}`;
@@ -188,8 +220,16 @@ const TreatmentPlanSetup = ({
     label: formatMedicationLabel(m),
   }));
 
-  const encounterOptions = createDateSortedOptions(encounters, formatEncounterLabel, 'date');
-  const labResultOptions = createDateSortedOptions(labResults, formatLabResultLabel, 'completed_date');
+  const encounterOptions = createDateSortedOptions(
+    encounters,
+    formatEncounterLabel,
+    'date'
+  );
+  const labResultOptions = createDateSortedOptions(
+    labResults,
+    formatLabResultLabel,
+    'completed_date'
+  );
 
   const equipmentOptions = equipment.map(e => ({
     value: e.id.toString(),
@@ -197,9 +237,9 @@ const TreatmentPlanSetup = ({
   }));
 
   // Get selected IDs from pending relationships
-  const getSelectedIds = (type) => {
+  const getSelectedIds = type => {
     const items = pendingRelationships[type] || [];
-    return items.map(item => typeof item === 'object' ? item.id : item);
+    return items.map(item => (typeof item === 'object' ? item.id : item));
   };
 
   // Get metadata for a specific item
@@ -227,8 +267,8 @@ const TreatmentPlanSetup = ({
 
     // Create new items array, preserving metadata for items that were already selected
     const newItems = values.map(id => {
-      const existing = existingItems.find(item =>
-        (typeof item === 'object' ? item.id : item) === id
+      const existing = existingItems.find(
+        item => (typeof item === 'object' ? item.id : item) === id
       );
       return existing || { id };
     });
@@ -266,335 +306,511 @@ const TreatmentPlanSetup = ({
 
   return (
     <Box pos="relative">
-      <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: 'sm', blur: 2 }} />
+      <LoadingOverlay
+        visible={loading}
+        zIndex={1000}
+        overlayProps={{ radius: 'sm', blur: 2 }}
+      />
 
       <Stack gap="md">
-            {/* Medications Section */}
-            <Box style={{ display: activeSection === 'medications' ? 'block' : 'none' }}>
-              <Stack gap="md">
-                <MultiSelect
-                  label="Medications to Link"
-                  placeholder={medicationOptions.length > 0 ? "Select medications..." : "No medications available"}
-                  data={medicationOptions}
-                  value={selectedMedIds}
-                  onChange={(values) => handleSelectionChange('medications', values)}
-                  searchable
-                  clearable
-                  disabled={medicationOptions.length === 0}
-                  comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                />
+        {/* Medications Section */}
+        <Box
+          style={{
+            display: activeSection === 'medications' ? 'block' : 'none',
+          }}
+        >
+          <Stack gap="md">
+            <MultiSelect
+              label="Medications to Link"
+              placeholder={
+                medicationOptions.length > 0
+                  ? 'Select medications...'
+                  : 'No medications available'
+              }
+              data={medicationOptions}
+              value={selectedMedIds}
+              onChange={values => handleSelectionChange('medications', values)}
+              searchable
+              clearable
+              disabled={medicationOptions.length === 0}
+              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+            />
 
-                {/* Show detail fields for each selected medication */}
-                {selectedMedIds.length > 0 && (
-                  <Stack gap="xs">
-                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
-                    {selectedMedIds.map((medId) => {
-                      const metadata = getItemMetadata('medications', medId);
-                      return (
-                        <ItemDetailsCard
-                          key={medId}
-                          label={getItemLabel('medications', medId)}
-                          color="teal"
-                          icon={IconPill}
-                        >
-                          <TextInput
-                            size="xs"
-                            placeholder="Specific dosage (e.g., 400mg 3x daily)"
-                            value={metadata.specific_dosage || ''}
-                            onChange={(e) => updateItemMetadata('medications', medId, 'specific_dosage', e.target.value)}
-                          />
-                          <TextInput
-                            size="xs"
-                            placeholder="Frequency (e.g., Every 8 hours)"
-                            value={metadata.specific_frequency || ''}
-                            onChange={(e) => updateItemMetadata('medications', medId, 'specific_frequency', e.target.value)}
-                          />
-                          <TextInput
-                            size="xs"
-                            placeholder="Duration (e.g., 2 weeks)"
-                            value={metadata.specific_duration || ''}
-                            onChange={(e) => updateItemMetadata('medications', medId, 'specific_duration', e.target.value)}
-                          />
-                          <TextInput
-                            size="xs"
-                            placeholder="Timing instructions"
-                            value={metadata.timing_instructions || ''}
-                            onChange={(e) => updateItemMetadata('medications', medId, 'timing_instructions', e.target.value)}
-                          />
-                          <Group grow gap="xs">
-                            <Select
-                              size="xs"
-                              placeholder="Treatment prescriber"
-                              data={practitioners.map(p => ({
-                                value: p.id.toString(),
-                                label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
-                              }))}
-                              value={metadata.specific_prescriber_id || ''}
-                              onChange={(value) => updateItemMetadata('medications', medId, 'specific_prescriber_id', value || '')}
-                              clearable
-                              searchable
-                              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                            />
-                            <Select
-                              size="xs"
-                              placeholder="Treatment pharmacy"
-                              data={pharmacies.map(p => ({
-                                value: p.id.toString(),
-                                label: p.name || p.brand || `Pharmacy #${p.id}`,
-                              }))}
-                              value={metadata.specific_pharmacy_id || ''}
-                              onChange={(value) => updateItemMetadata('medications', medId, 'specific_pharmacy_id', value || '')}
-                              clearable
-                              searchable
-                              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                            />
-                          </Group>
-                          <Group grow gap="xs">
-                            <DateInput
-                              size="xs"
-                              label={t('treatments.medications.specificStartDate', 'Treatment Start Date')}
-                              placeholder={dateInputFormat}
-                              value={parseDateInput(metadata.specific_start_date)}
-                              onChange={(date) => updateItemMetadata('medications', medId, 'specific_start_date', formatDateInputChange(date))}
-                              valueFormat={dateInputFormat}
-                              clearable
-                              firstDayOfWeek={0}
-                              popoverProps={{ withinPortal: true, zIndex: 4000 }}
-                            />
-                            <DateInput
-                              size="xs"
-                              label={t('treatments.medications.specificEndDate', 'Treatment End Date')}
-                              placeholder={dateInputFormat}
-                              value={parseDateInput(metadata.specific_end_date)}
-                              onChange={(date) => updateItemMetadata('medications', medId, 'specific_end_date', formatDateInputChange(date))}
-                              valueFormat={dateInputFormat}
-                              clearable
-                              firstDayOfWeek={0}
-                              minDate={parseDateInput(metadata.specific_start_date) || undefined}
-                              popoverProps={{ withinPortal: true, zIndex: 4000 }}
-                            />
-                          </Group>
-                          <Textarea
-                            size="xs"
-                            placeholder="Relevance note"
-                            value={metadata.relevance_note || ''}
-                            onChange={(e) => updateItemMetadata('medications', medId, 'relevance_note', e.target.value)}
-                            autosize
-                            minRows={1}
-                          />
-                        </ItemDetailsCard>
-                      );
-                    })}
-                  </Stack>
-                )}
-
-                {medicationOptions.length === 0 && !loading && (
-                  <Text size="sm" c="dimmed" ta="center">
-                    {t('treatmentPlan.noMedications')}
-                  </Text>
-                )}
+            {/* Show detail fields for each selected medication */}
+            {selectedMedIds.length > 0 && (
+              <Stack gap="xs">
+                <Text size="xs" c="dimmed">
+                  {t('treatmentPlan.clickToExpand')}
+                </Text>
+                {selectedMedIds.map(medId => {
+                  const metadata = getItemMetadata('medications', medId);
+                  return (
+                    <ItemDetailsCard
+                      key={medId}
+                      label={getItemLabel('medications', medId)}
+                      color="teal"
+                      icon={IconPill}
+                    >
+                      <TextInput
+                        size="xs"
+                        placeholder="Specific dosage (e.g., 400mg 3x daily)"
+                        value={metadata.specific_dosage || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'medications',
+                            medId,
+                            'specific_dosage',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <TextInput
+                        size="xs"
+                        placeholder="Frequency (e.g., Every 8 hours)"
+                        value={metadata.specific_frequency || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'medications',
+                            medId,
+                            'specific_frequency',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <TextInput
+                        size="xs"
+                        placeholder="Duration (e.g., 2 weeks)"
+                        value={metadata.specific_duration || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'medications',
+                            medId,
+                            'specific_duration',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <TextInput
+                        size="xs"
+                        placeholder="Timing instructions"
+                        value={metadata.timing_instructions || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'medications',
+                            medId,
+                            'timing_instructions',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Group grow gap="xs">
+                        <Select
+                          size="xs"
+                          placeholder="Treatment prescriber"
+                          data={practitioners.map(p => ({
+                            value: p.id.toString(),
+                            label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
+                          }))}
+                          value={metadata.specific_prescriber_id || ''}
+                          onChange={value =>
+                            updateItemMetadata(
+                              'medications',
+                              medId,
+                              'specific_prescriber_id',
+                              value || ''
+                            )
+                          }
+                          clearable
+                          searchable
+                          comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                        />
+                        <Select
+                          size="xs"
+                          placeholder="Treatment pharmacy"
+                          data={pharmacies.map(p => ({
+                            value: p.id.toString(),
+                            label: p.name || p.brand || `Pharmacy #${p.id}`,
+                          }))}
+                          value={metadata.specific_pharmacy_id || ''}
+                          onChange={value =>
+                            updateItemMetadata(
+                              'medications',
+                              medId,
+                              'specific_pharmacy_id',
+                              value || ''
+                            )
+                          }
+                          clearable
+                          searchable
+                          comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                        />
+                      </Group>
+                      <Group grow gap="xs">
+                        <DateInput
+                          size="xs"
+                          label={t(
+                            'treatments.medications.specificStartDate',
+                            'Treatment Start Date'
+                          )}
+                          placeholder={dateInputFormat}
+                          value={parseDateInput(metadata.specific_start_date)}
+                          onChange={date =>
+                            updateItemMetadata(
+                              'medications',
+                              medId,
+                              'specific_start_date',
+                              formatDateInputChange(date)
+                            )
+                          }
+                          valueFormat={dateInputFormat}
+                          clearable
+                          firstDayOfWeek={0}
+                          popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                        />
+                        <DateInput
+                          size="xs"
+                          label={t(
+                            'treatments.medications.specificEndDate',
+                            'Treatment End Date'
+                          )}
+                          placeholder={dateInputFormat}
+                          value={parseDateInput(metadata.specific_end_date)}
+                          onChange={date =>
+                            updateItemMetadata(
+                              'medications',
+                              medId,
+                              'specific_end_date',
+                              formatDateInputChange(date)
+                            )
+                          }
+                          valueFormat={dateInputFormat}
+                          clearable
+                          firstDayOfWeek={0}
+                          minDate={
+                            parseDateInput(metadata.specific_start_date) ||
+                            undefined
+                          }
+                          popoverProps={{ withinPortal: true, zIndex: 4000 }}
+                        />
+                      </Group>
+                      <Textarea
+                        size="xs"
+                        placeholder="Relevance note"
+                        value={metadata.relevance_note || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'medications',
+                            medId,
+                            'relevance_note',
+                            e.target.value
+                          )
+                        }
+                        autosize
+                        minRows={1}
+                      />
+                    </ItemDetailsCard>
+                  );
+                })}
               </Stack>
-            </Box>
+            )}
 
-            {/* Visits Section */}
-            <Box style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}>
-              <Stack gap="md">
-                <MultiSelect
-                  label="Visits to Link"
-                  placeholder={encounterOptions.length > 0 ? "Select visits..." : "No visits available"}
-                  data={encounterOptions}
-                  value={selectedEncIds}
-                  onChange={(values) => handleSelectionChange('encounters', values)}
-                  searchable
-                  clearable
-                  disabled={encounterOptions.length === 0}
-                  comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                />
+            {medicationOptions.length === 0 && !loading && (
+              <Text size="sm" c="dimmed" ta="center">
+                {t('treatmentPlan.noMedications')}
+              </Text>
+            )}
+          </Stack>
+        </Box>
 
-                {/* Show detail fields for each selected visit */}
-                {selectedEncIds.length > 0 && (
-                  <Stack gap="xs">
-                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
-                    {selectedEncIds.map((encId) => {
-                      const metadata = getItemMetadata('encounters', encId);
-                      return (
-                        <ItemDetailsCard
-                          key={encId}
-                          label={getItemLabel('encounters', encId)}
-                          color="blue"
-                          icon={IconStethoscope}
-                        >
-                          <Select
-                            size="xs"
-                            placeholder="Visit label"
-                            data={VISIT_LABEL_OPTIONS}
-                            value={metadata.visit_label || ''}
-                            onChange={(value) => updateItemMetadata('encounters', encId, 'visit_label', value || '')}
-                            clearable
-                            comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                          />
-                          <TextInput
-                            size="xs"
-                            placeholder="Visit sequence (1, 2, 3...)"
-                            type="number"
-                            value={metadata.visit_sequence || ''}
-                            onChange={(e) => updateItemMetadata('encounters', encId, 'visit_sequence', e.target.value)}
-                          />
-                          <Textarea
-                            size="xs"
-                            placeholder="Relevance note"
-                            value={metadata.relevance_note || ''}
-                            onChange={(e) => updateItemMetadata('encounters', encId, 'relevance_note', e.target.value)}
-                            autosize
-                            minRows={1}
-                          />
-                        </ItemDetailsCard>
-                      );
-                    })}
-                  </Stack>
-                )}
+        {/* Visits Section */}
+        <Box
+          style={{ display: activeSection === 'encounters' ? 'block' : 'none' }}
+        >
+          <Stack gap="md">
+            <MultiSelect
+              label="Visits to Link"
+              placeholder={
+                encounterOptions.length > 0
+                  ? 'Select visits...'
+                  : 'No visits available'
+              }
+              data={encounterOptions}
+              value={selectedEncIds}
+              onChange={values => handleSelectionChange('encounters', values)}
+              searchable
+              clearable
+              disabled={encounterOptions.length === 0}
+              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+            />
 
-                {encounterOptions.length === 0 && !loading && (
-                  <Text size="sm" c="dimmed" ta="center">
-                    {t('treatmentPlan.noVisits')}
-                  </Text>
-                )}
+            {/* Show detail fields for each selected visit */}
+            {selectedEncIds.length > 0 && (
+              <Stack gap="xs">
+                <Text size="xs" c="dimmed">
+                  {t('treatmentPlan.clickToExpand')}
+                </Text>
+                {selectedEncIds.map(encId => {
+                  const metadata = getItemMetadata('encounters', encId);
+                  return (
+                    <ItemDetailsCard
+                      key={encId}
+                      label={getItemLabel('encounters', encId)}
+                      color="blue"
+                      icon={IconStethoscope}
+                    >
+                      <Select
+                        size="xs"
+                        placeholder="Visit label"
+                        data={VISIT_LABEL_OPTIONS}
+                        value={metadata.visit_label || ''}
+                        onChange={value =>
+                          updateItemMetadata(
+                            'encounters',
+                            encId,
+                            'visit_label',
+                            value || ''
+                          )
+                        }
+                        clearable
+                        comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                      />
+                      <TextInput
+                        size="xs"
+                        placeholder="Visit sequence (1, 2, 3...)"
+                        type="number"
+                        value={metadata.visit_sequence || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'encounters',
+                            encId,
+                            'visit_sequence',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Textarea
+                        size="xs"
+                        placeholder="Relevance note"
+                        value={metadata.relevance_note || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'encounters',
+                            encId,
+                            'relevance_note',
+                            e.target.value
+                          )
+                        }
+                        autosize
+                        minRows={1}
+                      />
+                    </ItemDetailsCard>
+                  );
+                })}
               </Stack>
-            </Box>
+            )}
 
-            {/* Labs Section */}
-            <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
-              <Stack gap="md">
-                <MultiSelect
-                  label="Lab Results to Link"
-                  placeholder={labResultOptions.length > 0 ? "Select lab results..." : "No lab results available"}
-                  data={labResultOptions}
-                  value={selectedLabIds}
-                  onChange={(values) => handleSelectionChange('labResults', values)}
-                  searchable
-                  clearable
-                  disabled={labResultOptions.length === 0}
-                  comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                />
+            {encounterOptions.length === 0 && !loading && (
+              <Text size="sm" c="dimmed" ta="center">
+                {t('treatmentPlan.noVisits')}
+              </Text>
+            )}
+          </Stack>
+        </Box>
 
-                {/* Show detail fields for each selected lab */}
-                {selectedLabIds.length > 0 && (
-                  <Stack gap="xs">
-                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
-                    {selectedLabIds.map((labId) => {
-                      const metadata = getItemMetadata('labResults', labId);
-                      return (
-                        <ItemDetailsCard
-                          key={labId}
-                          label={getItemLabel('labResults', labId)}
-                          color="violet"
-                          icon={IconTestPipe}
-                        >
-                          <Select
-                            size="xs"
-                            placeholder="Purpose"
-                            data={PURPOSE_OPTIONS}
-                            value={metadata.purpose || ''}
-                            onChange={(value) => updateItemMetadata('labResults', labId, 'purpose', value || '')}
-                            clearable
-                            comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                          />
-                          <TextInput
-                            size="xs"
-                            placeholder="Expected frequency (e.g., Monthly)"
-                            value={metadata.expected_frequency || ''}
-                            onChange={(e) => updateItemMetadata('labResults', labId, 'expected_frequency', e.target.value)}
-                          />
-                          <Textarea
-                            size="xs"
-                            placeholder="Relevance note"
-                            value={metadata.relevance_note || ''}
-                            onChange={(e) => updateItemMetadata('labResults', labId, 'relevance_note', e.target.value)}
-                            autosize
-                            minRows={1}
-                          />
-                        </ItemDetailsCard>
-                      );
-                    })}
-                  </Stack>
-                )}
+        {/* Labs Section */}
+        <Box style={{ display: activeSection === 'labs' ? 'block' : 'none' }}>
+          <Stack gap="md">
+            <MultiSelect
+              label="Lab Results to Link"
+              placeholder={
+                labResultOptions.length > 0
+                  ? 'Select lab results...'
+                  : 'No lab results available'
+              }
+              data={labResultOptions}
+              value={selectedLabIds}
+              onChange={values => handleSelectionChange('labResults', values)}
+              searchable
+              clearable
+              disabled={labResultOptions.length === 0}
+              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+            />
 
-                {labResultOptions.length === 0 && !loading && (
-                  <Text size="sm" c="dimmed" ta="center">
-                    {t('treatmentPlan.noLabResults')}
-                  </Text>
-                )}
+            {/* Show detail fields for each selected lab */}
+            {selectedLabIds.length > 0 && (
+              <Stack gap="xs">
+                <Text size="xs" c="dimmed">
+                  {t('treatmentPlan.clickToExpand')}
+                </Text>
+                {selectedLabIds.map(labId => {
+                  const metadata = getItemMetadata('labResults', labId);
+                  return (
+                    <ItemDetailsCard
+                      key={labId}
+                      label={getItemLabel('labResults', labId)}
+                      color="violet"
+                      icon={IconTestPipe}
+                    >
+                      <Select
+                        size="xs"
+                        placeholder="Purpose"
+                        data={PURPOSE_OPTIONS}
+                        value={metadata.purpose || ''}
+                        onChange={value =>
+                          updateItemMetadata(
+                            'labResults',
+                            labId,
+                            'purpose',
+                            value || ''
+                          )
+                        }
+                        clearable
+                        comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+                      />
+                      <TextInput
+                        size="xs"
+                        placeholder="Expected frequency (e.g., Monthly)"
+                        value={metadata.expected_frequency || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'labResults',
+                            labId,
+                            'expected_frequency',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Textarea
+                        size="xs"
+                        placeholder="Relevance note"
+                        value={metadata.relevance_note || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'labResults',
+                            labId,
+                            'relevance_note',
+                            e.target.value
+                          )
+                        }
+                        autosize
+                        minRows={1}
+                      />
+                    </ItemDetailsCard>
+                  );
+                })}
               </Stack>
-            </Box>
+            )}
 
-            {/* Equipment Section */}
-            <Box style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}>
-              <Stack gap="md">
-                <MultiSelect
-                  label="Equipment to Link"
-                  placeholder={equipmentOptions.length > 0 ? "Select equipment..." : "No equipment available"}
-                  data={equipmentOptions}
-                  value={selectedEquipIds}
-                  onChange={(values) => handleSelectionChange('equipment', values)}
-                  searchable
-                  clearable
-                  disabled={equipmentOptions.length === 0}
-                  comboboxProps={{ withinPortal: true, zIndex: 4000 }}
-                />
+            {labResultOptions.length === 0 && !loading && (
+              <Text size="sm" c="dimmed" ta="center">
+                {t('treatmentPlan.noLabResults')}
+              </Text>
+            )}
+          </Stack>
+        </Box>
 
-                {/* Show detail fields for each selected equipment */}
-                {selectedEquipIds.length > 0 && (
-                  <Stack gap="xs">
-                    <Text size="xs" c="dimmed">{t('treatmentPlan.clickToExpand')}</Text>
-                    {selectedEquipIds.map((equipId) => {
-                      const metadata = getItemMetadata('equipment', equipId);
-                      return (
-                        <ItemDetailsCard
-                          key={equipId}
-                          label={getItemLabel('equipment', equipId)}
-                          color="orange"
-                          icon={IconDeviceDesktop}
-                        >
-                          <TextInput
-                            size="xs"
-                            placeholder="Usage frequency (e.g., Nightly)"
-                            value={metadata.usage_frequency || ''}
-                            onChange={(e) => updateItemMetadata('equipment', equipId, 'usage_frequency', e.target.value)}
-                          />
-                          <TextInput
-                            size="xs"
-                            placeholder="Specific settings (e.g., Pressure: 10 cmH2O)"
-                            value={metadata.specific_settings || ''}
-                            onChange={(e) => updateItemMetadata('equipment', equipId, 'specific_settings', e.target.value)}
-                          />
-                          <Textarea
-                            size="xs"
-                            placeholder="Relevance note"
-                            value={metadata.relevance_note || ''}
-                            onChange={(e) => updateItemMetadata('equipment', equipId, 'relevance_note', e.target.value)}
-                            autosize
-                            minRows={1}
-                          />
-                        </ItemDetailsCard>
-                      );
-                    })}
-                  </Stack>
-                )}
+        {/* Equipment Section */}
+        <Box
+          style={{ display: activeSection === 'equipment' ? 'block' : 'none' }}
+        >
+          <Stack gap="md">
+            <MultiSelect
+              label="Equipment to Link"
+              placeholder={
+                equipmentOptions.length > 0
+                  ? 'Select equipment...'
+                  : 'No equipment available'
+              }
+              data={equipmentOptions}
+              value={selectedEquipIds}
+              onChange={values => handleSelectionChange('equipment', values)}
+              searchable
+              clearable
+              disabled={equipmentOptions.length === 0}
+              comboboxProps={{ withinPortal: true, zIndex: 4000 }}
+            />
 
-                {equipmentOptions.length === 0 && !loading && (
-                  <Text size="sm" c="dimmed" ta="center">
-                    {t('treatmentPlan.noEquipment')}
-                  </Text>
-                )}
+            {/* Show detail fields for each selected equipment */}
+            {selectedEquipIds.length > 0 && (
+              <Stack gap="xs">
+                <Text size="xs" c="dimmed">
+                  {t('treatmentPlan.clickToExpand')}
+                </Text>
+                {selectedEquipIds.map(equipId => {
+                  const metadata = getItemMetadata('equipment', equipId);
+                  return (
+                    <ItemDetailsCard
+                      key={equipId}
+                      label={getItemLabel('equipment', equipId)}
+                      color="orange"
+                      icon={IconDeviceDesktop}
+                    >
+                      <TextInput
+                        size="xs"
+                        placeholder="Usage frequency (e.g., Nightly)"
+                        value={metadata.usage_frequency || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'equipment',
+                            equipId,
+                            'usage_frequency',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <TextInput
+                        size="xs"
+                        placeholder="Specific settings (e.g., Pressure: 10 cmH2O)"
+                        value={metadata.specific_settings || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'equipment',
+                            equipId,
+                            'specific_settings',
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Textarea
+                        size="xs"
+                        placeholder="Relevance note"
+                        value={metadata.relevance_note || ''}
+                        onChange={e =>
+                          updateItemMetadata(
+                            'equipment',
+                            equipId,
+                            'relevance_note',
+                            e.target.value
+                          )
+                        }
+                        autosize
+                        minRows={1}
+                      />
+                    </ItemDetailsCard>
+                  );
+                })}
               </Stack>
-            </Box>
+            )}
+
+            {equipmentOptions.length === 0 && !loading && (
+              <Text size="sm" c="dimmed" ta="center">
+                {t('treatmentPlan.noEquipment')}
+              </Text>
+            )}
+          </Stack>
+        </Box>
       </Stack>
     </Box>
   );
 };
 
 TreatmentPlanSetup.propTypes = {
-  activeSection: PropTypes.oneOf(['medications', 'encounters', 'labs', 'equipment']),
+  activeSection: PropTypes.oneOf([
+    'medications',
+    'encounters',
+    'labs',
+    'equipment',
+  ]),
   pendingRelationships: PropTypes.shape({
     medications: PropTypes.array,
     encounters: PropTypes.array,

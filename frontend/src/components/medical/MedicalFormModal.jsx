@@ -17,7 +17,7 @@ const MedicalFormModal = ({
   title,
   children,
   className = '',
-  size = 'lg'
+  size = 'lg',
 }) => {
   // Temporarily disable responsive features to fix dropdown hanging
   // const responsive = useResponsive();
@@ -37,9 +37,7 @@ const MedicalFormModal = ({
       trapFocus
       returnFocus
     >
-      <Stack spacing="md">
-        {children}
-      </Stack>
+      <Stack spacing="md">{children}</Stack>
     </Modal>
   );
 };

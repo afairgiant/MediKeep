@@ -14,8 +14,8 @@ const MantineAllergyForm = ({
   medicationsLoading = false,
 }) => {
   // Convert medications to Mantine format for dynamic options
-  const medicationSelectOptions = medicationsLoading 
-    ? [] 
+  const medicationSelectOptions = medicationsLoading
+    ? []
     : medicationsOptions.map(med => ({
         value: med.id.toString(),
         label: med.medication_name,
@@ -27,7 +27,6 @@ const MantineAllergyForm = ({
 
   const loadingStates = {
     medications: medicationsLoading,
-
   };
 
   return (
@@ -41,9 +40,7 @@ const MantineAllergyForm = ({
       editingItem={editingAllergy}
       fields={allergyFormFields}
       dynamicOptions={dynamicOptions}
-
       loadingStates={loadingStates}
-
     />
   );
 };

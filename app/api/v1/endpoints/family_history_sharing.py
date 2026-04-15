@@ -31,15 +31,12 @@ router = APIRouter()
 def get_organized_family_history(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get all family history accessible to current user (owned + shared)"""
     try:
         log_endpoint_access(
-            logger,
-            request,
-            current_user.id,
-            "family_history_organized_accessed"
+            logger, request, current_user.id, "family_history_organized_accessed"
         )
         service = FamilyHistoryService(db)
         return service.get_all_accessible_family_history(current_user)
@@ -53,7 +50,7 @@ def get_organized_family_history(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch family history"
+            detail="Failed to fetch family history",
         )
 
 
@@ -62,7 +59,7 @@ def get_family_member_shares(
     family_member_id: int,
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """See who has access to this family member's history"""
     try:
@@ -71,7 +68,7 @@ def get_family_member_shares(
             request,
             current_user.id,
             "family_member_shares_accessed",
-            family_member_id=family_member_id
+            family_member_id=family_member_id,
         )
         service = FamilyHistoryService(db)
         shares = service.get_family_member_shares(current_user, family_member_id)
@@ -79,23 +76,25 @@ def get_family_member_shares(
         # Format the response to match the expected structure
         formatted_shares = []
         for share_data in shares:
-            formatted_shares.append({
-                "id": share_data["share"].id,
-                "family_member_id": share_data["share"].family_member_id,
-                "shared_by_user_id": share_data["share"].shared_by_user_id,
-                "shared_with_user_id": share_data["share"].shared_with_user_id,
-                "permission_level": share_data["share"].permission_level,
-                "sharing_note": share_data["share"].sharing_note,
-                "created_at": share_data["share"].created_at,
-                "updated_at": share_data["share"].updated_at,
-                "shared_with": share_data["shared_with"],
-                "invitation": {
-                    "id": share_data["invitation"].id,
-                    "title": share_data["invitation"].title,
-                    "message": share_data["invitation"].message,
-                    "responded_at": share_data["invitation"].responded_at
+            formatted_shares.append(
+                {
+                    "id": share_data["share"].id,
+                    "family_member_id": share_data["share"].family_member_id,
+                    "shared_by_user_id": share_data["share"].shared_by_user_id,
+                    "shared_with_user_id": share_data["share"].shared_with_user_id,
+                    "permission_level": share_data["share"].permission_level,
+                    "sharing_note": share_data["share"].sharing_note,
+                    "created_at": share_data["share"].created_at,
+                    "updated_at": share_data["share"].updated_at,
+                    "shared_with": share_data["shared_with"],
+                    "invitation": {
+                        "id": share_data["invitation"].id,
+                        "title": share_data["invitation"].title,
+                        "message": share_data["invitation"].message,
+                        "responded_at": share_data["invitation"].responded_at,
+                    },
                 }
-            })
+            )
 
         return formatted_shares
     except ValueError as e:
@@ -106,10 +105,7 @@ def get_family_member_shares(
             user_id=current_user.id,
             family_member_id=family_member_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -121,7 +117,7 @@ def get_family_member_shares(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch shares"
+            detail="Failed to fetch shares",
         )
 
 
@@ -131,7 +127,7 @@ async def send_family_history_share_invitation(
     invite_data: FamilyHistoryShareInvitationCreate,
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Send invitation to share family member's history with another user"""
     try:
@@ -142,7 +138,7 @@ async def send_family_history_share_invitation(
             invite_data.shared_with_identifier,
             invite_data.permission_level,
             invite_data.sharing_note,
-            invite_data.expires_hours
+            invite_data.expires_hours,
         )
 
         log_security_event(
@@ -160,7 +156,7 @@ async def send_family_history_share_invitation(
             "message": "Family history share invitation sent successfully",
             "invitation_id": invitation.id,
             "expires_at": invitation.expires_at,
-            "title": invitation.title
+            "title": invitation.title,
         }
     except ValueError as e:
         log_validation_error(
@@ -170,10 +166,7 @@ async def send_family_history_share_invitation(
             user_id=current_user.id,
             family_member_id=family_member_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -185,7 +178,7 @@ async def send_family_history_share_invitation(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send invitation"
+            detail="Failed to send invitation",
         )
 
 
@@ -195,7 +188,7 @@ def revoke_family_member_share(
     user_id: int,
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Revoke family history sharing"""
     try:
@@ -221,10 +214,7 @@ def revoke_family_member_share(
             user_id=current_user.id,
             family_member_id=family_member_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -236,7 +226,7 @@ def revoke_family_member_share(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to revoke sharing"
+            detail="Failed to revoke sharing",
         )
 
 
@@ -245,7 +235,7 @@ def remove_my_access_to_family_history(
     family_member_id: int,
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Allow the recipient to remove their own access to shared family history"""
     try:
@@ -267,12 +257,11 @@ def remove_my_access_to_family_history(
         if "not found" in error_msg.lower():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No active sharing found for this family history record"
+                detail="No active sharing found for this family history record",
             )
         else:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=error_msg
+                status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg
             )
     except Exception as e:
         log_endpoint_error(
@@ -285,7 +274,7 @@ def remove_my_access_to_family_history(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to remove access"
+            detail="Failed to remove access",
         )
 
 
@@ -294,7 +283,7 @@ async def bulk_send_family_history_invitations(
     bulk_invite_data: FamilyHistoryBulkInvite,
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Send ONE invitation to share multiple family members with one user"""
     try:
@@ -305,7 +294,7 @@ async def bulk_send_family_history_invitations(
             bulk_invite_data.shared_with_identifier,
             bulk_invite_data.permission_level,
             bulk_invite_data.sharing_note,
-            bulk_invite_data.expires_hours
+            bulk_invite_data.expires_hours,
         )
 
         log_security_event(
@@ -326,10 +315,7 @@ async def bulk_send_family_history_invitations(
             str(e),
             user_id=current_user.id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -340,7 +326,7 @@ async def bulk_send_family_history_invitations(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to bulk send invitations"
+            detail="Failed to bulk send invitations",
         )
 
 
@@ -349,7 +335,7 @@ def get_family_member_details(
     family_member_id: int,
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get family member details with conditions (if user has access)"""
     try:
@@ -359,10 +345,12 @@ def get_family_member_details(
             current_user.id,
             "read",
             "FamilyMember",
-            record_id=family_member_id
+            record_id=family_member_id,
         )
         service = FamilyHistoryService(db)
-        family_member = service.get_family_member_with_conditions(family_member_id, current_user)
+        family_member = service.get_family_member_with_conditions(
+            family_member_id, current_user
+        )
 
         if not family_member:
             log_security_event(
@@ -375,7 +363,7 @@ def get_family_member_details(
             )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Family member not found or access denied"
+                detail="Family member not found or access denied",
             )
 
         return {
@@ -398,9 +386,10 @@ def get_family_member_details(
                     "notes": condition.notes,
                     "icd10_code": condition.icd10_code,
                     "created_at": condition.created_at,
-                    "updated_at": condition.updated_at
-                } for condition in family_member.family_conditions
-            ]
+                    "updated_at": condition.updated_at,
+                }
+                for condition in family_member.family_conditions
+            ],
         }
     except Exception as e:
         log_endpoint_error(
@@ -413,7 +402,7 @@ def get_family_member_details(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch family member details"
+            detail="Failed to fetch family member details",
         )
 
 
@@ -421,23 +410,17 @@ def get_family_member_details(
 def get_shared_family_history(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get only family history shared with current user"""
     try:
         log_endpoint_access(
-            logger,
-            request,
-            current_user.id,
-            "shared_family_history_accessed"
+            logger, request, current_user.id, "shared_family_history_accessed"
         )
         service = FamilyHistoryService(db)
         shared_history = service.get_shared_family_history(current_user)
 
-        return {
-            "shared_family_history": shared_history,
-            "count": len(shared_history)
-        }
+        return {"shared_family_history": shared_history, "count": len(shared_history)}
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -448,7 +431,7 @@ def get_shared_family_history(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch shared family history"
+            detail="Failed to fetch shared family history",
         )
 
 
@@ -456,23 +439,17 @@ def get_shared_family_history(
 def get_my_family_history(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get only family history owned by current user"""
     try:
         log_endpoint_access(
-            logger,
-            request,
-            current_user.id,
-            "owned_family_history_accessed"
+            logger, request, current_user.id, "owned_family_history_accessed"
         )
         service = FamilyHistoryService(db)
         owned_history = service.get_my_family_history(current_user)
 
-        return {
-            "owned_family_history": owned_history,
-            "count": len(owned_history)
-        }
+        return {"owned_family_history": owned_history, "count": len(owned_history)}
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -483,7 +460,7 @@ def get_my_family_history(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch owned family history"
+            detail="Failed to fetch owned family history",
         )
 
 
@@ -491,23 +468,17 @@ def get_my_family_history(
 def get_shared_by_me(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get all family history that current user has shared with others"""
     try:
         log_endpoint_access(
-            logger,
-            request,
-            current_user.id,
-            "family_history_shared_by_me_accessed"
+            logger, request, current_user.id, "family_history_shared_by_me_accessed"
         )
         service = FamilyHistoryService(db)
         shared_by_me = service.get_family_history_shared_by_me(current_user)
 
-        return {
-            "shared_by_me": shared_by_me,
-            "count": len(shared_by_me)
-        }
+        return {"shared_by_me": shared_by_me, "count": len(shared_by_me)}
     except Exception as e:
         log_endpoint_error(
             logger,
@@ -518,5 +489,5 @@ def get_shared_by_me(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch shared by me family history"
+            detail="Failed to fetch shared by me family history",
         )

@@ -3,6 +3,7 @@ API tests for admin user management endpoints.
 
 Tests the admin patient search and user creation with optional patient linking.
 """
+
 import pytest
 from datetime import date
 
@@ -126,10 +127,14 @@ class TestAdminCreateUser:
         assert user is not None
 
         # Verify auto-created patient
-        patient = db_session.query(Patient).filter(
-            Patient.owner_user_id == user.id,
-            Patient.is_self_record == True,
-        ).first()
+        patient = (
+            db_session.query(Patient)
+            .filter(
+                Patient.owner_user_id == user.id,
+                Patient.is_self_record == True,
+            )
+            .first()
+        )
         assert patient is not None
         assert user.active_patient_id == patient.id
 
@@ -188,10 +193,14 @@ class TestAdminCreateUser:
         assert patient.is_self_record is True
 
         # Verify original owner has edit share
-        share = db_session.query(PatientShare).filter(
-            PatientShare.patient_id == patient.id,
-            PatientShare.shared_with_user_id == owner.id,
-        ).first()
+        share = (
+            db_session.query(PatientShare)
+            .filter(
+                PatientShare.patient_id == patient.id,
+                PatientShare.shared_with_user_id == owner.id,
+            )
+            .first()
+        )
         assert share is not None
         assert share.permission_level == "edit"
         assert share.is_active is True
@@ -304,9 +313,11 @@ class TestAdminCreateUser:
 
         # Verify replacement exists for original owner
         db_session.refresh(owner)
-        replacement = db_session.query(Patient).filter(
-            Patient.id == transfer["replacement_patient_id"]
-        ).first()
+        replacement = (
+            db_session.query(Patient)
+            .filter(Patient.id == transfer["replacement_patient_id"])
+            .first()
+        )
         assert replacement is not None
         assert replacement.owner_user_id == owner.id
         assert replacement.is_self_record is True

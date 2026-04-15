@@ -5,6 +5,7 @@ from datetime import datetime
 
 class PatientPhotoBase(BaseModel):
     """Base schema for patient photos"""
+
     patient_id: int
     file_name: str
     file_size: Optional[int] = None
@@ -50,15 +51,18 @@ class PatientPhotoBase(BaseModel):
                 "image/gif",
                 "image/bmp",
                 "image/heic",
-                "image/heif"
+                "image/heif",
             ]
             if v.lower() not in allowed_types:
-                raise ValueError(f"Invalid image type. Allowed types: {', '.join(allowed_types)}")
+                raise ValueError(
+                    f"Invalid image type. Allowed types: {', '.join(allowed_types)}"
+                )
         return v.lower() if v else None
 
 
 class PatientPhotoCreate(PatientPhotoBase):
     """Schema for creating a patient photo"""
+
     file_path: str
     uploaded_by: Optional[int] = None
 
@@ -74,6 +78,7 @@ class PatientPhotoCreate(PatientPhotoBase):
 
 class PatientPhotoUpdate(BaseModel):
     """Schema for updating a patient photo (rarely used)"""
+
     file_size: Optional[int] = None
     width: Optional[int] = None
     height: Optional[int] = None
@@ -81,6 +86,7 @@ class PatientPhotoUpdate(BaseModel):
 
 class PatientPhotoResponse(PatientPhotoBase):
     """Schema for patient photo response"""
+
     id: int
     file_path: str
     uploaded_by: Optional[int] = None
@@ -92,6 +98,7 @@ class PatientPhotoResponse(PatientPhotoBase):
 
 class PatientPhotoWithUrl(PatientPhotoResponse):
     """Schema for patient photo with generated URL"""
+
     url: str
     thumbnail_url: str
 

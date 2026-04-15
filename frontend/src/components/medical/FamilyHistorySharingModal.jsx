@@ -474,7 +474,9 @@ const FamilyHistorySharingModal = ({
                             {share.shared_with.email}
                           </Text>
                           <Text size="xs" c="dimmed">
-                            {t('sharing.sharedOn', { date: formatDateTime(share.created_at) })}
+                            {t('sharing.sharedOn', {
+                              date: formatDateTime(share.created_at),
+                            })}
                           </Text>
                           {share.sharing_note && (
                             <Text size="xs" c="dimmed" italic>
@@ -517,9 +519,7 @@ const FamilyHistorySharingModal = ({
 
         {/* Footer */}
         <Alert icon={<IconInfoCircle />} color="blue" variant="light">
-          <Text size="xs">
-            {t('sharing.invitationInfo')}
-          </Text>
+          <Text size="xs">{t('sharing.invitationInfo')}</Text>
         </Alert>
       </Stack>
     </Modal>

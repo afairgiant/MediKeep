@@ -17,10 +17,10 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import { 
-  ERROR_MESSAGES, 
+import {
+  ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  getUserFriendlyError
+  getUserFriendlyError,
 } from '../../constants/errorMessages';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
@@ -41,12 +41,7 @@ import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { sanitizeComponentForApi } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import {
-  Button,
-  Container,
-  Stack,
-  Paper,
-} from '@mantine/core';
+import { Button, Container, Stack, Paper } from '@mantine/core';
 import { IconFileUpload } from '@tabler/icons-react';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
@@ -58,7 +53,17 @@ const LabResults = () => {
   const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Modern data management with useMedicalData
   const {
@@ -92,7 +97,8 @@ const LabResults = () => {
   const { practitioners, loading: practitionersLoading } = usePractitioners();
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('lab-result', labResults);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('lab-result', labResults);
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -128,7 +134,7 @@ const LabResults = () => {
         notes: '',
         practitioner_id: '',
       });
-      
+
       // Only refresh if we created a new lab result during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
       if (needsRefreshAfterSubmissionRef.current) {
@@ -136,7 +142,7 @@ const LabResults = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('lab_results_form_error', {
         message: 'Form submission error in lab results',
         error,
@@ -150,7 +156,13 @@ const LabResults = () => {
   const config = getMedicalPageConfig('labresults');
 
   // Get standardized formatters for lab results
-  const formatters = getEntityFormatters('lab_results', practitioners, null, null, formatDate);
+  const formatters = getEntityFormatters(
+    'lab_results',
+    practitioners,
+    null,
+    null,
+    formatDate
+  );
 
   // Use standardized data management
   const dataManagement = useDataManagement(labResults || [], config);
@@ -243,21 +255,27 @@ const LabResults = () => {
   const filteredLabResults = dataManagement.data;
   const paginatedLabResults = paginateData(filteredLabResults);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredLabResults.length); }, [filteredLabResults.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredLabResults.length);
+  }, [filteredLabResults.length, clampPage]);
 
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] =
+    useState(null);
 
   // Test component inline entry state (create mode only)
   const [testComponentMethods, setTestComponentMethods] = useState(null);
 
   // Pending relationships state (create mode only)
-  const [pendingRelationshipsMethods, setPendingRelationshipsMethods] = useState(null);
+  const [pendingRelationshipsMethods, setPendingRelationshipsMethods] =
+    useState(null);
 
   // View modal navigation with URL deep linking
   const {
@@ -270,7 +288,7 @@ const LabResults = () => {
   } = useViewModalNavigation({
     items: labResults,
     loading,
-    onClose: (labResult) => {
+    onClose: labResult => {
       if (labResult) {
         refreshFileCount(labResult.id);
       }
@@ -320,32 +338,39 @@ const LabResults = () => {
     setShowModal(true);
   }, [resetSubmission]);
 
-  const handleEditLabResult = useCallback(async labResult => {
-    resetSubmission(); // Reset submission state to prevent modal flash
-    setEditingLabResult(labResult);
-    setFormData({
-      test_name: labResult.test_name || '',
-      test_code: labResult.test_code || '',
-      test_category: labResult.test_category || '',
-      test_type: labResult.test_type || '',
-      facility: labResult.facility || '',
-      status: labResult.status || 'ordered',
-      labs_result: labResult.labs_result || '',
-      ordered_date: labResult.ordered_date || '',
-      completed_date: labResult.completed_date || '',
-      notes: labResult.notes || '',
-      practitioner_id: labResult.practitioner_id ? String(labResult.practitioner_id) : '',
-      tags: labResult.tags || [],
-    });
+  const handleEditLabResult = useCallback(
+    async labResult => {
+      resetSubmission(); // Reset submission state to prevent modal flash
+      setEditingLabResult(labResult);
+      setFormData({
+        test_name: labResult.test_name || '',
+        test_code: labResult.test_code || '',
+        test_category: labResult.test_category || '',
+        test_type: labResult.test_type || '',
+        facility: labResult.facility || '',
+        status: labResult.status || 'ordered',
+        labs_result: labResult.labs_result || '',
+        ordered_date: labResult.ordered_date || '',
+        completed_date: labResult.completed_date || '',
+        notes: labResult.notes || '',
+        practitioner_id: labResult.practitioner_id
+          ? String(labResult.practitioner_id)
+          : '',
+        tags: labResult.tags || [],
+      });
 
-    setShowModal(true);
-  }, [resetSubmission]);
+      setShowModal(true);
+    },
+    [resetSubmission]
+  );
 
   const handleLabResultUpdated = useCallback(async () => {
     // If modal is open, fetch the updated lab result directly
     if (viewingLabResult) {
       try {
-        const updatedLabResult = await apiService.getLabResult(viewingLabResult.id);
+        const updatedLabResult = await apiService.getLabResult(
+          viewingLabResult.id
+        );
         if (updatedLabResult) {
           setViewingLabResult(updatedLabResult);
           logger.info('lab_result_updated_in_modal', {
@@ -369,243 +394,279 @@ const LabResults = () => {
     await refreshData();
   }, [viewingLabResult, refreshData]);
 
-  const handleQuickImportSuccess = useCallback(async (labResultId) => {
-    setShowQuickImportModal(false);
+  const handleQuickImportSuccess = useCallback(
+    async labResultId => {
+      setShowQuickImportModal(false);
 
-    // Refresh lab results list
-    await refreshData();
+      // Refresh lab results list
+      await refreshData();
 
-    // Fetch the specific lab result directly to avoid race condition with stale state
-    try {
-      const labResult = await apiService.getLabResult(labResultId);
+      // Fetch the specific lab result directly to avoid race condition with stale state
+      try {
+        const labResult = await apiService.getLabResult(labResultId);
 
-      if (labResult) {
-        // Open the view modal with Test Components tab active
-        setViewingLabResult(labResult);
-        setInitialViewTab('test-components');
-        setShowViewModal(true);
+        if (labResult) {
+          // Open the view modal with Test Components tab active
+          setViewingLabResult(labResult);
+          setInitialViewTab('test-components');
+          setShowViewModal(true);
 
-        // Update URL with lab result ID
-        const searchParams = new URLSearchParams(location.search);
-        searchParams.set('view', labResult.id);
-        navigate(`${location.pathname}?${searchParams.toString()}`, {
-          replace: true,
-        });
+          // Update URL with lab result ID
+          const searchParams = new URLSearchParams(location.search);
+          searchParams.set('view', labResult.id);
+          navigate(`${location.pathname}?${searchParams.toString()}`, {
+            replace: true,
+          });
 
-        logger.info('quick_import_completed', {
-          message: 'Quick PDF import completed successfully',
+          logger.info('quick_import_completed', {
+            message: 'Quick PDF import completed successfully',
+            labResultId,
+            component: 'LabResults',
+          });
+        }
+      } catch (error) {
+        logger.error('quick_import_fetch_failed', {
+          message: 'Failed to fetch newly created lab result',
           labResultId,
+          error: error.message,
           component: 'LabResults',
         });
       }
-    } catch (error) {
-      logger.error('quick_import_fetch_failed', {
-        message: 'Failed to fetch newly created lab result',
-        labResultId,
-        error: error.message,
-        component: 'LabResults',
-      });
-    }
-  }, [refreshData, navigate, location.pathname, location.search]);
+    },
+    [refreshData, navigate, location.pathname, location.search]
+  );
 
-  const handleDeleteLabResult = useCallback(async labResultId => {
-    const success = await deleteItem(labResultId);
-    if (success) {
-      cleanupFileCount(labResultId);
-    }
-  }, [deleteItem, cleanupFileCount]);
+  const handleDeleteLabResult = useCallback(
+    async labResultId => {
+      const success = await deleteItem(labResultId);
+      if (success) {
+        cleanupFileCount(labResultId);
+      }
+    },
+    [deleteItem, cleanupFileCount]
+  );
 
-  const handleSubmit = useCallback(async e => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async e => {
+      e.preventDefault();
 
-    // Basic validation first
-    if (!formData.test_name.trim()) {
-      setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
-      return;
-    }
-
-    if (!currentPatient?.id) {
-      setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
-      return;
-    }
-
-    // Start submission process
-    startSubmission();
-
-    // Prevent double submission - check after startSubmission() to avoid race condition
-    if (!canSubmit) {
-      return;
-    }
-
-    const labResultData = {
-      ...formData,
-      patient_id: currentPatient.id,
-      practitioner_id: formData.practitioner_id
-        ? parseInt(formData.practitioner_id)
-        : null,
-      ordered_date: formData.ordered_date || null,
-      completed_date: formData.completed_date || null,
-    };
-
-    try {
-      let success;
-      let resultId;
-
-      // Submit form data
-      if (editingLabResult) {
-        success = await updateItem(editingLabResult.id, labResultData);
-        resultId = editingLabResult.id;
-        // No refresh needed for updates - user stays on same page
-      } else {
-        const result = await createItem(labResultData);
-        success = !!result;
-        resultId = result?.id;
-        // Set flag to refresh after new lab result creation (but only after form submission, not uploads)
-        if (success) {
-          needsRefreshAfterSubmissionRef.current = true;
-        }
+      // Basic validation first
+      if (!formData.test_name.trim()) {
+        setError(ERROR_MESSAGES.REQUIRED_FIELD_MISSING);
+        return;
       }
 
-      // Complete form submission
-      completeFormSubmission(success, resultId);
+      if (!currentPatient?.id) {
+        setError(ERROR_MESSAGES.PATIENT_NOT_SELECTED);
+        return;
+      }
 
-      if (success && resultId) {
-        // Submit inline test components (create mode only)
-        if (!editingLabResult && testComponentMethods?.hasPendingComponents?.()) {
-          try {
-            const pendingComponents = testComponentMethods.getPendingComponents();
-            const componentsToCreate = pendingComponents.map(c => sanitizeComponentForApi(c, resultId));
-            await labTestComponentApi.createBulkForLabResult(resultId, componentsToCreate);
-            logger.info('inline_test_components_created', {
-              message: 'Inline test components created with lab result',
-              labResultId: resultId,
-              componentCount: componentsToCreate.length,
-              component: 'LabResults',
-            });
-          } catch (componentError) {
-            logger.error('inline_test_components_error', {
-              message: 'Failed to create inline test components',
-              labResultId: resultId,
-              error: componentError?.message || String(componentError),
-              stack: componentError?.stack,
-              component: 'LabResults',
-            });
-            notifications.show({
-              title: t('common:warning', 'Warning'),
-              message: t('medical:labResults.form.componentCreationWarning', 'Lab result saved but test components could not be added. You can add them from the view page.'),
-              color: 'yellow',
-              autoClose: 8000,
-            });
-          }
-        }
+      // Start submission process
+      startSubmission();
 
-        // Submit pending relationships (create mode only)
-        if (!editingLabResult && pendingRelationshipsMethods?.hasPendingRelationships?.()) {
-          try {
-            const pending = pendingRelationshipsMethods.getPendingRelationships();
+      // Prevent double submission - check after startSubmission() to avoid race condition
+      if (!canSubmit) {
+        return;
+      }
 
-            const conditionPromises = pending.conditions.map(condRel =>
-              apiService.createLabResultCondition(resultId, {
-                lab_result_id: resultId,
-                condition_id: condRel.condition_id,
-                relevance_note: condRel.relevance_note,
-              })
-            );
+      const labResultData = {
+        ...formData,
+        patient_id: currentPatient.id,
+        practitioner_id: formData.practitioner_id
+          ? parseInt(formData.practitioner_id)
+          : null,
+        ordered_date: formData.ordered_date || null,
+        completed_date: formData.completed_date || null,
+      };
 
-            const encounterPromises = pending.encounters.map(encRel =>
-              apiService.createLabResultEncounter(resultId, {
-                encounter_id: encRel.encounter_id,
-                purpose: encRel.purpose,
-                relevance_note: encRel.relevance_note,
-              })
-            );
+      try {
+        let success;
+        let resultId;
 
-            await Promise.all([...conditionPromises, ...encounterPromises]);
-
-            logger.info('pending_relationships_created', {
-              message: 'Pending relationships created with lab result',
-              labResultId: resultId,
-              conditionCount: pending.conditions.length,
-              encounterCount: pending.encounters.length,
-              component: 'LabResults',
-            });
-          } catch (relError) {
-            logger.error('pending_relationships_error', {
-              message: 'Failed to create pending relationships',
-              labResultId: resultId,
-              error: relError?.message || String(relError),
-              component: 'LabResults',
-            });
-            notifications.show({
-              title: t('common:warning', 'Warning'),
-              message: t('medical:labResults.form.relationshipCreationWarning', 'Lab result saved but some relationships could not be created. You can add them from the edit page.'),
-              color: 'yellow',
-              autoClose: 8000,
-            });
-          }
-        }
-
-        // Check if we have files to upload
-        const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
-
-        if (hasPendingFiles) {
-          logger.info('lab_results_starting_file_upload', {
-            message: 'Starting file upload process',
-            labResultId: resultId,
-            pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
-            component: 'LabResults',
-          });
-
-          // Start file upload process
-          startFileUpload();
-
-          try {
-            // Upload files with progress tracking
-            await documentManagerMethods.uploadPendingFiles(resultId);
-            
-            // File upload completed successfully
-            completeFileUpload(true, documentManagerMethods.getPendingFilesCount(), 0);
-            
-            // Refresh file count
-            refreshFileCount(resultId);
-          } catch (uploadError) {
-            logger.error('lab_results_file_upload_error', {
-              message: 'File upload failed',
-              labResultId: resultId,
-              error: uploadError.message,
-              component: 'LabResults',
-            });
-            
-            // File upload failed
-            completeFileUpload(false, 0, documentManagerMethods.getPendingFilesCount());
-          }
+        // Submit form data
+        if (editingLabResult) {
+          success = await updateItem(editingLabResult.id, labResultData);
+          resultId = editingLabResult.id;
+          // No refresh needed for updates - user stays on same page
         } else {
-          // No files to upload, complete immediately
-          completeFileUpload(true, 0, 0);
+          const result = await createItem(labResultData);
+          success = !!result;
+          resultId = result?.id;
+          // Set flag to refresh after new lab result creation (but only after form submission, not uploads)
+          if (success) {
+            needsRefreshAfterSubmissionRef.current = true;
+          }
         }
+
+        // Complete form submission
+        completeFormSubmission(success, resultId);
+
+        if (success && resultId) {
+          // Submit inline test components (create mode only)
+          if (
+            !editingLabResult &&
+            testComponentMethods?.hasPendingComponents?.()
+          ) {
+            try {
+              const pendingComponents =
+                testComponentMethods.getPendingComponents();
+              const componentsToCreate = pendingComponents.map(c =>
+                sanitizeComponentForApi(c, resultId)
+              );
+              await labTestComponentApi.createBulkForLabResult(
+                resultId,
+                componentsToCreate
+              );
+              logger.info('inline_test_components_created', {
+                message: 'Inline test components created with lab result',
+                labResultId: resultId,
+                componentCount: componentsToCreate.length,
+                component: 'LabResults',
+              });
+            } catch (componentError) {
+              logger.error('inline_test_components_error', {
+                message: 'Failed to create inline test components',
+                labResultId: resultId,
+                error: componentError?.message || String(componentError),
+                stack: componentError?.stack,
+                component: 'LabResults',
+              });
+              notifications.show({
+                title: t('common:warning', 'Warning'),
+                message: t(
+                  'medical:labResults.form.componentCreationWarning',
+                  'Lab result saved but test components could not be added. You can add them from the view page.'
+                ),
+                color: 'yellow',
+                autoClose: 8000,
+              });
+            }
+          }
+
+          // Submit pending relationships (create mode only)
+          if (
+            !editingLabResult &&
+            pendingRelationshipsMethods?.hasPendingRelationships?.()
+          ) {
+            try {
+              const pending =
+                pendingRelationshipsMethods.getPendingRelationships();
+
+              const conditionPromises = pending.conditions.map(condRel =>
+                apiService.createLabResultCondition(resultId, {
+                  lab_result_id: resultId,
+                  condition_id: condRel.condition_id,
+                  relevance_note: condRel.relevance_note,
+                })
+              );
+
+              const encounterPromises = pending.encounters.map(encRel =>
+                apiService.createLabResultEncounter(resultId, {
+                  encounter_id: encRel.encounter_id,
+                  purpose: encRel.purpose,
+                  relevance_note: encRel.relevance_note,
+                })
+              );
+
+              await Promise.all([...conditionPromises, ...encounterPromises]);
+
+              logger.info('pending_relationships_created', {
+                message: 'Pending relationships created with lab result',
+                labResultId: resultId,
+                conditionCount: pending.conditions.length,
+                encounterCount: pending.encounters.length,
+                component: 'LabResults',
+              });
+            } catch (relError) {
+              logger.error('pending_relationships_error', {
+                message: 'Failed to create pending relationships',
+                labResultId: resultId,
+                error: relError?.message || String(relError),
+                component: 'LabResults',
+              });
+              notifications.show({
+                title: t('common:warning', 'Warning'),
+                message: t(
+                  'medical:labResults.form.relationshipCreationWarning',
+                  'Lab result saved but some relationships could not be created. You can add them from the edit page.'
+                ),
+                color: 'yellow',
+                autoClose: 8000,
+              });
+            }
+          }
+
+          // Check if we have files to upload
+          const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
+
+          if (hasPendingFiles) {
+            logger.info('lab_results_starting_file_upload', {
+              message: 'Starting file upload process',
+              labResultId: resultId,
+              pendingFilesCount: documentManagerMethods.getPendingFilesCount(),
+              component: 'LabResults',
+            });
+
+            // Start file upload process
+            startFileUpload();
+
+            try {
+              // Upload files with progress tracking
+              await documentManagerMethods.uploadPendingFiles(resultId);
+
+              // File upload completed successfully
+              completeFileUpload(
+                true,
+                documentManagerMethods.getPendingFilesCount(),
+                0
+              );
+
+              // Refresh file count
+              refreshFileCount(resultId);
+            } catch (uploadError) {
+              logger.error('lab_results_file_upload_error', {
+                message: 'File upload failed',
+                labResultId: resultId,
+                error: uploadError.message,
+                component: 'LabResults',
+              });
+
+              // File upload failed
+              completeFileUpload(
+                false,
+                0,
+                documentManagerMethods.getPendingFilesCount()
+              );
+            }
+          } else {
+            // No files to upload, complete immediately
+            completeFileUpload(true, 0, 0);
+          }
+        }
+      } catch (error) {
+        handleSubmissionFailure(error, 'form');
       }
-    } catch (error) {
-      handleSubmissionFailure(error, 'form');
-    }
-  }, [
-    formData,
-    currentPatient,
-    canSubmit,
-    editingLabResult,
-    updateItem,
-    createItem,
-    documentManagerMethods,
-    testComponentMethods,
-    pendingRelationshipsMethods,
-    startSubmission,
-    setError,
-    completeFormSubmission,
-    startFileUpload,
-    completeFileUpload,
-    handleSubmissionFailure,
-    refreshFileCount,
-    t,
-  ]);
+    },
+    [
+      formData,
+      currentPatient,
+      canSubmit,
+      editingLabResult,
+      updateItem,
+      createItem,
+      documentManagerMethods,
+      testComponentMethods,
+      pendingRelationshipsMethods,
+      startSubmission,
+      setError,
+      completeFormSubmission,
+      startFileUpload,
+      completeFileUpload,
+      handleSubmissionFailure,
+      refreshFileCount,
+      t,
+    ]
+  );
 
   const handleInputChange = useCallback(e => {
     const { name, value } = e.target;
@@ -617,7 +678,7 @@ const LabResults = () => {
     if (isBlocking) {
       return;
     }
-    
+
     resetSubmission(); // Reset submission state
     setShowModal(false);
     setEditingLabResult(null);
@@ -641,7 +702,9 @@ const LabResults = () => {
 
   const renderViewContent = () => {
     if (viewMode === 'components') {
-      return currentPatient?.id ? <TestComponentCatalog patientId={currentPatient.id} /> : null;
+      return currentPatient?.id ? (
+        <TestComponentCatalog patientId={currentPatient.id} />
+      ) : null;
     }
 
     if (filteredLabResults.length === 0) {
@@ -650,8 +713,14 @@ const LabResults = () => {
           emoji="🧪"
           title={t('labresults:noResults', 'No Lab Results Found')}
           hasActiveFilters={dataManagement.hasActiveFilters}
-          filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-          noDataMessage={t('labresults:startAdding', 'Start by adding your first lab result.')}
+          filteredMessage={t(
+            'shared:emptyStates.adjustSearch',
+            'Try adjusting your search or filter criteria.'
+          )}
+          noDataMessage={t(
+            'labresults:startAdding',
+            'Start by adding your first lab result.'
+          )}
           actionButton={
             <Button variant="filled" onClick={handleAddLabResult}>
               {t('labresults:addFirst', 'Add Your First Lab Result')}
@@ -666,7 +735,7 @@ const LabResults = () => {
         <AnimatedCardGrid
           items={paginatedLabResults}
           columns={{ base: 12, sm: 6, lg: 4 }}
-          renderCard={(result) => (
+          renderCard={result => (
             <LabResultCard
               labResult={result}
               onEdit={handleEditLabResult}
@@ -694,15 +763,63 @@ const LabResults = () => {
           disableDelete={isViewOnly}
           disableActionsTooltip={viewOnlyTooltip}
           columns={[
-            { header: t('shared:fields.testName', 'Test Name'), accessor: 'test_name', priority: 'high', width: 200 },
-            { header: t('shared:labels.category', 'Category'), accessor: 'test_category', priority: 'low', width: 150 },
-            { header: t('shared:labels.type', 'Type'), accessor: 'test_type', priority: 'low', width: 120 },
-            { header: t('shared:labels.facility', 'Facility'), accessor: 'facility', priority: 'low', width: 150 },
-            { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'high', width: 120 },
-            { header: t('shared:labels.orderingPractitioner', 'Ordering Practitioner'), accessor: 'practitioner_id', priority: 'low', width: 150 },
-            { header: t('shared:labels.orderedDate', 'Ordered Date'), accessor: 'ordered_date', priority: 'low', width: 120 },
-            { header: t('shared:labels.completedDate', 'Completed Date'), accessor: 'completed_date', priority: 'low', width: 120 },
-            { header: t('shared:tabs.documents', 'Files'), accessor: 'files', priority: 'low', width: 150 },
+            {
+              header: t('shared:fields.testName', 'Test Name'),
+              accessor: 'test_name',
+              priority: 'high',
+              width: 200,
+            },
+            {
+              header: t('shared:labels.category', 'Category'),
+              accessor: 'test_category',
+              priority: 'low',
+              width: 150,
+            },
+            {
+              header: t('shared:labels.type', 'Type'),
+              accessor: 'test_type',
+              priority: 'low',
+              width: 120,
+            },
+            {
+              header: t('shared:labels.facility', 'Facility'),
+              accessor: 'facility',
+              priority: 'low',
+              width: 150,
+            },
+            {
+              header: t('shared:fields.status', 'Status'),
+              accessor: 'status',
+              priority: 'high',
+              width: 120,
+            },
+            {
+              header: t(
+                'shared:labels.orderingPractitioner',
+                'Ordering Practitioner'
+              ),
+              accessor: 'practitioner_id',
+              priority: 'low',
+              width: 150,
+            },
+            {
+              header: t('shared:labels.orderedDate', 'Ordered Date'),
+              accessor: 'ordered_date',
+              priority: 'low',
+              width: 120,
+            },
+            {
+              header: t('shared:labels.completedDate', 'Completed Date'),
+              accessor: 'completed_date',
+              priority: 'low',
+              width: 120,
+            },
+            {
+              header: t('shared:tabs.documents', 'Files'),
+              accessor: 'files',
+              priority: 'low',
+              width: 150,
+            },
           ]}
           patientData={currentPatient}
           tableName={t('labresults:title', 'Lab Results')}
@@ -711,7 +828,7 @@ const LabResults = () => {
           onDelete={handleDeleteLabResult}
           formatters={{
             ...formatters,
-            practitioner_id: (value) => {
+            practitioner_id: value => {
               if (!value) return '-';
               const practitioner = practitioners.find(p => p.id === value);
               return practitioner ? practitioner.name : `ID: ${value}`;
@@ -737,7 +854,10 @@ const LabResults = () => {
     return (
       <MedicalPageLoading
         message={t('labresults:loading', 'Loading lab results...')}
-        hint={t('labresults:loadingHint', 'If this takes too long, please refresh the page')}
+        hint={t(
+          'labresults:loadingHint',
+          'If this takes too long, please refresh the page'
+        )}
       />
     );
   }
@@ -779,12 +899,23 @@ const LabResults = () => {
 
           {/* Mantine Filter Controls - hidden in components view (it has its own) */}
           {viewMode !== 'components' && (
-            <MedicalPageFilters dataManagement={dataManagement} config={config} />
+            <MedicalPageFilters
+              dataManagement={dataManagement}
+              config={config}
+            />
           )}
 
           {renderViewContent()}
           {filteredLabResults.length > 0 && viewMode !== 'components' && (
-            <PaginationControls page={page} totalPages={totalPages(filteredLabResults.length)} pageSize={pageSize} totalRecords={filteredLabResults.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredLabResults.length)}
+              pageSize={pageSize}
+              totalRecords={filteredLabResults.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </Stack>
       </Container>
@@ -794,7 +925,11 @@ const LabResults = () => {
         <LabResultFormWrapper
           isOpen={showModal}
           onClose={() => !isBlocking && handleCloseModal()}
-          title={editingLabResult ? t('labresults:editTitle', 'Edit Lab Result') : t('labresults:addTitle', 'Add New Lab Result')}
+          title={
+            editingLabResult
+              ? t('labresults:editTitle', 'Edit Lab Result')
+              : t('labresults:addTitle', 'Add New Lab Result')
+          }
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
@@ -810,7 +945,7 @@ const LabResults = () => {
           onDocumentManagerRef={setDocumentManagerMethods}
           onTestComponentRef={setTestComponentMethods}
           onPendingRelationshipsRef={setPendingRelationshipsMethods}
-          onFileUploadComplete={(success) => {
+          onFileUploadComplete={success => {
             if (success && editingLabResult) {
               refreshFileCount(editingLabResult.id);
             }
@@ -841,7 +976,7 @@ const LabResults = () => {
         navigate={navigate}
         isBlocking={isBlocking}
         initialTab={initialViewTab}
-        onFileUploadComplete={(success) => {
+        onFileUploadComplete={success => {
           if (success && viewingLabResult) {
             refreshFileCount(viewingLabResult.id);
           }
@@ -869,5 +1004,5 @@ const LabResults = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(LabResults, {
   injectResponsive: true,
-  displayName: 'ResponsiveLabResults'
+  displayName: 'ResponsiveLabResults',
 });

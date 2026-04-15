@@ -69,20 +69,20 @@
   flex-shrink: 0;
 }
 
-.channel-icon[data-type="discord"] {
-  background: #4752C4;
+.channel-icon[data-type='discord'] {
+  background: #4752c4;
 }
 
-.channel-icon[data-type="email"] {
-  background: #C5221F;
+.channel-icon[data-type='email'] {
+  background: #c5221f;
 }
 
-.channel-icon[data-type="gotify"] {
-  background: #2E7D32;
+.channel-icon[data-type='gotify'] {
+  background: #2e7d32;
 }
 
-.channel-icon[data-type="webhook"] {
-  background: #E65100;
+.channel-icon[data-type='webhook'] {
+  background: #e65100;
 }
 
 .channel-info {
@@ -104,7 +104,7 @@
   justify-content: center;
   width: 16px;
   height: 16px;
-  background: #2E7D32;
+  background: #2e7d32;
   color: white;
   border-radius: 50%;
   font-size: 0.625rem;

@@ -3,6 +3,7 @@ Tests for Lab Result PDF Parsing functionality.
 
 Tests the OCR extraction endpoint and text parsing logic.
 """
+
 import pytest
 import io
 from datetime import date
@@ -17,19 +18,21 @@ from tests.fixtures.pdf_fixtures import create_minimal_pdf
 
 # The correct mock target for the PDF extraction service singleton
 MOCK_EXTRACT_TEXT = (
-    'app.services.pdf_text_extraction_service.pdf_extraction_service.extract_text'
+    "app.services.pdf_text_extraction_service.pdf_extraction_service.extract_text"
 )
 
 
-def _make_extraction_result(text, method='native', page_count=1, confidence=0.95, error=None):
+def _make_extraction_result(
+    text, method="native", page_count=1, confidence=0.95, error=None
+):
     """Build a return value matching pdf_extraction_service.extract_text() format."""
     return {
-        'text': text,
-        'method': method,
-        'confidence': confidence,
-        'page_count': page_count,
-        'char_count': len(text),
-        'error': error,
+        "text": text,
+        "method": method,
+        "confidence": confidence,
+        "page_count": page_count,
+        "char_count": len(text),
+        "error": error,
     }
 
 
@@ -45,7 +48,7 @@ class TestLabResultPDFParsing:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         patient = patient_crud.create_for_user(
             db_session, user_id=user_data["user"].id, patient_data=patient_data
@@ -62,20 +65,20 @@ class TestLabResultPDFParsing:
         return create_user_token_headers(user_with_patient["user"].username)
 
     @pytest.fixture
-    def lab_result_id(self, client: TestClient, user_with_patient, authenticated_headers):
+    def lab_result_id(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Create a lab result for PDF upload tests."""
         lab_result_data = {
             "patient_id": user_with_patient["patient"].id,
             "test_name": "CBC Panel",
             "test_code": "CBC",
             "status": "ordered",
-            "completed_date": "2024-01-01"
+            "completed_date": "2024-01-01",
         }
 
         response = client.post(
-            "/api/v1/lab-results/",
-            json=lab_result_data,
-            headers=authenticated_headers
+            "/api/v1/lab-results/", json=lab_result_data, headers=authenticated_headers
         )
 
         assert response.status_code == 201
@@ -87,10 +90,12 @@ class TestLabResultPDFParsing:
 
     # ========== File Upload Validation Tests ==========
 
-    def test_pdf_upload_success(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_pdf_upload_success(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test successful PDF upload and OCR extraction."""
         pdf_file = self.create_pdf_file()
-        sample_text = 'WBC: 7.5 10^3/uL (4.0-11.0)\nRBC: 4.8 10^6/uL (4.5-5.5)'
+        sample_text = "WBC: 7.5 10^3/uL (4.0-11.0)\nRBC: 4.8 10^6/uL (4.5-5.5)"
 
         with patch(MOCK_EXTRACT_TEXT) as mock_extract:
             mock_extract.return_value = _make_extraction_result(sample_text)
@@ -98,31 +103,35 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", pdf_file, "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert data['status'] == 'success'
-            assert 'WBC: 7.5' in data['extracted_text']
-            assert data['metadata']['method'] == 'native'
+            assert data["status"] == "success"
+            assert "WBC: 7.5" in data["extracted_text"]
+            assert data["metadata"]["method"] == "native"
 
-    def test_pdf_upload_invalid_file_type(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_pdf_upload_invalid_file_type(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test rejection of non-PDF files."""
         text_file = io.BytesIO(b"This is not a PDF")
 
         response = client.post(
             f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
             files={"file": ("test.txt", text_file, "text/plain")},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 400
         body = response.json()
-        error_text = body.get('message', '') or body.get('detail', '')
+        error_text = body.get("message", "") or body.get("detail", "")
         assert "PDF" in error_text
 
-    def test_pdf_upload_file_too_large(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_pdf_upload_file_too_large(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test rejection of files exceeding size limit."""
         # Create a file larger than 15MB
         large_content = b"x" * (16 * 1024 * 1024)  # 16MB
@@ -131,38 +140,44 @@ class TestLabResultPDFParsing:
         response = client.post(
             f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
             files={"file": ("large.pdf", large_file, "application/pdf")},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 400
         body = response.json()
-        error_text = body.get('message', '') or body.get('detail', '')
+        error_text = body.get("message", "") or body.get("detail", "")
         assert "size" in error_text.lower() or "limit" in error_text.lower()
 
-    def test_pdf_upload_missing_file(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_pdf_upload_missing_file(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test error when no file is provided."""
         response = client.post(
             f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
 
-    def test_pdf_upload_nonexistent_lab_result(self, client: TestClient, authenticated_headers):
+    def test_pdf_upload_nonexistent_lab_result(
+        self, client: TestClient, authenticated_headers
+    ):
         """Test upload to non-existent lab result ID."""
         pdf_file = self.create_pdf_file()
 
         response = client.post(
             "/api/v1/lab-results/99999/ocr-parse",
             files={"file": ("test.pdf", pdf_file, "application/pdf")},
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 404
 
     # ========== Text Parsing Pattern Tests ==========
 
-    def test_parse_full_pattern_format(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_full_pattern_format(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test parsing of full pattern format: 'Test Name: Value Unit (Ref: Range)'."""
         sample_text = """
         WBC: 7.5 10^3/uL (Ref: 4.0-11.0)
@@ -176,15 +191,17 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'WBC: 7.5' in data['extracted_text']
-            assert 'Hemoglobin: 14.5' in data['extracted_text']
+            assert "WBC: 7.5" in data["extracted_text"]
+            assert "Hemoglobin: 14.5" in data["extracted_text"]
 
-    def test_parse_tabular_format(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_tabular_format(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test parsing of tab-separated tabular format."""
         sample_text = """
         Test Name\tValue\tUnit\tReference Range\tStatus
@@ -199,14 +216,16 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'WBC' in data['extracted_text']
+            assert "WBC" in data["extracted_text"]
 
-    def test_parse_simple_format(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_simple_format(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test parsing of simple format: 'Test Name Value Unit'."""
         sample_text = """
         WBC 7.5 10^3/uL
@@ -220,14 +239,16 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'WBC 7.5' in data['extracted_text']
+            assert "WBC 7.5" in data["extracted_text"]
 
-    def test_parse_csv_format(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_csv_format(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test parsing of CSV format."""
         sample_text = """
         Test Name,Value,Unit,Reference Range,Status
@@ -242,31 +263,37 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'WBC,7.5' in data['extracted_text']
+            assert "WBC,7.5" in data["extracted_text"]
 
     # ========== Edge Cases ==========
 
-    def test_parse_empty_pdf(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_empty_pdf(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test handling of empty PDF (no extractable text)."""
         with patch(MOCK_EXTRACT_TEXT) as mock_extract:
-            mock_extract.return_value = _make_extraction_result('')
+            mock_extract.return_value = _make_extraction_result("")
 
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
-                files={"file": ("empty.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                files={
+                    "file": ("empty.pdf", self.create_pdf_file(), "application/pdf")
+                },
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert data['extracted_text'] == ''
+            assert data["extracted_text"] == ""
 
-    def test_parse_multiline_results(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_multiline_results(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test parsing results that span multiple lines."""
         sample_text = """
         Hemoglobin A1c
@@ -282,15 +309,17 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'Hemoglobin A1c' in data['extracted_text']
-            assert '6.5%' in data['extracted_text']
+            assert "Hemoglobin A1c" in data["extracted_text"]
+            assert "6.5%" in data["extracted_text"]
 
-    def test_parse_special_characters(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_special_characters(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test handling of special characters in lab results."""
         sample_text = """
         WBC: 7.5 x 10^3/uL (Ref: 4.0-11.0)
@@ -304,14 +333,16 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'WBC: 7.5' in data['extracted_text']
+            assert "WBC: 7.5" in data["extracted_text"]
 
-    def test_parse_qualitative_results(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_qualitative_results(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test parsing qualitative (non-numeric) results."""
         sample_text = """
         COVID-19 PCR: Detected
@@ -327,15 +358,17 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'COVID-19 PCR: Detected' in data['extracted_text']
-            assert 'Blood Type: A+' in data['extracted_text']
+            assert "COVID-19 PCR: Detected" in data["extracted_text"]
+            assert "Blood Type: A+" in data["extracted_text"]
 
-    def test_parse_with_footnotes_and_flags(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_parse_with_footnotes_and_flags(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test parsing results with footnotes and special flags."""
         sample_text = """
         WBC: 15.2* 10^3/uL (Ref: 4.0-11.0) H
@@ -353,16 +386,18 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'WBC: 15.2*' in data['extracted_text']
+            assert "WBC: 15.2*" in data["extracted_text"]
 
     # ========== Error Handling Tests ==========
 
-    def test_ocr_extraction_failure(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_ocr_extraction_failure(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test that OCR extraction failures propagate as server errors."""
         with patch(MOCK_EXTRACT_TEXT) as mock_extract:
             mock_extract.side_effect = Exception("OCR processing failed")
@@ -372,11 +407,15 @@ class TestLabResultPDFParsing:
             with pytest.raises((Exception, ExceptionGroup)):
                 client.post(
                     f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
-                    files={"file": ("test.pdf", self.create_pdf_file(), "application/pdf")},
-                    headers=authenticated_headers
+                    files={
+                        "file": ("test.pdf", self.create_pdf_file(), "application/pdf")
+                    },
+                    headers=authenticated_headers,
                 )
 
-    def test_corrupted_pdf(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_corrupted_pdf(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test handling of corrupted PDF files."""
         corrupted_pdf = io.BytesIO(b"This is not a valid PDF structure")
 
@@ -386,7 +425,7 @@ class TestLabResultPDFParsing:
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
                 files={"file": ("corrupted.pdf", corrupted_pdf, "application/pdf")},
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
             # Corrupted PDF without %PDF magic bytes gets caught as invalid format (400)
@@ -400,7 +439,7 @@ class TestLabResultPDFParsing:
 
         response = client.post(
             f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
-            files={"file": ("test.pdf", pdf_file, "application/pdf")}
+            files={"file": ("test.pdf", pdf_file, "application/pdf")},
         )
 
         assert response.status_code == 401
@@ -410,8 +449,7 @@ class TestLabResultPDFParsing:
         # Create two users with lab results
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User", last_name="One",
-            birth_date=date(1990, 1, 1), gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -423,8 +461,7 @@ class TestLabResultPDFParsing:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User", last_name="Two",
-            birth_date=date(1990, 1, 1), gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -437,8 +474,10 @@ class TestLabResultPDFParsing:
         # User1 creates lab result
         lab_result_data = {
             "patient_id": patient1.id,
-            "test_name": "Private Test", "test_code": "PRIV",
-            "status": "ordered", "completed_date": "2024-01-01"
+            "test_name": "Private Test",
+            "test_code": "PRIV",
+            "status": "ordered",
+            "completed_date": "2024-01-01",
         }
         create_response = client.post(
             "/api/v1/lab-results/", json=lab_result_data, headers=headers1
@@ -450,50 +489,63 @@ class TestLabResultPDFParsing:
         response = client.post(
             f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
             files={"file": ("test.pdf", pdf_file, "application/pdf")},
-            headers=headers2
+            headers=headers2,
         )
 
-        assert response.status_code == 403  # Forbidden - user lacks access to this patient
+        assert (
+            response.status_code == 403
+        )  # Forbidden - user lacks access to this patient
 
     # ========== Performance Tests ==========
 
-    def test_large_pdf_processing(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_large_pdf_processing(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test processing of large PDF with many test results."""
         # Generate text with 100 test results
-        large_text = "\n".join([
-            f"Test_{i}: {10.0 + i*0.1} mg/dL (Ref: 5.0-15.0)"
-            for i in range(100)
-        ])
+        large_text = "\n".join(
+            [f"Test_{i}: {10.0 + i*0.1} mg/dL (Ref: 5.0-15.0)" for i in range(100)]
+        )
 
         with patch(MOCK_EXTRACT_TEXT) as mock_extract:
-            mock_extract.return_value = _make_extraction_result(large_text, page_count=5)
+            mock_extract.return_value = _make_extraction_result(
+                large_text, page_count=5
+            )
 
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
-                files={"file": ("large.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                files={
+                    "file": ("large.pdf", self.create_pdf_file(), "application/pdf")
+                },
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert 'Test_0:' in data['extracted_text']
-            assert 'Test_99:' in data['extracted_text']
+            assert "Test_0:" in data["extracted_text"]
+            assert "Test_99:" in data["extracted_text"]
 
-    def test_multi_page_pdf(self, client: TestClient, lab_result_id, authenticated_headers):
+    def test_multi_page_pdf(
+        self, client: TestClient, lab_result_id, authenticated_headers
+    ):
         """Test processing of multi-page PDF."""
-        sample_text = 'Page 1 results\nWBC: 7.5\n\nPage 2 results\nRBC: 4.8'
+        sample_text = "Page 1 results\nWBC: 7.5\n\nPage 2 results\nRBC: 4.8"
 
         with patch(MOCK_EXTRACT_TEXT) as mock_extract:
-            mock_extract.return_value = _make_extraction_result(sample_text, page_count=2)
+            mock_extract.return_value = _make_extraction_result(
+                sample_text, page_count=2
+            )
 
             response = client.post(
                 f"/api/v1/lab-results/{lab_result_id}/ocr-parse",
-                files={"file": ("multipage.pdf", self.create_pdf_file(), "application/pdf")},
-                headers=authenticated_headers
+                files={
+                    "file": ("multipage.pdf", self.create_pdf_file(), "application/pdf")
+                },
+                headers=authenticated_headers,
             )
 
             assert response.status_code == 200
             data = response.json()
-            assert data['metadata']['page_count'] == 2
-            assert 'Page 1 results' in data['extracted_text']
-            assert 'Page 2 results' in data['extracted_text']
+            assert data["metadata"]["page_count"] == 2
+            assert "Page 1 results" in data["extracted_text"]
+            assert "Page 2 results" in data["extracted_text"]

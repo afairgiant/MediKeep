@@ -205,7 +205,7 @@ class CRUDLabResultFile(
         results = (
             db.query(
                 LabResultFile.lab_result_id,
-                func.count(LabResultFile.id).label('file_count')
+                func.count(LabResultFile.id).label("file_count"),
             )
             .filter(LabResultFile.lab_result_id.in_(lab_result_ids))
             .group_by(LabResultFile.lab_result_id)

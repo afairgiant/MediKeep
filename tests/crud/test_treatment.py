@@ -1,6 +1,7 @@
 """
 Tests for Treatment CRUD operations.
 """
+
 import pytest
 from datetime import date, timedelta
 from sqlalchemy.orm import Session
@@ -25,7 +26,7 @@ class TestTreatmentCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -39,7 +40,7 @@ class TestTreatmentCRUD:
             name="Hypertension",
             diagnosis="Essential hypertension",
             diagnosis_date=date(2023, 1, 1),
-            status="active"
+            status="active",
         )
         return condition_crud.create(db_session, obj_in=condition_data)
 
@@ -53,7 +54,7 @@ class TestTreatmentCRUD:
             start_date=date(2023, 1, 15),
             frequency="Daily",
             status="active",
-            notes="Monitor blood pressure weekly"
+            notes="Monitor blood pressure weekly",
         )
 
         treatment = treatment_crud.create(db_session, obj_in=treatment_data)
@@ -75,7 +76,7 @@ class TestTreatmentCRUD:
                 treatment_name="Treatment 1",
                 treatment_type="medication",
                 start_date=date(2023, 1, 1),
-                status="active"
+                status="active",
             ),
             TreatmentCreate(
                 patient_id=test_patient.id,
@@ -83,15 +84,15 @@ class TestTreatmentCRUD:
                 treatment_name="Treatment 2",
                 treatment_type="therapy",
                 start_date=date(2023, 2, 1),
-                status="active"
+                status="active",
             ),
             TreatmentCreate(
                 patient_id=test_patient.id,
                 treatment_name="Unrelated Treatment",
                 treatment_type="other",
                 start_date=date(2023, 3, 1),
-                status="active"
-            )  # No condition_id
+                status="active",
+            ),  # No condition_id
         ]
 
         for treat_data in treatments_data:
@@ -112,14 +113,14 @@ class TestTreatmentCRUD:
                 treatment_name="Active Treatment 1",
                 treatment_type="medication",
                 start_date=date(2023, 1, 1),
-                status="active"
+                status="active",
             ),
             TreatmentCreate(
                 patient_id=test_patient.id,
                 treatment_name="Active Treatment 2",
                 treatment_type="therapy",
                 start_date=date(2023, 2, 1),
-                status="active"
+                status="active",
             ),
             TreatmentCreate(
                 patient_id=test_patient.id,
@@ -127,8 +128,8 @@ class TestTreatmentCRUD:
                 treatment_type="procedure",
                 start_date=date(2023, 1, 1),
                 end_date=date(2023, 3, 1),
-                status="completed"
-            )
+                status="completed",
+            ),
         ]
 
         for treat_data in treatments_data:
@@ -152,7 +153,7 @@ class TestTreatmentCRUD:
                 treatment_type="medication",
                 start_date=date(2023, 1, 1),
                 end_date=None,  # No end date
-                status="active"
+                status="active",
             ),
             TreatmentCreate(
                 patient_id=test_patient.id,
@@ -160,7 +161,7 @@ class TestTreatmentCRUD:
                 treatment_type="therapy",
                 start_date=date(2023, 2, 1),
                 end_date=today + timedelta(days=30),  # Future end date
-                status="active"
+                status="active",
             ),
             TreatmentCreate(
                 patient_id=test_patient.id,
@@ -168,8 +169,8 @@ class TestTreatmentCRUD:
                 treatment_type="procedure",
                 start_date=date(2023, 1, 1),
                 end_date=today - timedelta(days=10),  # Past end date
-                status="active"
-            )
+                status="active",
+            ),
         ]
 
         for treat_data in treatments_data:
@@ -193,15 +194,15 @@ class TestTreatmentCRUD:
                 treatment_name="Active Ongoing",
                 treatment_type="medication",
                 start_date=date(2023, 1, 1),
-                status="active"
+                status="active",
             ),
             TreatmentCreate(
                 patient_id=test_patient.id,
                 treatment_name="Cancelled Treatment",
                 treatment_type="medication",
                 start_date=date(2023, 1, 1),
-                status="cancelled"
-            )
+                status="cancelled",
+            ),
         ]
 
         for treat_data in treatments_data:
@@ -219,19 +220,17 @@ class TestTreatmentCRUD:
             treatment_name="Original Treatment",
             treatment_type="medication",
             start_date=date(2023, 1, 1),
-            status="active"
+            status="active",
         )
         created = treatment_crud.create(db_session, obj_in=treatment_data)
 
         update_data = TreatmentUpdate(
             treatment_name="Updated Treatment",
             frequency="Twice daily",
-            notes="Dosage adjusted"
+            notes="Dosage adjusted",
         )
 
-        updated = treatment_crud.update(
-            db_session, db_obj=created, obj_in=update_data
-        )
+        updated = treatment_crud.update(db_session, db_obj=created, obj_in=update_data)
 
         assert updated.treatment_name == "Updated Treatment"
         assert updated.frequency == "Twice daily"
@@ -245,7 +244,7 @@ class TestTreatmentCRUD:
             treatment_name="To Delete",
             treatment_type="test",
             start_date=date(2023, 1, 1),
-            status="active"
+            status="active",
         )
         created = treatment_crud.create(db_session, obj_in=treatment_data)
         treatment_id = created.id
@@ -274,7 +273,7 @@ class TestTreatmentCRUD:
             location="Main Hospital",
             dosage="50mg",
             notes="Monitor side effects",
-            status="active"
+            status="active",
         )
 
         treatment = treatment_crud.create(db_session, obj_in=treatment_data)
@@ -285,16 +284,24 @@ class TestTreatmentCRUD:
         assert treatment.location == "Main Hospital"
         assert treatment.dosage == "50mg"
 
-    def test_multiple_patients_isolation(self, db_session: Session, test_user, test_admin_user):
+    def test_multiple_patients_isolation(
+        self, db_session: Session, test_user, test_admin_user
+    ):
         """Test that treatments are properly isolated per patient."""
         # Create two patients (each under a different user)
         patient1_data = PatientCreate(
-            first_name="Patient", last_name="One",
-            birth_date=date(1990, 1, 1), gender="M", address="123 St"
+            first_name="Patient",
+            last_name="One",
+            birth_date=date(1990, 1, 1),
+            gender="M",
+            address="123 St",
         )
         patient2_data = PatientCreate(
-            first_name="Patient", last_name="Two",
-            birth_date=date(1985, 1, 1), gender="F", address="456 Ave"
+            first_name="Patient",
+            last_name="Two",
+            birth_date=date(1985, 1, 1),
+            gender="F",
+            address="456 Ave",
         )
 
         patient1 = patient_crud.create_for_user(
@@ -311,7 +318,7 @@ class TestTreatmentCRUD:
                 treatment_name=f"Patient1 Treatment {i+1}",
                 treatment_type="test",
                 start_date=date(2023, 1, 1),
-                status="active"
+                status="active",
             )
             treatment_crud.create(db_session, obj_in=treatment_data)
 
@@ -321,7 +328,7 @@ class TestTreatmentCRUD:
                 treatment_name=f"Patient2 Treatment {i+1}",
                 treatment_type="test",
                 start_date=date(2023, 1, 1),
-                status="active"
+                status="active",
             )
             treatment_crud.create(db_session, obj_in=treatment_data)
 

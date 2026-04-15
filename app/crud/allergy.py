@@ -16,7 +16,12 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate], TagFilterMixi
     """
 
     def get_by_severity(
-        self, db: Session, *, severity: str, patient_id: Optional[int] = None, load_relations: Optional[List[str]] = None
+        self,
+        db: Session,
+        *,
+        severity: str,
+        patient_id: Optional[int] = None,
+        load_relations: Optional[List[str]] = None
     ) -> List[Allergy]:
         """
         Retrieve allergies by severity, optionally filtered by patient.
@@ -77,7 +82,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate], TagFilterMixi
         severity_order = case(
             (Allergy.severity == "life-threatening", 1),
             (Allergy.severity == "severe", 2),
-            else_=3
+            else_=3,
         )
 
         query = (
@@ -94,7 +99,12 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate], TagFilterMixi
         return query.all()
 
     def get_by_allergen(
-        self, db: Session, *, allergen: str, patient_id: Optional[int] = None, load_relations: Optional[List[str]] = None
+        self,
+        db: Session,
+        *,
+        allergen: str,
+        patient_id: Optional[int] = None,
+        load_relations: Optional[List[str]] = None
     ) -> List[Allergy]:
         """
         Retrieve allergies by allergen name, optionally filtered by patient.

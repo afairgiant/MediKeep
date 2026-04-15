@@ -42,10 +42,10 @@ vi.mock('../../../hooks/useGlobalData', () => ({
 
 vi.mock('../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDate: (date) => date ? new Date(date).toLocaleDateString() : '',
+    formatDate: date => (date ? new Date(date).toLocaleDateString() : ''),
   }),
   default: () => ({
-    formatDate: (date) => date ? new Date(date).toLocaleDateString() : '',
+    formatDate: date => (date ? new Date(date).toLocaleDateString() : ''),
   }),
 }));
 
@@ -82,7 +82,13 @@ vi.mock('../../../services/api/familyHistoryApi', () => ({
 
 // Mock child components
 vi.mock('../InvitationCard', () => ({
-  default: function MockInvitationCard({ invitation, variant, onCancel, onRespond, showStatus }) {
+  default: function MockInvitationCard({
+    invitation,
+    variant,
+    onCancel,
+    onRespond,
+    showStatus,
+  }) {
     return (
       <div data-testid={`invitation-card-${invitation.id}`}>
         <div>Title: {invitation.title}</div>
@@ -91,16 +97,25 @@ vi.mock('../InvitationCard', () => ({
         <div>Variant: {variant}</div>
         {showStatus && <div>Show Status: true</div>}
         {onCancel && (
-          <button onClick={() => onCancel(invitation)} data-testid={`cancel-${invitation.id}`}>
+          <button
+            onClick={() => onCancel(invitation)}
+            data-testid={`cancel-${invitation.id}`}
+          >
             Cancel
           </button>
         )}
         {onRespond && (
           <>
-            <button onClick={() => onRespond(invitation, 'accepted')} data-testid={`accept-${invitation.id}`}>
+            <button
+              onClick={() => onRespond(invitation, 'accepted')}
+              data-testid={`accept-${invitation.id}`}
+            >
               Accept
             </button>
-            <button onClick={() => onRespond(invitation, 'rejected')} data-testid={`reject-${invitation.id}`}>
+            <button
+              onClick={() => onRespond(invitation, 'rejected')}
+              data-testid={`reject-${invitation.id}`}
+            >
               Reject
             </button>
           </>
@@ -111,12 +126,21 @@ vi.mock('../InvitationCard', () => ({
 }));
 
 vi.mock('../InvitationResponseModal', () => ({
-  default: function MockInvitationResponseModal({ opened, onClose, invitation, onSuccess }) {
+  default: function MockInvitationResponseModal({
+    opened,
+    onClose,
+    invitation,
+    onSuccess,
+  }) {
     return opened ? (
       <div data-testid="invitation-response-modal">
         <div>Response Modal for: {invitation?.title}</div>
-        <button onClick={onClose} data-testid="response-modal-close">Close</button>
-        <button onClick={onSuccess} data-testid="response-modal-success">Success</button>
+        <button onClick={onClose} data-testid="response-modal-close">
+          Close
+        </button>
+        <button onClick={onSuccess} data-testid="response-modal-success">
+          Success
+        </button>
       </div>
     ) : null;
   },
@@ -134,7 +158,7 @@ describe('InvitationManager Component', () => {
       created_at: '2024-01-15T10:30:00Z',
     },
     {
-      id: 'sent-2', 
+      id: 'sent-2',
       title: 'Family History: Brown Family',
       invitation_type: 'family_history_share',
       status: 'accepted',
@@ -179,9 +203,11 @@ describe('InvitationManager Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Setup default API responses
-    invitationApi.getPendingInvitations.mockResolvedValue(mockReceivedInvitations);
+    invitationApi.getPendingInvitations.mockResolvedValue(
+      mockReceivedInvitations
+    );
     invitationApi.getSentInvitations.mockResolvedValue(mockSentInvitations);
     familyHistoryApi.getSharedFamilyHistory.mockResolvedValue({
       shared_family_history: mockSharedFamilyHistory,
@@ -189,8 +215,12 @@ describe('InvitationManager Component', () => {
     invitationApi.respondToInvitation.mockResolvedValue({ message: 'Success' });
     invitationApi.cancelInvitation.mockResolvedValue({ message: 'Cancelled' });
     invitationApi.revokeInvitation.mockResolvedValue({ message: 'Revoked' });
-    familyHistoryApi.revokeShare.mockResolvedValue({ message: 'Access revoked' });
-    familyHistoryApi.removeMyAccess.mockResolvedValue({ message: 'Access removed' });
+    familyHistoryApi.revokeShare.mockResolvedValue({
+      message: 'Access revoked',
+    });
+    familyHistoryApi.removeMyAccess.mockResolvedValue({
+      message: 'Access removed',
+    });
   });
 
   const renderInvitationManager = (props = {}) => {
@@ -234,11 +264,15 @@ describe('InvitationManager Component', () => {
 
     it('should display loading state initially', async () => {
       // Mock slow API responses
-      invitationApi.getPendingInvitations.mockImplementation(() => new Promise(() => {}));
-      
+      invitationApi.getPendingInvitations.mockImplementation(
+        () => new Promise(() => {})
+      );
+
       renderInvitationManager();
 
-      expect(screen.getByText('Loading sent invitations...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Loading sent invitations...')
+      ).toBeInTheDocument();
     });
 
     it('should display correct badge counts for each tab', async () => {
@@ -257,11 +291,17 @@ describe('InvitationManager Component', () => {
       renderInvitationManager();
 
       await waitFor(() => {
-        expect(screen.getByTestId('invitation-card-sent-1')).toBeInTheDocument();
-        expect(screen.getByTestId('invitation-card-sent-2')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-card-sent-1')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-card-sent-2')
+        ).toBeInTheDocument();
       });
 
-      expect(screen.getByText('Title: Family History: Johnson Family')).toBeInTheDocument();
+      expect(
+        screen.getByText('Title: Family History: Johnson Family')
+      ).toBeInTheDocument();
       expect(screen.getAllByText('Status: pending').length).toBeGreaterThan(0);
       expect(screen.getByText('Status: accepted')).toBeInTheDocument();
     });
@@ -271,8 +311,12 @@ describe('InvitationManager Component', () => {
 
       await waitFor(() => {
         // Component renders both 'manager.sentInvitationsInfo' and 'manager.pendingStillCount' inside the same Text
-        expect(screen.getByText(/manager\.sentInvitationsInfo/)).toBeInTheDocument();
-        expect(screen.getByText(/manager\.pendingStillCount/)).toBeInTheDocument();
+        expect(
+          screen.getByText(/manager\.sentInvitationsInfo/)
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(/manager\.pendingStillCount/)
+        ).toBeInTheDocument();
       });
     });
 
@@ -318,18 +362,20 @@ describe('InvitationManager Component', () => {
 
     it('should show empty state when no sent invitations', async () => {
       invitationApi.getSentInvitations.mockResolvedValue([]);
-      
+
       renderInvitationManager();
 
       await waitFor(() => {
         expect(screen.getByText('manager.noSentTitle')).toBeInTheDocument();
-        expect(screen.getByText('manager.noSentDescription')).toBeInTheDocument();
+        expect(
+          screen.getByText('manager.noSentDescription')
+        ).toBeInTheDocument();
       });
     });
 
     it('should handle API errors when cancelling invitations', async () => {
       invitationApi.cancelInvitation.mockRejectedValue(new Error('API Error'));
-      
+
       renderInvitationManager();
 
       await waitFor(() => {
@@ -360,8 +406,12 @@ describe('InvitationManager Component', () => {
       await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
-        expect(screen.getByText('manager.pendingInvitationsCount')).toBeInTheDocument();
-        expect(screen.getByText('manager.familySharesCount')).toBeInTheDocument();
+        expect(
+          screen.getByText('manager.pendingInvitationsCount')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('manager.familySharesCount')
+        ).toBeInTheDocument();
       });
     });
 
@@ -371,12 +421,18 @@ describe('InvitationManager Component', () => {
       await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('invitation-card-received-1')).toBeInTheDocument();
-        expect(screen.getByText('Title: Family History: Wilson Family')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-card-received-1')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Title: Family History: Wilson Family')
+        ).toBeInTheDocument();
         expect(screen.getByText('Variant: received')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('manager.pendingInvitationsInfo')).toBeInTheDocument();
+      expect(
+        screen.getByText('manager.pendingInvitationsInfo')
+      ).toBeInTheDocument();
     });
 
     it('should display active shares section correctly', async () => {
@@ -390,7 +446,9 @@ describe('InvitationManager Component', () => {
         expect(screen.getByText('father • Born 1960')).toBeInTheDocument();
         expect(screen.getByText('manager.sharedBy')).toBeInTheDocument();
         expect(screen.getByText('view')).toBeInTheDocument();
-        expect(screen.getByText('"Shared for consultation"')).toBeInTheDocument();
+        expect(
+          screen.getByText('"Shared for consultation"')
+        ).toBeInTheDocument();
         expect(screen.getByText('manager.conditionsCount')).toBeInTheDocument();
       });
     });
@@ -408,8 +466,12 @@ describe('InvitationManager Component', () => {
 
       // Should open detailed response modal
       await waitFor(() => {
-        expect(screen.getByTestId('invitation-response-modal')).toBeInTheDocument();
-        expect(screen.getByText('Response Modal for: Family History: Wilson Family')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-response-modal')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Response Modal for: Family History: Wilson Family')
+        ).toBeInTheDocument();
       });
     });
 
@@ -425,7 +487,10 @@ describe('InvitationManager Component', () => {
       await userEvent.click(screen.getByTestId('reject-received-1'));
 
       await waitFor(() => {
-        expect(invitationApi.respondToInvitation).toHaveBeenCalledWith('received-1', 'rejected');
+        expect(invitationApi.respondToInvitation).toHaveBeenCalledWith(
+          'received-1',
+          'rejected'
+        );
         expect(notifications.show).toHaveBeenCalledWith({
           title: 'Invitation rejected',
           message: 'Successfully rejected the invitation',
@@ -447,7 +512,9 @@ describe('InvitationManager Component', () => {
       await userEvent.click(screen.getByText('manager.removeAccess'));
 
       await waitFor(() => {
-        expect(familyHistoryApi.removeMyAccess).toHaveBeenCalledWith('member-1');
+        expect(familyHistoryApi.removeMyAccess).toHaveBeenCalledWith(
+          'member-1'
+        );
         expect(notifications.show).toHaveBeenCalledWith({
           title: 'Access Removed',
           message: 'You no longer have access to this family history',
@@ -459,15 +526,19 @@ describe('InvitationManager Component', () => {
 
     it('should show empty state when no shared content', async () => {
       invitationApi.getPendingInvitations.mockResolvedValue([]);
-      familyHistoryApi.getSharedFamilyHistory.mockResolvedValue({ shared_family_history: [] });
-      
+      familyHistoryApi.getSharedFamilyHistory.mockResolvedValue({
+        shared_family_history: [],
+      });
+
       renderInvitationManager();
 
       await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         expect(screen.getByText('manager.noSharedTitle')).toBeInTheDocument();
-        expect(screen.getByText('manager.noSharedDescription')).toBeInTheDocument();
+        expect(
+          screen.getByText('manager.noSharedDescription')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -485,7 +556,9 @@ describe('InvitationManager Component', () => {
       await userEvent.click(screen.getByTestId('accept-received-1'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('invitation-response-modal')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-response-modal')
+        ).toBeInTheDocument();
       });
     });
 
@@ -496,13 +569,17 @@ describe('InvitationManager Component', () => {
       await userEvent.click(screen.getByTestId('accept-received-1'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('response-modal-success')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('response-modal-success')
+        ).toBeInTheDocument();
       });
 
       await userEvent.click(screen.getByTestId('response-modal-success'));
 
       await waitFor(() => {
-        expect(screen.queryByTestId('invitation-response-modal')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('invitation-response-modal')
+        ).not.toBeInTheDocument();
         // Should refresh data
         expect(invitationApi.getPendingInvitations).toHaveBeenCalledTimes(2);
       });
@@ -511,8 +588,10 @@ describe('InvitationManager Component', () => {
 
   describe('Error Handling', () => {
     it('should handle API errors when loading data', async () => {
-      invitationApi.getPendingInvitations.mockRejectedValue(new Error('API Error'));
-      
+      invitationApi.getPendingInvitations.mockRejectedValue(
+        new Error('API Error')
+      );
+
       renderInvitationManager();
 
       await waitFor(() => {
@@ -526,8 +605,10 @@ describe('InvitationManager Component', () => {
     });
 
     it('should handle errors when responding to invitations', async () => {
-      invitationApi.respondToInvitation.mockRejectedValue(new Error('Response failed'));
-      
+      invitationApi.respondToInvitation.mockRejectedValue(
+        new Error('Response failed')
+      );
+
       renderInvitationManager();
 
       await userEvent.click(screen.getByText('manager.sharedWithMe'));
@@ -549,8 +630,10 @@ describe('InvitationManager Component', () => {
     });
 
     it('should handle errors when revoking shared access', async () => {
-      familyHistoryApi.removeMyAccess.mockRejectedValue(new Error('Remove access failed'));
-      
+      familyHistoryApi.removeMyAccess.mockRejectedValue(
+        new Error('Remove access failed')
+      );
+
       renderInvitationManager();
 
       await userEvent.click(screen.getByText('manager.sharedWithMe'));
@@ -587,7 +670,9 @@ describe('InvitationManager Component', () => {
       await waitFor(() => {
         expect(invitationApi.getPendingInvitations).toHaveBeenCalledTimes(2);
         expect(invitationApi.getSentInvitations).toHaveBeenCalledTimes(2);
-        expect(familyHistoryApi.getSharedFamilyHistory).toHaveBeenCalledTimes(2);
+        expect(familyHistoryApi.getSharedFamilyHistory).toHaveBeenCalledTimes(
+          2
+        );
       });
     });
 
@@ -638,7 +723,9 @@ describe('InvitationManager Component', () => {
 
       // Should remain on shared tab after operation
       await waitFor(() => {
-        expect(screen.getByText('manager.pendingInvitationsCount')).toBeInTheDocument();
+        expect(
+          screen.getByText('manager.pendingInvitationsCount')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -656,21 +743,29 @@ describe('InvitationManager Component', () => {
         {
           id: 'sent-cancelled',
           status: 'cancelled',
-          title: 'Cancelled Invitation', 
+          title: 'Cancelled Invitation',
           invitation_type: 'family_history_share',
         },
       ];
 
       invitationApi.getSentInvitations.mockResolvedValue(sentWithRevoked);
-      
+
       renderInvitationManager();
 
       await waitFor(() => {
         // Should only show non-revoked/cancelled invitations
-        expect(screen.getByTestId('invitation-card-sent-1')).toBeInTheDocument();
-        expect(screen.getByTestId('invitation-card-sent-2')).toBeInTheDocument();
-        expect(screen.queryByTestId('invitation-card-sent-revoked')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('invitation-card-sent-cancelled')).not.toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-card-sent-1')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-card-sent-2')
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('invitation-card-sent-revoked')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('invitation-card-sent-cancelled')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -685,16 +780,22 @@ describe('InvitationManager Component', () => {
         },
       ];
 
-      invitationApi.getPendingInvitations.mockResolvedValue(receivedWithAccepted);
-      
+      invitationApi.getPendingInvitations.mockResolvedValue(
+        receivedWithAccepted
+      );
+
       renderInvitationManager();
 
       await userEvent.click(screen.getByText('manager.sharedWithMe'));
 
       await waitFor(() => {
         // Should only show pending invitations
-        expect(screen.getByTestId('invitation-card-received-1')).toBeInTheDocument();
-        expect(screen.queryByTestId('invitation-card-received-accepted')).not.toBeInTheDocument();
+        expect(
+          screen.getByTestId('invitation-card-received-1')
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('invitation-card-received-accepted')
+        ).not.toBeInTheDocument();
       });
     });
   });

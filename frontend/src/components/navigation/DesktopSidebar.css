@@ -47,7 +47,7 @@
   .desktop-sidebar {
     border-right: 2px solid var(--mantine-color-gray-9);
   }
-  
+
   .desktop-sidebar .nav-item.active {
     border: 2px solid var(--mantine-color-blue-6);
   }

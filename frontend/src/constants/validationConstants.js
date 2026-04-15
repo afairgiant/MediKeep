@@ -30,4 +30,8 @@ export const EDIT_EXCLUDED_FIELDS = ['password_hash', 'password'];
 /**
  * Fields that should be hidden for user model creation
  */
-export const USER_HIDDEN_CREATE_FIELDS = ['created_at', 'updated_at', 'active_patient'];
+export const USER_HIDDEN_CREATE_FIELDS = [
+  'created_at',
+  'updated_at',
+  'active_patient',
+];

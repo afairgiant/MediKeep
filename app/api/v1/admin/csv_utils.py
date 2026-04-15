@@ -7,7 +7,9 @@ from typing import Dict, List
 from fastapi.responses import StreamingResponse
 
 
-def stream_csv(headers: List[str], rows: List[Dict[str, str]], filename: str) -> StreamingResponse:
+def stream_csv(
+    headers: List[str], rows: List[Dict[str, str]], filename: str
+) -> StreamingResponse:
     """Build a StreamingResponse that yields a CSV file row-by-row.
 
     Args:

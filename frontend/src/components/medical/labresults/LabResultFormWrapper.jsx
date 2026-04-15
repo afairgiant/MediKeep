@@ -30,7 +30,10 @@ import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import {
+  parseDateInput,
+  formatDateInputChange,
+} from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import InlineTestComponentEntry from './InlineTestComponentEntry';
@@ -60,7 +63,9 @@ const PendingRelationshipsPicker = ({
   const [encounterPurpose, setEncounterPurpose] = useState('');
   const [encounterNote, setEncounterNote] = useState('');
 
-  const pendingConditionIds = pendingConditions.map(pc => pc.condition_id.toString());
+  const pendingConditionIds = pendingConditions.map(pc =>
+    pc.condition_id.toString()
+  );
   const availableConditions = conditions
     .filter(c => !pendingConditionIds.includes(c.id.toString()))
     .map(c => ({
@@ -68,7 +73,9 @@ const PendingRelationshipsPicker = ({
       label: `${c.diagnosis}${c.status ? ` (${c.status})` : ''}`,
     }));
 
-  const pendingEncounterIds = pendingEncounters.map(pe => pe.encounter_id.toString());
+  const pendingEncounterIds = pendingEncounters.map(pe =>
+    pe.encounter_id.toString()
+  );
   const availableEncounters = encounters
     .filter(e => !pendingEncounterIds.includes(e.id.toString()))
     .map(e => ({
@@ -91,14 +98,16 @@ const PendingRelationshipsPicker = ({
     setEncounterNote('');
   };
 
-  const getConditionLabel = (conditionId) => {
+  const getConditionLabel = conditionId => {
     const c = conditions.find(cond => cond.id === conditionId);
     return c ? c.diagnosis : `Condition #${conditionId}`;
   };
 
-  const getEncounterLabel = (encounterId) => {
+  const getEncounterLabel = encounterId => {
     const e = encounters.find(enc => enc.id === encounterId);
-    return e ? `${e.reason}${e.date ? ` (${e.date})` : ''}` : `Visit #${encounterId}`;
+    return e
+      ? `${e.reason}${e.date ? ` (${e.date})` : ''}`
+      : `Visit #${encounterId}`;
   };
 
   return (
@@ -122,10 +131,17 @@ const PendingRelationshipsPicker = ({
                       {getConditionLabel(pc.condition_id)}
                     </Badge>
                     {pc.relevance_note && (
-                      <Text size="xs" c="dimmed" fs="italic">{pc.relevance_note}</Text>
+                      <Text size="xs" c="dimmed" fs="italic">
+                        {pc.relevance_note}
+                      </Text>
                     )}
                   </Stack>
-                  <ActionIcon variant="light" color="red" size="sm" onClick={() => onRemoveCondition(index)}>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemoveCondition(index)}
+                  >
                     <IconTrash size={14} />
                   </ActionIcon>
                 </Group>
@@ -140,7 +156,7 @@ const PendingRelationshipsPicker = ({
                   placeholder={t('common:modals.chooseConditionToLink')}
                   data={availableConditions}
                   value={selectedCondition}
-                  onChange={(val) => setSelectedCondition(val || '')}
+                  onChange={val => setSelectedCondition(val || '')}
                   searchable
                   clearable
                   size="sm"
@@ -150,7 +166,7 @@ const PendingRelationshipsPicker = ({
                   style={{ flex: 1 }}
                   placeholder={t('common:modals.relevanceNoteOptional')}
                   value={conditionNote}
-                  onChange={(e) => setConditionNote(e.target.value)}
+                  onChange={e => setConditionNote(e.target.value)}
                   size="sm"
                 />
                 <ActionIcon
@@ -172,7 +188,9 @@ const PendingRelationshipsPicker = ({
       {encounters.length > 0 && (
         <Paper withBorder p="md">
           <Stack gap="sm">
-            <Title order={6}>{t('common:labResults.form.linkVisitsTitle', 'Link to Visits')}</Title>
+            <Title order={6}>
+              {t('common:labResults.form.linkVisitsTitle', 'Link to Visits')}
+            </Title>
 
             {/* Already-added pending encounters */}
             {pendingEncounters.map((pe, index) => (
@@ -184,14 +202,22 @@ const PendingRelationshipsPicker = ({
                     </Badge>
                     {pe.purpose && (
                       <Badge variant="outline" size="xs">
-                        {PURPOSE_OPTIONS.find(o => o.value === pe.purpose)?.label || pe.purpose}
+                        {PURPOSE_OPTIONS.find(o => o.value === pe.purpose)
+                          ?.label || pe.purpose}
                       </Badge>
                     )}
                     {pe.relevance_note && (
-                      <Text size="xs" c="dimmed" fs="italic">{pe.relevance_note}</Text>
+                      <Text size="xs" c="dimmed" fs="italic">
+                        {pe.relevance_note}
+                      </Text>
                     )}
                   </Stack>
-                  <ActionIcon variant="light" color="red" size="sm" onClick={() => onRemoveEncounter(index)}>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemoveEncounter(index)}
+                  >
                     <IconTrash size={14} />
                   </ActionIcon>
                 </Group>
@@ -204,10 +230,13 @@ const PendingRelationshipsPicker = ({
                 <Group gap="sm" align="flex-end">
                   <Select
                     style={{ flex: 2 }}
-                    placeholder={t('common:modals.chooseVisitToLink', 'Choose a visit to link')}
+                    placeholder={t(
+                      'common:modals.chooseVisitToLink',
+                      'Choose a visit to link'
+                    )}
                     data={availableEncounters}
                     value={selectedEncounter}
-                    onChange={(val) => setSelectedEncounter(val || '')}
+                    onChange={val => setSelectedEncounter(val || '')}
                     searchable
                     clearable
                     size="sm"
@@ -215,10 +244,13 @@ const PendingRelationshipsPicker = ({
                   />
                   <Select
                     style={{ flex: 1 }}
-                    placeholder={t('common:modals.selectPurpose', 'Select purpose')}
+                    placeholder={t(
+                      'common:modals.selectPurpose',
+                      'Select purpose'
+                    )}
                     data={PURPOSE_OPTIONS}
                     value={encounterPurpose}
-                    onChange={(val) => setEncounterPurpose(val || '')}
+                    onChange={val => setEncounterPurpose(val || '')}
                     clearable
                     size="sm"
                     comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -235,9 +267,12 @@ const PendingRelationshipsPicker = ({
                 </Group>
                 {selectedEncounter && (
                   <TextInput
-                    placeholder={t('common:modals.relevanceNoteOptional', 'Relevance note (optional)')}
+                    placeholder={t(
+                      'common:modals.relevanceNoteOptional',
+                      'Relevance note (optional)'
+                    )}
                     value={encounterNote}
-                    onChange={(e) => setEncounterNote(e.target.value)}
+                    onChange={e => setEncounterNote(e.target.value)}
                     size="sm"
                   />
                 )}
@@ -332,8 +367,16 @@ const LabResultFormWrapper = ({
     { value: 'critical', label: t('labresults:result.critical'), color: 'red' },
     { value: 'high', label: t('labresults:result.high'), color: 'orange' },
     { value: 'low', label: t('labresults:result.low'), color: 'orange' },
-    { value: 'borderline', label: t('labresults:result.borderline'), color: 'yellow' },
-    { value: 'inconclusive', label: t('labresults:result.inconclusive'), color: 'gray' },
+    {
+      value: 'borderline',
+      label: t('labresults:result.borderline'),
+      color: 'yellow',
+    },
+    {
+      value: 'inconclusive',
+      label: t('labresults:result.inconclusive'),
+      color: 'gray',
+    },
   ];
 
   const practitionerOptions = practitioners.map(p => ({
@@ -343,11 +386,16 @@ const LabResultFormWrapper = ({
 
   const getStatusColor = status => {
     switch (status) {
-      case 'ordered': return 'blue';
-      case 'in-progress': return 'yellow';
-      case 'completed': return 'green';
-      case 'cancelled': return 'red';
-      default: return 'gray';
+      case 'ordered':
+        return 'blue';
+      case 'in-progress':
+        return 'yellow';
+      case 'completed':
+        return 'green';
+      case 'cancelled':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -361,11 +409,11 @@ const LabResultFormWrapper = ({
     );
   };
 
-  const handleDocumentManagerRef = (methods) => {
+  const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) onDocumentManagerRef(methods);
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in lab results ${editingItem ? 'edit' : 'create'}`,
       labResultId: editingItem?.id,
@@ -375,7 +423,11 @@ const LabResultFormWrapper = ({
     if (onError) onError(error);
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('lab_results_upload_completed', {
       message: 'File upload completed in lab results form',
       labResultId: editingItem?.id,
@@ -384,7 +436,8 @@ const LabResultFormWrapper = ({
       failedCount,
       component: 'LabResultFormWrapper',
     });
-    if (onFileUploadComplete) onFileUploadComplete(success, completedCount, failedCount);
+    if (onFileUploadComplete)
+      onFileUploadComplete(success, completedCount, failedCount);
   };
 
   useEffect(() => {
@@ -400,7 +453,8 @@ const LabResultFormWrapper = ({
   useEffect(() => {
     if (onPendingRelationshipsRef) {
       onPendingRelationshipsRef({
-        hasPendingRelationships: () => pendingConditions.length > 0 || pendingEncounters.length > 0,
+        hasPendingRelationships: () =>
+          pendingConditions.length > 0 || pendingEncounters.length > 0,
         getPendingRelationships: () => ({
           conditions: pendingConditions,
           encounters: pendingEncounters,
@@ -413,27 +467,37 @@ const LabResultFormWrapper = ({
   const addPendingCondition = useCallback((conditionId, relevanceNote) => {
     setPendingConditions(prev => [
       ...prev,
-      { condition_id: parseInt(conditionId), relevance_note: relevanceNote || null },
+      {
+        condition_id: parseInt(conditionId),
+        relevance_note: relevanceNote || null,
+      },
     ]);
   }, []);
 
-  const removePendingCondition = useCallback((index) => {
+  const removePendingCondition = useCallback(index => {
     setPendingConditions(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   // Pending encounter helpers
-  const addPendingEncounter = useCallback((encounterId, purpose, relevanceNote) => {
-    setPendingEncounters(prev => [
-      ...prev,
-      { encounter_id: parseInt(encounterId), purpose: purpose || null, relevance_note: relevanceNote || null },
-    ]);
-  }, []);
+  const addPendingEncounter = useCallback(
+    (encounterId, purpose, relevanceNote) => {
+      setPendingEncounters(prev => [
+        ...prev,
+        {
+          encounter_id: parseInt(encounterId),
+          purpose: purpose || null,
+          relevance_note: relevanceNote || null,
+        },
+      ]);
+    },
+    []
+  );
 
-  const removePendingEncounter = useCallback((index) => {
+  const removePendingEncounter = useCallback(index => {
     setPendingEncounters(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -467,16 +531,30 @@ const LabResultFormWrapper = ({
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="basic"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
-              <Tabs.Tab value="results" leftSection={<IconChartBar size={16} />}>
+              <Tabs.Tab
+                value="results"
+                leftSection={<IconChartBar size={16} />}
+              >
                 {t('labresults:tabs.resultsStatus')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-                {editingItem ? t('shared:tabs.documents') : t('shared:tabs.addFiles')}
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
+                {editingItem
+                  ? t('shared:tabs.documents')
+                  : t('shared:tabs.addFiles')}
               </Tabs.Tab>
-              <Tabs.Tab value="relationships" leftSection={<IconLink size={16} />}>
+              <Tabs.Tab
+                value="relationships"
+                leftSection={<IconLink size={16} />}
+              >
                 {t('labresults:tabs.relationships')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
@@ -512,8 +590,10 @@ const LabResultFormWrapper = ({
                       label={t('labresults:testCategory.label')}
                       value={formData.test_category || null}
                       data={categoryOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'test_category', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'test_category', value: value || '' },
+                        });
                       }}
                       placeholder={t('shared:labels.selectCategory')}
                       description={t('labresults:testCategory.description')}
@@ -527,8 +607,10 @@ const LabResultFormWrapper = ({
                       label={t('labresults:testTypeField.label')}
                       value={formData.test_type || null}
                       data={testTypeOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'test_type', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'test_type', value: value || '' },
+                        });
                       }}
                       placeholder={t('labresults:testTypeField.placeholder')}
                       description={t('labresults:testTypeField.description')}
@@ -548,13 +630,24 @@ const LabResultFormWrapper = ({
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
                       label={t('shared:labels.orderingPractitioner')}
-                      value={formData.practitioner_id ? String(formData.practitioner_id) : null}
+                      value={
+                        formData.practitioner_id
+                          ? String(formData.practitioner_id)
+                          : null
+                      }
                       data={practitionerOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: {
+                            name: 'practitioner_id',
+                            value: value || '',
+                          },
+                        });
                       }}
                       placeholder={t('shared:fields.selectPractitioner')}
-                      description={t('labresults:orderingPractitioner.description')}
+                      description={t(
+                        'labresults:orderingPractitioner.description'
+                      )}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -570,8 +663,10 @@ const LabResultFormWrapper = ({
                       </Text>
                       <TagInput
                         value={formData.tags || []}
-                        onChange={(tags) => {
-                          onInputChange({ target: { name: 'tags', value: tags } });
+                        onChange={tags => {
+                          onInputChange({
+                            target: { name: 'tags', value: tags },
+                          });
                         }}
                         placeholder={t('common:fields.tags.placeholder')}
                       />
@@ -590,8 +685,10 @@ const LabResultFormWrapper = ({
                       label={t('labresults:testStatus.label')}
                       value={formData.status || null}
                       data={statusOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'status', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'status', value: value || '' },
+                        });
                       }}
                       placeholder={t('shared:fields.selectStatus')}
                       description={t('labresults:testStatus.description')}
@@ -603,8 +700,10 @@ const LabResultFormWrapper = ({
                       label={t('shared:labels.labResult')}
                       value={formData.labs_result || null}
                       data={labResultOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'labs_result', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'labs_result', value: value || '' },
+                        });
                       }}
                       placeholder={t('labresults:labResult.placeholder')}
                       description={t('labresults:labResult.description')}
@@ -616,9 +715,14 @@ const LabResultFormWrapper = ({
                     <DateInput
                       label={t('shared:labels.orderedDate')}
                       value={parseDateInput(formData.ordered_date)}
-                      onChange={(date) => {
+                      onChange={date => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'ordered_date', value: formattedDate } });
+                        onInputChange({
+                          target: {
+                            name: 'ordered_date',
+                            value: formattedDate,
+                          },
+                        });
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
@@ -632,9 +736,14 @@ const LabResultFormWrapper = ({
                     <DateInput
                       label={t('shared:labels.completedDate')}
                       value={parseDateInput(formData.completed_date)}
-                      onChange={(date) => {
+                      onChange={date => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'completed_date', value: formattedDate } });
+                        onInputChange({
+                          target: {
+                            name: 'completed_date',
+                            value: formattedDate,
+                          },
+                        });
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
@@ -655,7 +764,9 @@ const LabResultFormWrapper = ({
                           variant="light"
                           size="sm"
                         >
-                          {statusOptions.find(opt => opt.value === formData.status)?.label || formData.status}
+                          {statusOptions.find(
+                            opt => opt.value === formData.status
+                          )?.label || formData.status}
                         </Badge>
                       </Box>
                     </Grid.Col>
@@ -712,7 +823,9 @@ const LabResultFormWrapper = ({
                     {conditions.length > 0 && (
                       <Paper withBorder p="md" bg="var(--color-bg-secondary)">
                         <Stack gap="md">
-                          <Title order={5}>{t('labresults:form.linkConditionsTitle')}</Title>
+                          <Title order={5}>
+                            {t('labresults:form.linkConditionsTitle')}
+                          </Title>
                           <Text size="sm" c="dimmed">
                             {t('labresults:form.linkConditionsDescription')}
                           </Text>
@@ -729,9 +842,17 @@ const LabResultFormWrapper = ({
                     {encounters.length > 0 && (
                       <Paper withBorder p="md" bg="var(--color-bg-secondary)">
                         <Stack gap="md">
-                          <Title order={5}>{t('common:labResults.form.linkVisitsTitle', 'Link to Visits')}</Title>
+                          <Title order={5}>
+                            {t(
+                              'common:labResults.form.linkVisitsTitle',
+                              'Link to Visits'
+                            )}
+                          </Title>
                           <Text size="sm" c="dimmed">
-                            {t('common:labResults.form.linkVisitsDescription', 'Associate this lab result with visits where it was ordered or reviewed.')}
+                            {t(
+                              'common:labResults.form.linkVisitsDescription',
+                              'Associate this lab result with visits where it was ordered or reviewed.'
+                            )}
                           </Text>
                           <LabResultEncounterRelationships
                             labResultId={editingItem.id}
@@ -798,7 +919,10 @@ const LabResultFormWrapper = ({
               loading={isLoading || isSubmitting}
               disabled={!formData.test_name?.trim()}
             >
-              {editingItem ? t('common:buttons.update') : t('common:buttons.create')} {t('shared:categories.lab_results')}
+              {editingItem
+                ? t('common:buttons.update')
+                : t('common:buttons.create')}{' '}
+              {t('shared:categories.lab_results')}
             </SubmitButton>
           </Group>
         </Stack>

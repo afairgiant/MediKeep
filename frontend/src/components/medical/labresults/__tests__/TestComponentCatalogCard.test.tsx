@@ -12,7 +12,11 @@ vi.mock('@mantine/core', () => ({
   Group: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Stack: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Text: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-  Badge: ({ children, ...props }: any) => <span data-testid="badge" {...props}>{children}</span>,
+  Badge: ({ children, ...props }: any) => (
+    <span data-testid="badge" {...props}>
+      {children}
+    </span>
+  ),
 }));
 
 // Mock tabler icons
@@ -120,7 +124,11 @@ describe('TestComponentCatalogCard', () => {
 
   it('renders status badge for high status', () => {
     const onClick = vi.fn();
-    const highEntry = { ...quantEntry, status: 'high' as const, latest_value: 110 };
+    const highEntry = {
+      ...quantEntry,
+      status: 'high' as const,
+      latest_value: 110,
+    };
 
     render(<TestComponentCatalogCard entry={highEntry} onClick={onClick} />);
 
@@ -129,9 +137,15 @@ describe('TestComponentCatalogCard', () => {
 
   it('renders status badge for critical status', () => {
     const onClick = vi.fn();
-    const criticalEntry = { ...quantEntry, status: 'critical' as const, latest_value: 250 };
+    const criticalEntry = {
+      ...quantEntry,
+      status: 'critical' as const,
+      latest_value: 250,
+    };
 
-    render(<TestComponentCatalogCard entry={criticalEntry} onClick={onClick} />);
+    render(
+      <TestComponentCatalogCard entry={criticalEntry} onClick={onClick} />
+    );
 
     expect(screen.getByText('Critical')).toBeInTheDocument();
   });

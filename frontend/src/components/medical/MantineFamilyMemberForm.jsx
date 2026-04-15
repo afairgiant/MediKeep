@@ -39,7 +39,7 @@ const MantineFamilyMemberForm = ({
       totalFields: familyMemberFormFields?.length,
       filteredFields: filteredFields?.length,
       component: 'MantineFamilyMemberForm',
-      isDeceased: formData?.is_deceased
+      isDeceased: formData?.is_deceased,
     });
   }, [filteredFields?.length, formData?.is_deceased]);
 
@@ -48,7 +48,7 @@ const MantineFamilyMemberForm = ({
     logger.error('Family member form fields are not properly defined', {
       component: 'MantineFamilyMemberForm',
       fieldsType: typeof familyMemberFormFields,
-      fieldsValue: familyMemberFormFields
+      fieldsValue: familyMemberFormFields,
     });
     return null;
   }

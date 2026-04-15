@@ -16,14 +16,18 @@ class FamilyConditionBase(BaseModel):
     )
     severity: Optional[str] = Field(None, description="Severity of the condition")
     status: Optional[str] = Field(None, description="Status of the condition")
-    condition_type: Optional[str] = Field(None, description="Type/category of condition")
+    condition_type: Optional[str] = Field(
+        None, description="Type/category of condition"
+    )
     notes: Optional[str] = Field(
         None, max_length=5000, description="Additional notes about the condition"
     )
     icd10_code: Optional[str] = Field(
         None, max_length=10, description="ICD-10 diagnosis code"
     )
-    family_member_id: Optional[int] = Field(None, gt=0, description="ID of the family member")
+    family_member_id: Optional[int] = Field(
+        None, gt=0, description="ID of the family member"
+    )
 
     @field_validator("severity")
     @classmethod
@@ -31,7 +35,9 @@ class FamilyConditionBase(BaseModel):
         if v is not None:
             valid_severities = get_all_severity_levels()
             if v.lower() not in valid_severities:
-                raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
+                raise ValueError(
+                    f"Severity must be one of: {', '.join(valid_severities)}"
+                )
             return v.lower()
         return v
 
@@ -51,7 +57,9 @@ class FamilyConditionBase(BaseModel):
         if v is not None:
             valid_types = get_all_condition_types()
             if v.lower() not in valid_types:
-                raise ValueError(f"Condition type must be one of: {', '.join(valid_types)}")
+                raise ValueError(
+                    f"Condition type must be one of: {', '.join(valid_types)}"
+                )
             return v.lower()
         return v
 
@@ -75,7 +83,9 @@ class FamilyConditionUpdate(BaseModel):
         if v is not None:
             valid_severities = get_all_severity_levels()
             if v.lower() not in valid_severities:
-                raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
+                raise ValueError(
+                    f"Severity must be one of: {', '.join(valid_severities)}"
+                )
             return v.lower()
         return v
 
@@ -95,7 +105,9 @@ class FamilyConditionUpdate(BaseModel):
         if v is not None:
             valid_types = get_all_condition_types()
             if v.lower() not in valid_types:
-                raise ValueError(f"Condition type must be one of: {', '.join(valid_types)}")
+                raise ValueError(
+                    f"Condition type must be one of: {', '.join(valid_types)}"
+                )
             return v.lower()
         return v
 

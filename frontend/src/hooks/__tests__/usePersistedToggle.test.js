@@ -94,7 +94,9 @@ describe('usePersistedToggle', () => {
   test('persists value across hook re-renders', () => {
     localStorage.getItem.mockReturnValue(null);
 
-    const { result, rerender } = renderHook(() => usePersistedToggle(STORAGE_KEY, false));
+    const { result, rerender } = renderHook(() =>
+      usePersistedToggle(STORAGE_KEY, false)
+    );
 
     act(() => {
       result.current[1](true);

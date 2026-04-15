@@ -10,8 +10,12 @@ from sqlalchemy import or_
 from app.core.logging.config import get_logger
 from app.core.constants import is_admin_role, get_admin_roles_filter
 from app.models.models import (
-    User, Patient, UserPreferences, PatientShare,
-    FamilyHistoryShare, Invitation
+    User,
+    Patient,
+    UserPreferences,
+    PatientShare,
+    FamilyHistoryShare,
+    Invitation,
 )
 from app.models.activity_log import ActivityLog
 
@@ -28,7 +32,7 @@ class UserDeletionService:
         self,
         db: Session,
         user_id: int,
-        request_metadata: Optional[Dict[str, Any]] = None
+        request_metadata: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Delete user and all associated data in a single transaction.
@@ -53,7 +57,7 @@ class UserDeletionService:
         deletion_stats = {
             "user_id": user_id,
             "username": username,
-            "deleted_records": {}
+            "deleted_records": {},
         }
 
         logger.info(
@@ -61,66 +65,82 @@ class UserDeletionService:
             extra={
                 "user_id": user_id,
                 "username": username,
-                **(request_metadata or {})
-            }
+                **(request_metadata or {}),
+            },
         )
 
         # Execute deletion in proper order to avoid FK violations
         # Order: least dependent -> most dependent
 
         # 1. Delete user preferences
-        deleted_prefs = db.query(UserPreferences).filter(
-            UserPreferences.user_id == user_id
-        ).delete(synchronize_session=False)
+        deleted_prefs = (
+            db.query(UserPreferences)
+            .filter(UserPreferences.user_id == user_id)
+            .delete(synchronize_session=False)
+        )
 
         deletion_stats["deleted_records"]["user_preferences"] = deleted_prefs
 
         if deleted_prefs > 0:
             logger.info(
                 f"Deleted {deleted_prefs} user preferences for {username}",
-                extra={"user_id": user_id, "count": deleted_prefs}
+                extra={"user_id": user_id, "count": deleted_prefs},
             )
 
         # 2. Delete patient shares
-        deleted_shares = db.query(PatientShare).filter(
-            or_(
-                PatientShare.shared_by_user_id == user_id,
-                PatientShare.shared_with_user_id == user_id
+        deleted_shares = (
+            db.query(PatientShare)
+            .filter(
+                or_(
+                    PatientShare.shared_by_user_id == user_id,
+                    PatientShare.shared_with_user_id == user_id,
+                )
             )
-        ).delete(synchronize_session=False)
+            .delete(synchronize_session=False)
+        )
 
         deletion_stats["deleted_records"]["patient_shares"] = deleted_shares
 
         if deleted_shares > 0:
             logger.info(
                 f"Deleted {deleted_shares} patient shares for {username}",
-                extra={"user_id": user_id, "count": deleted_shares}
+                extra={"user_id": user_id, "count": deleted_shares},
             )
 
         # 3. Delete family history shares
-        deleted_family_shares = db.query(FamilyHistoryShare).filter(
-            or_(
-                FamilyHistoryShare.shared_by_user_id == user_id,
-                FamilyHistoryShare.shared_with_user_id == user_id
+        deleted_family_shares = (
+            db.query(FamilyHistoryShare)
+            .filter(
+                or_(
+                    FamilyHistoryShare.shared_by_user_id == user_id,
+                    FamilyHistoryShare.shared_with_user_id == user_id,
+                )
             )
-        ).delete(synchronize_session=False)
+            .delete(synchronize_session=False)
+        )
 
-        deletion_stats["deleted_records"]["family_history_shares"] = deleted_family_shares
+        deletion_stats["deleted_records"][
+            "family_history_shares"
+        ] = deleted_family_shares
 
         if deleted_family_shares > 0:
             logger.info(
                 f"Deleted {deleted_family_shares} family history shares for {username}",
-                extra={"user_id": user_id, "count": deleted_family_shares}
+                extra={"user_id": user_id, "count": deleted_family_shares},
             )
 
         # 4. Delete invitations
-        deleted_sent = db.query(Invitation).filter(
-            Invitation.sent_by_user_id == user_id
-        ).delete(synchronize_session=False)
+        deleted_sent = (
+            db.query(Invitation)
+            .filter(Invitation.sent_by_user_id == user_id)
+            .delete(synchronize_session=False)
+        )
 
-        deleted_received = db.query(Invitation).filter(
-            Invitation.sent_to_user_id == user_id
-        ).delete(synchronize_session=False)
+        deleted_received = (
+            db.query(Invitation)
+            .filter(Invitation.sent_to_user_id == user_id)
+            .delete(synchronize_session=False)
+        )
 
         deletion_stats["deleted_records"]["invitations_sent"] = deleted_sent
         deletion_stats["deleted_records"]["invitations_received"] = deleted_received
@@ -131,14 +151,12 @@ class UserDeletionService:
                 extra={
                     "user_id": user_id,
                     "sent": deleted_sent,
-                    "received": deleted_received
-                }
+                    "received": deleted_received,
+                },
             )
 
         # 5. Handle circular dependency with active_patient_id
-        patient_record = db.query(Patient).filter(
-            Patient.user_id == user_id
-        ).first()
+        patient_record = db.query(Patient).filter(Patient.user_id == user_id).first()
 
         patient_id = None
         if patient_record:
@@ -146,18 +164,18 @@ class UserDeletionService:
 
             # First, nullify any active_patient_id references to this patient
             # This prevents circular dependency issues during deletion
-            db.query(User).filter(
-                User.active_patient_id == patient_id
-            ).update({"active_patient_id": None}, synchronize_session=False)
+            db.query(User).filter(User.active_patient_id == patient_id).update(
+                {"active_patient_id": None}, synchronize_session=False
+            )
 
             # Nullify patient references in activity logs
-            db.query(ActivityLog).filter(
-                ActivityLog.patient_id == patient_id
-            ).update({"patient_id": None}, synchronize_session=False)
+            db.query(ActivityLog).filter(ActivityLog.patient_id == patient_id).update(
+                {"patient_id": None}, synchronize_session=False
+            )
 
             # Now we can safely delete the patient record (cascades to medical data)
             db.delete(patient_record)
-            
+
             # Flush changes to database to handle the circular dependency properly
             db.flush()
 
@@ -166,13 +184,15 @@ class UserDeletionService:
 
             logger.info(
                 f"Deleted patient record {patient_id} for {username}",
-                extra={"user_id": user_id, "patient_id": patient_id}
+                extra={"user_id": user_id, "patient_id": patient_id},
             )
 
         # 6. Nullify user references in activity logs
-        updated_logs = db.query(ActivityLog).filter(
-            ActivityLog.user_id == user_id
-        ).update({"user_id": None}, synchronize_session=False)
+        updated_logs = (
+            db.query(ActivityLog)
+            .filter(ActivityLog.user_id == user_id)
+            .update({"user_id": None}, synchronize_session=False)
+        )
 
         deletion_stats["deleted_records"]["activity_logs_updated"] = updated_logs
 
@@ -182,7 +202,7 @@ class UserDeletionService:
             if user_obj.active_patient_id:
                 user_obj.active_patient_id = None
                 db.flush()  # Ensure the change is flushed before deletion
-                
+
             # Finally, delete the user
             db.delete(user_obj)
             deletion_stats["deleted_records"]["user"] = 1
@@ -193,8 +213,8 @@ class UserDeletionService:
                 "user_id": user_id,
                 "username": username,
                 "deletion_stats": deletion_stats,
-                **(request_metadata or {})
-            }
+                **(request_metadata or {}),
+            },
         )
 
         return deletion_stats
@@ -216,10 +236,17 @@ class UserDeletionService:
         # Get user with lock to prevent concurrent modifications
         # Use nowait to prevent indefinite blocking
         try:
-            user = db.query(User).filter(User.id == user_id).with_for_update(nowait=True).first()
+            user = (
+                db.query(User)
+                .filter(User.id == user_id)
+                .with_for_update(nowait=True)
+                .first()
+            )
         except Exception as e:
             if "could not obtain lock" in str(e).lower():
-                raise ValueError("User account is currently being modified by another process. Please try again.")
+                raise ValueError(
+                    "User account is currently being modified by another process. Please try again."
+                )
             raise
 
         if not user:
@@ -230,7 +257,7 @@ class UserDeletionService:
         if total_users <= 1:
             logger.warning(
                 f"Attempted deletion of last user: {user.username}",
-                extra={"user_id": user_id, "username": user.username}
+                extra={"user_id": user_id, "username": user.username},
             )
             raise ValueError(
                 "Cannot delete the last remaining user in the system. "
@@ -239,14 +266,14 @@ class UserDeletionService:
 
         # Check if this is the last admin
         if is_admin_role(user.role):
-            admin_count = db.query(User).filter(
-                User.role.in_(get_admin_roles_filter())
-            ).count()
+            admin_count = (
+                db.query(User).filter(User.role.in_(get_admin_roles_filter())).count()
+            )
 
             if admin_count <= 1:
                 logger.warning(
                     f"Attempted deletion of last admin: {user.username}",
-                    extra={"user_id": user_id, "username": user.username}
+                    extra={"user_id": user_id, "username": user.username},
                 )
                 raise ValueError(
                     "Cannot delete the last remaining admin user in the system. "

@@ -76,11 +76,15 @@ const VisitViewModal = ({
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     handleError(error, 'document_manager');
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('visits_view_upload_completed', {
       message: 'File upload completed in visits view',
       visitId: visit?.id,
@@ -95,8 +99,12 @@ const VisitViewModal = ({
     }
   };
 
-  const getPractitionerDisplay = (practitionerId) => {
-    if (!practitionerId) return t('shared:labels.noPractitionerAssigned', 'No practitioner assigned');
+  const getPractitionerDisplay = practitionerId => {
+    if (!practitionerId)
+      return t(
+        'shared:labels.noPractitionerAssigned',
+        'No practitioner assigned'
+      );
 
     const practitioner = practitioners.find(
       p => p.id === parseInt(practitionerId)
@@ -104,15 +112,17 @@ const VisitViewModal = ({
     if (practitioner) {
       return `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`;
     }
-    return t('shared:labels.practitionerId', 'Practitioner ID: {{id}}', { id: practitionerId });
+    return t('shared:labels.practitionerId', 'Practitioner ID: {{id}}', {
+      id: practitionerId,
+    });
   };
 
-  const getConditionDetails = (conditionId) => {
+  const getConditionDetails = conditionId => {
     if (!conditionId || !conditions) return null;
     return conditions.find(c => c.id === conditionId);
   };
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = priority => {
     switch (priority) {
       case 'urgent':
         return 'red';
@@ -127,7 +137,7 @@ const VisitViewModal = ({
     }
   };
 
-  const getVisitTypeColor = (visitType) => {
+  const getVisitTypeColor = visitType => {
     switch (visitType?.toLowerCase()) {
       case 'emergency':
         return 'red';
@@ -147,31 +157,40 @@ const VisitViewModal = ({
   if (!visit) return null;
 
   try {
-    const practitioner = practitioners.find(p => p.id === parseInt(visit.practitioner_id));
+    const practitioner = practitioners.find(
+      p => p.id === parseInt(visit.practitioner_id)
+    );
     const condition = getConditionDetails(visit.condition_id);
 
     return (
       <Modal
         opened={isOpen}
         onClose={() => !isBlocking && onClose()}
-        title={t('visits.viewModal.title', 'Visit - {{date}}', { date: formatDate(visit.date) })}
+        title={t('visits.viewModal.title', 'Visit - {{date}}', {
+          date: formatDate(visit.date),
+        })}
         size="xl"
         centered
         zIndex={2000}
         styles={{
           body: {
             maxHeight: 'calc(100vh - 200px)',
-            overflowY: 'auto'
-          }
+            overflowY: 'auto',
+          },
         }}
       >
         <Stack gap="lg">
           {/* Header Card */}
-          <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+          <Paper
+            withBorder
+            p="md"
+            style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+          >
             <Group justify="space-between" align="center">
               <div>
                 <Title order={3} mb="xs">
-                  {visit.reason || t('visits.viewModal.generalVisit', 'General Visit')}
+                  {visit.reason ||
+                    t('visits.viewModal.generalVisit', 'General Visit')}
                 </Title>
                 <Group gap="xs">
                   {visit.visit_type && (
@@ -200,21 +219,33 @@ const VisitViewModal = ({
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="overview"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('visits.viewModal.tabs.visitInfo', 'Visit Info')}
               </Tabs.Tab>
-              <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
+              <Tabs.Tab
+                value="clinical"
+                leftSection={<IconStethoscope size={16} />}
+              >
                 {t('visits.viewModal.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
               {fetchEncounterLabResults && (
-                <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
+                <Tabs.Tab
+                  value="lab-results"
+                  leftSection={<IconFlask size={16} />}
+                >
                   {t('shared:categories.lab_results', 'Lab Results')}
                 </Tabs.Tab>
               )}
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {t('shared:tabs.documents', 'Documents')}
               </Tabs.Tab>
             </Tabs.List>
@@ -224,41 +255,66 @@ const VisitViewModal = ({
               <Box mt="md">
                 <Stack gap="lg">
                   <div>
-                    <Title order={4} mb="sm">{t('visits.viewModal.visitInformation', 'Visit Information')}</Title>
+                    <Title order={4} mb="sm">
+                      {t(
+                        'visits.viewModal.visitInformation',
+                        'Visit Information'
+                      )}
+                    </Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.date', 'Date')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.date', 'Date')}
+                        </Text>
                         <Text>{formatDate(visit.date)}</Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.reason', 'Reason')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.reason', 'Reason')}
+                        </Text>
                         <Text c={visit.reason ? 'inherit' : 'dimmed'}>
-                          {visit.reason || t('shared:labels.notSpecified', 'Not specified')}
+                          {visit.reason ||
+                            t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.visitType', 'Visit Type')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.visitType', 'Visit Type')}
+                        </Text>
                         <Text c={visit.visit_type ? 'inherit' : 'dimmed'}>
-                          {visit.visit_type || t('shared:labels.notSpecified', 'Not specified')}
+                          {visit.visit_type ||
+                            t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.priority', 'Priority')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('visits.viewModal.priority', 'Priority')}
+                        </Text>
                         <Text c={visit.priority ? 'inherit' : 'dimmed'}>
-                          {visit.priority || t('shared:labels.notSpecified', 'Not specified')}
+                          {visit.priority ||
+                            t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.location', 'Location')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('visits.viewModal.location', 'Location')}
+                        </Text>
                         <Text c={visit.location ? 'inherit' : 'dimmed'}>
-                          {visit.location || t('shared:labels.notSpecified', 'Not specified')}
+                          {visit.location ||
+                            t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.duration', 'Duration')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.duration', 'Duration')}
+                        </Text>
                         <Text c={visit.duration_minutes ? 'inherit' : 'dimmed'}>
                           {visit.duration_minutes
-                            ? t('shared:labels.minutesMinutes', '{{minutes}} minutes', { minutes: visit.duration_minutes })
+                            ? t(
+                                'shared:labels.minutesMinutes',
+                                '{{minutes}} minutes',
+                                { minutes: visit.duration_minutes }
+                              )
                             : t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
@@ -268,7 +324,9 @@ const VisitViewModal = ({
                   {/* Tags Section */}
                   {visit.tags && visit.tags.length > 0 && (
                     <div>
-                      <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
+                      <Title order={4} mb="sm">
+                        {t('shared:labels.tags', 'Tags')}
+                      </Title>
                       <Group gap="xs">
                         {visit.tags.map((tag, index) => (
                           <ClickableTagBadge
@@ -289,10 +347,14 @@ const VisitViewModal = ({
               <Box mt="md">
                 <Stack gap="lg">
                   <div>
-                    <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
+                    <Title order={4} mb="sm">
+                      {t('shared:fields.practitioner', 'Practitioner')}
+                    </Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.doctor', 'Doctor')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.doctor', 'Doctor')}
+                        </Text>
                         <Text c={visit.practitioner_id ? 'inherit' : 'dimmed'}>
                           {visit.practitioner_id
                             ? getPractitionerDisplay(visit.practitioner_id)
@@ -301,7 +363,9 @@ const VisitViewModal = ({
                       </Stack>
                       {practitioner?.specialty && (
                         <Stack gap="xs">
-                          <Text fw={500} size="sm" c="dimmed">{t('shared:labels.specialty', 'Specialty')}</Text>
+                          <Text fw={500} size="sm" c="dimmed">
+                            {t('shared:labels.specialty', 'Specialty')}
+                          </Text>
                           <Text>{practitioner.specialty}</Text>
                         </Stack>
                       )}
@@ -310,12 +374,25 @@ const VisitViewModal = ({
 
                   {condition && (
                     <div>
-                      <Title order={4} mb="sm">{t('shared:labels.relatedCondition', 'Related Condition')}</Title>
+                      <Title order={4} mb="sm">
+                        {t(
+                          'shared:labels.relatedCondition',
+                          'Related Condition'
+                        )}
+                      </Title>
                       <Text
                         c="blue"
-                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                        onClick={() => navigateToEntity('condition', condition.id, navigate)}
-                        title={t('shared:labels.viewConditionDetails', 'View condition details')}
+                        style={{
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                        }}
+                        onClick={() =>
+                          navigateToEntity('condition', condition.id, navigate)
+                        }
+                        title={t(
+                          'shared:labels.viewConditionDetails',
+                          'View condition details'
+                        )}
                       >
                         {condition.diagnosis}
                       </Text>
@@ -323,18 +400,32 @@ const VisitViewModal = ({
                   )}
 
                   <div>
-                    <Title order={4} mb="sm">{t('visits.viewModal.clinicalInformation', 'Clinical Information')}</Title>
+                    <Title order={4} mb="sm">
+                      {t(
+                        'visits.viewModal.clinicalInformation',
+                        'Clinical Information'
+                      )}
+                    </Title>
                     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('visits.viewModal.chiefComplaint', 'Chief Complaint')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t(
+                            'visits.viewModal.chiefComplaint',
+                            'Chief Complaint'
+                          )}
+                        </Text>
                         <Text c={visit.chief_complaint ? 'inherit' : 'dimmed'}>
-                          {visit.chief_complaint || t('shared:labels.notSpecified', 'Not specified')}
+                          {visit.chief_complaint ||
+                            t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                       <Stack gap="xs">
-                        <Text fw={500} size="sm" c="dimmed">{t('shared:labels.diagnosis', 'Diagnosis')}</Text>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.diagnosis', 'Diagnosis')}
+                        </Text>
                         <Text c={visit.diagnosis ? 'inherit' : 'dimmed'}>
-                          {visit.diagnosis || t('shared:labels.notSpecified', 'Not specified')}
+                          {visit.diagnosis ||
+                            t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
                       </Stack>
                     </SimpleGrid>
@@ -366,7 +457,9 @@ const VisitViewModal = ({
                   {/* Treatment Plan */}
                   {visit.treatment_plan && (
                     <div>
-                      <Title order={4} mb="sm">{t('visits.viewModal.treatmentPlan', 'Treatment Plan')}</Title>
+                      <Title order={4} mb="sm">
+                        {t('visits.viewModal.treatmentPlan', 'Treatment Plan')}
+                      </Title>
                       <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                         <Text style={{ whiteSpace: 'pre-wrap' }}>
                           {visit.treatment_plan}
@@ -378,7 +471,12 @@ const VisitViewModal = ({
                   {/* Follow-up Instructions */}
                   {visit.follow_up_instructions && (
                     <div>
-                      <Title order={4} mb="sm">{t('visits.viewModal.followUpInstructions', 'Follow-up Instructions')}</Title>
+                      <Title order={4} mb="sm">
+                        {t(
+                          'visits.viewModal.followUpInstructions',
+                          'Follow-up Instructions'
+                        )}
+                      </Title>
                       <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                         <Text style={{ whiteSpace: 'pre-wrap' }}>
                           {visit.follow_up_instructions}
@@ -389,13 +487,19 @@ const VisitViewModal = ({
 
                   {/* Additional Notes */}
                   <div>
-                    <Title order={4} mb="sm">{t('shared:fields.additionalNotes', 'Additional Notes')}</Title>
+                    <Title order={4} mb="sm">
+                      {t('shared:fields.additionalNotes', 'Additional Notes')}
+                    </Title>
                     <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
                       <Text
                         style={{ whiteSpace: 'pre-wrap' }}
                         c={visit.notes ? 'inherit' : 'dimmed'}
                       >
-                        {visit.notes || t('shared:labels.noNotesAvailable', 'No notes available')}
+                        {visit.notes ||
+                          t(
+                            'shared:labels.noNotesAvailable',
+                            'No notes available'
+                          )}
                       </Text>
                     </Paper>
                   </div>
@@ -407,7 +511,9 @@ const VisitViewModal = ({
             <Tabs.Panel value="documents">
               <Box mt="md">
                 <Stack gap="md">
-                  <Title order={4}>{t('shared:labels.attachedDocuments', 'Attached Documents')}</Title>
+                  <Title order={4}>
+                    {t('shared:labels.attachedDocuments', 'Attached Documents')}
+                  </Title>
                   <DocumentManagerWithProgress
                     entityType="visit"
                     entityId={visit.id}
@@ -423,7 +529,10 @@ const VisitViewModal = ({
 
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
-            <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+            <Tooltip
+              label={disableEditTooltip}
+              disabled={!disableEdit || !disableEditTooltip}
+            >
               <span>
                 <Button
                   variant="light"

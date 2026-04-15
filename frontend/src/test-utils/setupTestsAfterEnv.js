@@ -108,7 +108,8 @@ afterAll(() => {
 
 // Add custom matchers if needed
 expect.extend({
-  toBeInTheDocument: require('@testing-library/jest-dom/matchers').toBeInTheDocument,
+  toBeInTheDocument: require('@testing-library/jest-dom/matchers')
+    .toBeInTheDocument,
 });
 
 // Silence React 18 warnings in tests

@@ -7,6 +7,7 @@ Tests cover:
 - Email validation edge cases (invalid formats, case normalization)
 - Updating practitioners to add/remove email and practice fields
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -112,7 +113,7 @@ class TestPractitionerCreateSchema:
             phone_number="555-123-4567",
             email="jane.smith@hospital.com",
             website="https://drjanesmith.com",
-            rating=4.5
+            rating=4.5,
         )
         assert practitioner.name == "Dr. Jane Smith"
         assert practitioner.practice == "City Medical Center"
@@ -121,8 +122,7 @@ class TestPractitionerCreateSchema:
     def test_create_without_practice(self):
         """Test creating practitioner without practice (optional field)."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe",
-            specialty="General Practice"
+            name="Dr. John Doe", specialty="General Practice"
         )
         assert practitioner.name == "Dr. John Doe"
         assert practitioner.practice is None
@@ -130,27 +130,21 @@ class TestPractitionerCreateSchema:
     def test_create_without_email(self):
         """Test creating practitioner without email (optional field)."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe",
-            specialty="General Practice",
-            practice="Local Clinic"
+            name="Dr. John Doe", specialty="General Practice", practice="Local Clinic"
         )
         assert practitioner.email is None
 
     def test_create_with_empty_practice_converts_to_none(self):
         """Test that empty practice string converts to None."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe",
-            specialty="General Practice",
-            practice=""
+            name="Dr. John Doe", specialty="General Practice", practice=""
         )
         assert practitioner.practice is None
 
     def test_create_with_empty_email_converts_to_none(self):
         """Test that empty email string converts to None."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe",
-            specialty="General Practice",
-            email=""
+            name="Dr. John Doe", specialty="General Practice", email=""
         )
         assert practitioner.email is None
 
@@ -159,7 +153,7 @@ class TestPractitionerCreateSchema:
         practitioner = PractitionerCreate(
             name="Dr. John Doe",
             specialty="General Practice",
-            email="  DR.DOE@HOSPITAL.COM  "
+            email="  DR.DOE@HOSPITAL.COM  ",
         )
         assert practitioner.email == "dr.doe@hospital.com"
 
@@ -206,7 +200,9 @@ class TestPractitionerUpdateSchema:
 class TestPractitionerAPI:
     """Test practitioner API endpoints."""
 
-    def test_create_practitioner_with_all_fields(self, authenticated_client: TestClient):
+    def test_create_practitioner_with_all_fields(
+        self, authenticated_client: TestClient
+    ):
         """Test creating practitioner with all fields including email."""
         practitioner_data = {
             "name": "Dr. Sarah Johnson",
@@ -215,10 +211,12 @@ class TestPractitionerAPI:
             "phone_number": "555-555-0123",
             "email": "sarah.johnson@citymed.com",
             "website": "https://citymed.com/drjohnson",
-            "rating": 4.8
+            "rating": 4.8,
         }
 
-        response = authenticated_client.post("/api/v1/practitioners/", json=practitioner_data)
+        response = authenticated_client.post(
+            "/api/v1/practitioners/", json=practitioner_data
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -227,16 +225,20 @@ class TestPractitionerAPI:
         assert data["email"] == "sarah.johnson@citymed.com"
         assert data["rating"] == 4.8
 
-    def test_create_practitioner_without_practice(self, authenticated_client: TestClient):
+    def test_create_practitioner_without_practice(
+        self, authenticated_client: TestClient
+    ):
         """Test creating practitioner without practice (Italian use case)."""
         practitioner_data = {
             "name": "Dr. Marco Rossi",
             "specialty": "Cardiologia",
             "phone_number": "555-555-0124",
-            "email": "marco.rossi@email.it"
+            "email": "marco.rossi@email.it",
         }
 
-        response = authenticated_client.post("/api/v1/practitioners/", json=practitioner_data)
+        response = authenticated_client.post(
+            "/api/v1/practitioners/", json=practitioner_data
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -249,39 +251,49 @@ class TestPractitionerAPI:
         practitioner_data = {
             "name": "Dr. Emily Chen",
             "specialty": "Pediatrics",
-            "practice": "Children's Hospital"
+            "practice": "Children's Hospital",
         }
 
-        response = authenticated_client.post("/api/v1/practitioners/", json=practitioner_data)
+        response = authenticated_client.post(
+            "/api/v1/practitioners/", json=practitioner_data
+        )
 
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Dr. Emily Chen"
         assert data["email"] is None
 
-    def test_create_practitioner_email_normalized(self, authenticated_client: TestClient):
+    def test_create_practitioner_email_normalized(
+        self, authenticated_client: TestClient
+    ):
         """Test that email is normalized to lowercase on creation."""
         practitioner_data = {
             "name": "Dr. Test Doctor",
             "specialty": "Testing",
-            "email": "  TEST@HOSPITAL.COM  "
+            "email": "  TEST@HOSPITAL.COM  ",
         }
 
-        response = authenticated_client.post("/api/v1/practitioners/", json=practitioner_data)
+        response = authenticated_client.post(
+            "/api/v1/practitioners/", json=practitioner_data
+        )
 
         assert response.status_code == 200
         data = response.json()
         assert data["email"] == "test@hospital.com"
 
-    def test_create_practitioner_invalid_email_rejected(self, authenticated_client: TestClient):
+    def test_create_practitioner_invalid_email_rejected(
+        self, authenticated_client: TestClient
+    ):
         """Test that invalid email is rejected."""
         practitioner_data = {
             "name": "Dr. Bad Email",
             "specialty": "Testing",
-            "email": "not-a-valid-email"
+            "email": "not-a-valid-email",
         }
 
-        response = authenticated_client.post("/api/v1/practitioners/", json=practitioner_data)
+        response = authenticated_client.post(
+            "/api/v1/practitioners/", json=practitioner_data
+        )
 
         assert response.status_code == 422  # Validation error
 
@@ -291,40 +303,44 @@ class TestPractitionerAPI:
         create_data = {
             "name": "Dr. Update Test",
             "specialty": "Testing",
-            "practice": "Test Clinic"
+            "practice": "Test Clinic",
         }
-        create_response = authenticated_client.post("/api/v1/practitioners/", json=create_data)
+        create_response = authenticated_client.post(
+            "/api/v1/practitioners/", json=create_data
+        )
         assert create_response.status_code == 200
         practitioner_id = create_response.json()["id"]
 
         # Then add email
         update_data = {"email": "update.test@clinic.com"}
         update_response = authenticated_client.put(
-            f"/api/v1/practitioners/{practitioner_id}",
-            json=update_data
+            f"/api/v1/practitioners/{practitioner_id}", json=update_data
         )
 
         assert update_response.status_code == 200
         data = update_response.json()
         assert data["email"] == "update.test@clinic.com"
 
-    def test_update_practitioner_remove_practice(self, authenticated_client: TestClient):
+    def test_update_practitioner_remove_practice(
+        self, authenticated_client: TestClient
+    ):
         """Test removing practice from existing practitioner."""
         # First create with practice
         create_data = {
             "name": "Dr. Remove Practice",
             "specialty": "Testing",
-            "practice": "Old Hospital"
+            "practice": "Old Hospital",
         }
-        create_response = authenticated_client.post("/api/v1/practitioners/", json=create_data)
+        create_response = authenticated_client.post(
+            "/api/v1/practitioners/", json=create_data
+        )
         assert create_response.status_code == 200
         practitioner_id = create_response.json()["id"]
 
         # Then remove practice by setting to empty string
         update_data = {"practice": ""}
         update_response = authenticated_client.put(
-            f"/api/v1/practitioners/{practitioner_id}",
-            json=update_data
+            f"/api/v1/practitioners/{practitioner_id}", json=update_data
         )
 
         assert update_response.status_code == 200
@@ -337,36 +353,40 @@ class TestPractitionerAPI:
         create_data = {
             "name": "Dr. Remove Email",
             "specialty": "Testing",
-            "email": "to.remove@test.com"
+            "email": "to.remove@test.com",
         }
-        create_response = authenticated_client.post("/api/v1/practitioners/", json=create_data)
+        create_response = authenticated_client.post(
+            "/api/v1/practitioners/", json=create_data
+        )
         assert create_response.status_code == 200
         practitioner_id = create_response.json()["id"]
 
         # Then remove email by setting to empty string
         update_data = {"email": ""}
         update_response = authenticated_client.put(
-            f"/api/v1/practitioners/{practitioner_id}",
-            json=update_data
+            f"/api/v1/practitioners/{practitioner_id}", json=update_data
         )
 
         assert update_response.status_code == 200
         data = update_response.json()
         assert data["email"] is None
 
-    def test_get_practitioner_with_optional_fields(self, authenticated_client: TestClient):
+    def test_get_practitioner_with_optional_fields(
+        self, authenticated_client: TestClient
+    ):
         """Test getting practitioner displays optional fields correctly."""
         # Create practitioner without optional fields
-        create_data = {
-            "name": "Dr. Minimal",
-            "specialty": "Minimal Testing"
-        }
-        create_response = authenticated_client.post("/api/v1/practitioners/", json=create_data)
+        create_data = {"name": "Dr. Minimal", "specialty": "Minimal Testing"}
+        create_response = authenticated_client.post(
+            "/api/v1/practitioners/", json=create_data
+        )
         assert create_response.status_code == 200
         practitioner_id = create_response.json()["id"]
 
         # Get the practitioner
-        get_response = authenticated_client.get(f"/api/v1/practitioners/{practitioner_id}")
+        get_response = authenticated_client.get(
+            f"/api/v1/practitioners/{practitioner_id}"
+        )
 
         assert get_response.status_code == 200
         data = get_response.json()
@@ -374,14 +394,16 @@ class TestPractitionerAPI:
         assert data["practice"] is None
         assert data["email"] is None
 
-    def test_list_practitioners_includes_optional_fields(self, authenticated_client: TestClient):
+    def test_list_practitioners_includes_optional_fields(
+        self, authenticated_client: TestClient
+    ):
         """Test listing practitioners includes optional fields in response."""
         # Create a practitioner with all fields
         create_data = {
             "name": "Dr. Full Fields",
             "specialty": "Complete",
             "practice": "Full Hospital",
-            "email": "full@test.com"
+            "email": "full@test.com",
         }
         authenticated_client.post("/api/v1/practitioners/", json=create_data)
 
@@ -394,8 +416,7 @@ class TestPractitionerAPI:
 
         # Find our practitioner
         full_practitioner = next(
-            (p for p in practitioners if p["name"] == "Dr. Full Fields"),
-            None
+            (p for p in practitioners if p["name"] == "Dr. Full Fields"), None
         )
         assert full_practitioner is not None
         assert full_practitioner["practice"] == "Full Hospital"

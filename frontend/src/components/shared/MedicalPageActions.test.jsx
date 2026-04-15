@@ -4,7 +4,11 @@ import MedicalPageActions from './MedicalPageActions';
 
 // Mock Mantine components to avoid MantineProvider requirement
 vi.mock('@mantine/core', () => ({
-  Group: ({ children, ...props }) => <div data-testid="mantine-group" {...props}>{children}</div>,
+  Group: ({ children, ...props }) => (
+    <div data-testid="mantine-group" {...props}>
+      {children}
+    </div>
+  ),
   Button: ({ children, onClick, disabled, leftSection, ...props }) => (
     <button onClick={onClick} disabled={disabled} {...props}>
       {leftSection}
@@ -378,9 +382,7 @@ describe('MedicalPageActions', () => {
             label: 'Add Item',
             onClick,
           }}
-          secondaryActions={[
-            { label: 'Secondary', onClick },
-          ]}
+          secondaryActions={[{ label: 'Secondary', onClick }]}
           showViewToggle={false}
         >
           <span data-testid="custom-child">Custom</span>
@@ -421,9 +423,7 @@ describe('MedicalPageActions', () => {
             onClick,
             visible: false,
           }}
-          secondaryActions={[
-            { label: 'Visible Secondary', onClick },
-          ]}
+          secondaryActions={[{ label: 'Visible Secondary', onClick }]}
           showViewToggle={false}
         />
       );

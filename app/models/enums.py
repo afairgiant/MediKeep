@@ -10,6 +10,7 @@ from enum import Enum
 
 class BaseStatus(Enum):
     """Base status values common across most medical entities"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     COMPLETED = "completed"
@@ -18,8 +19,9 @@ class BaseStatus(Enum):
 
 class ConditionStatus(Enum):
     """Status values specific to medical conditions"""
+
     ACTIVE = "active"
-    INACTIVE = "inactive" 
+    INACTIVE = "inactive"
     RESOLVED = "resolved"  # Mapped from old "resolved"
     CHRONIC = "chronic"
     RECURRENCE = "recurrence"
@@ -28,6 +30,7 @@ class ConditionStatus(Enum):
 
 class MedicationStatus(Enum):
     """Status values for medications"""
+
     ACTIVE = "active"
     STOPPED = "stopped"
     ON_HOLD = "on-hold"
@@ -37,6 +40,7 @@ class MedicationStatus(Enum):
 
 class MedicationType(Enum):
     """Types of medications for categorization"""
+
     PRESCRIPTION = "prescription"
     OTC = "otc"
     SUPPLEMENT = "supplement"
@@ -45,6 +49,7 @@ class MedicationType(Enum):
 
 class AllergyStatus(Enum):
     """Status values for allergies"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     RESOLVED = "resolved"
@@ -53,6 +58,7 @@ class AllergyStatus(Enum):
 
 class LabResultStatus(Enum):
     """Status values for lab results"""
+
     ORDERED = "ordered"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -61,6 +67,7 @@ class LabResultStatus(Enum):
 
 class ProcedureStatus(Enum):
     """Status values for procedures"""
+
     SCHEDULED = "scheduled"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -70,6 +77,7 @@ class ProcedureStatus(Enum):
 
 class ProcedureOutcome(Enum):
     """Outcome values for procedures"""
+
     SUCCESSFUL = "successful"
     ABNORMAL = "abnormal"
     COMPLICATIONS = "complications"
@@ -79,8 +87,9 @@ class ProcedureOutcome(Enum):
 
 class TreatmentStatus(Enum):
     """Status values for treatments"""
+
     PLANNED = "planned"
-    ACTIVE = "active"      # Mapped from old "ongoing"
+    ACTIVE = "active"  # Mapped from old "ongoing"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
@@ -89,6 +98,7 @@ class TreatmentStatus(Enum):
 
 class EncounterPriority(Enum):
     """Priority levels for medical encounters"""
+
     ROUTINE = "routine"
     URGENT = "urgent"
     EMERGENCY = "emergency"
@@ -96,6 +106,7 @@ class EncounterPriority(Enum):
 
 class SeverityLevel(Enum):
     """Severity levels for conditions, allergies, etc."""
+
     MILD = "mild"
     MODERATE = "moderate"
     SEVERE = "severe"
@@ -104,6 +115,7 @@ class SeverityLevel(Enum):
 
 class RelationshipToSelf(Enum):
     """Relationship of patient record to the account owner"""
+
     SELF = "self"
     SPOUSE = "spouse"
     PARTNER = "partner"
@@ -125,6 +137,7 @@ class RelationshipToSelf(Enum):
 
 class FamilyRelationship(Enum):
     """Family relationship types for family history"""
+
     FATHER = "father"
     MOTHER = "mother"
     BROTHER = "brother"
@@ -141,6 +154,7 @@ class FamilyRelationship(Enum):
 
 class ConditionType(Enum):
     """Medical condition types for categorization"""
+
     CARDIOVASCULAR = "cardiovascular"
     DIABETES = "diabetes"
     CANCER = "cancer"
@@ -155,6 +169,7 @@ class ConditionType(Enum):
 
 class InsuranceType(Enum):
     """Insurance types for categorization"""
+
     MEDICAL = "medical"
     DENTAL = "dental"
     VISION = "vision"
@@ -163,6 +178,7 @@ class InsuranceType(Enum):
 
 class InsuranceStatus(Enum):
     """Status values for insurance policies"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     EXPIRED = "expired"
@@ -171,6 +187,7 @@ class InsuranceStatus(Enum):
 
 class SymptomSeverity(Enum):
     """Severity levels for symptoms"""
+
     MILD = "mild"
     MODERATE = "moderate"
     SEVERE = "severe"
@@ -179,6 +196,7 @@ class SymptomSeverity(Enum):
 
 class SymptomStatus(Enum):
     """Status values for symptoms"""
+
     ACTIVE = "active"
     RESOLVED = "resolved"
     RECURRING = "recurring"
@@ -186,14 +204,16 @@ class SymptomStatus(Enum):
 
 class InjuryStatus(Enum):
     """Status values for injuries"""
-    ACTIVE = "active"           # Currently being treated
-    HEALING = "healing"         # In recovery
-    RESOLVED = "resolved"       # Fully healed
-    CHRONIC = "chronic"         # Long-term/permanent effects
+
+    ACTIVE = "active"  # Currently being treated
+    HEALING = "healing"  # In recovery
+    RESOLVED = "resolved"  # Fully healed
+    CHRONIC = "chronic"  # Long-term/permanent effects
 
 
 class Laterality(Enum):
     """Laterality values for body part affected"""
+
     LEFT = "left"
     RIGHT = "right"
     BILATERAL = "bilateral"
@@ -303,21 +323,21 @@ def get_all_laterality_values():
 
 # Status mapping for data migration (old -> new)
 STATUS_MIGRATIONS = {
-    'condition': {
-        'resolved': 'resolved',  # Keep as is
-        'stopped': 'inactive',   # Map stopped to inactive
+    "condition": {
+        "resolved": "resolved",  # Keep as is
+        "stopped": "inactive",  # Map stopped to inactive
     },
-    'medication': {
-        'stopped': 'inactive',   # Map stopped to inactive
-        'on-hold': 'on_hold',    # Fix hyphen to underscore
+    "medication": {
+        "stopped": "inactive",  # Map stopped to inactive
+        "on-hold": "on_hold",  # Fix hyphen to underscore
     },
-    'treatment': {
-        'ongoing': 'active',     # Map ongoing to active
+    "treatment": {
+        "ongoing": "active",  # Map ongoing to active
     },
-    'procedure': {
-        'in-progress': 'in_progress',  # Fix hyphen to underscore
+    "procedure": {
+        "in-progress": "in_progress",  # Fix hyphen to underscore
     },
-    'lab_result': {
+    "lab_result": {
         # No changes needed
-    }
+    },
 }

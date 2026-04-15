@@ -19,13 +19,23 @@ import {
   ActionIcon,
   Center,
   Alert,
-  Skeleton
+  Skeleton,
 } from '@mantine/core';
-import { IconInfoCircle, IconEdit, IconTrash, IconChartLine } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconEdit,
+  IconTrash,
+  IconChartLine,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import StatusBadge from '../StatusBadge';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
-import { getCategoryDisplayName, getCategoryColor, getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
+import {
+  getCategoryDisplayName,
+  getCategoryColor,
+  getQualitativeDisplayName,
+  getQualitativeColor,
+} from '../../../constants/labCategories';
 import logger from '../../../services/logger';
 
 interface TestComponentDisplayProps {
@@ -49,7 +59,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
   onEdit,
   onDelete,
   onTrendClick,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const handleError = (error: Error, context: string) => {
@@ -64,16 +74,28 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     }
   };
 
-  const getStatusColor = (status: string | null | undefined, value: number | null | undefined, refMin?: number | null, refMax?: number | null): string => {
+  const getStatusColor = (
+    status: string | null | undefined,
+    value: number | null | undefined,
+    refMin?: number | null,
+    refMax?: number | null
+  ): string => {
     if (status) {
       switch (status.toLowerCase()) {
-        case 'normal': return 'green';
-        case 'high': return 'orange';
-        case 'low': return 'orange';
-        case 'critical': return 'red';
-        case 'abnormal': return 'yellow';
-        case 'borderline': return 'yellow';
-        default: return 'gray';
+        case 'normal':
+          return 'green';
+        case 'high':
+          return 'orange';
+        case 'low':
+          return 'orange';
+        case 'critical':
+          return 'red';
+        case 'abnormal':
+          return 'yellow';
+        case 'borderline':
+          return 'yellow';
+        default:
+          return 'gray';
       }
     }
 
@@ -95,7 +117,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     const { ref_range_min, ref_range_max, ref_range_text } = component;
 
     if (ref_range_text) return ref_range_text;
-    if (ref_range_min != null && ref_range_max != null) return `${ref_range_min} - ${ref_range_max}`;
+    if (ref_range_min != null && ref_range_max != null)
+      return `${ref_range_min} - ${ref_range_max}`;
     if (ref_range_min != null) return `≥ ${ref_range_min}`;
     if (ref_range_max != null) return `≤ ${ref_range_max}`;
     return 'Not specified';
@@ -106,15 +129,21 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     onEdit?: (component: LabTestComponent) => void;
     onDelete?: (component: LabTestComponent) => void;
   }> = React.memo(({ component, onEdit, onDelete }) => {
-    const handleEdit = React.useCallback((e: React.MouseEvent) => {
-      e.stopPropagation();
-      onEdit?.(component);
-    }, [component, onEdit]);
+    const handleEdit = React.useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onEdit?.(component);
+      },
+      [component, onEdit]
+    );
 
-    const handleDelete = React.useCallback((e: React.MouseEvent) => {
-      e.stopPropagation();
-      onDelete?.(component);
-    }, [component, onDelete]);
+    const handleDelete = React.useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onDelete?.(component);
+      },
+      [component, onDelete]
+    );
 
     return (
       <Group gap={4}>
@@ -143,131 +172,170 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     );
   });
 
-  const TestComponentCard: React.FC<{ component: LabTestComponent }> = React.memo(({ component }) => {
-    const statusColor = getStatusColor(component.status, component.value, component.ref_range_min, component.ref_range_max);
-    const referenceRange = formatReferenceRange(component);
+  const TestComponentCard: React.FC<{ component: LabTestComponent }> =
+    React.memo(({ component }) => {
+      const statusColor = getStatusColor(
+        component.status,
+        component.value,
+        component.ref_range_min,
+        component.ref_range_max
+      );
+      const referenceRange = formatReferenceRange(component);
 
-    // Use canonical_test_name for trend matching if available, otherwise use test_name
-    const trendTestName = component.canonical_test_name || component.test_name;
+      // Use canonical_test_name for trend matching if available, otherwise use test_name
+      const trendTestName =
+        component.canonical_test_name || component.test_name;
 
-    const handleCardClick = React.useCallback((e: React.MouseEvent) => {
-      // Don't trigger if clicking on action buttons
-      const target = e.target as HTMLElement;
-      if (target.closest('button')) {
-        return;
-      }
-      onTrendClick?.(trendTestName);
-    }, [trendTestName]);
+      const handleCardClick = React.useCallback(
+        (e: React.MouseEvent) => {
+          // Don't trigger if clicking on action buttons
+          const target = e.target as HTMLElement;
+          if (target.closest('button')) {
+            return;
+          }
+          onTrendClick?.(trendTestName);
+        },
+        [trendTestName]
+      );
 
-    const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
-      // Support Enter and Space keys for accessibility
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onTrendClick?.(trendTestName);
-      }
-    }, [trendTestName]);
+      const handleKeyDown = React.useCallback(
+        (e: React.KeyboardEvent) => {
+          // Support Enter and Space keys for accessibility
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onTrendClick?.(trendTestName);
+          }
+        },
+        [trendTestName]
+      );
 
-    return (
-      <Card
-        withBorder
-        shadow="sm"
-        radius="md"
-        p="md"
-        style={{ cursor: 'pointer' }}
-        onClick={handleCardClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        role="button"
-        aria-label={`View trends for ${trendTestName}`}
-      >
-        <Stack gap="sm">
-          {/* Header */}
-          <Group justify="space-between" align="flex-start">
-            <Stack gap={4} style={{ flex: 1 }}>
-              <Group gap="xs" align="center">
-                <Text fw={600} size="sm">{component.test_name}</Text>
-                {component.abbreviation && (
-                  <Badge variant="light" color="gray" size="xs">
-                    {component.abbreviation}
-                  </Badge>
-                )}
-                {/* Trend indicator badge */}
-                <Tooltip label={t('shared:labels.trendCharts')}>
-                  <Badge variant="light" color="blue" size="xs" leftSection={<IconChartLine size={10} />}>
-                    {t('shared:labels.trendCharts')}
-                  </Badge>
-                </Tooltip>
-              </Group>
-              {component.test_code && (
-                <Text size="xs" c="dimmed">{component.test_code}</Text>
-              )}
-            </Stack>
-
-            {/* Edit/Delete - only show when actions enabled */}
-            {showActions && (
-              <EditDeleteActions
-                component={component}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            )}
-          </Group>
-
-          {/* Value and Status */}
-          <Group justify="space-between" align="center">
-            <div>
-              {component.result_type === 'qualitative' && component.qualitative_value ? (
-                <Badge
-                  size="lg"
-                  variant="filled"
-                  color={getQualitativeColor(component.qualitative_value)}
-                >
-                  {getQualitativeDisplayName(component.qualitative_value)}
-                </Badge>
-              ) : (
-                <Group gap="xs" align="baseline">
-                  <Text fw={700} size="lg" c={statusColor}>
-                    {component.value}
+      return (
+        <Card
+          withBorder
+          shadow="sm"
+          radius="md"
+          p="md"
+          style={{ cursor: 'pointer' }}
+          onClick={handleCardClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="button"
+          aria-label={`View trends for ${trendTestName}`}
+        >
+          <Stack gap="sm">
+            {/* Header */}
+            <Group justify="space-between" align="flex-start">
+              <Stack gap={4} style={{ flex: 1 }}>
+                <Group gap="xs" align="center">
+                  <Text fw={600} size="sm">
+                    {component.test_name}
                   </Text>
-                  <Text size="sm" c="dimmed">
-                    {component.unit}
-                  </Text>
+                  {component.abbreviation && (
+                    <Badge variant="light" color="gray" size="xs">
+                      {component.abbreviation}
+                    </Badge>
+                  )}
+                  {/* Trend indicator badge */}
+                  <Tooltip label={t('shared:labels.trendCharts')}>
+                    <Badge
+                      variant="light"
+                      color="blue"
+                      size="xs"
+                      leftSection={<IconChartLine size={10} />}
+                    >
+                      {t('shared:labels.trendCharts')}
+                    </Badge>
+                  </Tooltip>
                 </Group>
-              )}
-            </div>
+                {component.test_code && (
+                  <Text size="xs" c="dimmed">
+                    {component.test_code}
+                  </Text>
+                )}
+              </Stack>
 
-            {component.status && (
-              <StatusBadge status={component.status} size="sm" color={getStatusColor(component.status, component.value, component.ref_range_min, component.ref_range_max)} />
-            )}
-          </Group>
-
-          {/* Reference Range */}
-          {component.result_type !== 'qualitative' && (
-            <Group gap="xs" align="center">
-              <Text size="xs" c="dimmed" fw={500}>{t('labresults:display.referenceLabel')}</Text>
-              <Text size="xs">{referenceRange}</Text>
-              {component.unit && referenceRange !== 'Not specified' && (
-                <Text size="xs" c="dimmed">{component.unit}</Text>
+              {/* Edit/Delete - only show when actions enabled */}
+              {showActions && (
+                <EditDeleteActions
+                  component={component}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
               )}
             </Group>
-          )}
 
-          {/* Notes */}
-          {component.notes && (
-            <Box>
-              <Divider size="xs" />
-              <Group gap="xs" align="flex-start" mt="xs">
-                <IconInfoCircle size={14} style={{ marginTop: 2, flexShrink: 0 }} />
-                <Text size="xs" c="dimmed" style={{ lineHeight: 1.4 }}>
-                  {component.notes}
+            {/* Value and Status */}
+            <Group justify="space-between" align="center">
+              <div>
+                {component.result_type === 'qualitative' &&
+                component.qualitative_value ? (
+                  <Badge
+                    size="lg"
+                    variant="filled"
+                    color={getQualitativeColor(component.qualitative_value)}
+                  >
+                    {getQualitativeDisplayName(component.qualitative_value)}
+                  </Badge>
+                ) : (
+                  <Group gap="xs" align="baseline">
+                    <Text fw={700} size="lg" c={statusColor}>
+                      {component.value}
+                    </Text>
+                    <Text size="sm" c="dimmed">
+                      {component.unit}
+                    </Text>
+                  </Group>
+                )}
+              </div>
+
+              {component.status && (
+                <StatusBadge
+                  status={component.status}
+                  size="sm"
+                  color={getStatusColor(
+                    component.status,
+                    component.value,
+                    component.ref_range_min,
+                    component.ref_range_max
+                  )}
+                />
+              )}
+            </Group>
+
+            {/* Reference Range */}
+            {component.result_type !== 'qualitative' && (
+              <Group gap="xs" align="center">
+                <Text size="xs" c="dimmed" fw={500}>
+                  {t('labresults:display.referenceLabel')}
                 </Text>
+                <Text size="xs">{referenceRange}</Text>
+                {component.unit && referenceRange !== 'Not specified' && (
+                  <Text size="xs" c="dimmed">
+                    {component.unit}
+                  </Text>
+                )}
               </Group>
-            </Box>
-          )}
-        </Stack>
-      </Card>
-    );
-  });
+            )}
+
+            {/* Notes */}
+            {component.notes && (
+              <Box>
+                <Divider size="xs" />
+                <Group gap="xs" align="flex-start" mt="xs">
+                  <IconInfoCircle
+                    size={14}
+                    style={{ marginTop: 2, flexShrink: 0 }}
+                  />
+                  <Text size="xs" c="dimmed" style={{ lineHeight: 1.4 }}>
+                    {component.notes}
+                  </Text>
+                </Group>
+              </Box>
+            )}
+          </Stack>
+        </Card>
+      );
+    });
 
   const LoadingSkeleton: React.FC = () => (
     <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
@@ -289,7 +357,9 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
   const EmptyState: React.FC = () => (
     <Center p="xl">
       <Stack align="center" gap="md">
-        <Text size="lg" c="dimmed">{t('labresults:display.noComponents')}</Text>
+        <Text size="lg" c="dimmed">
+          {t('labresults:display.noComponents')}
+        </Text>
         <Text size="sm" c="dimmed" ta="center">
           {t('labresults:display.noComponentsDescription')}
         </Text>
@@ -305,31 +375,37 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     }
 
     // Group components by category
-    const groupedComponents = components.reduce((groups, component) => {
-      const category = component.category || 'other';
-      if (!groups[category]) {
-        groups[category] = [];
-      }
-      groups[category].push(component);
-      return groups;
-    }, {} as Record<string, LabTestComponent[]>);
+    const groupedComponents = components.reduce(
+      (groups, component) => {
+        const category = component.category || 'other';
+        if (!groups[category]) {
+          groups[category] = [];
+        }
+        groups[category].push(component);
+        return groups;
+      },
+      {} as Record<string, LabTestComponent[]>
+    );
 
     // Sort categories
     const sortedCategories = Object.keys(groupedComponents).sort();
 
     // Create sorted structure
-    const sortedGroupedComponents = sortedCategories.reduce((acc, category) => {
-      acc[category] = [...groupedComponents[category]].sort((a, b) => {
-        // Sort by display_order first, then by test_name
-        if (a.display_order != null && b.display_order != null) {
-          return a.display_order - b.display_order;
-        }
-        if (a.display_order != null) return -1;
-        if (b.display_order != null) return 1;
-        return a.test_name.localeCompare(b.test_name);
-      });
-      return acc;
-    }, {} as Record<string, LabTestComponent[]>);
+    const sortedGroupedComponents = sortedCategories.reduce(
+      (acc, category) => {
+        acc[category] = [...groupedComponents[category]].sort((a, b) => {
+          // Sort by display_order first, then by test_name
+          if (a.display_order != null && b.display_order != null) {
+            return a.display_order - b.display_order;
+          }
+          if (a.display_order != null) return -1;
+          if (b.display_order != null) return 1;
+          return a.test_name.localeCompare(b.test_name);
+        });
+        return acc;
+      },
+      {} as Record<string, LabTestComponent[]>
+    );
 
     return { sortedCategories, sortedGroupedComponents };
   }, [components]);
@@ -354,7 +430,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
     if (!groupByCategory) {
       return (
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-          {components.map((component) => (
+          {components.map(component => (
             <TestComponentCard key={component.id} component={component} />
           ))}
         </SimpleGrid>
@@ -363,7 +439,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
 
     return (
       <Stack gap="xl">
-        {sortedCategories.map((category) => (
+        {sortedCategories.map(category => (
           <Paper key={category} withBorder p="md" radius="md">
             <Stack gap="md">
               {/* Category Header */}
@@ -379,13 +455,15 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                   }
                 />
                 <Text size="sm" c="dimmed">
-                  {t('labresults:templates.testCount', { count: sortedGroupedComponents[category].length })}
+                  {t('labresults:templates.testCount', {
+                    count: sortedGroupedComponents[category].length,
+                  })}
                 </Text>
               </Group>
 
               {/* Components Grid */}
               <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                {sortedGroupedComponents[category].map((component) => (
+                {sortedGroupedComponents[category].map(component => (
                   <TestComponentCard key={component.id} component={component} />
                 ))}
               </SimpleGrid>
