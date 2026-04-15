@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Badge,
@@ -13,7 +13,6 @@ import {
   Paper,
   Loader,
   Center,
-  Table,
   Tooltip,
 } from '@mantine/core';
 import {

@@ -1,11 +1,7 @@
 import { vi } from 'vitest';
-import React from 'react';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
+import { screen } from '@testing-library/react';
 import Login from '../../pages/auth/Login';
 import render from '../../test-utils/render';
-import { createMockUser } from '../../test-utils/test-data';
 
 // Mock react-router-dom navigate
 const mockNavigate = vi.fn();

@@ -2,7 +2,6 @@
 /**
  * Simple test component to verify PatientSelector imports and basic functionality
  */
-import React from 'react';
 import { Text, Paper } from '@mantine/core';
 
 const PatientSelectorTest = () => {

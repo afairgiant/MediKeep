@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Group,
@@ -6,7 +5,6 @@ import {
   Title,
   ActionIcon,
   Text,
-  Flex,
   Box,
   Stack,
   Divider,

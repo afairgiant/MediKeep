@@ -1,4 +1,3 @@
-import React from 'react';
 import { vi } from 'vitest';
 import { render as rtlRender } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';

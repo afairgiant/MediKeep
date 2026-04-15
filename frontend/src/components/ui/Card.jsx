@@ -1,4 +1,3 @@
-import React from 'react';
 // CSS now handled by Mantine adapter
 
 export const Card = ({ children, className = '', ...props }) => {

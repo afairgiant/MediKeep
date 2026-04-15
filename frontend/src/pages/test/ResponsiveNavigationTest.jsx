@@ -4,7 +4,7 @@
  * For manually testing navigation behavior across different breakpoints
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Container,
   Title,

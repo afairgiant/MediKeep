@@ -1,5 +1,4 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import React from 'react';
 import render, { screen, waitFor } from '../../test-utils/render';
 import DocumentManager from './DocumentManager';
 import { getPaperlessSettings } from '../../services/api/paperlessApi';

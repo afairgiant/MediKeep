@@ -1,4 +1,3 @@
-import React from 'react';
 import { Text, Progress, Group, ThemeIcon, Stack, Alert } from '@mantine/core';
 import {
   IconUpload,

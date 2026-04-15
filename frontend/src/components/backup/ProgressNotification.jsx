@@ -1,4 +1,3 @@
-import React from 'react';
 import { notifications } from '@mantine/notifications';
 import { Progress, Text, Group } from '@mantine/core';
 

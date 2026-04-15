@@ -1,5 +1,5 @@
 /* eslint-disable i18next/no-literal-string -- test page, not user-facing */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Title,

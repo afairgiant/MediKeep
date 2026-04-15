@@ -5,9 +5,6 @@ import logger from '../services/logger';
 import {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  WARNING_MESSAGES,
-  getUserFriendlyError,
-  formatErrorWithContext,
 } from '../constants/errorMessages';
 
 // Configuration object for upload progress settings

@@ -3,7 +3,6 @@
  * Provides consistent status display across all medical pages using Mantine Badge
  */
 
-import React from 'react';
 import { Badge } from '@mantine/core';
 
 const StatusBadge = ({

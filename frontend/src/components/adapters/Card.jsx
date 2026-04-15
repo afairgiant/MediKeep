@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card as MantineCard } from '@mantine/core';
 import { CardHeader, CardTitle, CardContent } from '../ui/Card';
 

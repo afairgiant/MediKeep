@@ -6,7 +6,6 @@
  * File specified in RESPONSIVE_IMPLEMENTATION_PLAN.md line 256
  */
 
-import React from 'react';
 import { Container, Box } from '@mantine/core';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 import { useResponsive } from '../../hooks/useResponsive';

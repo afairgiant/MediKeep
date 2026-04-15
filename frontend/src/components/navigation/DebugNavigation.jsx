@@ -3,7 +3,6 @@
  * DebugNavigation - Debug component to test what's rendering
  */
 
-import React from 'react';
 
 const DebugNavigation = ({ currentPath, userInfo, className = '' }) => {
   // Very basic HTML navigation for testing

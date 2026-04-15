@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useEffect,
   useCallback,
@@ -11,7 +11,6 @@ import { apiService } from '../../services/api';
 import { getPaperlessSettings } from '../../services/api/paperlessApi.jsx';
 import logger from '../../services/logger';
 import {
-  ERROR_MESSAGES,
   SUCCESS_MESSAGES,
   getUserFriendlyError,
   enhancePaperlessError,

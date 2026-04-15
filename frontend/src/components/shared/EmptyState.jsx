@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { Paper, Card, Center, Stack, Title, Text } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';

@@ -10,7 +10,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:react/jsx-runtime', // For new JSX transform (no need to import React)
   ],
-  plugins: ['i18next'],
+  plugins: ['i18next', 'unused-imports'],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
@@ -25,7 +25,18 @@ module.exports = {
   },
   rules: {
     // Add custom rules here
-    'no-unused-vars': 'warn',
+    // Disable core no-unused-vars in favor of unused-imports, which auto-fixes unused imports
+    'no-unused-vars': 'off',
+    'unused-imports/no-unused-imports': 'error',
+    'unused-imports/no-unused-vars': [
+      'warn',
+      {
+        vars: 'all',
+        varsIgnorePattern: '^_',
+        args: 'after-used',
+        argsIgnorePattern: '^_',
+      },
+    ],
     'no-console': 'error', // Prevent all console statements - use logger instead
     // prop-types disabled: project is migrating to TypeScript, which provides stronger guarantees
     'react/prop-types': 'off',
@@ -90,8 +101,8 @@ module.exports = {
         ecmaFeatures: { jsx: true },
       },
       rules: {
-        // TypeScript handles type-checking; disable the JS variant to avoid false positives
-        'no-unused-vars': 'off',
+        // TypeScript handles unused-checking via tsc; the unused-imports plugin
+        // still runs and auto-fixes unused imports (which tsc only warns about).
       },
     },
   ],

@@ -3,9 +3,7 @@ import { vi } from 'vitest';
 /**
  * Integration tests for FamilyHistory page sharing functionality
  */
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { renderWithPatient } from '../../../test-utils/render';
 import FamilyHistory from '../FamilyHistory';
 

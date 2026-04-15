@@ -1,7 +1,5 @@
 import { vi } from 'vitest';
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute, {
   AdminRoute,
   RoleRoute,

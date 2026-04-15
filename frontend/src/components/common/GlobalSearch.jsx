@@ -4,7 +4,7 @@
  */
 import logger from '../../services/logger';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TextInput, Box } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 import { useDebouncedValue } from '@mantine/hooks';

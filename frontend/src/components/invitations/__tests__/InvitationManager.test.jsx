@@ -4,8 +4,7 @@ import { vi } from 'vitest';
  * Comprehensive tests for InvitationManager component
  * Tests the complete invitation management workflow including tabs, data loading, and user interactions
  */
-import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MantineProvider } from '@mantine/core';
 import { notifications } from '@mantine/notifications';

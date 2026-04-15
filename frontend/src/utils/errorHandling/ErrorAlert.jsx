@@ -12,7 +12,6 @@ import {
   List,
   Badge,
   Group,
-  Collapse,
   Button,
 } from '@mantine/core';
 import { useTranslation } from 'react-i18next';

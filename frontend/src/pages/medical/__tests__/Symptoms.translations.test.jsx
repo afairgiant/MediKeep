@@ -8,9 +8,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 // Override global i18n mock so t(key) returns the key, enabling key-based assertions
 vi.mock('react-i18next', () => ({

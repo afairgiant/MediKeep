@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import ResponsiveContext from '../contexts/ResponsiveContext';
 import {
   RESPONSIVE_CONFIG,

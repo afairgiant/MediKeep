@@ -1,18 +1,15 @@
 import logger from '../../services/logger';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Group,
   Button,
   Title,
-  ActionIcon,
   Text,
-  Flex,
   Box,
   Divider,
   Menu,
-  Burger,
 } from '@mantine/core';
 import {
   IconArrowLeft,
@@ -20,7 +17,6 @@ import {
   IconLogout,
   IconSun,
   IconMoon,
-  IconMenu2,
   IconChevronDown,
   IconLanguage,
 } from '@tabler/icons-react';

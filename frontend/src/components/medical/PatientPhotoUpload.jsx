@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   FileInput,
   Avatar,
   Group,
-  ActionIcon,
   Stack,
   Text,
   Button,
   Box,
 } from '@mantine/core';
-import { IconCamera, IconX, IconTrash } from '@tabler/icons-react';
+import { IconCamera, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';

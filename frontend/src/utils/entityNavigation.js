@@ -8,8 +8,6 @@ import logger from '../services/logger';
 
 import {
   getRelationship,
-  getRelationshipEndpoint,
-  getRelationshipFilterKey,
   ENTITY_TYPES,
 } from './entityRelationships';
 

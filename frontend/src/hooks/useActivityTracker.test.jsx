@@ -6,7 +6,6 @@ import {
   useNavigationActivityTracker,
 } from './useActivityTracker';
 import { AuthProvider } from '../contexts/AuthContext';
-import React from 'react';
 
 // Mock the auth context
 const mockUpdateActivity = vi.fn().mockResolvedValue(undefined);

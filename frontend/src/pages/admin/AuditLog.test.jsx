@@ -1,4 +1,3 @@
-import React from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Must be before any component imports so ResizeObserver is available

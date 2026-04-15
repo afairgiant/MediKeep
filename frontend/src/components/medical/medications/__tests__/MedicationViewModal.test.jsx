@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MantineProvider } from '@mantine/core';
 import '@testing-library/jest-dom';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { createEntityLinkProps } from './linkNavigation';
 import { MEDICATION_TYPE_LABELS } from '../constants/medicationTypes';
 import { formatDateWithPreference } from './dateFormatUtils';

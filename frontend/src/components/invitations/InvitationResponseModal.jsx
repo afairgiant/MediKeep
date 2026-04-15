@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   Stack,
@@ -11,8 +11,6 @@ import {
   Badge,
   Divider,
   Paper,
-  Title,
-  List,
   LoadingOverlay,
 } from '@mantine/core';
 import {

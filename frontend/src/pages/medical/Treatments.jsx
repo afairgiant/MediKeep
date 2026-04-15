@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -31,9 +31,7 @@ import TreatmentViewModal from '../../components/medical/treatments/TreatmentVie
 import TreatmentFormWrapper from '../../components/medical/treatments/TreatmentFormWrapper';
 import {
   Button,
-  Card,
   Stack,
-  Text,
   Container,
   Alert,
   Paper,

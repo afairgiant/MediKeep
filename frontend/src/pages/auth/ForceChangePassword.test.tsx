@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import ForceChangePassword from './ForceChangePassword';
 import render from '../../test-utils/render';

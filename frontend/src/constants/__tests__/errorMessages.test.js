@@ -10,7 +10,6 @@ import {
   SUCCESS_MESSAGES,
   WARNING_MESSAGES,
   ERROR_CATEGORIES,
-  ERROR_TYPE_MAPPING,
   getErrorCategory,
   formatErrorWithContext,
   enhancePaperlessError,

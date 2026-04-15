@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -12,8 +11,6 @@ import {
   renderResponsive,
   testAtAllBreakpoints,
   TEST_VIEWPORTS,
-  mockViewport,
-  DEVICE_TYPES,
   getBreakpointForWidth,
   getDeviceTypeForBreakpoint,
 } from './ResponsiveTestUtils';

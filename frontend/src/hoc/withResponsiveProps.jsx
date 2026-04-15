@@ -1,9 +1,7 @@
 import React, { forwardRef, memo, useMemo } from 'react';
 import { useResponsive } from '../hooks/useResponsive';
-import {
-  useBreakpointValue,
-  useBreakpointConfig,
-} from '../hooks/useBreakpoint';
+
+
 
 /**
  * HOC that transforms component props based on responsive breakpoints

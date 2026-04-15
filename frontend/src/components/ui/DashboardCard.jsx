@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Title, Text, Button, Stack } from '@mantine/core';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';

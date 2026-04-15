@@ -12,7 +12,6 @@ import {
   UnstyledButton,
   Center,
   ScrollArea,
-  Stack,
   Pagination,
   Select,
   Badge,

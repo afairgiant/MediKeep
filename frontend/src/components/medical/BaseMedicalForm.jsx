@@ -1,10 +1,9 @@
-import React, {
+import {
   memo,
   useMemo,
   useCallback,
   useState,
   useEffect,
-  useRef,
 } from 'react';
 import {
   TextInput,
@@ -26,7 +25,6 @@ import {
 } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../i18n';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { ResponsiveModal } from '../adapters';
 import { withResponsive } from '../../hoc/withResponsive';

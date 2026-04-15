@@ -1,4 +1,3 @@
-import React from 'react';
 import { Select, Loader } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import {
@@ -7,7 +6,6 @@ import {
   Text,
   Stack,
   Badge,
-  Button,
   ActionIcon,
   Box,
 } from '@mantine/core';

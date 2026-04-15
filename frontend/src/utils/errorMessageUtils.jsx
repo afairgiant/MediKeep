@@ -8,11 +8,9 @@
 import {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  WARNING_MESSAGES,
   getUserFriendlyError,
   formatErrorWithContext,
   enhancePaperlessError,
-  getErrorCategory,
 } from '../constants/errorMessages';
 import i18n from '../i18n/config';
 import { notifications } from '@mantine/notifications';
@@ -20,7 +18,6 @@ import {
   IconCheck,
   IconX,
   IconExclamationMark,
-  IconAlertTriangle,
 } from '@tabler/icons-react';
 import logger from '../services/logger';
 

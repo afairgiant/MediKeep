@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef, memo, useCallback } from 'react';
+import { useMemo, useEffect, useRef, memo, useCallback } from 'react';
 import BaseMedicalForm from './BaseMedicalForm';
 import { medicationFormFields } from '../../utils/medicalFormFields';
 import logger from '../../services/logger';

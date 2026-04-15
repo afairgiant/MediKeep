@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Card,
   Group,
@@ -10,7 +9,6 @@ import {
   Alert,
   ThemeIcon,
   Menu,
-  Tooltip,
   Paper,
 } from '@mantine/core';
 import {

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Button, Loader, Group, Text } from '@mantine/core';
+import { Button, Group, Text } from '@mantine/core';
 import { IconCheck, IconX, IconUpload } from '@tabler/icons-react';
 
 /**

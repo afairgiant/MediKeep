@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
@@ -7,9 +7,6 @@ import { useViewModalNavigation } from '../../hooks/useViewModalNavigation';
 import { apiService } from '../../services/api';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import { usePatientWithStaticData } from '../../hooks/useGlobalData';
-import { getEntityFormatters } from '../../utils/tableFormatters';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import {
   initializeFormData as initFormData,
   restructureFormData,
@@ -21,8 +18,6 @@ import logger from '../../services/logger';
 import { notifications } from '@mantine/notifications';
 import {
   ERROR_MESSAGES,
-  SUCCESS_MESSAGES,
-  getUserFriendlyError,
 } from '../../constants/errorMessages';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
@@ -36,7 +31,6 @@ import StatusBadge from '../../components/medical/StatusBadge';
 import InsuranceCard from '../../components/medical/insurance/InsuranceCard';
 import InsuranceFormWrapper from '../../components/medical/insurance/InsuranceFormWrapper';
 import InsuranceViewModal from '../../components/medical/insurance/InsuranceViewModal';
-import DocumentManagerWithProgress from '../../components/shared/DocumentManagerWithProgress';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
@@ -49,13 +43,9 @@ import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 import {
   Badge,
   Button,
-  Card,
   Stack,
   Text,
   Container,
-  Divider,
-  Modal,
-  Title,
   Paper,
 } from '@mantine/core';
 

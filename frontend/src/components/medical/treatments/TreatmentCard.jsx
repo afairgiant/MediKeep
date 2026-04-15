@@ -1,4 +1,3 @@
-import React from 'react';
 import { Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';

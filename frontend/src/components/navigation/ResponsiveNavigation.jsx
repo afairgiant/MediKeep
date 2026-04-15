@@ -5,7 +5,7 @@
  * Following PR #3: Navigation & Layout System specifications
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useResponsive } from '../../hooks/useResponsive';
 // import DesktopSidebar from './DesktopSidebar';
 import DesktopSidebarSimple from './DesktopSidebarSimple'; // Temporarily using simple version for Firefox debugging

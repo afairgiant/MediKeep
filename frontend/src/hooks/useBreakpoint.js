@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useResponsive } from './useResponsive';
-import { BREAKPOINTS, RESPONSIVE_VALUES } from '../config/responsive.config';
+import { RESPONSIVE_VALUES } from '../config/responsive.config';
 
 /**
  * useBreakpointValue Hook

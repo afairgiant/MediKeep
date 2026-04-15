@@ -1,4 +1,3 @@
-import React from 'react';
 import { Divider, Stack, Title, Paper, Text, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';

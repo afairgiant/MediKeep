@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import MantineMedicationForm from '../MantineMedicationForm';
 import logger from '../../../services/logger';
 

@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useRef,
   useEffect,
@@ -15,7 +15,6 @@ import {
   Text,
   Container,
   Paper,
-  Title,
   Badge,
   Group,
 } from '@mantine/core';
@@ -36,7 +35,6 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
@@ -55,7 +53,6 @@ import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import {
   MEDICATION_TYPES,
-  MEDICATION_TYPE_LABELS,
 } from '../../constants/medicationTypes';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import logger from '../../services/logger';

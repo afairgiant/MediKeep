@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Stack,
   Paper,
@@ -12,7 +12,6 @@ import {
   Modal,
   ActionIcon,
   Badge,
-  Divider,
   FileInput,
   TextInput,
   ThemeIcon,
@@ -20,12 +19,8 @@ import {
   Menu,
 } from '@mantine/core';
 import {
-  IconFile,
-  IconDownload,
-  IconTrash,
   IconUpload,
   IconX,
-  IconRestore,
   IconFileText,
   IconAlertTriangle,
   IconRefresh,
@@ -48,9 +43,7 @@ import {
 } from '../../services/api/paperlessApi.jsx';
 import { linkPapraDocument } from '../../services/api/papraApi.jsx';
 import logger from '../../services/logger';
-import FileUploadZone from './FileUploadZone';
 import FileList from './FileList';
-import FileCountBadge from './FileCountBadge';
 import StorageBackendSelector from './StorageBackendSelector';
 import useDocumentManagerCore from './DocumentManagerCore';
 import LinkPaperlessDocumentModal from './LinkPaperlessDocumentModal';

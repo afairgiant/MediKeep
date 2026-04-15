@@ -1,4 +1,4 @@
-import React, {
+import {
   memo,
   useMemo,
   useCallback,
@@ -12,7 +12,6 @@ import {
   Card,
   Group,
   Text,
-  Badge,
   Stack,
   Pagination,
   ActionIcon,
@@ -23,7 +22,6 @@ import {
   Center,
 } from '@mantine/core';
 import {
-  IconSearch,
   IconArrowsSort,
   IconSortAscending,
   IconSortDescending,

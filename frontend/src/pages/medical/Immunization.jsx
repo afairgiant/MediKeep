@@ -1,19 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import logger from '../../services/logger';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Container,
   Paper,
-  Text,
-  Title,
   Stack,
-  Badge,
-  Grid,
-  Card,
-  Divider,
-  Modal,
-  SimpleGrid,
 } from '@mantine/core';
 import { IconPlus, IconVaccine } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';

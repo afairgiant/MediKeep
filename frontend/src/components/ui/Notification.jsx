@@ -2,7 +2,7 @@
  * Notification Toast component
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import './Notification.css';
 
 const Notification = ({

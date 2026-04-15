@@ -7,7 +7,6 @@ import userEvent from '@testing-library/user-event';
 import {
   renderResponsive,
   testBreakpointTransitions,
-  measureRenderPerformance,
   TEST_VIEWPORTS,
   mockViewport,
   BREAKPOINTS,

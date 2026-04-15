@@ -11,7 +11,6 @@ import {
   Text,
   Badge,
   SimpleGrid,
-  Title,
   Divider,
   Paper,
   Box,

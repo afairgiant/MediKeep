@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback, useEffect, useRef } from 'react';
+import { memo, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Modal as MantineModal, ScrollArea, Box, rem } from '@mantine/core';
 import { useResponsive } from '../../hooks/useResponsive';
 import { MedicalFormLayoutStrategy } from '../../strategies/MedicalFormLayoutStrategy';

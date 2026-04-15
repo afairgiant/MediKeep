@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { notifyError } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
-import { Button } from '../../components/ui';
 import { IconUser, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
 import styles from '../../styles/pages/Login.module.css';
 

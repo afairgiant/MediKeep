@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   Badge,
   Text,
@@ -10,14 +9,11 @@ import {
   Button,
   Menu,
   ActionIcon,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconChevronDown,
   IconChevronUp,
   IconStethoscope,
-  IconEdit,
-  IconTrash,
   IconDots,
   IconShare,
   IconX,

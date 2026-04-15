@@ -3,12 +3,11 @@
  * Allows users to switch between owned and shared patients
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Select,
   Group,
-  Avatar,
   Text,
   Button,
   ActionIcon,
@@ -33,7 +32,6 @@ import {
   IconChevronDown,
   IconUsers,
   IconShare,
-  IconCheck,
   IconAlertCircle,
   IconUserCheck,
   IconEdit,

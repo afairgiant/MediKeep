@@ -1,4 +1,3 @@
-import React from 'react';
 import BaseMedicalForm from './BaseMedicalForm';
 import { allergyFormFields } from '../../utils/medicalFormFields';
 

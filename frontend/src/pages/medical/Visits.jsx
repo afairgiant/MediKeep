@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Container, Paper, Stack } from '@mantine/core';
 import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';

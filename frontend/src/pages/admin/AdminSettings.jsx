@@ -9,7 +9,6 @@ import {
   Button,
   Switch,
   NumberInput,
-  Select,
   Alert,
   ThemeIcon,
   Center,

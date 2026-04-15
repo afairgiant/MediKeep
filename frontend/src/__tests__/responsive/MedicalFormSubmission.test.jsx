@@ -1,6 +1,5 @@
 import { vi } from 'vitest';
-import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Import test utilities

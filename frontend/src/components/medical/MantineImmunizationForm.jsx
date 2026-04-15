@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';
 import { immunizationFormFields } from '../../utils/medicalFormFields';

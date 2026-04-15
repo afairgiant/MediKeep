@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Group,
@@ -9,7 +9,6 @@ import {
   Text,
   Badge,
   Stack,
-  Flex,
   Collapse,
   ActionIcon,
   useMantineColorScheme,

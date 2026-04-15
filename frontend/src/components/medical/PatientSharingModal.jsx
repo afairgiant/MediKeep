@@ -3,7 +3,7 @@
  * Interface for sharing patients with other users
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Stack,
@@ -18,11 +18,8 @@ import {
   Table,
   Paper,
   Title,
-  Divider,
   Switch,
   Textarea,
-  Box,
-  Flex,
   Tooltip,
   Card,
   Avatar,
@@ -33,11 +30,8 @@ import {
   IconTrash,
   IconEdit,
   IconAlertCircle,
-  IconCheck,
-  IconX,
   IconUser,
   IconClock,
-  IconShield,
   IconUsers,
   IconRefresh,
 } from '@tabler/icons-react';

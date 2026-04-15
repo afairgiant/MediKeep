@@ -4,7 +4,6 @@ import { vi } from 'vitest';
  * Comprehensive tests for FamilyHistorySharingModal component
  * Tests single sharing, bulk sharing, form validation, and error handling
  */
-import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { notifications } from '@mantine/notifications';
