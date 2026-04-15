@@ -3,7 +3,6 @@ import { Card as MantineCard } from '@mantine/core';
 import { CardHeader, CardTitle, CardContent } from '../ui/Card';
 
 export const Card = ({ children, className, ...props }) => {
-
   return (
     <MantineCard
       shadow="sm"

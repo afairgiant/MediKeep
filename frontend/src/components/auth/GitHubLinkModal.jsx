@@ -4,23 +4,23 @@ import Modal from '../adapters/Modal';
 import Button from '../adapters/Button';
 import FormInput from '../adapters/FormInput';
 
-const GitHubLinkModal = ({ 
-  isOpen, 
-  onClose, 
-  githubUserInfo, 
-  tempToken, 
+const GitHubLinkModal = ({
+  isOpen,
+  onClose,
+  githubUserInfo,
+  tempToken,
   onLinkComplete,
-  onError 
+  onError,
 }) => {
   const { t } = useTranslation(['auth', 'shared']);
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
@@ -41,13 +41,15 @@ const GitHubLinkModal = ({
         body: JSON.stringify({
           temp_token: tempToken,
           username: formData.username,
-          password: formData.password
+          password: formData.password,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail?.message || 'Failed to link GitHub account');
+        throw new Error(
+          errorData.detail?.message || 'Failed to link GitHub account'
+        );
       }
 
       const data = await response.json();
@@ -60,11 +62,11 @@ const GitHubLinkModal = ({
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     // Clear errors when user starts typing
     if (errors[name] || errors.general) {
@@ -75,15 +77,15 @@ const GitHubLinkModal = ({
   const handleCreateNew = () => {
     // For now, just show a message that this isn't supported yet
     setErrors({
-      general: t('github.createNewNotSupported')
+      general: t('github.createNewNotSupported'),
     });
   };
 
   if (!isOpen) return null;
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <Modal
+      isOpen={isOpen}
       onClose={onClose}
       title={t('github.title')}
       className="github-link-modal"
@@ -92,19 +94,26 @@ const GitHubLinkModal = ({
         <div className="github-info-section">
           <h4>{t('github.accountDetails')}</h4>
           <div className="github-user-info">
-            <p><strong>{t('github.githubUsername')}</strong> {githubUserInfo?.github_username}</p>
-            <p><strong>{t('github.githubId')}</strong> {githubUserInfo?.github_id}</p>
+            <p>
+              <strong>{t('github.githubUsername')}</strong>{' '}
+              {githubUserInfo?.github_username}
+            </p>
+            <p>
+              <strong>{t('github.githubId')}</strong>{' '}
+              {githubUserInfo?.github_id}
+            </p>
             {githubUserInfo?.name && (
-              <p><strong>{t('shared:labels.name')}:</strong> {githubUserInfo.name}</p>
+              <p>
+                <strong>{t('shared:labels.name')}:</strong>{' '}
+                {githubUserInfo.name}
+              </p>
             )}
           </div>
         </div>
 
         <div className="link-options">
           <h4>{t('github.linkToExisting')}</h4>
-          <p>
-            {t('github.noPublicEmail')}
-          </p>
+          <p>{t('github.noPublicEmail')}</p>
 
           <form onSubmit={handleSubmit} className="link-form">
             <FormInput
@@ -132,7 +141,10 @@ const GitHubLinkModal = ({
             />
 
             {errors.general && (
-              <div className="error-message" style={{ color: 'red', marginBottom: '1rem' }}>
+              <div
+                className="error-message"
+                style={{ color: 'red', marginBottom: '1rem' }}
+              >
                 {errors.general}
               </div>
             )}
@@ -232,7 +244,7 @@ const GitHubLinkModal = ({
           .modal-buttons {
             flex-direction: column;
           }
-          
+
           .modal-buttons button {
             width: 100%;
           }

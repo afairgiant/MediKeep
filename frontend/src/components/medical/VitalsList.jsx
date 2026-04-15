@@ -71,7 +71,10 @@ import {
 } from '../../utils/unitConversion';
 import logger from '../../services/logger';
 import { timezoneService } from '../../services/timezoneService';
-import { GLUCOSE_CONTEXT_MANTINE_COLORS, GLUCOSE_DEFAULT_MANTINE_COLOR } from './vitals/types';
+import {
+  GLUCOSE_CONTEXT_MANTINE_COLORS,
+  GLUCOSE_DEFAULT_MANTINE_COLOR,
+} from './vitals/types';
 
 const PAGE_SIZE_OPTIONS = [
   { value: '10', label: '10' },
@@ -145,10 +148,13 @@ const VitalsList = ({
 
       // Use the new paginated endpoint for server-side pagination
       if (patientId) {
-        const response = await vitalsService.getPatientVitalsPaginated(patientId, {
-          skip,
-          limit: pageSize,
-        });
+        const response = await vitalsService.getPatientVitalsPaginated(
+          patientId,
+          {
+            skip,
+            limit: pageSize,
+          }
+        );
 
         // Extract data from paginated response (expects { items, total, skip, limit })
         // Handle both direct response and wrapped response formats
@@ -160,7 +166,10 @@ const VitalsList = ({
         setTotalRecords(total);
       } else {
         // Fallback to non-paginated endpoint if no patientId
-        const response = await vitalsService.getVitals({ skip, limit: pageSize });
+        const response = await vitalsService.getVitals({
+          skip,
+          limit: pageSize,
+        });
         const data = response?.data || response;
         setInternalVitals(Array.isArray(data) ? data : []);
         setTotalRecords(Array.isArray(data) ? data.length : 0);
@@ -185,7 +194,7 @@ const VitalsList = ({
   }, [onRefresh, loadVitals, vitalsData]);
 
   // Reset to page 1 when pageSize changes
-  const handlePageSizeChange = (newSize) => {
+  const handlePageSizeChange = newSize => {
     if (newSize === null || newSize === undefined) return;
     const numericValue = Number(newSize);
     if (!Number.isFinite(numericValue) || numericValue <= 0) return;
@@ -198,7 +207,8 @@ const VitalsList = ({
   const isLoading = loading !== undefined ? loading : internalLoading;
   const currentError = error !== undefined ? error : internalError;
   // For external data, use array length; for internal, use tracked total
-  const actualTotalRecords = vitalsData !== undefined ? vitalsData.length : totalRecords;
+  const actualTotalRecords =
+    vitalsData !== undefined ? vitalsData.length : totalRecords;
 
   const handleDelete = async (vitalsId, skipConfirm = false) => {
     if (
@@ -388,7 +398,11 @@ const VitalsList = ({
             label: 'Temperature',
             value: selectedVital.temperature
               ? formatMeasurement(
-                  convertForDisplay(selectedVital.temperature, 'temperature', unitSystem),
+                  convertForDisplay(
+                    selectedVital.temperature,
+                    'temperature',
+                    unitSystem
+                  ),
                   'temperature',
                   unitSystem,
                   false
@@ -428,9 +442,7 @@ const VitalsList = ({
                 )
               : 'N/A',
             icon: IconWeight,
-            unit: selectedVital.weight
-              ? unitLabels[unitSystem].weight
-              : '',
+            unit: selectedVital.weight ? unitLabels[unitSystem].weight : '',
           },
           {
             label: 'Height',
@@ -554,12 +566,16 @@ const VitalsList = ({
                   </Text>
                   <Text size="xs" c="dimmed">
                     {selectedVital.practitioner.specialty}
-                    {selectedVital.practitioner.practice ? ` • ${selectedVital.practitioner.practice}` : ''}
+                    {selectedVital.practitioner.practice
+                      ? ` • ${selectedVital.practitioner.practice}`
+                      : ''}
                   </Text>
                 </>
               ) : (
                 <Text size="sm" c="dimmed">
-                  {t('shared:labels.practitionerId', { id: selectedVital.practitioner_id })}
+                  {t('shared:labels.practitionerId', {
+                    id: selectedVital.practitioner_id,
+                  })}
                 </Text>
               )}
             </Card>
@@ -575,7 +591,7 @@ const VitalsList = ({
   const [expandedPage, setExpandedPage] = useState(1);
   const EXPANDED_PAGE_SIZE = 20;
 
-  const toggleGroup = (groupKey) => {
+  const toggleGroup = groupKey => {
     setExpandedGroup(prev => {
       if (prev === groupKey) return null;
       setExpandedPage(1); // Reset sub-pagination when switching groups
@@ -608,34 +624,40 @@ const VitalsList = ({
     }
 
     // Build summary rows for import groups
-    const summaryRows = Object.entries(importGroups).map(([groupKey, readings]) => {
-      const glucoseValues = readings
-        .map(r => r.blood_glucose)
-        .filter(v => v != null);
+    const summaryRows = Object.entries(importGroups).map(
+      ([groupKey, readings]) => {
+        const glucoseValues = readings
+          .map(r => r.blood_glucose)
+          .filter(v => v != null);
 
-      const stats = glucoseValues.length > 0
-        ? {
-            avg: Math.round(glucoseValues.reduce((a, b) => a + b, 0) / glucoseValues.length),
-            min: Math.round(Math.min(...glucoseValues)),
-            max: Math.round(Math.max(...glucoseValues)),
-          }
-        : null;
+        const stats =
+          glucoseValues.length > 0
+            ? {
+                avg: Math.round(
+                  glucoseValues.reduce((a, b) => a + b, 0) /
+                    glucoseValues.length
+                ),
+                min: Math.round(Math.min(...glucoseValues)),
+                max: Math.round(Math.max(...glucoseValues)),
+              }
+            : null;
 
-      return {
-        type: 'summary',
-        groupKey,
-        date: readings[0].recorded_date,
-        source: readings[0].import_source,
-        deviceUsed: readings[0].device_used,
-        readings,
-        count: readings.length,
-        stats,
-      };
-    });
+        return {
+          type: 'summary',
+          groupKey,
+          date: readings[0].recorded_date,
+          source: readings[0].import_source,
+          deviceUsed: readings[0].device_used,
+          readings,
+          count: readings.length,
+          stats,
+        };
+      }
+    );
 
     // Merge and sort by date
     const allItems = [...manualRecords, ...summaryRows];
-    const getItemDate = (item) =>
+    const getItemDate = item =>
       new Date(item.type === 'summary' ? item.date : item.record.recorded_date);
 
     allItems.sort((a, b) => {
@@ -651,8 +673,8 @@ const VitalsList = ({
   const isServerSidePagination = vitalsData === undefined && patientId;
 
   // Determine if we have imported data that needs grouping
-  const hasImportedData = vitalsData !== undefined &&
-    sortedVitals.some(v => v.import_source);
+  const hasImportedData =
+    vitalsData !== undefined && sortedVitals.some(v => v.import_source);
 
   // When grouping is active, pagination counts grouped items (1 row per day),
   // not the raw record count
@@ -732,9 +754,14 @@ const VitalsList = ({
             color="var(--mantine-color-gray-5)"
           />
           <Stack align="center" gap="xs">
-            <Text fw={500}>{t('vitals:table.noRecords', 'No vitals records found')}</Text>
+            <Text fw={500}>
+              {t('vitals:table.noRecords', 'No vitals records found')}
+            </Text>
             <Text c="dimmed" ta="center" size="sm">
-              {t('vitals:table.noRecordsDesc', 'Vital signs will appear here once recorded')}
+              {t(
+                'vitals:table.noRecordsDesc',
+                'Vital signs will appear here once recorded'
+              )}
             </Text>
           </Stack>
         </Stack>
@@ -743,14 +770,27 @@ const VitalsList = ({
   }
 
   // Reusable N/A cell for summary rows where columns are not applicable
-  const naCell = <Table.Td><Text size="sm" c="dimmed">{t('labels.notAvailable')}</Text></Table.Td>;
+  const naCell = (
+    <Table.Td>
+      <Text size="sm" c="dimmed">
+        {t('labels.notAvailable')}
+      </Text>
+    </Table.Td>
+  );
 
   // Render a single vital row (used for both individual records and expanded group readings)
   const renderVitalRow = (vital, isNested = false) => (
-    <Table.Tr key={vital.id} style={isNested ? { backgroundColor: 'var(--color-bg-secondary)' } : undefined}>
+    <Table.Tr
+      key={vital.id}
+      style={
+        isNested ? { backgroundColor: 'var(--color-bg-secondary)' } : undefined
+      }
+    >
       <Table.Td>
         <Text size="sm" fw={500} pl={isNested ? 'md' : undefined}>
-          {isNested ? formatDateTime(vital.recorded_date) : formatDate(vital.recorded_date)}
+          {isNested
+            ? formatDateTime(vital.recorded_date)
+            : formatDate(vital.recorded_date)}
         </Text>
       </Table.Td>
       <Table.Td>
@@ -826,9 +866,15 @@ const VitalsList = ({
               <Badge
                 size="xs"
                 variant="light"
-                color={GLUCOSE_CONTEXT_MANTINE_COLORS[vital.glucose_context] ?? GLUCOSE_DEFAULT_MANTINE_COLOR}
+                color={
+                  GLUCOSE_CONTEXT_MANTINE_COLORS[vital.glucose_context] ??
+                  GLUCOSE_DEFAULT_MANTINE_COLOR
+                }
               >
-                {t(`vitals.glucoseContext.${vital.glucose_context}`, vital.glucose_context)}
+                {t(
+                  `vitals.glucoseContext.${vital.glucose_context}`,
+                  vital.glucose_context
+                )}
               </Badge>
             )}
           </Group>
@@ -908,12 +954,18 @@ const VitalsList = ({
   );
 
   // Handle deleting all imported readings for a day
-  const handleDeleteDay = async (item) => {
+  const handleDeleteDay = async item => {
     const d = new Date(item.date);
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    if (!window.confirm(
-      t('shared:labels.deleteAllCountImportedReadingsForThisDay', 'Delete all {{count}} imported readings for this day?', { count: item.count })
-    )) {
+    if (
+      !window.confirm(
+        t(
+          'shared:labels.deleteAllCountImportedReadingsForThisDay',
+          'Delete all {{count}} imported readings for this day?',
+          { count: item.count }
+        )
+      )
+    ) {
       return;
     }
 
@@ -935,22 +987,32 @@ const VitalsList = ({
   };
 
   // Build chart data from a day's readings for mini glucose chart
-  const buildDayChartData = (readings) => {
+  const buildDayChartData = readings => {
     return readings
       .filter(r => r.blood_glucose != null)
       .sort((a, b) => new Date(a.recorded_date) - new Date(b.recorded_date))
       .map(r => ({
-        time: new Date(r.recorded_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: timezoneService.getTimezone() }),
+        time: new Date(r.recorded_date).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: timezoneService.getTimezone(),
+        }),
         glucose: r.blood_glucose,
       }));
   };
 
   // Render the expanded daily view: mini chart + stats + sub-paginated table
-  const renderExpandedDayView = (item) => {
+  const renderExpandedDayView = item => {
     const chartData = buildDayChartData(item.readings);
-    const totalSubPages = Math.max(1, Math.ceil(item.readings.length / EXPANDED_PAGE_SIZE));
+    const totalSubPages = Math.max(
+      1,
+      Math.ceil(item.readings.length / EXPANDED_PAGE_SIZE)
+    );
     const subStart = (expandedPage - 1) * EXPANDED_PAGE_SIZE;
-    const subEnd = Math.min(subStart + EXPANDED_PAGE_SIZE, item.readings.length);
+    const subEnd = Math.min(
+      subStart + EXPANDED_PAGE_SIZE,
+      item.readings.length
+    );
     const pageReadings = [...item.readings]
       .sort((a, b) => new Date(b.recorded_date) - new Date(a.recorded_date))
       .slice(subStart, subEnd);
@@ -964,7 +1026,13 @@ const VitalsList = ({
     return (
       <Table.Tr key={`${item.groupKey}-expanded`}>
         <Table.Td colSpan={colCount} style={{ padding: 0 }}>
-          <Paper p="md" style={{ backgroundColor: 'var(--color-bg-secondary)', borderRadius: 0 }}>
+          <Paper
+            p="md"
+            style={{
+              backgroundColor: 'var(--color-bg-secondary)',
+              borderRadius: 0,
+            }}
+          >
             <Stack gap="md">
               {/* Mini glucose chart */}
               {chartData.length > 1 && (
@@ -973,8 +1041,14 @@ const VitalsList = ({
                     {t('vitals:summary.glucoseTrend', 'Glucose Trend')}
                   </Text>
                   <ResponsiveContainer width="100%" height={180}>
-                    <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--mantine-color-gray-3)" />
+                    <LineChart
+                      data={chartData}
+                      margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--mantine-color-gray-3)"
+                      />
                       <XAxis
                         dataKey="time"
                         tick={{ fontSize: 10 }}
@@ -988,10 +1062,21 @@ const VitalsList = ({
                       />
                       <Tooltip
                         contentStyle={{ fontSize: 12 }}
-                        formatter={(value) => [`${value} mg/dL`, t('vitals:modal.bloodGlucose', 'Glucose')]}
+                        formatter={value => [
+                          `${value} mg/dL`,
+                          t('vitals:modal.bloodGlucose', 'Glucose'),
+                        ]}
                       />
-                      <ReferenceLine y={normalMin} stroke="var(--mantine-color-green-4)" strokeDasharray="4 4" />
-                      <ReferenceLine y={normalMax} stroke="var(--mantine-color-orange-4)" strokeDasharray="4 4" />
+                      <ReferenceLine
+                        y={normalMin}
+                        stroke="var(--mantine-color-green-4)"
+                        strokeDasharray="4 4"
+                      />
+                      <ReferenceLine
+                        y={normalMax}
+                        stroke="var(--mantine-color-orange-4)"
+                        strokeDasharray="4 4"
+                      />
                       <Line
                         type="monotone"
                         dataKey="glucose"
@@ -1009,20 +1094,36 @@ const VitalsList = ({
               {item.stats && (
                 <Group grow>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('vitals:summary.avgGlucose', 'Avg')}</Text>
-                    <Text size="sm" fw={600}>{item.stats.avg} {t('vitals:units.mgdl')}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('vitals:summary.avgGlucose', 'Avg')}
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {item.stats.avg} {t('vitals:units.mgdl')}
+                    </Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('shared:labels.min', 'Min')}</Text>
-                    <Text size="sm" fw={600}>{item.stats.min} {t('vitals:units.mgdl')}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('shared:labels.min', 'Min')}
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {item.stats.min} {t('vitals:units.mgdl')}
+                    </Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('shared:labels.max', 'Max')}</Text>
-                    <Text size="sm" fw={600}>{item.stats.max} {t('vitals:units.mgdl')}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('shared:labels.max', 'Max')}
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {item.stats.max} {t('vitals:units.mgdl')}
+                    </Text>
                   </Paper>
                   <Paper p="xs" withBorder ta="center">
-                    <Text size="xs" c="dimmed">{t('shared:labels.countReadings', 'Readings')}</Text>
-                    <Text size="sm" fw={600}>{item.count}</Text>
+                    <Text size="xs" c="dimmed">
+                      {t('shared:labels.countReadings', 'Readings')}
+                    </Text>
+                    <Text size="sm" fw={600}>
+                      {item.count}
+                    </Text>
                   </Paper>
                 </Group>
               )}
@@ -1033,7 +1134,10 @@ const VitalsList = ({
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>{t('shared:labels.time', 'Time')}</Table.Th>
-                      <Table.Th>{t('vitals:modal.bloodGlucose', 'Glucose')} ({t('vitals:units.mgdl')})</Table.Th>
+                      <Table.Th>
+                        {t('vitals:modal.bloodGlucose', 'Glucose')} (
+                        {t('vitals:units.mgdl')})
+                      </Table.Th>
                       {showActions && <Table.Th />}
                     </Table.Tr>
                   </Table.Thead>
@@ -1041,10 +1145,14 @@ const VitalsList = ({
                     {pageReadings.map(vital => (
                       <Table.Tr key={vital.id}>
                         <Table.Td>
-                          <Text size="xs">{formatDateTime(vital.recorded_date)}</Text>
+                          <Text size="xs">
+                            {formatDateTime(vital.recorded_date)}
+                          </Text>
                         </Table.Td>
                         <Table.Td>
-                          <Text size="xs" fw={500}>{vital.blood_glucose ?? 'N/A'}</Text>
+                          <Text size="xs" fw={500}>
+                            {vital.blood_glucose ?? 'N/A'}
+                          </Text>
                         </Table.Td>
                         {showActions && (
                           <Table.Td>
@@ -1068,11 +1176,15 @@ const VitalsList = ({
                 {totalSubPages > 1 && (
                   <Group justify="space-between" mt="xs">
                     <Text size="xs" c="dimmed">
-                      {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
-                        start: subStart + 1,
-                        end: subEnd,
-                        total: item.readings.length,
-                      })}
+                      {t(
+                        'pagination.showingRange',
+                        'Showing {{start}} to {{end}} of {{total}} results',
+                        {
+                          start: subStart + 1,
+                          end: subEnd,
+                          total: item.readings.length,
+                        }
+                      )}
                     </Text>
                     <Pagination
                       total={totalSubPages}
@@ -1085,7 +1197,6 @@ const VitalsList = ({
                   </Group>
                 )}
               </Box>
-
             </Stack>
           </Paper>
         </Table.Td>
@@ -1095,7 +1206,7 @@ const VitalsList = ({
 
   // Render a summary row that looks like a normal vitals row.
   // Shows date + count badge, avg glucose in the glucose column, and expands on click.
-  const renderSummaryRow = (item) => {
+  const renderSummaryRow = item => {
     const isExpanded = expandedGroup === item.groupKey;
 
     return (
@@ -1106,7 +1217,11 @@ const VitalsList = ({
         >
           <Table.Td>
             <Group gap="xs">
-              {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+              {isExpanded ? (
+                <IconChevronDown size={14} />
+              ) : (
+                <IconChevronRight size={14} />
+              )}
               <Text size="sm" fw={500}>
                 {formatDate(item.date)}
               </Text>
@@ -1116,7 +1231,11 @@ const VitalsList = ({
             </Group>
           </Table.Td>
           {/* BP, Heart Rate, Temperature, Weight, BMI - not applicable for grouped rows */}
-          {naCell}{naCell}{naCell}{naCell}{naCell}
+          {naCell}
+          {naCell}
+          {naCell}
+          {naCell}
+          {naCell}
           {/* Glucose - show avg (min-max) */}
           <Table.Td>
             {item.stats ? (
@@ -1128,11 +1247,14 @@ const VitalsList = ({
                 {t('vitals:units.mgdl')}
               </Text>
             ) : (
-              <Text size="sm" c="dimmed">{t('labels.notAvailable')}</Text>
+              <Text size="sm" c="dimmed">
+                {t('labels.notAvailable')}
+              </Text>
             )}
           </Table.Td>
           {/* A1C, O2 Sat - not applicable for grouped rows */}
-          {naCell}{naCell}
+          {naCell}
+          {naCell}
           {showActions && (
             <Table.Td>
               <Group gap="xs">
@@ -1189,9 +1311,13 @@ const VitalsList = ({
   // When imported data is present, render grouped display items (summary + individual rows).
   // Otherwise, render flat paginated vitals rows.
   const rows = hasImportedData
-    ? groupedDisplayItems.slice(startIndex, endIndex).map(item =>
-        item.type === 'summary' ? renderSummaryRow(item) : renderVitalRow(item.record)
-      )
+    ? groupedDisplayItems
+        .slice(startIndex, endIndex)
+        .map(item =>
+          item.type === 'summary'
+            ? renderSummaryRow(item)
+            : renderVitalRow(item.record)
+        )
     : paginatedVitals.map(vital => renderVitalRow(vital));
 
   return (
@@ -1252,10 +1378,7 @@ const VitalsList = ({
                   </ThComponent>
                 </Table.Th>
                 <Table.Th>
-                  <ThComponent
-                    sorted="a1c"
-                    onSort={() => handleSort('a1c')}
-                  >
+                  <ThComponent sorted="a1c" onSort={() => handleSort('a1c')}>
                     {t('vitals:modal.a1c', 'A1C')}
                   </ThComponent>
                 </Table.Th>
@@ -1282,15 +1405,23 @@ const VitalsList = ({
 
         {/* Pagination Controls */}
         {effectiveTotalRecords > 0 && (
-          <Group justify={totalPages > 1 ? 'space-between' : 'flex-end'} align="center" mt="md">
+          <Group
+            justify={totalPages > 1 ? 'space-between' : 'flex-end'}
+            align="center"
+            mt="md"
+          >
             {/* Left: Record count (only show when multiple pages) */}
             {totalPages > 1 && (
               <Text size="sm" c="dimmed">
-                {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
-                  start: startIndex + 1,
-                  end: endIndex,
-                  total: effectiveTotalRecords,
-                })}
+                {t(
+                  'pagination.showingRange',
+                  'Showing {{start}} to {{end}} of {{total}} results',
+                  {
+                    start: startIndex + 1,
+                    end: endIndex,
+                    total: effectiveTotalRecords,
+                  }
+                )}
               </Text>
             )}
 

@@ -18,10 +18,20 @@ export function usePatientPermissions() {
 
   return useMemo(() => {
     if (!patient || !user) {
-      return { isOwner: false, permissionLevel: 'view', canCreate: false, canEdit: false, canDelete: false, isViewOnly: true, viewOnlyTooltip: undefined };
+      return {
+        isOwner: false,
+        permissionLevel: 'view',
+        canCreate: false,
+        canEdit: false,
+        canDelete: false,
+        isViewOnly: true,
+        viewOnlyTooltip: undefined,
+      };
     }
     const isOwner = patient.owner_user_id === user.id;
-    const permissionLevel = isOwner ? 'full' : (patient.permission_level || 'view');
+    const permissionLevel = isOwner
+      ? 'full'
+      : patient.permission_level || 'view';
     const isViewOnly = permissionLevel === 'view' && !isOwner;
     const viewOnlyTooltip = isViewOnly ? t('permissions.viewOnly') : undefined;
 

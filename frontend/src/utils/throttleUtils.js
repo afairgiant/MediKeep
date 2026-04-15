@@ -5,7 +5,6 @@
 import logger from '../services/logger';
 import { env } from '../config/env';
 
-
 /**
  * Creates a throttled function with built-in error handling and safety measures
  * @param {Function} func - The function to throttle
@@ -22,7 +21,7 @@ export function createSafeThrottle(func, delay, options = {}) {
     leading = true,
     trailing = false,
     onError = null,
-    debugName = 'throttled-function'
+    debugName = 'throttled-function',
   } = options;
 
   let timeoutId = null;
@@ -33,7 +32,7 @@ export function createSafeThrottle(func, delay, options = {}) {
   // Helper function to safely execute the original function (moved outside for access in flush)
   const safeExecute = () => {
     if (isDestroyed) return;
-    
+
     try {
       lastCallTime = Date.now();
       return func.apply(this, lastArgs);
@@ -42,7 +41,10 @@ export function createSafeThrottle(func, delay, options = {}) {
         try {
           onError(error, debugName, lastArgs);
         } catch (handlerError) {
-          logger.error(`Error in throttle error handler for ${debugName}:`, handlerError);
+          logger.error(
+            `Error in throttle error handler for ${debugName}:`,
+            handlerError
+          );
         }
       } else {
         logger.error(`Error in throttled function ${debugName}:`, error);
@@ -50,7 +52,7 @@ export function createSafeThrottle(func, delay, options = {}) {
     }
   };
 
-  const throttledFunction = function(...args) {
+  const throttledFunction = function (...args) {
     // Prevent execution if throttle has been destroyed
     if (isDestroyed) {
       if (env.DEV) {
@@ -61,7 +63,7 @@ export function createSafeThrottle(func, delay, options = {}) {
 
     const currentTime = Date.now();
     const timeSinceLastCall = currentTime - lastCallTime;
-    
+
     lastArgs = args;
 
     // If enough time has passed, execute immediately (leading edge)
@@ -76,12 +78,15 @@ export function createSafeThrottle(func, delay, options = {}) {
     // If trailing edge is enabled and we don't have a pending timeout
     if (trailing && !timeoutId) {
       const remainingTime = delay - timeSinceLastCall;
-      timeoutId = setTimeout(() => {
-        timeoutId = null;
-        if (!isDestroyed) {
-          safeExecute();
-        }
-      }, Math.max(0, remainingTime));
+      timeoutId = setTimeout(
+        () => {
+          timeoutId = null;
+          if (!isDestroyed) {
+            safeExecute();
+          }
+        },
+        Math.max(0, remainingTime)
+      );
     }
   };
 
@@ -97,7 +102,7 @@ export function createSafeThrottle(func, delay, options = {}) {
 
   // Add method to check if throttle is active
   throttledFunction.isPending = () => timeoutId !== null;
-  
+
   // Add method to flush pending execution
   throttledFunction.flush = () => {
     if (timeoutId && !isDestroyed) {
@@ -133,7 +138,7 @@ export function createActivityThrottle(activityFunc, delay, activityType) {
         timestamp: new Date().toISOString(),
         // Don't log args as they might contain sensitive event data
       });
-    }
+    },
   });
 }
 
@@ -148,9 +153,11 @@ export function createRaceSafeWrapper(asyncFunc, debugName = 'async-function') {
   let pendingPromise = null;
   let isDestroyed = false;
 
-  const wrapper = async function(...args) {
+  const wrapper = async function (...args) {
     if (isDestroyed) {
-      throw new Error(`Attempted to call destroyed race-safe wrapper: ${debugName}`);
+      throw new Error(
+        `Attempted to call destroyed race-safe wrapper: ${debugName}`
+      );
     }
 
     // If there's already a pending execution, return that promise
@@ -188,31 +195,42 @@ export function createRaceSafeWrapper(asyncFunc, debugName = 'async-function') {
  * @param {string} debugName - Name for debugging
  * @returns {Function} Function with retry logic
  */
-export function createRetryWrapper(func, maxRetries = 3, baseDelay = 1000, debugName = 'retry-function') {
-  return async function(...args) {
+export function createRetryWrapper(
+  func,
+  maxRetries = 3,
+  baseDelay = 1000,
+  debugName = 'retry-function'
+) {
+  return async function (...args) {
     let lastError;
-    
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         return await func.apply(this, args);
       } catch (error) {
         lastError = error;
-        
+
         if (attempt === maxRetries) {
-          logger.error(`${debugName} failed after ${maxRetries} retries:`, error);
+          logger.error(
+            `${debugName} failed after ${maxRetries} retries:`,
+            error
+          );
           throw error;
         }
-        
+
         // Exponential backoff with jitter
         const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
-        
+
         if (env.DEV) {
-          logger.warn(`${debugName} retry ${attempt + 1}/${maxRetries} after error:`, error.message);
+          logger.warn(
+            `${debugName} retry ${attempt + 1}/${maxRetries} after error:`,
+            error.message
+          );
         }
       }
     }
-    
+
     throw lastError;
   };
 }
@@ -250,7 +268,7 @@ export function createThrottleCleanupManager() {
       throttles.clear();
       isDestroyed = true;
     },
-    
+
     get isDestroyed() {
       return isDestroyed;
     },
@@ -261,6 +279,6 @@ export function createThrottleCleanupManager() {
 
     isDestroyed() {
       return isDestroyed;
-    }
+    },
   };
 }

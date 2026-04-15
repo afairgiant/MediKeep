@@ -82,15 +82,36 @@ export const medicationFormFields = [
     clearable: true,
     options: [
       { value: 'oral', labelKey: 'shared:fields.oral' },
-      { value: 'injection', labelKey: 'medical:medications.route.options.injection' },
-      { value: 'topical', labelKey: 'medical:medications.route.options.topical' },
-      { value: 'intravenous', labelKey: 'medical:medications.route.options.intravenous' },
-      { value: 'intramuscular', labelKey: 'medical:medications.route.options.intramuscular' },
-      { value: 'subcutaneous', labelKey: 'medical:medications.route.options.subcutaneous' },
-      { value: 'inhalation', labelKey: 'medical:medications.route.options.inhalation' },
+      {
+        value: 'injection',
+        labelKey: 'medical:medications.route.options.injection',
+      },
+      {
+        value: 'topical',
+        labelKey: 'medical:medications.route.options.topical',
+      },
+      {
+        value: 'intravenous',
+        labelKey: 'medical:medications.route.options.intravenous',
+      },
+      {
+        value: 'intramuscular',
+        labelKey: 'medical:medications.route.options.intramuscular',
+      },
+      {
+        value: 'subcutaneous',
+        labelKey: 'medical:medications.route.options.subcutaneous',
+      },
+      {
+        value: 'inhalation',
+        labelKey: 'medical:medications.route.options.inhalation',
+      },
       { value: 'nasal', labelKey: 'shared:fields.nasal' },
       { value: 'rectal', labelKey: 'medical:medications.route.options.rectal' },
-      { value: 'sublingual', labelKey: 'medical:medications.route.options.sublingual' },
+      {
+        value: 'sublingual',
+        labelKey: 'medical:medications.route.options.sublingual',
+      },
     ],
   },
   {

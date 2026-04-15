@@ -51,7 +51,9 @@ export const getReleaseNotes = async (limit = 10) => {
   let response = await fetch(`/api/v1/system/releases?limit=${limit}`);
 
   if (!response.ok && env.DEV) {
-    response = await fetch(`http://localhost:8000/api/v1/system/releases?limit=${limit}`);
+    response = await fetch(
+      `http://localhost:8000/api/v1/system/releases?limit=${limit}`
+    );
   }
 
   if (response.ok) {

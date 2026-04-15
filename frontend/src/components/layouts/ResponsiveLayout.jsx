@@ -1,7 +1,7 @@
 /**
  * ResponsiveLayout - Main layout wrapper component
  * Provides consistent responsive layout structure for the entire application
- * 
+ *
  * Following PR #3: Navigation & Layout System specifications
  * File specified in RESPONSIVE_IMPLEMENTATION_PLAN.md line 256
  */
@@ -19,37 +19,45 @@ const ResponsiveLayout = ({
   maxWidth = 'xl',
   fluid = false,
   padding = 'md',
-  className = ''
+  className = '',
 }) => {
   const responsive = useResponsive();
 
   // Create responsive Container with proper sizing
-  const ResponsiveContainer = ResponsiveComponentFactory.createMantine(Container, {
-    size: fluid ? undefined : {
-      xs: 'xs',
-      sm: 'sm', 
-      md: 'md',
-      lg: 'lg',
-      xl: maxWidth,
-      xxl: maxWidth
-    },
-    p: {
-      xs: 'xs',
-      sm: 'sm',
-      md: padding,
-      lg: padding,
-      xl: padding
+  const ResponsiveContainer = ResponsiveComponentFactory.createMantine(
+    Container,
+    {
+      size: fluid
+        ? undefined
+        : {
+            xs: 'xs',
+            sm: 'sm',
+            md: 'md',
+            lg: 'lg',
+            xl: maxWidth,
+            xxl: maxWidth,
+          },
+      p: {
+        xs: 'xs',
+        sm: 'sm',
+        md: padding,
+        lg: padding,
+        xl: padding,
+      },
     }
-  });
+  );
 
   // Create responsive content wrapper
-  const ResponsiveContentWrapper = ResponsiveComponentFactory.createMantine(Box, {
-    style: {
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column'
+  const ResponsiveContentWrapper = ResponsiveComponentFactory.createMantine(
+    Box,
+    {
+      style: {
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+      },
     }
-  });
+  );
 
   return (
     <ResponsiveContentWrapper className={`responsive-layout ${className}`}>
@@ -66,13 +74,16 @@ const ResponsiveLayout = ({
         className="responsive-layout-content"
         style={{
           flex: 1,
-          marginLeft: withNavigation && (responsive.isAbove('md') || responsive.matches('lg'))
-            ? '280px'
-            : '0',
+          marginLeft:
+            withNavigation &&
+            (responsive.isAbove('md') || responsive.matches('lg'))
+              ? '280px'
+              : '0',
           transition: 'margin-left 0.3s ease',
-          paddingTop: responsive.matches('xs') || responsive.matches('sm')
-            ? '60px' // Account for mobile navigation toggle
-            : '0'
+          paddingTop:
+            responsive.matches('xs') || responsive.matches('sm')
+              ? '60px' // Account for mobile navigation toggle
+              : '0',
         }}
       >
         {fluid ? (
@@ -80,9 +91,7 @@ const ResponsiveLayout = ({
             {children}
           </Box>
         ) : (
-          <ResponsiveContainer>
-            {children}
-          </ResponsiveContainer>
+          <ResponsiveContainer>{children}</ResponsiveContainer>
         )}
       </Box>
     </ResponsiveContentWrapper>

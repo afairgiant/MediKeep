@@ -39,8 +39,12 @@ export const insurancesPageConfig = {
 
         const now = new Date();
         const currentYear = now.getFullYear();
-        const effectiveDate = item.effective_date ? new Date(item.effective_date) : null;
-        const expirationDate = item.expiration_date ? new Date(item.expiration_date) : null;
+        const effectiveDate = item.effective_date
+          ? new Date(item.effective_date)
+          : null;
+        const expirationDate = item.expiration_date
+          ? new Date(item.expiration_date)
+          : null;
 
         switch (dateRange) {
           case 'this_year':
@@ -112,13 +116,21 @@ export const insurancesPageConfig = {
         const aIsPrimary = a.insurance_type === 'medical' && a.is_primary;
         const bIsPrimary = b.insurance_type === 'medical' && b.is_primary;
         if (aIsPrimary !== bIsPrimary) {
-          return sortOrder === 'asc' ? (aIsPrimary ? 1 : -1) : (aIsPrimary ? -1 : 1);
+          return sortOrder === 'asc'
+            ? aIsPrimary
+              ? 1
+              : -1
+            : aIsPrimary
+              ? -1
+              : 1;
         }
 
         // Then by status priority: active > pending > expired > inactive
         const aStatusIndex = STATUS_PRIORITY_ORDER.indexOf(a.status);
         const bStatusIndex = STATUS_PRIORITY_ORDER.indexOf(b.status);
-        const statusDiff = (aStatusIndex === -1 ? 999 : aStatusIndex) - (bStatusIndex === -1 ? 999 : bStatusIndex);
+        const statusDiff =
+          (aStatusIndex === -1 ? 999 : aStatusIndex) -
+          (bStatusIndex === -1 ? 999 : bStatusIndex);
         if (statusDiff !== 0) {
           return sortOrder === 'asc' ? statusDiff : -statusDiff;
         }

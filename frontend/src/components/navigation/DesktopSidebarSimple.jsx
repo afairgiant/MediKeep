@@ -5,8 +5,20 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Stack, Group, Text, Divider, UnstyledButton, Button } from '@mantine/core';
-import { IconChevronLeft, IconChevronRight, IconLogout } from '@tabler/icons-react';
+import {
+  Box,
+  Stack,
+  Group,
+  Text,
+  Divider,
+  UnstyledButton,
+  Button,
+} from '@mantine/core';
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconLogout,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import './DesktopSidebar.css';
 
@@ -17,11 +29,11 @@ const DesktopSidebarSimple = ({
   menuItems = [],
   userInfo,
   onLogout,
-  className = ''
+  className = '',
 }) => {
   const { t } = useTranslation('shared');
   // Simple active path check
-  const isActivePath = (itemPath) => {
+  const isActivePath = itemPath => {
     return currentPath && currentPath.includes(itemPath);
   };
 
@@ -43,7 +55,7 @@ const DesktopSidebarSimple = ({
         zIndex: 100,
         padding: '16px',
         overflowY: 'auto',
-        boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)'
+        boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
       }}
     >
       <Stack h="100%" justify="space-between">
@@ -55,8 +67,15 @@ const DesktopSidebarSimple = ({
                 {t('labels.admin')}
               </Text>
             )}
-            <UnstyledButton onClick={onToggle} title={isOpen ? 'Collapse' : 'Expand'}>
-              {isOpen ? <IconChevronLeft size={20} /> : <IconChevronRight size={20} />}
+            <UnstyledButton
+              onClick={onToggle}
+              title={isOpen ? 'Collapse' : 'Expand'}
+            >
+              {isOpen ? (
+                <IconChevronLeft size={20} />
+              ) : (
+                <IconChevronRight size={20} />
+              )}
             </UnstyledButton>
           </Group>
 
@@ -67,58 +86,68 @@ const DesktopSidebarSimple = ({
             {/* If no menu items, show default items */}
             {menuItems.length === 0 ? (
               <>
-                <Link 
-                  to="/admin" 
+                <Link
+                  to="/admin"
                   style={{
                     padding: '8px 12px',
                     borderRadius: '4px',
                     textDecoration: 'none',
                     color: isActivePath('/admin') ? '#228be6' : '#495057',
-                    backgroundColor: isActivePath('/admin') ? '#e7f5ff' : 'transparent',
+                    backgroundColor: isActivePath('/admin')
+                      ? '#e7f5ff'
+                      : 'transparent',
                     fontWeight: isActivePath('/admin') ? 600 : 400,
-                    display: 'block'
+                    display: 'block',
                   }}
                 >
                   {isOpen ? 'Dashboard' : 'D'}
                 </Link>
-                <Link 
-                  to="/admin/data-models" 
+                <Link
+                  to="/admin/data-models"
                   style={{
                     padding: '8px 12px',
                     borderRadius: '4px',
                     textDecoration: 'none',
                     color: isActivePath('/data-models') ? '#228be6' : '#495057',
-                    backgroundColor: isActivePath('/data-models') ? '#e7f5ff' : 'transparent',
+                    backgroundColor: isActivePath('/data-models')
+                      ? '#e7f5ff'
+                      : 'transparent',
                     fontWeight: isActivePath('/data-models') ? 600 : 400,
-                    display: 'block'
+                    display: 'block',
                   }}
                 >
                   {isOpen ? 'Data Models' : 'M'}
                 </Link>
-                <Link 
-                  to="/admin/create-user" 
+                <Link
+                  to="/admin/create-user"
                   style={{
                     padding: '8px 12px',
                     borderRadius: '4px',
                     textDecoration: 'none',
                     color: isActivePath('/create-user') ? '#228be6' : '#495057',
-                    backgroundColor: isActivePath('/create-user') ? '#e7f5ff' : 'transparent',
+                    backgroundColor: isActivePath('/create-user')
+                      ? '#e7f5ff'
+                      : 'transparent',
                     fontWeight: isActivePath('/create-user') ? 600 : 400,
-                    display: 'block'
+                    display: 'block',
                   }}
                 >
                   {isOpen ? 'Create User' : 'U'}
                 </Link>
-                <Link 
-                  to="/admin/system-health" 
+                <Link
+                  to="/admin/system-health"
                   style={{
                     padding: '8px 12px',
                     borderRadius: '4px',
                     textDecoration: 'none',
-                    color: isActivePath('/system-health') ? '#228be6' : '#495057',
-                    backgroundColor: isActivePath('/system-health') ? '#e7f5ff' : 'transparent',
+                    color: isActivePath('/system-health')
+                      ? '#228be6'
+                      : '#495057',
+                    backgroundColor: isActivePath('/system-health')
+                      ? '#e7f5ff'
+                      : 'transparent',
                     fontWeight: isActivePath('/system-health') ? 600 : 400,
-                    display: 'block'
+                    display: 'block',
                   }}
                 >
                   {isOpen ? 'System Health' : 'H'}
@@ -133,23 +162,28 @@ const DesktopSidebarSimple = ({
                       {section.section}
                     </Text>
                   )}
-                  {section.items && section.items.map((item, itemIdx) => (
-                    <Link
-                      key={itemIdx}
-                      to={item.path}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        textDecoration: 'none',
-                        color: isActivePath(item.path) ? '#228be6' : '#495057',
-                        backgroundColor: isActivePath(item.path) ? '#e7f5ff' : 'transparent',
-                        fontWeight: isActivePath(item.path) ? 600 : 400,
-                        display: 'block'
-                      }}
-                    >
-                      {isOpen ? item.label : item.label.charAt(0)}
-                    </Link>
-                  ))}
+                  {section.items &&
+                    section.items.map((item, itemIdx) => (
+                      <Link
+                        key={itemIdx}
+                        to={item.path}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '4px',
+                          textDecoration: 'none',
+                          color: isActivePath(item.path)
+                            ? '#228be6'
+                            : '#495057',
+                          backgroundColor: isActivePath(item.path)
+                            ? '#e7f5ff'
+                            : 'transparent',
+                          fontWeight: isActivePath(item.path) ? 600 : 400,
+                          display: 'block',
+                        }}
+                      >
+                        {isOpen ? item.label : item.label.charAt(0)}
+                      </Link>
+                    ))}
                 </Stack>
               ))
             )}
@@ -159,17 +193,25 @@ const DesktopSidebarSimple = ({
         {/* Footer Section */}
         <Stack spacing="xs">
           <Divider />
-          
+
           {/* User info */}
           {userInfo && (
             <Box px="xs" py="sm">
               {isOpen ? (
                 <>
-                  <Text size="sm" fw={500}>{userInfo.full_name || userInfo.username}</Text>
-                  <Text size="xs" c="dimmed">@{userInfo.username}</Text>
+                  <Text size="sm" fw={500}>
+                    {userInfo.full_name || userInfo.username}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    @{userInfo.username}
+                  </Text>
                 </>
               ) : (
-                <Text size="lg" fw={500}>{(userInfo.full_name || userInfo.username).charAt(0).toUpperCase()}</Text>
+                <Text size="lg" fw={500}>
+                  {(userInfo.full_name || userInfo.username)
+                    .charAt(0)
+                    .toUpperCase()}
+                </Text>
               )}
             </Box>
           )}

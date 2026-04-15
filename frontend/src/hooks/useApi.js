@@ -9,7 +9,7 @@ export const useApi = () => {
   const execute = useCallback(async (apiCall, options = {}) => {
     // Create new abort controller for this request
     const controller = new AbortController();
-    
+
     // Store reference but don't cancel existing requests immediately
     // This prevents race conditions between multiple hooks
     const previousController = abortControllerRef.current;
@@ -40,7 +40,8 @@ export const useApi = () => {
         if (abortControllerRef.current === controller) {
           // Use actual error message (already processed by extractErrorMessage in baseApi)
           // Fall back to options.errorMessage only if err.message is empty
-          let errorMessage = err.message || options.errorMessage || 'An error occurred';
+          let errorMessage =
+            err.message || options.errorMessage || 'An error occurred';
 
           // Apply getUserFriendlyError to format with error codes
           const operation = options.operation || 'save';
@@ -53,7 +54,10 @@ export const useApi = () => {
       return null;
     } finally {
       // Only set loading to false if this is still the current request
-      if (abortControllerRef.current === controller && !controller.signal.aborted) {
+      if (
+        abortControllerRef.current === controller &&
+        !controller.signal.aborted
+      ) {
         setLoading(false);
       }
     }

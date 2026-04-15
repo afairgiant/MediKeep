@@ -13,7 +13,7 @@ import { apiService } from './index';
  * @param {string} data.papra_api_token - Bearer token for authentication
  * @returns {Promise} Connection test results
  */
-export const testConnection = async (data) => {
+export const testConnection = async data => {
   return apiService.post('/papra/test-connection', {
     papra_url: data.papra_url,
     papra_api_token: data.papra_api_token,
@@ -37,13 +37,16 @@ export const getSettings = async () => {
  * @param {boolean} data.papra_enabled - Enable/disable Papra integration
  * @returns {Promise} Updated settings
  */
-export const saveSettings = async (data) => {
+export const saveSettings = async data => {
   // Only send fields that are actually defined to avoid overwriting with null
   const payload = {};
   if (data.papra_url !== undefined) payload.papra_url = data.papra_url;
-  if (data.papra_api_token !== undefined) payload.papra_api_token = data.papra_api_token;
-  if (data.papra_organization_id !== undefined) payload.papra_organization_id = data.papra_organization_id;
-  if (data.papra_enabled !== undefined) payload.papra_enabled = data.papra_enabled;
+  if (data.papra_api_token !== undefined)
+    payload.papra_api_token = data.papra_api_token;
+  if (data.papra_organization_id !== undefined)
+    payload.papra_organization_id = data.papra_organization_id;
+  if (data.papra_enabled !== undefined)
+    payload.papra_enabled = data.papra_enabled;
   return apiService.put('/papra/settings', payload);
 };
 
@@ -63,7 +66,10 @@ export const getOrganizations = async () => {
  * @param {number} options.pageSize - Results per page
  * @returns {Promise} Search results with results array and count
  */
-export const searchPapraDocuments = async (query = '', { page = 0, pageSize = 20 } = {}) => {
+export const searchPapraDocuments = async (
+  query = '',
+  { page = 0, pageSize = 20 } = {}
+) => {
   const params = new URLSearchParams();
   if (query) params.append('query', query);
   params.append('page', page.toString());
@@ -81,7 +87,10 @@ export const searchPapraDocuments = async (query = '', { page = 0, pageSize = 20
  * @returns {Promise} Created file record
  */
 export const linkPapraDocument = async (entityType, entityId, data) => {
-  return apiService.post(`/entity-files/${entityType}/${entityId}/link-papra`, data);
+  return apiService.post(
+    `/entity-files/${entityType}/${entityId}/link-papra`,
+    data
+  );
 };
 
 export default {

@@ -21,11 +21,19 @@ const {
   useDataManagement: vi.fn(),
   usePersistedViewMode: vi.fn(),
   mockFamilyHistoryApi: {
-    getOrganizedHistory: vi.fn(() => Promise.resolve({ owned_family_history: [], shared_family_history: [] })),
+    getOrganizedHistory: vi.fn(() =>
+      Promise.resolve({ owned_family_history: [], shared_family_history: [] })
+    ),
     getFamilyHistory: vi.fn(() => Promise.resolve({})),
-    getSharedFamilyHistory: vi.fn(() => Promise.resolve({ shared_family_history: [] })),
-    sendShareInvitation: vi.fn(() => Promise.resolve({ message: 'Invitation sent' })),
-    bulkSendInvitations: vi.fn(() => Promise.resolve({ total_sent: 2, total_failed: 0, results: [] })),
+    getSharedFamilyHistory: vi.fn(() =>
+      Promise.resolve({ shared_family_history: [] })
+    ),
+    sendShareInvitation: vi.fn(() =>
+      Promise.resolve({ message: 'Invitation sent' })
+    ),
+    bulkSendInvitations: vi.fn(() =>
+      Promise.resolve({ total_sent: 2, total_failed: 0, results: [] })
+    ),
     getFamilyMemberShares: vi.fn(() => Promise.resolve([])),
     revokeShare: vi.fn(() => Promise.resolve({ message: 'Share revoked' })),
   },
@@ -38,7 +46,9 @@ vi.mock('../../../hooks/useDataManagement', () => ({
   useDataManagement,
   default: useDataManagement,
 }));
-vi.mock('../../../hooks/usePersistedViewMode', () => ({ usePersistedViewMode }));
+vi.mock('../../../hooks/usePersistedViewMode', () => ({
+  usePersistedViewMode,
+}));
 vi.mock('../../../hooks/useResponsive', () => ({
   useResponsive: () => ({ isMobile: false, isTablet: false, isDesktop: true }),
 }));
@@ -113,7 +123,7 @@ vi.mock('../../../utils/linkNavigation', () => ({
   navigateToEntity: vi.fn(),
 }));
 vi.mock('../../../utils/helpers', () => ({
-  createCardClickHandler: (handler, item) => (e) => {
+  createCardClickHandler: (handler, item) => e => {
     if (e.target.tagName === 'BUTTON') return;
     handler(item);
   },
@@ -129,7 +139,7 @@ vi.mock('../../../utils/errorHandling', () => ({
 
 // --- HOC mock ---
 vi.mock('../../../hoc/withResponsive', () => ({
-  withResponsive: (Component) => Component,
+  withResponsive: Component => Component,
 }));
 
 // --- Component mocks ---
@@ -144,11 +154,16 @@ vi.mock('../../../components/shared/MedicalPageActions', () => ({
           {primaryAction.label}
         </button>
       )}
-      {secondaryActions && secondaryActions.map((action, i) => (
-        <button key={i} onClick={action.onClick} data-testid={`secondary-action-${i}`}>
-          {action.label}
-        </button>
-      ))}
+      {secondaryActions &&
+        secondaryActions.map((action, i) => (
+          <button
+            key={i}
+            onClick={action.onClick}
+            data-testid={`secondary-action-${i}`}
+          >
+            {action.label}
+          </button>
+        ))}
     </div>
   ),
 }));
@@ -161,7 +176,7 @@ vi.mock('../../../components/shared/MedicalPageLoading', () => ({
 vi.mock('../../../components/shared/AnimatedCardGrid', () => ({
   default: ({ items, renderCard }) => (
     <div data-testid="card-grid">
-      {items.map((item) => (
+      {items.map(item => (
         <div key={item.id} data-testid={`card-wrapper-${item.id}`}>
           {renderCard(item)}
         </div>
@@ -173,12 +188,18 @@ vi.mock('../../../components/adapters', () => ({
   ResponsiveTable: ({ data, columns }) => (
     <table data-testid="responsive-table">
       <thead>
-        <tr>{columns.map((col) => <th key={col.accessor}>{col.header}</th>)}</tr>
+        <tr>
+          {columns.map(col => (
+            <th key={col.accessor}>{col.header}</th>
+          ))}
+        </tr>
       </thead>
       <tbody>
-        {data.map((row) => (
+        {data.map(row => (
           <tr key={row.id}>
-            {columns.map((col) => <td key={col.accessor}>{String(row[col.accessor] ?? '')}</td>)}
+            {columns.map(col => (
+              <td key={col.accessor}>{String(row[col.accessor] ?? '')}</td>
+            ))}
           </tr>
         ))}
       </tbody>
@@ -192,19 +213,34 @@ vi.mock('../../../components/invitations', () => ({
   InvitationManager: ({ opened, onClose, onUpdate }) =>
     opened ? (
       <div data-testid="invitation-manager">
-        <button onClick={onClose} data-testid="close-invitation-manager">Close</button>
-        <button onClick={onUpdate} data-testid="update-invitations">Update</button>
+        <button onClick={onClose} data-testid="close-invitation-manager">
+          Close
+        </button>
+        <button onClick={onUpdate} data-testid="update-invitations">
+          Update
+        </button>
       </div>
     ) : null,
 }));
 vi.mock('../../../components/medical/FamilyHistorySharingModal', () => ({
-  default: ({ opened, onClose, familyMember, familyMembers, bulkMode, onSuccess }) =>
+  default: ({
+    opened,
+    onClose,
+    familyMember,
+    familyMembers,
+    bulkMode,
+    onSuccess,
+  }) =>
     opened ? (
       <div data-testid="family-history-sharing-modal">
         <div>Bulk Mode: {bulkMode ? 'Yes' : 'No'}</div>
         {familyMember && <div>Family Member: {familyMember.name}</div>}
-        <button onClick={onClose} data-testid="close-sharing-modal">Close</button>
-        <button onClick={onSuccess} data-testid="sharing-success">Success</button>
+        <button onClick={onClose} data-testid="close-sharing-modal">
+          Close
+        </button>
+        <button onClick={onSuccess} data-testid="sharing-success">
+          Success
+        </button>
       </div>
     ) : null,
 }));
@@ -229,7 +265,14 @@ vi.mock('../../../components/medical/family-history', () => ({
       </div>
     );
   },
-  FamilyHistoryFormWrapper: ({ isOpen, onClose, title, formData, onInputChange, onSubmit }) => {
+  FamilyHistoryFormWrapper: ({
+    isOpen,
+    onClose,
+    title,
+    formData,
+    onInputChange,
+    onSubmit,
+  }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="form-modal" role="dialog">
@@ -268,9 +311,7 @@ const mockFamilyMembers = [
     relationship: 'mother',
     birth_year: 1965,
     is_shared: false,
-    family_conditions: [
-      { condition: 'Heart Disease', status: 'active' },
-    ],
+    family_conditions: [{ condition: 'Heart Disease', status: 'active' }],
   },
 ];
 
@@ -423,10 +464,14 @@ describe('FamilyHistory Page - Sharing Integration Tests', () => {
     });
 
     it('should handle errors when loading shared family history', () => {
-      mockFamilyHistoryApi.getSharedFamilyHistory.mockRejectedValue(new Error('Shared API Error'));
+      mockFamilyHistoryApi.getSharedFamilyHistory.mockRejectedValue(
+        new Error('Shared API Error')
+      );
 
       // Verify the mock is configured
-      expect(mockFamilyHistoryApi.getSharedFamilyHistory()).rejects.toThrow('Shared API Error');
+      expect(mockFamilyHistoryApi.getSharedFamilyHistory()).rejects.toThrow(
+        'Shared API Error'
+      );
     });
   });
 

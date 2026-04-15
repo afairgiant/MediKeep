@@ -43,19 +43,19 @@ const PageHeader = ({
       navigate(backButtonPath);
     }
   };
-  
+
   const baseClasses =
     variant === 'dashboard'
       ? 'page-header dashboard-header'
       : 'page-header medical-page-header';
-  
+
   return (
     <>
       <header className={`${baseClasses} ${className}`}>
         <div className="header-left">
           {showBackButton && (
-            <button 
-              className="back-button" 
+            <button
+              className="back-button"
               onClick={handleBackClick}
               type="button"
             >
@@ -63,7 +63,7 @@ const PageHeader = ({
             </button>
           )}
         </div>
-        
+
         {showTitle && (
           <div className="header-center">
             <h1 className="page-title">
@@ -72,12 +72,12 @@ const PageHeader = ({
             </h1>
           </div>
         )}
-        
+
         <div className="header-right">
           <div className="header-actions">
             {/* Page-specific actions */}
             {actions}
-            
+
             {/* Mobile hamburger toggle (replaces theme toggle - theme is in sidebar) */}
             {isMobile && (
               <button
@@ -95,7 +95,7 @@ const PageHeader = ({
           </div>
         </div>
       </header>
-      
+
       {/* Navigation Bar - rendered below header */}
       {showNavigation && (
         <NavigationWrapper

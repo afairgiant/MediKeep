@@ -48,7 +48,9 @@ function buildSinglePayload(newRelationship) {
   return {
     encounter_id: parseInt(newRelationship.encounter_ids[0]),
     visit_label: newRelationship.visit_label || null,
-    visit_sequence: newRelationship.visit_sequence ? parseInt(newRelationship.visit_sequence) : null,
+    visit_sequence: newRelationship.visit_sequence
+      ? parseInt(newRelationship.visit_sequence)
+      : null,
     relevance_note: newRelationship.relevance_note || null,
   };
 }
@@ -107,12 +109,20 @@ function TreatmentEncounterRelationships({
     buildBulkPayload,
   });
 
-  const getEncounterById = (encounterId) => {
+  const getEncounterById = encounterId => {
     return safeEncounters.find(e => e.id === encounterId);
   };
 
-  const encounterOptions = createDateSortedOptions(safeEncounters, formatEncounterLabel, 'date');
-  const availableOptions = filterAvailableOptions(encounterOptions, relationships, 'encounter_id');
+  const encounterOptions = createDateSortedOptions(
+    safeEncounters,
+    formatEncounterLabel,
+    'date'
+  );
+  const availableOptions = filterAvailableOptions(
+    encounterOptions,
+    relationships,
+    'encounter_id'
+  );
   const selectedCount = newRelationship.encounter_ids.length;
 
   return (
@@ -123,7 +133,9 @@ function TreatmentEncounterRelationships({
         {relationships.length > 0 ? (
           <Stack gap="sm">
             {relationships.map(relationship => {
-              const encounter = relationship.encounter || getEncounterById(relationship.encounter_id);
+              const encounter =
+                relationship.encounter ||
+                getEncounterById(relationship.encounter_id);
               const isEditing = editingRelationship?.id === relationship.id;
 
               return (
@@ -134,26 +146,40 @@ function TreatmentEncounterRelationships({
                         variant="light"
                         color="blue"
                         leftSection={<IconStethoscope size={12} />}
-                        style={isViewMode && onEntityClick ? { cursor: 'pointer' } : undefined}
-                        onClick={isViewMode && onEntityClick ? () => onEntityClick(relationship.encounter_id) : undefined}
+                        style={
+                          isViewMode && onEntityClick
+                            ? { cursor: 'pointer' }
+                            : undefined
+                        }
+                        onClick={
+                          isViewMode && onEntityClick
+                            ? () => onEntityClick(relationship.encounter_id)
+                            : undefined
+                        }
                       >
-                        {formatDateDisplay(encounter?.date)} - {encounter?.visit_type || 'Visit'}
+                        {formatDateDisplay(encounter?.date)} -{' '}
+                        {encounter?.visit_type || 'Visit'}
                       </Badge>
                       {relationship.visit_label && (
                         <Badge variant="outline" size="sm" color="cyan">
-                          {getOptionLabel(relationship.visit_label, VISIT_LABEL_OPTIONS)}
+                          {getOptionLabel(
+                            relationship.visit_label,
+                            VISIT_LABEL_OPTIONS
+                          )}
                         </Badge>
                       )}
                       {relationship.visit_sequence && (
                         <Badge variant="outline" size="sm" color="grape">
-                          {t('shared:labels.visitType')} #{relationship.visit_sequence}
+                          {t('shared:labels.visitType')} #
+                          {relationship.visit_sequence}
                         </Badge>
                       )}
                     </Group>
 
                     {encounter?.reason && (
                       <Text size="sm" c="dimmed">
-                        <strong>{t('shared:labels.reason')}:</strong> {encounter.reason}
+                        <strong>{t('shared:labels.reason')}:</strong>{' '}
+                        {encounter.reason}
                       </Text>
                     )}
 
@@ -164,7 +190,9 @@ function TreatmentEncounterRelationships({
                           placeholder="Visit label"
                           data={VISIT_LABEL_OPTIONS}
                           value={editingRelationship?.visit_label || ''}
-                          onChange={(value) => updateEditingRelationship('visit_label', value)}
+                          onChange={value =>
+                            updateEditingRelationship('visit_label', value)
+                          }
                           clearable
                           comboboxProps={{ withinPortal: true, zIndex: 4000 }}
                         />
@@ -173,13 +201,23 @@ function TreatmentEncounterRelationships({
                           placeholder="Visit sequence number"
                           type="number"
                           value={editingRelationship?.visit_sequence || ''}
-                          onChange={(e) => updateEditingRelationship('visit_sequence', e.target.value)}
+                          onChange={e =>
+                            updateEditingRelationship(
+                              'visit_sequence',
+                              e.target.value
+                            )
+                          }
                         />
                         <Textarea
                           size="xs"
                           placeholder="Relevance note"
                           value={editingRelationship?.relevance_note || ''}
-                          onChange={(e) => updateEditingRelationship('relevance_note', e.target.value)}
+                          onChange={e =>
+                            updateEditingRelationship(
+                              'relevance_note',
+                              e.target.value
+                            )
+                          }
                           autosize
                           minRows={2}
                         />
@@ -196,13 +234,16 @@ function TreatmentEncounterRelationships({
                   {!isViewMode && (
                     <RelationshipRowActions
                       isEditing={isEditing}
-                      onSave={() => handleEditRelationship(relationship.id, {
-                        visit_label: editingRelationship?.visit_label || null,
-                        visit_sequence: editingRelationship?.visit_sequence
-                          ? parseInt(editingRelationship.visit_sequence)
-                          : null,
-                        relevance_note: editingRelationship?.relevance_note || null,
-                      })}
+                      onSave={() =>
+                        handleEditRelationship(relationship.id, {
+                          visit_label: editingRelationship?.visit_label || null,
+                          visit_sequence: editingRelationship?.visit_sequence
+                            ? parseInt(editingRelationship.visit_sequence)
+                            : null,
+                          relevance_note:
+                            editingRelationship?.relevance_note || null,
+                        })
+                      }
                       onCancel={cancelEditing}
                       onEdit={() => startEditing(relationship, EDIT_FIELDS)}
                       onDelete={() => handleDeleteRelationship(relationship.id)}
@@ -215,7 +256,10 @@ function TreatmentEncounterRelationships({
           </Stack>
         ) : (
           <RelationshipEmptyState
-            message={t('labels.noEncountersLinked', 'No visits linked to this treatment')}
+            message={t(
+              'labels.noEncountersLinked',
+              'No visits linked to this treatment'
+            )}
             description="Link visits to track appointments related to this treatment plan."
             isViewMode={isViewMode}
           />
@@ -241,7 +285,7 @@ function TreatmentEncounterRelationships({
             placeholder="Choose visits to link"
             data={availableOptions}
             value={newRelationship.encounter_ids}
-            onChange={(values) => updateNewRelationship('encounter_ids', values)}
+            onChange={values => updateNewRelationship('encounter_ids', values)}
             searchable
             clearable
             required
@@ -255,7 +299,9 @@ function TreatmentEncounterRelationships({
                 placeholder="Select visit type"
                 data={VISIT_LABEL_OPTIONS}
                 value={newRelationship.visit_label}
-                onChange={(value) => updateNewRelationship('visit_label', value || '')}
+                onChange={value =>
+                  updateNewRelationship('visit_label', value || '')
+                }
                 clearable
                 comboboxProps={{ withinPortal: true, zIndex: 4000 }}
                 description="Categorize this visit in the treatment plan"
@@ -266,7 +312,9 @@ function TreatmentEncounterRelationships({
                 placeholder="e.g., 1, 2, 3..."
                 type="number"
                 value={newRelationship.visit_sequence}
-                onChange={(e) => updateNewRelationship('visit_sequence', e.target.value)}
+                onChange={e =>
+                  updateNewRelationship('visit_sequence', e.target.value)
+                }
                 description="Order of this visit in the treatment plan"
               />
             </>
@@ -276,7 +324,9 @@ function TreatmentEncounterRelationships({
             label="Relevance Note (Optional)"
             placeholder="Describe how this visit relates to the treatment"
             value={newRelationship.relevance_note}
-            onChange={(e) => updateNewRelationship('relevance_note', e.target.value)}
+            onChange={e =>
+              updateNewRelationship('relevance_note', e.target.value)
+            }
             autosize
             minRows={2}
           />
@@ -286,7 +336,9 @@ function TreatmentEncounterRelationships({
             onSubmit={handleAddRelationship}
             loading={loading}
             disabled={selectedCount === 0}
-            submitLabel={selectedCount > 1 ? `Link ${selectedCount} Visits` : 'Link Visit'}
+            submitLabel={
+              selectedCount > 1 ? `Link ${selectedCount} Visits` : 'Link Visit'
+            }
           />
         </RelationshipAddModal>
       </Stack>

@@ -12,7 +12,11 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, fallbackOrOpts?: string | Record<string, unknown>) => {
       if (typeof fallbackOrOpts === 'string') return fallbackOrOpts;
-      if (fallbackOrOpts && typeof fallbackOrOpts === 'object' && 'defaultValue' in fallbackOrOpts) {
+      if (
+        fallbackOrOpts &&
+        typeof fallbackOrOpts === 'object' &&
+        'defaultValue' in fallbackOrOpts
+      ) {
         return String(fallbackOrOpts.defaultValue);
       }
       return key;
@@ -32,7 +36,7 @@ vi.mock('sanitize-html', () => ({
 
 // Stub Mantine's Accordion so we can test content without full Mantine setup.
 // The Accordion.Control text and Accordion.Panel content are rendered directly.
-vi.mock('@mantine/core', async (importOriginal) => {
+vi.mock('@mantine/core', async importOriginal => {
   const original = await importOriginal<typeof import('@mantine/core')>();
   return {
     ...original,
@@ -41,9 +45,13 @@ vi.mock('@mantine/core', async (importOriginal) => {
         <div data-testid="accordion">{children}</div>
       ),
       {
-        Item: ({ children, value }: { children: React.ReactNode; value: string }) => (
-          <div data-testid={`accordion-item-${value}`}>{children}</div>
-        ),
+        Item: ({
+          children,
+          value,
+        }: {
+          children: React.ReactNode;
+          value: string;
+        }) => <div data-testid={`accordion-item-${value}`}>{children}</div>,
         Control: ({ children }: { children: React.ReactNode }) => (
           <div data-testid="accordion-control">{children}</div>
         ),
@@ -56,7 +64,9 @@ vi.mock('@mantine/core', async (importOriginal) => {
       <div data-testid="skeleton" style={{ height }} />
     ),
     Badge: ({ children, ...rest }: { children: React.ReactNode }) => (
-      <span data-testid="badge" {...rest}>{children}</span>
+      <span data-testid="badge" {...rest}>
+        {children}
+      </span>
     ),
     Group: ({ children, ...rest }: { children: React.ReactNode }) => (
       <div {...rest}>{children}</div>
@@ -110,13 +120,15 @@ const mockGetReleaseNotes = vi.mocked(getReleaseNotes);
 // Test data factories
 // ---------------------------------------------------------------------------
 
-function makeRelease(overrides: Partial<{
-  tag_name: string;
-  name: string;
-  body: string;
-  published_at: string;
-  html_url: string;
-}> = {}) {
+function makeRelease(
+  overrides: Partial<{
+    tag_name: string;
+    name: string;
+    body: string;
+    published_at: string;
+    html_url: string;
+  }> = {}
+) {
   return {
     tag_name: 'v0.58.0',
     name: 'Release 0.58.0',
@@ -165,8 +177,12 @@ describe('ReleaseNotesHistory', () => {
         makeRelease({ tag_name: 'v0.57.0', name: 'Release 0.57.0' }),
       ];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -182,8 +198,12 @@ describe('ReleaseNotesHistory', () => {
         makeRelease({ tag_name: 'v0.57.0', name: 'Release 0.57.0' }),
       ];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -202,8 +222,12 @@ describe('ReleaseNotesHistory', () => {
         makeRelease({ tag_name: 'v0.57.0' }),
       ];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -216,8 +240,12 @@ describe('ReleaseNotesHistory', () => {
     it('does not show "Current" badge when no release matches currentVersion', async () => {
       const releases = [makeRelease({ tag_name: 'v0.57.0' })];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -229,12 +257,22 @@ describe('ReleaseNotesHistory', () => {
 
     it('renders a "View on GitHub" link for the visible release', async () => {
       const releases = [
-        makeRelease({ tag_name: 'v0.58.0', html_url: 'https://github.com/example/v0.58.0' }),
-        makeRelease({ tag_name: 'v0.57.0', html_url: 'https://github.com/example/v0.57.0' }),
+        makeRelease({
+          tag_name: 'v0.58.0',
+          html_url: 'https://github.com/example/v0.58.0',
+        }),
+        makeRelease({
+          tag_name: 'v0.57.0',
+          html_url: 'https://github.com/example/v0.57.0',
+        }),
       ];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -248,36 +286,54 @@ describe('ReleaseNotesHistory', () => {
     });
 
     it('renders release body content inside the accordion panel', async () => {
-      const releases = [makeRelease({ tag_name: 'v0.58.0', body: '## Changes\n- new feature' })];
+      const releases = [
+        makeRelease({ tag_name: 'v0.58.0', body: '## Changes\n- new feature' }),
+      ];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
       await waitFor(() => {
-        expect(document.querySelector('.release-notes-body')).toBeInTheDocument();
+        expect(
+          document.querySelector('.release-notes-body')
+        ).toBeInTheDocument();
       });
     });
 
     it('shows "no changes" text when a release body is empty', async () => {
       const releases = [makeRelease({ body: '' })];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
       await waitFor(() => {
-        expect(screen.getByText('No changes listed for this release')).toBeInTheDocument();
+        expect(
+          screen.getByText('No changes listed for this release')
+        ).toBeInTheDocument();
       });
     });
 
     it('falls back to tag_name when release name is empty', async () => {
       const releases = [makeRelease({ name: '', tag_name: 'v0.58.0' })];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -289,19 +345,29 @@ describe('ReleaseNotesHistory', () => {
 
   describe('empty state', () => {
     it('renders the empty state message when releases array is empty', async () => {
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
       await waitFor(() => {
-        expect(screen.getByText('No release notes available')).toBeInTheDocument();
+        expect(
+          screen.getByText('No release notes available')
+        ).toBeInTheDocument();
       });
     });
 
     it('does not render the accordion when releases array is empty', async () => {
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -319,7 +385,9 @@ describe('ReleaseNotesHistory', () => {
       render(<ReleaseNotesHistory />);
 
       await waitFor(() => {
-        expect(screen.getByText('Unable to load release notes')).toBeInTheDocument();
+        expect(
+          screen.getByText('Unable to load release notes')
+        ).toBeInTheDocument();
       });
     });
 
@@ -338,7 +406,9 @@ describe('ReleaseNotesHistory', () => {
       // First call fails, second call succeeds
       mockGetVersionInfo
         .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+        .mockResolvedValue({ version: '0.58.0' } as Awaited<
+          ReturnType<typeof getVersionInfo>
+        >);
       mockGetReleaseNotes
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValue({
@@ -372,8 +442,12 @@ describe('ReleaseNotesHistory', () => {
 
   describe('API calls', () => {
     it('calls getVersionInfo and getReleaseNotes on mount', async () => {
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 
@@ -384,8 +458,12 @@ describe('ReleaseNotesHistory', () => {
     });
 
     it('requests 5 releases from getReleaseNotes', async () => {
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
-      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<ReturnType<typeof getReleaseNotes>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
+      mockGetReleaseNotes.mockResolvedValue({ releases: [] } as Awaited<
+        ReturnType<typeof getReleaseNotes>
+      >);
 
       render(<ReleaseNotesHistory />);
 

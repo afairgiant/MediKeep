@@ -13,7 +13,12 @@ import EncounterLabResultRelationships from '../EncounterLabResultRelationships'
 vi.mock('../../../../services/api', () => ({
   apiService: {
     linkEncounterLabResult: vi.fn(() =>
-      Promise.resolve({ id: 10, lab_result_id: 2, purpose: 'ordered_during', relevance_note: '' })
+      Promise.resolve({
+        id: 10,
+        lab_result_id: 2,
+        purpose: 'ordered_during',
+        relevance_note: '',
+      })
     ),
     updateEncounterLabResult: vi.fn(() => Promise.resolve()),
     unlinkEncounterLabResult: vi.fn(() => Promise.resolve()),
@@ -22,13 +27,13 @@ vi.mock('../../../../services/api', () => ({
 
 // Mock @tabler/icons-react
 vi.mock('@tabler/icons-react', () => ({
-  IconPlus: (props) => <span data-testid="icon-plus" {...props} />,
-  IconTrash: (props) => <span data-testid="icon-trash" {...props} />,
-  IconEdit: (props) => <span data-testid="icon-edit" {...props} />,
-  IconCheck: (props) => <span data-testid="icon-check" {...props} />,
-  IconX: (props) => <span data-testid="icon-x" {...props} />,
-  IconFlask: (props) => <span data-testid="icon-flask" {...props} />,
-  IconInfoCircle: (props) => <span data-testid="icon-info" {...props} />,
+  IconPlus: props => <span data-testid="icon-plus" {...props} />,
+  IconTrash: props => <span data-testid="icon-trash" {...props} />,
+  IconEdit: props => <span data-testid="icon-edit" {...props} />,
+  IconCheck: props => <span data-testid="icon-check" {...props} />,
+  IconX: props => <span data-testid="icon-x" {...props} />,
+  IconFlask: props => <span data-testid="icon-flask" {...props} />,
+  IconInfoCircle: props => <span data-testid="icon-info" {...props} />,
 }));
 
 // Mock scrollIntoView for Mantine Select/MultiSelect
@@ -36,9 +41,24 @@ Element.prototype.scrollIntoView = vi.fn();
 
 describe('EncounterLabResultRelationships Component', () => {
   const mockLabResults = [
-    { id: 1, test_name: 'Complete Blood Count', status: 'final', ordered_date: '2025-01-10' },
-    { id: 2, test_name: 'Lipid Panel', status: 'preliminary', ordered_date: '2025-02-15' },
-    { id: 3, test_name: 'Thyroid Function', status: 'final', ordered_date: '2025-03-01' },
+    {
+      id: 1,
+      test_name: 'Complete Blood Count',
+      status: 'final',
+      ordered_date: '2025-01-10',
+    },
+    {
+      id: 2,
+      test_name: 'Lipid Panel',
+      status: 'preliminary',
+      ordered_date: '2025-02-15',
+    },
+    {
+      id: 3,
+      test_name: 'Thyroid Function',
+      status: 'final',
+      ordered_date: '2025-03-01',
+    },
   ];
 
   const mockRelationships = [
@@ -83,7 +103,9 @@ describe('EncounterLabResultRelationships Component', () => {
       };
       render(<EncounterLabResultRelationships {...propsNoRelationships} />);
 
-      expect(screen.getByText('No lab results linked to this visit')).toBeInTheDocument();
+      expect(
+        screen.getByText('No lab results linked to this visit')
+      ).toBeInTheDocument();
     });
 
     it('should show purpose badge for linked relationships', () => {
@@ -99,7 +121,9 @@ describe('EncounterLabResultRelationships Component', () => {
     });
 
     it('should not show Add button in view mode', () => {
-      render(<EncounterLabResultRelationships {...defaultProps} isViewMode={true} />);
+      render(
+        <EncounterLabResultRelationships {...defaultProps} isViewMode={true} />
+      );
 
       expect(screen.queryByText('Link Lab Result')).not.toBeInTheDocument();
     });
@@ -113,7 +137,9 @@ describe('EncounterLabResultRelationships Component', () => {
     it('should display relevance note when present', () => {
       render(<EncounterLabResultRelationships {...defaultProps} />);
 
-      expect(screen.getByText('Ordered to evaluate anemia')).toBeInTheDocument();
+      expect(
+        screen.getByText('Ordered to evaluate anemia')
+      ).toBeInTheDocument();
     });
 
     it('should show no relevance note message when note is empty in edit mode', () => {
@@ -134,20 +160,26 @@ describe('EncounterLabResultRelationships Component', () => {
       };
       render(<EncounterLabResultRelationships {...propsNoNote} />);
 
-      expect(screen.getByText('No relevance note provided')).toBeInTheDocument();
+      expect(
+        screen.getByText('No relevance note provided')
+      ).toBeInTheDocument();
     });
   });
 
   describe('View Mode', () => {
     it('should not show edit or delete buttons in view mode', () => {
-      render(<EncounterLabResultRelationships {...defaultProps} isViewMode={true} />);
+      render(
+        <EncounterLabResultRelationships {...defaultProps} isViewMode={true} />
+      );
 
       expect(screen.queryByTestId('icon-edit')).not.toBeInTheDocument();
       expect(screen.queryByTestId('icon-trash')).not.toBeInTheDocument();
     });
 
     it('should navigate when lab result name is clicked in view mode', async () => {
-      render(<EncounterLabResultRelationships {...defaultProps} isViewMode={true} />);
+      render(
+        <EncounterLabResultRelationships {...defaultProps} isViewMode={true} />
+      );
 
       const labResultLink = screen.getByText('Complete Blood Count');
       await userEvent.click(labResultLink);
@@ -192,7 +224,9 @@ describe('EncounterLabResultRelationships Component', () => {
       await userEvent.click(addButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Link Lab Result to Visit')).toBeInTheDocument();
+        expect(
+          screen.getByText('Link Lab Result to Visit')
+        ).toBeInTheDocument();
       });
     });
 
@@ -225,12 +259,16 @@ describe('EncounterLabResultRelationships Component', () => {
         render(<EncounterLabResultRelationships {...propsEmpty} />);
       }).not.toThrow();
 
-      expect(screen.getByText('No lab results linked to this visit')).toBeInTheDocument();
+      expect(
+        screen.getByText('No lab results linked to this visit')
+      ).toBeInTheDocument();
     });
 
     it('should handle empty labResults array gracefully', () => {
       expect(() => {
-        render(<EncounterLabResultRelationships {...defaultProps} labResults={[]} />);
+        render(
+          <EncounterLabResultRelationships {...defaultProps} labResults={[]} />
+        );
       }).not.toThrow();
     });
   });
@@ -244,7 +282,12 @@ describe('EncounterLabResultRelationships Component', () => {
 
     it('should render without errors in view mode', () => {
       expect(() => {
-        render(<EncounterLabResultRelationships {...defaultProps} isViewMode={true} />);
+        render(
+          <EncounterLabResultRelationships
+            {...defaultProps}
+            isViewMode={true}
+          />
+        );
       }).not.toThrow();
     });
   });

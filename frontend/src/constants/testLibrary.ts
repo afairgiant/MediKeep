@@ -21,7 +21,12 @@ export const TEST_LIBRARY_VERSION = typedLibraryData.version;
 export const TEST_LIBRARY_LAST_UPDATED = typedLibraryData.lastUpdated;
 
 // Re-export types for convenience
-export type { TestLibraryItem, TestCategory, ResultType, QualitativeValue } from './testLibraryTypes';
+export type {
+  TestLibraryItem,
+  TestCategory,
+  ResultType,
+  QualitativeValue,
+} from './testLibraryTypes';
 
 /**
  * Helper Functions
@@ -36,7 +41,10 @@ const SORTED_TEST_LIBRARY = [...TEST_LIBRARY].sort((a, b) =>
  * Search tests by name, abbreviation, or common names
  * Supports fuzzy matching for better UX
  */
-export function searchTests(query: string, limit: number = 200): TestLibraryItem[] {
+export function searchTests(
+  query: string,
+  limit: number = 200
+): TestLibraryItem[] {
   if (!query || query.trim().length === 0) {
     // Return pre-sorted tests (performance optimization)
     return SORTED_TEST_LIBRARY.slice(0, limit);
@@ -44,38 +52,45 @@ export function searchTests(query: string, limit: number = 200): TestLibraryItem
 
   const searchTerm = query.toLowerCase().trim();
 
-  return TEST_LIBRARY
-    .map(test => {
-      let score = 0;
+  return TEST_LIBRARY.map(test => {
+    let score = 0;
 
-      // Exact match on test name or abbreviation (highest priority)
-      if (test.test_name.toLowerCase() === searchTerm || test.abbreviation?.toLowerCase() === searchTerm) {
-        score = 1000;
-      }
-      // Starts with query
-      else if (test.test_name.toLowerCase().startsWith(searchTerm) || test.abbreviation?.toLowerCase().startsWith(searchTerm)) {
-        score = 500;
-      }
-      // Contains query in test name
-      else if (test.test_name.toLowerCase().includes(searchTerm)) {
-        score = 200;
-      }
-      // Contains query in abbreviation
-      else if (test.abbreviation?.toLowerCase().includes(searchTerm)) {
-        score = 150;
-      }
-      // Match common names
-      else if (test.common_names?.some(name => name.toLowerCase().includes(searchTerm))) {
-        score = 100;
-      }
+    // Exact match on test name or abbreviation (highest priority)
+    if (
+      test.test_name.toLowerCase() === searchTerm ||
+      test.abbreviation?.toLowerCase() === searchTerm
+    ) {
+      score = 1000;
+    }
+    // Starts with query
+    else if (
+      test.test_name.toLowerCase().startsWith(searchTerm) ||
+      test.abbreviation?.toLowerCase().startsWith(searchTerm)
+    ) {
+      score = 500;
+    }
+    // Contains query in test name
+    else if (test.test_name.toLowerCase().includes(searchTerm)) {
+      score = 200;
+    }
+    // Contains query in abbreviation
+    else if (test.abbreviation?.toLowerCase().includes(searchTerm)) {
+      score = 150;
+    }
+    // Match common names
+    else if (
+      test.common_names?.some(name => name.toLowerCase().includes(searchTerm))
+    ) {
+      score = 100;
+    }
 
-      // Boost score for common tests
-      if (test.is_common && score > 0) {
-        score += 50;
-      }
+    // Boost score for common tests
+    if (test.is_common && score > 0) {
+      score += 50;
+    }
 
-      return { test, score };
-    })
+    return { test, score };
+  })
     .filter(result => result.score > 0)
     .sort((a, b) => {
       // First sort by score (descending)
@@ -92,19 +107,21 @@ export function searchTests(query: string, limit: number = 200): TestLibraryItem
 /**
  * Get tests by category
  */
-export function getTestsByCategory(category: TestLibraryItem['category']): TestLibraryItem[] {
-  return TEST_LIBRARY
-    .filter(test => test.category === category)
-    .sort((a, b) => (a.display_order || 999) - (b.display_order || 999));
+export function getTestsByCategory(
+  category: TestLibraryItem['category']
+): TestLibraryItem[] {
+  return TEST_LIBRARY.filter(test => test.category === category).sort(
+    (a, b) => (a.display_order || 999) - (b.display_order || 999)
+  );
 }
 
 /**
  * Get only common tests (for default suggestions)
  */
 export function getCommonTests(): TestLibraryItem[] {
-  return TEST_LIBRARY
-    .filter(test => test.is_common)
-    .sort((a, b) => (a.display_order || 999) - (b.display_order || 999));
+  return TEST_LIBRARY.filter(test => test.is_common).sort(
+    (a, b) => (a.display_order || 999) - (b.display_order || 999)
+  );
 }
 
 /**
@@ -112,15 +129,19 @@ export function getCommonTests(): TestLibraryItem[] {
  */
 export function getTestByName(testName: string): TestLibraryItem | undefined {
   return TEST_LIBRARY.find(
-    test => test.test_name.toLowerCase() === testName.toLowerCase() ||
-            test.abbreviation?.toLowerCase() === testName.toLowerCase()
+    test =>
+      test.test_name.toLowerCase() === testName.toLowerCase() ||
+      test.abbreviation?.toLowerCase() === testName.toLowerCase()
   );
 }
 
 /**
  * Get autocomplete options formatted for Mantine Autocomplete
  */
-export function getAutocompleteOptions(query: string = '', limit: number = 200): string[] {
+export function getAutocompleteOptions(
+  query: string = '',
+  limit: number = 200
+): string[] {
   const tests = searchTests(query, limit);
   return tests.map(test => {
     if (test.abbreviation) {

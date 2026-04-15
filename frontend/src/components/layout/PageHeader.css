@@ -219,11 +219,7 @@
 
 /* Dashboard variant styles */
 .dashboard-header {
-  background: linear-gradient(
-    135deg,
-    #7048e8 0%,
-    #9775fa 100%
-  ) !important;
+  background: linear-gradient(135deg, #7048e8 0%, #9775fa 100%) !important;
   color: var(--color-text-light, white) !important;
   box-shadow: var(--shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1)) !important;
   border-bottom: none !important;
@@ -321,7 +317,7 @@
 }
 
 /* Ensure Mantine dropdowns are not cut off */
-[data-mantine-component="Menu.Dropdown"] {
+[data-mantine-component='Menu.Dropdown'] {
   overflow: visible !important;
   z-index: 99999 !important;
 }
@@ -472,7 +468,6 @@
   }
 }
 
-
 /* Exactly 1024px - very tight spacing */
 
 /* Small Laptop: 1025px - 1200px */
@@ -536,16 +531,20 @@
 }
 
 /* Standard (non-gradient) page header variant */
-.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle {
+.page-header:not(.dashboard-header):not(.medical-page-header)
+  .header-mobile-nav-toggle {
   background: var(--color-bg-secondary, #f1f3f5);
   border-color: var(--color-border-light, #e5e7eb);
 }
 
-.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle .hamburger-line {
+.page-header:not(.dashboard-header):not(.medical-page-header)
+  .header-mobile-nav-toggle
+  .hamburger-line {
   background: var(--color-text-primary, #333);
 }
 
-.page-header:not(.dashboard-header):not(.medical-page-header) .header-mobile-nav-toggle:hover {
+.page-header:not(.dashboard-header):not(.medical-page-header)
+  .header-mobile-nav-toggle:hover {
   background: var(--color-bg-tertiary, #e9ecef);
 }
 

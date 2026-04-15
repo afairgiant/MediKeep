@@ -51,7 +51,10 @@ declare module '../utils/medicalPageConfigs' {
     startDateField?: string;
     endDateField?: string;
     dateRangeOptions?: FilterOption[];
-    customFilters?: Record<string, (item: any, filterValue: string, additionalData?: any) => boolean>;
+    customFilters?: Record<
+      string,
+      (item: any, filterValue: string, additionalData?: any) => boolean
+    >;
     customSearchFunction?: (item: any, searchTerm: string) => boolean;
     additionalFilters?: Array<{
       field: string;
@@ -66,7 +69,10 @@ declare module '../utils/medicalPageConfigs' {
     defaultSortOrder: 'asc' | 'desc';
     sortOptions: SortOption[];
     sortTypes?: Record<string, string>;
-    customSortFunctions?: Record<string, (a: any, b: any, sortOrder?: string) => number>;
+    customSortFunctions?: Record<
+      string,
+      (a: any, b: any, sortOrder?: string) => number
+    >;
   }
 
   export interface PageConfigFilterControls {

@@ -94,7 +94,10 @@ const ToolsMaintenance = () => {
             </Text>
           </Group>
           <Text c="dimmed" size="md">
-            {t('tools.subtitle', 'Administrative tools for system maintenance and data management')}
+            {t(
+              'tools.subtitle',
+              'Administrative tools for system maintenance and data management'
+            )}
           </Text>
         </Card>
 
@@ -107,11 +110,10 @@ const ToolsMaintenance = () => {
             <Text fw={600} size="lg">
               {t('tools.testLibrary.title', 'Test Library Maintenance')}
             </Text>
-            <Badge
-              variant="light"
-              color={testLibraryError ? 'red' : 'green'}
-            >
-              {testLibraryError ? 'Error' : t('tools.testLibrary.operational', 'Operational')}
+            <Badge variant="light" color={testLibraryError ? 'red' : 'green'}>
+              {testLibraryError
+                ? 'Error'
+                : t('tools.testLibrary.operational', 'Operational')}
             </Badge>
           </Group>
 
@@ -130,7 +132,10 @@ const ToolsMaintenance = () => {
               {testLibraryInfo && (
                 <Stack gap={0} mb="md">
                   <HealthItem
-                    label={t('tools.testLibrary.libraryVersion', 'Library Version')}
+                    label={t(
+                      'tools.testLibrary.libraryVersion',
+                      'Library Version'
+                    )}
                     value={testLibraryInfo.version}
                     status="info"
                   />
@@ -156,26 +161,47 @@ const ToolsMaintenance = () => {
                 <Alert
                   color={syncResult.success ? 'green' : 'red'}
                   variant="light"
-                  icon={syncResult.success ? <IconCheck size={16} /> : <IconX size={16} />}
+                  icon={
+                    syncResult.success ? (
+                      <IconCheck size={16} />
+                    ) : (
+                      <IconX size={16} />
+                    )
+                  }
                   mb="md"
                   withCloseButton
                   onClose={() => setSyncResult(null)}
                   title={
                     syncResult.type === 'reload'
-                      ? t('tools.testLibrary.libraryReloaded', 'Library Reloaded')
+                      ? t(
+                          'tools.testLibrary.libraryReloaded',
+                          'Library Reloaded'
+                        )
                       : t('tools.testLibrary.syncComplete', 'Sync Complete')
                   }
                 >
                   {syncResult.type === 'sync' && (
                     <Group gap="lg" mb="xs">
                       <Text size="sm">
-                        {t('shared:labels.processedCount', 'Processed: {{count}}', { count: syncResult.components_processed })}
+                        {t(
+                          'shared:labels.processedCount',
+                          'Processed: {{count}}',
+                          { count: syncResult.components_processed }
+                        )}
                       </Text>
                       <Text size="sm">
-                        {t('shared:labels.namesUpdatedCount', 'Names Updated: {{count}}', { count: syncResult.canonical_names_updated })}
+                        {t(
+                          'shared:labels.namesUpdatedCount',
+                          'Names Updated: {{count}}',
+                          { count: syncResult.canonical_names_updated }
+                        )}
                       </Text>
                       <Text size="sm">
-                        {t('shared:labels.categoriesUpdatedCount', 'Categories Updated: {{count}}', { count: syncResult.categories_updated })}
+                        {t(
+                          'shared:labels.categoriesUpdatedCount',
+                          'Categories Updated: {{count}}',
+                          { count: syncResult.categories_updated }
+                        )}
                       </Text>
                     </Group>
                   )}
@@ -217,9 +243,35 @@ const ToolsMaintenance = () => {
                 mt="md"
                 icon={<IconInfoCircle size={16} />}
               >
-                <Text size="sm" mb={4} dangerouslySetInnerHTML={{ __html: t('tools.testLibrary.reloadDesc', '<strong>Reload Library:</strong> Refreshes the test library from disk (use after updating test_library.json)') }} />
-                <Text size="sm" mb={4} dangerouslySetInnerHTML={{ __html: t('tools.testLibrary.syncUnmatchedDesc', '<strong>Sync Unmatched:</strong> Updates components that don\'t have a canonical name yet') }} />
-                <Text size="sm" dangerouslySetInnerHTML={{ __html: t('tools.testLibrary.forceSyncAllDesc', '<strong>Force Sync All:</strong> Re-matches all components (categories and canonical names)') }} />
+                <Text
+                  size="sm"
+                  mb={4}
+                  dangerouslySetInnerHTML={{
+                    __html: t(
+                      'tools.testLibrary.reloadDesc',
+                      '<strong>Reload Library:</strong> Refreshes the test library from disk (use after updating test_library.json)'
+                    ),
+                  }}
+                />
+                <Text
+                  size="sm"
+                  mb={4}
+                  dangerouslySetInnerHTML={{
+                    __html: t(
+                      'tools.testLibrary.syncUnmatchedDesc',
+                      "<strong>Sync Unmatched:</strong> Updates components that don't have a canonical name yet"
+                    ),
+                  }}
+                />
+                <Text
+                  size="sm"
+                  dangerouslySetInnerHTML={{
+                    __html: t(
+                      'tools.testLibrary.forceSyncAllDesc',
+                      '<strong>Force Sync All:</strong> Re-matches all components (categories and canonical names)'
+                    ),
+                  }}
+                />
               </Alert>
             </>
           )}

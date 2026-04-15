@@ -5,9 +5,7 @@ import { MantineProvider } from '@mantine/core';
 import NavigationToggle from '../NavigationToggle';
 
 const TestWrapper = ({ children }) => (
-  <MantineProvider>
-    {children}
-  </MantineProvider>
+  <MantineProvider>{children}</MantineProvider>
 );
 
 describe('NavigationToggle', () => {
@@ -28,7 +26,9 @@ describe('NavigationToggle', () => {
       </TestWrapper>
     );
 
-    const button = screen.getByRole('button', { name: /open navigation menu/i });
+    const button = screen.getByRole('button', {
+      name: /open navigation menu/i,
+    });
     expect(button).toBeInTheDocument();
   });
 
@@ -39,7 +39,9 @@ describe('NavigationToggle', () => {
       </TestWrapper>
     );
 
-    const button = screen.getByRole('button', { name: /close navigation menu/i });
+    const button = screen.getByRole('button', {
+      name: /close navigation menu/i,
+    });
     expect(button).toBeInTheDocument();
   });
 

@@ -6,13 +6,13 @@ import {
   Group,
   ThemeIcon,
   Paper,
-  Badge
+  Badge,
 } from '@mantine/core';
 import {
   IconFolder,
   IconCloud,
   IconServer,
-  IconCheck
+  IconCheck,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,7 +25,7 @@ const StorageBackendSelector = ({
   papraConnected = false,
   disabled = false,
   size = 'sm',
-  className = ''
+  className = '',
 }) => {
   const { t } = useTranslation('documents');
   const data = [
@@ -34,7 +34,7 @@ const StorageBackendSelector = ({
       label: 'Local Storage',
       icon: IconFolder,
       color: 'blue',
-      description: 'Store files locally on this server'
+      description: 'Store files locally on this server',
     },
     {
       value: 'paperless',
@@ -46,7 +46,7 @@ const StorageBackendSelector = ({
         : paperlessEnabled
           ? 'Paperless enabled but connection not verified - check Settings'
           : 'Paperless not enabled - enable in Settings',
-      disabled: false
+      disabled: false,
     },
     {
       value: 'papra',
@@ -58,34 +58,28 @@ const StorageBackendSelector = ({
         : papraEnabled
           ? 'Papra enabled but connection not verified - check Settings'
           : 'Papra not enabled - enable in Settings',
-      disabled: false
-    }
+      disabled: false,
+    },
   ];
 
   return (
     <Stack gap="xs" className={className}>
       <Group gap="xs" align="center">
-        <Text size="sm" fw={500}>{t('storage.backendLabel')}</Text>
+        <Text size="sm" fw={500}>
+          {t('storage.backendLabel')}
+        </Text>
         {paperlessConnected && (
-          <Badge
-            size="xs"
-            color="green"
-            leftSection={<IconCheck size={10} />}
-          >
+          <Badge size="xs" color="green" leftSection={<IconCheck size={10} />}>
             {t('storage.connectedBadge')}
           </Badge>
         )}
         {papraConnected && (
-          <Badge
-            size="xs"
-            color="teal"
-            leftSection={<IconCheck size={10} />}
-          >
+          <Badge size="xs" color="teal" leftSection={<IconCheck size={10} />}>
             {t('storage.connectedBadge')}
           </Badge>
         )}
       </Group>
-      
+
       <SegmentedControl
         value={value}
         onChange={onChange}
@@ -95,9 +89,9 @@ const StorageBackendSelector = ({
           value: item.value,
           label: (
             <Group gap="xs" wrap="nowrap">
-              <ThemeIcon 
-                variant="light" 
-                color={item.disabled ? 'gray' : item.color} 
+              <ThemeIcon
+                variant="light"
+                color={item.disabled ? 'gray' : item.color}
                 size="sm"
               >
                 <item.icon size={14} />
@@ -107,7 +101,7 @@ const StorageBackendSelector = ({
               </Text>
             </Group>
           ),
-          disabled: item.disabled
+          disabled: item.disabled,
         }))}
         styles={{
           indicator: {
@@ -115,10 +109,10 @@ const StorageBackendSelector = ({
           },
           control: {
             padding: '8px 12px',
-          }
+          },
         }}
       />
-      
+
       <Text size="xs" c="dimmed">
         {data.find(item => item.value === value)?.description}
       </Text>

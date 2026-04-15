@@ -9,12 +9,12 @@
  * Based on common device sizes and Bootstrap/Mantine standards
  */
 export const BREAKPOINTS = Object.freeze({
-  xs: 0,     // Mobile phones (0-575px)
-  sm: 576,   // Large phones, small tablets (576-767px)
-  md: 768,   // Tablets, small laptops with zoom (768-1023px)
-  lg: 1024,  // Laptops, small desktops (1024-1279px)
-  xl: 1280,  // Desktop monitors (1280-1535px)
-  xxl: 1536  // Large desktop monitors (1536px+)
+  xs: 0, // Mobile phones (0-575px)
+  sm: 576, // Large phones, small tablets (576-767px)
+  md: 768, // Tablets, small laptops with zoom (768-1023px)
+  lg: 1024, // Laptops, small desktops (1024-1279px)
+  xl: 1280, // Desktop monitors (1280-1535px)
+  xxl: 1536, // Large desktop monitors (1536px+)
 });
 
 /**
@@ -23,27 +23,27 @@ export const BREAKPOINTS = Object.freeze({
 export const RESPONSIVE_CONFIG = Object.freeze({
   // Debounce delay for resize events in milliseconds
   debounceDelay: 150,
-  
+
   // Performance mode: 'balanced' | 'performance' | 'quality'
   // balanced: Standard debouncing and updates
   // performance: Aggressive debouncing, fewer updates
   // quality: Minimal debouncing, smooth updates
   performanceMode: 'balanced',
-  
+
   // Default breakpoint to use as fallback
   fallbackBreakpoint: 'lg',
-  
+
   // Enable virtual scrolling for large lists
   enableVirtualization: true,
-  
+
   // Desktop-first approach (false = mobile-first)
   mobileFirst: false,
-  
+
   // Transition duration for responsive changes (ms)
   transitionDuration: 200,
-  
+
   // Enable debug logging for responsive events
-  debugMode: false
+  debugMode: false,
 });
 
 /**
@@ -112,7 +112,7 @@ export const BREAKPOINT_NAMES = Object.freeze({
   md: 'Medium',
   lg: 'Large',
   xl: 'Extra Large',
-  xxl: 'Extra Extra Large'
+  xxl: 'Extra Extra Large',
 });
 
 /**
@@ -126,9 +126,9 @@ export const RESPONSIVE_VALUES = Object.freeze({
     md: '720px',
     lg: '960px',
     xl: '1140px',
-    xxl: '1320px'
+    xxl: '1320px',
   },
-  
+
   // Grid columns
   gridColumns: {
     xs: 1,
@@ -136,9 +136,9 @@ export const RESPONSIVE_VALUES = Object.freeze({
     md: 2,
     lg: 3,
     xl: 4,
-    xxl: 4
+    xxl: 4,
   },
-  
+
   // Spacing/gutter sizes
   gutter: {
     xs: 8,
@@ -146,9 +146,9 @@ export const RESPONSIVE_VALUES = Object.freeze({
     md: 16,
     lg: 20,
     xl: 24,
-    xxl: 28
+    xxl: 28,
   },
-  
+
   // Font size scales
   fontSize: {
     xs: '14px',
@@ -156,6 +156,6 @@ export const RESPONSIVE_VALUES = Object.freeze({
     md: '15px',
     lg: '16px',
     xl: '16px',
-    xxl: '16px'
-  }
+    xxl: '16px',
+  },
 });

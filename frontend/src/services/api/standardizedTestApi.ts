@@ -33,34 +33,51 @@ class StandardizedTestApi {
   /**
    * Search for standardized tests
    */
-  async search(query: string, category?: string, limit: number = 200): Promise<TestSearchResponse> {
+  async search(
+    query: string,
+    category?: string,
+    limit: number = 200
+  ): Promise<TestSearchResponse> {
     const params: any = { limit };
     if (query) params.query = query;
     if (category) params.category = category;
 
-    const response = await apiService.get(`${this.basePath}/search`, { params });
+    const response = await apiService.get(`${this.basePath}/search`, {
+      params,
+    });
     return response.data;
   }
 
   /**
    * Get autocomplete suggestions
    */
-  async autocomplete(query: string, category?: string, limit: number = 50): Promise<AutocompleteOption[]> {
+  async autocomplete(
+    query: string,
+    category?: string,
+    limit: number = 50
+  ): Promise<AutocompleteOption[]> {
     const params: any = { query, limit };
     if (category) params.category = category;
 
-    const response = await apiService.get(`${this.basePath}/autocomplete`, { params });
+    const response = await apiService.get(`${this.basePath}/autocomplete`, {
+      params,
+    });
     return response.data;
   }
 
   /**
    * Get common/frequently used tests
    */
-  async getCommon(category?: string, limit: number = 100): Promise<StandardizedTest[]> {
+  async getCommon(
+    category?: string,
+    limit: number = 100
+  ): Promise<StandardizedTest[]> {
     const params: any = { limit };
     if (category) params.category = category;
 
-    const response = await apiService.get(`${this.basePath}/common`, { params });
+    const response = await apiService.get(`${this.basePath}/common`, {
+      params,
+    });
     return response.data;
   }
 
@@ -68,7 +85,9 @@ class StandardizedTestApi {
    * Get tests by category
    */
   async getByCategory(category: string): Promise<StandardizedTest[]> {
-    const response = await apiService.get(`${this.basePath}/by-category/${category}`);
+    const response = await apiService.get(
+      `${this.basePath}/by-category/${category}`
+    );
     return response.data;
   }
 
@@ -76,7 +95,9 @@ class StandardizedTestApi {
    * Get test by LOINC code
    */
   async getByLoinc(loincCode: string): Promise<StandardizedTest> {
-    const response = await apiService.get(`${this.basePath}/by-loinc/${loincCode}`);
+    const response = await apiService.get(
+      `${this.basePath}/by-loinc/${loincCode}`
+    );
     return response.data;
   }
 
@@ -84,14 +105,18 @@ class StandardizedTestApi {
    * Get test by name (exact match)
    */
   async getByName(testName: string): Promise<StandardizedTest> {
-    const response = await apiService.get(`${this.basePath}/by-name/${testName}`);
+    const response = await apiService.get(
+      `${this.basePath}/by-name/${testName}`
+    );
     return response.data;
   }
 
   /**
    * Get test count
    */
-  async count(category?: string): Promise<{ category: string | null; count: number }> {
+  async count(
+    category?: string
+  ): Promise<{ category: string | null; count: number }> {
     const params: any = {};
     if (category) params.category = category;
 

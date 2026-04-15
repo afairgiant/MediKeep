@@ -28,24 +28,32 @@ class AdminApiService extends BaseApiService {
     return this.get('/dashboard/stats');
   }
 
-  async getRecentActivity(limit = 20, actionFilterOrSignal = null, entityFilter = null) {
+  async getRecentActivity(
+    limit = 20,
+    actionFilterOrSignal = null,
+    entityFilter = null
+  ) {
     const params = { limit };
-    
+
     // Handle backward compatibility: if second parameter looks like a signal, treat it as such
     let signal = null;
     let actionFilter = null;
-    
-    if (actionFilterOrSignal && typeof actionFilterOrSignal === 'object' && actionFilterOrSignal.aborted !== undefined) {
+
+    if (
+      actionFilterOrSignal &&
+      typeof actionFilterOrSignal === 'object' &&
+      actionFilterOrSignal.aborted !== undefined
+    ) {
       // Second parameter is an AbortSignal
       signal = actionFilterOrSignal;
     } else if (typeof actionFilterOrSignal === 'string') {
       // Second parameter is an action filter
       actionFilter = actionFilterOrSignal;
     }
-    
+
     if (actionFilter) params.action_filter = actionFilter;
     if (entityFilter) params.entity_filter = entityFilter;
-    
+
     const options = signal ? { signal } : {};
     return this.get('/dashboard/recent-activity', params, options);
   }
@@ -66,7 +74,10 @@ class AdminApiService extends BaseApiService {
     if (options.startDate) params.start_date = options.startDate;
     if (options.endDate) params.end_date = options.endDate;
     if (options.compare) params.compare = true;
-    return this.get('/dashboard/analytics-data', { params, signal: options.signal });
+    return this.get('/dashboard/analytics-data', {
+      params,
+      signal: options.signal,
+    });
   }
 
   async getFrontendLogHealth() {

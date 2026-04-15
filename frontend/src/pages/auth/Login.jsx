@@ -163,7 +163,7 @@ const Login = () => {
                 <IconLock size={18} />
               </span>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 name="password"
                 value={formData.password}
@@ -175,7 +175,7 @@ const Login = () => {
               <span
                 className={styles.inputIconSuffix}
                 onClick={() => setShowPassword(prev => !prev)}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     setShowPassword(prev => !prev);
@@ -183,7 +183,11 @@ const Login = () => {
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
+                aria-label={
+                  showPassword
+                    ? t('login.hidePassword')
+                    : t('login.showPassword')
+                }
               >
                 {showPassword ? (
                   <IconEyeOff size={18} />
@@ -194,8 +198,11 @@ const Login = () => {
             </div>
           </div>
 
-
-          <button type="submit" disabled={isLoading} className={styles.submitBtn}>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={styles.submitBtn}
+          >
             {isLoading ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
@@ -212,7 +219,16 @@ const Login = () => {
               onClick={handleSSOLogin}
               disabled={isLoading || ssoLoading}
             >
-              {ssoLoading ? t('common:labels.loading') : t('login.continueWith', { provider: ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO' })}
+              {ssoLoading
+                ? t('common:labels.loading')
+                : t('login.continueWith', {
+                    provider:
+                      ssoConfig.provider_type === 'google'
+                        ? 'Google'
+                        : ssoConfig.provider_type === 'github'
+                          ? 'GitHub'
+                          : 'SSO',
+                  })}
             </button>
           </div>
         )}
@@ -236,7 +252,6 @@ const Login = () => {
           </div>
         )}
       </div>
-
     </div>
   );
 };

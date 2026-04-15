@@ -1,14 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Stack,
-  Paper,
-  Group,
-  Text,
-  Badge,
-  Loader,
-  Alert,
-} from '@mantine/core';
+import { Stack, Paper, Group, Text, Badge, Loader, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
@@ -34,7 +26,10 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
       setError(null);
 
       try {
-        const data = await apiService.getMedicationTreatments(medicationId, controller.signal);
+        const data = await apiService.getMedicationTreatments(
+          medicationId,
+          controller.signal
+        );
         if (isMountedRef.current && !controller.signal.aborted) {
           setTreatments(Array.isArray(data) ? data : []);
         }
@@ -66,7 +61,9 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
     return (
       <Stack align="center" py="md">
         <Loader size="sm" />
-        <Text size="sm" c="dimmed">{t('medications.treatments.loading', 'Loading treatments...')}</Text>
+        <Text size="sm" c="dimmed">
+          {t('medications.treatments.loading', 'Loading treatments...')}
+        </Text>
       </Stack>
     );
   }
@@ -82,14 +79,17 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
   if (treatments.length === 0) {
     return (
       <Text size="sm" c="dimmed" ta="center" py="md">
-        {t('medications.treatments.empty', 'This medication is not used in any treatments.')}
+        {t(
+          'medications.treatments.empty',
+          'This medication is not used in any treatments.'
+        )}
       </Text>
     );
   }
 
   return (
     <Stack gap="xs">
-      {treatments.map((rel) => {
+      {treatments.map(rel => {
         const trt = rel.treatment;
         if (!trt) return null;
 
@@ -99,7 +99,9 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
             withBorder
             p="xs"
             style={onTreatmentClick ? { cursor: 'pointer' } : undefined}
-            onClick={onTreatmentClick ? () => onTreatmentClick(trt.id) : undefined}
+            onClick={
+              onTreatmentClick ? () => onTreatmentClick(trt.id) : undefined
+            }
           >
             <Group justify="space-between" wrap="wrap">
               <Stack gap={2}>
@@ -144,7 +146,8 @@ const MedicationTreatmentsList = ({ medicationId, onTreatmentClick }) => {
                 )}
                 {rel.specific_frequency && (
                   <Badge variant="outline" size="xs" color="cyan">
-                    {t('medications.treatments.overrideFrequency', 'Freq')}: {rel.specific_frequency}
+                    {t('medications.treatments.overrideFrequency', 'Freq')}:{' '}
+                    {rel.specific_frequency}
                   </Badge>
                 )}
               </Group>

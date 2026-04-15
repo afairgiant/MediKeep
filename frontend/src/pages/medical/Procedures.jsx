@@ -21,7 +21,7 @@ import { notifications } from '@mantine/notifications';
 import {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  getUserFriendlyError
+  getUserFriendlyError,
 } from '../../constants/errorMessages';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
@@ -37,14 +37,7 @@ import ProcedureViewModal from '../../components/medical/procedures/ProcedureVie
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
-import {
-  Button,
-  Stack,
-  Text,
-  Container,
-  Card,
-  Paper,
-} from '@mantine/core';
+import { Button, Stack, Text, Container, Card, Paper } from '@mantine/core';
 
 const INITIAL_FORM_DATA = {
   procedure_name: '',
@@ -72,13 +65,29 @@ const Procedures = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('procedures');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Get practitioners data
   const { practitioners } = usePractitioners();
 
   // Get standardized formatters for procedures with linking support
-  const formatters = getEntityFormatters('procedures', practitioners, navigate, null, formatDate);
+  const formatters = getEntityFormatters(
+    'procedures',
+    practitioners,
+    navigate,
+    null,
+    formatDate
+  );
 
   // Modern data management with useMedicalData
   const {
@@ -114,7 +123,8 @@ const Procedures = () => {
   const dataManagement = useDataManagement(procedures, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('procedure', procedures);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('procedure', procedures);
 
   // View modal navigation with URL deep linking
   const {
@@ -125,7 +135,7 @@ const Procedures = () => {
   } = useViewModalNavigation({
     items: procedures,
     loading,
-    onClose: (procedure) => {
+    onClose: procedure => {
       if (procedure) {
         refreshFileCount(procedure.id);
       }
@@ -139,7 +149,8 @@ const Procedures = () => {
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] = useState(null);
+  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] =
+    useState(null);
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
@@ -171,7 +182,7 @@ const Procedures = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('procedures_form_error', {
         message: 'Form submission error in procedures',
         error,
@@ -204,7 +215,9 @@ const Procedures = () => {
       procedure_setting: procedure.procedure_setting || '',
       procedure_complications: procedure.procedure_complications || '',
       procedure_duration: procedure.procedure_duration || '',
-      practitioner_id: procedure.practitioner_id ? String(procedure.practitioner_id) : '',
+      practitioner_id: procedure.practitioner_id
+        ? String(procedure.practitioner_id)
+        : '',
       anesthesia_type: procedure.anesthesia_type || '',
       anesthesia_notes: procedure.anesthesia_notes || '',
       tags: procedure.tags || [],
@@ -300,7 +313,7 @@ const Procedures = () => {
       if (success && resultId) {
         // Check if we have files to upload
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
-        
+
         if (hasPendingFiles) {
           logger.info('procedures_starting_file_upload', {
             message: 'Starting file upload process',
@@ -339,7 +352,10 @@ const Procedures = () => {
           completeFileUpload(true, 0, 0);
         }
       } else {
-        handleSubmissionFailure(new Error(ERROR_MESSAGES.FORM_SUBMISSION_FAILED), 'form');
+        handleSubmissionFailure(
+          new Error(ERROR_MESSAGES.FORM_SUBMISSION_FAILED),
+          'form'
+        );
       }
     } catch (error) {
       logger.error('procedures_submission_error', {
@@ -347,7 +363,7 @@ const Procedures = () => {
         error: error.message,
         component: 'Procedures',
       });
-      
+
       handleSubmissionFailure(error, 'form');
     }
   };
@@ -356,14 +372,21 @@ const Procedures = () => {
   const filteredProcedures = dataManagement.data;
   const paginatedProcedures = paginateData(filteredProcedures);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredProcedures.length); }, [filteredProcedures.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredProcedures.length);
+  }, [filteredProcedures.length, clampPage]);
 
   if (loading) {
     return (
       <MedicalPageLoading
         message={t('procedures.loadingProcedures', 'Loading procedures...')}
-        hint={t('shared:labels.ifThisTakesTooLongPleaseRefreshThePage', 'If this takes too long, please refresh the page')}
+        hint={t(
+          'shared:labels.ifThisTakesTooLongPleaseRefreshThePage',
+          'If this takes too long, please refresh the page'
+        )}
       />
     );
   }
@@ -371,7 +394,10 @@ const Procedures = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('shared:categories.procedures', 'Procedures')} icon="🔬" />
+        <PageHeader
+          title={t('shared:categories.procedures', 'Procedures')}
+          icon="🔬"
+        />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts
@@ -402,11 +428,24 @@ const Procedures = () => {
               emoji="🔬"
               title={t('procedures.noProceduresFound', 'No Procedures Found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('procedures.startAdding', 'Start by adding your first procedure.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'procedures.startAdding',
+                'Start by adding your first procedure.'
+              )}
               actionButton={
-                <Button variant="filled" onClick={handleAddProcedure} disabled={isViewOnly}>
-                  {t('procedures.addFirstProcedure', 'Add Your First Procedure')}
+                <Button
+                  variant="filled"
+                  onClick={handleAddProcedure}
+                  disabled={isViewOnly}
+                >
+                  {t(
+                    'procedures.addFirstProcedure',
+                    'Add Your First Procedure'
+                  )}
                 </Button>
               }
             />
@@ -414,7 +453,7 @@ const Procedures = () => {
             <AnimatedCardGrid
               items={paginatedProcedures}
               columns={{ base: 12, sm: 6, lg: 4 }}
-              renderCard={(procedure) => (
+              renderCard={procedure => (
                 <ProcedureCard
                   procedure={procedure}
                   onEdit={handleEditProcedure}
@@ -439,15 +478,60 @@ const Procedures = () => {
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
                 columns={[
-                  { header: t('shared:fields.procedureName'), accessor: 'procedure_name', priority: 'high', width: 200 },
-                  { header: t('shared:labels.type'), accessor: 'procedure_type', priority: 'medium', width: 120 },
-                  { header: t('procedures.table.code'), accessor: 'procedure_code', priority: 'low', width: 100 },
-                  { header: t('shared:labels.date'), accessor: 'date', priority: 'high', width: 120 },
-                  { header: t('shared:fields.status'), accessor: 'status', priority: 'high', width: 100 },
-                  { header: t('shared:labels.setting'), accessor: 'procedure_setting', priority: 'low', width: 120 },
-                  { header: t('shared:labels.facility'), accessor: 'facility', priority: 'medium', width: 150 },
-                  { header: t('shared:fields.practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 150 },
-                  { header: t('shared:labels.description'), accessor: 'description', priority: 'low', width: 200 },
+                  {
+                    header: t('shared:fields.procedureName'),
+                    accessor: 'procedure_name',
+                    priority: 'high',
+                    width: 200,
+                  },
+                  {
+                    header: t('shared:labels.type'),
+                    accessor: 'procedure_type',
+                    priority: 'medium',
+                    width: 120,
+                  },
+                  {
+                    header: t('procedures.table.code'),
+                    accessor: 'procedure_code',
+                    priority: 'low',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:labels.date'),
+                    accessor: 'date',
+                    priority: 'high',
+                    width: 120,
+                  },
+                  {
+                    header: t('shared:fields.status'),
+                    accessor: 'status',
+                    priority: 'high',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:labels.setting'),
+                    accessor: 'procedure_setting',
+                    priority: 'low',
+                    width: 120,
+                  },
+                  {
+                    header: t('shared:labels.facility'),
+                    accessor: 'facility',
+                    priority: 'medium',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:fields.practitioner'),
+                    accessor: 'practitioner_name',
+                    priority: 'medium',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:labels.description'),
+                    accessor: 'description',
+                    priority: 'low',
+                    width: 200,
+                  },
                 ]}
                 patientData={currentPatient}
                 tableName="Procedures"
@@ -461,7 +545,15 @@ const Procedures = () => {
             </Paper>
           )}
           {filteredProcedures.length > 0 && (
-            <PaginationControls page={page} totalPages={totalPages(filteredProcedures.length)} pageSize={pageSize} totalRecords={filteredProcedures.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredProcedures.length)}
+              pageSize={pageSize}
+              totalRecords={filteredProcedures.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </Stack>
       </Container>
@@ -469,7 +561,11 @@ const Procedures = () => {
       <ProcedureFormWrapper
         isOpen={showModal}
         onClose={() => !isBlocking && setShowModal(false)}
-        title={editingProcedure ? t('procedures.editProcedure', 'Edit Procedure') : t('procedures.addNewProcedure', 'Add New Procedure')}
+        title={
+          editingProcedure
+            ? t('procedures.editProcedure', 'Edit Procedure')
+            : t('procedures.addNewProcedure', 'Add New Procedure')
+        }
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
@@ -487,7 +583,9 @@ const Procedures = () => {
         {/* Form Loading Overlay */}
         <FormLoadingOverlay
           visible={isBlocking}
-          message={statusMessage?.title || t('procedures.processing', 'Processing...')}
+          message={
+            statusMessage?.title || t('procedures.processing', 'Processing...')
+          }
           submessage={statusMessage?.message}
           type={statusMessage?.type || 'loading'}
         />
@@ -502,7 +600,7 @@ const Procedures = () => {
         navigate={navigate}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onFileUploadComplete={(success) => {
+        onFileUploadComplete={success => {
           if (success && viewingProcedure) {
             refreshFileCount(viewingProcedure.id);
           }
@@ -515,5 +613,5 @@ const Procedures = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Procedures, {
   injectResponsive: true,
-  displayName: 'ResponsiveProcedures'
+  displayName: 'ResponsiveProcedures',
 });

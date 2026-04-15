@@ -38,14 +38,14 @@ vi.mock('../../../utils/linkNavigation', () => ({
 }));
 
 vi.mock('@tabler/icons-react', () => ({
-  IconStethoscope: (props) => <span data-testid="icon-stethoscope" {...props} />,
-  IconInfoCircle: (props) => <span data-testid="icon-info" {...props} />,
-  IconPlus: (props) => <span data-testid="icon-plus" {...props} />,
-  IconTrash: (props) => <span data-testid="icon-trash" {...props} />,
-  IconEdit: (props) => <span data-testid="icon-edit" {...props} />,
-  IconCheck: (props) => <span data-testid="icon-check" {...props} />,
-  IconX: (props) => <span data-testid="icon-x" {...props} />,
-  IconPill: (props) => <span data-testid="icon-pill" {...props} />,
+  IconStethoscope: props => <span data-testid="icon-stethoscope" {...props} />,
+  IconInfoCircle: props => <span data-testid="icon-info" {...props} />,
+  IconPlus: props => <span data-testid="icon-plus" {...props} />,
+  IconTrash: props => <span data-testid="icon-trash" {...props} />,
+  IconEdit: props => <span data-testid="icon-edit" {...props} />,
+  IconCheck: props => <span data-testid="icon-check" {...props} />,
+  IconX: props => <span data-testid="icon-x" {...props} />,
+  IconPill: props => <span data-testid="icon-pill" {...props} />,
 }));
 
 // Needed for Mantine Select/MultiSelect
@@ -66,7 +66,12 @@ const mockRelationships = [
     id: 101,
     condition_id: 1,
     medication_id: 10,
-    condition: { id: 1, diagnosis: 'Hypertension', status: 'active', severity: 'moderate' },
+    condition: {
+      id: 1,
+      diagnosis: 'Hypertension',
+      status: 'active',
+      severity: 'moderate',
+    },
   },
 ];
 
@@ -98,7 +103,9 @@ async function openAddModal() {
   });
 
   const linkButtons = screen.getAllByText(I18N.linkCondition);
-  const enabledBtn = linkButtons.find((btn) => !btn.disabled && btn.tagName === 'BUTTON');
+  const enabledBtn = linkButtons.find(
+    btn => !btn.disabled && btn.tagName === 'BUTTON'
+  );
   await userEvent.click(enabledBtn || linkButtons[0]);
 
   await waitFor(() => {
@@ -302,7 +309,9 @@ describe('MedicationRelationships (direction="medication")', () => {
 
       render(<MedicationRelationships {...defaultProps} />);
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: I18N.linkCondition })).toBeDisabled();
+        expect(
+          screen.getByRole('button', { name: I18N.linkCondition })
+        ).toBeDisabled();
       });
     });
   });
@@ -378,8 +387,8 @@ describe('MedicationRelationships (direction="medication")', () => {
 
       await waitFor(() => {
         expect(mockDeleteConditionMedication).toHaveBeenCalledWith(
-          1,   // condition_id from the relationship
-          101  // relationship id
+          1, // condition_id from the relationship
+          101 // relationship id
         );
       });
     });
@@ -470,7 +479,9 @@ describe('MedicationRelationships (direction="medication")', () => {
       await waitFor(() => {
         expect(screen.getByText('Hypertension')).toBeInTheDocument();
       });
-      expect(screen.getByRole('button', { name: I18N.linkCondition })).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: I18N.linkCondition })
+      ).toBeDisabled();
     });
 
     it('enables Link Condition button when no conditions are yet linked', async () => {
@@ -489,14 +500,12 @@ describe('MedicationRelationships (direction="medication")', () => {
   // ----------------------------------------------------------
   describe('Navigation', () => {
     it('calls navigateToEntity when condition name is clicked', async () => {
-      const { navigateToEntity } = await import('../../../utils/linkNavigation');
+      const { navigateToEntity } =
+        await import('../../../utils/linkNavigation');
       const mockNavigate = vi.fn();
 
       render(
-        <MedicationRelationships
-          {...defaultProps}
-          navigate={mockNavigate}
-        />
+        <MedicationRelationships {...defaultProps} navigate={mockNavigate} />
       );
 
       await waitFor(() => {
@@ -505,7 +514,11 @@ describe('MedicationRelationships (direction="medication")', () => {
 
       await userEvent.click(screen.getByText('Hypertension'));
 
-      expect(navigateToEntity).toHaveBeenCalledWith('condition', 1, mockNavigate);
+      expect(navigateToEntity).toHaveBeenCalledWith(
+        'condition',
+        1,
+        mockNavigate
+      );
     });
   });
 });

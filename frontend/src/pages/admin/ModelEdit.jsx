@@ -13,7 +13,11 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { IconAlertTriangle, IconAlertCircle, IconArrowLeft } from '@tabler/icons-react';
+import {
+  IconAlertTriangle,
+  IconAlertCircle,
+  IconArrowLeft,
+} from '@tabler/icons-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { AdminResetPasswordModal } from '../../components/auth';
 import FieldRenderer from '../../components/admin/FieldRenderer';
@@ -45,11 +49,20 @@ const ModelEdit = () => {
   const [resetUsername, setResetUsername] = useState('');
 
   // Warning modal states
-  const [usernameWarningOpened, { open: openUsernameWarning, close: closeUsernameWarning }] = useDisclosure(false);
-  const [roleWarningOpened, { open: openRoleWarning, close: closeRoleWarning }] = useDisclosure(false);
+  const [
+    usernameWarningOpened,
+    { open: openUsernameWarning, close: closeUsernameWarning },
+  ] = useDisclosure(false);
+  const [
+    roleWarningOpened,
+    { open: openRoleWarning, close: closeRoleWarning },
+  ] = useDisclosure(false);
   const [pendingUpdateData, setPendingUpdateData] = useState(null);
 
-  const { handleFieldChange } = useFieldHandlers(setFormData, setValidationErrors);
+  const { handleFieldChange } = useFieldHandlers(
+    setFormData,
+    setValidationErrors
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -66,12 +79,16 @@ const ModelEdit = () => {
         setRecord(recordResult);
         setFormData(recordResult);
       } catch (err) {
-        logger.error('record_edit_load_error', 'Error loading record for edit', {
-          component: 'ModelEdit',
-          modelName,
-          recordId,
-          error: err.message,
-        });
+        logger.error(
+          'record_edit_load_error',
+          'Error loading record for edit',
+          {
+            component: 'ModelEdit',
+            modelName,
+            recordId,
+            error: err.message,
+          }
+        );
         setError(err.message || 'Failed to load record');
       } finally {
         setLoading(false);
@@ -111,54 +128,72 @@ const ModelEdit = () => {
     return updateData;
   }, [metadata, formData, modelName]);
 
-  const executeSave = useCallback(async (updateData) => {
-    try {
-      setSaving(true);
-      setError(null);
+  const executeSave = useCallback(
+    async updateData => {
+      try {
+        setSaving(true);
+        setError(null);
 
-      await adminApiService.updateModelRecord(modelName, recordId, updateData);
+        await adminApiService.updateModelRecord(
+          modelName,
+          recordId,
+          updateData
+        );
 
-      // Handle username change logout
-      if (modelName === 'user' && updateData.username && record.username !== updateData.username) {
-        const currentUserAfterSave = await secureStorage.getJSON('user') || {};
-        const currentUsernameAfterSave = currentUserAfterSave.username;
+        // Handle username change logout
+        if (
+          modelName === 'user' &&
+          updateData.username &&
+          record.username !== updateData.username
+        ) {
+          const currentUserAfterSave =
+            (await secureStorage.getJSON('user')) || {};
+          const currentUsernameAfterSave = currentUserAfterSave.username;
 
-        if (record.username === currentUsernameAfterSave) {
-          notifications.show({
-            title: t('models.usernameUpdated', 'Username updated'),
-            message: t('models.usernameUpdatedMessage', { username: updateData.username, defaultValue: `Your username has been changed. Please log in with your new username: "${updateData.username}"` }),
-            color: 'blue',
-            autoClose: 5000,
-          });
-          await logout();
-          navigate('/login');
-          return;
+          if (record.username === currentUsernameAfterSave) {
+            notifications.show({
+              title: t('models.usernameUpdated', 'Username updated'),
+              message: t('models.usernameUpdatedMessage', {
+                username: updateData.username,
+                defaultValue: `Your username has been changed. Please log in with your new username: "${updateData.username}"`,
+              }),
+              color: 'blue',
+              autoClose: 5000,
+            });
+            await logout();
+            navigate('/login');
+            return;
+          }
         }
-      }
 
-      notifications.show({
-        title: t('models.changesSaved', 'Changes saved'),
-        message: t('models.recordUpdated', 'Record updated successfully'),
-        color: 'green',
-      });
-      navigate(`/admin/models/${modelName}/${recordId}`);
-    } catch (err) {
-      logger.error('record_save_error', 'Error saving record', {
-        component: 'ModelEdit',
-        modelName,
-        recordId,
-        error: err.message,
-      });
-      setError(err.message || t('models.failedToSave', 'Failed to save record'));
-      notifications.show({
-        title: t('models.saveFailed', 'Save failed'),
-        message: err.message || t('models.failedToSave', 'Failed to save record'),
-        color: 'red',
-      });
-    } finally {
-      setSaving(false);
-    }
-  }, [modelName, recordId, record, navigate, logout, t]);
+        notifications.show({
+          title: t('models.changesSaved', 'Changes saved'),
+          message: t('models.recordUpdated', 'Record updated successfully'),
+          color: 'green',
+        });
+        navigate(`/admin/models/${modelName}/${recordId}`);
+      } catch (err) {
+        logger.error('record_save_error', 'Error saving record', {
+          component: 'ModelEdit',
+          modelName,
+          recordId,
+          error: err.message,
+        });
+        setError(
+          err.message || t('models.failedToSave', 'Failed to save record')
+        );
+        notifications.show({
+          title: t('models.saveFailed', 'Save failed'),
+          message:
+            err.message || t('models.failedToSave', 'Failed to save record'),
+          color: 'red',
+        });
+      } finally {
+        setSaving(false);
+      }
+    },
+    [modelName, recordId, record, navigate, logout, t]
+  );
 
   const handleSave = async () => {
     if (!handleValidateForm()) return;
@@ -166,7 +201,7 @@ const ModelEdit = () => {
     const updateData = buildUpdateData();
 
     if (modelName === 'user') {
-      const currentUser = await secureStorage.getJSON('user') || {};
+      const currentUser = (await secureStorage.getJSON('user')) || {};
       const currentUsername = currentUser.username;
 
       // Check username change for self
@@ -182,7 +217,10 @@ const ModelEdit = () => {
       if (updateData.role && record.role !== updateData.role) {
         const recordRole = (record.role || '').toLowerCase();
         const newRole = (updateData.role || '').toLowerCase();
-        if (['admin', 'administrator'].includes(recordRole) && !['admin', 'administrator'].includes(newRole)) {
+        if (
+          ['admin', 'administrator'].includes(recordRole) &&
+          !['admin', 'administrator'].includes(newRole)
+        ) {
           setPendingUpdateData(updateData);
           openRoleWarning();
           return;
@@ -193,13 +231,13 @@ const ModelEdit = () => {
     await executeSave(updateData);
   };
 
-  const dismissWarning = (closeModal) => {
+  const dismissWarning = closeModal => {
     closeModal();
     setPendingUpdateData(null);
     setSaving(false);
   };
 
-  const confirmPendingUpdate = async (closeModal) => {
+  const confirmPendingUpdate = async closeModal => {
     closeModal();
     if (pendingUpdateData) {
       await executeSave(pendingUpdateData);
@@ -239,10 +277,19 @@ const ModelEdit = () => {
       <AdminLayout>
         <Center style={{ minHeight: 'calc(100vh - 140px)' }}>
           <Stack align="center" gap="md">
-            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title="Error">
+            <Alert
+              icon={<IconAlertCircle size={16} />}
+              color="red"
+              variant="light"
+              title="Error"
+            >
               {error}
             </Alert>
-            <Button variant="default" leftSection={<IconArrowLeft size={16} />} onClick={handleCancel}>
+            <Button
+              variant="default"
+              leftSection={<IconArrowLeft size={16} />}
+              onClick={handleCancel}
+            >
               {t('admin:models.backToDataModels')}
             </Button>
           </Stack>
@@ -256,29 +303,37 @@ const ModelEdit = () => {
       <div className="model-edit">
         <div className="model-edit-header">
           <div className="edit-title">
-            <h1>{t('models.editRecord', { modelName: metadata?.display_name || modelName, defaultValue: `Edit ${metadata?.display_name || modelName}` })}</h1>
-            <p>{t('models.recordId', { id: recordId, defaultValue: `Record ID: ${recordId}` })}</p>
+            <h1>
+              {t('models.editRecord', {
+                modelName: metadata?.display_name || modelName,
+                defaultValue: `Edit ${metadata?.display_name || modelName}`,
+              })}
+            </h1>
+            <p>
+              {t('models.recordId', {
+                id: recordId,
+                defaultValue: `Record ID: ${recordId}`,
+              })}
+            </p>
           </div>
 
           <div className="edit-actions">
-            <Button
-              variant="default"
-              onClick={handleCancel}
-              disabled={saving}
-            >
+            <Button variant="default" onClick={handleCancel} disabled={saving}>
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
-            <Button
-              onClick={handleSave}
-              loading={saving}
-            >
+            <Button onClick={handleSave} loading={saving}>
               {t('common:buttons.save', 'Save Changes')}
             </Button>
           </div>
         </div>
 
         {error && (
-          <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" mb="md">
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            color="red"
+            variant="light"
+            mb="md"
+          >
             {error}
           </Alert>
         )}
@@ -316,19 +371,27 @@ const ModelEdit = () => {
 
                 {validationErrors[field.name] && (
                   <div className="field-errors">
-                    {validationErrors[field.name].map((validationError, index) => (
-                      <div key={index} className="error-message">
-                        {validationError}
-                      </div>
-                    ))}
+                    {validationErrors[field.name].map(
+                      (validationError, index) => (
+                        <div key={index} className="error-message">
+                          {validationError}
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
 
                 <div className="field-meta">
-                  {t('models.fieldType', { type: field.type, defaultValue: `Type: ${field.type}` })}
-                  {field.max_length && ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
-                  {field.foreign_key && ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
-                  {!field.nullable && ` | ${t('models.fieldRequired', 'Required')}`}
+                  {t('models.fieldType', {
+                    type: field.type,
+                    defaultValue: `Type: ${field.type}`,
+                  })}
+                  {field.max_length &&
+                    ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
+                  {field.foreign_key &&
+                    ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
+                  {!field.nullable &&
+                    ` | ${t('models.fieldRequired', 'Required')}`}
                 </div>
               </div>
             ))}
@@ -342,24 +405,51 @@ const ModelEdit = () => {
         onClose={() => dismissWarning(closeUsernameWarning)}
         title={
           <Group gap="xs">
-            <IconAlertTriangle size={20} color="var(--mantine-color-yellow-6)" />
-            <Text fw={600}>{t('models.usernameChangeWarning', 'Username Change Warning')}</Text>
+            <IconAlertTriangle
+              size={20}
+              color="var(--mantine-color-yellow-6)"
+            />
+            <Text fw={600}>
+              {t('models.usernameChangeWarning', 'Username Change Warning')}
+            </Text>
           </Group>
         }
         centered
       >
         <Stack gap="md">
-          <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
-            <Text size="sm" dangerouslySetInnerHTML={{ __html: t('models.usernameChangeText', { oldUsername: record?.username, newUsername: pendingUpdateData?.username, defaultValue: `You are about to change your own username from <strong>"${record?.username}"</strong> to <strong>"${pendingUpdateData?.username}"</strong>.` }) }} />
+          <Alert
+            color="yellow"
+            variant="light"
+            icon={<IconAlertTriangle size={16} />}
+          >
+            <Text
+              size="sm"
+              dangerouslySetInnerHTML={{
+                __html: t('models.usernameChangeText', {
+                  oldUsername: record?.username,
+                  newUsername: pendingUpdateData?.username,
+                  defaultValue: `You are about to change your own username from <strong>"${record?.username}"</strong> to <strong>"${pendingUpdateData?.username}"</strong>.`,
+                }),
+              }}
+            />
             <Text size="sm" mt="xs">
-              {t('models.usernameChangeLogout', 'This will log you out immediately and you will need to log back in with the new username.')}
+              {t(
+                'models.usernameChangeLogout',
+                'This will log you out immediately and you will need to log back in with the new username.'
+              )}
             </Text>
           </Alert>
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={() => dismissWarning(closeUsernameWarning)}>
+            <Button
+              variant="default"
+              onClick={() => dismissWarning(closeUsernameWarning)}
+            >
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
-            <Button color="yellow" onClick={() => confirmPendingUpdate(closeUsernameWarning)}>
+            <Button
+              color="yellow"
+              onClick={() => confirmPendingUpdate(closeUsernameWarning)}
+            >
               {t('models.changeUsername', 'Change Username')}
             </Button>
           </Group>
@@ -372,26 +462,47 @@ const ModelEdit = () => {
         onClose={() => dismissWarning(closeRoleWarning)}
         title={
           <Group gap="xs">
-            <IconAlertTriangle size={20} color="var(--mantine-color-yellow-6)" />
-            <Text fw={600}>{t('models.roleChangeWarning', 'Role Change Warning')}</Text>
+            <IconAlertTriangle
+              size={20}
+              color="var(--mantine-color-yellow-6)"
+            />
+            <Text fw={600}>
+              {t('models.roleChangeWarning', 'Role Change Warning')}
+            </Text>
           </Group>
         }
         centered
       >
         <Stack gap="md">
-          <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
+          <Alert
+            color="yellow"
+            variant="light"
+            icon={<IconAlertTriangle size={16} />}
+          >
             <Text size="sm">
-              {t('models.roleChangeText', 'You are about to remove admin privileges from this user.')}
+              {t(
+                'models.roleChangeText',
+                'You are about to remove admin privileges from this user.'
+              )}
             </Text>
             <Text size="sm" mt="xs">
-              {t('models.roleChangeLastAdmin', 'If this is the last admin user in the system, you may lose admin access.')}
+              {t(
+                'models.roleChangeLastAdmin',
+                'If this is the last admin user in the system, you may lose admin access.'
+              )}
             </Text>
           </Alert>
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={() => dismissWarning(closeRoleWarning)}>
+            <Button
+              variant="default"
+              onClick={() => dismissWarning(closeRoleWarning)}
+            >
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
-            <Button color="yellow" onClick={() => confirmPendingUpdate(closeRoleWarning)}>
+            <Button
+              color="yellow"
+              onClick={() => confirmPendingUpdate(closeRoleWarning)}
+            >
               {t('models.changeRole', 'Change Role')}
             </Button>
           </Group>

@@ -32,7 +32,9 @@ export const useViewNavigation = () => {
     const searchParams = new URLSearchParams(location.search);
     searchParams.delete('view');
     const newSearch = searchParams.toString();
-    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, { replace });
+    navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
+      replace,
+    });
   };
 
   /**

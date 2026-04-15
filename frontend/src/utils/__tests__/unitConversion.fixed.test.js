@@ -7,7 +7,7 @@ import {
   convertHeight,
   convertForDisplay,
   convertForStorage,
-  formatMeasurement
+  formatMeasurement,
 } from '../unitConversion';
 
 describe('Weight Conversion - Fixed', () => {
@@ -57,14 +57,14 @@ describe('Height Conversion - Fixed', () => {
   test('cmToInches converts with 2 decimal precision', () => {
     // Math.round(180 / 2.54 * 100) / 100
     expect(convertHeight.cmToInches(180)).toBe(70.87);
-    expect(convertHeight.cmToInches(175)).toBe(68.90);
+    expect(convertHeight.cmToInches(175)).toBe(68.9);
   });
 
   test('handles edge cases - check what actually returns', () => {
     expect(convertHeight.inchesToCm(null)).toBeNull();
     expect(convertHeight.inchesToCm(undefined)).toBeNull();
     expect(convertHeight.inchesToCm('')).toBeNull();
-    
+
     // Check if these actually return null or NaN
     const result = convertHeight.cmToInches('invalid');
     if (isNaN(result)) {
@@ -81,7 +81,7 @@ describe('Format Measurement - Fixed', () => {
     const formatted = formatMeasurement(182.98, 'weight', 'imperial');
     expect(typeof formatted).toBe('string');
     expect(formatted).toContain('lbs');
-    
+
     // Test without units
     const noUnits = formatMeasurement(182.98, 'weight', 'imperial', false);
     expect(typeof noUnits).toBe('string');
@@ -103,7 +103,7 @@ describe('Integration Tests - Realistic', () => {
 
     const displayHeight = convertForDisplay(storedHeight, 'height', 'metric');
     const displayWeight = convertForDisplay(storedWeight, 'weight', 'metric');
-    
+
     // Just verify they're reasonable metric values
     expect(displayHeight).toBeGreaterThan(170);
     expect(displayHeight).toBeLessThan(180);
@@ -113,10 +113,18 @@ describe('Integration Tests - Realistic', () => {
 
   test('User metric input conversion', () => {
     const userInputHeight = 175; // cm
-    const userInputWeight = 83;   // kg
+    const userInputWeight = 83; // kg
 
-    const storageHeight = convertForStorage(userInputHeight, 'height', 'metric');
-    const storageWeight = convertForStorage(userInputWeight, 'weight', 'metric');
+    const storageHeight = convertForStorage(
+      userInputHeight,
+      'height',
+      'metric'
+    );
+    const storageWeight = convertForStorage(
+      userInputWeight,
+      'weight',
+      'metric'
+    );
 
     // Should be reasonable imperial storage values
     expect(storageHeight).toBeGreaterThan(65);
@@ -149,7 +157,7 @@ describe('Specific Value Tests', () => {
   test('height conversion specific values', () => {
     // Test specific conversions that we know work
     expect(convertHeight.inchesToCm(68.9)).toBe(175.0);
-    expect(convertHeight.cmToInches(175)).toBe(68.90);
+    expect(convertHeight.cmToInches(175)).toBe(68.9);
   });
 
   test('weight conversion specific values', () => {
@@ -162,14 +170,14 @@ describe('Specific Value Tests', () => {
     const originalHeight = 68.9;
     const cm = convertHeight.inchesToCm(originalHeight);
     const backToInches = convertHeight.cmToInches(cm);
-    
+
     // Allow for rounding differences
     expect(Math.abs(backToInches - originalHeight)).toBeLessThan(0.1);
 
     const originalWeight = 182.98;
     const kg = convertWeight.lbsToKg(originalWeight);
     const backToLbs = convertWeight.kgToLbs(kg);
-    
+
     expect(Math.abs(backToLbs - originalWeight)).toBeLessThan(1);
   });
 });

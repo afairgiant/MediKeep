@@ -38,13 +38,16 @@ const NavigationWrapper = ({
   const { logout } = useAuth();
   const handleLogout = useCallback(async () => {
     logger.info('🚪 NAVIGATION_LOGOUT: NavigationWrapper logout clicked', {
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
     try {
       await logout();
-      logger.info('🚪 NAVIGATION_LOGOUT: AuthContext logout completed, redirecting...', {
-        timestamp: new Date().toISOString()
-      });
+      logger.info(
+        '🚪 NAVIGATION_LOGOUT: AuthContext logout completed, redirecting...',
+        {
+          timestamp: new Date().toISOString(),
+        }
+      );
     } catch (error) {
       logger.error('🚪 NAVIGATION_LOGOUT: Error during logout:', error);
       // Fallback: direct redirect if auth logout fails
@@ -60,7 +63,7 @@ const NavigationWrapper = ({
       navigate(backButtonPath);
     }
   }, [onBackClick, navigate, backButtonPath]);
-  
+
   return (
     <div className={`navigation-wrapper ${className}`}>
       {/* Render appropriate navigation based on viewport */}

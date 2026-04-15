@@ -22,16 +22,18 @@
   margin-left: 0.25rem;
 }
 
-.channel-form .form-group input[type="text"],
-.channel-form .form-group input[type="email"],
-.channel-form .form-group input[type="number"],
-.channel-form .form-group input[type="password"],
+.channel-form .form-group input[type='text'],
+.channel-form .form-group input[type='email'],
+.channel-form .form-group input[type='number'],
+.channel-form .form-group input[type='password'],
 .channel-form .form-group select {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border-light);
   border-radius: 6px;
   font-size: 0.875rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .channel-form .form-group input:focus,
@@ -59,7 +61,7 @@
   font-weight: normal;
 }
 
-.channel-form .form-group-checkbox input[type="checkbox"] {
+.channel-form .form-group-checkbox input[type='checkbox'] {
   width: 16px;
   height: 16px;
   cursor: pointer;

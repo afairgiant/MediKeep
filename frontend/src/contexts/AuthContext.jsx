@@ -140,7 +140,7 @@ export function AuthProvider({ children }) {
 
         logger.info('Verifying session with server', {
           category: 'auth_restore_attempt',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
         const user = await authService.getCurrentUser();
@@ -148,7 +148,7 @@ export function AuthProvider({ children }) {
         if (!user) {
           logger.info('No valid session found', {
             category: 'auth_init_no_session',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
           clearAuthData();
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
@@ -163,7 +163,10 @@ export function AuthProvider({ children }) {
           const userPrefs = await getUserPreferences();
           if (userPrefs.session_timeout_minutes) {
             sessionTimeoutMinutes = userPrefs.session_timeout_minutes;
-            localStorage.setItem('medapp_sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
+            localStorage.setItem(
+              'medapp_sessionTimeoutMinutes',
+              sessionTimeoutMinutes.toString()
+            );
           }
           // Language preference is applied by UserPreferencesContext
         } catch (prefError) {
@@ -193,7 +196,7 @@ export function AuthProvider({ children }) {
           message: 'Auth initialization failed',
           error: error.message,
           stack: error.stack,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         dispatch({ type: AUTH_ACTIONS.LOGOUT });
       } finally {
@@ -207,8 +210,12 @@ export function AuthProvider({ children }) {
   // Refs so the interval closure reads fresh values without re-registering
   const lastActivityRef = React.useRef(state.lastActivity);
   const sessionTimeoutRef = React.useRef(state.sessionTimeoutMinutes);
-  useEffect(() => { lastActivityRef.current = state.lastActivity; }, [state.lastActivity]);
-  useEffect(() => { sessionTimeoutRef.current = state.sessionTimeoutMinutes; }, [state.sessionTimeoutMinutes]);
+  useEffect(() => {
+    lastActivityRef.current = state.lastActivity;
+  }, [state.lastActivity]);
+  useEffect(() => {
+    sessionTimeoutRef.current = state.sessionTimeoutMinutes;
+  }, [state.sessionTimeoutMinutes]);
 
   // Inactivity check -- single interval, created once on login, torn down on logout
   useEffect(() => {
@@ -249,10 +256,11 @@ export function AuthProvider({ children }) {
   const clearAuthData = () => {
     localStorage.removeItem('medapp_sessionTimeoutMinutes');
 
-    const cacheKeys = Object.keys(localStorage).filter(key =>
-      key.startsWith('appData_') ||
-      key.startsWith('patient_') ||
-      key.startsWith('cache_')
+    const cacheKeys = Object.keys(localStorage).filter(
+      key =>
+        key.startsWith('appData_') ||
+        key.startsWith('patient_') ||
+        key.startsWith('cache_')
     );
     cacheKeys.forEach(key => localStorage.removeItem(key));
   };
@@ -284,7 +292,10 @@ export function AuthProvider({ children }) {
 
       // Check if this is SSO login (user object) or regular login (credentials).
       // SSO callers pass a truthy second arg (legacy: token string; new: { sso: true }).
-      const isSSO = ssoFlag !== null && typeof credentialsOrUser === 'object' && credentialsOrUser.username;
+      const isSSO =
+        ssoFlag !== null &&
+        typeof credentialsOrUser === 'object' &&
+        credentialsOrUser.username;
 
       let user, result;
 
@@ -292,7 +303,7 @@ export function AuthProvider({ children }) {
         // SSO login - user object is provided directly by the SSO callback
         user = {
           ...credentialsOrUser,
-          isAdmin: isAdminRole(credentialsOrUser.role)
+          isAdmin: isAdminRole(credentialsOrUser.role),
         };
 
         logger.info('Processing SSO login', {
@@ -300,7 +311,7 @@ export function AuthProvider({ children }) {
           username: user.username,
           userId: user.id,
           role: user.role,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       } else {
         // Regular username/password login
@@ -320,24 +331,31 @@ export function AuthProvider({ children }) {
           category: 'auth_regular_login',
           username: user.username,
           userId: user.id,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
       // Clear any existing cached data from localStorage
-      const cacheKeys = Object.keys(localStorage).filter(key =>
-        key.startsWith('appData_') ||
-        key.startsWith('patient_') ||
-        key.startsWith('cache_')
+      const cacheKeys = Object.keys(localStorage).filter(
+        key =>
+          key.startsWith('appData_') ||
+          key.startsWith('patient_') ||
+          key.startsWith('cache_')
       );
       cacheKeys.forEach(key => localStorage.removeItem(key));
 
       // Get session timeout from result or use default
-      const sessionTimeoutMinutes = (isSSO ? 120 : result?.sessionTimeoutMinutes) || 120;
-      const mustChangePassword = isSSO ? false : (result?.mustChangePassword || false);
+      const sessionTimeoutMinutes =
+        (isSSO ? 120 : result?.sessionTimeoutMinutes) || 120;
+      const mustChangePassword = isSSO
+        ? false
+        : result?.mustChangePassword || false;
 
       // Store session timeout preference in localStorage (not sensitive)
-      localStorage.setItem('medapp_sessionTimeoutMinutes', sessionTimeoutMinutes.toString());
+      localStorage.setItem(
+        'medapp_sessionTimeoutMinutes',
+        sessionTimeoutMinutes.toString()
+      );
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -379,15 +397,15 @@ export function AuthProvider({ children }) {
         stack: error.stack,
         isAuthenticated: state.isAuthenticated,
         userId: state.user?.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } finally {
       // Clear auth data first
       clearAuthData();
-      
+
       // Dispatch logout action to update state
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
-      
+
       notifyInfo('notifications:toasts.auth.logoutSuccess');
     }
   };
@@ -402,25 +420,25 @@ export function AuthProvider({ children }) {
       }
 
       dispatch({ type: AUTH_ACTIONS.UPDATE_ACTIVITY });
-      
+
       // Log activity update in development mode only
       if (env.DEV) {
         secureActivityLogger.logActivityDetected({
           component: 'AuthContext',
           action: 'activity_updated',
-          timeSinceLastUpdate
+          timeSinceLastUpdate,
         });
       }
     } catch (error) {
       secureActivityLogger.logActivityError(error, {
         component: 'AuthContext',
-        action: 'updateActivity'
+        action: 'updateActivity',
       });
-      
+
       // Don't throw the error to prevent breaking the app
       logger.error('Failed to update activity', {
         error: error.message,
-        category: 'auth_context_error'
+        category: 'auth_context_error',
       });
     }
   };
@@ -448,11 +466,14 @@ export function AuthProvider({ children }) {
     return false;
   };
 
-  const updateSessionTimeout = (timeoutMinutes) => {
-    localStorage.setItem('medapp_sessionTimeoutMinutes', timeoutMinutes.toString());
+  const updateSessionTimeout = timeoutMinutes => {
+    localStorage.setItem(
+      'medapp_sessionTimeoutMinutes',
+      timeoutMinutes.toString()
+    );
     dispatch({
       type: AUTH_ACTIONS.UPDATE_SESSION_TIMEOUT,
-      payload: timeoutMinutes
+      payload: timeoutMinutes,
     });
   };
 

@@ -42,7 +42,9 @@ describe('Login Component', () => {
 
       expect(document.getElementById('username')).toBeInTheDocument();
       expect(document.getElementById('password')).toBeInTheDocument();
-      expect(document.querySelector('button[type="submit"]')).toBeInTheDocument();
+      expect(
+        document.querySelector('button[type="submit"]')
+      ).toBeInTheDocument();
     });
 
     test('hides registration UI until config loads, then shows create account button', async () => {
@@ -50,10 +52,16 @@ describe('Login Component', () => {
       let resolveRegistration;
       let resolveSSO;
       authService.checkRegistrationEnabled.mockImplementation(
-        () => new Promise(r => { resolveRegistration = r; })
+        () =>
+          new Promise(r => {
+            resolveRegistration = r;
+          })
       );
       authService.getSSOConfig.mockImplementation(
-        () => new Promise(r => { resolveSSO = r; })
+        () =>
+          new Promise(r => {
+            resolveSSO = r;
+          })
       );
 
       render(<Login />);
@@ -66,7 +74,9 @@ describe('Login Component', () => {
       resolveSSO({ enabled: false });
 
       // After config loads: button appears
-      expect(await screen.findByText('login.createAccount')).toBeInTheDocument();
+      expect(
+        await screen.findByText('login.createAccount')
+      ).toBeInTheDocument();
     });
 
     test('renders with MediKeep title', () => {

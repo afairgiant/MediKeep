@@ -20,12 +20,12 @@ const EquipmentCard = ({
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('equipment_card_error', {
       message: 'Error in EquipmentCard',
       equipmentId: equipment?.id,
@@ -44,7 +44,7 @@ const EquipmentCard = ({
     if (equipment.equipment_type) {
       badges.push({
         label: getEquipmentTypeLabel(equipment.equipment_type),
-        color: 'blue'
+        color: 'blue',
       });
     }
 
@@ -52,7 +52,7 @@ const EquipmentCard = ({
       badges.push({
         label: equipment.manufacturer,
         color: 'gray',
-        variant: 'outline'
+        variant: 'outline',
       });
     }
 
@@ -60,32 +60,48 @@ const EquipmentCard = ({
       {
         label: t('equipment.fields.modelNumber', 'Model'),
         value: equipment.model_number,
-        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value || t('shared:labels.notSpecified', 'Not specified'),
       },
       {
         label: t('equipment.fields.serialNumber', 'Serial #'),
         value: equipment.serial_number,
-        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value || t('shared:labels.notSpecified', 'Not specified'),
       },
       {
         label: t('equipment.fields.prescribedDate', 'Prescribed'),
         value: equipment.prescribed_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value
+            ? formatLongDate(value)
+            : t('shared:labels.notSpecified', 'Not specified'),
       },
       {
         label: t('equipment.fields.nextService', 'Next Service'),
         value: equipment.next_service_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value
+            ? formatLongDate(value)
+            : t('shared:labels.notSpecified', 'Not specified'),
       },
       {
         label: t('shared:labels.supplier', 'Supplier'),
         value: equipment.supplier,
-        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value || t('shared:labels.notSpecified', 'Not specified'),
       },
     ].filter(field => field.value);
 
     const titleContent = (
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          width: '100%',
+        }}
+      >
         <Text fw={600} size="lg" style={{ flex: 1 }}>
           {equipment.equipment_name}
         </Text>
@@ -99,7 +115,11 @@ const EquipmentCard = ({
     return (
       <BaseMedicalCard
         title={titleContent}
-        subtitle={equipment.equipment_type ? getEquipmentTypeLabel(equipment.equipment_type) : null}
+        subtitle={
+          equipment.equipment_type
+            ? getEquipmentTypeLabel(equipment.equipment_type)
+            : null
+        }
         badges={badges}
         fields={fields}
         notes={equipment.notes}

@@ -30,16 +30,12 @@ vi.mock('../../constants/errorMessages', () => ({
     UPLOAD_MULTIPLE_SUCCESS: 'All files uploaded successfully',
   },
   WARNING_MESSAGES: {},
-  getUserFriendlyError: vi.fn((error) => error),
-  formatErrorWithContext: vi.fn((error) => error),
+  getUserFriendlyError: vi.fn(error => error),
+  formatErrorWithContext: vi.fn(error => error),
 }));
 
 // Wrapper component for Mantine provider
-const wrapper = ({ children }) => (
-  <MantineProvider>
-    {children}
-  </MantineProvider>
-);
+const wrapper = ({ children }) => <MantineProvider>{children}</MantineProvider>;
 
 describe('useUploadProgress Hook', () => {
   beforeEach(() => {
@@ -89,8 +85,18 @@ describe('useUploadProgress Hook', () => {
     test('should initialize upload with files', () => {
       const { result } = renderHook(() => useUploadProgress(), { wrapper });
       const mockFiles = [
-        { id: 'file-1', name: 'test1.pdf', size: 1000, description: 'Test file 1' },
-        { id: 'file-2', name: 'test2.pdf', size: 2000, description: 'Test file 2' },
+        {
+          id: 'file-1',
+          name: 'test1.pdf',
+          size: 1000,
+          description: 'Test file 1',
+        },
+        {
+          id: 'file-2',
+          name: 'test2.pdf',
+          size: 2000,
+          description: 'Test file 2',
+        },
       ];
 
       act(() => {
@@ -109,7 +115,10 @@ describe('useUploadProgress Hook', () => {
         error: null,
       });
       expect(result.current.uploadState.startTime).toBeGreaterThan(0);
-      expect(logger.info).toHaveBeenCalledWith('upload_progress_started', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'upload_progress_started',
+        expect.any(Object)
+      );
     });
 
     test('should generate file IDs when not provided', () => {
@@ -143,9 +152,7 @@ describe('useUploadProgress Hook', () => {
   describe('updateFileProgress - Race Condition Testing', () => {
     test('should handle rapid progress updates without data corruption', async () => {
       const { result } = renderHook(() => useUploadProgress(), { wrapper });
-      const mockFiles = [
-        { id: 'file-1', name: 'test1.pdf', size: 1000 },
-      ];
+      const mockFiles = [{ id: 'file-1', name: 'test1.pdf', size: 1000 }];
 
       act(() => {
         result.current.startUpload(mockFiles);
@@ -153,7 +160,7 @@ describe('useUploadProgress Hook', () => {
 
       // Simulate rapid progress updates (race condition scenario)
       const progressUpdates = [10, 25, 30, 50, 75, 90, 100];
-      
+
       act(() => {
         progressUpdates.forEach((progress, index) => {
           // Simulate multiple concurrent updates
@@ -209,7 +216,11 @@ describe('useUploadProgress Hook', () => {
 
       invalidInputs.forEach((invalidInput, index) => {
         act(() => {
-          result.current.updateFileProgress('file-1', invalidInput, 'uploading');
+          result.current.updateFileProgress(
+            'file-1',
+            invalidInput,
+            'uploading'
+          );
         });
 
         expect(result.current.uploadState.files[0].progress).toBe(0);
@@ -262,7 +273,9 @@ describe('useUploadProgress Hook', () => {
       });
 
       const completedFile = result.current.uploadState.files[0];
-      expect(completedFile.endTime).toBeGreaterThanOrEqual(completedFile.startTime);
+      expect(completedFile.endTime).toBeGreaterThanOrEqual(
+        completedFile.startTime
+      );
     });
   });
 
@@ -332,11 +345,15 @@ describe('useUploadProgress Hook', () => {
 
   describe('Memory Leak Prevention', () => {
     test('should properly unmount without memory leaks', () => {
-      const { result, unmount } = renderHook(() => useUploadProgress(), { wrapper });
+      const { result, unmount } = renderHook(() => useUploadProgress(), {
+        wrapper,
+      });
 
       // Start upload and perform operations
       act(() => {
-        result.current.startUpload([{ id: 'file-1', name: 'test.pdf', size: 1000 }]);
+        result.current.startUpload([
+          { id: 'file-1', name: 'test.pdf', size: 1000 },
+        ]);
         result.current.updateFileProgress('file-1', 50, 'uploading');
       });
 
@@ -348,7 +365,9 @@ describe('useUploadProgress Hook', () => {
       const { result } = renderHook(() => useUploadProgress(), { wrapper });
 
       act(() => {
-        result.current.startUpload([{ id: 'file-1', name: 'test.pdf', size: 1000 }]);
+        result.current.startUpload([
+          { id: 'file-1', name: 'test.pdf', size: 1000 },
+        ]);
       });
 
       act(() => {
@@ -364,7 +383,9 @@ describe('useUploadProgress Hook', () => {
       const { result } = renderHook(() => useUploadProgress(), { wrapper });
 
       act(() => {
-        result.current.startUpload([{ id: 'file-1', name: 'test.pdf', size: 1000 }]);
+        result.current.startUpload([
+          { id: 'file-1', name: 'test.pdf', size: 1000 },
+        ]);
       });
 
       // Multiple reset calls should not cause errors
@@ -566,7 +587,12 @@ describe('useUploadProgress Hook', () => {
 
       act(() => {
         result.current.updateFileProgress('file-1', 100, 'completed');
-        result.current.updateFileProgress('file-2', 25, 'failed', 'Network error');
+        result.current.updateFileProgress(
+          'file-2',
+          25,
+          'failed',
+          'Network error'
+        );
       });
 
       expect(result.current.uploadState.hasErrors).toBe(true);
@@ -584,19 +610,28 @@ describe('useUploadProgress Hook', () => {
         result.current.startUpload(mockFiles);
       });
 
-      expect(logger.info).toHaveBeenCalledWith('upload_progress_started', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'upload_progress_started',
+        expect.any(Object)
+      );
 
       act(() => {
         result.current.updateFileProgress('file-1', 100, 'completed');
       });
 
-      expect(logger.info).toHaveBeenCalledWith('upload_progress_state_change', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'upload_progress_state_change',
+        expect.any(Object)
+      );
 
       act(() => {
         result.current.completeUpload(true);
       });
 
-      expect(logger.info).toHaveBeenCalledWith('upload_progress_completed', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'upload_progress_completed',
+        expect.any(Object)
+      );
     });
 
     test('should throttle debug logging for frequent updates', () => {
@@ -714,7 +749,7 @@ describe('useUploadProgress Hook', () => {
       // Update all files
       act(() => {
         mockFiles.forEach((file, index) => {
-          result.current.updateFileProgress(file.id, (index + 1), 'uploading');
+          result.current.updateFileProgress(file.id, index + 1, 'uploading');
         });
       });
 

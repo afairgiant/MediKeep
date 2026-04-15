@@ -271,7 +271,10 @@
 .form-group textarea:focus {
   outline: none;
   border-color: var(--color-primary, #667eea);
-  box-shadow: var(--form-input-focus-shadow, 0 0 0 3px rgba(102, 126, 234, 0.25));
+  box-shadow: var(
+    --form-input-focus-shadow,
+    0 0 0 3px rgba(102, 126, 234, 0.25)
+  );
 }
 
 .form-actions {
@@ -441,4 +444,3 @@
 }
 
 /* Responsive Design */
-

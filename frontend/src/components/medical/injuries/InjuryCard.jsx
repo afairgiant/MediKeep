@@ -30,7 +30,7 @@ const InjuryCard = ({
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('injury_card_error', {
       message: 'Error in InjuryCard',
       injuryId: injury?.id,
@@ -44,7 +44,7 @@ const InjuryCard = ({
   };
 
   // Helper function to get severity icon
-  const getSeverityIcon = (severity) => {
+  const getSeverityIcon = severity => {
     switch (severity) {
       case 'life-threatening':
         return IconExclamationCircle;
@@ -60,7 +60,7 @@ const InjuryCard = ({
   };
 
   // Helper function to get severity color
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     switch (severity) {
       case 'life-threatening':
         return 'red';
@@ -76,7 +76,7 @@ const InjuryCard = ({
   };
 
   // Helper function to get status color
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     switch (status) {
       case 'active':
         return 'red';
@@ -92,19 +92,19 @@ const InjuryCard = ({
   };
 
   // Helper function to get practitioner details
-  const getPractitionerDetails = (practitionerId) => {
+  const getPractitionerDetails = practitionerId => {
     if (!practitionerId || practitioners.length === 0) return null;
-    return practitioners.find((prac) => prac.id === practitionerId);
+    return practitioners.find(prac => prac.id === practitionerId);
   };
 
   // Helper function to get injury type details
-  const getInjuryTypeDetails = (typeId) => {
+  const getInjuryTypeDetails = typeId => {
     if (!typeId || injuryTypes.length === 0) return null;
-    return injuryTypes.find((type) => type.id === typeId);
+    return injuryTypes.find(type => type.id === typeId);
   };
 
   // Format laterality display
-  const formatLaterality = (laterality) => {
+  const formatLaterality = laterality => {
     if (!laterality) return null;
     const lateralityMap = {
       left: 'Left',
@@ -152,15 +152,17 @@ const InjuryCard = ({
       {
         label: t('injuries.bodyPart.label', 'Body Part'),
         value: injury.body_part,
-        render: (value) => value || t('shared:labels.unknown', 'Not specified'),
+        render: value => value || t('shared:labels.unknown', 'Not specified'),
       },
       {
         label: t('injuries.dateOfInjury.label', 'Date of Injury'),
         value: injury.date_of_injury,
-        render: (value) =>
-          value ? formatLongDate(value) : t('shared:labels.unknown', 'Not specified'),
+        render: value =>
+          value
+            ? formatLongDate(value)
+            : t('shared:labels.unknown', 'Not specified'),
       },
-    ].filter((field) => field.value); // Only show fields with values
+    ].filter(field => field.value); // Only show fields with values
 
     // Custom title with injury type and severity icon
     const titleContent = (
@@ -191,8 +193,13 @@ const InjuryCard = ({
           fw={500}
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
-          onClick={() => navigateToEntity('practitioner', practitioner.id, navigate)}
-          title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
+          onClick={() =>
+            navigateToEntity('practitioner', practitioner.id, navigate)
+          }
+          title={t(
+            'shared:labels.viewPractitionerDetails',
+            'View practitioner details'
+          )}
         >
           {practitioner.name}
         </Text>

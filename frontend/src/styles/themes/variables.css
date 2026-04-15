@@ -64,7 +64,9 @@
   --color-border-dark: #374151;
 
   /* Typography */
-  --font-family-sans: 'Segoe UI', Tahoma, Geneva, Verdana, 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
+  --font-family-sans:
+    'Segoe UI', Tahoma, Geneva, Verdana, 'Microsoft YaHei', 'PingFang SC',
+    'Noto Sans CJK SC', sans-serif;
   --font-family-mono: 'Courier New', Consolas, Monaco, monospace;
 
   --font-size-xs: 0.75rem;

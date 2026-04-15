@@ -63,4 +63,3 @@ describe('App Component', () => {
     expect(document.querySelector('.App')).toBeInTheDocument();
   });
 });
-

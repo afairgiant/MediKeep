@@ -1,12 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { MultiSelect, Switch, Group, Text, Badge, ActionIcon, Stack } from '@mantine/core';
+import {
+  MultiSelect,
+  Switch,
+  Group,
+  Text,
+  Badge,
+  ActionIcon,
+  Stack,
+} from '@mantine/core';
 import { X, Tag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import apiService from '../../services/api';
 import logger from '../../services/logger';
 
 interface TagFilterProps {
-  entityType: 'lab_result' | 'medication' | 'condition' | 'procedure' | 'immunization' | 'treatment' | 'encounter' | 'allergy';
+  entityType:
+    | 'lab_result'
+    | 'medication'
+    | 'condition'
+    | 'procedure'
+    | 'immunization'
+    | 'treatment'
+    | 'encounter'
+    | 'allergy';
   selectedTags: string[];
   onTagsChange: (tags: string[]) => void;
   matchAll: boolean;
@@ -18,12 +34,14 @@ export function TagFilter({
   selectedTags,
   onTagsChange,
   matchAll,
-  onMatchAllChange
+  onMatchAllChange,
 }: TagFilterProps) {
   const { t } = useTranslation('common');
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [popularTags, setPopularTags] = useState<Array<{ tag: string; count: number }>>([]);
+  const [popularTags, setPopularTags] = useState<
+    Array<{ tag: string; count: number }>
+  >([]);
 
   // Fetch available tags for the entity type
   useEffect(() => {
@@ -34,23 +52,23 @@ export function TagFilter({
         const response = await apiService.get('/tags/popular', {
           params: {
             entity_types: [entityType],
-            limit: 20
-          }
+            limit: 20,
+          },
         });
-        
+
         const tagsData = response.data;
         setPopularTags(tagsData);
         setAvailableTags(tagsData.map((item: any) => item.tag));
-        
+
         logger.info(`Loaded ${tagsData.length} tags for ${entityType}`, {
           component: 'TagFilter',
-          entityType
+          entityType,
         });
       } catch (error) {
         logger.error('Failed to fetch available tags', {
           component: 'TagFilter',
           entityType,
-          error
+          error,
         });
         setAvailableTags([]);
         setPopularTags([]);
@@ -73,7 +91,7 @@ export function TagFilter({
   // Format data for MultiSelect
   const selectData = availableTags.map(tag => ({
     value: tag,
-    label: tag
+    label: tag,
   }));
 
   return (
@@ -84,7 +102,7 @@ export function TagFilter({
           value={selectedTags}
           onChange={onTagsChange}
           label="Filter by tags"
-          placeholder={isLoading ? "Loading tags..." : "Select tags to filter"}
+          placeholder={isLoading ? 'Loading tags...' : 'Select tags to filter'}
           searchable
           clearable
           leftSection={<Tag size={16} />}
@@ -93,10 +111,10 @@ export function TagFilter({
           disabled={isLoading}
           style={{ flex: 1 }}
         />
-        
+
         {selectedTags.length > 0 && (
-          <ActionIcon 
-            color="gray" 
+          <ActionIcon
+            color="gray"
             variant="subtle"
             onClick={clearAllTags}
             mt={32}
@@ -136,7 +154,7 @@ export function TagFilter({
         <Group gap="xs">
           <Switch
             checked={matchAll}
-            onChange={(e) => onMatchAllChange(e.currentTarget.checked)}
+            onChange={e => onMatchAllChange(e.currentTarget.checked)}
             label={
               <Text size="sm">
                 {matchAll ? t('search.matchAll') : t('search.matchAny')}
@@ -144,8 +162,8 @@ export function TagFilter({
             }
           />
           <Text size="xs" c="dimmed">
-            {matchAll 
-              ? 'Show items that have all selected tags' 
+            {matchAll
+              ? 'Show items that have all selected tags'
               : 'Show items that have at least one selected tag'}
           </Text>
         </Group>

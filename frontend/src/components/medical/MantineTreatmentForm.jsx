@@ -34,17 +34,15 @@ const MantineTreatmentForm = ({
   const dynamicOptions = {
     conditions: conditionOptions,
     practitioners: practitionerOptions,
-
   };
 
   const loadingStates = {
     conditions: conditionsLoading,
     practitioners: practitionersLoading,
-
   };
 
   // Get status color for visual feedback
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     switch (status) {
       case 'planned':
         return 'blue';
@@ -63,11 +61,20 @@ const MantineTreatmentForm = ({
 
   // Status options with labels
   const statusOptions = [
-    { value: 'planned', label: t('treatments.treatmentStatus.options.planned') },
+    {
+      value: 'planned',
+      label: t('treatments.treatmentStatus.options.planned'),
+    },
     { value: 'active', label: t('treatments.treatmentStatus.options.active') },
     { value: 'on-hold', label: t('treatments.treatmentStatus.options.onHold') },
-    { value: 'completed', label: t('treatments.treatmentStatus.options.completed') },
-    { value: 'cancelled', label: t('treatments.treatmentStatus.options.cancelled') },
+    {
+      value: 'completed',
+      label: t('treatments.treatmentStatus.options.completed'),
+    },
+    {
+      value: 'cancelled',
+      label: t('treatments.treatmentStatus.options.cancelled'),
+    },
   ];
 
   return (
@@ -82,7 +89,6 @@ const MantineTreatmentForm = ({
       fields={treatmentFormFields}
       dynamicOptions={dynamicOptions}
       loadingStates={loadingStates}
-
       modalSize="lg"
     >
       {/* Status Badge Visual Indicator */}

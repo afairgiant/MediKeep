@@ -10,7 +10,7 @@ import {
   measureRenderPerformance,
   TEST_VIEWPORTS,
   mockViewport,
-  BREAKPOINTS
+  BREAKPOINTS,
 } from './ResponsiveTestUtils';
 
 import logger from '../../services/logger';
@@ -28,42 +28,73 @@ vi.mock('../../services/logger', () => ({
 // Mock useResponsive hook with performance tracking
 const mockUseResponsive = vi.fn();
 vi.mock('../../hooks/useResponsive', () => ({
-  useResponsive: () => mockUseResponsive()
+  useResponsive: () => mockUseResponsive(),
 }));
 
 // Mock ResponsiveTable with simple HTML
 vi.mock('../../components/adapters/ResponsiveTable', () => {
-  function MockResponsiveTable({ data = [], columns = [], onRowClick, pagination, totalRecords, pageSize = 20, virtualization, loading }) {
+  function MockResponsiveTable({
+    data = [],
+    columns = [],
+    onRowClick,
+    pagination,
+    totalRecords,
+    pageSize = 20,
+    virtualization,
+    loading,
+  }) {
     if (loading) {
       return (
         <div data-testid="responsive-table-loading">
           {Array.from({ length: 5 }, (_, i) => (
-            <div key={i} data-testid="skeleton" style={{ height: 40, background: '#eee' }} />
+            <div
+              key={i}
+              data-testid="skeleton"
+              style={{ height: 40, background: '#eee' }}
+            />
           ))}
         </div>
       );
     }
 
     // Simulate virtualization: only render a subset of rows
-    const isVirtualized = virtualization === true || (virtualization === 'auto' && data.length > 100);
-    const visibleData = isVirtualized ? data.slice(0, Math.min(50, data.length)) : data;
+    const isVirtualized =
+      virtualization === true ||
+      (virtualization === 'auto' && data.length > 100);
+    const visibleData = isVirtualized
+      ? data.slice(0, Math.min(50, data.length))
+      : data;
 
     return (
       <div data-testid="responsive-table">
-        {isVirtualized && <div data-testid="scroll-area" data-scrollable="true" style={{ overflow: 'auto', maxHeight: 500 }} />}
+        {isVirtualized && (
+          <div
+            data-testid="scroll-area"
+            data-scrollable="true"
+            style={{ overflow: 'auto', maxHeight: 500 }}
+          />
+        )}
         <table role="table">
           <thead>
             <tr role="row">
               {columns.map(col => (
-                <th key={col.key} role="columnheader">{col.title}</th>
+                <th key={col.key} role="columnheader">
+                  {col.title}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {visibleData.map((row, i) => (
-              <tr key={row.id ?? i} role="row" onClick={() => onRowClick && onRowClick(row, i)}>
+              <tr
+                key={row.id ?? i}
+                role="row"
+                onClick={() => onRowClick && onRowClick(row, i)}
+              >
                 {columns.map(col => (
-                  <td key={col.key} role="cell">{row[col.key]}</td>
+                  <td key={col.key} role="cell">
+                    {row[col.key]}
+                  </td>
                 ))}
               </tr>
             ))}
@@ -98,7 +129,14 @@ vi.mock('../../components/adapters/ResponsiveModal', () => {
 
 // Mock ResponsiveSelect with native select
 vi.mock('../../components/adapters/ResponsiveSelect', () => {
-  function MockResponsiveSelect({ options = [], label, onChange, error, value, ...rest }) {
+  function MockResponsiveSelect({
+    options = [],
+    label,
+    onChange,
+    error,
+    value,
+    ...rest
+  }) {
     const normalizedOptions = options.map(opt =>
       typeof opt === 'string' ? { value: opt, label: opt } : opt
     );
@@ -109,43 +147,71 @@ vi.mock('../../components/adapters/ResponsiveSelect', () => {
           id={label ? `select-${label}` : undefined}
           role="combobox"
           value={value || ''}
-          onChange={(e) => onChange && onChange(e.target.value)}
+          onChange={e => onChange && onChange(e.target.value)}
         >
           <option value="">Select...</option>
           {normalizedOptions.map((opt, i) => (
-            <option key={opt.value ?? i} value={opt.value}>{opt.label}</option>
+            <option key={opt.value ?? i} value={opt.value}>
+              {opt.label}
+            </option>
           ))}
         </select>
         {error && <div role="alert">{error}</div>}
       </div>
     );
   }
-  return { default: MockResponsiveSelect, ResponsiveSelect: MockResponsiveSelect };
+  return {
+    default: MockResponsiveSelect,
+    ResponsiveSelect: MockResponsiveSelect,
+  };
 });
 
 // Mock MantineMedicationForm with simple HTML
 vi.mock('../../components/medical/MantineMedicationForm', () => ({
-  default: function MockMedicationForm({ isOpen, onClose, onSubmit, onInputChange, formData = {}, practitionersOptions = [] }) {
+  default: function MockMedicationForm({
+    isOpen,
+    onClose,
+    onSubmit,
+    onInputChange,
+    formData = {},
+    practitionersOptions = [],
+  }) {
     if (!isOpen) return null;
     return (
-      <form data-testid="medication-form" onSubmit={(e) => { e.preventDefault(); onSubmit && onSubmit(formData); }}>
+      <form
+        data-testid="medication-form"
+        onSubmit={e => {
+          e.preventDefault();
+          onSubmit && onSubmit(formData);
+        }}
+      >
         <label htmlFor="perf-med-name">Medication Name</label>
         <input
           id="perf-med-name"
           name="medication_name"
           role="textbox"
           defaultValue={formData.medication_name || ''}
-          onChange={(e) => onInputChange && onInputChange({ target: { name: 'medication_name', value: e.target.value } })}
+          onChange={e =>
+            onInputChange &&
+            onInputChange({
+              target: { name: 'medication_name', value: e.target.value },
+            })
+          }
         />
         <label htmlFor="perf-med-dosage">Dosage</label>
         <input
           id="perf-med-dosage"
           name="dosage"
           defaultValue={formData.dosage || ''}
-          onChange={(e) => onInputChange && onInputChange({ target: { name: 'dosage', value: e.target.value } })}
+          onChange={e =>
+            onInputChange &&
+            onInputChange({ target: { name: 'dosage', value: e.target.value } })
+          }
         />
         <button type="submit">Save</button>
-        <button type="button" onClick={onClose}>Close</button>
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
       </form>
     );
   },
@@ -158,17 +224,17 @@ import ResponsiveSelect from '../../components/adapters/ResponsiveSelect';
 import MantineMedicationForm from '../../components/medical/MantineMedicationForm';
 
 // Performance measurement utilities
-const measureAsyncRender = async (renderFn) => {
+const measureAsyncRender = async renderFn => {
   const start = performance.now();
   const result = await renderFn();
   const end = performance.now();
   return {
     result,
-    duration: end - start
+    duration: end - start,
   };
 };
 
-const createMockData = (count) => {
+const createMockData = count => {
   return Array.from({ length: count }, (_, index) => ({
     id: index,
     medication_name: `Medication ${index}`,
@@ -177,7 +243,7 @@ const createMockData = (count) => {
     prescribing_practitioner: `Dr. ${String.fromCharCode(65 + (index % 26))}`,
     start_date: '2024-01-01',
     status: index % 3 === 0 ? 'Discontinued' : 'Active',
-    notes: `Notes for medication ${index}`.repeat(Math.floor(index % 5) + 1)
+    notes: `Notes for medication ${index}`.repeat(Math.floor(index % 5) + 1),
   }));
 };
 
@@ -188,7 +254,7 @@ const createMockColumns = () => [
   { key: 'prescribing_practitioner', title: 'Doctor', priority: 'medium' },
   { key: 'start_date', title: 'Start Date', priority: 'low' },
   { key: 'status', title: 'Status', priority: 'high' },
-  { key: 'notes', title: 'Notes', priority: 'low' }
+  { key: 'notes', title: 'Notes', priority: 'low' },
 ];
 
 describe('Responsive Component Performance Tests', () => {
@@ -202,7 +268,7 @@ describe('Responsive Component Performance Tests', () => {
       isTablet: false,
       isDesktop: true,
       width: 1280,
-      height: 720
+      height: 720,
     });
   });
 
@@ -220,7 +286,7 @@ describe('Responsive Component Performance Tests', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Breakpoint transition'),
         expect.objectContaining({
-          transitionTime: expect.stringMatching(/\d+\.\d+ms/)
+          transitionTime: expect.stringMatching(/\d+\.\d+ms/),
         })
       );
     });
@@ -247,17 +313,31 @@ describe('Responsive Component Performance Tests', () => {
       );
 
       debugCalls.forEach(call => {
-        const transitionTime = parseFloat(call[1].transitionTime.replace('ms', ''));
+        const transitionTime = parseFloat(
+          call[1].transitionTime.replace('ms', '')
+        );
         expect(transitionTime).toBeLessThan(100);
       });
     });
 
     it('handles rapid breakpoint changes without performance degradation', async () => {
       const { rerender } = renderResponsive(
-        <ResponsiveTable data={createMockData(25)} columns={createMockColumns()} />
+        <ResponsiveTable
+          data={createMockData(25)}
+          columns={createMockColumns()}
+        />
       );
 
-      const breakpointSequence = ['xs', 'sm', 'md', 'lg', 'xl', 'xs', 'lg', 'md'];
+      const breakpointSequence = [
+        'xs',
+        'sm',
+        'md',
+        'lg',
+        'xl',
+        'xs',
+        'lg',
+        'md',
+      ];
       const transitionTimes = [];
 
       for (let i = 0; i < breakpointSequence.length - 1; i++) {
@@ -266,23 +346,27 @@ describe('Responsive Component Performance Tests', () => {
 
         const currentViewport = TEST_VIEWPORTS[currentBreakpoint] || {
           width: BREAKPOINTS[currentBreakpoint].min + 50,
-          height: 600
+          height: 600,
         };
         const nextViewport = TEST_VIEWPORTS[nextBreakpoint] || {
           width: BREAKPOINTS[nextBreakpoint].min + 50,
-          height: 600
+          height: 600,
         };
 
         // Update mock for current breakpoint
         mockUseResponsive.mockReturnValue({
           breakpoint: currentBreakpoint,
-          deviceType: currentBreakpoint === 'xs' || currentBreakpoint === 'sm' ? 'mobile' :
-                     currentBreakpoint === 'md' ? 'tablet' : 'desktop',
+          deviceType:
+            currentBreakpoint === 'xs' || currentBreakpoint === 'sm'
+              ? 'mobile'
+              : currentBreakpoint === 'md'
+                ? 'tablet'
+                : 'desktop',
           isMobile: currentBreakpoint === 'xs' || currentBreakpoint === 'sm',
           isTablet: currentBreakpoint === 'md',
           isDesktop: ['lg', 'xl'].includes(currentBreakpoint),
           width: currentViewport.width,
-          height: currentViewport.height
+          height: currentViewport.height,
         });
 
         mockViewport(currentViewport.width, currentViewport.height);
@@ -292,17 +376,26 @@ describe('Responsive Component Performance Tests', () => {
         // Update to next breakpoint
         mockUseResponsive.mockReturnValue({
           breakpoint: nextBreakpoint,
-          deviceType: nextBreakpoint === 'xs' || nextBreakpoint === 'sm' ? 'mobile' :
-                     nextBreakpoint === 'md' ? 'tablet' : 'desktop',
+          deviceType:
+            nextBreakpoint === 'xs' || nextBreakpoint === 'sm'
+              ? 'mobile'
+              : nextBreakpoint === 'md'
+                ? 'tablet'
+                : 'desktop',
           isMobile: nextBreakpoint === 'xs' || nextBreakpoint === 'sm',
           isTablet: nextBreakpoint === 'md',
           isDesktop: ['lg', 'xl'].includes(nextBreakpoint),
           width: nextViewport.width,
-          height: nextViewport.height
+          height: nextViewport.height,
         });
 
         mockViewport(nextViewport.width, nextViewport.height);
-        rerender(<ResponsiveTable data={createMockData(25)} columns={createMockColumns()} />);
+        rerender(
+          <ResponsiveTable
+            data={createMockData(25)}
+            columns={createMockColumns()}
+          />
+        );
 
         const endTime = performance.now();
         transitionTimes.push(endTime - startTime);
@@ -314,7 +407,8 @@ describe('Responsive Component Performance Tests', () => {
       });
 
       // Average transition time should be reasonable
-      const averageTime = transitionTimes.reduce((a, b) => a + b, 0) / transitionTimes.length;
+      const averageTime =
+        transitionTimes.reduce((a, b) => a + b, 0) / transitionTimes.length;
       expect(averageTime).toBeLessThan(50);
     });
   });
@@ -353,7 +447,7 @@ describe('Responsive Component Performance Tests', () => {
       for (const count of optionCounts) {
         const options = Array.from({ length: count }, (_, i) => ({
           value: i.toString(),
-          label: `Option ${i + 1}`
+          label: `Option ${i + 1}`,
         }));
 
         const { duration } = await measureAsyncRender(async () => {
@@ -373,7 +467,9 @@ describe('Responsive Component Performance Tests', () => {
       // Performance should not degrade significantly with option count
       // Allow generous multiplier since small absolute times have high variance
       // Use Math.max to avoid false failures when 100-option render time is very small
-      expect(renderTimes[1000]).toBeLessThan(Math.max(renderTimes[100] * 20, 200));
+      expect(renderTimes[1000]).toBeLessThan(
+        Math.max(renderTimes[100] * 20, 200)
+      );
     });
 
     it('measures ResponsiveModal render performance', async () => {
@@ -455,7 +551,10 @@ describe('Responsive Component Performance Tests', () => {
       const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
 
       const { unmount } = renderResponsive(
-        <ResponsiveTable data={createMockData(10)} columns={createMockColumns()} />
+        <ResponsiveTable
+          data={createMockData(10)}
+          columns={createMockColumns()}
+        />
       );
 
       const addedListeners = addEventListenerSpy.mock.calls.length;
@@ -584,7 +683,9 @@ describe('Responsive Component Performance Tests', () => {
         />
       );
 
-      const medicationField = screen.getByRole('textbox', { name: /medication/i });
+      const medicationField = screen.getByRole('textbox', {
+        name: /medication/i,
+      });
 
       const interactionStart = performance.now();
 
@@ -610,7 +711,7 @@ describe('Responsive Component Performance Tests', () => {
       const FormWithValidation = () => {
         const [error, setError] = React.useState(null);
 
-        const handleChange = (value) => {
+        const handleChange = value => {
           const validationError = mockValidation(value);
           setError(validationError);
         };
@@ -632,7 +733,9 @@ describe('Responsive Component Performance Tests', () => {
 
       // Trigger multiple validation cycles by changing select value
       for (let i = 0; i < 10; i++) {
-        fireEvent.change(select, { target: { value: `Option ${(i % 3) + 1}` } });
+        fireEvent.change(select, {
+          target: { value: `Option ${(i % 3) + 1}` },
+        });
       }
 
       const validationEnd = performance.now();
@@ -705,20 +808,23 @@ describe('Responsive Component Performance Tests', () => {
   describe('Concurrent Rendering Performance', () => {
     it('handles multiple responsive components simultaneously', async () => {
       const components = [
-        <ResponsiveTable key="table" data={createMockData(20)} columns={createMockColumns()} />,
+        <ResponsiveTable
+          key="table"
+          data={createMockData(20)}
+          columns={createMockColumns()}
+        />,
         <ResponsiveModal key="modal" opened={true} onClose={() => {}}>
           <ResponsiveSelect options={['A', 'B', 'C']} />
         </ResponsiveModal>,
-        <ResponsiveSelect key="select" options={Array.from({ length: 50 }, (_, i) => `Option ${i}`)} />
+        <ResponsiveSelect
+          key="select"
+          options={Array.from({ length: 50 }, (_, i) => `Option ${i}`)}
+        />,
       ];
 
       const renderStart = performance.now();
 
-      const { unmount } = renderResponsive(
-        <div>
-          {components}
-        </div>
-      );
+      const { unmount } = renderResponsive(<div>{components}</div>);
 
       const renderEnd = performance.now();
       const renderTime = renderEnd - renderStart;

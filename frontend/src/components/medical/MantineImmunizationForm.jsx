@@ -18,29 +18,56 @@ const MantineImmunizationForm = ({
   const siteOptions = [
     { value: 'left_arm', label: t('immunizations.siteOptions.leftArm') },
     { value: 'right_arm', label: t('immunizations.siteOptions.rightArm') },
-    { value: 'left_deltoid', label: t('immunizations.siteOptions.leftDeltoid') },
-    { value: 'right_deltoid', label: t('immunizations.siteOptions.rightDeltoid') },
+    {
+      value: 'left_deltoid',
+      label: t('immunizations.siteOptions.leftDeltoid'),
+    },
+    {
+      value: 'right_deltoid',
+      label: t('immunizations.siteOptions.rightDeltoid'),
+    },
     { value: 'left_thigh', label: t('immunizations.siteOptions.leftThigh') },
     { value: 'right_thigh', label: t('immunizations.siteOptions.rightThigh') },
   ];
 
   // Route options with medical descriptions
   const routeOptions = [
-    { value: 'intramuscular', label: t('immunizations.routeOptions.intramuscular') },
-    { value: 'subcutaneous', label: t('immunizations.routeOptions.subcutaneous') },
-    { value: 'intradermal', label: t('immunizations.routeOptions.intradermal') },
+    {
+      value: 'intramuscular',
+      label: t('immunizations.routeOptions.intramuscular'),
+    },
+    {
+      value: 'subcutaneous',
+      label: t('immunizations.routeOptions.subcutaneous'),
+    },
+    {
+      value: 'intradermal',
+      label: t('immunizations.routeOptions.intradermal'),
+    },
     { value: 'oral', label: t('shared:fields.oral') },
     { value: 'nasal', label: t('shared:fields.nasal') },
   ];
 
   // Common vaccine manufacturers
   const manufacturerOptions = [
-    { value: 'Pfizer-BioNTech', label: t('immunizations.manufacturerOptions.pfizerBioNTech') },
+    {
+      value: 'Pfizer-BioNTech',
+      label: t('immunizations.manufacturerOptions.pfizerBioNTech'),
+    },
     { value: 'Moderna', label: t('immunizations.manufacturerOptions.moderna') },
-    { value: 'Johnson & Johnson', label: t('immunizations.manufacturerOptions.johnsonJohnson') },
-    { value: 'AstraZeneca', label: t('immunizations.manufacturerOptions.astraZeneca') },
+    {
+      value: 'Johnson & Johnson',
+      label: t('immunizations.manufacturerOptions.johnsonJohnson'),
+    },
+    {
+      value: 'AstraZeneca',
+      label: t('immunizations.manufacturerOptions.astraZeneca'),
+    },
     { value: 'Merck', label: t('immunizations.manufacturerOptions.merck') },
-    { value: 'GlaxoSmithKline', label: t('immunizations.manufacturerOptions.glaxoSmithKline') },
+    {
+      value: 'GlaxoSmithKline',
+      label: t('immunizations.manufacturerOptions.glaxoSmithKline'),
+    },
     { value: 'Sanofi', label: t('immunizations.manufacturerOptions.sanofi') },
     { value: 'Other', label: t('shared:fields.other') },
   ];

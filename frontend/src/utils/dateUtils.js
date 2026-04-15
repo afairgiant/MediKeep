@@ -7,27 +7,30 @@ import { timezoneService } from '../services/timezoneService';
 /**
  * Parse a date input value to a JavaScript Date object
  * Handles string dates in YYYY-MM-DD format to avoid timezone issues
- * 
+ *
  * @param {string|Date|null} dateValue - The date value to parse
  * @returns {Date|null} - Parsed Date object or null
  */
-export const parseDateInput = (dateValue) => {
+export const parseDateInput = dateValue => {
   if (!dateValue) return null;
-  
+
   // If it's already a Date object, return it
   if (dateValue instanceof Date) {
     return dateValue;
   }
-  
+
   // Handle YYYY-MM-DD string format
-  if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue.trim())) {
+  if (
+    typeof dateValue === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(dateValue.trim())
+  ) {
     const [year, month, day] = dateValue.trim().split('-').map(Number);
     if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
       // Use local date to avoid timezone issues (month is 0-indexed)
       return new Date(year, month - 1, day);
     }
   }
-  
+
   // Fallback to standard Date parsing
   const parsed = new Date(dateValue);
   return isNaN(parsed.getTime()) ? null : parsed;
@@ -35,22 +38,22 @@ export const parseDateInput = (dateValue) => {
 
 /**
  * Format a date value to YYYY-MM-DD string format for API consumption
- * 
+ *
  * @param {string|Date|null} dateValue - The date value to format
  * @returns {string|null} - Formatted date string or null
  */
-export const formatDateForAPI = (dateValue) => {
+export const formatDateForAPI = dateValue => {
   if (!dateValue) return null;
-  
+
   // If it's already a YYYY-MM-DD string, return as is
   if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
     return dateValue;
   }
-  
+
   // Parse the date
   const date = parseDateInput(dateValue);
   if (!date) return null;
-  
+
   // Format as YYYY-MM-DD
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -65,7 +68,7 @@ export const formatDateForAPI = (dateValue) => {
  * @param {string|Date|null} date - The date value from DateInput onChange
  * @returns {string} - Formatted date string (YYYY-MM-DD) or empty string
  */
-export const formatDateInputChange = (date) => {
+export const formatDateInputChange = date => {
   if (!date) return '';
 
   // If it's already a YYYY-MM-DD string, return as is
@@ -93,12 +96,20 @@ export const formatDateInputChange = (date) => {
 export const getTodayEndOfDay = () => {
   const today = new Date();
   // Create new Date object to avoid mutation
-  return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
+  return new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
 };
 
 /**
  * Get today's date as a YYYY-MM-DD string
- * 
+ *
  * @returns {string} - Today's date formatted as YYYY-MM-DD
  */
 export const getTodayString = () => {
@@ -108,38 +119,46 @@ export const getTodayString = () => {
 
 /**
  * Check if a date is in the future
- * 
+ *
  * @param {string|Date} dateValue - The date to check
  * @returns {boolean} - True if the date is in the future
  */
-export const isDateInFuture = (dateValue) => {
+export const isDateInFuture = dateValue => {
   if (!dateValue) return false;
-  
+
   const date = parseDateInput(dateValue);
   if (!date) return false;
-  
+
   // Create new Date object to avoid mutation
   const today = new Date();
-  const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-  
+  const endOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+
   return date > endOfToday;
 };
 
 /**
  * Check if end date is before start date
- * 
+ *
  * @param {string|Date} startDate - The start date
  * @param {string|Date} endDate - The end date
  * @returns {boolean} - True if end date is before start date
  */
 export const isEndDateBeforeStartDate = (startDate, endDate) => {
   if (!startDate || !endDate) return false;
-  
+
   const start = parseDateInput(startDate);
   const end = parseDateInput(endDate);
-  
+
   if (!start || !end) return false;
-  
+
   return end < start;
 };
 
@@ -149,7 +168,7 @@ export const isEndDateBeforeStartDate = (startDate, endDate) => {
  * @param {string|Date} dateValue - The date to format
  * @returns {string} - Formatted date string for display
  */
-export const formatDateForDisplay = (dateValue) => {
+export const formatDateForDisplay = dateValue => {
   const date = parseDateInput(dateValue);
   if (!date) return '';
 
@@ -180,7 +199,10 @@ export const formatDateForDisplay = (dateValue) => {
  * @param {string} preferredFormat - Preferred format hint: 'dmy' (day-month-year) or 'mdy' (month-day-year)
  * @returns {{ date: Date|null, error: string|null }} - Parsed Date object and any error message
  */
-export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => {
+export const parseDateTimeString = (
+  dateTimeString,
+  preferredFormat = 'mdy'
+) => {
   if (!dateTimeString || typeof dateTimeString !== 'string') {
     return { date: null, error: null };
   }
@@ -191,7 +213,9 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
   }
 
   // Try ISO format first (YYYY-MM-DDTHH:mm:ss or YYYY-MM-DD HH:mm:ss)
-  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/);
+  const isoMatch = trimmed.match(
+    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/
+  );
   if (isoMatch) {
     const [, year, month, day, hour, minute, second = '0'] = isoMatch;
     const date = new Date(
@@ -208,7 +232,9 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
   }
 
   // Try formats with separators (/, -, .)
-  const dateTimeMatch = trimmed.match(/^(\d{1,2})([/\-\.])(\d{1,2})\2(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  const dateTimeMatch = trimmed.match(
+    /^(\d{1,2})([/\-\.])(\d{1,2})\2(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+  );
   if (dateTimeMatch) {
     const [, part1, , part2, year, hour, minute, second = '0'] = dateTimeMatch;
     const p1 = parseInt(part1, 10);
@@ -254,7 +280,11 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
     const date = new Date(y, month - 1, day, h, m, s);
 
     // Verify the date is valid (catches invalid dates like Feb 30)
-    if (isNaN(date.getTime()) || date.getDate() !== day || date.getMonth() !== month - 1) {
+    if (
+      isNaN(date.getTime()) ||
+      date.getDate() !== day ||
+      date.getMonth() !== month - 1
+    ) {
       return { date: null, error: 'Invalid date' };
     }
 
@@ -264,7 +294,8 @@ export const parseDateTimeString = (dateTimeString, preferredFormat = 'mdy') => 
   // No valid format matched
   return {
     date: null,
-    error: 'Unrecognized format. Supported: MM/DD/YYYY HH:mm, DD/MM/YYYY HH:mm, or YYYY-MM-DD HH:mm (seconds optional)'
+    error:
+      'Unrecognized format. Supported: MM/DD/YYYY HH:mm, DD/MM/YYYY HH:mm, or YYYY-MM-DD HH:mm (seconds optional)',
   };
 };
 
@@ -338,7 +369,11 @@ export const formatDateTimeForInput = (date, includeSeconds = true) => {
  * @param {boolean} includeSeconds - Whether to include seconds
  * @returns {string} - Formatted datetime string based on preference
  */
-export const formatDateTimeForInputWithPreference = (date, formatCode = 'mdy', includeSeconds = false) => {
+export const formatDateTimeForInputWithPreference = (
+  date,
+  formatCode = 'mdy',
+  includeSeconds = false
+) => {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
     return '';
   }

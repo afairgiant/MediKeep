@@ -93,7 +93,12 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
       title={
         <Group gap="sm">
           {EntityIcon && item && (
-            <ThemeIcon size="md" color={item.color} variant="light" aria-hidden="true">
+            <ThemeIcon
+              size="md"
+              color={item.color}
+              variant="light"
+              aria-hidden="true"
+            >
               <EntityIcon size={16} />
             </ThemeIcon>
           )}
@@ -181,7 +186,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
             </Text>
             {Array.isArray(item.tags) && item.tags.length > 0 ? (
               <Group gap={6} wrap="wrap">
-                {item.tags.map((tag) => (
+                {item.tags.map(tag => (
                   <ClickableTagBadge
                     key={tag}
                     tag={tag}
@@ -215,7 +220,11 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
           </Paper>
         </Stack>
       ) : (
-        <Stack align="center" justify="center" style={{ height: '100%', minHeight: 200 }}>
+        <Stack
+          align="center"
+          justify="center"
+          style={{ height: '100%', minHeight: 200 }}
+        >
           <Text size="sm" c="dimmed">
             {t('search.previewRecord')}
           </Text>

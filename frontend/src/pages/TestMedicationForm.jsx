@@ -1,6 +1,14 @@
 /* eslint-disable i18next/no-literal-string -- test page, not user-facing */
 import React, { useState, useEffect } from 'react';
-import { Container, Title, Button, Text, Stack, Paper, Code } from '@mantine/core';
+import {
+  Container,
+  Title,
+  Button,
+  Text,
+  Stack,
+  Paper,
+  Code,
+} from '@mantine/core';
 import BaseMedicalForm from '../components/medical/BaseMedicalForm';
 import { medicationFormFields } from '../utils/medicalFormFields';
 import logger from '../services/logger';
@@ -12,7 +20,7 @@ const TestMedicationForm = () => {
     openTime: null,
     renderCount: 0,
     lastRenderTime: null,
-    screenSize: { width: window.innerWidth, height: window.innerHeight }
+    screenSize: { width: window.innerWidth, height: window.innerHeight },
   });
 
   // Monitor screen size
@@ -20,7 +28,7 @@ const TestMedicationForm = () => {
     const updateScreenSize = () => {
       setPerformanceMetrics(prev => ({
         ...prev,
-        screenSize: { width: window.innerWidth, height: window.innerHeight }
+        screenSize: { width: window.innerWidth, height: window.innerHeight },
       }));
     };
 
@@ -33,52 +41,54 @@ const TestMedicationForm = () => {
     logger.info('Opening test medication form', {
       component: 'TestMedicationForm',
       screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight
+      screenHeight: window.innerHeight,
     });
-    
+
     setPerformanceMetrics(prev => ({
       ...prev,
       openTime: startTime,
-      renderCount: 0
+      renderCount: 0,
     }));
-    
+
     setIsFormOpen(true);
   };
 
   const handleCloseForm = () => {
     const closeTime = performance.now();
-    const totalTime = performanceMetrics.openTime ? closeTime - performanceMetrics.openTime : 0;
-    
+    const totalTime = performanceMetrics.openTime
+      ? closeTime - performanceMetrics.openTime
+      : 0;
+
     logger.info('Closing test medication form', {
       component: 'TestMedicationForm',
       totalOpenTime: totalTime,
-      renderCount: performanceMetrics.renderCount
+      renderCount: performanceMetrics.renderCount,
     });
-    
+
     setIsFormOpen(false);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     logger.debug('Form input changed', {
       component: 'TestMedicationForm',
       fieldName: name,
-      valueLength: value ? value.toString().length : 0
+      valueLength: value ? value.toString().length : 0,
     });
-    
+
     setFormData(prev => ({ ...prev, [name]: value }));
     setPerformanceMetrics(prev => ({
       ...prev,
       renderCount: prev.renderCount + 1,
-      lastRenderTime: performance.now()
+      lastRenderTime: performance.now(),
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     logger.info('Test form submitted', {
       component: 'TestMedicationForm',
-      formDataKeys: Object.keys(formData)
+      formDataKeys: Object.keys(formData),
     });
     handleCloseForm();
   };
@@ -87,42 +97,42 @@ const TestMedicationForm = () => {
   const testPractitioners = Array.from({ length: 50 }, (_, i) => ({
     id: i + 1,
     name: `Dr. Test ${i + 1}`,
-    specialty: `Specialty ${i % 5}`
+    specialty: `Specialty ${i % 5}`,
   }));
 
   const testPharmacies = Array.from({ length: 30 }, (_, i) => ({
     id: i + 1,
     name: `Pharmacy ${i + 1}`,
     city: `City ${i % 3}`,
-    state: 'ST'
+    state: 'ST',
   }));
 
   const practitionerOptions = testPractitioners.map(p => ({
     value: String(p.id),
-    label: `${p.name} - ${p.specialty}`
+    label: `${p.name} - ${p.specialty}`,
   }));
 
   const pharmacyOptions = testPharmacies.map(p => ({
     value: String(p.id),
-    label: `${p.name} - ${p.city}, ${p.state}`
+    label: `${p.name} - ${p.city}, ${p.state}`,
   }));
 
   return (
     <Container size="lg" py="xl">
       <Stack spacing="lg">
         <Title order={1}>Medication Form Test Page</Title>
-        
+
         <Paper shadow="xs" p="md">
           <Stack spacing="sm">
             <Text fw={600}>Current Screen Size:</Text>
             <Code block>
-              Width: {performanceMetrics.screenSize.width}px
-              Height: {performanceMetrics.screenSize.height}px
-              Category: {
-                performanceMetrics.screenSize.height < 600 ? 'Very Small (< 600px)' :
-                performanceMetrics.screenSize.height < 800 ? 'Small (600-800px)' :
-                'Large (> 800px)'
-              }
+              Width: {performanceMetrics.screenSize.width}px Height:{' '}
+              {performanceMetrics.screenSize.height}px Category:{' '}
+              {performanceMetrics.screenSize.height < 600
+                ? 'Very Small (< 600px)'
+                : performanceMetrics.screenSize.height < 800
+                  ? 'Small (600-800px)'
+                  : 'Large (> 800px)'}
             </Code>
           </Stack>
         </Paper>
@@ -133,16 +143,15 @@ const TestMedicationForm = () => {
             <Code block>
               Form Open: {isFormOpen ? 'Yes' : 'No'}
               Render Count: {performanceMetrics.renderCount}
-              Time Since Open: {
-                isFormOpen && performanceMetrics.openTime
-                  ? `${(performance.now() - performanceMetrics.openTime).toFixed(0)}ms`
-                  : 'N/A'
-              }
+              Time Since Open:{' '}
+              {isFormOpen && performanceMetrics.openTime
+                ? `${(performance.now() - performanceMetrics.openTime).toFixed(0)}ms`
+                : 'N/A'}
             </Code>
           </Stack>
         </Paper>
 
-        <Button 
+        <Button
           onClick={handleOpenForm}
           disabled={isFormOpen}
           size="lg"
@@ -153,9 +162,10 @@ const TestMedicationForm = () => {
 
         <Paper shadow="xs" p="md">
           <Text size="sm" c="dimmed">
-            This test page helps debug the medication form hanging issue on small screens.
-            Open the browser console to see detailed logging. Try resizing the window
-            while the form is open to test responsive behavior.
+            This test page helps debug the medication form hanging issue on
+            small screens. Open the browser console to see detailed logging. Try
+            resizing the window while the form is open to test responsive
+            behavior.
           </Text>
         </Paper>
       </Stack>
@@ -170,7 +180,7 @@ const TestMedicationForm = () => {
         fields={medicationFormFields}
         dynamicOptions={{
           practitioners: practitionerOptions,
-          pharmacies: pharmacyOptions
+          pharmacies: pharmacyOptions,
         }}
         modalSize="lg"
       />

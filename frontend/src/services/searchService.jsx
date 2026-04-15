@@ -44,7 +44,7 @@ class SearchService {
       type: item.type,
       id: item.id,
       tags: item.tags || [],
-      data: item
+      data: item,
     };
 
     switch (recordType) {
@@ -52,11 +52,13 @@ class SearchService {
         return {
           ...baseItem,
           title: item.medication_name,
-          subtitle: item.dosage ? `${item.dosage} - ${item.status}` : item.status,
+          subtitle: item.dosage
+            ? `${item.dosage} - ${item.status}`
+            : item.status,
           description: item.notes || '',
           date: item.start_date || item.created_at,
           icon: 'IconPill',
-          color: 'green'
+          color: 'green',
         };
 
       case 'conditions':
@@ -67,7 +69,7 @@ class SearchService {
           description: item.diagnosis || item.notes || '',
           date: item.diagnosed_date || item.created_at,
           icon: 'IconStethoscope',
-          color: 'blue'
+          color: 'blue',
         };
 
       case 'lab_results':
@@ -78,7 +80,7 @@ class SearchService {
           description: item.notes || '',
           date: item.test_date || item.created_at,
           icon: 'IconFlask',
-          color: 'indigo'
+          color: 'indigo',
         };
 
       case 'procedures':
@@ -89,29 +91,33 @@ class SearchService {
           description: item.description || item.notes || '',
           date: item.procedure_date || item.created_at,
           icon: 'IconMedicalCross',
-          color: 'violet'
+          color: 'violet',
         };
 
       case 'immunizations':
         return {
           ...baseItem,
           title: item.vaccine_name,
-          subtitle: item.dose_number ? `Dose ${item.dose_number} - ${item.status}` : item.status,
+          subtitle: item.dose_number
+            ? `Dose ${item.dose_number} - ${item.status}`
+            : item.status,
           description: item.notes || '',
           date: item.administered_date || item.created_at,
           icon: 'IconVaccine',
-          color: 'orange'
+          color: 'orange',
         };
 
       case 'treatments':
         return {
           ...baseItem,
           title: item.treatment_name,
-          subtitle: item.treatment_type ? `${item.treatment_type} - ${item.status}` : item.status,
+          subtitle: item.treatment_type
+            ? `${item.treatment_type} - ${item.status}`
+            : item.status,
           description: item.description || item.notes || '',
           date: item.start_date || item.created_at,
           icon: 'IconHeartbeat',
-          color: 'pink'
+          color: 'pink',
         };
 
       case 'encounters':
@@ -122,7 +128,7 @@ class SearchService {
           description: item.chief_complaint || item.notes || '',
           date: item.encounter_date || item.created_at,
           icon: 'IconCalendarEvent',
-          color: 'teal'
+          color: 'teal',
         };
 
       case 'allergies':
@@ -133,7 +139,7 @@ class SearchService {
           description: item.notes || '',
           date: item.identified_date || item.created_at,
           icon: 'IconAlertTriangle',
-          color: 'red'
+          color: 'red',
         };
 
       case 'vitals':
@@ -144,15 +150,19 @@ class SearchService {
           description: item.notes || '',
           date: item.recorded_date || item.created_at,
           icon: 'IconHeartbeat',
-          color: 'cyan'
+          color: 'cyan',
         };
 
       default:
-        logger.warn('unknown_record_type', 'Unknown record type in search results', {
-          component: 'SearchService',
-          recordType,
-          item
-        });
+        logger.warn(
+          'unknown_record_type',
+          'Unknown record type in search results',
+          {
+            component: 'SearchService',
+            recordType,
+            item,
+          }
+        );
         return null;
     }
   }
@@ -197,7 +207,7 @@ class SearchService {
       treatment: `/treatments?view=${id}`,
       vital: `/vitals?view=${id}`,
       encounter: `/visits?view=${id}`,
-      lab_result: `/lab-results?view=${id}`
+      lab_result: `/lab-results?view=${id}`,
     };
 
     return routeMap[type] || `/dashboard`;
@@ -215,13 +225,13 @@ class SearchService {
       return {
         results: [],
         totalCount: 0,
-        pagination: { skip: 0, limit: 20, hasMore: false }
+        pagination: { skip: 0, limit: 20, hasMore: false },
       };
     }
 
     try {
       const params = {
-        ...paginationOptions
+        ...paginationOptions,
       };
 
       if (query && query.trim().length > 0) {
@@ -235,27 +245,32 @@ class SearchService {
 
       const searchData = await apiService.get('/search/', { params });
 
-      const formattedResults = this.formatSearchResults(searchData?.results || {});
+      const formattedResults = this.formatSearchResults(
+        searchData?.results || {}
+      );
 
       return {
         results: formattedResults,
         totalCount: searchData?.total_count || 0,
-        pagination: searchData?.pagination || { skip: 0, limit: 20, hasMore: false },
-        resultsByType: searchData?.results || {}
+        pagination: searchData?.pagination || {
+          skip: 0,
+          limit: 20,
+          hasMore: false,
+        },
+        resultsByType: searchData?.results || {},
       };
-
     } catch (error) {
       logger.error('paginated_search_error', 'Paginated search failed', {
         component: 'SearchService',
         error: error.message,
         query,
-        patientId
+        patientId,
       });
 
       return {
         results: [],
         totalCount: 0,
-        pagination: { skip: 0, limit: 20, hasMore: false }
+        pagination: { skip: 0, limit: 20, hasMore: false },
       };
     }
   }

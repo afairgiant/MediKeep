@@ -184,7 +184,9 @@ const AdminSettings = () => {
         <Center h={400}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text c="dimmed">{t('settings.loading', 'Loading settings...')}</Text>
+            <Text c="dimmed">
+              {t('settings.loading', 'Loading settings...')}
+            </Text>
           </Stack>
         </Center>
       </AdminLayout>
@@ -205,7 +207,10 @@ const AdminSettings = () => {
             </Text>
           </Group>
           <Text c="dimmed" size="md">
-            {t('settings.subtitle', 'Configure system-wide settings and retention policies')}
+            {t(
+              'settings.subtitle',
+              'Configure system-wide settings and retention policies'
+            )}
           </Text>
         </Card>
 
@@ -240,9 +245,14 @@ const AdminSettings = () => {
           </Group>
           <Group justify="space-between" align="flex-start">
             <Stack gap={4} style={{ flex: 1 }}>
-              <Text fw={500}>{t('settings.dataRetention.trashRetention', 'Trash Retention')}</Text>
+              <Text fw={500}>
+                {t('settings.dataRetention.trashRetention', 'Trash Retention')}
+              </Text>
               <Text size="sm" c="dimmed">
-                {t('settings.dataRetention.trashRetentionDesc', 'Number of days to keep deleted files in trash before permanent deletion')}
+                {t(
+                  'settings.dataRetention.trashRetentionDesc',
+                  'Number of days to keep deleted files in trash before permanent deletion'
+                )}
               </Text>
             </Stack>
             <NumberInput
@@ -250,7 +260,9 @@ const AdminSettings = () => {
               min={1}
               max={365}
               value={settings.trash_retention_days}
-              onChange={value => handleInputChange('trash_retention_days', value)}
+              onChange={value =>
+                handleInputChange('trash_retention_days', value)
+              }
               onBlur={() => handleBlur('trash_retention_days', 1)}
               suffix=" days"
             />
@@ -269,9 +281,17 @@ const AdminSettings = () => {
           </Group>
           <Group justify="space-between" align="flex-start">
             <Stack gap={4} style={{ flex: 1 }}>
-              <Text fw={500}>{t('settings.userManagement.allowRegistration', 'Allow New User Registration')}</Text>
+              <Text fw={500}>
+                {t(
+                  'settings.userManagement.allowRegistration',
+                  'Allow New User Registration'
+                )}
+              </Text>
               <Text size="sm" c="dimmed">
-                {t('settings.userManagement.allowRegistrationDesc', 'Enable or disable the ability for new users to create accounts from the login page')}
+                {t(
+                  'settings.userManagement.allowRegistrationDesc',
+                  'Enable or disable the ability for new users to create accounts from the login page'
+                )}
               </Text>
             </Stack>
             <Group gap="sm">
@@ -289,7 +309,9 @@ const AdminSettings = () => {
                 variant="light"
                 color={settings.allow_user_registration ? 'green' : 'red'}
               >
-                {settings.allow_user_registration ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
+                {settings.allow_user_registration
+                  ? t('shared:labels.enabled', 'Enabled')
+                  : t('shared:labels.disabled', 'Disabled')}
               </Badge>
             </Group>
           </Group>
@@ -304,11 +326,10 @@ const AdminSettings = () => {
             <Text fw={600} size="lg">
               {t('settings.sso.title', 'Single Sign-On (SSO)')}
             </Text>
-            <Badge
-              variant="light"
-              color={ssoConfig.enabled ? 'green' : 'gray'}
-            >
-              {ssoConfig.enabled ? t('shared:labels.enabled', 'Enabled') : t('shared:labels.disabled', 'Disabled')}
+            <Badge variant="light" color={ssoConfig.enabled ? 'green' : 'gray'}>
+              {ssoConfig.enabled
+                ? t('shared:labels.enabled', 'Enabled')
+                : t('shared:labels.disabled', 'Disabled')}
             </Badge>
           </Group>
 
@@ -316,27 +337,39 @@ const AdminSettings = () => {
             {ssoConfig.enabled ? (
               <>
                 <Group justify="space-between">
-                  <Text fw={500}>{t('shared:labels.provider', 'Provider')}</Text>
+                  <Text fw={500}>
+                    {t('shared:labels.provider', 'Provider')}
+                  </Text>
                   <Text c="dimmed">
-                    {capitalizeFirst(ssoConfig.provider_type) || t('shared:labels.unknown', 'Unknown')}
+                    {capitalizeFirst(ssoConfig.provider_type) ||
+                      t('shared:labels.unknown', 'Unknown')}
                   </Text>
                 </Group>
 
                 <Group justify="space-between">
-                  <Text fw={500}>{t('settings.sso.ssoRegistration', 'SSO Registration')}</Text>
+                  <Text fw={500}>
+                    {t('settings.sso.ssoRegistration', 'SSO Registration')}
+                  </Text>
                   <Badge
                     variant="light"
                     color={ssoConfig.registration_enabled ? 'green' : 'yellow'}
                   >
-                    {ssoConfig.registration_enabled ? t('health.sso.allowed', 'Allowed') : t('health.sso.blocked', 'Blocked')}
+                    {ssoConfig.registration_enabled
+                      ? t('health.sso.allowed', 'Allowed')
+                      : t('health.sso.blocked', 'Blocked')}
                   </Badge>
                 </Group>
 
                 <Group justify="space-between" align="flex-start">
                   <Stack gap={4}>
-                    <Text fw={500}>{t('settings.sso.testConnection', 'Test Connection')}</Text>
+                    <Text fw={500}>
+                      {t('settings.sso.testConnection', 'Test Connection')}
+                    </Text>
                     <Text size="sm" c="dimmed">
-                      {t('settings.sso.testConnectionDesc', 'Test the SSO provider connection and configuration')}
+                      {t(
+                        'settings.sso.testConnectionDesc',
+                        'Test the SSO provider connection and configuration'
+                      )}
                     </Text>
                   </Stack>
                   <Button
@@ -372,7 +405,10 @@ const AdminSettings = () => {
                 icon={<IconInfoCircle size={16} />}
               >
                 <Text size="sm" mb="xs">
-                  {t('settings.sso.ssoDisabledInfo', 'SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:')}
+                  {t(
+                    'settings.sso.ssoDisabledInfo',
+                    'SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:'
+                  )}
                 </Text>
                 {/* eslint-disable i18next/no-literal-string -- environment variable names */}
                 <List size="sm" spacing={4}>

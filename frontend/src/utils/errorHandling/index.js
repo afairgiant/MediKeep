@@ -1,13 +1,13 @@
 /**
  * Centralized Error Handling System
- * 
+ *
  * A modular, scalable error handling system for the entire application.
- * 
+ *
  * Usage:
  * import { useErrorHandler } from '@/utils/errorHandling';
- * 
+ *
  * const { handleError, clearError, currentError } = useErrorHandler('ComponentName');
- * 
+ *
  * try {
  *   await apiCall();
  * } catch (error) {
@@ -29,13 +29,13 @@ export { getErrorConfig } from './config';
 export { ErrorIcon } from './ErrorIcon';
 
 // Constants (addresses reviewer feedback about magic strings)
-export { 
-    ERROR_SEVERITY, 
-    ERROR_TYPES, 
-    ERROR_DOMAINS, 
-    ERROR_COLORS, 
-    ERROR_ICONS,
-    ERROR_PATTERNS,
-    NOTIFICATION_DURATIONS,
-    ERROR_QUEUE_CONFIG
+export {
+  ERROR_SEVERITY,
+  ERROR_TYPES,
+  ERROR_DOMAINS,
+  ERROR_COLORS,
+  ERROR_ICONS,
+  ERROR_PATTERNS,
+  NOTIFICATION_DURATIONS,
+  ERROR_QUEUE_CONFIG,
 } from './constants';

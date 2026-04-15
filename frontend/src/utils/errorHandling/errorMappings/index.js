@@ -15,51 +15,51 @@ import { generalErrors } from './general';
  * Each domain contributes its own error patterns and configurations
  */
 export const errorMappings = {
-    ...sharingErrors,
-    ...authErrors,
-    ...networkErrors,
-    ...validationErrors,
-    ...generalErrors
+  ...sharingErrors,
+  ...authErrors,
+  ...networkErrors,
+  ...validationErrors,
+  ...generalErrors,
 };
 
 /**
  * Get error mapping by pattern
- * 
+ *
  * @param {string} pattern - Error pattern to match
  * @returns {Object|null} Error configuration or null if not found
  */
-export const getErrorMapping = (pattern) => {
-    const lowerPattern = pattern.toLowerCase();
-    
-    // Exact match first
-    if (errorMappings[lowerPattern]) {
-        return errorMappings[lowerPattern];
+export const getErrorMapping = pattern => {
+  const lowerPattern = pattern.toLowerCase();
+
+  // Exact match first
+  if (errorMappings[lowerPattern]) {
+    return errorMappings[lowerPattern];
+  }
+
+  // Partial match
+  for (const [key, config] of Object.entries(errorMappings)) {
+    if (lowerPattern.includes(key)) {
+      return config;
     }
-    
-    // Partial match
-    for (const [key, config] of Object.entries(errorMappings)) {
-        if (lowerPattern.includes(key)) {
-            return config;
-        }
-    }
-    
-    return null;
+  }
+
+  return null;
 };
 
 /**
  * Get all error patterns for a specific domain
- * 
+ *
  * @param {string} domain - Domain name (sharing, auth, network, etc.)
  * @returns {Object} Error mappings for the domain
  */
-export const getErrorsByDomain = (domain) => {
-    const domainMappings = {
-        sharing: sharingErrors,
-        auth: authErrors,
-        network: networkErrors,
-        validation: validationErrors,
-        general: generalErrors
-    };
-    
-    return domainMappings[domain] || {};
+export const getErrorsByDomain = domain => {
+  const domainMappings = {
+    sharing: sharingErrors,
+    auth: authErrors,
+    network: networkErrors,
+    validation: validationErrors,
+    general: generalErrors,
+  };
+
+  return domainMappings[domain] || {};
 };

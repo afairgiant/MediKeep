@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-  Modal,
-} from '@mantine/core';
+import { Modal } from '@mantine/core';
 import VitalsForm from '../VitalsForm';
 import logger from '../../../services/logger';
 
@@ -19,7 +17,7 @@ const VitalFormWrapper = ({
   createItem,
   updateItem,
 }) => {
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('vital_form_wrapper_error', {
       message: 'Error in VitalFormWrapper',
       vitalId: editingVital?.id,
@@ -28,7 +26,7 @@ const VitalFormWrapper = ({
     });
   };
 
-  const handleFormSave = async (formData) => {
+  const handleFormSave = async formData => {
     try {
       await onSave(formData);
     } catch (error) {

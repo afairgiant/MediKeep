@@ -2,11 +2,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX, IconExclamationMark } from '@tabler/icons-react';
 import logger from '../services/logger';
-import { 
-  ERROR_MESSAGES, 
-  SUCCESS_MESSAGES, 
-  WARNING_MESSAGES, 
-  getUserFriendlyError
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  WARNING_MESSAGES,
+  getUserFriendlyError,
 } from '../constants/errorMessages';
 
 /**
@@ -28,15 +28,25 @@ export const useFormSubmissionWithUploads = ({
     uploadSuccess: false,
     canClose: true,
   });
-  
+
   const [overallSuccess, setOverallSuccess] = useState(false);
 
   // Handle success callback when submission is complete and successful
   useEffect(() => {
-    if (submissionState.isCompleted && submissionState.canClose && overallSuccess && onSuccess) {
+    if (
+      submissionState.isCompleted &&
+      submissionState.canClose &&
+      overallSuccess &&
+      onSuccess
+    ) {
       onSuccess();
     }
-  }, [submissionState.isCompleted, submissionState.canClose, overallSuccess, onSuccess]);
+  }, [
+    submissionState.isCompleted,
+    submissionState.canClose,
+    overallSuccess,
+    onSuccess,
+  ]);
 
   // Start form submission process
   const startSubmission = useCallback(() => {
@@ -49,7 +59,7 @@ export const useFormSubmissionWithUploads = ({
       uploadSuccess: false,
       canClose: false,
     });
-    
+
     setOverallSuccess(false);
 
     logger.info('form_submission_started', {
@@ -60,28 +70,31 @@ export const useFormSubmissionWithUploads = ({
   }, [entityType, component]);
 
   // Mark form submission as completed (entity created/updated)
-  const completeFormSubmission = useCallback((success, entityId = null) => {
-    setSubmissionState(prev => ({
-      ...prev,
-      isSubmitting: false,
-      submitSuccess: success,
-      hasErrors: prev.hasErrors || !success,
-    }));
+  const completeFormSubmission = useCallback(
+    (success, entityId = null) => {
+      setSubmissionState(prev => ({
+        ...prev,
+        isSubmitting: false,
+        submitSuccess: success,
+        hasErrors: prev.hasErrors || !success,
+      }));
 
-    logger.info('form_submission_completed', {
-      message: 'Form submission completed',
-      entityType,
-      entityId,
-      success,
-      component,
-    });
+      logger.info('form_submission_completed', {
+        message: 'Form submission completed',
+        entityType,
+        entityId,
+        success,
+        component,
+      });
 
-    if (!success && onError) {
-      onError(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
-    }
+      if (!success && onError) {
+        onError(ERROR_MESSAGES.FORM_SUBMISSION_FAILED);
+      }
 
-    return success;
-  }, [entityType, component, onError]);
+      return success;
+    },
+    [entityType, component, onError]
+  );
 
   // Start file upload process
   const startFileUpload = useCallback(() => {
@@ -99,101 +112,112 @@ export const useFormSubmissionWithUploads = ({
   }, [entityType, component]);
 
   // Complete file upload process
-  const completeFileUpload = useCallback((success, completedCount = 0, failedCount = 0) => {
-    const hasUploadErrors = failedCount > 0 || !success;
-    
-    setSubmissionState(prev => {
-      const updatedState = {
-        ...prev,
-        isUploading: false,
-        uploadSuccess: success,
-        hasErrors: prev.hasErrors || hasUploadErrors,
-        isCompleted: true,
-        canClose: true,
-      };
+  const completeFileUpload = useCallback(
+    (success, completedCount = 0, failedCount = 0) => {
+      const hasUploadErrors = failedCount > 0 || !success;
 
-      // Calculate overall success using current state
-      const currentOverallSuccess = prev.submitSuccess && success;
-      setOverallSuccess(currentOverallSuccess);
+      setSubmissionState(prev => {
+        const updatedState = {
+          ...prev,
+          isUploading: false,
+          uploadSuccess: success,
+          hasErrors: prev.hasErrors || hasUploadErrors,
+          isCompleted: true,
+          canClose: true,
+        };
 
-      // Show appropriate notifications based on overall success
-      if (currentOverallSuccess && failedCount === 0) {
-        notifications.show({
-          title: 'Success!',
-          message: completedCount > 0 
-            ? `${SUCCESS_MESSAGES.FORM_SAVED.replace('successfully!', 'and')} ${completedCount} file(s) uploaded successfully!`
-            : SUCCESS_MESSAGES.FORM_SAVED,
-          color: 'green',
-          icon: <IconCheck size={16} />,
-          autoClose: 5000,
-        });
-      } else if (prev.submitSuccess && failedCount > 0) {
-        notifications.show({
-          title: 'Partially Successful',
-          message: `Form saved successfully, but ${failedCount} file(s) failed to upload. ${completedCount} file(s) uploaded successfully.`,
-          color: 'orange',
-          icon: <IconExclamationMark size={16} />,
-          autoClose: 7000,
-        });
-      } else if (!prev.submitSuccess) {
-        notifications.show({
-          title: 'Submission Failed',
-          message: ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
-          color: 'red',
-          icon: <IconX size={16} />,
-          autoClose: 7000,
-        });
-      }
+        // Calculate overall success using current state
+        const currentOverallSuccess = prev.submitSuccess && success;
+        setOverallSuccess(currentOverallSuccess);
 
-      return updatedState;
-    });
+        // Show appropriate notifications based on overall success
+        if (currentOverallSuccess && failedCount === 0) {
+          notifications.show({
+            title: 'Success!',
+            message:
+              completedCount > 0
+                ? `${SUCCESS_MESSAGES.FORM_SAVED.replace('successfully!', 'and')} ${completedCount} file(s) uploaded successfully!`
+                : SUCCESS_MESSAGES.FORM_SAVED,
+            color: 'green',
+            icon: <IconCheck size={16} />,
+            autoClose: 5000,
+          });
+        } else if (prev.submitSuccess && failedCount > 0) {
+          notifications.show({
+            title: 'Partially Successful',
+            message: `Form saved successfully, but ${failedCount} file(s) failed to upload. ${completedCount} file(s) uploaded successfully.`,
+            color: 'orange',
+            icon: <IconExclamationMark size={16} />,
+            autoClose: 7000,
+          });
+        } else if (!prev.submitSuccess) {
+          notifications.show({
+            title: 'Submission Failed',
+            message: ERROR_MESSAGES.FORM_SUBMISSION_FAILED,
+            color: 'red',
+            icon: <IconX size={16} />,
+            autoClose: 7000,
+          });
+        }
 
-    logger.info('form_file_upload_completed', {
-      message: 'File upload process completed',
-      entityType,
-      success,
-      completedCount,
-      failedCount,
-      component,
-    });
+        return updatedState;
+      });
 
-    return true;
-  }, [entityType, component]);
+      logger.info('form_file_upload_completed', {
+        message: 'File upload process completed',
+        entityType,
+        success,
+        completedCount,
+        failedCount,
+        component,
+      });
+
+      return true;
+    },
+    [entityType, component]
+  );
 
   // Handle submission failure
-  const handleSubmissionFailure = useCallback((error, stage = 'form') => {
-    setSubmissionState(prev => ({
-      ...prev,
-      isSubmitting: stage === 'form' ? false : prev.isSubmitting,
-      isUploading: stage === 'upload' ? false : prev.isUploading,
-      hasErrors: true,
-      isCompleted: true,
-      canClose: true,
-    }));
+  const handleSubmissionFailure = useCallback(
+    (error, stage = 'form') => {
+      setSubmissionState(prev => ({
+        ...prev,
+        isSubmitting: stage === 'form' ? false : prev.isSubmitting,
+        isUploading: stage === 'upload' ? false : prev.isUploading,
+        hasErrors: true,
+        isCompleted: true,
+        canClose: true,
+      }));
 
-    const errorMessage = getUserFriendlyError(error, stage === 'form' ? 'save' : 'upload');
-    
-    logger.error('form_submission_failure', {
-      message: 'Form submission failed',
-      entityType,
-      stage,
-      error: error?.message || error || 'Unknown error',
-      userFriendlyError: errorMessage,
-      component,
-    });
+      const errorMessage = getUserFriendlyError(
+        error,
+        stage === 'form' ? 'save' : 'upload'
+      );
 
-    notifications.show({
-      title: stage === 'form' ? 'Form Submission Failed' : 'File Upload Failed',
-      message: errorMessage,
-      color: 'red',
-      icon: <IconX size={16} />,
-      autoClose: 7000,
-    });
+      logger.error('form_submission_failure', {
+        message: 'Form submission failed',
+        entityType,
+        stage,
+        error: error?.message || error || 'Unknown error',
+        userFriendlyError: errorMessage,
+        component,
+      });
 
-    if (onError) {
-      onError(errorMessage);
-    }
-  }, [entityType, component, onError]);
+      notifications.show({
+        title:
+          stage === 'form' ? 'Form Submission Failed' : 'File Upload Failed',
+        message: errorMessage,
+        color: 'red',
+        icon: <IconX size={16} />,
+        autoClose: 7000,
+      });
+
+      if (onError) {
+        onError(errorMessage);
+      }
+    },
+    [entityType, component, onError]
+  );
 
   // Reset submission state
   const resetSubmission = useCallback(() => {
@@ -206,7 +230,7 @@ export const useFormSubmissionWithUploads = ({
       uploadSuccess: false,
       canClose: true,
     });
-    
+
     setOverallSuccess(false);
 
     logger.info('form_submission_reset', {
@@ -225,7 +249,7 @@ export const useFormSubmissionWithUploads = ({
         type: 'loading',
       };
     }
-    
+
     if (submissionState.isUploading) {
       return {
         title: 'Uploading Files...',
@@ -233,7 +257,7 @@ export const useFormSubmissionWithUploads = ({
         type: 'loading',
       };
     }
-    
+
     if (submissionState.isCompleted) {
       if (submissionState.submitSuccess && submissionState.uploadSuccess) {
         return {
@@ -241,7 +265,10 @@ export const useFormSubmissionWithUploads = ({
           message: 'Form and files saved successfully.',
           type: 'success',
         };
-      } else if (submissionState.submitSuccess && !submissionState.uploadSuccess) {
+      } else if (
+        submissionState.submitSuccess &&
+        !submissionState.uploadSuccess
+      ) {
         return {
           title: 'Partially Complete',
           message: 'Form saved, but some files failed to upload.',
@@ -255,14 +282,14 @@ export const useFormSubmissionWithUploads = ({
         };
       }
     }
-    
+
     return null;
   }, [submissionState]);
 
   return {
     // State
     submissionState,
-    
+
     // Actions
     startSubmission,
     completeFormSubmission,
@@ -270,12 +297,12 @@ export const useFormSubmissionWithUploads = ({
     completeFileUpload,
     handleSubmissionFailure,
     resetSubmission,
-    
+
     // Derived state
     isBlocking: submissionState.isSubmitting || submissionState.isUploading,
     canSubmit: !submissionState.isSubmitting && !submissionState.isUploading,
     statusMessage: getStatusMessage(),
-    
+
     // State booleans for convenience
     isSubmitting: submissionState.isSubmitting,
     isUploading: submissionState.isUploading,

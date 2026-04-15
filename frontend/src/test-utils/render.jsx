@@ -49,7 +49,10 @@ function render(
   } = {}
 ) {
   const mergedAuthContext = { ...defaultAuthContext, ...authContextValue };
-  const mergedAppDataContext = { ...defaultAppDataContext, ...appDataContextValue };
+  const mergedAppDataContext = {
+    ...defaultAppDataContext,
+    ...appDataContextValue,
+  };
 
   function Wrapper({ children }) {
     const content = (
@@ -71,9 +74,7 @@ function render(
     }
 
     return (
-      <BrowserRouter initialEntries={initialEntries}>
-        {content}
-      </BrowserRouter>
+      <BrowserRouter initialEntries={initialEntries}>{content}</BrowserRouter>
     );
   }
 

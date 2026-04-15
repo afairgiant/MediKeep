@@ -55,11 +55,21 @@ function fillForm(overrides = {}) {
   };
   const values = { ...defaults, ...overrides };
 
-  fireEvent.change(document.getElementById('username'), { target: { name: 'username', value: values.username } });
-  fireEvent.change(document.getElementById('password'), { target: { name: 'password', value: values.password } });
-  fireEvent.change(document.getElementById('email'), { target: { name: 'email', value: values.email } });
-  fireEvent.change(document.getElementById('firstName'), { target: { name: 'firstName', value: values.firstName } });
-  fireEvent.change(document.getElementById('lastName'), { target: { name: 'lastName', value: values.lastName } });
+  fireEvent.change(document.getElementById('username'), {
+    target: { name: 'username', value: values.username },
+  });
+  fireEvent.change(document.getElementById('password'), {
+    target: { name: 'password', value: values.password },
+  });
+  fireEvent.change(document.getElementById('email'), {
+    target: { name: 'email', value: values.email },
+  });
+  fireEvent.change(document.getElementById('firstName'), {
+    target: { name: 'firstName', value: values.firstName },
+  });
+  fireEvent.change(document.getElementById('lastName'), {
+    target: { name: 'lastName', value: values.lastName },
+  });
 }
 
 describe('UserRegistrationForm', () => {
@@ -73,7 +83,10 @@ describe('UserRegistrationForm', () => {
   describe('Basic rendering', () => {
     test('renders form fields', () => {
       render(
-        <UserRegistrationForm onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+        <UserRegistrationForm
+          onSuccess={mockOnSuccess}
+          onCancel={mockOnCancel}
+        />
       );
 
       expect(document.getElementById('username')).toBeInTheDocument();
@@ -85,7 +98,10 @@ describe('UserRegistrationForm', () => {
 
     test('does not show role field when not admin context', () => {
       render(
-        <UserRegistrationForm onSuccess={mockOnSuccess} isAdminContext={false} />
+        <UserRegistrationForm
+          onSuccess={mockOnSuccess}
+          isAdminContext={false}
+        />
       );
 
       expect(document.getElementById('role')).not.toBeInTheDocument();
@@ -106,15 +122,22 @@ describe('UserRegistrationForm', () => {
         <UserRegistrationForm onSuccess={mockOnSuccess} isAdminContext={true} />
       );
 
-      expect(screen.getByText(/Link to existing patient record/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Link to existing patient record/i)
+      ).toBeInTheDocument();
     });
 
     test('does not show link checkbox when not admin context', () => {
       render(
-        <UserRegistrationForm onSuccess={mockOnSuccess} isAdminContext={false} />
+        <UserRegistrationForm
+          onSuccess={mockOnSuccess}
+          isAdminContext={false}
+        />
       );
 
-      expect(screen.queryByText(/Link to existing patient record/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/Link to existing patient record/i)
+      ).not.toBeInTheDocument();
     });
 
     test('shows patient dropdown when checkbox is checked', async () => {
@@ -132,7 +155,9 @@ describe('UserRegistrationForm', () => {
 
       // The Select component should appear (Mantine renders a combobox input)
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/loading patients|select a patient/i)).toBeInTheDocument();
+        expect(
+          screen.getByPlaceholderText(/loading patients|select a patient/i)
+        ).toBeInTheDocument();
       });
     });
 
@@ -151,12 +176,16 @@ describe('UserRegistrationForm', () => {
       // Check
       fireEvent.click(checkbox);
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/loading patients|select a patient/i)).toBeInTheDocument();
+        expect(
+          screen.getByPlaceholderText(/loading patients|select a patient/i)
+        ).toBeInTheDocument();
       });
 
       // Uncheck
       fireEvent.click(checkbox);
-      expect(screen.queryByPlaceholderText(/select a patient/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByPlaceholderText(/select a patient/i)
+      ).not.toBeInTheDocument();
     });
 
     test('loads patients when checkbox is toggled on', async () => {
@@ -214,7 +243,8 @@ describe('UserRegistrationForm', () => {
       });
 
       // Wait for loading to complete and find the select input
-      const selectInput = await screen.findByPlaceholderText(/select a patient/i);
+      const selectInput =
+        await screen.findByPlaceholderText(/select a patient/i);
       fireEvent.click(selectInput);
 
       await waitFor(() => {
@@ -223,7 +253,9 @@ describe('UserRegistrationForm', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText(/current owner's self-record/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/current owner's self-record/i)
+        ).toBeInTheDocument();
       });
     });
   });
@@ -259,7 +291,12 @@ describe('UserRegistrationForm', () => {
         <UserRegistrationForm onSuccess={mockOnSuccess} isAdminContext={true} />
       );
 
-      fillForm({ username: 'childuser', email: 'child@test.com', firstName: 'Child', lastName: 'User' });
+      fillForm({
+        username: 'childuser',
+        email: 'child@test.com',
+        firstName: 'Child',
+        lastName: 'User',
+      });
 
       // Enable linking and wait for patients to load
       fireEvent.click(document.getElementById('linkExistingPatient'));
@@ -269,7 +306,8 @@ describe('UserRegistrationForm', () => {
       });
 
       // Wait for loading to complete, open dropdown and select patient
-      const selectInput = await screen.findByPlaceholderText(/select a patient/i);
+      const selectInput =
+        await screen.findByPlaceholderText(/select a patient/i);
       fireEvent.click(selectInput);
 
       await waitFor(() => {
@@ -305,7 +343,12 @@ describe('UserRegistrationForm', () => {
         <UserRegistrationForm onSuccess={mockOnSuccess} isAdminContext={true} />
       );
 
-      fillForm({ username: 'regularuser', email: 'reg@test.com', firstName: 'Regular', lastName: 'User' });
+      fillForm({
+        username: 'regularuser',
+        email: 'reg@test.com',
+        firstName: 'Regular',
+        lastName: 'User',
+      });
 
       fireEvent.submit(document.querySelector('form'));
 
@@ -325,16 +368,26 @@ describe('UserRegistrationForm', () => {
       });
 
       render(
-        <UserRegistrationForm onSuccess={mockOnSuccess} isAdminContext={false} />
+        <UserRegistrationForm
+          onSuccess={mockOnSuccess}
+          isAdminContext={false}
+        />
       );
 
-      fillForm({ username: 'normaluser', email: 'normal@test.com', firstName: 'Normal', lastName: 'User' });
+      fillForm({
+        username: 'normaluser',
+        email: 'normal@test.com',
+        firstName: 'Normal',
+        lastName: 'User',
+      });
 
       fireEvent.submit(document.querySelector('form'));
 
       await waitFor(() => {
         expect(authService.register).toHaveBeenCalled();
-        expect(adminApiService.createUserWithPatientLink).not.toHaveBeenCalled();
+        expect(
+          adminApiService.createUserWithPatientLink
+        ).not.toHaveBeenCalled();
       });
     });
   });

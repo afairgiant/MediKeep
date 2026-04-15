@@ -44,10 +44,7 @@ import { ResponsiveProvider } from './providers/ResponsiveProvider';
 
 // Authentication
 import { AuthProvider } from './contexts/AuthContext';
-import {
-  ThemeProvider,
-  useTheme,
-} from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AppDataProvider } from './contexts/AppDataContext';
 import { UserPreferencesProvider } from './contexts/UserPreferencesContext';
 import ProtectedRoute, {
@@ -110,7 +107,11 @@ import Footer from './components/shared/Footer';
 import logger from './services/logger';
 import { timezoneService } from './services/timezoneService';
 import { ENTITY_TYPES } from './utils/entityRelationships';
-import { useActivityTracker, useNavigationActivityTracker, useApiActivityTracker } from './hooks/useActivityTracker';
+import {
+  useActivityTracker,
+  useNavigationActivityTracker,
+  useApiActivityTracker,
+} from './hooks/useActivityTracker';
 import { apiClient } from './services/apiClient';
 
 import { useReleaseNotes } from './hooks/useReleaseNotes';
@@ -247,7 +248,7 @@ function ActivityTracker() {
     trackTouch: true,
     enabled: true,
   });
-  
+
   // API calls (background polling, etc.) should NOT reset the inactivity timer.
   // Only real user interactions (mouse, keyboard, touch, scroll) count as activity.
   const getApiStats = () => ({});
@@ -283,20 +284,23 @@ function ActivityTracker() {
 
   // Performance monitoring for activity tracking
   useEffect(() => {
-    const performanceTimer = setInterval(() => {
-      if (isTracking) {
-        const uiStats = getStats();
-        const apiStats = getApiStats();
-        
-        logger.debug('Activity tracking performance', {
-          category: 'activity_tracking_performance',
-          component: 'ActivityTracker',
-          uiStats,
-          apiStats,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
+    const performanceTimer = setInterval(
+      () => {
+        if (isTracking) {
+          const uiStats = getStats();
+          const apiStats = getApiStats();
+
+          logger.debug('Activity tracking performance', {
+            category: 'activity_tracking_performance',
+            component: 'ActivityTracker',
+            uiStats,
+            apiStats,
+            timestamp: new Date().toISOString(),
+          });
+        }
+      },
+      5 * 60 * 1000
+    ); // Every 5 minutes
 
     return () => clearInterval(performanceTimer);
   }, [isTracking, getStats, getApiStats]);
@@ -306,7 +310,8 @@ function ActivityTracker() {
 
 // What's New trigger: shows release notes modal on first login after version change
 function WhatsNewTrigger() {
-  const { showModal, dismissModal, unseenReleases, currentVersion } = useReleaseNotes();
+  const { showModal, dismissModal, unseenReleases, currentVersion } =
+    useReleaseNotes();
   return (
     <WhatsNewModal
       opened={showModal}
@@ -325,7 +330,11 @@ function ThemedMantineProvider({ children }) {
   // so there's no reason to suspend this high-tree component during language changes.
   const { i18n } = useTranslation(undefined, { useSuspense: false });
   return (
-    <MantineProvider theme={theme} forceColorScheme={colorScheme} cssVariablesResolver={cssVariablesResolver}>
+    <MantineProvider
+      theme={theme}
+      forceColorScheme={colorScheme}
+      cssVariablesResolver={cssVariablesResolver}
+    >
       <Notifications />
       <ResponsiveProvider>
         <DatesProvider settings={{ locale: i18n.language }}>
@@ -348,10 +357,14 @@ function App() {
 
     // Initialize timezone service
     timezoneService.init().catch(error => {
-      logger.warn('timezone_service_init_failed', 'Timezone service initialization failed', {
-        error: error.message,
-        component: 'App',
-      });
+      logger.warn(
+        'timezone_service_init_failed',
+        'Timezone service initialization failed',
+        {
+          error: error.message,
+          component: 'App',
+        }
+      );
     });
 
     // Set up performance monitoring
@@ -373,302 +386,331 @@ function App() {
           <UserPreferencesProvider>
             <AppDataProvider>
               <ThemeProvider>
-              <ThemedMantineProvider>
-                    {/* Suspense lives INSIDE the theme providers so Mantine and CSS
+                <ThemedMantineProvider>
+                  {/* Suspense lives INSIDE the theme providers so Mantine and CSS
                         variables remain applied to the fallback and stay mounted during
                         language-change suspensions — otherwise the fallback renders
                         un-themed and causes a dark/light flash on switch. */}
-                    <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
+                  <Suspense
+                    fallback={
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          height: '100vh',
+                        }}
+                      >
+                        Loading...
+                      </div>
+                    }
+                  >
                     <NavigationTracker />
                     <WhatsNewTrigger />
                     {/* <ActivityTracker /> */}
                     <div className="App">
                       <div style={{ flex: 1 }}>
                         <Routes>
-                        {/* Public Routes */}
-                        <Route
-                          path="/login"
-                          element={
-                            <PublicRoute>
-                              <Login />
-                            </PublicRoute>
-                          }
-                        />
-                        <Route
-                          path="/user-creation"
-                          element={
-                            <PublicRoute>
-                              <UserCreation />
-                            </PublicRoute>
-                          }
-                        />
-                        <Route
-                          path="/auth/sso/callback"
-                          element={
-                            <PublicRoute>
-                              <SSOCallback />
-                            </PublicRoute>
-                          }
-                        />
-                        {/* Forced password change — requires authentication but not full access */}
-                        <Route
-                          path="/change-password"
-                          element={
-                            <ProtectedRoute>
-                              <ForceChangePassword />
-                            </ProtectedRoute>
-                          }
-                        />
-                        {/* Protected Routes */}
-                        <Route
-                          path="/dashboard"
-                          element={
-                            <ProtectedRoute>
-                              <Dashboard />
-                            </ProtectedRoute>
-                          }
-                        />
-                        {/* Medical Records Routes */}
-                        <Route
-                          path="/patients/me"
-                          element={
-                            <ProtectedRoute>
-                              <PatientInfo />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/patients/:section?"
-                          element={
-                            <ProtectedRoute>
-                              <PlaceholderPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        {/* Generated entity routes */}
-                        {generateEntityRoutes()}
-                        {/* Symptom Diary Route */}
-                        <Route
-                          path="/symptoms"
-                          element={
-                            <ProtectedRoute>
-                              <Symptoms />
-                            </ProtectedRoute>
-                          }
-                        />
-                        {/* Medical Equipment Route */}
-                        <Route
-                          path="/medical-equipment"
-                          element={
-                            <ProtectedRoute>
-                              <MedicalEquipment />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/reports/builder"
-                          element={
-                            <ProtectedRoute>
-                              <ReportBuilder />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/tools/tags"
-                          element={
-                            <ProtectedRoute>
-                              <TagManagement />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/tag-search"
-                          element={<Navigate to="/search" replace />}
-                        />
-                        <Route
-                          path="/search"
-                          element={
-                            <ProtectedRoute>
-                              <SearchResults />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/export"
-                          element={
-                            <ProtectedRoute>
-                              <ExportPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/settings"
-                          element={
-                            <ProtectedRoute>
-                              <Settings />
-                            </ProtectedRoute>
-                          }
-                        />
-                        {/* Admin Routes - Require Admin Role */}
-                        <Route
-                          path="/admin"
-                          element={
-                            <AdminRoute>
-                              <AdminDashboard />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/analytics"
-                          element={
-                            <AdminRoute>
-                              <Analytics />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/data-models"
-                          element={
-                            <AdminRoute>
-                              <DataModels />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/create-user"
-                          element={
-                            <AdminRoute>
-                              <AdminUserCreate />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/backup"
-                          element={
-                            <AdminRoute>
-                              <BackupManagement />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/users"
-                          element={
-                            <AdminRoute>
-                              <UserManagement />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/models/:modelName"
-                          element={
-                            <AdminRoute>
-                              <ModelManagement />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/models/:modelName/:recordId"
-                          element={
-                            <AdminRoute>
-                              <ModelView />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/models/:modelName/:recordId/edit"
-                          element={
-                            <AdminRoute>
-                              <ModelEdit />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/models/:modelName/create"
-                          element={
-                            <AdminRoute>
-                              <ModelCreate />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/system-health"
-                          element={
-                            <AdminRoute>
-                              <SystemHealth />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/settings"
-                          element={
-                            <AdminRoute>
-                              <AdminSettings />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/audit-log"
-                          element={
-                            <AdminRoute>
-                              <AuditLog />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/trash"
-                          element={
-                            <AdminRoute>
-                              <TrashManagement />
-                            </AdminRoute>
-                          }
-                        />
-                        <Route
-                          path="/admin/tools"
-                          element={
-                            <AdminRoute>
-                              <ToolsMaintenance />
-                            </AdminRoute>
-                          }
-                        />
-                        {/* Development/Testing Routes */}
-                        <Route
-                          path="/test/medication-form"
-                          element={
-                            <ProtectedRoute>
-                              <TestMedicationForm />
-                            </ProtectedRoute>
-                          }
-                        />
-                        
-                        {/* Navigation Test Page */}
-                        <Route
-                          path="/test/navigation"
-                          element={
-                            <ProtectedRoute>
-                              <ResponsiveNavigationTest />
-                            </ProtectedRoute>
-                          }
-                        />
-                        {/* Emergency service worker cleanup route */}
-                        <Route
-                          path="/kill-sw"
-                          /* eslint-disable i18next/no-literal-string -- emergency developer route */
-                          element={<div style={{padding: '20px', textAlign: 'center'}}>
-                            <h1>Service Worker Cleanup</h1>
-                            <p>All service workers and caches have been cleared.</p>
-                            <p>Please close this tab and restart your browser completely.</p>
-                            <button onClick={() => window.location.href='/'} style={{padding: '10px 20px', margin: '10px'}}>
-                              Go Back to App
-                            </button>
-                          </div>}
-                          /* eslint-enable i18next/no-literal-string */
-                        />
-                        {/* Default redirect */}
-                        <Route
-                          path="/"
-                          element={<Navigate to="/dashboard" />}
-                        />
-                      </Routes>
+                          {/* Public Routes */}
+                          <Route
+                            path="/login"
+                            element={
+                              <PublicRoute>
+                                <Login />
+                              </PublicRoute>
+                            }
+                          />
+                          <Route
+                            path="/user-creation"
+                            element={
+                              <PublicRoute>
+                                <UserCreation />
+                              </PublicRoute>
+                            }
+                          />
+                          <Route
+                            path="/auth/sso/callback"
+                            element={
+                              <PublicRoute>
+                                <SSOCallback />
+                              </PublicRoute>
+                            }
+                          />
+                          {/* Forced password change — requires authentication but not full access */}
+                          <Route
+                            path="/change-password"
+                            element={
+                              <ProtectedRoute>
+                                <ForceChangePassword />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Protected Routes */}
+                          <Route
+                            path="/dashboard"
+                            element={
+                              <ProtectedRoute>
+                                <Dashboard />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Medical Records Routes */}
+                          <Route
+                            path="/patients/me"
+                            element={
+                              <ProtectedRoute>
+                                <PatientInfo />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/patients/:section?"
+                            element={
+                              <ProtectedRoute>
+                                <PlaceholderPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Generated entity routes */}
+                          {generateEntityRoutes()}
+                          {/* Symptom Diary Route */}
+                          <Route
+                            path="/symptoms"
+                            element={
+                              <ProtectedRoute>
+                                <Symptoms />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Medical Equipment Route */}
+                          <Route
+                            path="/medical-equipment"
+                            element={
+                              <ProtectedRoute>
+                                <MedicalEquipment />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/reports/builder"
+                            element={
+                              <ProtectedRoute>
+                                <ReportBuilder />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/tools/tags"
+                            element={
+                              <ProtectedRoute>
+                                <TagManagement />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/tag-search"
+                            element={<Navigate to="/search" replace />}
+                          />
+                          <Route
+                            path="/search"
+                            element={
+                              <ProtectedRoute>
+                                <SearchResults />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/export"
+                            element={
+                              <ProtectedRoute>
+                                <ExportPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/settings"
+                            element={
+                              <ProtectedRoute>
+                                <Settings />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Admin Routes - Require Admin Role */}
+                          <Route
+                            path="/admin"
+                            element={
+                              <AdminRoute>
+                                <AdminDashboard />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/analytics"
+                            element={
+                              <AdminRoute>
+                                <Analytics />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/data-models"
+                            element={
+                              <AdminRoute>
+                                <DataModels />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/create-user"
+                            element={
+                              <AdminRoute>
+                                <AdminUserCreate />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/backup"
+                            element={
+                              <AdminRoute>
+                                <BackupManagement />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/users"
+                            element={
+                              <AdminRoute>
+                                <UserManagement />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/models/:modelName"
+                            element={
+                              <AdminRoute>
+                                <ModelManagement />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/models/:modelName/:recordId"
+                            element={
+                              <AdminRoute>
+                                <ModelView />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/models/:modelName/:recordId/edit"
+                            element={
+                              <AdminRoute>
+                                <ModelEdit />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/models/:modelName/create"
+                            element={
+                              <AdminRoute>
+                                <ModelCreate />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/system-health"
+                            element={
+                              <AdminRoute>
+                                <SystemHealth />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/settings"
+                            element={
+                              <AdminRoute>
+                                <AdminSettings />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/audit-log"
+                            element={
+                              <AdminRoute>
+                                <AuditLog />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/trash"
+                            element={
+                              <AdminRoute>
+                                <TrashManagement />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/tools"
+                            element={
+                              <AdminRoute>
+                                <ToolsMaintenance />
+                              </AdminRoute>
+                            }
+                          />
+                          {/* Development/Testing Routes */}
+                          <Route
+                            path="/test/medication-form"
+                            element={
+                              <ProtectedRoute>
+                                <TestMedicationForm />
+                              </ProtectedRoute>
+                            }
+                          />
+
+                          {/* Navigation Test Page */}
+                          <Route
+                            path="/test/navigation"
+                            element={
+                              <ProtectedRoute>
+                                <ResponsiveNavigationTest />
+                              </ProtectedRoute>
+                            }
+                          />
+                          {/* Emergency service worker cleanup route */}
+                          <Route
+                            path="/kill-sw"
+                            /* eslint-disable i18next/no-literal-string -- emergency developer route */
+                            element={
+                              <div
+                                style={{ padding: '20px', textAlign: 'center' }}
+                              >
+                                <h1>Service Worker Cleanup</h1>
+                                <p>
+                                  All service workers and caches have been
+                                  cleared.
+                                </p>
+                                <p>
+                                  Please close this tab and restart your browser
+                                  completely.
+                                </p>
+                                <button
+                                  onClick={() => (window.location.href = '/')}
+                                  style={{
+                                    padding: '10px 20px',
+                                    margin: '10px',
+                                  }}
+                                >
+                                  Go Back to App
+                                </button>
+                              </div>
+                            }
+                            /* eslint-enable i18next/no-literal-string */
+                          />
+                          {/* Default redirect */}
+                          <Route
+                            path="/"
+                            element={<Navigate to="/dashboard" />}
+                          />
+                        </Routes>
                       </div>
 
                       {/* Footer */}
@@ -677,8 +719,8 @@ function App() {
 
                     {/* Toast Notifications */}
                     <ThemedToastContainer />
-                    </Suspense>
-              </ThemedMantineProvider>
+                  </Suspense>
+                </ThemedMantineProvider>
               </ThemeProvider>
             </AppDataProvider>
           </UserPreferencesProvider>

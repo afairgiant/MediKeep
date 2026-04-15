@@ -76,7 +76,11 @@ const AdminDashboard = () => {
   } = useAdminData({
     entityName: 'Recent Activity',
     apiMethodsConfig: {
-      load: signal => adminApiService.getRecentActivity(DASHBOARD_CONFIG.RECENT_ACTIVITY_LIMIT, signal),
+      load: signal =>
+        adminApiService.getRecentActivity(
+          DASHBOARD_CONFIG.RECENT_ACTIVITY_LIMIT,
+          signal
+        ),
     },
     autoRefresh: false,
   });
@@ -125,7 +129,9 @@ const AdminDashboard = () => {
         <Center h={400}>
           <Stack align="center">
             <Loader size="lg" />
-            <Text c="dimmed">{t('dashboard.loading', 'Loading comprehensive dashboard...')}</Text>
+            <Text c="dimmed">
+              {t('dashboard.loading', 'Loading comprehensive dashboard...')}
+            </Text>
           </Stack>
         </Center>
       </AdminLayout>
@@ -140,7 +146,12 @@ const AdminDashboard = () => {
           <Group justify="space-between" align="flex-start">
             <div>
               <Group align="center" mb="xs">
-                <ThemeIcon size="xl" variant="light" color="blue" aria-hidden="true">
+                <ThemeIcon
+                  size="xl"
+                  variant="light"
+                  color="blue"
+                  aria-hidden="true"
+                >
                   <IconStethoscope size={24} />
                 </ThemeIcon>
                 <Text size="xl" fw={700}>
@@ -148,7 +159,10 @@ const AdminDashboard = () => {
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
-                {t('dashboard.subtitle', 'Comprehensive system overview and management')}
+                {t(
+                  'dashboard.subtitle',
+                  'Comprehensive system overview and management'
+                )}
               </Text>
             </div>
             <Group>
@@ -170,7 +184,11 @@ const AdminDashboard = () => {
             icon={IconUsers}
             value={stats?.total_users || 0}
             label={t('dashboard.stats.totalUsers', 'Total Users')}
-            change={t('shared:categories.count_this_week', '+{{count}} this week', { count: stats?.recent_registrations || 0 })}
+            change={t(
+              'shared:categories.count_this_week',
+              '+{{count}} this week',
+              { count: stats?.recent_registrations || 0 }
+            )}
             color="blue"
             href="/admin/models/user"
           />
@@ -192,7 +210,11 @@ const AdminDashboard = () => {
             icon={IconPill}
             value={stats?.total_medications || 0}
             label={t('shared:categories.medications', 'Medications')}
-            change={t('shared:categories.count_active_prescriptions', '{{count}} active prescriptions', { count: stats?.active_medications || 0 })}
+            change={t(
+              'shared:categories.count_active_prescriptions',
+              '{{count}} active prescriptions',
+              { count: stats?.active_medications || 0 }
+            )}
             color="cyan"
             href="/admin/models/medication"
           />
@@ -236,13 +258,20 @@ const AdminDashboard = () => {
 };
 
 // Reusable StatCard Component
-const StatCard = ({ icon: IconComponent, value, label, change, color, href }) => {
+const StatCard = ({
+  icon: IconComponent,
+  value,
+  label,
+  change,
+  color,
+  href,
+}) => {
   const navigate = useNavigate();
 
   const handleNavigation = href ? () => navigate(href) : undefined;
 
   const handleKeyDown = href
-    ? (event) => {
+    ? event => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           handleNavigation();
@@ -305,75 +334,96 @@ const SystemHealthCard = ({
   const { t } = useTranslation('admin');
 
   return (
-  <Card shadow="sm" p="lg" withBorder h="100%" style={{ position: 'relative' }}>
-    <LoadingOverlay visible={isRefreshing} />
-    <Group justify="space-between" mb="md">
-      <Group>
-        <ThemeIcon size="lg" variant="light" color="blue" aria-hidden="true">
-          <IconShieldCheck size={20} />
-        </ThemeIcon>
-        <div>
-          <Text size="lg" fw={600}>
-            {t('shared:labels.systemHealth', 'System Health')}
-          </Text>
-          <Text size="sm" c="dimmed">
-            {t('dashboard.systemHealth.subtitle', 'Current system status')}
-          </Text>
-        </div>
-      </Group>
-      <Badge
-        color={systemHealth?.database_status === 'healthy' ? 'green' : 'orange'}
-        variant="light"
-      >
-        {systemHealth?.database_status || t('shared:labels.unknown', 'Unknown')}
-      </Badge>
-    </Group>
-
-    {loading && (
-      <Center py="xl">
-        <Loader size="sm" />
-      </Center>
-    )}
-
-    {error && (
-      <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
-        {t('dashboard.systemHealth.errorLoading', 'Error loading system health')}
-      </Alert>
-    )}
-
-    {!loading && !error && (
-      <Stack gap="md">
-        <HealthMetric
-          icon={IconDatabase}
-          label={t('dashboard.systemHealth.databaseStatus', 'Database Status')}
-          value={systemHealth?.database_status || t('shared:labels.unknown', 'Unknown')}
-          color="blue"
-        />
-        <HealthMetric
-          icon={IconReportAnalytics}
-          label={t('shared:labels.totalRecords', 'Total Records')}
-          value={systemHealth?.total_records || 0}
-          color="green"
-        />
-        <HealthMetric
-          icon={IconClock}
-          label={t('dashboard.systemHealth.uptime', 'Uptime')}
-          value={systemHealth?.system_uptime || t('shared:labels.unknown', 'Unknown')}
-          color="orange"
-        />
-        <HealthMetric
-          icon={IconDatabase}
-          label={t('dashboard.systemHealth.lastBackup', 'Last Backup')}
-          value={
-            systemHealth?.last_backup
-              ? formatDate(systemHealth.last_backup)
-              : t('dashboard.systemHealth.noBackup', 'No backup')
+    <Card
+      shadow="sm"
+      p="lg"
+      withBorder
+      h="100%"
+      style={{ position: 'relative' }}
+    >
+      <LoadingOverlay visible={isRefreshing} />
+      <Group justify="space-between" mb="md">
+        <Group>
+          <ThemeIcon size="lg" variant="light" color="blue" aria-hidden="true">
+            <IconShieldCheck size={20} />
+          </ThemeIcon>
+          <div>
+            <Text size="lg" fw={600}>
+              {t('shared:labels.systemHealth', 'System Health')}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {t('dashboard.systemHealth.subtitle', 'Current system status')}
+            </Text>
+          </div>
+        </Group>
+        <Badge
+          color={
+            systemHealth?.database_status === 'healthy' ? 'green' : 'orange'
           }
-          color="purple"
-        />
-      </Stack>
-    )}
-  </Card>
+          variant="light"
+        >
+          {systemHealth?.database_status ||
+            t('shared:labels.unknown', 'Unknown')}
+        </Badge>
+      </Group>
+
+      {loading && (
+        <Center py="xl">
+          <Loader size="sm" />
+        </Center>
+      )}
+
+      {error && (
+        <Alert icon={<IconAlertCircle size={16} />} color="red" mb="md">
+          {t(
+            'dashboard.systemHealth.errorLoading',
+            'Error loading system health'
+          )}
+        </Alert>
+      )}
+
+      {!loading && !error && (
+        <Stack gap="md">
+          <HealthMetric
+            icon={IconDatabase}
+            label={t(
+              'dashboard.systemHealth.databaseStatus',
+              'Database Status'
+            )}
+            value={
+              systemHealth?.database_status ||
+              t('shared:labels.unknown', 'Unknown')
+            }
+            color="blue"
+          />
+          <HealthMetric
+            icon={IconReportAnalytics}
+            label={t('shared:labels.totalRecords', 'Total Records')}
+            value={systemHealth?.total_records || 0}
+            color="green"
+          />
+          <HealthMetric
+            icon={IconClock}
+            label={t('dashboard.systemHealth.uptime', 'Uptime')}
+            value={
+              systemHealth?.system_uptime ||
+              t('shared:labels.unknown', 'Unknown')
+            }
+            color="orange"
+          />
+          <HealthMetric
+            icon={IconDatabase}
+            label={t('dashboard.systemHealth.lastBackup', 'Last Backup')}
+            value={
+              systemHealth?.last_backup
+                ? formatDate(systemHealth.last_backup)
+                : t('dashboard.systemHealth.noBackup', 'No backup')
+            }
+            color="purple"
+          />
+        </Stack>
+      )}
+    </Card>
   );
 };
 
@@ -390,7 +440,13 @@ SystemHealthCard.propTypes = {
 };
 
 // Reusable ActivityCard Component
-const ActivityCard = ({ activities, loading, error, isRefreshing = false, onViewAll }) => {
+const ActivityCard = ({
+  activities,
+  loading,
+  error,
+  isRefreshing = false,
+  onViewAll,
+}) => {
   const { t } = useTranslation('admin');
 
   const getActivityIcon = (modelName, action) => {
@@ -421,7 +477,13 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
   };
 
   return (
-    <Card shadow="sm" p="lg" withBorder h="100%" style={{ position: 'relative' }}>
+    <Card
+      shadow="sm"
+      p="lg"
+      withBorder
+      h="100%"
+      style={{ position: 'relative' }}
+    >
       <LoadingOverlay visible={isRefreshing} />
       <Group justify="space-between" mb="md">
         <Group>
@@ -438,7 +500,9 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
           </div>
         </Group>
         <Badge variant="light" color="green">
-          {t('shared:labels.countActivities', '{{count}} activities', { count: activities.length })}
+          {t('shared:labels.countActivities', '{{count}} activities', {
+            count: activities.length,
+          })}
         </Badge>
       </Group>
 
@@ -456,13 +520,20 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
 
       {!loading && !error && (
         <>
-          <Stack gap="sm" mah={DASHBOARD_CONFIG.ACTIVITY_MAX_HEIGHT} style={{ overflowY: 'auto' }}>
+          <Stack
+            gap="sm"
+            mah={DASHBOARD_CONFIG.ACTIVITY_MAX_HEIGHT}
+            style={{ overflowY: 'auto' }}
+          >
             {activities.length > 0 ? (
               activities.map((activity, index) => (
                 <ActivityItem
                   key={index}
                   activity={activity}
-                  iconData={getActivityIcon(activity.model_name, activity.action)}
+                  iconData={getActivityIcon(
+                    activity.model_name,
+                    activity.action
+                  )}
                 />
               ))
             ) : (
@@ -472,7 +543,10 @@ const ActivityCard = ({ activities, loading, error, isRefreshing = false, onView
                     <IconActivity size={24} />
                   </ThemeIcon>
                   <Text c="dimmed" size="sm">
-                    {t('dashboard.recentActivity.noActivity', 'No recent activity to display')}
+                    {t(
+                      'dashboard.recentActivity.noActivity',
+                      'No recent activity to display'
+                    )}
                   </Text>
                 </Stack>
               </Center>
@@ -525,7 +599,10 @@ const QuickActionsCard = () => {
             {t('dashboard.quickActions.title', 'Quick Actions')}
           </Text>
           <Text size="sm" c="dimmed">
-            {t('dashboard.quickActions.subtitle', 'Common administrative tasks')}
+            {t(
+              'dashboard.quickActions.subtitle',
+              'Common administrative tasks'
+            )}
           </Text>
         </div>
       </Group>
@@ -535,21 +612,30 @@ const QuickActionsCard = () => {
           href="/admin/data-models"
           icon={IconDatabase}
           title={t('shared:labels.dataModels', 'Data Models')}
-          desc={t('dashboard.quickActions.dataModelsDesc', 'View and manage database tables')}
+          desc={t(
+            'dashboard.quickActions.dataModelsDesc',
+            'View and manage database tables'
+          )}
           color="blue"
         />
         <ActionButton
           href="/admin/create-user"
           icon={IconUserCog}
           title={t('dashboard.quickActions.createUser', 'Create New User')}
-          desc={t('dashboard.quickActions.createUserDesc', 'Create user account with patient profile')}
+          desc={t(
+            'dashboard.quickActions.createUserDesc',
+            'Create user account with patient profile'
+          )}
           color="green"
         />
         <ActionButton
           href="/admin/system-health"
           icon={IconShieldCheck}
           title={t('shared:labels.systemHealth', 'System Health')}
-          desc={t('dashboard.quickActions.systemHealthDesc', 'Monitor system status')}
+          desc={t(
+            'dashboard.quickActions.systemHealthDesc',
+            'Monitor system status'
+          )}
           color="orange"
         />
         <ActionButton
@@ -563,21 +649,30 @@ const QuickActionsCard = () => {
           href="/admin/settings"
           icon={IconSettings}
           title={t('shared:labels.settings', 'Settings')}
-          desc={t('dashboard.quickActions.settingsDesc', 'System configuration')}
+          desc={t(
+            'dashboard.quickActions.settingsDesc',
+            'System configuration'
+          )}
           color="gray"
         />
         <ActionButton
           href="/admin/models/user"
           icon={IconUsers}
           title={t('dashboard.quickActions.manageUsers', 'Manage Users')}
-          desc={t('dashboard.quickActions.manageUsersDesc', 'View and manage user accounts')}
+          desc={t(
+            'dashboard.quickActions.manageUsersDesc',
+            'View and manage user accounts'
+          )}
           color="teal"
         />
         <ActionButton
           href="/admin/audit-log"
           icon={IconActivity}
           title={t('shared:labels.auditLog', 'Audit Log')}
-          desc={t('dashboard.quickActions.auditLogDesc', 'View system activity log')}
+          desc={t(
+            'dashboard.quickActions.auditLogDesc',
+            'View system activity log'
+          )}
           color="red"
         />
         <ActionButton
@@ -662,14 +757,21 @@ ActivityItem.propTypes = {
   }).isRequired,
 };
 
-const ActionButton = ({ href, icon: IconComponent, title, desc, color, disabled }) => {
+const ActionButton = ({
+  href,
+  icon: IconComponent,
+  title,
+  desc,
+  color,
+  disabled,
+}) => {
   const navigate = useNavigate();
 
   const handleClick = disabled ? undefined : () => navigate(href);
 
   const handleKeyDown = disabled
     ? undefined
-    : (event) => {
+    : event => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           navigate(href);

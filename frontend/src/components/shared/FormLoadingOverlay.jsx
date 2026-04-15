@@ -89,12 +89,12 @@ const FormLoadingOverlay = ({
                 {getIcon()}
               </ThemeIcon>
             )}
-            
+
             <Stack gap="xs" align="center">
               <Text fw={600} size="lg">
                 {message}
               </Text>
-              
+
               {submessage && (
                 <Text size="sm" c="dimmed" ta="center">
                   {submessage}

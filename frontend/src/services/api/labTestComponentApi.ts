@@ -3,7 +3,11 @@ import logger from '../logger';
 
 // Types for Lab Test Components
 export type ResultType = 'quantitative' | 'qualitative';
-export type QualitativeValue = 'positive' | 'negative' | 'detected' | 'undetected';
+export type QualitativeValue =
+  | 'positive'
+  | 'negative'
+  | 'detected'
+  | 'undetected';
 
 export interface LabTestComponent {
   id?: number;
@@ -16,11 +20,33 @@ export interface LabTestComponent {
   ref_range_min?: number | null;
   ref_range_max?: number | null;
   ref_range_text?: string | null;
-  status?: 'normal' | 'high' | 'low' | 'critical' | 'abnormal' | 'borderline' | null;
-  category?: 'chemistry' | 'hematology' | 'hepatology' | 'immunology' | 'microbiology' | 'endocrinology' |
-             'cardiology' | 'toxicology' | 'genetics' | 'molecular' | 'pathology' | 'lipids' | 'hearing' | 'stomatology' | 'other' | null;
+  status?:
+    | 'normal'
+    | 'high'
+    | 'low'
+    | 'critical'
+    | 'abnormal'
+    | 'borderline'
+    | null;
+  category?:
+    | 'chemistry'
+    | 'hematology'
+    | 'hepatology'
+    | 'immunology'
+    | 'microbiology'
+    | 'endocrinology'
+    | 'cardiology'
+    | 'toxicology'
+    | 'genetics'
+    | 'molecular'
+    | 'pathology'
+    | 'lipids'
+    | 'hearing'
+    | 'stomatology'
+    | 'other'
+    | null;
   display_order?: number | null;
-  canonical_test_name?: string | null;  // Links to standardized test name for trend matching
+  canonical_test_name?: string | null; // Links to standardized test name for trend matching
   notes?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -28,11 +54,16 @@ export interface LabTestComponent {
   qualitative_value?: QualitativeValue | null;
 }
 
-export interface LabTestComponentCreate extends Omit<LabTestComponent, 'id' | 'created_at' | 'updated_at' | 'lab_result_id'> {
+export interface LabTestComponentCreate extends Omit<
+  LabTestComponent,
+  'id' | 'created_at' | 'updated_at' | 'lab_result_id'
+> {
   lab_result_id?: number; // Optional here since it's set from URL
 }
 
-export interface LabTestComponentUpdate extends Partial<Omit<LabTestComponent, 'id' | 'lab_result_id' | 'created_at' | 'updated_at'>> {}
+export interface LabTestComponentUpdate extends Partial<
+  Omit<LabTestComponent, 'id' | 'lab_result_id' | 'created_at' | 'updated_at'>
+> {}
 
 export interface LabTestComponentFilters {
   category?: string;
@@ -86,7 +117,12 @@ export interface TrendStatistics {
   min?: number | null;
   max?: number | null;
   std_dev?: number | null;
-  trend_direction: 'increasing' | 'decreasing' | 'stable' | 'worsening' | 'improving';
+  trend_direction:
+    | 'increasing'
+    | 'decreasing'
+    | 'stable'
+    | 'worsening'
+    | 'improving';
   time_in_range_percent?: number | null;
   normal_count: number;
   abnormal_count: number;
@@ -139,11 +175,23 @@ export interface ComponentCatalogEntry {
   latest_value?: number | null;
   latest_qualitative_value?: string | null;
   unit?: string | null;
-  status?: 'normal' | 'high' | 'low' | 'critical' | 'abnormal' | 'borderline' | null;
+  status?:
+    | 'normal'
+    | 'high'
+    | 'low'
+    | 'critical'
+    | 'abnormal'
+    | 'borderline'
+    | null;
   category?: string | null;
   result_type?: ResultType | null;
   reading_count: number;
-  trend_direction: 'increasing' | 'decreasing' | 'stable' | 'worsening' | 'improving';
+  trend_direction:
+    | 'increasing'
+    | 'decreasing'
+    | 'stable'
+    | 'worsening'
+    | 'improving';
   latest_date?: string | null;
   ref_range_min?: number | null;
   ref_range_max?: number | null;
@@ -167,8 +215,10 @@ class LabTestComponentApi {
   ): Promise<{ data: LabTestComponent[] }> {
     try {
       const params = {
-        ...(patientId !== null && patientId !== undefined ? { patient_id: patientId } : {}),
-        ...(filters || {})
+        ...(patientId !== null && patientId !== undefined
+          ? { patient_id: patientId }
+          : {}),
+        ...(filters || {}),
       };
 
       const response = await apiService.get(
@@ -179,7 +229,7 @@ class LabTestComponentApi {
       logger.debug('lab_test_components_fetched', {
         labResultId,
         componentCount: response?.length || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return { data: response || [] };
@@ -187,7 +237,7 @@ class LabTestComponentApi {
       logger.error('lab_test_components_fetch_error', {
         labResultId,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -208,7 +258,7 @@ class LabTestComponentApi {
 
       logger.debug('lab_test_component_fetched', {
         componentId,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -216,7 +266,7 @@ class LabTestComponentApi {
       logger.error('lab_test_component_fetch_error', {
         componentId,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -232,9 +282,10 @@ class LabTestComponentApi {
     signal?: AbortSignal
   ): Promise<LabTestComponent> {
     try {
-      const params = patientId !== null && patientId !== undefined
-        ? { patient_id: patientId }
-        : {};
+      const params =
+        patientId !== null && patientId !== undefined
+          ? { patient_id: patientId }
+          : {};
 
       const response = await apiService.post(
         `/lab-test-components/lab-result/${labResultId}/components`,
@@ -245,7 +296,7 @@ class LabTestComponentApi {
       logger.info('lab_test_component_created', {
         labResultId,
         testName: data.test_name,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -254,7 +305,7 @@ class LabTestComponentApi {
         labResultId,
         testName: data?.test_name,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -277,15 +328,16 @@ class LabTestComponentApi {
     signal?: AbortSignal
   ): Promise<LabTestComponentBulkResponse> {
     try {
-      const params = patientId !== null && patientId !== undefined
-        ? { patient_id: patientId }
-        : {};
+      const params =
+        patientId !== null && patientId !== undefined
+          ? { patient_id: patientId }
+          : {};
 
       const response = await apiService.post(
         `/lab-test-components/lab-result/${labResultId}/components/bulk`,
         {
           lab_result_id: labResultId,
-          components
+          components,
         },
         { params, signal }
       );
@@ -294,7 +346,7 @@ class LabTestComponentApi {
         labResultId,
         componentCount: components.length,
         createdCount: response?.created_count || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -303,7 +355,7 @@ class LabTestComponentApi {
         labResultId,
         componentCount: components?.length || 0,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -319,9 +371,10 @@ class LabTestComponentApi {
     signal?: AbortSignal
   ): Promise<LabTestComponent> {
     try {
-      const params = patientId !== null && patientId !== undefined
-        ? { patient_id: patientId }
-        : {};
+      const params =
+        patientId !== null && patientId !== undefined
+          ? { patient_id: patientId }
+          : {};
 
       const response = await apiService.put(
         `/lab-test-components/components/${componentId}`,
@@ -331,7 +384,7 @@ class LabTestComponentApi {
 
       logger.info('lab_test_component_updated', {
         componentId,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -339,7 +392,7 @@ class LabTestComponentApi {
       logger.error('lab_test_component_update_error', {
         componentId,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -354,9 +407,10 @@ class LabTestComponentApi {
     signal?: AbortSignal
   ): Promise<{ success: boolean }> {
     try {
-      const params = patientId !== null && patientId !== undefined
-        ? { patient_id: patientId }
-        : {};
+      const params =
+        patientId !== null && patientId !== undefined
+          ? { patient_id: patientId }
+          : {};
 
       await apiService.delete(
         `/lab-test-components/components/${componentId}`,
@@ -365,7 +419,7 @@ class LabTestComponentApi {
 
       logger.info('lab_test_component_deleted', {
         componentId,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return { success: true };
@@ -373,7 +427,7 @@ class LabTestComponentApi {
       logger.error('lab_test_component_delete_error', {
         componentId,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -402,7 +456,8 @@ class LabTestComponentApi {
         ...(filters.status && { status: filters.status }),
         ...(filters.skip !== undefined && { skip: filters.skip }),
         ...(filters.limit !== undefined && { limit: filters.limit }),
-        ...(patientId !== null && patientId !== undefined && { patient_id: patientId })
+        ...(patientId !== null &&
+          patientId !== undefined && { patient_id: patientId }),
       };
 
       const response = await apiService.get(
@@ -413,7 +468,7 @@ class LabTestComponentApi {
       logger.debug('lab_test_components_searched', {
         query,
         resultCount: response?.length || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -421,7 +476,7 @@ class LabTestComponentApi {
       logger.error('lab_test_components_search_error', {
         query,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -438,7 +493,8 @@ class LabTestComponentApi {
     try {
       const params: any = {
         ...(labResultId && { lab_result_id: labResultId }),
-        ...(patientId !== null && patientId !== undefined && { patient_id: patientId })
+        ...(patientId !== null &&
+          patientId !== undefined && { patient_id: patientId }),
       };
 
       const response = await apiService.get(
@@ -449,7 +505,7 @@ class LabTestComponentApi {
       logger.debug('lab_test_abnormal_results_fetched', {
         labResultId,
         abnormalCount: response?.length || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -457,7 +513,7 @@ class LabTestComponentApi {
       logger.error('lab_test_abnormal_results_error', {
         labResultId,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -472,9 +528,10 @@ class LabTestComponentApi {
     signal?: AbortSignal
   ): Promise<LabTestComponentStatistics> {
     try {
-      const params = patientId !== null && patientId !== undefined
-        ? { patient_id: patientId }
-        : {};
+      const params =
+        patientId !== null && patientId !== undefined
+          ? { patient_id: patientId }
+          : {};
 
       const response = await apiService.get(
         `/lab-test-components/lab-result/${labResultId}/statistics`,
@@ -484,7 +541,7 @@ class LabTestComponentApi {
       logger.debug('lab_test_statistics_fetched', {
         labResultId,
         totalComponents: response?.total_components || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -492,7 +549,7 @@ class LabTestComponentApi {
       logger.error('lab_test_statistics_error', {
         labResultId,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -514,14 +571,14 @@ class LabTestComponentApi {
 
       logger.debug('test_name_suggestions_fetched', {
         suggestionCount: response?.length || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
     } catch (error: any) {
       logger.error('test_name_suggestions_error', {
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -543,14 +600,14 @@ class LabTestComponentApi {
 
       logger.debug('abbreviation_suggestions_fetched', {
         suggestionCount: response?.length || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
     } catch (error: any) {
       logger.error('abbreviation_suggestions_error', {
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -563,8 +620,8 @@ class LabTestComponentApi {
     patientId: number,
     testName: string,
     options?: {
-      dateFrom?: string;  // YYYY-MM-DD
-      dateTo?: string;    // YYYY-MM-DD
+      dateFrom?: string; // YYYY-MM-DD
+      dateTo?: string; // YYYY-MM-DD
       limit?: number;
     },
     signal?: AbortSignal
@@ -591,7 +648,7 @@ class LabTestComponentApi {
         patientId,
         testName,
         dataPointCount: response?.data_points?.length || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -600,7 +657,7 @@ class LabTestComponentApi {
         patientId,
         testName,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -637,7 +694,7 @@ class LabTestComponentApi {
         patientId,
         itemCount: response?.items?.length || 0,
         total: response?.total || 0,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
 
       return response;
@@ -645,7 +702,7 @@ class LabTestComponentApi {
       logger.error('component_catalog_fetch_error', {
         patientId,
         error: error.message,
-        component: 'LabTestComponentApi'
+        component: 'LabTestComponentApi',
       });
       throw error;
     }
@@ -660,110 +717,460 @@ class LabTestComponentApi {
     // Users will enter both values and ranges when using templates
     return Promise.resolve({
       cbc: {
-        name: "Complete Blood Count (CBC)",
-        description: "Common blood cell tests - enter your lab's values and reference ranges",
+        name: 'Complete Blood Count (CBC)',
+        description:
+          "Common blood cell tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "White Blood Cell Count", abbreviation: "WBC", unit: "K/uL", category: "hematology", display_order: 1 },
-          { test_name: "Red Blood Cell Count", abbreviation: "RBC", unit: "M/uL", category: "hematology", display_order: 2 },
-          { test_name: "Hemoglobin", abbreviation: "HGB", unit: "g/dL", category: "hematology", display_order: 3 },
-          { test_name: "Hematocrit", abbreviation: "HCT", unit: "%", category: "hematology", display_order: 4 },
-          { test_name: "Platelet Count", abbreviation: "PLT", unit: "K/uL", category: "hematology", display_order: 5 },
-          { test_name: "Mean Corpuscular Volume", abbreviation: "MCV", unit: "fL", category: "hematology", display_order: 6 },
-          { test_name: "Mean Corpuscular Hemoglobin", abbreviation: "MCH", unit: "pg", category: "hematology", display_order: 7 },
-          { test_name: "Mean Corpuscular Hemoglobin Concentration", abbreviation: "MCHC", unit: "g/dL", category: "hematology", display_order: 8 }
-        ]
+          {
+            test_name: 'White Blood Cell Count',
+            abbreviation: 'WBC',
+            unit: 'K/uL',
+            category: 'hematology',
+            display_order: 1,
+          },
+          {
+            test_name: 'Red Blood Cell Count',
+            abbreviation: 'RBC',
+            unit: 'M/uL',
+            category: 'hematology',
+            display_order: 2,
+          },
+          {
+            test_name: 'Hemoglobin',
+            abbreviation: 'HGB',
+            unit: 'g/dL',
+            category: 'hematology',
+            display_order: 3,
+          },
+          {
+            test_name: 'Hematocrit',
+            abbreviation: 'HCT',
+            unit: '%',
+            category: 'hematology',
+            display_order: 4,
+          },
+          {
+            test_name: 'Platelet Count',
+            abbreviation: 'PLT',
+            unit: 'K/uL',
+            category: 'hematology',
+            display_order: 5,
+          },
+          {
+            test_name: 'Mean Corpuscular Volume',
+            abbreviation: 'MCV',
+            unit: 'fL',
+            category: 'hematology',
+            display_order: 6,
+          },
+          {
+            test_name: 'Mean Corpuscular Hemoglobin',
+            abbreviation: 'MCH',
+            unit: 'pg',
+            category: 'hematology',
+            display_order: 7,
+          },
+          {
+            test_name: 'Mean Corpuscular Hemoglobin Concentration',
+            abbreviation: 'MCHC',
+            unit: 'g/dL',
+            category: 'hematology',
+            display_order: 8,
+          },
+        ],
       },
       bmp: {
-        name: "Basic Metabolic Panel (BMP)",
-        description: "Common chemistry tests - enter your lab's values and reference ranges",
+        name: 'Basic Metabolic Panel (BMP)',
+        description:
+          "Common chemistry tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "endocrinology", display_order: 1 },
-          { test_name: "Sodium", abbreviation: "Na", unit: "mmol/L", category: "chemistry", display_order: 2 },
-          { test_name: "Potassium", abbreviation: "K", unit: "mmol/L", category: "chemistry", display_order: 3 },
-          { test_name: "Chloride", abbreviation: "Cl", unit: "mmol/L", category: "chemistry", display_order: 4 },
-          { test_name: "Carbon Dioxide", abbreviation: "CO2", unit: "mmol/L", category: "chemistry", display_order: 5 },
-          { test_name: "Blood Urea Nitrogen", abbreviation: "BUN", unit: "mg/dL", category: "chemistry", display_order: 6 },
-          { test_name: "Creatinine", abbreviation: "CREA", unit: "mg/dL", category: "chemistry", display_order: 7 },
-          { test_name: "Calcium", abbreviation: "Ca", unit: "mg/dL", category: "chemistry", display_order: 8 }
-        ]
+          {
+            test_name: 'Glucose',
+            abbreviation: 'GLU',
+            unit: 'mg/dL',
+            category: 'endocrinology',
+            display_order: 1,
+          },
+          {
+            test_name: 'Sodium',
+            abbreviation: 'Na',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 2,
+          },
+          {
+            test_name: 'Potassium',
+            abbreviation: 'K',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 3,
+          },
+          {
+            test_name: 'Chloride',
+            abbreviation: 'Cl',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 4,
+          },
+          {
+            test_name: 'Carbon Dioxide',
+            abbreviation: 'CO2',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 5,
+          },
+          {
+            test_name: 'Blood Urea Nitrogen',
+            abbreviation: 'BUN',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 6,
+          },
+          {
+            test_name: 'Creatinine',
+            abbreviation: 'CREA',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 7,
+          },
+          {
+            test_name: 'Calcium',
+            abbreviation: 'Ca',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 8,
+          },
+        ],
       },
       cmp: {
-        name: "Comprehensive Metabolic Panel (CMP)",
-        description: "Extended chemistry tests - enter your lab's values and reference ranges",
+        name: 'Comprehensive Metabolic Panel (CMP)',
+        description:
+          "Extended chemistry tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "endocrinology", display_order: 1 },
-          { test_name: "Sodium", abbreviation: "Na", unit: "mmol/L", category: "chemistry", display_order: 2 },
-          { test_name: "Potassium", abbreviation: "K", unit: "mmol/L", category: "chemistry", display_order: 3 },
-          { test_name: "Chloride", abbreviation: "Cl", unit: "mmol/L", category: "chemistry", display_order: 4 },
-          { test_name: "Carbon Dioxide", abbreviation: "CO2", unit: "mmol/L", category: "chemistry", display_order: 5 },
-          { test_name: "Blood Urea Nitrogen", abbreviation: "BUN", unit: "mg/dL", category: "chemistry", display_order: 6 },
-          { test_name: "Creatinine", abbreviation: "CREA", unit: "mg/dL", category: "chemistry", display_order: 7 },
-          { test_name: "Calcium", abbreviation: "Ca", unit: "mg/dL", category: "chemistry", display_order: 8 },
-          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "hepatology", display_order: 9 },
-          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "hepatology", display_order: 10 },
-          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "hepatology", display_order: 11 },
-          { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "hepatology", display_order: 12 },
-          { test_name: "Alanine Aminotransferase", abbreviation: "ALT", unit: "U/L", category: "hepatology", display_order: 13 },
-          { test_name: "Aspartate Aminotransferase", abbreviation: "AST", unit: "U/L", category: "hepatology", display_order: 14 }
-        ]
+          {
+            test_name: 'Glucose',
+            abbreviation: 'GLU',
+            unit: 'mg/dL',
+            category: 'endocrinology',
+            display_order: 1,
+          },
+          {
+            test_name: 'Sodium',
+            abbreviation: 'Na',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 2,
+          },
+          {
+            test_name: 'Potassium',
+            abbreviation: 'K',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 3,
+          },
+          {
+            test_name: 'Chloride',
+            abbreviation: 'Cl',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 4,
+          },
+          {
+            test_name: 'Carbon Dioxide',
+            abbreviation: 'CO2',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 5,
+          },
+          {
+            test_name: 'Blood Urea Nitrogen',
+            abbreviation: 'BUN',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 6,
+          },
+          {
+            test_name: 'Creatinine',
+            abbreviation: 'CREA',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 7,
+          },
+          {
+            test_name: 'Calcium',
+            abbreviation: 'Ca',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 8,
+          },
+          {
+            test_name: 'Total Protein',
+            abbreviation: 'TP',
+            unit: 'g/dL',
+            category: 'hepatology',
+            display_order: 9,
+          },
+          {
+            test_name: 'Albumin',
+            abbreviation: 'ALB',
+            unit: 'g/dL',
+            category: 'hepatology',
+            display_order: 10,
+          },
+          {
+            test_name: 'Total Bilirubin',
+            abbreviation: 'TBIL',
+            unit: 'mg/dL',
+            category: 'hepatology',
+            display_order: 11,
+          },
+          {
+            test_name: 'Alkaline Phosphatase',
+            abbreviation: 'ALP',
+            unit: 'U/L',
+            category: 'hepatology',
+            display_order: 12,
+          },
+          {
+            test_name: 'Alanine Aminotransferase',
+            abbreviation: 'ALT',
+            unit: 'U/L',
+            category: 'hepatology',
+            display_order: 13,
+          },
+          {
+            test_name: 'Aspartate Aminotransferase',
+            abbreviation: 'AST',
+            unit: 'U/L',
+            category: 'hepatology',
+            display_order: 14,
+          },
+        ],
       },
       lipid: {
-        name: "Lipid Panel",
-        description: "Cholesterol and triglyceride tests - enter your lab's values and reference ranges",
+        name: 'Lipid Panel',
+        description:
+          "Cholesterol and triglyceride tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Total Cholesterol", abbreviation: "CHOL", unit: "mg/dL", category: "lipids", display_order: 1 },
-          { test_name: "LDL Cholesterol", abbreviation: "LDL", unit: "mg/dL", category: "lipids", display_order: 2 },
-          { test_name: "HDL Cholesterol", abbreviation: "HDL", unit: "mg/dL", category: "lipids", display_order: 3 },
-          { test_name: "Triglycerides", abbreviation: "TRIG", unit: "mg/dL", category: "lipids", display_order: 4 }
-        ]
+          {
+            test_name: 'Total Cholesterol',
+            abbreviation: 'CHOL',
+            unit: 'mg/dL',
+            category: 'lipids',
+            display_order: 1,
+          },
+          {
+            test_name: 'LDL Cholesterol',
+            abbreviation: 'LDL',
+            unit: 'mg/dL',
+            category: 'lipids',
+            display_order: 2,
+          },
+          {
+            test_name: 'HDL Cholesterol',
+            abbreviation: 'HDL',
+            unit: 'mg/dL',
+            category: 'lipids',
+            display_order: 3,
+          },
+          {
+            test_name: 'Triglycerides',
+            abbreviation: 'TRIG',
+            unit: 'mg/dL',
+            category: 'lipids',
+            display_order: 4,
+          },
+        ],
       },
       liver: {
-        name: "Liver Function Panel",
-        description: "Liver enzyme and function tests - enter your lab's values and reference ranges",
+        name: 'Liver Function Panel',
+        description:
+          "Liver enzyme and function tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Alanine Aminotransferase", abbreviation: "ALT", unit: "U/L", category: "hepatology", display_order: 1 },
-          { test_name: "Aspartate Aminotransferase", abbreviation: "AST", unit: "U/L", category: "hepatology", display_order: 2 },
-          { test_name: "Alkaline Phosphatase", abbreviation: "ALP", unit: "U/L", category: "hepatology", display_order: 3 },
-          { test_name: "Gamma-glutamyl Transferase", abbreviation: "GGT", unit: "U/L", category: "hepatology", display_order: 4 },
-          { test_name: "Total Bilirubin", abbreviation: "TBIL", unit: "mg/dL", category: "hepatology", display_order: 5 },
-          { test_name: "Direct Bilirubin", abbreviation: "DBIL", unit: "mg/dL", category: "hepatology", display_order: 6 },
-          { test_name: "Total Protein", abbreviation: "TP", unit: "g/dL", category: "hepatology", display_order: 7 },
-          { test_name: "Albumin", abbreviation: "ALB", unit: "g/dL", category: "hepatology", display_order: 8 },
-          { test_name: "Somatomedin C", abbreviation: "IGF-1", unit: "ng/mL", category: "endocrinology", display_order: 9 }
-        ]
+          {
+            test_name: 'Alanine Aminotransferase',
+            abbreviation: 'ALT',
+            unit: 'U/L',
+            category: 'hepatology',
+            display_order: 1,
+          },
+          {
+            test_name: 'Aspartate Aminotransferase',
+            abbreviation: 'AST',
+            unit: 'U/L',
+            category: 'hepatology',
+            display_order: 2,
+          },
+          {
+            test_name: 'Alkaline Phosphatase',
+            abbreviation: 'ALP',
+            unit: 'U/L',
+            category: 'hepatology',
+            display_order: 3,
+          },
+          {
+            test_name: 'Gamma-glutamyl Transferase',
+            abbreviation: 'GGT',
+            unit: 'U/L',
+            category: 'hepatology',
+            display_order: 4,
+          },
+          {
+            test_name: 'Total Bilirubin',
+            abbreviation: 'TBIL',
+            unit: 'mg/dL',
+            category: 'hepatology',
+            display_order: 5,
+          },
+          {
+            test_name: 'Direct Bilirubin',
+            abbreviation: 'DBIL',
+            unit: 'mg/dL',
+            category: 'hepatology',
+            display_order: 6,
+          },
+          {
+            test_name: 'Total Protein',
+            abbreviation: 'TP',
+            unit: 'g/dL',
+            category: 'hepatology',
+            display_order: 7,
+          },
+          {
+            test_name: 'Albumin',
+            abbreviation: 'ALB',
+            unit: 'g/dL',
+            category: 'hepatology',
+            display_order: 8,
+          },
+          {
+            test_name: 'Somatomedin C',
+            abbreviation: 'IGF-1',
+            unit: 'ng/mL',
+            category: 'endocrinology',
+            display_order: 9,
+          },
+        ],
       },
       thyroid: {
-        name: "Thyroid Panel",
-        description: "Thyroid hormone tests - enter your lab's values and reference ranges",
+        name: 'Thyroid Panel',
+        description:
+          "Thyroid hormone tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Thyroid Stimulating Hormone", abbreviation: "TSH", unit: "mIU/L", category: "endocrinology", display_order: 1 },
-          { test_name: "Free T4", abbreviation: "FT4", unit: "ng/dL", category: "endocrinology", display_order: 2 },
-          { test_name: "Free T3", abbreviation: "FT3", unit: "pg/mL", category: "endocrinology", display_order: 3 },
-          { test_name: "Total T4", abbreviation: "T4", unit: "μg/dL", category: "endocrinology", display_order: 4 },
-          { test_name: "Total T3", abbreviation: "T3", unit: "ng/dL", category: "endocrinology", display_order: 5 }
-        ]
+          {
+            test_name: 'Thyroid Stimulating Hormone',
+            abbreviation: 'TSH',
+            unit: 'mIU/L',
+            category: 'endocrinology',
+            display_order: 1,
+          },
+          {
+            test_name: 'Free T4',
+            abbreviation: 'FT4',
+            unit: 'ng/dL',
+            category: 'endocrinology',
+            display_order: 2,
+          },
+          {
+            test_name: 'Free T3',
+            abbreviation: 'FT3',
+            unit: 'pg/mL',
+            category: 'endocrinology',
+            display_order: 3,
+          },
+          {
+            test_name: 'Total T4',
+            abbreviation: 'T4',
+            unit: 'μg/dL',
+            category: 'endocrinology',
+            display_order: 4,
+          },
+          {
+            test_name: 'Total T3',
+            abbreviation: 'T3',
+            unit: 'ng/dL',
+            category: 'endocrinology',
+            display_order: 5,
+          },
+        ],
       },
       renal: {
-        name: "Renal Function Panel",
-        description: "Kidney function tests - enter your lab's values and reference ranges",
+        name: 'Renal Function Panel',
+        description:
+          "Kidney function tests - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Blood Urea Nitrogen", abbreviation: "BUN", unit: "mg/dL", category: "chemistry", display_order: 1 },
-          { test_name: "Creatinine", abbreviation: "CREA", unit: "mg/dL", category: "chemistry", display_order: 2 },
-          { test_name: "Estimated GFR", abbreviation: "eGFR", unit: "mL/min/1.73m²", category: "chemistry", display_order: 3 },
-          { test_name: "Sodium", abbreviation: "Na", unit: "mmol/L", category: "chemistry", display_order: 4 },
-          { test_name: "Potassium", abbreviation: "K", unit: "mmol/L", category: "chemistry", display_order: 5 },
-          { test_name: "Chloride", abbreviation: "Cl", unit: "mmol/L", category: "chemistry", display_order: 6 }
-        ]
+          {
+            test_name: 'Blood Urea Nitrogen',
+            abbreviation: 'BUN',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 1,
+          },
+          {
+            test_name: 'Creatinine',
+            abbreviation: 'CREA',
+            unit: 'mg/dL',
+            category: 'chemistry',
+            display_order: 2,
+          },
+          {
+            test_name: 'Estimated GFR',
+            abbreviation: 'eGFR',
+            unit: 'mL/min/1.73m²',
+            category: 'chemistry',
+            display_order: 3,
+          },
+          {
+            test_name: 'Sodium',
+            abbreviation: 'Na',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 4,
+          },
+          {
+            test_name: 'Potassium',
+            abbreviation: 'K',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 5,
+          },
+          {
+            test_name: 'Chloride',
+            abbreviation: 'Cl',
+            unit: 'mmol/L',
+            category: 'chemistry',
+            display_order: 6,
+          },
+        ],
       },
       diabetes: {
-        name: "Diabetes Panel",
-        description: "Blood sugar and diabetes markers - enter your lab's values and reference ranges",
+        name: 'Diabetes Panel',
+        description:
+          "Blood sugar and diabetes markers - enter your lab's values and reference ranges",
         tests: [
-          { test_name: "Glucose", abbreviation: "GLU", unit: "mg/dL", category: "endocrinology", display_order: 1 },
-          { test_name: "Hemoglobin A1c", abbreviation: "HbA1c", unit: "%", category: "endocrinology", display_order: 2 },
-          { test_name: "Estimated Average Glucose", abbreviation: "eAG", unit: "mg/dL", category: "endocrinology", display_order: 3 }
-        ]
-      }
+          {
+            test_name: 'Glucose',
+            abbreviation: 'GLU',
+            unit: 'mg/dL',
+            category: 'endocrinology',
+            display_order: 1,
+          },
+          {
+            test_name: 'Hemoglobin A1c',
+            abbreviation: 'HbA1c',
+            unit: '%',
+            category: 'endocrinology',
+            display_order: 2,
+          },
+          {
+            test_name: 'Estimated Average Glucose',
+            abbreviation: 'eAG',
+            unit: 'mg/dL',
+            category: 'endocrinology',
+            display_order: 3,
+          },
+        ],
+      },
     });
   }
 }

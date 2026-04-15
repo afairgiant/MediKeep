@@ -19,20 +19,24 @@ class PatientApiService extends BaseApiService {
   async createPatient(patientData) {
     logger.info('patient_api_create', {
       message: 'Creating patient record',
-      isSelfRecord: patientData.is_self_record
+      isSelfRecord: patientData.is_self_record,
     });
 
     try {
-      const result = await this.post('/', patientData, 'Failed to create patient');
+      const result = await this.post(
+        '/',
+        patientData,
+        'Failed to create patient'
+      );
       logger.info('patient_api_create_success', {
         message: 'Patient created successfully',
-        patientId: result.id
+        patientId: result.id,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_create_error', {
         message: 'Failed to create patient',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -46,20 +50,22 @@ class PatientApiService extends BaseApiService {
   async getAccessiblePatients(permission = 'view') {
     logger.debug('patient_api_list', {
       message: 'Getting accessible patients',
-      permission
+      permission,
     });
 
     try {
-      const result = await this.get(`/?permission=${permission}`, { errorMessage: 'Failed to get patients' });
+      const result = await this.get(`/?permission=${permission}`, {
+        errorMessage: 'Failed to get patients',
+      });
       logger.debug('patient_api_list_success', {
         message: 'Patients retrieved successfully',
-        count: result.total_count
+        count: result.total_count,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_list_error', {
         message: 'Failed to get patients',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -73,21 +79,23 @@ class PatientApiService extends BaseApiService {
   async getPatient(patientId) {
     logger.debug('patient_api_get', {
       message: 'Getting patient by ID',
-      patientId
+      patientId,
     });
 
     try {
-      const result = await this.get(`/${patientId}`, { errorMessage: 'Failed to get patient' });
+      const result = await this.get(`/${patientId}`, {
+        errorMessage: 'Failed to get patient',
+      });
       logger.debug('patient_api_get_success', {
         message: 'Patient retrieved successfully',
-        patientId
+        patientId,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_get_error', {
         message: 'Failed to get patient',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -102,21 +110,25 @@ class PatientApiService extends BaseApiService {
   async updatePatient(patientId, patientData) {
     logger.info('patient_api_update', {
       message: 'Updating patient record',
-      patientId
+      patientId,
     });
 
     try {
-      const result = await this.put(`/${patientId}`, patientData, 'Failed to update patient');
+      const result = await this.put(
+        `/${patientId}`,
+        patientData,
+        'Failed to update patient'
+      );
       logger.info('patient_api_update_success', {
         message: 'Patient updated successfully',
-        patientId
+        patientId,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_update_error', {
         message: 'Failed to update patient',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -130,21 +142,24 @@ class PatientApiService extends BaseApiService {
   async deletePatient(patientId) {
     logger.info('patient_api_delete', {
       message: 'Deleting patient record',
-      patientId
+      patientId,
     });
 
     try {
-      const result = await this.delete(`/${patientId}`, 'Failed to delete patient');
+      const result = await this.delete(
+        `/${patientId}`,
+        'Failed to delete patient'
+      );
       logger.info('patient_api_delete_success', {
         message: 'Patient deleted successfully',
-        patientId
+        patientId,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_delete_error', {
         message: 'Failed to delete patient',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -156,20 +171,22 @@ class PatientApiService extends BaseApiService {
    */
   async getOwnedPatients() {
     logger.debug('patient_api_owned', {
-      message: 'Getting owned patients'
+      message: 'Getting owned patients',
     });
 
     try {
-      const result = await this.get('/owned/list', { errorMessage: 'Failed to get owned patients' });
+      const result = await this.get('/owned/list', {
+        errorMessage: 'Failed to get owned patients',
+      });
       logger.debug('patient_api_owned_success', {
         message: 'Owned patients retrieved successfully',
-        count: result.length
+        count: result.length,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_owned_error', {
         message: 'Failed to get owned patients',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -181,20 +198,22 @@ class PatientApiService extends BaseApiService {
    */
   async getSelfRecord() {
     logger.debug('patient_api_self', {
-      message: 'Getting self-record patient'
+      message: 'Getting self-record patient',
     });
 
     try {
-      const result = await this.get('/self-record', { errorMessage: 'Failed to get self-record' });
+      const result = await this.get('/self-record', {
+        errorMessage: 'Failed to get self-record',
+      });
       logger.debug('patient_api_self_success', {
         message: 'Self-record retrieved successfully',
-        hasSelfRecord: !!result
+        hasSelfRecord: !!result,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_self_error', {
         message: 'Failed to get self-record',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -208,21 +227,25 @@ class PatientApiService extends BaseApiService {
   async switchActivePatient(patientId) {
     logger.info('patient_api_switch', {
       message: 'Switching active patient',
-      patientId
+      patientId,
     });
 
     try {
-      const result = await this.post('/switch', { patient_id: patientId }, 'Failed to switch patient');
+      const result = await this.post(
+        '/switch',
+        { patient_id: patientId },
+        'Failed to switch patient'
+      );
       logger.info('patient_api_switch_success', {
         message: 'Patient switched successfully',
-        patientId
+        patientId,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_switch_error', {
         message: 'Failed to switch patient',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -234,20 +257,22 @@ class PatientApiService extends BaseApiService {
    */
   async getActivePatient() {
     logger.debug('patient_api_active', {
-      message: 'Getting active patient'
+      message: 'Getting active patient',
     });
 
     try {
-      const result = await this.get('/active/current', { errorMessage: 'Failed to get active patient' });
+      const result = await this.get('/active/current', {
+        errorMessage: 'Failed to get active patient',
+      });
       logger.debug('patient_api_active_success', {
         message: 'Active patient retrieved successfully',
-        hasActivePatient: !!result
+        hasActivePatient: !!result,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_active_error', {
         message: 'Failed to get active patient',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -259,21 +284,23 @@ class PatientApiService extends BaseApiService {
    */
   async getPatientStats() {
     logger.debug('patient_api_stats', {
-      message: 'Getting patient statistics'
+      message: 'Getting patient statistics',
     });
 
     try {
-      const result = await this.get('/stats', { errorMessage: 'Failed to get patient statistics' });
+      const result = await this.get('/stats', {
+        errorMessage: 'Failed to get patient statistics',
+      });
       logger.debug('patient_api_stats_success', {
         message: 'Patient statistics retrieved successfully',
         ownedCount: result.owned_count,
-        accessibleCount: result.accessible_count
+        accessibleCount: result.accessible_count,
       });
       return result;
     } catch (error) {
       logger.error('patient_api_stats_error', {
         message: 'Failed to get patient statistics',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -334,7 +361,7 @@ class PatientApiService extends BaseApiService {
       message: 'Uploading patient photo',
       patientId,
       fileSize: file.size,
-      fileType: file.type
+      fileType: file.type,
     });
 
     try {
@@ -347,7 +374,7 @@ class PatientApiService extends BaseApiService {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-        hasFile: !!file
+        hasFile: !!file,
       });
 
       const result = await this.rawApiCall(`/patients/${patientId}/photo`, {
@@ -359,7 +386,7 @@ class PatientApiService extends BaseApiService {
       logger.info('patient_photo_upload_success', {
         message: 'Patient photo uploaded successfully',
         patientId,
-        photoId: result.id
+        photoId: result.id,
       });
 
       return result;
@@ -367,7 +394,7 @@ class PatientApiService extends BaseApiService {
       logger.error('patient_photo_upload_error', {
         message: 'Failed to upload patient photo',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -381,12 +408,12 @@ class PatientApiService extends BaseApiService {
   async getPhotoUrl(patientId) {
     try {
       const response = await this.rawApiCall(`/patients/${patientId}/photo`, {
-        method: 'GET'
+        method: 'GET',
       });
 
       // rawApiCall returns the Response object, convert to blob
       const blob = await response.blob();
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.readAsDataURL(blob);
@@ -399,7 +426,7 @@ class PatientApiService extends BaseApiService {
       logger.debug('patient_photo_url_error', {
         message: 'Failed to get photo URL',
         patientId,
-        error: error.message
+        error: error.message,
       });
       return null;
     }
@@ -413,7 +440,7 @@ class PatientApiService extends BaseApiService {
   async getPhotoInfo(patientId) {
     logger.debug('patient_photo_info', {
       message: 'Getting patient photo info',
-      patientId
+      patientId,
     });
 
     try {
@@ -427,7 +454,7 @@ class PatientApiService extends BaseApiService {
       logger.error('patient_photo_info_error', {
         message: 'Failed to get patient photo info',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -441,23 +468,23 @@ class PatientApiService extends BaseApiService {
   async deletePhoto(patientId) {
     logger.info('patient_photo_delete', {
       message: 'Deleting patient photo',
-      patientId
+      patientId,
     });
 
     try {
       await this.rawApiCall(`/patients/${patientId}/photo`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       logger.info('patient_photo_delete_success', {
         message: 'Patient photo deleted successfully',
-        patientId
+        patientId,
       });
     } catch (error) {
       logger.error('patient_photo_delete_error', {
         message: 'Failed to delete patient photo',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -476,7 +503,7 @@ class PatientApiService extends BaseApiService {
       logger.debug('patient_photo_check_error', {
         message: 'Error checking if patient has photo',
         patientId,
-        error: error.message
+        error: error.message,
       });
       return false;
     }

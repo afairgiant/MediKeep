@@ -21,16 +21,20 @@ class PatientSharingApiService extends BaseApiService {
       message: 'Sending patient share invitation',
       patientId: invitationData.patient_id,
       sharedWithIdentifier: invitationData.shared_with_user_identifier,
-      permissionLevel: invitationData.permission_level
+      permissionLevel: invitationData.permission_level,
     });
 
     try {
-      const result = await this.post('/', invitationData, 'Failed to send patient share invitation');
+      const result = await this.post(
+        '/',
+        invitationData,
+        'Failed to send patient share invitation'
+      );
       logger.info('patient_sharing_invitation_send_success', {
         message: 'Patient share invitation sent successfully',
         invitationId: result.invitation_id,
         patientId: invitationData.patient_id,
-        sharedWithIdentifier: invitationData.shared_with_user_identifier
+        sharedWithIdentifier: invitationData.shared_with_user_identifier,
       });
       return result;
     } catch (error) {
@@ -38,7 +42,7 @@ class PatientSharingApiService extends BaseApiService {
         message: 'Failed to send patient share invitation',
         patientId: invitationData.patient_id,
         sharedWithIdentifier: invitationData.shared_with_user_identifier,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -61,16 +65,20 @@ class PatientSharingApiService extends BaseApiService {
       message: 'Sending bulk patient share invitations',
       patientIds: bulkInvitationData.patient_ids,
       sharedWithIdentifier: bulkInvitationData.shared_with_user_identifier,
-      permissionLevel: bulkInvitationData.permission_level
+      permissionLevel: bulkInvitationData.permission_level,
     });
 
     try {
-      const result = await this.post('/bulk-invite', bulkInvitationData, 'Failed to send bulk patient share invitations');
+      const result = await this.post(
+        '/bulk-invite',
+        bulkInvitationData,
+        'Failed to send bulk patient share invitations'
+      );
       logger.info('patient_sharing_bulk_invitation_send_success', {
         message: 'Bulk patient share invitations sent successfully',
         invitationId: result.invitation_id,
         patientCount: bulkInvitationData.patient_ids.length,
-        sharedWithIdentifier: bulkInvitationData.shared_with_user_identifier
+        sharedWithIdentifier: bulkInvitationData.shared_with_user_identifier,
       });
       return result;
     } catch (error) {
@@ -78,7 +86,7 @@ class PatientSharingApiService extends BaseApiService {
         message: 'Failed to send bulk patient share invitations',
         patientIds: bulkInvitationData.patient_ids,
         sharedWithIdentifier: bulkInvitationData.shared_with_user_identifier,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -92,22 +100,25 @@ class PatientSharingApiService extends BaseApiService {
   async removeMyAccess(patientId) {
     logger.info('patient_sharing_remove_my_access', {
       message: 'Removing my access to shared patient',
-      patientId
+      patientId,
     });
 
     try {
-      const data = await this.delete(`/remove-my-access/${patientId}`, 'Failed to remove access');
-      
+      const data = await this.delete(
+        `/remove-my-access/${patientId}`,
+        'Failed to remove access'
+      );
+
       logger.info('patient_sharing_remove_my_access_success', {
         message: 'Successfully removed my access to patient',
-        patientId
+        patientId,
       });
       return data;
     } catch (error) {
       logger.error('patient_sharing_remove_my_access_error', {
         message: 'Failed to remove my access to patient',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -123,19 +134,23 @@ class PatientSharingApiService extends BaseApiService {
     logger.info('patient_sharing_revoke', {
       message: 'Revoking patient share',
       patientId,
-      sharedWithUserId
+      sharedWithUserId,
     });
 
     try {
-      const data = await this.deleteWithBody('/revoke', {
-        patient_id: patientId,
-        shared_with_user_id: sharedWithUserId
-      }, 'Failed to revoke patient share');
-      
+      const data = await this.deleteWithBody(
+        '/revoke',
+        {
+          patient_id: patientId,
+          shared_with_user_id: sharedWithUserId,
+        },
+        'Failed to revoke patient share'
+      );
+
       logger.info('patient_sharing_revoke_success', {
         message: 'Patient share revoked successfully',
         patientId,
-        sharedWithUserId
+        sharedWithUserId,
       });
       return data;
     } catch (error) {
@@ -143,7 +158,7 @@ class PatientSharingApiService extends BaseApiService {
         message: 'Failed to revoke patient share',
         patientId,
         sharedWithUserId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -160,7 +175,7 @@ class PatientSharingApiService extends BaseApiService {
     logger.info('patient_sharing_update', {
       message: 'Updating patient share',
       patientId,
-      sharedWithUserId
+      sharedWithUserId,
     });
 
     try {
@@ -169,12 +184,12 @@ class PatientSharingApiService extends BaseApiService {
         updateData,
         'Failed to update patient share'
       );
-      
+
       logger.info('patient_sharing_update_success', {
         message: 'Patient share updated successfully',
         shareId: result.id,
         patientId,
-        sharedWithUserId
+        sharedWithUserId,
       });
       return result;
     } catch (error) {
@@ -182,7 +197,7 @@ class PatientSharingApiService extends BaseApiService {
         message: 'Failed to update patient share',
         patientId,
         sharedWithUserId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -196,22 +211,24 @@ class PatientSharingApiService extends BaseApiService {
   async getPatientShares(patientId) {
     logger.debug('patient_sharing_get_shares', {
       message: 'Getting patient shares',
-      patientId
+      patientId,
     });
 
     try {
-      const result = await this.get(`/${patientId}`, { errorMessage: 'Failed to get patient shares' });
+      const result = await this.get(`/${patientId}`, {
+        errorMessage: 'Failed to get patient shares',
+      });
       logger.debug('patient_sharing_get_shares_success', {
         message: 'Patient shares retrieved successfully',
         patientId,
-        shareCount: result.total_count
+        shareCount: result.total_count,
       });
       return result;
     } catch (error) {
       logger.error('patient_sharing_get_shares_error', {
         message: 'Failed to get patient shares',
         patientId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -223,21 +240,23 @@ class PatientSharingApiService extends BaseApiService {
    */
   async getUserSharingStats() {
     logger.debug('patient_sharing_get_stats', {
-      message: 'Getting user sharing statistics'
+      message: 'Getting user sharing statistics',
     });
 
     try {
-      const result = await this.get('/stats/user', { errorMessage: 'Failed to get sharing statistics' });
+      const result = await this.get('/stats/user', {
+        errorMessage: 'Failed to get sharing statistics',
+      });
       logger.debug('patient_sharing_get_stats_success', {
         message: 'Sharing statistics retrieved successfully',
         sharedByMe: result.shared_by_me,
-        sharedWithMe: result.shared_with_me
+        sharedWithMe: result.shared_with_me,
       });
       return result;
     } catch (error) {
       logger.error('patient_sharing_get_stats_error', {
         message: 'Failed to get sharing statistics',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -249,20 +268,22 @@ class PatientSharingApiService extends BaseApiService {
    */
   async getSharesReceived() {
     logger.debug('patient_sharing_get_received', {
-      message: 'Getting shares received'
+      message: 'Getting shares received',
     });
 
     try {
-      const result = await this.get('/shared-with-me', { errorMessage: 'Failed to get received shares' });
+      const result = await this.get('/shared-with-me', {
+        errorMessage: 'Failed to get received shares',
+      });
       logger.debug('patient_sharing_get_received_success', {
         message: 'Received shares retrieved successfully',
-        count: result.length
+        count: result.length,
       });
       return result;
     } catch (error) {
       logger.error('patient_sharing_get_received_error', {
         message: 'Failed to get received shares',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -274,20 +295,22 @@ class PatientSharingApiService extends BaseApiService {
    */
   async getSharesCreated() {
     logger.debug('patient_sharing_get_created', {
-      message: 'Getting shares created'
+      message: 'Getting shares created',
     });
 
     try {
-      const result = await this.get('/shared-by-me', { errorMessage: 'Failed to get created shares' });
+      const result = await this.get('/shared-by-me', {
+        errorMessage: 'Failed to get created shares',
+      });
       logger.debug('patient_sharing_get_created_success', {
         message: 'Created shares retrieved successfully',
-        count: result.length
+        count: result.length,
       });
       return result;
     } catch (error) {
       logger.error('patient_sharing_get_created_error', {
         message: 'Failed to get created shares',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -299,20 +322,24 @@ class PatientSharingApiService extends BaseApiService {
    */
   async cleanupExpiredShares() {
     logger.info('patient_sharing_cleanup', {
-      message: 'Cleaning up expired shares'
+      message: 'Cleaning up expired shares',
     });
 
     try {
-      const result = await this.post('/cleanup-expired', {}, 'Failed to cleanup expired shares');
+      const result = await this.post(
+        '/cleanup-expired',
+        {},
+        'Failed to cleanup expired shares'
+      );
       logger.info('patient_sharing_cleanup_success', {
         message: 'Expired shares cleaned up successfully',
-        result: result.message
+        result: result.message,
       });
       return result;
     } catch (error) {
       logger.error('patient_sharing_cleanup_error', {
         message: 'Failed to cleanup expired shares',
-        error: error.message
+        error: error.message,
       });
       throw error;
     }

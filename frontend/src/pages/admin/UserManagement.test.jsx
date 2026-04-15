@@ -28,13 +28,16 @@ vi.mock('../../services/logger', () => ({
 
 vi.mock('../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDateTime: (d) => d || '-',
-    formatDate: (d) => d || '-',
+    formatDateTime: d => d || '-',
+    formatDate: d => d || '-',
   }),
 }));
 
 vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => ({ user: { id: 1, role: 'admin', username: 'currentadmin' }, logout: vi.fn() }),
+  useAuth: () => ({
+    user: { id: 1, role: 'admin', username: 'currentadmin' },
+    logout: vi.fn(),
+  }),
 }));
 
 const mockGetUsers = vi.fn();
@@ -143,7 +146,12 @@ describe('UserManagement', () => {
     mockGetUserLoginHistory.mockResolvedValue({
       data: {
         items: [
-          { id: 1, timestamp: '2026-02-26T10:00:00', ip_address: '127.0.0.1', description: 'User logged in: currentadmin' },
+          {
+            id: 1,
+            timestamp: '2026-02-26T10:00:00',
+            ip_address: '127.0.0.1',
+            description: 'User logged in: currentadmin',
+          },
         ],
         total: 1,
       },
@@ -213,7 +221,9 @@ describe('UserManagement', () => {
     renderUserManagement();
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search users...')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('Search users...')
+      ).toBeInTheDocument();
     });
   });
 
@@ -293,7 +303,9 @@ describe('UserManagement', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('User logged in: currentadmin')).toBeInTheDocument();
+      expect(
+        screen.getByText('User logged in: currentadmin')
+      ).toBeInTheDocument();
     });
   });
 
@@ -311,12 +323,14 @@ describe('UserManagement', () => {
     const deleteMenuItem = await waitFor(() => {
       const items = screen.getAllByText('Delete User');
       // The menu item (not the page title)
-      return items.find((el) => el.closest('[role="menuitem"]'));
+      return items.find(el => el.closest('[role="menuitem"]'));
     });
     fireEvent.click(deleteMenuItem);
 
     await waitFor(() => {
-      expect(screen.getByText(/This action cannot be undone/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/This action cannot be undone/)
+      ).toBeInTheDocument();
     });
 
     // Verify the confirmation input is present
@@ -338,7 +352,10 @@ describe('UserManagement', () => {
     await waitFor(() => {
       // The Deactivate menu item should be present but disabled for self
       const deactivateItem = screen.getByText('Deactivate');
-      expect(deactivateItem.closest('button')).toHaveAttribute('data-disabled', 'true');
+      expect(deactivateItem.closest('button')).toHaveAttribute(
+        'data-disabled',
+        'true'
+      );
     });
   });
 
@@ -355,9 +372,12 @@ describe('UserManagement', () => {
     await waitFor(() => {
       // Find the Delete User menu item in the dropdown - should be disabled for self
       const deleteItems = screen.getAllByText('Delete User');
-      const menuItem = deleteItems.find((el) => el.closest('[role="menuitem"]'));
+      const menuItem = deleteItems.find(el => el.closest('[role="menuitem"]'));
       expect(menuItem).toBeTruthy();
-      expect(menuItem.closest('button')).toHaveAttribute('data-disabled', 'true');
+      expect(menuItem.closest('button')).toHaveAttribute(
+        'data-disabled',
+        'true'
+      );
     });
   });
 });

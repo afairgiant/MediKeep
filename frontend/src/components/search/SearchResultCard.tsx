@@ -61,7 +61,9 @@ export function SearchResultCard({
   const { t } = useTranslation(['common', 'shared']);
   const EntityIcon = row.icon;
   const hasQuery = typeof query === 'string' && query.trim().length > 0;
-  const visibleTags = Array.isArray(row.tags) ? row.tags.slice(0, MAX_VISIBLE_TAGS) : [];
+  const visibleTags = Array.isArray(row.tags)
+    ? row.tags.slice(0, MAX_VISIBLE_TAGS)
+    : [];
   const overflowCount =
     Array.isArray(row.tags) && row.tags.length > MAX_VISIBLE_TAGS
       ? row.tags.length - MAX_VISIBLE_TAGS
@@ -164,7 +166,7 @@ export function SearchResultCard({
         {/* Tags row */}
         {visibleTags.length > 0 && (
           <Group gap={4} wrap="wrap">
-            {visibleTags.map((tag) => (
+            {visibleTags.map(tag => (
               <ClickableTagBadge
                 key={tag}
                 tag={tag}

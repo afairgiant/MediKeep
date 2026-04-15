@@ -10,12 +10,12 @@ import { VitalDataPoint } from '../components/medical/vitals/types';
 export type AggregationPeriod = 'daily' | 'weekly' | 'biweekly' | 'monthly';
 
 export interface AggregatedDataPoint {
-  date: string;           // Start of period (ISO date string)
-  periodLabel: string;    // Display label (e.g., "Jan 2020", "Week of Jan 1")
+  date: string; // Start of period (ISO date string)
+  periodLabel: string; // Display label (e.g., "Jan 2020", "Week of Jan 1")
   average: number;
   min: number;
   max: number;
-  count: number;          // Number of readings in period
+  count: number; // Number of readings in period
   // For blood pressure, we also track secondary values
   secondaryAverage?: number | null;
   secondaryMin?: number | null;
@@ -42,7 +42,9 @@ export interface AggregationResult {
  *   regardless of time span. Detected by peak day, not average,
  *   so it works even when CGM data covers only part of the range.
  */
-export function getAggregationPeriod(dataPoints: VitalDataPoint[]): AggregationPeriod | null {
+export function getAggregationPeriod(
+  dataPoints: VitalDataPoint[]
+): AggregationPeriod | null {
   if (dataPoints.length === 0) return null;
 
   const dates = dataPoints.map(p => new Date(p.recorded_date));
@@ -100,7 +102,9 @@ function getPeriodStart(date: Date, period: AggregationPeriod): Date {
     case 'biweekly': {
       // Start of bi-weekly period (aligned to year start)
       const startOfYear = new Date(d.getFullYear(), 0, 1);
-      const daysSinceYearStart = Math.floor((d.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+      const daysSinceYearStart = Math.floor(
+        (d.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)
+      );
       const biweekNumber = Math.floor(daysSinceYearStart / 14);
       const biweekStart = new Date(startOfYear);
       biweekStart.setDate(biweekStart.getDate() + biweekNumber * 14);
@@ -120,7 +124,20 @@ function getPeriodStart(date: Date, period: AggregationPeriod): Date {
  * Get display label for a period
  */
 function getPeriodLabel(date: Date, period: AggregationPeriod): string {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   switch (period) {
     case 'daily':
@@ -189,12 +206,13 @@ export function aggregateDataPoints(
       average: values.reduce((a, b) => a + b, 0) / values.length,
       min: Math.min(...values),
       max: Math.max(...values),
-      count: points.length
+      count: points.length,
     };
 
     // Add secondary value statistics if present
     if (secondaryValues.length > 0) {
-      aggregatedPoint.secondaryAverage = secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length;
+      aggregatedPoint.secondaryAverage =
+        secondaryValues.reduce((a, b) => a + b, 0) / secondaryValues.length;
       aggregatedPoint.secondaryMin = Math.min(...secondaryValues);
       aggregatedPoint.secondaryMax = Math.max(...secondaryValues);
     }
@@ -203,8 +221,8 @@ export function aggregateDataPoints(
   }
 
   // Sort by date (oldest first for chart display)
-  return aggregatedPoints.sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+  return aggregatedPoints.sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 }
 
@@ -216,7 +234,9 @@ export function aggregateDataPoints(
  *
  * @returns Aggregation result with aggregated points, period used, and total raw points
  */
-export function smartAggregateVitalData(dataPoints: VitalDataPoint[]): AggregationResult {
+export function smartAggregateVitalData(
+  dataPoints: VitalDataPoint[]
+): AggregationResult {
   const period = getAggregationPeriod(dataPoints);
 
   if (period === null) {
@@ -224,7 +244,7 @@ export function smartAggregateVitalData(dataPoints: VitalDataPoint[]): Aggregati
     return {
       aggregatedPoints: [],
       period: null,
-      totalRawPoints: dataPoints.length
+      totalRawPoints: dataPoints.length,
     };
   }
 
@@ -233,7 +253,7 @@ export function smartAggregateVitalData(dataPoints: VitalDataPoint[]): Aggregati
   return {
     aggregatedPoints,
     period,
-    totalRawPoints: dataPoints.length
+    totalRawPoints: dataPoints.length,
   };
 }
 
@@ -263,7 +283,7 @@ export function convertToChartData(aggregatedPoints: AggregatedDataPoint[]): {
     secondaryMin: point.secondaryMin,
     secondaryMax: point.secondaryMax,
     count: point.count,
-    periodLabel: point.periodLabel
+    periodLabel: point.periodLabel,
   }));
 }
 
@@ -283,7 +303,7 @@ export function getAggregationDescription(
     daily: 'daily',
     weekly: 'weekly',
     biweekly: 'bi-weekly',
-    monthly: 'monthly'
+    monthly: 'monthly',
   };
 
   return `${rawCount} data points (${aggregatedCount} ${periodLabels[period]} averages displayed)`;

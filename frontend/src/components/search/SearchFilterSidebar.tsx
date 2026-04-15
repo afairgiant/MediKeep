@@ -47,15 +47,60 @@ import { ClickableTagBadge } from '../common/ClickableTagBadge';
 // ---------------------------------------------------------------------------
 
 export const RECORD_TYPES = [
-  { value: 'medications', labelKey: 'shared:categories.medications', icon: IconPill, color: 'green' },
-  { value: 'conditions', labelKey: 'shared:categories.conditions', icon: IconStethoscope, color: 'blue' },
-  { value: 'lab_results', labelKey: 'shared:categories.lab_results', icon: IconFlask, color: 'indigo' },
-  { value: 'procedures', labelKey: 'shared:categories.procedures', icon: IconMedicalCross, color: 'violet' },
-  { value: 'immunizations', labelKey: 'shared:categories.immunizations', icon: IconVaccine, color: 'orange' },
-  { value: 'treatments', labelKey: 'shared:categories.treatments', icon: IconHeartbeat, color: 'pink' },
-  { value: 'encounters', labelKey: 'search.types.encounters', icon: IconCalendarEvent, color: 'teal' },
-  { value: 'allergies', labelKey: 'shared:categories.allergies', icon: IconAlertTriangle, color: 'red' },
-  { value: 'vitals', labelKey: 'shared:categories.vitals', icon: IconHeartbeat, color: 'cyan' },
+  {
+    value: 'medications',
+    labelKey: 'shared:categories.medications',
+    icon: IconPill,
+    color: 'green',
+  },
+  {
+    value: 'conditions',
+    labelKey: 'shared:categories.conditions',
+    icon: IconStethoscope,
+    color: 'blue',
+  },
+  {
+    value: 'lab_results',
+    labelKey: 'shared:categories.lab_results',
+    icon: IconFlask,
+    color: 'indigo',
+  },
+  {
+    value: 'procedures',
+    labelKey: 'shared:categories.procedures',
+    icon: IconMedicalCross,
+    color: 'violet',
+  },
+  {
+    value: 'immunizations',
+    labelKey: 'shared:categories.immunizations',
+    icon: IconVaccine,
+    color: 'orange',
+  },
+  {
+    value: 'treatments',
+    labelKey: 'shared:categories.treatments',
+    icon: IconHeartbeat,
+    color: 'pink',
+  },
+  {
+    value: 'encounters',
+    labelKey: 'search.types.encounters',
+    icon: IconCalendarEvent,
+    color: 'teal',
+  },
+  {
+    value: 'allergies',
+    labelKey: 'shared:categories.allergies',
+    icon: IconAlertTriangle,
+    color: 'red',
+  },
+  {
+    value: 'vitals',
+    labelKey: 'shared:categories.vitals',
+    icon: IconHeartbeat,
+    color: 'cyan',
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -134,7 +179,10 @@ export function SearchFilterSidebar({
   onDateRangeChange,
 }: SearchFilterSidebarProps) {
   const { t } = useTranslation(['common', 'shared']);
-  const [collapsed, setCollapsed] = usePersistedToggle('search_sidebar_collapsed', false);
+  const [collapsed, setCollapsed] = usePersistedToggle(
+    'search_sidebar_collapsed',
+    false
+  );
 
   const activeFilterCount =
     selectedTypes.length +
@@ -168,7 +216,9 @@ export function SearchFilterSidebar({
   );
 
   const isPresetActive = useCallback(
-    (preset: 'last7' | 'last30' | 'last6m' | 'lastYear' | 'allTime'): boolean => {
+    (
+      preset: 'last7' | 'last30' | 'last6m' | 'lastYear' | 'allTime'
+    ): boolean => {
       if (preset === 'allTime') {
         return dateRange[0] === null && dateRange[1] === null;
       }
@@ -190,7 +240,8 @@ export function SearchFilterSidebar({
         return false;
       }
 
-      const normalizeToDate = (d: Date): string => d.toISOString().split('T')[0];
+      const normalizeToDate = (d: Date): string =>
+        d.toISOString().split('T')[0];
 
       return (
         normalizeToDate(dateRange[0]) === normalizeToDate(presetRange[0]) &&
@@ -201,7 +252,9 @@ export function SearchFilterSidebar({
   );
 
   const sortOptions = [
-    ...(query ? [{ value: 'relevance', label: t('search.sortRelevance') }] : []),
+    ...(query
+      ? [{ value: 'relevance', label: t('search.sortRelevance') }]
+      : []),
     { value: 'date_desc', label: t('search.sortDateNewest') },
     { value: 'date_asc', label: t('search.sortDateOldest') },
     { value: 'title', label: t('search.sortTitle') },
@@ -223,11 +276,7 @@ export function SearchFilterSidebar({
           gap: 8,
         }}
       >
-        <Tooltip
-          label={t('search.expandFilters')}
-          position="right"
-          withArrow
-        >
+        <Tooltip label={t('search.expandFilters')} position="right" withArrow>
           <ActionIcon
             variant="subtle"
             onClick={() => setCollapsed(false)}
@@ -243,17 +292,15 @@ export function SearchFilterSidebar({
             size="xs"
             circle
             color="blue"
-            aria-label={t('search.activeFilterCount', { count: activeFilterCount })}
+            aria-label={t('search.activeFilterCount', {
+              count: activeFilterCount,
+            })}
           >
             {activeFilterCount}
           </Badge>
         )}
 
-        <Tooltip
-          label={t('search.expandFilters')}
-          position="right"
-          withArrow
-        >
+        <Tooltip label={t('search.expandFilters')} position="right" withArrow>
           <ActionIcon
             variant="subtle"
             size="xs"
@@ -299,7 +346,7 @@ export function SearchFilterSidebar({
         <Text size="sm" fw={500} c="dimmed">
           {t('search.recordTypes')}
         </Text>
-        {RECORD_TYPES.map((recordType) => {
+        {RECORD_TYPES.map(recordType => {
           const IconComponent = recordType.icon;
           return (
             <Checkbox
@@ -328,7 +375,7 @@ export function SearchFilterSidebar({
         </Text>
         <Select
           value={sortBy}
-          onChange={(val) => {
+          onChange={val => {
             if (val) onSortChange(val);
           }}
           data={sortOptions}
@@ -349,7 +396,7 @@ export function SearchFilterSidebar({
         </Group>
 
         <MultiSelect
-          data={popularTags.map((pt) => ({
+          data={popularTags.map(pt => ({
             value: pt.tag,
             label: `${pt.tag} (${pt.usage_count})`,
           }))}
@@ -380,7 +427,7 @@ export function SearchFilterSidebar({
 
         {isLoadingTags && (
           <Stack gap={4}>
-            {[1, 2, 3].map((n) => (
+            {[1, 2, 3].map(n => (
               <Skeleton key={n} height={20} radius="md" />
             ))}
           </Stack>

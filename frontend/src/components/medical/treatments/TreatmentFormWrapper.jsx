@@ -33,7 +33,10 @@ import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import {
+  parseDateInput,
+  formatDateInputChange,
+} from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
@@ -74,18 +77,25 @@ const TreatmentFormWrapper = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Track relationship counts for badge display (edit mode)
-  const [relationshipCounts, setRelationshipCounts] = useState({ medications: 0, encounters: 0, labResults: 0, equipment: 0 });
+  const [relationshipCounts, setRelationshipCounts] = useState({
+    medications: 0,
+    encounters: 0,
+    labResults: 0,
+    equipment: 0,
+  });
 
   // Track pending relationships for creation mode
-  const [pendingRelationships, setPendingRelationships] = useState(EMPTY_PENDING_RELATIONSHIPS);
+  const [pendingRelationships, setPendingRelationships] = useState(
+    EMPTY_PENDING_RELATIONSHIPS
+  );
 
-  const handleDocumentManagerRef = (methods) => {
+  const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {
       onDocumentManagerRef(methods);
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in treatments ${editingTreatment ? 'edit' : 'create'}`,
       treatmentId: editingTreatment?.id,
@@ -98,7 +108,11 @@ const TreatmentFormWrapper = ({
     }
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('treatments_upload_completed', {
       message: 'File upload completed in treatments form',
       treatmentId: editingTreatment?.id,
@@ -114,9 +128,7 @@ const TreatmentFormWrapper = ({
   };
 
   // Form handlers
-  const {
-    handleTextInputChange,
-  } = useFormHandlers(onInputChange);
+  const { handleTextInputChange } = useFormHandlers(onInputChange);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -126,7 +138,12 @@ const TreatmentFormWrapper = ({
     }
     if (!isOpen) {
       setIsSubmitting(false);
-      setRelationshipCounts({ medications: 0, encounters: 0, labResults: 0, equipment: 0 });
+      setRelationshipCounts({
+        medications: 0,
+        encounters: 0,
+        labResults: 0,
+        equipment: 0,
+      });
       setPendingRelationships(EMPTY_PENDING_RELATIONSHIPS);
     }
   }, [isOpen]);
@@ -139,7 +156,7 @@ const TreatmentFormWrapper = ({
     (pendingRelationships.equipment?.length || 0);
 
   // Handle form submission with pending relationships
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -155,7 +172,7 @@ const TreatmentFormWrapper = ({
         const promises = [];
         let failedCount = 0;
 
-        const trackFailure = (label) => (err) => {
+        const trackFailure = label => err => {
           failedCount++;
           logger.error(`Failed to link ${label}`, { error: err.message });
         };
@@ -165,18 +182,24 @@ const TreatmentFormWrapper = ({
         for (const med of meds) {
           const medData = typeof med === 'object' ? med : { id: med };
           promises.push(
-            apiService.linkTreatmentMedication(treatmentId, {
-              medication_id: parseInt(medData.id),
-              specific_dosage: medData.specific_dosage || null,
-              specific_frequency: medData.specific_frequency || null,
-              specific_duration: medData.specific_duration || null,
-              timing_instructions: medData.timing_instructions || null,
-              relevance_note: medData.relevance_note || null,
-              specific_prescriber_id: medData.specific_prescriber_id ? parseInt(medData.specific_prescriber_id) : null,
-              specific_pharmacy_id: medData.specific_pharmacy_id ? parseInt(medData.specific_pharmacy_id) : null,
-              specific_start_date: medData.specific_start_date || null,
-              specific_end_date: medData.specific_end_date || null,
-            }).catch(trackFailure('medication'))
+            apiService
+              .linkTreatmentMedication(treatmentId, {
+                medication_id: parseInt(medData.id),
+                specific_dosage: medData.specific_dosage || null,
+                specific_frequency: medData.specific_frequency || null,
+                specific_duration: medData.specific_duration || null,
+                timing_instructions: medData.timing_instructions || null,
+                relevance_note: medData.relevance_note || null,
+                specific_prescriber_id: medData.specific_prescriber_id
+                  ? parseInt(medData.specific_prescriber_id)
+                  : null,
+                specific_pharmacy_id: medData.specific_pharmacy_id
+                  ? parseInt(medData.specific_pharmacy_id)
+                  : null,
+                specific_start_date: medData.specific_start_date || null,
+                specific_end_date: medData.specific_end_date || null,
+              })
+              .catch(trackFailure('medication'))
           );
         }
 
@@ -185,12 +208,16 @@ const TreatmentFormWrapper = ({
         for (const enc of encs) {
           const encData = typeof enc === 'object' ? enc : { id: enc };
           promises.push(
-            apiService.linkTreatmentEncounter(treatmentId, {
-              encounter_id: parseInt(encData.id),
-              visit_label: encData.visit_label || null,
-              visit_sequence: encData.visit_sequence ? parseInt(encData.visit_sequence) : null,
-              relevance_note: encData.relevance_note || null,
-            }).catch(trackFailure('encounter'))
+            apiService
+              .linkTreatmentEncounter(treatmentId, {
+                encounter_id: parseInt(encData.id),
+                visit_label: encData.visit_label || null,
+                visit_sequence: encData.visit_sequence
+                  ? parseInt(encData.visit_sequence)
+                  : null,
+                relevance_note: encData.relevance_note || null,
+              })
+              .catch(trackFailure('encounter'))
           );
         }
 
@@ -199,12 +226,14 @@ const TreatmentFormWrapper = ({
         for (const lab of labs) {
           const labData = typeof lab === 'object' ? lab : { id: lab };
           promises.push(
-            apiService.linkTreatmentLabResult(treatmentId, {
-              lab_result_id: parseInt(labData.id),
-              purpose: labData.purpose || null,
-              expected_frequency: labData.expected_frequency || null,
-              relevance_note: labData.relevance_note || null,
-            }).catch(trackFailure('lab result'))
+            apiService
+              .linkTreatmentLabResult(treatmentId, {
+                lab_result_id: parseInt(labData.id),
+                purpose: labData.purpose || null,
+                expected_frequency: labData.expected_frequency || null,
+                relevance_note: labData.relevance_note || null,
+              })
+              .catch(trackFailure('lab result'))
           );
         }
 
@@ -213,12 +242,14 @@ const TreatmentFormWrapper = ({
         for (const equip of equips) {
           const equipData = typeof equip === 'object' ? equip : { id: equip };
           promises.push(
-            apiService.linkTreatmentEquipment(treatmentId, {
-              equipment_id: parseInt(equipData.id),
-              usage_frequency: equipData.usage_frequency || null,
-              specific_settings: equipData.specific_settings || null,
-              relevance_note: equipData.relevance_note || null,
-            }).catch(trackFailure('equipment'))
+            apiService
+              .linkTreatmentEquipment(treatmentId, {
+                equipment_id: parseInt(equipData.id),
+                usage_frequency: equipData.usage_frequency || null,
+                specific_settings: equipData.specific_settings || null,
+                relevance_note: equipData.relevance_note || null,
+              })
+              .catch(trackFailure('equipment'))
           );
         }
 
@@ -227,10 +258,13 @@ const TreatmentFormWrapper = ({
 
         if (failedCount > 0) {
           notifications.show({
-            title: t('treatments.form.linkingPartialFailure', 'Some items could not be linked'),
+            title: t(
+              'treatments.form.linkingPartialFailure',
+              'Some items could not be linked'
+            ),
             message: t(
               'treatments.form.linkingPartialFailureMessage',
-              `Treatment was created, but ${failedCount} item${failedCount !== 1 ? 's' : ''} failed to link. You can add them from the edit form.`,
+              `Treatment was created, but ${failedCount} item${failedCount !== 1 ? 's' : ''} failed to link. You can add them from the edit form.`
             ),
             color: 'yellow',
             autoClose: 8000,
@@ -254,11 +288,21 @@ const TreatmentFormWrapper = ({
 
   // Relationship tab values and their corresponding child activeSection values
   const RELATIONSHIP_TABS = ['medications', 'visits', 'labs', 'equipment'];
-  const TAB_TO_SECTION = { medications: 'medications', visits: 'encounters', labs: 'labs', equipment: 'equipment' };
-  const TAB_TO_COUNT_KEY = { medications: 'medications', visits: 'encounters', labs: 'labResults', equipment: 'equipment' };
+  const TAB_TO_SECTION = {
+    medications: 'medications',
+    visits: 'encounters',
+    labs: 'labs',
+    equipment: 'equipment',
+  };
+  const TAB_TO_COUNT_KEY = {
+    medications: 'medications',
+    visits: 'encounters',
+    labs: 'labResults',
+    equipment: 'equipment',
+  };
 
   // Get badge count for a specific relationship tab
-  const getTabBadgeCount = (tabValue) => {
+  const getTabBadgeCount = tabValue => {
     const countKey = TAB_TO_COUNT_KEY[tabValue];
     if (editingTreatment) {
       return relationshipCounts[countKey] || 0;
@@ -268,7 +312,10 @@ const TreatmentFormWrapper = ({
 
   // Total badge count for Basic Info alert
   const totalBadgeCount = editingTreatment
-    ? (relationshipCounts.medications + relationshipCounts.encounters + relationshipCounts.labResults + relationshipCounts.equipment)
+    ? relationshipCounts.medications +
+      relationshipCounts.encounters +
+      relationshipCounts.labResults +
+      relationshipCounts.equipment
     : pendingCount;
 
   return (
@@ -287,7 +334,10 @@ const TreatmentFormWrapper = ({
         message={
           statusMessage?.title ||
           (isSubmitting && pendingCount > 0 && !editingTreatment
-            ? t('treatments.form.creatingWithLinks', 'Creating treatment and linking items...')
+            ? t(
+                'treatments.form.creatingWithLinks',
+                'Creating treatment and linking items...'
+              )
             : t('treatments.form.savingTreatment', 'Saving treatment...'))
         }
         submessage={statusMessage?.message}
@@ -298,12 +348,21 @@ const TreatmentFormWrapper = ({
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="basic"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('shared:tabs.basicInfo', 'Basic Info')}
               </Tabs.Tab>
               {formData.mode !== 'advanced' && (
-                <Tabs.Tab value="schedule" leftSection={<IconCalendar size={16} />}>
-                  {t('treatments.form.tabs.scheduleDosage', 'Schedule & Dosage')}
+                <Tabs.Tab
+                  value="schedule"
+                  leftSection={<IconCalendar size={16} />}
+                >
+                  {t(
+                    'treatments.form.tabs.scheduleDosage',
+                    'Schedule & Dosage'
+                  )}
                 </Tabs.Tab>
               )}
               {formData.mode === 'advanced' && (
@@ -311,50 +370,61 @@ const TreatmentFormWrapper = ({
                   <Tabs.Tab
                     value="medications"
                     leftSection={<IconPill size={16} />}
-                    rightSection={getTabBadgeCount('medications') > 0 ? (
-                      <Badge size="sm" variant="filled" color="teal" circle>
-                        {getTabBadgeCount('medications')}
-                      </Badge>
-                    ) : null}
+                    rightSection={
+                      getTabBadgeCount('medications') > 0 ? (
+                        <Badge size="sm" variant="filled" color="teal" circle>
+                          {getTabBadgeCount('medications')}
+                        </Badge>
+                      ) : null
+                    }
                   >
                     {t('shared:categories.medications')}
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="visits"
                     leftSection={<IconStethoscope size={16} />}
-                    rightSection={getTabBadgeCount('visits') > 0 ? (
-                      <Badge size="sm" variant="filled" color="blue" circle>
-                        {getTabBadgeCount('visits')}
-                      </Badge>
-                    ) : null}
+                    rightSection={
+                      getTabBadgeCount('visits') > 0 ? (
+                        <Badge size="sm" variant="filled" color="blue" circle>
+                          {getTabBadgeCount('visits')}
+                        </Badge>
+                      ) : null
+                    }
                   >
                     {t('shared:tabs.visits')}
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="labs"
                     leftSection={<IconTestPipe size={16} />}
-                    rightSection={getTabBadgeCount('labs') > 0 ? (
-                      <Badge size="sm" variant="filled" color="violet" circle>
-                        {getTabBadgeCount('labs')}
-                      </Badge>
-                    ) : null}
+                    rightSection={
+                      getTabBadgeCount('labs') > 0 ? (
+                        <Badge size="sm" variant="filled" color="violet" circle>
+                          {getTabBadgeCount('labs')}
+                        </Badge>
+                      ) : null
+                    }
                   >
                     {t('shared:categories.lab_results')}
                   </Tabs.Tab>
                   <Tabs.Tab
                     value="equipment"
                     leftSection={<IconDeviceDesktop size={16} />}
-                    rightSection={getTabBadgeCount('equipment') > 0 ? (
-                      <Badge size="sm" variant="filled" color="orange" circle>
-                        {getTabBadgeCount('equipment')}
-                      </Badge>
-                    ) : null}
+                    rightSection={
+                      getTabBadgeCount('equipment') > 0 ? (
+                        <Badge size="sm" variant="filled" color="orange" circle>
+                          {getTabBadgeCount('equipment')}
+                        </Badge>
+                      ) : null
+                    }
                   >
                     {t('shared:categories.medical_equipment')}
                   </Tabs.Tab>
                 </>
               )}
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {editingTreatment
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
@@ -375,13 +445,19 @@ const TreatmentFormWrapper = ({
                       </Text>
                       <SegmentedControl
                         value={formData.mode || 'simple'}
-                        onChange={(value) => {
+                        onChange={value => {
                           onInputChange({ target: { name: 'mode', value } });
                           // Reset to basic tab when hiding current tab
-                          if (value === 'simple' && RELATIONSHIP_TABS.includes(activeTab)) {
+                          if (
+                            value === 'simple' &&
+                            RELATIONSHIP_TABS.includes(activeTab)
+                          ) {
                             setActiveTab('basic');
                           }
-                          if (value === 'advanced' && activeTab === 'schedule') {
+                          if (
+                            value === 'advanced' &&
+                            activeTab === 'schedule'
+                          ) {
                             setActiveTab('basic');
                           }
                         }}
@@ -392,15 +468,24 @@ const TreatmentFormWrapper = ({
                           },
                           {
                             value: 'advanced',
-                            label: t('shared:labels.treatmentPlan', 'Treatment Plan'),
+                            label: t(
+                              'shared:labels.treatmentPlan',
+                              'Treatment Plan'
+                            ),
                           },
                         ]}
                         size="sm"
                       />
                       <Text size="xs" c="dimmed">
                         {formData.mode === 'advanced'
-                          ? t('treatments.mode.advancedDescription', 'Medication-centric plan with per-medication overrides')
-                          : t('treatments.mode.simpleDescription', 'Basic tracking with schedule and dosage')}
+                          ? t(
+                              'treatments.mode.advancedDescription',
+                              'Medication-centric plan with per-medication overrides'
+                            )
+                          : t(
+                              'treatments.mode.simpleDescription',
+                              'Basic tracking with schedule and dosage'
+                            )}
                       </Text>
                     </Stack>
                   </Grid.Col>
@@ -409,46 +494,98 @@ const TreatmentFormWrapper = ({
                       label={t('shared:fields.treatmentName', 'Treatment Name')}
                       value={formData.treatment_name || ''}
                       onChange={handleTextInputChange('treatment_name')}
-                      placeholder={t('treatments.form.enterTreatmentName', 'Enter treatment name')}
+                      placeholder={t(
+                        'treatments.form.enterTreatmentName',
+                        'Enter treatment name'
+                      )}
                       required
-                      description={t('treatments.form.treatmentNameDesc', 'Name of the treatment')}
+                      description={t(
+                        'treatments.form.treatmentNameDesc',
+                        'Name of the treatment'
+                      )}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('shared:fields.treatmentType', 'Treatment Category')}
+                      label={t(
+                        'shared:fields.treatmentType',
+                        'Treatment Category'
+                      )}
                       value={formData.treatment_type || null}
                       data={(() => {
                         const predefinedOptions = [
-                          { value: 'medication_therapy', label: 'Medication Therapy' },
-                          { value: 'physical_therapy', label: 'Physical Therapy' },
-                          { value: 'surgery_procedure', label: 'Surgery / Procedure' },
-                          { value: 'lifestyle_dietary', label: 'Lifestyle / Dietary' },
-                          { value: 'monitoring', label: 'Monitoring / Observation' },
-                          { value: 'mental_health', label: 'Mental Health / Counseling' },
+                          {
+                            value: 'medication_therapy',
+                            label: 'Medication Therapy',
+                          },
+                          {
+                            value: 'physical_therapy',
+                            label: 'Physical Therapy',
+                          },
+                          {
+                            value: 'surgery_procedure',
+                            label: 'Surgery / Procedure',
+                          },
+                          {
+                            value: 'lifestyle_dietary',
+                            label: 'Lifestyle / Dietary',
+                          },
+                          {
+                            value: 'monitoring',
+                            label: 'Monitoring / Observation',
+                          },
+                          {
+                            value: 'mental_health',
+                            label: 'Mental Health / Counseling',
+                          },
                           { value: 'rehabilitation', label: 'Rehabilitation' },
-                          { value: 'alternative', label: 'Alternative / Complementary' },
-                          { value: 'combination', label: 'Combination Therapy' },
+                          {
+                            value: 'alternative',
+                            label: 'Alternative / Complementary',
+                          },
+                          {
+                            value: 'combination',
+                            label: 'Combination Therapy',
+                          },
                           { value: 'other', label: 'Other' },
                         ];
                         // If current value is custom (not in predefined list), add it
                         const currentValue = formData.treatment_type;
-                        if (currentValue && !predefinedOptions.find(o => o.value === currentValue)) {
-                          return [{ value: currentValue, label: currentValue }, ...predefinedOptions];
+                        if (
+                          currentValue &&
+                          !predefinedOptions.find(o => o.value === currentValue)
+                        ) {
+                          return [
+                            { value: currentValue, label: currentValue },
+                            ...predefinedOptions,
+                          ];
                         }
                         return predefinedOptions;
                       })()}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'treatment_type', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: {
+                            name: 'treatment_type',
+                            value: value || '',
+                          },
+                        });
                       }}
-                      placeholder={t('treatments.form.treatmentTypePlaceholder', 'Select or type category')}
-                      description={t('treatments.form.treatmentTypeDesc', 'Select a category or type your own')}
+                      placeholder={t(
+                        'treatments.form.treatmentTypePlaceholder',
+                        'Select or type category'
+                      )}
+                      description={t(
+                        'treatments.form.treatmentTypeDesc',
+                        'Select a category or type your own'
+                      )}
                       clearable
                       searchable
                       creatable
-                      getCreateLabel={(query) => `+ Use "${query}"`}
-                      onCreate={(query) => {
-                        onInputChange({ target: { name: 'treatment_type', value: query } });
+                      getCreateLabel={query => `+ Use "${query}"`}
+                      onCreate={query => {
+                        onInputChange({
+                          target: { name: 'treatment_type', value: query },
+                        });
                         return { value: query, label: query };
                       }}
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -459,34 +596,68 @@ const TreatmentFormWrapper = ({
                       label={t('shared:fields.status', 'Status')}
                       value={formData.status || null}
                       data={[
-                        { value: 'planned', label: t('treatments.form.statusPlanned', 'Planned') },
-                        { value: 'active', label: t('shared:labels.active', 'Active') },
-                        { value: 'on-hold', label: t('treatments.form.statusOnHold', 'On Hold') },
-                        { value: 'completed', label: t('shared:fields.completed', 'Completed') },
-                        { value: 'cancelled', label: t('shared:fields.cancelled', 'Cancelled') },
+                        {
+                          value: 'planned',
+                          label: t('treatments.form.statusPlanned', 'Planned'),
+                        },
+                        {
+                          value: 'active',
+                          label: t('shared:labels.active', 'Active'),
+                        },
+                        {
+                          value: 'on-hold',
+                          label: t('treatments.form.statusOnHold', 'On Hold'),
+                        },
+                        {
+                          value: 'completed',
+                          label: t('shared:fields.completed', 'Completed'),
+                        },
+                        {
+                          value: 'cancelled',
+                          label: t('shared:fields.cancelled', 'Cancelled'),
+                        },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'status', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'status', value: value || '' },
+                        });
                       }}
-                      placeholder={t('shared:fields.selectStatus', 'Select status')}
-                      description={t('treatments.form.statusDesc', 'Current treatment status')}
+                      placeholder={t(
+                        'shared:fields.selectStatus',
+                        'Select status'
+                      )}
+                      description={t(
+                        'treatments.form.statusDesc',
+                        'Current treatment status'
+                      )}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
-                      label={t('shared:labels.relatedCondition', 'Related Condition')}
+                      label={t(
+                        'shared:labels.relatedCondition',
+                        'Related Condition'
+                      )}
                       value={formData.condition_id || null}
                       data={conditionsOptions.map(condition => ({
                         value: condition.id.toString(),
                         label: `${condition.diagnosis}${condition.severity ? ` (${condition.severity})` : ''}`,
                       }))}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'condition_id', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'condition_id', value: value || '' },
+                        });
                       }}
-                      placeholder={t('treatments.form.selectCondition', 'Select condition')}
-                      description={t('treatments.form.relatedConditionDesc', 'Link this treatment to a condition')}
+                      placeholder={t(
+                        'treatments.form.selectCondition',
+                        'Select condition'
+                      )}
+                      description={t(
+                        'treatments.form.relatedConditionDesc',
+                        'Link this treatment to a condition'
+                      )}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -501,11 +672,22 @@ const TreatmentFormWrapper = ({
                         value: prac.id.toString(),
                         label: `${prac.name}${prac.specialty ? ` - ${prac.specialty}` : ''}`,
                       }))}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'practitioner_id', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: {
+                            name: 'practitioner_id',
+                            value: value || '',
+                          },
+                        });
                       }}
-                      placeholder={t('shared:fields.selectPractitioner', 'Select practitioner')}
-                      description={t('treatments.form.practitionerDesc', 'Healthcare provider administering treatment')}
+                      placeholder={t(
+                        'shared:fields.selectPractitioner',
+                        'Select practitioner'
+                      )}
+                      description={t(
+                        'treatments.form.practitionerDesc',
+                        'Healthcare provider administering treatment'
+                      )}
                       searchable
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
@@ -516,13 +698,18 @@ const TreatmentFormWrapper = ({
                     <DateInput
                       label={t('shared:labels.startDate', 'Start Date')}
                       value={parseDateInput(formData.start_date)}
-                      onChange={(date) => {
+                      onChange={date => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'start_date', value: formattedDate } });
+                        onInputChange({
+                          target: { name: 'start_date', value: formattedDate },
+                        });
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
-                      description={t('treatments.form.startDateDesc', 'When treatment is planned to begin or began')}
+                      description={t(
+                        'treatments.form.startDateDesc',
+                        'When treatment is planned to begin or began'
+                      )}
                       clearable
                       firstDayOfWeek={0}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
@@ -532,13 +719,18 @@ const TreatmentFormWrapper = ({
                     <DateInput
                       label={t('shared:labels.endDate', 'End Date')}
                       value={parseDateInput(formData.end_date)}
-                      onChange={(date) => {
+                      onChange={date => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'end_date', value: formattedDate } });
+                        onInputChange({
+                          target: { name: 'end_date', value: formattedDate },
+                        });
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
-                      description={t('treatments.form.endDateDesc', 'When treatment ends (if applicable)')}
+                      description={t(
+                        'treatments.form.endDateDesc',
+                        'When treatment ends (if applicable)'
+                      )}
                       clearable
                       firstDayOfWeek={0}
                       minDate={parseDateInput(formData.start_date) || undefined}
@@ -550,8 +742,14 @@ const TreatmentFormWrapper = ({
                       label={t('shared:labels.description', 'Description')}
                       value={formData.description || ''}
                       onChange={handleTextInputChange('description')}
-                      placeholder={t('treatments.form.descriptionPlaceholder', 'Describe the treatment')}
-                      description={t('treatments.form.descriptionDesc', 'Brief description of the treatment')}
+                      placeholder={t(
+                        'treatments.form.descriptionPlaceholder',
+                        'Describe the treatment'
+                      )}
+                      description={t(
+                        'treatments.form.descriptionDesc',
+                        'Brief description of the treatment'
+                      )}
                       rows={3}
                       minRows={2}
                       autosize
@@ -563,12 +761,17 @@ const TreatmentFormWrapper = ({
                         {t('shared:labels.tags', 'Tags')}
                       </Text>
                       <Text size="xs" c="dimmed" mb="xs">
-                        {t('treatments.form.tagsDesc', 'Add tags to categorize and organize treatments')}
+                        {t(
+                          'treatments.form.tagsDesc',
+                          'Add tags to categorize and organize treatments'
+                        )}
                       </Text>
                       <TagInput
                         value={formData.tags || []}
-                        onChange={(tags) => {
-                          onInputChange({ target: { name: 'tags', value: tags } });
+                        onChange={tags => {
+                          onInputChange({
+                            target: { name: 'tags', value: tags },
+                          });
                         }}
                         placeholder={t('shared:fields.addTags', 'Add tags...')}
                       />
@@ -588,8 +791,7 @@ const TreatmentFormWrapper = ({
                       <Text size="sm">
                         {editingTreatment
                           ? `This treatment has ${totalBadgeCount} linked item${totalBadgeCount !== 1 ? 's' : ''} in the Treatment Plan`
-                          : `${totalBadgeCount} item${totalBadgeCount !== 1 ? 's' : ''} selected to link when treatment is created`
-                        }
+                          : `${totalBadgeCount} item${totalBadgeCount !== 1 ? 's' : ''} selected to link when treatment is created`}
                       </Text>
                       <Button
                         variant="subtle"
@@ -611,11 +813,20 @@ const TreatmentFormWrapper = ({
                   <Grid>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <TextInput
-                        label={t('treatments.form.dosageAmount', 'Dosage/Amount')}
+                        label={t(
+                          'treatments.form.dosageAmount',
+                          'Dosage/Amount'
+                        )}
                         value={formData.dosage || ''}
                         onChange={handleTextInputChange('dosage')}
-                        placeholder={t('treatments.form.dosagePlaceholder', 'e.g., 10mg, 1 session')}
-                        description={t('treatments.form.dosageDesc', 'Amount or dosage per treatment')}
+                        placeholder={t(
+                          'treatments.form.dosagePlaceholder',
+                          'e.g., 10mg, 1 session'
+                        )}
+                        description={t(
+                          'treatments.form.dosageDesc',
+                          'Amount or dosage per treatment'
+                        )}
                       />
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -623,8 +834,14 @@ const TreatmentFormWrapper = ({
                         label={t('shared:fields.frequency', 'Frequency')}
                         value={formData.frequency || ''}
                         onChange={handleTextInputChange('frequency')}
-                        placeholder={t('treatments.form.frequencyPlaceholder', 'e.g., Daily, Twice weekly')}
-                        description={t('treatments.form.frequencyDesc', 'How often treatment is administered')}
+                        placeholder={t(
+                          'treatments.form.frequencyPlaceholder',
+                          'e.g., Daily, Twice weekly'
+                        )}
+                        description={t(
+                          'treatments.form.frequencyDesc',
+                          'How often treatment is administered'
+                        )}
                       />
                     </Grid.Col>
                   </Grid>
@@ -654,8 +871,14 @@ const TreatmentFormWrapper = ({
                   label={t('treatments.form.treatmentNotes', 'Treatment Notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
-                  placeholder={t('treatments.form.notesPlaceholder', 'Enter treatment notes, observations, or additional details')}
-                  description={t('treatments.form.notesDesc', 'Additional information about this treatment')}
+                  placeholder={t(
+                    'treatments.form.notesPlaceholder',
+                    'Enter treatment notes, observations, or additional details'
+                  )}
+                  description={t(
+                    'treatments.form.notesDesc',
+                    'Additional information about this treatment'
+                  )}
                   rows={5}
                   minRows={3}
                   autosize
@@ -666,9 +889,14 @@ const TreatmentFormWrapper = ({
 
           {/* Relationship content - rendered outside Tabs to preserve state across tab switches */}
           {formData.mode === 'advanced' && (
-            <Box mt="md" style={{
-              display: RELATIONSHIP_TABS.includes(activeTab) ? 'block' : 'none'
-            }}>
+            <Box
+              mt="md"
+              style={{
+                display: RELATIONSHIP_TABS.includes(activeTab)
+                  ? 'block'
+                  : 'none',
+              }}
+            >
               {editingTreatment ? (
                 <TreatmentRelationshipsManager
                   activeSection={TAB_TO_SECTION[activeTab] || 'medications'}
@@ -689,7 +917,11 @@ const TreatmentFormWrapper = ({
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
+            <Button
+              variant="default"
+              onClick={onClose}
+              disabled={isLoading || isSubmitting}
+            >
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <SubmitButton
@@ -699,9 +931,11 @@ const TreatmentFormWrapper = ({
               {editingTreatment
                 ? t('treatments.form.updateTreatment', 'Update Treatment')
                 : pendingCount > 0
-                  ? t('treatments.form.createWithLinks', `Create Treatment & Link ${pendingCount} Item${pendingCount !== 1 ? 's' : ''}`)
-                  : t('treatments.form.createTreatment', 'Create Treatment')
-              }
+                  ? t(
+                      'treatments.form.createWithLinks',
+                      `Create Treatment & Link ${pendingCount} Item${pendingCount !== 1 ? 's' : ''}`
+                    )
+                  : t('treatments.form.createTreatment', 'Create Treatment')}
             </SubmitButton>
           </Group>
         </Stack>

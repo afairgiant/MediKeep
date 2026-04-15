@@ -4,7 +4,10 @@
  */
 
 import sanitizeHtml from 'sanitize-html';
-import { LabTestComponentCreate, QualitativeValue } from '../services/api/labTestComponentApi';
+import {
+  LabTestComponentCreate,
+  QualitativeValue,
+} from '../services/api/labTestComponentApi';
 import { ComponentCategory, ComponentStatus } from '../constants/labCategories';
 
 let nextRowId = 1;
@@ -123,7 +126,7 @@ function sanitizeInput(input: string | undefined): string | null {
   if (!input) return null;
   const sanitized = sanitizeHtml(input, {
     allowedTags: [],
-    allowedAttributes: {}
+    allowedAttributes: {},
   }).trim();
   return sanitized || null;
 }
@@ -139,16 +142,27 @@ export function sanitizeComponentForApi(
     test_name: sanitizeInput(component.test_name) || '',
     abbreviation: sanitizeInput(component.abbreviation),
     test_code: sanitizeInput(component.test_code),
-    value: isQualitative ? null : (isValidNumber(component.value) ? component.value : null),
-    unit: isQualitative ? null : (sanitizeInput(component.unit) || ''),
-    ref_range_min: component.ref_range_min === '' ? null : (component.ref_range_min as number),
-    ref_range_max: component.ref_range_max === '' ? null : (component.ref_range_max as number),
+    value: isQualitative
+      ? null
+      : isValidNumber(component.value)
+        ? component.value
+        : null,
+    unit: isQualitative ? null : sanitizeInput(component.unit) || '',
+    ref_range_min:
+      component.ref_range_min === ''
+        ? null
+        : (component.ref_range_min as number),
+    ref_range_max:
+      component.ref_range_max === ''
+        ? null
+        : (component.ref_range_max as number),
     ref_range_text: sanitizeInput(component.ref_range_text),
     status: (component.status as ComponentStatus | null) || null,
     category: (component.category as ComponentCategory | null) || null,
     display_order: component.display_order ?? null,
     notes: sanitizeInput(component.notes),
     result_type: component.result_type || 'quantitative',
-    qualitative_value: (component.qualitative_value as QualitativeValue) || null
+    qualitative_value:
+      (component.qualitative_value as QualitativeValue) || null,
   };
 }

@@ -31,7 +31,7 @@ export const ALLOWED_PHOTO_TYPES: readonly string[] = [
   'image/gif',
   'image/bmp',
   'image/heic',
-  'image/heif'
+  'image/heif',
 ] as const;
 
 export const PHOTO_MAX_SIZE: number = 15 * 1024 * 1024; // 15MB in bytes
@@ -43,11 +43,12 @@ export const PHOTO_TYPE_DISPLAY_NAMES: Record<string, string> = {
   'image/gif': 'GIF',
   'image/bmp': 'BMP',
   'image/heic': 'HEIC',
-  'image/heif': 'HEIF'
+  'image/heif': 'HEIF',
 };
 
 // Human-readable list for error messages
-export const ALLOWED_PHOTO_TYPES_DISPLAY: string = 'JPEG, PNG, GIF, BMP, HEIC, or HEIF';
+export const ALLOWED_PHOTO_TYPES_DISPLAY: string =
+  'JPEG, PNG, GIF, BMP, HEIC, or HEIF';
 
 // ========================================
 // MEDICAL RECORD DOCUMENT UPLOADS (All Medical Entities)
@@ -59,32 +60,50 @@ export const ALLOWED_PHOTO_TYPES_DISPLAY: string = 'JPEG, PNG, GIF, BMP, HEIC, o
  */
 export const MEDICAL_DOCUMENT_EXTENSIONS: readonly string[] = [
   // Documents
-  '.pdf', '.txt', '.csv', '.xml', '.json',
-  '.doc', '.docx', '.xls', '.xlsx',
+  '.pdf',
+  '.txt',
+  '.csv',
+  '.xml',
+  '.json',
+  '.doc',
+  '.docx',
+  '.xls',
+  '.xlsx',
 
   // Images
-  '.jpg', '.jpeg', '.png', '.tiff', '.bmp', '.gif',
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.tiff',
+  '.bmp',
+  '.gif',
 
   // Medical Imaging
-  '.dcm',  // DICOM medical imaging
+  '.dcm', // DICOM medical imaging
 
   // Archives (Medical imaging CDs/DVDs often come in these formats)
-  '.zip',  // ZIP archives for medical imaging packages
-  '.iso',  // CD/DVD image format
-  '.7z', '.rar',  // Additional archive formats
+  '.zip', // ZIP archives for medical imaging packages
+  '.iso', // CD/DVD image format
+  '.7z',
+  '.rar', // Additional archive formats
 
   // Video (Ultrasound, procedures, surgical recordings)
-  '.avi', '.mp4', '.mov', '.webm',
+  '.avi',
+  '.mp4',
+  '.mov',
+  '.webm',
 
   // 3D Models (Surgical planning, prosthetics)
   '.stl',
 
   // Research Imaging Formats
-  '.nii',   // NIfTI - Neuroimaging format
-  '.nrrd',  // Nearly Raw Raster Data
+  '.nii', // NIfTI - Neuroimaging format
+  '.nrrd', // Nearly Raw Raster Data
 
   // Audio (Respiratory sounds, cardiac auscultation)
-  '.mp3', '.wav', '.m4a'
+  '.mp3',
+  '.wav',
+  '.m4a',
 ] as const;
 
 /**
@@ -99,7 +118,8 @@ export const MEDICAL_DOCUMENT_MIME_TYPES: MimeTypeMapping = {
   '.xml': 'application/xml',
   '.json': 'application/json',
   '.doc': 'application/msword',
-  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.docx':
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   '.xls': 'application/vnd.ms-excel',
   '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 
@@ -136,7 +156,7 @@ export const MEDICAL_DOCUMENT_MIME_TYPES: MimeTypeMapping = {
   // Audio
   '.mp3': 'audio/mpeg',
   '.wav': 'audio/wav',
-  '.m4a': 'audio/mp4'
+  '.m4a': 'audio/mp4',
 };
 
 /**
@@ -146,7 +166,7 @@ export const MEDICAL_DOCUMENT_MIME_TYPES: MimeTypeMapping = {
 export const MEDICAL_DOCUMENT_CONFIG: FileUploadConfig = {
   acceptedTypes: MEDICAL_DOCUMENT_EXTENSIONS,
   maxSize: 1024 * 1024 * 1024, // 1GB (increased for archive support)
-  maxFiles: 10
+  maxFiles: 10,
 };
 
 /**

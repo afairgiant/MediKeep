@@ -7,7 +7,11 @@ import frontendLogger from '../../services/frontendLogger';
 import { Button, Checkbox, Select } from '../ui';
 import styles from './UserRegistrationForm.module.css';
 
-const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) => {
+const UserRegistrationForm = ({
+  onSuccess,
+  onCancel,
+  isAdminContext = false,
+}) => {
   const { t } = useTranslation(['admin', 'common', 'shared']);
   const [formData, setFormData] = useState({
     username: '',
@@ -56,7 +60,9 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
     };
 
     loadPatients();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [linkExistingPatient, isAdminContext]);
 
   // Build dropdown options from patient data
@@ -91,7 +97,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
     });
   };
 
-  const handleLinkToggle = (checked) => {
+  const handleLinkToggle = checked => {
     setLinkExistingPatient(checked);
     if (!checked) {
       setSelectedPatientId(null);
@@ -99,34 +105,59 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
     setError('');
   };
 
-  const handlePatientSelect = (value) => {
+  const handlePatientSelect = value => {
     setSelectedPatientId(value);
     setError('');
   };
 
   const validateForm = () => {
     if (!formData.firstName.trim()) {
-      setError(t('createUser.validation.firstNameRequired', 'Please enter the first name'));
+      setError(
+        t(
+          'createUser.validation.firstNameRequired',
+          'Please enter the first name'
+        )
+      );
       return false;
     }
 
     if (!formData.lastName.trim()) {
-      setError(t('createUser.validation.lastNameRequired', 'Please enter the last name'));
+      setError(
+        t(
+          'createUser.validation.lastNameRequired',
+          'Please enter the last name'
+        )
+      );
       return false;
     }
 
     if (formData.username.length < 3) {
-      setError(t('createUser.validation.usernameMinLength', 'Username must be at least 3 characters long'));
+      setError(
+        t(
+          'createUser.validation.usernameMinLength',
+          'Username must be at least 3 characters long'
+        )
+      );
       return false;
     }
 
     if (formData.password.length < 6) {
-      setError(t('createUser.validation.passwordMinLength', 'Password must be at least 6 characters long'));
+      setError(
+        t(
+          'createUser.validation.passwordMinLength',
+          'Password must be at least 6 characters long'
+        )
+      );
       return false;
     }
 
     if (!/[a-zA-Z]/.test(formData.password) || !/\d/.test(formData.password)) {
-      setError(t('createUser.validation.passwordRequirements', 'Password must contain at least one letter and one number'));
+      setError(
+        t(
+          'createUser.validation.passwordRequirements',
+          'Password must contain at least one letter and one number'
+        )
+      );
       return false;
     }
 
@@ -139,7 +170,11 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
 
     if (err?.detail && Array.isArray(err.detail)) {
       return err.detail
-        .map(e => (typeof e === 'object' && e.msg) ? `${e.loc?.join('.')} - ${e.msg}` : String(e))
+        .map(e =>
+          typeof e === 'object' && e.msg
+            ? `${e.loc?.join('.')} - ${e.msg}`
+            : String(e)
+        )
         .join('; ');
     }
 
@@ -185,7 +220,10 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
 
         const result = await adminApiService.createUserWithPatientLink(payload);
 
-        if (result.status === 'success' || result.status === 'partial_success') {
+        if (
+          result.status === 'success' ||
+          result.status === 'partial_success'
+        ) {
           const successKey = result.data?.linked_patient_id
             ? 'notifications:toasts.auth.userCreatedWithLinkSuccess'
             : 'notifications:toasts.auth.userCreatedSuccess';
@@ -193,10 +231,13 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           notifySuccess(successKey);
 
           if (result.status === 'partial_success') {
-            frontendLogger.logError('Partial success creating user with patient link', {
-              message: result.message,
-              component: 'UserRegistrationForm',
-            });
+            frontendLogger.logError(
+              'Partial success creating user with patient link',
+              {
+                message: result.message,
+                component: 'UserRegistrationForm',
+              }
+            );
           }
 
           onSuccess?.({
@@ -206,7 +247,10 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             linkedPatientId: result.data?.linked_patient_id,
           });
         } else {
-          setError(result.message || t('createUser.errors.createFailed', 'Failed to create user'));
+          setError(
+            result.message ||
+              t('createUser.errors.createFailed', 'Failed to create user')
+          );
         }
       } else {
         const registerResult = await authService.register(buildPayload());
@@ -220,10 +264,15 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
             isAdminContext: false,
           });
         } else {
-          setError(parseErrorMessage(
-            registerResult.error,
-            t('createUser.errors.accountCreateFailed', 'Failed to create account')
-          ));
+          setError(
+            parseErrorMessage(
+              registerResult.error,
+              t(
+                'createUser.errors.accountCreateFailed',
+                'Failed to create account'
+              )
+            )
+          );
         }
       }
     } catch (err) {
@@ -233,10 +282,15 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
         isAdminContext,
       });
 
-      setError(parseErrorMessage(
-        err,
-        t('createUser.errors.createRetry', 'Failed to create user. Please try again.')
-      ));
+      setError(
+        parseErrorMessage(
+          err,
+          t(
+            'createUser.errors.createRetry',
+            'Failed to create user. Please try again.'
+          )
+        )
+      );
     } finally {
       setIsCreating(false);
     }
@@ -247,7 +301,9 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       <div className={styles.formGroup}>
-        <label htmlFor="username">{t('shared:labels.username', 'Username')} *</label>
+        <label htmlFor="username">
+          {t('shared:labels.username', 'Username')} *
+        </label>
         <input
           type="text"
           id="username"
@@ -261,7 +317,9 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="password">{t('shared:labels.password', 'Password')} *</label>
+        <label htmlFor="password">
+          {t('shared:labels.password', 'Password')} *
+        </label>
         <input
           type="password"
           id="password"
@@ -270,18 +328,36 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           onChange={handleChange}
           required
           disabled={isCreating}
-          placeholder={t('createUser.passwordPlaceholder', 'Enter password (min 6 chars, include letter & number)')}
+          placeholder={t(
+            'createUser.passwordPlaceholder',
+            'Enter password (min 6 chars, include letter & number)'
+          )}
           minLength={6}
         />
         <div className={styles.passwordRequirements}>
-          <div className={`${styles.requirement} ${formData.password.length >= 6 ? styles.valid : ''}`}>
-            {t('admin.createUser.passwordReqs.minLength', 'At least 6 characters')}
+          <div
+            className={`${styles.requirement} ${formData.password.length >= 6 ? styles.valid : ''}`}
+          >
+            {t(
+              'admin.createUser.passwordReqs.minLength',
+              'At least 6 characters'
+            )}
           </div>
-          <div className={`${styles.requirement} ${/[a-zA-Z]/.test(formData.password) ? styles.valid : ''}`}>
-            {t('admin.createUser.passwordReqs.hasLetter', 'Contains at least one letter')}
+          <div
+            className={`${styles.requirement} ${/[a-zA-Z]/.test(formData.password) ? styles.valid : ''}`}
+          >
+            {t(
+              'admin.createUser.passwordReqs.hasLetter',
+              'Contains at least one letter'
+            )}
           </div>
-          <div className={`${styles.requirement} ${/[0-9]/.test(formData.password) ? styles.valid : ''}`}>
-            {t('admin.createUser.passwordReqs.hasNumber', 'Contains at least one number')}
+          <div
+            className={`${styles.requirement} ${/[0-9]/.test(formData.password) ? styles.valid : ''}`}
+          >
+            {t(
+              'admin.createUser.passwordReqs.hasNumber',
+              'Contains at least one number'
+            )}
           </div>
         </div>
       </div>
@@ -318,7 +394,9 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       )}
 
       <div className={styles.formGroup}>
-        <label htmlFor="firstName">{t('shared:labels.firstName', 'First Name')} *</label>
+        <label htmlFor="firstName">
+          {t('shared:labels.firstName', 'First Name')} *
+        </label>
         <input
           type="text"
           id="firstName"
@@ -332,7 +410,9 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="lastName">{t('shared:labels.lastName', 'Last Name')} *</label>
+        <label htmlFor="lastName">
+          {t('shared:labels.lastName', 'Last Name')} *
+        </label>
         <input
           type="text"
           id="lastName"
@@ -350,12 +430,18 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
           <Checkbox
             checked={linkExistingPatient}
             onChange={handleLinkToggle}
-            label={t('createUser.linkPatient.checkbox', 'Link to existing patient record')}
+            label={t(
+              'createUser.linkPatient.checkbox',
+              'Link to existing patient record'
+            )}
             disabled={isCreating}
             id="linkExistingPatient"
           />
           <p className={styles.fieldHint}>
-            {t('admin.createUser.linkPatient.hint', 'Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).')}
+            {t(
+              'admin.createUser.linkPatient.hint',
+              'Instead of creating a new patient record, link the new user to an existing patient (e.g., a child who now needs their own login).'
+            )}
           </p>
 
           {linkExistingPatient && (
@@ -367,7 +453,10 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
                 placeholder={
                   isLoadingPatients
                     ? t('createUser.linkPatient.loading', 'Loading patients...')
-                    : t('createUser.linkPatient.selectPlaceholder', 'Select a patient...')
+                    : t(
+                        'createUser.linkPatient.selectPlaceholder',
+                        'Select a patient...'
+                      )
                 }
                 disabled={isCreating || isLoadingPatients}
                 searchable
@@ -378,25 +467,45 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
                 <div className={styles.selectedPatientCard}>
                   <div className={styles.selectedPatientInfo}>
                     <p>
-                      <strong>{selectedPatient.first_name} {selectedPatient.last_name}</strong>
+                      <strong>
+                        {selectedPatient.first_name} {selectedPatient.last_name}
+                      </strong>
                       {selectedPatient.is_self_record && (
                         <span className={styles.selfRecordBadge}>
-                          {t('admin.createUser.linkPatient.selfRecordBadge', 'Self-Record')}
+                          {t(
+                            'admin.createUser.linkPatient.selfRecordBadge',
+                            'Self-Record'
+                          )}
                         </span>
                       )}
                     </p>
-                    <p>{t('createUser.linkPatient.patientId', 'ID')}: {selectedPatient.id}</p>
+                    <p>
+                      {t('createUser.linkPatient.patientId', 'ID')}:{' '}
+                      {selectedPatient.id}
+                    </p>
                     {selectedPatient.birth_date && (
-                      <p>{t('createUser.linkPatient.dob', 'DOB')}: {selectedPatient.birth_date}</p>
+                      <p>
+                        {t('createUser.linkPatient.dob', 'DOB')}:{' '}
+                        {selectedPatient.birth_date}
+                      </p>
                     )}
                     {selectedPatient.owner_full_name && (
-                      <p>{t('createUser.linkPatient.currentOwner', 'Current Owner')}: {selectedPatient.owner_full_name}</p>
+                      <p>
+                        {t(
+                          'createUser.linkPatient.currentOwner',
+                          'Current Owner'
+                        )}
+                        : {selectedPatient.owner_full_name}
+                      </p>
                     )}
                   </div>
                   {selectedPatient.is_self_record && (
                     <div className={styles.selfRecordWarning}>
                       <strong>{t('shared:labels.note', 'Note:')}</strong>{' '}
-                      {t('admin.createUser.linkPatient.selfRecordWarning', 'This is the current owner\'s self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient.')}
+                      {t(
+                        'admin.createUser.linkPatient.selfRecordWarning',
+                        "This is the current owner's self-record. A new self-record will be created for the original owner with their demographics copied over. The original owner will receive edit access to this patient."
+                      )}
                     </div>
                   )}
                 </div>
@@ -408,11 +517,7 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
 
       <div className={styles.formActions}>
         {onCancel && (
-          <Button
-            variant="secondary"
-            onClick={onCancel}
-            disabled={isCreating}
-          >
+          <Button variant="secondary" onClick={onCancel} disabled={isCreating}>
             {t('shared:fields.cancel', 'Cancel')}
           </Button>
         )}
@@ -429,7 +534,11 @@ const UserRegistrationForm = ({ onSuccess, onCancel, isAdminContext = false }) =
       {!isAdminContext && (
         <div className={styles.createUserInfo}>
           <p>
-            <strong>{t('shared:labels.note', 'Note:')}</strong> {t('createUser.noteText', 'A patient record will be automatically created for this user with default role "user".')}
+            <strong>{t('shared:labels.note', 'Note:')}</strong>{' '}
+            {t(
+              'createUser.noteText',
+              'A patient record will be automatically created for this user with default role "user".'
+            )}
           </p>
         </div>
       )}

@@ -57,7 +57,11 @@
 }
 
 .controls-left .add-button {
-  background: linear-gradient(135deg, var(--color-success, #1a7a30) 0%, #20c997 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #1a7a30) 0%,
+    #20c997 100%
+  );
   color: white;
   border: none;
   padding: 12px 24px;
@@ -407,9 +411,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Design */
-

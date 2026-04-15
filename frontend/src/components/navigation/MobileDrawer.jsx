@@ -1,13 +1,22 @@
 /**
  * MobileDrawer - Full-screen drawer navigation for mobile (sm and xs breakpoints)
  * Full-screen overlay with hamburger menu trigger
- * 
+ *
  * Following PR #3: Navigation & Layout System specifications
  */
 
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Drawer, Stack, Group, Text, Divider, UnstyledButton, ScrollArea, Button } from '@mantine/core';
+import {
+  Drawer,
+  Stack,
+  Group,
+  Text,
+  Divider,
+  UnstyledButton,
+  ScrollArea,
+  Button,
+} from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
@@ -24,14 +33,14 @@ const MobileDrawer = ({
   menuItems = [],
   userInfo,
   onLogout,
-  className = ''
+  className = '',
 }) => {
   const { t } = useTranslation(['navigation', 'shared']);
   const responsive = useResponsive();
 
   // Handle escape key to close drawer
   useEffect(() => {
-    const handleEscapeKey = (event) => {
+    const handleEscapeKey = event => {
       if (event.key === 'Escape' && isOpen && onClose) {
         onClose();
       }
@@ -48,11 +57,11 @@ const MobileDrawer = ({
 
   // Create responsive Mantine components
   const ResponsiveStack = ResponsiveComponentFactory.createMantine(Stack, {
-    spacing: { xs: 'sm', sm: 'md' }
+    spacing: { xs: 'sm', sm: 'md' },
   });
 
   const ResponsiveText = ResponsiveComponentFactory.createMantine(Text, {
-    size: { xs: 'md', sm: 'lg' }
+    size: { xs: 'md', sm: 'lg' },
   });
 
   // Check if current path matches menu item
@@ -64,7 +73,7 @@ const MobileDrawer = ({
   };
 
   // Handle link click with navigation callback
-  const handleLinkClickInternal = (path) => {
+  const handleLinkClickInternal = path => {
     if (onLinkClick) {
       onLinkClick(path);
     }
@@ -73,8 +82,8 @@ const MobileDrawer = ({
   return (
     <>
       {/* Toggle Button - Fixed positioned */}
-      <NavigationToggle 
-        isOpen={isOpen} 
+      <NavigationToggle
+        isOpen={isOpen}
         onToggle={onToggle}
         className="mobile-navigation-toggle"
         style={{
@@ -83,7 +92,7 @@ const MobileDrawer = ({
           left: '16px',
           zIndex: 1002,
           backgroundColor: 'var(--color-bg-primary)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
         }}
         size="lg"
         variant="filled"
@@ -100,14 +109,14 @@ const MobileDrawer = ({
         styles={{
           content: {
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
           },
           body: {
             padding: responsive.breakpoint === 'xs' ? '16px' : '24px',
             height: '100%',
             display: 'flex',
-            flexDirection: 'column'
-          }
+            flexDirection: 'column',
+          },
         }}
         transitionProps={{ duration: 300 }}
       >
@@ -121,24 +130,24 @@ const MobileDrawer = ({
                   {t('shared:labels.admin')}
                 </ResponsiveText>
               </Group>
-              
+
               <Divider />
 
               {/* Navigation Menu */}
               <ResponsiveStack spacing="xl">
                 {menuItems.map((section, sectionIndex) => (
                   <ResponsiveStack key={sectionIndex} spacing="md">
-                    <ResponsiveText 
-                      size="sm" 
-                      fw={600} 
-                      c="dimmed" 
-                      tt="uppercase" 
+                    <ResponsiveText
+                      size="sm"
+                      fw={600}
+                      c="dimmed"
+                      tt="uppercase"
                       ta="center"
                       px="xs"
                     >
                       {section.section}
                     </ResponsiveText>
-                    
+
                     <ResponsiveStack spacing="sm">
                       {section.items.map((item, itemIndex) => (
                         <UnstyledButton
@@ -155,7 +164,10 @@ const MobileDrawer = ({
                             justifyContent: 'center',
                             flexDirection: 'column',
                             gap: '8px',
-                            padding: responsive.breakpoint === 'xs' ? '16px 12px' : '20px 16px',
+                            padding:
+                              responsive.breakpoint === 'xs'
+                                ? '16px 12px'
+                                : '20px 16px',
                             borderRadius: '8px',
                             color: isActivePath(item.path, item.exact)
                               ? 'var(--mantine-color-blue-light-color)'
@@ -167,19 +179,29 @@ const MobileDrawer = ({
                               ? '2px solid var(--mantine-color-blue-3)'
                               : '2px solid transparent',
                             '&:hover': {
-                              backgroundColor: isActivePath(item.path, item.exact)
+                              backgroundColor: isActivePath(
+                                item.path,
+                                item.exact
+                              )
                                 ? 'var(--mantine-color-blue-1)'
-                                : 'var(--mantine-color-gray-1)'
+                                : 'var(--mantine-color-gray-1)',
                             },
                             transition: 'all 0.2s ease',
-                            minHeight: '64px'
+                            minHeight: '64px',
                           }}
                         >
-                          <span style={{ fontSize: responsive.breakpoint === 'xs' ? '24px' : '28px' }}>
+                          <span
+                            style={{
+                              fontSize:
+                                responsive.breakpoint === 'xs'
+                                  ? '24px'
+                                  : '28px',
+                            }}
+                          >
                             {item.icon}
                           </span>
-                          <ResponsiveText 
-                            size={responsive.breakpoint === 'xs' ? 'sm' : 'md'} 
+                          <ResponsiveText
+                            size={responsive.breakpoint === 'xs' ? 'sm' : 'md'}
                             fw={500}
                             ta="center"
                           >
@@ -197,7 +219,7 @@ const MobileDrawer = ({
           {/* Footer Section */}
           <ResponsiveStack spacing="md" mt="md">
             <Divider />
-            
+
             {/* User Info */}
             {userInfo && (
               <Group justify="center" align="center">

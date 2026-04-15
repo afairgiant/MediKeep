@@ -212,7 +212,14 @@ export const useFiltering = (data = [], config = {}) => {
         case 'year':
           // Filter by current calendar year (Jan 1 - Dec 31)
           const currentYearStart = new Date(now.getFullYear(), 0, 1);
-          const currentYearEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+          const currentYearEnd = new Date(
+            now.getFullYear(),
+            11,
+            31,
+            23,
+            59,
+            59
+          );
           return itemDate >= currentYearStart && itemDate <= currentYearEnd;
         case 'past_year':
           // Filter by past 12 months from today
@@ -225,7 +232,14 @@ export const useFiltering = (data = [], config = {}) => {
         case 'last_year':
           // Filter by previous calendar year (e.g., 2025 if now is 2026)
           const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
-          const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+          const lastYearEnd = new Date(
+            now.getFullYear() - 1,
+            11,
+            31,
+            23,
+            59,
+            59
+          );
           return itemDate >= lastYearStart && itemDate <= lastYearEnd;
 
         case 'past_month':
@@ -299,10 +313,13 @@ export const useFiltering = (data = [], config = {}) => {
       // Search filter
       if (filters.search && filters.search.trim()) {
         const searchTerm = filters.search.toLowerCase();
-        
+
         // Check if there's a custom search function
         if (config.customSearchFunction) {
-          const matchesCustomSearch = config.customSearchFunction(item, searchTerm);
+          const matchesCustomSearch = config.customSearchFunction(
+            item,
+            searchTerm
+          );
           if (!matchesCustomSearch) return false;
         } else {
           // Default field-based search
@@ -310,12 +327,15 @@ export const useFiltering = (data = [], config = {}) => {
             const value = getNestedValue(item, field);
             return value?.toString()?.toLowerCase()?.includes(searchTerm);
           });
-          
+
           // Check tags if the field search doesn't match
-          const matchesTags = item.tags && Array.isArray(item.tags) 
-            ? item.tags.some(tag => tag?.toString()?.toLowerCase()?.includes(searchTerm))
-            : false;
-          
+          const matchesTags =
+            item.tags && Array.isArray(item.tags)
+              ? item.tags.some(tag =>
+                  tag?.toString()?.toLowerCase()?.includes(searchTerm)
+                )
+              : false;
+
           const matchesSearch = matchesSearchFields || matchesTags;
           if (!matchesSearch) return false;
         }
@@ -355,7 +375,8 @@ export const useFiltering = (data = [], config = {}) => {
 
       // Medication type filter
       if (filters.medicationType !== 'all' && config.medicationTypeField) {
-        if (item[config.medicationTypeField] !== filters.medicationType) return false;
+        if (item[config.medicationTypeField] !== filters.medicationType)
+          return false;
       }
 
       // Date range filter

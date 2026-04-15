@@ -48,16 +48,31 @@ const Treatments = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('treatments');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Get practitioners data
-  const { practitioners: practitionersObject } =
-    usePatientWithStaticData();
+  const { practitioners: practitionersObject } = usePatientWithStaticData();
 
   const practitioners = practitionersObject?.practitioners || [];
 
   // Get standardized formatters for treatments
-  const treatmentFormatters = getEntityFormatters('treatments', practitioners, navigate, null, formatDate);
+  const treatmentFormatters = getEntityFormatters(
+    'treatments',
+    practitioners,
+    navigate,
+    null,
+    formatDate
+  );
 
   // Modern data management with useMedicalData
   const {
@@ -76,7 +91,8 @@ const Treatments = () => {
     entityName: 'treatment',
     apiMethodsConfig: {
       getAll: signal => apiService.getTreatments(signal),
-      getByPatient: (patientId, signal) => apiService.getPatientTreatments(patientId, signal),
+      getByPatient: (patientId, signal) =>
+        apiService.getPatientTreatments(patientId, signal),
       create: (data, signal) => apiService.createTreatment(data, signal),
       update: (id, data, signal) =>
         apiService.updateTreatment(id, data, signal),
@@ -107,7 +123,8 @@ const Treatments = () => {
   const dataManagement = useDataManagement(treatments, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('treatment', treatments);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('treatment', treatments);
 
   // View modal navigation with URL deep linking
   const {
@@ -182,7 +199,7 @@ const Treatments = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('treatments_form_error', {
         message: 'Form submission error in treatments',
         error,
@@ -228,8 +245,12 @@ const Treatments = () => {
       frequency: treatment.frequency || '',
       mode: treatment.mode || 'simple',
       notes: treatment.notes || '',
-      condition_id: treatment.condition_id ? String(treatment.condition_id) : '',
-      practitioner_id: treatment.practitioner_id ? String(treatment.practitioner_id) : '',
+      condition_id: treatment.condition_id
+        ? String(treatment.condition_id)
+        : '',
+      practitioner_id: treatment.practitioner_id
+        ? String(treatment.practitioner_id)
+        : '',
       tags: treatment.tags || [],
     });
     setShowModal(true);
@@ -364,21 +385,15 @@ const Treatments = () => {
   };
 
   const getPractitionerInfo = practitionerId => {
-    if (
-      !practitionerId ||
-      !practitioners ||
-      practitioners.length === 0
-    ) {
+    if (!practitionerId || !practitioners || practitioners.length === 0) {
       return null;
     }
-    const practitioner = practitioners.find(
-      p => p.id === practitionerId
-    );
+    const practitioner = practitioners.find(p => p.id === practitionerId);
     return practitioner;
   };
 
   // Generic handler factory for navigating to entity pages with view modal
-  const createEntityClickHandler = (path) => (entityId) => {
+  const createEntityClickHandler = path => entityId => {
     if (entityId) {
       navigate(`${path}?view=${entityId}`);
     }
@@ -394,14 +409,21 @@ const Treatments = () => {
   const filteredTreatments = dataManagement.data;
   const paginatedTreatments = paginateData(filteredTreatments);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredTreatments.length); }, [filteredTreatments.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredTreatments.length);
+  }, [filteredTreatments.length, clampPage]);
 
   if (loading) {
     return (
       <MedicalPageLoading
         message={t('treatments.loadingTreatments', 'Loading treatments...')}
-        hint={t('shared:labels.ifThisTakesTooLongPleaseRefreshThePage', 'If this takes too long, please refresh the page')}
+        hint={t(
+          'shared:labels.ifThisTakesTooLongPleaseRefreshThePage',
+          'If this takes too long, please refresh the page'
+        )}
       />
     );
   }
@@ -409,7 +431,10 @@ const Treatments = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('shared:categories.treatments', 'Treatments')} icon="🩹" />
+        <PageHeader
+          title={t('shared:categories.treatments', 'Treatments')}
+          icon="🩹"
+        />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts
@@ -421,7 +446,10 @@ const Treatments = () => {
             <Alert
               variant="light"
               color="orange"
-              title={t('treatments.conditionsLoadingError', 'Conditions Loading Error')}
+              title={t(
+                'treatments.conditionsLoadingError',
+                'Conditions Loading Error'
+              )}
             >
               {conditionsError}
             </Alert>
@@ -449,11 +477,20 @@ const Treatments = () => {
               emoji="🩹"
               title={t('treatments.noTreatmentsFound', 'No Treatments Found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('treatments.startAdding', 'Start by adding your first treatment.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'treatments.startAdding',
+                'Start by adding your first treatment.'
+              )}
               actionButton={
                 <Button variant="filled" onClick={handleAddTreatment}>
-                  {t('treatments.addFirstTreatment', 'Add Your First Treatment')}
+                  {t(
+                    'treatments.addFirstTreatment',
+                    'Add Your First Treatment'
+                  )}
                 </Button>
               }
             />
@@ -461,7 +498,7 @@ const Treatments = () => {
             <AnimatedCardGrid
               items={paginatedTreatments}
               columns={{ base: 12, sm: 6, lg: 4 }}
-              renderCard={(treatment) => (
+              renderCard={treatment => (
                 <TreatmentCard
                   treatment={treatment}
                   conditions={conditions}
@@ -474,7 +511,7 @@ const Treatments = () => {
                   fileCountLoading={fileCountsLoading[treatment.id] || false}
                   disableActions={isViewOnly}
                   disableActionsTooltip={viewOnlyTooltip}
-                  onError={(error) => {
+                  onError={error => {
                     logger.error('TreatmentCard error', {
                       treatmentId: treatment.id,
                       error: error.message,
@@ -487,69 +524,127 @@ const Treatments = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
-              persistKey="treatments"
-              data={paginatedTreatments}
-              pagination={false}
-              disableEdit={isViewOnly}
-              disableDelete={isViewOnly}
-              disableActionsTooltip={viewOnlyTooltip}
-              columns={[
-                  { header: 'Treatment', accessor: 'treatment_name', priority: 'high', width: 200 },
-                  { header: 'Type', accessor: 'treatment_type', priority: 'medium', width: 120 },
-                  { header: 'Practitioner', accessor: 'practitioner', priority: 'low', width: 150 },
-                  { header: 'Related Condition', accessor: 'condition', priority: 'low', width: 150 },
-                  { header: 'Start Date', accessor: 'start_date', priority: 'high', width: 120 },
-                  { header: 'End Date', accessor: 'end_date', priority: 'medium', width: 120 },
-                  { header: 'Status', accessor: 'status', priority: 'high', width: 120 },
-                  { header: 'Dosage', accessor: 'dosage', priority: 'low', width: 150 },
-                  { header: 'Frequency', accessor: 'frequency', priority: 'low', width: 150 },
-                  { header: 'Notes', accessor: 'notes', priority: 'low', width: 200 }
+                persistKey="treatments"
+                data={paginatedTreatments}
+                pagination={false}
+                disableEdit={isViewOnly}
+                disableDelete={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
+                columns={[
+                  {
+                    header: 'Treatment',
+                    accessor: 'treatment_name',
+                    priority: 'high',
+                    width: 200,
+                  },
+                  {
+                    header: 'Type',
+                    accessor: 'treatment_type',
+                    priority: 'medium',
+                    width: 120,
+                  },
+                  {
+                    header: 'Practitioner',
+                    accessor: 'practitioner',
+                    priority: 'low',
+                    width: 150,
+                  },
+                  {
+                    header: 'Related Condition',
+                    accessor: 'condition',
+                    priority: 'low',
+                    width: 150,
+                  },
+                  {
+                    header: 'Start Date',
+                    accessor: 'start_date',
+                    priority: 'high',
+                    width: 120,
+                  },
+                  {
+                    header: 'End Date',
+                    accessor: 'end_date',
+                    priority: 'medium',
+                    width: 120,
+                  },
+                  {
+                    header: 'Status',
+                    accessor: 'status',
+                    priority: 'high',
+                    width: 120,
+                  },
+                  {
+                    header: 'Dosage',
+                    accessor: 'dosage',
+                    priority: 'low',
+                    width: 150,
+                  },
+                  {
+                    header: 'Frequency',
+                    accessor: 'frequency',
+                    priority: 'low',
+                    width: 150,
+                  },
+                  {
+                    header: 'Notes',
+                    accessor: 'notes',
+                    priority: 'low',
+                    width: 200,
+                  },
                 ]}
-              patientData={currentPatient}
-              tableName="Treatments"
-              onView={handleViewTreatment}
-              onEdit={handleEditTreatment}
-              onDelete={handleDeleteTreatment}
-              formatters={{
-                treatment_name: treatmentFormatters.treatment_name,
-                treatment_type: treatmentFormatters.treatment_type,
-                practitioner: (value, row) => {
-                  if (row.practitioner_id) {
-                    const practitionerInfo = getPractitionerInfo(
-                      row.practitioner_id
-                    );
-                    return `Dr. ${
-                      row.practitioner?.name ||
-                      practitionerInfo?.name ||
-                      `#${row.practitioner_id}`
-                    }`;
-                  }
-                  return 'No practitioner';
-                },
-                condition: (value, row) => {
-                  if (row.condition_id) {
-                    return (
-                      row.condition?.diagnosis ||
-                      getConditionName(row.condition_id) ||
-                      `Condition #${row.condition_id}`
-                    );
-                  }
-                  return 'No condition linked';
-                },
-                start_date: treatmentFormatters.start_date,
-                end_date: treatmentFormatters.end_date,
-                status: treatmentFormatters.status,
-                dosage: treatmentFormatters.dosage,
-                frequency: treatmentFormatters.frequency,
-                notes: treatmentFormatters.notes,
-              }}
-              dataType="medical"
-              responsive={responsive}
-            />
-          </Paper>
+                patientData={currentPatient}
+                tableName="Treatments"
+                onView={handleViewTreatment}
+                onEdit={handleEditTreatment}
+                onDelete={handleDeleteTreatment}
+                formatters={{
+                  treatment_name: treatmentFormatters.treatment_name,
+                  treatment_type: treatmentFormatters.treatment_type,
+                  practitioner: (value, row) => {
+                    if (row.practitioner_id) {
+                      const practitionerInfo = getPractitionerInfo(
+                        row.practitioner_id
+                      );
+                      return `Dr. ${
+                        row.practitioner?.name ||
+                        practitionerInfo?.name ||
+                        `#${row.practitioner_id}`
+                      }`;
+                    }
+                    return 'No practitioner';
+                  },
+                  condition: (value, row) => {
+                    if (row.condition_id) {
+                      return (
+                        row.condition?.diagnosis ||
+                        getConditionName(row.condition_id) ||
+                        `Condition #${row.condition_id}`
+                      );
+                    }
+                    return 'No condition linked';
+                  },
+                  start_date: treatmentFormatters.start_date,
+                  end_date: treatmentFormatters.end_date,
+                  status: treatmentFormatters.status,
+                  dosage: treatmentFormatters.dosage,
+                  frequency: treatmentFormatters.frequency,
+                  notes: treatmentFormatters.notes,
+                }}
+                dataType="medical"
+                responsive={responsive}
+              />
+            </Paper>
           )}
           {filteredTreatments.length > 0 && (
-            <PaginationControls page={page} totalPages={totalPages(filteredTreatments.length)} pageSize={pageSize} totalRecords={filteredTreatments.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredTreatments.length)}
+              pageSize={pageSize}
+              totalRecords={filteredTreatments.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </Stack>
       </Container>
@@ -599,5 +694,5 @@ const Treatments = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Treatments, {
   injectResponsive: true,
-  displayName: 'ResponsiveTreatments'
+  displayName: 'ResponsiveTreatments',
 });

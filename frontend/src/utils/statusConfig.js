@@ -1,6 +1,6 @@
 /**
  * Unified Status Configuration
- * 
+ *
  * Standardized status values and labels for all medical entities.
  * This ensures consistency across the application and matches the backend enums.
  */
@@ -109,7 +109,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-green-3)',
     icon: '🟢',
   },
-  
+
   // Inactive/Stopped states - Gray
   inactive: {
     color: 'var(--mantine-color-gray-6)',
@@ -117,7 +117,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-gray-3)',
     icon: '⚫',
   },
-  
+
   // Completed/Resolved states - Blue
   completed: {
     color: 'var(--mantine-color-blue-8)',
@@ -131,7 +131,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-blue-3)',
     icon: '✅',
   },
-  
+
   // Cancelled states - Red
   cancelled: {
     color: 'var(--mantine-color-red-8)',
@@ -139,7 +139,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-red-3)',
     icon: '❌',
   },
-  
+
   // On Hold/Paused states - Orange
   on_hold: {
     color: 'var(--mantine-color-yellow-8)',
@@ -147,7 +147,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-yellow-3)',
     icon: '⏸️',
   },
-  
+
   // In Progress states - Blue
   in_progress: {
     color: 'var(--mantine-color-cyan-8)',
@@ -155,7 +155,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-cyan-3)',
     icon: '🔄',
   },
-  
+
   // Chronic states - Purple
   chronic: {
     color: 'var(--mantine-color-gray-7)',
@@ -163,7 +163,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-gray-4)',
     icon: '🔵',
   },
-  
+
   // Special condition states
   recurrence: {
     color: 'var(--mantine-color-red-8)',
@@ -177,7 +177,7 @@ export const STATUS_STYLES = {
     borderColor: 'var(--mantine-color-red-3)',
     icon: '⚠️',
   },
-  
+
   // Lab/Procedure specific
   ordered: {
     color: 'var(--mantine-color-gray-6)',
@@ -222,17 +222,17 @@ export const SEVERITY_STYLES = {
 };
 
 // Helper function to get status style
-export const getStatusStyle = (status) => {
+export const getStatusStyle = status => {
   return STATUS_STYLES[status] || STATUS_STYLES.inactive;
 };
 
 // Helper function to get severity style
-export const getSeverityStyle = (severity) => {
+export const getSeverityStyle = severity => {
   return SEVERITY_STYLES[severity] || SEVERITY_STYLES.mild;
 };
 
 // Helper function to format status display
-export const formatStatusDisplay = (status) => {
+export const formatStatusDisplay = status => {
   const style = getStatusStyle(status);
   return {
     text: status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' '),
@@ -242,7 +242,7 @@ export const formatStatusDisplay = (status) => {
 };
 
 // Helper function to format severity display
-export const formatSeverityDisplay = (severity) => {
+export const formatSeverityDisplay = severity => {
   const style = getSeverityStyle(severity);
   return {
     text: severity.charAt(0).toUpperCase() + severity.slice(1),

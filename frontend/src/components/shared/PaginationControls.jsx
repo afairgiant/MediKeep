@@ -26,11 +26,15 @@ const PaginationControls = ({
   return (
     <Group justify="space-between" align="center" mt="md">
       <Text size="sm" c="dimmed">
-        {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
-          start: startIndex + 1,
-          end: endIndex,
-          total: totalRecords,
-        })}
+        {t(
+          'pagination.showingRange',
+          'Showing {{start}} to {{end}} of {{total}} results',
+          {
+            start: startIndex + 1,
+            end: endIndex,
+            total: totalRecords,
+          }
+        )}
       </Text>
 
       <Pagination

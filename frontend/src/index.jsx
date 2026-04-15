@@ -10,9 +10,7 @@ import { isProduction } from './config/env';
 import './i18n';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <App />
-);
+root.render(<App />);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
@@ -26,9 +24,9 @@ if (isProduction()) {
       onSuccess: () => {
         logger.info('app_offline_ready', 'App ready for offline use', {
           component: 'index',
-          action: 'service_worker_success'
+          action: 'service_worker_success',
         });
-      }
+      },
     });
   });
 }

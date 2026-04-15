@@ -6,7 +6,11 @@
 }
 
 .immunization-header {
-  background: linear-gradient(135deg, var(--color-success, #1a7a30) 0%, #20c997 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #1a7a30) 0%,
+    #20c997 100%
+  );
   color: white;
   padding: 1.5rem 2rem;
   display: flex;
@@ -81,8 +85,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading p {
@@ -111,7 +119,11 @@
 }
 
 .add-button {
-  background: linear-gradient(135deg, var(--color-success, #1a7a30) 0%, #20c997 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #1a7a30) 0%,
+    #20c997 100%
+  );
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -290,7 +302,11 @@
 }
 
 .save-button {
-  background: linear-gradient(135deg, var(--color-success, #1a7a30) 0%, #20c997 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #1a7a30) 0%,
+    #20c997 100%
+  );
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -363,7 +379,11 @@
 }
 
 .dose-badge {
-  background: linear-gradient(135deg, var(--color-success, #1a7a30) 0%, #20c997 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #1a7a30) 0%,
+    #20c997 100%
+  );
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 15px;
@@ -445,4 +465,3 @@
 }
 
 /* Responsive Design */
-

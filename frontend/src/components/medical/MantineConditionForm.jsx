@@ -4,7 +4,10 @@ import { Divider, Stack, Title } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import MedicationRelationships from './MedicationRelationships';
 import { conditionFormFields } from '../../utils/medicalFormFields';
-import { CONDITION_STATUS_OPTIONS, SEVERITY_OPTIONS } from '../../utils/statusConfig';
+import {
+  CONDITION_STATUS_OPTIONS,
+  SEVERITY_OPTIONS,
+} from '../../utils/statusConfig';
 
 const MantineConditionForm = ({
   isOpen,
@@ -26,22 +29,26 @@ const MantineConditionForm = ({
   };
 
   // Custom content for medication relationships (only for editing)
-  const customContent = editingCondition && medications.length > 0 && fetchConditionMedications && navigate ? (
-    <>
-      <Divider />
-      <Stack gap="md">
-        <Title order={4}>{t('labels.linkedMedications')}</Title>
-        <MedicationRelationships 
-          conditionId={editingCondition.id}
-          conditionMedications={conditionMedications}
-          medications={medications}
-          fetchConditionMedications={fetchConditionMedications}
-          navigate={navigate}
-          isViewMode={false}
-        />
-      </Stack>
-    </>
-  ) : null;
+  const customContent =
+    editingCondition &&
+    medications.length > 0 &&
+    fetchConditionMedications &&
+    navigate ? (
+      <>
+        <Divider />
+        <Stack gap="md">
+          <Title order={4}>{t('labels.linkedMedications')}</Title>
+          <MedicationRelationships
+            conditionId={editingCondition.id}
+            conditionMedications={conditionMedications}
+            medications={medications}
+            fetchConditionMedications={fetchConditionMedications}
+            navigate={navigate}
+            isViewMode={false}
+          />
+        </Stack>
+      </>
+    ) : null;
 
   return (
     <BaseMedicalForm

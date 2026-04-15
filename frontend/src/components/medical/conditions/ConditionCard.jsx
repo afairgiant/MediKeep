@@ -16,12 +16,12 @@ const ConditionCard = ({
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('condition_card_error', {
       message: 'Error in ConditionCard',
       conditionId: condition?.id,
@@ -35,36 +35,68 @@ const ConditionCard = ({
   };
 
   // Helper function to get condition icon based on diagnosis
-  const getConditionIcon = (diagnosis) => {
+  const getConditionIcon = diagnosis => {
     const diagnosisLower = diagnosis.toLowerCase();
     if (diagnosisLower.includes('diabetes')) return '💉';
-    if (diagnosisLower.includes('hypertension') || diagnosisLower.includes('blood pressure')) return '❤️';
-    if (diagnosisLower.includes('asthma') || diagnosisLower.includes('respiratory')) return '🫁';
-    if (diagnosisLower.includes('arthritis') || diagnosisLower.includes('joint')) return '🦴';
-    if (diagnosisLower.includes('heart') || diagnosisLower.includes('cardiac')) return '❤️';
-    if (diagnosisLower.includes('cancer') || diagnosisLower.includes('tumor')) return '🎗️';
-    if (diagnosisLower.includes('migraine') || diagnosisLower.includes('headache')) return '🧠';
-    if (diagnosisLower.includes('allergy') || diagnosisLower.includes('allergic')) return '⚠️';
+    if (
+      diagnosisLower.includes('hypertension') ||
+      diagnosisLower.includes('blood pressure')
+    )
+      return '❤️';
+    if (
+      diagnosisLower.includes('asthma') ||
+      diagnosisLower.includes('respiratory')
+    )
+      return '🫁';
+    if (
+      diagnosisLower.includes('arthritis') ||
+      diagnosisLower.includes('joint')
+    )
+      return '🦴';
+    if (diagnosisLower.includes('heart') || diagnosisLower.includes('cardiac'))
+      return '❤️';
+    if (diagnosisLower.includes('cancer') || diagnosisLower.includes('tumor'))
+      return '🎗️';
+    if (
+      diagnosisLower.includes('migraine') ||
+      diagnosisLower.includes('headache')
+    )
+      return '🧠';
+    if (
+      diagnosisLower.includes('allergy') ||
+      diagnosisLower.includes('allergic')
+    )
+      return '⚠️';
     return '🏥'; // Default medical icon
   };
 
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     switch (severity) {
-      case 'critical': return 'red';
-      case 'severe': return 'orange';
-      case 'moderate': return 'yellow';
-      case 'mild': return 'blue';
-      default: return 'gray';
+      case 'critical':
+        return 'red';
+      case 'severe':
+        return 'orange';
+      case 'moderate':
+        return 'yellow';
+      case 'mild':
+        return 'blue';
+      default:
+        return 'gray';
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     switch (status) {
-      case 'active': return 'green';
-      case 'inactive': return 'gray';
-      case 'resolved': return 'blue';
-      case 'chronic': return 'orange';
-      default: return 'gray';
+      case 'active':
+        return 'green';
+      case 'inactive':
+        return 'gray';
+      case 'resolved':
+        return 'blue';
+      case 'chronic':
+        return 'orange';
+      default:
+        return 'gray';
     }
   };
 
@@ -79,11 +111,13 @@ const ConditionCard = ({
 
     let duration;
     if (diffDays < 30) {
-      const unit = diffDays === 1 ? t('common:time.day') : t('common:time.days');
+      const unit =
+        diffDays === 1 ? t('common:time.day') : t('common:time.days');
       duration = `${diffDays} ${unit}`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      const unit = months === 1 ? t('common:time.month') : t('common:time.months');
+      const unit =
+        months === 1 ? t('common:time.month') : t('common:time.months');
       duration = `${months} ${unit}`;
     } else {
       const years = Math.floor(diffDays / 365);
@@ -102,18 +136,18 @@ const ConditionCard = ({
   try {
     // Generate badges based on condition properties
     const badges = [];
-    
+
     if (condition.severity) {
-      badges.push({ 
-        label: condition.severity, 
-        color: getSeverityColor(condition.severity) 
+      badges.push({
+        label: condition.severity,
+        color: getSeverityColor(condition.severity),
       });
     }
 
     if (condition.icd10_code) {
-      badges.push({ 
-        label: `ICD-10: ${condition.icd10_code}`, 
-        color: 'blue' 
+      badges.push({
+        label: `ICD-10: ${condition.icd10_code}`,
+        color: 'blue',
       });
     }
 
@@ -122,32 +156,38 @@ const ConditionCard = ({
       {
         label: t('shared:fields.onsetDate'),
         value: condition.onset_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
+        render: value =>
+          value ? formatLongDate(value) : t('shared:labels.notSpecified'),
       },
       {
         label: t('shared:labels.duration'),
         value: condition.onset_date,
-        render: () => condition.onset_date
-          ? getConditionDuration(condition.onset_date, condition.end_date, condition.status)
-          : t('shared:labels.notSpecified')
+        render: () =>
+          condition.onset_date
+            ? getConditionDuration(
+                condition.onset_date,
+                condition.end_date,
+                condition.status
+              )
+            : t('shared:labels.notSpecified'),
       },
       condition.end_date && {
         label: t('shared:labels.endDate'),
         value: condition.end_date,
-        render: (value) => formatLongDate(value)
+        render: value => formatLongDate(value),
       },
       condition.snomed_code && {
         label: t('shared:fields.snomedCode'),
         value: condition.snomed_code,
-        render: (value) => value
+        render: value => value,
       },
       condition.code_description && {
         label: t('shared:fields.codeDescription'),
         value: condition.code_description,
-        render: (value) => value,
+        render: value => value,
         align: 'flex-start',
-        style: { flex: 1 }
-      }
+        style: { flex: 1 },
+      },
     ].filter(Boolean);
 
     return (

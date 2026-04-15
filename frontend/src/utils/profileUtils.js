@@ -3,7 +3,6 @@
  */
 import logger from '../services/logger';
 
-
 /**
  * Check if a patient's profile is complete
  * @param {Object} patient - Patient object from global state

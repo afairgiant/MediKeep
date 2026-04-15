@@ -12,7 +12,6 @@ export const Modal = ({
   className = '',
   ...props
 }) => {
-
   // Map sizes to Mantine sizes
   const sizeMap = {
     small: 'sm',

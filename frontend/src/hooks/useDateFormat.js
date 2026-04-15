@@ -19,7 +19,11 @@ import {
   formatDateTimeForInputWithPreference,
   getDateTimePlaceholder,
 } from '../utils/dateUtils';
-import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT, getIntlLocale } from '../utils/constants';
+import {
+  DATE_FORMAT_OPTIONS,
+  DEFAULT_DATE_FORMAT,
+  getIntlLocale,
+} from '../utils/constants';
 
 /**
  * Hook that provides date formatting functions using user's preferred format
@@ -64,7 +68,10 @@ export const useDateFormat = () => {
 
   const formatLongDate = useCallback(
     (dateValue, longMonth = false) => {
-      return formatDateLong(dateValue, effectiveFormat, { longMonth, displayLocale });
+      return formatDateLong(dateValue, effectiveFormat, {
+        longMonth,
+        displayLocale,
+      });
     },
     [effectiveFormat, displayLocale]
   );
@@ -87,7 +94,11 @@ export const useDateFormat = () => {
   // Format datetime for input fields (respects user's date format preference)
   const formatDateTimeInput = useCallback(
     (dateValue, includeSeconds = false) => {
-      return formatDateTimeForInputWithPreference(dateValue, effectiveFormat, includeSeconds);
+      return formatDateTimeForInputWithPreference(
+        dateValue,
+        effectiveFormat,
+        includeSeconds
+      );
     },
     [effectiveFormat]
   );
@@ -100,7 +111,9 @@ export const useDateFormat = () => {
 
   // Date-only input format pattern (e.g., "MM/DD/YYYY") for DateInput valueFormat/placeholder
   const dateInputFormat = useMemo(
-    () => DATE_FORMAT_OPTIONS[effectiveFormat]?.pattern || DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT].pattern,
+    () =>
+      DATE_FORMAT_OPTIONS[effectiveFormat]?.pattern ||
+      DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT].pattern,
     [effectiveFormat]
   );
 

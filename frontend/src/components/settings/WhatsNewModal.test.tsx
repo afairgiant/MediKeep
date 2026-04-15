@@ -12,7 +12,11 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, fallbackOrOpts?: string | Record<string, unknown>) => {
       if (typeof fallbackOrOpts === 'string') return fallbackOrOpts;
-      if (fallbackOrOpts && typeof fallbackOrOpts === 'object' && 'defaultValue' in fallbackOrOpts) {
+      if (
+        fallbackOrOpts &&
+        typeof fallbackOrOpts === 'object' &&
+        'defaultValue' in fallbackOrOpts
+      ) {
         return String(fallbackOrOpts.defaultValue);
       }
       return key;
@@ -66,13 +70,15 @@ vi.mock('sanitize-html', () => ({
 // Test data factories
 // ---------------------------------------------------------------------------
 
-function makeRelease(overrides: Partial<{
-  tag_name: string;
-  name: string;
-  body: string;
-  published_at: string;
-  html_url: string;
-}> = {}) {
+function makeRelease(
+  overrides: Partial<{
+    tag_name: string;
+    name: string;
+    body: string;
+    published_at: string;
+    html_url: string;
+  }> = {}
+) {
   return {
     tag_name: 'v0.58.0',
     name: 'Release 0.58.0',
@@ -208,12 +214,16 @@ describe('WhatsNewModal', () => {
   describe('empty releases', () => {
     it('shows the empty state message when releases array is empty', () => {
       renderModal({ releases: [] });
-      expect(screen.getByText('No release notes available')).toBeInTheDocument();
+      expect(
+        screen.getByText('No release notes available')
+      ).toBeInTheDocument();
     });
 
     it('does not render a release-notes-body div when releases is empty', () => {
       renderModal({ releases: [] });
-      expect(document.querySelector('.release-notes-body')).not.toBeInTheDocument();
+      expect(
+        document.querySelector('.release-notes-body')
+      ).not.toBeInTheDocument();
     });
   });
 

@@ -87,7 +87,11 @@
 
 /* Add Button */
 .add-button {
-  background: linear-gradient(135deg, var(--color-success, #1a7a30) 0%, #20c997 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #1a7a30) 0%,
+    #20c997 100%
+  );
   color: white;
   border: none;
   padding: 12px 24px;
@@ -332,7 +336,11 @@
 }
 
 .save-button {
-  background: linear-gradient(135deg, var(--color-success, #1a7a30) 0%, #20c997 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-success, #1a7a30) 0%,
+    #20c997 100%
+  );
   color: white;
 }
 
@@ -570,4 +578,3 @@
 }
 
 /* Responsive Design */
-

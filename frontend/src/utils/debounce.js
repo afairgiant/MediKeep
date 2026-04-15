@@ -15,30 +15,30 @@
  */
 export function debounce(func, delay, options = {}) {
   const { leading = false, trailing = true } = options;
-  
+
   let timeoutId = null;
   let lastArgs = null;
   let lastThis = null;
   let lastCallTime = null;
   let result = null;
-  
+
   function invokeFunc() {
     const args = lastArgs;
     const thisArg = lastThis;
-    
+
     lastArgs = null;
     lastThis = null;
     result = func.apply(thisArg, args);
     return result;
   }
-  
+
   function leadingEdge() {
     // Reset any trailing edge timer
     timeoutId = setTimeout(timerExpired, delay);
     // Invoke the function on the leading edge if specified
     return leading ? invokeFunc() : result;
   }
-  
+
   function timerExpired() {
     timeoutId = null;
     // Only invoke if we have lastArgs which means func has been called
@@ -49,15 +49,15 @@ export function debounce(func, delay, options = {}) {
     lastArgs = lastThis = null;
     return result;
   }
-  
+
   function debounced(...args) {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
-    
+
     lastArgs = args;
     lastThis = this;
     lastCallTime = time;
-    
+
     if (isInvoking) {
       if (!timeoutId) {
         return leadingEdge();
@@ -66,18 +66,18 @@ export function debounce(func, delay, options = {}) {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(timerExpired, delay);
     }
-    
+
     return result;
   }
-  
+
   function shouldInvoke(time) {
-    return lastCallTime === null || (time - lastCallTime >= delay);
+    return lastCallTime === null || time - lastCallTime >= delay;
   }
-  
+
   /**
    * Cancel any pending debounced invocations
    */
-  debounced.cancel = function() {
+  debounced.cancel = function () {
     if (timeoutId !== null) {
       clearTimeout(timeoutId);
       timeoutId = null;
@@ -86,11 +86,11 @@ export function debounce(func, delay, options = {}) {
     lastThis = null;
     lastCallTime = null;
   };
-  
+
   /**
    * Immediately invoke any pending debounced invocations
    */
-  debounced.flush = function() {
+  debounced.flush = function () {
     if (timeoutId !== null) {
       clearTimeout(timeoutId);
       if (lastArgs) {
@@ -100,14 +100,14 @@ export function debounce(func, delay, options = {}) {
     }
     return result;
   };
-  
+
   /**
    * Check if there are any pending invocations
    */
-  debounced.pending = function() {
+  debounced.pending = function () {
     return timeoutId !== null;
   };
-  
+
   return debounced;
 }
 
@@ -119,16 +119,16 @@ export function debounce(func, delay, options = {}) {
  */
 export function simpleDebounce(func, delay) {
   let timeoutId;
-  
-  const debounced = function(...args) {
+
+  const debounced = function (...args) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func.apply(this, args), delay);
   };
-  
-  debounced.cancel = function() {
+
+  debounced.cancel = function () {
     clearTimeout(timeoutId);
   };
-  
+
   return debounced;
 }
 

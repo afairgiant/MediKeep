@@ -34,12 +34,16 @@ vi.mock('../../../services/api/invitationApi', () => ({
 // Mock other dependencies
 vi.mock('../../invitations', () => ({
   InvitationManager: ({ opened }) =>
-    opened ? <div data-testid="invitation-manager">Invitation Manager</div> : null,
+    opened ? (
+      <div data-testid="invitation-manager">Invitation Manager</div>
+    ) : null,
 }));
 
 vi.mock('../../medical', () => ({
   PatientSharingModal: ({ opened }) =>
-    opened ? <div data-testid="patient-sharing-modal">Patient Sharing</div> : null,
+    opened ? (
+      <div data-testid="patient-sharing-modal">Patient Sharing</div>
+    ) : null,
 }));
 
 vi.mock('../../../hooks/useGlobalData', () => ({
@@ -77,7 +81,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
 
     // Wait for invitations to load - the title comes from the data, not i18n
     await waitFor(() => {
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
     });
   });
 
@@ -87,7 +93,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
     });
 
     // Find the green accept ActionIcon by its style containing green color
@@ -101,11 +109,15 @@ describe('InvitationNotifications Confirmation Modal', () => {
 
       // The confirmation modal title uses i18n key
       await waitFor(() => {
-        expect(screen.getByText('invitations.confirmTitle')).toBeInTheDocument();
+        expect(
+          screen.getByText('invitations.confirmTitle')
+        ).toBeInTheDocument();
       });
 
       // Confirm question also uses i18n key
-      expect(screen.getByText('invitations.confirmQuestion')).toBeInTheDocument();
+      expect(
+        screen.getByText('invitations.confirmQuestion')
+      ).toBeInTheDocument();
     }
   });
 
@@ -113,7 +125,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
     });
 
     // Find and click the green accept button
@@ -126,7 +140,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
       await userEvent.click(acceptButton);
 
       await waitFor(() => {
-        expect(screen.getByText('invitations.confirmTitle')).toBeInTheDocument();
+        expect(
+          screen.getByText('invitations.confirmTitle')
+        ).toBeInTheDocument();
       });
 
       // Click the Accept Invitation button (i18n key)
@@ -153,7 +169,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
     });
 
     // Find and click accept button to open modal
@@ -166,7 +184,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
       await userEvent.click(acceptButton);
 
       await waitFor(() => {
-        expect(screen.getByText('invitations.confirmTitle')).toBeInTheDocument();
+        expect(
+          screen.getByText('invitations.confirmTitle')
+        ).toBeInTheDocument();
       });
 
       // Click cancel button (i18n key: common:buttons.cancel)
@@ -175,7 +195,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
 
       // Modal should close without API call
       await waitFor(() => {
-        expect(screen.queryByText('invitations.confirmTitle')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('invitations.confirmTitle')
+        ).not.toBeInTheDocument();
       });
 
       expect(mockApiService.post).not.toHaveBeenCalled();
@@ -188,7 +210,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
     });
 
     // Verify the mock is set up for error path
@@ -205,7 +229,9 @@ describe('InvitationNotifications Confirmation Modal', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
     });
 
     // The "From:" text uses i18n key pattern: "invitations.from: Dr. Sarah Johnson"

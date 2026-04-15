@@ -25,24 +25,28 @@ const PractitionerViewModal = ({
   onClose,
   practitioner,
   onEdit,
-  navigate
+  navigate,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const [practiceDetails, setPracticeDetails] = useState(null);
   const [isLoadingPractice, setIsLoadingPractice] = useState(false);
   const [showPracticeEditModal, setShowPracticeEditModal] = useState(false);
 
-  const fetchPracticeDetails = useCallback(async (practiceId) => {
+  const fetchPracticeDetails = useCallback(async practiceId => {
     setIsLoadingPractice(true);
     try {
       const data = await apiService.getPractice(practiceId);
       setPracticeDetails(data);
     } catch (error) {
-      logger.error('practice_details_load_failed', 'Failed to load practice details', {
-        component: 'PractitionerViewModal',
-        practiceId,
-        error: error.message,
-      });
+      logger.error(
+        'practice_details_load_failed',
+        'Failed to load practice details',
+        {
+          component: 'PractitionerViewModal',
+          practiceId,
+          error: error.message,
+        }
+      );
       setPracticeDetails(null);
     } finally {
       setIsLoadingPractice(false);
@@ -70,7 +74,7 @@ const PractitionerViewModal = ({
     }
   };
 
-  const getSpecialtyColor = (specialty) => {
+  const getSpecialtyColor = specialty => {
     const specialtyColors = {
       Cardiology: 'red',
       'Emergency Medicine': 'red',
@@ -99,16 +103,22 @@ const PractitionerViewModal = ({
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
-          overflowY: 'auto'
-        }
+          overflowY: 'auto',
+        },
       }}
     >
       <Stack gap="md">
         {/* Header Card */}
-        <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <Paper
+          withBorder
+          p="md"
+          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3} mb="xs">{practitioner.name}</Title>
+              <Title order={3} mb="xs">
+                {practitioner.name}
+              </Title>
               <Group gap="xs">
                 {practitioner.specialty && (
                   <Badge
@@ -126,18 +136,27 @@ const PractitionerViewModal = ({
                 )}
               </Group>
             </div>
-            {practitioner.rating !== null && practitioner.rating !== undefined && (
-              <Badge variant="filled" color="yellow" size="lg" leftSection={<IconStar size={14} />}>
-                {practitioner.rating}/5
-              </Badge>
-            )}
+            {practitioner.rating !== null &&
+              practitioner.rating !== undefined && (
+                <Badge
+                  variant="filled"
+                  color="yellow"
+                  size="lg"
+                  leftSection={<IconStar size={14} />}
+                >
+                  {practitioner.rating}/5
+                </Badge>
+              )}
           </Group>
         </Paper>
 
         <Card withBorder p="md">
           <Stack gap="sm">
             <Text fw={600} size="sm" c="dimmed">
-              {t('practitioners.viewModal.practitionerContact', 'PRACTITIONER CONTACT')}
+              {t(
+                'practitioners.viewModal.practitionerContact',
+                'PRACTITIONER CONTACT'
+              )}
             </Text>
             <Divider />
             <Grid>
@@ -148,9 +167,15 @@ const PractitionerViewModal = ({
                   </Text>
                   <Text
                     size="sm"
-                    c={(practitioner.practice_name || practitioner.practice) ? 'inherit' : 'dimmed'}
+                    c={
+                      practitioner.practice_name || practitioner.practice
+                        ? 'inherit'
+                        : 'dimmed'
+                    }
                   >
-                    {practitioner.practice_name || practitioner.practice || notSpecified}
+                    {practitioner.practice_name ||
+                      practitioner.practice ||
+                      notSpecified}
                   </Text>
                 </Group>
               </Grid.Col>
@@ -185,10 +210,7 @@ const PractitionerViewModal = ({
                   <Text size="sm" fw={500} w={80}>
                     {t('shared:labels.email', 'Email')}:
                   </Text>
-                  <Text
-                    size="sm"
-                    c={practitioner.email ? 'inherit' : 'dimmed'}
-                  >
+                  <Text size="sm" c={practitioner.email ? 'inherit' : 'dimmed'}>
                     {practitioner.email ? (
                       <Anchor
                         href={`mailto:${practitioner.email}`}
@@ -272,7 +294,10 @@ const PractitionerViewModal = ({
                 <Group gap="xs">
                   <IconBuilding size={16} color="var(--mantine-color-dimmed)" />
                   <Text fw={600} size="sm" c="dimmed">
-                    {t('practitioners.viewModal.practiceDetails', 'PRACTICE DETAILS')}
+                    {t(
+                      'practitioners.viewModal.practiceDetails',
+                      'PRACTICE DETAILS'
+                    )}
                   </Text>
                 </Group>
                 {practiceDetails && (
@@ -303,7 +328,12 @@ const PractitionerViewModal = ({
                         <Text size="sm" fw={500} w={100}>
                           {t('shared:labels.phone', 'Phone')}:
                         </Text>
-                        <Text size="sm" c={practiceDetails.phone_number ? 'inherit' : 'dimmed'}>
+                        <Text
+                          size="sm"
+                          c={
+                            practiceDetails.phone_number ? 'inherit' : 'dimmed'
+                          }
+                        >
                           {practiceDetails.phone_number || notSpecified}
                         </Text>
                       </Group>
@@ -313,7 +343,10 @@ const PractitionerViewModal = ({
                         <Text size="sm" fw={500} w={100}>
                           {t('practitioners.viewModal.practiceFax', 'Fax')}:
                         </Text>
-                        <Text size="sm" c={practiceDetails.fax_number ? 'inherit' : 'dimmed'}>
+                        <Text
+                          size="sm"
+                          c={practiceDetails.fax_number ? 'inherit' : 'dimmed'}
+                        >
                           {practiceDetails.fax_number || notSpecified}
                         </Text>
                       </Group>
@@ -327,7 +360,10 @@ const PractitionerViewModal = ({
                         <Text size="sm" fw={500} w={100}>
                           {t('shared:labels.website', 'Website')}:
                         </Text>
-                        <Text size="sm" c={practiceDetails.website ? 'inherit' : 'dimmed'}>
+                        <Text
+                          size="sm"
+                          c={practiceDetails.website ? 'inherit' : 'dimmed'}
+                        >
                           {practiceDetails.website ? (
                             <Anchor
                               href={practiceDetails.website}
@@ -336,18 +372,34 @@ const PractitionerViewModal = ({
                               size="sm"
                               c="blue"
                             >
-                              {practiceDetails.website.replace(/^https?:\/\//, '')}
+                              {practiceDetails.website.replace(
+                                /^https?:\/\//,
+                                ''
+                              )}
                             </Anchor>
-                          ) : notSpecified}
+                          ) : (
+                            notSpecified
+                          )}
                         </Text>
                       </Group>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
                       <Group>
                         <Text size="sm" fw={500} w={100}>
-                          {t('practitioners.viewModal.practicePortal', 'Patient Portal')}:
+                          {t(
+                            'practitioners.viewModal.practicePortal',
+                            'Patient Portal'
+                          )}
+                          :
                         </Text>
-                        <Text size="sm" c={practiceDetails.patient_portal_url ? 'inherit' : 'dimmed'}>
+                        <Text
+                          size="sm"
+                          c={
+                            practiceDetails.patient_portal_url
+                              ? 'inherit'
+                              : 'dimmed'
+                          }
+                        >
                           {practiceDetails.patient_portal_url ? (
                             <Anchor
                               href={practiceDetails.patient_portal_url}
@@ -356,9 +408,14 @@ const PractitionerViewModal = ({
                               size="sm"
                               c="blue"
                             >
-                              {practiceDetails.patient_portal_url.replace(/^https?:\/\//, '')}
+                              {practiceDetails.patient_portal_url.replace(
+                                /^https?:\/\//,
+                                ''
+                              )}
                             </Anchor>
-                          ) : notSpecified}
+                          ) : (
+                            notSpecified
+                          )}
                         </Text>
                       </Group>
                     </Grid.Col>
@@ -369,33 +426,51 @@ const PractitionerViewModal = ({
                     <Text size="sm" fw={500} w={100}>
                       {t('shared:tabs.notes', 'Notes')}:
                     </Text>
-                    <Text size="sm" c={practiceDetails.notes ? 'inherit' : 'dimmed'} style={{ whiteSpace: 'pre-wrap' }}>
+                    <Text
+                      size="sm"
+                      c={practiceDetails.notes ? 'inherit' : 'dimmed'}
+                      style={{ whiteSpace: 'pre-wrap' }}
+                    >
                       {practiceDetails.notes || notSpecified}
                     </Text>
                   </Group>
 
                   {/* Locations */}
-                  {practiceDetails.locations && practiceDetails.locations.length > 0 && (
-                    <div>
-                      <Text size="sm" fw={500} mb={4}>
-                        {t('practitioners.viewModal.practiceLocations', 'Locations')}:
-                      </Text>
-                      <Stack gap={4}>
-                        {practiceDetails.locations.map((loc, idx) => (
-                          <Text key={idx} size="xs" c="dimmed">
-                            {[loc.label, loc.address, loc.city, loc.state, loc.zip, loc.phone]
-                              .filter(Boolean)
-                              .join(' - ')}
-                          </Text>
-                        ))}
-                      </Stack>
-                    </div>
-                  )}
-
+                  {practiceDetails.locations &&
+                    practiceDetails.locations.length > 0 && (
+                      <div>
+                        <Text size="sm" fw={500} mb={4}>
+                          {t(
+                            'practitioners.viewModal.practiceLocations',
+                            'Locations'
+                          )}
+                          :
+                        </Text>
+                        <Stack gap={4}>
+                          {practiceDetails.locations.map((loc, idx) => (
+                            <Text key={idx} size="xs" c="dimmed">
+                              {[
+                                loc.label,
+                                loc.address,
+                                loc.city,
+                                loc.state,
+                                loc.zip,
+                                loc.phone,
+                              ]
+                                .filter(Boolean)
+                                .join(' - ')}
+                            </Text>
+                          ))}
+                        </Stack>
+                      </div>
+                    )}
                 </Stack>
               ) : (
                 <Text size="sm" c="dimmed" fs="italic">
-                  {t('practitioners.viewModal.practiceLoadError', 'Failed to load practice details')}
+                  {t(
+                    'practitioners.viewModal.practiceLoadError',
+                    'Failed to load practice details'
+                  )}
                 </Text>
               )}
             </Stack>
@@ -407,7 +482,11 @@ const PractitionerViewModal = ({
           <Button variant="default" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />}>
+          <Button
+            variant="filled"
+            onClick={handleEdit}
+            leftSection={<IconEdit size={16} />}
+          >
             {t('practitioners.viewModal.editButton', 'Edit Practitioner')}
           </Button>
         </Group>

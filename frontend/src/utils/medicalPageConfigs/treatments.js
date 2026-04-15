@@ -41,9 +41,7 @@ export const treatmentsPageConfig = {
             return (
               (startDate && startDate >= weekAgo) ||
               effectiveEndDateWeek >= weekAgo ||
-              (startDate &&
-                startDate <= now &&
-                effectiveEndDateWeek >= weekAgo)
+              (startDate && startDate <= now && effectiveEndDateWeek >= weekAgo)
             );
 
           case 'month':
@@ -87,17 +85,14 @@ export const treatmentsPageConfig = {
             return (
               (startDate && startDate >= yearAgo) ||
               effectiveEndDateYear >= yearAgo ||
-              (startDate &&
-                startDate <= now &&
-                effectiveEndDateYear >= yearAgo)
+              (startDate && startDate <= now && effectiveEndDateYear >= yearAgo)
             );
 
           case 'current':
             // Currently active treatments
             const effectiveEndDateCurrent = endDate || now;
             return (
-              (!startDate || startDate <= now) &&
-              effectiveEndDateCurrent >= now
+              (!startDate || startDate <= now) && effectiveEndDateCurrent >= now
             );
 
           case 'past':

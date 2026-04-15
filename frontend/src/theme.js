@@ -8,7 +8,7 @@ const FONT_FAMILY =
  * Must be passed to MantineProvider via cssVariablesResolver prop.
  * Returns { variables, light, dark } per ConvertCSSVariablesInput type.
  */
-export const cssVariablesResolver = (theme) => ({
+export const cssVariablesResolver = theme => ({
   variables: {
     '--input-bd-focus': theme.colors.primary[5],
     '--card-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',

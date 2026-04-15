@@ -65,19 +65,19 @@ class ErrorBoundary extends React.Component {
         <div className="error-boundary">
           <div className="error-content">
             <h1>{i18n.t('errors:boundary.somethingWentWrong')}</h1>
-            <p>
-              {i18n.t('errors:boundary.unexpectedError')}
-            </p>
+            <p>{i18n.t('errors:boundary.unexpectedError')}</p>
 
             <div className="error-details">
               {this.state.errorId && (
                 <p>
-                  <strong>{i18n.t('errors:boundary.errorIdLabel')}</strong> {this.state.errorId}
+                  <strong>{i18n.t('errors:boundary.errorIdLabel')}</strong>{' '}
+                  {this.state.errorId}
                 </p>
               )}
               {this.props.componentName && (
                 <p>
-                  <strong>{i18n.t('errors:boundary.componentLabel')}</strong> {this.props.componentName}
+                  <strong>{i18n.t('errors:boundary.componentLabel')}</strong>{' '}
+                  {this.props.componentName}
                 </p>
               )}
             </div>
@@ -85,8 +85,9 @@ class ErrorBoundary extends React.Component {
             <details>
               <summary>{i18n.t('errors:boundary.errorDetails')}</summary>
               <pre>{this.state.error?.toString()}</pre>
-              {isDevelopment() &&
-                this.state.error?.stack && <pre>{this.state.error.stack}</pre>}
+              {isDevelopment() && this.state.error?.stack && (
+                <pre>{this.state.error.stack}</pre>
+              )}
             </details>
 
             <div className="error-actions">
@@ -106,7 +107,13 @@ class ErrorBoundary extends React.Component {
               </button>
             </div>
 
-            <p style={{ marginTop: '20px', fontSize: '0.9em', color: 'var(--mantine-color-gray-6)' }}>
+            <p
+              style={{
+                marginTop: '20px',
+                fontSize: '0.9em',
+                color: 'var(--mantine-color-gray-6)',
+              }}
+            >
               {i18n.t('errors:boundary.errorLogged')}
             </p>
           </div>

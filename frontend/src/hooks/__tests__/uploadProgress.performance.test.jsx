@@ -30,26 +30,22 @@ vi.mock('../../constants/errorMessages', () => ({
     FORM_SAVED: 'Form saved successfully!',
   },
   WARNING_MESSAGES: {},
-  getUserFriendlyError: vi.fn((error) => error),
-  formatErrorWithContext: vi.fn((error) => error),
+  getUserFriendlyError: vi.fn(error => error),
+  formatErrorWithContext: vi.fn(error => error),
 }));
 
 // Wrapper component for Mantine provider
-const wrapper = ({ children }) => (
-  <MantineProvider>
-    {children}
-  </MantineProvider>
-);
+const wrapper = ({ children }) => <MantineProvider>{children}</MantineProvider>;
 
 // Performance test utilities
-const measureExecutionTime = (fn) => {
+const measureExecutionTime = fn => {
   const start = performance.now();
   fn();
   const end = performance.now();
   return end - start;
 };
 
-const createLargeFileSet = (count) => {
+const createLargeFileSet = count => {
   return Array.from({ length: count }, (_, i) => ({
     id: `file-${i}`,
     name: `test-file-${i}.pdf`,
@@ -104,20 +100,24 @@ describe('Upload Progress Performance Tests', () => {
       const { result } = renderHook(() => useUploadProgress(), { wrapper });
       const massiveFileSet = createLargeFileSet(1000);
 
-      const memoryBefore = performance.memory ? performance.memory.usedJSHeapSize : 0;
-      
+      const memoryBefore = performance.memory
+        ? performance.memory.usedJSHeapSize
+        : 0;
+
       const duration = measureExecutionTime(() => {
         act(() => {
           result.current.startUpload(massiveFileSet);
         });
       });
 
-      const memoryAfter = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      const memoryAfter = performance.memory
+        ? performance.memory.usedJSHeapSize
+        : 0;
       const memoryIncrease = memoryAfter - memoryBefore;
 
       expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
       expect(result.current.uploadState.files).toHaveLength(1000);
-      
+
       // Memory increase should be reasonable (less than 50MB for 1000 file objects)
       if (performance.memory) {
         expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
@@ -139,10 +139,10 @@ describe('Upload Progress Performance Tests', () => {
           // Perform 1000 updates across 10 files
           for (let i = 0; i < 1000; i++) {
             const fileIndex = i % 10;
-            const progress = (i % 101); // Progress from 0-100
+            const progress = i % 101; // Progress from 0-100
             result.current.updateFileProgress(
-              testFiles[fileIndex].id, 
-              progress, 
+              testFiles[fileIndex].id,
+              progress,
               'uploading'
             );
           }
@@ -187,7 +187,7 @@ describe('Upload Progress Performance Tests', () => {
 
       const batchUpdates = testFiles.map((file, index) => ({
         fileId: file.id,
-        progress: (index + 1),
+        progress: index + 1,
         status: 'uploading',
       }));
 
@@ -205,13 +205,15 @@ describe('Upload Progress Performance Tests', () => {
   describe('Memory Leak Prevention', () => {
     test('should not accumulate memory with repeated upload cycles', () => {
       const { result } = renderHook(() => useUploadProgress(), { wrapper });
-      
-      const memoryBefore = performance.memory ? performance.memory.usedJSHeapSize : 0;
+
+      const memoryBefore = performance.memory
+        ? performance.memory.usedJSHeapSize
+        : 0;
 
       // Perform 10 upload cycles
       for (let cycle = 0; cycle < 10; cycle++) {
         const testFiles = createLargeFileSet(50);
-        
+
         act(() => {
           result.current.startUpload(testFiles);
         });
@@ -229,7 +231,9 @@ describe('Upload Progress Performance Tests', () => {
         });
       }
 
-      const memoryAfter = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      const memoryAfter = performance.memory
+        ? performance.memory.usedJSHeapSize
+        : 0;
       const memoryIncrease = memoryAfter - memoryBefore;
 
       // Memory should not increase significantly after multiple cycles
@@ -247,7 +251,9 @@ describe('Upload Progress Performance Tests', () => {
       // Perform multiple start/reset cycles rapidly
       for (let i = 0; i < 20; i++) {
         act(() => {
-          result.current.startUpload([{ id: `file-${i}`, name: 'test.pdf', size: 1000 }]);
+          result.current.startUpload([
+            { id: `file-${i}`, name: 'test.pdf', size: 1000 },
+          ]);
         });
         act(() => {
           result.current.resetUpload();
@@ -262,7 +268,9 @@ describe('Upload Progress Performance Tests', () => {
     });
 
     test('should handle unmount during high-activity upload', () => {
-      const { result, unmount } = renderHook(() => useUploadProgress(), { wrapper });
+      const { result, unmount } = renderHook(() => useUploadProgress(), {
+        wrapper,
+      });
       const testFiles = createLargeFileSet(100);
 
       act(() => {
@@ -273,7 +281,11 @@ describe('Upload Progress Performance Tests', () => {
       const updateInterval = setInterval(() => {
         act(() => {
           testFiles.forEach(file => {
-            result.current.updateFileProgress(file.id, Math.random() * 100, 'uploading');
+            result.current.updateFileProgress(
+              file.id,
+              Math.random() * 100,
+              'uploading'
+            );
           });
         });
       }, 10);
@@ -294,12 +306,14 @@ describe('Upload Progress Performance Tests', () => {
 
   describe('Form-Upload Coordination Performance', () => {
     test('should handle rapid form-upload state transitions efficiently', () => {
-      const { result } = renderHook(() => 
-        useFormSubmissionWithUploads({
-          entityType: 'performance-test',
-          onSuccess: vi.fn(),
-          onError: vi.fn(),
-        }), { wrapper }
+      const { result } = renderHook(
+        () =>
+          useFormSubmissionWithUploads({
+            entityType: 'performance-test',
+            onSuccess: vi.fn(),
+            onError: vi.fn(),
+          }),
+        { wrapper }
       );
 
       const duration = measureExecutionTime(() => {
@@ -320,15 +334,19 @@ describe('Upload Progress Performance Tests', () => {
     });
 
     test('should maintain performance with concurrent hook operations', () => {
-      const { result: formResult } = renderHook(() => 
-        useFormSubmissionWithUploads({
-          entityType: 'concurrent-test',
-          onSuccess: vi.fn(),
-          onError: vi.fn(),
-        }), { wrapper }
+      const { result: formResult } = renderHook(
+        () =>
+          useFormSubmissionWithUploads({
+            entityType: 'concurrent-test',
+            onSuccess: vi.fn(),
+            onError: vi.fn(),
+          }),
+        { wrapper }
       );
 
-      const { result: uploadResult } = renderHook(() => useUploadProgress(), { wrapper });
+      const { result: uploadResult } = renderHook(() => useUploadProgress(), {
+        wrapper,
+      });
 
       const testFiles = createLargeFileSet(25);
 
@@ -336,19 +354,19 @@ describe('Upload Progress Performance Tests', () => {
         act(() => {
           // Start form submission
           formResult.current.startSubmission();
-          
+
           // Simultaneously start upload
           uploadResult.current.startUpload(testFiles);
-          
+
           // Rapidly update both
           for (let i = 0; i < 50; i++) {
             uploadResult.current.updateFileProgress(
-              testFiles[i % testFiles.length].id, 
-              i * 2, 
+              testFiles[i % testFiles.length].id,
+              i * 2,
               'uploading'
             );
           }
-          
+
           // Complete both
           formResult.current.completeFormSubmission(true, 'entity-concurrent');
           formResult.current.startFileUpload();
@@ -392,8 +410,8 @@ describe('Upload Progress Performance Tests', () => {
         act(() => {
           for (let i = 0; i < 10000; i++) {
             result.current.updateFileProgress(
-              testFiles[0].id, 
-              Math.random() * 100, 
+              testFiles[0].id,
+              Math.random() * 100,
               'uploading'
             );
           }
@@ -405,12 +423,14 @@ describe('Upload Progress Performance Tests', () => {
     });
 
     test('should handle rapid error state changes without performance impact', () => {
-      const { result } = renderHook(() => 
-        useFormSubmissionWithUploads({
-          entityType: 'error-stress-test',
-          onSuccess: vi.fn(),
-          onError: vi.fn(),
-        }), { wrapper }
+      const { result } = renderHook(
+        () =>
+          useFormSubmissionWithUploads({
+            entityType: 'error-stress-test',
+            onSuccess: vi.fn(),
+            onError: vi.fn(),
+          }),
+        { wrapper }
       );
 
       const duration = measureExecutionTime(() => {
@@ -418,7 +438,10 @@ describe('Upload Progress Performance Tests', () => {
           // Rapid error-recovery cycles
           for (let i = 0; i < 1000; i++) {
             result.current.startSubmission();
-            result.current.handleSubmissionFailure(new Error(`Error ${i}`), 'form');
+            result.current.handleSubmissionFailure(
+              new Error(`Error ${i}`),
+              'form'
+            );
             result.current.resetSubmission();
           }
         });
@@ -438,7 +461,9 @@ describe('Upload Progress Performance Tests', () => {
         result.current.startUpload(testFiles);
       });
 
-      const memoryBefore = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      const memoryBefore = performance.memory
+        ? performance.memory.usedJSHeapSize
+        : 0;
 
       // Perform extensive updates
       act(() => {
@@ -449,7 +474,9 @@ describe('Upload Progress Performance Tests', () => {
         }
       });
 
-      const memoryAfter = performance.memory ? performance.memory.usedJSHeapSize : 0;
+      const memoryAfter = performance.memory
+        ? performance.memory.usedJSHeapSize
+        : 0;
       const memoryIncrease = memoryAfter - memoryBefore;
 
       // Memory increase should be minimal despite many updates
@@ -473,8 +500,8 @@ describe('Upload Progress Performance Tests', () => {
         for (let i = 0; i < iterations; i++) {
           const fileIndex = i % testFiles.length;
           result.current.updateFileProgress(
-            testFiles[fileIndex].id, 
-            (i % 101), 
+            testFiles[fileIndex].id,
+            i % 101,
             'uploading'
           );
         }
@@ -491,13 +518,17 @@ describe('Upload Progress Performance Tests', () => {
 
   describe('Real-world Simulation', () => {
     test('should handle realistic upload workflow with 20 mixed-size files', () => {
-      const { result: uploadResult } = renderHook(() => useUploadProgress(), { wrapper });
-      const { result: formResult } = renderHook(() => 
-        useFormSubmissionWithUploads({
-          entityType: 'realistic-test',
-          onSuccess: vi.fn(),
-          onError: vi.fn(),
-        }), { wrapper }
+      const { result: uploadResult } = renderHook(() => useUploadProgress(), {
+        wrapper,
+      });
+      const { result: formResult } = renderHook(
+        () =>
+          useFormSubmissionWithUploads({
+            entityType: 'realistic-test',
+            onSuccess: vi.fn(),
+            onError: vi.fn(),
+          }),
+        { wrapper }
       );
 
       // Realistic file sizes (some small, some large)
@@ -507,31 +538,39 @@ describe('Upload Progress Performance Tests', () => {
         { id: 'medium-1', name: 'presentation.pptx', size: 1024 * 1024 * 2 }, // 2MB
         { id: 'medium-2', name: 'video.mp4', size: 1024 * 1024 * 5 }, // 5MB
         { id: 'large-1', name: 'backup.zip', size: 1024 * 1024 * 10 }, // 10MB
-        ...createLargeFileSet(15) // Additional smaller files
+        ...createLargeFileSet(15), // Additional smaller files
       ];
 
       const totalDuration = measureExecutionTime(() => {
         act(() => {
           // Start form submission
           formResult.current.startSubmission();
-          
+
           // Complete form
           formResult.current.completeFormSubmission(true, 'realistic-entity');
-          
+
           // Start uploads
           formResult.current.startFileUpload();
           uploadResult.current.startUpload(realisticFiles);
-          
+
           // Simulate realistic progress updates (not all files progress equally)
           for (let progress = 0; progress <= 100; progress += 5) {
             realisticFiles.forEach((file, index) => {
               // Some files upload faster than others
-              const adjustedProgress = Math.min(100, progress + (index % 3) * 2);
-              const status = adjustedProgress === 100 ? 'completed' : 'uploading';
-              uploadResult.current.updateFileProgress(file.id, adjustedProgress, status);
+              const adjustedProgress = Math.min(
+                100,
+                progress + (index % 3) * 2
+              );
+              const status =
+                adjustedProgress === 100 ? 'completed' : 'uploading';
+              uploadResult.current.updateFileProgress(
+                file.id,
+                adjustedProgress,
+                status
+              );
             });
           }
-          
+
           // Complete the workflow
           uploadResult.current.completeUpload(true);
           formResult.current.completeFileUpload(true, realisticFiles.length, 0);

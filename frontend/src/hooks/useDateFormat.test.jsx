@@ -17,10 +17,12 @@ vi.mock('../utils/dateFormatUtils', () => ({
     if (!dateValue) return 'N/A';
     return `formatted-${formatCode}-${dateValue}`;
   }),
-  formatDateLong: vi.fn((dateValue, formatCode, { longMonth, displayLocale } = {}) => {
-    if (!dateValue) return 'N/A';
-    return `long-${formatCode}-${dateValue}-${displayLocale || 'no-locale'}`;
-  }),
+  formatDateLong: vi.fn(
+    (dateValue, formatCode, { longMonth, displayLocale } = {}) => {
+      if (!dateValue) return 'N/A';
+      return `long-${formatCode}-${dateValue}-${displayLocale || 'no-locale'}`;
+    }
+  ),
   formatDateTimeWithPreference: vi.fn((dateValue, formatCode, options) => {
     if (!dateValue) return 'N/A';
     return `datetime-${formatCode}-${dateValue}`;
@@ -58,9 +60,24 @@ vi.mock('react-i18next', () => ({
 // Mock constants
 vi.mock('../utils/constants', () => ({
   DATE_FORMAT_OPTIONS: {
-    mdy: { code: 'mdy', label: 'MM/DD/YYYY (US)', locale: 'en-US', pattern: 'MM/DD/YYYY' },
-    dmy: { code: 'dmy', label: 'DD/MM/YYYY (EU)', locale: 'en-GB', pattern: 'DD/MM/YYYY' },
-    ymd: { code: 'ymd', label: 'YYYY-MM-DD (ISO)', locale: 'sv-SE', pattern: 'YYYY-MM-DD' },
+    mdy: {
+      code: 'mdy',
+      label: 'MM/DD/YYYY (US)',
+      locale: 'en-US',
+      pattern: 'MM/DD/YYYY',
+    },
+    dmy: {
+      code: 'dmy',
+      label: 'DD/MM/YYYY (EU)',
+      locale: 'en-GB',
+      pattern: 'DD/MM/YYYY',
+    },
+    ymd: {
+      code: 'ymd',
+      label: 'YYYY-MM-DD (ISO)',
+      locale: 'sv-SE',
+      pattern: 'YYYY-MM-DD',
+    },
   },
   DEFAULT_DATE_FORMAT: 'mdy',
   getIntlLocale: langCode => {
@@ -71,11 +88,18 @@ vi.mock('../utils/constants', () => ({
 
 // Mock dateUtils
 vi.mock('../utils/dateUtils', () => ({
-  formatDateTimeForInputWithPreference: vi.fn((date, formatCode, includeSeconds) => {
-    if (!date || !(date instanceof Date)) return '';
-    const formattedDate = formatCode === 'dmy' ? '25/01/2026' : formatCode === 'ymd' ? '2026-01-25' : '01/25/2026';
-    return `${formattedDate} 10:30`;
-  }),
+  formatDateTimeForInputWithPreference: vi.fn(
+    (date, formatCode, includeSeconds) => {
+      if (!date || !(date instanceof Date)) return '';
+      const formattedDate =
+        formatCode === 'dmy'
+          ? '25/01/2026'
+          : formatCode === 'ymd'
+            ? '2026-01-25'
+            : '01/25/2026';
+      return `${formattedDate} 10:30`;
+    }
+  ),
   getDateTimePlaceholder: vi.fn(formatCode => {
     const placeholders = {
       mdy: 'e.g., 07/29/2015 23:58',

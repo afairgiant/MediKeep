@@ -17,12 +17,19 @@ function sanitizeEventData(eventData) {
   }
 
   const sanitized = {};
-  
+
   // Safe properties that can be logged
   const safeProperties = [
-    'type', 'timestamp', 'category', 'component', 
-    'method', 'status', 'fromPath', 'toPath',
-    'throttleMs', 'isAuthenticated'
+    'type',
+    'timestamp',
+    'category',
+    'component',
+    'method',
+    'status',
+    'fromPath',
+    'toPath',
+    'throttleMs',
+    'isAuthenticated',
   ];
 
   safeProperties.forEach(prop => {
@@ -33,7 +40,7 @@ function sanitizeEventData(eventData) {
 
   // Add safe metadata
   sanitized.timestamp = sanitized.timestamp || new Date().toISOString();
-  
+
   return sanitized;
 }
 
@@ -49,7 +56,7 @@ function sanitizeError(error) {
     message: error.message || 'Unknown error',
     name: error.name || 'Error',
     type: typeof error,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
     // Deliberately excluding stack trace and other potentially sensitive data
   };
 }
@@ -63,7 +70,7 @@ class SecureActivityLogger {
     this.logCount = 0;
     this.errorCount = 0;
     this.lastLogTime = 0;
-    
+
     // Rate limiting to prevent log spam
     this.maxLogsPerMinute = 60;
     this.logTimestamps = [];
@@ -76,14 +83,16 @@ class SecureActivityLogger {
   isRateLimited() {
     const now = Date.now();
     const oneMinuteAgo = now - 60000;
-    
+
     // Remove old timestamps
-    this.logTimestamps = this.logTimestamps.filter(timestamp => timestamp > oneMinuteAgo);
-    
+    this.logTimestamps = this.logTimestamps.filter(
+      timestamp => timestamp > oneMinuteAgo
+    );
+
     if (this.logTimestamps.length >= this.maxLogsPerMinute) {
       return true;
     }
-    
+
     this.logTimestamps.push(now);
     return false;
   }
@@ -102,7 +111,7 @@ class SecureActivityLogger {
       action: 'initialized',
       component: initData.component || 'unknown',
       timestamp: new Date().toISOString(),
-      ...initData
+      ...initData,
     });
 
     logger.debug('Activity tracking initialized', sanitized);
@@ -122,7 +131,7 @@ class SecureActivityLogger {
       category: 'activity_tracking',
       action: 'activity_detected',
       timestamp: new Date().toISOString(),
-      ...activityData
+      ...activityData,
     });
 
     logger.debug('User activity detected', sanitized);
@@ -142,7 +151,7 @@ class SecureActivityLogger {
       category: 'activity_tracking',
       action: 'cleanup',
       timestamp: new Date().toISOString(),
-      ...cleanupData
+      ...cleanupData,
     });
 
     logger.debug('Activity tracking cleaned up', sanitized);
@@ -163,14 +172,14 @@ class SecureActivityLogger {
     const sanitizedContext = sanitizeEventData({
       category: 'activity_tracking_error',
       timestamp: new Date().toISOString(),
-      ...context
+      ...context,
     });
 
     // Always log errors regardless of LOG_ACTIVITY_DETAILS setting
     logger.error('Activity tracking error', {
       ...sanitizedError,
       ...sanitizedContext,
-      errorCount: ++this.errorCount
+      errorCount: ++this.errorCount,
     });
   }
 
@@ -188,7 +197,7 @@ class SecureActivityLogger {
       timestamp: new Date().toISOString(),
       totalLogs: this.logCount,
       totalErrors: this.errorCount,
-      ...metrics
+      ...metrics,
     });
 
     logger.debug('Activity tracking performance', sanitized);
@@ -203,7 +212,7 @@ class SecureActivityLogger {
     const sanitized = sanitizeEventData({
       category: 'session_management',
       timestamp: new Date().toISOString(),
-      ...sessionData
+      ...sessionData,
     });
 
     logger.debug('Session event', sanitized);
@@ -220,12 +229,12 @@ class SecureActivityLogger {
       lastLogTime: this.lastLogTime,
       rateLimit: {
         maxLogsPerMinute: this.maxLogsPerMinute,
-        currentLogCount: this.logTimestamps.length
+        currentLogCount: this.logTimestamps.length,
       },
       config: {
         logActivityDetails: this.config.LOG_ACTIVITY_DETAILS,
-        logSensitiveData: this.config.LOG_SENSITIVE_DATA
-      }
+        logSensitiveData: this.config.LOG_SENSITIVE_DATA,
+      },
     };
   }
 

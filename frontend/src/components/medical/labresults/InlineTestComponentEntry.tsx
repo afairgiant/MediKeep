@@ -22,10 +22,23 @@ import {
   Autocomplete,
   Badge,
 } from '@mantine/core';
-import { IconPlus, IconTrash, IconChevronDown, IconChevronUp, IconFlask } from '@tabler/icons-react';
+import {
+  IconPlus,
+  IconTrash,
+  IconChevronDown,
+  IconChevronUp,
+  IconFlask,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { getAutocompleteOptions, extractTestName, getTestByName } from '../../../constants/testLibrary';
-import { CATEGORY_SELECT_OPTIONS, QUALITATIVE_SELECT_OPTIONS } from '../../../constants/labCategories';
+import {
+  getAutocompleteOptions,
+  extractTestName,
+  getTestByName,
+} from '../../../constants/testLibrary';
+import {
+  CATEGORY_SELECT_OPTIONS,
+  QUALITATIVE_SELECT_OPTIONS,
+} from '../../../constants/labCategories';
 import {
   calculateStatus,
   capitalizeStatus,
@@ -52,7 +65,9 @@ function InlineTestComponentEntry({
 }: InlineTestComponentEntryProps): React.ReactElement {
   const { t } = useTranslation(['medical', 'shared']);
   const [expanded, setExpanded] = useState(false);
-  const [components, setComponents] = useState<ComponentRowData[]>([createEmptyRow(1)]);
+  const [components, setComponents] = useState<ComponentRowData[]>([
+    createEmptyRow(1),
+  ]);
   const justSelectedRef = useRef<{ index: number; value: string } | null>(null);
 
   const getPendingComponents = useCallback((): ComponentRowData[] => {
@@ -73,30 +88,48 @@ function InlineTestComponentEntry({
     return () => onRef?.(null);
   }, [onRef, hasPendingComponents, getPendingComponents, clearComponents]);
 
-  const updateComponent = useCallback((index: number, field: string, value: unknown) => {
-    setComponents(prev => prev.map((comp, i) => {
-      if (i !== index) return comp;
+  const updateComponent = useCallback(
+    (index: number, field: string, value: unknown) => {
+      setComponents(prev =>
+        prev.map((comp, i) => {
+          if (i !== index) return comp;
 
-      const updatedComp = { ...comp, [field]: value };
+          const updatedComp = { ...comp, [field]: value };
 
-      if (field === 'value' || field === 'ref_range_min' || field === 'ref_range_max') {
-        updatedComp.status = calculateStatus(
-          field === 'value' ? value as number | '' : updatedComp.value,
-          field === 'ref_range_min' ? value as number | '' : updatedComp.ref_range_min,
-          field === 'ref_range_max' ? value as number | '' : updatedComp.ref_range_max
-        );
-      }
+          if (
+            field === 'value' ||
+            field === 'ref_range_min' ||
+            field === 'ref_range_max'
+          ) {
+            updatedComp.status = calculateStatus(
+              field === 'value' ? (value as number | '') : updatedComp.value,
+              field === 'ref_range_min'
+                ? (value as number | '')
+                : updatedComp.ref_range_min,
+              field === 'ref_range_max'
+                ? (value as number | '')
+                : updatedComp.ref_range_max
+            );
+          }
 
-      return updatedComp;
-    }));
-  }, []);
+          return updatedComp;
+        })
+      );
+    },
+    []
+  );
 
-  const updateComponentFields = useCallback((index: number, fields: Partial<ComponentRowData>) => {
-    setComponents(prev => prev.map((comp, i) => {
-      if (i !== index) return comp;
-      return { ...comp, ...fields };
-    }));
-  }, []);
+  const updateComponentFields = useCallback(
+    (index: number, fields: Partial<ComponentRowData>) => {
+      setComponents(prev =>
+        prev.map((comp, i) => {
+          if (i !== index) return comp;
+          return { ...comp, ...fields };
+        })
+      );
+    },
+    []
+  );
 
   const addRow = useCallback(() => {
     setComponents(prev => [...prev, createEmptyRow(prev.length + 1)]);
@@ -136,7 +169,10 @@ function InlineTestComponentEntry({
       <Collapse in={expanded}>
         <Stack gap="md" mt="md">
           <Text size="sm" c="dimmed">
-            {t('labresults:form.testComponentsDescription', 'Optionally add individual test values. You can also add more later.')}
+            {t(
+              'labresults:form.testComponentsDescription',
+              'Optionally add individual test values. You can also add more later.'
+            )}
           </Text>
 
           {components.map((component, index) => (
@@ -152,9 +188,13 @@ function InlineTestComponentEntry({
                     size="sm"
                     onClick={() => removeRow(index)}
                     disabled={components.length === 1 || disabled}
-                    title={components.length === 1
-                      ? t('labresults:form.cannotRemoveLastRow', 'Cannot remove last row')
-                      : t('labresults:form.removeRow', 'Remove row')
+                    title={
+                      components.length === 1
+                        ? t(
+                            'labresults:form.cannotRemoveLastRow',
+                            'Cannot remove last row'
+                          )
+                        : t('labresults:form.removeRow', 'Remove row')
                     }
                   >
                     <IconTrash size={14} />
@@ -165,20 +205,30 @@ function InlineTestComponentEntry({
                   <Grid.Col span={12}>
                     <Autocomplete
                       label={t('shared:fields.testName', 'Test Name')}
-                      placeholder={t('labresults:form.searchTests', 'Type to search tests...')}
+                      placeholder={t(
+                        'labresults:form.searchTests',
+                        'Type to search tests...'
+                      )}
                       size="xs"
                       value={component.test_name}
-                      onChange={(value) => {
+                      onChange={value => {
                         if (justSelectedRef.current?.index === index) {
-                          updateComponent(index, 'test_name', justSelectedRef.current.value);
+                          updateComponent(
+                            index,
+                            'test_name',
+                            justSelectedRef.current.value
+                          );
                           justSelectedRef.current = null;
                         } else {
                           updateComponent(index, 'test_name', value);
                         }
                       }}
-                      onOptionSubmit={(value) => {
+                      onOptionSubmit={value => {
                         const cleanTestName = extractTestName(value);
-                        justSelectedRef.current = { index, value: cleanTestName };
+                        justSelectedRef.current = {
+                          index,
+                          value: cleanTestName,
+                        };
 
                         const libraryTest = getTestByName(cleanTestName);
                         const autoFillFields: Partial<ComponentRowData> = {
@@ -186,18 +236,25 @@ function InlineTestComponentEntry({
                           ...(libraryTest && {
                             unit: libraryTest.default_unit,
                             category: libraryTest.category,
-                            ...(libraryTest.abbreviation && { abbreviation: libraryTest.abbreviation }),
-                            ...(libraryTest.result_type && { result_type: libraryTest.result_type }),
+                            ...(libraryTest.abbreviation && {
+                              abbreviation: libraryTest.abbreviation,
+                            }),
+                            ...(libraryTest.result_type && {
+                              result_type: libraryTest.result_type,
+                            }),
                           }),
                         };
                         updateComponentFields(index, autoFillFields);
                       }}
-                      data={getAutocompleteOptions(component.test_name || '', 200)}
+                      data={getAutocompleteOptions(
+                        component.test_name || '',
+                        200
+                      )}
                       limit={200}
                       maxDropdownHeight={300}
                       comboboxProps={{
                         zIndex: 3003,
-                        transitionProps: { duration: 0, transition: 'pop' }
+                        transitionProps: { duration: 0, transition: 'pop' },
                       }}
                       withScrollArea
                       disabled={disabled}
@@ -207,48 +264,78 @@ function InlineTestComponentEntry({
                   <Grid.Col span={6}>
                     <TextInput
                       label={t('labresults:form.abbreviation', 'Abbreviation')}
-                      placeholder={t('labresults:form.abbreviationPlaceholder', 'e.g., HGB')}
+                      placeholder={t(
+                        'labresults:form.abbreviationPlaceholder',
+                        'e.g., HGB'
+                      )}
                       size="xs"
                       value={component.abbreviation || ''}
-                      onChange={(event) => updateComponent(index, 'abbreviation', event.target.value)}
+                      onChange={event =>
+                        updateComponent(
+                          index,
+                          'abbreviation',
+                          event.target.value
+                        )
+                      }
                       disabled={disabled}
                     />
                   </Grid.Col>
                   <Grid.Col span={6}>
                     <TextInput
                       label={t('shared:fields.testCode', 'Test Code')}
-                      placeholder={t('labresults:form.testCodePlaceholder', 'e.g., 718-7')}
+                      placeholder={t(
+                        'labresults:form.testCodePlaceholder',
+                        'e.g., 718-7'
+                      )}
                       size="xs"
                       value={component.test_code || ''}
-                      onChange={(event) => updateComponent(index, 'test_code', event.target.value)}
+                      onChange={event =>
+                        updateComponent(index, 'test_code', event.target.value)
+                      }
                       disabled={disabled}
                     />
                   </Grid.Col>
 
-                  <Grid.Col span={component.result_type === 'qualitative' ? 6 : 4}>
+                  <Grid.Col
+                    span={component.result_type === 'qualitative' ? 6 : 4}
+                  >
                     <TextInput
                       label={t('labresults:form.unit', 'Unit')}
                       placeholder={t('labresults:form.unit', 'Unit')}
                       size="xs"
                       value={component.unit}
-                      onChange={(event) => updateComponent(index, 'unit', event.target.value)}
+                      onChange={event =>
+                        updateComponent(index, 'unit', event.target.value)
+                      }
                       disabled={disabled}
                     />
                   </Grid.Col>
 
-                  <Grid.Col span={component.result_type === 'qualitative' ? 6 : 4}>
+                  <Grid.Col
+                    span={component.result_type === 'qualitative' ? 6 : 4}
+                  >
                     {component.result_type === 'qualitative' ? (
                       <Select
                         label={t('labresults:form.result', 'Result')}
-                        placeholder={t('labresults:form.selectResult', 'Select result')}
+                        placeholder={t(
+                          'labresults:form.selectResult',
+                          'Select result'
+                        )}
                         size="xs"
                         data={QUALITATIVE_SELECT_OPTIONS}
                         value={component.qualitative_value || null}
-                        onChange={(value) => {
-                          updateComponent(index, 'qualitative_value', value || '');
+                        onChange={value => {
+                          updateComponent(
+                            index,
+                            'qualitative_value',
+                            value || ''
+                          );
                           if (value === 'positive' || value === 'detected') {
                             updateComponent(index, 'status', 'abnormal');
-                          } else if (value === 'negative' || value === 'undetected') {
+                          } else if (
+                            value === 'negative' ||
+                            value === 'undetected'
+                          ) {
                             updateComponent(index, 'status', 'normal');
                           }
                         }}
@@ -261,7 +348,9 @@ function InlineTestComponentEntry({
                         placeholder={t('shared:labels.value', 'Value')}
                         size="xs"
                         value={component.value}
-                        onChange={(value) => updateComponent(index, 'value', value)}
+                        onChange={value =>
+                          updateComponent(index, 'value', value)
+                        }
                         hideControls
                         disabled={disabled}
                       />
@@ -271,7 +360,10 @@ function InlineTestComponentEntry({
                   <Grid.Col span={4}>
                     <TextInput
                       label={t('shared:fields.status', 'Status')}
-                      placeholder={t('labresults:form.autoCalculated', 'Auto-calculated')}
+                      placeholder={t(
+                        'labresults:form.autoCalculated',
+                        'Auto-calculated'
+                      )}
                       size="xs"
                       value={capitalizeStatus(component.status)}
                       readOnly
@@ -280,8 +372,8 @@ function InlineTestComponentEntry({
                           backgroundColor: 'var(--color-bg-secondary)',
                           color: getStatusInputColor(component.status),
                           fontWeight: 500,
-                          cursor: 'default'
-                        }
+                          cursor: 'default',
+                        },
                       }}
                     />
                   </Grid.Col>
@@ -294,7 +386,9 @@ function InlineTestComponentEntry({
                           placeholder={t('shared:labels.min', 'Min')}
                           size="xs"
                           value={component.ref_range_min}
-                          onChange={(value) => updateComponent(index, 'ref_range_min', value)}
+                          onChange={value =>
+                            updateComponent(index, 'ref_range_min', value)
+                          }
                           hideControls
                           disabled={disabled}
                         />
@@ -305,7 +399,9 @@ function InlineTestComponentEntry({
                           placeholder={t('shared:labels.max', 'Max')}
                           size="xs"
                           value={component.ref_range_max}
-                          onChange={(value) => updateComponent(index, 'ref_range_max', value)}
+                          onChange={value =>
+                            updateComponent(index, 'ref_range_max', value)
+                          }
                           hideControls
                           disabled={disabled}
                         />
@@ -316,14 +412,19 @@ function InlineTestComponentEntry({
                   <Grid.Col span={6}>
                     <Select
                       label={t('shared:labels.category', 'Category')}
-                      placeholder={t('shared:labels.selectCategory', 'Select category')}
+                      placeholder={t(
+                        'shared:labels.selectCategory',
+                        'Select category'
+                      )}
                       size="xs"
                       clearable
                       searchable
                       comboboxProps={{ zIndex: 3003 }}
                       data={CATEGORY_SELECT_OPTIONS}
                       value={component.category || null}
-                      onChange={(value) => updateComponent(index, 'category', value)}
+                      onChange={value =>
+                        updateComponent(index, 'category', value)
+                      }
                       disabled={disabled}
                     />
                   </Grid.Col>
@@ -331,10 +432,15 @@ function InlineTestComponentEntry({
                   <Grid.Col span={6}>
                     <TextInput
                       label={t('shared:tabs.notes', 'Notes')}
-                      placeholder={t('labresults:form.notesOptional', 'Notes (optional)')}
+                      placeholder={t(
+                        'labresults:form.notesOptional',
+                        'Notes (optional)'
+                      )}
                       size="xs"
                       value={component.notes || ''}
-                      onChange={(event) => updateComponent(index, 'notes', event.target.value)}
+                      onChange={event =>
+                        updateComponent(index, 'notes', event.target.value)
+                      }
                       disabled={disabled}
                     />
                   </Grid.Col>

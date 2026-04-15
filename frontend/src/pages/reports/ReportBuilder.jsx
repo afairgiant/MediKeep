@@ -84,7 +84,10 @@ const ReportBuilder = () => {
   // UI state
   const [activeTab, setActiveTab] = useState('medications');
   const [activeSegment, setActiveSegment] = useState('records');
-  const [showSettingsModal, { open: openSettingsModal, close: closeSettingsModal }] = useDisclosure(false);
+  const [
+    showSettingsModal,
+    { open: openSettingsModal, close: closeSettingsModal },
+  ] = useDisclosure(false);
 
   // Initialize data on mount
   useEffect(() => {
@@ -106,7 +109,9 @@ const ReportBuilder = () => {
   }, [location.search, templates, loadTemplateForReport]);
 
   // Get available categories from data summary
-  const availableCategories = dataSummary?.categories ? Object.keys(dataSummary.categories) : [];
+  const availableCategories = dataSummary?.categories
+    ? Object.keys(dataSummary.categories)
+    : [];
 
   // Debug logging for development
   useEffect(() => {
@@ -121,31 +126,33 @@ const ReportBuilder = () => {
 
   // Category display names mapping
   const categoryDisplayNames = {
-    'medications': t('shared:categories.medications'),
-    'conditions': t('shared:categories.conditions'),
-    'procedures': t('shared:categories.procedures'),
-    'lab_results': t('shared:categories.lab_results'),
-    'immunizations': t('shared:categories.immunizations'),
-    'allergies': t('shared:categories.allergies'),
-    'treatments': t('shared:categories.treatments'),
-    'encounters': t('shared:tabs.visits'),
-    'vitals': t('shared:categories.vitals'),
-    'practitioners': t('shared:categories.practitioners'),
-    'pharmacies': t('shared:categories.pharmacies'),
-    'emergency_contacts': t('shared:categories.emergency_contacts'),
-    'family_history': t('shared:categories.family_history'),
-    'symptoms': t('shared:categories.symptoms'),
-    'injuries': t('shared:categories.injuries'),
-    'insurance': t('shared:categories.insurance'),
+    medications: t('shared:categories.medications'),
+    conditions: t('shared:categories.conditions'),
+    procedures: t('shared:categories.procedures'),
+    lab_results: t('shared:categories.lab_results'),
+    immunizations: t('shared:categories.immunizations'),
+    allergies: t('shared:categories.allergies'),
+    treatments: t('shared:categories.treatments'),
+    encounters: t('shared:tabs.visits'),
+    vitals: t('shared:categories.vitals'),
+    practitioners: t('shared:categories.practitioners'),
+    pharmacies: t('shared:categories.pharmacies'),
+    emergency_contacts: t('shared:categories.emergency_contacts'),
+    family_history: t('shared:categories.family_history'),
+    symptoms: t('shared:categories.symptoms'),
+    injuries: t('shared:categories.injuries'),
+    insurance: t('shared:categories.insurance'),
   };
 
   // Handle template save
-  const handleSaveTemplate = async (templateFormData) => {
+  const handleSaveTemplate = async templateFormData => {
     // Convert selected records to API format
-    const selectedRecordsArray = Object.entries(selectedRecords).map(([category, records]) => ({
-      category,
-      record_ids: Object.keys(records).map(id => parseInt(id, 10)),
-    }));
+    const selectedRecordsArray = Object.entries(selectedRecords).map(
+      ([category, records]) => ({
+        category,
+        record_ids: Object.keys(records).map(id => parseInt(id, 10)),
+      })
+    );
 
     const templateData = {
       ...templateFormData,
@@ -157,7 +164,7 @@ const ReportBuilder = () => {
   };
 
   // Handle template load
-  const handleLoadTemplate = async (templateId) => {
+  const handleLoadTemplate = async templateId => {
     const template = await loadTemplateForReport(templateId);
     if (template) {
       // Clear current selections first
@@ -166,7 +173,9 @@ const ReportBuilder = () => {
       // Load template selections (this would need to be implemented in the hook)
       notifications.show({
         title: t('builder.notifications.templateLoaded'),
-        message: t('builder.notifications.templateLoadedMessage', { name: template.name }),
+        message: t('builder.notifications.templateLoadedMessage', {
+          name: template.name,
+        }),
         color: 'blue',
         autoClose: 5000,
       });
@@ -190,7 +199,11 @@ const ReportBuilder = () => {
   };
 
   if (loading || templatesLoading) {
-    return <MedicalPageLoading message={t('builder.loading', 'Loading reports...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('builder.loading', 'Loading reports...')}
+      />
+    );
   }
 
   return (
@@ -251,14 +264,21 @@ const ReportBuilder = () => {
           {hasSelections && (
             <Box mb="md">
               <Group justify="space-between" mb={4}>
-                <Text size="sm" fw={500}>{t('builder.progress.recordsSelected')}</Text>
+                <Text size="sm" fw={500}>
+                  {t('builder.progress.recordsSelected')}
+                </Text>
                 <Text size="sm" c="dimmed">
                   {selectedCount} {t('shared:labels.medicalRecords', 'records')}
-                  {trendChartCount > 0 && `, ${trendChartCount} ${t('shared:labels.trendCharts', 'charts').toLowerCase()}`}
+                  {trendChartCount > 0 &&
+                    `, ${trendChartCount} ${t('shared:labels.trendCharts', 'charts').toLowerCase()}`}
                 </Text>
               </Group>
               <Progress
-                value={(selectedCount / Math.max(dataSummary?.total_records || 1, 1)) * 100}
+                value={
+                  (selectedCount /
+                    Math.max(dataSummary?.total_records || 1, 1)) *
+                  100
+                }
                 color="blue"
                 size="sm"
               />
@@ -281,13 +301,21 @@ const ReportBuilder = () => {
                     }
                   });
                 }}
-                disabled={!dataSummary?.categories || Object.keys(dataSummary.categories).length === 0}
+                disabled={
+                  !dataSummary?.categories ||
+                  Object.keys(dataSummary.categories).length === 0
+                }
               >
                 {t('builder.buttons.selectAll')}
               </Button>
             )}
             {hasSelections && (
-              <Button size="xs" variant="subtle" color="red" onClick={clearSelections}>
+              <Button
+                size="xs"
+                variant="subtle"
+                color="red"
+                onClick={clearSelections}
+              >
                 {t('builder.buttons.clearSelections')}
               </Button>
             )}
@@ -306,7 +334,9 @@ const ReportBuilder = () => {
                   <IconNotes size={16} />
                   <span>{t('shared:labels.medicalRecords')}</span>
                   {selectedCount > 0 && (
-                    <Badge size="xs" variant="filled" color="blue">{selectedCount}</Badge>
+                    <Badge size="xs" variant="filled" color="blue">
+                      {selectedCount}
+                    </Badge>
                   )}
                 </Group>
               ),
@@ -318,7 +348,9 @@ const ReportBuilder = () => {
                   <IconChartLine size={16} />
                   <span>{t('shared:labels.trendCharts')}</span>
                   {trendChartCount > 0 && (
-                    <Badge size="xs" variant="filled" color="teal">{trendChartCount}</Badge>
+                    <Badge size="xs" variant="filled" color="teal">
+                      {trendChartCount}
+                    </Badge>
                   )}
                 </Group>
               ),
@@ -348,7 +380,11 @@ const ReportBuilder = () => {
               <Paper shadow="sm" p="xl" radius="md">
                 <Center py="xl">
                   <Stack align="center" gap="md">
-                    <IconFileDescription size={64} stroke={1} color="var(--mantine-color-gray-5)" />
+                    <IconFileDescription
+                      size={64}
+                      stroke={1}
+                      color="var(--mantine-color-gray-5)"
+                    />
                     <Stack align="center" gap="xs">
                       <Title order={3}>{t('builder.noData.title')}</Title>
                       <Text c="dimmed" ta="center">
@@ -393,29 +429,49 @@ const ReportBuilder = () => {
           <TextInput
             label={t('builder.settingsModal.reportTitle.label')}
             value={reportSettings.report_title}
-            onChange={(event) => updateReportSettings({ report_title: event.target.value })}
+            onChange={event =>
+              updateReportSettings({ report_title: event.target.value })
+            }
           />
 
           <Stack gap="sm">
             <Switch
               label={t('builder.settingsModal.includePatientInfo.label')}
-              description={t('builder.settingsModal.includePatientInfo.description')}
+              description={t(
+                'builder.settingsModal.includePatientInfo.description'
+              )}
               checked={reportSettings.include_patient_info}
-              onChange={(event) => updateReportSettings({ include_patient_info: event.currentTarget.checked })}
+              onChange={event =>
+                updateReportSettings({
+                  include_patient_info: event.currentTarget.checked,
+                })
+              }
             />
 
             <Switch
               label={t('builder.settingsModal.includeProfilePicture.label')}
-              description={t('builder.settingsModal.includeProfilePicture.description')}
+              description={t(
+                'builder.settingsModal.includeProfilePicture.description'
+              )}
               checked={reportSettings.include_profile_picture}
-              onChange={(event) => updateReportSettings({ include_profile_picture: event.currentTarget.checked })}
+              onChange={event =>
+                updateReportSettings({
+                  include_profile_picture: event.currentTarget.checked,
+                })
+              }
             />
 
             <Switch
               label={t('builder.settingsModal.includeSummary.label')}
-              description={t('builder.settingsModal.includeSummary.description')}
+              description={t(
+                'builder.settingsModal.includeSummary.description'
+              )}
               checked={reportSettings.include_summary}
-              onChange={(event) => updateReportSettings({ include_summary: event.currentTarget.checked })}
+              onChange={event =>
+                updateReportSettings({
+                  include_summary: event.currentTarget.checked,
+                })
+              }
             />
           </Stack>
 

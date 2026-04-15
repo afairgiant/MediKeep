@@ -37,7 +37,7 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
     setSearchQuery('');
   };
 
-  const handleSearchKeyDown = (e) => {
+  const handleSearchKeyDown = e => {
     if (e.key === 'Enter') {
       handleSearch();
     }
@@ -74,9 +74,12 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
 
         <Box style={{ flex: 1, maxWidth: 500 }} mx="md" visibleFrom="sm">
           <TextInput
-            placeholder={t('header.searchPlaceholder', 'Search records, users, or data...')}
+            placeholder={t(
+              'header.searchPlaceholder',
+              'Search records, users, or data...'
+            )}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.currentTarget.value)}
+            onChange={e => setSearchQuery(e.currentTarget.value)}
             onKeyDown={handleSearchKeyDown}
             aria-label={t('header.searchAriaLabel', 'Search data models')}
             leftSection={<IconSearch size={16} />}
@@ -129,15 +132,31 @@ const AdminHeader = ({ user, onLogout, onToggleSidebar }) => {
             </Avatar>
           </Group>
 
-          <Tooltip label={t('header.switchToMode', 'Switch to {{mode}} mode', { mode: theme === 'light' ? t('shared.dark', 'dark') : t('shared.light', 'light') })}>
+          <Tooltip
+            label={t('header.switchToMode', 'Switch to {{mode}} mode', {
+              mode:
+                theme === 'light'
+                  ? t('shared.dark', 'dark')
+                  : t('shared.light', 'light'),
+            })}
+          >
             <ActionIcon
               variant="default"
               size="lg"
               radius="xl"
               onClick={toggleTheme}
-              title={t('header.switchToMode', 'Switch to {{mode}} mode', { mode: theme === 'light' ? t('shared.dark', 'dark') : t('shared.light', 'light') })}
+              title={t('header.switchToMode', 'Switch to {{mode}} mode', {
+                mode:
+                  theme === 'light'
+                    ? t('shared.dark', 'dark')
+                    : t('shared.light', 'light'),
+              })}
             >
-              {theme === 'light' ? <IconMoon size={18} /> : <IconSun size={18} />}
+              {theme === 'light' ? (
+                <IconMoon size={18} />
+              ) : (
+                <IconSun size={18} />
+              )}
             </ActionIcon>
           </Tooltip>
 

@@ -1056,15 +1056,41 @@ const VitalsForm = ({
                   <Grid.Col span={6}>{renderField('a1c')}</Grid.Col>
                   <Grid.Col span={6}>
                     <Select
-                      label={t('vitals:modal.glucoseContext', 'Measurement Type')}
-                      placeholder={t('vitals:modal.glucoseContextPlaceholder', 'Optional')}
+                      label={t(
+                        'vitals:modal.glucoseContext',
+                        'Measurement Type'
+                      )}
+                      placeholder={t(
+                        'vitals:modal.glucoseContextPlaceholder',
+                        'Optional'
+                      )}
                       value={formData.glucose_context || null}
-                      onChange={(val) => handleInputChange('glucose_context', val || '')}
+                      onChange={val =>
+                        handleInputChange('glucose_context', val || '')
+                      }
                       data={[
-                        { value: 'fasting', label: t('vitals:glucoseContext.fasting', 'Fasting') },
-                        { value: 'before_meal', label: t('vitals:glucoseContext.before_meal', 'Before Meal') },
-                        { value: 'after_meal', label: t('vitals:glucoseContext.after_meal', 'After Meal') },
-                        { value: 'random', label: t('vitals:glucoseContext.random', 'Random') },
+                        {
+                          value: 'fasting',
+                          label: t('vitals:glucoseContext.fasting', 'Fasting'),
+                        },
+                        {
+                          value: 'before_meal',
+                          label: t(
+                            'vitals:glucoseContext.before_meal',
+                            'Before Meal'
+                          ),
+                        },
+                        {
+                          value: 'after_meal',
+                          label: t(
+                            'vitals:glucoseContext.after_meal',
+                            'After Meal'
+                          ),
+                        },
+                        {
+                          value: 'random',
+                          label: t('vitals:glucoseContext.random', 'Random'),
+                        },
                       ]}
                       leftSection={<IconDropletFilled size={16} />}
                       clearable
@@ -1079,7 +1105,10 @@ const VitalsForm = ({
                     variant="light"
                     color="green"
                     icon={<IconUser size={16} />}
-                    title={t('shared:labels.patientInformation', 'Patient Information')}
+                    title={t(
+                      'shared:labels.patientInformation',
+                      'Patient Information'
+                    )}
                     mt="md"
                   >
                     {t(

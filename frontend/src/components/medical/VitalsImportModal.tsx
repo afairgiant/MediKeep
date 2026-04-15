@@ -145,7 +145,11 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
     setError(null);
 
     try {
-      const result = await vitalsService.previewImport(patientId, selectedDevice, file);
+      const result = await vitalsService.previewImport(
+        patientId,
+        selectedDevice,
+        file
+      );
       setPreviewData(result);
       setStep('preview');
     } catch (err: any) {
@@ -191,13 +195,16 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
     onClose();
   }, [onImportComplete, onClose]);
 
-  const deviceOptions = devices.map((d) => ({ value: d.key, label: d.name }));
+  const deviceOptions = devices.map(d => ({ value: d.key, label: d.name }));
 
   const renderSelectStep = () => (
     <Stack gap="md">
       <Select
         label={t('vitals:import.selectDevice', 'Select Device')}
-        placeholder={t('vitals:import.selectDevicePlaceholder', 'Choose your device...')}
+        placeholder={t(
+          'vitals:import.selectDevicePlaceholder',
+          'Choose your device...'
+        )}
         data={deviceOptions}
         value={selectedDevice}
         onChange={setSelectedDevice}
@@ -214,7 +221,11 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
       />
 
       {error && (
-        <Alert variant="light" color="red" icon={<IconAlertTriangle size={16} />}>
+        <Alert
+          variant="light"
+          color="red"
+          icon={<IconAlertTriangle size={16} />}
+        >
           {error}
         </Alert>
       )}
@@ -280,17 +291,28 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
         {/* Duplicate warning */}
         {previewData.duplicate_count > 0 && (
-          <Alert variant="light" color="orange" icon={<IconAlertTriangle size={16} />}>
+          <Alert
+            variant="light"
+            color="orange"
+            icon={<IconAlertTriangle size={16} />}
+          >
             <Stack gap="xs">
               <Text size="sm">
-                {t('shared:labels.countReadingsAlreadyExistInThisDateRangeCheckTheBoxAboveToSkipThem', '{{count}} readings already exist in this date range. Check the box above to skip them.', {
-                  count: previewData.duplicate_count,
-                })}
+                {t(
+                  'shared:labels.countReadingsAlreadyExistInThisDateRangeCheckTheBoxAboveToSkipThem',
+                  '{{count}} readings already exist in this date range. Check the box above to skip them.',
+                  {
+                    count: previewData.duplicate_count,
+                  }
+                )}
               </Text>
               <Checkbox
-                label={t('vitals:import.skipDuplicates', 'Skip duplicate readings')}
+                label={t(
+                  'vitals:import.skipDuplicates',
+                  'Skip duplicate readings'
+                )}
                 checked={skipDuplicates}
-                onChange={(e) => setSkipDuplicates(e.currentTarget.checked)}
+                onChange={e => setSkipDuplicates(e.currentTarget.checked)}
               />
             </Stack>
           </Alert>
@@ -298,9 +320,14 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
         {/* Warnings */}
         {previewData.warnings.length > 0 && (
-          <Alert variant="light" color="yellow" icon={<IconAlertTriangle size={16} />}>
+          <Alert
+            variant="light"
+            color="yellow"
+            icon={<IconAlertTriangle size={16} />}
+          >
             <Text size="sm" fw={500} mb="xs">
-              {t('shared:labels.warnings', 'Warnings')} ({previewData.warnings.length})
+              {t('shared:labels.warnings', 'Warnings')} (
+              {previewData.warnings.length})
             </Text>
             {previewData.warnings.slice(0, 5).map((w, i) => (
               <Text key={i} size="xs">
@@ -309,7 +336,9 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
             ))}
             {previewData.warnings.length > 5 && (
               <Text size="xs" c="dimmed" mt="xs">
-                {t('shared:labels.andCountMore', { count: previewData.warnings.length - 5 })}
+                {t('shared:labels.andCountMore', {
+                  count: previewData.warnings.length - 5,
+                })}
               </Text>
             )}
           </Alert>
@@ -320,7 +349,10 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           <Table.Thead>
             <Table.Tr>
               <Table.Th>{t('shared:labels.date', 'Date')}</Table.Th>
-              <Table.Th>{t('vitals:modal.bloodGlucose', 'Glucose')} ({t('vitals:units.mgdl')})</Table.Th>
+              <Table.Th>
+                {t('vitals:modal.bloodGlucose', 'Glucose')} (
+                {t('vitals:units.mgdl')})
+              </Table.Th>
               <Table.Th>{t('shared:fields.status', 'Status')}</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -353,16 +385,24 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
         {previewData.total_readings > 10 && (
           <Text size="xs" c="dimmed" ta="center">
-            {t('pagination.showingRange', 'Showing {{start}} to {{end}} of {{total}} results', {
-              start: 1,
-              end: 10,
-              total: previewData.total_readings,
-            })}
+            {t(
+              'pagination.showingRange',
+              'Showing {{start}} to {{end}} of {{total}} results',
+              {
+                start: 1,
+                end: 10,
+                total: previewData.total_readings,
+              }
+            )}
           </Text>
         )}
 
         {error && (
-          <Alert variant="light" color="red" icon={<IconAlertTriangle size={16} />}>
+          <Alert
+            variant="light"
+            color="red"
+            icon={<IconAlertTriangle size={16} />}
+          >
             {error}
           </Alert>
         )}
@@ -380,7 +420,10 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           >
             {t('vitals:import.back', 'Back')}
           </Button>
-          <Button onClick={handleImport} leftSection={<IconFileImport size={16} />}>
+          <Button
+            onClick={handleImport}
+            leftSection={<IconFileImport size={16} />}
+          >
             {t('vitals:import.importButton', 'Import')}{' '}
             {skipDuplicates && previewData.duplicate_count > 0
               ? `(${previewData.new_count})`
@@ -405,13 +448,21 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
 
     const message =
       importResult.skipped_duplicates > 0
-        ? t('vitals:import.successWithSkipped', 'Imported {{imported}} readings ({{skipped}} duplicates skipped)', {
-            imported: importResult.imported_count,
-            skipped: importResult.skipped_duplicates,
-          })
-        : t('shared:labels.successfullyImportedCountReadings', 'Successfully imported {{count}} readings', {
-            count: importResult.imported_count,
-          });
+        ? t(
+            'vitals:import.successWithSkipped',
+            'Imported {{imported}} readings ({{skipped}} duplicates skipped)',
+            {
+              imported: importResult.imported_count,
+              skipped: importResult.skipped_duplicates,
+            }
+          )
+        : t(
+            'shared:labels.successfullyImportedCountReadings',
+            'Successfully imported {{count}} readings',
+            {
+              count: importResult.imported_count,
+            }
+          );
 
     return (
       <Stack gap="md" align="center" py="md">
@@ -421,7 +472,11 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
         </Text>
 
         {importResult.errors.length > 0 && (
-          <Alert variant="light" color="red" icon={<IconAlertTriangle size={16} />}>
+          <Alert
+            variant="light"
+            color="red"
+            icon={<IconAlertTriangle size={16} />}
+          >
             {importResult.errors.map((e, i) => (
               <Text key={i} size="sm">
                 {e}
@@ -430,7 +485,9 @@ const VitalsImportModal: React.FC<VitalsImportModalProps> = ({
           </Alert>
         )}
 
-        <Button onClick={handleComplete}>{t('shared:labels.close', 'Close')}</Button>
+        <Button onClick={handleComplete}>
+          {t('shared:labels.close', 'Close')}
+        </Button>
       </Stack>
     );
   };

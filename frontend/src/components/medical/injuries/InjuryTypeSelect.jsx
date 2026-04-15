@@ -20,7 +20,7 @@ const InjuryTypeSelect = ({
   const safeInjuryTypes = Array.isArray(injuryTypes) ? injuryTypes : [];
 
   // Convert injury types to Select data format
-  const selectData = safeInjuryTypes.map((type) => ({
+  const selectData = safeInjuryTypes.map(type => ({
     value: String(type.id),
     label: type.name,
   }));
@@ -35,13 +35,16 @@ const InjuryTypeSelect = ({
       placeholder={t('injuries.injuryType.placeholder', 'Select type')}
       data={selectData}
       value={value ? String(value) : null}
-      onChange={(val) => onChange(val ? parseInt(val, 10) : null)}
+      onChange={val => onChange(val ? parseInt(val, 10) : null)}
       rightSection={loading ? <Loader size="xs" /> : undefined}
       disabled={disabled || loading}
       error={error}
       clearable
       searchable
-      nothingFoundMessage={t('injuries.injuryType.noResults', 'No matching types found')}
+      nothingFoundMessage={t(
+        'injuries.injuryType.noResults',
+        'No matching types found'
+      )}
       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
     />
   );

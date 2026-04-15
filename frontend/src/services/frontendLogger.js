@@ -54,16 +54,20 @@ class FrontendLogger {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return `session_${Date.now()}_${crypto.randomUUID()}`;
     }
-    
+
     // Secure fallback using crypto.getRandomValues()
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint8Array(16);
       crypto.getRandomValues(array);
-      const hex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+      const hex = Array.from(array, byte =>
+        byte.toString(16).padStart(2, '0')
+      ).join('');
       return `session_${Date.now()}_${hex}`;
     }
-    
-    throw new Error('Crypto API not available - cannot generate secure session ID');
+
+    throw new Error(
+      'Crypto API not available - cannot generate secure session ID'
+    );
   }
 
   //   Initialize log level from backend
@@ -238,24 +242,24 @@ class FrontendLogger {
     // Use appropriate console method based on level
     switch (level) {
       case 'DEBUG':
-    // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.debug(fullMessage, logData);
         break;
       case 'INFO':
-    // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.info(fullMessage, logData);
         break;
       case 'WARNING':
-    // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.warn(fullMessage, logData);
         break;
       case 'ERROR':
       case 'CRITICAL':
-    // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.error(fullMessage, logData);
         break;
       default:
-    // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.log(fullMessage, logData);
     }
   }
@@ -658,7 +662,7 @@ class FrontendLogger {
       if (response.ok) {
         // Log successful backend transmission at debug level
         if (this.shouldLog('DEBUG')) {
-    // eslint-disable-next-line no-console
+          // eslint-disable-next-line no-console
           console.debug(
             `[${new Date().toLocaleTimeString()}] DEBUG Frontend Debug: ${logType} sent to backend`,
             {
@@ -668,12 +672,12 @@ class FrontendLogger {
           );
         }
       } else {
-    // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.error('Failed to send log to backend:', response.status);
         // Don't create infinite loop by logging this error
       }
     } catch (error) {
-    // eslint-disable-next-line no-console
+      // eslint-disable-next-line no-console
       console.error('Error sending log to backend:', error);
       // Store in queue for retry
       this.errorQueue.push({ logType, data });

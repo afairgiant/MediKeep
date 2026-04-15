@@ -345,9 +345,7 @@ class VitalsService {
    */
   async getVitalsStats(params = {}) {
     const queryParams = new URLSearchParams(params).toString();
-    const url = queryParams
-      ? `/vitals/stats?${queryParams}`
-      : `/vitals/stats`;
+    const url = queryParams ? `/vitals/stats?${queryParams}` : `/vitals/stats`;
     return await apiClient.get(url);
   }
 }

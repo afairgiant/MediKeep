@@ -7,9 +7,7 @@ import DesktopSidebar from '../DesktopSidebar';
 
 const TestWrapper = ({ children }) => (
   <BrowserRouter>
-    <MantineProvider>
-      {children}
-    </MantineProvider>
+    <MantineProvider>{children}</MantineProvider>
   </BrowserRouter>
 );
 
@@ -23,16 +21,16 @@ describe('DesktopSidebar', () => {
         section: 'Main',
         items: [
           { path: '/dashboard', label: 'Dashboard', icon: '📊', exact: true },
-          { path: '/patients', label: 'Patients', icon: '👤' }
-        ]
-      }
+          { path: '/patients', label: 'Patients', icon: '👤' },
+        ],
+      },
     ],
     userInfo: {
       username: 'testuser',
       fullName: 'Test User',
-      role: 'User'
+      role: 'User',
     },
-    onLogout: vi.fn()
+    onLogout: vi.fn(),
   };
 
   test('renders without crashing', () => {

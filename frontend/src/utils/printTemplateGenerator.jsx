@@ -6,7 +6,12 @@ import logger from '../services/logger';
 import { timezoneService } from '../services/timezoneService';
 
 import { formatDateWithPreference } from './dateFormatUtils';
-import { formatFieldLabel, formatFieldValue, insurancePrintLabelMappings, contactInfoLabelMappings } from './fieldFormatters';
+import {
+  formatFieldLabel,
+  formatFieldValue,
+  insurancePrintLabelMappings,
+  contactInfoLabelMappings,
+} from './fieldFormatters';
 
 /**
  * Cached CSS styles for medical record printing
@@ -111,12 +116,14 @@ export const getMedicalPrintStyles = () => MEDICAL_PRINT_STYLES;
  * @param {Object} config - Header configuration
  * @returns {string} HTML for header section
  */
-export const generatePrintHeader = (config) => {
+export const generatePrintHeader = config => {
   const { title, type, status, isPrimary = false, statusBadges = {} } = config;
-  
+
   const statusClass = statusBadges[status] || 'status-active';
-  const primaryBadge = isPrimary ? '<span class="primary-badge">PRIMARY</span>' : '';
-  
+  const primaryBadge = isPrimary
+    ? '<span class="primary-badge">PRIMARY</span>'
+    : '';
+
   return `
     <div class="header">
       <div class="record-title">${title}</div>
@@ -143,7 +150,7 @@ export const generateFieldGridSection = (sectionTitle, data, options = {}) => {
     labelMappings = {},
     excludeFields = [],
     includeEmpty = false,
-    customFormatting = {}
+    customFormatting = {},
   } = options;
 
   const fields = Object.entries(data)
@@ -154,10 +161,10 @@ export const generateFieldGridSection = (sectionTitle, data, options = {}) => {
     })
     .map(([key, value]) => {
       const label = formatFieldLabel(key, labelMappings);
-      const formattedValue = customFormatting[key] 
+      const formattedValue = customFormatting[key]
         ? customFormatting[key](value)
         : formatFieldValue(key, value);
-      
+
       return `
         <div class="field">
           <span class="label">${label}:</span>
@@ -203,33 +210,35 @@ export const generateMedicalRecordPrint = (data, config) => {
     type,
     headerConfig = {},
     sections = [],
-    customStyles = ''
+    customStyles = '',
   } = config;
 
   const styles = getMedicalPrintStyles() + customStyles;
-  
+
   const header = generatePrintHeader({
     title,
     type,
     status: data.status,
     isPrimary: data.is_primary,
-    ...headerConfig
+    ...headerConfig,
   });
 
-  const sectionHTML = sections.map(section => {
-    const { 
-      title: sectionTitle, 
-      data: sectionData, 
-      options = {},
-      customHTML = null 
-    } = section;
+  const sectionHTML = sections
+    .map(section => {
+      const {
+        title: sectionTitle,
+        data: sectionData,
+        options = {},
+        customHTML = null,
+      } = section;
 
-    if (customHTML) {
-      return customHTML;
-    }
+      if (customHTML) {
+        return customHTML;
+      }
 
-    return generateFieldGridSection(sectionTitle, sectionData, options);
-  }).join('');
+      return generateFieldGridSection(sectionTitle, sectionData, options);
+    })
+    .join('');
 
   const footer = generatePrintFooter();
 
@@ -249,7 +258,7 @@ export const generateMedicalRecordPrint = (data, config) => {
 };
 
 // Default date formatter using user's date preference
-const defaultFormatDate = (value) => {
+const defaultFormatDate = value => {
   if (!value) return '-';
   try {
     return formatDateWithPreference(value, timezoneService.dateFormatCode);
@@ -264,7 +273,10 @@ const defaultFormatDate = (value) => {
  * @param {Function} formatDate - Date formatting function from useDateFormat hook (optional)
  * @returns {string} Complete HTML for insurance printing
  */
-export const generateInsurancePrint = (insurance, formatDate = defaultFormatDate) => {
+export const generateInsurancePrint = (
+  insurance,
+  formatDate = defaultFormatDate
+) => {
   const coverageDetails = insurance.coverage_details || {};
   const contactInfo = insurance.contact_info || {};
 
@@ -273,11 +285,11 @@ export const generateInsurancePrint = (insurance, formatDate = defaultFormatDate
     type: `${insurance.insurance_type} Insurance`,
     headerConfig: {
       statusBadges: {
-        'active': 'status-active',
-        'inactive': 'status-inactive',
-        'pending': 'status-pending',
-        'expired': 'status-expired'
-      }
+        active: 'status-active',
+        inactive: 'status-inactive',
+        pending: 'status-pending',
+        expired: 'status-expired',
+      },
     },
     sections: [
       {
@@ -285,48 +297,67 @@ export const generateInsurancePrint = (insurance, formatDate = defaultFormatDate
         data: {
           'Member Name': insurance.member_name,
           'Member ID': insurance.member_id,
-          ...(insurance.group_number && { 'Group Number': insurance.group_number }),
+          ...(insurance.group_number && {
+            'Group Number': insurance.group_number,
+          }),
           ...(insurance.plan_name && { 'Plan Name': insurance.plan_name }),
-          ...(insurance.employer_group && { 'Employer/Group': insurance.employer_group }),
-          ...(insurance.policy_holder_name && insurance.policy_holder_name !== insurance.member_name && {
-            'Policy Holder': insurance.policy_holder_name,
-            'Relationship': insurance.relationship_to_holder || 'Self'
-          })
-        }
+          ...(insurance.employer_group && {
+            'Employer/Group': insurance.employer_group,
+          }),
+          ...(insurance.policy_holder_name &&
+            insurance.policy_holder_name !== insurance.member_name && {
+              'Policy Holder': insurance.policy_holder_name,
+              Relationship: insurance.relationship_to_holder || 'Self',
+            }),
+        },
       },
       {
         title: 'Coverage Period',
         data: {
           'Effective Date': formatDate(insurance.effective_date),
-          ...(insurance.expiration_date && { 'Expiration Date': formatDate(insurance.expiration_date) })
-        }
+          ...(insurance.expiration_date && {
+            'Expiration Date': formatDate(insurance.expiration_date),
+          }),
+        },
       },
-      ...(Object.keys(coverageDetails).length > 0 ? [{
-        title: 'Coverage Details',
-        data: coverageDetails,
-        options: {
-          labelMappings: insurancePrintLabelMappings
-        }
-      }] : []),
-      ...(Object.keys(contactInfo).length > 0 ? [{
-        title: 'Contact Information',
-        data: contactInfo,
-        options: {
-          labelMappings: contactInfoLabelMappings
-        }
-      }] : []),
-      ...(insurance.notes ? [{
-        title: 'Notes',
-        customHTML: `
+      ...(Object.keys(coverageDetails).length > 0
+        ? [
+            {
+              title: 'Coverage Details',
+              data: coverageDetails,
+              options: {
+                labelMappings: insurancePrintLabelMappings,
+              },
+            },
+          ]
+        : []),
+      ...(Object.keys(contactInfo).length > 0
+        ? [
+            {
+              title: 'Contact Information',
+              data: contactInfo,
+              options: {
+                labelMappings: contactInfoLabelMappings,
+              },
+            },
+          ]
+        : []),
+      ...(insurance.notes
+        ? [
+            {
+              title: 'Notes',
+              customHTML: `
           <div class="section">
             <div class="section-title">Notes</div>
             <div style="padding: 5px; background-color: #f8f9fa; border-radius: 3px;">
               ${insurance.notes.replace(/\n/g, '<br>')}
             </div>
           </div>
-        `
-      }] : [])
-    ]
+        `,
+            },
+          ]
+        : []),
+    ],
   };
 
   return generateMedicalRecordPrint(insurance, config);
@@ -352,7 +383,12 @@ export const openPrintWindow = (html, windowTitle = 'Medical Record') => {
  * @param {Function} onError - Error callback
  * @param {Function} formatDate - Date formatting function from useDateFormat hook (optional)
  */
-export const printInsuranceRecord = (insurance, onSuccess, onError, formatDate = defaultFormatDate) => {
+export const printInsuranceRecord = (
+  insurance,
+  onSuccess,
+  onError,
+  formatDate = defaultFormatDate
+) => {
   try {
     const html = generateInsurancePrint(insurance, formatDate);
     openPrintWindow(html, `Insurance Details - ${insurance.company_name}`);

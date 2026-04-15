@@ -11,20 +11,20 @@ import {
   Stack,
   Tooltip,
   Skeleton,
-  Box
+  Box,
 } from '@mantine/core';
 import {
   IconFlask,
   IconAlertTriangle,
   IconCheck,
   IconTrendingUp,
-  IconTrendingDown
+  IconTrendingDown,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import {
   LabTestComponent,
   labTestComponentApi,
-  LabTestComponentFilters
+  LabTestComponentFilters,
 } from '../../../services/api/labTestComponentApi';
 import { useCurrentPatient } from '../../../hooks/useGlobalData';
 import { getCategoryDisplayName } from '../../../constants/labCategories';
@@ -47,7 +47,7 @@ interface SummaryStats {
 const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
   labResultId,
   compact = true,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
   const [stats, setStats] = useState<SummaryStats | null>(null);
@@ -56,21 +56,25 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
 
   const { patient: currentPatient } = useCurrentPatient() as any;
 
-  const handleError = useCallback((error: Error, context: string) => {
-    logger.error('test_component_summary_error', {
-      message: `Error in TestComponentSummary: ${context}`,
-      labResultId,
-      error: error.message,
-      component: 'TestComponentSummary',
-    });
+  const handleError = useCallback(
+    (error: Error, context: string) => {
+      logger.error('test_component_summary_error', {
+        message: `Error in TestComponentSummary: ${context}`,
+        labResultId,
+        error: error.message,
+        component: 'TestComponentSummary',
+      });
 
-    const errorMessage = error.message || 'Failed to load test component summary';
-    setError(errorMessage);
+      const errorMessage =
+        error.message || 'Failed to load test component summary';
+      setError(errorMessage);
 
-    if (onError) {
-      onError(error);
-    }
-  }, [labResultId, onError]);
+      if (onError) {
+        onError(error);
+      }
+    },
+    [labResultId, onError]
+  );
 
   const loadSummary = useCallback(async () => {
     setLoading(true);
@@ -92,7 +96,7 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
         critical: 0,
         abnormal: 0,
         normal: 0,
-        categories: []
+        categories: [],
       };
 
       const categorySet = new Set<string>();
@@ -193,11 +197,16 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
         <Group gap="xs">
           <IconFlask size={14} />
           <Text size="sm" fw={500}>
-            {t('labresults:summary.testComponentsTotal', { count: stats.total })}
+            {t('labresults:summary.testComponentsTotal', {
+              count: stats.total,
+            })}
           </Text>
           {stats.categories.length > 0 && (
             <Text size="xs" c="dimmed">
-              {'\u2022'} {t('labresults:stats.categoriesCount', { count: stats.categories.length })}
+              {'\u2022'}{' '}
+              {t('labresults:stats.categoriesCount', {
+                count: stats.categories.length,
+              })}
             </Text>
           )}
         </Group>
@@ -205,7 +214,9 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
         {/* Status Badges */}
         <Group gap="xs">
           {stats.critical > 0 && (
-            <Tooltip label={`${stats.critical} critical result${stats.critical !== 1 ? 's' : ''}`}>
+            <Tooltip
+              label={`${stats.critical} critical result${stats.critical !== 1 ? 's' : ''}`}
+            >
               <Badge
                 size="sm"
                 color="red"
@@ -218,7 +229,9 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
           )}
 
           {stats.abnormal > 0 && (
-            <Tooltip label={`${stats.abnormal} abnormal result${stats.abnormal !== 1 ? 's' : ''}`}>
+            <Tooltip
+              label={`${stats.abnormal} abnormal result${stats.abnormal !== 1 ? 's' : ''}`}
+            >
               <Badge
                 size="sm"
                 color="orange"
@@ -231,7 +244,9 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
           )}
 
           {stats.normal > 0 && (
-            <Tooltip label={`${stats.normal} normal result${stats.normal !== 1 ? 's' : ''}`}>
+            <Tooltip
+              label={`${stats.normal} normal result${stats.normal !== 1 ? 's' : ''}`}
+            >
               <Badge
                 size="sm"
                 color="green"
@@ -259,18 +274,15 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
         {stats.categories.length > 0 && (
           <Group gap={4}>
             {stats.categories.slice(0, 3).map(category => (
-              <Badge
-                key={category}
-                size="xs"
-                variant="light"
-                color="gray"
-              >
+              <Badge key={category} size="xs" variant="light" color="gray">
                 {getCategoryDisplayName(category)}
               </Badge>
             ))}
             {stats.categories.length > 3 && (
               <Text size="xs" c="dimmed">
-                {t('labresults:summary.moreCategories', { count: stats.categories.length - 3 })}
+                {t('labresults:summary.moreCategories', {
+                  count: stats.categories.length - 3,
+                })}
               </Text>
             )}
           </Group>
@@ -285,7 +297,11 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
       <Group justify="space-between">
         <Group gap="xs">
           <IconFlask size={16} />
-          <Text fw={600}>{t('labresults:summary.testComponentsCount', { count: stats.total })}</Text>
+          <Text fw={600}>
+            {t('labresults:summary.testComponentsCount', {
+              count: stats.total,
+            })}
+          </Text>
         </Group>
         <Badge color={getHealthScoreColor(healthScore)}>
           {t('labresults:summary.healthyPercent', { score: healthScore })}
@@ -296,36 +312,39 @@ const TestComponentSummary: React.FC<TestComponentSummaryProps> = ({
         {stats.normal > 0 && (
           <Group gap="xs">
             <IconCheck size={16} color="green" />
-            <Text size="sm">{stats.normal} {t('labresults:stats.normal')}</Text>
+            <Text size="sm">
+              {stats.normal} {t('labresults:stats.normal')}
+            </Text>
           </Group>
         )}
 
         {stats.abnormal > 0 && (
           <Group gap="xs">
             <IconTrendingUp size={16} color="orange" />
-            <Text size="sm">{stats.abnormal} {t('labresults:stats.abnormal')}</Text>
+            <Text size="sm">
+              {stats.abnormal} {t('labresults:stats.abnormal')}
+            </Text>
           </Group>
         )}
 
         {stats.critical > 0 && (
           <Group gap="xs">
             <IconAlertTriangle size={16} color="red" />
-            <Text size="sm">{stats.critical} {t('labresults:stats.critical')}</Text>
+            <Text size="sm">
+              {stats.critical} {t('labresults:stats.critical')}
+            </Text>
           </Group>
         )}
       </Group>
 
       {stats.categories.length > 0 && (
         <Stack gap="xs">
-          <Text size="sm" fw={500} c="dimmed">{t('labresults:summary.categoriesLabel')}</Text>
+          <Text size="sm" fw={500} c="dimmed">
+            {t('labresults:summary.categoriesLabel')}
+          </Text>
           <Group gap="xs">
             {stats.categories.map(category => (
-              <Badge
-                key={category}
-                size="sm"
-                variant="light"
-                color="blue"
-              >
+              <Badge key={category} size="sm" variant="light" color="blue">
                 {getCategoryDisplayName(category)}
               </Badge>
             ))}

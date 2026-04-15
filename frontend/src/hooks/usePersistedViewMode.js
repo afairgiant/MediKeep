@@ -28,15 +28,17 @@ function readValidMode(key) {
  */
 export function usePersistedViewMode(pageKey, defaultMode = 'cards') {
   if (typeof pageKey !== 'string' || pageKey.trim().length === 0) {
-    throw new Error('usePersistedViewMode: "pageKey" must be a non-empty string');
+    throw new Error(
+      'usePersistedViewMode: "pageKey" must be a non-empty string'
+    );
   }
 
   const storageKey = `medikeep_viewmode_${pageKey}`;
 
   const [viewMode, setViewMode] = useState(() => {
-    return readValidMode(storageKey)
-      ?? readValidMode(LEGACY_KEY)
-      ?? defaultMode;
+    return (
+      readValidMode(storageKey) ?? readValidMode(LEGACY_KEY) ?? defaultMode
+    );
   });
 
   useEffect(() => {

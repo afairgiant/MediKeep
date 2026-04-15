@@ -1,15 +1,18 @@
 import React, { forwardRef, memo, useMemo } from 'react';
 import { useResponsive } from '../hooks/useResponsive';
-import { useBreakpointValue, useBreakpointConfig } from '../hooks/useBreakpoint';
+import {
+  useBreakpointValue,
+  useBreakpointConfig,
+} from '../hooks/useBreakpoint';
 
 /**
  * HOC that transforms component props based on responsive breakpoints
  * More focused than withResponsive, specifically for prop transformation
- * 
+ *
  * @param {React.Component} WrappedComponent - Component to enhance
  * @param {Object|Function} propsConfig - Configuration for prop transformation
  * @returns {React.Component} Enhanced component with transformed props
- * 
+ *
  * @example
  * // Object configuration
  * const ResponsiveButton = withResponsiveProps(Button, {
@@ -17,7 +20,7 @@ import { useBreakpointValue, useBreakpointConfig } from '../hooks/useBreakpoint'
  *   fullWidth: { xs: true, md: false },
  *   variant: { xs: 'filled', lg: 'outline' }
  * });
- * 
+ *
  * // Function configuration
  * const ResponsiveModal = withResponsiveProps(Modal, (responsive) => ({
  *   size: responsive.isMobile ? 'full' : 'lg',
@@ -30,65 +33,68 @@ export function withResponsiveProps(WrappedComponent, propsConfig) {
     throw new Error('withResponsiveProps: propsConfig is required');
   }
 
-  const ResponsivePropsComponent = memo(forwardRef((props, ref) => {
-    const responsive = useResponsive();
-    
-    // Pre-calculate responsive values for object configuration
-    const responsiveValues = useMemo(() => {
-      if (typeof propsConfig === 'object') {
-        const values = {};
-        Object.entries(propsConfig).forEach(([propName, breakpointValues]) => {
-          // Get responsive value directly from breakpoint
-          const currentBreakpoint = responsive.breakpoint;
-          let value = breakpointValues[currentBreakpoint];
-          
-          // Fallback to smaller breakpoints if current not defined
-          if (value === undefined) {
-            const fallbackOrder = ['xl', 'lg', 'md', 'sm', 'xs'];
-            const currentIndex = fallbackOrder.indexOf(currentBreakpoint);
-            
-            for (let i = currentIndex + 1; i < fallbackOrder.length; i++) {
-              const fallbackBreakpoint = fallbackOrder[i];
-              if (breakpointValues[fallbackBreakpoint] !== undefined) {
-                value = breakpointValues[fallbackBreakpoint];
-                break;
+  const ResponsivePropsComponent = memo(
+    forwardRef((props, ref) => {
+      const responsive = useResponsive();
+
+      // Pre-calculate responsive values for object configuration
+      const responsiveValues = useMemo(() => {
+        if (typeof propsConfig === 'object') {
+          const values = {};
+          Object.entries(propsConfig).forEach(
+            ([propName, breakpointValues]) => {
+              // Get responsive value directly from breakpoint
+              const currentBreakpoint = responsive.breakpoint;
+              let value = breakpointValues[currentBreakpoint];
+
+              // Fallback to smaller breakpoints if current not defined
+              if (value === undefined) {
+                const fallbackOrder = ['xl', 'lg', 'md', 'sm', 'xs'];
+                const currentIndex = fallbackOrder.indexOf(currentBreakpoint);
+
+                for (let i = currentIndex + 1; i < fallbackOrder.length; i++) {
+                  const fallbackBreakpoint = fallbackOrder[i];
+                  if (breakpointValues[fallbackBreakpoint] !== undefined) {
+                    value = breakpointValues[fallbackBreakpoint];
+                    break;
+                  }
+                }
+              }
+
+              if (value !== null && value !== undefined) {
+                values[propName] = value;
               }
             }
-          }
-          
-          if (value !== null && value !== undefined) {
-            values[propName] = value;
-          }
-        });
-        return values;
-      }
-      return {};
-    }, [responsive.breakpoint]);
-    
-    const transformedProps = useMemo(() => {
-      let responsivePropsToApply = {};
+          );
+          return values;
+        }
+        return {};
+      }, [responsive.breakpoint]);
 
-      if (typeof propsConfig === 'function') {
-        // Function configuration - call with responsive state
-        responsivePropsToApply = propsConfig(responsive) || {};
-      } else if (typeof propsConfig === 'object') {
-        // Object configuration - use pre-calculated values
-        responsivePropsToApply = responsiveValues;
-      }
+      const transformedProps = useMemo(() => {
+        let responsivePropsToApply = {};
 
-      // Merge original props with responsive props (responsive props take precedence)
-      return {
-        ...props,
-        ...responsivePropsToApply
-      };
-    }, [props, responsive, responsiveValues]);
+        if (typeof propsConfig === 'function') {
+          // Function configuration - call with responsive state
+          responsivePropsToApply = propsConfig(responsive) || {};
+        } else if (typeof propsConfig === 'object') {
+          // Object configuration - use pre-calculated values
+          responsivePropsToApply = responsiveValues;
+        }
 
-    return <WrappedComponent {...transformedProps} ref={ref} />;
-  }));
+        // Merge original props with responsive props (responsive props take precedence)
+        return {
+          ...props,
+          ...responsivePropsToApply,
+        };
+      }, [props, responsive, responsiveValues]);
 
-  const componentName = WrappedComponent.displayName || 
-    WrappedComponent.name || 
-    'Component';
+      return <WrappedComponent {...transformedProps} ref={ref} />;
+    })
+  );
+
+  const componentName =
+    WrappedComponent.displayName || WrappedComponent.name || 'Component';
   ResponsivePropsComponent.displayName = `withResponsiveProps(${componentName})`;
 
   return ResponsivePropsComponent;
@@ -97,16 +103,16 @@ export function withResponsiveProps(WrappedComponent, propsConfig) {
 /**
  * Creates a hook for responsive props transformation
  * Useful when you need responsive props but don't want to wrap the component
- * 
+ *
  * @param {Object|Function} propsConfig - Configuration for prop transformation
  * @returns {Function} Hook that returns responsive props
- * 
+ *
  * @example
  * const useResponsiveButtonProps = createResponsivePropsHook({
  *   size: { xs: 'sm', md: 'lg' },
  *   fullWidth: { xs: true, md: false }
  * });
- * 
+ *
  * function MyButton(props) {
  *   const responsiveProps = useResponsiveButtonProps();
  *   return <Button {...props} {...responsiveProps} />;
@@ -119,7 +125,7 @@ export function createResponsivePropsHook(propsConfig) {
 
   return function useResponsiveProps() {
     const responsive = useResponsive();
-    
+
     return useMemo(() => {
       if (typeof propsConfig === 'function') {
         return propsConfig(responsive) || {};
@@ -131,12 +137,12 @@ export function createResponsivePropsHook(propsConfig) {
           // Get responsive value directly from breakpoint
           const currentBreakpoint = responsive.breakpoint;
           let value = breakpointValues[currentBreakpoint];
-          
+
           // Fallback to smaller breakpoints if current not defined
           if (value === undefined) {
             const fallbackOrder = ['xl', 'lg', 'md', 'sm', 'xs'];
             const currentIndex = fallbackOrder.indexOf(currentBreakpoint);
-            
+
             for (let i = currentIndex + 1; i < fallbackOrder.length; i++) {
               const fallbackBreakpoint = fallbackOrder[i];
               if (breakpointValues[fallbackBreakpoint] !== undefined) {
@@ -145,7 +151,7 @@ export function createResponsivePropsHook(propsConfig) {
               }
             }
           }
-          
+
           if (value !== null && value !== undefined) {
             responsiveProps[propName] = value;
           }
@@ -161,11 +167,11 @@ export function createResponsivePropsHook(propsConfig) {
 /**
  * HOC for responsive style transformation
  * Applies different styles based on breakpoint
- * 
+ *
  * @param {React.Component} WrappedComponent - Component to enhance
  * @param {Object|Function} stylesConfig - Styles configuration
  * @returns {React.Component} Enhanced component with responsive styles
- * 
+ *
  * @example
  * const ResponsiveCard = withResponsiveStyles(Card, {
  *   xs: { padding: '8px', fontSize: '14px' },
@@ -178,51 +184,52 @@ export function withResponsiveStyles(WrappedComponent, stylesConfig) {
     throw new Error('withResponsiveStyles: stylesConfig is required');
   }
 
-  const ResponsiveStylesComponent = memo(forwardRef((props, ref) => {
-    const responsive = useResponsive();
-    
-    const enhancedProps = useMemo(() => {
-      let responsiveStyles = {};
+  const ResponsiveStylesComponent = memo(
+    forwardRef((props, ref) => {
+      const responsive = useResponsive();
 
-      if (typeof stylesConfig === 'function') {
-        responsiveStyles = stylesConfig(responsive) || {};
-      } else if (typeof stylesConfig === 'object') {
-        // Get responsive styles directly from breakpoint
-        const currentBreakpoint = responsive.breakpoint;
-        responsiveStyles = stylesConfig[currentBreakpoint];
-        
-        // Fallback to smaller breakpoints if current not defined
-        if (!responsiveStyles) {
-          const fallbackOrder = ['xl', 'lg', 'md', 'sm', 'xs'];
-          const currentIndex = fallbackOrder.indexOf(currentBreakpoint);
-          
-          for (let i = currentIndex + 1; i < fallbackOrder.length; i++) {
-            const fallbackBreakpoint = fallbackOrder[i];
-            if (stylesConfig[fallbackBreakpoint]) {
-              responsiveStyles = stylesConfig[fallbackBreakpoint];
-              break;
+      const enhancedProps = useMemo(() => {
+        let responsiveStyles = {};
+
+        if (typeof stylesConfig === 'function') {
+          responsiveStyles = stylesConfig(responsive) || {};
+        } else if (typeof stylesConfig === 'object') {
+          // Get responsive styles directly from breakpoint
+          const currentBreakpoint = responsive.breakpoint;
+          responsiveStyles = stylesConfig[currentBreakpoint];
+
+          // Fallback to smaller breakpoints if current not defined
+          if (!responsiveStyles) {
+            const fallbackOrder = ['xl', 'lg', 'md', 'sm', 'xs'];
+            const currentIndex = fallbackOrder.indexOf(currentBreakpoint);
+
+            for (let i = currentIndex + 1; i < fallbackOrder.length; i++) {
+              const fallbackBreakpoint = fallbackOrder[i];
+              if (stylesConfig[fallbackBreakpoint]) {
+                responsiveStyles = stylesConfig[fallbackBreakpoint];
+                break;
+              }
             }
           }
+
+          responsiveStyles = responsiveStyles || {};
         }
-        
-        responsiveStyles = responsiveStyles || {};
-      }
 
-      return {
-        ...props,
-        style: {
-          ...responsiveStyles,
-          ...props.style
-        }
-      };
-    }, [props, responsive]);
+        return {
+          ...props,
+          style: {
+            ...responsiveStyles,
+            ...props.style,
+          },
+        };
+      }, [props, responsive]);
 
-    return <WrappedComponent {...enhancedProps} ref={ref} />;
-  }));
+      return <WrappedComponent {...enhancedProps} ref={ref} />;
+    })
+  );
 
-  const componentName = WrappedComponent.displayName || 
-    WrappedComponent.name || 
-    'Component';
+  const componentName =
+    WrappedComponent.displayName || WrappedComponent.name || 'Component';
   ResponsiveStylesComponent.displayName = `withResponsiveStyles(${componentName})`;
 
   return ResponsiveStylesComponent;
@@ -231,15 +238,15 @@ export function withResponsiveStyles(WrappedComponent, stylesConfig) {
 /**
  * HOC for responsive className application
  * Applies different CSS classes based on breakpoint
- * 
+ *
  * @param {React.Component} WrappedComponent - Component to enhance
  * @param {Object|Function} classConfig - Class configuration
  * @returns {React.Component} Enhanced component with responsive classes
- * 
+ *
  * @example
  * const ResponsiveDiv = withResponsiveClasses('div', {
  *   xs: 'mobile-layout',
- *   md: 'tablet-layout', 
+ *   md: 'tablet-layout',
  *   lg: 'desktop-layout'
  * });
  */
@@ -248,52 +255,53 @@ export function withResponsiveClasses(WrappedComponent, classConfig) {
     throw new Error('withResponsiveClasses: classConfig is required');
   }
 
-  const ResponsiveClassesComponent = memo(forwardRef((props, ref) => {
-    const responsive = useResponsive();
-    
-    const enhancedProps = useMemo(() => {
-      let responsiveClassName = '';
+  const ResponsiveClassesComponent = memo(
+    forwardRef((props, ref) => {
+      const responsive = useResponsive();
 
-      if (typeof classConfig === 'function') {
-        responsiveClassName = classConfig(responsive) || '';
-      } else if (typeof classConfig === 'object') {
-        // Get responsive className directly from breakpoint
-        const currentBreakpoint = responsive.breakpoint;
-        responsiveClassName = classConfig[currentBreakpoint];
-        
-        // Fallback to smaller breakpoints if current not defined
-        if (!responsiveClassName) {
-          const fallbackOrder = ['xl', 'lg', 'md', 'sm', 'xs'];
-          const currentIndex = fallbackOrder.indexOf(currentBreakpoint);
-          
-          for (let i = currentIndex + 1; i < fallbackOrder.length; i++) {
-            const fallbackBreakpoint = fallbackOrder[i];
-            if (classConfig[fallbackBreakpoint]) {
-              responsiveClassName = classConfig[fallbackBreakpoint];
-              break;
+      const enhancedProps = useMemo(() => {
+        let responsiveClassName = '';
+
+        if (typeof classConfig === 'function') {
+          responsiveClassName = classConfig(responsive) || '';
+        } else if (typeof classConfig === 'object') {
+          // Get responsive className directly from breakpoint
+          const currentBreakpoint = responsive.breakpoint;
+          responsiveClassName = classConfig[currentBreakpoint];
+
+          // Fallback to smaller breakpoints if current not defined
+          if (!responsiveClassName) {
+            const fallbackOrder = ['xl', 'lg', 'md', 'sm', 'xs'];
+            const currentIndex = fallbackOrder.indexOf(currentBreakpoint);
+
+            for (let i = currentIndex + 1; i < fallbackOrder.length; i++) {
+              const fallbackBreakpoint = fallbackOrder[i];
+              if (classConfig[fallbackBreakpoint]) {
+                responsiveClassName = classConfig[fallbackBreakpoint];
+                break;
+              }
             }
           }
+
+          responsiveClassName = responsiveClassName || '';
         }
-        
-        responsiveClassName = responsiveClassName || '';
-      }
 
-      const combinedClassName = [props.className, responsiveClassName]
-        .filter(Boolean)
-        .join(' ');
+        const combinedClassName = [props.className, responsiveClassName]
+          .filter(Boolean)
+          .join(' ');
 
-      return {
-        ...props,
-        className: combinedClassName
-      };
-    }, [props, responsive]);
+        return {
+          ...props,
+          className: combinedClassName,
+        };
+      }, [props, responsive]);
 
-    return <WrappedComponent {...enhancedProps} ref={ref} />;
-  }));
+      return <WrappedComponent {...enhancedProps} ref={ref} />;
+    })
+  );
 
-  const componentName = WrappedComponent.displayName || 
-    WrappedComponent.name || 
-    'Component';
+  const componentName =
+    WrappedComponent.displayName || WrappedComponent.name || 'Component';
   ResponsiveClassesComponent.displayName = `withResponsiveClasses(${componentName})`;
 
   return ResponsiveClassesComponent;
@@ -302,17 +310,17 @@ export function withResponsiveClasses(WrappedComponent, classConfig) {
 /**
  * Utility function to create responsive prop configurations
  * Helps with creating consistent prop mappings
- * 
+ *
  * @param {Object} config - Base configuration
  * @returns {Object} Responsive prop configuration
- * 
+ *
  * @example
  * const buttonConfig = createResponsiveConfig({
  *   mobile: { size: 'sm', fullWidth: true },
  *   tablet: { size: 'md', fullWidth: false },
  *   desktop: { size: 'lg', fullWidth: false }
  * });
- * 
+ *
  * // Expands to:
  * // {
  * //   size: { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg', xl: 'lg' },
@@ -321,12 +329,12 @@ export function withResponsiveClasses(WrappedComponent, classConfig) {
  */
 export function createResponsiveConfig(config) {
   const { mobile = {}, tablet = {}, desktop = {} } = config;
-  
+
   const result = {};
   const allProps = new Set([
     ...Object.keys(mobile),
-    ...Object.keys(tablet), 
-    ...Object.keys(desktop)
+    ...Object.keys(tablet),
+    ...Object.keys(desktop),
   ]);
 
   allProps.forEach(prop => {
@@ -334,8 +342,18 @@ export function createResponsiveConfig(config) {
       xs: mobile[prop],
       sm: mobile[prop],
       md: tablet[prop] !== undefined ? tablet[prop] : mobile[prop],
-      lg: desktop[prop] !== undefined ? desktop[prop] : (tablet[prop] !== undefined ? tablet[prop] : mobile[prop]),
-      xl: desktop[prop] !== undefined ? desktop[prop] : (tablet[prop] !== undefined ? tablet[prop] : mobile[prop])
+      lg:
+        desktop[prop] !== undefined
+          ? desktop[prop]
+          : tablet[prop] !== undefined
+            ? tablet[prop]
+            : mobile[prop],
+      xl:
+        desktop[prop] !== undefined
+          ? desktop[prop]
+          : tablet[prop] !== undefined
+            ? tablet[prop]
+            : mobile[prop],
     };
   });
 
@@ -344,11 +362,11 @@ export function createResponsiveConfig(config) {
 
 /**
  * Batch HOC for applying multiple responsive transformations
- * 
+ *
  * @param {React.Component} WrappedComponent - Component to enhance
  * @param {Object} config - Configuration object
  * @returns {React.Component} Enhanced component
- * 
+ *
  * @example
  * const ResponsiveButton = withResponsiveEnhancements(Button, {
  *   props: {
@@ -366,8 +384,12 @@ export function createResponsiveConfig(config) {
  * });
  */
 export function withResponsiveEnhancements(WrappedComponent, config = {}) {
-  const { props: propsConfig, styles: stylesConfig, classes: classConfig } = config;
-  
+  const {
+    props: propsConfig,
+    styles: stylesConfig,
+    classes: classConfig,
+  } = config;
+
   let EnhancedComponent = WrappedComponent;
 
   if (propsConfig) {

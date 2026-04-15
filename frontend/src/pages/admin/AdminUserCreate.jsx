@@ -37,7 +37,12 @@ const AdminUserCreate = () => {
               </ThemeIcon>
               <div>
                 <h1>{t('createUser.pageTitle', 'Create New User')}</h1>
-                <p>{t('createUser.pageSubtitle', 'Create a new user account with patient profile')}</p>
+                <p>
+                  {t(
+                    'createUser.pageSubtitle',
+                    'Create a new user account with patient profile'
+                  )}
+                </p>
               </div>
             </Group>
           </div>
@@ -53,7 +58,10 @@ const AdminUserCreate = () => {
                 {t('createUser.cardTitle', 'User Account Details')}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('createUser.cardSubtitle', 'Fill out the form below to create a new user account')}
+                {t(
+                  'createUser.cardSubtitle',
+                  'Fill out the form below to create a new user account'
+                )}
               </Text>
             </div>
           </Group>
@@ -72,14 +80,41 @@ const AdminUserCreate = () => {
                 </ThemeIcon>
                 <div>
                   <Text size="sm" fw={500}>
-                    {t('createUser.autoFeaturesTitle', 'Auto-Generated Features')}
+                    {t(
+                      'createUser.autoFeaturesTitle',
+                      'Auto-Generated Features'
+                    )}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    &bull; {t('createUser.autoFeatures.patientRecord', 'Patient record will be automatically created (or link to an existing one)')}<br/>
-                    &bull; {t('createUser.autoFeatures.linkExisting', 'Use "Link to existing patient" to transfer a patient record to the new user')}<br/>
-                    &bull; {t('createUser.autoFeatures.editAccess', 'Original owner will keep edit access to linked patients')}<br/>
-                    &bull; {t('createUser.autoFeatures.timestamps', 'Account timestamps will be set automatically')}<br/>
-                    &bull; {t('createUser.autoFeatures.immediateLogin', 'User can log in immediately after creation')}
+                    &bull;{' '}
+                    {t(
+                      'createUser.autoFeatures.patientRecord',
+                      'Patient record will be automatically created (or link to an existing one)'
+                    )}
+                    <br />
+                    &bull;{' '}
+                    {t(
+                      'createUser.autoFeatures.linkExisting',
+                      'Use "Link to existing patient" to transfer a patient record to the new user'
+                    )}
+                    <br />
+                    &bull;{' '}
+                    {t(
+                      'createUser.autoFeatures.editAccess',
+                      'Original owner will keep edit access to linked patients'
+                    )}
+                    <br />
+                    &bull;{' '}
+                    {t(
+                      'createUser.autoFeatures.timestamps',
+                      'Account timestamps will be set automatically'
+                    )}
+                    <br />
+                    &bull;{' '}
+                    {t(
+                      'createUser.autoFeatures.immediateLogin',
+                      'User can log in immediately after creation'
+                    )}
                   </Text>
                 </div>
               </Group>

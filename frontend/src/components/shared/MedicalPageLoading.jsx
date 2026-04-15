@@ -28,7 +28,11 @@ function MedicalPageLoading({ message = 'Loading...', hint }) {
         <Stack align="center">
           <Loader size="lg" />
           <Text>{message}</Text>
-          {hint && <Text size="sm" c="dimmed">{hint}</Text>}
+          {hint && (
+            <Text size="sm" c="dimmed">
+              {hint}
+            </Text>
+          )}
         </Stack>
       </Center>
     </Container>

@@ -44,9 +44,9 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
     }
   }, [practiceData, isOpen]);
 
-  const handleChange = (field) => (event) => {
+  const handleChange = field => event => {
     const value = event?.target?.value ?? event;
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
@@ -55,7 +55,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
     setIsSubmitting(true);
     try {
       const payload = { ...formData };
-      Object.keys(payload).forEach((key) => {
+      Object.keys(payload).forEach(key => {
         if (payload[key] === '') {
           payload[key] = null;
         }
@@ -70,8 +70,14 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
       notifications.show({
         title: t('common:messages.updateSuccess', 'Success'),
         message: isEditing
-          ? t('common:practitioners.viewModal.practiceUpdateSuccess', 'Practice updated successfully')
-          : t('common:practitioners.practices.createSuccess', 'Practice created successfully'),
+          ? t(
+              'common:practitioners.viewModal.practiceUpdateSuccess',
+              'Practice updated successfully'
+            )
+          : t(
+              'common:practitioners.practices.createSuccess',
+              'Practice created successfully'
+            ),
         color: 'green',
       });
       onSaved();
@@ -79,7 +85,10 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
     } catch {
       notifications.show({
         title: t('shared:labels.error', 'Error'),
-        message: t('common:practitioners.viewModal.practiceUpdateError', 'Failed to update practice'),
+        message: t(
+          'common:practitioners.viewModal.practiceUpdateError',
+          'Failed to update practice'
+        ),
         color: 'red',
       });
     } finally {
@@ -93,9 +102,10 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={isEditing
-        ? t('common:practitioners.viewModal.editPractice', 'Edit Practice')
-        : t('common:practitioners.practices.createTitle', 'Add Practice')
+      title={
+        isEditing
+          ? t('common:practitioners.viewModal.editPractice', 'Edit Practice')
+          : t('common:practitioners.practices.createTitle', 'Add Practice')
       }
       size="md"
       centered

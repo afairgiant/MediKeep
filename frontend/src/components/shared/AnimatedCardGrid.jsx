@@ -31,7 +31,7 @@ const MAX_TOTAL_STAGGER = 0.4; // seconds
 function AnimatedCardGrid({
   items,
   renderCard,
-  keyExtractor = (item) => item.id,
+  keyExtractor = item => item.id,
   columns = { base: 12, md: 6, lg: 4 },
   animate = true,
   staggerDelay = 0.03,
@@ -45,12 +45,15 @@ function AnimatedCardGrid({
     return null;
   }
 
-  const effectiveStagger = Math.min(staggerDelay, MAX_TOTAL_STAGGER / items.length);
+  const effectiveStagger = Math.min(
+    staggerDelay,
+    MAX_TOTAL_STAGGER / items.length
+  );
 
   if (!animate) {
     return (
       <Grid>
-        {items.map((item) => (
+        {items.map(item => (
           <Grid.Col key={keyExtractor(item)} span={columns}>
             {renderCard(item)}
           </Grid.Col>
@@ -94,10 +97,7 @@ AnimatedCardGrid.propTypes = {
   /** Function to extract a unique key from each item (default: item => item.id) */
   keyExtractor: PropTypes.func,
   /** Responsive column spans using Mantine's object syntax (default: { base: 12, md: 6, lg: 4 }) */
-  columns: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.object,
-  ]),
+  columns: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
   /** Whether to animate the cards (default: true) */
   animate: PropTypes.bool,
   /** Delay between each card's animation in seconds (default: 0.03, capped so total stagger stays under 0.4s) */

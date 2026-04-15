@@ -8,15 +8,15 @@ import { Avatar } from '@mantine/core';
 const PatientAvatar = ({
   photoUrl,
   patient,
-  size = "sm",
-  color = "blue",
-  radius = "xl",
+  size = 'sm',
+  color = 'blue',
+  radius = 'xl',
   style,
   children,
   ...props
 }) => {
   // Generate patient initials for fallback
-  const getPatientInitials = (patient) => {
+  const getPatientInitials = patient => {
     if (!patient) return '';
     const firstInitial = patient.first_name?.[0] || '';
     const lastInitial = patient.last_name?.[0] || '';

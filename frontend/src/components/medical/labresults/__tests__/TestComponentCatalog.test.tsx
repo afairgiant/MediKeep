@@ -4,7 +4,11 @@ import TestComponentCatalog from '../TestComponentCatalog';
 
 // Mock Mantine components to avoid MantineProvider requirement
 vi.mock('@mantine/core', () => ({
-  Stack: ({ children, ...props }: any) => <div data-testid="mantine-stack" {...props}>{children}</div>,
+  Stack: ({ children, ...props }: any) => (
+    <div data-testid="mantine-stack" {...props}>
+      {children}
+    </div>
+  ),
   Group: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   TextInput: ({ placeholder, ...props }: any) => (
     <input placeholder={placeholder} data-testid="search-input" {...props} />
@@ -20,13 +24,25 @@ vi.mock('@mantine/core', () => ({
       {children}
     </div>
   ),
-  SimpleGrid: ({ children, ...props }: any) => <div data-testid="simple-grid" {...props}>{children}</div>,
-  SegmentedControl: ({ ...props }: any) => <div data-testid="segmented-control" {...props} />,
+  SimpleGrid: ({ children, ...props }: any) => (
+    <div data-testid="simple-grid" {...props}>
+      {children}
+    </div>
+  ),
+  SegmentedControl: ({ ...props }: any) => (
+    <div data-testid="segmented-control" {...props} />
+  ),
   Collapse: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   UnstyledButton: ({ children, onClick, ...props }: any) => (
-    <button onClick={onClick} {...props}>{children}</button>
+    <button onClick={onClick} {...props}>
+      {children}
+    </button>
   ),
-  Badge: ({ children, ...props }: any) => <span data-testid="badge" {...props}>{children}</span>,
+  Badge: ({ children, ...props }: any) => (
+    <span data-testid="badge" {...props}>
+      {children}
+    </span>
+  ),
 }));
 
 // Mock tabler icons
@@ -78,9 +94,7 @@ vi.mock('../../../shared/AnimatedCardGrid', () => ({
 
 // Mock EmptyState
 vi.mock('../../../shared/EmptyState', () => ({
-  default: ({ title }: any) => (
-    <div data-testid="empty-state">{title}</div>
-  ),
+  default: ({ title }: any) => <div data-testid="empty-state">{title}</div>,
 }));
 
 // Mock TestComponentCatalogCard
@@ -99,7 +113,11 @@ vi.mock('../TestComponentCatalogCard', () => ({
 // Mock TestComponentTrendsPanel
 vi.mock('../TestComponentTrendsPanel', () => ({
   default: ({ opened, testName }: any) => (
-    <div data-testid="trends-panel" data-opened={opened} data-test-name={testName} />
+    <div
+      data-testid="trends-panel"
+      data-opened={opened}
+      data-test-name={testName}
+    />
   ),
 }));
 
@@ -223,7 +241,7 @@ describe('TestComponentCatalog', () => {
     expect(mockGetComponentCatalog).toHaveBeenCalledWith(
       42,
       expect.objectContaining({ limit: 500 }),
-      expect.any(AbortSignal),
+      expect.any(AbortSignal)
     );
   });
 

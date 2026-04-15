@@ -46,12 +46,12 @@ export const restructureFormData = (formData, fieldConfig) => {
   basicFields.forEach(field => {
     if (formData[field] !== undefined) {
       let value = formData[field];
-      
+
       // Handle boolean fields properly
       if (field === 'is_primary') {
         value = Boolean(value);
       }
-      
+
       basicData[field] = value;
     }
   });
@@ -60,7 +60,7 @@ export const restructureFormData = (formData, fieldConfig) => {
   const nestedData = {};
   Object.entries(nestedFieldGroups).forEach(([groupName, fields]) => {
     const groupData = {};
-    
+
     fields.forEach(field => {
       const value = formData[field];
       // Include field if it has a value (not undefined, null, or empty string)
@@ -89,7 +89,7 @@ export const initializeFormData = (item, fieldConfig, defaultValues = {}) => {
   if (item) {
     // Edit mode - flatten existing item
     return flattenNestedObject(item, {
-      nestedFields: Object.keys(nestedFieldGroups)
+      nestedFields: Object.keys(nestedFieldGroups),
     });
   }
 
@@ -122,7 +122,7 @@ export const initializeFormData = (item, fieldConfig, defaultValues = {}) => {
 export const insuranceFieldConfig = {
   basicFields: [
     'insurance_type',
-    'company_name', 
+    'company_name',
     'employer_group',
     'member_name',
     'member_id',
@@ -134,23 +134,45 @@ export const insuranceFieldConfig = {
     'expiration_date',
     'status',
     'is_primary',
-    'notes'
+    'notes',
   ],
   nestedFieldGroups: {
     coverage_details: [
-      'primary_care_physician', 'deductible_individual', 'deductible_family',
-      'copay_primary_care', 'copay_specialist', 'copay_emergency_room', 'copay_urgent_care',
-      'plan_type', 'dental_plan_type', 'vision_plan_type', 'prescription_plan_type',
-      'annual_maximum', 'preventive_coverage', 'basic_coverage', 'major_coverage',
-      'exam_copay', 'frame_allowance', 'lens_coverage', 'contact_allowance',
-      'bin_number', 'pcn_number', 'rxgroup', 'copay_generic', 'copay_brand', 
-      'copay_specialty', 'pharmacy_network_info'
+      'primary_care_physician',
+      'deductible_individual',
+      'deductible_family',
+      'copay_primary_care',
+      'copay_specialist',
+      'copay_emergency_room',
+      'copay_urgent_care',
+      'plan_type',
+      'dental_plan_type',
+      'vision_plan_type',
+      'prescription_plan_type',
+      'annual_maximum',
+      'preventive_coverage',
+      'basic_coverage',
+      'major_coverage',
+      'exam_copay',
+      'frame_allowance',
+      'lens_coverage',
+      'contact_allowance',
+      'bin_number',
+      'pcn_number',
+      'rxgroup',
+      'copay_generic',
+      'copay_brand',
+      'copay_specialty',
+      'pharmacy_network_info',
     ],
     contact_info: [
-      'customer_service_phone', 'claims_address', 'website_url', 
-      'preauth_phone', 'provider_services_phone'
-    ]
-  }
+      'customer_service_phone',
+      'claims_address',
+      'website_url',
+      'preauth_phone',
+      'provider_services_phone',
+    ],
+  },
 };
 
 /**
@@ -170,5 +192,5 @@ export const insuranceDefaultValues = {
   expiration_date: '',
   status: 'active',
   is_primary: false,
-  notes: ''
+  notes: '',
 };

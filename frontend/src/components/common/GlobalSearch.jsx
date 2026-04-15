@@ -4,7 +4,6 @@
  */
 import logger from '../../services/logger';
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { TextInput, Box } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
@@ -12,12 +11,12 @@ import { useDebouncedValue } from '@mantine/hooks';
 import SearchResults from './SearchResults';
 import { searchService } from '../../services/searchService';
 
-const GlobalSearch = ({ 
-  patientId, 
-  placeholder = "Search medical records, tags...",
+const GlobalSearch = ({
+  patientId,
+  placeholder = 'Search medical records, tags...',
   width = 300,
   style = {},
-  ...props 
+  ...props
 }) => {
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
@@ -29,26 +28,38 @@ const GlobalSearch = ({
   // Perform search when debounced query changes
   useEffect(() => {
     const performSearch = async () => {
-      logger.debug('global_search_triggered', 'GlobalSearch useEffect triggered', {
-        debouncedQuery,
-        patientId,
-        component: 'GlobalSearch'
-      });
+      logger.debug(
+        'global_search_triggered',
+        'GlobalSearch useEffect triggered',
+        {
+          debouncedQuery,
+          patientId,
+          component: 'GlobalSearch',
+        }
+      );
 
       if (!debouncedQuery || debouncedQuery.trim().length < 2) {
-        logger.debug('global_search_query_short', 'Query too short, clearing results', {
-          component: 'GlobalSearch'
-        });
+        logger.debug(
+          'global_search_query_short',
+          'Query too short, clearing results',
+          {
+            component: 'GlobalSearch',
+          }
+        );
         setResults([]);
         setShowResults(false);
         return;
       }
 
       if (!patientId) {
-        logger.debug('global_search_no_patient', 'No patient ID provided, clearing results', {
-          patientId,
-          component: 'GlobalSearch'
-        });
+        logger.debug(
+          'global_search_no_patient',
+          'No patient ID provided, clearing results',
+          {
+            patientId,
+            component: 'GlobalSearch',
+          }
+        );
         setResults([]);
         setShowResults(false);
         return;
@@ -57,16 +68,19 @@ const GlobalSearch = ({
       logger.info('global_search_starting', 'Starting search request', {
         query: debouncedQuery,
         patientId,
-        component: 'GlobalSearch'
+        component: 'GlobalSearch',
       });
       setLoading(true);
       setShowResults(true);
 
       try {
-        const searchResults = await searchService.searchPatientRecords(debouncedQuery, patientId);
+        const searchResults = await searchService.searchPatientRecords(
+          debouncedQuery,
+          patientId
+        );
         logger.info('global_search_success', 'Search completed successfully', {
           resultCount: searchResults.length,
-          component: 'GlobalSearch'
+          component: 'GlobalSearch',
         });
         setResults(searchResults);
       } catch (error) {
@@ -74,7 +88,7 @@ const GlobalSearch = ({
           error: error.message,
           query: debouncedQuery,
           patientId,
-          component: 'GlobalSearch'
+          component: 'GlobalSearch',
         });
         setResults([]);
       } finally {
@@ -87,7 +101,7 @@ const GlobalSearch = ({
 
   // Handle clicking outside to close results
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowResults(false);
       }
@@ -112,17 +126,21 @@ const GlobalSearch = ({
   };
 
   return (
-    <Box ref={searchRef} style={{ position: 'relative', width, ...style }} {...props}>
+    <Box
+      ref={searchRef}
+      style={{ position: 'relative', width, ...style }}
+      {...props}
+    >
       <TextInput
         placeholder={placeholder}
         leftSection={<IconSearch size={16} />}
         value={query}
-        onChange={(event) => setQuery(event.currentTarget.value)}
+        onChange={event => setQuery(event.currentTarget.value)}
         onFocus={handleInputFocus}
         style={{ width: '100%' }}
         radius="md"
       />
-      
+
       <SearchResults
         results={results}
         loading={loading}

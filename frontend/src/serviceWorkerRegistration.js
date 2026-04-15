@@ -39,10 +39,14 @@ function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
-      logger.info('service_worker_registered', 'Service worker registered successfully', {
-        component: 'serviceWorkerRegistration',
-        swUrl
-      });
+      logger.info(
+        'service_worker_registered',
+        'Service worker registered successfully',
+        {
+          component: 'serviceWorkerRegistration',
+          swUrl,
+        }
+      );
 
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
@@ -53,9 +57,13 @@ function registerValidSW(swUrl, config) {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
               // An update is available — tell the new SW to activate immediately
-              logger.info('service_worker_update_available', 'New content available, activating update', {
-                component: 'serviceWorkerRegistration'
-              });
+              logger.info(
+                'service_worker_update_available',
+                'New content available, activating update',
+                {
+                  component: 'serviceWorkerRegistration',
+                }
+              );
               if (registration.waiting) {
                 registration.waiting.postMessage({ type: 'SKIP_WAITING' });
               }
@@ -63,9 +71,13 @@ function registerValidSW(swUrl, config) {
                 config.onUpdate(registration);
               }
             } else {
-              logger.info('service_worker_cached', 'Content cached for offline use', {
-                component: 'serviceWorkerRegistration'
-              });
+              logger.info(
+                'service_worker_cached',
+                'Content cached for offline use',
+                {
+                  component: 'serviceWorkerRegistration',
+                }
+              );
               if (config && config.onSuccess) {
                 config.onSuccess(registration);
               }
@@ -87,10 +99,14 @@ function registerValidSW(swUrl, config) {
       }
     })
     .catch(error => {
-      logger.error('service_worker_registration_failed', 'Service worker registration failed', {
-        component: 'serviceWorkerRegistration',
-        error: error.message
-      });
+      logger.error(
+        'service_worker_registration_failed',
+        'Service worker registration failed',
+        {
+          component: 'serviceWorkerRegistration',
+          error: error.message,
+        }
+      );
     });
 }
 
@@ -118,9 +134,13 @@ function checkValidServiceWorker(swUrl, config) {
       }
     })
     .catch(() => {
-      logger.warn('service_worker_offline', 'No internet connection found. App is running in offline mode.', {
-        component: 'serviceWorkerRegistration'
-      });
+      logger.warn(
+        'service_worker_offline',
+        'No internet connection found. App is running in offline mode.',
+        {
+          component: 'serviceWorkerRegistration',
+        }
+      );
     });
 }
 
@@ -129,15 +149,23 @@ export function unregister() {
     navigator.serviceWorker.ready
       .then(registration => {
         registration.unregister();
-        logger.info('service_worker_unregistered', 'Service worker unregistered', {
-          component: 'serviceWorkerRegistration'
-        });
+        logger.info(
+          'service_worker_unregistered',
+          'Service worker unregistered',
+          {
+            component: 'serviceWorkerRegistration',
+          }
+        );
       })
       .catch(error => {
-        logger.error('service_worker_unregister_failed', 'Service worker unregister failed', {
-          component: 'serviceWorkerRegistration',
-          error: error.message
-        });
+        logger.error(
+          'service_worker_unregister_failed',
+          'Service worker unregister failed',
+          {
+            component: 'serviceWorkerRegistration',
+            error: error.message,
+          }
+        );
       });
   }
 }

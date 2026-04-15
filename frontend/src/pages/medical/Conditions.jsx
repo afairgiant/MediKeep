@@ -2,17 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-  Container,
-  Paper,
-  Stack,
-} from '@mantine/core';
+import { Container, Paper, Stack } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import {
-  IconPlus,
-  IconShieldCheck,
-} from '@tabler/icons-react';
-import { useMedicalData, useDataManagement, useEntityFileCounts, useViewModalNavigation } from '../../hooks';
+  useMedicalData,
+  useDataManagement,
+  useEntityFileCounts,
+  useViewModalNavigation,
+} from '../../hooks';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import { apiService } from '../../services/api';
@@ -23,7 +21,7 @@ import {
   formatDateForAPI,
   getTodayString,
   isDateInFuture,
-  isEndDateBeforeStartDate
+  isEndDateBeforeStartDate,
 } from '../../utils/dateUtils';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
@@ -52,7 +50,17 @@ const Conditions = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('conditions');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Load medications and practitioners for linking dropdowns
   const [medications, setMedications] = useState([]);
@@ -60,7 +68,6 @@ const Conditions = () => {
 
   // Condition-medication relationships (for the junction table)
   const [conditionMedications, setConditionMedications] = useState({});
-  
 
   // Standardized data management
   const {
@@ -95,7 +102,8 @@ const Conditions = () => {
   const dataManagement = useDataManagement(conditions, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('condition', conditions);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('condition', conditions);
 
   // View modal navigation with URL deep linking
   const {
@@ -109,7 +117,13 @@ const Conditions = () => {
   });
 
   // Get standardized formatters for conditions
-  const conditionsFormatters = getEntityFormatters('conditions', [], navigate, null, formatDate);
+  const conditionsFormatters = getEntityFormatters(
+    'conditions',
+    [],
+    navigate,
+    null,
+    formatDate
+  );
 
   // Form and UI state
   const [showModal, setShowModal] = useState(false);
@@ -173,7 +187,7 @@ const Conditions = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('conditions_form_error', {
         message: 'Form submission error in conditions',
         error,
@@ -209,7 +223,8 @@ const Conditions = () => {
   useEffect(() => {
     if (currentPatient?.id) {
       // Load medications
-      apiService.getPatientMedications(currentPatient.id)
+      apiService
+        .getPatientMedications(currentPatient.id)
         .then(response => {
           setMedications(response || []);
         })
@@ -219,7 +234,8 @@ const Conditions = () => {
         });
 
       // Load practitioners
-      apiService.getPractitioners()
+      apiService
+        .getPractitioners()
         .then(response => {
           setPractitioners(response || []);
         })
@@ -231,12 +247,13 @@ const Conditions = () => {
   }, [currentPatient?.id]);
 
   // Function to fetch condition-medication relationships
-  const fetchConditionMedications = async (conditionId) => {
+  const fetchConditionMedications = async conditionId => {
     try {
-      const relationships = await apiService.getConditionMedications(conditionId);
+      const relationships =
+        await apiService.getConditionMedications(conditionId);
       setConditionMedications(prev => ({
         ...prev,
-        [conditionId]: relationships || []
+        [conditionId]: relationships || [],
       }));
       return relationships;
     } catch (error) {
@@ -255,7 +272,9 @@ const Conditions = () => {
       notes: condition.notes || '',
       status: condition.status || 'active', // Default status applied early for consistency
       severity: condition.severity || '',
-      practitioner_id: condition.practitioner_id ? condition.practitioner_id.toString() : '',
+      practitioner_id: condition.practitioner_id
+        ? condition.practitioner_id.toString()
+        : '',
       icd10_code: condition.icd10_code || '',
       snomed_code: condition.snomed_code || '',
       code_description: condition.code_description || '',
@@ -277,7 +296,7 @@ const Conditions = () => {
     }
   };
 
-  const handlePractitionerClick = (practitionerId) => {
+  const handlePractitionerClick = practitionerId => {
     navigate(`/practitioners?view=${practitionerId}`);
   };
 
@@ -293,12 +312,16 @@ const Conditions = () => {
     const todayString = getTodayString();
 
     if (isDateInFuture(formData.onset_date)) {
-      setError(`Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      setError(
+        `Onset date (${formData.onset_date}) cannot be in the future. Please select a date on or before today (${todayString}).`
+      );
       return;
     }
 
     if (isDateInFuture(formData.end_date)) {
-      setError(`End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`);
+      setError(
+        `End date (${formData.end_date}) cannot be in the future. Please select a date on or before today (${todayString}).`
+      );
       return;
     }
 
@@ -329,7 +352,9 @@ const Conditions = () => {
       notes: formData.notes || null,
       status: formData.status || 'active',
       severity: formData.severity || null,
-      practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
+      practitioner_id: formData.practitioner_id
+        ? parseInt(formData.practitioner_id)
+        : null,
       icd10_code: formData.icd10_code || null,
       snomed_code: formData.snomed_code || null,
       code_description: formData.code_description || null,
@@ -372,8 +397,14 @@ const Conditions = () => {
           } catch (err) {
             logger.error('Failed to link medications to new condition:', err);
             notifications.show({
-              title: t('conditions.notifications.medicationLinkWarning', 'Medication Linking Issue'),
-              message: t('conditions.notifications.medicationLinkFailed', 'Condition was created, but some medications could not be linked. You can link them manually by editing the condition.'),
+              title: t(
+                'conditions.notifications.medicationLinkWarning',
+                'Medication Linking Issue'
+              ),
+              message: t(
+                'conditions.notifications.medicationLinkFailed',
+                'Condition was created, but some medications could not be linked. You can link them manually by editing the condition.'
+              ),
               color: 'yellow',
             });
           }
@@ -432,16 +463,27 @@ const Conditions = () => {
   const filteredConditions = dataManagement.data;
   const paginatedConditions = paginateData(filteredConditions);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredConditions.length); }, [filteredConditions.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredConditions.length);
+  }, [filteredConditions.length, clampPage]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('conditions.loading', 'Loading conditions...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('conditions.loading', 'Loading conditions...')}
+      />
+    );
   }
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('shared:labels.medicalConditions', 'Medical Conditions')} icon="🩺" />
+      <PageHeader
+        title={t('shared:labels.medicalConditions', 'Medical Conditions')}
+        icon="🩺"
+      />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -472,7 +514,11 @@ const Conditions = () => {
         <ConditionFormWrapper
           isOpen={showModal}
           onClose={() => !isBlocking && setShowModal(false)}
-          title={editingCondition ? t('conditions.editTitle', 'Edit Condition') : t('conditions.addTitle', 'Add New Condition')}
+          title={
+            editingCondition
+              ? t('conditions.editTitle', 'Edit Condition')
+              : t('conditions.addTitle', 'Add New Condition')
+          }
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
@@ -503,13 +549,19 @@ const Conditions = () => {
               icon={IconShieldCheck}
               title={t('conditions.noResults', 'No medical conditions found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('conditions.getStarted', 'Click "Add New Condition" to get started.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'conditions.getStarted',
+                'Click "Add New Condition" to get started.'
+              )}
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
               items={paginatedConditions}
-              renderCard={(condition) => (
+              renderCard={condition => (
                 <ConditionCard
                   condition={condition}
                   onView={handleViewCondition}
@@ -533,13 +585,48 @@ const Conditions = () => {
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
                 columns={[
-                  { header: t('shared:labels.condition', 'Condition'), accessor: 'diagnosis', priority: 'high', width: 200 },
-                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'high', width: 120 },
-                  { header: t('shared:fields.onsetDate', 'Onset Date'), accessor: 'onset_date', priority: 'medium', width: 130 },
-                  { header: t('shared:labels.endDate', 'End Date'), accessor: 'end_date', priority: 'low', width: 130 },
-                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'high', width: 100 },
-                  { header: t('conditions.table.icd10', 'ICD-10'), accessor: 'icd10_code', priority: 'low', width: 100 },
-                  { header: t('shared:tabs.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 },
+                  {
+                    header: t('shared:labels.condition', 'Condition'),
+                    accessor: 'diagnosis',
+                    priority: 'high',
+                    width: 200,
+                  },
+                  {
+                    header: t('shared:fields.severity', 'Severity'),
+                    accessor: 'severity',
+                    priority: 'high',
+                    width: 120,
+                  },
+                  {
+                    header: t('shared:fields.onsetDate', 'Onset Date'),
+                    accessor: 'onset_date',
+                    priority: 'medium',
+                    width: 130,
+                  },
+                  {
+                    header: t('shared:labels.endDate', 'End Date'),
+                    accessor: 'end_date',
+                    priority: 'low',
+                    width: 130,
+                  },
+                  {
+                    header: t('shared:fields.status', 'Status'),
+                    accessor: 'status',
+                    priority: 'high',
+                    width: 100,
+                  },
+                  {
+                    header: t('conditions.table.icd10', 'ICD-10'),
+                    accessor: 'icd10_code',
+                    priority: 'low',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:tabs.notes', 'Notes'),
+                    accessor: 'notes',
+                    priority: 'low',
+                    width: 200,
+                  },
                 ]}
                 patientData={currentPatient}
                 tableName={t('shared:labels.medicalConditions', 'Conditions')}
@@ -561,7 +648,15 @@ const Conditions = () => {
             </Paper>
           )}
           {filteredConditions.length > 0 && (
-            <PaginationControls page={page} totalPages={totalPages(filteredConditions.length)} pageSize={pageSize} totalRecords={filteredConditions.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredConditions.length)}
+              pageSize={pageSize}
+              totalRecords={filteredConditions.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </motion.div>
 
@@ -588,5 +683,5 @@ const Conditions = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Conditions, {
   injectResponsive: true,
-  displayName: 'ResponsiveConditions'
+  displayName: 'ResponsiveConditions',
 });

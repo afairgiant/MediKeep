@@ -71,17 +71,19 @@ describe('InvitationCard Component', () => {
   const renderInvitationCard = (invitation, props = {}) => {
     const defaultProps = { ...mockProps, ...props };
 
-    return render(
-      <InvitationCard invitation={invitation} {...defaultProps} />
-    );
+    return render(<InvitationCard invitation={invitation} {...defaultProps} />);
   };
 
   describe('Basic Rendering', () => {
     it('should render invitation card with basic information', () => {
       renderInvitationCard(baseFamilyHistoryInvitation);
 
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
-      expect(screen.getByText('response.familyHistoryShare')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('response.familyHistoryShare')
+      ).toBeInTheDocument();
       expect(screen.getByText('pending')).toBeInTheDocument();
       expect(screen.getByText('From: Dr. Sarah Johnson')).toBeInTheDocument();
     });
@@ -89,15 +91,23 @@ describe('InvitationCard Component', () => {
     it('should render different invitation types correctly', () => {
       renderInvitationCard(patientShareInvitation);
 
-      expect(screen.getByText('Patient Record Share: Alice Wilson')).toBeInTheDocument();
-      expect(screen.getByText('response.patientRecordShare')).toBeInTheDocument();
+      expect(
+        screen.getByText('Patient Record Share: Alice Wilson')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('response.patientRecordShare')
+      ).toBeInTheDocument();
       expect(screen.getByText('accepted')).toBeInTheDocument();
     });
 
     it('should render invitation message when present', () => {
       renderInvitationCard(baseFamilyHistoryInvitation);
 
-      expect(screen.getByText('"Please review this family medical history for consultation."')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          '"Please review this family medical history for consultation."'
+        )
+      ).toBeInTheDocument();
     });
 
     it('should not render message section when message is absent', () => {
@@ -139,9 +149,7 @@ describe('InvitationCard Component', () => {
         const statusBadge = screen.getByText(status);
         expect(statusBadge).toBeInTheDocument();
 
-        rerender(
-          <InvitationCard invitation={invitation} {...mockProps} />
-        );
+        rerender(<InvitationCard invitation={invitation} {...mockProps} />);
       });
     });
 
@@ -163,47 +171,80 @@ describe('InvitationCard Component', () => {
 
   describe('Variant Display - Received', () => {
     it('should show "From" label for received invitations', () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        variant: 'received',
+      });
 
       expect(screen.getByText('From: Dr. Sarah Johnson')).toBeInTheDocument();
     });
 
     it('should show action buttons for pending received invitations', () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        variant: 'received',
+      });
 
-      expect(screen.getByRole('button', { name: 'card.acceptInvitation' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'card.rejectInvitation' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'card.acceptInvitation' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'card.rejectInvitation' })
+      ).toBeInTheDocument();
     });
 
     it('should not show action buttons for non-pending received invitations', () => {
-      const acceptedInvitation = { ...baseFamilyHistoryInvitation, status: 'accepted' };
+      const acceptedInvitation = {
+        ...baseFamilyHistoryInvitation,
+        status: 'accepted',
+      };
       renderInvitationCard(acceptedInvitation, { variant: 'received' });
 
-      expect(screen.queryByRole('button', { name: 'card.acceptInvitation' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'card.rejectInvitation' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'card.acceptInvitation' })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'card.rejectInvitation' })
+      ).not.toBeInTheDocument();
     });
 
     it('should not show action buttons for expired received invitations', () => {
       renderInvitationCard(expiredInvitation, { variant: 'received' });
 
-      expect(screen.queryByRole('button', { name: 'card.acceptInvitation' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'card.rejectInvitation' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'card.acceptInvitation' })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'card.rejectInvitation' })
+      ).not.toBeInTheDocument();
     });
 
     it('should handle accept button click', async () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        variant: 'received',
+      });
 
-      await userEvent.click(screen.getByRole('button', { name: 'card.acceptInvitation' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'card.acceptInvitation' })
+      );
 
-      expect(mockProps.onRespond).toHaveBeenCalledWith(baseFamilyHistoryInvitation, 'accepted');
+      expect(mockProps.onRespond).toHaveBeenCalledWith(
+        baseFamilyHistoryInvitation,
+        'accepted'
+      );
     });
 
     it('should handle reject button click', async () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        variant: 'received',
+      });
 
-      await userEvent.click(screen.getByRole('button', { name: 'card.rejectInvitation' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'card.rejectInvitation' })
+      );
 
-      expect(mockProps.onRespond).toHaveBeenCalledWith(baseFamilyHistoryInvitation, 'rejected');
+      expect(mockProps.onRespond).toHaveBeenCalledWith(
+        baseFamilyHistoryInvitation,
+        'rejected'
+      );
     });
   });
 
@@ -227,7 +268,10 @@ describe('InvitationCard Component', () => {
     });
 
     it('should show menu with revoke option for accepted family history sent invitations', async () => {
-      const acceptedInvitation = { ...baseFamilyHistoryInvitation, status: 'accepted' };
+      const acceptedInvitation = {
+        ...baseFamilyHistoryInvitation,
+        status: 'accepted',
+      };
       renderInvitationCard(acceptedInvitation, { variant: 'sent' });
 
       const menuTrigger = screen.getByRole('button', { name: '' });
@@ -239,10 +283,15 @@ describe('InvitationCard Component', () => {
     });
 
     it('should not show menu for rejected or expired sent invitations', () => {
-      const rejectedInvitation = { ...baseFamilyHistoryInvitation, status: 'rejected' };
+      const rejectedInvitation = {
+        ...baseFamilyHistoryInvitation,
+        status: 'rejected',
+      };
       renderInvitationCard(rejectedInvitation, { variant: 'sent' });
 
-      expect(screen.queryByRole('button', { name: '' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: '' })
+      ).not.toBeInTheDocument();
     });
 
     it('should handle cancel action from menu', async () => {
@@ -257,11 +306,16 @@ describe('InvitationCard Component', () => {
 
       await userEvent.click(screen.getByText('card.cancelInvitation'));
 
-      expect(mockProps.onCancel).toHaveBeenCalledWith(baseFamilyHistoryInvitation);
+      expect(mockProps.onCancel).toHaveBeenCalledWith(
+        baseFamilyHistoryInvitation
+      );
     });
 
     it('should handle revoke action from menu', async () => {
-      const acceptedInvitation = { ...baseFamilyHistoryInvitation, status: 'accepted' };
+      const acceptedInvitation = {
+        ...baseFamilyHistoryInvitation,
+        status: 'accepted',
+      };
       renderInvitationCard(acceptedInvitation, { variant: 'sent' });
 
       const menuTrigger = screen.getByRole('button', { name: '' });
@@ -327,30 +381,46 @@ describe('InvitationCard Component', () => {
       renderInvitationCard(baseFamilyHistoryInvitation, { compact: true });
 
       // Should show basic info
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
       expect(screen.getByText('From: Dr. Sarah Johnson')).toBeInTheDocument();
       expect(screen.getByText('pending')).toBeInTheDocument();
 
       // Should not show detailed info
-      expect(screen.queryByText('response.familyHistoryShare')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('response.familyHistoryShare')
+      ).not.toBeInTheDocument();
       expect(screen.queryByText(/Please review/)).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'card.acceptInvitation' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'card.acceptInvitation' })
+      ).not.toBeInTheDocument();
     });
 
     it('should show chevron icon when onView is provided in compact mode', () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { compact: true, onView: mockProps.onView });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        compact: true,
+        onView: mockProps.onView,
+      });
 
       // The cursor style is on the Paper element (the outermost wrapper in compact mode)
       // Find the Paper element which has the cursor style applied
-      const titleEl = screen.getByText('Family History: Johnson Family Medical Records');
+      const titleEl = screen.getByText(
+        'Family History: Johnson Family Medical Records'
+      );
       const paperEl = titleEl.closest('[class*="mantine-Paper-root"]');
       expect(paperEl).toHaveStyle('cursor: pointer');
     });
 
     it('should handle click in compact mode when onView is provided', async () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { compact: true, onView: mockProps.onView });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        compact: true,
+        onView: mockProps.onView,
+      });
 
-      const titleEl = screen.getByText('Family History: Johnson Family Medical Records');
+      const titleEl = screen.getByText(
+        'Family History: Johnson Family Medical Records'
+      );
       const paperEl = titleEl.closest('[class*="mantine-Paper-root"]');
       await userEvent.click(paperEl);
 
@@ -359,21 +429,31 @@ describe('InvitationCard Component', () => {
 
     it('should not be clickable in compact mode when onView is not provided', () => {
       // Explicitly set onView to undefined to override the default mockProps.onView
-      renderInvitationCard(baseFamilyHistoryInvitation, { compact: true, onView: undefined });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        compact: true,
+        onView: undefined,
+      });
 
-      const titleEl = screen.getByText('Family History: Johnson Family Medical Records');
+      const titleEl = screen.getByText(
+        'Family History: Johnson Family Medical Records'
+      );
       const paperEl = titleEl.closest('[class*="mantine-Paper-root"]');
       expect(paperEl).toHaveStyle('cursor: default');
     });
 
     it('should show correct sender/recipient in compact mode based on variant', () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { compact: true, variant: 'sent' });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        compact: true,
+        variant: 'sent',
+      });
 
       expect(screen.getByText('To: Dr. Michael Brown')).toBeInTheDocument();
     });
 
     it('should apply opacity to expired invitations in compact mode', () => {
-      const { container } = renderInvitationCard(expiredInvitation, { compact: true });
+      const { container } = renderInvitationCard(expiredInvitation, {
+        compact: true,
+      });
 
       const cardElement = container.querySelector('[style*="opacity"]');
       expect(cardElement).toHaveStyle('opacity: 0.6');
@@ -394,11 +474,15 @@ describe('InvitationCard Component', () => {
     it('should display correct type labels', () => {
       // Test family history share
       renderInvitationCard(baseFamilyHistoryInvitation);
-      expect(screen.getByText('response.familyHistoryShare')).toBeInTheDocument();
+      expect(
+        screen.getByText('response.familyHistoryShare')
+      ).toBeInTheDocument();
 
       // Test patient share
       renderInvitationCard(patientShareInvitation);
-      expect(screen.getByText('response.patientRecordShare')).toBeInTheDocument();
+      expect(
+        screen.getByText('response.patientRecordShare')
+      ).toBeInTheDocument();
     });
 
     it('should handle unknown invitation types gracefully', () => {
@@ -452,17 +536,24 @@ describe('InvitationCard Component', () => {
       });
 
       // Should render without errors
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
 
       // Buttons should still be present but not functional
-      expect(screen.getByRole('button', { name: 'card.acceptInvitation' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'card.rejectInvitation' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'card.acceptInvitation' })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'card.rejectInvitation' })
+      ).toBeInTheDocument();
     });
 
     it('should handle very long titles with truncation in compact mode', () => {
       const longTitleInvitation = {
         ...baseFamilyHistoryInvitation,
-        title: 'This is a very long invitation title that should be truncated in compact mode to prevent layout issues',
+        title:
+          'This is a very long invitation title that should be truncated in compact mode to prevent layout issues',
       };
 
       renderInvitationCard(longTitleInvitation, { compact: true });
@@ -479,31 +570,46 @@ describe('InvitationCard Component', () => {
       renderInvitationCard(invitationWithInvalidStatus);
 
       // Should render without crashing, default color should be applied
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
     it('should have proper button roles and labels', () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        variant: 'received',
+      });
 
-      const acceptButton = screen.getByRole('button', { name: 'card.acceptInvitation' });
-      const rejectButton = screen.getByRole('button', { name: 'card.rejectInvitation' });
+      const acceptButton = screen.getByRole('button', {
+        name: 'card.acceptInvitation',
+      });
+      const rejectButton = screen.getByRole('button', {
+        name: 'card.rejectInvitation',
+      });
 
       expect(acceptButton).toBeInTheDocument();
       expect(rejectButton).toBeInTheDocument();
     });
 
     it('should support keyboard navigation for interactive elements', async () => {
-      renderInvitationCard(baseFamilyHistoryInvitation, { variant: 'received' });
+      renderInvitationCard(baseFamilyHistoryInvitation, {
+        variant: 'received',
+      });
 
-      const acceptButton = screen.getByRole('button', { name: 'card.acceptInvitation' });
+      const acceptButton = screen.getByRole('button', {
+        name: 'card.acceptInvitation',
+      });
 
       acceptButton.focus();
       expect(acceptButton).toHaveFocus();
 
       await userEvent.keyboard('{Enter}');
-      expect(mockProps.onRespond).toHaveBeenCalledWith(baseFamilyHistoryInvitation, 'accepted');
+      expect(mockProps.onRespond).toHaveBeenCalledWith(
+        baseFamilyHistoryInvitation,
+        'accepted'
+      );
     });
 
     it('should have appropriate ARIA attributes for expired invitations', () => {
