@@ -127,5 +127,13 @@ module.exports = {
         // still runs and auto-fixes unused imports (which tsc only warns about).
       },
     },
+    {
+      // TypeScript declaration files: param names in function-type signatures
+      // are documentation, not real bindings — don't flag them as unused.
+      files: ['**/*.d.ts'],
+      rules: {
+        'unused-imports/no-unused-vars': 'off',
+      },
+    },
   ],
 };
