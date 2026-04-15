@@ -5,7 +5,6 @@ import logger from '../services/logger';
 import {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  WARNING_MESSAGES,
   getUserFriendlyError,
 } from '../constants/errorMessages';
 

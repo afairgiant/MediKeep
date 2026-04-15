@@ -1,7 +1,5 @@
-import { useMemo } from 'react';
 import { useFiltering } from './useFiltering';
 import { useSorting } from './useSorting';
-import logger from '../services/logger';
 
 /**
  * Combined data management hook for filtering and sorting

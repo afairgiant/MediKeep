@@ -3,10 +3,8 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
 import render, {
   screen,
-  fireEvent,
   waitFor,
 } from '../../../../test-utils/render';
 import userEvent from '@testing-library/user-event';

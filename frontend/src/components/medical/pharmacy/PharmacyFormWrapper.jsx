@@ -1,4 +1,3 @@
-import React from 'react';
 import MantinePharmacyForm from '../MantinePharmacyForm';
 import logger from '../../../services/logger';
 

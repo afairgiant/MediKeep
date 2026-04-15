@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Stack } from '@mantine/core';
 import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';

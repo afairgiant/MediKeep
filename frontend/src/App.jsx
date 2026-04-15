@@ -110,7 +110,6 @@ import { ENTITY_TYPES } from './utils/entityRelationships';
 import {
   useActivityTracker,
   useNavigationActivityTracker,
-  useApiActivityTracker,
 } from './hooks/useActivityTracker';
 import { apiClient } from './services/apiClient';
 

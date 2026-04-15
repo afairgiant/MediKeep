@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   Button,

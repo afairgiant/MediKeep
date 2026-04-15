@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   Group,
@@ -15,7 +15,6 @@ import {
   Title,
   Box,
   Container,
-  Badge,
   Divider,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';

@@ -5,9 +5,6 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import { usePatientWithStaticData } from '../../hooks/useGlobalData';
-import { getEntityFormatters } from '../../utils/tableFormatters';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
 import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
@@ -19,7 +16,6 @@ import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
-import StatusBadge from '../../components/medical/StatusBadge';
 import { InvitationManager } from '../../components/invitations';
 import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
 import {
@@ -38,18 +34,15 @@ import {
   Alert,
   Title,
   Tabs,
-  Checkbox,
   Paper,
   useMantineColorScheme,
 } from '@mantine/core';
 // Note: Button is still needed for the Alert cancel button
 import {
   IconUsers,
-  IconPlus,
   IconUserPlus,
   IconShare,
   IconMail,
-  IconSend2,
   IconX,
   IconSend,
 } from '@tabler/icons-react';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal } from '@mantine/core';
 import MantineFamilyMemberForm from '../MantineFamilyMemberForm';
 import MantineFamilyConditionForm from '../MantineFamilyConditionForm';

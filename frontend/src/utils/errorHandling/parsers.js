@@ -4,7 +4,7 @@
  * Updated to use constants as suggested by reviewer feedback
  */
 
-import { ERROR_TYPES, ERROR_PATTERNS, ERROR_REGEX_PATTERNS } from './constants';
+import { ERROR_TYPES, ERROR_REGEX_PATTERNS } from './constants';
 
 /**
  * Enhanced error parser that extracts specific error information

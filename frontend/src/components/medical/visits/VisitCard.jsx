@@ -1,5 +1,4 @@
-import React from 'react';
-import { Badge, Text, Group, Box, Divider } from '@mantine/core';
+import { Text, Group, Box } from '@mantine/core';
 import { IconCalendar } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';

@@ -1,6 +1,5 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import React from 'react';
 import { useDateFormat } from './useDateFormat';
 
 // Mock the UserPreferencesContext

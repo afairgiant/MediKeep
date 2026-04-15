@@ -3,7 +3,6 @@
  * For debugging Firefox compatibility issues
  */
 
-import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,

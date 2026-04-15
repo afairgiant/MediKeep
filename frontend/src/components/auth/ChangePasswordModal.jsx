@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui';
 import { Button, Alert } from '../ui';

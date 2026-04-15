@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useViewport } from '../../hooks/useViewport';

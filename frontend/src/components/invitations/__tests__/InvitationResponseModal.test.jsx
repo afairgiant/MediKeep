@@ -2,7 +2,6 @@
  * Comprehensive tests for InvitationResponseModal component
  * Tests modal display, form interactions, response handling, and error states
  */
-import React from 'react';
 import { vi } from 'vitest';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

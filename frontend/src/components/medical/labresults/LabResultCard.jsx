@@ -1,9 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Badge, Text, Group } from '@mantine/core';
+import { Badge, Text } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
-import TestComponentSummary from './TestComponentSummary';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import logger from '../../../services/logger';

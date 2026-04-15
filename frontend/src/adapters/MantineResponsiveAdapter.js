@@ -1,4 +1,3 @@
-import { BREAKPOINTS } from '../config/responsive.config';
 import { env } from '../config/env';
 
 /**

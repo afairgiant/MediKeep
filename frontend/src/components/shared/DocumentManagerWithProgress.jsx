@@ -3,7 +3,6 @@ import React, {
   useCallback,
   useEffect,
   useRef,
-  useMemo,
 } from 'react';
 import {
   Stack,

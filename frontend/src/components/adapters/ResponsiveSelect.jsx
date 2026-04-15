@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import {
   Select as MantineSelect,
   Loader,
@@ -7,7 +7,7 @@ import {
   Box,
   rem,
 } from '@mantine/core';
-import { IconSearch, IconChevronDown } from '@tabler/icons-react';
+import { IconChevronDown } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../../hooks/useResponsive';
 import logger from '../../services/logger';

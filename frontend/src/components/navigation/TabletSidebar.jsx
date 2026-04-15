@@ -5,7 +5,7 @@
  * Following PR #3: Navigation & Layout System specifications
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,

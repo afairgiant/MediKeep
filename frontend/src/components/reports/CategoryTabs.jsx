@@ -1,4 +1,3 @@
-import React from 'react';
 import { Tabs, Badge, Text, Stack, Center } from '@mantine/core';
 import { IconFileDescription } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -7,7 +6,6 @@ import {
   Text,
   Badge,
   Button,
-  Divider,
   Grid,
   Paper,
   ActionIcon,
@@ -41,7 +39,6 @@ import {
 } from '../../../utils/unitConversion';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
-import logger from '../../../services/logger';
 
 // BMI conversion factor for imperial units (pounds and inches)
 const BMI_IMPERIAL_CONVERSION_FACTOR = 703;

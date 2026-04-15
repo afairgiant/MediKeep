@@ -1,5 +1,4 @@
-import React from 'react';
-import { Badge, Text, Group } from '@mantine/core';
+import { Badge, Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';

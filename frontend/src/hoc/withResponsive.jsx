@@ -1,6 +1,5 @@
 import React, { forwardRef, memo, useMemo } from 'react';
 import { useResponsive } from '../hooks/useResponsive';
-import { useBreakpointValue } from '../hooks/useBreakpoint';
 
 /**
  * Higher-Order Component (HOC) that enhances components with responsive capabilities

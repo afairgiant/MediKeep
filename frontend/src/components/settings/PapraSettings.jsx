@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Select, Text } from '@mantine/core';
+import { Select } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import IntegrationSettingsCard from './IntegrationSettingsCard';
 import {

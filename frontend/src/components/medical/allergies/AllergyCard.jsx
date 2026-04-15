@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Text, Group } from '@mantine/core';
+import { Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import {
   IconAlertTriangle,

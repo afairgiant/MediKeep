@@ -5,7 +5,6 @@
  * Following PR #3: Navigation & Layout System specifications
  */
 
-import React from 'react';
 import { ActionIcon } from '@mantine/core';
 import { IconMenu2, IconX } from '@tabler/icons-react';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';

@@ -16,7 +16,6 @@ import {
   Badge,
   ActionIcon,
   ScrollArea,
-  Tooltip,
   Center,
   Box,
   Select,

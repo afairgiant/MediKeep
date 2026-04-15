@@ -1,4 +1,3 @@
-import React from 'react';
 import { DateInput as MantineDateInput } from '@mantine/dates';
 
 export const DateInput = ({

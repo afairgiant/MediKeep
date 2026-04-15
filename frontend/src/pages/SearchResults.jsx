@@ -20,7 +20,6 @@ import {
   Skeleton,
   Table,
   ScrollArea,
-  Tooltip,
   Flex,
   ActionIcon,
   ThemeIcon,

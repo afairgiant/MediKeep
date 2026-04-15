@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal as MantineModal } from '@mantine/core';
 
 export const Modal = ({

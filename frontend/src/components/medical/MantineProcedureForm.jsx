@@ -1,4 +1,3 @@
-import React from 'react';
 import BaseMedicalForm from './BaseMedicalForm';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import UploadProgressErrorBoundary from '../shared/UploadProgressErrorBoundary';

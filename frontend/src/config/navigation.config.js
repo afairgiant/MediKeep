@@ -1,4 +1,3 @@
-import logger from '../services/logger';
 
 import { ENTITY_TYPES } from '../utils/entityRelationships';
 import { buildEntityUrl } from '../utils/entityNavigation';

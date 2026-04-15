@@ -3,7 +3,6 @@
  * DebugResponsive - Debug component to see responsive state
  */
 
-import React from 'react';
 import { useResponsive } from '../../hooks/useResponsive';
 
 const DebugResponsive = ({ currentPath, userInfo }) => {

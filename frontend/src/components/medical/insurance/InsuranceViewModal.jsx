@@ -5,14 +5,10 @@ import {
   Modal,
   Title,
   Text,
-  Grid,
   Group,
   Badge,
   Button,
   Stack,
-  Divider,
-  ActionIcon,
-  Card,
   Tabs,
   Box,
   SimpleGrid,
@@ -29,10 +25,8 @@ import {
   IconFileText,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import {
-  formatFieldLabel,
-  formatFieldValue,
-} from '../../../utils/fieldFormatters';
+
+
 import StatusBadge from '../StatusBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { useTranslation } from 'react-i18next';

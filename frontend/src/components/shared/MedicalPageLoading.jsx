@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { Container, Center, Stack, Loader, Text } from '@mantine/core';
 

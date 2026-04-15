@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal } from '@mantine/core';
 import VitalsForm from '../VitalsForm';
 import logger from '../../../services/logger';

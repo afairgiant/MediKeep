@@ -4,7 +4,6 @@ import { vi } from 'vitest';
  * Simplified system test for family history invitation confirmation popup
  * Tests the core functionality of the confirmation modal
  */
-import React from 'react';
 import render, { screen, waitFor } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import { notifications } from '@mantine/notifications';

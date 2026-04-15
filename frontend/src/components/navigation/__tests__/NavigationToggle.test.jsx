@@ -1,5 +1,4 @@
 import { vi, describe, test, expect } from 'vitest';
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MantineProvider } from '@mantine/core';
 import NavigationToggle from '../NavigationToggle';

@@ -11,18 +11,15 @@ import {
   Stack,
   Tooltip,
   Skeleton,
-  Box,
 } from '@mantine/core';
 import {
   IconFlask,
   IconAlertTriangle,
   IconCheck,
   IconTrendingUp,
-  IconTrendingDown,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import {
-  LabTestComponent,
   labTestComponentApi,
   LabTestComponentFilters,
 } from '../../../services/api/labTestComponentApi';

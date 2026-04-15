@@ -1,5 +1,5 @@
 // React and routing
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -31,7 +31,6 @@ import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 // Mantine UI
 import {
   Button,
-  Group,
   Stack,
   Text,
   Container,

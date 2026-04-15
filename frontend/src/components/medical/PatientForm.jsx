@@ -3,7 +3,7 @@
  * Supports both self-records and records for others
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Stack,
@@ -25,7 +25,6 @@ import {
   IconCalendar,
   IconMapPin,
   IconAlertCircle,
-  IconCheck,
   IconDeviceFloppy,
   IconX,
 } from '@tabler/icons-react';

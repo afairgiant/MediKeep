@@ -4,7 +4,7 @@
  */
 import logger from '../../services/logger';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
@@ -22,7 +22,6 @@ import {
   Card,
   Flex,
   Box,
-  Divider,
   Container,
   Group,
 } from '@mantine/core';
@@ -52,7 +51,7 @@ import { VitalTrendsPanel } from '../../components/medical/vitals';
 import VitalsImportModal from '../../components/medical/VitalsImportModal';
 
 import { apiService } from '../../services/api';
-import { useCurrentPatient, usePractitioners } from '../../hooks/useGlobalData';
+import { usePractitioners } from '../../hooks/useGlobalData';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';

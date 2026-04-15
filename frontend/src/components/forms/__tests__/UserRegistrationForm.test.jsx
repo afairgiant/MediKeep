@@ -1,5 +1,4 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import render from '../../../test-utils/render';
 import UserRegistrationForm from '../UserRegistrationForm';

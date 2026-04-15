@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { notifySuccess } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';

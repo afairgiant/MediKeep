@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Stack,
@@ -14,7 +14,6 @@ import {
   ThemeIcon,
   SimpleGrid,
   ActionIcon,
-  Menu,
   Divider,
 } from '@mantine/core';
 import {

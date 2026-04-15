@@ -1,11 +1,9 @@
-import React from 'react';
 import {
   SegmentedControl,
   Stack,
   Text,
   Group,
   ThemeIcon,
-  Paper,
   Badge,
 } from '@mantine/core';
 import {

@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Select as MantineSelect } from '@mantine/core';
 
 export const Select = memo(

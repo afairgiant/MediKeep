@@ -4,8 +4,7 @@
  * Enhanced with responsive behavior for different screen sizes
  */
 
-import React from 'react';
-import { Modal, Stack, ScrollArea } from '@mantine/core';
+import { Modal, Stack } from '@mantine/core';
 // Temporarily disable responsive features to fix dropdown hanging
 // import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 // import MantineResponsiveAdapter from '../../adapters/MantineResponsiveAdapter';

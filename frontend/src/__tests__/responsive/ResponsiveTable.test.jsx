@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import React from 'react';
 import {
   screen,
   waitFor,
@@ -17,13 +16,10 @@ import {
   renderResponsive,
   testAtAllBreakpoints,
   TEST_VIEWPORTS,
-  mockViewport,
-  DEVICE_TYPES,
   getBreakpointForWidth,
   getDeviceTypeForBreakpoint,
 } from './ResponsiveTestUtils';
 
-import logger from '../../services/logger';
 import { useResponsive } from '../../hooks/useResponsive';
 
 // Mock logger to avoid console noise during tests

@@ -4,7 +4,6 @@ import { vi } from 'vitest';
  * Comprehensive tests for InvitationCard component
  * Tests different invitation types, variants, states, and user interactions
  */
-import React from 'react';
 import render, { screen, waitFor } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import InvitationCard from '../InvitationCard';

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Badge, Text, Group, Anchor } from '@mantine/core';
+import { Text, Group, Anchor } from '@mantine/core';
 import { IconStethoscope, IconUser, IconStar } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import logger from '../../../services/logger';

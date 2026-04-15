@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Modal,
   Stack,
@@ -8,11 +7,8 @@ import {
   ThemeIcon,
   Paper,
   Button,
-  Alert,
   Badge,
-  Center,
   Loader,
-  ActionIcon,
   Divider,
 } from '@mantine/core';
 import {
@@ -21,7 +17,6 @@ import {
   IconX,
   IconExclamationMark,
   IconFile,
-  IconAlertTriangle,
   IconRefresh,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';

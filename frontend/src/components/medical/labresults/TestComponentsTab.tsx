@@ -20,8 +20,6 @@ import {
   Center,
   Box,
   LoadingOverlay,
-  Menu,
-  Tooltip,
 } from '@mantine/core';
 import {
   IconFlask,
@@ -30,11 +28,8 @@ import {
   IconTemplate,
   IconChartBar,
   IconRefresh,
-  IconSettings,
   IconAlertCircle,
   IconEye,
-  IconEdit,
-  IconChevronDown,
 } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import TestComponentDisplay from './TestComponentDisplay';

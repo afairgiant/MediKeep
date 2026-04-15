@@ -1,4 +1,3 @@
-import React from 'react';
 import MantineVisitForm from '../MantineVisitForm';
 import logger from '../../../services/logger';
 

@@ -5,10 +5,9 @@ import { vi } from 'vitest';
  * Tests complete user workflows for family history sharing from start to finish
  */
 import React from 'react';
-import render, { screen, waitFor, act } from '../../test-utils/render';
+import render, { screen, waitFor } from '../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { notifications } from '@mantine/notifications';
 
 // Components for complete workflow testing
 import Dashboard from '../../pages/Dashboard';

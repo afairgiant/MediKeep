@@ -3,7 +3,6 @@
  * Displays search results with clickable items that navigate to record details
  */
 
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Paper,
@@ -12,7 +11,6 @@ import {
   Text,
   Avatar,
   Loader,
-  Alert,
   ActionIcon,
   Badge,
   Divider,

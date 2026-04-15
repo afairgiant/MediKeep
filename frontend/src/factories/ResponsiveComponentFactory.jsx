@@ -1,7 +1,6 @@
 import React from 'react';
 import { env } from '../config/env';
 import {
-  withResponsive,
   withResponsiveTransform,
   withResponsiveRender,
 } from '../hoc/withResponsive';

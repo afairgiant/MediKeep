@@ -7,7 +7,6 @@ import userEvent from '@testing-library/user-event';
 import {
   renderResponsive,
   testAtAllBreakpoints,
-  mockMedicalData,
   TEST_VIEWPORTS,
   mockViewport,
 } from './ResponsiveTestUtils';

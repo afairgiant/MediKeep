@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -10,18 +10,14 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePractitioners } from '../../hooks/useGlobalData';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
-import { notifications } from '@mantine/notifications';
 import {
   ERROR_MESSAGES,
-  SUCCESS_MESSAGES,
-  getUserFriendlyError,
 } from '../../constants/errorMessages';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
 import { ResponsiveTable } from '../../components/adapters';
@@ -37,7 +33,7 @@ import ProcedureViewModal from '../../components/medical/procedures/ProcedureVie
 import ProcedureFormWrapper from '../../components/medical/procedures/ProcedureFormWrapper';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
-import { Button, Stack, Text, Container, Card, Paper } from '@mantine/core';
+import { Button, Stack, Container, Paper } from '@mantine/core';
 
 const INITIAL_FORM_DATA = {
   procedure_name: '',

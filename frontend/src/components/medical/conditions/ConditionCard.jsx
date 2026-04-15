@@ -1,9 +1,6 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Badge, Text, Group } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { navigateToEntity } from '../../../utils/linkNavigation';
 import logger from '../../../services/logger';
 
 const ConditionCard = ({

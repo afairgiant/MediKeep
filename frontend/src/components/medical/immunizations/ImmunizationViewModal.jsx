@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -26,7 +26,6 @@ import { useTagColors } from '../../../hooks/useTagColors';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
-import logger from '../../../services/logger';
 
 const ImmunizationViewModal = ({
   isOpen,
