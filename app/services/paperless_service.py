@@ -41,8 +41,9 @@ def _build_title_fallback_query(query: str, user_id: Optional[int] = None) -> st
     query matches titles across the whole Paperless instance.
     """
     terms = [t for t in query.split() if t]
+    _escape = r'\\\1'
     clauses = [
-        f"title:*{_LUCENE_SPECIAL_CHARS.sub(r'\\\1', term)}*" for term in terms
+        f"title:*{_LUCENE_SPECIAL_CHARS.sub(_escape, term)}*" for term in terms
     ]
     if user_id is not None:
         clauses.append(f"custom_fields.medical_record_user_id:{user_id}")
