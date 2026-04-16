@@ -16,7 +16,7 @@ class TestVitalsFormatting:
     @pytest.fixture
     def sample_vital_record(self):
         return {
-            "recorded_date": "2024-03-15",
+            "measurement_date": "2024-03-15",
             "systolic_bp": 120,
             "diastolic_bp": 80,
             "heart_rate": 72,
@@ -97,7 +97,7 @@ class TestVitalsFormatting:
         generator.translator = get_translator("en", "mdy")
 
         record = {
-            "recorded_date": "2024-03-15",
+            "measurement_date": "2024-03-15",
             "heart_rate": 72,
             "temperature": None,
             "weight": None,
@@ -117,7 +117,7 @@ class TestVitalsFormatting:
 
         records = [
             sample_vital_record,
-            {**sample_vital_record, "recorded_date": "2024-04-15"},
+            {**sample_vital_record, "measurement_date": "2024-04-15"},
         ]
         story = generator._format_vitals(records)
 

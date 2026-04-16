@@ -380,17 +380,26 @@ class TestInjurySorting:
 
 class TestVitalsSorting:
 
-    def test_sorted_by_recorded_date_desc(self, gen):
+    def test_sorted_by_measurement_date_desc(self, gen):
+        records = [
+            {"measurement_date": "2021-01-15", "heart_rate": 60},
+            {"measurement_date": "2024-06-01", "heart_rate": 75},
+        ]
+        story = gen._format_vitals(records)
+        text = _extract_text(story)
+        pos_2024 = text.find("06/01/2024")
+        pos_2021 = text.find("01/15/2021")
+        assert pos_2024 < pos_2021
+
+    def test_recorded_date_fallback(self, gen):
         records = [
             {"recorded_date": "2021-01-15", "heart_rate": 60},
             {"recorded_date": "2024-06-01", "heart_rate": 75},
         ]
         story = gen._format_vitals(records)
         text = _extract_text(story)
-        # More recent date should appear first in output
-        pos_2024 = text.find("06/01/2024")
-        pos_2021 = text.find("01/15/2021")
-        assert pos_2024 < pos_2021
+        assert "06/01/2024" in text
+        assert "01/15/2021" in text
 
 
 # ---------------------------------------------------------------------------
@@ -449,3 +458,29 @@ class TestAlphabeticalSorting:
         story = gen._format_practitioners(records)
         text = _extract_text(story)
         assert _ordered(text, "Alice", "bob", "zoe")
+
+
+# ---------------------------------------------------------------------------
+# Emergency information section — status filter coverage
+# ---------------------------------------------------------------------------
+
+class TestEmergencyInformationSection:
+
+    def _make_data(self, status: str, condition_name: str = "Test Condition") -> dict:
+        return {
+            "conditions": [{"condition_name": condition_name, "status": status}],
+            "allergies": [],
+            "medications": [],
+        }
+
+    def test_recurrence_included_in_emergency_summary(self, gen):
+        data = self._make_data("recurrence", "Recurrent Cancer")
+        story = gen._create_emergency_information_section(data)
+        text = _extract_text(story)
+        assert "Recurrent Cancer" in text
+
+    def test_relapse_included_in_emergency_summary(self, gen):
+        data = self._make_data("relapse", "Relapsing MS")
+        story = gen._create_emergency_information_section(data)
+        text = _extract_text(story)
+        assert "Relapsing MS" in text
