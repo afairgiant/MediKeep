@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Stack,
@@ -118,7 +118,7 @@ const LinkPapraDocumentModal = ({
     }
   };
 
-  const handleSelectDocument = (doc) => {
+  const handleSelectDocument = doc => {
     setSelectedDoc(doc);
     setDescription(`Linked from Papra: ${doc.name}`);
   };
@@ -148,7 +148,7 @@ const LinkPapraDocumentModal = ({
       });
 
       // Remove from search results
-      setSearchResults((prev) => prev.filter((d) => d.id !== selectedDoc.id));
+      setSearchResults(prev => prev.filter(d => d.id !== selectedDoc.id));
       setSelectedDoc(null);
       setDescription('');
 
@@ -168,7 +168,7 @@ const LinkPapraDocumentModal = ({
     }
   };
 
-  const formatFileSize = (bytes) => {
+  const formatFileSize = bytes => {
     if (!bytes) return null;
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -191,19 +191,27 @@ const LinkPapraDocumentModal = ({
           placeholder="Search by name..."
           leftSection={<IconSearch size={16} />}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           rightSection={loading && <Loader size="xs" />}
           autoFocus
         />
 
         {/* Info Alert */}
-        <Alert variant="light" color="blue" icon={<IconAlertCircle size={16} />}>
+        <Alert
+          variant="light"
+          color="blue"
+          icon={<IconAlertCircle size={16} />}
+        >
           {t('linkPapra.infoText', { entityType })}
         </Alert>
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="light" color="red" icon={<IconAlertCircle size={16} />}>
+          <Alert
+            variant="light"
+            color="red"
+            icon={<IconAlertCircle size={16} />}
+          >
             {error}
           </Alert>
         )}
@@ -229,7 +237,7 @@ const LinkPapraDocumentModal = ({
             </Center>
           ) : (
             <Stack gap="sm">
-              {searchResults.map((doc) => (
+              {searchResults.map(doc => (
                 <Card
                   key={doc.id}
                   withBorder
@@ -244,7 +252,7 @@ const LinkPapraDocumentModal = ({
                       selectedDoc?.id === doc.id ? '#e7f5ff' : 'transparent',
                   }}
                   onClick={() => handleSelectDocument(doc)}
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       handleSelectDocument(doc);
@@ -313,7 +321,7 @@ const LinkPapraDocumentModal = ({
             label="Description (optional)"
             placeholder="Add a note about this document"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             rows={2}
           />
         )}

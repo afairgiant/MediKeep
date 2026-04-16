@@ -20,67 +20,67 @@ import { isPhoneField } from './phoneUtils';
  */
 const defaultLabelMappings = {
   // Insurance fields
-  'primary_care_physician': 'Primary Care Physician',
-  'deductible_individual': 'Individual Deductible',
-  'deductible_family': 'Family Deductible',
-  'copay_primary_care': 'Primary Care Copay',
-  'copay_specialist': 'Specialist Copay',
-  'copay_emergency_room': 'Emergency Room Copay',
-  'copay_urgent_care': 'Urgent Care Copay',
-  'plan_type': 'Plan Type',
-  'dental_plan_type': 'Dental Plan Type',
-  'vision_plan_type': 'Vision Plan Type',
-  'prescription_plan_type': 'Prescription Plan Type',
-  'annual_maximum': 'Annual Maximum',
-  'preventive_coverage': 'Preventive Coverage',
-  'basic_coverage': 'Basic Coverage',
-  'major_coverage': 'Major Coverage',
-  'exam_copay': 'Exam Copay',
-  'frame_allowance': 'Frame Allowance',
-  'contact_allowance': 'Contact Allowance',
-  'lens_coverage': 'Lens Coverage',
-  'bin_number': 'BIN Number',
-  'pcn_number': 'PCN Number',
-  'rxgroup': 'RX Group',
-  'copay_generic': 'Generic Copay',
-  'copay_brand': 'Brand Name Copay',
-  'copay_specialty': 'Specialty Copay',
-  'pharmacy_network_info': 'Pharmacy Network',
-  'customer_service_phone': 'Customer Service',
-  'website_url': 'Website',
-  'preauth_phone': 'Pre-authorization',
-  'provider_services_phone': 'Provider Services',
-  'claims_address': 'Claims Address',
-  'employer_group': 'Employer/Group Sponsor',
-  'policy_holder_name': 'Policy Holder Name',
-  'relationship_to_holder': 'Relationship to Holder',
-  'effective_date': 'Effective Date',
-  'expiration_date': 'Expiration Date',
-  'insurance_type': 'Insurance Type',
-  'company_name': 'Company Name',
-  'member_name': 'Member Name',
-  'member_id': 'Member ID',
-  'group_number': 'Group Number',
-  'plan_name': 'Plan Name',
-  
+  primary_care_physician: 'Primary Care Physician',
+  deductible_individual: 'Individual Deductible',
+  deductible_family: 'Family Deductible',
+  copay_primary_care: 'Primary Care Copay',
+  copay_specialist: 'Specialist Copay',
+  copay_emergency_room: 'Emergency Room Copay',
+  copay_urgent_care: 'Urgent Care Copay',
+  plan_type: 'Plan Type',
+  dental_plan_type: 'Dental Plan Type',
+  vision_plan_type: 'Vision Plan Type',
+  prescription_plan_type: 'Prescription Plan Type',
+  annual_maximum: 'Annual Maximum',
+  preventive_coverage: 'Preventive Coverage',
+  basic_coverage: 'Basic Coverage',
+  major_coverage: 'Major Coverage',
+  exam_copay: 'Exam Copay',
+  frame_allowance: 'Frame Allowance',
+  contact_allowance: 'Contact Allowance',
+  lens_coverage: 'Lens Coverage',
+  bin_number: 'BIN Number',
+  pcn_number: 'PCN Number',
+  rxgroup: 'RX Group',
+  copay_generic: 'Generic Copay',
+  copay_brand: 'Brand Name Copay',
+  copay_specialty: 'Specialty Copay',
+  pharmacy_network_info: 'Pharmacy Network',
+  customer_service_phone: 'Customer Service',
+  website_url: 'Website',
+  preauth_phone: 'Pre-authorization',
+  provider_services_phone: 'Provider Services',
+  claims_address: 'Claims Address',
+  employer_group: 'Employer/Group Sponsor',
+  policy_holder_name: 'Policy Holder Name',
+  relationship_to_holder: 'Relationship to Holder',
+  effective_date: 'Effective Date',
+  expiration_date: 'Expiration Date',
+  insurance_type: 'Insurance Type',
+  company_name: 'Company Name',
+  member_name: 'Member Name',
+  member_id: 'Member ID',
+  group_number: 'Group Number',
+  plan_name: 'Plan Name',
+
   // Common medical fields
-  'first_name': 'First Name',
-  'last_name': 'Last Name',
-  'date_of_birth': 'Date of Birth',
-  'phone_number': 'Phone Number',
-  'email_address': 'Email Address',
-  'created_at': 'Created Date',
-  'updated_at': 'Last Updated',
-  'is_primary': 'Primary',
-  'is_active': 'Active Status',
-  'start_date': 'Start Date',
-  'end_date': 'End Date',
-  'ordered_date': 'Ordered Date',
-  'completed_date': 'Completed Date',
-  'test_name': 'Test Name',
-  'medication_name': 'Medication Name',
-  'dosage_amount': 'Dosage Amount',
-  'practitioner_name': 'Practitioner Name'
+  first_name: 'First Name',
+  last_name: 'Last Name',
+  date_of_birth: 'Date of Birth',
+  phone_number: 'Phone Number',
+  email_address: 'Email Address',
+  created_at: 'Created Date',
+  updated_at: 'Last Updated',
+  is_primary: 'Primary',
+  is_active: 'Active Status',
+  start_date: 'Start Date',
+  end_date: 'End Date',
+  ordered_date: 'Ordered Date',
+  completed_date: 'Completed Date',
+  test_name: 'Test Name',
+  medication_name: 'Medication Name',
+  dosage_amount: 'Dosage Amount',
+  practitioner_name: 'Practitioner Name',
 };
 
 /**
@@ -94,15 +94,13 @@ export const formatFieldLabel = (fieldName, customMappings = {}) => {
 
   // Check custom mappings first, then default mappings
   const allMappings = { ...defaultLabelMappings, ...customMappings };
-  
+
   if (allMappings[fieldName]) {
     return allMappings[fieldName];
   }
 
   // Fallback: convert snake_case to Title Case
-  return fieldName
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, l => l.toUpperCase());
+  return fieldName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
 /**
@@ -112,27 +110,27 @@ export const formatFieldLabel = (fieldName, customMappings = {}) => {
 const defaultFormatRules = {
   currency: {
     fields: CURRENCY_FIELDS,
-    format: (value) => `$${value}`
+    format: value => `$${value}`,
   },
   percentage: {
     fields: PERCENTAGE_FIELDS,
     excludeFields: PERCENTAGE_EXCLUDE_FIELDS,
-    format: (value) => `${value}%`
+    format: value => `${value}%`,
   },
   date: {
     fields: DATE_FIELDS,
-    format: (value) => {
+    format: value => {
       try {
         return formatDateWithPreference(value, timezoneService.dateFormatCode);
       } catch {
         return value;
       }
-    }
+    },
   },
   boolean: {
     fields: BOOLEAN_FIELDS,
-    format: (value) => value ? 'Yes' : 'No'
-  }
+    format: value => (value ? 'Yes' : 'No'),
+  },
 };
 
 /**
@@ -156,14 +154,21 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
 
   // Apply format rules based on field name patterns
   for (const [ruleType, rule] of Object.entries(allFormatRules)) {
-    const shouldApply = rule.fields.some(pattern => fieldName.includes(pattern));
-    const shouldExclude = rule.excludeFields?.some(pattern => fieldName.includes(pattern));
-    
+    const shouldApply = rule.fields.some(pattern =>
+      fieldName.includes(pattern)
+    );
+    const shouldExclude = rule.excludeFields?.some(pattern =>
+      fieldName.includes(pattern)
+    );
+
     if (shouldApply && !shouldExclude) {
       try {
         return rule.format(value);
       } catch (error) {
-        logger.warn(`Error formatting ${fieldName} with rule ${ruleType}:`, error);
+        logger.warn(
+          `Error formatting ${fieldName} with rule ${ruleType}:`,
+          error
+        );
         return String(value);
       }
     }
@@ -177,48 +182,48 @@ export const formatFieldValue = (fieldName, value, customFormatRules = {}) => {
  * Insurance-specific label mappings for print templates
  */
 export const insurancePrintLabelMappings = {
-  'primary_care_physician': 'Primary Care Physician',
-  'deductible_individual': 'Individual Deductible',
-  'deductible_family': 'Family Deductible',
-  'copay_primary_care': 'Primary Care Copay',
-  'copay_specialist': 'Specialist Copay',
-  'copay_emergency_room': 'Emergency Room Copay',
-  'copay_urgent_care': 'Urgent Care Copay',
-  'plan_type': 'Plan Type',
-  'dental_plan_type': 'Dental Plan Type',
-  'vision_plan_type': 'Vision Plan Type',
-  'prescription_plan_type': 'Prescription Plan Type',
-  'annual_maximum': 'Annual Maximum',
-  'preventive_coverage': 'Preventive Coverage',
-  'basic_coverage': 'Basic Coverage',
-  'major_coverage': 'Major Coverage',
-  'exam_copay': 'Exam Copay',
-  'frame_allowance': 'Frame Allowance',
-  'lens_coverage': 'Lens Coverage',
-  'contact_allowance': 'Contact Allowance',
-  'bin_number': 'BIN Number',
-  'pcn_number': 'PCN Number',
-  'rxgroup': 'RX Group',
-  'copay_generic': 'Generic Copay',
-  'copay_brand': 'Brand Name Copay',
-  'copay_specialty': 'Specialty Copay',
-  'pharmacy_network_info': 'Pharmacy Network Info',
-  'customer_service_phone': 'Customer Service Phone',
-  'claims_address': 'Claims Address',
-  'website_url': 'Website URL',
-  'preauth_phone': 'Pre-authorization Phone',
-  'provider_services_phone': 'Provider Services Phone'
+  primary_care_physician: 'Primary Care Physician',
+  deductible_individual: 'Individual Deductible',
+  deductible_family: 'Family Deductible',
+  copay_primary_care: 'Primary Care Copay',
+  copay_specialist: 'Specialist Copay',
+  copay_emergency_room: 'Emergency Room Copay',
+  copay_urgent_care: 'Urgent Care Copay',
+  plan_type: 'Plan Type',
+  dental_plan_type: 'Dental Plan Type',
+  vision_plan_type: 'Vision Plan Type',
+  prescription_plan_type: 'Prescription Plan Type',
+  annual_maximum: 'Annual Maximum',
+  preventive_coverage: 'Preventive Coverage',
+  basic_coverage: 'Basic Coverage',
+  major_coverage: 'Major Coverage',
+  exam_copay: 'Exam Copay',
+  frame_allowance: 'Frame Allowance',
+  lens_coverage: 'Lens Coverage',
+  contact_allowance: 'Contact Allowance',
+  bin_number: 'BIN Number',
+  pcn_number: 'PCN Number',
+  rxgroup: 'RX Group',
+  copay_generic: 'Generic Copay',
+  copay_brand: 'Brand Name Copay',
+  copay_specialty: 'Specialty Copay',
+  pharmacy_network_info: 'Pharmacy Network Info',
+  customer_service_phone: 'Customer Service Phone',
+  claims_address: 'Claims Address',
+  website_url: 'Website URL',
+  preauth_phone: 'Pre-authorization Phone',
+  provider_services_phone: 'Provider Services Phone',
 };
 
 /**
  * Contact info specific label mappings
  */
 export const contactInfoLabelMappings = {
-  'customer_service_phone': 'Customer Service Phone',
-  'claims_address': 'Claims Address',
-  'website_url': 'Website URL',
-  'preauth_phone': 'Pre-authorization Phone',
-  'provider_services_phone': 'Provider Services Phone'
+  customer_service_phone: 'Customer Service Phone',
+  claims_address: 'Claims Address',
+  website_url: 'Website URL',
+  preauth_phone: 'Pre-authorization Phone',
+  provider_services_phone: 'Provider Services Phone',
 };
 
 /**
@@ -232,7 +237,7 @@ export const formatFieldCollection = (data, options = {}) => {
     customLabelMappings = {},
     customFormatRules = {},
     excludeEmpty = true,
-    excludeFields = []
+    excludeFields = [],
   } = options;
 
   const formatted = [];
@@ -240,15 +245,16 @@ export const formatFieldCollection = (data, options = {}) => {
   Object.entries(data).forEach(([key, value]) => {
     // Skip excluded fields
     if (excludeFields.includes(key)) return;
-    
+
     // Skip empty values if requested
-    if (excludeEmpty && (value === null || value === undefined || value === '')) return;
+    if (excludeEmpty && (value === null || value === undefined || value === ''))
+      return;
 
     formatted.push({
       key,
       label: formatFieldLabel(key, customLabelMappings),
       value: formatFieldValue(key, value, customFormatRules),
-      rawValue: value
+      rawValue: value,
     });
   });
 

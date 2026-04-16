@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   Tabs,
@@ -46,28 +46,31 @@ const InjuryViewModal = ({
 
   // Get practitioner details
   const practitioner = injury.practitioner_id
-    ? practitioners.find((p) => p.id === injury.practitioner_id)
+    ? practitioners.find(p => p.id === injury.practitioner_id)
     : null;
 
   // Get injury type details
   const injuryType = injury.injury_type_id
-    ? injuryTypes.find((t) => t.id === injury.injury_type_id)
+    ? injuryTypes.find(t => t.id === injury.injury_type_id)
     : null;
 
   // Format laterality display
-  const formatLaterality = (laterality) => {
+  const formatLaterality = laterality => {
     if (!laterality) return null;
     const map = {
       left: t('injuries.laterality.options.left', 'Left'),
       right: t('injuries.laterality.options.right', 'Right'),
       bilateral: t('injuries.laterality.options.bilateral', 'Both Sides'),
-      not_applicable: t('injuries.laterality.options.notApplicable', 'Not Applicable'),
+      not_applicable: t(
+        'injuries.laterality.options.notApplicable',
+        'Not Applicable'
+      ),
     };
     return map[laterality] || laterality;
   };
 
   // Format status display
-  const formatStatus = (status) => {
+  const formatStatus = status => {
     const map = {
       active: t('injuries.status.options.active', 'Active'),
       healing: t('injuries.status.options.healing', 'Healing'),
@@ -78,7 +81,7 @@ const InjuryViewModal = ({
   };
 
   // Get status color
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     const colors = {
       active: 'red',
       healing: 'yellow',
@@ -89,18 +92,21 @@ const InjuryViewModal = ({
   };
 
   // Format severity display
-  const formatSeverity = (severity) => {
+  const formatSeverity = severity => {
     const map = {
       mild: t('common:severity.mild', 'Mild'),
       moderate: t('common:severity.moderate', 'Moderate'),
       severe: t('common:severity.severe', 'Severe'),
-      'life-threatening': t('common:severity.lifeThreatening', 'Life-threatening'),
+      'life-threatening': t(
+        'common:severity.lifeThreatening',
+        'Life-threatening'
+      ),
     };
     return map[severity] || severity;
   };
 
   // Get severity color
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     const colors = {
       mild: 'blue',
       moderate: 'yellow',
@@ -161,13 +167,19 @@ const InjuryViewModal = ({
         {/* Tabbed Content */}
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
-            <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
+            <Tabs.Tab
+              value="overview"
+              leftSection={<IconInfoCircle size={16} />}
+            >
               {t('shared:tabs.overview', 'Overview')}
             </Tabs.Tab>
             <Tabs.Tab value="treatment" leftSection={<IconBandage size={16} />}>
               {t('shared:labels.treatment', 'Treatment')}
             </Tabs.Tab>
-            <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+            <Tabs.Tab
+              value="documents"
+              leftSection={<IconFileText size={16} />}
+            >
               {t('shared:tabs.documents', 'Documents')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
@@ -192,7 +204,9 @@ const InjuryViewModal = ({
                       label={t('injuries.laterality.label', 'Side')}
                       value={formatLaterality(injury.laterality)}
                     />
-                    <FieldDisplay label={t('injuries.dateOfInjury.label', 'Date of Injury')}>
+                    <FieldDisplay
+                      label={t('injuries.dateOfInjury.label', 'Date of Injury')}
+                    >
                       <Group gap="xs">
                         <IconCalendar size={14} />
                         <Text size="sm" fw={500}>
@@ -207,21 +221,36 @@ const InjuryViewModal = ({
                 <Grid.Col span={{ base: 12, sm: 6 }}>
                   <Paper p="md" withBorder>
                     <Text fw={600} mb="md">
-                      {t('injuries.viewModal.additionalInfo', 'Additional Info')}
+                      {t(
+                        'injuries.viewModal.additionalInfo',
+                        'Additional Info'
+                      )}
                     </Text>
                     <FieldDisplay
                       label={t('injuries.injuryType.label', 'Type')}
                       value={injuryType?.name}
                     />
-                    <FieldDisplay label={t('injuries.practitioner.label', 'Treating Practitioner')}>
+                    <FieldDisplay
+                      label={t(
+                        'injuries.practitioner.label',
+                        'Treating Practitioner'
+                      )}
+                    >
                       {practitioner ? (
                         <Text
                           size="sm"
                           fw={500}
                           c="blue"
-                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                          style={{
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                          }}
                           onClick={() =>
-                            navigateToEntity('practitioner', practitioner.id, navigate)
+                            navigateToEntity(
+                              'practitioner',
+                              practitioner.id,
+                              navigate
+                            )
                           }
                         >
                           {practitioner.name}
@@ -263,7 +292,10 @@ const InjuryViewModal = ({
                 />
                 <Divider my="md" />
                 <FieldDisplay
-                  label={t('shared:fields.treatmentReceived', 'Treatment Received')}
+                  label={t(
+                    'shared:fields.treatmentReceived',
+                    'Treatment Received'
+                  )}
                   value={injury.treatment_received}
                 />
                 <Divider my="md" />
@@ -305,9 +337,16 @@ const InjuryViewModal = ({
           <Button variant="subtle" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+          <Tooltip
+            label={disableEditTooltip}
+            disabled={!disableEdit || !disableEditTooltip}
+          >
             <span>
-              <Button leftSection={<IconEdit size={16} />} onClick={() => onEdit(injury)} disabled={disableEdit}>
+              <Button
+                leftSection={<IconEdit size={16} />}
+                onClick={() => onEdit(injury)}
+                disabled={disableEdit}
+              >
                 {t('shared:labels.edit', 'Edit')}
               </Button>
             </span>

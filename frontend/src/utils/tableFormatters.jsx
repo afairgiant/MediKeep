@@ -1,4 +1,3 @@
-import React from 'react';
 import { createEntityLinkProps } from './linkNavigation';
 import { MEDICATION_TYPE_LABELS } from '../constants/medicationTypes';
 import { formatDateWithPreference } from './dateFormatUtils';
@@ -14,10 +13,20 @@ import { timezoneService } from '../services/timezoneService';
  * @param {Function} formatDate - Date formatting function from useDateFormat hook
  * @returns {Object} Standard formatters object
  */
-export const createStandardFormatters = (formatDate) => {
+export const createStandardFormatters = formatDate => {
   // Helper for entity links (defined first so it can be referenced)
-  const entityLink = (entityType, entityData, navigate, getEntityName = null) => {
-    const linkProps = createEntityLinkProps(entityType, entityData, navigate, getEntityName);
+  const entityLink = (
+    entityType,
+    entityData,
+    navigate,
+    getEntityName = null
+  ) => {
+    const linkProps = createEntityLinkProps(
+      entityType,
+      entityData,
+      navigate,
+      getEntityName
+    );
     if (!linkProps) return '-';
 
     return (
@@ -78,7 +87,9 @@ export const createStandardFormatters = (formatDate) => {
       if (!item.practitioner_id) {
         return '-';
       }
-      const found = practitioners.find(p => p.id === item.practitioner_id)?.name || `Practitioner ID: ${item.practitioner_id}`;
+      const found =
+        practitioners.find(p => p.id === item.practitioner_id)?.name ||
+        `Practitioner ID: ${item.practitioner_id}`;
       return found;
     },
 
@@ -92,16 +103,28 @@ export const createStandardFormatters = (formatDate) => {
     entityLink,
 
     // Clickable practitioner link
-    practitionerLink: (value, item, practitioners = [], navigate, getEntityName = null) => {
+    practitionerLink: (
+      value,
+      item,
+      practitioners = [],
+      navigate,
+      getEntityName = null
+    ) => {
       // Handle nested practitioner object first
       if (item.practitioner) {
-        return entityLink('practitioner', item.practitioner, navigate, getEntityName);
+        return entityLink(
+          'practitioner',
+          item.practitioner,
+          navigate,
+          getEntityName
+        );
       }
       // Fall back to ID lookup
       if (!item.practitioner_id) return '-';
 
-      const practitioner = practitioners.find(p => p.id === item.practitioner_id) ||
-                          { id: item.practitioner_id };
+      const practitioner = practitioners.find(
+        p => p.id === item.practitioner_id
+      ) || { id: item.practitioner_id };
 
       return entityLink('practitioner', practitioner, navigate, getEntityName);
     },
@@ -141,7 +164,7 @@ export const createStandardFormatters = (formatDate) => {
 
 // Default formatters using user's date preference (via timezoneService singleton)
 // Components should use createStandardFormatters(formatDate) from useDateFormat hook
-const defaultFormatDate = (value) => {
+const defaultFormatDate = value => {
   if (!value) return '-';
   try {
     return formatDateWithPreference(value, timezoneService.dateFormatCode);
@@ -160,9 +183,17 @@ export const standardFormatters = createStandardFormatters(defaultFormatDate);
  * @param {function} formatDate - Date formatting function from useDateFormat hook
  * @returns {Object} Formatters object for the entity
  */
-export const getEntityFormatters = (entityType, practitioners = [], navigate = null, getEntityName = null, formatDate = null) => {
+export const getEntityFormatters = (
+  entityType,
+  practitioners = [],
+  navigate = null,
+  getEntityName = null,
+  formatDate = null
+) => {
   // Use provided formatDate or fall back to standardFormatters
-  const formatters = formatDate ? createStandardFormatters(formatDate) : standardFormatters;
+  const formatters = formatDate
+    ? createStandardFormatters(formatDate)
+    : standardFormatters;
 
   const baseFormatters = {
     status: formatters.status,
@@ -184,10 +215,19 @@ export const getEntityFormatters = (entityType, practitioners = [], navigate = n
         effective_period_start: formatters.date,
         effective_period_end: formatters.date,
         practitioner_name: navigate
-          ? (value, item) => formatters.practitionerLink(value, item, practitioners, navigate, getEntityName)
-          : (value, item) => formatters.practitioner(value, item, practitioners),
+          ? (value, item) =>
+              formatters.practitionerLink(
+                value,
+                item,
+                practitioners,
+                navigate,
+                getEntityName
+              )
+          : (value, item) =>
+              formatters.practitioner(value, item, practitioners),
         pharmacy_name: navigate
-          ? (value, item) => formatters.pharmacyLink(value, item, navigate, getEntityName)
+          ? (value, item) =>
+              formatters.pharmacyLink(value, item, navigate, getEntityName)
           : (value, item) => formatters.pharmacy(value, item),
       };
 
@@ -201,8 +241,16 @@ export const getEntityFormatters = (entityType, practitioners = [], navigate = n
         procedure_duration: formatters.duration,
         facility: formatters.simple,
         practitioner_name: navigate
-          ? (value, item) => formatters.practitionerLink(value, item, practitioners, navigate, getEntityName)
-          : (value, item) => formatters.practitioner(value, item, practitioners),
+          ? (value, item) =>
+              formatters.practitionerLink(
+                value,
+                item,
+                practitioners,
+                navigate,
+                getEntityName
+              )
+          : (value, item) =>
+              formatters.practitioner(value, item, practitioners),
         description: value => formatters.text(value, 50),
         notes: value => formatters.text(value, 50),
       };
@@ -272,8 +320,16 @@ export const getEntityFormatters = (entityType, practitioners = [], navigate = n
         visit_date: formatters.date,
         facility: formatters.simple,
         practitioner_name: navigate
-          ? (value, item) => formatters.practitionerLink(value, item, practitioners, navigate, getEntityName)
-          : (value, item) => formatters.practitioner(value, item, practitioners),
+          ? (value, item) =>
+              formatters.practitionerLink(
+                value,
+                item,
+                practitioners,
+                navigate,
+                getEntityName
+              )
+          : (value, item) =>
+              formatters.practitioner(value, item, practitioners),
         reason: value => formatters.text(value, 50),
         diagnosis: value => formatters.text(value, 50),
         notes: value => formatters.text(value, 50),

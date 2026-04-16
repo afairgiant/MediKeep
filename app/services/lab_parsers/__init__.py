@@ -63,11 +63,11 @@ lab_parser_registry = LabParserRegistry()
 
 
 __all__ = [
-    'BaseLabParser',
-    'LabTestResult',
-    'LabCorpParserV2',
-    'QuestParser',
-    'EpicMyChartParser',
-    'LabParserRegistry',
-    'lab_parser_registry'
+    "BaseLabParser",
+    "LabTestResult",
+    "LabCorpParserV2",
+    "QuestParser",
+    "EpicMyChartParser",
+    "LabParserRegistry",
+    "lab_parser_registry",
 ]

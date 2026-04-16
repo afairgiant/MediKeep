@@ -4,6 +4,7 @@ Tests for standardized test CRUD operations.
 Tests the dual database compatibility (PostgreSQL and SQLite)
 for standardized tests with JSON array fields.
 """
+
 import pytest
 from sqlalchemy.orm import Session
 
@@ -24,7 +25,7 @@ class TestStandardizedTestCRUD:
             "category": "Hematology",
             "default_unit": "10*3/uL",
             "is_common": True,
-            "display_order": 1
+            "display_order": 1,
         }
 
         test = standardized_test.create_test(db_session, test_data)
@@ -46,7 +47,7 @@ class TestStandardizedTestCRUD:
             "common_names": ["Blood Sugar", "Glucose"],
             "category": "Chemistry",
             "default_unit": "mg/dL",
-            "is_common": True
+            "is_common": True,
         }
 
         created_test = standardized_test.create_test(db_session, test_data)
@@ -65,7 +66,7 @@ class TestStandardizedTestCRUD:
             "common_names": ["Hemoglobin", "Hb"],
             "category": "Hematology",
             "default_unit": "g/dL",
-            "is_common": True
+            "is_common": True,
         }
 
         standardized_test.create_test(db_session, test_data)
@@ -84,7 +85,7 @@ class TestStandardizedTestCRUD:
             "common_names": ["Sodium", "Na"],
             "category": "Chemistry",
             "default_unit": "mmol/L",
-            "is_common": True
+            "is_common": True,
         }
 
         standardized_test.create_test(db_session, test_data)
@@ -114,7 +115,7 @@ class TestStandardizedTestSearch:
                 "category": "Hematology",
                 "default_unit": "10*3/uL",
                 "is_common": True,
-                "display_order": 1
+                "display_order": 1,
             },
             {
                 "loinc_code": "2345-7",
@@ -124,7 +125,7 @@ class TestStandardizedTestSearch:
                 "category": "Chemistry",
                 "default_unit": "mg/dL",
                 "is_common": True,
-                "display_order": 2
+                "display_order": 2,
             },
             {
                 "loinc_code": "718-7",
@@ -134,7 +135,7 @@ class TestStandardizedTestSearch:
                 "category": "Hematology",
                 "default_unit": "g/dL",
                 "is_common": True,
-                "display_order": 3
+                "display_order": 3,
             },
             {
                 "loinc_code": "2951-2",
@@ -144,8 +145,8 @@ class TestStandardizedTestSearch:
                 "category": "Chemistry",
                 "default_unit": "mmol/L",
                 "is_common": False,
-                "display_order": 4
-            }
+                "display_order": 4,
+            },
         ]
 
         standardized_test.bulk_create_tests(db_session, tests_data)
@@ -200,7 +201,9 @@ class TestStandardizedTestSearch:
 
     def test_search_by_category(self, db_session: Session):
         """Test filtering by category."""
-        results = standardized_test.search_tests(db_session, "glu", category="Chemistry")
+        results = standardized_test.search_tests(
+            db_session, "glu", category="Chemistry"
+        )
 
         assert len(results) > 0
         assert all(test.category == "Chemistry" for test in results)
@@ -232,7 +235,7 @@ class TestStandardizedTestUpdate:
             "common_names": ["WBC"],
             "category": "Hematology",
             "default_unit": "10*3/uL",
-            "is_common": False
+            "is_common": False,
         }
 
         test = standardized_test.create_test(db_session, test_data)
@@ -240,7 +243,7 @@ class TestStandardizedTestUpdate:
         # Update the test
         updates = {
             "is_common": True,
-            "common_names": ["WBC", "Leukocyte Count", "White Count"]
+            "common_names": ["WBC", "Leukocyte Count", "White Count"],
         }
 
         updated_test = standardized_test.update_test(db_session, test.id, updates)
@@ -269,7 +272,7 @@ class TestStandardizedTestDelete:
             "common_names": ["WBC"],
             "category": "Hematology",
             "default_unit": "10*3/uL",
-            "is_common": True
+            "is_common": True,
         }
 
         test = standardized_test.create_test(db_session, test_data)
@@ -304,7 +307,7 @@ class TestStandardizedTestBulkOperations:
                 "common_names": ["WBC", "Leukocyte Count"],
                 "category": "Hematology",
                 "default_unit": "10*3/uL",
-                "is_common": True
+                "is_common": True,
             },
             {
                 "loinc_code": "2345-7",
@@ -313,8 +316,8 @@ class TestStandardizedTestBulkOperations:
                 "common_names": ["Blood Sugar", "Glucose"],
                 "category": "Chemistry",
                 "default_unit": "mg/dL",
-                "is_common": True
-            }
+                "is_common": True,
+            },
         ]
 
         count = standardized_test.bulk_create_tests(db_session, tests_data)
@@ -338,7 +341,7 @@ class TestStandardizedTestBulkOperations:
                 "common_names": ["WBC"],
                 "category": "Hematology",
                 "default_unit": "10*3/uL",
-                "is_common": True
+                "is_common": True,
             },
             {
                 "loinc_code": "2345-7",
@@ -347,8 +350,8 @@ class TestStandardizedTestBulkOperations:
                 "common_names": ["Glucose"],
                 "category": "Chemistry",
                 "default_unit": "mg/dL",
-                "is_common": True
-            }
+                "is_common": True,
+            },
         ]
 
         standardized_test.bulk_create_tests(db_session, tests_data)
@@ -356,7 +359,9 @@ class TestStandardizedTestBulkOperations:
         total_count = standardized_test.count_tests(db_session)
         assert total_count == 2
 
-        hematology_count = standardized_test.count_tests(db_session, category="Hematology")
+        hematology_count = standardized_test.count_tests(
+            db_session, category="Hematology"
+        )
         assert hematology_count == 1
 
     def test_clear_all_tests(self, db_session: Session):
@@ -369,7 +374,7 @@ class TestStandardizedTestBulkOperations:
                 "common_names": ["WBC"],
                 "category": "Hematology",
                 "default_unit": "10*3/uL",
-                "is_common": True
+                "is_common": True,
             }
         ]
 
@@ -397,7 +402,7 @@ class TestStandardizedTestHelperMethods:
                 "category": "Hematology",
                 "default_unit": "10*3/uL",
                 "is_common": True,
-                "display_order": 1
+                "display_order": 1,
             },
             {
                 "loinc_code": "2345-7",
@@ -407,8 +412,8 @@ class TestStandardizedTestHelperMethods:
                 "category": "Chemistry",
                 "default_unit": "mg/dL",
                 "is_common": False,
-                "display_order": 2
-            }
+                "display_order": 2,
+            },
         ]
 
         standardized_test.bulk_create_tests(db_session, tests_data)
@@ -429,7 +434,7 @@ class TestStandardizedTestHelperMethods:
                 "category": "Hematology",
                 "default_unit": "10*3/uL",
                 "is_common": True,
-                "display_order": 1
+                "display_order": 1,
             },
             {
                 "loinc_code": "2345-7",
@@ -439,13 +444,15 @@ class TestStandardizedTestHelperMethods:
                 "category": "Chemistry",
                 "default_unit": "mg/dL",
                 "is_common": True,
-                "display_order": 2
-            }
+                "display_order": 2,
+            },
         ]
 
         standardized_test.bulk_create_tests(db_session, tests_data)
 
-        hematology_tests = standardized_test.get_tests_by_category(db_session, "Hematology")
+        hematology_tests = standardized_test.get_tests_by_category(
+            db_session, "Hematology"
+        )
 
         assert len(hematology_tests) == 1
         assert hematology_tests[0].category == "Hematology"
@@ -460,7 +467,7 @@ class TestStandardizedTestHelperMethods:
                 "common_names": ["WBC"],
                 "category": "Hematology",
                 "default_unit": "10*3/uL",
-                "is_common": True
+                "is_common": True,
             }
         ]
 

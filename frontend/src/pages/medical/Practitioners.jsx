@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   ActionIcon,
   Accordion,
@@ -32,10 +32,7 @@ import EmptyState from '../../components/shared/EmptyState';
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
-import {
-  usePractitioners,
-  useDataManagement,
-} from '../../hooks';
+import { usePractitioners, useDataManagement } from '../../hooks';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -76,9 +73,18 @@ const Practitioners = () => {
   const dataManagement = useDataManagement(practitioners, config);
 
   // Get standardized formatters for practitioners
-  const defaultFormatters = getEntityFormatters('default', [], navigate, null, formatDate);
+  const defaultFormatters = getEntityFormatters(
+    'default',
+    [],
+    navigate,
+    null,
+    formatDate
+  );
   const [editingPractitioner, setEditingPractitioner] = useState(null);
-  const [groupByPractice, setGroupByPractice] = usePersistedToggle('medikeep_practitioners_groupby', false);
+  const [groupByPractice, setGroupByPractice] = usePersistedToggle(
+    'medikeep_practitioners_groupby',
+    false
+  );
   const [practiceEditData, setPracticeEditData] = useState(null);
   const [showPracticeEditModal, setShowPracticeEditModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -94,7 +100,12 @@ const Practitioners = () => {
   // Handle global error state
   useEffect(() => {
     if (practitionersError) {
-      setError(t('practitioners.errors.loadFailed', 'Failed to load practitioners. Please try again.'));
+      setError(
+        t(
+          'practitioners.errors.loadFailed',
+          'Failed to load practitioners. Please try again.'
+        )
+      );
     } else {
       setError('');
     }
@@ -142,7 +153,9 @@ const Practitioners = () => {
     setFormData({
       name: practitioner.name || '',
       specialty: practitioner.specialty || '',
-      practice_id: practitioner.practice_id ? String(practitioner.practice_id) : '',
+      practice_id: practitioner.practice_id
+        ? String(practitioner.practice_id)
+        : '',
       phone_number: practitioner.phone_number || '',
       email: practitioner.email || '',
       website: practitioner.website || '',
@@ -184,7 +197,9 @@ const Practitioners = () => {
         ...formData,
         practice_id:
           formData.practice_id && formData.practice_id !== ''
-            ? (Number.isNaN(parseInt(formData.practice_id, 10)) ? null : parseInt(formData.practice_id, 10))
+            ? Number.isNaN(parseInt(formData.practice_id, 10))
+              ? null
+              : parseInt(formData.practice_id, 10)
             : null,
         phone_number: formData.phone_number?.trim() || null,
         email:
@@ -239,7 +254,7 @@ const Practitioners = () => {
     }));
   };
 
-  const handleEditPractice = async (practiceId) => {
+  const handleEditPractice = async practiceId => {
     try {
       const data = await apiService.getPractice(practiceId);
       setPracticeEditData(data);
@@ -247,7 +262,10 @@ const Practitioners = () => {
     } catch {
       notifications.show({
         title: t('shared:labels.error'),
-        message: t('practitioners.editPracticeError', 'Failed to load practice for editing'),
+        message: t(
+          'practitioners.editPracticeError',
+          'Failed to load practice for editing'
+        ),
         color: 'red',
       });
     }
@@ -282,7 +300,9 @@ const Practitioners = () => {
     });
 
     return {
-      practices: Object.values(groups).sort((a, b) => a.name.localeCompare(b.name)),
+      practices: Object.values(groups).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
       ungrouped,
     };
   }, [groupByPractice, filteredPractitioners]);
@@ -310,82 +330,131 @@ const Practitioners = () => {
   }, [location.search, filteredPractitioners, loading, showViewModal]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('practitioners.loading', 'Loading practitioners...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('practitioners.loading', 'Loading practitioners...')}
+      />
+    );
   }
 
   return (
     <>
-    <Container size="xl" py="sm">
-      <PageHeader title={t('shared:categories.healthcare_practitioners', 'Healthcare Practitioners')} icon="👨‍⚕️" />
+      <Container size="xl" py="sm">
+        <PageHeader
+          title={t(
+            'shared:categories.healthcare_practitioners',
+            'Healthcare Practitioners'
+          )}
+          icon="👨‍⚕️"
+        />
 
-      <MedicalPageAlerts
+        <MedicalPageAlerts
           error={error}
           successMessage={successMessage}
           onClearError={() => setError('')}
         />
 
-      <Tabs defaultValue="practitioners" mt="md">
-        <Tabs.List mb="sm" className="no-print">
-          <Tabs.Tab value="practitioners">
-            {t('shared:categories.practitioners', 'Practitioners')}
-          </Tabs.Tab>
-          <Tabs.Tab value="practices" leftSection={<IconBuilding size={16} />}>
-            {t('practitioners.tabs.practices', 'Practices')}
-          </Tabs.Tab>
-        </Tabs.List>
+        <Tabs defaultValue="practitioners" mt="md">
+          <Tabs.List mb="sm" className="no-print">
+            <Tabs.Tab value="practitioners">
+              {t('shared:categories.practitioners', 'Practitioners')}
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="practices"
+              leftSection={<IconBuilding size={16} />}
+            >
+              {t('practitioners.tabs.practices', 'Practices')}
+            </Tabs.Tab>
+          </Tabs.List>
 
-        <Tabs.Panel value="practitioners">
-          <Stack gap="sm">
-            <MedicalPageActions
-              primaryAction={{
-                label: t('practitioners.actions.addNew', 'Add New Practitioner'),
-                onClick: handleAddPractitioner,
-                leftSection: <IconPlus size={16} />,
-                size: 'sm',
-              }}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              viewToggleSize="sm"
-              mb={0}
-            />
-
-            {/* Mantine Filter Controls */}
-            <MedicalPageFilters dataManagement={dataManagement} config={config} />
-
-            {/* Group by Practice Toggle */}
-            <Group className="no-print">
-              <Switch
-                label={t('practitioners.groupByPractice', 'Group by Practice')}
-                checked={groupByPractice}
-                onChange={(event) => setGroupByPractice(event.currentTarget.checked)}
-                size="sm"
+          <Tabs.Panel value="practitioners">
+            <Stack gap="sm">
+              <MedicalPageActions
+                primaryAction={{
+                  label: t(
+                    'practitioners.actions.addNew',
+                    'Add New Practitioner'
+                  ),
+                  onClick: handleAddPractitioner,
+                  leftSection: <IconPlus size={16} />,
+                  size: 'sm',
+                }}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                viewToggleSize="sm"
+                mb={0}
               />
-            </Group>
 
-            {/* Content */}
+              {/* Mantine Filter Controls */}
+              <MedicalPageFilters
+                dataManagement={dataManagement}
+                config={config}
+              />
+
+              {/* Group by Practice Toggle */}
+              <Group className="no-print">
+                <Switch
+                  label={t(
+                    'practitioners.groupByPractice',
+                    'Group by Practice'
+                  )}
+                  checked={groupByPractice}
+                  onChange={event =>
+                    setGroupByPractice(event.currentTarget.checked)
+                  }
+                  size="sm"
+                />
+              </Group>
+
+              {/* Content */}
               {filteredPractitioners.length === 0 ? (
                 <EmptyState
                   icon={IconShieldCheck}
-                  title={t('practitioners.empty.title', 'No healthcare practitioners found')}
+                  title={t(
+                    'practitioners.empty.title',
+                    'No healthcare practitioners found'
+                  )}
                   hasActiveFilters={dataManagement.hasActiveFilters}
-                  filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-                  noDataMessage={t('practitioners.empty.noData', 'Click "Add New Practitioner" to get started.')}
+                  filteredMessage={t(
+                    'shared:emptyStates.adjustSearch',
+                    'Try adjusting your search or filter criteria.'
+                  )}
+                  noDataMessage={t(
+                    'practitioners.empty.noData',
+                    'Click "Add New Practitioner" to get started.'
+                  )}
                 />
               ) : groupByPractice && groupedPractitioners ? (
-                <Accordion variant="separated" multiple defaultValue={groupedPractitioners.practices.map(g => String(g.id))}>
+                <Accordion
+                  variant="separated"
+                  multiple
+                  defaultValue={groupedPractitioners.practices.map(g =>
+                    String(g.id)
+                  )}
+                >
                   {groupedPractitioners.practices.map(group => (
                     <Accordion.Item key={group.id} value={String(group.id)}>
                       <Accordion.Control>
-                        <Group gap="xs" justify="space-between" wrap="nowrap" style={{ width: '100%' }}>
+                        <Group
+                          gap="xs"
+                          justify="space-between"
+                          wrap="nowrap"
+                          style={{ width: '100%' }}
+                        >
                           <Group gap="xs">
                             <IconBuilding size={18} />
                             <Text fw={600}>{group.name}</Text>
-                            <Text size="sm" c="dimmed">({group.practitioners.length})</Text>
+                            <Text size="sm" c="dimmed">
+                              ({group.practitioners.length})
+                            </Text>
                           </Group>
                           <ActionIcon
                             size="sm"
                             variant="subtle"
-                            onClick={(e) => { e.stopPropagation(); handleEditPractice(group.id); }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleEditPractice(group.id);
+                            }}
                             title={t('practitioners.viewModal.editPractice')}
                           >
                             <IconEdit size={16} />
@@ -397,20 +466,28 @@ const Practitioners = () => {
                           <AnimatedCardGrid
                             items={group.practitioners}
                             columns={{ base: 12, md: 6, lg: 4 }}
-                            renderCard={(practitioner) => (
+                            renderCard={practitioner => (
                               <PractitionerCard
                                 practitioner={practitioner}
                                 onEdit={handleEditPractitioner}
                                 onDelete={handleDeletePractitioner}
                                 onView={handleViewPractitioner}
                                 navigate={navigate}
-                                onError={(error) => {
-                                  setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
-                                  frontendLogger.logError('PractitionerCard error', {
-                                    practitionerId: practitioner.id,
-                                    error: error.message,
-                                    page: 'Practitioners',
-                                  });
+                                onError={error => {
+                                  setError(
+                                    t(
+                                      'practitioners.errors.generic',
+                                      'An error occurred. Please try again.'
+                                    )
+                                  );
+                                  frontendLogger.logError(
+                                    'PractitionerCard error',
+                                    {
+                                      practitionerId: practitioner.id,
+                                      error: error.message,
+                                      page: 'Practitioners',
+                                    }
+                                  );
                                 }}
                               />
                             )}
@@ -421,11 +498,39 @@ const Practitioners = () => {
                               persistKey={`practitioners-group-${group.id}`}
                               data={group.practitioners}
                               columns={[
-                                { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                                { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                                { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                                { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                                { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                                {
+                                  header: t('shared:labels.name', 'Name'),
+                                  accessor: 'name',
+                                  priority: 'high',
+                                  width: 200,
+                                },
+                                {
+                                  header: t(
+                                    'shared:labels.specialty',
+                                    'Specialty'
+                                  ),
+                                  accessor: 'specialty',
+                                  priority: 'high',
+                                  width: 150,
+                                },
+                                {
+                                  header: t('shared:labels.phone', 'Phone'),
+                                  accessor: 'phone_number',
+                                  priority: 'low',
+                                  width: 150,
+                                },
+                                {
+                                  header: t('shared:labels.email', 'Email'),
+                                  accessor: 'email',
+                                  priority: 'low',
+                                  width: 180,
+                                },
+                                {
+                                  header: t('shared:labels.rating', 'Rating'),
+                                  accessor: 'rating',
+                                  priority: 'low',
+                                  width: 100,
+                                },
                               ]}
                               tableName={group.name}
                               onView={handleViewPractitioner}
@@ -436,7 +541,10 @@ const Practitioners = () => {
                                 specialty: defaultFormatters.simple,
                                 phone_number: value => value || '-',
                                 email: value => value || '-',
-                                rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
+                                rating: value =>
+                                  value !== null && value !== undefined
+                                    ? `${value}/5`
+                                    : '-',
                               }}
                               dataType="medical"
                               responsive={responsive}
@@ -451,8 +559,15 @@ const Practitioners = () => {
                       <Accordion.Control>
                         <Group gap="xs">
                           <IconUser size={18} />
-                          <Text fw={600}>{t('practitioners.ungroupedTitle', 'Independent Practitioners')}</Text>
-                          <Text size="sm" c="dimmed">({groupedPractitioners.ungrouped.length})</Text>
+                          <Text fw={600}>
+                            {t(
+                              'practitioners.ungroupedTitle',
+                              'Independent Practitioners'
+                            )}
+                          </Text>
+                          <Text size="sm" c="dimmed">
+                            ({groupedPractitioners.ungrouped.length})
+                          </Text>
                         </Group>
                       </Accordion.Control>
                       <Accordion.Panel>
@@ -460,20 +575,28 @@ const Practitioners = () => {
                           <AnimatedCardGrid
                             items={groupedPractitioners.ungrouped}
                             columns={{ base: 12, md: 6, lg: 4 }}
-                            renderCard={(practitioner) => (
+                            renderCard={practitioner => (
                               <PractitionerCard
                                 practitioner={practitioner}
                                 onEdit={handleEditPractitioner}
                                 onDelete={handleDeletePractitioner}
                                 onView={handleViewPractitioner}
                                 navigate={navigate}
-                                onError={(error) => {
-                                  setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
-                                  frontendLogger.logError('PractitionerCard error', {
-                                    practitionerId: practitioner.id,
-                                    error: error.message,
-                                    page: 'Practitioners',
-                                  });
+                                onError={error => {
+                                  setError(
+                                    t(
+                                      'practitioners.errors.generic',
+                                      'An error occurred. Please try again.'
+                                    )
+                                  );
+                                  frontendLogger.logError(
+                                    'PractitionerCard error',
+                                    {
+                                      practitionerId: practitioner.id,
+                                      error: error.message,
+                                      page: 'Practitioners',
+                                    }
+                                  );
                                 }}
                               />
                             )}
@@ -484,13 +607,44 @@ const Practitioners = () => {
                               persistKey="practitioners-ungrouped"
                               data={groupedPractitioners.ungrouped}
                               columns={[
-                                { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                                { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                                { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                                { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                                { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                                {
+                                  header: t('shared:labels.name', 'Name'),
+                                  accessor: 'name',
+                                  priority: 'high',
+                                  width: 200,
+                                },
+                                {
+                                  header: t(
+                                    'shared:labels.specialty',
+                                    'Specialty'
+                                  ),
+                                  accessor: 'specialty',
+                                  priority: 'high',
+                                  width: 150,
+                                },
+                                {
+                                  header: t('shared:labels.phone', 'Phone'),
+                                  accessor: 'phone_number',
+                                  priority: 'low',
+                                  width: 150,
+                                },
+                                {
+                                  header: t('shared:labels.email', 'Email'),
+                                  accessor: 'email',
+                                  priority: 'low',
+                                  width: 180,
+                                },
+                                {
+                                  header: t('shared:labels.rating', 'Rating'),
+                                  accessor: 'rating',
+                                  priority: 'low',
+                                  width: 100,
+                                },
                               ]}
-                              tableName={t('practitioners.ungroupedTitle', 'Independent Practitioners')}
+                              tableName={t(
+                                'practitioners.ungroupedTitle',
+                                'Independent Practitioners'
+                              )}
                               onView={handleViewPractitioner}
                               onEdit={handleEditPractitioner}
                               onDelete={handleDeletePractitioner}
@@ -499,7 +653,10 @@ const Practitioners = () => {
                                 specialty: defaultFormatters.simple,
                                 phone_number: value => value || '-',
                                 email: value => value || '-',
-                                rating: value => value !== null && value !== undefined ? `${value}/5` : '-',
+                                rating: value =>
+                                  value !== null && value !== undefined
+                                    ? `${value}/5`
+                                    : '-',
                               }}
                               dataType="medical"
                               responsive={responsive}
@@ -514,15 +671,20 @@ const Practitioners = () => {
                 <AnimatedCardGrid
                   items={filteredPractitioners}
                   columns={{ base: 12, md: 6, lg: 4 }}
-                  renderCard={(practitioner) => (
+                  renderCard={practitioner => (
                     <PractitionerCard
                       practitioner={practitioner}
                       onEdit={handleEditPractitioner}
                       onDelete={handleDeletePractitioner}
                       onView={handleViewPractitioner}
                       navigate={navigate}
-                      onError={(error) => {
-                        setError(t('practitioners.errors.generic', 'An error occurred. Please try again.'));
+                      onError={error => {
+                        setError(
+                          t(
+                            'practitioners.errors.generic',
+                            'An error occurred. Please try again.'
+                          )
+                        );
                         frontendLogger.logError('PractitionerCard error', {
                           practitionerId: practitioner.id,
                           error: error.message,
@@ -538,14 +700,47 @@ const Practitioners = () => {
                     persistKey="practitioners"
                     data={filteredPractitioners}
                     columns={[
-                      { header: t('shared:labels.name', 'Name'), accessor: 'name', priority: 'high', width: 200 },
-                      { header: t('shared:labels.specialty', 'Specialty'), accessor: 'specialty', priority: 'high', width: 150 },
-                      { header: t('shared:labels.practice', 'Practice'), accessor: 'practice_name', priority: 'low', width: 150 },
-                      { header: t('shared:labels.phone', 'Phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                      { header: t('shared:labels.email', 'Email'), accessor: 'email', priority: 'low', width: 180 },
-                      { header: t('shared:labels.rating', 'Rating'), accessor: 'rating', priority: 'low', width: 100 }
+                      {
+                        header: t('shared:labels.name', 'Name'),
+                        accessor: 'name',
+                        priority: 'high',
+                        width: 200,
+                      },
+                      {
+                        header: t('shared:labels.specialty', 'Specialty'),
+                        accessor: 'specialty',
+                        priority: 'high',
+                        width: 150,
+                      },
+                      {
+                        header: t('shared:labels.practice', 'Practice'),
+                        accessor: 'practice_name',
+                        priority: 'low',
+                        width: 150,
+                      },
+                      {
+                        header: t('shared:labels.phone', 'Phone'),
+                        accessor: 'phone_number',
+                        priority: 'low',
+                        width: 150,
+                      },
+                      {
+                        header: t('shared:labels.email', 'Email'),
+                        accessor: 'email',
+                        priority: 'low',
+                        width: 180,
+                      },
+                      {
+                        header: t('shared:labels.rating', 'Rating'),
+                        accessor: 'rating',
+                        priority: 'low',
+                        width: 100,
+                      },
                     ]}
-                    tableName={t('shared:categories.healthcare_practitioners', 'Healthcare Practitioners')}
+                    tableName={t(
+                      'shared:categories.healthcare_practitioners',
+                      'Healthcare Practitioners'
+                    )}
                     onView={handleViewPractitioner}
                     onEdit={handleEditPractitioner}
                     onDelete={handleDeletePractitioner}
@@ -560,7 +755,10 @@ const Practitioners = () => {
                             <ActionIcon
                               size="xs"
                               variant="subtle"
-                              onClick={(e) => { e.stopPropagation(); handleEditPractice(row.practice_id); }}
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleEditPractice(row.practice_id);
+                              }}
                               title={t('practitioners.viewModal.editPractice')}
                             >
                               <IconEdit size={14} />
@@ -571,27 +769,31 @@ const Practitioners = () => {
                       phone_number: value => value || '-',
                       email: value => value || '-',
                       rating: value =>
-                        value !== null && value !== undefined ? `${value}/5` : '-',
+                        value !== null && value !== undefined
+                          ? `${value}/5`
+                          : '-',
                     }}
                     dataType="medical"
                     responsive={responsive}
                   />
                 </Paper>
               )}
-          </Stack>
-        </Tabs.Panel>
+            </Stack>
+          </Tabs.Panel>
 
-        <Tabs.Panel value="practices">
-          <PracticesList onPracticeSaved={handlePracticeSaved} />
-        </Tabs.Panel>
-      </Tabs>
+          <Tabs.Panel value="practices">
+            <PracticesList onPracticeSaved={handlePracticeSaved} />
+          </Tabs.Panel>
+        </Tabs>
       </Container>
 
       <PractitionerFormWrapper
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={
-          editingPractitioner ? t('practitioners.form.editTitle', 'Edit Practitioner') : t('practitioners.form.addTitle', 'Add New Practitioner')
+          editingPractitioner
+            ? t('practitioners.form.editTitle', 'Edit Practitioner')
+            : t('practitioners.form.addTitle', 'Add New Practitioner')
         }
         formData={formData}
         onInputChange={handleInputChange}
@@ -611,7 +813,10 @@ const Practitioners = () => {
 
       <PracticeEditModal
         isOpen={showPracticeEditModal}
-        onClose={() => { setShowPracticeEditModal(false); setPracticeEditData(null); }}
+        onClose={() => {
+          setShowPracticeEditModal(false);
+          setPracticeEditData(null);
+        }}
         practiceData={practiceEditData}
         onSaved={handlePracticeSaved}
       />
@@ -622,5 +827,5 @@ const Practitioners = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Practitioners, {
   injectResponsive: true,
-  displayName: 'ResponsivePractitioners'
+  displayName: 'ResponsivePractitioners',
 });

@@ -14,10 +14,20 @@ import {
   ScrollArea,
   Tooltip,
 } from '@mantine/core';
-import { IconArrowUp, IconArrowDown, IconArrowsSort } from '@tabler/icons-react';
+import {
+  IconArrowUp,
+  IconArrowDown,
+  IconArrowsSort,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
-import { TrendResponse, TrendDataPoint } from '../../../services/api/labTestComponentApi';
-import { getQualitativeDisplayName, getQualitativeColor } from '../../../constants/labCategories';
+import {
+  TrendResponse,
+  TrendDataPoint,
+} from '../../../services/api/labTestComponentApi';
+import {
+  getQualitativeDisplayName,
+  getQualitativeColor,
+} from '../../../constants/labCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 
 interface TestComponentTrendTableProps {
@@ -27,7 +37,9 @@ interface TestComponentTrendTableProps {
 type SortField = 'date' | 'value' | 'status';
 type SortOrder = 'asc' | 'desc';
 
-const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trendData }) => {
+const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
+  trendData,
+}) => {
   const { t } = useTranslation(['labresults', 'shared']);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc'); // Most recent first by default
@@ -94,7 +106,10 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
         }
         case 'value':
           // Handle qualitative: sort alphabetically by qualitative_value
-          if (a.result_type === 'qualitative' || b.result_type === 'qualitative') {
+          if (
+            a.result_type === 'qualitative' ||
+            b.result_type === 'qualitative'
+          ) {
             const valA = a.qualitative_value || '';
             const valB = b.qualitative_value || '';
             comparison = valA.localeCompare(valB);
@@ -153,7 +168,9 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
     <Stack gap="md">
       <Group justify="space-between" align="center">
         <Text size="sm" fw={600}>
-          {t('trendTable.historicalData', { count: trendData.data_points.length })}
+          {t('trendTable.historicalData', {
+            count: trendData.data_points.length,
+          })}
         </Text>
         <Text size="xs" c="dimmed">
           {t('trendTable.clickToSort')}
@@ -166,42 +183,69 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>
-                  <Group gap="xs" style={{ cursor: 'pointer' }} onClick={() => handleSort('date')}>
-                    <Text size="xs" fw={600}>{t('shared:labels.date')}</Text>
+                  <Group
+                    gap="xs"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleSort('date')}
+                  >
+                    <Text size="xs" fw={600}>
+                      {t('shared:labels.date')}
+                    </Text>
                     <SortIcon field="date" />
                   </Group>
                 </Table.Th>
                 <Table.Th>
-                  <Group gap="xs" style={{ cursor: 'pointer' }} onClick={() => handleSort('value')}>
-                    <Text size="xs" fw={600}>{t('shared:labels.value')}</Text>
+                  <Group
+                    gap="xs"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleSort('value')}
+                  >
+                    <Text size="xs" fw={600}>
+                      {t('shared:labels.value')}
+                    </Text>
                     <SortIcon field="value" />
                   </Group>
                 </Table.Th>
                 <Table.Th>
-                  <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.unit')}</Text>
+                  <Text size="xs" fw={600}>
+                    {t('labresults:testComponents.editModal.fields.unit')}
+                  </Text>
                 </Table.Th>
                 <Table.Th>
-                  <Group gap="xs" style={{ cursor: 'pointer' }} onClick={() => handleSort('status')}>
-                    <Text size="xs" fw={600}>{t('shared:fields.status')}</Text>
+                  <Group
+                    gap="xs"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleSort('status')}
+                  >
+                    <Text size="xs" fw={600}>
+                      {t('shared:fields.status')}
+                    </Text>
                     <SortIcon field="status" />
                   </Group>
                 </Table.Th>
                 <Table.Th>
-                  <Text size="xs" fw={600}>{t('labresults:testComponents.editModal.fields.referenceRange')}</Text>
+                  <Text size="xs" fw={600}>
+                    {t(
+                      'labresults:testComponents.editModal.fields.referenceRange'
+                    )}
+                  </Text>
                 </Table.Th>
                 <Table.Th>
-                  <Text size="xs" fw={600}>{t('trendTable.labResult')}</Text>
+                  <Text size="xs" fw={600}>
+                    {t('trendTable.labResult')}
+                  </Text>
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {sortedData.map((point) => (
+              {sortedData.map(point => (
                 <Table.Tr key={point.id}>
                   <Table.Td>
                     <Text size="sm">{formatDate(point)}</Text>
                   </Table.Td>
                   <Table.Td>
-                    {point.result_type === 'qualitative' && point.qualitative_value ? (
+                    {point.result_type === 'qualitative' &&
+                    point.qualitative_value ? (
                       <Badge
                         size="sm"
                         variant="filled"
@@ -210,11 +254,15 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
                         {getQualitativeDisplayName(point.qualitative_value)}
                       </Badge>
                     ) : (
-                      <Text size="sm" fw={600}>{point.value}</Text>
+                      <Text size="sm" fw={600}>
+                        {point.value}
+                      </Text>
                     )}
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm" c="dimmed">{point.result_type === 'qualitative' ? '-' : point.unit}</Text>
+                    <Text size="sm" c="dimmed">
+                      {point.result_type === 'qualitative' ? '-' : point.unit}
+                    </Text>
                   </Table.Td>
                   <Table.Td>
                     {point.status ? (
@@ -226,12 +274,16 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({ trend
                         {point.status}
                       </Badge>
                     ) : (
-                      <Text size="xs" c="dimmed">-</Text>
+                      <Text size="xs" c="dimmed">
+                        -
+                      </Text>
                     )}
                   </Table.Td>
                   <Table.Td>
                     <Text size="xs" c="dimmed">
-                      {point.result_type === 'qualitative' ? '-' : formatReferenceRange(point)}
+                      {point.result_type === 'qualitative'
+                        ? '-'
+                        : formatReferenceRange(point)}
                     </Text>
                   </Table.Td>
                   <Table.Td>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Stack,
   Group,
@@ -30,7 +30,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 
 /**
  * TemplateManager Component
- * 
+ *
  * Manages report templates - saving, loading, editing, and deleting
  * Integrates with the useReportTemplates hook
  */
@@ -44,9 +44,11 @@ const TemplateManager = ({
 }) => {
   const { t } = useTranslation(['reports', 'shared']);
   const { formatDate } = useDateFormat();
-  const [showSaveModal, { open: openSaveModal, close: closeSaveModal }] = useDisclosure(false);
-  const [showEditModal, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
-  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [showSaveModal, { open: openSaveModal, close: closeSaveModal }] =
+    useDisclosure(false);
+  const [showEditModal, { open: openEditModal, close: closeEditModal }] =
+    useDisclosure(false);
+  const [, setEditingTemplate] = useState(null);
   const [templateForm, setTemplateForm] = useState({
     name: '',
     description: '',
@@ -65,7 +67,7 @@ const TemplateManager = ({
       });
       return;
     }
-    
+
     setTemplateForm({
       name: '',
       description: '',
@@ -76,7 +78,7 @@ const TemplateManager = ({
   };
 
   // Handle edit existing template
-  const handleEdit = (template) => {
+  const handleEdit = template => {
     setEditingTemplate(template);
     setTemplateForm({
       name: template.name || '',
@@ -134,7 +136,7 @@ const TemplateManager = ({
   };
 
   // Handle delete template
-  const handleDelete = async (template) => {
+  const handleDelete = async template => {
     const success = await onDeleteTemplate(template.id, template.name);
     if (success) {
       notifications.show({
@@ -150,8 +152,8 @@ const TemplateManager = ({
     <>
       <Menu shadow="md" width={300} position="bottom-end">
         <Menu.Target>
-          <Button 
-            leftSection={<IconTemplate size={16} />} 
+          <Button
+            leftSection={<IconTemplate size={16} />}
             rightSection={<IconChevronDown size={16} />}
             variant="outline"
           >
@@ -161,20 +163,24 @@ const TemplateManager = ({
 
         <Menu.Dropdown>
           <Menu.Label>{t('templates.reportTemplates')}</Menu.Label>
-          
+
           {templates.length === 0 ? (
             <Menu.Item disabled>
-              <Text size="sm" c="dimmed">{t('templates.noSaved')}</Text>
+              <Text size="sm" c="dimmed">
+                {t('templates.noSaved')}
+              </Text>
             </Menu.Item>
           ) : (
-            templates.slice(0, 5).map((template) => (
+            templates.slice(0, 5).map(template => (
               <Menu.Item
                 key={template.id}
                 leftSection={<IconDownload size={16} />}
                 onClick={() => onLoadTemplate(template.id)}
               >
                 <Stack gap={2}>
-                  <Text size="sm" fw={500}>{template.name}</Text>
+                  <Text size="sm" fw={500}>
+                    {template.name}
+                  </Text>
                   {template.description && (
                     <Text size="xs" c="dimmed" lineClamp={1}>
                       {template.description}
@@ -182,7 +188,9 @@ const TemplateManager = ({
                   )}
                   <Group gap="xs">
                     <Badge size="xs" color="blue" variant="light">
-                      {t('templates.categories', { count: template.selected_records?.length || 0 })}
+                      {t('templates.categories', {
+                        count: template.selected_records?.length || 0,
+                      })}
                     </Badge>
                     {template.is_public && (
                       <Badge size="xs" color="green" variant="light">
@@ -204,7 +212,7 @@ const TemplateManager = ({
           )}
 
           <Menu.Divider />
-          
+
           <Menu.Item
             leftSection={<IconDeviceFloppy size={16} />}
             onClick={handleSaveNew}
@@ -218,9 +226,11 @@ const TemplateManager = ({
       {/* Templates List (for expanded view) */}
       {templates.length > 0 && (
         <Paper p="md" withBorder radius="md" mt="md">
-          <Text fw={500} mb="sm">{t('templates.savedTemplates')}</Text>
+          <Text fw={500} mb="sm">
+            {t('templates.savedTemplates')}
+          </Text>
           <Stack gap="xs">
-            {templates.map((template) => (
+            {templates.map(template => (
               <TemplateCard
                 key={template.id}
                 template={template}
@@ -246,22 +256,26 @@ const TemplateManager = ({
             label="Template Name"
             placeholder="Enter template name"
             value={templateForm.name}
-            onChange={(event) => setTemplateForm(prev => ({ 
-              ...prev, 
-              name: event.target.value 
-            }))}
+            onChange={event =>
+              setTemplateForm(prev => ({
+                ...prev,
+                name: event.target.value,
+              }))
+            }
             required
             data-autofocus
           />
-          
+
           <Textarea
             label="Description"
             placeholder="Optional description"
             value={templateForm.description}
-            onChange={(event) => setTemplateForm(prev => ({ 
-              ...prev, 
-              description: event.target.value 
-            }))}
+            onChange={event =>
+              setTemplateForm(prev => ({
+                ...prev,
+                description: event.target.value,
+              }))
+            }
             rows={3}
           />
 
@@ -270,27 +284,29 @@ const TemplateManager = ({
               label="Make template public"
               description="Other users can see and use this template"
               checked={templateForm.is_public}
-              onChange={(event) => setTemplateForm(prev => ({ 
-                ...prev, 
-                is_public: event.currentTarget.checked 
-              }))}
+              onChange={event =>
+                setTemplateForm(prev => ({
+                  ...prev,
+                  is_public: event.currentTarget.checked,
+                }))
+              }
             />
-            
+
             <Switch
               label="Share with family members"
               description="Family members can access this template"
               checked={templateForm.shared_with_family}
-              onChange={(event) => setTemplateForm(prev => ({ 
-                ...prev, 
-                shared_with_family: event.currentTarget.checked 
-              }))}
+              onChange={event =>
+                setTemplateForm(prev => ({
+                  ...prev,
+                  shared_with_family: event.currentTarget.checked,
+                }))
+              }
             />
           </Stack>
 
           <Alert color="blue" variant="light">
-            <Text size="sm">
-              {t('templates.saveDescription')}
-            </Text>
+            <Text size="sm">{t('templates.saveDescription')}</Text>
           </Alert>
 
           <Group justify="flex-end" mt="md">
@@ -316,21 +332,25 @@ const TemplateManager = ({
             label="Template Name"
             placeholder="Enter template name"
             value={templateForm.name}
-            onChange={(event) => setTemplateForm(prev => ({ 
-              ...prev, 
-              name: event.target.value 
-            }))}
+            onChange={event =>
+              setTemplateForm(prev => ({
+                ...prev,
+                name: event.target.value,
+              }))
+            }
             required
           />
-          
+
           <Textarea
             label="Description"
             placeholder="Optional description"
             value={templateForm.description}
-            onChange={(event) => setTemplateForm(prev => ({ 
-              ...prev, 
-              description: event.target.value 
-            }))}
+            onChange={event =>
+              setTemplateForm(prev => ({
+                ...prev,
+                description: event.target.value,
+              }))
+            }
             rows={3}
           />
 
@@ -339,20 +359,24 @@ const TemplateManager = ({
               label="Make template public"
               description="Other users can see and use this template"
               checked={templateForm.is_public}
-              onChange={(event) => setTemplateForm(prev => ({ 
-                ...prev, 
-                is_public: event.currentTarget.checked 
-              }))}
+              onChange={event =>
+                setTemplateForm(prev => ({
+                  ...prev,
+                  is_public: event.currentTarget.checked,
+                }))
+              }
             />
-            
+
             <Switch
               label="Share with family members"
               description="Family members can access this template"
               checked={templateForm.shared_with_family}
-              onChange={(event) => setTemplateForm(prev => ({ 
-                ...prev, 
-                shared_with_family: event.currentTarget.checked 
-              }))}
+              onChange={event =>
+                setTemplateForm(prev => ({
+                  ...prev,
+                  shared_with_family: event.currentTarget.checked,
+                }))
+              }
             />
           </Stack>
 
@@ -380,9 +404,13 @@ const TemplateCard = ({ template, onLoad, onEdit, onDelete, formatDate }) => {
       <Group justify="space-between">
         <Stack gap={2} style={{ flex: 1 }}>
           <Group>
-            <Text fw={500} size="sm">{template.name}</Text>
+            <Text fw={500} size="sm">
+              {template.name}
+            </Text>
             <Badge size="xs" color="blue" variant="light">
-              {t('templates.categories', { count: template.selected_records?.length || 0 })}
+              {t('templates.categories', {
+                count: template.selected_records?.length || 0,
+              })}
             </Badge>
             {template.is_public && (
               <Badge size="xs" color="green" variant="light">
@@ -411,10 +439,21 @@ const TemplateCard = ({ template, onLoad, onEdit, onDelete, formatDate }) => {
           <Button size="xs" variant="light" onClick={onLoad}>
             {t('templates.loadTemplate')}
           </Button>
-          <ActionIcon size="sm" variant="subtle" onClick={onEdit} aria-label={`Edit template ${template.name}`}>
+          <ActionIcon
+            size="sm"
+            variant="subtle"
+            onClick={onEdit}
+            aria-label={`Edit template ${template.name}`}
+          >
             <IconEdit size={16} aria-hidden="true" />
           </ActionIcon>
-          <ActionIcon size="sm" variant="subtle" color="red" onClick={onDelete} aria-label={`Delete template ${template.name}`}>
+          <ActionIcon
+            size="sm"
+            variant="subtle"
+            color="red"
+            onClick={onDelete}
+            aria-label={`Delete template ${template.name}`}
+          >
             <IconTrash size={16} aria-hidden="true" />
           </ActionIcon>
         </Group>

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Badge, Text, Group } from '@mantine/core';
+import { Text } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -17,12 +16,12 @@ const ImmunizationCard = ({
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('immunization_card_error', {
       message: 'Error in ImmunizationCard',
       immunizationId: immunization?.id,
@@ -36,43 +35,62 @@ const ImmunizationCard = ({
   };
 
   // Helper function to get immunization icon based on vaccine name
-  const getImmunizationIcon = (vaccineName) => {
+  const getImmunizationIcon = vaccineName => {
     const vaccineLower = vaccineName.toLowerCase();
-    if (vaccineLower.includes('covid') || vaccineLower.includes('corona')) return '🛡️';
-    if (vaccineLower.includes('flu') || vaccineLower.includes('influenza')) return '💉';
-    if (vaccineLower.includes('tetanus') || vaccineLower.includes('diphtheria')) return '🛡️';
-    if (vaccineLower.includes('measles') || vaccineLower.includes('mumps') || vaccineLower.includes('rubella')) return '💉';
+    if (vaccineLower.includes('covid') || vaccineLower.includes('corona'))
+      return '🛡️';
+    if (vaccineLower.includes('flu') || vaccineLower.includes('influenza'))
+      return '💉';
+    if (vaccineLower.includes('tetanus') || vaccineLower.includes('diphtheria'))
+      return '🛡️';
+    if (
+      vaccineLower.includes('measles') ||
+      vaccineLower.includes('mumps') ||
+      vaccineLower.includes('rubella')
+    )
+      return '💉';
     if (vaccineLower.includes('hepatitis')) return '💉';
-    if (vaccineLower.includes('pneumonia') || vaccineLower.includes('pneumococcal')) return '💉';
+    if (
+      vaccineLower.includes('pneumonia') ||
+      vaccineLower.includes('pneumococcal')
+    )
+      return '💉';
     return '💉'; // Default immunization icon
   };
 
   // Helper function to get dose color
-  const getDoseColor = (doseNumber) => {
+  const getDoseColor = doseNumber => {
     switch (doseNumber) {
-      case 1: return 'blue';
-      case 2: return 'green';
-      case 3: return 'orange';
-      case 4: return 'red';
-      default: return 'gray';
+      case 1:
+        return 'blue';
+      case 2:
+        return 'green';
+      case 3:
+        return 'orange';
+      case 4:
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   try {
     // Generate badges based on immunization properties
     const badges = [];
-    
+
     if (immunization.dose_number) {
       badges.push({
-        label: t('shared:labels.doseNumber', 'Dose {{number}}', { number: immunization.dose_number }),
-        color: getDoseColor(immunization.dose_number)
+        label: t('shared:labels.doseNumber', 'Dose {{number}}', {
+          number: immunization.dose_number,
+        }),
+        color: getDoseColor(immunization.dose_number),
       });
     }
 
     if (immunization.manufacturer) {
-      badges.push({ 
-        label: immunization.manufacturer, 
-        color: 'gray' 
+      badges.push({
+        label: immunization.manufacturer,
+        color: 'gray',
       });
     }
 
@@ -81,42 +99,43 @@ const ImmunizationCard = ({
       {
         label: t('shared:fields.dateAdministered'),
         value: immunization.date_administered,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
+        render: value =>
+          value ? formatLongDate(value) : t('shared:labels.notSpecified'),
       },
       immunization.lot_number && {
         label: t('shared:fields.lotNumber'),
         value: immunization.lot_number,
-        render: (value) => value
+        render: value => value,
       },
       immunization.ndc_number && {
         label: t('shared:fields.ndcNumber'),
         value: immunization.ndc_number,
-        render: (value) => value
+        render: value => value,
       },
       immunization.site && {
         label: t('immunizations.site.label'),
         value: immunization.site,
-        render: (value) => value
+        render: value => value,
       },
       immunization.route && {
         label: t('immunizations.route.label'),
         value: immunization.route,
-        render: (value) => value
+        render: value => value,
       },
       immunization.location && {
         label: t('shared:labels.location'),
         value: immunization.location,
-        render: (value) => value
+        render: value => value,
       },
       immunization.expiration_date && {
         label: t('immunizations.expirationDate.label'),
         value: immunization.expiration_date,
-        render: (value) => formatLongDate(value)
+        render: value => formatLongDate(value),
       },
       immunization.practitioner_id && {
         label: t('shared:fields.practitioner'),
         value: immunization.practitioner_id,
-        render: (value) => {
+        render: value => {
           if (!value) return t('shared:labels.notSpecified');
           const practitioner = practitioners.find(p => p.id === value);
           return (
@@ -125,21 +144,29 @@ const ImmunizationCard = ({
               c="blue"
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
+              title={t(
+                'shared:labels.viewPractitionerDetails',
+                'View practitioner details'
+              )}
             >
-              {practitioner?.name || t('common:immunizations.card.practitionerId', 'ID: {{id}}', { id: value })}
+              {practitioner?.name ||
+                t('common:immunizations.card.practitionerId', 'ID: {{id}}', {
+                  id: value,
+                })}
             </Text>
           );
-        }
-      }
+        },
+      },
     ].filter(Boolean);
 
     return (
       <BaseMedicalCard
         title={immunization.vaccine_name}
-        subtitle={immunization.vaccine_trade_name ?
-          `${getImmunizationIcon(immunization.vaccine_name)} ${immunization.vaccine_trade_name}` :
-          getImmunizationIcon(immunization.vaccine_name)}
+        subtitle={
+          immunization.vaccine_trade_name
+            ? `${getImmunizationIcon(immunization.vaccine_name)} ${immunization.vaccine_trade_name}`
+            : getImmunizationIcon(immunization.vaccine_name)
+        }
         badges={badges}
         tags={immunization.tags || []}
         fields={fields}

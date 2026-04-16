@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui';
 import { Button, Alert } from '../ui';
@@ -59,17 +59,23 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError(t('settings:security.password.forceChange.errors.passwordsMustMatch'));
+      setError(
+        t('settings:security.password.forceChange.errors.passwordsMustMatch')
+      );
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setError(t('settings:security.password.forceChange.errors.passwordTooShort'));
+      setError(
+        t('settings:security.password.forceChange.errors.passwordTooShort')
+      );
       return;
     }
 
     if (passwordData.currentPassword === passwordData.newPassword) {
-      setError(t('settings:security.password.forceChange.errors.passwordMustDiffer'));
+      setError(
+        t('settings:security.password.forceChange.errors.passwordMustDiffer')
+      );
       return;
     }
 
@@ -109,7 +115,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
         <form onSubmit={handlePasswordChange} className="password-form">
           <div className="form-group">
-            <label htmlFor="currentPassword">{t('settings:security.password.currentPassword')}</label>
+            <label htmlFor="currentPassword">
+              {t('settings:security.password.currentPassword')}
+            </label>
             <input
               type="password"
               id="currentPassword"
@@ -123,7 +131,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="newPassword">{t('settings:security.password.newPassword')}</label>
+            <label htmlFor="newPassword">
+              {t('settings:security.password.newPassword')}
+            </label>
             <input
               type="password"
               id="newPassword"
@@ -141,7 +151,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">{t('settings:security.password.confirmPassword')}</label>
+            <label htmlFor="confirmPassword">
+              {t('settings:security.password.confirmPassword')}
+            </label>
             <input
               type="password"
               id="confirmPassword"
@@ -169,7 +181,9 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
               loading={isChangingPassword}
               disabled={isChangingPassword}
             >
-              {isChangingPassword ? t('settings:security.password.forceChange.submitting') : t('settings:security.password.button')}
+              {isChangingPassword
+                ? t('settings:security.password.forceChange.submitting')
+                : t('settings:security.password.button')}
             </Button>
           </div>
         </form>

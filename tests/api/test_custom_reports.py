@@ -1,6 +1,7 @@
 """
 Tests for Custom Reports API endpoints.
 """
+
 import pytest
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
@@ -25,8 +26,7 @@ class TestCustomReportsAPI:
     ):
         """Test getting data summary for report generation."""
         response = client.get(
-            "/api/v1/custom-reports/data-summary",
-            headers=authenticated_headers
+            "/api/v1/custom-reports/data-summary", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -40,8 +40,7 @@ class TestCustomReportsAPI:
     ):
         """Test that data summary has correct structure."""
         response = client.get(
-            "/api/v1/custom-reports/data-summary",
-            headers=authenticated_headers
+            "/api/v1/custom-reports/data-summary", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -65,8 +64,7 @@ class TestCustomReportsAPI:
     ):
         """Test data summary for patient with no medical records."""
         response = client.get(
-            "/api/v1/custom-reports/data-summary",
-            headers=authenticated_headers
+            "/api/v1/custom-reports/data-summary", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -81,25 +79,31 @@ class TestCustomReportsAPI:
     ):
         """Test generating a basic custom report."""
         # Get record IDs from populated data
-        medication_ids = [populated_patient_data["medication"].id] if populated_patient_data.get("medication") else []
+        medication_ids = (
+            [populated_patient_data["medication"].id]
+            if populated_patient_data.get("medication")
+            else []
+        )
 
         report_request = {
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": medication_ids
-                }
-            ] if medication_ids else []
+            "selected_records": (
+                [{"category": "medications", "record_ids": medication_ids}]
+                if medication_ids
+                else []
+            )
         }
 
         response = client.post(
             "/api/v1/custom-reports/generate",
             json=report_request,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # Should fail validation if no records selected, or succeed with PDF
-        assert response.status_code in [200, 422], f"Unexpected status code: {response.status_code}"
+        assert response.status_code in [
+            200,
+            422,
+        ], f"Unexpected status code: {response.status_code}"
 
         if response.status_code == 200:
             assert response.headers.get("content-type") == "application/pdf"
@@ -107,18 +111,10 @@ class TestCustomReportsAPI:
     def test_generate_report_unauthenticated(self, client: TestClient):
         """Test that report generation requires authentication."""
         report_request = {
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [1]
-                }
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [1]}]
         }
 
-        response = client.post(
-            "/api/v1/custom-reports/generate",
-            json=report_request
-        )
+        response = client.post("/api/v1/custom-reports/generate", json=report_request)
 
         assert response.status_code == 401
 
@@ -129,10 +125,7 @@ class TestCustomReportsAPI:
         # Create two separate users with their own patients
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -144,10 +137,7 @@ class TestCustomReportsAPI:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -164,7 +154,7 @@ class TestCustomReportsAPI:
             medication_name="Test Med",
             dosage="100mg",
             status="active",
-            patient_id=patient2.id
+            patient_id=patient2.id,
         )
         med = medication_crud.create(db_session, obj_in=med_data)
 
@@ -173,15 +163,13 @@ class TestCustomReportsAPI:
             "selected_records": [
                 {
                     "category": "medications",
-                    "record_ids": [med.id]  # This is user2's medication
+                    "record_ids": [med.id],  # This is user2's medication
                 }
             ]
         }
 
         response = client.post(
-            "/api/v1/custom-reports/generate",
-            json=report_request,
-            headers=headers1
+            "/api/v1/custom-reports/generate", json=report_request, headers=headers1
         )
 
         # Should fail with 403 - user1 doesn't have access to user2's medication
@@ -208,31 +196,23 @@ class TestReportTemplatesAPI:
                 "medication_name": "Test Med",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         med_id = med_response.json()["id"]
 
         template = {
             "name": "Monthly Health Summary",
             "description": "Template for monthly health reports",
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [med_id]
-                }
-            ],
-            "report_settings": {
-                "include_charts": True,
-                "date_range": "last_30_days"
-            }
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
+            "report_settings": {"include_charts": True, "date_range": "last_30_days"},
         }
 
         response = client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -252,31 +232,25 @@ class TestReportTemplatesAPI:
                 "medication_name": "Test Med",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         med_id = med_response.json()["id"]
 
         template = {
             "name": "Test Template",
             "description": "Template for testing",
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [med_id]
-                }
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
         }
         client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         response = client.get(
-            "/api/v1/custom-reports/templates",
-            headers=authenticated_headers
+            "/api/v1/custom-reports/templates", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -298,50 +272,44 @@ class TestReportTemplatesAPI:
                 "severity": "severe",
                 "status": "active",
                 "reaction": "Anaphylaxis",  # Required field missing from schema
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # If allergy creation fails, skip test
         if allergy_response.status_code != 200:
-            pytest.skip(f"Cannot create allergy for test (API bug - missing 'reaction' field): {allergy_response.status_code}")
+            pytest.skip(
+                f"Cannot create allergy for test (API bug - missing 'reaction' field): {allergy_response.status_code}"
+            )
 
         allergy_id = allergy_response.json()["id"]
 
         template = {
             "name": "Specific Template",
             "description": "Template to fetch by ID",
-            "selected_records": [
-                {
-                    "category": "allergies",
-                    "record_ids": [allergy_id]
-                }
-            ]
+            "selected_records": [{"category": "allergies", "record_ids": [allergy_id]}],
         }
         save_response = client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         template_id = save_response.json()["template_id"]
 
         response = client.get(
             f"/api/v1/custom-reports/templates/{template_id}",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Specific Template"
 
-    def test_get_template_nonexistent(
-        self, client: TestClient, authenticated_headers
-    ):
+    def test_get_template_nonexistent(self, client: TestClient, authenticated_headers):
         """Test getting a nonexistent template."""
         response = client.get(
-            "/api/v1/custom-reports/templates/99999",
-            headers=authenticated_headers
+            "/api/v1/custom-reports/templates/99999", headers=authenticated_headers
         )
 
         assert response.status_code == 404
@@ -358,26 +326,21 @@ class TestReportTemplatesAPI:
                 "medication_name": "Med 1",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         med1_id = med1_response.json()["id"]
 
         template = {
             "name": "Original Name",
             "description": "Original description",
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [med1_id]
-                }
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [med1_id]}],
         }
         save_response = client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         template_id = save_response.json()["template_id"]
 
@@ -388,9 +351,9 @@ class TestReportTemplatesAPI:
                 "medication_name": "Med 2",
                 "dosage": "20mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         med2_id = med2_response.json()["id"]
 
@@ -400,14 +363,16 @@ class TestReportTemplatesAPI:
             json={
                 "condition_name": "Test Condition",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # If condition creation fails, test with medications only
         if cond_response.status_code != 200:
-            pytest.skip(f"Cannot create condition for test (API bug): {cond_response.status_code}")
+            pytest.skip(
+                f"Cannot create condition for test (API bug): {cond_response.status_code}"
+            )
 
         cond_id = cond_response.json()["id"]
 
@@ -415,22 +380,16 @@ class TestReportTemplatesAPI:
             "name": "Updated Name",
             "description": "Updated description",
             "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [med1_id, med2_id]
-                },
-                {
-                    "category": "conditions",
-                    "record_ids": [cond_id]
-                }
+                {"category": "medications", "record_ids": [med1_id, med2_id]},
+                {"category": "conditions", "record_ids": [cond_id]},
             ],
-            "report_settings": {"include_charts": True}
+            "report_settings": {"include_charts": True},
         }
 
         response = client.put(
             f"/api/v1/custom-reports/templates/{template_id}",
             json=updated_template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -444,18 +403,13 @@ class TestReportTemplatesAPI:
         updated_template = {
             "name": "Updated Name",
             "description": "Updated description",
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [1]
-                }
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [1]}],
         }
 
         response = client.put(
             "/api/v1/custom-reports/templates/99999",
             json=updated_template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 404
@@ -472,32 +426,27 @@ class TestReportTemplatesAPI:
                 "medication_name": "Test Med",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         med_id = med_response.json()["id"]
 
         template = {
             "name": "Template to Delete",
             "description": "Will be deleted",
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [med_id]
-                }
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
         }
         save_response = client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         template_id = save_response.json()["template_id"]
 
         response = client.delete(
             f"/api/v1/custom-reports/templates/{template_id}",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -506,7 +455,7 @@ class TestReportTemplatesAPI:
 
         get_response = client.get(
             f"/api/v1/custom-reports/templates/{template_id}",
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         assert get_response.status_code == 404
 
@@ -515,8 +464,7 @@ class TestReportTemplatesAPI:
     ):
         """Test deleting a nonexistent template."""
         response = client.delete(
-            "/api/v1/custom-reports/templates/99999",
-            headers=authenticated_headers
+            "/api/v1/custom-reports/templates/99999", headers=authenticated_headers
         )
 
         assert response.status_code == 404
@@ -525,10 +473,7 @@ class TestReportTemplatesAPI:
         """Test that users can only access their own templates."""
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -540,10 +485,7 @@ class TestReportTemplatesAPI:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -560,32 +502,24 @@ class TestReportTemplatesAPI:
                 "medication_name": "User1 Med",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient1.id
+                "patient_id": patient1.id,
             },
-            headers=headers1
+            headers=headers1,
         )
         med_id = med_response.json()["id"]
 
         template = {
             "name": "User 1 Private Template",
             "description": "Private template",
-            "selected_records": [
-                {
-                    "category": "medications",
-                    "record_ids": [med_id]
-                }
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
         }
         save_response = client.post(
-            "/api/v1/custom-reports/templates",
-            json=template,
-            headers=headers1
+            "/api/v1/custom-reports/templates", json=template, headers=headers1
         )
         template_id = save_response.json()["template_id"]
 
         response = client.get(
-            f"/api/v1/custom-reports/templates/{template_id}",
-            headers=headers2
+            f"/api/v1/custom-reports/templates/{template_id}", headers=headers2
         )
         assert response.status_code == 404
 
@@ -598,10 +532,8 @@ class TestReportTemplatesAPI:
             "/api/v1/custom-reports/templates",
             json={
                 "name": "Test",
-                "selected_records": [
-                    {"category": "medications", "record_ids": [1]}
-                ]
-            }
+                "selected_records": [{"category": "medications", "record_ids": [1]}],
+            },
         )
         assert response.status_code == 401
 
@@ -617,23 +549,21 @@ class TestReportTemplatesAPI:
                 "medication_name": "Test Med",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         med_id = med_response.json()["id"]
 
         invalid_template = {
             "description": "Missing name",
-            "selected_records": [
-                {"category": "medications", "record_ids": [med_id]}
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
         }
 
         response = client.post(
             "/api/v1/custom-reports/templates",
             json=invalid_template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
@@ -656,14 +586,16 @@ class TestReportTemplatesAPI:
                 "medication_name": "Test Med",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # If medication creation fails, skip test
         if med_response.status_code != 200:
-            pytest.skip(f"Cannot create medication for test (API issue): {med_response.status_code}")
+            pytest.skip(
+                f"Cannot create medication for test (API issue): {med_response.status_code}"
+            )
 
         med_id = med_response.json()["id"]
 
@@ -671,15 +603,13 @@ class TestReportTemplatesAPI:
         # Test empty name
         empty_name_template = {
             "name": "",
-            "selected_records": [
-                {"category": "medications", "record_ids": [med_id]}
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
         }
 
         response = client.post(
             "/api/v1/custom-reports/templates",
             json=empty_name_template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         # Should be 422, but API accepts empty name (200)
         assert response.status_code in [200, 422]
@@ -688,15 +618,13 @@ class TestReportTemplatesAPI:
         # Test excessively long name (>255 characters)
         long_name_template = {
             "name": "A" * 300,
-            "selected_records": [
-                {"category": "medications", "record_ids": [med_id]}
-            ]
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
         }
 
         response = client.post(
             "/api/v1/custom-reports/templates",
             json=long_name_template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         # Should be 422, but API may accept it (200) or truncate it
         assert response.status_code in [200, 422]
@@ -705,15 +633,12 @@ class TestReportTemplatesAPI:
         self, client: TestClient, authenticated_headers
     ):
         """Test template with empty records list."""
-        template = {
-            "name": "Empty Records Template",
-            "selected_records": []
-        }
+        template = {"name": "Empty Records Template", "selected_records": []}
 
         response = client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         # TODO: API currently accepts empty records, but ideally should reject
@@ -729,15 +654,15 @@ class TestReportTemplatesAPI:
             "selected_records": [
                 {
                     "category": "medications",
-                    "record_ids": []  # Empty list - should fail
+                    "record_ids": [],  # Empty list - should fail
                 }
-            ]
+            ],
         }
 
         response = client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
@@ -754,24 +679,22 @@ class TestReportTemplatesAPI:
                 "medication_name": "Test Med",
                 "dosage": "10mg",
                 "status": "active",
-                "patient_id": patient_id
+                "patient_id": patient_id,
             },
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
         med_id = med_response.json()["id"]
 
         template = {
             "name": "Invalid Settings Template",
-            "selected_records": [
-                {"category": "medications", "record_ids": [med_id]}
-            ],
-            "report_settings": "not_a_dict"  # Should be dict
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
+            "report_settings": "not_a_dict",  # Should be dict
         }
 
         response = client.post(
             "/api/v1/custom-reports/templates",
             json=template,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422

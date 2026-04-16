@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -12,11 +12,7 @@ import {
   Select,
   Checkbox,
 } from '@mantine/core';
-import {
-  IconUser,
-  IconHome,
-  IconNotes,
-} from '@tabler/icons-react';
+import { IconUser, IconHome, IconNotes } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import SubmitButton from '../shared/SubmitButton';
@@ -59,7 +55,7 @@ const MantineEmergencyContactForm = ({
   }, [isOpen]);
 
   // Input change handler with phone validation
-  const handleInputChangeWithValidation = (e) => {
+  const handleInputChangeWithValidation = e => {
     const { name, value } = e.target;
 
     // Clear any existing error for this field
@@ -71,8 +67,13 @@ const MantineEmergencyContactForm = ({
     }
 
     // Handle phone number validation
-    const isPhoneFieldCheck = name === 'phone_number' || name === 'secondary_phone';
-    if (isPhoneFieldCheck && value.trim() !== '' && !isValidPhoneNumber(value)) {
+    const isPhoneFieldCheck =
+      name === 'phone_number' || name === 'secondary_phone';
+    if (
+      isPhoneFieldCheck &&
+      value.trim() !== '' &&
+      !isValidPhoneNumber(value)
+    ) {
       setFieldErrors(prev => ({
         ...prev,
         [name]: t('errors:form.invalidPhoneDigits'),
@@ -83,12 +84,14 @@ const MantineEmergencyContactForm = ({
   };
 
   // Wrap handleTextInputChange to route through phone validation
-  const handleValidatedTextInput = (fieldName) => (e) => {
-    handleInputChangeWithValidation({ target: { name: fieldName, value: e.target.value } });
+  const handleValidatedTextInput = fieldName => e => {
+    handleInputChangeWithValidation({
+      target: { name: fieldName, value: e.target.value },
+    });
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -109,12 +112,31 @@ const MantineEmergencyContactForm = ({
   if (!isOpen) return null;
 
   const relationshipOptions = [
-    'spouse', 'partner', 'parent', 'mother', 'father',
-    'child', 'son', 'daughter', 'sibling', 'brother', 'sister',
-    'grandparent', 'grandmother', 'grandfather',
-    'grandchild', 'grandson', 'granddaughter',
-    'aunt', 'uncle', 'cousin',
-    'friend', 'neighbor', 'caregiver', 'guardian', 'other',
+    'spouse',
+    'partner',
+    'parent',
+    'mother',
+    'father',
+    'child',
+    'son',
+    'daughter',
+    'sibling',
+    'brother',
+    'sister',
+    'grandparent',
+    'grandmother',
+    'grandfather',
+    'grandchild',
+    'grandson',
+    'granddaughter',
+    'aunt',
+    'uncle',
+    'cousin',
+    'friend',
+    'neighbor',
+    'caregiver',
+    'guardian',
+    'other',
   ].map(key => ({
     value: key,
     label: t(`medical:emergencyContacts.form.relationship.options.${key}`),
@@ -133,7 +155,9 @@ const MantineEmergencyContactForm = ({
     >
       <FormLoadingOverlay
         visible={isSubmitting || isLoading}
-        message={statusMessage?.title || t('medical:emergencyContacts.messages.saving')}
+        message={
+          statusMessage?.title || t('medical:emergencyContacts.messages.saving')
+        }
         submessage={statusMessage?.message}
         type={statusMessage?.type || 'loading'}
       />
@@ -162,8 +186,12 @@ const MantineEmergencyContactForm = ({
                       label={t('shared:fields.fullName')}
                       value={formData.name || ''}
                       onChange={handleTextInputChange('name')}
-                      placeholder={t('medical:emergencyContacts.form.name.placeholder')}
-                      description={t('medical:emergencyContacts.form.name.description')}
+                      placeholder={t(
+                        'medical:emergencyContacts.form.name.placeholder'
+                      )}
+                      description={t(
+                        'medical:emergencyContacts.form.name.description'
+                      )}
                       required
                     />
                   </Grid.Col>
@@ -172,11 +200,15 @@ const MantineEmergencyContactForm = ({
                       label={t('shared:labels.relationship')}
                       value={formData.relationship || null}
                       data={relationshipOptions}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'relationship', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'relationship', value: value || '' },
+                        });
                       }}
                       placeholder={t('shared:fields.selectRelationship')}
-                      description={t('medical:emergencyContacts.form.relationship.description')}
+                      description={t(
+                        'medical:emergencyContacts.form.relationship.description'
+                      )}
                       required
                       searchable
                       clearable
@@ -185,21 +217,31 @@ const MantineEmergencyContactForm = ({
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('medical:emergencyContacts.form.primaryPhone.label')}
+                      label={t(
+                        'medical:emergencyContacts.form.primaryPhone.label'
+                      )}
                       value={formData.phone_number || ''}
                       onChange={handleValidatedTextInput('phone_number')}
-                      placeholder={t('medical:emergencyContacts.form.primaryPhone.placeholder')}
-                      description={t('medical:emergencyContacts.form.primaryPhone.description')}
+                      placeholder={t(
+                        'medical:emergencyContacts.form.primaryPhone.placeholder'
+                      )}
+                      description={t(
+                        'medical:emergencyContacts.form.primaryPhone.description'
+                      )}
                       error={fieldErrors.phone_number}
                       required
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
-                      label={t('medical:emergencyContacts.form.secondaryPhone.label')}
+                      label={t(
+                        'medical:emergencyContacts.form.secondaryPhone.label'
+                      )}
                       value={formData.secondary_phone || ''}
                       onChange={handleValidatedTextInput('secondary_phone')}
-                      placeholder={t('medical:emergencyContacts.form.secondaryPhone.placeholder')}
+                      placeholder={t(
+                        'medical:emergencyContacts.form.secondaryPhone.placeholder'
+                      )}
                       error={fieldErrors.secondary_phone}
                     />
                   </Grid.Col>
@@ -208,7 +250,9 @@ const MantineEmergencyContactForm = ({
                       label={t('shared:fields.emailAddress')}
                       value={formData.email || ''}
                       onChange={handleTextInputChange('email')}
-                      placeholder={t('medical:emergencyContacts.form.email.placeholder')}
+                      placeholder={t(
+                        'medical:emergencyContacts.form.email.placeholder'
+                      )}
                     />
                   </Grid.Col>
                 </Grid>
@@ -224,26 +268,44 @@ const MantineEmergencyContactForm = ({
                       label={t('shared:labels.address')}
                       value={formData.address || ''}
                       onChange={handleTextInputChange('address')}
-                      placeholder={t('medical:emergencyContacts.form.address.placeholder')}
+                      placeholder={t(
+                        'medical:emergencyContacts.form.address.placeholder'
+                      )}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Checkbox
-                      label={t('medical:emergencyContacts.form.isPrimary.label')}
-                      description={t('medical:emergencyContacts.form.isPrimary.description')}
+                      label={t(
+                        'medical:emergencyContacts.form.isPrimary.label'
+                      )}
+                      description={t(
+                        'medical:emergencyContacts.form.isPrimary.description'
+                      )}
                       checked={!!formData.is_primary}
-                      onChange={(e) =>
-                        onInputChange({ target: { name: 'is_primary', value: e.currentTarget.checked } })
+                      onChange={e =>
+                        onInputChange({
+                          target: {
+                            name: 'is_primary',
+                            value: e.currentTarget.checked,
+                          },
+                        })
                       }
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Checkbox
                       label={t('medical:emergencyContacts.form.isActive.label')}
-                      description={t('medical:emergencyContacts.form.isActive.description')}
+                      description={t(
+                        'medical:emergencyContacts.form.isActive.description'
+                      )}
                       checked={!!formData.is_active}
-                      onChange={(e) =>
-                        onInputChange({ target: { name: 'is_active', value: e.currentTarget.checked } })
+                      onChange={e =>
+                        onInputChange({
+                          target: {
+                            name: 'is_active',
+                            value: e.currentTarget.checked,
+                          },
+                        })
                       }
                     />
                   </Grid.Col>
@@ -258,7 +320,9 @@ const MantineEmergencyContactForm = ({
                   label={t('shared:tabs.notes')}
                   value={formData.notes || ''}
                   onChange={handleTextInputChange('notes')}
-                  placeholder={t('medical:emergencyContacts.form.notes.placeholder')}
+                  placeholder={t(
+                    'medical:emergencyContacts.form.notes.placeholder'
+                  )}
                   rows={5}
                   minRows={3}
                   autosize
@@ -269,14 +333,20 @@ const MantineEmergencyContactForm = ({
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
+            <Button
+              variant="default"
+              onClick={onClose}
+              disabled={isLoading || isSubmitting}
+            >
               {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.name?.trim()}
             >
-              {editingContact ? t('common:buttons.update') : t('common:buttons.create')}{' '}
+              {editingContact
+                ? t('common:buttons.update')
+                : t('common:buttons.create')}{' '}
               {t('shared:categories.emergency_contacts')}
             </SubmitButton>
           </Group>

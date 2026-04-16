@@ -1,6 +1,5 @@
 import { vi } from 'vitest';
-import React from 'react';
-import { screen, fireEvent, within } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import render from '../../../../test-utils/render';
@@ -11,11 +10,11 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
   default: () => ({
     dateInputFormat: 'MM/DD/YYYY',
     dateFormat: 'mdy',
-    formatDate: (d) => d,
-    formatDateWithTime: (d) => d,
-    formatDateTime: (d) => d,
-    formatLongDate: (d) => d,
-    formatDateTimeInput: (d) => d,
+    formatDate: d => d,
+    formatDateWithTime: d => d,
+    formatDateTime: d => d,
+    formatLongDate: d => d,
+    formatDateTimeInput: d => d,
     locale: 'en-US',
     formatLabel: 'MM/DD/YYYY',
     formatExample: '01/31/2024',
@@ -25,7 +24,7 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
     dateInputFormat: 'MM/DD/YYYY',
     dateFormat: 'mdy',
-    formatDate: (d) => d,
+    formatDate: d => d,
   }),
 }));
 
@@ -33,12 +32,23 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => (
     <div>
-      <label htmlFor={`date-${label}`}>{label}{required && ' *'}</label>
+      <label htmlFor={`date-${label}`}>
+        {label}
+        {required && ' *'}
+      </label>
       <input
         id={`date-${label}`}
         type="date"
-        value={value ? (value instanceof Date ? value.toISOString().split('T')[0] : value) : ''}
-        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={
+          value
+            ? value instanceof Date
+              ? value.toISOString().split('T')[0]
+              : value
+            : ''
+        }
+        onChange={e =>
+          onChange(e.target.value ? new Date(e.target.value) : null)
+        }
         data-testid={`date-${label.toLowerCase().replace(/\s+/g, '-')}`}
         {...props}
       />
@@ -55,8 +65,8 @@ vi.mock('react-i18next', () => ({
 
 // Mock useFormHandlers
 vi.mock('../../../../hooks/useFormHandlers', () => ({
-  useFormHandlers: (onInputChange) => ({
-    handleTextInputChange: (name) => (e) => {
+  useFormHandlers: onInputChange => ({
+    handleTextInputChange: name => e => {
       onInputChange({ target: { name, value: e.target.value } });
     },
   }),
@@ -72,7 +82,7 @@ vi.mock('../../../common/TagInput', () => ({
         type="text"
         placeholder={placeholder}
         value={value?.join(', ') || ''}
-        onChange={(e) => onChange(e.target.value.split(', ').filter(Boolean))}
+        onChange={e => onChange(e.target.value.split(', ').filter(Boolean))}
         data-testid="tag-input"
       />
     </div>
@@ -88,7 +98,12 @@ vi.mock('../../../shared/FormLoadingOverlay', () => ({
 // Mock SubmitButton - render as real button with type="submit"
 vi.mock('../../../shared/SubmitButton', () => ({
   default: ({ children, disabled, loading, ...props }) => (
-    <button type="submit" disabled={disabled || loading} data-testid="submit-btn" {...props}>
+    <button
+      type="submit"
+      disabled={disabled || loading}
+      data-testid="submit-btn"
+      {...props}
+    >
       {children}
     </button>
   ),
@@ -171,7 +186,9 @@ describe('EquipmentFormWrapper', () => {
 
       // Navigate to Notes tab to check those fields
       await user.click(screen.getByRole('tab', { name: /Notes/i }));
-      expect(screen.getByRole('textbox', { name: /^Notes/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('textbox', { name: /^Notes/i })
+      ).toBeInTheDocument();
       expect(screen.getByLabelText(/Tags/i)).toBeInTheDocument();
     });
 
@@ -310,7 +327,8 @@ describe('EquipmentFormWrapper', () => {
       render(<EquipmentFormWrapper {...defaultProps} />);
 
       // Prescribed By is on the Basic Info tab (default)
-      const practitionerInput = screen.getByPlaceholderText(/Select practitioner/i);
+      const practitionerInput =
+        screen.getByPlaceholderText(/Select practitioner/i);
       await user.click(practitionerInput);
 
       // Wait for dropdown
@@ -434,10 +452,14 @@ describe('EquipmentFormWrapper', () => {
         practitioner_id: '1',
       };
 
-      render(<EquipmentFormWrapper {...defaultProps} formData={populatedData} />);
+      render(
+        <EquipmentFormWrapper {...defaultProps} formData={populatedData} />
+      );
 
       // Basic Info tab (default) - equipment name is visible
-      expect(screen.getByDisplayValue('Portable Nebulizer')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Portable Nebulizer')
+      ).toBeInTheDocument();
 
       // Device Details tab - manufacturer, model, serial, supplier
       await user.click(screen.getByRole('tab', { name: /Device Details/i }));
@@ -448,11 +470,15 @@ describe('EquipmentFormWrapper', () => {
 
       // Service & Dates tab - usage instructions
       await user.click(screen.getByRole('tab', { name: /Service & Dates/i }));
-      expect(screen.getByDisplayValue('Use as needed for breathing treatments')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Use as needed for breathing treatments')
+      ).toBeInTheDocument();
 
       // Notes tab - notes
       await user.click(screen.getByRole('tab', { name: /^Notes/i }));
-      expect(screen.getByDisplayValue('Keep clean and dry')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Keep clean and dry')
+      ).toBeInTheDocument();
     });
   });
 
@@ -502,10 +528,13 @@ describe('EquipmentFormWrapper', () => {
     });
 
     test('disables practitioner select when practitioners loading', () => {
-      render(<EquipmentFormWrapper {...defaultProps} practitionersLoading={true} />);
+      render(
+        <EquipmentFormWrapper {...defaultProps} practitionersLoading={true} />
+      );
 
       // Mantine Select's input should be disabled
-      const practitionerInput = screen.getByPlaceholderText(/Select practitioner/i);
+      const practitionerInput =
+        screen.getByPlaceholderText(/Select practitioner/i);
       expect(practitionerInput).toBeDisabled();
     });
   });

@@ -2,6 +2,7 @@
 Pydantic schemas for notification framework
 """
 
+import re
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -9,7 +10,9 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
-def _validate_url_protocol(url: str, allowed_protocols: tuple = ("http://", "https://")) -> str:
+def _validate_url_protocol(
+    url: str, allowed_protocols: tuple = ("http://", "https://")
+) -> str:
     """Validate that URL starts with an allowed protocol."""
     url = url.strip().rstrip("/")
     if not any(url.startswith(p) for p in allowed_protocols):
@@ -20,14 +23,17 @@ def _validate_url_protocol(url: str, allowed_protocols: tuple = ("http://", "htt
 
 class ChannelType(str, Enum):
     """Supported notification channel types"""
+
     DISCORD = "discord"
     EMAIL = "email"
     GOTIFY = "gotify"
+    NTFY = "ntfy"
     WEBHOOK = "webhook"
 
 
 class EventType(str, Enum):
     """Supported notification event types"""
+
     # Backup events
     BACKUP_COMPLETED = "backup_completed"
     BACKUP_FAILED = "backup_failed"
@@ -43,6 +49,7 @@ class EventType(str, Enum):
 
 class NotificationStatus(str, Enum):
     """Notification delivery status"""
+
     PENDING = "pending"
     SENT = "sent"
     FAILED = "failed"
@@ -52,21 +59,28 @@ class NotificationStatus(str, Enum):
 # Channel Configuration Schemas
 # ============================================================================
 
+
 class DiscordChannelConfig(BaseModel):
     """Configuration for Discord webhook notifications"""
+
     webhook_url: str = Field(..., description="Discord webhook URL")
 
     @field_validator("webhook_url")
     @classmethod
     def validate_webhook_url(cls, v):
         v = v.strip()
-        if not v.startswith("https://discord.com/api/webhooks/") and not v.startswith("https://discordapp.com/api/webhooks/"):
+        valid_prefixes = (
+            "https://discord.com/api/webhooks/",
+            "https://discordapp.com/api/webhooks/",
+        )
+        if not v.startswith(valid_prefixes):
             raise ValueError("Invalid Discord webhook URL format")
         return v
 
 
 class EmailChannelConfig(BaseModel):
     """Configuration for SMTP email notifications"""
+
     smtp_host: str = Field(..., description="SMTP server hostname")
     smtp_port: int = Field(587, ge=1, le=65535, description="SMTP port")
     smtp_user: str = Field(..., description="SMTP username")
@@ -94,6 +108,7 @@ class EmailChannelConfig(BaseModel):
 
 class GotifyChannelConfig(BaseModel):
     """Configuration for Gotify push notifications"""
+
     server_url: str = Field(..., description="Gotify server URL")
     app_token: str = Field(..., description="Gotify application token")
     priority: int = Field(5, ge=0, le=10, description="Notification priority (0-10)")
@@ -112,8 +127,46 @@ class GotifyChannelConfig(BaseModel):
         return v
 
 
+_NTFY_TOPIC_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+class NtfyChannelConfig(BaseModel):
+    """Configuration for ntfy push notifications"""
+
+    server_url: str = Field("https://ntfy.sh", description="ntfy server URL")
+    topic: str = Field(..., description="ntfy topic name")
+    auth_token: Optional[str] = Field(
+        None, description="Bearer token for protected topics"
+    )
+    priority: Optional[int] = Field(
+        None, ge=1, le=5, description="Notification priority (1-5)"
+    )
+
+    @field_validator("server_url")
+    @classmethod
+    def validate_server_url(cls, v):
+        return _validate_url_protocol(v)
+
+    @field_validator("topic")
+    @classmethod
+    def validate_topic(cls, v):
+        # ntfy topics: letters, digits, underscore, dash; 1-64 chars.
+        # Interpolated into the Apprise URL path, so reserved URL chars would silently misroute.
+        v = v.strip()
+        if not v:
+            raise ValueError("Topic cannot be empty")
+        if len(v) > 64:
+            raise ValueError("Topic cannot exceed 64 characters")
+        if not _NTFY_TOPIC_PATTERN.match(v):
+            raise ValueError(
+                "Topic may only contain letters, digits, underscores, and dashes"
+            )
+        return v
+
+
 class WebhookChannelConfig(BaseModel):
     """Configuration for generic webhook notifications"""
+
     url: str = Field(..., description="Webhook URL")
     method: str = Field("POST", description="HTTP method (GET or POST)")
     headers: Optional[Dict[str, str]] = Field(None, description="Custom headers")
@@ -137,8 +190,10 @@ class WebhookChannelConfig(BaseModel):
 # Channel CRUD Schemas
 # ============================================================================
 
+
 class ChannelCreate(BaseModel):
     """Schema for creating a notification channel"""
+
     name: str = Field(..., min_length=1, max_length=100, description="Channel name")
     channel_type: ChannelType = Field(..., description="Channel type")
     config: Dict[str, Any] = Field(..., description="Channel-specific configuration")
@@ -159,6 +214,7 @@ class ChannelCreate(BaseModel):
             ChannelType.DISCORD: DiscordChannelConfig,
             ChannelType.EMAIL: EmailChannelConfig,
             ChannelType.GOTIFY: GotifyChannelConfig,
+            ChannelType.NTFY: NtfyChannelConfig,
             ChannelType.WEBHOOK: WebhookChannelConfig,
         }
 
@@ -172,9 +228,16 @@ class ChannelCreate(BaseModel):
 
 class ChannelUpdate(BaseModel):
     """Schema for updating a notification channel"""
-    name: Optional[str] = Field(None, min_length=1, max_length=100, description="Channel name")
-    config: Optional[Dict[str, Any]] = Field(None, description="Channel-specific configuration")
-    is_enabled: Optional[bool] = Field(None, description="Whether the channel is enabled")
+
+    name: Optional[str] = Field(
+        None, min_length=1, max_length=100, description="Channel name"
+    )
+    config: Optional[Dict[str, Any]] = Field(
+        None, description="Channel-specific configuration"
+    )
+    is_enabled: Optional[bool] = Field(
+        None, description="Whether the channel is enabled"
+    )
 
     @field_validator("name")
     @classmethod
@@ -188,6 +251,7 @@ class ChannelUpdate(BaseModel):
 
 class ChannelResponse(BaseModel):
     """Schema for channel response (without sensitive config)"""
+
     id: int
     name: str
     channel_type: str
@@ -207,23 +271,33 @@ class ChannelResponse(BaseModel):
 
 class ChannelWithConfigResponse(ChannelResponse):
     """Schema for channel response with masked config (for edit forms)"""
-    config_masked: Dict[str, Any] = Field(..., description="Config with sensitive fields masked")
+
+    config_masked: Dict[str, Any] = Field(
+        ..., description="Config with sensitive fields masked"
+    )
 
 
 # ============================================================================
 # Preference Schemas
 # ============================================================================
 
+
 class PreferenceCreate(BaseModel):
     """Schema for creating/updating a notification preference"""
+
     channel_id: int = Field(..., gt=0, description="Channel ID")
     event_type: EventType = Field(..., description="Event type")
-    is_enabled: bool = Field(True, description="Whether notification is enabled for this event/channel")
-    remind_before_minutes: Optional[int] = Field(None, ge=0, description="Reminder time in minutes")
+    is_enabled: bool = Field(
+        True, description="Whether notification is enabled for this event/channel"
+    )
+    remind_before_minutes: Optional[int] = Field(
+        None, ge=0, description="Reminder time in minutes"
+    )
 
 
 class PreferenceResponse(BaseModel):
     """Schema for preference response"""
+
     id: int
     channel_id: int
     channel_name: str
@@ -238,6 +312,7 @@ class PreferenceResponse(BaseModel):
 
 class PreferenceMatrix(BaseModel):
     """Schema for the full preference matrix (events x channels)"""
+
     channels: List[ChannelResponse]
     events: List[str]
     preferences: Dict[str, Dict[int, bool]]  # event_type -> channel_id -> is_enabled
@@ -247,8 +322,10 @@ class PreferenceMatrix(BaseModel):
 # History Schemas
 # ============================================================================
 
+
 class HistoryResponse(BaseModel):
     """Schema for notification history entry"""
+
     id: int
     event_type: str
     title: str
@@ -266,6 +343,7 @@ class HistoryResponse(BaseModel):
 
 class HistoryListResponse(BaseModel):
     """Schema for paginated history response"""
+
     items: List[HistoryResponse]
     total: int
     page: int
@@ -276,17 +354,20 @@ class HistoryListResponse(BaseModel):
 # Notification Test Schemas
 # ============================================================================
 
+
 class TestNotificationRequest(BaseModel):
     """Schema for sending a test notification"""
+
     message: Optional[str] = Field(
         "This is a test notification from MediKeep",
         max_length=500,
-        description="Custom test message"
+        description="Custom test message",
     )
 
 
 class TestNotificationResponse(BaseModel):
     """Schema for test notification result"""
+
     success: bool
     message: str
     channel_name: str
@@ -297,18 +378,21 @@ class TestNotificationResponse(BaseModel):
 # Event Types Response
 # ============================================================================
 
+
 class EventTypeInfo(BaseModel):
     """Schema for event type information"""
+
     value: str
     label: str
     description: str
     category: str
     is_implemented: bool = Field(
         True,
-        description="Whether this event has triggers implemented in the application"
+        description="Whether this event has triggers implemented in the application",
     )
 
 
 class EventTypesResponse(BaseModel):
     """Schema for list of available event types"""
+
     event_types: List[EventTypeInfo]

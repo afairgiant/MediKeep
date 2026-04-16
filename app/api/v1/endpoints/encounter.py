@@ -73,7 +73,9 @@ def read_encounters(
     limit: int = Query(default=100, le=100),
     practitioner_id: Optional[int] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -92,7 +94,7 @@ def read_encounters(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
         elif practitioner_id:
             encounters = encounter.get_by_practitioner(
@@ -114,7 +116,7 @@ def read_encounters(
             "read",
             "Encounter",
             patient_id=target_patient_id,
-            count=len(encounters)
+            count=len(encounters),
         )
 
         return encounters
@@ -133,10 +135,18 @@ def read_encounter(
     """Get encounter by ID with related information - only allows access to user's own encounters."""
     with handle_database_errors(request=request):
         encounter_obj = encounter.get_with_relations(
-            db=db, record_id=encounter_id, relations=["patient", "practitioner", "condition"]
+            db=db,
+            record_id=encounter_id,
+            relations=["patient", "practitioner", "condition"],
         )
         handle_not_found(encounter_obj, "Encounter", request)
-        verify_patient_ownership(encounter_obj, current_user_patient_id, "encounter", db=db, current_user=current_user)
+        verify_patient_ownership(
+            encounter_obj,
+            current_user_patient_id,
+            "encounter",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -145,7 +155,7 @@ def read_encounter(
             "read",
             "Encounter",
             record_id=encounter_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return encounter_obj
@@ -222,7 +232,7 @@ def get_recent_encounters(
             "Encounter",
             patient_id=patient_id,
             count=len(encounters),
-            days=days
+            days=days,
         )
 
         return encounters
@@ -253,7 +263,7 @@ def get_patient_encounters(
             "read",
             "Encounter",
             patient_id=patient_id,
-            count=len(encounters)
+            count=len(encounters),
         )
 
         return encounters
@@ -278,7 +288,13 @@ def get_encounter_lab_results(
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user)
+        verify_patient_ownership(
+            db_encounter,
+            current_user_patient_id,
+            "encounter",
+            db=db,
+            current_user=current_user,
+        )
 
         results = encounter_lab_result.get_by_encounter_with_details(
             db, encounter_id=encounter_id
@@ -286,20 +302,22 @@ def get_encounter_lab_results(
 
         enhanced = []
         for rel, lab in results:
-            enhanced.append({
-                "id": rel.id,
-                "encounter_id": rel.encounter_id,
-                "lab_result_id": rel.lab_result_id,
-                "purpose": rel.purpose,
-                "relevance_note": rel.relevance_note,
-                "created_at": rel.created_at,
-                "updated_at": rel.updated_at,
-                "lab_result_name": lab.test_name,
-                "lab_result_date": lab.ordered_date,
-                "lab_result_status": lab.status,
-                "encounter_reason": db_encounter.reason,
-                "encounter_date": db_encounter.date,
-            })
+            enhanced.append(
+                {
+                    "id": rel.id,
+                    "encounter_id": rel.encounter_id,
+                    "lab_result_id": rel.lab_result_id,
+                    "purpose": rel.purpose,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "lab_result_name": lab.test_name,
+                    "lab_result_date": lab.ordered_date,
+                    "lab_result_status": lab.status,
+                    "encounter_reason": db_encounter.reason,
+                    "encounter_date": db_encounter.date,
+                }
+            )
         return enhanced
 
 
@@ -320,7 +338,14 @@ def create_encounter_lab_result(
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_encounter,
+            current_user_patient_id,
+            "encounter",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         db_lab = lab_result.get(db, id=link_in.lab_result_id)
         handle_not_found(db_lab, "Lab result", request)
@@ -341,6 +366,7 @@ def create_encounter_lab_result(
             )
 
         from app.models.models import EncounterLabResult as ELRModel
+
         obj = ELRModel(
             encounter_id=encounter_id,
             lab_result_id=link_in.lab_result_id,
@@ -370,7 +396,14 @@ def bulk_create_encounter_lab_results(
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_encounter,
+            current_user_patient_id,
+            "encounter",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         for lr_id in bulk_in.lab_result_ids:
             db_lab = lab_result.get(db, id=lr_id)
@@ -409,7 +442,14 @@ def update_encounter_lab_result(
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_encounter,
+            current_user_patient_id,
+            "encounter",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
         handle_not_found(relationship, "Encounter lab result relationship", request)
@@ -438,7 +478,14 @@ def delete_encounter_lab_result(
     with handle_database_errors(request=request):
         db_encounter = encounter.get(db, id=encounter_id)
         handle_not_found(db_encounter, "Encounter", request)
-        verify_patient_ownership(db_encounter, current_user_patient_id, "encounter", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_encounter,
+            current_user_patient_id,
+            "encounter",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         relationship = encounter_lab_result.get(db, id=relationship_id)
         handle_not_found(relationship, "Encounter lab result relationship", request)

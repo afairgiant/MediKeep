@@ -54,12 +54,24 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(patients.router, prefix="/patients", tags=["patients"])
 
 # V1 Patient Management and Sharing
-api_router.include_router(patient_management.router, prefix="/patient-management", tags=["v1-patient-management"])
-api_router.include_router(patient_sharing.router, prefix="/patient-sharing", tags=["v1-patient-sharing"])
+api_router.include_router(
+    patient_management.router,
+    prefix="/patient-management",
+    tags=["v1-patient-management"],
+)
+api_router.include_router(
+    patient_sharing.router, prefix="/patient-sharing", tags=["v1-patient-sharing"]
+)
 
 # V1.5 Family History Sharing and Invitations
-api_router.include_router(family_history_sharing.router, prefix="/family-history-sharing", tags=["family-history-sharing"])
-api_router.include_router(invitations.router, prefix="/invitations", tags=["invitations"])
+api_router.include_router(
+    family_history_sharing.router,
+    prefix="/family-history-sharing",
+    tags=["family-history-sharing"],
+)
+api_router.include_router(
+    invitations.router, prefix="/invitations", tags=["invitations"]
+)
 api_router.include_router(
     lab_result.router, prefix="/lab-results", tags=["lab-results"]
 )
@@ -67,7 +79,9 @@ api_router.include_router(
     lab_result_file.router, prefix="/lab-result-files", tags=["lab-result-files"]
 )
 api_router.include_router(
-    lab_test_component.router, prefix="/lab-test-components", tags=["lab-test-components"]
+    lab_test_component.router,
+    prefix="/lab-test-components",
+    tags=["lab-test-components"],
 )
 api_router.include_router(
     entity_file.router, prefix="/entity-files", tags=["entity-files"]
@@ -77,7 +91,9 @@ api_router.include_router(
 api_router.include_router(search.router, prefix="/search", tags=["search"])
 
 # Standardized tests (LOINC)
-api_router.include_router(standardized_tests.router, prefix="/standardized-tests", tags=["standardized-tests"])
+api_router.include_router(
+    standardized_tests.router, prefix="/standardized-tests", tags=["standardized-tests"]
+)
 
 # Cross-entity tag management
 api_router.include_router(tags.router, prefix="/tags", tags=["tags"])
@@ -97,11 +113,15 @@ api_router.include_router(
 api_router.include_router(insurance.router, prefix="/insurances", tags=["insurance"])
 api_router.include_router(procedure.router, prefix="/procedures", tags=["procedures"])
 api_router.include_router(treatment.router, prefix="/treatments", tags=["treatments"])
-api_router.include_router(medical_equipment.router, prefix="/medical-equipment", tags=["medical-equipment"])
+api_router.include_router(
+    medical_equipment.router, prefix="/medical-equipment", tags=["medical-equipment"]
+)
 api_router.include_router(allergy.router, prefix="/allergies", tags=["allergies"])
 api_router.include_router(vitals.router, prefix="/vitals", tags=["vitals"])
 api_router.include_router(symptom.router, prefix="/symptoms", tags=["symptoms"])
-api_router.include_router(injury_type.router, prefix="/injury-types", tags=["injury-types"])
+api_router.include_router(
+    injury_type.router, prefix="/injury-types", tags=["injury-types"]
+)
 api_router.include_router(injury.router, prefix="/injuries", tags=["injuries"])
 
 # Healthcare provider endpoints
@@ -123,7 +143,9 @@ api_router.include_router(
 api_router.include_router(export.router, prefix="/export", tags=["export"])
 
 # Custom reports endpoints
-api_router.include_router(custom_reports.router, prefix="/custom-reports", tags=["custom-reports"])
+api_router.include_router(
+    custom_reports.router, prefix="/custom-reports", tags=["custom-reports"]
+)
 
 # Utils endpoints
 api_router.include_router(utils.router)
@@ -141,4 +163,6 @@ api_router.include_router(papra.router, prefix="/papra", tags=["papra"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 
 # Notification endpoints
-api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+api_router.include_router(
+    notifications.router, prefix="/notifications", tags=["notifications"]
+)

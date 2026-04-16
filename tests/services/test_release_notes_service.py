@@ -138,7 +138,9 @@ class TestCacheBehaviour:
         ]
         service._cache = stale_releases
         # Timestamp set far in the past so TTL is exceeded
-        service._cache_timestamp = time.time() - (ReleaseNotesService.CACHE_TTL_SECONDS + 1)
+        service._cache_timestamp = time.time() - (
+            ReleaseNotesService.CACHE_TTL_SECONDS + 1
+        )
 
         with patch.object(
             service,
@@ -215,7 +217,9 @@ class TestFetchFromGitHub:
         assert release["name"] == "Initial Release"
         assert release["body"] == "First release notes"
         assert release["published_at"] == "2024-01-01T00:00:00Z"
-        assert release["html_url"] == "https://github.com/example/repo/releases/tag/v1.0.0"
+        assert (
+            release["html_url"] == "https://github.com/example/repo/releases/tag/v1.0.0"
+        )
         # Extra fields from GitHub must not be forwarded to consumers
         assert "extra_field" not in release
 
@@ -237,7 +241,9 @@ class TestFetchFromGitHub:
         assert service._cache_timestamp == 1_700_000_000.0
 
     @pytest.mark.asyncio
-    async def test_fetch_from_github_returns_empty_list_on_http_error_with_no_cache(self):
+    async def test_fetch_from_github_returns_empty_list_on_http_error_with_no_cache(
+        self,
+    ):
         """An httpx.HTTPError with no stale cache results in an empty list, not an exception."""
         service = ReleaseNotesService()
         mock_async_client = MagicMock()
@@ -252,7 +258,9 @@ class TestFetchFromGitHub:
         assert result == []
 
     @pytest.mark.asyncio
-    async def test_fetch_from_github_returns_empty_list_on_generic_exception_with_no_cache(self):
+    async def test_fetch_from_github_returns_empty_list_on_generic_exception_with_no_cache(
+        self,
+    ):
         """An unexpected exception with no stale cache results in an empty list."""
         service = ReleaseNotesService()
         mock_async_client = MagicMock()
@@ -281,7 +289,9 @@ class TestFetchFromGitHub:
         ]
         # Populate stale cache (expired timestamp)
         service._cache = stale
-        service._cache_timestamp = time.time() - (ReleaseNotesService.CACHE_TTL_SECONDS + 100)
+        service._cache_timestamp = time.time() - (
+            ReleaseNotesService.CACHE_TTL_SECONDS + 100
+        )
 
         mock_async_client = MagicMock()
         mock_client_instance = AsyncMock()

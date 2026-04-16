@@ -19,16 +19,20 @@ class Logger {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return `session_${Date.now()}_${crypto.randomUUID()}`;
     }
-    
+
     // Secure fallback using crypto.getRandomValues()
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint8Array(16);
       crypto.getRandomValues(array);
-      const hex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+      const hex = Array.from(array, byte =>
+        byte.toString(16).padStart(2, '0')
+      ).join('');
       return `session_${Date.now()}_${hex}`;
     }
-    
-    throw new Error('Crypto API not available - cannot generate secure session ID');
+
+    throw new Error(
+      'Crypto API not available - cannot generate secure session ID'
+    );
   }
 
   setupNetworkListener() {

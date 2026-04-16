@@ -13,7 +13,13 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.crud.symptom import symptom_parent, symptom_occurrence, symptom_condition, symptom_medication, symptom_treatment
+from app.crud.symptom import (
+    symptom_parent,
+    symptom_occurrence,
+    symptom_condition,
+    symptom_medication,
+    symptom_treatment,
+)
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.symptom import (
@@ -83,7 +89,7 @@ def read_symptoms(
                 patient_id=target_patient_id,
                 search_term=search,
                 skip=skip,
-                limit=limit
+                limit=limit,
             )
         elif status:
             # Filter by status - uses get_by_patient with status filter
@@ -92,15 +98,12 @@ def read_symptoms(
                 patient_id=target_patient_id,
                 status=status,
                 skip=skip,
-                limit=limit
+                limit=limit,
             )
         else:
             # Get all symptoms
             symptoms_list = symptom_parent.get_by_patient(
-                db=db,
-                patient_id=target_patient_id,
-                skip=skip,
-                limit=limit
+                db=db, patient_id=target_patient_id, skip=skip, limit=limit
             )
 
         return symptoms_list
@@ -111,7 +114,9 @@ def read_symptom_stats(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
-    patient_id: Optional[int] = Query(None, description="Patient ID for patient switching"),
+    patient_id: Optional[int] = Query(
+        None, description="Patient ID for patient switching"
+    ),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get symptom statistics for the current user or specified patient."""
@@ -131,7 +136,9 @@ def read_symptom_timeline(
     *,
     request: Request,
     db: Session = Depends(deps.get_db),
-    patient_id: Optional[int] = Query(None, description="Patient ID for patient switching"),
+    patient_id: Optional[int] = Query(
+        None, description="Patient ID for patient switching"
+    ),
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
     current_user_id: int = Depends(deps.get_current_user_id),
@@ -149,10 +156,7 @@ def read_symptom_timeline(
         end_dt = datetime.fromisoformat(end_date) if end_date else None
 
         timeline_data = symptom_occurrence.get_timeline_data(
-            db=db,
-            patient_id=target_patient_id,
-            start_date=start_dt,
-            end_date=end_dt
+            db=db, patient_id=target_patient_id, start_date=start_dt, end_date=end_dt
         )
         return timeline_data
 
@@ -172,7 +176,13 @@ def read_symptom_by_id(
             db=db, record_id=symptom_id, relations=["patient"]
         )
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
         return symptom_obj
 
 
@@ -247,15 +257,25 @@ def log_symptom_occurrence(
         # Verify symptom exists and belongs to user
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Create occurrence with symptom_id from path (prevent override from body)
         occurrence = symptom_occurrence.create(
             db=db,
             obj_in=SymptomOccurrenceCreate(
                 symptom_id=symptom_id,  # Force path param, ignore any symptom_id in body
-                **{k: v for k, v in occurrence_in.model_dump().items() if k != 'symptom_id'}
-            )
+                **{
+                    k: v
+                    for k, v in occurrence_in.model_dump().items()
+                    if k != "symptom_id"
+                },
+            ),
         )
 
         return occurrence
@@ -277,19 +297,25 @@ def read_symptom_occurrences(
         # Verify symptom exists and belongs to user
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Get occurrences
         occurrences = symptom_occurrence.get_by_symptom(
-            db=db,
-            symptom_id=symptom_id,
-            skip=skip,
-            limit=limit
+            db=db, symptom_id=symptom_id, skip=skip, limit=limit
         )
         return occurrences
 
 
-@router.get("/{symptom_id}/occurrences/{occurrence_id}", response_model=SymptomOccurrenceResponse)
+@router.get(
+    "/{symptom_id}/occurrences/{occurrence_id}",
+    response_model=SymptomOccurrenceResponse,
+)
 def read_symptom_occurrence_by_id(
     *,
     symptom_id: int,
@@ -304,7 +330,13 @@ def read_symptom_occurrence_by_id(
         # Verify symptom exists and belongs to user
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Get occurrence
         occurrence = symptom_occurrence.get(db=db, id=occurrence_id)
@@ -313,12 +345,18 @@ def read_symptom_occurrence_by_id(
         # Verify occurrence belongs to this symptom
         if occurrence.symptom_id != symptom_id:
             from fastapi import HTTPException
-            raise HTTPException(status_code=404, detail="Occurrence not found for this symptom")
+
+            raise HTTPException(
+                status_code=404, detail="Occurrence not found for this symptom"
+            )
 
         return occurrence
 
 
-@router.put("/{symptom_id}/occurrences/{occurrence_id}", response_model=SymptomOccurrenceResponse)
+@router.put(
+    "/{symptom_id}/occurrences/{occurrence_id}",
+    response_model=SymptomOccurrenceResponse,
+)
 def update_symptom_occurrence(
     *,
     symptom_id: int,
@@ -334,7 +372,13 @@ def update_symptom_occurrence(
         # Verify symptom exists and belongs to user
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Get and update occurrence
         occurrence = symptom_occurrence.get(db=db, id=occurrence_id)
@@ -343,9 +387,14 @@ def update_symptom_occurrence(
         # Verify occurrence belongs to this symptom
         if occurrence.symptom_id != symptom_id:
             from fastapi import HTTPException
-            raise HTTPException(status_code=404, detail="Occurrence not found for this symptom")
 
-        updated_occurrence = symptom_occurrence.update(db=db, db_obj=occurrence, obj_in=occurrence_in)
+            raise HTTPException(
+                status_code=404, detail="Occurrence not found for this symptom"
+            )
+
+        updated_occurrence = symptom_occurrence.update(
+            db=db, db_obj=occurrence, obj_in=occurrence_in
+        )
         return updated_occurrence
 
 
@@ -364,7 +413,13 @@ def delete_symptom_occurrence(
         # Verify symptom exists and belongs to user
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Get and delete occurrence
         occurrence = symptom_occurrence.get(db=db, id=occurrence_id)
@@ -373,7 +428,10 @@ def delete_symptom_occurrence(
         # Verify occurrence belongs to this symptom
         if occurrence.symptom_id != symptom_id:
             from fastapi import HTTPException
-            raise HTTPException(status_code=404, detail="Occurrence not found for this symptom")
+
+            raise HTTPException(
+                status_code=404, detail="Occurrence not found for this symptom"
+            )
 
         symptom_occurrence.delete(db=db, id=occurrence_id)
         return {"message": "Symptom occurrence deleted successfully"}
@@ -399,7 +457,13 @@ def link_symptom_to_condition(
         # Verify symptom ownership
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Check if relationship already exists
         existing = symptom_condition.get_by_symptom_and_condition(
@@ -425,7 +489,13 @@ def get_symptom_conditions(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         return symptom_condition.get_by_symptom(db=db, symptom_id=symptom_id)
 
@@ -444,7 +514,13 @@ def unlink_symptom_from_condition(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         success = symptom_condition.delete_by_symptom_and_condition(
             db=db, symptom_id=symptom_id, condition_id=condition_id
@@ -470,7 +546,13 @@ def link_symptom_to_medication(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Check if relationship already exists
         existing = symptom_medication.get_by_symptom_and_medication(
@@ -495,7 +577,13 @@ def get_symptom_medications(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         return symptom_medication.get_by_symptom(db=db, symptom_id=symptom_id)
 
@@ -514,7 +602,13 @@ def unlink_symptom_from_medication(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         success = symptom_medication.delete_by_symptom_and_medication(
             db=db, symptom_id=symptom_id, medication_id=medication_id
@@ -540,7 +634,13 @@ def link_symptom_to_treatment(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         # Check if relationship already exists
         existing = symptom_treatment.get_by_symptom_and_treatment(
@@ -565,7 +665,13 @@ def get_symptom_treatments(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         return symptom_treatment.get_by_symptom(db=db, symptom_id=symptom_id)
 
@@ -584,7 +690,13 @@ def unlink_symptom_from_treatment(
     with handle_database_errors(request=request):
         symptom_obj = symptom_parent.get(db=db, id=symptom_id)
         handle_not_found(symptom_obj, "Symptom", request)
-        verify_patient_ownership(symptom_obj, current_user_patient_id, "symptom", db=db, current_user=current_user)
+        verify_patient_ownership(
+            symptom_obj,
+            current_user_patient_id,
+            "symptom",
+            db=db,
+            current_user=current_user,
+        )
 
         success = symptom_treatment.delete_by_symptom_and_treatment(
             db=db, symptom_id=symptom_id, treatment_id=treatment_id

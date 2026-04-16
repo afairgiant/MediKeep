@@ -4,6 +4,7 @@ Integration tests for Patient Sharing Invitation API endpoints
 Tests API endpoints for sending invitations, accepting them, and handling errors.
 Tests user-friendly error messages and proper HTTP status codes.
 """
+
 import pytest
 from datetime import datetime, timedelta, timezone, date
 from fastapi.testclient import TestClient
@@ -21,12 +22,13 @@ class TestSendPatientShareInvitationEndpoint:
         """Create owner user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="owner",
             email="owner@example.com",
             password="password123",
             full_name="Owner User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -35,12 +37,13 @@ class TestSendPatientShareInvitationEndpoint:
         """Create recipient user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="recipient",
             email="recipient@example.com",
             password="password123",
             full_name="Recipient User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -53,7 +56,7 @@ class TestSendPatientShareInvitationEndpoint:
             first_name="Test",
             last_name="Patient",
             birth_date=date(1990, 1, 1),
-            gender="M"
+            gender="M",
         )
         db_session.add(patient)
         db_session.commit()
@@ -66,71 +69,73 @@ class TestSendPatientShareInvitationEndpoint:
         token = create_access_token(data={"sub": owner.username})
         return {"Authorization": f"Bearer {token}"}
 
-    def test_send_invitation_success(self, client, owner_token_headers, patient, recipient):
+    def test_send_invitation_success(
+        self, client, owner_token_headers, patient, recipient
+    ):
         """Test successfully sending patient share invitation"""
         payload = {
             "patient_id": patient.id,
             "shared_with_user_identifier": recipient.username,
             "permission_level": "view",
             "message": "Please access my records",
-            "expires_hours": 168
+            "expires_hours": 168,
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['message'] == "Patient share invitation sent successfully"
-        assert 'invitation_id' in data
-        assert 'expires_at' in data
+        assert data["message"] == "Patient share invitation sent successfully"
+        assert "invitation_id" in data
+        assert "expires_at" in data
 
-    def test_send_invitation_patient_not_found(self, client, owner_token_headers, recipient):
+    def test_send_invitation_patient_not_found(
+        self, client, owner_token_headers, recipient
+    ):
         """Test sending invitation for non-existent patient returns 404"""
         payload = {
             "patient_id": 99999,
             "shared_with_user_identifier": recipient.username,
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code == 404
-        assert "not found" in response.json()['message'].lower()
+        assert "not found" in response.json()["message"].lower()
 
-    def test_send_invitation_recipient_not_found(self, client, owner_token_headers, patient):
+    def test_send_invitation_recipient_not_found(
+        self, client, owner_token_headers, patient
+    ):
         """Test sending invitation to non-existent user returns 404"""
         payload = {
             "patient_id": patient.id,
             "shared_with_user_identifier": "nonexistent@example.com",
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code == 404
-        assert "not found" in response.json()['message'].lower()
+        assert "not found" in response.json()["message"].lower()
 
-    def test_send_invitation_already_shared(self, client, db_session, owner_token_headers, patient, owner, recipient):
+    def test_send_invitation_already_shared(
+        self, client, db_session, owner_token_headers, patient, owner, recipient
+    ):
         """Test sending invitation when already shared returns 409"""
         # Create existing share
         share = PatientShare(
             patient_id=patient.id,
             shared_by_user_id=owner.id,
             shared_with_user_id=recipient.id,
-            permission_level='view',
-            is_active=True
+            permission_level="view",
+            is_active=True,
         )
         db_session.add(share)
         db_session.commit()
@@ -138,28 +143,28 @@ class TestSendPatientShareInvitationEndpoint:
         payload = {
             "patient_id": patient.id,
             "shared_with_user_identifier": recipient.username,
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code == 409
-        assert "already shared" in response.json()['message'].lower()
+        assert "already shared" in response.json()["message"].lower()
 
-    def test_send_invitation_pending_exists(self, client, db_session, owner_token_headers, patient, owner, recipient):
+    def test_send_invitation_pending_exists(
+        self, client, db_session, owner_token_headers, patient, owner, recipient
+    ):
         """Test sending invitation when pending invitation exists returns 409"""
         # Create pending invitation
         invitation = Invitation(
             sent_by_user_id=owner.id,
             sent_to_user_id=recipient.id,
-            invitation_type='patient_share',
-            status='pending',
-            title='Test',
-            context_data={'patient_id': patient.id}
+            invitation_type="patient_share",
+            status="pending",
+            title="Test",
+            context_data={"patient_id": patient.id},
         )
         db_session.add(invitation)
         db_session.commit()
@@ -167,30 +172,28 @@ class TestSendPatientShareInvitationEndpoint:
         payload = {
             "patient_id": patient.id,
             "shared_with_user_identifier": recipient.username,
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code == 409
-        assert "pending invitation" in response.json()['message'].lower()
+        assert "pending invitation" in response.json()["message"].lower()
 
-    def test_send_invitation_invalid_permission_level(self, client, owner_token_headers, patient, recipient):
+    def test_send_invitation_invalid_permission_level(
+        self, client, owner_token_headers, patient, recipient
+    ):
         """Test sending invitation with invalid permission level returns 400"""
         payload = {
             "patient_id": patient.id,
             "shared_with_user_identifier": recipient.username,
-            "permission_level": "superuser"
+            "permission_level": "superuser",
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code in [400, 422]
@@ -200,7 +203,7 @@ class TestSendPatientShareInvitationEndpoint:
         payload = {
             "patient_id": patient.id,
             "shared_with_user_identifier": recipient.username,
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post("/api/v1/patient-sharing/", json=payload)
@@ -215,12 +218,13 @@ class TestBulkSendPatientShareInvitationEndpoint:
         """Create owner user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="owner",
             email="owner@example.com",
             password="password123",
             full_name="Owner User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -229,12 +233,13 @@ class TestBulkSendPatientShareInvitationEndpoint:
         """Create recipient user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="recipient",
             email="recipient@example.com",
             password="password123",
             full_name="Recipient User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -249,7 +254,7 @@ class TestBulkSendPatientShareInvitationEndpoint:
                 first_name=f"Patient{i}",
                 last_name=f"Test{i}",
                 birth_date=date(1990, 1, 1),
-                gender="M"
+                gender="M",
             )
             db_session.add(patient)
             patients.append(patient)
@@ -271,21 +276,23 @@ class TestBulkSendPatientShareInvitationEndpoint:
             "patient_ids": patient_ids,
             "shared_with_user_identifier": recipient.username,
             "permission_level": "view",
-            "message": "Access to family records"
+            "message": "Access to family records",
         }
 
         response = client.post(
             "/api/v1/patient-sharing/bulk-invite",
             json=payload,
-            headers=owner_token_headers
+            headers=owner_token_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['patient_count'] == 3
-        assert 'invitation_id' in data
+        assert data["patient_count"] == 3
+        assert "invitation_id" in data
 
-    def test_bulk_send_partial_ownership(self, client, db_session, owner_token_headers, patients):
+    def test_bulk_send_partial_ownership(
+        self, client, db_session, owner_token_headers, patients
+    ):
         """Test bulk send fails if user doesn't own all patients"""
         # Create another user with a patient
         other_user = User(
@@ -293,7 +300,7 @@ class TestBulkSendPatientShareInvitationEndpoint:
             email="other@example.com",
             password_hash="hashed",
             full_name="Other User",
-            role="user"
+            role="user",
         )
         db_session.add(other_user)
         db_session.commit()
@@ -304,7 +311,7 @@ class TestBulkSendPatientShareInvitationEndpoint:
             first_name="Other",
             last_name="Patient",
             birth_date=date(1990, 1, 1),
-            gender="F"
+            gender="F",
         )
         db_session.add(other_patient)
         db_session.commit()
@@ -313,13 +320,13 @@ class TestBulkSendPatientShareInvitationEndpoint:
         payload = {
             "patient_ids": patient_ids,
             "shared_with_user_identifier": "recipient@example.com",
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post(
             "/api/v1/patient-sharing/bulk-invite",
             json=payload,
-            headers=owner_token_headers
+            headers=owner_token_headers,
         )
 
         assert response.status_code in [400, 404, 500]
@@ -333,12 +340,13 @@ class TestAcceptPatientShareInvitationEndpoint:
         """Create owner user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="owner",
             email="owner@example.com",
             password="password123",
             full_name="Owner User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -347,12 +355,13 @@ class TestAcceptPatientShareInvitationEndpoint:
         """Create recipient user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="recipient",
             email="recipient@example.com",
             password="password123",
             full_name="Recipient User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -365,7 +374,7 @@ class TestAcceptPatientShareInvitationEndpoint:
             first_name="Test",
             last_name="Patient",
             birth_date=date(1990, 1, 1),
-            gender="M"
+            gender="M",
         )
         db_session.add(patient)
         db_session.commit()
@@ -378,15 +387,15 @@ class TestAcceptPatientShareInvitationEndpoint:
         invitation = Invitation(
             sent_by_user_id=owner.id,
             sent_to_user_id=recipient.id,
-            invitation_type='patient_share',
-            status='pending',
+            invitation_type="patient_share",
+            status="pending",
             title=f"Patient Share: {patient.first_name} {patient.last_name}",
             context_data={
-                'patient_id': patient.id,
-                'patient_name': f"{patient.first_name} {patient.last_name}",
-                'permission_level': 'view'
+                "patient_id": patient.id,
+                "patient_name": f"{patient.first_name} {patient.last_name}",
+                "permission_level": "view",
             },
-            expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         )
         db_session.add(invitation)
         db_session.commit()
@@ -399,29 +408,32 @@ class TestAcceptPatientShareInvitationEndpoint:
         token = create_access_token(data={"sub": recipient.username})
         return {"Authorization": f"Bearer {token}"}
 
-    def test_accept_invitation_success(self, client, db_session, recipient_token_headers, pending_invitation, patient):
+    def test_accept_invitation_success(
+        self, client, db_session, recipient_token_headers, pending_invitation, patient
+    ):
         """Test successfully accepting patient share invitation"""
-        payload = {
-            "response": "accepted",
-            "response_note": "Thank you for sharing"
-        }
+        payload = {"response": "accepted", "response_note": "Thank you for sharing"}
 
         response = client.post(
             f"/api/v1/invitations/{pending_invitation.id}/respond",
             json=payload,
-            headers=recipient_token_headers
+            headers=recipient_token_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert "accepted" in data['message'].lower()
-        assert 'share_id' in data
+        assert "accepted" in data["message"].lower()
+        assert "share_id" in data
 
         # Verify share was created
-        share = db_session.query(PatientShare).filter(
-            PatientShare.patient_id == patient.id,
-            PatientShare.invitation_id == pending_invitation.id
-        ).first()
+        share = (
+            db_session.query(PatientShare)
+            .filter(
+                PatientShare.patient_id == patient.id,
+                PatientShare.invitation_id == pending_invitation.id,
+            )
+            .first()
+        )
         assert share is not None
         assert share.is_active is True
 
@@ -432,12 +444,14 @@ class TestAcceptPatientShareInvitationEndpoint:
         response = client.post(
             "/api/v1/invitations/99999/respond",
             json=payload,
-            headers=recipient_token_headers
+            headers=recipient_token_headers,
         )
 
         assert response.status_code == 404
 
-    def test_accept_invitation_expired(self, client, db_session, recipient_token_headers, pending_invitation):
+    def test_accept_invitation_expired(
+        self, client, db_session, recipient_token_headers, pending_invitation
+    ):
         """Test accepting expired invitation returns 400"""
         # Make invitation expired
         pending_invitation.expires_at = datetime.now(timezone.utc) - timedelta(days=1)
@@ -448,28 +462,27 @@ class TestAcceptPatientShareInvitationEndpoint:
         response = client.post(
             f"/api/v1/invitations/{pending_invitation.id}/respond",
             json=payload,
-            headers=recipient_token_headers
+            headers=recipient_token_headers,
         )
 
         assert response.status_code == 400
-        assert "expired" in response.json()['message'].lower()
+        assert "expired" in response.json()["message"].lower()
 
-    def test_reject_invitation(self, client, recipient_token_headers, pending_invitation):
+    def test_reject_invitation(
+        self, client, recipient_token_headers, pending_invitation
+    ):
         """Test rejecting patient share invitation"""
-        payload = {
-            "response": "rejected",
-            "response_note": "Not interested"
-        }
+        payload = {"response": "rejected", "response_note": "Not interested"}
 
         response = client.post(
             f"/api/v1/invitations/{pending_invitation.id}/respond",
             json=payload,
-            headers=recipient_token_headers
+            headers=recipient_token_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['status'] == 'rejected'
+        assert data["status"] == "rejected"
 
 
 class TestBulkAcceptPatientShareInvitation:
@@ -480,12 +493,13 @@ class TestBulkAcceptPatientShareInvitation:
         """Create owner user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="owner",
             email="owner@example.com",
             password="password123",
             full_name="Owner User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -494,12 +508,13 @@ class TestBulkAcceptPatientShareInvitation:
         """Create recipient user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="recipient",
             email="recipient@example.com",
             password="password123",
             full_name="Recipient User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -514,7 +529,7 @@ class TestBulkAcceptPatientShareInvitation:
                 first_name=f"Patient{i}",
                 last_name=f"Test{i}",
                 birth_date=date(1990, 1, 1),
-                gender="M"
+                gender="M",
             )
             db_session.add(patient)
             patients.append(patient)
@@ -528,9 +543,9 @@ class TestBulkAcceptPatientShareInvitation:
         """Create bulk invitation"""
         patients_data = [
             {
-                'patient_id': p.id,
-                'patient_name': f"{p.first_name} {p.last_name}",
-                'patient_birth_date': p.birth_date.isoformat()
+                "patient_id": p.id,
+                "patient_name": f"{p.first_name} {p.last_name}",
+                "patient_birth_date": p.birth_date.isoformat(),
             }
             for p in patients
         ]
@@ -538,16 +553,16 @@ class TestBulkAcceptPatientShareInvitation:
         invitation = Invitation(
             sent_by_user_id=owner.id,
             sent_to_user_id=recipient.id,
-            invitation_type='patient_share',
-            status='pending',
+            invitation_type="patient_share",
+            status="pending",
             title="Bulk Patient Share",
             context_data={
-                'is_bulk_invite': True,
-                'patients': patients_data,
-                'permission_level': 'view',
-                'patient_count': len(patients)
+                "is_bulk_invite": True,
+                "patients": patients_data,
+                "permission_level": "view",
+                "patient_count": len(patients),
             },
-            expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         )
         db_session.add(invitation)
         db_session.commit()
@@ -560,31 +575,45 @@ class TestBulkAcceptPatientShareInvitation:
         token = create_access_token(data={"sub": recipient.username})
         return {"Authorization": f"Bearer {token}"}
 
-    def test_accept_bulk_invitation_success(self, client, db_session, recipient_token_headers, bulk_invitation, patients):
+    def test_accept_bulk_invitation_success(
+        self, client, db_session, recipient_token_headers, bulk_invitation, patients
+    ):
         """Test successfully accepting bulk patient share invitation"""
         payload = {"response": "accepted"}
 
         response = client.post(
             f"/api/v1/invitations/{bulk_invitation.id}/respond",
             json=payload,
-            headers=recipient_token_headers
+            headers=recipient_token_headers,
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data['share_count'] == 3
-        assert len(data['share_ids']) == 3
+        assert data["share_count"] == 3
+        assert len(data["share_ids"]) == 3
 
         # Verify all shares were created
         for patient in patients:
-            share = db_session.query(PatientShare).filter(
-                PatientShare.patient_id == patient.id,
-                PatientShare.invitation_id == bulk_invitation.id
-            ).first()
+            share = (
+                db_session.query(PatientShare)
+                .filter(
+                    PatientShare.patient_id == patient.id,
+                    PatientShare.invitation_id == bulk_invitation.id,
+                )
+                .first()
+            )
             assert share is not None
             assert share.is_active is True
 
-    def test_accept_bulk_invitation_patient_verification(self, client, db_session, recipient_token_headers, bulk_invitation, patients, owner):
+    def test_accept_bulk_invitation_patient_verification(
+        self,
+        client,
+        db_session,
+        recipient_token_headers,
+        bulk_invitation,
+        patients,
+        owner,
+    ):
         """Test bulk acceptance verifies patient still exists and sender still owns it"""
         # Delete one patient before acceptance
         db_session.delete(patients[0])
@@ -595,14 +624,14 @@ class TestBulkAcceptPatientShareInvitation:
         response = client.post(
             f"/api/v1/invitations/{bulk_invitation.id}/respond",
             json=payload,
-            headers=recipient_token_headers
+            headers=recipient_token_headers,
         )
 
         # Should still succeed but only create shares for valid patients
         assert response.status_code == 200
         data = response.json()
         # Should only create 2 shares (patient 0 was deleted)
-        assert data['share_count'] <= 3
+        assert data["share_count"] <= 3
 
 
 class TestRaceConditions:
@@ -613,12 +642,13 @@ class TestRaceConditions:
         """Create owner user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="owner",
             email="owner@example.com",
             password="password123",
             full_name="Owner User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -627,12 +657,13 @@ class TestRaceConditions:
         """Create recipient user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="recipient",
             email="recipient@example.com",
             password="password123",
             full_name="Recipient User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -645,7 +676,7 @@ class TestRaceConditions:
             first_name="Test",
             last_name="Patient",
             birth_date=date(1990, 1, 1),
-            gender="M"
+            gender="M",
         )
         db_session.add(patient)
         db_session.commit()
@@ -658,15 +689,15 @@ class TestRaceConditions:
         invitation = Invitation(
             sent_by_user_id=owner.id,
             sent_to_user_id=recipient.id,
-            invitation_type='patient_share',
-            status='pending',
+            invitation_type="patient_share",
+            status="pending",
             title=f"Patient Share: {patient.first_name} {patient.last_name}",
             context_data={
-                'patient_id': patient.id,
-                'patient_name': f"{patient.first_name} {patient.last_name}",
-                'permission_level': 'view'
+                "patient_id": patient.id,
+                "patient_name": f"{patient.first_name} {patient.last_name}",
+                "permission_level": "view",
             },
-            expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         )
         db_session.add(invitation)
         db_session.commit()
@@ -679,7 +710,16 @@ class TestRaceConditions:
         token = create_access_token(data={"sub": recipient.username})
         return {"Authorization": f"Bearer {token}"}
 
-    def test_concurrent_acceptance_handling(self, client, db_session, recipient_token_headers, pending_invitation, patient, owner, recipient):
+    def test_concurrent_acceptance_handling(
+        self,
+        client,
+        db_session,
+        recipient_token_headers,
+        pending_invitation,
+        patient,
+        owner,
+        recipient,
+    ):
         """
         CRITICAL: Test that duplicate acceptance is handled gracefully
         Simulates race condition where share already exists when accepting
@@ -689,28 +729,32 @@ class TestRaceConditions:
         response1 = client.post(
             f"/api/v1/invitations/{pending_invitation.id}/respond",
             json=payload,
-            headers=recipient_token_headers
+            headers=recipient_token_headers,
         )
 
         assert response1.status_code == 200
 
         # Verify only one share exists
-        shares = db_session.query(PatientShare).filter(
-            PatientShare.patient_id == patient.id,
-            PatientShare.shared_with_user_id == recipient.id
-        ).all()
+        shares = (
+            db_session.query(PatientShare)
+            .filter(
+                PatientShare.patient_id == patient.id,
+                PatientShare.shared_with_user_id == recipient.id,
+            )
+            .all()
+        )
 
         assert len(shares) == 1
 
         # Trying to accept again should fail gracefully
         # Reset invitation status to simulate concurrent request
         db_session.refresh(pending_invitation)
-        if pending_invitation.status == 'accepted':
+        if pending_invitation.status == "accepted":
             # Second request should handle existing share
             response2 = client.post(
                 f"/api/v1/invitations/{pending_invitation.id}/respond",
                 json=payload,
-                headers=recipient_token_headers
+                headers=recipient_token_headers,
             )
             # Should get error about already responded or should handle gracefully
             assert response2.status_code in [200, 400, 404, 409]
@@ -724,12 +768,13 @@ class TestErrorMessages:
         """Create owner user"""
         from app.crud.user import user as user_crud
         from app.schemas.user import UserCreate
+
         user_data = UserCreate(
             username="owner",
             email="owner@example.com",
             password="password123",
             full_name="Owner User",
-            role="user"
+            role="user",
         )
         return user_crud.create(db_session, obj_in=user_data)
 
@@ -744,22 +789,22 @@ class TestErrorMessages:
         payload = {
             "patient_id": 99999,
             "shared_with_user_identifier": "someone@example.com",
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code == 404
-        detail = response.json()['message']
+        detail = response.json()["message"]
         # Should be user-friendly, not technical
         assert "not found" in detail.lower()
         assert "permission" in detail.lower()
 
-    def test_recipient_not_found_includes_identifier(self, client, db_session, owner_token_headers, owner):
+    def test_recipient_not_found_includes_identifier(
+        self, client, db_session, owner_token_headers, owner
+    ):
         """Test recipient not found message includes the identifier"""
         patient = Patient(
             user_id=owner.id,
@@ -767,7 +812,7 @@ class TestErrorMessages:
             first_name="Test",
             last_name="Patient",
             birth_date=date(1990, 1, 1),
-            gender="M"
+            gender="M",
         )
         db_session.add(patient)
         db_session.commit()
@@ -775,15 +820,13 @@ class TestErrorMessages:
         payload = {
             "patient_id": patient.id,
             "shared_with_user_identifier": "nonexistent@example.com",
-            "permission_level": "view"
+            "permission_level": "view",
         }
 
         response = client.post(
-            "/api/v1/patient-sharing/",
-            json=payload,
-            headers=owner_token_headers
+            "/api/v1/patient-sharing/", json=payload, headers=owner_token_headers
         )
 
         assert response.status_code == 404
-        detail = response.json()['message']
+        detail = response.json()["message"]
         assert "nonexistent@example.com" in detail

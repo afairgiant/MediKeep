@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { Modal, Button } from '../ui';
@@ -16,33 +16,148 @@ const CHANNEL_CONFIGS = {
         type: 'text',
         placeholder: 'https://discord.com/api/webhooks/...',
         required: true,
-        helpText: 'Get this from Discord Server Settings > Integrations > Webhooks',
+        helpText:
+          'Get this from Discord Server Settings > Integrations > Webhooks',
       },
     ],
   },
   email: {
     fields: [
-      { name: 'smtp_host', label: 'SMTP Server', type: 'text', placeholder: 'smtp.gmail.com', required: true },
-      { name: 'smtp_port', label: 'SMTP Port', type: 'number', placeholder: '587', required: true, defaultValue: 587 },
-      { name: 'smtp_user', label: 'Username', type: 'text', placeholder: 'user@gmail.com', required: true },
-      { name: 'smtp_password', label: 'Password', type: 'password', placeholder: 'App password', required: true },
-      { name: 'from_email', label: 'From Email', type: 'email', placeholder: 'sender@gmail.com', required: true },
-      { name: 'to_email', label: 'To Email', type: 'email', placeholder: 'recipient@example.com', required: true },
-      { name: 'use_tls', label: 'Use TLS', type: 'checkbox', defaultValue: true },
+      {
+        name: 'smtp_host',
+        label: 'SMTP Server',
+        type: 'text',
+        placeholder: 'smtp.gmail.com',
+        required: true,
+      },
+      {
+        name: 'smtp_port',
+        label: 'SMTP Port',
+        type: 'number',
+        placeholder: '587',
+        required: true,
+        defaultValue: 587,
+      },
+      {
+        name: 'smtp_user',
+        label: 'Username',
+        type: 'text',
+        placeholder: 'user@gmail.com',
+        required: true,
+      },
+      {
+        name: 'smtp_password',
+        label: 'Password',
+        type: 'password',
+        placeholder: 'App password',
+        required: true,
+      },
+      {
+        name: 'from_email',
+        label: 'From Email',
+        type: 'email',
+        placeholder: 'sender@gmail.com',
+        required: true,
+      },
+      {
+        name: 'to_email',
+        label: 'To Email',
+        type: 'email',
+        placeholder: 'recipient@example.com',
+        required: true,
+      },
+      {
+        name: 'use_tls',
+        label: 'Use TLS',
+        type: 'checkbox',
+        defaultValue: true,
+      },
     ],
   },
   gotify: {
     fields: [
-      { name: 'server_url', label: 'Server URL', type: 'text', placeholder: 'https://gotify.example.com', required: true },
-      { name: 'app_token', label: 'App Token', type: 'password', placeholder: 'Application token', required: true },
-      { name: 'priority', label: 'Priority (0-10)', type: 'number', placeholder: '5', defaultValue: 5, min: 0, max: 10 },
+      {
+        name: 'server_url',
+        label: 'Server URL',
+        type: 'text',
+        placeholder: 'https://gotify.example.com',
+        required: true,
+      },
+      {
+        name: 'app_token',
+        label: 'App Token',
+        type: 'password',
+        placeholder: 'Application token',
+        required: true,
+      },
+      {
+        name: 'priority',
+        label: 'Priority (0-10)',
+        type: 'number',
+        placeholder: '5',
+        defaultValue: 5,
+        min: 0,
+        max: 10,
+      },
+    ],
+  },
+  ntfy: {
+    fields: [
+      {
+        name: 'topic',
+        label: 'Topic',
+        type: 'text',
+        placeholder: 'my-alerts',
+        required: true,
+        helpText:
+          'Unique topic name. Subscribe to the same topic on ntfy.sh or your ntfy app.',
+      },
+      {
+        name: 'server_url',
+        label: 'Server URL',
+        type: 'text',
+        placeholder: 'https://ntfy.sh',
+        required: true,
+        defaultValue: 'https://ntfy.sh',
+      },
+      {
+        name: 'auth_token',
+        label: 'Auth Token (optional)',
+        type: 'password',
+        placeholder: 'tk_... (for protected topics)',
+      },
+      {
+        name: 'priority',
+        label: 'Priority (1-5)',
+        type: 'number',
+        placeholder: '3',
+        min: 1,
+        max: 5,
+      },
     ],
   },
   webhook: {
     fields: [
-      { name: 'url', label: 'Webhook URL', type: 'text', placeholder: 'https://api.example.com/webhook', required: true },
-      { name: 'method', label: 'Method', type: 'select', options: ['POST', 'GET'], defaultValue: 'POST' },
-      { name: 'auth_token', label: 'Auth Token (optional)', type: 'password', placeholder: 'Bearer token' },
+      {
+        name: 'url',
+        label: 'Webhook URL',
+        type: 'text',
+        placeholder: 'https://api.example.com/webhook',
+        required: true,
+      },
+      {
+        name: 'method',
+        label: 'Method',
+        type: 'select',
+        options: ['POST', 'GET'],
+        defaultValue: 'POST',
+      },
+      {
+        name: 'auth_token',
+        label: 'Auth Token (optional)',
+        type: 'password',
+        placeholder: 'Bearer token',
+      },
     ],
   },
 };
@@ -51,8 +166,22 @@ const CHANNEL_TYPES = [
   { value: 'discord', label: 'Discord' },
   { value: 'email', label: 'Email (SMTP)' },
   { value: 'gotify', label: 'Gotify' },
+  { value: 'ntfy', label: 'ntfy' },
   { value: 'webhook', label: 'Webhook' },
 ];
+
+// Hydrate field defaults into config state so required fields with defaults
+// (e.g., ntfy server_url, email smtp_port) pass validation without user interaction.
+const buildDefaultConfig = channelType => {
+  const typeConfig = CHANNEL_CONFIGS[channelType];
+  if (!typeConfig) return {};
+  return typeConfig.fields.reduce((acc, field) => {
+    if (field.defaultValue !== undefined) {
+      acc[field.name] = field.defaultValue;
+    }
+    return acc;
+  }, {});
+};
 
 /**
  * ChannelFormModal Component
@@ -64,7 +193,7 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
   const [formData, setFormData] = useState({
     name: '',
     channel_type: 'discord',
-    config: {},
+    config: buildDefaultConfig('discord'),
     is_enabled: true,
   });
   const [errors, setErrors] = useState({});
@@ -85,7 +214,7 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
       setFormData({
         name: '',
         channel_type: 'discord',
-        config: {},
+        config: buildDefaultConfig('discord'),
         is_enabled: true,
       });
     }
@@ -120,11 +249,11 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
 
   const handleChannelTypeChange = e => {
     const newType = e.target.value;
-    // Reset config when type changes, but keep name
+    // Reset config to the new type's defaults so required fields are pre-populated
     setFormData(prev => ({
       ...prev,
       channel_type: newType,
-      config: {},
+      config: buildDefaultConfig(newType),
     }));
     setErrors({});
   };
@@ -133,7 +262,10 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = t('channels.errors.nameRequired', 'Channel name is required');
+      newErrors.name = t(
+        'channels.errors.nameRequired',
+        'Channel name is required'
+      );
     }
 
     // Validate config fields based on channel type
@@ -144,8 +276,18 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
           const value = formData.config[field.name];
           if (!value || (typeof value === 'string' && !value.trim())) {
             // Don't require masked fields when editing
-            if (!(isEditing && field.type === 'password' && value?.includes('...'))) {
-              newErrors[`config.${field.name}`] = t('channels.errors.fieldRequired', '{{field}} is required', { field: field.label });
+            if (
+              !(
+                isEditing &&
+                field.type === 'password' &&
+                value?.includes('...')
+              )
+            ) {
+              newErrors[`config.${field.name}`] = t(
+                'channels.errors.fieldRequired',
+                '{{field}} is required',
+                { field: field.label }
+              );
             }
           }
         }
@@ -190,7 +332,10 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
             if (value && typeof value === 'string' && !value.includes('...')) {
               configToSave[field.name] = value;
               hasConfigChanges = true;
-            } else if (typeof value === 'boolean' || typeof value === 'number') {
+            } else if (
+              typeof value === 'boolean' ||
+              typeof value === 'number'
+            ) {
               configToSave[field.name] = value;
               hasConfigChanges = true;
             }
@@ -215,14 +360,21 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
     if (!typeConfig) return null;
 
     return typeConfig.fields.map(field => {
-      const value = formData.config[field.name] ?? field.defaultValue ?? (field.type === 'checkbox' ? false : '');
+      const value =
+        formData.config[field.name] ??
+        field.defaultValue ??
+        (field.type === 'checkbox' ? false : '');
       const error = errors[`config.${field.name}`];
 
       if (field.type === 'checkbox') {
         return (
           <div key={field.name} className="form-group form-group-checkbox">
             <label>
-              <input type="checkbox" checked={!!value} onChange={e => handleConfigChange(field.name, e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={!!value}
+                onChange={e => handleConfigChange(field.name, e.target.checked)}
+              />
               <span>{field.label}</span>
             </label>
           </div>
@@ -233,7 +385,10 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
         return (
           <div key={field.name} className="form-group">
             <label>{field.label}</label>
-            <select value={value || field.defaultValue || ''} onChange={e => handleConfigChange(field.name, e.target.value)}>
+            <select
+              value={value || field.defaultValue || ''}
+              onChange={e => handleConfigChange(field.name, e.target.value)}
+            >
               {field.options.map(opt => (
                 <option key={opt} value={opt}>
                   {opt}
@@ -246,7 +401,10 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
       }
 
       return (
-        <div key={field.name} className={`form-group ${error ? 'has-error' : ''}`}>
+        <div
+          key={field.name}
+          className={`form-group ${error ? 'has-error' : ''}`}
+        >
           <label>
             {field.label}
             {field.required && <span className="required">*</span>}
@@ -254,12 +412,21 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
           <input
             type={field.type}
             value={value}
-            onChange={e => handleConfigChange(field.name, field.type === 'number' ? parseInt(e.target.value, 10) || '' : e.target.value)}
+            onChange={e =>
+              handleConfigChange(
+                field.name,
+                field.type === 'number'
+                  ? parseInt(e.target.value, 10) || ''
+                  : e.target.value
+              )
+            }
             placeholder={field.placeholder}
             min={field.min}
             max={field.max}
           />
-          {field.helpText && <span className="field-help">{field.helpText}</span>}
+          {field.helpText && (
+            <span className="field-help">{field.helpText}</span>
+          )}
           {error && <span className="field-error">{error}</span>}
         </div>
       );
@@ -267,21 +434,42 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? t('channels.edit', 'Edit Channel') : t('channels.add', 'Add Channel')}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        isEditing
+          ? t('channels.edit', 'Edit Channel')
+          : t('channels.add', 'Add Channel')
+      }
+    >
       <form className="channel-form" onSubmit={handleSubmit}>
         <div className={`form-group ${errors.name ? 'has-error' : ''}`}>
           <label>
             {t('channels.fields.name', 'Channel Name')}
             <span className="required">*</span>
           </label>
-          <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder={t('channels.fields.namePlaceholder', 'My Discord Server')} />
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder={t(
+              'channels.fields.namePlaceholder',
+              'My Discord Server'
+            )}
+          />
           {errors.name && <span className="field-error">{errors.name}</span>}
         </div>
 
         {!isEditing && (
           <div className="form-group">
             <label>{t('channels.fields.type', 'Channel Type')}</label>
-            <select name="channel_type" value={formData.channel_type} onChange={handleChannelTypeChange}>
+            <select
+              name="channel_type"
+              value={formData.channel_type}
+              onChange={handleChannelTypeChange}
+            >
               {CHANNEL_TYPES.map(type => (
                 <option key={type.value} value={type.value}>
                   {type.label}
@@ -293,7 +481,12 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
 
         <div className="form-group form-group-checkbox">
           <label>
-            <input type="checkbox" name="is_enabled" checked={formData.is_enabled} onChange={handleInputChange} />
+            <input
+              type="checkbox"
+              name="is_enabled"
+              checked={formData.is_enabled}
+              onChange={handleInputChange}
+            />
             <span>{t('channels.fields.enabled', 'Enable this channel')}</span>
           </label>
         </div>
@@ -301,18 +494,34 @@ const ChannelFormModal = ({ isOpen, onClose, onSave, channel }) => {
         <div className="config-section">
           <h4>
             {t('channels.configTitle', '{{type}} Configuration', {
-              type: CHANNEL_TYPES.find(t => t.value === formData.channel_type)?.label || formData.channel_type,
+              type:
+                CHANNEL_TYPES.find(t => t.value === formData.channel_type)
+                  ?.label || formData.channel_type,
             })}
           </h4>
           {renderConfigFields()}
         </div>
 
         <div className="modal-actions">
-          <Button variant="secondary" type="button" onClick={onClose} disabled={saving}>
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+          >
             {t('shared:fields.cancel', 'Cancel')}
           </Button>
-          <Button variant="primary" type="submit" loading={saving} disabled={saving}>
-            {saving ? t('shared:labels.saving', 'Saving...') : isEditing ? t('common:buttons.save', 'Save') : t('common:buttons.create', 'Create')}
+          <Button
+            variant="primary"
+            type="submit"
+            loading={saving}
+            disabled={saving}
+          >
+            {saving
+              ? t('shared:labels.saving', 'Saving...')
+              : isEditing
+                ? t('common:buttons.save', 'Save')
+                : t('common:buttons.create', 'Create')}
           </Button>
         </div>
       </form>

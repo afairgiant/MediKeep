@@ -71,11 +71,7 @@ RelationshipErrorAlert.propTypes = {
 /**
  * Empty state display when no relationships exist.
  */
-export function RelationshipEmptyState({
-  message,
-  description,
-  isViewMode,
-}) {
+export function RelationshipEmptyState({ message, description, isViewMode }) {
   return (
     <Paper withBorder p="md" ta="center">
       <Text c="dimmed">{message}</Text>
@@ -99,16 +95,13 @@ RelationshipEmptyState.propTypes = {
  */
 export function RelationshipAddFooter({
   availableCount,
-  entityName,
-  entityNamePlural,
+  entityName: _entityName,
+  entityNamePlural: _entityNamePlural,
   buttonLabel,
   onAdd,
   loading,
 }) {
   const { t } = useTranslation(['common', 'shared']);
-  const plural = availableCount !== 1;
-  const displayName = plural ? (entityNamePlural || `${entityName}s`) : entityName;
-
   return (
     <Group justify="space-between" align="center">
       <Text size="sm" c="dimmed">
@@ -158,12 +151,7 @@ export function RelationshipRowActions({
         >
           <IconCheck size={14} />
         </ActionIcon>
-        <ActionIcon
-          variant="light"
-          color="gray"
-          size="sm"
-          onClick={onCancel}
-        >
+        <ActionIcon variant="light" color="gray" size="sm" onClick={onCancel}>
           <IconX size={14} />
         </ActionIcon>
       </Group>
@@ -172,12 +160,7 @@ export function RelationshipRowActions({
 
   return (
     <Group gap="xs">
-      <ActionIcon
-        variant="light"
-        color="blue"
-        size="sm"
-        onClick={onEdit}
-      >
+      <ActionIcon variant="light" color="blue" size="sm" onClick={onEdit}>
         <IconEdit size={14} />
       </ActionIcon>
       <ActionIcon
@@ -205,12 +188,7 @@ RelationshipRowActions.propTypes = {
 /**
  * Standard modal for adding relationships.
  */
-export function RelationshipAddModal({
-  opened,
-  onClose,
-  title,
-  children,
-}) {
+export function RelationshipAddModal({ opened, onClose, title, children }) {
   return (
     <Modal
       opened={opened}
@@ -220,9 +198,7 @@ export function RelationshipAddModal({
       centered
       zIndex={3000}
     >
-      <Stack gap="md">
-        {children}
-      </Stack>
+      <Stack gap="md">{children}</Stack>
     </Modal>
   );
 }
@@ -251,11 +227,7 @@ export function RelationshipModalFooter({
       <Button variant="light" onClick={onCancel}>
         {t('shared:fields.cancel', 'Cancel')}
       </Button>
-      <Button
-        onClick={onSubmit}
-        loading={loading}
-        disabled={disabled}
-      >
+      <Button onClick={onSubmit} loading={loading} disabled={disabled}>
         {submitLabel}
       </Button>
     </Group>

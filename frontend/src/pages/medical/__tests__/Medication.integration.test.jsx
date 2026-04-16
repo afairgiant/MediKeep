@@ -3,14 +3,18 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
 import { screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithPatient } from '../../../test-utils/render';
 import Medication from '../Medication';
 
 // --- Hoisted mock functions ---
-const { useMedicalData, useDataManagement, usePersistedViewMode, useViewModalNavigation } = vi.hoisted(() => ({
+const {
+  useMedicalData,
+  useDataManagement,
+  usePersistedViewMode,
+  useViewModalNavigation,
+} = vi.hoisted(() => ({
   useMedicalData: vi.fn(),
   useDataManagement: vi.fn(),
   usePersistedViewMode: vi.fn(),
@@ -23,8 +27,12 @@ vi.mock('../../../hooks/useDataManagement', () => ({
   useDataManagement,
   default: useDataManagement,
 }));
-vi.mock('../../../hooks/useViewModalNavigation', () => ({ useViewModalNavigation }));
-vi.mock('../../../hooks/usePersistedViewMode', () => ({ usePersistedViewMode }));
+vi.mock('../../../hooks/useViewModalNavigation', () => ({
+  useViewModalNavigation,
+}));
+vi.mock('../../../hooks/usePersistedViewMode', () => ({
+  usePersistedViewMode,
+}));
 vi.mock('../../../hooks/useEntityFileCounts', () => ({
   useEntityFileCounts: () => ({
     fileCounts: {},
@@ -37,22 +45,29 @@ vi.mock('../../../hooks/useResponsive', () => ({
 }));
 vi.mock('../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDate: (d) => d || '',
-    formatDateTime: (d) => d || '',
+    formatDate: d => d || '',
+    formatDateTime: d => d || '',
   }),
 }));
 vi.mock('../../../hooks/useGlobalData', () => ({
   usePatientWithStaticData: () => ({
-    practitioners: { practitioners: [
-      { id: 1, name: 'Dr. Smith', specialty: 'Family Medicine' },
-      { id: 2, name: 'Dr. Johnson', specialty: 'Endocrinology' },
-    ]},
-    pharmacies: { pharmacies: [
-      { id: 1, name: 'CVS Pharmacy - Main St' },
-      { id: 2, name: 'Walgreens - Downtown' },
-    ]},
+    practitioners: {
+      practitioners: [
+        { id: 1, name: 'Dr. Smith', specialty: 'Family Medicine' },
+        { id: 2, name: 'Dr. Johnson', specialty: 'Endocrinology' },
+      ],
+    },
+    pharmacies: {
+      pharmacies: [
+        { id: 1, name: 'CVS Pharmacy - Main St' },
+        { id: 2, name: 'Walgreens - Downtown' },
+      ],
+    },
   }),
-  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+  useCurrentPatient: () => ({
+    patient: { id: 1, owner_user_id: 1, permission_level: 'full' },
+    loading: false,
+  }),
 }));
 vi.mock('../../../hooks/usePatientPermissions', () => ({
   usePatientPermissions: () => ({
@@ -98,7 +113,7 @@ vi.mock('../../../utils/linkNavigation', () => ({
   navigateToEntity: vi.fn(),
 }));
 vi.mock('../../../utils/helpers', () => ({
-  createCardClickHandler: (handler, item) => (e) => {
+  createCardClickHandler: (handler, item) => e => {
     if (e.target.tagName === 'BUTTON') return;
     handler(item);
   },
@@ -110,7 +125,7 @@ vi.mock('../../../constants/medicationTypes', () => ({
 
 // --- HOC mock ---
 vi.mock('../../../hoc/withResponsive', () => ({
-  withResponsive: (Component) => Component,
+  withResponsive: Component => Component,
 }));
 
 // --- Component mocks ---
@@ -118,7 +133,7 @@ vi.mock('../../../components', () => ({
   PageHeader: ({ title }) => <div data-testid="page-header">{title}</div>,
 }));
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, viewMode, onViewModeChange }) => (
+  default: ({ primaryAction, viewMode: _viewMode, onViewModeChange }) => (
     <div data-testid="page-actions">
       {primaryAction && (
         <button onClick={primaryAction.onClick} data-testid="add-button">
@@ -127,8 +142,18 @@ vi.mock('../../../components/shared/MedicalPageActions', () => ({
       )}
       {onViewModeChange && (
         <>
-          <button onClick={() => onViewModeChange('cards')} data-testid="cards-btn">Cards</button>
-          <button onClick={() => onViewModeChange('table')} data-testid="table-btn">Table</button>
+          <button
+            onClick={() => onViewModeChange('cards')}
+            data-testid="cards-btn"
+          >
+            Cards
+          </button>
+          <button
+            onClick={() => onViewModeChange('table')}
+            data-testid="table-btn"
+          >
+            Table
+          </button>
         </>
       )}
     </div>
@@ -144,7 +169,9 @@ vi.mock('../../../components/shared/MedicalPageAlerts', () => ({
   default: ({ error, successMessage }) => (
     <div data-testid="alerts">
       {error && <span data-testid="error-alert">{error}</span>}
-      {successMessage && <span data-testid="success-alert">{successMessage}</span>}
+      {successMessage && (
+        <span data-testid="success-alert">{successMessage}</span>
+      )}
     </div>
   ),
 }));
@@ -159,7 +186,7 @@ vi.mock('../../../components/shared/EmptyState', () => ({
 vi.mock('../../../components/shared/AnimatedCardGrid', () => ({
   default: ({ items, renderCard }) => (
     <div data-testid="card-grid">
-      {items.map((item) => (
+      {items.map(item => (
         <div key={item.id} data-testid={`card-wrapper-${item.id}`}>
           {renderCard(item)}
         </div>
@@ -171,12 +198,18 @@ vi.mock('../../../components/adapters', () => ({
   ResponsiveTable: ({ data, columns, onView, onEdit, onDelete }) => (
     <table data-testid="responsive-table">
       <thead>
-        <tr>{columns.map((col) => <th key={col.accessor}>{col.header}</th>)}</tr>
+        <tr>
+          {columns.map(col => (
+            <th key={col.accessor}>{col.header}</th>
+          ))}
+        </tr>
       </thead>
       <tbody>
-        {data.map((row) => (
+        {data.map(row => (
           <tr key={row.id}>
-            {columns.map((col) => <td key={col.accessor}>{String(row[col.accessor] ?? '')}</td>)}
+            {columns.map(col => (
+              <td key={col.accessor}>{String(row[col.accessor] ?? '')}</td>
+            ))}
             <td>
               <button onClick={() => onView(row)}>View</button>
               <button onClick={() => onEdit(row)}>Edit</button>
@@ -203,7 +236,13 @@ vi.mock('../../../components/medical/medications', () => ({
       <button onClick={() => onDelete(medication.id)}>Delete</button>
     </div>
   ),
-  MedicationViewModal: ({ isOpen, onClose, medication, onEdit, conditions }) => {
+  MedicationViewModal: ({
+    isOpen,
+    onClose,
+    medication,
+    onEdit,
+    conditions,
+  }) => {
     if (!isOpen || !medication) return null;
     return (
       <div data-testid="view-modal" role="dialog">
@@ -213,43 +252,91 @@ vi.mock('../../../components/medical/medications', () => ({
         <span>{medication.frequency}</span>
         {medication.indication && <span>{medication.indication}</span>}
         {conditions !== undefined && (
-          <span data-testid="view-modal-conditions-count">{conditions.length}</span>
+          <span data-testid="view-modal-conditions-count">
+            {conditions.length}
+          </span>
         )}
         <button onClick={onClose}>Close</button>
         <button onClick={() => onEdit(medication)}>Edit</button>
       </div>
     );
   },
-  MedicationFormWrapper: ({ isOpen, onClose, title, formData, onInputChange, onSubmit, conditions, navigate }) => {
+  MedicationFormWrapper: ({
+    isOpen,
+    onClose,
+    title,
+    formData,
+    onInputChange,
+    onSubmit,
+    conditions,
+    navigate: _navigate,
+  }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="form-modal" role="dialog">
         <h2>{title}</h2>
         {conditions !== undefined && (
-          <span data-testid="form-modal-conditions-count">{conditions.length}</span>
+          <span data-testid="form-modal-conditions-count">
+            {conditions.length}
+          </span>
         )}
         <form onSubmit={onSubmit}>
           <label htmlFor="med-name">Medication Name *</label>
-          <input id="med-name" name="medication_name" value={formData.medication_name || ''} onChange={onInputChange} />
+          <input
+            id="med-name"
+            name="medication_name"
+            value={formData.medication_name || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="med-dosage">Dosage</label>
-          <input id="med-dosage" name="dosage" value={formData.dosage || ''} onChange={onInputChange} />
+          <input
+            id="med-dosage"
+            name="dosage"
+            value={formData.dosage || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="med-frequency">Frequency</label>
-          <input id="med-frequency" name="frequency" value={formData.frequency || ''} onChange={onInputChange} />
+          <input
+            id="med-frequency"
+            name="frequency"
+            value={formData.frequency || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="med-indication">Indication</label>
-          <input id="med-indication" name="indication" value={formData.indication || ''} onChange={onInputChange} />
+          <input
+            id="med-indication"
+            name="indication"
+            value={formData.indication || ''}
+            onChange={onInputChange}
+          />
 
           <label htmlFor="med-notes">Notes</label>
-          <textarea id="med-notes" name="notes" value={formData.notes || ''} onChange={onInputChange} />
+          <textarea
+            id="med-notes"
+            name="notes"
+            value={formData.notes || ''}
+            onChange={onInputChange}
+          />
 
-          <button type="button" data-testid="select-conditions" onClick={() => {
-            onInputChange({ target: { name: 'condition_ids', value: ['1', '2'] } });
-          }}>Select Conditions</button>
+          <button
+            type="button"
+            data-testid="select-conditions"
+            onClick={() => {
+              onInputChange({
+                target: { name: 'condition_ids', value: ['1', '2'] },
+              });
+            }}
+          >
+            Select Conditions
+          </button>
 
           <button type="submit">Submit</button>
-          <button type="button" onClick={onClose}>Cancel</button>
+          <button type="button" onClick={onClose}>
+            Cancel
+          </button>
         </form>
       </div>
     );
@@ -403,7 +490,9 @@ describe('Medication Page Integration Tests', () => {
 
       renderWithPatient(<Medication />);
 
-      expect(screen.getByTestId('error-alert')).toHaveTextContent('Failed to load medications');
+      expect(screen.getByTestId('error-alert')).toHaveTextContent(
+        'Failed to load medications'
+      );
     });
   });
 
@@ -439,10 +528,18 @@ describe('Medication Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Medication Name *'), { target: { value: 'Aspirin', name: 'medication_name' } });
-      fireEvent.change(within(form).getByLabelText('Dosage'), { target: { value: '81mg', name: 'dosage' } });
-      fireEvent.change(within(form).getByLabelText('Frequency'), { target: { value: 'Daily', name: 'frequency' } });
-      fireEvent.change(within(form).getByLabelText('Indication'), { target: { value: 'Blood thinner', name: 'indication' } });
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Aspirin', name: 'medication_name' },
+      });
+      fireEvent.change(within(form).getByLabelText('Dosage'), {
+        target: { value: '81mg', name: 'dosage' },
+      });
+      fireEvent.change(within(form).getByLabelText('Frequency'), {
+        target: { value: 'Daily', name: 'frequency' },
+      });
+      fireEvent.change(within(form).getByLabelText('Indication'), {
+        target: { value: 'Blood thinner', name: 'indication' },
+      });
 
       fireEvent.click(within(form).getByText('Submit'));
 
@@ -477,11 +574,15 @@ describe('Medication Page Integration Tests', () => {
       await userEvent.click(editButton);
 
       const form = screen.getByTestId('form-modal');
-      expect(within(form).getByLabelText('Medication Name *')).toHaveValue('Lisinopril');
+      expect(within(form).getByLabelText('Medication Name *')).toHaveValue(
+        'Lisinopril'
+      );
       expect(within(form).getByLabelText('Dosage')).toHaveValue('10mg');
 
       // Modify dosage
-      fireEvent.change(within(form).getByLabelText('Dosage'), { target: { value: '20mg', name: 'dosage' } });
+      fireEvent.change(within(form).getByLabelText('Dosage'), {
+        target: { value: '20mg', name: 'dosage' },
+      });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
@@ -534,7 +635,9 @@ describe('Medication Page Integration Tests', () => {
     test('searches medications by name', async () => {
       useDataManagement.mockReturnValue({
         ...mockDataManagement,
-        data: mockMedications.filter(m => m.medication_name.toLowerCase().includes('lisinopril')),
+        data: mockMedications.filter(m =>
+          m.medication_name.toLowerCase().includes('lisinopril')
+        ),
         hasActiveFilters: true,
       });
 
@@ -565,7 +668,9 @@ describe('Medication Page Integration Tests', () => {
       expect(within(modal).getByText('Lisinopril')).toBeInTheDocument();
       expect(within(modal).getByText('10mg')).toBeInTheDocument();
       expect(within(modal).getByText('Daily')).toBeInTheDocument();
-      expect(within(modal).getByText('High blood pressure')).toBeInTheDocument();
+      expect(
+        within(modal).getByText('High blood pressure')
+      ).toBeInTheDocument();
     });
   });
 
@@ -620,7 +725,9 @@ describe('Medication Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Medication Name *'), { target: { value: 'Test Med', name: 'medication_name' } });
+      fireEvent.change(within(form).getByLabelText('Medication Name *'), {
+        target: { value: 'Test Med', name: 'medication_name' },
+      });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
@@ -638,7 +745,9 @@ describe('Medication Page Integration Tests', () => {
 
       renderWithPatient(<Medication />);
 
-      expect(screen.getByTestId('success-alert')).toHaveTextContent('Medication created successfully');
+      expect(screen.getByTestId('success-alert')).toHaveTextContent(
+        'Medication created successfully'
+      );
     });
   });
 
@@ -712,7 +821,9 @@ describe('Medication Page Integration Tests', () => {
       await userEvent.click(editButton);
 
       const form = screen.getByTestId('form-modal');
-      expect(within(form).getByLabelText('Notes')).toHaveValue('Take with food');
+      expect(within(form).getByLabelText('Notes')).toHaveValue(
+        'Take with food'
+      );
     });
 
     test('notes display in view modal', async () => {
@@ -765,7 +876,9 @@ describe('Medication Page Integration Tests', () => {
       await userEvent.click(addButton);
 
       await waitFor(() => {
-        const conditionsCount = screen.getByTestId('form-modal-conditions-count');
+        const conditionsCount = screen.getByTestId(
+          'form-modal-conditions-count'
+        );
         expect(conditionsCount).toHaveTextContent('2');
       });
     });
@@ -789,14 +902,18 @@ describe('Medication Page Integration Tests', () => {
       renderWithPatient(<Medication />);
 
       await waitFor(() => {
-        const conditionsCount = screen.getByTestId('view-modal-conditions-count');
+        const conditionsCount = screen.getByTestId(
+          'view-modal-conditions-count'
+        );
         expect(conditionsCount).toHaveTextContent('3');
       });
     });
 
     test('passes empty conditions array when getConditionsDropdown fails', async () => {
       const { apiService } = await import('../../../services/api');
-      apiService.getConditionsDropdown.mockRejectedValue(new Error('Network error'));
+      apiService.getConditionsDropdown.mockRejectedValue(
+        new Error('Network error')
+      );
 
       useViewModalNavigation.mockReturnValue({
         isOpen: true,
@@ -809,14 +926,16 @@ describe('Medication Page Integration Tests', () => {
 
       await waitFor(() => {
         // Modal should still render with empty conditions list
-        const conditionsCount = screen.getByTestId('view-modal-conditions-count');
+        const conditionsCount = screen.getByTestId(
+          'view-modal-conditions-count'
+        );
         expect(conditionsCount).toHaveTextContent('0');
       });
     });
 
     test('conditions array starts empty and is populated after fetch', async () => {
       let resolveConditions;
-      const conditionsPromise = new Promise((resolve) => {
+      const conditionsPromise = new Promise(resolve => {
         resolveConditions = resolve;
       });
 
@@ -834,14 +953,18 @@ describe('Medication Page Integration Tests', () => {
 
       // Initially conditions should be empty
       await waitFor(() => {
-        expect(screen.getByTestId('view-modal-conditions-count')).toHaveTextContent('0');
+        expect(
+          screen.getByTestId('view-modal-conditions-count')
+        ).toHaveTextContent('0');
       });
 
       // Resolve with conditions
       resolveConditions([{ id: 1, diagnosis: 'Hypertension' }]);
 
       await waitFor(() => {
-        expect(screen.getByTestId('view-modal-conditions-count')).toHaveTextContent('1');
+        expect(
+          screen.getByTestId('view-modal-conditions-count')
+        ).toHaveTextContent('1');
       });
     });
 
@@ -876,8 +999,12 @@ describe('Medication Page Integration Tests', () => {
 
       await waitFor(() => {
         expect(apiService.createConditionMedication).toHaveBeenCalledTimes(2);
-        expect(apiService.createConditionMedication).toHaveBeenCalledWith(1, { medication_id: 10 });
-        expect(apiService.createConditionMedication).toHaveBeenCalledWith(2, { medication_id: 10 });
+        expect(apiService.createConditionMedication).toHaveBeenCalledWith(1, {
+          medication_id: 10,
+        });
+        expect(apiService.createConditionMedication).toHaveBeenCalledWith(2, {
+          medication_id: 10,
+        });
       });
     });
 

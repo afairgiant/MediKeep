@@ -52,7 +52,13 @@ export const medicationsPageConfig = {
         const bIsActive = b.status === 'active';
         // Active medications first (desc) or last (asc)
         if (aIsActive !== bIsActive) {
-          return sortOrder === 'asc' ? (aIsActive ? 1 : -1) : (aIsActive ? -1 : 1);
+          return sortOrder === 'asc'
+            ? aIsActive
+              ? 1
+              : -1
+            : aIsActive
+              ? -1
+              : 1;
         }
         // Always sub-sort alphabetically A-Z within each status group
         return a.medication_name.localeCompare(b.medication_name);

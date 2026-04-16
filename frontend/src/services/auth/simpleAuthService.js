@@ -7,18 +7,15 @@ import logger from '../logger';
 import { env } from '../../config/env';
 import { isAdminRole } from '../../utils/authUtils';
 
-
 class SimpleAuthService {
   constructor() {
     // Try to use the proxy first, fallback to direct backend
-    this.baseURL =
-      env.DEV
-        ? '/api/v1' // Use proxy in development
-        : '/api/v1'; // Use relative path in production
-    this.directBackendURL =
-      env.PROD
-        ? '/api/v1'
-        : 'http://localhost:8000/api/v1'; // Fallback for development
+    this.baseURL = env.DEV
+      ? '/api/v1' // Use proxy in development
+      : '/api/v1'; // Use relative path in production
+    this.directBackendURL = env.PROD
+      ? '/api/v1'
+      : 'http://localhost:8000/api/v1'; // Fallback for development
     this.tokenKey = 'token';
     this.userKey = 'user';
   } // Make API request with fallback
@@ -33,11 +30,11 @@ class SimpleAuthService {
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       try {
-        logger.info(`Attempting request ${i + 1}/${urls.length}`, { 
-          url, 
-          attempt: i + 1, 
+        logger.info(`Attempting request ${i + 1}/${urls.length}`, {
+          url,
+          attempt: i + 1,
           totalUrls: urls.length,
-          category: 'auth_connection'
+          category: 'auth_connection',
         });
 
         // Create timeout promise - longer for SSO operations
@@ -54,7 +51,7 @@ class SimpleAuthService {
           url,
           status: response.status,
           statusText: response.statusText,
-          category: 'auth_connection'
+          category: 'auth_connection',
         });
 
         // Return response regardless of status (let caller handle HTTP errors)
@@ -63,7 +60,7 @@ class SimpleAuthService {
         logger.warn(`Failed to connect to ${url}`, {
           url,
           error: error.message,
-          category: 'auth_connection_failure'
+          category: 'auth_connection_failure',
         });
         lastError = error;
 
@@ -72,7 +69,7 @@ class SimpleAuthService {
           logger.info(`Trying next URL in fallback sequence`, {
             failedUrl: url,
             nextAttempt: i + 2,
-            category: 'auth_connection'
+            category: 'auth_connection',
           });
           continue;
         }
@@ -103,7 +100,7 @@ class SimpleAuthService {
     } catch (error) {
       logger.error('Error parsing JWT token', {
         error: error.message,
-        category: 'auth_token_parse_error'
+        category: 'auth_token_parse_error',
       });
       return null;
     }
@@ -113,7 +110,7 @@ class SimpleAuthService {
     try {
       logger.info('Attempting user login', {
         username: credentials.username,
-        category: 'auth_login_attempt'
+        category: 'auth_login_attempt',
       });
 
       const formData = new URLSearchParams();
@@ -131,7 +128,7 @@ class SimpleAuthService {
       logger.info('Login response received', {
         status: response.status,
         statusText: response.statusText,
-        category: 'auth_login_response'
+        category: 'auth_login_response',
       });
 
       if (!response.ok) {
@@ -139,7 +136,7 @@ class SimpleAuthService {
         logger.error('Login failed', {
           status: response.status,
           errorData,
-          category: 'auth_login_failure'
+          category: 'auth_login_failure',
         });
         return {
           success: false,
@@ -151,7 +148,7 @@ class SimpleAuthService {
       logger.info('Login successful', {
         hasToken: !!data.access_token,
         tokenType: data.token_type,
-        category: 'auth_login_success'
+        category: 'auth_login_success',
       });
 
       if (!data.access_token) {
@@ -168,7 +165,7 @@ class SimpleAuthService {
         username: payload?.sub,
         role: payload?.role,
         hasExpiry: !!payload?.exp,
-        category: 'auth_token_info'
+        category: 'auth_token_info',
       });
 
       const user = {
@@ -191,7 +188,7 @@ class SimpleAuthService {
       logger.error('Login error occurred', {
         error: error.message,
         errorType: error.constructor.name,
-        category: 'auth_login_error'
+        category: 'auth_login_error',
       });
       return {
         success: false,
@@ -205,7 +202,7 @@ class SimpleAuthService {
         username: userData.username,
         role: userData.role || 'user',
         hasEmail: !!userData.email,
-        category: 'auth_registration_attempt'
+        category: 'auth_registration_attempt',
       });
 
       const registrationData = {
@@ -224,7 +221,7 @@ class SimpleAuthService {
         status: response.status,
         statusText: response.statusText,
         username: userData.username,
-        category: 'auth_registration_attempt'
+        category: 'auth_registration_attempt',
       });
 
       if (!response.ok) {
@@ -233,7 +230,7 @@ class SimpleAuthService {
           status: response.status,
           errorData,
           username: userData.username,
-          category: 'auth_registration_failure'
+          category: 'auth_registration_failure',
         });
         return {
           success: false,
@@ -245,7 +242,7 @@ class SimpleAuthService {
       logger.info('Registration successful', {
         username: userData.username,
         userId: data?.id || data?.user_id,
-        category: 'auth_registration_success'
+        category: 'auth_registration_success',
       });
 
       return {
@@ -257,7 +254,7 @@ class SimpleAuthService {
         error: error.message,
         errorType: error.constructor.name,
         username: userData.username,
-        category: 'auth_registration_failure'
+        category: 'auth_registration_failure',
       });
       return {
         success: false,
@@ -283,7 +280,7 @@ class SimpleAuthService {
       logger.error('Error fetching current user from backend', {
         error: error.message,
         errorType: error.constructor.name,
-        category: 'auth_user_fetch_error'
+        category: 'auth_user_fetch_error',
       });
       return null;
     }
@@ -292,7 +289,7 @@ class SimpleAuthService {
   // Refresh token (not implemented for this simple auth system)
   async refreshToken() {
     logger.warn('Token refresh not implemented for simple auth system', {
-      category: 'auth_refresh_token'
+      category: 'auth_refresh_token',
     });
     return { success: false, error: 'Token refresh not supported' };
   }
@@ -309,14 +306,14 @@ class SimpleAuthService {
       } catch (error) {
         logger.warn('Backend logout request failed', {
           error: error.message,
-          category: 'auth_logout'
+          category: 'auth_logout',
         });
       }
     } catch (error) {
       logger.error('Error during logout process', {
         error: error.message,
         errorType: error.constructor.name,
-        category: 'auth_logout'
+        category: 'auth_logout',
       });
     }
   }
@@ -336,7 +333,7 @@ class SimpleAuthService {
       if (!response.ok) {
         logger.error('Failed to check registration status', {
           status: response.status,
-          category: 'auth_registration_check'
+          category: 'auth_registration_check',
         });
         // Default to disabled if check fails (safe default -- don't expose registration UI on error)
         return { registration_enabled: false };
@@ -345,13 +342,13 @@ class SimpleAuthService {
       const data = await response.json();
       logger.info('Registration status checked', {
         enabled: data.registration_enabled,
-        category: 'auth_registration_check'
+        category: 'auth_registration_check',
       });
       return data;
     } catch (error) {
       logger.error('Error checking registration status', {
         error: error.message,
-        category: 'auth_registration_check'
+        category: 'auth_registration_check',
       });
       // Default to disabled if check fails (safe default -- don't expose registration UI on error)
       return { registration_enabled: false };
@@ -364,7 +361,7 @@ class SimpleAuthService {
   async getSSOConfig() {
     try {
       logger.info('Checking SSO configuration', {
-        category: 'sso_config_check'
+        category: 'sso_config_check',
       });
 
       const response = await this.makeRequest('/auth/sso/config', {
@@ -375,7 +372,7 @@ class SimpleAuthService {
       if (!response.ok) {
         logger.warn('Failed to get SSO config', {
           status: response.status,
-          category: 'sso_config_check'
+          category: 'sso_config_check',
         });
         return { enabled: false };
       }
@@ -385,13 +382,13 @@ class SimpleAuthService {
         enabled: data.enabled,
         provider: data.provider_type,
         registration_enabled: data.registration_enabled,
-        category: 'sso_config_check'
+        category: 'sso_config_check',
       });
       return data;
     } catch (error) {
       logger.error('Error checking SSO config', {
         error: error.message,
-        category: 'sso_config_check'
+        category: 'sso_config_check',
       });
       return { enabled: false };
     }
@@ -402,7 +399,7 @@ class SimpleAuthService {
     try {
       logger.info('Initiating SSO login', {
         returnUrl,
-        category: 'sso_initiate'
+        category: 'sso_initiate',
       });
 
       const params = new URLSearchParams();
@@ -421,23 +418,25 @@ class SimpleAuthService {
         logger.error('Failed to initiate SSO', {
           status: response.status,
           errorData,
-          category: 'sso_initiate'
+          category: 'sso_initiate',
         });
-        throw new Error(errorData.detail || 'Failed to start SSO authentication');
+        throw new Error(
+          errorData.detail || 'Failed to start SSO authentication'
+        );
       }
 
       const data = await response.json();
       logger.info('SSO initiation successful', {
         provider: data.provider,
         hasAuthUrl: !!data.auth_url,
-        category: 'sso_initiate'
+        category: 'sso_initiate',
       });
 
       return data;
     } catch (error) {
       logger.error('SSO initiation error', {
         error: error.message,
-        category: 'sso_initiate'
+        category: 'sso_initiate',
       });
       throw error;
     }
@@ -449,7 +448,7 @@ class SimpleAuthService {
       logger.info('Completing SSO authentication', {
         hasCode: !!code,
         hasState: !!state,
-        category: 'sso_callback'
+        category: 'sso_callback',
       });
 
       // Send OAuth code and state in POST body for security (not URL)
@@ -458,8 +457,8 @@ class SimpleAuthService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: code,
-          state: state
-        })
+          state: state,
+        }),
       });
 
       if (!response.ok) {
@@ -467,51 +466,53 @@ class SimpleAuthService {
         logger.error('SSO callback failed', {
           status: response.status,
           errorData,
-          category: 'sso_callback'
+          category: 'sso_callback',
         });
-        
+
         // Handle specific SSO errors
         if (errorData.error_code === 'REGISTRATION_DISABLED') {
           throw new Error(errorData.message || 'Registration is disabled');
         }
-        
+
         throw new Error(errorData.message || 'SSO authentication failed');
       }
 
       const data = await response.json();
-      
+
       // Check if this is a conflict response
       if (data.conflict) {
         logger.info('SSO conflict detected', {
           hasExistingUser: !!data.existing_user_info,
           hasSSOUser: !!data.sso_user_info,
-          category: 'sso_callback'
+          category: 'sso_callback',
         });
-        
+
         return {
           success: true,
           conflict: true,
           existing_user_info: data.existing_user_info,
           sso_user_info: data.sso_user_info,
-          temp_token: data.temp_token
+          temp_token: data.temp_token,
         };
       }
-      
+
       logger.info('SSO authentication successful', {
         isNewUser: data.is_new_user,
         authMethod: data.user?.auth_method,
-        category: 'sso_callback'
+        category: 'sso_callback',
       });
 
-      const enrichedUser = data.user ? {
-        id: data.user.id,
-        username: data.user.username,
-        email: data.user.email,
-        fullName: data.user.full_name,
-        role: data.user.role,
-        authMethod: data.user.auth_method,
-        isAdmin: isAdminRole(data.user.role),
-      } : null;
+      const enrichedUser = data.user
+        ? {
+            id: data.user.id,
+            username: data.user.username,
+            email: data.user.email,
+            fullName: data.user.full_name,
+            role: data.user.role,
+            authMethod: data.user.auth_method,
+            isAdmin: isAdminRole(data.user.role),
+          }
+        : null;
 
       return {
         success: true,
@@ -522,7 +523,7 @@ class SimpleAuthService {
     } catch (error) {
       logger.error('SSO callback error', {
         error: error.message,
-        category: 'sso_callback'
+        category: 'sso_callback',
       });
       return {
         success: false,
@@ -535,7 +536,7 @@ class SimpleAuthService {
   async testSSOConnection() {
     try {
       logger.info('Testing SSO connection', {
-        category: 'sso_test'
+        category: 'sso_test',
       });
 
       const response = await this.makeRequest('/auth/sso/test-connection', {
@@ -546,7 +547,7 @@ class SimpleAuthService {
       if (!response.ok) {
         logger.error('SSO connection test failed', {
           status: response.status,
-          category: 'sso_test'
+          category: 'sso_test',
         });
         return { success: false, message: 'Connection test failed' };
       }
@@ -554,13 +555,13 @@ class SimpleAuthService {
       const data = await response.json();
       logger.info('SSO connection test result', {
         success: data.success,
-        category: 'sso_test'
+        category: 'sso_test',
       });
       return data;
     } catch (error) {
       logger.error('SSO connection test error', {
         error: error.message,
-        category: 'sso_test'
+        category: 'sso_test',
       });
       return { success: false, message: error.message };
     }
@@ -572,7 +573,7 @@ class SimpleAuthService {
       logger.info('Resolving SSO account conflict', {
         action,
         preference,
-        category: 'sso_conflict'
+        category: 'sso_conflict',
       });
 
       const response = await this.makeRequest('/auth/sso/resolve-conflict', {
@@ -583,7 +584,7 @@ class SimpleAuthService {
         body: JSON.stringify({
           temp_token: tempToken,
           action: action,
-          preference: preference
+          preference: preference,
         }),
       });
 
@@ -592,21 +593,24 @@ class SimpleAuthService {
         logger.error('SSO conflict resolution failed', {
           status: response.status,
           error: errorData,
-          category: 'sso_conflict'
+          category: 'sso_conflict',
         });
-        
-        return { 
-          success: false, 
-          error: errorData.detail?.message || errorData.detail || 'Failed to resolve account conflict' 
+
+        return {
+          success: false,
+          error:
+            errorData.detail?.message ||
+            errorData.detail ||
+            'Failed to resolve account conflict',
         };
       }
 
       const data = await response.json();
-      
+
       logger.info('SSO conflict resolved successfully', {
         hasToken: !!data.access_token,
         hasUser: !!data.user,
-        category: 'sso_conflict'
+        category: 'sso_conflict',
       });
 
       // Prepare the result in the expected format
@@ -615,16 +619,15 @@ class SimpleAuthService {
         user: {
           ...data.user,
           // Ensure isAdmin property is set based on role
-          isAdmin: isAdminRole(data.user.role)
+          isAdmin: isAdminRole(data.user.role),
         },
         token: data.access_token,
-        isNewUser: data.is_new_user
+        isNewUser: data.is_new_user,
       };
-
     } catch (error) {
       logger.error('SSO conflict resolution error', {
         error: error.message,
-        category: 'sso_conflict'
+        category: 'sso_conflict',
       });
       return { success: false, error: error.message };
     }

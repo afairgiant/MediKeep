@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal as MantineModal } from '@mantine/core';
 
 export const Modal = ({
@@ -12,7 +11,6 @@ export const Modal = ({
   className = '',
   ...props
 }) => {
-
   // Map sizes to Mantine sizes
   const sizeMap = {
     small: 'sm',

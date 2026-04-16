@@ -2,9 +2,12 @@ import { describe, test, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MantineProvider } from '@mantine/core';
 import { IconHeart } from '@tabler/icons-react';
-import HealthItem, { getHealthColor, HEALTH_STATUS_COLORS } from '../HealthItem';
+import HealthItem, {
+  getHealthColor,
+  HEALTH_STATUS_COLORS,
+} from '../HealthItem';
 
-const renderHealthItem = (props) => {
+const renderHealthItem = props => {
   return render(
     <MantineProvider>
       <HealthItem {...props} />
@@ -56,9 +59,14 @@ describe('getHealthColor', () => {
 describe('HEALTH_STATUS_COLORS', () => {
   test('contains all expected keys', () => {
     const expectedKeys = [
-      'healthy', 'ok', 'operational',
-      'warning', 'slow',
-      'error', 'unhealthy', 'failed',
+      'healthy',
+      'ok',
+      'operational',
+      'warning',
+      'slow',
+      'error',
+      'unhealthy',
+      'failed',
       'info',
     ];
     expectedKeys.forEach(key => {
@@ -104,6 +112,8 @@ describe('HealthItem', () => {
     });
 
     expect(screen.getByText('Health')).toBeInTheDocument();
-    expect(document.querySelector('.mantine-ThemeIcon-root')).toBeInTheDocument();
+    expect(
+      document.querySelector('.mantine-ThemeIcon-root')
+    ).toBeInTheDocument();
   });
 });

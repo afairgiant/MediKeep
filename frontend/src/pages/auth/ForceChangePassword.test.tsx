@@ -1,5 +1,4 @@
 import { vi } from 'vitest';
-import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import ForceChangePassword from './ForceChangePassword';
 import render from '../../test-utils/render';
@@ -43,13 +42,27 @@ describe('ForceChangePassword', () => {
     render(<ForceChangePassword />, { authContextValue: authContext });
 
   // Helper: fill all three fields and submit the form
-  const fillAndSubmit = (currentPwd: string, newPwd: string, confirmPwd: string) => {
-    const currentInput = document.getElementById('currentPassword') as HTMLInputElement;
+  const fillAndSubmit = (
+    currentPwd: string,
+    newPwd: string,
+    confirmPwd: string
+  ) => {
+    const currentInput = document.getElementById(
+      'currentPassword'
+    ) as HTMLInputElement;
     const newInput = document.getElementById('newPassword') as HTMLInputElement;
-    const confirmInput = document.getElementById('confirmPassword') as HTMLInputElement;
-    fireEvent.change(currentInput, { target: { value: currentPwd, name: 'currentPassword' } });
-    fireEvent.change(newInput, { target: { value: newPwd, name: 'newPassword' } });
-    fireEvent.change(confirmInput, { target: { value: confirmPwd, name: 'confirmPassword' } });
+    const confirmInput = document.getElementById(
+      'confirmPassword'
+    ) as HTMLInputElement;
+    fireEvent.change(currentInput, {
+      target: { value: currentPwd, name: 'currentPassword' },
+    });
+    fireEvent.change(newInput, {
+      target: { value: newPwd, name: 'newPassword' },
+    });
+    fireEvent.change(confirmInput, {
+      target: { value: confirmPwd, name: 'confirmPassword' },
+    });
     fireEvent.submit(document.querySelector('form')!);
   };
 
@@ -78,13 +91,19 @@ describe('ForceChangePassword', () => {
     test('renders within login-container layout', () => {
       renderComponent();
       // CSS Modules hash class names, so check for partial class match
-      expect(document.querySelector('[class*="loginContainer"]')).toBeInTheDocument();
-      expect(document.querySelector('[class*="loginForm"]')).toBeInTheDocument();
+      expect(
+        document.querySelector('[class*="loginContainer"]')
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector('[class*="loginForm"]')
+      ).toBeInTheDocument();
     });
 
     test('renders a submit button', () => {
       renderComponent();
-      expect(document.querySelector('button[type="submit"]')).toBeInTheDocument();
+      expect(
+        document.querySelector('button[type="submit"]')
+      ).toBeInTheDocument();
     });
   });
 
@@ -161,7 +180,9 @@ describe('ForceChangePassword', () => {
       fillAndSubmit('oldpass1', 'newpass123', 'newpass123');
       await waitFor(() => {
         expect(mockClearMustChangePassword).toHaveBeenCalled();
-        expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
+        expect(mockNavigate).toHaveBeenCalledWith('/dashboard', {
+          replace: true,
+        });
       });
     });
 
@@ -180,7 +201,9 @@ describe('ForceChangePassword', () => {
 
   describe('Failed Password Change', () => {
     test('shows changeFailed error when API rejects', async () => {
-      vi.mocked(apiService.changePassword).mockRejectedValue(new Error('Network error'));
+      vi.mocked(apiService.changePassword).mockRejectedValue(
+        new Error('Network error')
+      );
       renderComponent();
       fillAndSubmit('oldpass1', 'newpass123', 'newpass123');
       await waitFor(() => {
@@ -193,7 +216,9 @@ describe('ForceChangePassword', () => {
     });
 
     test('logs error with component context and error message', async () => {
-      vi.mocked(apiService.changePassword).mockRejectedValue(new Error('API error'));
+      vi.mocked(apiService.changePassword).mockRejectedValue(
+        new Error('API error')
+      );
       renderComponent();
       fillAndSubmit('oldpass1', 'newpass123', 'newpass123');
       await waitFor(() => {
@@ -208,7 +233,9 @@ describe('ForceChangePassword', () => {
     });
 
     test('does not navigate or clear flag when API fails', async () => {
-      vi.mocked(apiService.changePassword).mockRejectedValue(new Error('API error'));
+      vi.mocked(apiService.changePassword).mockRejectedValue(
+        new Error('API error')
+      );
       renderComponent();
       fillAndSubmit('oldpass1', 'newpass123', 'newpass123');
       await waitFor(() => {

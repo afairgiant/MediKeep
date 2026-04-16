@@ -8,14 +8,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 // Override global i18n mock so t(key) returns the key, enabling key-based assertions
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key) => key,
+    t: key => key,
     i18n: { language: 'en', changeLanguage: vi.fn() },
   }),
   Trans: ({ i18nKey, children }) => i18nKey || children,
@@ -54,7 +53,10 @@ vi.mock('../../../services/api/symptomApi', () => ({
 
 vi.mock('../../../hooks/useGlobalData', () => ({
   usePatientWithStaticData: () => stablePatientData,
-  useCurrentPatient: () => ({ patient: { id: 1, owner_user_id: 1, permission_level: 'full' }, loading: false }),
+  useCurrentPatient: () => ({
+    patient: { id: 1, owner_user_id: 1, permission_level: 'full' },
+    loading: false,
+  }),
 }));
 vi.mock('../../../hooks/usePatientPermissions', () => ({
   usePatientPermissions: () => ({
@@ -78,7 +80,7 @@ vi.mock('../../../hooks/useViewModalNavigation', () => ({
 }));
 
 vi.mock('../../../hooks/useDateFormat', () => ({
-  useDateFormat: () => ({ formatDate: (d) => d || '' }),
+  useDateFormat: () => ({ formatDate: d => d || '' }),
 }));
 
 vi.mock('../../../services/logger', () => ({
@@ -104,30 +106,38 @@ vi.mock('@mantine/core', () => ({
     ({ children }) => <div data-testid="mantine-tabs">{children}</div>,
     {
       List: ({ children }) => <div>{children}</div>,
-      Tab: ({ children, value }) => <button data-value={value}>{children}</button>,
+      Tab: ({ children, value }) => (
+        <button data-value={value}>{children}</button>
+      ),
       Panel: ({ children }) => <div>{children}</div>,
     }
   ),
   Badge: ({ children }) => <span>{children}</span>,
   Button: ({ children, onClick, disabled, leftSection }) => (
-    <button onClick={onClick} disabled={disabled}>{leftSection}{children}</button>
+    <button onClick={onClick} disabled={disabled}>
+      {leftSection}
+      {children}
+    </button>
   ),
   Group: ({ children }) => <div>{children}</div>,
   createTheme: () => ({}),
-  useMantineColorScheme: () => ({ colorScheme: 'light', setColorScheme: vi.fn() }),
+  useMantineColorScheme: () => ({
+    colorScheme: 'light',
+    setColorScheme: vi.fn(),
+  }),
 }));
 
 // Mock @tabler/icons-react
 vi.mock('@tabler/icons-react', () => ({
-  IconStethoscope: (props) => <span data-testid="icon-stethoscope" {...props} />,
-  IconPlus: (props) => <span data-testid="icon-plus" {...props} />,
-  IconTrash: (props) => <span data-testid="icon-trash" {...props} />,
-  IconTimeline: (props) => <span data-testid="icon-timeline" {...props} />,
-  IconCalendar: (props) => <span data-testid="icon-calendar" {...props} />,
-  IconList: (props) => <span data-testid="icon-list" {...props} />,
-  IconEye: (props) => <span data-testid="icon-eye" {...props} />,
-  IconNote: (props) => <span data-testid="icon-note" {...props} />,
-  IconEdit: (props) => <span data-testid="icon-edit" {...props} />,
+  IconStethoscope: props => <span data-testid="icon-stethoscope" {...props} />,
+  IconPlus: props => <span data-testid="icon-plus" {...props} />,
+  IconTrash: props => <span data-testid="icon-trash" {...props} />,
+  IconTimeline: props => <span data-testid="icon-timeline" {...props} />,
+  IconCalendar: props => <span data-testid="icon-calendar" {...props} />,
+  IconList: props => <span data-testid="icon-list" {...props} />,
+  IconEye: props => <span data-testid="icon-eye" {...props} />,
+  IconNote: props => <span data-testid="icon-note" {...props} />,
+  IconEdit: props => <span data-testid="icon-edit" {...props} />,
 }));
 
 // Mock sub-components with simple HTML
@@ -139,7 +149,9 @@ vi.mock('../../../components/medical/MantineSymptomForm', () => ({
         <h2>{title}</h2>
         <form onSubmit={onSubmit}>
           <button type="submit">{submitButtonText}</button>
-          <button type="button" onClick={onClose}>buttons.cancel</button>
+          <button type="button" onClick={onClose}>
+            buttons.cancel
+          </button>
         </form>
       </div>
     );
@@ -154,7 +166,9 @@ vi.mock('../../../components/medical/MantineSymptomOccurrenceForm', () => ({
         <h2>{title}</h2>
         <form onSubmit={onSubmit}>
           <button type="submit">{submitButtonText}</button>
-          <button type="button" onClick={onClose}>buttons.cancel</button>
+          <button type="button" onClick={onClose}>
+            buttons.cancel
+          </button>
         </form>
       </div>
     );
@@ -182,7 +196,9 @@ vi.mock('../../../components/shared/MedicalPageAlerts', () => ({
   default: ({ error, successMessage }) => (
     <div data-testid="alerts">
       {error && <span data-testid="error-text">{error}</span>}
-      {successMessage && <span data-testid="success-text">{successMessage}</span>}
+      {successMessage && (
+        <span data-testid="success-text">{successMessage}</span>
+      )}
     </div>
   ),
 }));
@@ -244,12 +260,16 @@ describe('Symptoms Page - Translations', () => {
   describe('Page Headers', () => {
     it('should display page title with correct i18n key', async () => {
       await renderAndWait();
-      expect(screen.getByTestId('page-header')).toHaveTextContent('symptoms.title');
+      expect(screen.getByTestId('page-header')).toHaveTextContent(
+        'symptoms.title'
+      );
     });
 
     it('should display add symptom button with correct i18n key', async () => {
       await renderAndWait();
-      expect(screen.getByTestId('add-symptom-btn')).toHaveTextContent('symptoms.addSymptom');
+      expect(screen.getByTestId('add-symptom-btn')).toHaveTextContent(
+        'symptoms.addSymptom'
+      );
     });
 
     it('should render page title without errors', async () => {
@@ -344,7 +364,9 @@ describe('Symptoms Page - Translations', () => {
       expect(screen.getByTestId('symptom-form-modal')).toBeInTheDocument();
 
       await user.click(screen.getByText('buttons.cancel'));
-      expect(screen.queryByTestId('symptom-form-modal')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('symptom-form-modal')
+      ).not.toBeInTheDocument();
     });
   });
 

@@ -131,7 +131,7 @@ const MedicationRelationships = ({
   };
 
   // Resolve the condition ID used for API calls depending on direction
-  const getRelConditionId = (relationship) =>
+  const getRelConditionId = relationship =>
     isMedicationDirection ? relationship.condition_id : conditionId;
 
   // === Condition direction: sync relationships from parent cache ===
@@ -144,7 +144,8 @@ const MedicationRelationships = ({
   // === Condition direction: fetch if cache is empty ===
   useEffect(() => {
     if (!isMedicationDirection && conditionId && fetchConditionMedications) {
-      const hasExistingData = conditionMedications && conditionMedications[conditionId];
+      const hasExistingData =
+        conditionMedications && conditionMedications[conditionId];
       if (!hasExistingData) {
         fetchConditionMedications(conditionId).catch(err => {
           logger.error('Failed to fetch condition medications:', err);
@@ -160,19 +161,25 @@ const MedicationRelationships = ({
     setError(null);
 
     try {
-      const rels = (await apiService.getMedicationConditions(medicationId)) || [];
+      const rels =
+        (await apiService.getMedicationConditions(medicationId)) || [];
       setRelationships(rels);
 
       // Fetch condition details for relationships missing condition data
-      const missingConditions = rels.filter(rel => !rel.condition && rel.condition_id);
+      const missingConditions = rels.filter(
+        rel => !rel.condition && rel.condition_id
+      );
       if (missingConditions.length > 0) {
         const conditionResults = await Promise.all(
           missingConditions.map(rel =>
             apiService.getCondition(rel.condition_id).catch(() => {
-              logger.warn('Condition not found - may be deleted or orphaned relationship', {
-                component: 'MedicationRelationships',
-                conditionId: rel.condition_id,
-              });
+              logger.warn(
+                'Condition not found - may be deleted or orphaned relationship',
+                {
+                  component: 'MedicationRelationships',
+                  conditionId: rel.condition_id,
+                }
+              );
               return null;
             })
           )
@@ -192,7 +199,11 @@ const MedicationRelationships = ({
         medicationId,
         error: err.message,
       });
-      setError(err.response?.data?.detail || err.message || t('errors:relationships.fetchFailed'));
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          t('errors:relationships.fetchFailed')
+      );
       setRelationships([]);
     } finally {
       setLoading(false);
@@ -246,7 +257,11 @@ const MedicationRelationships = ({
       resetAndCloseModal();
     } catch (err) {
       logger.error('Error adding relationship:', err);
-      setError(err.response?.data?.detail || err.message || t('errors:relationships.addFailed', 'Failed to add relationship'));
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          t('errors:relationships.addFailed', 'Failed to add relationship')
+      );
     } finally {
       setLoading(false);
     }
@@ -257,18 +272,29 @@ const MedicationRelationships = ({
     setError(null);
 
     try {
-      await apiService.updateConditionMedication(getRelConditionId(relationship), relationship.id, updates);
+      await apiService.updateConditionMedication(
+        getRelConditionId(relationship),
+        relationship.id,
+        updates
+      );
       await refreshRelationships();
       setEditingRelationship(null);
     } catch (err) {
       logger.error('Error updating relationship:', err);
-      setError(err.response?.data?.detail || err.message || t('errors:relationships.updateFailed', 'Failed to update relationship'));
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          t(
+            'errors:relationships.updateFailed',
+            'Failed to update relationship'
+          )
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteRelationship = async (relationship) => {
+  const handleDeleteRelationship = async relationship => {
     if (!window.confirm(t(config.confirmRemove))) {
       return;
     }
@@ -277,11 +303,21 @@ const MedicationRelationships = ({
     setError(null);
 
     try {
-      await apiService.deleteConditionMedication(getRelConditionId(relationship), relationship.id);
+      await apiService.deleteConditionMedication(
+        getRelConditionId(relationship),
+        relationship.id
+      );
       await refreshRelationships();
     } catch (err) {
       logger.error('Error deleting relationship:', err);
-      setError(err.response?.data?.detail || err.message || t('errors:relationships.deleteFailed', 'Failed to delete relationship'));
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          t(
+            'errors:relationships.deleteFailed',
+            'Failed to delete relationship'
+          )
+      );
     } finally {
       setLoading(false);
     }
@@ -294,11 +330,17 @@ const MedicationRelationships = ({
       return (
         <Textarea
           placeholder={t('modals.relevanceNoteOptional')}
-          value={editingRelationship?.relevance_note || relationship.relevance_note || ''}
-          onChange={(e) => setEditingRelationship({
-            ...editingRelationship,
-            relevance_note: e.target.value
-          })}
+          value={
+            editingRelationship?.relevance_note ||
+            relationship.relevance_note ||
+            ''
+          }
+          onChange={e =>
+            setEditingRelationship({
+              ...editingRelationship,
+              relevance_note: e.target.value,
+            })
+          }
           size="sm"
           autosize
           minRows={2}
@@ -325,9 +367,10 @@ const MedicationRelationships = ({
     return null;
   };
 
-  const renderConditionDirectionItem = (relationship) => {
-    const medication = relationship.medication
-      || medications.find(m => m.id === relationship.medication_id);
+  const renderConditionDirectionItem = relationship => {
+    const medication =
+      relationship.medication ||
+      medications.find(m => m.id === relationship.medication_id);
 
     return (
       <Group gap="sm">
@@ -337,9 +380,12 @@ const MedicationRelationships = ({
             fw={500}
             c="blue"
             style={{ cursor: 'pointer', textDecoration: 'underline' }}
-            onClick={() => navigateToEntity('medication', medication?.id, navigate)}
+            onClick={() =>
+              navigateToEntity('medication', medication?.id, navigate)
+            }
           >
-            {medication?.medication_name || `Medication ID: ${relationship.medication_id}`}
+            {medication?.medication_name ||
+              `Medication ID: ${relationship.medication_id}`}
           </Text>
         ) : (
           <Badge
@@ -347,9 +393,12 @@ const MedicationRelationships = ({
             color="teal"
             leftSection={<IconPill size={12} />}
             style={{ cursor: 'pointer' }}
-            onClick={() => navigateToEntity('medication', medication?.id, navigate)}
+            onClick={() =>
+              navigateToEntity('medication', medication?.id, navigate)
+            }
           >
-            {medication?.medication_name || `Medication ID: ${relationship.medication_id}`}
+            {medication?.medication_name ||
+              `Medication ID: ${relationship.medication_id}`}
           </Badge>
         )}
         {medication?.dosage && (
@@ -371,9 +420,13 @@ const MedicationRelationships = ({
     );
   };
 
-  const renderMedicationDirectionItem = (relationship) => {
-    const condition = relationship.condition || conditionsCache[relationship.condition_id];
-    const conditionName = condition?.diagnosis || condition?.condition_name || `Deleted Condition (ID: ${relationship.condition_id})`;
+  const renderMedicationDirectionItem = relationship => {
+    const condition =
+      relationship.condition || conditionsCache[relationship.condition_id];
+    const conditionName =
+      condition?.diagnosis ||
+      condition?.condition_name ||
+      `Deleted Condition (ID: ${relationship.condition_id})`;
     const isOrphaned = !condition;
 
     return (
@@ -382,23 +435,39 @@ const MedicationRelationships = ({
           size="sm"
           fw={500}
           c={isOrphaned ? 'red' : 'blue'}
-          style={isOrphaned ? { fontStyle: 'italic' } : { cursor: 'pointer', textDecoration: 'underline' }}
-          onClick={isOrphaned ? undefined : () => {
-            const condId = condition?.id || relationship.condition_id;
-            if (condId && navigate) {
-              navigateToEntity('condition', condId, navigate);
-            }
-          }}
+          style={
+            isOrphaned
+              ? { fontStyle: 'italic' }
+              : { cursor: 'pointer', textDecoration: 'underline' }
+          }
+          onClick={
+            isOrphaned
+              ? undefined
+              : () => {
+                  const condId = condition?.id || relationship.condition_id;
+                  if (condId && navigate) {
+                    navigateToEntity('condition', condId, navigate);
+                  }
+                }
+          }
         >
           {conditionName}
         </Text>
         {condition?.status && (
-          <Badge variant="outline" size="sm" color={getStatusColor(condition.status)}>
+          <Badge
+            variant="outline"
+            size="sm"
+            color={getStatusColor(condition.status)}
+          >
             {condition.status}
           </Badge>
         )}
         {condition?.severity && (
-          <Badge variant="outline" size="sm" color={getSeverityColor(condition.severity)}>
+          <Badge
+            variant="outline"
+            size="sm"
+            color={getSeverityColor(condition.severity)}
+          >
             {condition.severity}
           </Badge>
         )}
@@ -412,7 +481,9 @@ const MedicationRelationships = ({
   let selectedIds = [];
 
   if (isMedicationDirection) {
-    const linkedConditionIds = relationships.map(rel => String(rel.condition_id));
+    const linkedConditionIds = relationships.map(rel =>
+      String(rel.condition_id)
+    );
     availableOptions = conditions
       .filter(c => !linkedConditionIds.includes(String(c.id)))
       .map(c => ({
@@ -425,7 +496,9 @@ const MedicationRelationships = ({
       value: medication.id.toString(),
       label: `${medication.medication_name}${medication.dosage ? ` (${medication.dosage})` : ''}${medication.status ? ` - ${medication.status}` : ''}`,
     }));
-    const linkedMedicationIds = relationships.map(rel => rel.medication_id.toString());
+    const linkedMedicationIds = relationships.map(rel =>
+      rel.medication_id.toString()
+    );
     availableOptions = medicationOptions.filter(
       option => !linkedMedicationIds.includes(option.value)
     );
@@ -434,7 +507,11 @@ const MedicationRelationships = ({
 
   // === Loading state for medication direction ===
   if (isMedicationDirection && loading && relationships.length === 0) {
-    return <Text size="sm" c="dimmed">{t('labels.loadingRelatedConditions')}</Text>;
+    return (
+      <Text size="sm" c="dimmed">
+        {t('labels.loadingRelatedConditions')}
+      </Text>
+    );
   }
 
   return (
@@ -457,8 +534,7 @@ const MedicationRelationships = ({
                   <Stack gap="xs" style={{ flex: 1 }}>
                     {isMedicationDirection
                       ? renderMedicationDirectionItem(relationship)
-                      : renderConditionDirectionItem(relationship)
-                    }
+                      : renderConditionDirectionItem(relationship)}
                     {renderRelevanceNote(relationship, isEditing)}
                   </Stack>
 
@@ -470,9 +546,13 @@ const MedicationRelationships = ({
                             variant="light"
                             color="green"
                             size="sm"
-                            onClick={() => handleEditRelationship(relationship, {
-                              relevance_note: editingRelationship?.relevance_note || relationship.relevance_note
-                            })}
+                            onClick={() =>
+                              handleEditRelationship(relationship, {
+                                relevance_note:
+                                  editingRelationship?.relevance_note ||
+                                  relationship.relevance_note,
+                              })
+                            }
                             loading={loading}
                           >
                             <IconCheck size={14} />
@@ -492,10 +572,13 @@ const MedicationRelationships = ({
                             variant="light"
                             color="blue"
                             size="sm"
-                            onClick={() => setEditingRelationship({
-                              id: relationship.id,
-                              relevance_note: relationship.relevance_note || ''
-                            })}
+                            onClick={() =>
+                              setEditingRelationship({
+                                id: relationship.id,
+                                relevance_note:
+                                  relationship.relevance_note || '',
+                              })
+                            }
                           >
                             <IconEdit size={14} />
                           </ActionIcon>
@@ -503,7 +586,9 @@ const MedicationRelationships = ({
                             variant="light"
                             color="red"
                             size="sm"
-                            onClick={() => handleDeleteRelationship(relationship)}
+                            onClick={() =>
+                              handleDeleteRelationship(relationship)
+                            }
                             loading={loading}
                           >
                             <IconTrash size={14} />
@@ -555,8 +640,11 @@ const MedicationRelationships = ({
             placeholder={t(config.selectPlaceholder)}
             data={availableOptions}
             value={selectedIds}
-            onChange={(values) => {
-              setNewRelationship(prev => ({ ...prev, [config.idsField]: values }));
+            onChange={values => {
+              setNewRelationship(prev => ({
+                ...prev,
+                [config.idsField]: values,
+              }));
             }}
             searchable
             clearable
@@ -568,10 +656,12 @@ const MedicationRelationships = ({
             label={t('modals.relevanceNote')}
             placeholder={t(config.relevancePlaceholder)}
             value={newRelationship.relevance_note}
-            onChange={(e) => setNewRelationship(prev => ({
-              ...prev,
-              relevance_note: e.target.value
-            }))}
+            onChange={e =>
+              setNewRelationship(prev => ({
+                ...prev,
+                relevance_note: e.target.value,
+              }))
+            }
             autosize
             minRows={3}
           />

@@ -3,8 +3,13 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 import Dashboard from './Dashboard';
@@ -27,14 +32,14 @@ vi.mock('../hooks/useGlobalData', () => ({
   })),
 }));
 vi.mock('../components/medical', () => ({
-  PatientSelector: ({ onPatientChange, currentPatientId }) => (
+  PatientSelector: ({ onPatientChange: _onPatientChange, currentPatientId }) => (
     <div data-testid="patient-selector">
       <span data-testid="current-patient-id">{currentPatientId}</span>
     </div>
   ),
 }));
 vi.mock('../components/common', () => ({
-  GlobalSearch: ({ patientId, placeholder }) => (
+  GlobalSearch: ({ patientId: _patientId, placeholder }) => (
     <input data-testid="global-search" placeholder={placeholder} />
   ),
 }));
@@ -144,7 +149,7 @@ describe('Dashboard Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorageMock.clear();
-    
+
     // Default API mocks
     apiService.getRecentActivity.mockResolvedValue([]);
     apiService.getDashboardStats.mockResolvedValue({
@@ -153,7 +158,7 @@ describe('Dashboard Component', () => {
       total_lab_results: 8,
       total_procedures: 3,
     });
-    
+
     // Mock JWT token for admin check
     localStorageMock.getItem.mockImplementation(key => {
       if (key === 'token') {
@@ -174,10 +179,16 @@ describe('Dashboard Component', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('page-header')).toBeInTheDocument();
-        expect(screen.getByTestId('header-title')).toHaveTextContent('MediKeep');
+        expect(screen.getByTestId('header-title')).toHaveTextContent(
+          'MediKeep'
+        );
         expect(screen.getByTestId('header-icon')).toBeInTheDocument();
-        expect(screen.getByTestId('header-variant')).toHaveTextContent('dashboard');
-        expect(screen.getByTestId('show-back-button')).toHaveTextContent('false');
+        expect(screen.getByTestId('header-variant')).toHaveTextContent(
+          'dashboard'
+        );
+        expect(screen.getByTestId('show-back-button')).toHaveTextContent(
+          'false'
+        );
       });
     });
 
@@ -188,7 +199,9 @@ describe('Dashboard Component', () => {
 
       await waitFor(() => {
         expect(screen.getByText(/medikeep dashboard/i)).toBeInTheDocument();
-        expect(screen.getByText(/manage your health information securely/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/manage your health information securely/i)
+        ).toBeInTheDocument();
         expect(screen.getByText(/hello/i)).toBeInTheDocument();
       });
     });
@@ -216,8 +229,12 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Core Medical Information')).toBeInTheDocument();
-        expect(screen.getByText('Treatments and Procedures')).toBeInTheDocument();
+        expect(
+          screen.getByText('Core Medical Information')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Treatments and Procedures')
+        ).toBeInTheDocument();
         expect(screen.getByText('Health Monitoring')).toBeInTheDocument();
         expect(screen.getByText('Prevention & History')).toBeInTheDocument();
         expect(screen.getByText('Additional Resources')).toBeInTheDocument();
@@ -243,33 +260,45 @@ describe('Dashboard Component', () => {
         loading: true,
       });
       // Keep activity loading to prevent initialLoadComplete from becoming true
-      apiService.getRecentActivity.mockImplementation(() => new Promise(() => {}));
+      apiService.getRecentActivity.mockImplementation(
+        () => new Promise(() => {})
+      );
 
       await act(async () => {
         renderDashboard();
       });
 
-      expect(screen.getByText('Loading your medical dashboard...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Loading your medical dashboard...')
+      ).toBeInTheDocument();
     });
 
     it('shows loading screen when activity is loading', async () => {
-      apiService.getRecentActivity.mockImplementation(() => new Promise(() => {}));
+      apiService.getRecentActivity.mockImplementation(
+        () => new Promise(() => {})
+      );
 
       await act(async () => {
         renderDashboard();
       });
 
-      expect(screen.getByText('Loading your medical dashboard...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Loading your medical dashboard...')
+      ).toBeInTheDocument();
     });
 
     it('shows loading screen when stats are loading', async () => {
-      apiService.getDashboardStats.mockImplementation(() => new Promise(() => {}));
+      apiService.getDashboardStats.mockImplementation(
+        () => new Promise(() => {})
+      );
 
       await act(async () => {
         renderDashboard();
       });
 
-      expect(screen.getByText('Loading your medical dashboard...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Loading your medical dashboard...')
+      ).toBeInTheDocument();
     });
   });
 
@@ -330,7 +359,7 @@ describe('Dashboard Component', () => {
           })
         );
       });
-      
+
       // Should display fallback stats - there are multiple 0s so check for presence
       await waitFor(() => {
         expect(screen.getAllByText('0')).toHaveLength(4); // Four stat cards with 0
@@ -355,7 +384,9 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Added new medication: Aspirin')).toBeInTheDocument();
+        expect(
+          screen.getByText('Added new medication: Aspirin')
+        ).toBeInTheDocument();
         expect(screen.getByText('Updated lab results')).toBeInTheDocument();
       });
     });
@@ -426,9 +457,12 @@ describe('Dashboard Component', () => {
         renderDashboard(adminAuthContext);
       });
 
-      await waitFor(() => {
-        expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
     });
 
     it('does not show admin dashboard for regular users', async () => {
@@ -472,9 +506,14 @@ describe('Dashboard Component', () => {
         renderDashboard(mockAuthContext);
       });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('profile-completion-modal')).toBeInTheDocument();
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByTestId('profile-completion-modal')
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('does not show profile modal for returning users', async () => {
@@ -488,7 +527,9 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByTestId('profile-completion-modal')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('profile-completion-modal')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -503,22 +544,31 @@ describe('Dashboard Component', () => {
         renderDashboard(mockAuthContext);
       });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('profile-completion-modal')).toBeInTheDocument();
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByTestId('profile-completion-modal')
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
 
       const closeButton = screen.getByText('Close');
       fireEvent.click(closeButton);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('profile-completion-modal')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('profile-completion-modal')
+        ).not.toBeInTheDocument();
       });
     });
   });
 
   describe('Welcome Box', () => {
     it('can be dismissed and persists dismissal in localStorage', async () => {
-      const mockAuthContext = createMockAuthContext({ user: { id: 123, username: 'testuser' } });
+      const mockAuthContext = createMockAuthContext({
+        user: { id: 123, username: 'testuser' },
+      });
 
       await act(async () => {
         renderDashboard(mockAuthContext);
@@ -532,13 +582,20 @@ describe('Dashboard Component', () => {
       fireEvent.click(closeButton);
 
       await waitFor(() => {
-        expect(screen.queryByText(/medikeep dashboard/i)).not.toBeInTheDocument();
-        expect(localStorageMock.setItem).toHaveBeenCalledWith('welcomeBox_dismissed_123', 'true');
+        expect(
+          screen.queryByText(/medikeep dashboard/i)
+        ).not.toBeInTheDocument();
+        expect(localStorageMock.setItem).toHaveBeenCalledWith(
+          'welcomeBox_dismissed_123',
+          'true'
+        );
       });
     });
 
     it('respects previously dismissed state from localStorage', async () => {
-      const mockAuthContext = createMockAuthContext({ user: { id: 123, username: 'testuser' } });
+      const mockAuthContext = createMockAuthContext({
+        user: { id: 123, username: 'testuser' },
+      });
       localStorageMock.getItem.mockImplementation(key => {
         if (key === 'welcomeBox_dismissed_123') return 'true';
         return null;
@@ -549,7 +606,9 @@ describe('Dashboard Component', () => {
       });
 
       await waitFor(() => {
-        expect(screen.queryByText(/medikeep dashboard/i)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/medikeep dashboard/i)
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -606,11 +665,14 @@ describe('Dashboard Component', () => {
         renderDashboard();
       });
 
-      await waitFor(() => {
-        expect(screen.getByText('Patient Information')).toBeInTheDocument();
-        expect(screen.getByText('Medications')).toBeInTheDocument();
-        expect(screen.getAllByText('Lab Results')).toHaveLength(2); // One in stats, one in modules
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Patient Information')).toBeInTheDocument();
+          expect(screen.getByText('Medications')).toBeInTheDocument();
+          expect(screen.getAllByText('Lab Results')).toHaveLength(2); // One in stats, one in modules
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('renders all treatment modules', async () => {
@@ -618,10 +680,13 @@ describe('Dashboard Component', () => {
         renderDashboard();
       });
 
-      await waitFor(() => {
-        expect(screen.getByText('Treatments')).toBeInTheDocument();
-        expect(screen.getAllByText('Procedures')).toHaveLength(2); // One in stats, one in modules
-      }, { timeout: 2000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Treatments')).toBeInTheDocument();
+          expect(screen.getAllByText('Procedures')).toHaveLength(2); // One in stats, one in modules
+        },
+        { timeout: 2000 }
+      );
     });
 
     it('renders all monitoring modules', async () => {

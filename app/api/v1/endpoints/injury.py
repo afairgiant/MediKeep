@@ -3,6 +3,7 @@ API endpoints for Injury entity and its relationships.
 
 Injury represents a physical injury record for a patient.
 """
+
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -61,6 +62,7 @@ logger = get_logger(__name__, "app")
 # Main Injury CRUD endpoints
 # =====================================================
 
+
 @router.post("/", response_model=InjuryWithRelations)
 def create_injury(
     *,
@@ -97,10 +99,14 @@ def read_injuries(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    status: Optional[str] = Query(None, description="Filter by status (active/healing/resolved/chronic)"),
+    status: Optional[str] = Query(
+        None, description="Filter by status (active/healing/resolved/chronic)"
+    ),
     injury_type_id: Optional[int] = Query(None, description="Filter by injury type"),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -119,7 +125,7 @@ def read_injuries(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
         elif status:
             injuries = injury.get_by_status(
@@ -141,7 +147,7 @@ def read_injuries(
             "read",
             "Injury",
             patient_id=target_patient_id,
-            count=len(injuries)
+            count=len(injuries),
         )
 
         return injuries
@@ -161,7 +167,13 @@ def read_injury(
     with handle_database_errors(request=request):
         injury_obj = injury.get_with_relations(db=db, record_id=injury_id)
         handle_not_found(injury_obj, "Injury")
-        verify_patient_ownership(injury_obj, current_user_patient_id, "injury", db=db, current_user=current_user)
+        verify_patient_ownership(
+            injury_obj,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -170,7 +182,7 @@ def read_injury(
             "read",
             "Injury",
             record_id=injury_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return injury_obj
@@ -232,7 +244,10 @@ def delete_injury(
 # Injury-Medication relationship endpoints
 # =====================================================
 
-@router.get("/{injury_id}/medications", response_model=List[InjuryMedicationWithDetails])
+
+@router.get(
+    "/{injury_id}/medications", response_model=List[InjuryMedicationWithDetails]
+)
 def get_injury_medications(
     *,
     injury_id: int,
@@ -247,7 +262,13 @@ def get_injury_medications(
         # Verify injury exists and belongs to user
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+        )
 
         relationships = injury_medication.get_by_injury(db, injury_id=injury_id)
 
@@ -255,24 +276,36 @@ def get_injury_medications(
         enhanced = []
         for rel in relationships:
             med = medication_crud.get(db, id=rel.medication_id)
-            enhanced.append({
-                "id": rel.id,
-                "injury_id": rel.injury_id,
-                "medication_id": rel.medication_id,
-                "relevance_note": rel.relevance_note,
-                "created_at": rel.created_at,
-                "updated_at": rel.updated_at,
-                "medication": {
-                    "id": med.id,
-                    "medication_name": med.medication_name,
-                    "dosage": med.dosage,
-                    "status": med.status,
-                } if med else None
-            })
+            enhanced.append(
+                {
+                    "id": rel.id,
+                    "injury_id": rel.injury_id,
+                    "medication_id": rel.medication_id,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "medication": (
+                        {
+                            "id": med.id,
+                            "medication_name": med.medication_name,
+                            "dosage": med.dosage,
+                            "status": med.status,
+                        }
+                        if med
+                        else None
+                    ),
+                }
+            )
 
         log_data_access(
-            logger, request, current_user_id, "read", "InjuryMedication",
-            record_id=injury_id, patient_id=current_user_patient_id, count=len(relationships)
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "InjuryMedication",
+            record_id=injury_id,
+            patient_id=current_user_patient_id,
+            count=len(relationships),
         )
 
         return enhanced
@@ -294,7 +327,14 @@ def create_injury_medication(
         # Verify injury exists and belongs to user
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Verify medication exists and belongs to same patient
         db_medication = medication_crud.get(db, id=medication_in.medication_id)
@@ -302,7 +342,7 @@ def create_injury_medication(
         if db_medication.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link medication that belongs to a different patient",
-                request=request
+                request=request,
             )
 
         # Check if relationship already exists
@@ -312,16 +352,22 @@ def create_injury_medication(
         if existing:
             raise BusinessLogicException(
                 message="This medication is already linked to this injury",
-                request=request
+                request=request,
             )
 
         medication_in.injury_id = injury_id
         relationship = injury_medication.create(db, obj_in=medication_in)
 
         log_data_access(
-            logger, request, current_user_id, "create", "InjuryMedication",
-            record_id=relationship.id, patient_id=current_user_patient_id,
-            injury_id=injury_id, medication_id=medication_in.medication_id
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "InjuryMedication",
+            record_id=relationship.id,
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            medication_id=medication_in.medication_id,
         )
 
         return relationship
@@ -343,7 +389,14 @@ def delete_injury_medication(
         # Verify injury exists and belongs to user
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         success = injury_medication.delete_by_injury_and_medication(
             db, injury_id=injury_id, medication_id=medication_id
@@ -352,12 +405,18 @@ def delete_injury_medication(
             raise NotFoundException(
                 resource="InjuryMedication",
                 message="Medication relationship not found",
-                request=request
+                request=request,
             )
 
         log_data_access(
-            logger, request, current_user_id, "delete", "InjuryMedication",
-            patient_id=current_user_patient_id, injury_id=injury_id, medication_id=medication_id
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "InjuryMedication",
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            medication_id=medication_id,
         )
 
         return {"message": "Medication unlinked from injury"}
@@ -366,6 +425,7 @@ def delete_injury_medication(
 # =====================================================
 # Injury-Condition relationship endpoints
 # =====================================================
+
 
 @router.get("/{injury_id}/conditions", response_model=List[InjuryConditionWithDetails])
 def get_injury_conditions(
@@ -381,31 +441,49 @@ def get_injury_conditions(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+        )
 
         relationships = injury_condition.get_by_injury(db, injury_id=injury_id)
 
         enhanced = []
         for rel in relationships:
             cond = condition_crud.get(db, id=rel.condition_id)
-            enhanced.append({
-                "id": rel.id,
-                "injury_id": rel.injury_id,
-                "condition_id": rel.condition_id,
-                "relevance_note": rel.relevance_note,
-                "created_at": rel.created_at,
-                "updated_at": rel.updated_at,
-                "condition": {
-                    "id": cond.id,
-                    "diagnosis": cond.diagnosis,
-                    "status": cond.status,
-                    "severity": cond.severity,
-                } if cond else None
-            })
+            enhanced.append(
+                {
+                    "id": rel.id,
+                    "injury_id": rel.injury_id,
+                    "condition_id": rel.condition_id,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "condition": (
+                        {
+                            "id": cond.id,
+                            "diagnosis": cond.diagnosis,
+                            "status": cond.status,
+                            "severity": cond.severity,
+                        }
+                        if cond
+                        else None
+                    ),
+                }
+            )
 
         log_data_access(
-            logger, request, current_user_id, "read", "InjuryCondition",
-            record_id=injury_id, patient_id=current_user_patient_id, count=len(relationships)
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "InjuryCondition",
+            record_id=injury_id,
+            patient_id=current_user_patient_id,
+            count=len(relationships),
         )
 
         return enhanced
@@ -426,14 +504,21 @@ def create_injury_condition(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         db_condition = condition_crud.get(db, id=condition_in.condition_id)
         handle_not_found(db_condition, "Condition")
         if db_condition.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link condition that belongs to a different patient",
-                request=request
+                request=request,
             )
 
         existing = injury_condition.get_by_injury_and_condition(
@@ -442,16 +527,22 @@ def create_injury_condition(
         if existing:
             raise BusinessLogicException(
                 message="This condition is already linked to this injury",
-                request=request
+                request=request,
             )
 
         condition_in.injury_id = injury_id
         relationship = injury_condition.create(db, obj_in=condition_in)
 
         log_data_access(
-            logger, request, current_user_id, "create", "InjuryCondition",
-            record_id=relationship.id, patient_id=current_user_patient_id,
-            injury_id=injury_id, condition_id=condition_in.condition_id
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "InjuryCondition",
+            record_id=relationship.id,
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            condition_id=condition_in.condition_id,
         )
 
         return relationship
@@ -472,7 +563,14 @@ def delete_injury_condition(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         success = injury_condition.delete_by_injury_and_condition(
             db, injury_id=injury_id, condition_id=condition_id
@@ -481,12 +579,18 @@ def delete_injury_condition(
             raise NotFoundException(
                 resource="InjuryCondition",
                 message="Condition relationship not found",
-                request=request
+                request=request,
             )
 
         log_data_access(
-            logger, request, current_user_id, "delete", "InjuryCondition",
-            patient_id=current_user_patient_id, injury_id=injury_id, condition_id=condition_id
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "InjuryCondition",
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            condition_id=condition_id,
         )
 
         return {"message": "Condition unlinked from injury"}
@@ -495,6 +599,7 @@ def delete_injury_condition(
 # =====================================================
 # Injury-Treatment relationship endpoints
 # =====================================================
+
 
 @router.get("/{injury_id}/treatments", response_model=List[InjuryTreatmentWithDetails])
 def get_injury_treatments(
@@ -510,30 +615,48 @@ def get_injury_treatments(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+        )
 
         relationships = injury_treatment.get_by_injury(db, injury_id=injury_id)
 
         enhanced = []
         for rel in relationships:
             treat = treatment_crud.get(db, id=rel.treatment_id)
-            enhanced.append({
-                "id": rel.id,
-                "injury_id": rel.injury_id,
-                "treatment_id": rel.treatment_id,
-                "relevance_note": rel.relevance_note,
-                "created_at": rel.created_at,
-                "updated_at": rel.updated_at,
-                "treatment": {
-                    "id": treat.id,
-                    "treatment_name": treat.treatment_name,
-                    "status": treat.status,
-                } if treat else None
-            })
+            enhanced.append(
+                {
+                    "id": rel.id,
+                    "injury_id": rel.injury_id,
+                    "treatment_id": rel.treatment_id,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "treatment": (
+                        {
+                            "id": treat.id,
+                            "treatment_name": treat.treatment_name,
+                            "status": treat.status,
+                        }
+                        if treat
+                        else None
+                    ),
+                }
+            )
 
         log_data_access(
-            logger, request, current_user_id, "read", "InjuryTreatment",
-            record_id=injury_id, patient_id=current_user_patient_id, count=len(relationships)
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "InjuryTreatment",
+            record_id=injury_id,
+            patient_id=current_user_patient_id,
+            count=len(relationships),
         )
 
         return enhanced
@@ -554,14 +677,21 @@ def create_injury_treatment(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         db_treatment = treatment_crud.get(db, id=treatment_in.treatment_id)
         handle_not_found(db_treatment, "Treatment")
         if db_treatment.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link treatment that belongs to a different patient",
-                request=request
+                request=request,
             )
 
         existing = injury_treatment.get_by_injury_and_treatment(
@@ -570,16 +700,22 @@ def create_injury_treatment(
         if existing:
             raise BusinessLogicException(
                 message="This treatment is already linked to this injury",
-                request=request
+                request=request,
             )
 
         treatment_in.injury_id = injury_id
         relationship = injury_treatment.create(db, obj_in=treatment_in)
 
         log_data_access(
-            logger, request, current_user_id, "create", "InjuryTreatment",
-            record_id=relationship.id, patient_id=current_user_patient_id,
-            injury_id=injury_id, treatment_id=treatment_in.treatment_id
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "InjuryTreatment",
+            record_id=relationship.id,
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            treatment_id=treatment_in.treatment_id,
         )
 
         return relationship
@@ -600,7 +736,14 @@ def delete_injury_treatment(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         success = injury_treatment.delete_by_injury_and_treatment(
             db, injury_id=injury_id, treatment_id=treatment_id
@@ -609,12 +752,18 @@ def delete_injury_treatment(
             raise NotFoundException(
                 resource="InjuryTreatment",
                 message="Treatment relationship not found",
-                request=request
+                request=request,
             )
 
         log_data_access(
-            logger, request, current_user_id, "delete", "InjuryTreatment",
-            patient_id=current_user_patient_id, injury_id=injury_id, treatment_id=treatment_id
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "InjuryTreatment",
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            treatment_id=treatment_id,
         )
 
         return {"message": "Treatment unlinked from injury"}
@@ -623,6 +772,7 @@ def delete_injury_treatment(
 # =====================================================
 # Injury-Procedure relationship endpoints
 # =====================================================
+
 
 @router.get("/{injury_id}/procedures", response_model=List[InjuryProcedureWithDetails])
 def get_injury_procedures(
@@ -638,30 +788,48 @@ def get_injury_procedures(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user)
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+        )
 
         relationships = injury_procedure.get_by_injury(db, injury_id=injury_id)
 
         enhanced = []
         for rel in relationships:
             proc = procedure_crud.get(db, id=rel.procedure_id)
-            enhanced.append({
-                "id": rel.id,
-                "injury_id": rel.injury_id,
-                "procedure_id": rel.procedure_id,
-                "relevance_note": rel.relevance_note,
-                "created_at": rel.created_at,
-                "updated_at": rel.updated_at,
-                "procedure": {
-                    "id": proc.id,
-                    "procedure_name": proc.procedure_name,
-                    "status": proc.status,
-                } if proc else None
-            })
+            enhanced.append(
+                {
+                    "id": rel.id,
+                    "injury_id": rel.injury_id,
+                    "procedure_id": rel.procedure_id,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "procedure": (
+                        {
+                            "id": proc.id,
+                            "procedure_name": proc.procedure_name,
+                            "status": proc.status,
+                        }
+                        if proc
+                        else None
+                    ),
+                }
+            )
 
         log_data_access(
-            logger, request, current_user_id, "read", "InjuryProcedure",
-            record_id=injury_id, patient_id=current_user_patient_id, count=len(relationships)
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "InjuryProcedure",
+            record_id=injury_id,
+            patient_id=current_user_patient_id,
+            count=len(relationships),
         )
 
         return enhanced
@@ -682,14 +850,21 @@ def create_injury_procedure(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         db_procedure = procedure_crud.get(db, id=procedure_in.procedure_id)
         handle_not_found(db_procedure, "Procedure")
         if db_procedure.patient_id != db_injury.patient_id:
             raise BusinessLogicException(
                 message="Cannot link procedure that belongs to a different patient",
-                request=request
+                request=request,
             )
 
         existing = injury_procedure.get_by_injury_and_procedure(
@@ -698,16 +873,22 @@ def create_injury_procedure(
         if existing:
             raise BusinessLogicException(
                 message="This procedure is already linked to this injury",
-                request=request
+                request=request,
             )
 
         procedure_in.injury_id = injury_id
         relationship = injury_procedure.create(db, obj_in=procedure_in)
 
         log_data_access(
-            logger, request, current_user_id, "create", "InjuryProcedure",
-            record_id=relationship.id, patient_id=current_user_patient_id,
-            injury_id=injury_id, procedure_id=procedure_in.procedure_id
+            logger,
+            request,
+            current_user_id,
+            "create",
+            "InjuryProcedure",
+            record_id=relationship.id,
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            procedure_id=procedure_in.procedure_id,
         )
 
         return relationship
@@ -728,7 +909,14 @@ def delete_injury_procedure(
     with handle_database_errors(request=request):
         db_injury = injury.get(db, id=injury_id)
         handle_not_found(db_injury, "Injury")
-        verify_patient_ownership(db_injury, current_user_patient_id, "injury", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            db_injury,
+            current_user_patient_id,
+            "injury",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         success = injury_procedure.delete_by_injury_and_procedure(
             db, injury_id=injury_id, procedure_id=procedure_id
@@ -737,12 +925,18 @@ def delete_injury_procedure(
             raise NotFoundException(
                 resource="InjuryProcedure",
                 message="Procedure relationship not found",
-                request=request
+                request=request,
             )
 
         log_data_access(
-            logger, request, current_user_id, "delete", "InjuryProcedure",
-            patient_id=current_user_patient_id, injury_id=injury_id, procedure_id=procedure_id
+            logger,
+            request,
+            current_user_id,
+            "delete",
+            "InjuryProcedure",
+            patient_id=current_user_patient_id,
+            injury_id=injury_id,
+            procedure_id=procedure_id,
         )
 
         return {"message": "Procedure unlinked from injury"}
@@ -751,6 +945,7 @@ def delete_injury_procedure(
 # =====================================================
 # Convenience endpoints
 # =====================================================
+
 
 @router.get("/patient/{patient_id}/active", response_model=List[InjuryWithRelations])
 def get_active_injuries(
@@ -771,7 +966,7 @@ def get_active_injuries(
             "read",
             "Injury",
             patient_id=patient_id,
-            count=len(injuries)
+            count=len(injuries),
         )
 
         return injuries

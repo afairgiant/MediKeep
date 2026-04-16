@@ -12,15 +12,15 @@ import { env } from '../../config/env';
 class DocumentManagerErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      error: null, 
+    this.state = {
+      hasError: false,
+      error: null,
       errorInfo: null,
-      componentName: props.componentName || 'DocumentManager Component'
+      componentName: props.componentName || 'DocumentManager Component',
     };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(_error) {
     // Update state so the next render will show the fallback UI
     return { hasError: true };
   }
@@ -37,15 +37,15 @@ class DocumentManagerErrorBoundary extends React.Component {
 
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
   }
 
   handleRetry = () => {
-    this.setState({ 
-      hasError: false, 
-      error: null, 
-      errorInfo: null 
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
     });
   };
 
@@ -57,37 +57,56 @@ class DocumentManagerErrorBoundary extends React.Component {
           variant="light"
           color="red"
           title={`${this.state.componentName} Error`}
-          icon={<ThemeIcon color="red" size="lg" variant="light">
-            <IconAlertTriangle size={20} />
-          </ThemeIcon>}
+          icon={
+            <ThemeIcon color="red" size="lg" variant="light">
+              <IconAlertTriangle size={20} />
+            </ThemeIcon>
+          }
         >
           <Stack gap="md">
             <Text size="sm">
               {i18n.t('documents:errorBoundary.documentErrorDescription')}
             </Text>
-            <Text size="xs" c="dimmed" component="ul" style={{ margin: 0, paddingLeft: '1rem' }}>
+            <Text
+              size="xs"
+              c="dimmed"
+              component="ul"
+              style={{ margin: 0, paddingLeft: '1rem' }}
+            >
               <li>{i18n.t('documents:errorBoundary.networkIssues')}</li>
               <li>{i18n.t('documents:errorBoundary.invalidData')}</li>
               <li>{i18n.t('documents:errorBoundary.browserCompat')}</li>
               <li>{i18n.t('documents:errorBoundary.tempIssues')}</li>
             </Text>
-            
+
             {this.state.error && env.DEV && (
               <details style={{ marginTop: '0.5rem' }}>
-                <summary style={{ cursor: 'pointer', fontSize: '0.8rem', color: 'var(--mantine-color-dimmed)' }}>
+                <summary
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    color: 'var(--mantine-color-dimmed)',
+                  }}
+                >
                   {i18n.t('documents:errorBoundary.errorDetails')}
                 </summary>
-                <Text size="xs" c="red" ff="monospace" style={{ 
-                  marginTop: '0.5rem', 
-                  padding: '0.5rem', 
-                  backgroundColor: 'var(--mantine-color-red-0)',
-                  borderRadius: 'var(--mantine-radius-sm)',
-                  whiteSpace: 'pre-wrap',
-                  overflow: 'auto',
-                  maxHeight: '200px'
-                }}>
+                <Text
+                  size="xs"
+                  c="red"
+                  ff="monospace"
+                  style={{
+                    marginTop: '0.5rem',
+                    padding: '0.5rem',
+                    backgroundColor: 'var(--mantine-color-red-0)',
+                    borderRadius: 'var(--mantine-radius-sm)',
+                    whiteSpace: 'pre-wrap',
+                    overflow: 'auto',
+                    maxHeight: '200px',
+                  }}
+                >
                   {this.state.error.message}
-                  {this.state.error.stack && `\n\nStack Trace:\n${this.state.error.stack}`}
+                  {this.state.error.stack &&
+                    `\n\nStack Trace:\n${this.state.error.stack}`}
                 </Text>
               </details>
             )}

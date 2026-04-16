@@ -12,22 +12,15 @@ vi.mock('react-i18next', () => ({
 }));
 
 // Wrapper for Mantine components
-const renderWithMantine = (component) => {
-  return render(
-    <MantineProvider>
-      {component}
-    </MantineProvider>
-  );
+const renderWithMantine = component => {
+  return render(<MantineProvider>{component}</MantineProvider>);
 };
 
 describe('MedicalPageAlerts', () => {
   describe('Rendering behavior', () => {
     it('renders nothing when both error and successMessage are null', () => {
       const { container } = renderWithMantine(
-        <MedicalPageAlerts
-          error={null}
-          successMessage={null}
-        />
+        <MedicalPageAlerts error={null} successMessage={null} />
       );
 
       // Component returns null, so no Alert elements should be present
@@ -35,19 +28,14 @@ describe('MedicalPageAlerts', () => {
     });
 
     it('renders nothing when both error and successMessage are undefined', () => {
-      const { container } = renderWithMantine(
-        <MedicalPageAlerts />
-      );
+      const { container } = renderWithMantine(<MedicalPageAlerts />);
 
       expect(container.querySelector('[class*="mantine-Alert"]')).toBeNull();
     });
 
     it('renders nothing when both error and successMessage are empty strings', () => {
       const { container } = renderWithMantine(
-        <MedicalPageAlerts
-          error=""
-          successMessage=""
-        />
+        <MedicalPageAlerts error="" successMessage="" />
       );
 
       expect(container.querySelector('[class*="mantine-Alert"]')).toBeNull();
@@ -56,11 +44,7 @@ describe('MedicalPageAlerts', () => {
 
   describe('Error alert', () => {
     it('renders error alert with default title and icon', () => {
-      renderWithMantine(
-        <MedicalPageAlerts
-          error="Something went wrong"
-        />
-      );
+      renderWithMantine(<MedicalPageAlerts error="Something went wrong" />);
 
       expect(screen.getByText('Error')).toBeInTheDocument();
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
@@ -81,10 +65,7 @@ describe('MedicalPageAlerts', () => {
     it('shows close button when onClearError is provided', () => {
       const mockClearError = vi.fn();
       renderWithMantine(
-        <MedicalPageAlerts
-          error="Test error"
-          onClearError={mockClearError}
-        />
+        <MedicalPageAlerts error="Test error" onClearError={mockClearError} />
       );
 
       const closeButton = screen.getByRole('button');
@@ -94,10 +75,7 @@ describe('MedicalPageAlerts', () => {
     it('calls onClearError when close button is clicked', () => {
       const mockClearError = vi.fn();
       renderWithMantine(
-        <MedicalPageAlerts
-          error="Test error"
-          onClearError={mockClearError}
-        />
+        <MedicalPageAlerts error="Test error" onClearError={mockClearError} />
       );
 
       const closeButton = screen.getByRole('button');
@@ -106,24 +84,20 @@ describe('MedicalPageAlerts', () => {
     });
 
     it('does not show close button when onClearError is not provided', () => {
-      renderWithMantine(
-        <MedicalPageAlerts
-          error="Test error"
-        />
-      );
+      renderWithMantine(<MedicalPageAlerts error="Test error" />);
 
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 
     it('preserves whitespace with pre-line style for multi-line errors', () => {
       const { container } = renderWithMantine(
-        <MedicalPageAlerts
-          error="Line 1\nLine 2"
-        />
+        <MedicalPageAlerts error="Line 1\nLine 2" />
       );
 
       // The style is applied to the Alert root element
-      const alertRoot = container.querySelector('[class*="mantine-Alert-root"]');
+      const alertRoot = container.querySelector(
+        '[class*="mantine-Alert-root"]'
+      );
       expect(alertRoot).toBeInTheDocument();
       expect(alertRoot).toHaveStyle({ whiteSpace: 'pre-line' });
     });
@@ -132,9 +106,7 @@ describe('MedicalPageAlerts', () => {
   describe('Success alert', () => {
     it('renders success alert with default title and icon', () => {
       renderWithMantine(
-        <MedicalPageAlerts
-          successMessage="Operation completed"
-        />
+        <MedicalPageAlerts successMessage="Operation completed" />
       );
 
       expect(screen.getByText('Success')).toBeInTheDocument();
@@ -155,10 +127,7 @@ describe('MedicalPageAlerts', () => {
 
     it('does not show close button on success by default', () => {
       renderWithMantine(
-        <MedicalPageAlerts
-          successMessage="Success"
-          onClearSuccess={vi.fn()}
-        />
+        <MedicalPageAlerts successMessage="Success" onClearSuccess={vi.fn()} />
       );
 
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
@@ -211,10 +180,7 @@ describe('MedicalPageAlerts', () => {
 
     it('wraps both alerts in a Stack with gap="xs"', () => {
       const { container } = renderWithMantine(
-        <MedicalPageAlerts
-          error="Error"
-          successMessage="Success"
-        />
+        <MedicalPageAlerts error="Error" successMessage="Success" />
       );
 
       // Should have a Stack wrapper (Mantine Stack component)
@@ -226,10 +192,7 @@ describe('MedicalPageAlerts', () => {
   describe('Custom props', () => {
     it('renders with custom variant prop', () => {
       const { container } = renderWithMantine(
-        <MedicalPageAlerts
-          error="Error"
-          variant="filled"
-        />
+        <MedicalPageAlerts error="Error" variant="filled" />
       );
 
       // Verify the alert renders - variant is passed to Mantine's Alert
@@ -241,10 +204,7 @@ describe('MedicalPageAlerts', () => {
 
     it('renders with custom margin bottom prop', () => {
       const { container } = renderWithMantine(
-        <MedicalPageAlerts
-          error="Error"
-          mb="xl"
-        />
+        <MedicalPageAlerts error="Error" mb="xl" />
       );
 
       // Verify alert renders with the mb prop passed through
@@ -256,7 +216,9 @@ describe('MedicalPageAlerts', () => {
       renderWithMantine(
         <MedicalPageAlerts
           error="Error"
-          errorIcon={<IconExclamationCircle data-testid="custom-error-icon" size={16} />}
+          errorIcon={
+            <IconExclamationCircle data-testid="custom-error-icon" size={16} />
+          }
         />
       );
 
@@ -267,7 +229,9 @@ describe('MedicalPageAlerts', () => {
       renderWithMantine(
         <MedicalPageAlerts
           successMessage="Success"
-          successIcon={<IconThumbUp data-testid="custom-success-icon" size={16} />}
+          successIcon={
+            <IconThumbUp data-testid="custom-success-icon" size={16} />
+          }
         />
       );
 
@@ -277,11 +241,7 @@ describe('MedicalPageAlerts', () => {
 
   describe('Edge cases', () => {
     it('renders alert for whitespace-only error string', () => {
-      renderWithMantine(
-        <MedicalPageAlerts
-          error="   "
-        />
-      );
+      renderWithMantine(<MedicalPageAlerts error="   " />);
 
       // Whitespace-only strings are truthy in JS, so alert renders
       expect(screen.getByText('Error')).toBeInTheDocument();
@@ -289,13 +249,12 @@ describe('MedicalPageAlerts', () => {
 
     it('renders with numeric mb value', () => {
       const { container } = renderWithMantine(
-        <MedicalPageAlerts
-          error="Error"
-          mb={20}
-        />
+        <MedicalPageAlerts error="Error" mb={20} />
       );
 
-      expect(container.querySelector('[class*="mantine-Alert"]')).toBeInTheDocument();
+      expect(
+        container.querySelector('[class*="mantine-Alert"]')
+      ).toBeInTheDocument();
     });
   });
 });

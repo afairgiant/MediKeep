@@ -1,4 +1,3 @@
-import React from 'react';
 import { vi } from 'vitest';
 import { render as rtlRender } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
@@ -49,7 +48,10 @@ function render(
   } = {}
 ) {
   const mergedAuthContext = { ...defaultAuthContext, ...authContextValue };
-  const mergedAppDataContext = { ...defaultAppDataContext, ...appDataContextValue };
+  const mergedAppDataContext = {
+    ...defaultAppDataContext,
+    ...appDataContextValue,
+  };
 
   function Wrapper({ children }) {
     const content = (
@@ -71,9 +73,7 @@ function render(
     }
 
     return (
-      <BrowserRouter initialEntries={initialEntries}>
-        {content}
-      </BrowserRouter>
+      <BrowserRouter initialEntries={initialEntries}>{content}</BrowserRouter>
     );
   }
 

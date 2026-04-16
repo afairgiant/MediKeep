@@ -1,6 +1,7 @@
 """
 Tests for Test Library Sync Service.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -32,7 +33,7 @@ class TestTestLibrarySyncService:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -46,7 +47,7 @@ class TestTestLibrarySyncService:
             test_name="Complete Blood Count",
             test_category="blood work",
             status="completed",
-            completed_date=date(2024, 1, 15)
+            completed_date=date(2024, 1, 15),
         )
         return lab_result_crud.create(db_session, obj_in=lab_result_data)
 
@@ -54,17 +55,21 @@ class TestTestLibrarySyncService:
     def reset_migration_flag(self, db_session: Session):
         """Reset migration flag before each test."""
         # Delete the migration setting before each test
-        setting = db_session.query(SystemSetting).filter(
-            SystemSetting.key == TestLibrarySyncService.MIGRATION_KEY
-        ).first()
+        setting = (
+            db_session.query(SystemSetting)
+            .filter(SystemSetting.key == TestLibrarySyncService.MIGRATION_KEY)
+            .first()
+        )
         if setting:
             db_session.delete(setting)
             db_session.commit()
         yield
         # Clean up after test
-        setting = db_session.query(SystemSetting).filter(
-            SystemSetting.key == TestLibrarySyncService.MIGRATION_KEY
-        ).first()
+        setting = (
+            db_session.query(SystemSetting)
+            .filter(SystemSetting.key == TestLibrarySyncService.MIGRATION_KEY)
+            .first()
+        )
         if setting:
             db_session.delete(setting)
             db_session.commit()
@@ -81,13 +86,12 @@ class TestTestLibrarySyncService:
         assert isinstance(test_library_sync, TestLibrarySyncService)
 
     # Test auto_link_component
-    def test_auto_link_component_exact_match(self, sync_service, db_session, test_lab_result):
+    def test_auto_link_component_exact_match(
+        self, sync_service, db_session, test_lab_result
+    ):
         """Test auto-linking a component with exact match."""
         component_data = LabTestComponentCreate(
-            lab_result_id=test_lab_result.id,
-            test_name="WBC",
-            value=7.5,
-            unit="K/uL"
+            lab_result_id=test_lab_result.id, test_name="WBC", value=7.5, unit="K/uL"
         )
         component = lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -96,13 +100,12 @@ class TestTestLibrarySyncService:
         assert canonical_name is not None
         assert canonical_name == "White Blood Cell Count"
 
-    def test_auto_link_component_abbreviation_match(self, sync_service, db_session, test_lab_result):
+    def test_auto_link_component_abbreviation_match(
+        self, sync_service, db_session, test_lab_result
+    ):
         """Test auto-linking with abbreviation match."""
         component_data = LabTestComponentCreate(
-            lab_result_id=test_lab_result.id,
-            test_name="HGB",
-            value=14.5,
-            unit="g/dL"
+            lab_result_id=test_lab_result.id, test_name="HGB", value=14.5, unit="g/dL"
         )
         component = lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -111,13 +114,15 @@ class TestTestLibrarySyncService:
         assert canonical_name is not None
         assert canonical_name == "Hemoglobin"
 
-    def test_auto_link_component_common_name_match(self, sync_service, db_session, test_lab_result):
+    def test_auto_link_component_common_name_match(
+        self, sync_service, db_session, test_lab_result
+    ):
         """Test auto-linking with common name match."""
         component_data = LabTestComponentCreate(
             lab_result_id=test_lab_result.id,
             test_name="Leukocytes",
             value=7.5,
-            unit="K/uL"
+            unit="K/uL",
         )
         component = lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -126,13 +131,15 @@ class TestTestLibrarySyncService:
         assert canonical_name is not None
         assert canonical_name == "White Blood Cell Count"
 
-    def test_auto_link_component_no_match(self, sync_service, db_session, test_lab_result):
+    def test_auto_link_component_no_match(
+        self, sync_service, db_session, test_lab_result
+    ):
         """Test auto-linking with no match returns None."""
         component_data = LabTestComponentCreate(
             lab_result_id=test_lab_result.id,
             test_name="Unknown Test XYZ",
             value=100,
-            unit="unit"
+            unit="unit",
         )
         component = lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -140,13 +147,15 @@ class TestTestLibrarySyncService:
 
         assert canonical_name is None
 
-    def test_auto_link_component_case_insensitive(self, sync_service, db_session, test_lab_result):
+    def test_auto_link_component_case_insensitive(
+        self, sync_service, db_session, test_lab_result
+    ):
         """Test that auto-linking is case-insensitive."""
         component_data = LabTestComponentCreate(
             lab_result_id=test_lab_result.id,
             test_name="HEMOGLOBIN",
             value=14.5,
-            unit="g/dL"
+            unit="g/dL",
         )
         component = lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -156,7 +165,9 @@ class TestTestLibrarySyncService:
         assert canonical_name == "Hemoglobin"
 
     # Test auto_link_all_for_patient
-    def test_auto_link_all_for_patient_empty(self, sync_service, db_session, test_patient):
+    def test_auto_link_all_for_patient_empty(
+        self, sync_service, db_session, test_patient
+    ):
         """Test auto-linking for patient with no components."""
         result = sync_service.auto_link_all_for_patient(db_session, test_patient.id)
 
@@ -164,7 +175,9 @@ class TestTestLibrarySyncService:
         assert result["linked"] == 0
         assert result["unlinked"] == 0
 
-    def test_auto_link_all_for_patient_success(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_auto_link_all_for_patient_success(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test auto-linking all components for a patient."""
         # Create components without canonical names
         components_data = [
@@ -172,19 +185,19 @@ class TestTestLibrarySyncService:
                 lab_result_id=test_lab_result.id,
                 test_name="WBC",
                 value=7.5,
-                unit="K/uL"
+                unit="K/uL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="HGB",
                 value=14.5,
-                unit="g/dL"
+                unit="g/dL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Platelets",
                 value=250,
-                unit="K/uL"
+                unit="K/uL",
             ),
         ]
 
@@ -209,26 +222,28 @@ class TestTestLibrarySyncService:
         assert "Hemoglobin" in canonical_names
         assert "Platelet Count" in canonical_names
 
-    def test_auto_link_all_for_patient_partial_match(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_auto_link_all_for_patient_partial_match(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test auto-linking with some matches and some non-matches."""
         components_data = [
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="WBC",
                 value=7.5,
-                unit="K/uL"
+                unit="K/uL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Unknown Test XYZ",
                 value=100,
-                unit="unit"
+                unit="unit",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="HGB",
                 value=14.5,
-                unit="g/dL"
+                unit="g/dL",
             ),
         ]
 
@@ -241,7 +256,9 @@ class TestTestLibrarySyncService:
         assert result["linked"] == 2
         assert result["unlinked"] == 1
 
-    def test_auto_link_all_for_patient_skips_already_linked(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_auto_link_all_for_patient_skips_already_linked(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test that auto-link skips components with existing canonical names."""
         # Create component with canonical name already set
         component_data = LabTestComponentCreate(
@@ -249,16 +266,13 @@ class TestTestLibrarySyncService:
             test_name="WBC",
             value=7.5,
             unit="K/uL",
-            canonical_test_name="White Blood Cell Count"
+            canonical_test_name="White Blood Cell Count",
         )
         lab_test_component_crud.create(db_session, obj_in=component_data)
 
         # Create component without canonical name
         component_data2 = LabTestComponentCreate(
-            lab_result_id=test_lab_result.id,
-            test_name="HGB",
-            value=14.5,
-            unit="g/dL"
+            lab_result_id=test_lab_result.id, test_name="HGB", value=14.5, unit="g/dL"
         )
         lab_test_component_crud.create(db_session, obj_in=component_data2)
 
@@ -270,7 +284,9 @@ class TestTestLibrarySyncService:
         assert result["unlinked"] == 0
 
     # Test run_one_time_migration
-    def test_run_one_time_migration_first_run(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_run_one_time_migration_first_run(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test one-time migration on first run."""
         # Create components
         components_data = [
@@ -278,13 +294,13 @@ class TestTestLibrarySyncService:
                 lab_result_id=test_lab_result.id,
                 test_name="WBC",
                 value=7.5,
-                unit="K/uL"
+                unit="K/uL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="HGB",
                 value=14.5,
-                unit="g/dL"
+                unit="g/dL",
             ),
         ]
 
@@ -300,7 +316,9 @@ class TestTestLibrarySyncService:
         assert result["unlinked"] == 0
 
         # Check that migration flag was set
-        migration_status = system_setting.get_setting(db_session, sync_service.MIGRATION_KEY)
+        migration_status = system_setting.get_setting(
+            db_session, sync_service.MIGRATION_KEY
+        )
         assert migration_status is not None
         assert "true" in migration_status.lower()
 
@@ -315,7 +333,9 @@ class TestTestLibrarySyncService:
         assert result["skipped"] is True
         assert result["reason"] == "already_completed"
 
-    def test_run_one_time_migration_large_batch(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_run_one_time_migration_large_batch(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test migration handles batching correctly with multiple batches."""
         # Create more components than batch size
         # The service processes in batches, filtering for NULL canonical names each time
@@ -329,7 +349,7 @@ class TestTestLibrarySyncService:
                     lab_result_id=test_lab_result.id,
                     test_name="WBC" if i % 2 == 0 else "HGB",
                     value=7.5 + i,
-                    unit="K/uL"
+                    unit="K/uL",
                 )
             )
 
@@ -346,32 +366,34 @@ class TestTestLibrarySyncService:
         assert result["processed"] == num_components
         assert result["linked"] == num_components
 
-    def test_run_one_time_migration_partial_success(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_run_one_time_migration_partial_success(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test migration with mix of successful and unsuccessful matches."""
         components_data = [
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="WBC",
                 value=7.5,
-                unit="K/uL"
+                unit="K/uL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Unknown Test 1",
                 value=100,
-                unit="unit"
+                unit="unit",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="HGB",
                 value=14.5,
-                unit="g/dL"
+                unit="g/dL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Unknown Test 2",
                 value=200,
-                unit="unit"
+                unit="unit",
             ),
         ]
 
@@ -406,11 +428,15 @@ class TestTestLibrarySyncService:
         assert result["unlinked"] == 0
 
         # Migration flag should still be set
-        migration_status = system_setting.get_setting(db_session, sync_service.MIGRATION_KEY)
+        migration_status = system_setting.get_setting(
+            db_session, sync_service.MIGRATION_KEY
+        )
         assert migration_status is not None
         assert "true" in migration_status.lower()
 
-    def test_run_one_time_migration_only_processes_null_canonical_names(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_run_one_time_migration_only_processes_null_canonical_names(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test that migration only processes components with NULL canonical_test_name."""
         # Create components with canonical names already set
         component_with_canonical = LabTestComponentCreate(
@@ -418,16 +444,13 @@ class TestTestLibrarySyncService:
             test_name="WBC",
             value=7.5,
             unit="K/uL",
-            canonical_test_name="White Blood Cell Count"
+            canonical_test_name="White Blood Cell Count",
         )
         lab_test_component_crud.create(db_session, obj_in=component_with_canonical)
 
         # Create component without canonical name
         component_without_canonical = LabTestComponentCreate(
-            lab_result_id=test_lab_result.id,
-            test_name="HGB",
-            value=14.5,
-            unit="g/dL"
+            lab_result_id=test_lab_result.id, test_name="HGB", value=14.5, unit="g/dL"
         )
         lab_test_component_crud.create(db_session, obj_in=component_without_canonical)
 
@@ -438,7 +461,9 @@ class TestTestLibrarySyncService:
         assert result["linked"] == 1
 
     # Test error handling
-    def test_schema_validation_prevents_invalid_test_names(self, db_session, test_lab_result):
+    def test_schema_validation_prevents_invalid_test_names(
+        self, db_session, test_lab_result
+    ):
         """Test that Pydantic validation prevents invalid test names."""
         # The schema validation should prevent creation of components with invalid names
         # This test verifies that the validation is working as expected
@@ -447,18 +472,20 @@ class TestTestLibrarySyncService:
                 lab_result_id=test_lab_result.id,
                 test_name=" ",  # Whitespace-only name - should fail validation
                 value=100,
-                unit="unit"
+                unit="unit",
             )
 
     # Integration tests
-    def test_full_workflow_new_components_get_auto_linked(self, sync_service, db_session, test_patient, test_lab_result):
+    def test_full_workflow_new_components_get_auto_linked(
+        self, sync_service, db_session, test_patient, test_lab_result
+    ):
         """Test full workflow: create components, auto-link for patient."""
         # Create unlinked components
         component_data = LabTestComponentCreate(
             lab_result_id=test_lab_result.id,
             test_name="Total Cholesterol",
             value=200,
-            unit="mg/dL"
+            unit="mg/dL",
         )
         created = lab_test_component_crud.create(db_session, obj_in=component_data)
 

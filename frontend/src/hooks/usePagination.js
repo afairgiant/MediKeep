@@ -2,7 +2,10 @@ import { useState, useCallback } from 'react';
 
 const VALID_PAGE_SIZES = [10, 20, 25, 50];
 const DEFAULT_PAGE_SIZE = 20;
-const PAGE_SIZE_OPTIONS = VALID_PAGE_SIZES.map(s => ({ value: String(s), label: String(s) }));
+const PAGE_SIZE_OPTIONS = VALID_PAGE_SIZES.map(s => ({
+  value: String(s),
+  label: String(s),
+}));
 
 /**
  * Shared pagination state hook for medical record pages.
@@ -13,19 +16,19 @@ export const usePagination = ({ defaultPageSize = DEFAULT_PAGE_SIZE } = {}) => {
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
   const totalPages = useCallback(
-    (totalRecords) => Math.max(1, Math.ceil(totalRecords / pageSize)),
+    totalRecords => Math.max(1, Math.ceil(totalRecords / pageSize)),
     [pageSize]
   );
 
   const paginateData = useCallback(
-    (data) => {
+    data => {
       const start = (page - 1) * pageSize;
       return data.slice(start, start + pageSize);
     },
     [page, pageSize]
   );
 
-  const handlePageSizeChange = useCallback((newSize) => {
+  const handlePageSizeChange = useCallback(newSize => {
     if (newSize === null || newSize === undefined) return;
     const numericValue = Number(newSize);
     if (!Number.isFinite(numericValue) || numericValue <= 0) return;
@@ -39,7 +42,7 @@ export const usePagination = ({ defaultPageSize = DEFAULT_PAGE_SIZE } = {}) => {
 
   // Clamp page when it exceeds total pages (e.g., after deleting last item on last page)
   const clampPage = useCallback(
-    (totalRecords) => {
+    totalRecords => {
       const maxPage = totalPages(totalRecords);
       if (page > maxPage) {
         setPage(maxPage);

@@ -1,5 +1,4 @@
 import { vi, describe, test, expect } from 'vitest';
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
@@ -14,16 +13,14 @@ vi.mock('../../../hooks/useResponsive', () => ({
     isMobile: false,
     isTablet: false,
     isDesktop: true,
-    isAbove: (bp) => bp === 'md' || bp === 'sm' || bp === 'xs',
-    matches: (bp) => bp === 'lg'
-  })
+    isAbove: bp => bp === 'md' || bp === 'sm' || bp === 'xs',
+    matches: bp => bp === 'lg',
+  }),
 }));
 
 const TestWrapper = ({ children }) => (
   <BrowserRouter>
-    <MantineProvider>
-      {children}
-    </MantineProvider>
+    <MantineProvider>{children}</MantineProvider>
   </BrowserRouter>
 );
 
@@ -35,16 +32,16 @@ describe('ResponsiveNavigation', () => {
         section: 'Main',
         items: [
           { path: '/dashboard', label: 'Dashboard', icon: '📊', exact: true },
-          { path: '/patients', label: 'Patients', icon: '👤' }
-        ]
-      }
+          { path: '/patients', label: 'Patients', icon: '👤' },
+        ],
+      },
     ],
     userInfo: {
       username: 'testuser',
       fullName: 'Test User',
-      role: 'User'
+      role: 'User',
     },
-    onLogout: vi.fn()
+    onLogout: vi.fn(),
   };
 
   test('renders without crashing', () => {
@@ -74,9 +71,9 @@ describe('ResponsiveNavigation', () => {
       user: {
         username: 'altuser',
         full_name: 'Alt User',
-        role: 'user'
+        role: 'user',
       },
-      userInfo: undefined
+      userInfo: undefined,
     };
 
     render(

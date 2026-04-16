@@ -1,4 +1,3 @@
-import React from 'react';
 import { Divider, Stack, Title, Paper, Text, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalForm from './BaseMedicalForm';
@@ -138,12 +137,17 @@ const MantineLabResultForm = ({
   // Custom content for divider, badges, condition relationships, and file management
   const customContent = (
     <>
-      <Divider label={t('labresults:form.testDetails')} labelPosition="center" />
+      <Divider
+        label={t('labresults:form.testDetails')}
+        labelPosition="center"
+      />
 
       {/* Status Badge */}
       {formData.status && (
         <div style={{ marginTop: '-8px', marginBottom: '8px' }}>
-          <Text size="sm" fw={500} mb="xs">{t('labresults:form.statusIndicator')}</Text>
+          <Text size="sm" fw={500} mb="xs">
+            {t('labresults:form.statusIndicator')}
+          </Text>
           <Badge
             color={getStatusColor(formData.status)}
             variant="light"
@@ -157,7 +161,9 @@ const MantineLabResultForm = ({
       {/* Result Badge */}
       {formData.labs_result && (
         <div style={{ marginBottom: '16px' }}>
-          <Text size="sm" fw={500} mb="xs">{t('labresults:form.resultIndicator')}</Text>
+          <Text size="sm" fw={500} mb="xs">
+            {t('labresults:form.resultIndicator')}
+          </Text>
           {getResultBadge(formData.labs_result)}
         </div>
       )}
@@ -165,10 +171,16 @@ const MantineLabResultForm = ({
       {/* Condition Relationships Section for Edit Mode */}
       {editingLabResult && conditions.length > 0 && (
         <>
-          <Divider label={t('shared:labels.relatedConditions')} labelPosition="center" mt="lg" />
+          <Divider
+            label={t('shared:labels.relatedConditions')}
+            labelPosition="center"
+            mt="lg"
+          />
           <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Stack gap="md">
-              <Title order={5}>{t('labresults:form.linkConditionsTitle')}</Title>
+              <Title order={5}>
+                {t('labresults:form.linkConditionsTitle')}
+              </Title>
               <Text size="sm" c="dimmed">
                 {t('labresults:form.linkConditionsDescription')}
               </Text>
@@ -187,12 +199,21 @@ const MantineLabResultForm = ({
       {/* Encounter Relationships Section for Edit Mode */}
       {editingLabResult && encounters.length > 0 && (
         <>
-          <Divider label={t('common:labResults.form.linkedVisits', 'Linked Visits')} labelPosition="center" mt="lg" />
+          <Divider
+            label={t('common:labResults.form.linkedVisits', 'Linked Visits')}
+            labelPosition="center"
+            mt="lg"
+          />
           <Paper withBorder p="md" bg="var(--color-bg-secondary)">
             <Stack gap="md">
-              <Title order={5}>{t('common:labResults.form.linkVisitsTitle', 'Link to Visits')}</Title>
+              <Title order={5}>
+                {t('common:labResults.form.linkVisitsTitle', 'Link to Visits')}
+              </Title>
               <Text size="sm" c="dimmed">
-                {t('common:labResults.form.linkVisitsDescription', 'Associate this lab result with visits where it was ordered or reviewed.')}
+                {t(
+                  'common:labResults.form.linkVisitsDescription',
+                  'Associate this lab result with visits where it was ordered or reviewed.'
+                )}
               </Text>
               <LabResultEncounterRelationships
                 labResultId={editingLabResult.id}

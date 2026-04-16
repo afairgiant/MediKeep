@@ -68,11 +68,12 @@ class DexcomParser(BaseVitalsParser):
         header = rows[0]
         col_map = {col.strip().lower(): idx for idx, col in enumerate(header)}
 
-        timestamp_col = col_map.get("timestamp (yyyy-mm-ddthh:mm:ss)") or col_map.get("timestamp")
+        timestamp_col = col_map.get("timestamp (yyyy-mm-ddthh:mm:ss)") or col_map.get(
+            "timestamp"
+        )
         event_type_col = col_map.get("event type")
-        glucose_col = (
-            col_map.get("glucose value (mg/dl)")
-            or col_map.get("glucose value")
+        glucose_col = col_map.get("glucose value (mg/dl)") or col_map.get(
+            "glucose value"
         )
 
         if timestamp_col is None or event_type_col is None or glucose_col is None:

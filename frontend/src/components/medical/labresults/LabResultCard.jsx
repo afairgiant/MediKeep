@@ -1,155 +1,176 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Badge, Text, Group } from '@mantine/core';
+import { Badge, Text } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
-import TestComponentSummary from './TestComponentSummary';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import logger from '../../../services/logger';
 
-const LabResultCard = React.memo(({
-  labResult,
-  onEdit,
-  onDelete,
-  onView,
-  fileCount,
-  fileCountLoading,
-  practitioners,
-  navigate,
-  disableActions = false,
-  disableActionsTooltip,
-  onError
-}) => {
-  const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { formatLongDate } = useDateFormat();
+const LabResultCard = React.memo(
+  ({
+    labResult,
+    onEdit,
+    onDelete,
+    onView,
+    fileCount,
+    fileCountLoading,
+    practitioners,
+    navigate,
+    disableActions = false,
+    disableActionsTooltip,
+    onError,
+  }) => {
+    const { t } = useTranslation(['medical', 'common', 'shared']);
+    const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
-    logger.error('lab_result_card_error', {
-      message: 'Error in LabResultCard',
-      labResultId: labResult?.id,
-      error: error.message,
-      component: 'LabResultCard',
-    });
-    
-    if (onError) {
-      onError(error);
+    const handleError = error => {
+      logger.error('lab_result_card_error', {
+        message: 'Error in LabResultCard',
+        labResultId: labResult?.id,
+        error: error.message,
+        component: 'LabResultCard',
+      });
+
+      if (onError) {
+        onError(error);
+      }
+    };
+
+    try {
+      // Find practitioner for this lab result
+      const practitioner = practitioners.find(
+        p => p.id === labResult.practitioner_id
+      );
+
+      // Generate badges
+      const badges = [];
+      if (labResult.test_category) {
+        badges.push({ label: labResult.test_category, color: 'blue' });
+      }
+
+      // Generate dynamic fields
+      const fields = [
+        {
+          label: t('shared:fields.testCode'),
+          value: labResult.test_code,
+        },
+        {
+          label: t('labresults:testTypeField.label'),
+          value: labResult.test_type,
+          render: value =>
+            value ? (
+              <Badge variant="light" color="cyan" size="sm">
+                {value}
+              </Badge>
+            ) : (
+              t('shared:labels.notSpecified')
+            ),
+        },
+        {
+          label: t('labresults:testingFacility.label'),
+          value: labResult.facility,
+        },
+        {
+          label: t('shared:labels.orderedDate'),
+          value: labResult.ordered_date,
+          render: value =>
+            value ? formatLongDate(value) : t('shared:labels.notSpecified'),
+        },
+        {
+          label: t('shared:labels.completedDate'),
+          value: labResult.completed_date,
+          render: value =>
+            value
+              ? formatLongDate(value)
+              : t('common:labels.notCompleted', 'Not completed'),
+        },
+        {
+          label: t('shared:labels.labResult'),
+          value: labResult.labs_result,
+          render: value =>
+            value ? (
+              <StatusBadge status={value} />
+            ) : (
+              t('shared:fields.pending', 'Pending')
+            ),
+        },
+        {
+          label: t('shared:labels.orderingPractitioner'),
+          value: labResult.practitioner_id,
+          render: value => {
+            if (!value) return t('shared:labels.notSpecified');
+
+            const practitionerName =
+              practitioner?.name || `Practitioner ID: ${value}`;
+            return (
+              <Text
+                size="sm"
+                c="blue"
+                style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() =>
+                  navigateToEntity('practitioner', value, navigate)
+                }
+                title={t(
+                  'shared:labels.viewPractitionerDetails',
+                  'View practitioner details'
+                )}
+              >
+                {practitionerName}
+              </Text>
+            );
+          },
+        },
+        // NOTE: TestComponentSummary is NOT shown in the card to prevent infinite API calls
+        // Test components are only displayed in the LabResultViewModal's "Test Components" tab
+        // This design decision improves performance and user experience
+      ];
+
+      return (
+        <BaseMedicalCard
+          title={labResult.test_name}
+          status={labResult.status}
+          badges={badges}
+          tags={labResult.tags || []}
+          fields={fields}
+          notes={labResult.notes}
+          fileCount={fileCount}
+          fileCountLoading={fileCountLoading}
+          onView={() => onView(labResult)}
+          onEdit={() => onEdit(labResult)}
+          onDelete={() => onDelete(labResult)}
+          entityType="lab-result"
+          disableActions={disableActions}
+          disableActionsTooltip={disableActionsTooltip}
+          onError={handleError}
+        />
+      );
+    } catch (error) {
+      handleError(error);
+      return null;
     }
-  };
-
-  try {
-    // Find practitioner for this lab result
-    const practitioner = practitioners.find(p => p.id === labResult.practitioner_id);
-
-    // Generate badges
-    const badges = [];
-    if (labResult.test_category) {
-      badges.push({ label: labResult.test_category, color: 'blue' });
-    }
-    
-    // Generate dynamic fields
-    const fields = [
-      {
-        label: t('shared:fields.testCode'),
-        value: labResult.test_code
-      },
-      {
-        label: t('labresults:testTypeField.label'),
-        value: labResult.test_type,
-        render: (value) => value ? (
-          <Badge variant="light" color="cyan" size="sm">
-            {value}
-          </Badge>
-        ) : t('shared:labels.notSpecified')
-      },
-      {
-        label: t('labresults:testingFacility.label'),
-        value: labResult.facility
-      },
-      {
-        label: t('shared:labels.orderedDate'),
-        value: labResult.ordered_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
-      },
-      {
-        label: t('shared:labels.completedDate'),
-        value: labResult.completed_date,
-        render: (value) => value ? formatLongDate(value) : t('common:labels.notCompleted', 'Not completed')
-      },
-      {
-        label: t('shared:labels.labResult'),
-        value: labResult.labs_result,
-        render: (value) => value ? (
-          <StatusBadge status={value} />
-        ) : t('shared:fields.pending', 'Pending')
-      },
-      {
-        label: t('shared:labels.orderingPractitioner'),
-        value: labResult.practitioner_id,
-        render: (value) => {
-          if (!value) return t('shared:labels.notSpecified');
-
-          const practitionerName = practitioner?.name || `Practitioner ID: ${value}`;
-          return (
-            <Text
-              size="sm"
-              c="blue"
-              style={{ cursor: 'pointer', textDecoration: 'underline' }}
-              onClick={() => navigateToEntity('practitioner', value, navigate)}
-              title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
-            >
-              {practitionerName}
-            </Text>
-          );
-        }
-      },
-      // NOTE: TestComponentSummary is NOT shown in the card to prevent infinite API calls
-      // Test components are only displayed in the LabResultViewModal's "Test Components" tab
-      // This design decision improves performance and user experience
-    ];
-
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function for React.memo
+    // Only re-render if these specific props change
     return (
-      <BaseMedicalCard
-        title={labResult.test_name}
-        status={labResult.status}
-        badges={badges}
-        tags={labResult.tags || []}
-        fields={fields}
-        notes={labResult.notes}
-        fileCount={fileCount}
-        fileCountLoading={fileCountLoading}
-        onView={() => onView(labResult)}
-        onEdit={() => onEdit(labResult)}
-        onDelete={() => onDelete(labResult)}
-        entityType="lab-result"
-        disableActions={disableActions}
-        disableActionsTooltip={disableActionsTooltip}
-        onError={handleError}
-      />
+      prevProps.labResult.id === nextProps.labResult.id &&
+      prevProps.labResult.test_name === nextProps.labResult.test_name &&
+      prevProps.labResult.status === nextProps.labResult.status &&
+      prevProps.labResult.labs_result === nextProps.labResult.labs_result &&
+      prevProps.labResult.ordered_date === nextProps.labResult.ordered_date &&
+      prevProps.labResult.completed_date ===
+        nextProps.labResult.completed_date &&
+      prevProps.fileCount === nextProps.fileCount &&
+      prevProps.fileCountLoading === nextProps.fileCountLoading &&
+      prevProps.disableActions === nextProps.disableActions &&
+      prevProps.disableActionsTooltip === nextProps.disableActionsTooltip &&
+      prevProps.onEdit === nextProps.onEdit &&
+      prevProps.onDelete === nextProps.onDelete &&
+      prevProps.onView === nextProps.onView
     );
-  } catch (error) {
-    handleError(error);
-    return null;
   }
-}, (prevProps, nextProps) => {
-  // Custom comparison function for React.memo
-  // Only re-render if these specific props change
-  return (
-    prevProps.labResult.id === nextProps.labResult.id &&
-    prevProps.labResult.test_name === nextProps.labResult.test_name &&
-    prevProps.labResult.status === nextProps.labResult.status &&
-    prevProps.labResult.labs_result === nextProps.labResult.labs_result &&
-    prevProps.labResult.ordered_date === nextProps.labResult.ordered_date &&
-    prevProps.labResult.completed_date === nextProps.labResult.completed_date &&
-    prevProps.fileCount === nextProps.fileCount &&
-    prevProps.fileCountLoading === nextProps.fileCountLoading &&
-    prevProps.disableActions === nextProps.disableActions &&
-    prevProps.disableActionsTooltip === nextProps.disableActionsTooltip &&
-    prevProps.onEdit === nextProps.onEdit &&
-    prevProps.onDelete === nextProps.onDelete &&
-    prevProps.onView === nextProps.onView
-  );
-});
+);
 
 LabResultCard.displayName = 'LabResultCard';
 

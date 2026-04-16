@@ -148,17 +148,32 @@ class TestLocaleFileLoading:
         data = _load_locale(lang)
         fields = data.get("fields", {})
         for vital_field in [
-            "bloodPressure", "heartRate", "temperature",
-            "weight", "height", "oxygenSaturation",
-            "respiratoryRate", "bloodGlucose", "bmi", "painScale",
+            "bloodPressure",
+            "heartRate",
+            "temperature",
+            "weight",
+            "height",
+            "oxygenSaturation",
+            "respiratoryRate",
+            "bloodGlucose",
+            "bmi",
+            "painScale",
         ]:
-            assert vital_field in fields, f"Missing field '{vital_field}' in language '{lang}'"
+            assert (
+                vital_field in fields
+            ), f"Missing field '{vital_field}' in language '{lang}'"
 
     @pytest.mark.parametrize("lang", list(SUPPORTED_LANGUAGES))
     def test_report_text_present(self, lang):
         data = _load_locale(lang)
         text = data.get("report", {})
-        for key in ["recordsSummary", "recordsByCategory", "reportSummary", "record", "records"]:
+        for key in [
+            "recordsSummary",
+            "recordsByCategory",
+            "reportSummary",
+            "record",
+            "records",
+        ]:
             assert key in text, f"Missing text key '{key}' in language '{lang}'"
 
 

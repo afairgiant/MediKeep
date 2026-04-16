@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Stack,
   Group,
@@ -13,14 +13,14 @@ import {
   IconX,
   IconFile,
   IconFolder,
-  IconCloud
+  IconCloud,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
 import {
   MEDICAL_DOCUMENT_EXTENSIONS,
   MEDICAL_DOCUMENT_MIME_TYPES,
-  MEDICAL_DOCUMENT_CONFIG
+  MEDICAL_DOCUMENT_CONFIG,
 } from '../../constants/fileTypes';
 import logger from '../../services/logger';
 
@@ -34,7 +34,7 @@ const FileUploadZone = ({
   disabled = false,
   className = '',
   selectedStorageBackend = 'local',
-  paperlessSettings = null,
+  paperlessSettings: _paperlessSettings = null,
   mode = 'view',
   autoUpload = false,
 }) => {
@@ -43,96 +43,121 @@ const FileUploadZone = ({
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   // Validate file
-  const validateFile = useCallback((file) => {
-    const errors = [];
+  const validateFile = useCallback(
+    file => {
+      const errors = [];
 
-    // Check file size
-    if (file.size > maxSize) {
-      errors.push(`File size exceeds ${Math.round(maxSize / 1024 / 1024)}MB limit`);
-    }
+      // Check file size
+      if (file.size > maxSize) {
+        errors.push(
+          `File size exceeds ${Math.round(maxSize / 1024 / 1024)}MB limit`
+        );
+      }
 
-    // Check file type
-    const fileName = file.name.toLowerCase();
-    const hasValidExtension = acceptedTypes.some(type =>
-      fileName.endsWith(type.toLowerCase())
-    );
+      // Check file type
+      const fileName = file.name.toLowerCase();
+      const hasValidExtension = acceptedTypes.some(type =>
+        fileName.endsWith(type.toLowerCase())
+      );
 
-    // Log validation details for debugging
-    logger.debug('file_validation', 'File validation check', {
-      component: 'FileUploadZone',
-      fileName: file.name,
-      fileNameLower: fileName,
-      acceptedTypes: acceptedTypes,
-      hasZip: acceptedTypes.includes('.zip'),
-      hasValidExtension
-    });
+      // Log validation details for debugging
+      logger.debug('file_validation', 'File validation check', {
+        component: 'FileUploadZone',
+        fileName: file.name,
+        fileNameLower: fileName,
+        acceptedTypes: acceptedTypes,
+        hasZip: acceptedTypes.includes('.zip'),
+        hasValidExtension,
+      });
 
-    if (!hasValidExtension) {
-      errors.push(`File type not supported. Accepted: ${acceptedTypes.join(', ')}`);
-    }
-    
-    return errors;
-  }, [acceptedTypes, maxSize]);
+      if (!hasValidExtension) {
+        errors.push(
+          `File type not supported. Accepted: ${acceptedTypes.join(', ')}`
+        );
+      }
+
+      return errors;
+    },
+    [acceptedTypes, maxSize]
+  );
 
   // Handle file selection (both drag/drop and file input) - ADD TO SELECTED FILES
-  const handleFilesSelected = useCallback((files) => {
-    if (disabled) return;
+  const handleFilesSelected = useCallback(
+    files => {
+      if (disabled) return;
 
-    const fileArray = Array.from(files);
-    
-    // Check max files limit
-    if (selectedFiles.length + fileArray.length > maxFiles) {
-      if (onValidationError) {
-        onValidationError(`Cannot select more than ${maxFiles} files at once`);
+      const fileArray = Array.from(files);
+
+      // Check max files limit
+      if (selectedFiles.length + fileArray.length > maxFiles) {
+        if (onValidationError) {
+          onValidationError(
+            `Cannot select more than ${maxFiles} files at once`
+          );
+        }
+        return;
       }
-      return;
-    }
 
-    // Process files and add to selected list
-    const validFiles = [];
-    const errorMessages = [];
+      // Process files and add to selected list
+      const validFiles = [];
+      const errorMessages = [];
 
-    fileArray.forEach(file => {
-      const validationErrors = validateFile(file);
-      
-      if (validationErrors.length > 0) {
-        errorMessages.push(`${file.name}: ${validationErrors.join(', ')}`);
-      } else {
-        validFiles.push({
-          id: Date.now() + Math.random(),
-          file,
-          description: '',
-          status: 'ready'
-        });
+      fileArray.forEach(file => {
+        const validationErrors = validateFile(file);
+
+        if (validationErrors.length > 0) {
+          errorMessages.push(`${file.name}: ${validationErrors.join(', ')}`);
+        } else {
+          validFiles.push({
+            id: Date.now() + Math.random(),
+            file,
+            description: '',
+            status: 'ready',
+          });
+        }
+      });
+
+      // Show validation errors if any
+      if (errorMessages.length > 0 && onValidationError) {
+        onValidationError(errorMessages.join('; '));
       }
-    });
 
-    // Show validation errors if any
-    if (errorMessages.length > 0 && onValidationError) {
-      onValidationError(errorMessages.join('; '));
-    }
+      // Auto-upload: skip staging step, pass directly to onUpload callback
+      if (autoUpload && validFiles.length > 0 && onUpload) {
+        onUpload(
+          validFiles.map(({ file, description }) => ({ file, description }))
+        );
+        return;
+      }
 
-    // Auto-upload: skip staging step, pass directly to onUpload callback
-    if (autoUpload && validFiles.length > 0 && onUpload) {
-      onUpload(validFiles.map(({ file, description }) => ({ file, description })));
-      return;
-    }
-
-    // Add valid files to selected list
-    if (validFiles.length > 0) {
-      setSelectedFiles(prev => [...prev, ...validFiles]);
-    }
-  }, [disabled, maxFiles, validateFile, onValidationError, selectedFiles.length, autoUpload, onUpload]);
+      // Add valid files to selected list
+      if (validFiles.length > 0) {
+        setSelectedFiles(prev => [...prev, ...validFiles]);
+      }
+    },
+    [
+      disabled,
+      maxFiles,
+      validateFile,
+      onValidationError,
+      selectedFiles.length,
+      autoUpload,
+      onUpload,
+    ]
+  );
 
   // Handle upload button click
   const handleUpload = useCallback(() => {
     const filesToUpload = selectedFiles.map(item => ({
       file: item.file,
-      description: item.description
+      description: item.description,
     }));
 
     if (filesToUpload.length > 0 && onUpload) {
-      logger.info('Uploading files:', filesToUpload.map(f => f.file.name));
+      logger.info(
+        'Uploading files:',
+        filesToUpload.map(f => f.file.name)
+      );
       onUpload(filesToUpload);
       // Clear selected files after upload
       setSelectedFiles([]);
@@ -140,15 +165,8 @@ const FileUploadZone = ({
   }, [selectedFiles, onUpload]);
 
   // Remove file from selected list
-  const removeFile = useCallback((fileId) => {
+  const removeFile = useCallback(fileId => {
     setSelectedFiles(prev => prev.filter(f => f.id !== fileId));
-  }, []);
-
-  // Update file description
-  const updateDescription = useCallback((fileId, description) => {
-    setSelectedFiles(prev => prev.map(f => 
-      f.id === fileId ? { ...f, description } : f
-    ));
   }, []);
 
   // Storage backend info
@@ -157,20 +175,20 @@ const FileUploadZone = ({
       return {
         icon: IconCloud,
         label: 'Paperless-ngx',
-        color: 'green'
+        color: 'green',
       };
     }
     if (selectedStorageBackend === 'papra') {
       return {
         icon: IconCloud,
         label: 'Papra',
-        color: 'teal'
+        color: 'teal',
       };
     }
     return {
       icon: IconFolder,
       label: 'Local Storage',
-      color: 'blue'
+      color: 'blue',
     };
   };
 
@@ -181,9 +199,11 @@ const FileUploadZone = ({
       {/* Dropzone */}
       <Dropzone
         onDrop={handleFilesSelected}
-        onReject={(files) => {
+        onReject={files => {
           if (onValidationError) {
-            const rejectedReasons = files.map(f => f.errors.map(e => e.message).join('; '));
+            const rejectedReasons = files.map(f =>
+              f.errors.map(e => e.message).join('; ')
+            );
             onValidationError(rejectedReasons.join('; '));
           }
         }}
@@ -199,10 +219,17 @@ const FileUploadZone = ({
         onDragLeave={() => setDragActive(false)}
         style={{
           borderColor: dragActive ? 'var(--mantine-color-blue-6)' : undefined,
-          backgroundColor: dragActive ? 'var(--mantine-color-blue-light)' : undefined,
+          backgroundColor: dragActive
+            ? 'var(--mantine-color-blue-light)'
+            : undefined,
         }}
       >
-        <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
+        <Group
+          justify="center"
+          gap="xl"
+          mih={220}
+          style={{ pointerEvents: 'none' }}
+        >
           <Dropzone.Accept>
             <IconUpload
               size={52}
@@ -211,11 +238,7 @@ const FileUploadZone = ({
             />
           </Dropzone.Accept>
           <Dropzone.Reject>
-            <IconX
-              size={52}
-              color="var(--mantine-color-red-6)"
-              stroke={1.5}
-            />
+            <IconX size={52} color="var(--mantine-color-red-6)" stroke={1.5} />
           </Dropzone.Reject>
           <Dropzone.Idle>
             <IconFile
@@ -230,13 +253,15 @@ const FileUploadZone = ({
               {t('fileUpload.dragOrClick')}
             </Text>
             <Text size="sm" c="dimmed" inline mt={7}>
-              {mode === 'create' 
-                ? 'Files will be uploaded after creating the record' 
-                : 'Select files, then click Upload to start'
-              }
+              {mode === 'create'
+                ? 'Files will be uploaded after creating the record'
+                : 'Select files, then click Upload to start'}
             </Text>
             <Text size="xs" c="dimmed" mt="xs">
-              {t('fileUpload.accepted', { types: acceptedTypes.join(', '), size: Math.round(maxSize / 1024 / 1024) })}
+              {t('fileUpload.accepted', {
+                types: acceptedTypes.join(', '),
+                size: Math.round(maxSize / 1024 / 1024),
+              })}
             </Text>
             <Group justify="center" mt="md">
               <ThemeIcon size="sm" variant="light" color={storageInfo.color}>
@@ -276,9 +301,17 @@ const FileUploadZone = ({
           <Text fw={500} size="sm">
             {t('fileUpload.selectedFiles', { count: selectedFiles.length })}
           </Text>
-          
-          {selectedFiles.map((item) => (
-            <Group key={item.id} justify="space-between" p="sm" style={{ border: '1px solid var(--mantine-color-gray-3)', borderRadius: '4px' }}>
+
+          {selectedFiles.map(item => (
+            <Group
+              key={item.id}
+              justify="space-between"
+              p="sm"
+              style={{
+                border: '1px solid var(--mantine-color-gray-3)',
+                borderRadius: '4px',
+              }}
+            >
               <Group gap="sm">
                 <IconFile size={16} />
                 <div>
@@ -298,7 +331,7 @@ const FileUploadZone = ({
               </Button>
             </Group>
           ))}
-          
+
           {/* Upload Button */}
           <Group justify="center" mt="md">
             <Button
@@ -307,10 +340,9 @@ const FileUploadZone = ({
               disabled={disabled || selectedFiles.length === 0}
               color={storageInfo.color}
             >
-              {mode === 'create' 
+              {mode === 'create'
                 ? `Add ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''} (Upload After Creating)`
-                : `Upload ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''} to ${storageInfo.label}`
-              }
+                : `Upload ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''} to ${storageInfo.label}`}
             </Button>
           </Group>
         </Stack>

@@ -1,13 +1,6 @@
-import React from 'react';
 import { Button as MantineButton } from '@mantine/core';
 
-export const Button = ({
-  variant,
-  size,
-  loading,
-  children,
-  ...props
-}) => {
+export const Button = ({ variant, size, loading, children, ...props }) => {
   // Map your old variants to Mantine
   const variantMap = {
     primary: 'filled',

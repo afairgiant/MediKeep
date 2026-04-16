@@ -15,16 +15,40 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging.config import get_logger
 from app.models.models import (
-    Allergy, Condition, ConditionMedication, EmergencyContact, Encounter, FamilyCondition,
-    FamilyMember, Immunization, Injury, InjuryType, Insurance, LabResult, Medication, Patient,
-    Pharmacy, Practitioner, Procedure, ReportGenerationAudit, ReportTemplate, Symptom,
-    SymptomOccurrence, Treatment, User, Vitals
+    Allergy,
+    Condition,
+    ConditionMedication,
+    EmergencyContact,
+    Encounter,
+    FamilyCondition,
+    FamilyMember,
+    Immunization,
+    Injury,
+    InjuryType,
+    Insurance,
+    LabResult,
+    Medication,
+    Patient,
+    Pharmacy,
+    Practitioner,
+    Procedure,
+    ReportGenerationAudit,
+    ReportTemplate,
+    Symptom,
+    SymptomOccurrence,
+    Treatment,
+    User,
+    Vitals,
 )
 from app.models.procedures import MedicalEquipment
 from app.schemas.custom_reports import (
-    CategorySummary, CustomReportError, CustomReportRequest,
-    DataSummaryResponse, RecordSummary, ReportTemplate as ReportTemplateSchema,
-    SelectiveRecordRequest
+    CategorySummary,
+    CustomReportError,
+    CustomReportRequest,
+    DataSummaryResponse,
+    RecordSummary,
+    ReportTemplate as ReportTemplateSchema,
+    SelectiveRecordRequest,
 )
 from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.services.export_service import ExportService, UnitConverter
@@ -35,28 +59,28 @@ logger = get_logger(__name__, "app")
 
 class CustomReportService:
     """Service for generating custom medical reports with selective data"""
-    
+
     # Map category names to model classes
     CATEGORY_MODELS = {
-        'medications': Medication,
-        'lab_results': LabResult,
-        'allergies': Allergy,
-        'conditions': Condition,
-        'immunizations': Immunization,
-        'procedures': Procedure,
-        'treatments': Treatment,
-        'encounters': Encounter,
-        'vitals': Vitals,
-        'emergency_contacts': EmergencyContact,
-        'practitioners': Practitioner,
-        'pharmacies': Pharmacy,
-        'family_history': FamilyMember,
-        'symptoms': Symptom,
-        'injuries': Injury,
-        'insurance': Insurance,
-        'medical_equipment': MedicalEquipment,
+        "medications": Medication,
+        "lab_results": LabResult,
+        "allergies": Allergy,
+        "conditions": Condition,
+        "immunizations": Immunization,
+        "procedures": Procedure,
+        "treatments": Treatment,
+        "encounters": Encounter,
+        "vitals": Vitals,
+        "emergency_contacts": EmergencyContact,
+        "practitioners": Practitioner,
+        "pharmacies": Pharmacy,
+        "family_history": FamilyMember,
+        "symptoms": Symptom,
+        "injuries": Injury,
+        "insurance": Insurance,
+        "medical_equipment": MedicalEquipment,
     }
-    
+
     def __init__(self, db: Session):
         self.db = db
         self.export_service = ExportService(db)
@@ -67,7 +91,7 @@ class CustomReportService:
         # Default unit system, updated per-request when user prefs are loaded
         self._user_unit_system = "imperial"
         logger.debug("CustomReportService initialized")
-    
+
     async def get_data_summary_for_selection(self, user_id: int) -> DataSummaryResponse:
         """
         Get summarized data for all categories to support record selection.
@@ -84,14 +108,17 @@ class CustomReportService:
         if not user:
             logger.warning(f"User {user_id} not found")
             return DataSummaryResponse(categories={}, total_records=0)
-        
+
         # Get the active patient ID
         if not user.active_patient_id:
             # Check if user has a self-record that can be set as active
-            self_record = self.db.query(Patient).filter(
-                Patient.owner_user_id == user_id,
-                Patient.is_self_record == True
-            ).first()
+            self_record = (
+                self.db.query(Patient)
+                .filter(
+                    Patient.owner_user_id == user_id, Patient.is_self_record == True
+                )
+                .first()
+            )
 
             if self_record:
                 try:
@@ -104,8 +131,8 @@ class CustomReportService:
                         extra={
                             "user_id": user_id,
                             "patient_id": self_record.id,
-                            "context": "custom_report_access"
-                        }
+                            "context": "custom_report_access",
+                        },
                     )
                 except Exception as e:
                     self.db.rollback()
@@ -115,16 +142,18 @@ class CustomReportService:
                             "user_id": user_id,
                             "patient_id": self_record.id,
                             "context": "custom_report_access",
-                            "error": str(e)
-                        }
+                            "error": str(e),
+                        },
                     )
                     logger.warning(f"No active patient for user {user_id}")
                     return DataSummaryResponse(categories={}, total_records=0)
             else:
                 # Check if user has any owned patients at all
-                any_patient = self.db.query(Patient).filter(
-                    Patient.owner_user_id == user_id
-                ).first()
+                any_patient = (
+                    self.db.query(Patient)
+                    .filter(Patient.owner_user_id == user_id)
+                    .first()
+                )
 
                 if any_patient:
                     try:
@@ -137,8 +166,8 @@ class CustomReportService:
                             extra={
                                 "user_id": user_id,
                                 "patient_id": any_patient.id,
-                                "context": "custom_report_access"
-                            }
+                                "context": "custom_report_access",
+                            },
                         )
                     except Exception as e:
                         self.db.rollback()
@@ -148,99 +177,105 @@ class CustomReportService:
                                 "user_id": user_id,
                                 "patient_id": any_patient.id,
                                 "context": "custom_report_access",
-                                "error": str(e)
-                            }
+                                "error": str(e),
+                            },
                         )
                         logger.warning(
                             "No patients available for user",
                             extra={
                                 "user_id": user_id,
-                                "context": "custom_report_access"
-                            }
+                                "context": "custom_report_access",
+                            },
                         )
                         return DataSummaryResponse(categories={}, total_records=0)
                 else:
                     logger.warning(
                         "No patients available for user",
-                        extra={
-                            "user_id": user_id,
-                            "context": "custom_report_access"
-                        }
+                        extra={"user_id": user_id, "context": "custom_report_access"},
                     )
                     return DataSummaryResponse(categories={}, total_records=0)
-        
+
         # Include patient ID in cache key so different patients have different caches
         cache_key = f"summary_{user_id}_{user.active_patient_id}"
         now = time.time()
-        
+
         # Check cache
-        if (cache_key in self._summary_cache and 
-            now - self._summary_cache[cache_key]['timestamp'] < self._cache_timeout):
-            logger.debug(f"Returning cached summary for user {user_id}, patient {user.active_patient_id}")
-            return self._summary_cache[cache_key]['data']
-        
-        logger.debug(f"Generating new data summary for user {user_id}, active patient {user.active_patient_id}")
-        
+        if (
+            cache_key in self._summary_cache
+            and now - self._summary_cache[cache_key]["timestamp"] < self._cache_timeout
+        ):
+            logger.debug(
+                f"Returning cached summary for user {user_id}, patient {user.active_patient_id}"
+            )
+            return self._summary_cache[cache_key]["data"]
+
+        logger.debug(
+            f"Generating new data summary for user {user_id}, active patient {user.active_patient_id}"
+        )
+
         # Get the patient
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
-            logger.warning(f"Active patient {user.active_patient_id} not found for user {user_id}")
+            logger.warning(
+                f"Active patient {user.active_patient_id} not found for user {user_id}"
+            )
             return DataSummaryResponse(categories={}, total_records=0)
-        
+
         logger.debug(f"Found active patient {patient.id} for user {user_id}")
-        
+
         categories = {}
         total_records = 0
-        
+
         # Generate summary for each category
         for category_name, model_class in self.CATEGORY_MODELS.items():
             try:
                 category_summary = await self._get_category_summary(
-                    patient.id, 
-                    category_name, 
-                    model_class
+                    patient.id, category_name, model_class
                 )
                 categories[category_name] = category_summary
                 total_records += category_summary.count
             except Exception as e:
-                logger.error(f"Error getting summary for {category_name}: {str(e)}", exc_info=True)
+                logger.error(
+                    f"Error getting summary for {category_name}: {str(e)}",
+                    exc_info=True,
+                )
                 categories[category_name] = CategorySummary(count=0, records=[])
-        
+
         # Get last update timestamp
         last_updated = self._get_last_update_timestamp(patient.id)
-        
+
         summary = DataSummaryResponse(
             categories=categories,
             total_records=total_records,
-            last_updated=last_updated
+            last_updated=last_updated,
         )
-        
+
         # Log summary statistics
-        logger.info(f"Data summary for user {user_id}: {total_records} total records across {len([c for c in categories.values() if c.count > 0])} categories with data")
+        logger.info(
+            f"Data summary for user {user_id}: {total_records} total records across {len([c for c in categories.values() if c.count > 0])} categories with data"
+        )
         for cat_name, cat_data in categories.items():
             if cat_data.count > 0:
-                logger.debug(f"  - {cat_name}: {cat_data.count} records, {len(cat_data.records)} displayed")
-        
+                logger.debug(
+                    f"  - {cat_name}: {cat_data.count} records, {len(cat_data.records)} displayed"
+                )
+
         # Update cache
-        self._summary_cache[cache_key] = {
-            'data': summary,
-            'timestamp': now
-        }
-        
+        self._summary_cache[cache_key] = {"data": summary, "timestamp": now}
+
         return summary
-    
+
     async def _get_category_summary(
-        self, 
-        patient_id: int, 
-        category: str, 
-        model_class
+        self, patient_id: int, category: str, model_class
     ) -> CategorySummary:
         """Get summary for a specific category"""
         records = []
-        
+
         # Categories that don't have patient_id (shared resources)
-        shared_categories = ['practitioners', 'pharmacies']
-        
+        shared_categories = ["practitioners", "pharmacies"]
+
         # Build base query
         if category in shared_categories:
             # For shared resources, get all records
@@ -249,34 +284,44 @@ class CustomReportService:
         else:
             # For patient-specific records, filter by patient_id
             # First check if the model has patient_id field
-            if not hasattr(model_class, 'patient_id'):
-                logger.error(f"Model {model_class.__name__} does not have patient_id field")
+            if not hasattr(model_class, "patient_id"):
+                logger.error(
+                    f"Model {model_class.__name__} does not have patient_id field"
+                )
                 return CategorySummary(count=0, records=[], has_more=False)
-            
-            logger.debug(f"Querying patient-specific category: {category} for patient_id: {patient_id}")
-            query = self.db.query(model_class).filter(model_class.patient_id == patient_id)
-        
+
+            logger.debug(
+                f"Querying patient-specific category: {category} for patient_id: {patient_id}"
+            )
+            query = self.db.query(model_class).filter(
+                model_class.patient_id == patient_id
+            )
+
         # Get total count
         try:
             total_count = query.count()
             logger.debug(f"Category {category}: found {total_count} total records")
         except Exception as e:
-            logger.error(f"Error counting records for {category}: {str(e)}", exc_info=True)
+            logger.error(
+                f"Error counting records for {category}: {str(e)}", exc_info=True
+            )
             return CategorySummary(count=0, records=[], has_more=False)
-        
+
         # Get limited records for display (max 100 for UI performance)
         limit = 100
-        
+
         # Order by created_at if it exists, otherwise by id
         try:
-            if hasattr(model_class, 'created_at'):
+            if hasattr(model_class, "created_at"):
                 items = query.order_by(model_class.created_at.desc()).limit(limit).all()
             else:
                 items = query.order_by(model_class.id.desc()).limit(limit).all()
         except Exception as e:
-            logger.error(f"Error fetching records for {category}: {str(e)}", exc_info=True)
+            logger.error(
+                f"Error fetching records for {category}: {str(e)}", exc_info=True
+            )
             return CategorySummary(count=0, records=[], has_more=False)
-        
+
         # Convert to RecordSummary
         for item in items:
             logger.debug(f"Processing {category} item {item.id} for data summary")
@@ -284,200 +329,203 @@ class CustomReportService:
             if record_summary:
                 records.append(record_summary)
             else:
-                logger.warning(f"Failed to convert {category} item {item.id} to RecordSummary")
-        
+                logger.warning(
+                    f"Failed to convert {category} item {item.id} to RecordSummary"
+                )
+
         logger.debug(f"Successfully converted {len(records)} records for {category}")
-        
+
         return CategorySummary(
-            count=total_count,
-            records=records,
-            has_more=total_count > limit
+            count=total_count, records=records, has_more=total_count > limit
         )
-    
-    def _convert_to_record_summary(self, item: Any, category: str) -> Optional[RecordSummary]:
+
+    def _convert_to_record_summary(
+        self, item: Any, category: str
+    ) -> Optional[RecordSummary]:
         """Convert a database model instance to RecordSummary"""
         try:
-            item_id = getattr(item, 'id', 'unknown')
-            
+            item_id = getattr(item, "id", "unknown")
+
             # Use a generic approach that works for all models
             # Try to find the main name/title field
             title_field = self._get_title_field(item, category)
             date_field = self._get_date_field(item, category)
             key_info = self._get_key_info(item, category)
-            
+
             result = RecordSummary(
                 id=item.id,
                 title=title_field or f"{category.replace('_', ' ').title()} #{item.id}",
                 date=date_field,
-                practitioner=getattr(item, 'practitioner_name', None) or getattr(item, 'provider_name', None),
+                practitioner=getattr(item, "practitioner_name", None)
+                or getattr(item, "provider_name", None),
                 key_info=key_info,
-                status=getattr(item, 'status', None)
+                status=getattr(item, "status", None),
             )
-            
+
             return result
-            
+
         except Exception as e:
-            logger.error(f"Error converting {category} record {getattr(item, 'id', 'unknown')}: {str(e)}", exc_info=True)
+            logger.error(
+                f"Error converting {category} record {getattr(item, 'id', 'unknown')}: {str(e)}",
+                exc_info=True,
+            )
             # Return a basic record instead of None to ensure we don't lose data
             return RecordSummary(
-                id=getattr(item, 'id', 0),
+                id=getattr(item, "id", 0),
                 title=f"{category.replace('_', ' ').title()} Record",
                 date=None,
                 practitioner=None,
                 key_info="Details not available",
-                status=None
+                status=None,
             )
-    
+
     def _get_title_field(self, item: Any, category: str) -> Optional[str]:
         """Get the appropriate title field for the category"""
         # Map categories to their specific name fields and fallback fields
         category_field_map = {
-            'medications': {
-                'primary': ['medication_name'],
-                'fallbacks': ['alternative_name', 'indication', 'dosage']
+            "medications": {
+                "primary": ["medication_name"],
+                "fallbacks": ["alternative_name", "indication", "dosage"],
             },
-            'conditions': {
-                'primary': ['condition_name'],
-                'fallbacks': ['diagnosis', 'description', 'notes', 'icd_code']
+            "conditions": {
+                "primary": ["condition_name"],
+                "fallbacks": ["diagnosis", "description", "notes", "icd_code"],
             },
-            'procedures': {
-                'primary': ['procedure_name'],
-                'fallbacks': ['procedure_code', 'description', 'notes']
+            "procedures": {
+                "primary": ["procedure_name"],
+                "fallbacks": ["procedure_code", "description", "notes"],
             },
-            'treatments': {
-                'primary': ['treatment_name'],
-                'fallbacks': ['treatment_type', 'description', 'notes']
+            "treatments": {
+                "primary": ["treatment_name"],
+                "fallbacks": ["treatment_type", "description", "notes"],
             },
-            'lab_results': {
-                'primary': ['test_name'],
-                'fallbacks': ['test_code', 'category', 'description']
+            "lab_results": {
+                "primary": ["test_name"],
+                "fallbacks": ["test_code", "category", "description"],
             },
-            'immunizations': {
-                'primary': ['vaccine_name'],
-                'fallbacks': ['vaccine_type', 'manufacturer', 'series']
+            "immunizations": {
+                "primary": ["vaccine_name"],
+                "fallbacks": ["vaccine_type", "manufacturer", "series"],
             },
-            'allergies': {
-                'primary': ['allergen'],  # The actual field name is 'allergen'
-                'fallbacks': ['reaction', 'category', 'severity']
+            "allergies": {
+                "primary": ["allergen"],  # The actual field name is 'allergen'
+                "fallbacks": ["reaction", "category", "severity"],
             },
-            'encounters': {
-                'primary': ['reason'],
-                'fallbacks': ['visit_type', 'chief_complaint', 'diagnosis', 'notes']
+            "encounters": {
+                "primary": ["reason"],
+                "fallbacks": ["visit_type", "chief_complaint", "diagnosis", "notes"],
             },
-            'vitals': {
-                'primary': ['measurement_type'],
-                'fallbacks': ['category', 'description']
+            "vitals": {
+                "primary": ["measurement_type"],
+                "fallbacks": ["category", "description"],
             },
-            'emergency_contacts': {
-                'primary': ['name'],  # The actual field name is 'name'
-                'fallbacks': ['relationship']
+            "emergency_contacts": {
+                "primary": ["name"],  # The actual field name is 'name'
+                "fallbacks": ["relationship"],
             },
-            'practitioners': {
-                'primary': ['name'],
-                'fallbacks': ['full_name', 'first_name', 'last_name', 'specialty']
+            "practitioners": {
+                "primary": ["name"],
+                "fallbacks": ["full_name", "first_name", "last_name", "specialty"],
             },
-            'pharmacies': {
-                'primary': ['name'],
-                'fallbacks': ['pharmacy_name', 'business_name', 'address']
+            "pharmacies": {
+                "primary": ["name"],
+                "fallbacks": ["pharmacy_name", "business_name", "address"],
             },
-            'family_history': {
-                'primary': ['name'],
-                'fallbacks': ['relationship']
+            "family_history": {"primary": ["name"], "fallbacks": ["relationship"]},
+            "symptoms": {
+                "primary": ["symptom_name"],
+                "fallbacks": ["category", "general_notes"],
             },
-            'symptoms': {
-                'primary': ['symptom_name'],
-                'fallbacks': ['category', 'general_notes']
+            "injuries": {
+                "primary": ["injury_name"],
+                "fallbacks": ["body_part", "mechanism", "notes"],
             },
-            'injuries': {
-                'primary': ['injury_name'],
-                'fallbacks': ['body_part', 'mechanism', 'notes']
+            "insurance": {
+                "primary": ["company_name"],
+                "fallbacks": ["plan_name", "insurance_type", "member_name"],
             },
-            'insurance': {
-                'primary': ['company_name'],
-                'fallbacks': ['plan_name', 'insurance_type', 'member_name']
-            }
         }
 
         # Get field configuration for this category
-        field_config = category_field_map.get(category, {
-            'primary': ['name', 'title'],
-            'fallbacks': ['description', 'notes']
-        })
-        
+        field_config = category_field_map.get(
+            category,
+            {"primary": ["name", "title"], "fallbacks": ["description", "notes"]},
+        )
+
         # Try primary fields first
-        for field_name in field_config.get('primary', []):
+        for field_name in field_config.get("primary", []):
             value = getattr(item, field_name, None)
             if value and str(value).strip():
                 logger.debug(f"Found primary field '{field_name}' for {category}")
                 return str(value).strip()
-        
+
         # Try fallback fields
-        for field_name in field_config.get('fallbacks', []):
+        for field_name in field_config.get("fallbacks", []):
             value = getattr(item, field_name, None)
             if value and str(value).strip():
                 logger.debug(f"Using fallback field '{field_name}' for {category}")
                 # Add a prefix to indicate this is a fallback field
-                field_display = field_name.replace('_', ' ').title()
+                field_display = field_name.replace("_", " ").title()
                 return f"{str(value).strip()}"
-        
+
         # Final fallback to common generic fields
-        common_fields = ['name', 'title', 'full_name', 'description', 'notes']
+        common_fields = ["name", "title", "full_name", "description", "notes"]
         for field in common_fields:
             value = getattr(item, field, None)
             if value and str(value).strip():
                 logger.debug(f"Using common fallback field '{field}' for {category}")
                 return str(value).strip()
-        
+
         logger.info(f"No title field found for {category}")
         return None
-    
+
     def _get_date_field(self, item: Any, category: str) -> Optional[Any]:
         """Get the appropriate date field for the category"""
         # Map categories to their specific date fields
         category_date_map = {
-            'medications': 'effective_period_start',
-            'conditions': 'onset_date',
-            'procedures': 'date',
-            'treatments': 'start_date',
-            'lab_results': 'ordered_date',
-            'immunizations': 'administered_date',
-            'allergies': 'onset_date',
-            'encounters': 'date',
-            'vitals': 'measurement_date',
-            'emergency_contacts': 'created_at',
-            'practitioners': 'created_at',
-            'pharmacies': 'created_at',
-            'family_history': 'created_at',
-            'symptoms': 'first_occurrence_date',
-            'injuries': 'date_of_injury',
-            'insurance': 'effective_date'
+            "medications": "effective_period_start",
+            "conditions": "onset_date",
+            "procedures": "date",
+            "treatments": "start_date",
+            "lab_results": "ordered_date",
+            "immunizations": "administered_date",
+            "allergies": "onset_date",
+            "encounters": "date",
+            "vitals": "measurement_date",
+            "emergency_contacts": "created_at",
+            "practitioners": "created_at",
+            "pharmacies": "created_at",
+            "family_history": "created_at",
+            "symptoms": "first_occurrence_date",
+            "injuries": "date_of_injury",
+            "insurance": "effective_date",
         }
-        
+
         # Try the specific field first
         if category in category_date_map:
             value = getattr(item, category_date_map[category], None)
             if value:
                 return value
-        
+
         # Fallback to common date fields
-        common_date_fields = ['created_at', 'updated_at', 'date']
+        common_date_fields = ["created_at", "updated_at", "date"]
         for field in common_date_fields:
             value = getattr(item, field, None)
             if value:
                 return value
-        
+
         return None
-    
+
     def _get_key_info(self, item: Any, category: str) -> str:
         """Get key information for the record based on category"""
         try:
-            if category == 'medications':
+            if category == "medications":
                 parts = []
-                dosage = getattr(item, 'dosage', None)
-                frequency = getattr(item, 'frequency', None)
-                route = getattr(item, 'route', None)
-                indication = getattr(item, 'indication', None)
-                
+                dosage = getattr(item, "dosage", None)
+                frequency = getattr(item, "frequency", None)
+                route = getattr(item, "route", None)
+                indication = getattr(item, "indication", None)
+
                 if dosage:
                     parts.append(f"Dosage: {dosage}")
                 if frequency:
@@ -486,38 +534,38 @@ class CustomReportService:
                     parts.append(f"Route: {route}")
                 if indication:
                     parts.append(f"For: {indication}")
-                
+
                 return " | ".join(parts) if parts else "Medication details"
-                
-            elif category == 'conditions':
+
+            elif category == "conditions":
                 parts = []
-                severity = getattr(item, 'severity', None)
-                verification_status = getattr(item, 'verification_status', None)
-                
+                severity = getattr(item, "severity", None)
+                verification_status = getattr(item, "verification_status", None)
+
                 if severity:
                     parts.append(f"Severity: {severity}")
                 if verification_status:
                     parts.append(f"Status: {verification_status}")
-                
+
                 return " | ".join(parts) if parts else "Condition details"
-                
-            elif category == 'procedures':
+
+            elif category == "procedures":
                 parts = []
-                procedure_code = getattr(item, 'procedure_code', None)
-                status = getattr(item, 'status', None)
-                
+                procedure_code = getattr(item, "procedure_code", None)
+                status = getattr(item, "status", None)
+
                 if procedure_code:
                     parts.append(f"Code: {procedure_code}")
                 if status:
                     parts.append(f"Status: {status}")
-                
+
                 return " | ".join(parts) if parts else "Procedure details"
-                
-            elif category == 'lab_results':
+
+            elif category == "lab_results":
                 parts = []
-                test_type = getattr(item, 'test_type', None)
-                labs_result = getattr(item, 'labs_result', None)
-                status = getattr(item, 'status', None)
+                test_type = getattr(item, "test_type", None)
+                labs_result = getattr(item, "labs_result", None)
+                status = getattr(item, "status", None)
 
                 if test_type:
                     parts.append(f"Type: {test_type}")
@@ -527,47 +575,49 @@ class CustomReportService:
                     parts.append(f"Status: {status}")
 
                 return " | ".join(parts) if parts else "Lab result details"
-                
-            elif category == 'immunizations':
+
+            elif category == "immunizations":
                 parts = []
-                site = getattr(item, 'site', None)
-                lot_number = getattr(item, 'lot_number', None)
-                manufacturer = getattr(item, 'manufacturer', None)
-                
+                site = getattr(item, "site", None)
+                lot_number = getattr(item, "lot_number", None)
+                manufacturer = getattr(item, "manufacturer", None)
+
                 if site:
                     parts.append(f"Site: {site}")
                 if manufacturer:
                     parts.append(f"Manufacturer: {manufacturer}")
                 if lot_number:
                     parts.append(f"Lot: {lot_number}")
-                
+
                 return " | ".join(parts) if parts else "Immunization details"
-                
-            elif category == 'treatments':
+
+            elif category == "treatments":
                 parts = []
-                dosage = getattr(item, 'dosage', None)
-                frequency = getattr(item, 'frequency', None)
-                status = getattr(item, 'status', None)
-                
+                dosage = getattr(item, "dosage", None)
+                frequency = getattr(item, "frequency", None)
+                status = getattr(item, "status", None)
+
                 if dosage:
                     parts.append(f"Dosage: {dosage}")
                 if frequency:
                     parts.append(f"Frequency: {frequency}")
                 if status:
                     parts.append(f"Status: {status}")
-                
+
                 return " | ".join(parts) if parts else "Treatment details"
-                
-            elif category == 'vitals':
-                return self._format_vitals_info(item, unit_system=self._user_unit_system)
-                
-            elif category == 'encounters':
+
+            elif category == "vitals":
+                return self._format_vitals_info(
+                    item, unit_system=self._user_unit_system
+                )
+
+            elif category == "encounters":
                 parts = []
-                reason = getattr(item, 'reason', None)
-                visit_type = getattr(item, 'visit_type', None)
-                diagnosis = getattr(item, 'diagnosis', None)
-                chief_complaint = getattr(item, 'chief_complaint', None)
-                
+                reason = getattr(item, "reason", None)
+                visit_type = getattr(item, "visit_type", None)
+                diagnosis = getattr(item, "diagnosis", None)
+                chief_complaint = getattr(item, "chief_complaint", None)
+
                 if reason:
                     parts.append(f"Reason: {reason}")
                 if visit_type:
@@ -576,77 +626,79 @@ class CustomReportService:
                     parts.append(f"Diagnosis: {diagnosis}")
                 elif chief_complaint:
                     parts.append(f"Complaint: {chief_complaint}")
-                
+
                 return " | ".join(parts) if parts else "Visit details"
-                
-            elif category == 'allergies':
+
+            elif category == "allergies":
                 parts = []
-                severity = getattr(item, 'severity', None)
-                reaction = getattr(item, 'reaction', None)
-                
+                severity = getattr(item, "severity", None)
+                reaction = getattr(item, "reaction", None)
+
                 if severity:
                     parts.append(f"Severity: {severity}")
                 if reaction:
                     parts.append(f"Reaction: {reaction}")
-                
+
                 return " | ".join(parts) if parts else "Allergy details"
-            
-            elif category == 'practitioners':
+
+            elif category == "practitioners":
                 parts = []
-                practice = getattr(item, 'practice', None)
-                specialty = getattr(item, 'specialty', None)
-                phone = getattr(item, 'phone_number', None)
-                
+                practice = getattr(item, "practice", None)
+                specialty = getattr(item, "specialty", None)
+                phone = getattr(item, "phone_number", None)
+
                 if practice:
                     parts.append(f"Practice: {practice}")
                 if specialty:
                     parts.append(f"Specialty: {specialty}")
                 if phone:
                     parts.append(f"Phone: {phone}")
-                
+
                 return " | ".join(parts) if parts else "Practitioner details"
-            
-            elif category == 'pharmacies':
+
+            elif category == "pharmacies":
                 parts = []
-                brand = getattr(item, 'brand', None)
-                address = getattr(item, 'address', None)
-                phone = getattr(item, 'phone_number', None)
-                
+                brand = getattr(item, "brand", None)
+                address = getattr(item, "address", None)
+                phone = getattr(item, "phone_number", None)
+
                 if brand:
                     parts.append(f"Brand: {brand}")
                 if address:
                     # Truncate long addresses
-                    addr_display = address[:50] + "..." if len(address) > 50 else address
+                    addr_display = (
+                        address[:50] + "..." if len(address) > 50 else address
+                    )
                     parts.append(addr_display)
                 if phone:
                     parts.append(f"Phone: {phone}")
-                
+
                 return " | ".join(parts) if parts else "Pharmacy details"
-            
-            elif category == 'emergency_contacts':
+
+            elif category == "emergency_contacts":
                 parts = []
-                relationship = getattr(item, 'relationship', None)
-                phone = getattr(item, 'phone_number', None)
-                
+                relationship = getattr(item, "relationship", None)
+                phone = getattr(item, "phone_number", None)
+
                 if relationship:
                     parts.append(relationship)
                 if phone:
                     parts.append(f"Phone: {phone}")
-                
+
                 return " | ".join(parts) if parts else "Contact details"
-            
-            elif category == 'family_history':
+
+            elif category == "family_history":
                 parts = []
-                relationship = getattr(item, 'relationship', None)
-                birth_year = getattr(item, 'birth_year', None)
-                is_deceased = getattr(item, 'is_deceased', None)
-                
+                relationship = getattr(item, "relationship", None)
+                birth_year = getattr(item, "birth_year", None)
+                is_deceased = getattr(item, "is_deceased", None)
+
                 if relationship:
                     parts.append(relationship)
                 if birth_year:
                     age_info = f"Born {birth_year}"
                     if is_deceased:
-                        death_year = getattr(item, 'death_year', None)
+                        death_year = getattr(item, "death_year", None)
                         if death_year:
                             age_info += f", died {death_year}"
                         else:
@@ -654,26 +706,30 @@ class CustomReportService:
                     parts.append(age_info)
                 elif is_deceased:
                     parts.append("Deceased")
-                
+
                 # Try to get condition count from related conditions
                 try:
-                    condition_count = self.db.query(FamilyCondition).filter(
-                        FamilyCondition.family_member_id == item.id
-                    ).count()
+                    condition_count = (
+                        self.db.query(FamilyCondition)
+                        .filter(FamilyCondition.family_member_id == item.id)
+                        .count()
+                    )
                     if condition_count > 0:
-                        parts.append(f"{condition_count} medical condition{'s' if condition_count != 1 else ''}")
+                        parts.append(
+                            f"{condition_count} medical condition{'s' if condition_count != 1 else ''}"
+                        )
                 except Exception:
                     # If we can't get conditions, don't add to parts
                     pass
-                
+
                 return " | ".join(parts) if parts else "Family member details"
 
-            elif category == 'symptoms':
+            elif category == "symptoms":
                 parts = []
-                category_val = getattr(item, 'category', None)
-                status = getattr(item, 'status', None)
-                is_chronic = getattr(item, 'is_chronic', None)
-                typical_triggers = getattr(item, 'typical_triggers', None)
+                category_val = getattr(item, "category", None)
+                status = getattr(item, "status", None)
+                is_chronic = getattr(item, "is_chronic", None)
+                typical_triggers = getattr(item, "typical_triggers", None)
 
                 if category_val:
                     parts.append(f"Category: {category_val}")
@@ -686,17 +742,21 @@ class CustomReportService:
                         triggers_text = ", ".join(str(t) for t in typical_triggers)
                     else:
                         triggers_text = str(typical_triggers)
-                    triggers_display = triggers_text[:50] + "..." if len(triggers_text) > 50 else triggers_text
+                    triggers_display = (
+                        triggers_text[:50] + "..."
+                        if len(triggers_text) > 50
+                        else triggers_text
+                    )
                     parts.append(f"Triggers: {triggers_display}")
 
                 return " | ".join(parts) if parts else "Symptom details"
 
-            elif category == 'injuries':
+            elif category == "injuries":
                 parts = []
-                body_part = getattr(item, 'body_part', None)
-                severity = getattr(item, 'severity', None)
-                status = getattr(item, 'status', None)
-                mechanism = getattr(item, 'mechanism', None)
+                body_part = getattr(item, "body_part", None)
+                severity = getattr(item, "severity", None)
+                status = getattr(item, "status", None)
+                mechanism = getattr(item, "mechanism", None)
 
                 if body_part:
                     parts.append(f"Body Part: {body_part}")
@@ -705,17 +765,21 @@ class CustomReportService:
                 if status:
                     parts.append(f"Status: {status}")
                 if mechanism:
-                    mech_display = mechanism[:30] + "..." if len(str(mechanism)) > 30 else mechanism
+                    mech_display = (
+                        mechanism[:30] + "..."
+                        if len(str(mechanism)) > 30
+                        else mechanism
+                    )
                     parts.append(f"Cause: {mech_display}")
 
                 return " | ".join(parts) if parts else "Injury details"
 
-            elif category == 'insurance':
+            elif category == "insurance":
                 parts = []
-                insurance_type = getattr(item, 'insurance_type', None)
-                plan_name = getattr(item, 'plan_name', None)
-                member_id = getattr(item, 'member_id', None)
-                is_primary = getattr(item, 'is_primary', None)
+                insurance_type = getattr(item, "insurance_type", None)
+                plan_name = getattr(item, "plan_name", None)
+                member_id = getattr(item, "member_id", None)
+                is_primary = getattr(item, "is_primary", None)
 
                 if insurance_type:
                     parts.append(insurance_type)
@@ -731,88 +795,96 @@ class CustomReportService:
             return f"{category.replace('_', ' ').title()} record"
         except Exception:
             return "Details not available"
-    
+
     def _format_vitals_info(self, vital: Vitals, unit_system: str = "imperial") -> str:
         """Format vital signs into a readable summary with unit conversion"""
         parts = []
         unit_labels = UnitConverter.get_unit_labels(unit_system)
-        if hasattr(vital, 'blood_pressure_systolic') and vital.blood_pressure_systolic:
-            parts.append(f"BP: {vital.blood_pressure_systolic}/{vital.blood_pressure_diastolic or '?'}")
-        if hasattr(vital, 'heart_rate') and vital.heart_rate:
+        if hasattr(vital, "blood_pressure_systolic") and vital.blood_pressure_systolic:
+            parts.append(
+                f"BP: {vital.blood_pressure_systolic}/{vital.blood_pressure_diastolic or '?'}"
+            )
+        if hasattr(vital, "heart_rate") and vital.heart_rate:
             parts.append(f"HR: {vital.heart_rate}")
-        if hasattr(vital, 'temperature') and vital.temperature:
+        if hasattr(vital, "temperature") and vital.temperature:
             temp = vital.temperature
             if unit_system == "metric":
                 temp = UnitConverter.fahrenheit_to_celsius(temp)
             parts.append(f"Temp: {temp}{unit_labels['temperature']}")
         return " | ".join(parts) if parts else "No measurements"
-    
+
     def _get_last_update_timestamp(self, patient_id: int) -> Optional[datetime]:
         """Get the most recent update timestamp across all categories"""
         latest = None
-        
+
         for model_class in self.CATEGORY_MODELS.values():
             try:
-                if hasattr(model_class, 'updated_at') and hasattr(model_class, 'patient_id'):
-                    record = (self.db.query(model_class.updated_at)
-                             .filter(model_class.patient_id == patient_id)
-                             .order_by(model_class.updated_at.desc())
-                             .first())
+                if hasattr(model_class, "updated_at") and hasattr(
+                    model_class, "patient_id"
+                ):
+                    record = (
+                        self.db.query(model_class.updated_at)
+                        .filter(model_class.patient_id == patient_id)
+                        .order_by(model_class.updated_at.desc())
+                        .first()
+                    )
                     if record and record[0]:
                         if not latest or record[0] > latest:
                             latest = record[0]
             except Exception:
                 continue
-        
+
         return latest
-    
+
     async def validate_record_ownership(
-        self, 
-        user_id: int, 
-        selected_records: List[SelectiveRecordRequest]
+        self, user_id: int, selected_records: List[SelectiveRecordRequest]
     ):
         """Ensure user can only access their own records"""
         # Get the active patient for the user
         user = self.db.query(User).filter(User.id == user_id).first()
         if not user:
             raise PermissionError("User not found")
-        
+
         if not user.active_patient_id:
             raise PermissionError("No active patient selected")
-        
-        patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+
+        patient = (
+            self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+        )
         if not patient:
             raise PermissionError("Active patient record not found")
-        
+
         # Categories that don't have patient_id (shared resources)
-        shared_categories = ['practitioners', 'pharmacies']
-        
+        shared_categories = ["practitioners", "pharmacies"]
+
         for record_group in selected_records:
             if record_group.category not in self.CATEGORY_MODELS:
                 raise ValueError(f"Invalid category: {record_group.category}")
-            
+
             model_class = self.CATEGORY_MODELS[record_group.category]
-            
+
             if record_group.category in shared_categories:
                 # For shared resources, just validate that the IDs exist
                 valid_ids = set(
-                    record[0] for record in self.db.query(model_class.id)
+                    record[0]
+                    for record in self.db.query(model_class.id)
                     .filter(model_class.id.in_(record_group.record_ids))
                     .all()
                 )
             else:
                 # Get valid record IDs for this user and category
                 valid_ids = set(
-                    record[0] for record in self.db.query(model_class.id)
+                    record[0]
+                    for record in self.db.query(model_class.id)
                     .filter(model_class.patient_id == patient.id)
                     .filter(model_class.id.in_(record_group.record_ids))
                     .all()
                 )
-            
+
             # Check for invalid IDs
             requested_ids = set(record_group.record_ids)
             invalid_ids = requested_ids - valid_ids
-            
+
             if invalid_ids:
                 logger.warning(
                     f"User {user_id} attempted to access unauthorized "
@@ -821,11 +893,9 @@ class CustomReportService:
                 raise PermissionError(
                     f"Access denied to {record_group.category} records: {list(invalid_ids)}"
                 )
-    
+
     async def generate_selective_report(
-        self,
-        user_id: int,
-        request: CustomReportRequest
+        self, user_id: int, request: CustomReportRequest
     ) -> bytes:
         """Generate PDF with only selected records and/or trend charts"""
         start_time = time.time()
@@ -842,16 +912,20 @@ class CustomReportService:
             user = self.db.query(User).filter(User.id == user_id).first()
             if not user:
                 raise CustomReportError("User not found")
-            patient = self.db.query(Patient).filter(Patient.id == user.active_patient_id).first()
+            patient = (
+                self.db.query(Patient)
+                .filter(Patient.id == user.active_patient_id)
+                .first()
+            )
 
             if not patient:
                 raise CustomReportError("No active patient found")
 
             # Read user preferences for unit system, language, and date format
             user_prefs = user_preferences_crud.get_by_user_id(self.db, user_id=user_id)
-            unit_system = (user_prefs and user_prefs.unit_system) or 'imperial'
-            language = (user_prefs and user_prefs.language) or 'en'
-            date_format = (user_prefs and user_prefs.date_format) or 'mdy'
+            unit_system = (user_prefs and user_prefs.unit_system) or "imperial"
+            language = (user_prefs and user_prefs.language) or "en"
+            date_format = (user_prefs and user_prefs.date_format) or "mdy"
             self._user_unit_system = unit_system
 
             # Collect selected data
@@ -861,9 +935,7 @@ class CustomReportService:
             for record_group in request.selected_records:
                 try:
                     category_data = await self._get_selected_records(
-                        patient.id,
-                        record_group.category,
-                        record_group.record_ids
+                        patient.id, record_group.category, record_group.record_ids
                     )
                     if category_data:
                         report_data[record_group.category] = category_data
@@ -877,8 +949,10 @@ class CustomReportService:
             trend_chart_data = []
             if request.trend_charts:
                 trend_chart_data = self._generate_trend_charts(
-                    patient.id, request.trend_charts,
-                    unit_system=unit_system, language=language,
+                    patient.id,
+                    request.trend_charts,
+                    unit_system=unit_system,
+                    language=language,
                     date_format=date_format,
                 )
 
@@ -886,7 +960,7 @@ class CustomReportService:
             if not report_data and not trend_chart_data and failed_categories:
                 raise CustomReportError(
                     "No categories could be processed successfully",
-                    details={'failed_categories': failed_categories}
+                    details={"failed_categories": failed_categories},
                 )
 
             if not report_data and not trend_chart_data:
@@ -907,11 +981,7 @@ class CustomReportService:
             # Log successful generation
             generation_time = int((time.time() - start_time) * 1000)
             await self._log_report_generation_complete(
-                user_id,
-                request,
-                generation_time,
-                len(pdf_data),
-                failed_categories
+                user_id, request, generation_time, len(pdf_data), failed_categories
             )
 
             return pdf_data
@@ -928,7 +998,9 @@ class CustomReportService:
         "height": ("inches_to_cm", "height"),
     }
 
-    def _convert_trend_data_units(self, data: Dict[str, Any], vital_type: str, unit_system: str) -> Dict[str, Any]:
+    def _convert_trend_data_units(
+        self, data: Dict[str, Any], vital_type: str, unit_system: str
+    ) -> Dict[str, Any]:
         """Convert trend data values and unit labels if user prefers metric."""
         if unit_system != "metric" or vital_type not in self._CONVERTIBLE_VITALS:
             return data
@@ -939,7 +1011,9 @@ class CustomReportService:
 
         converted = dict(data)
         if "values" in converted and converted["values"]:
-            converted["values"] = [converter_fn(v) if v is not None else None for v in converted["values"]]
+            converted["values"] = [
+                converter_fn(v) if v is not None else None for v in converted["values"]
+            ]
         converted["unit"] = unit_labels.get(label_key, data.get("unit", ""))
 
         # Convert reference range so the normal band matches converted values
@@ -988,19 +1062,29 @@ class CustomReportService:
         # Build a unified list of (label, fetch_fn, render_fn, chart_type) tasks
         chart_tasks = []
         for vc in trend_charts.vital_charts:
-            chart_tasks.append((
-                vc.vital_type,
-                lambda v=vc: fetcher.fetch_vital_trend(patient_id, v.vital_type, v.date_from, v.date_to),
-                lambda data, v=vc: generator.generate_vital_chart(data, v.vital_type),
-                "vital",
-            ))
+            chart_tasks.append(
+                (
+                    vc.vital_type,
+                    lambda v=vc: fetcher.fetch_vital_trend(
+                        patient_id, v.vital_type, v.date_from, v.date_to
+                    ),
+                    lambda data, v=vc: generator.generate_vital_chart(
+                        data, v.vital_type
+                    ),
+                    "vital",
+                )
+            )
         for lc in trend_charts.lab_test_charts:
-            chart_tasks.append((
-                lc.test_name,
-                lambda l=lc: fetcher.fetch_lab_test_trend(patient_id, l.test_name, l.date_from, l.date_to),
-                lambda data, l=lc: generator.generate_lab_test_chart(data),
-                "lab_test",
-            ))
+            chart_tasks.append(
+                (
+                    lc.test_name,
+                    lambda l=lc: fetcher.fetch_lab_test_trend(
+                        patient_id, l.test_name, l.date_from, l.date_to
+                    ),
+                    lambda data, l=lc: generator.generate_lab_test_chart(data),
+                    "lab_test",
+                )
+            )
 
         for label, fetch_fn, render_fn, chart_type in chart_tasks:
             try:
@@ -1012,7 +1096,10 @@ class CustomReportService:
                     # Use translated display name for vital fields
                     field_key = label.replace("-", "_")
                     translated_name = translator.field(field_key)
-                    if translated_name != field_key.replace("_", " ").title() or language == "en":
+                    if (
+                        translated_name != field_key.replace("_", " ").title()
+                        or language == "en"
+                    ):
                         data["display_name"] = translated_name
 
                 # Use the display name directly as the chart title
@@ -1020,15 +1107,17 @@ class CustomReportService:
 
                 png_bytes = render_fn(data)
                 if png_bytes:
-                    chart_results.append({
-                        "title": data.get("display_name", label),
-                        "png_bytes": png_bytes,
-                        "statistics": data.get("statistics", {}),
-                        "unit": data.get("unit", ""),
-                        "chart_type": chart_type,
-                        "date_from": data.get("date_from"),
-                        "date_to": data.get("date_to"),
-                    })
+                    chart_results.append(
+                        {
+                            "title": data.get("display_name", label),
+                            "png_bytes": png_bytes,
+                            "statistics": data.get("statistics", {}),
+                            "unit": data.get("unit", ""),
+                            "chart_type": chart_type,
+                            "date_from": data.get("date_from"),
+                            "date_to": data.get("date_to"),
+                        }
+                    )
                 else:
                     logger.warning("No data for %s chart: %s", chart_type, label)
             except Exception as e:
@@ -1036,117 +1125,135 @@ class CustomReportService:
 
         logger.info("Generated %d trend charts for report", len(chart_results))
         return chart_results
-    
+
     async def _get_selected_records(
-        self,
-        patient_id: int,
-        category: str,
-        record_ids: List[int]
+        self, patient_id: int, category: str, record_ids: List[int]
     ) -> List[Dict[str, Any]]:
         """Get specific records for a category"""
         if category not in self.CATEGORY_MODELS:
             raise ValueError(f"Invalid category: {category}")
-        
+
         model_class = self.CATEGORY_MODELS[category]
-        
+
         # Categories that don't have patient_id (shared resources)
-        shared_categories = ['practitioners', 'pharmacies']
-        
+        shared_categories = ["practitioners", "pharmacies"]
+
         if category in shared_categories:
             # For shared resources, just filter by IDs
-            query = (self.db.query(model_class)
-                    .filter(model_class.id.in_(record_ids)))
+            query = self.db.query(model_class).filter(model_class.id.in_(record_ids))
         else:
             # For patient-specific records, filter by patient_id and IDs
-            query = (self.db.query(model_class)
-                    .filter(model_class.patient_id == patient_id)
-                    .filter(model_class.id.in_(record_ids)))
+            query = (
+                self.db.query(model_class)
+                .filter(model_class.patient_id == patient_id)
+                .filter(model_class.id.in_(record_ids))
+            )
 
         # Eager-load test components for lab results to avoid N+1 queries
-        if category == 'lab_results':
+        if category == "lab_results":
             query = query.options(selectinload(LabResult.test_components))
 
         records = query.all()
-        
-        logger.info(f"Retrieved {len(records)} {category} records for report generation")
-        
+
+        logger.info(
+            f"Retrieved {len(records)} {category} records for report generation"
+        )
+
         # Convert to dictionaries
         result = []
         for record in records:
             record_dict = self._model_to_dict(record)
-            
+
             # Special handling for family history - include family conditions
-            if category == 'family_history':
+            if category == "family_history":
                 family_member_id = record.id
-                family_conditions = (self.db.query(FamilyCondition)
-                                   .filter(FamilyCondition.family_member_id == family_member_id)
-                                   .all())
-                
+                family_conditions = (
+                    self.db.query(FamilyCondition)
+                    .filter(FamilyCondition.family_member_id == family_member_id)
+                    .all()
+                )
+
                 # Add conditions to the family member record
-                record_dict['conditions'] = []
+                record_dict["conditions"] = []
                 for condition in family_conditions:
                     condition_dict = self._model_to_dict(condition)
-                    record_dict['conditions'].append(condition_dict)
-                
-                logger.info(f"Family member {family_member_id} has {len(family_conditions)} conditions")
-            
+                    record_dict["conditions"].append(condition_dict)
+
+                logger.info(
+                    f"Family member {family_member_id} has {len(family_conditions)} conditions"
+                )
+
             # Enrich records with practitioner and condition names
-            elif category in ('encounters', 'treatments', 'procedures'):
+            elif category in ("encounters", "treatments", "procedures"):
                 practitioner_name = self._resolve_practitioner_name(record)
                 if practitioner_name:
-                    record_dict['practitioner_name'] = practitioner_name
+                    record_dict["practitioner_name"] = practitioner_name
 
                 condition_display = self._resolve_condition_display(record)
                 if condition_display:
-                    record_dict['condition_name'] = condition_display
+                    record_dict["condition_name"] = condition_display
 
-                logger.info(f"{category.rstrip('s').title()} {record.id} enhanced with practitioner and condition info")
+                logger.info(
+                    f"{category.rstrip('s').title()} {record.id} enhanced with practitioner and condition info"
+                )
 
             # Special handling for lab results - include test components and practitioner
-            elif category == 'lab_results':
+            elif category == "lab_results":
                 practitioner_name = self._resolve_practitioner_name(record)
                 if practitioner_name:
-                    record_dict['ordered_by'] = practitioner_name
+                    record_dict["ordered_by"] = practitioner_name
 
-                test_components = getattr(record, 'test_components', None)
+                test_components = getattr(record, "test_components", None)
                 if test_components:
                     # Sort by display_order, then test_name, then id for deterministic output
                     sorted_components = sorted(
                         test_components,
-                        key=lambda c: (c.display_order or 999, c.test_name or '', c.id)
+                        key=lambda c: (c.display_order or 999, c.test_name or "", c.id),
                     )
-                    record_dict['test_components'] = []
+                    record_dict["test_components"] = []
                     for component in sorted_components:
                         comp_dict = self._model_to_dict(component)
                         ref_range = self._build_reference_range(component)
                         if ref_range:
-                            comp_dict['reference_range'] = ref_range
-                        record_dict['test_components'].append(comp_dict)
+                            comp_dict["reference_range"] = ref_range
+                        record_dict["test_components"].append(comp_dict)
 
-                logger.info(f"Lab result {record.id} enhanced with {len(record_dict.get('test_components', []))} test components")
+                logger.info(
+                    f"Lab result {record.id} enhanced with {len(record_dict.get('test_components', []))} test components"
+                )
 
             # Special handling for injuries - include practitioner and injury_type names
-            elif category == 'injuries':
+            elif category == "injuries":
                 practitioner_name = self._resolve_practitioner_name(record)
                 if practitioner_name:
-                    record_dict['practitioner'] = practitioner_name
+                    record_dict["practitioner"] = practitioner_name
 
-                if hasattr(record, 'injury_type_id') and record.injury_type_id:
-                    injury_type = self.db.query(InjuryType).filter(InjuryType.id == record.injury_type_id).first()
+                if hasattr(record, "injury_type_id") and record.injury_type_id:
+                    injury_type = (
+                        self.db.query(InjuryType)
+                        .filter(InjuryType.id == record.injury_type_id)
+                        .first()
+                    )
                     if injury_type:
-                        record_dict['injury_type'] = injury_type.name
+                        record_dict["injury_type"] = injury_type.name
 
-                logger.info(f"Injury {record.id} enhanced with practitioner and injury type info")
+                logger.info(
+                    f"Injury {record.id} enhanced with practitioner and injury type info"
+                )
 
-            elif category == 'medications':
-                if hasattr(record, 'pharmacy_id') and record.pharmacy_id:
-                    pharmacy = self.db.query(Pharmacy).filter(Pharmacy.id == record.pharmacy_id).first()
+            elif category == "medications":
+                if hasattr(record, "pharmacy_id") and record.pharmacy_id:
+                    pharmacy = (
+                        self.db.query(Pharmacy)
+                        .filter(Pharmacy.id == record.pharmacy_id)
+                        .first()
+                    )
                     if pharmacy:
-                        record_dict['pharmacy_name'] = pharmacy.name
+                        record_dict["pharmacy_name"] = pharmacy.name
 
                 practitioner_name = self._resolve_practitioner_name(record)
                 if practitioner_name:
-                    record_dict['prescribing_practitioner'] = practitioner_name
+                    record_dict["prescribing_practitioner"] = practitioner_name
 
                 condition_rels = (
                     self.db.query(ConditionMedication)
@@ -1155,21 +1262,30 @@ class CustomReportService:
                 )
                 associated_conditions = []
                 for rel in condition_rels:
-                    condition = self.db.query(Condition).filter(Condition.id == rel.condition_id).first()
+                    condition = (
+                        self.db.query(Condition)
+                        .filter(Condition.id == rel.condition_id)
+                        .first()
+                    )
                     if condition:
-                        entry = {"condition_name": condition.condition_name or f"Condition #{condition.id}"}
+                        entry = {
+                            "condition_name": condition.condition_name
+                            or f"Condition #{condition.id}"
+                        }
                         if rel.relevance_note:
                             entry["relevance_note"] = rel.relevance_note
                         associated_conditions.append(entry)
                 if associated_conditions:
-                    record_dict['associated_conditions'] = associated_conditions
+                    record_dict["associated_conditions"] = associated_conditions
 
-                logger.info(f"Medication {record.id} enhanced with pharmacy, practitioner, and condition info")
+                logger.info(
+                    f"Medication {record.id} enhanced with pharmacy, practitioner, and condition info"
+                )
 
-            elif category == 'conditions':
+            elif category == "conditions":
                 practitioner_name = self._resolve_practitioner_name(record)
                 if practitioner_name:
-                    record_dict['practitioner_name'] = practitioner_name
+                    record_dict["practitioner_name"] = practitioner_name
 
                 med_rels = (
                     self.db.query(ConditionMedication)
@@ -1178,45 +1294,60 @@ class CustomReportService:
                 )
                 associated_medications = []
                 for rel in med_rels:
-                    medication = self.db.query(Medication).filter(Medication.id == rel.medication_id).first()
+                    medication = (
+                        self.db.query(Medication)
+                        .filter(Medication.id == rel.medication_id)
+                        .first()
+                    )
                     if medication:
-                        entry = {"medication_name": medication.medication_name or f"Medication #{medication.id}"}
+                        entry = {
+                            "medication_name": medication.medication_name
+                            or f"Medication #{medication.id}"
+                        }
                         if medication.dosage:
                             entry["dosage"] = medication.dosage
                         if rel.relevance_note:
                             entry["relevance_note"] = rel.relevance_note
                         associated_medications.append(entry)
                 if associated_medications:
-                    record_dict['associated_medications'] = associated_medications
+                    record_dict["associated_medications"] = associated_medications
 
-                logger.info(f"Condition {record.id} enhanced with practitioner and medication info")
-            
+                logger.info(
+                    f"Condition {record.id} enhanced with practitioner and medication info"
+                )
+
             logger.debug(f"Processed record {record.id}")
             result.append(record_dict)
-        
+
         return result
-    
+
     def _resolve_practitioner_name(self, record) -> Optional[str]:
         """Look up the practitioner name for a record with a practitioner_id foreign key."""
-        practitioner_id = getattr(record, 'practitioner_id', None)
+        practitioner_id = getattr(record, "practitioner_id", None)
         if not practitioner_id:
             return None
-        practitioner = self.db.query(Practitioner).filter(Practitioner.id == practitioner_id).first()
+        practitioner = (
+            self.db.query(Practitioner)
+            .filter(Practitioner.id == practitioner_id)
+            .first()
+        )
         return practitioner.name if practitioner else None
 
     def _resolve_condition_display(self, record) -> Optional[str]:
         """Look up a display name for a record with a condition_id foreign key."""
-        condition_id = getattr(record, 'condition_id', None)
+        condition_id = getattr(record, "condition_id", None)
         if not condition_id:
             return None
-        condition = self.db.query(Condition).filter(Condition.id == condition_id).first()
+        condition = (
+            self.db.query(Condition).filter(Condition.id == condition_id).first()
+        )
         if not condition:
             return None
         return (
             condition.condition_name
-            or getattr(condition, 'diagnosis', None)
-            or getattr(condition, 'description', None)
-            or getattr(condition, 'icd_code', None)
+            or getattr(condition, "diagnosis", None)
+            or getattr(condition, "description", None)
+            or getattr(condition, "icd_code", None)
             or f"Condition #{condition.id}"
         )
 
@@ -1244,7 +1375,7 @@ class CustomReportService:
                 value = value.isoformat()
             result[column.name] = value
         return result
-    
+
     async def _generate_pdf_report(
         self,
         patient: Patient,
@@ -1259,266 +1390,277 @@ class CustomReportService:
         """Generate PDF report using the custom PDF generator with user preferences"""
         # Prepare data for PDF generator
         pdf_data = {
-            'patient': self._model_to_dict(patient) if request.include_patient_info else None,
-            'report_title': request.report_title,
-            'generation_date': datetime.now(),
-            'data': report_data,
-            'summary': self._generate_summary(report_data) if request.include_summary else None,
-            'failed_categories': failed_categories if failed_categories else None,
-            'include_patient_info': request.include_patient_info,
-            'include_summary': request.include_summary,
-            'include_profile_picture': request.include_profile_picture,
-            'trend_charts': trend_chart_data if trend_chart_data else None,
+            "patient": (
+                self._model_to_dict(patient) if request.include_patient_info else None
+            ),
+            "report_title": request.report_title,
+            "generation_date": datetime.now(),
+            "data": report_data,
+            "summary": (
+                self._generate_summary(report_data) if request.include_summary else None
+            ),
+            "failed_categories": failed_categories if failed_categories else None,
+            "include_patient_info": request.include_patient_info,
+            "include_summary": request.include_summary,
+            "include_profile_picture": request.include_profile_picture,
+            "trend_charts": trend_chart_data if trend_chart_data else None,
             # User preferences for formatting
-            'unit_system': unit_system,
-            'language': language,
-            'date_format': date_format,
+            "unit_system": unit_system,
+            "language": language,
+            "date_format": date_format,
         }
 
         # Use new PDF generator
         pdf_bytes = await self.pdf_generator.generate_pdf(pdf_data)
         return pdf_bytes
-    
+
     def _generate_summary(self, report_data: Dict[str, List[Dict]]) -> Dict[str, Any]:
         """Generate summary statistics for the report"""
-        summary = {
-            'total_categories': len(report_data),
-            'category_counts': {}
-        }
-        
+        summary = {"total_categories": len(report_data), "category_counts": {}}
+
         for category, records in report_data.items():
-            summary['category_counts'][category] = len(records)
-        
-        summary['total_records'] = sum(summary['category_counts'].values())
-        
+            summary["category_counts"][category] = len(records)
+
+        summary["total_records"] = sum(summary["category_counts"].values())
+
         return summary
-    
+
     async def save_report_template(
-        self,
-        user_id: int,
-        template_data: ReportTemplateSchema
+        self, user_id: int, template_data: ReportTemplateSchema
     ) -> int:
         """Save a report template for reuse"""
         # Validate that user owns the selected records
         await self.validate_record_ownership(user_id, template_data.selected_records)
-        
+
         # Check if template name already exists for user
-        existing = (self.db.query(ReportTemplate)
-                   .filter(ReportTemplate.user_id == user_id)
-                   .filter(ReportTemplate.name == template_data.name)
-                   .filter(ReportTemplate.is_active == True)
-                   .first())
-        
+        existing = (
+            self.db.query(ReportTemplate)
+            .filter(ReportTemplate.user_id == user_id)
+            .filter(ReportTemplate.name == template_data.name)
+            .filter(ReportTemplate.is_active == True)
+            .first()
+        )
+
         if existing:
-            raise ValueError(f"Template with name '{template_data.name}' already exists")
-        
+            raise ValueError(
+                f"Template with name '{template_data.name}' already exists"
+            )
+
         # Create new template
         db_template = ReportTemplate(
             user_id=user_id,
             name=template_data.name,
             description=template_data.description,
-            selected_records=json.dumps([
-                {'category': sr.category, 'record_ids': sr.record_ids}
-                for sr in template_data.selected_records
-            ]),
+            selected_records=json.dumps(
+                [
+                    {"category": sr.category, "record_ids": sr.record_ids}
+                    for sr in template_data.selected_records
+                ]
+            ),
             report_settings=json.dumps(template_data.report_settings or {}),
             is_public=template_data.is_public,
-            shared_with_family=template_data.shared_with_family
+            shared_with_family=template_data.shared_with_family,
         )
-        
+
         self.db.add(db_template)
         self.db.commit()
         self.db.refresh(db_template)
-        
+
         logger.info(f"Template '{template_data.name}' saved by user {user_id}")
         return db_template.id
-    
+
     async def get_saved_templates(self, user_id: int) -> List[ReportTemplateSchema]:
         """Get all templates accessible to user"""
-        templates = (self.db.query(ReportTemplate)
-                    .filter(ReportTemplate.user_id == user_id)
-                    .filter(ReportTemplate.is_active == True)
-                    .all())
-        
+        templates = (
+            self.db.query(ReportTemplate)
+            .filter(ReportTemplate.user_id == user_id)
+            .filter(ReportTemplate.is_active == True)
+            .all()
+        )
+
         result = []
         for template in templates:
             # Parse JSON fields
             selected_records = json.loads(template.selected_records)
             report_settings = json.loads(template.report_settings)
-            
+
             # Convert to schema
-            result.append(ReportTemplateSchema(
-                name=template.name,
-                description=template.description,
-                selected_records=[
-                    SelectiveRecordRequest(
-                        category=sr['category'],
-                        record_ids=sr['record_ids']
-                    )
-                    for sr in selected_records
-                ],
-                report_settings=report_settings,
-                is_public=template.is_public,
-                shared_with_family=template.shared_with_family
-            ))
-        
+            result.append(
+                ReportTemplateSchema(
+                    name=template.name,
+                    description=template.description,
+                    selected_records=[
+                        SelectiveRecordRequest(
+                            category=sr["category"], record_ids=sr["record_ids"]
+                        )
+                        for sr in selected_records
+                    ],
+                    report_settings=report_settings,
+                    is_public=template.is_public,
+                    shared_with_family=template.shared_with_family,
+                )
+            )
+
         return result
-    
-    async def get_template(self, user_id: int, template_id: int) -> Optional[ReportTemplateSchema]:
+
+    async def get_template(
+        self, user_id: int, template_id: int
+    ) -> Optional[ReportTemplateSchema]:
         """Get a specific template"""
-        template = (self.db.query(ReportTemplate)
-                   .filter(ReportTemplate.id == template_id)
-                   .filter(ReportTemplate.user_id == user_id)
-                   .filter(ReportTemplate.is_active == True)
-                   .first())
-        
+        template = (
+            self.db.query(ReportTemplate)
+            .filter(ReportTemplate.id == template_id)
+            .filter(ReportTemplate.user_id == user_id)
+            .filter(ReportTemplate.is_active == True)
+            .first()
+        )
+
         if not template:
             return None
-        
+
         # Parse and return
         selected_records = json.loads(template.selected_records)
         report_settings = json.loads(template.report_settings)
-        
+
         return ReportTemplateSchema(
             name=template.name,
             description=template.description,
             selected_records=[
                 SelectiveRecordRequest(
-                    category=sr['category'],
-                    record_ids=sr['record_ids']
+                    category=sr["category"], record_ids=sr["record_ids"]
                 )
                 for sr in selected_records
             ],
             report_settings=report_settings,
             is_public=template.is_public,
-            shared_with_family=template.shared_with_family
+            shared_with_family=template.shared_with_family,
         )
-    
+
     async def update_template(
-        self,
-        user_id: int,
-        template_id: int,
-        template_data: ReportTemplateSchema
+        self, user_id: int, template_id: int, template_data: ReportTemplateSchema
     ) -> bool:
         """Update an existing template"""
-        template = (self.db.query(ReportTemplate)
-                   .filter(ReportTemplate.id == template_id)
-                   .filter(ReportTemplate.user_id == user_id)
-                   .filter(ReportTemplate.is_active == True)
-                   .first())
-        
+        template = (
+            self.db.query(ReportTemplate)
+            .filter(ReportTemplate.id == template_id)
+            .filter(ReportTemplate.user_id == user_id)
+            .filter(ReportTemplate.is_active == True)
+            .first()
+        )
+
         if not template:
             return False
-        
+
         # Validate ownership of new records
         await self.validate_record_ownership(user_id, template_data.selected_records)
-        
+
         # Update template
         template.name = template_data.name
         template.description = template_data.description
-        template.selected_records = json.dumps([
-            {'category': sr.category, 'record_ids': sr.record_ids}
-            for sr in template_data.selected_records
-        ])
+        template.selected_records = json.dumps(
+            [
+                {"category": sr.category, "record_ids": sr.record_ids}
+                for sr in template_data.selected_records
+            ]
+        )
         template.report_settings = json.dumps(template_data.report_settings or {})
         template.is_public = template_data.is_public
         template.shared_with_family = template_data.shared_with_family
         template.updated_at = datetime.utcnow()
-        
+
         self.db.commit()
-        
+
         logger.info(f"Template {template_id} updated by user {user_id}")
         return True
-    
+
     async def delete_template(self, user_id: int, template_id: int) -> bool:
         """Soft delete a template"""
-        template = (self.db.query(ReportTemplate)
-                   .filter(ReportTemplate.id == template_id)
-                   .filter(ReportTemplate.user_id == user_id)
-                   .filter(ReportTemplate.is_active == True)
-                   .first())
-        
+        template = (
+            self.db.query(ReportTemplate)
+            .filter(ReportTemplate.id == template_id)
+            .filter(ReportTemplate.user_id == user_id)
+            .filter(ReportTemplate.is_active == True)
+            .first()
+        )
+
         if not template:
             return False
-        
+
         # Soft delete
         template.is_active = False
         template.updated_at = datetime.utcnow()
-        
+
         self.db.commit()
-        
+
         logger.info(f"Template {template_id} deleted by user {user_id}")
         return True
-    
+
     async def _log_report_generation_start(
-        self,
-        user_id: int,
-        request: CustomReportRequest
+        self, user_id: int, request: CustomReportRequest
     ):
         """Log the start of report generation"""
         categories = [sr.category for sr in request.selected_records]
         total_records = sum(len(sr.record_ids) for sr in request.selected_records)
-        
+
         logger.info(
             f"Report generation started - User: {user_id}, "
             f"Categories: {categories}, Total Records: {total_records}"
         )
-    
+
     async def _log_report_generation_complete(
         self,
         user_id: int,
         request: CustomReportRequest,
         generation_time_ms: int,
         file_size: int,
-        failed_categories: List[str]
+        failed_categories: List[str],
     ):
         """Log successful report generation to audit table"""
         categories = [sr.category for sr in request.selected_records]
         total_records = sum(len(sr.record_ids) for sr in request.selected_records)
-        
+
         audit = ReportGenerationAudit(
             user_id=user_id,
-            report_type='custom_report',
+            report_type="custom_report",
             categories_included=categories,
             total_records=total_records,
             generation_time_ms=generation_time_ms,
             file_size_bytes=file_size,
-            status='partial' if failed_categories else 'success',
-            error_details=json.dumps({'failed_categories': failed_categories}) if failed_categories else None
+            status="partial" if failed_categories else "success",
+            error_details=(
+                json.dumps({"failed_categories": failed_categories})
+                if failed_categories
+                else None
+            ),
         )
-        
+
         self.db.add(audit)
         self.db.commit()
-        
+
         logger.info(
             f"Report generated successfully - User: {user_id}, "
             f"Time: {generation_time_ms}ms, Size: {file_size} bytes"
         )
-    
+
     async def _log_report_generation_failed(
-        self,
-        user_id: int,
-        request: CustomReportRequest,
-        error: str
+        self, user_id: int, request: CustomReportRequest, error: str
     ):
         """Log failed report generation to audit table"""
         categories = [sr.category for sr in request.selected_records]
         total_records = sum(len(sr.record_ids) for sr in request.selected_records)
-        
+
         audit = ReportGenerationAudit(
             user_id=user_id,
-            report_type='custom_report',
+            report_type="custom_report",
             categories_included=categories,
             total_records=total_records,
             generation_time_ms=0,
             file_size_bytes=0,
-            status='failed',
-            error_details=error[:1000]  # Limit error message length
+            status="failed",
+            error_details=error[:1000],  # Limit error message length
         )
-        
+
         self.db.add(audit)
         self.db.commit()
-        
-        logger.error(
-            f"Report generation failed - User: {user_id}, Error: {error}"
-        )
+
+        logger.error(f"Report generation failed - User: {user_id}, Error: {error}")

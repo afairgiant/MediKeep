@@ -18,21 +18,64 @@ export const familyMemberFormFields = [
     labelKey: 'medical:familyHistory.form.member.relationship.label',
     placeholderKey: 'shared:fields.selectRelationship',
     required: true,
-    descriptionKey: 'medical:familyHistory.form.member.relationship.description',
+    descriptionKey:
+      'medical:familyHistory.form.member.relationship.description',
     gridColumn: 6,
     searchable: true,
     options: [
-      { value: 'father', labelKey: 'medical:familyHistory.form.member.relationshipOptions.father' },
-      { value: 'mother', labelKey: 'medical:familyHistory.form.member.relationshipOptions.mother' },
-      { value: 'brother', labelKey: 'medical:familyHistory.form.member.relationshipOptions.brother' },
-      { value: 'sister', labelKey: 'medical:familyHistory.form.member.relationshipOptions.sister' },
-      { value: 'paternal_grandfather', labelKey: 'medical:familyHistory.form.member.relationshipOptions.paternalGrandfather' },
-      { value: 'paternal_grandmother', labelKey: 'medical:familyHistory.form.member.relationshipOptions.paternalGrandmother' },
-      { value: 'maternal_grandfather', labelKey: 'medical:familyHistory.form.member.relationshipOptions.maternalGrandfather' },
-      { value: 'maternal_grandmother', labelKey: 'medical:familyHistory.form.member.relationshipOptions.maternalGrandmother' },
-      { value: 'uncle', labelKey: 'medical:familyHistory.form.member.relationshipOptions.uncle' },
-      { value: 'aunt', labelKey: 'medical:familyHistory.form.member.relationshipOptions.aunt' },
-      { value: 'cousin', labelKey: 'medical:familyHistory.form.member.relationshipOptions.cousin' },
+      {
+        value: 'father',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.father',
+      },
+      {
+        value: 'mother',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.mother',
+      },
+      {
+        value: 'brother',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.brother',
+      },
+      {
+        value: 'sister',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.sister',
+      },
+      {
+        value: 'paternal_grandfather',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.paternalGrandfather',
+      },
+      {
+        value: 'paternal_grandmother',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.paternalGrandmother',
+      },
+      {
+        value: 'maternal_grandfather',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.maternalGrandfather',
+      },
+      {
+        value: 'maternal_grandmother',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.maternalGrandmother',
+      },
+      {
+        value: 'uncle',
+        labelKey: 'medical:familyHistory.form.member.relationshipOptions.uncle',
+      },
+      {
+        value: 'aunt',
+        labelKey: 'medical:familyHistory.form.member.relationshipOptions.aunt',
+      },
+      {
+        value: 'cousin',
+        labelKey:
+          'medical:familyHistory.form.member.relationshipOptions.cousin',
+      },
       { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },

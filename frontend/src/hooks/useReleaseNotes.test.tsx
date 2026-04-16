@@ -46,14 +46,19 @@ function storageKey(userId: string | number): string {
 
 // Configure localStorage.getItem to return `storedValue` for `key` and null
 // for everything else. Pass `null` to simulate no stored value.
-function mockLocalStorageGetItem(key: string, storedValue: string | null): void {
+function mockLocalStorageGetItem(
+  key: string,
+  storedValue: string | null
+): void {
   vi.mocked(localStorage.getItem).mockImplementation((k: string) =>
     k === key ? storedValue : null
   );
 }
 
 // Capture what value was stored via setItem for a given key.
-function captureLocalStorageSetItem(): { getLastCall: (key: string) => string | undefined } {
+function captureLocalStorageSetItem(): {
+  getLastCall: (_key: string) => string | undefined;
+} {
   const calls: Map<string, string> = new Map();
   vi.mocked(localStorage.setItem).mockImplementation((k: string, v: string) => {
     calls.set(k, v);
@@ -67,13 +72,15 @@ function captureLocalStorageSetItem(): { getLastCall: (key: string) => string | 
 // Test data factories
 // ---------------------------------------------------------------------------
 
-function makeRelease(overrides: Partial<{
-  tag_name: string;
-  name: string;
-  body: string;
-  published_at: string;
-  html_url: string;
-}> = {}) {
+function makeRelease(
+  overrides: Partial<{
+    tag_name: string;
+    name: string;
+    body: string;
+    published_at: string;
+    html_url: string;
+  }> = {}
+) {
   return {
     tag_name: 'v0.58.0',
     name: 'Release 0.58.0',
@@ -119,7 +126,9 @@ describe('useReleaseNotes', () => {
         isAuthenticated: false,
       } as ReturnType<typeof useAuth>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -134,7 +143,9 @@ describe('useReleaseNotes', () => {
         isAuthenticated: true,
       } as ReturnType<typeof useAuth>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -145,17 +156,26 @@ describe('useReleaseNotes', () => {
   describe('first-time user (no localStorage entry)', () => {
     it('shows modal with the current release when version matches exactly', async () => {
       // localStorage.getItem returns null (already the default)
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
       const currentRelease = makeRelease({ tag_name: 'v0.58.0' });
-      const olderRelease = makeRelease({ tag_name: 'v0.57.0', name: 'Release 0.57.0' });
+      const olderRelease = makeRelease({
+        tag_name: 'v0.57.0',
+        name: 'Release 0.57.0',
+      });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [currentRelease, olderRelease],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -165,16 +185,25 @@ describe('useReleaseNotes', () => {
     });
 
     it('shows the closest release at or below currentVersion when no exact match', async () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
-      const olderRelease = makeRelease({ tag_name: 'v0.57.0', name: 'Closest' });
+      const olderRelease = makeRelease({
+        tag_name: 'v0.57.0',
+        name: 'Closest',
+      });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [olderRelease],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -184,17 +213,26 @@ describe('useReleaseNotes', () => {
     });
 
     it('does not show releases newer than currentVersion for first-time user', async () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
       const newerRelease = makeRelease({ tag_name: 'v0.60.0', name: 'Future' });
-      const currentRelease = makeRelease({ tag_name: 'v0.58.0', name: 'Current' });
+      const currentRelease = makeRelease({
+        tag_name: 'v0.58.0',
+        name: 'Current',
+      });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [newerRelease, currentRelease],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -205,14 +243,20 @@ describe('useReleaseNotes', () => {
     });
 
     it('does not show modal when releases array is empty', async () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -225,16 +269,22 @@ describe('useReleaseNotes', () => {
       const userId = 42;
       mockLocalStorageGetItem(storageKey(userId), 'v0.58.0');
 
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       const release = makeRelease({ tag_name: 'v0.58.0' });
 
-      mockGetVersionInfo.mockResolvedValue({ version: 'v0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: 'v0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [release],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -246,18 +296,24 @@ describe('useReleaseNotes', () => {
       const userId = 7;
       mockLocalStorageGetItem(storageKey(userId), 'v0.56.0');
 
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       const v58 = makeRelease({ tag_name: 'v0.58.0', name: 'v0.58.0' });
       const v57 = makeRelease({ tag_name: 'v0.57.0', name: 'v0.57.0' });
       const v56 = makeRelease({ tag_name: 'v0.56.0', name: 'v0.56.0' });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [v58, v57, v56],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -273,7 +329,9 @@ describe('useReleaseNotes', () => {
       const userId = 13;
       mockLocalStorageGetItem(storageKey(userId), 'v0.50.0');
 
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       // GitHub has releases newer than what user is running
       const v55 = makeRelease({ tag_name: 'v0.55.0', name: 'v0.55.0' });
@@ -283,12 +341,16 @@ describe('useReleaseNotes', () => {
       const v50 = makeRelease({ tag_name: 'v0.50.0', name: 'v0.50.0' });
 
       // User upgraded to v0.53.0, but GitHub already has v0.54.0 and v0.55.0
-      mockGetVersionInfo.mockResolvedValue({ version: '0.53.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.53.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [v55, v54, v53, v51, v50],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -303,18 +365,24 @@ describe('useReleaseNotes', () => {
       const userId = 14;
       mockLocalStorageGetItem(storageKey(userId), 'v0.50.0');
 
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       const v55 = makeRelease({ tag_name: 'v0.55.0', name: 'v0.55.0' });
       const v50 = makeRelease({ tag_name: 'v0.50.0', name: 'v0.50.0' });
 
       // User is still on v0.50.0 - no upgrade happened
-      mockGetVersionInfo.mockResolvedValue({ version: '0.50.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.50.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [v55, v50],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -328,16 +396,22 @@ describe('useReleaseNotes', () => {
       // Stored without leading 'v'; current version also without leading 'v'
       mockLocalStorageGetItem(storageKey(userId), '0.58.0');
 
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       const release = makeRelease({ tag_name: 'v0.58.0' });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [release],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -347,16 +421,22 @@ describe('useReleaseNotes', () => {
 
   describe('dismissModal', () => {
     it('sets showModal to false when dismissed', async () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(5) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(5) as ReturnType<typeof useAuth>
+      );
 
       const release = makeRelease({ tag_name: 'v0.58.0' });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [release],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.showModal).toBe(true));
 
@@ -369,18 +449,24 @@ describe('useReleaseNotes', () => {
 
     it('writes currentVersion to localStorage under the user-specific key', async () => {
       const userId = 9;
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       const release = makeRelease({ tag_name: 'v0.58.0' });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [release],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
       const spy = captureLocalStorageSetItem();
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.showModal).toBe(true));
       await waitFor(() => expect(result.current.currentVersion).toBe('0.58.0'));
@@ -394,13 +480,17 @@ describe('useReleaseNotes', () => {
 
     it('does not call localStorage.setItem when currentVersion is empty', async () => {
       const userId = 2;
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       // API failure means currentVersion stays as empty string
       mockGetVersionInfo.mockRejectedValue(new Error('network error'));
       mockGetReleaseNotes.mockRejectedValue(new Error('network error'));
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -413,31 +503,41 @@ describe('useReleaseNotes', () => {
 
       // setItem should not have been called for the storage key
       const setItemCalls = vi.mocked(localStorage.setItem).mock.calls;
-      const storedForUser = setItemCalls.find(([k]) => k === storageKey(userId));
+      const storedForUser = setItemCalls.find(
+        ([k]) => k === storageKey(userId)
+      );
       expect(storedForUser).toBeUndefined();
     });
   });
 
   describe('loading and error states', () => {
     it('starts in loading state while fetch is pending', () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
       // Never resolves
       mockGetVersionInfo.mockReturnValue(new Promise(() => {}));
       mockGetReleaseNotes.mockReturnValue(new Promise(() => {}));
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       expect(result.current.loading).toBe(true);
     });
 
     it('sets error when the API call throws an Error', async () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
       mockGetVersionInfo.mockRejectedValue(new Error('Server error'));
       mockGetReleaseNotes.mockRejectedValue(new Error('Server error'));
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -446,12 +546,16 @@ describe('useReleaseNotes', () => {
     });
 
     it('sets a generic error message for non-Error rejection', async () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
       mockGetVersionInfo.mockRejectedValue('string rejection');
       mockGetReleaseNotes.mockRejectedValue('string rejection');
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -459,19 +563,25 @@ describe('useReleaseNotes', () => {
     });
 
     it('exposes all releases in the releases field after a successful fetch', async () => {
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(1) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(1) as ReturnType<typeof useAuth>
+      );
 
       const releases = [
         makeRelease({ tag_name: 'v0.58.0' }),
         makeRelease({ tag_name: 'v0.57.0' }),
       ];
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.57.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.57.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases,
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -485,17 +595,23 @@ describe('useReleaseNotes', () => {
       // Stored has leading 'v', current version from server does not
       mockLocalStorageGetItem(storageKey(userId), 'v0.57.0');
 
-      mockUseAuth.mockReturnValue(makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>);
+      mockUseAuth.mockReturnValue(
+        makeAuthenticatedUser(userId) as ReturnType<typeof useAuth>
+      );
 
       const v58 = makeRelease({ tag_name: 'v0.58.0' });
       const v57 = makeRelease({ tag_name: 'v0.57.0' });
 
-      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<ReturnType<typeof getVersionInfo>>);
+      mockGetVersionInfo.mockResolvedValue({ version: '0.58.0' } as Awaited<
+        ReturnType<typeof getVersionInfo>
+      >);
       mockGetReleaseNotes.mockResolvedValue({
         releases: [v58, v57],
       } as Awaited<ReturnType<typeof getReleaseNotes>>);
 
-      const { result } = renderHook(() => useReleaseNotes(), { wrapper: Wrapper });
+      const { result } = renderHook(() => useReleaseNotes(), {
+        wrapper: Wrapper,
+      });
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 

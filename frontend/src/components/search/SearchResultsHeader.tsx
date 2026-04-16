@@ -32,21 +32,21 @@ import { RECORD_TYPES } from './SearchFilterSidebar';
 
 interface SearchResultsHeaderProps {
   query: string;
-  onQueryChange: (query: string) => void;
-  onSearch: (e: React.FormEvent) => void;
+  onQueryChange: (_query: string) => void;
+  onSearch: (_e: React.FormEvent) => void;
   loading: boolean;
   selectedTypes: string[];
-  onTypeToggle: (type: string) => void;
+  onTypeToggle: (_type: string) => void;
   selectedTags: string[];
-  onTagRemove: (tag: string) => void;
+  onTagRemove: (_tag: string) => void;
   matchMode: string;
   hasActiveFilters: boolean;
-  getTagColor: (tag: string) => string | null;
+  getTagColor: (_tag: string) => string | null;
   resultCount: number;
   isSearching: boolean;
   hasPatient: boolean;
   viewMode: string;
-  onViewModeChange: (mode: string) => void;
+  onViewModeChange: (_mode: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -78,7 +78,9 @@ export function SearchResultsHeader({
       {/* Active Filter Chips */}
       {(hasActiveFilters || matchMode === 'all') && (
         <Group gap="xs" mb="sm">
-          <Text size="xs" fw={500} c="dimmed">{t('search.activeFilters')}:</Text>
+          <Text size="xs" fw={500} c="dimmed">
+            {t('search.activeFilters')}:
+          </Text>
           {selectedTypes.map(type => {
             const typeConfig = RECORD_TYPES.find(rt => rt.value === type);
             return (
@@ -92,7 +94,9 @@ export function SearchResultsHeader({
                     size="xs"
                     variant="transparent"
                     onClick={() => onTypeToggle(type)}
-                    aria-label={t('search.removeTypeFilter', { type: typeConfig ? t(typeConfig.labelKey) : type })}
+                    aria-label={t('search.removeTypeFilter', {
+                      type: typeConfig ? t(typeConfig.labelKey) : type,
+                    })}
                   />
                 }
               >
@@ -134,7 +138,7 @@ export function SearchResultsHeader({
             <TextInput
               placeholder={t('search.placeholder')}
               value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
+              onChange={e => onQueryChange(e.target.value)}
               leftSection={<IconSearch size="1rem" />}
               style={{ flex: 1, minWidth: '200px' }}
               size="md"
@@ -156,9 +160,7 @@ export function SearchResultsHeader({
         <Group justify="space-between" mb="xs">
           <Text size="sm" c="dimmed">
             {t('search.resultCount', { count: resultCount })}
-            {query && (
-              <> {t('search.filtered')}</>
-            )}
+            {query && <> {t('search.filtered')}</>}
           </Text>
           <SegmentedControl
             size="xs"
@@ -169,7 +171,11 @@ export function SearchResultsHeader({
                 value: 'table',
                 label: (
                   <Tooltip label={t('search.viewTable')} withArrow>
-                    <Group gap={0} justify="center" aria-label={t('search.viewTable')}>
+                    <Group
+                      gap={0}
+                      justify="center"
+                      aria-label={t('search.viewTable')}
+                    >
                       <IconTable size="0.9rem" />
                     </Group>
                   </Tooltip>
@@ -179,7 +185,11 @@ export function SearchResultsHeader({
                 value: 'cards',
                 label: (
                   <Tooltip label={t('search.viewCards')} withArrow>
-                    <Group gap={0} justify="center" aria-label={t('search.viewCards')}>
+                    <Group
+                      gap={0}
+                      justify="center"
+                      aria-label={t('search.viewCards')}
+                    >
                       <IconLayoutGrid size="0.9rem" />
                     </Group>
                   </Tooltip>

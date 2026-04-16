@@ -1,8 +1,10 @@
 import { vi } from 'vitest';
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import ProtectedRoute, { AdminRoute, RoleRoute, PublicRoute } from './ProtectedRoute';
+import ProtectedRoute, {
+  AdminRoute,
+  RoleRoute,
+  PublicRoute,
+} from './ProtectedRoute';
 import render from '../../test-utils/render';
 
 // vi.hoisted ensures this fn is available when vi.mock() factories run (they are hoisted)
@@ -28,15 +30,24 @@ let mockPathname = '/test';
 // Mock react-router-dom hooks and Navigate
 vi.mock('react-router-dom', async () => ({
   ...(await vi.importActual('react-router-dom')),
-  useLocation: () => ({ pathname: mockPathname, state: null, search: '', hash: '' }),
-  Navigate: ({ to, state, replace }) => (
+  useLocation: () => ({
+    pathname: mockPathname,
+    state: null,
+    search: '',
+    hash: '',
+  }),
+  Navigate: ({ to, state: _state, replace }) => (
     <div data-testid="navigate" data-to={to} data-replace={replace} />
   ),
 }));
 
 // Test components
-const TestComponent = () => <div data-testid="protected-content">Protected Content</div>;
-const PublicComponent = () => <div data-testid="public-content">Public Content</div>;
+const TestComponent = () => (
+  <div data-testid="protected-content">Protected Content</div>
+);
+const PublicComponent = () => (
+  <div data-testid="public-content">Public Content</div>
+);
 
 describe('ProtectedRoute', () => {
   beforeEach(() => {
@@ -61,12 +72,16 @@ describe('ProtectedRoute', () => {
       );
 
       expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-      expect(screen.getByText('Verifying authentication...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Verifying authentication...')
+      ).toBeInTheDocument();
     });
 
     test('shows custom fallback when provided during loading', () => {
-      const CustomFallback = () => <div data-testid="custom-fallback">Custom Loading</div>;
-      
+      const CustomFallback = () => (
+        <div data-testid="custom-fallback">Custom Loading</div>
+      );
+
       render(
         <ProtectedRoute fallback={<CustomFallback />}>
           <TestComponent />
@@ -252,7 +267,7 @@ describe('ProtectedRoute', () => {
 
     test('allows users with required role', () => {
       const mockHasRole = vi.fn(() => true);
-      
+
       render(
         <ProtectedRoute requiredRole="doctor">
           <TestComponent />
@@ -302,7 +317,7 @@ describe('ProtectedRoute', () => {
 
     test('allows users with any required role', () => {
       const mockHasAnyRole = vi.fn(() => true);
-      
+
       render(
         <ProtectedRoute requiredRoles={['doctor', 'nurse']}>
           <TestComponent />

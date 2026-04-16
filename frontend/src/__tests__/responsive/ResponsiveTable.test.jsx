@@ -1,6 +1,11 @@
 import { vi } from 'vitest';
-import React from 'react';
-import { screen, waitFor, fireEvent, within, act } from '@testing-library/react';
+import {
+  screen,
+  waitFor,
+  fireEvent,
+  within,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Import component to test
@@ -11,13 +16,10 @@ import {
   renderResponsive,
   testAtAllBreakpoints,
   TEST_VIEWPORTS,
-  mockViewport,
-  DEVICE_TYPES,
   getBreakpointForWidth,
-  getDeviceTypeForBreakpoint
+  getDeviceTypeForBreakpoint,
 } from './ResponsiveTestUtils';
 
-import logger from '../../services/logger';
 import { useResponsive } from '../../hooks/useResponsive';
 
 // Mock logger to avoid console noise during tests
@@ -39,8 +41,8 @@ vi.mock('../../hooks/useResponsive', () => ({
     isTablet: false,
     isDesktop: true,
     width: 1280,
-    height: 720
-  }))
+    height: 720,
+  })),
 }));
 
 // Sample data for testing
@@ -52,7 +54,7 @@ const sampleMedicationData = [
     frequency: 'Once daily',
     prescribing_practitioner: 'Dr. Smith',
     start_date: '2024-01-15',
-    status: 'Active'
+    status: 'Active',
   },
   {
     id: 2,
@@ -61,7 +63,7 @@ const sampleMedicationData = [
     frequency: 'Twice daily',
     prescribing_practitioner: 'Dr. Johnson',
     start_date: '2024-02-01',
-    status: 'Active'
+    status: 'Active',
   },
   {
     id: 3,
@@ -70,8 +72,8 @@ const sampleMedicationData = [
     frequency: 'Once daily',
     prescribing_practitioner: 'Dr. Brown',
     start_date: '2024-01-10',
-    status: 'Discontinued'
-  }
+    status: 'Discontinued',
+  },
 ];
 
 const sampleColumns = [
@@ -79,38 +81,38 @@ const sampleColumns = [
     key: 'medication_name',
     title: 'Medication',
     priority: 'high',
-    render: (value) => <strong>{value}</strong>
+    render: value => <strong>{value}</strong>,
   },
   {
     key: 'dosage',
     title: 'Dosage',
-    priority: 'high'
+    priority: 'high',
   },
   {
     key: 'frequency',
     title: 'Frequency',
-    priority: 'medium'
+    priority: 'medium',
   },
   {
     key: 'prescribing_practitioner',
     title: 'Prescribing Doctor',
-    priority: 'medium'
+    priority: 'medium',
   },
   {
     key: 'start_date',
     title: 'Start Date',
-    priority: 'low'
+    priority: 'low',
   },
   {
     key: 'status',
     title: 'Status',
     priority: 'high',
-    render: (value) => (
+    render: value => (
       <span style={{ color: value === 'Active' ? 'green' : 'red' }}>
         {value}
       </span>
-    )
-  }
+    ),
+  },
 ];
 
 const sampleAllergyData = [
@@ -119,22 +121,22 @@ const sampleAllergyData = [
     allergen: 'Penicillin',
     reaction_type: 'Skin rash',
     severity: 'Moderate',
-    notes: 'Developed rash within 2 hours'
+    notes: 'Developed rash within 2 hours',
   },
   {
     id: 2,
     allergen: 'Shellfish',
     reaction_type: 'Swelling',
     severity: 'Severe',
-    notes: 'Anaphylactic reaction'
-  }
+    notes: 'Anaphylactic reaction',
+  },
 ];
 
 const sampleAllergyColumns = [
   { key: 'allergen', title: 'Allergen', priority: 'high' },
   { key: 'reaction_type', title: 'Reaction', priority: 'high' },
   { key: 'severity', title: 'Severity', priority: 'high' },
-  { key: 'notes', title: 'Notes', priority: 'low' }
+  { key: 'notes', title: 'Notes', priority: 'low' },
 ];
 
 describe('ResponsiveTable Component Tests', () => {
@@ -142,7 +144,7 @@ describe('ResponsiveTable Component Tests', () => {
     data: sampleMedicationData,
     columns: sampleColumns,
     dataType: 'medications',
-    medicalContext: 'medications'
+    medicalContext: 'medications',
   };
 
   beforeEach(() => {
@@ -155,7 +157,7 @@ describe('ResponsiveTable Component Tests', () => {
       isTablet: false,
       isDesktop: true,
       width: 1280,
-      height: 720
+      height: 720,
     });
   });
 
@@ -165,7 +167,9 @@ describe('ResponsiveTable Component Tests', () => {
       // On desktop/tablet, should render as table; on mobile as cards
       // Use queryAllByText (not queryByText) to avoid "multiple elements" error from hidden print table
       const table = screen.queryByRole('table');
-      const texts = screen.queryAllByText(sampleMedicationData[0].medication_name);
+      const texts = screen.queryAllByText(
+        sampleMedicationData[0].medication_name
+      );
       expect(table !== null || texts.length > 0).toBeTruthy();
     });
 
@@ -192,7 +196,9 @@ describe('ResponsiveTable Component Tests', () => {
     testAtAllBreakpoints(
       <ResponsiveTable {...defaultProps} />,
       (breakpoint, viewport) => {
-        const deviceType = getDeviceTypeForBreakpoint(getBreakpointForWidth(viewport.width));
+        const deviceType = getDeviceTypeForBreakpoint(
+          getBreakpointForWidth(viewport.width)
+        );
 
         describe(`Table Display at ${breakpoint}`, () => {
           it('displays correct view type for breakpoint', () => {
@@ -201,20 +207,24 @@ describe('ResponsiveTable Component Tests', () => {
               breakpoint,
               deviceType,
               isMobile: deviceType === 'mobile',
-              isTablet: deviceType === 'tablet', 
+              isTablet: deviceType === 'tablet',
               isDesktop: deviceType === 'desktop',
               width: viewport.width,
-              height: viewport.height
+              height: viewport.height,
             });
 
-            renderResponsive(<ResponsiveTable {...defaultProps} />, { viewport });
+            renderResponsive(<ResponsiveTable {...defaultProps} />, {
+              viewport,
+            });
 
             if (deviceType === 'mobile') {
               // Mobile should show cards (no table role)
               expect(screen.queryByRole('table')).not.toBeInTheDocument();
               // Cards are rendered but don't have specific test IDs - check for card content instead
               // Use getAllByText to avoid "multiple elements" error from always-present hidden print table
-              expect(screen.getAllByText('Lisinopril').length).toBeGreaterThan(0);
+              expect(screen.getAllByText('Lisinopril').length).toBeGreaterThan(
+                0
+              );
             } else {
               // Tablet and desktop should show table
               expect(screen.getByRole('table')).toBeInTheDocument();
@@ -226,27 +236,39 @@ describe('ResponsiveTable Component Tests', () => {
               breakpoint,
               deviceType,
               isMobile: deviceType === 'mobile',
-              isTablet: deviceType === 'tablet', 
+              isTablet: deviceType === 'tablet',
               isDesktop: deviceType === 'desktop',
               width: viewport.width,
-              height: viewport.height
+              height: viewport.height,
             });
 
-            renderResponsive(<ResponsiveTable {...defaultProps} />, { viewport });
+            renderResponsive(<ResponsiveTable {...defaultProps} />, {
+              viewport,
+            });
 
             if (deviceType === 'desktop') {
               // Desktop should show all columns
               sampleColumns.forEach(column => {
-                expect(screen.getByRole('columnheader', { name: column.title })).toBeInTheDocument();
+                expect(
+                  screen.getByRole('columnheader', { name: column.title })
+                ).toBeInTheDocument();
               });
             } else if (deviceType === 'tablet') {
               // Tablet should show high and medium priority columns
-              const highPriorityColumns = sampleColumns.filter(col => col.priority === 'high');
-              const mediumPriorityColumns = sampleColumns.filter(col => col.priority === 'medium');
-              
-              [...highPriorityColumns, ...mediumPriorityColumns].forEach(column => {
-                expect(screen.getByRole('columnheader', { name: column.title })).toBeInTheDocument();
-              });
+              const highPriorityColumns = sampleColumns.filter(
+                col => col.priority === 'high'
+              );
+              const mediumPriorityColumns = sampleColumns.filter(
+                col => col.priority === 'medium'
+              );
+
+              [...highPriorityColumns, ...mediumPriorityColumns].forEach(
+                column => {
+                  expect(
+                    screen.getByRole('columnheader', { name: column.title })
+                  ).toBeInTheDocument();
+                }
+              );
             }
           });
 
@@ -255,25 +277,30 @@ describe('ResponsiveTable Component Tests', () => {
               const user = userEvent.setup();
               const mockOnRowClick = vi.fn();
 
-                useResponsive.mockReturnValue({
+              useResponsive.mockReturnValue({
                 breakpoint,
                 deviceType: 'mobile',
                 isMobile: true,
                 isTablet: false,
                 isDesktop: false,
                 width: viewport.width,
-                height: viewport.height
+                height: viewport.height,
               });
 
               renderResponsive(
-                <ResponsiveTable {...defaultProps} onRowClick={mockOnRowClick} />,
+                <ResponsiveTable
+                  {...defaultProps}
+                  onRowClick={mockOnRowClick}
+                />,
                 { viewport }
               );
 
               // Find and click first card (mobile view) - cards are Mantine Card components
               // getAllByText returns in DOM order; cards render before hidden print table
               const firstCardContent = screen.getAllByText('Lisinopril')[0];
-              const firstCard = firstCardContent.closest('[class*="Card-root"]');
+              const firstCard = firstCardContent.closest(
+                '[class*="Card-root"]'
+              );
               if (firstCard) {
                 await user.click(firstCard);
 
@@ -297,12 +324,12 @@ describe('ResponsiveTable Component Tests', () => {
       ...defaultProps,
       sortable: true,
       sortBy: null,
-      sortDirection: 'asc'
+      sortDirection: 'asc',
     };
 
     it('renders sortable column headers', () => {
       renderResponsive(<ResponsiveTable {...sortableProps} />, {
-        viewport: TEST_VIEWPORTS.desktop
+        viewport: TEST_VIEWPORTS.desktop,
       });
 
       // Check for sort icons - they're ActionIcon components with SVG icons
@@ -323,7 +350,9 @@ describe('ResponsiveTable Component Tests', () => {
       );
 
       // Click on medication name column to sort
-      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+      const medicationHeader = screen.getByRole('columnheader', {
+        name: /medication/i,
+      });
       await user.click(medicationHeader);
 
       await waitFor(() => {
@@ -340,23 +369,25 @@ describe('ResponsiveTable Component Tests', () => {
 
     it('displays correct sort indicators', () => {
       renderResponsive(
-        <ResponsiveTable 
-          {...sortableProps} 
+        <ResponsiveTable
+          {...sortableProps}
           sortBy="medication_name"
           sortDirection="asc"
         />,
         { viewport: TEST_VIEWPORTS.desktop }
       );
 
-      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+      const medicationHeader = screen.getByRole('columnheader', {
+        name: /medication/i,
+      });
       expect(medicationHeader).toHaveAttribute('aria-sort', 'ascending');
     });
 
     it('sorts data correctly when internal sorting is enabled', () => {
       const unsortedData = [...sampleMedicationData].reverse();
-      
+
       renderResponsive(
-        <ResponsiveTable 
+        <ResponsiveTable
           {...sortableProps}
           data={unsortedData}
           sortBy="medication_name"
@@ -376,7 +407,7 @@ describe('ResponsiveTable Component Tests', () => {
       ...defaultProps,
       selectable: true,
       selectedRows: [],
-      onRowSelect: vi.fn()
+      onRowSelect: vi.fn(),
     };
 
     it('handles row selection correctly', async () => {
@@ -393,14 +424,17 @@ describe('ResponsiveTable Component Tests', () => {
       await user.click(firstDataRow);
 
       await waitFor(() => {
-        expect(mockOnRowSelect).toHaveBeenCalledWith(sampleMedicationData[0], true);
+        expect(mockOnRowSelect).toHaveBeenCalledWith(
+          sampleMedicationData[0],
+          true
+        );
       });
     });
 
     it('shows selected state visually', () => {
       renderResponsive(
-        <ResponsiveTable 
-          {...selectableProps} 
+        <ResponsiveTable
+          {...selectableProps}
           selectedRows={[1]} // First medication selected
         />,
         { viewport: TEST_VIEWPORTS.desktop }
@@ -418,12 +452,12 @@ describe('ResponsiveTable Component Tests', () => {
       page: 1,
       pageSize: 2,
       totalRecords: 5,
-      onPageChange: vi.fn()
+      onPageChange: vi.fn(),
     };
 
     it('renders pagination controls', () => {
       renderResponsive(<ResponsiveTable {...paginatedProps} />, {
-        viewport: TEST_VIEWPORTS.desktop
+        viewport: TEST_VIEWPORTS.desktop,
       });
 
       // Mantine v8 Pagination renders page number buttons, not a <nav> element
@@ -450,11 +484,7 @@ describe('ResponsiveTable Component Tests', () => {
 
     it('does not render pagination when not needed', () => {
       renderResponsive(
-        <ResponsiveTable 
-          {...paginatedProps} 
-          totalRecords={2} 
-          pageSize={5} 
-        />,
+        <ResponsiveTable {...paginatedProps} totalRecords={2} pageSize={5} />,
         { viewport: TEST_VIEWPORTS.desktop }
       );
 
@@ -471,13 +501,13 @@ describe('ResponsiveTable Component Tests', () => {
         isTablet: false,
         isDesktop: false,
         width: 375,
-        height: 667
+        height: 667,
       });
     });
 
     it('renders data as cards on mobile', () => {
       renderResponsive(<ResponsiveTable {...defaultProps} />, {
-        viewport: TEST_VIEWPORTS.mobile
+        viewport: TEST_VIEWPORTS.mobile,
       });
 
       // Should not have table
@@ -492,7 +522,7 @@ describe('ResponsiveTable Component Tests', () => {
 
     it('shows priority fields in card view', () => {
       renderResponsive(<ResponsiveTable {...defaultProps} />, {
-        viewport: TEST_VIEWPORTS.mobile
+        viewport: TEST_VIEWPORTS.mobile,
       });
 
       // High priority fields should be visible
@@ -538,7 +568,7 @@ describe('ResponsiveTable Component Tests', () => {
 
       // Should show "+X more fields" text for cards with hidden fields
       // The actual text pattern is "+N more field" or "+N more fields"
-      const moreFieldsText = screen.queryByText(/\+\d+ more field/);
+      screen.queryByText(/\+\d+ more field/);
       // This is optional based on how many fields are displayed vs total columns
       // Just verify it renders without error
       expect(screen.getAllByText('Lisinopril').length).toBeGreaterThan(0);
@@ -548,10 +578,7 @@ describe('ResponsiveTable Component Tests', () => {
   describe('Accessibility Tests', () => {
     it('has proper ARIA labels', () => {
       renderResponsive(
-        <ResponsiveTable 
-          {...defaultProps}
-          aria-label="Medications table"
-        />,
+        <ResponsiveTable {...defaultProps} aria-label="Medications table" />,
         { viewport: TEST_VIEWPORTS.desktop }
       );
 
@@ -561,7 +588,7 @@ describe('ResponsiveTable Component Tests', () => {
 
     it('has correct ARIA sort attributes', () => {
       renderResponsive(
-        <ResponsiveTable 
+        <ResponsiveTable
           {...defaultProps}
           sortable={true}
           sortBy="medication_name"
@@ -570,7 +597,9 @@ describe('ResponsiveTable Component Tests', () => {
         { viewport: TEST_VIEWPORTS.desktop }
       );
 
-      const sortedHeader = screen.getByRole('columnheader', { name: /medication/i });
+      const sortedHeader = screen.getByRole('columnheader', {
+        name: /medication/i,
+      });
       expect(sortedHeader).toHaveAttribute('aria-sort', 'descending');
     });
 
@@ -609,11 +638,11 @@ describe('ResponsiveTable Component Tests', () => {
         isTablet: false,
         isDesktop: false,
         width: 375,
-        height: 667
+        height: 667,
       });
 
       renderResponsive(<ResponsiveTable {...defaultProps} />, {
-        viewport: TEST_VIEWPORTS.mobile
+        viewport: TEST_VIEWPORTS.mobile,
       });
 
       // Cards don't have explicit role="button", but they should be clickable
@@ -634,21 +663,21 @@ describe('ResponsiveTable Component Tests', () => {
         frequency: index % 2 === 0 ? 'Once daily' : 'Twice daily',
         prescribing_practitioner: `Dr. ${String.fromCharCode(65 + (index % 26))}`,
         start_date: '2024-01-01',
-        status: index % 3 === 0 ? 'Discontinued' : 'Active'
+        status: index % 3 === 0 ? 'Discontinued' : 'Active',
       }));
 
       const startTime = performance.now();
-      
+
       const { unmount } = renderResponsive(
         <ResponsiveTable {...defaultProps} data={largeDataset} />,
         { viewport: TEST_VIEWPORTS.desktop }
       );
-      
+
       const renderTime = performance.now() - startTime;
-      
+
       // Should render within reasonable time (2000ms accounts for jsdom test environment overhead)
       expect(renderTime).toBeLessThan(2000);
-      
+
       unmount();
     });
 
@@ -660,12 +689,12 @@ describe('ResponsiveTable Component Tests', () => {
         frequency: 'Once daily',
         prescribing_practitioner: 'Dr. Smith',
         start_date: '2024-01-01',
-        status: 'Active'
+        status: 'Active',
       }));
 
       renderResponsive(
-        <ResponsiveTable 
-          {...defaultProps} 
+        <ResponsiveTable
+          {...defaultProps}
           data={veryLargeDataset}
           virtualization={true}
         />,
@@ -682,7 +711,7 @@ describe('ResponsiveTable Component Tests', () => {
   describe('Different Data Types Tests', () => {
     it('handles allergy data correctly', () => {
       renderResponsive(
-        <ResponsiveTable 
+        <ResponsiveTable
           data={sampleAllergyData}
           columns={sampleAllergyColumns}
           dataType="allergies"
@@ -704,11 +733,11 @@ describe('ResponsiveTable Component Tests', () => {
         isTablet: true,
         isDesktop: false,
         width: 768,
-        height: 1024
+        height: 1024,
       });
 
       renderResponsive(
-        <ResponsiveTable 
+        <ResponsiveTable
           data={sampleAllergyData}
           columns={sampleAllergyColumns}
           dataType="allergies"
@@ -718,8 +747,12 @@ describe('ResponsiveTable Component Tests', () => {
       );
 
       // High priority allergy columns should be visible
-      expect(screen.getByRole('columnheader', { name: /allergen/i })).toBeInTheDocument();
-      expect(screen.getByRole('columnheader', { name: /severity/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('columnheader', { name: /allergen/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('columnheader', { name: /severity/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -728,7 +761,7 @@ describe('ResponsiveTable Component Tests', () => {
       // Test with malformed data
       const invalidData = [
         { id: 1, medication_name: null, dosage: undefined },
-        { id: 2, medication_name: 'Test', dosage: '' }
+        { id: 2, medication_name: 'Test', dosage: '' },
       ];
 
       renderResponsive(
@@ -741,10 +774,9 @@ describe('ResponsiveTable Component Tests', () => {
     });
 
     it('handles missing columns configuration', () => {
-      renderResponsive(
-        <ResponsiveTable {...defaultProps} columns={[]} />,
-        { viewport: TEST_VIEWPORTS.desktop }
-      );
+      renderResponsive(<ResponsiveTable {...defaultProps} columns={[]} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
 
       // Component renders without crashing with empty columns (shows table with no columns visible)
       // Note: component only shows "no data available" when data array is empty, not when columns are empty
@@ -811,7 +843,9 @@ describe('ResponsiveTable Component Tests', () => {
       await user.click(viewButtons[0]);
 
       await waitFor(() => {
-        expect(actionProps.onView).toHaveBeenCalledWith(sampleMedicationData[0]);
+        expect(actionProps.onView).toHaveBeenCalledWith(
+          sampleMedicationData[0]
+        );
       });
     });
 
@@ -825,7 +859,9 @@ describe('ResponsiveTable Component Tests', () => {
       await user.click(editButtons[1]);
 
       await waitFor(() => {
-        expect(actionProps.onEdit).toHaveBeenCalledWith(sampleMedicationData[1]);
+        expect(actionProps.onEdit).toHaveBeenCalledWith(
+          sampleMedicationData[1]
+        );
       });
     });
 
@@ -839,7 +875,9 @@ describe('ResponsiveTable Component Tests', () => {
       await user.click(deleteButtons[2]);
 
       await waitFor(() => {
-        expect(actionProps.onDelete).toHaveBeenCalledWith(sampleMedicationData[2].id);
+        expect(actionProps.onDelete).toHaveBeenCalledWith(
+          sampleMedicationData[2].id
+        );
       });
     });
 
@@ -862,14 +900,19 @@ describe('ResponsiveTable Component Tests', () => {
     });
 
     it('renders only provided action callbacks', () => {
-      renderResponsive(
-        <ResponsiveTable {...defaultProps} onView={vi.fn()} />,
-        { viewport: TEST_VIEWPORTS.desktop }
-      );
+      renderResponsive(<ResponsiveTable {...defaultProps} onView={vi.fn()} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
 
-      expect(screen.getAllByRole('button', { name: /view/i })).toHaveLength(sampleMedicationData.length);
-      expect(screen.queryAllByRole('button', { name: /edit/i })).toHaveLength(0);
-      expect(screen.queryAllByRole('button', { name: /delete/i })).toHaveLength(0);
+      expect(screen.getAllByRole('button', { name: /view/i })).toHaveLength(
+        sampleMedicationData.length
+      );
+      expect(screen.queryAllByRole('button', { name: /edit/i })).toHaveLength(
+        0
+      );
+      expect(screen.queryAllByRole('button', { name: /delete/i })).toHaveLength(
+        0
+      );
     });
 
     it('renders action buttons in mobile card view', () => {
@@ -942,13 +985,14 @@ describe('ResponsiveTable Component Tests', () => {
 
     it('persists sort state to localStorage when persistKey is provided', async () => {
       await act(async () => {
-        renderResponsive(
-          <ResponsiveTable {...persistProps} />,
-          { viewport: TEST_VIEWPORTS.desktop }
-        );
+        renderResponsive(<ResponsiveTable {...persistProps} />, {
+          viewport: TEST_VIEWPORTS.desktop,
+        });
       });
 
-      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+      const medicationHeader = screen.getByRole('columnheader', {
+        name: /medication/i,
+      });
 
       // Use fireEvent + act to ensure the click and all resulting effects are flushed
       await act(async () => {
@@ -973,15 +1017,16 @@ describe('ResponsiveTable Component Tests', () => {
 
       // Wrap render in act to ensure the initial mount effects and state are fully flushed
       await act(async () => {
-        renderResponsive(
-          <ResponsiveTable {...persistProps} />,
-          { viewport: TEST_VIEWPORTS.desktop }
-        );
+        renderResponsive(<ResponsiveTable {...persistProps} />, {
+          viewport: TEST_VIEWPORTS.desktop,
+        });
       });
 
       // waitFor handles any React async state settling
       await waitFor(() => {
-        const dosageHeader = screen.getByRole('columnheader', { name: /dosage/i });
+        const dosageHeader = screen.getByRole('columnheader', {
+          name: /dosage/i,
+        });
         expect(dosageHeader).toHaveAttribute('aria-sort', 'descending');
       });
     });
@@ -989,17 +1034,18 @@ describe('ResponsiveTable Component Tests', () => {
     it('does not interact with localStorage when persistKey is not provided', async () => {
       const user = userEvent.setup();
 
-      renderResponsive(
-        <ResponsiveTable {...defaultProps} sortable={true} />,
-        { viewport: TEST_VIEWPORTS.desktop }
-      );
+      renderResponsive(<ResponsiveTable {...defaultProps} sortable={true} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
 
-      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+      const medicationHeader = screen.getByRole('columnheader', {
+        name: /medication/i,
+      });
       await user.click(medicationHeader);
 
       // localStorage is globally mocked — assert the mock was never called with a sort key
-      const sortCalls = localStorage.setItem.mock.calls.filter(
-        ([key]) => key.startsWith('medikeep_sort_')
+      const sortCalls = localStorage.setItem.mock.calls.filter(([key]) =>
+        key.startsWith('medikeep_sort_')
       );
       expect(sortCalls).toHaveLength(0);
     });
@@ -1008,10 +1054,9 @@ describe('ResponsiveTable Component Tests', () => {
       // localStorage is globally mocked — configure getItem to return corrupted data
       localStorage.getItem.mockReturnValue('not-valid-json{{{');
 
-      renderResponsive(
-        <ResponsiveTable {...persistProps} />,
-        { viewport: TEST_VIEWPORTS.desktop }
-      );
+      renderResponsive(<ResponsiveTable {...persistProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
 
       // Should render without crashing and use default sort
       expect(screen.getByRole('table')).toBeInTheDocument();
@@ -1023,10 +1068,9 @@ describe('ResponsiveTable Component Tests', () => {
         JSON.stringify({ sortBy: 123, sortDirection: 'invalid' })
       );
 
-      renderResponsive(
-        <ResponsiveTable {...persistProps} />,
-        { viewport: TEST_VIEWPORTS.desktop }
-      );
+      renderResponsive(<ResponsiveTable {...persistProps} />, {
+        viewport: TEST_VIEWPORTS.desktop,
+      });
 
       // Should render without crashing
       expect(screen.getByRole('table')).toBeInTheDocument();
@@ -1034,13 +1078,14 @@ describe('ResponsiveTable Component Tests', () => {
 
     it('updates localStorage when sort direction changes', async () => {
       await act(async () => {
-        renderResponsive(
-          <ResponsiveTable {...persistProps} />,
-          { viewport: TEST_VIEWPORTS.desktop }
-        );
+        renderResponsive(<ResponsiveTable {...persistProps} />, {
+          viewport: TEST_VIEWPORTS.desktop,
+        });
       });
 
-      const medicationHeader = screen.getByRole('columnheader', { name: /medication/i });
+      const medicationHeader = screen.getByRole('columnheader', {
+        name: /medication/i,
+      });
 
       // First click: asc — flush effects with act so localStorage is written synchronously
       await act(async () => {
@@ -1051,7 +1096,9 @@ describe('ResponsiveTable Component Tests', () => {
         ([key]) => key === 'medikeep_sort_test-table'
       );
       expect(callsAfterFirst.length).toBeGreaterThan(0);
-      const parsedFirst = JSON.parse(callsAfterFirst[callsAfterFirst.length - 1][1]);
+      const parsedFirst = JSON.parse(
+        callsAfterFirst[callsAfterFirst.length - 1][1]
+      );
       expect(parsedFirst.sortDirection).toBe('asc');
 
       // Second click: desc
@@ -1061,7 +1108,9 @@ describe('ResponsiveTable Component Tests', () => {
       const callsAfterSecond = localStorage.setItem.mock.calls.filter(
         ([key]) => key === 'medikeep_sort_test-table'
       );
-      const parsedSecond = JSON.parse(callsAfterSecond[callsAfterSecond.length - 1][1]);
+      const parsedSecond = JSON.parse(
+        callsAfterSecond[callsAfterSecond.length - 1][1]
+      );
       expect(parsedSecond.sortDirection).toBe('desc');
     });
   });

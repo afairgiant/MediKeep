@@ -1,4 +1,5 @@
 """API endpoints for Medical Equipment."""
+
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -66,7 +67,9 @@ def read_medical_equipment(
     status: Optional[str] = Query(None),
     equipment_type: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -84,7 +87,7 @@ def read_medical_equipment(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
         elif equipment_type:
             equipment_list = medical_equipment.get_by_type(
@@ -110,7 +113,7 @@ def read_medical_equipment(
             "read",
             "MedicalEquipment",
             patient_id=target_patient_id,
-            count=len(equipment_list)
+            count=len(equipment_list),
         )
 
         return equipment_list
@@ -138,7 +141,7 @@ def get_active_equipment(
             "MedicalEquipment",
             patient_id=target_patient_id,
             count=len(equipment_list),
-            status="active"
+            status="active",
         )
 
         return equipment_list
@@ -166,7 +169,7 @@ def get_equipment_needing_service(
             "MedicalEquipment",
             patient_id=target_patient_id,
             count=len(equipment_list),
-            filter="needing_service"
+            filter="needing_service",
         )
 
         return equipment_list
@@ -190,7 +193,13 @@ def read_single_equipment(
             relations=["patient", "practitioner"],
         )
         handle_not_found(equipment_obj, "MedicalEquipment", request)
-        verify_patient_ownership(equipment_obj, current_user_patient_id, "medical equipment", db=db, current_user=current_user)
+        verify_patient_ownership(
+            equipment_obj,
+            current_user_patient_id,
+            "medical equipment",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -199,7 +208,7 @@ def read_single_equipment(
             "read",
             "MedicalEquipment",
             record_id=equipment_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return equipment_obj

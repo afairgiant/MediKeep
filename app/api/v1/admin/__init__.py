@@ -34,10 +34,16 @@ router.include_router(restore.router, prefix="/restore", tags=["admin-restore"])
 
 router.include_router(trash_management.router, prefix="", tags=["admin-trash"])
 
-router.include_router(maintenance.router, prefix="/maintenance", tags=["admin-maintenance"])
+router.include_router(
+    maintenance.router, prefix="/maintenance", tags=["admin-maintenance"]
+)
 
-router.include_router(user_management.router, prefix="/user-management", tags=["admin-user-management"])
+router.include_router(
+    user_management.router, prefix="/user-management", tags=["admin-user-management"]
+)
 
-router.include_router(activity_log.router, prefix="/activity-log", tags=["admin-activity-log"])
+router.include_router(
+    activity_log.router, prefix="/activity-log", tags=["admin-activity-log"]
+)
 
 __all__ = ["router"]

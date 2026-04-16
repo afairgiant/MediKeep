@@ -1,6 +1,7 @@
 """
 Tests for Canonical Test Matching Service.
 """
+
 import pytest
 
 from app.services.canonical_test_matching import (
@@ -269,7 +270,9 @@ class TestCanonicalTestMatchingService:
 
     def test_match_complex_names(self, matching_service):
         """Test matching complex test names."""
-        result = matching_service.find_canonical_match("Mean Corpuscular Hemoglobin Concentration")
+        result = matching_service.find_canonical_match(
+            "Mean Corpuscular Hemoglobin Concentration"
+        )
         assert result == "Mean Corpuscular Hemoglobin Concentration"
 
         result = matching_service.find_canonical_match("MCHC")

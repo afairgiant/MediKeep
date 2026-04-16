@@ -45,8 +45,14 @@ export const injuryFormFields = [
     options: [
       { value: 'left', labelKey: 'medical:injuries.laterality.options.left' },
       { value: 'right', labelKey: 'medical:injuries.laterality.options.right' },
-      { value: 'bilateral', labelKey: 'medical:injuries.laterality.options.bilateral' },
-      { value: 'not_applicable', labelKey: 'medical:injuries.laterality.options.notApplicable' },
+      {
+        value: 'bilateral',
+        labelKey: 'medical:injuries.laterality.options.bilateral',
+      },
+      {
+        value: 'not_applicable',
+        labelKey: 'medical:injuries.laterality.options.notApplicable',
+      },
     ],
   },
   {

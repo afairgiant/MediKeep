@@ -22,9 +22,7 @@ const ADMIN_ROUTE_LABELS = {
  * e.g. "lab_result" -> "Lab Result", "emergency-contact" -> "Emergency Contact"
  */
 function humanize(str) {
-  return str
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+  return str.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
 /**
@@ -85,7 +83,10 @@ export function generateAdminBreadcrumbs(pathname) {
   }
 
   // Fallback: split pathname and build crumbs from segments
-  const segments = pathname.replace(/^\/admin\/?/, '').split('/').filter(Boolean);
+  const segments = pathname
+    .replace(/^\/admin\/?/, '')
+    .split('/')
+    .filter(Boolean);
   let currentPath = '/admin';
 
   for (let i = 0; i < segments.length; i++) {

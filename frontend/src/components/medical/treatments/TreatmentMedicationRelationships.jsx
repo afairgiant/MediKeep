@@ -13,7 +13,10 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { IconPill } from '@tabler/icons-react';
-import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import {
+  parseDateInput,
+  formatDateInputChange,
+} from '../../../utils/dateUtils';
 import { useTreatmentRelationships } from '../../../hooks/useTreatmentRelationships';
 import {
   RelationshipContainer,
@@ -42,9 +45,13 @@ const INITIAL_RELATIONSHIP_STATE = {
 };
 
 const EDIT_FIELDS = [
-  'specific_dosage', 'specific_frequency', 'relevance_note',
-  'specific_prescriber_id', 'specific_pharmacy_id',
-  'specific_start_date', 'specific_end_date',
+  'specific_dosage',
+  'specific_frequency',
+  'relevance_note',
+  'specific_prescriber_id',
+  'specific_pharmacy_id',
+  'specific_start_date',
+  'specific_end_date',
 ];
 
 function buildSinglePayload(newRelationship) {
@@ -55,8 +62,12 @@ function buildSinglePayload(newRelationship) {
     specific_duration: newRelationship.specific_duration || null,
     timing_instructions: newRelationship.timing_instructions || null,
     relevance_note: newRelationship.relevance_note || null,
-    specific_prescriber_id: newRelationship.specific_prescriber_id ? parseInt(newRelationship.specific_prescriber_id) : null,
-    specific_pharmacy_id: newRelationship.specific_pharmacy_id ? parseInt(newRelationship.specific_pharmacy_id) : null,
+    specific_prescriber_id: newRelationship.specific_prescriber_id
+      ? parseInt(newRelationship.specific_prescriber_id)
+      : null,
+    specific_pharmacy_id: newRelationship.specific_pharmacy_id
+      ? parseInt(newRelationship.specific_pharmacy_id)
+      : null,
     specific_start_date: newRelationship.specific_start_date || null,
     specific_end_date: newRelationship.specific_end_date || null,
   };
@@ -120,12 +131,19 @@ function TreatmentMedicationRelationships({
     buildBulkPayload,
   });
 
-  const getMedicationById = (medicationId) => {
+  const getMedicationById = medicationId => {
     return safeMedications.find(m => m.id === medicationId);
   };
 
-  const medicationOptions = createSelectOptions(safeMedications, formatMedicationLabel);
-  const availableOptions = filterAvailableOptions(medicationOptions, relationships, 'medication_id');
+  const medicationOptions = createSelectOptions(
+    safeMedications,
+    formatMedicationLabel
+  );
+  const availableOptions = filterAvailableOptions(
+    medicationOptions,
+    relationships,
+    'medication_id'
+  );
   const selectedCount = newRelationship.medication_ids.length;
 
   return (
@@ -136,7 +154,9 @@ function TreatmentMedicationRelationships({
         {relationships.length > 0 ? (
           <Stack gap="sm">
             {relationships.map(relationship => {
-              const medication = relationship.medication || getMedicationById(relationship.medication_id);
+              const medication =
+                relationship.medication ||
+                getMedicationById(relationship.medication_id);
               const isEditing = editingRelationship?.id === relationship.id;
 
               return (
@@ -147,19 +167,30 @@ function TreatmentMedicationRelationships({
                         variant="light"
                         color="teal"
                         leftSection={<IconPill size={12} />}
-                        style={isViewMode && onEntityClick ? { cursor: 'pointer' } : undefined}
-                        onClick={isViewMode && onEntityClick ? () => onEntityClick(relationship.medication_id) : undefined}
+                        style={
+                          isViewMode && onEntityClick
+                            ? { cursor: 'pointer' }
+                            : undefined
+                        }
+                        onClick={
+                          isViewMode && onEntityClick
+                            ? () => onEntityClick(relationship.medication_id)
+                            : undefined
+                        }
                       >
-                        {medication?.medication_name || `Medication ID: ${relationship.medication_id}`}
+                        {medication?.medication_name ||
+                          `Medication ID: ${relationship.medication_id}`}
                       </Badge>
                       {(relationship.specific_dosage || medication?.dosage) && (
                         <Badge variant="outline" size="sm">
                           {relationship.specific_dosage || medication?.dosage}
                         </Badge>
                       )}
-                      {(relationship.specific_frequency || medication?.frequency) && (
+                      {(relationship.specific_frequency ||
+                        medication?.frequency) && (
                         <Badge variant="outline" size="sm" color="cyan">
-                          {relationship.specific_frequency || medication?.frequency}
+                          {relationship.specific_frequency ||
+                            medication?.frequency}
                         </Badge>
                       )}
                       {relationship.specific_duration && (
@@ -176,7 +207,8 @@ function TreatmentMedicationRelationships({
 
                     {relationship.timing_instructions && (
                       <Text size="sm" c="dimmed">
-                        <strong>{t('treatments.timingLabel')}</strong> {relationship.timing_instructions}
+                        <strong>{t('treatments.timingLabel')}</strong>{' '}
+                        {relationship.timing_instructions}
                       </Text>
                     )}
 
@@ -186,13 +218,23 @@ function TreatmentMedicationRelationships({
                           size="xs"
                           placeholder="Specific dosage for this treatment"
                           value={editingRelationship?.specific_dosage || ''}
-                          onChange={(e) => updateEditingRelationship('specific_dosage', e.target.value)}
+                          onChange={e =>
+                            updateEditingRelationship(
+                              'specific_dosage',
+                              e.target.value
+                            )
+                          }
                         />
                         <TextInput
                           size="xs"
                           placeholder="Specific frequency"
                           value={editingRelationship?.specific_frequency || ''}
-                          onChange={(e) => updateEditingRelationship('specific_frequency', e.target.value)}
+                          onChange={e =>
+                            updateEditingRelationship(
+                              'specific_frequency',
+                              e.target.value
+                            )
+                          }
                         />
                         <Group grow gap="xs">
                           <Select
@@ -202,8 +244,16 @@ function TreatmentMedicationRelationships({
                               value: p.id.toString(),
                               label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
                             }))}
-                            value={editingRelationship?.specific_prescriber_id?.toString() || ''}
-                            onChange={(value) => updateEditingRelationship('specific_prescriber_id', value || '')}
+                            value={
+                              editingRelationship?.specific_prescriber_id?.toString() ||
+                              ''
+                            }
+                            onChange={value =>
+                              updateEditingRelationship(
+                                'specific_prescriber_id',
+                                value || ''
+                              )
+                            }
                             clearable
                             searchable
                             comboboxProps={{ withinPortal: true, zIndex: 4000 }}
@@ -215,8 +265,16 @@ function TreatmentMedicationRelationships({
                               value: p.id.toString(),
                               label: p.name || p.brand || `Pharmacy #${p.id}`,
                             }))}
-                            value={editingRelationship?.specific_pharmacy_id?.toString() || ''}
-                            onChange={(value) => updateEditingRelationship('specific_pharmacy_id', value || '')}
+                            value={
+                              editingRelationship?.specific_pharmacy_id?.toString() ||
+                              ''
+                            }
+                            onChange={value =>
+                              updateEditingRelationship(
+                                'specific_pharmacy_id',
+                                value || ''
+                              )
+                            }
                             clearable
                             searchable
                             comboboxProps={{ withinPortal: true, zIndex: 4000 }}
@@ -226,8 +284,15 @@ function TreatmentMedicationRelationships({
                           <DateInput
                             size="xs"
                             placeholder={dateInputFormat}
-                            value={parseDateInput(editingRelationship?.specific_start_date)}
-                            onChange={(date) => updateEditingRelationship('specific_start_date', formatDateInputChange(date))}
+                            value={parseDateInput(
+                              editingRelationship?.specific_start_date
+                            )}
+                            onChange={date =>
+                              updateEditingRelationship(
+                                'specific_start_date',
+                                formatDateInputChange(date)
+                              )
+                            }
                             valueFormat={dateInputFormat}
                             clearable
                             popoverProps={{ withinPortal: true, zIndex: 4000 }}
@@ -235,8 +300,15 @@ function TreatmentMedicationRelationships({
                           <DateInput
                             size="xs"
                             placeholder={dateInputFormat}
-                            value={parseDateInput(editingRelationship?.specific_end_date)}
-                            onChange={(date) => updateEditingRelationship('specific_end_date', formatDateInputChange(date))}
+                            value={parseDateInput(
+                              editingRelationship?.specific_end_date
+                            )}
+                            onChange={date =>
+                              updateEditingRelationship(
+                                'specific_end_date',
+                                formatDateInputChange(date)
+                              )
+                            }
                             valueFormat={dateInputFormat}
                             clearable
                             popoverProps={{ withinPortal: true, zIndex: 4000 }}
@@ -246,7 +318,12 @@ function TreatmentMedicationRelationships({
                           size="xs"
                           placeholder="Relevance note"
                           value={editingRelationship?.relevance_note || ''}
-                          onChange={(e) => updateEditingRelationship('relevance_note', e.target.value)}
+                          onChange={e =>
+                            updateEditingRelationship(
+                              'relevance_note',
+                              e.target.value
+                            )
+                          }
                           autosize
                           minRows={2}
                         />
@@ -263,15 +340,32 @@ function TreatmentMedicationRelationships({
                   {!isViewMode && (
                     <RelationshipRowActions
                       isEditing={isEditing}
-                      onSave={() => handleEditRelationship(relationship.id, {
-                        specific_dosage: editingRelationship?.specific_dosage || null,
-                        specific_frequency: editingRelationship?.specific_frequency || null,
-                        relevance_note: editingRelationship?.relevance_note || null,
-                        specific_prescriber_id: editingRelationship?.specific_prescriber_id ? parseInt(editingRelationship.specific_prescriber_id) : null,
-                        specific_pharmacy_id: editingRelationship?.specific_pharmacy_id ? parseInt(editingRelationship.specific_pharmacy_id) : null,
-                        specific_start_date: editingRelationship?.specific_start_date || null,
-                        specific_end_date: editingRelationship?.specific_end_date || null,
-                      })}
+                      onSave={() =>
+                        handleEditRelationship(relationship.id, {
+                          specific_dosage:
+                            editingRelationship?.specific_dosage || null,
+                          specific_frequency:
+                            editingRelationship?.specific_frequency || null,
+                          relevance_note:
+                            editingRelationship?.relevance_note || null,
+                          specific_prescriber_id:
+                            editingRelationship?.specific_prescriber_id
+                              ? parseInt(
+                                  editingRelationship.specific_prescriber_id
+                                )
+                              : null,
+                          specific_pharmacy_id:
+                            editingRelationship?.specific_pharmacy_id
+                              ? parseInt(
+                                  editingRelationship.specific_pharmacy_id
+                                )
+                              : null,
+                          specific_start_date:
+                            editingRelationship?.specific_start_date || null,
+                          specific_end_date:
+                            editingRelationship?.specific_end_date || null,
+                        })
+                      }
                       onCancel={cancelEditing}
                       onEdit={() => startEditing(relationship, EDIT_FIELDS)}
                       onDelete={() => handleDeleteRelationship(relationship.id)}
@@ -284,7 +378,10 @@ function TreatmentMedicationRelationships({
           </Stack>
         ) : (
           <RelationshipEmptyState
-            message={t('labels.noMedicationsLinked', 'No medications linked to this treatment')}
+            message={t(
+              'labels.noMedicationsLinked',
+              'No medications linked to this treatment'
+            )}
             description="Link medications to track what is prescribed for this treatment plan."
             isViewMode={isViewMode}
           />
@@ -310,7 +407,7 @@ function TreatmentMedicationRelationships({
             placeholder="Choose medications to link"
             data={availableOptions}
             value={newRelationship.medication_ids}
-            onChange={(values) => updateNewRelationship('medication_ids', values)}
+            onChange={values => updateNewRelationship('medication_ids', values)}
             searchable
             clearable
             required
@@ -323,7 +420,9 @@ function TreatmentMedicationRelationships({
                 label="Specific Dosage (Optional)"
                 placeholder="e.g., 400mg 3x daily with meals"
                 value={newRelationship.specific_dosage}
-                onChange={(e) => updateNewRelationship('specific_dosage', e.target.value)}
+                onChange={e =>
+                  updateNewRelationship('specific_dosage', e.target.value)
+                }
                 description="Override the medication's default dosage for this treatment"
               />
 
@@ -331,14 +430,18 @@ function TreatmentMedicationRelationships({
                 label="Duration (Optional)"
                 placeholder="e.g., 2 weeks, Until symptoms resolve"
                 value={newRelationship.specific_duration}
-                onChange={(e) => updateNewRelationship('specific_duration', e.target.value)}
+                onChange={e =>
+                  updateNewRelationship('specific_duration', e.target.value)
+                }
               />
 
               <TextInput
                 label="Timing Instructions (Optional)"
                 placeholder="e.g., Take 30 min before PT session"
                 value={newRelationship.timing_instructions}
-                onChange={(e) => updateNewRelationship('timing_instructions', e.target.value)}
+                onChange={e =>
+                  updateNewRelationship('timing_instructions', e.target.value)
+                }
               />
 
               <Group grow gap="sm">
@@ -350,7 +453,9 @@ function TreatmentMedicationRelationships({
                     label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
                   }))}
                   value={newRelationship.specific_prescriber_id || null}
-                  onChange={(value) => updateNewRelationship('specific_prescriber_id', value || '')}
+                  onChange={value =>
+                    updateNewRelationship('specific_prescriber_id', value || '')
+                  }
                   clearable
                   searchable
                   comboboxProps={{ withinPortal: true, zIndex: 4000 }}
@@ -363,7 +468,9 @@ function TreatmentMedicationRelationships({
                     label: p.name || p.brand || `Pharmacy #${p.id}`,
                   }))}
                   value={newRelationship.specific_pharmacy_id || null}
-                  onChange={(value) => updateNewRelationship('specific_pharmacy_id', value || '')}
+                  onChange={value =>
+                    updateNewRelationship('specific_pharmacy_id', value || '')
+                  }
                   clearable
                   searchable
                   comboboxProps={{ withinPortal: true, zIndex: 4000 }}
@@ -375,7 +482,12 @@ function TreatmentMedicationRelationships({
                   label="Treatment Start Date"
                   placeholder={dateInputFormat}
                   value={parseDateInput(newRelationship.specific_start_date)}
-                  onChange={(date) => updateNewRelationship('specific_start_date', formatDateInputChange(date))}
+                  onChange={date =>
+                    updateNewRelationship(
+                      'specific_start_date',
+                      formatDateInputChange(date)
+                    )
+                  }
                   valueFormat={dateInputFormat}
                   clearable
                   popoverProps={{ withinPortal: true, zIndex: 4000 }}
@@ -384,7 +496,12 @@ function TreatmentMedicationRelationships({
                   label="Treatment End Date"
                   placeholder={dateInputFormat}
                   value={parseDateInput(newRelationship.specific_end_date)}
-                  onChange={(date) => updateNewRelationship('specific_end_date', formatDateInputChange(date))}
+                  onChange={date =>
+                    updateNewRelationship(
+                      'specific_end_date',
+                      formatDateInputChange(date)
+                    )
+                  }
                   valueFormat={dateInputFormat}
                   clearable
                   popoverProps={{ withinPortal: true, zIndex: 4000 }}
@@ -397,7 +514,9 @@ function TreatmentMedicationRelationships({
             label="Relevance Note (Optional)"
             placeholder="Describe how this medication relates to the treatment"
             value={newRelationship.relevance_note}
-            onChange={(e) => updateNewRelationship('relevance_note', e.target.value)}
+            onChange={e =>
+              updateNewRelationship('relevance_note', e.target.value)
+            }
             autosize
             minRows={2}
           />
@@ -407,7 +526,11 @@ function TreatmentMedicationRelationships({
             onSubmit={handleAddRelationship}
             loading={loading}
             disabled={selectedCount === 0}
-            submitLabel={selectedCount > 1 ? `Link ${selectedCount} Medications` : 'Link Medication'}
+            submitLabel={
+              selectedCount > 1
+                ? `Link ${selectedCount} Medications`
+                : 'Link Medication'
+            }
           />
         </RelationshipAddModal>
       </Stack>

@@ -1,4 +1,3 @@
-import React from 'react';
 import MantinePharmacyForm from '../MantinePharmacyForm';
 import logger from '../../../services/logger';
 
@@ -11,9 +10,9 @@ const PharmacyFormWrapper = ({
   onSubmit,
   editingPharmacy,
   isLoading,
-  statusMessage,
+  statusMessage: _statusMessage,
 }) => {
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('pharmacy_form_wrapper_error', {
       message: 'Error in PharmacyFormWrapper',
       editingPharmacy: editingPharmacy?.id,
@@ -22,7 +21,7 @@ const PharmacyFormWrapper = ({
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     try {
       e.preventDefault();
       onSubmit(e);
@@ -31,7 +30,7 @@ const PharmacyFormWrapper = ({
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     try {
       onInputChange(e);
     } catch (error) {

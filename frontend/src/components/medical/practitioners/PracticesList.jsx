@@ -41,56 +41,62 @@ const PracticesList = ({ onPracticeSaved }) => {
     [practices]
   );
 
-  const handleEditPractice = useCallback(async (practiceId) => {
-    try {
-      const data = await apiService.getPractice(practiceId);
-      setPracticeEditData(data);
-      setShowPracticeEditModal(true);
-    } catch (err) {
-      notifications.show({
-        title: t('shared:labels.error'),
-        message: t('practitioners.editPracticeError'),
-        color: 'red',
-      });
-      frontendLogger.logError('Failed to load practice for editing', {
-        practiceId,
-        error: err.message,
-        component: 'PracticesList',
-      });
-    }
-  }, [t]);
+  const handleEditPractice = useCallback(
+    async practiceId => {
+      try {
+        const data = await apiService.getPractice(practiceId);
+        setPracticeEditData(data);
+        setShowPracticeEditModal(true);
+      } catch (err) {
+        notifications.show({
+          title: t('shared:labels.error'),
+          message: t('practitioners.editPracticeError'),
+          color: 'red',
+        });
+        frontendLogger.logError('Failed to load practice for editing', {
+          practiceId,
+          error: err.message,
+          component: 'PracticesList',
+        });
+      }
+    },
+    [t]
+  );
 
-  const handleDeletePractice = useCallback(async (practice) => {
-    if (
-      !window.confirm(
-        t('practitioners.practices.deleteConfirm', { name: practice.name })
-      )
-    ) {
-      return;
-    }
+  const handleDeletePractice = useCallback(
+    async practice => {
+      if (
+        !window.confirm(
+          t('practitioners.practices.deleteConfirm', { name: practice.name })
+        )
+      ) {
+        return;
+      }
 
-    try {
-      await apiService.deletePractice(practice.id);
-      notifications.show({
-        title: t('shared:labels.success', 'Success'),
-        message: t('practitioners.practices.deleteSuccess'),
-        color: 'green',
-      });
-      await refresh();
-      if (onPracticeSaved) onPracticeSaved();
-    } catch (err) {
-      notifications.show({
-        title: t('shared:labels.error'),
-        message: t('practitioners.practices.deleteError'),
-        color: 'red',
-      });
-      frontendLogger.logError('Failed to delete practice', {
-        practiceId: practice.id,
-        error: err.message,
-        component: 'PracticesList',
-      });
-    }
-  }, [t, refresh, onPracticeSaved]);
+      try {
+        await apiService.deletePractice(practice.id);
+        notifications.show({
+          title: t('shared:labels.success', 'Success'),
+          message: t('practitioners.practices.deleteSuccess'),
+          color: 'green',
+        });
+        await refresh();
+        if (onPracticeSaved) onPracticeSaved();
+      } catch (err) {
+        notifications.show({
+          title: t('shared:labels.error'),
+          message: t('practitioners.practices.deleteError'),
+          color: 'red',
+        });
+        frontendLogger.logError('Failed to delete practice', {
+          practiceId: practice.id,
+          error: err.message,
+          component: 'PracticesList',
+        });
+      }
+    },
+    [t, refresh, onPracticeSaved]
+  );
 
   const handlePracticeSaved = useCallback(() => {
     refresh();
@@ -108,14 +114,17 @@ const PracticesList = ({ onPracticeSaved }) => {
           placeholder={t('practitioners.practices.searchPlaceholder')}
           leftSection={<IconSearch size={16} />}
           value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
+          onChange={e => setSearch(e.currentTarget.value)}
           size="sm"
           style={{ flex: 1 }}
         />
         <Button
           size="sm"
           leftSection={<IconPlus size={16} />}
-          onClick={() => { setPracticeEditData(null); setShowPracticeEditModal(true); }}
+          onClick={() => {
+            setPracticeEditData(null);
+            setShowPracticeEditModal(true);
+          }}
         >
           {t('practitioners.practices.addNew', 'Add Practice')}
         </Button>
@@ -143,9 +152,24 @@ const PracticesList = ({ onPracticeSaved }) => {
             size="sm"
             sortable={false}
             columns={[
-              { header: t('shared:labels.name'), accessor: 'name', priority: 'high', width: 200 },
-              { header: t('shared:labels.phone'), accessor: 'phone_number', priority: 'low', width: 130 },
-              { header: t('shared:labels.website'), accessor: 'website', priority: 'low', width: 160 },
+              {
+                header: t('shared:labels.name'),
+                accessor: 'name',
+                priority: 'high',
+                width: 200,
+              },
+              {
+                header: t('shared:labels.phone'),
+                accessor: 'phone_number',
+                priority: 'low',
+                width: 130,
+              },
+              {
+                header: t('shared:labels.website'),
+                accessor: 'website',
+                priority: 'low',
+                width: 160,
+              },
               {
                 header: t('shared:categories.practitioners'),
                 accessor: 'practitioner_count',
@@ -161,12 +185,16 @@ const PracticesList = ({ onPracticeSaved }) => {
             ]}
             tableName={t('practitioners.tabs.practices')}
             formatters={{
-              phone_number: (value) => value || '-',
-              website: (value) => value || '-',
-              practitioner_count: (value) => {
+              phone_number: value => value || '-',
+              website: value => value || '-',
+              practitioner_count: value => {
                 const count = value ?? 0;
                 return (
-                  <Badge size="sm" color={count === 0 ? 'red' : 'blue'} variant="light">
+                  <Badge
+                    size="sm"
+                    color={count === 0 ? 'red' : 'blue'}
+                    variant="light"
+                  >
                     {count}
                   </Badge>
                 );
@@ -174,7 +202,12 @@ const PracticesList = ({ onPracticeSaved }) => {
               id: (value, row) => {
                 const count = row.practitioner_count ?? 0;
                 return (
-                  <Group gap="xs" wrap="nowrap" className="no-print" onClick={(e) => e.stopPropagation()}>
+                  <Group
+                    gap="xs"
+                    wrap="nowrap"
+                    className="no-print"
+                    onClick={e => e.stopPropagation()}
+                  >
                     <Button
                       variant="subtle"
                       size="compact-xs"
@@ -219,7 +252,10 @@ const PracticesList = ({ onPracticeSaved }) => {
 
       <PracticeEditModal
         isOpen={showPracticeEditModal}
-        onClose={() => { setShowPracticeEditModal(false); setPracticeEditData(null); }}
+        onClose={() => {
+          setShowPracticeEditModal(false);
+          setPracticeEditData(null);
+        }}
         practiceData={practiceEditData}
         onSaved={handlePracticeSaved}
       />

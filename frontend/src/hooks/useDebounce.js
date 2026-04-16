@@ -34,15 +34,18 @@ export const useDebouncedCallback = (callback, delay, dependencies = []) => {
     callbackRef.current = callback;
   }, [callback]);
 
-  const debouncedCallback = useCallback((...args) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+  const debouncedCallback = useCallback(
+    (...args) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
-    timeoutRef.current = setTimeout(() => {
-      callbackRef.current(...args);
-    }, delay);
-  }, [delay]);
+      timeoutRef.current = setTimeout(() => {
+        callbackRef.current(...args);
+      }, delay);
+    },
+    [delay]
+  );
 
   useEffect(() => {
     return () => {
@@ -58,6 +61,7 @@ export const useDebouncedCallback = (callback, delay, dependencies = []) => {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dependencies array is provided by caller; ESLint cannot statically verify caller-supplied deps
   }, dependencies);
 
   return debouncedCallback;

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Badge, Text, Group, Anchor } from '@mantine/core';
+import { Text, Anchor } from '@mantine/core';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
@@ -9,12 +8,12 @@ const PharmacyCard = ({
   onEdit,
   onDelete,
   onView,
-  navigate,
-  onError
+  navigate: _navigate,
+  onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('pharmacy_card_error', {
       message: 'Error in PharmacyCard',
       pharmacyId: pharmacy?.id,
@@ -67,8 +66,13 @@ const PharmacyCard = ({
       {
         label: t('shared:labels.website'),
         value: pharmacy.website,
-        render: (value) => {
-          if (!value) return <Text size="sm" c="dimmed">{t('shared:labels.notSpecified')}</Text>;
+        render: value => {
+          if (!value)
+            return (
+              <Text size="sm" c="dimmed">
+                {t('shared:labels.notSpecified')}
+              </Text>
+            );
           return (
             <Anchor
               href={value.startsWith('http') ? value : `https://${value}`}
@@ -80,7 +84,7 @@ const PharmacyCard = ({
               {value}
             </Anchor>
           );
-        }
+        },
       },
       pharmacy.specialty_services && {
         label: t('shared:labels.specialties'),

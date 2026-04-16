@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MantineProvider } from '@mantine/core';
@@ -6,43 +5,27 @@ import { IconAlertTriangle, IconPill } from '@tabler/icons-react';
 import EmptyState from '../EmptyState';
 
 // Wrapper for Mantine components
-const renderWithMantine = (component) => {
-  return render(
-    <MantineProvider>
-      {component}
-    </MantineProvider>
-  );
+const renderWithMantine = component => {
+  return render(<MantineProvider>{component}</MantineProvider>);
 };
 
 describe('EmptyState', () => {
   describe('Icon variant (default)', () => {
     it('renders with required props', () => {
-      renderWithMantine(
-        <EmptyState
-          title="No items found"
-        />
-      );
+      renderWithMantine(<EmptyState title="No items found" />);
 
       expect(screen.getByText('No items found')).toBeInTheDocument();
     });
 
     it('renders with custom icon', () => {
-      renderWithMantine(
-        <EmptyState
-          icon={IconPill}
-          title="No medications"
-        />
-      );
+      renderWithMantine(<EmptyState icon={IconPill} title="No medications" />);
 
       expect(screen.getByText('No medications')).toBeInTheDocument();
     });
 
     it('shows static message when provided', () => {
       renderWithMantine(
-        <EmptyState
-          title="No items"
-          message="This is a static message"
-        />
+        <EmptyState title="No items" message="This is a static message" />
       );
 
       expect(screen.getByText('This is a static message')).toBeInTheDocument();
@@ -58,8 +41,12 @@ describe('EmptyState', () => {
         />
       );
 
-      expect(screen.getByText('Try adjusting your filters')).toBeInTheDocument();
-      expect(screen.queryByText('Click Add to get started')).not.toBeInTheDocument();
+      expect(
+        screen.getByText('Try adjusting your filters')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText('Click Add to get started')
+      ).not.toBeInTheDocument();
     });
 
     it('shows noData message when hasActiveFilters is false', () => {
@@ -73,26 +60,22 @@ describe('EmptyState', () => {
       );
 
       expect(screen.getByText('Click Add to get started')).toBeInTheDocument();
-      expect(screen.queryByText('Try adjusting your filters')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Try adjusting your filters')
+      ).not.toBeInTheDocument();
     });
 
     it('does not render message when none provided', () => {
-      const { container } = renderWithMantine(
-        <EmptyState
-          title="No items"
-        />
-      );
+      renderWithMantine(<EmptyState title="No items" />);
 
       // Should only have the title, no additional Text for message
-      expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('No items');
+      expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(
+        'No items'
+      );
     });
 
     it('uses default icon when none provided', () => {
-      renderWithMantine(
-        <EmptyState
-          title="No items"
-        />
-      );
+      renderWithMantine(<EmptyState title="No items" />);
 
       // Should render without errors (default IconAlertTriangle)
       expect(screen.getByText('No items')).toBeInTheDocument();
@@ -101,12 +84,7 @@ describe('EmptyState', () => {
 
   describe('Emoji variant', () => {
     it('renders emoji instead of icon when emoji prop is provided', () => {
-      renderWithMantine(
-        <EmptyState
-          emoji="🧪"
-          title="No Lab Results"
-        />
-      );
+      renderWithMantine(<EmptyState emoji="🧪" title="No Lab Results" />);
 
       expect(screen.getByText('🧪')).toBeInTheDocument();
       expect(screen.getByText('No Lab Results')).toBeInTheDocument();
@@ -126,7 +104,9 @@ describe('EmptyState', () => {
         />
       );
 
-      expect(screen.getByRole('button', { name: 'Add First Procedure' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Add First Procedure' })
+      ).toBeInTheDocument();
     });
 
     it('hides action button when filters are active', () => {
@@ -143,7 +123,9 @@ describe('EmptyState', () => {
         />
       );
 
-      expect(screen.queryByRole('button', { name: 'Add First Procedure' })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Add First Procedure' })
+      ).not.toBeInTheDocument();
       expect(screen.getByText('Adjust your filters')).toBeInTheDocument();
     });
 
@@ -162,42 +144,38 @@ describe('EmptyState', () => {
       expect(screen.getByText('🏥')).toBeInTheDocument();
       expect(screen.getByText('No Insurance Found')).toBeInTheDocument();
       expect(screen.getByText('Start by adding insurance')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Add Insurance' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Add Insurance' })
+      ).toBeInTheDocument();
     });
   });
 
   describe('Variant selection', () => {
     it('uses icon variant when no emoji provided', () => {
       const { container } = renderWithMantine(
-        <EmptyState
-          icon={IconAlertTriangle}
-          title="Icon Variant"
-        />
+        <EmptyState icon={IconAlertTriangle} title="Icon Variant" />
       );
 
       // Icon variant uses Paper component
-      expect(container.querySelector('[class*="mantine-Paper"]')).toBeInTheDocument();
+      expect(
+        container.querySelector('[class*="mantine-Paper"]')
+      ).toBeInTheDocument();
     });
 
     it('uses emoji variant when emoji provided', () => {
       const { container } = renderWithMantine(
-        <EmptyState
-          emoji="🎯"
-          title="Emoji Variant"
-        />
+        <EmptyState emoji="🎯" title="Emoji Variant" />
       );
 
       // Emoji variant uses Card component
-      expect(container.querySelector('[class*="mantine-Card"]')).toBeInTheDocument();
+      expect(
+        container.querySelector('[class*="mantine-Card"]')
+      ).toBeInTheDocument();
     });
 
     it('emoji takes precedence over icon', () => {
       renderWithMantine(
-        <EmptyState
-          icon={IconAlertTriangle}
-          emoji="🎯"
-          title="Test"
-        />
+        <EmptyState icon={IconAlertTriangle} emoji="🎯" title="Test" />
       );
 
       // Should show emoji, not icon
@@ -207,12 +185,7 @@ describe('EmptyState', () => {
 
   describe('Edge cases', () => {
     it('handles empty string messages gracefully', () => {
-      renderWithMantine(
-        <EmptyState
-          title="No items"
-          message=""
-        />
-      );
+      renderWithMantine(<EmptyState title="No items" message="" />);
 
       expect(screen.getByText('No items')).toBeInTheDocument();
     });

@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Paper,
   Text,
@@ -25,7 +24,8 @@ function OccurrenceStatusIndicator({ occurrence, t, formatDate }) {
   if (occurrence.resolved_date) {
     return (
       <Text size="sm" c="green">
-        <strong>{t('shared:labels.resolved', 'Resolved')}:</strong> {formatDate(occurrence.resolved_date)}
+        <strong>{t('shared:labels.resolved', 'Resolved')}:</strong>{' '}
+        {formatDate(occurrence.resolved_date)}
       </Text>
     );
   }
@@ -71,7 +71,8 @@ function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
             {occurrence.pain_scale !== null &&
               occurrence.pain_scale !== undefined && (
                 <Badge color="red" variant="outline" size="sm">
-                  {t('symptoms.calendar.pain', 'Pain')}: {occurrence.pain_scale}/10
+                  {t('symptoms.calendar.pain', 'Pain')}: {occurrence.pain_scale}
+                  /10
                 </Badge>
               )}
           </Group>
@@ -87,21 +88,28 @@ function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
 
         {occurrence.duration && (
           <Text size="sm">
-            <strong>{t('shared:labels.duration', 'Duration')}:</strong> {occurrence.duration}
+            <strong>{t('shared:labels.duration', 'Duration')}:</strong>{' '}
+            {occurrence.duration}
           </Text>
         )}
         {occurrence.location && (
           <Text size="sm">
-            <strong>{t('shared:labels.location', 'Location')}:</strong> {occurrence.location}
+            <strong>{t('shared:labels.location', 'Location')}:</strong>{' '}
+            {occurrence.location}
           </Text>
         )}
         {occurrence.occurrence_time && (
           <Text size="sm">
-            <strong>{t('shared:labels.time', 'Time')}:</strong> {formatTimeToAmPm(occurrence.occurrence_time)}
+            <strong>{t('shared:labels.time', 'Time')}:</strong>{' '}
+            {formatTimeToAmPm(occurrence.occurrence_time)}
           </Text>
         )}
 
-        <OccurrenceStatusIndicator occurrence={occurrence} t={t} formatDate={formatDate} />
+        <OccurrenceStatusIndicator
+          occurrence={occurrence}
+          t={t}
+          formatDate={formatDate}
+        />
 
         {occurrence.notes && (
           <Text size="sm" c="dimmed">
@@ -111,7 +119,8 @@ function OccurrenceDetailCard({ occurrence, onViewSymptom }) {
 
         <Divider />
         <Text size="xs" c="dimmed">
-          {t('symptoms.calendar.occurrenceId', 'Occurrence ID')}: {occurrence.occurrence_id}
+          {t('symptoms.calendar.occurrenceId', 'Occurrence ID')}:{' '}
+          {occurrence.occurrence_id}
         </Text>
       </Stack>
     </Paper>

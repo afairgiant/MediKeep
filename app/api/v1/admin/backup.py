@@ -102,9 +102,7 @@ class AutoBackupScheduleUpdate(BaseModel):
         if v is None:
             return v
         if v not in VALID_DAYS_OF_WEEK:
-            raise ValueError(
-                f"Must be one of: {', '.join(sorted(VALID_DAYS_OF_WEEK))}"
-            )
+            raise ValueError(f"Must be one of: {', '.join(sorted(VALID_DAYS_OF_WEEK))}")
         return v
 
 
@@ -300,12 +298,24 @@ async def export_backup_history(
         backups = await backup_service.list_backups()
 
         headers = [
-            "ID", "Backup Type", "Status", "Filename",
-            "Size (bytes)", "Created At", "Description", "File Exists",
+            "ID",
+            "Backup Type",
+            "Status",
+            "Filename",
+            "Size (bytes)",
+            "Created At",
+            "Description",
+            "File Exists",
         ]
         field_keys = [
-            "id", "backup_type", "status", "filename",
-            "size_bytes", "created_at", "description", "file_exists",
+            "id",
+            "backup_type",
+            "status",
+            "filename",
+            "size_bytes",
+            "created_at",
+            "description",
+            "file_exists",
         ]
 
         rows = []
@@ -322,7 +332,10 @@ async def export_backup_history(
 
     except Exception as e:
         log_endpoint_error(
-            logger, request, "Failed to export backup history", e,
+            logger,
+            request,
+            "Failed to export backup history",
+            e,
             user_id=current_user.id,
         )
         raise HTTPException(

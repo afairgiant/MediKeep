@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Modal,
   Stack,
@@ -8,20 +7,14 @@ import {
   ThemeIcon,
   Paper,
   Button,
-  Alert,
   Badge,
-  Center,
   Loader,
-  ActionIcon,
   Divider,
 } from '@mantine/core';
 import {
-  IconUpload,
   IconCheck,
   IconX,
   IconExclamationMark,
-  IconFile,
-  IconAlertTriangle,
   IconRefresh,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
@@ -43,35 +36,6 @@ const UploadProgressModal = ({
   uploadSpeed,
 }) => {
   const { t } = useTranslation('documents');
-  const getFileStatusIcon = (status) => {
-    switch (status) {
-      case 'completed':
-        return <IconCheck size={16} />;
-      case 'failed':
-        return <IconX size={16} />;
-      case 'uploading':
-        return <IconUpload size={16} />;
-      case 'pending':
-        return <IconFile size={16} />;
-      default:
-        return <IconFile size={16} />;
-    }
-  };
-
-  const getFileStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return 'green';
-      case 'failed':
-        return 'red';
-      case 'uploading':
-        return 'blue';
-      case 'pending':
-        return 'gray';
-      default:
-        return 'gray';
-    }
-  };
 
   const getOverallStatusIcon = () => {
     if (isCompleted && !hasErrors) {
@@ -112,7 +76,8 @@ const UploadProgressModal = ({
             color={getOverallStatusColor()}
             variant="light"
             style={{
-              animation: !isCompleted && !hasErrors ? 'pulse 2s infinite' : 'none',
+              animation:
+                !isCompleted && !hasErrors ? 'pulse 2s infinite' : 'none',
             }}
           >
             {getOverallStatusIcon()}
@@ -125,8 +90,8 @@ const UploadProgressModal = ({
               {isCompleted && !hasErrors
                 ? 'Upload completed successfully!'
                 : hasErrors && isCompleted
-                ? 'Upload completed with errors'
-                : subtitle}
+                  ? 'Upload completed with errors'
+                  : subtitle}
             </Text>
           </Stack>
         </Group>
@@ -152,15 +117,14 @@ const UploadProgressModal = ({
           <Stack gap="sm">
             <Group justify="space-between" align="center">
               <Text fw={500}>{t('upload.overallProgress')}</Text>
-              <Badge
-                variant="light"
-                color={getOverallStatusColor()}
-                size="lg"
-              >
-                {t('upload.filesProgress', { completed: completedFiles, total: files.length })}
+              <Badge variant="light" color={getOverallStatusColor()} size="lg">
+                {t('upload.filesProgress', {
+                  completed: completedFiles,
+                  total: files.length,
+                })}
               </Badge>
             </Group>
-            
+
             <Progress
               value={overallProgress}
               color={getOverallStatusColor()}
@@ -173,10 +137,12 @@ const UploadProgressModal = ({
                 },
               }}
             />
-            
+
             <Group justify="space-between" align="center">
               <Text size="sm" c="dimmed">
-                {t('upload.percentComplete', { percent: Math.round(overallProgress) })}
+                {t('upload.percentComplete', {
+                  percent: Math.round(overallProgress),
+                })}
               </Text>
               {estimatedTimeRemaining && !isCompleted && (
                 <Text size="sm" c="dimmed">
@@ -204,7 +170,7 @@ const UploadProgressModal = ({
               </Text>
             </Group>
           )}
-          
+
           {uploadingFiles > 0 && (
             <Group gap="xs">
               <ThemeIcon size="sm" color="blue" variant="light">
@@ -215,7 +181,7 @@ const UploadProgressModal = ({
               </Text>
             </Group>
           )}
-          
+
           {failedFiles > 0 && (
             <Group gap="xs">
               <ThemeIcon size="sm" color="red" variant="light">
@@ -235,7 +201,7 @@ const UploadProgressModal = ({
           <Text fw={500} size="sm" c="dimmed">
             {t('fileList.fileDetails')}
           </Text>
-          
+
           {files.map((file, index) => (
             <Paper
               key={file.id || index}
@@ -245,10 +211,10 @@ const UploadProgressModal = ({
                 file.status === 'completed'
                   ? 'green.0'
                   : file.status === 'failed'
-                  ? 'red.0'
-                  : file.status === 'uploading'
-                  ? 'blue.0'
-                  : 'gray.0'
+                    ? 'red.0'
+                    : file.status === 'uploading'
+                      ? 'blue.0'
+                      : 'gray.0'
               }
             >
               <PaperlessUploadStatus
@@ -278,10 +244,12 @@ const UploadProgressModal = ({
               {t('upload.retryFailed')}
             </Button>
           )}
-          
+
           <Button
             variant={isCompleted ? 'filled' : 'light'}
-            color={isCompleted && !hasErrors ? 'green' : hasErrors ? 'red' : 'gray'}
+            color={
+              isCompleted && !hasErrors ? 'green' : hasErrors ? 'red' : 'gray'
+            }
             onClick={onClose}
             disabled={!canClose}
             leftSection={
@@ -307,11 +275,17 @@ const UploadProgressModal = ({
           role="status"
           aria-live="polite"
           aria-atomic="true"
-          style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px' }}
+          style={{
+            position: 'absolute',
+            left: '-10000px',
+            width: '1px',
+            height: '1px',
+          }}
         >
           {isCompleted && !hasErrors && 'Upload completed successfully'}
           {hasErrors && `Upload completed with ${failedFiles} errors`}
-          {!isCompleted && `Uploading ${files.length} files, ${completedFiles} completed`}
+          {!isCompleted &&
+            `Uploading ${files.length} files, ${completedFiles} completed`}
         </div>
       </Stack>
 

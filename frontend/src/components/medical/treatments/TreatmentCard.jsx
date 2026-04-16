@@ -1,4 +1,3 @@
-import React from 'react';
 import { Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import BaseMedicalCard from '../base/BaseMedicalCard';
@@ -13,17 +12,17 @@ const TreatmentCard = ({
   onView,
   conditions = [],
   onConditionClick,
-  navigate,
+  navigate: _navigate,
   fileCount = 0,
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('treatment_card_error', {
       message: 'Error in TreatmentCard',
       treatmentId: treatment?.id,
@@ -37,7 +36,7 @@ const TreatmentCard = ({
   };
 
   // Helper function to get condition name from ID
-  const getConditionName = (conditionId) => {
+  const getConditionName = conditionId => {
     if (!conditionId || !conditions || conditions.length === 0) {
       return null;
     }
@@ -45,7 +44,7 @@ const TreatmentCard = ({
     return condition ? condition.diagnosis || condition.name : null;
   };
 
-  const handleConditionClick = (conditionId) => {
+  const handleConditionClick = conditionId => {
     if (onConditionClick) {
       onConditionClick(conditionId);
     }
@@ -66,7 +65,7 @@ const TreatmentCard = ({
   };
 
   // Get display label for treatment type (supports both predefined and custom values)
-  const getTreatmentTypeLabel = (type) => {
+  const getTreatmentTypeLabel = type => {
     if (!type) return null;
     return TREATMENT_CATEGORY_LABELS[type] || type;
   };
@@ -78,18 +77,21 @@ const TreatmentCard = ({
     if (treatment.treatment_type) {
       badges.push({
         label: getTreatmentTypeLabel(treatment.treatment_type),
-        color: 'blue'
+        color: 'blue',
       });
     }
 
     if (treatment.condition_id) {
       badges.push({
-        label: treatment.condition?.diagnosis ||
-                getConditionName(treatment.condition_id) ||
-                t('common:treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id }),
+        label:
+          treatment.condition?.diagnosis ||
+          getConditionName(treatment.condition_id) ||
+          t('common:treatments.card.conditionId', 'Condition #{{id}}', {
+            id: treatment.condition_id,
+          }),
         color: 'teal',
         clickable: true,
-        onClick: () => handleConditionClick(treatment.condition_id)
+        onClick: () => handleConditionClick(treatment.condition_id),
       });
     }
 
@@ -98,34 +100,43 @@ const TreatmentCard = ({
       {
         label: t('shared:labels.startDate'),
         value: treatment.start_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
+        render: value =>
+          value ? formatLongDate(value) : t('shared:labels.notSpecified'),
       },
       {
         label: t('shared:labels.endDate'),
         value: treatment.end_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.notSpecified')
+        render: value =>
+          value ? formatLongDate(value) : t('shared:labels.notSpecified'),
       },
       {
         label: t('treatments.amount.label'),
         value: treatment.dosage,
-        render: (value) => value || t('shared:labels.notSpecified')
+        render: value => value || t('shared:labels.notSpecified'),
       },
       {
         label: t('shared:fields.frequency'),
         value: treatment.frequency,
-        render: (value) => value || t('shared:labels.notSpecified')
+        render: value => value || t('shared:labels.notSpecified'),
       },
       {
         label: t('shared:labels.description'),
         value: treatment.description,
-        render: (value) => value || t('shared:labels.notSpecified'),
-        style: { flex: 1 }
-      }
+        render: value => value || t('shared:labels.notSpecified'),
+        style: { flex: 1 },
+      },
     ].filter(field => field.value); // Only show fields with values
 
     // Custom status badge in title area
     const titleContent = (
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          width: '100%',
+        }}
+      >
         <Text fw={600} size="lg" style={{ flex: 1 }}>
           {treatment.treatment_name}
         </Text>
@@ -145,11 +156,16 @@ const TreatmentCard = ({
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
           onClick={() => handleConditionClick(treatment.condition_id)}
-          title={t('shared:labels.viewConditionDetails', 'View condition details')}
+          title={t(
+            'shared:labels.viewConditionDetails',
+            'View condition details'
+          )}
         >
           {treatment.condition?.diagnosis ||
-           getConditionName(treatment.condition_id) ||
-           t('common:treatments.card.conditionId', 'Condition #{{id}}', { id: treatment.condition_id })}
+            getConditionName(treatment.condition_id) ||
+            t('common:treatments.card.conditionId', 'Condition #{{id}}', {
+              id: treatment.condition_id,
+            })}
         </Text>
       </Group>
     ) : null;
@@ -157,7 +173,11 @@ const TreatmentCard = ({
     return (
       <BaseMedicalCard
         title={titleContent}
-        subtitle={treatment.treatment_type ? getTreatmentTypeLabel(treatment.treatment_type) : null}
+        subtitle={
+          treatment.treatment_type
+            ? getTreatmentTypeLabel(treatment.treatment_type)
+            : null
+        }
         badges={badges.filter(badge => !badge.clickable)}
         tags={treatment.tags || []}
         fields={fields}

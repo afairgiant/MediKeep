@@ -120,7 +120,9 @@ class TestGetActivityLog:
         assert "medication" in data["items"][0]["description"].lower()
 
     def test_filter_by_user_id(self, admin_client, sample_activities, test_admin_user):
-        response = admin_client.get(f"/api/v1/admin/activity-log?user_id={test_admin_user.id}")
+        response = admin_client.get(
+            f"/api/v1/admin/activity-log?user_id={test_admin_user.id}"
+        )
         assert response.status_code == 200
 
         data = response.json()
@@ -179,8 +181,13 @@ class TestExportActivityLog:
         reader = csv.reader(io.StringIO(content))
         headers = next(reader)
         assert headers == [
-            "Timestamp", "User", "Action", "Entity Type",
-            "Entity ID", "Description", "IP Address",
+            "Timestamp",
+            "User",
+            "Action",
+            "Entity Type",
+            "Entity ID",
+            "Description",
+            "IP Address",
         ]
 
     def test_csv_has_data_rows(self, admin_client, sample_activities):
@@ -229,7 +236,9 @@ class TestGetActivityLogFilters:
         assert entity_map["patient"] == "Patient"
         assert entity_map["lab_result"] == "Lab Result"
 
-    def test_users_include_active_users(self, admin_client, sample_activities, test_admin_user):
+    def test_users_include_active_users(
+        self, admin_client, sample_activities, test_admin_user
+    ):
         response = admin_client.get("/api/v1/admin/activity-log/filters")
         data = response.json()
 

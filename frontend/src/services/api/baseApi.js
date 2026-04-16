@@ -77,7 +77,7 @@ class BaseApiService {
           message: 'Admin access denied (401)',
           url,
           activeRequests: this.activeRequests,
-          action: 'retry_will_handle'
+          action: 'retry_will_handle',
         });
         return false;
       }
@@ -86,7 +86,7 @@ class BaseApiService {
       logger.warn('api_auth_error', {
         message: 'Session expired or invalid (401)',
         url: response.url,
-        action: 'redirect_to_login'
+        action: 'redirect_to_login',
       });
       window.location.href = '/login';
       return true;
@@ -96,7 +96,7 @@ class BaseApiService {
       logger.warn('api_rate_limit', {
         message: 'Rate limit detected',
         status: response.status,
-        url: response.url
+        url: response.url,
       });
       return false;
     }
@@ -128,7 +128,7 @@ class BaseApiService {
           message: 'Retrying request due to concurrent auth issue',
           attempt: retryCount + 1,
           maxRetries,
-          url: response.url
+          url: response.url,
         });
         await new Promise(resolve =>
           setTimeout(resolve, 200 + retryCount * 100)
@@ -166,25 +166,25 @@ class BaseApiService {
   async get(endpoint, options = {}) {
     const { params, signal, ...rest } = options;
     const errorMessage = rest.errorMessage || 'Request failed';
-    
+
     // Build URL with query parameters BEFORE queuing
     let url = `${this.baseURL}${this.basePath}${endpoint}`;
-    
+
     if (params && Object.keys(params).length > 0) {
       const searchParams = new URLSearchParams(params);
       url += `?${searchParams.toString()}`;
     }
-    
+
     return this.queueRequest(async () => {
       const timestamp = new Date().toISOString();
-      
+
       logger.debug('api_request', {
         message: 'GET request queued',
         timestamp,
         endpoint: `${this.basePath}${endpoint}`,
         method: 'GET',
         params: params || null,
-        finalUrl: url
+        finalUrl: url,
       });
 
       const response = await fetch(url, {
@@ -198,7 +198,7 @@ class BaseApiService {
         timestamp,
         status: response.status,
         endpoint: `${this.basePath}${endpoint}`,
-        method: 'GET'
+        method: 'GET',
       });
       return this.handleResponse(response, errorMessage);
     });

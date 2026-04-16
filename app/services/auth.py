@@ -26,7 +26,10 @@ class AuthService:
 
     @staticmethod
     def create_user(
-        db: Session, username: str, password: str, is_superuser: bool = False,
+        db: Session,
+        username: str,
+        password: str,
+        is_superuser: bool = False,
         must_change_password: bool = False,
     ) -> User:
         """Create a new user with an associated patient record"""
@@ -38,7 +41,9 @@ class AuthService:
             role="admin" if is_superuser else "user",
             password=password,
         )
-        new_user = user.create(db, obj_in=user_create, must_change_password=must_change_password)
+        new_user = user.create(
+            db, obj_in=user_create, must_change_password=must_change_password
+        )
 
         # Create a patient record for the user
         try:
@@ -60,15 +65,15 @@ class AuthService:
                         "category": "app",
                         "event": "patient_record_created_for_new_user",
                         "user_id": user_id,
-                    }
+                    },
                 )
             else:
                 logger.warning(
                     "Could not create patient record for new user - no user ID",
                     extra={
-                        "category": "app", 
+                        "category": "app",
                         "event": "patient_record_creation_no_user_id",
-                    }
+                    },
                 )
 
         except Exception as e:
@@ -79,7 +84,7 @@ class AuthService:
                     "event": "patient_record_creation_failed",
                     "user_id": getattr(new_user, "id", None),
                     "error": str(e),
-                }
+                },
             )
             # Don't fail user creation if patient creation fails
 

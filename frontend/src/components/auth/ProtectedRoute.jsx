@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { isUserAdmin } from '../../utils/authUtils';
@@ -17,7 +17,14 @@ function ProtectedRoute({
   redirectTo = '/login',
   fallback = null,
 }) {
-  const { isAuthenticated, isLoading, user, hasRole, hasAnyRole, mustChangePassword } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    user,
+    hasRole,
+    hasAnyRole,
+    mustChangePassword,
+  } = useAuth();
   const location = useLocation();
   const toastShownRef = useRef(false);
 
@@ -43,15 +50,19 @@ function ProtectedRoute({
     if (adminOnly && !isUserAdmin(user)) {
       return { to: '/dashboard', reason: 'admin-required' };
     }
-    
+
     if (requiredRole && !hasRole(requiredRole)) {
       return { to: '/dashboard', reason: 'role-required', role: requiredRole };
     }
-    
+
     if (requiredRoles.length > 0 && !hasAnyRole(requiredRoles)) {
-      return { to: '/dashboard', reason: 'roles-required', roles: requiredRoles };
+      return {
+        to: '/dashboard',
+        reason: 'roles-required',
+        roles: requiredRoles,
+      };
     }
-    
+
     return null;
   };
 
@@ -67,7 +78,7 @@ function ProtectedRoute({
     // Only show toast if we have redirect info and haven't shown one yet
     if (redirectInfo && !toastShownRef.current && !isLoading) {
       toastShownRef.current = true;
-      
+
       switch (redirectInfo.reason) {
         case 'unauthenticated':
           notifyWarning('notifications:toasts.auth.loginRequired');
@@ -76,10 +87,14 @@ function ProtectedRoute({
           notifyError('notifications:toasts.auth.accessDeniedAdmin');
           break;
         case 'role-required':
-          notifyError('notifications:toasts.auth.accessDeniedRole', { interpolation: { role: redirectInfo.role } });
+          notifyError('notifications:toasts.auth.accessDeniedRole', {
+            interpolation: { role: redirectInfo.role },
+          });
           break;
         case 'roles-required':
-          notifyError('notifications:toasts.auth.accessDeniedRoles', { interpolation: { roles: redirectInfo.roles.join(', ') } });
+          notifyError('notifications:toasts.auth.accessDeniedRoles', {
+            interpolation: { roles: redirectInfo.roles.join(', ') },
+          });
           break;
         default:
           break;
@@ -139,7 +154,12 @@ export function PublicRoute({ children, redirectTo = '/dashboard' }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={mustChangePassword ? '/change-password' : redirectTo} replace />;
+    return (
+      <Navigate
+        to={mustChangePassword ? '/change-password' : redirectTo}
+        replace
+      />
+    );
   }
 
   return children;

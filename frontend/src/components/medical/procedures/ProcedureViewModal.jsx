@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -66,11 +66,15 @@ const ProcedureViewModal = ({
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     handleError(error, 'document_management');
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('procedures_view_upload_completed', {
       message: 'File upload completed in procedures view',
       procedureId: procedure?.id,
@@ -100,7 +104,9 @@ const ProcedureViewModal = ({
 
   try {
     // Find practitioner for this procedure
-    const practitioner = practitioners.find(p => p.id === procedure.practitioner_id);
+    const practitioner = practitioners.find(
+      p => p.id === procedure.practitioner_id
+    );
 
     return (
       <Modal
@@ -113,10 +119,16 @@ const ProcedureViewModal = ({
       >
         <Stack gap="lg">
           {/* Header Card */}
-          <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+          <Paper
+            withBorder
+            p="md"
+            style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+          >
             <Group justify="space-between" align="center">
               <div>
-                <Title order={3} mb="xs">{procedure.procedure_name}</Title>
+                <Title order={3} mb="xs">
+                  {procedure.procedure_name}
+                </Title>
                 <Group gap="xs">
                   {procedure.procedure_type && (
                     <Badge variant="light" color="blue" size="sm">
@@ -135,202 +147,345 @@ const ProcedureViewModal = ({
           </Paper>
 
           <Tabs value={activeTab} onChange={setActiveTab}>
-          <Tabs.List>
-            <Tabs.Tab value="overview" leftSection={<IconInfoCircle size={16} />}>
-              {t('shared:tabs.overview', 'Overview')}
-            </Tabs.Tab>
-            <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
-              {t('shared:tabs.clinicalDetails', 'Clinical Details')}
-            </Tabs.Tab>
-            <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-              {t('shared:tabs.notes', 'Notes')}
-            </Tabs.Tab>
-            <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
-              {t('shared:tabs.documents', 'Documents')}
-            </Tabs.Tab>
-          </Tabs.List>
+            <Tabs.List>
+              <Tabs.Tab
+                value="overview"
+                leftSection={<IconInfoCircle size={16} />}
+              >
+                {t('shared:tabs.overview', 'Overview')}
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="clinical"
+                leftSection={<IconStethoscope size={16} />}
+              >
+                {t('shared:tabs.clinicalDetails', 'Clinical Details')}
+              </Tabs.Tab>
+              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                {t('shared:tabs.notes', 'Notes')}
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
+                {t('shared:tabs.documents', 'Documents')}
+              </Tabs.Tab>
+            </Tabs.List>
 
-          {/* Overview Tab */}
-          <Tabs.Panel value="overview">
-            <Box mt="md">
-              <Stack gap="lg">
-                {/* Basic Information */}
-                <div>
-                  <Title order={4} mb="sm">{t('shared:labels.basicInformation', 'Basic Information')}</Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.procedureName', 'Procedure Name')}</Text>
-                      <Text size="sm">{procedure.procedure_name}</Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.procedureType', 'Procedure Type')}</Text>
-                      <Text size="sm" c={procedure.procedure_type ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_type || t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.procedureCode', 'Procedure Code')}</Text>
-                      <Text size="sm" c={procedure.procedure_code ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_code || t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.date', 'Date')}</Text>
-                      <Text size="sm" c={procedure.date ? 'inherit' : 'dimmed'}>
-                        {procedure.date ? formatDate(procedure.date) : t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.status', 'Status')}</Text>
-                      <StatusBadge status={procedure.status} />
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.outcome', 'Outcome')}</Text>
-                      {procedure.outcome ? (
-                        <StatusBadge status={procedure.outcome} />
-                      ) : (
-                        <Text size="sm" c="dimmed">{t('shared:labels.notSpecified', 'Not specified')}</Text>
-                      )}
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.setting', 'Setting')}</Text>
-                      <Text size="sm" c={procedure.procedure_setting ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_setting || t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.duration', 'Duration')}</Text>
-                      <Text size="sm" c={procedure.procedure_duration ? 'inherit' : 'dimmed'}>
-                        {procedure.procedure_duration ? t('shared:labels.minutesMinutes', '{{minutes}} minutes', { minutes: procedure.procedure_duration }) : t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.facility', 'Facility')}</Text>
-                      <Text size="sm" c={procedure.facility ? 'inherit' : 'dimmed'}>
-                        {procedure.facility || t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-                </div>
-
-                {/* Practitioner Information */}
-                <div>
-                  <Title order={4} mb="sm">{t('shared:fields.practitioner', 'Practitioner')}</Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.doctor', 'Doctor')}</Text>
-                      {procedure.practitioner_id ? (
+            {/* Overview Tab */}
+            <Tabs.Panel value="overview">
+              <Box mt="md">
+                <Stack gap="lg">
+                  {/* Basic Information */}
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:labels.basicInformation', 'Basic Information')}
+                    </Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:fields.procedureName', 'Procedure Name')}
+                        </Text>
+                        <Text size="sm">{procedure.procedure_name}</Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:fields.procedureType', 'Procedure Type')}
+                        </Text>
                         <Text
                           size="sm"
-                          fw={600}
-                          c="blue"
-                          style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                          onClick={() => navigateToEntity('practitioner', procedure.practitioner_id, navigate)}
-                          title={t('shared:labels.viewPractitionerDetails', 'View practitioner details')}
+                          c={procedure.procedure_type ? 'inherit' : 'dimmed'}
                         >
-                          {practitioner?.name || t('shared:labels.practitionerId', 'Practitioner ID: {{id}}', { id: procedure.practitioner_id })}
+                          {procedure.procedure_type ||
+                            t('shared:labels.notSpecified', 'Not specified')}
                         </Text>
-                      ) : (
-                        <Text size="sm" c="dimmed">{t('shared:labels.notSpecified', 'Not specified')}</Text>
-                      )}
-                    </Stack>
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:labels.specialty', 'Specialty')}</Text>
-                      <Text size="sm" c={practitioner?.specialty ? 'inherit' : 'dimmed'}>
-                        {practitioner?.specialty || t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <Title order={4} mb="sm">{t('shared:labels.description', 'Description')}</Title>
-                  <Text size="sm" c={procedure.description ? 'inherit' : 'dimmed'}>
-                    {procedure.description || t('procedures.viewModal.noDescription', 'No description available')}
-                  </Text>
-                </div>
-
-                {/* Tags Section */}
-                {procedure.tags && procedure.tags.length > 0 && (
-                  <div>
-                    <Title order={4} mb="sm">{t('shared:labels.tags', 'Tags')}</Title>
-                    <Group gap="xs">
-                      {procedure.tags.map((tag, index) => (
-                        <ClickableTagBadge
-                          key={index}
-                          tag={tag}
-                          color={getTagColor(tag)}
-                        />
-                      ))}
-                    </Group>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:fields.procedureCode', 'Procedure Code')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={procedure.procedure_code ? 'inherit' : 'dimmed'}
+                        >
+                          {procedure.procedure_code ||
+                            t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.date', 'Date')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={procedure.date ? 'inherit' : 'dimmed'}
+                        >
+                          {procedure.date
+                            ? formatDate(procedure.date)
+                            : t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:fields.status', 'Status')}
+                        </Text>
+                        <StatusBadge status={procedure.status} />
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:fields.outcome', 'Outcome')}
+                        </Text>
+                        {procedure.outcome ? (
+                          <StatusBadge status={procedure.outcome} />
+                        ) : (
+                          <Text size="sm" c="dimmed">
+                            {t('shared:labels.notSpecified', 'Not specified')}
+                          </Text>
+                        )}
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.setting', 'Setting')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={procedure.procedure_setting ? 'inherit' : 'dimmed'}
+                        >
+                          {procedure.procedure_setting ||
+                            t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.duration', 'Duration')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={
+                            procedure.procedure_duration ? 'inherit' : 'dimmed'
+                          }
+                        >
+                          {procedure.procedure_duration
+                            ? t(
+                                'shared:labels.minutesMinutes',
+                                '{{minutes}} minutes',
+                                { minutes: procedure.procedure_duration }
+                              )
+                            : t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.facility', 'Facility')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={procedure.facility ? 'inherit' : 'dimmed'}
+                        >
+                          {procedure.facility ||
+                            t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                    </SimpleGrid>
                   </div>
-                )}
-              </Stack>
-            </Box>
-          </Tabs.Panel>
 
-          {/* Clinical Details Tab */}
-          <Tabs.Panel value="clinical">
-            <Box mt="md">
-              <Stack gap="lg">
-                {/* Anesthesia Information */}
-                <div>
-                  <Title order={4} mb="sm">{t('procedures.viewModal.anesthesiaInfo', 'Anesthesia Information')}</Title>
-                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                    <Stack gap="xs">
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.anesthesiaType', 'Anesthesia Type')}</Text>
-                      <Text size="sm" c={procedure.anesthesia_type ? 'inherit' : 'dimmed'}>
-                        {procedure.anesthesia_type || t('shared:labels.notSpecified', 'Not specified')}
-                      </Text>
-                    </Stack>
-                    <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
-                      <Text fw={500} size="sm" c="dimmed">{t('shared:fields.anesthesiaNotes', 'Anesthesia Notes')}</Text>
-                      <Text size="sm" c={procedure.anesthesia_notes ? 'inherit' : 'dimmed'}>
-                        {procedure.anesthesia_notes || t('procedures.viewModal.noAnesthesiaNotes', 'No anesthesia notes available')}
-                      </Text>
-                    </Stack>
-                  </SimpleGrid>
-                </div>
+                  {/* Practitioner Information */}
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:fields.practitioner', 'Practitioner')}
+                    </Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.doctor', 'Doctor')}
+                        </Text>
+                        {procedure.practitioner_id ? (
+                          <Text
+                            size="sm"
+                            fw={600}
+                            c="blue"
+                            style={{
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                            }}
+                            onClick={() =>
+                              navigateToEntity(
+                                'practitioner',
+                                procedure.practitioner_id,
+                                navigate
+                              )
+                            }
+                            title={t(
+                              'shared:labels.viewPractitionerDetails',
+                              'View practitioner details'
+                            )}
+                          >
+                            {practitioner?.name ||
+                              t(
+                                'shared:labels.practitionerId',
+                                'Practitioner ID: {{id}}',
+                                { id: procedure.practitioner_id }
+                              )}
+                          </Text>
+                        ) : (
+                          <Text size="sm" c="dimmed">
+                            {t('shared:labels.notSpecified', 'Not specified')}
+                          </Text>
+                        )}
+                      </Stack>
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:labels.specialty', 'Specialty')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={practitioner?.specialty ? 'inherit' : 'dimmed'}
+                        >
+                          {practitioner?.specialty ||
+                            t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                    </SimpleGrid>
+                  </div>
 
-                {/* Complications */}
-                <div>
-                  <Title order={4} mb="sm">{t('shared:fields.complications', 'Complications')}</Title>
-                  <Text size="sm" c={procedure.procedure_complications ? '#d63384' : 'dimmed'}>
-                    {procedure.procedure_complications || t('procedures.viewModal.noComplications', 'No complications reported')}
-                  </Text>
-                </div>
-              </Stack>
-            </Box>
-          </Tabs.Panel>
+                  {/* Description */}
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:labels.description', 'Description')}
+                    </Title>
+                    <Text
+                      size="sm"
+                      c={procedure.description ? 'inherit' : 'dimmed'}
+                    >
+                      {procedure.description ||
+                        t(
+                          'procedures.viewModal.noDescription',
+                          'No description available'
+                        )}
+                    </Text>
+                  </div>
 
-          {/* Notes Tab */}
-          <Tabs.Panel value="notes">
-            <Box mt="md">
-              <Stack gap="lg">
-                <div>
-                  <Title order={4} mb="sm">{t('shared:labels.clinicalNotes', 'Clinical Notes')}</Title>
-                  <Text size="sm" c={procedure.notes ? 'inherit' : 'dimmed'}>
-                    {procedure.notes || t('procedures.viewModal.noClinicalNotes', 'No clinical notes available')}
-                  </Text>
-                </div>
-              </Stack>
-            </Box>
-          </Tabs.Panel>
+                  {/* Tags Section */}
+                  {procedure.tags && procedure.tags.length > 0 && (
+                    <div>
+                      <Title order={4} mb="sm">
+                        {t('shared:labels.tags', 'Tags')}
+                      </Title>
+                      <Group gap="xs">
+                        {procedure.tags.map((tag, index) => (
+                          <ClickableTagBadge
+                            key={index}
+                            tag={tag}
+                            color={getTagColor(tag)}
+                          />
+                        ))}
+                      </Group>
+                    </div>
+                  )}
+                </Stack>
+              </Box>
+            </Tabs.Panel>
 
-          {/* Documents Tab */}
-          <Tabs.Panel value="documents">
-            <Box mt="md">
-              <DocumentManagerWithProgress
-                entityType="procedure"
-                entityId={procedure.id}
-                mode="view"
-                showProgressModal={true}
-                onUploadComplete={handleDocumentUploadComplete}
-                onError={handleDocumentError}
-              />
-            </Box>
-          </Tabs.Panel>
+            {/* Clinical Details Tab */}
+            <Tabs.Panel value="clinical">
+              <Box mt="md">
+                <Stack gap="lg">
+                  {/* Anesthesia Information */}
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t(
+                        'procedures.viewModal.anesthesiaInfo',
+                        'Anesthesia Information'
+                      )}
+                    </Title>
+                    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+                      <Stack gap="xs">
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t('shared:fields.anesthesiaType', 'Anesthesia Type')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={procedure.anesthesia_type ? 'inherit' : 'dimmed'}
+                        >
+                          {procedure.anesthesia_type ||
+                            t('shared:labels.notSpecified', 'Not specified')}
+                        </Text>
+                      </Stack>
+                      <Stack gap="xs" style={{ gridColumn: '1 / -1' }}>
+                        <Text fw={500} size="sm" c="dimmed">
+                          {t(
+                            'shared:fields.anesthesiaNotes',
+                            'Anesthesia Notes'
+                          )}
+                        </Text>
+                        <Text
+                          size="sm"
+                          c={procedure.anesthesia_notes ? 'inherit' : 'dimmed'}
+                        >
+                          {procedure.anesthesia_notes ||
+                            t(
+                              'procedures.viewModal.noAnesthesiaNotes',
+                              'No anesthesia notes available'
+                            )}
+                        </Text>
+                      </Stack>
+                    </SimpleGrid>
+                  </div>
+
+                  {/* Complications */}
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:fields.complications', 'Complications')}
+                    </Title>
+                    <Text
+                      size="sm"
+                      c={
+                        procedure.procedure_complications ? '#d63384' : 'dimmed'
+                      }
+                    >
+                      {procedure.procedure_complications ||
+                        t(
+                          'procedures.viewModal.noComplications',
+                          'No complications reported'
+                        )}
+                    </Text>
+                  </div>
+                </Stack>
+              </Box>
+            </Tabs.Panel>
+
+            {/* Notes Tab */}
+            <Tabs.Panel value="notes">
+              <Box mt="md">
+                <Stack gap="lg">
+                  <div>
+                    <Title order={4} mb="sm">
+                      {t('shared:labels.clinicalNotes', 'Clinical Notes')}
+                    </Title>
+                    <Text size="sm" c={procedure.notes ? 'inherit' : 'dimmed'}>
+                      {procedure.notes ||
+                        t(
+                          'procedures.viewModal.noClinicalNotes',
+                          'No clinical notes available'
+                        )}
+                    </Text>
+                  </div>
+                </Stack>
+              </Box>
+            </Tabs.Panel>
+
+            {/* Documents Tab */}
+            <Tabs.Panel value="documents">
+              <Box mt="md">
+                <DocumentManagerWithProgress
+                  entityType="procedure"
+                  entityId={procedure.id}
+                  mode="view"
+                  showProgressModal={true}
+                  onUploadComplete={handleDocumentUploadComplete}
+                  onError={handleDocumentError}
+                />
+              </Box>
+            </Tabs.Panel>
           </Tabs>
 
           {/* Action Buttons */}
@@ -338,9 +493,17 @@ const ProcedureViewModal = ({
             <Button variant="default" onClick={onClose}>
               {t('shared:labels.close', 'Close')}
             </Button>
-            <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+            <Tooltip
+              label={disableEditTooltip}
+              disabled={!disableEdit || !disableEditTooltip}
+            >
               <span>
-                <Button variant="filled" onClick={handleEditClick} leftSection={<IconEdit size={16} />} disabled={disableEdit}>
+                <Button
+                  variant="filled"
+                  onClick={handleEditClick}
+                  leftSection={<IconEdit size={16} />}
+                  disabled={disableEdit}
+                >
                   {t('shared:labels.edit', 'Edit')}
                 </Button>
               </span>

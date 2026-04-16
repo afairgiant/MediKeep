@@ -25,7 +25,10 @@ export function compareVersions(a: string, b: string): number {
 /**
  * Return true when tagName matches currentVersion (ignoring leading "v").
  */
-export function isCurrentRelease(tagName: string, currentVersion: string): boolean {
+export function isCurrentRelease(
+  tagName: string,
+  currentVersion: string
+): boolean {
   return normalizeVersion(tagName) === normalizeVersion(currentVersion);
 }
 

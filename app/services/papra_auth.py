@@ -39,7 +39,7 @@ class PapraAuth:
         return {
             "Accept": "application/json",
             "Authorization": f"Bearer {self.token}",
-            "User-Agent": "MediKeep/2.0"
+            "User-Agent": "MediKeep/2.0",
         }
 
     def get_safe_info(self) -> dict:
@@ -48,7 +48,7 @@ class PapraAuth:
             "url": self.url,
             "auth_type": "bearer",
             "has_token": bool(self.token),
-            "organization_id": self.organization_id
+            "organization_id": self.organization_id,
         }
 
     async def test_connection(self) -> Tuple[bool, str]:
@@ -70,22 +70,32 @@ class PapraAuth:
                     elif response.status == 403:
                         return False, "Access forbidden - check token permissions"
                     else:
-                        logger.warning("Papra connection failed", extra={
-                            "status_code": response.status,
-                            "url_host": urlparse(self.url).hostname
-                        })
-                        return False, "Unable to connect to Papra. Please verify your settings."
+                        logger.warning(
+                            "Papra connection failed",
+                            extra={
+                                "status_code": response.status,
+                                "url_host": urlparse(self.url).hostname,
+                            },
+                        )
+                        return (
+                            False,
+                            "Unable to connect to Papra. Please verify your settings.",
+                        )
 
         except aiohttp.ClientError as e:
-            logger.error("Papra connection error", extra={
-                "error_type": type(e).__name__,
-                "url_host": urlparse(self.url).hostname
-            })
+            logger.error(
+                "Papra connection error",
+                extra={
+                    "error_type": type(e).__name__,
+                    "url_host": urlparse(self.url).hostname,
+                },
+            )
             return False, "Unable to connect to Papra. Please check your configuration."
         except Exception as e:
-            logger.error("Unexpected error during Papra connection test", extra={
-                "error_type": type(e).__name__
-            })
+            logger.error(
+                "Unexpected error during Papra connection test",
+                extra={"error_type": type(e).__name__},
+            )
             return False, "An error occurred while connecting to Papra."
 
     async def list_organizations(self) -> list:
@@ -101,9 +111,10 @@ class PapraAuth:
             async with aiohttp.ClientSession(headers=headers) as session:
                 async with session.get(f"{self.url}/api/organizations") as response:
                     if response.status != 200:
-                        logger.error("Failed to list Papra organizations", extra={
-                            "status_code": response.status
-                        })
+                        logger.error(
+                            "Failed to list Papra organizations",
+                            extra={"status_code": response.status},
+                        )
                         return []
 
                     data = await response.json()
@@ -119,14 +130,16 @@ class PapraAuth:
                     return []
 
         except Exception as e:
-            logger.error("Error listing Papra organizations", extra={
-                "error_type": type(e).__name__
-            })
+            logger.error(
+                "Error listing Papra organizations",
+                extra={"error_type": type(e).__name__},
+            )
             return []
 
 
-def create_papra_auth(url: str, encrypted_token: str, organization_id: str,
-                      user_id: int = None) -> PapraAuth:
+def create_papra_auth(
+    url: str, encrypted_token: str, organization_id: str, user_id: int = None
+) -> PapraAuth:
     """
     Factory function to create PapraAuth from encrypted credentials.
 

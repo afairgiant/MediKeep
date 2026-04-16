@@ -10,7 +10,7 @@ import {
   Select,
   TextInput,
   Divider,
-  Alert
+  Alert,
 } from '@mantine/core';
 import {
   IconDownload,
@@ -27,10 +27,9 @@ import {
   IconAlertTriangle,
   IconClock,
   IconEye,
-  IconAlertCircle,
   IconCopy,
   IconX,
-  IconUnlink
+  IconUnlink,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -46,7 +45,7 @@ const FileList = ({
   onPreview,
   onRestore,
   onView,
-  className = ''
+  className = '',
 }) => {
   const { formatDate } = useDateFormat();
   const { t } = useTranslation('documents');
@@ -55,39 +54,41 @@ const FileList = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterByType, setFilterByType] = useState('');
 
-
   // Get file icon and color based on type
   const getFileIcon = (fileName, fileType) => {
     const extension = fileName.split('.').pop()?.toLowerCase();
     const mimeType = fileType?.toLowerCase();
 
-    if (mimeType?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'].includes(extension)) {
+    if (
+      mimeType?.startsWith('image/') ||
+      ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'].includes(extension)
+    ) {
       return { icon: IconPhoto, color: 'blue' };
     }
-    
+
     if (extension === 'pdf' || mimeType === 'application/pdf') {
       return { icon: IconFile, color: 'red' };
     }
-    
+
     if (['doc', 'docx'].includes(extension) || mimeType?.includes('word')) {
       return { icon: IconFileText, color: 'blue' };
     }
-    
+
     if (['xls', 'xlsx'].includes(extension) || mimeType?.includes('excel')) {
       return { icon: IconFileText, color: 'green' };
     }
-    
+
     return { icon: IconFile, color: 'gray' };
   };
 
   // Get storage backend icon and info
-  const getStorageBackendInfo = (storageBackend) => {
+  const getStorageBackendInfo = storageBackend => {
     if (storageBackend === 'paperless') {
       return {
         icon: IconCloud,
         color: 'green',
         label: 'Paperless',
-        description: 'Stored in paperless-ngx'
+        description: 'Stored in paperless-ngx',
       };
     }
     if (storageBackend === 'papra') {
@@ -95,14 +96,14 @@ const FileList = ({
         icon: IconCloud,
         color: 'teal',
         label: 'Papra',
-        description: 'Stored in Papra'
+        description: 'Stored in Papra',
       };
     }
     return {
       icon: IconFolder,
       color: 'blue',
       label: 'Local',
-      description: 'Stored locally'
+      description: 'Stored locally',
     };
   };
 
@@ -111,25 +112,34 @@ const FileList = ({
     const extension = fileName?.split('.').pop()?.toLowerCase();
     const mimeType = fileType?.toLowerCase();
 
-
     // PDF files
     if (extension === 'pdf' || mimeType === 'application/pdf') {
       return true;
     }
 
     // Image files
-    if (mimeType?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(extension)) {
+    if (
+      mimeType?.startsWith('image/') ||
+      ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(extension)
+    ) {
       return true;
     }
 
     // Text files
-    if (mimeType?.startsWith('text/') || ['txt', 'md', 'csv', 'log'].includes(extension)) {
+    if (
+      mimeType?.startsWith('text/') ||
+      ['txt', 'md', 'csv', 'log'].includes(extension)
+    ) {
       return true;
     }
 
     // Web files (HTML, XML, etc.)
-    if (['html', 'htm', 'xml', 'json'].includes(extension) || 
-        ['text/html', 'application/xml', 'text/xml', 'application/json'].includes(mimeType)) {
+    if (
+      ['html', 'htm', 'xml', 'json'].includes(extension) ||
+      ['text/html', 'application/xml', 'text/xml', 'application/json'].includes(
+        mimeType
+      )
+    ) {
       return true;
     }
 
@@ -137,10 +147,10 @@ const FileList = ({
   };
 
   // Format file size
-  const formatFileSize = (bytes) => {
+  const formatFileSize = bytes => {
     if (!bytes) return 'Unknown size';
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -154,9 +164,10 @@ const FileList = ({
     // Apply search filter
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
-      filtered = filtered.filter(file => 
-        file.file_name?.toLowerCase().includes(lowerSearchTerm) ||
-        file.description?.toLowerCase().includes(lowerSearchTerm)
+      filtered = filtered.filter(
+        file =>
+          file.file_name?.toLowerCase().includes(lowerSearchTerm) ||
+          file.description?.toLowerCase().includes(lowerSearchTerm)
       );
     }
 
@@ -171,7 +182,7 @@ const FileList = ({
     // Apply sorting
     filtered.sort((a, b) => {
       let aValue, bValue;
-      
+
       switch (sortBy) {
         case 'file_name':
           aValue = a.file_name?.toLowerCase() || '';
@@ -206,13 +217,15 @@ const FileList = ({
 
   // Get unique file types for filter dropdown
   const fileTypes = React.useMemo(() => {
-    const types = files.map(file => file.file_name?.split('.').pop()?.toLowerCase()).filter(Boolean);
+    const types = files
+      .map(file => file.file_name?.split('.').pop()?.toLowerCase())
+      .filter(Boolean);
     return [...new Set(types)].sort();
   }, [files]);
 
   // Toggle sort order
   const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
   };
 
   if (files.length === 0) {
@@ -237,18 +250,21 @@ const FileList = ({
             placeholder="Search files..."
             leftSection={<IconSearch size={16} />}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             style={{ flex: 1 }}
           />
-          
+
           <Select
             placeholder="Filter by type"
             data={[
               { value: '', label: 'All types' },
-              ...fileTypes.map(type => ({ value: type, label: type.toUpperCase() }))
+              ...fileTypes.map(type => ({
+                value: type,
+                label: type.toUpperCase(),
+              })),
             ]}
             value={filterByType}
-            onChange={(value) => setFilterByType(value || '')}
+            onChange={value => setFilterByType(value || '')}
             clearable
             style={{ minWidth: 120 }}
             comboboxProps={{ withinPortal: true, zIndex: 2100 }}
@@ -260,20 +276,24 @@ const FileList = ({
               { value: 'uploaded_at', label: 'Upload Date' },
               { value: 'file_name', label: 'Name' },
               { value: 'file_size', label: 'Size' },
-              { value: 'file_type', label: 'Type' }
+              { value: 'file_type', label: 'Type' },
             ]}
             value={sortBy}
-            onChange={(value) => setSortBy(value || 'uploaded_at')}
+            onChange={value => setSortBy(value || 'uploaded_at')}
             style={{ minWidth: 120 }}
             comboboxProps={{ withinPortal: true, zIndex: 2100 }}
           />
-          
+
           <ActionIcon
             variant="light"
             onClick={toggleSortOrder}
             title={`Sort ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
           >
-            {sortOrder === 'asc' ? <IconSortAscending size={16} /> : <IconSortDescending size={16} />}
+            {sortOrder === 'asc' ? (
+              <IconSortAscending size={16} />
+            ) : (
+              <IconSortDescending size={16} />
+            )}
           </ActionIcon>
         </Group>
       </Paper>
@@ -285,28 +305,37 @@ const FileList = ({
             {t('fileList.noMatch')}
           </Alert>
         ) : (
-          processedFiles.map((file) => {
-            const { icon: FileIcon, color } = getFileIcon(file.file_name, file.file_type);
+          processedFiles.map(file => {
+            const { icon: FileIcon, color } = getFileIcon(
+              file.file_name,
+              file.file_type
+            );
             const isMarkedForDeletion = filesToDelete.includes(file.id);
             // Check if file is missing (deleted from remote OR no document ID)
-            const isRemoteBackend = file.storage_backend === 'paperless' || file.storage_backend === 'papra';
-            const isMissing = isRemoteBackend &&
-                             (file.sync_status === 'missing' || syncStatus[file.id] === false);
+            const isRemoteBackend =
+              file.storage_backend === 'paperless' ||
+              file.storage_backend === 'papra';
+            const isMissing =
+              isRemoteBackend &&
+              (file.sync_status === 'missing' || syncStatus[file.id] === false);
 
             // Check if file is still processing (Paperless only - Papra is synchronous)
-            const isProcessing = file.storage_backend === 'paperless' && file.sync_status === 'processing';
+            const isProcessing =
+              file.storage_backend === 'paperless' &&
+              file.sync_status === 'processing';
 
             // Check if file is a duplicate
-            const isDuplicate = isRemoteBackend && file.sync_status === 'duplicate';
+            const isDuplicate =
+              isRemoteBackend && file.sync_status === 'duplicate';
 
             // Check if file processing failed
             const isFailed = isRemoteBackend && file.sync_status === 'failed';
 
             // Check if this is a linked document (not uploaded by us)
-            const isLinkedDocument = file.file_path && (
-              file.file_path.startsWith('paperless://document/') ||
-              file.file_path.startsWith('papra://document/')
-            );
+            const isLinkedDocument =
+              file.file_path &&
+              (file.file_path.startsWith('paperless://document/') ||
+                file.file_path.startsWith('papra://document/'));
 
             return (
               <Paper
@@ -316,7 +345,9 @@ const FileList = ({
                 bg={isMarkedForDeletion ? 'red.0' : 'white'}
                 style={{
                   opacity: isMarkedForDeletion ? 0.7 : 1,
-                  borderColor: isMarkedForDeletion ? 'var(--mantine-color-red-3)' : undefined,
+                  borderColor: isMarkedForDeletion
+                    ? 'var(--mantine-color-red-3)'
+                    : undefined,
                 }}
               >
                 <Group justify="space-between" align="flex-start">
@@ -324,27 +355,29 @@ const FileList = ({
                     <ThemeIcon variant="light" color={color}>
                       <FileIcon size={20} />
                     </ThemeIcon>
-                    
+
                     <Stack gap="xs" style={{ flex: 1 }}>
                       {/* File name and metadata */}
                       <Group gap="md" align="flex-start">
                         <Stack gap={2} style={{ flex: 1 }}>
                           <Group gap="xs" wrap="nowrap">
-                            <Text 
-                              fw={500} 
+                            <Text
+                              fw={500}
                               size="sm"
                               c={isMissing ? 'red' : undefined}
                               style={{
-                                textDecoration: isMissing ? 'line-through' : 'none',
-                                flex: 1
+                                textDecoration: isMissing
+                                  ? 'line-through'
+                                  : 'none',
+                                flex: 1,
                               }}
                             >
                               {file.file_name}
                             </Text>
                             {isMissing && (
-                              <Badge 
-                                color="red" 
-                                variant="light" 
+                              <Badge
+                                color="red"
+                                variant="light"
                                 size="xs"
                                 leftSection={<IconAlertTriangle size={10} />}
                                 title="This document is missing from Paperless"
@@ -353,9 +386,9 @@ const FileList = ({
                               </Badge>
                             )}
                             {isProcessing && (
-                              <Badge 
-                                color="orange" 
-                                variant="light" 
+                              <Badge
+                                color="orange"
+                                variant="light"
                                 size="xs"
                                 leftSection={<IconClock size={10} />}
                                 title="Document is being processed by Paperless"
@@ -364,9 +397,9 @@ const FileList = ({
                               </Badge>
                             )}
                             {isDuplicate && (
-                              <Badge 
-                                color="yellow" 
-                                variant="light" 
+                              <Badge
+                                color="yellow"
+                                variant="light"
                                 size="xs"
                                 leftSection={<IconCopy size={10} />}
                                 title="Document was detected as a duplicate in Paperless"
@@ -375,7 +408,7 @@ const FileList = ({
                               </Badge>
                             )}
                             {isFailed && (
-                              <Badge 
+                              <Badge
                                 color="red"
                                 variant="light"
                                 size="xs"
@@ -389,14 +422,16 @@ const FileList = ({
                             <Text size="xs" c="dimmed">
                               {formatFileSize(file.file_size)}
                             </Text>
-                            
+
                             {/* Storage Backend Badge */}
                             {(() => {
-                              const storageInfo = getStorageBackendInfo(file.storage_backend);
+                              const storageInfo = getStorageBackendInfo(
+                                file.storage_backend
+                              );
                               return (
-                                <Badge 
-                                  variant="light" 
-                                  color={storageInfo.color} 
+                                <Badge
+                                  variant="light"
+                                  color={storageInfo.color}
                                   size="xs"
                                   leftSection={<storageInfo.icon size={10} />}
                                   title={storageInfo.description}
@@ -405,7 +440,7 @@ const FileList = ({
                                 </Badge>
                               );
                             })()}
-                            
+
                             {file.file_type && (
                               <Badge variant="light" color="gray" size="xs">
                                 {file.file_type}
@@ -418,14 +453,14 @@ const FileList = ({
                             )}
                           </Group>
                         </Stack>
-                        
+
                         {isMarkedForDeletion && (
                           <Badge color="red" size="sm">
                             {t('fileList.markedForDeletion')}
                           </Badge>
                         )}
                       </Group>
-                      
+
                       {/* Description */}
                       {showDescriptions && file.description && (
                         <>
@@ -437,21 +472,22 @@ const FileList = ({
                       )}
                     </Stack>
                   </Group>
-                  
+
                   {/* Actions */}
                   {showActions && (
                     <Group gap="xs" style={{ flexShrink: 0 }}>
-                      {onView && isFileViewable(file.file_name, file.file_type) && (
-                        <ActionIcon
-                          variant="light"
-                          color="green"
-                          onClick={() => onView(file.id, file.file_name)}
-                          title="View file in new tab"
-                        >
-                          <IconEye size={16} />
-                        </ActionIcon>
-                      )}
-                      
+                      {onView &&
+                        isFileViewable(file.file_name, file.file_type) && (
+                          <ActionIcon
+                            variant="light"
+                            color="green"
+                            onClick={() => onView(file.id, file.file_name)}
+                            title="View file in new tab"
+                          >
+                            <IconEye size={16} />
+                          </ActionIcon>
+                        )}
+
                       {onDownload && (
                         <ActionIcon
                           variant="light"
@@ -462,7 +498,7 @@ const FileList = ({
                           <IconDownload size={16} />
                         </ActionIcon>
                       )}
-                      
+
                       {onPreview && (
                         <ActionIcon
                           variant="light"
@@ -473,18 +509,24 @@ const FileList = ({
                           <IconFile size={16} />
                         </ActionIcon>
                       )}
-                      
+
                       {onDelete && !isMarkedForDeletion && (
                         <ActionIcon
                           variant="light"
-                          color={isLinkedDocument ? "blue" : "red"}
+                          color={isLinkedDocument ? 'blue' : 'red'}
                           onClick={() => onDelete(file.id)}
-                          title={isLinkedDocument ? "Unlink document" : "Delete file"}
+                          title={
+                            isLinkedDocument ? 'Unlink document' : 'Delete file'
+                          }
                         >
-                          {isLinkedDocument ? <IconUnlink size={16} /> : <IconTrash size={16} />}
+                          {isLinkedDocument ? (
+                            <IconUnlink size={16} />
+                          ) : (
+                            <IconTrash size={16} />
+                          )}
                         </ActionIcon>
                       )}
-                      
+
                       {onRestore && isMarkedForDeletion && (
                         <ActionIcon
                           variant="light"
@@ -503,13 +545,16 @@ const FileList = ({
           })
         )}
       </Stack>
-      
+
       {/* Summary */}
       {processedFiles.length > 0 && (
         <Paper withBorder p="sm" bg="var(--color-bg-secondary)">
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              {t('fileList.showingFiles', { showing: processedFiles.length, total: files.length })}
+              {t('fileList.showingFiles', {
+                showing: processedFiles.length,
+                total: files.length,
+              })}
             </Text>
             {filesToDelete.length > 0 && (
               <Text size="sm" c="red">

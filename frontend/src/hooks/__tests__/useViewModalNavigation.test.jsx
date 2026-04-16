@@ -83,10 +83,9 @@ describe('useViewModalNavigation Hook', () => {
         result.current.openModal(mockItems[1]);
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/test-page?view=2',
-        { replace: true }
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/test-page?view=2', {
+        replace: true,
+      });
     });
 
     test('should use custom paramName for URL parameter', () => {
@@ -102,10 +101,9 @@ describe('useViewModalNavigation Hook', () => {
         result.current.openModal(mockItems[0]);
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/test-page?itemId=1',
-        { replace: true }
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/test-page?itemId=1', {
+        replace: true,
+      });
     });
 
     test('should preserve existing URL parameters when opening', () => {
@@ -175,10 +173,9 @@ describe('useViewModalNavigation Hook', () => {
         result.current.closeModal();
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/test-page',
-        { replace: true }
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/test-page', {
+        replace: true,
+      });
     });
 
     test('should preserve other URL parameters when closing', () => {
@@ -201,10 +198,9 @@ describe('useViewModalNavigation Hook', () => {
         result.current.closeModal();
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith(
-        '/test-page?filter=active',
-        { replace: true }
-      );
+      expect(mockNavigate).toHaveBeenCalledWith('/test-page?filter=active', {
+        replace: true,
+      });
     });
 
     test('should call onClose callback with the closed item', () => {

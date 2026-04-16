@@ -17,15 +17,6 @@ import {
 import {
   IconPill,
   IconFlask,
-  IconMedicalCross,
-  IconBrain,
-  IconAlertTriangle,
-  IconVaccine,
-  IconHeartbeat,
-  IconPhoneCall,
-  IconClipboardList,
-  IconCalendarEvent,
-  IconUser,
   IconPlus,
   IconEdit,
   IconTrash,
@@ -54,7 +45,11 @@ describe('Activity Navigation Utils', () => {
     });
 
     it('should return null for unknown model', () => {
-      const activity = { id: 3, model_name: 'unknown_model', action: 'created' };
+      const activity = {
+        id: 3,
+        model_name: 'unknown_model',
+        action: 'created',
+      };
       expect(getActivityNavigationUrl(activity)).toBe(null);
     });
 
@@ -125,7 +120,9 @@ describe('Activity Navigation Utils', () => {
     it('should return correct display names', () => {
       expect(getModelDisplayName('medication')).toBe('Medication');
       expect(getModelDisplayName('lab_result')).toBe('Lab Result');
-      expect(getModelDisplayName('emergency_contact')).toBe('Emergency Contact');
+      expect(getModelDisplayName('emergency_contact')).toBe(
+        'Emergency Contact'
+      );
     });
 
     it('should handle unknown models gracefully', () => {
@@ -161,7 +158,11 @@ describe('Activity Navigation Utils', () => {
     });
 
     it('should return false for unknown models', () => {
-      const activity = { id: 1, model_name: 'unknown_model', action: 'created' };
+      const activity = {
+        id: 1,
+        model_name: 'unknown_model',
+        action: 'created',
+      };
       expect(isActivityClickable(activity)).toBe(false);
     });
 
@@ -176,7 +177,8 @@ describe('Activity Navigation Utils', () => {
       const activity = {
         model_name: 'medication',
         action: 'created',
-        description: 'This is a long description that provides good context and details about what happened',
+        description:
+          'This is a long description that provides good context and details about what happened',
       };
       expect(formatActivityDescription(activity)).toBe(activity.description);
     });
@@ -266,9 +268,17 @@ describe('Activity Navigation Utils', () => {
       });
 
       it('should filter by both type and action', () => {
-        const result = filterActivities(sampleActivities, 'medication', 'created');
+        const result = filterActivities(
+          sampleActivities,
+          'medication',
+          'created'
+        );
         expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({ id: 1, model_name: 'medication', action: 'created' });
+        expect(result[0]).toEqual({
+          id: 1,
+          model_name: 'medication',
+          action: 'created',
+        });
       });
 
       it('should handle empty array', () => {
@@ -284,23 +294,23 @@ describe('Activity Navigation Utils', () => {
 
     describe('groupActivities', () => {
       const sampleActivities = [
-        { 
-          id: 1, 
-          model_name: 'medication', 
+        {
+          id: 1,
+          model_name: 'medication',
           action: 'created',
-          timestamp: '2024-01-15T10:30:00Z'
+          timestamp: '2024-01-15T10:30:00Z',
         },
-        { 
-          id: 2, 
-          model_name: 'lab_result', 
+        {
+          id: 2,
+          model_name: 'lab_result',
           action: 'updated',
-          timestamp: '2024-01-15T14:20:00Z'
+          timestamp: '2024-01-15T14:20:00Z',
         },
-        { 
-          id: 3, 
-          model_name: 'medication', 
+        {
+          id: 3,
+          model_name: 'medication',
           action: 'deleted',
-          timestamp: '2024-01-14T09:15:00Z'
+          timestamp: '2024-01-14T09:15:00Z',
         },
       ];
 

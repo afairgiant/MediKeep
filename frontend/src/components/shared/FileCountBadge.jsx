@@ -1,30 +1,41 @@
 import React from 'react';
-import { Badge, Group, Text, Loader, ActionIcon, ThemeIcon } from '@mantine/core';
+import {
+  Badge,
+  Group,
+  Text,
+  Loader,
+  ActionIcon,
+  ThemeIcon,
+} from '@mantine/core';
 import { IconFile, IconFiles } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
 const FileCountBadge = ({
   count = 0,
-  entityType = '',
+  entityType: _entityType = '',
   variant = 'badge', // 'badge', 'text', 'icon'
   size = 'sm',
   onClick,
   loading = false,
-  className = ''
+  className = '',
 }) => {
   const { t } = useTranslation('documents');
   // Wrap onClick to stop propagation (prevents double-firing when inside clickable cards)
-  const handleClick = onClick ? (e) => {
-    e.stopPropagation();
-    onClick(e);
-  } : undefined;
+  const handleClick = onClick
+    ? e => {
+        e.stopPropagation();
+        onClick(e);
+      }
+    : undefined;
 
   // Handle loading state
   if (loading) {
     return (
       <Group gap="xs" className={className}>
         <Loader size="xs" />
-        <Text size="xs" c="dimmed">Loading...</Text>
+        <Text size="xs" c="dimmed">
+          Loading...
+        </Text>
       </Group>
     );
   }
@@ -46,7 +57,7 @@ const FileCountBadge = ({
             {t('fileCount.noFiles')}
           </Badge>
         );
-      
+
       case 'text':
         return (
           <Text
@@ -59,17 +70,19 @@ const FileCountBadge = ({
             {t('fileCount.noFiles')}
           </Text>
         );
-      
+
       case 'icon':
         return (
           <Group gap="xs" className={className}>
             <ThemeIcon variant="light" color="gray" size="sm">
               <IconFile size={14} />
             </ThemeIcon>
-            <Text size="xs" c="dimmed">0</Text>
+            <Text size="xs" c="dimmed">
+              0
+            </Text>
           </Group>
         );
-      
+
       default:
         return null;
     }
@@ -96,7 +109,7 @@ const FileCountBadge = ({
           {t('fileCount.attached', '{{count}} attached', { count })}
         </Badge>
       );
-    
+
     case 'text':
       return (
         <Group
@@ -105,7 +118,10 @@ const FileCountBadge = ({
           style={{ cursor: onClick ? 'pointer' : 'default' }}
           className={className}
         >
-          {React.createElement(icon, { size: 14, color: 'var(--mantine-color-green-6)' })}
+          {React.createElement(icon, {
+            size: 14,
+            color: 'var(--mantine-color-green-6)',
+          })}
           <Text
             size={size}
             c="green"
@@ -116,7 +132,7 @@ const FileCountBadge = ({
           </Text>
         </Group>
       );
-    
+
     case 'icon':
       if (onClick) {
         return (
@@ -143,7 +159,7 @@ const FileCountBadge = ({
           </Group>
         );
       }
-    
+
     default:
       return (
         <Badge

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -73,19 +73,13 @@ const Dashboard = () => {
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const { isMobile } = useViewport();
-  const {
-    user: authUser,
-    shouldShowProfilePrompts,
-    checkIsFirstLogin,
-  } = useAuth();
+  const { user: authUser } = useAuth();
 
   // Using global state for patient data
-  const { patient: currentPatient, loading: patientLoading } = useCurrentPatient();
-  const {
-    refreshPatient,
-    invalidateAll,
-    setCurrentPatient,
-  } = useCacheManager();
+  const { patient: currentPatient, loading: patientLoading } =
+    useCurrentPatient();
+  const { refreshPatient, invalidateAll, setCurrentPatient } =
+    useCacheManager();
 
   const [recentActivity, setRecentActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
@@ -112,13 +106,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     const loadInitialData = async () => {
-      await Promise.all([
-        fetchRecentActivity(),
-        fetchDashboardStats(),
-      ]);
+      await Promise.all([fetchRecentActivity(), fetchDashboardStats()]);
       setInitialLoadComplete(true);
     };
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load runs once on mount; fetchers are stable in component scope
   }, []);
 
   // Note: currentPatient is now managed by useCurrentPatient hook
@@ -129,6 +121,7 @@ const Dashboard = () => {
     if (currentPatient?.id && initialLoadComplete) {
       fetchDashboardStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-fetch on patient/load state change; fetchDashboardStats is stable in component scope
   }, [currentPatient?.id, initialLoadComplete]);
 
   // Refresh recent activity when active patient changes
@@ -136,6 +129,7 @@ const Dashboard = () => {
     if (currentPatient?.id && initialLoadComplete) {
       fetchRecentActivity();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-fetch on patient/load state change; fetchRecentActivity is stable in component scope
   }, [currentPatient?.id, initialLoadComplete]);
 
   // Auto-refresh recent activity every 30 seconds to catch new updates
@@ -145,6 +139,7 @@ const Dashboard = () => {
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart interval only when patient changes; fetchRecentActivity is stable in component scope
   }, [currentPatient]);
 
   useEffect(() => {
@@ -411,7 +406,7 @@ const Dashboard = () => {
     });
   }
 
-  const StatsRow = (props) => (
+  const StatsRow = props => (
     <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={12} {...props}>
       {dashboardStatsCards.map((stat, index) => (
         <StatCard key={index} stat={stat} />
@@ -428,7 +423,11 @@ const Dashboard = () => {
       h={90}
     >
       <Stack align="center" justify="center" h="100%">
-        <Text size={isMobile ? '18px' : '22px'} fw={700} c={colorScheme === 'dark' ? `${stat.color}.3` : stat.color}>
+        <Text
+          size={isMobile ? '18px' : '22px'}
+          fw={700}
+          c={colorScheme === 'dark' ? `${stat.color}.3` : stat.color}
+        >
           {stat.value}
         </Text>
         <Text size="12px" c="dimmed" ta="center">
@@ -441,7 +440,7 @@ const Dashboard = () => {
   const ModuleCard = ({ module }) => {
     const Icon = module.icon;
 
-    const handleClick = e => {
+    const handleClick = _e => {
       logger.info('ModuleCard clicked:', module.link);
       try {
         navigate(module.link);
@@ -463,7 +462,7 @@ const Dashboard = () => {
         role="button"
         tabIndex={0}
         onClick={handleClick}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             handleClick(e);
@@ -476,7 +475,10 @@ const Dashboard = () => {
             mb="xs"
             style={{ background: `var(--mantine-color-${module.color}-light)` }}
           >
-            <Icon size={20} color={`var(--mantine-color-${module.color}-filled)`} />
+            <Icon
+              size={20}
+              color={`var(--mantine-color-${module.color}-filled)`}
+            />
           </Box>
           <Text size="13px" fw={600} ta="center">
             {module.title}
@@ -486,7 +488,7 @@ const Dashboard = () => {
     );
   };
 
-  const ActivityItem = ({ activity, index }) => {
+  const ActivityItem = ({ activity, index: _index }) => {
     const isClickable = isActivityClickable(activity);
     const navigationUrl = getActivityNavigationUrl(activity);
     const ActivityIcon = getActivityIcon(activity.model_name);
@@ -494,9 +496,12 @@ const Dashboard = () => {
     const actionColor = getActionBadgeColor(activity.action);
     const tooltip = getActivityTooltip(activity);
     const formattedDescription = formatActivityDescription(activity);
-    const actionDisplayName = t(`activity.actions.${activity.action?.toLowerCase()}`, activity.action);
+    const actionDisplayName = t(
+      `activity.actions.${activity.action?.toLowerCase()}`,
+      activity.action
+    );
 
-    const handleClick = e => {
+    const handleClick = _e => {
       if (isClickable && navigationUrl) {
         navigate(navigationUrl);
         frontendLogger.logInfo('Activity item clicked', {
@@ -606,10 +611,11 @@ const Dashboard = () => {
       </Group>
 
       {lastActivityUpdate && (
-
         <Text size="11px" c="dimmed" mb={10}>
-          {t('dashboard.activity.lastUpdated', 'Last updated')}: {lastActivityUpdate.toLocaleTimeString([], { timeZone: timezoneService.getTimezone() })}
-
+          {t('dashboard.activity.lastUpdated', 'Last updated')}:{' '}
+          {lastActivityUpdate.toLocaleTimeString([], {
+            timeZone: timezoneService.getTimezone(),
+          })}
         </Text>
       )}
 
@@ -644,7 +650,10 @@ const Dashboard = () => {
               {t('dashboard.activity.noActivity', 'No recent activity')}
             </Text>
             <Text size="xs" c="dimmed" ta="center">
-              {t('dashboard.activity.noActivityDescription', 'Your medical record activities will appear here')}
+              {t(
+                'dashboard.activity.noActivityDescription',
+                'Your medical record activities will appear here'
+              )}
             </Text>
           </Stack>
         </Paper>
@@ -664,7 +673,9 @@ const Dashboard = () => {
             maw={400}
             animate
           />
-          <Text c="dimmed">{t('dashboard.loading', 'Loading your medical dashboard...')}</Text>
+          <Text c="dimmed">
+            {t('dashboard.loading', 'Loading your medical dashboard...')}
+          </Text>
         </Stack>
       </Container>
     );
@@ -672,260 +683,296 @@ const Dashboard = () => {
 
   return (
     <Container size={1400} py="md" px={{ base: 12, sm: 16, md: 'md' }}>
-        <PageHeader
-          title="MediKeep"
-          icon={<img src="/medikeep-icon.svg" alt="" width={36} height={36} style={{ verticalAlign: 'middle' }} />}
-          variant="dashboard"
-          showBackButton={false}
-        />
+      <PageHeader
+        title="MediKeep"
+        icon={
+          <img
+            src="/medikeep-icon.svg"
+            alt=""
+            width={36}
+            height={36}
+            style={{ verticalAlign: 'middle' }}
+          />
+        }
+        variant="dashboard"
+        showBackButton={false}
+      />
 
-        <Stack gap={{ base: 16, md: 20 }} mt={{ base: 12, md: 20 }}>
-          {/* Welcome Section */}
-          {showWelcomeBox && (
-            <Paper
-              p="14px 20px"
-              radius="md"
-              bg="var(--mantine-primary-color-filled)"
-              c="white"
-              pos="relative"
-            >
-              <ActionIcon
-                variant="subtle"
-                color="rgba(255,255,255,0.7)"
-                size="sm"
-                pos="absolute"
-                top={8}
-                right={8}
-                onClick={() => {
-                  setShowWelcomeBox(false);
-                  // Persist the dismissal for this user
-                  if (authUser?.id) {
-                    localStorage.setItem(
-                      `welcomeBox_dismissed_${authUser.id}`,
-                      'true'
-                    );
-                  }
-                }}
-                title="Close welcome message"
-                style={{
-                  zIndex: 1,
-                }}
-              >
-                <IconX size={14} />
-              </ActionIcon>
-
-              <Flex
-                justify="space-between"
-                align="center"
-                pr={{ base: 32, sm: 'xl' }}
-                direction={{ base: 'column', sm: 'row' }}
-                gap={{ base: 8, sm: 'xs' }}
-                wrap="wrap"
-              >
-                <div>
-                  <Title order={2} size="18px" fw={600} mb={4}>
-                    {t('dashboard.title', 'MediKeep Dashboard')}
-                  </Title>
-                  <Text size="13px" opacity={0.9}>
-                    {t('dashboard.subtitle', 'Manage your health information securely')}
-                  </Text>
-                </div>
-                {authUser && (
-                  <Badge
-                    bg="rgba(255,255,255,0.2)"
-                    variant="filled"
-                    size="lg"
-                    radius="xl"
-                    style={{ alignSelf: 'flex-start' }}
-                  >
-                    {t('dashboard.hello', 'Hello')},{' '}
-                    {authUser.fullName ||
-                      authUser.full_name ||
-                      authUser.username}
-                    !
-                  </Badge>
-                )}
-              </Flex>
-            </Paper>
-          )}
-
-          {/* Patient Selector and Search Bar - Responsive Layout */}
-          <Flex
-            justify="space-between"
-            align="flex-end"
-            gap="md"
-            direction={{ base: 'column', sm: 'row' }}
-            wrap="wrap"
-            style={{ width: '100%' }}
+      <Stack gap={{ base: 16, md: 20 }} mt={{ base: 12, md: 20 }}>
+        {/* Welcome Section */}
+        {showWelcomeBox && (
+          <Paper
+            p="14px 20px"
+            radius="md"
+            bg="var(--mantine-primary-color-filled)"
+            c="white"
+            pos="relative"
           >
-            {/* Patient Selector */}
-            <Box
+            <ActionIcon
+              variant="subtle"
+              color="rgba(255,255,255,0.7)"
+              size="sm"
+              pos="absolute"
+              top={8}
+              right={8}
+              onClick={() => {
+                setShowWelcomeBox(false);
+                // Persist the dismissal for this user
+                if (authUser?.id) {
+                  localStorage.setItem(
+                    `welcomeBox_dismissed_${authUser.id}`,
+                    'true'
+                  );
+                }
+              }}
+              title="Close welcome message"
               style={{
-                flex: '1 1 auto',
-                maxWidth: isMobile ? '100%' : '500px',
-                minWidth: '200px',
-                width: '100%',
+                zIndex: 1,
               }}
             >
-              <PatientSelector
-                onPatientChange={handlePatientChange}
-                currentPatientId={currentPatient?.id}
-                loading={patientSelectorLoading}
-                compact={true}
+              <IconX size={14} />
+            </ActionIcon>
+
+            <Flex
+              justify="space-between"
+              align="center"
+              pr={{ base: 32, sm: 'xl' }}
+              direction={{ base: 'column', sm: 'row' }}
+              gap={{ base: 8, sm: 'xs' }}
+              wrap="wrap"
+            >
+              <div>
+                <Title order={2} size="18px" fw={600} mb={4}>
+                  {t('dashboard.title', 'MediKeep Dashboard')}
+                </Title>
+                <Text size="13px" opacity={0.9}>
+                  {t(
+                    'dashboard.subtitle',
+                    'Manage your health information securely'
+                  )}
+                </Text>
+              </div>
+              {authUser && (
+                <Badge
+                  bg="rgba(255,255,255,0.2)"
+                  variant="filled"
+                  size="lg"
+                  radius="xl"
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  {t('dashboard.hello', 'Hello')},{' '}
+                  {authUser.fullName || authUser.full_name || authUser.username}
+                  !
+                </Badge>
+              )}
+            </Flex>
+          </Paper>
+        )}
+
+        {/* Patient Selector and Search Bar - Responsive Layout */}
+        <Flex
+          justify="space-between"
+          align="flex-end"
+          gap="md"
+          direction={{ base: 'column', sm: 'row' }}
+          wrap="wrap"
+          style={{ width: '100%' }}
+        >
+          {/* Patient Selector */}
+          <Box
+            style={{
+              flex: '1 1 auto',
+              maxWidth: isMobile ? '100%' : '500px',
+              minWidth: '200px',
+              width: '100%',
+            }}
+          >
+            <PatientSelector
+              onPatientChange={handlePatientChange}
+              currentPatientId={currentPatient?.id}
+              loading={patientSelectorLoading}
+              compact={true}
+            />
+          </Box>
+
+          {/* Search Bar + Advanced Search link */}
+          <Group
+            gap="xs"
+            align="flex-end"
+            style={{ width: '100%', maxWidth: isMobile ? '100%' : 350 }}
+          >
+            <Box style={{ flex: 1, minWidth: 120 }}>
+              <GlobalSearch
+                patientId={currentPatient?.id}
+                placeholder={t(
+                  'dashboard.search.placeholder',
+                  'Search medical records...'
+                )}
+                width="100%"
               />
             </Box>
+            <Text
+              size="xs"
+              c="dimmed"
+              td="underline"
+              mb={6}
+              style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+              onClick={() => navigate('/search')}
+              role="link"
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate('/search');
+                }
+              }}
+            >
+              {t('dashboard.search.advancedSearch', 'Advanced Search')}
+            </Text>
+          </Group>
+        </Flex>
 
-            {/* Search Bar + Advanced Search link */}
-            <Group gap="xs" align="flex-end" style={{ width: '100%', maxWidth: isMobile ? '100%' : 350 }}>
-              <Box style={{ flex: 1, minWidth: 120 }}>
-                <GlobalSearch
-                  patientId={currentPatient?.id}
-                  placeholder={t('dashboard.search.placeholder', 'Search medical records...')}
-                  width="100%"
-                />
-              </Box>
-              <Text
-                size="xs"
-                c="dimmed"
-                td="underline"
-                mb={6}
-                style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
-                onClick={() => navigate('/search')}
-                role="link"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate('/search');
-                  }
-                }}
-              >
-                {t('dashboard.search.advancedSearch', 'Advanced Search')}
-              </Text>
-            </Group>
-          </Flex>
+        {/* Main Content Grid */}
+        <Grid mb={24}>
+          <Grid.Col span={{ base: 12, sm: 8 }}>
+            <Stack gap={{ base: 16, md: 24 }}>
+              {/* Core Medical Information */}
+              <div>
+                <Text size="16px" fw={600} mb={12}>
+                  {t(
+                    'dashboard.sections.coreMedical',
+                    'Core Medical Information'
+                  )}
+                </Text>
+                <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
+                  {coreModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
+              </div>
 
-          {/* Main Content Grid */}
-          <Grid mb={24}>
-            <Grid.Col span={{ base: 12, sm: 8 }}>
-              <Stack gap={{ base: 16, md: 24 }}>
-                {/* Core Medical Information */}
-                <div>
-                  <Text size="16px" fw={600} mb={12}>
-                    {t('dashboard.sections.coreMedical', 'Core Medical Information')}
-                  </Text>
-                  <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
-                    {coreModules.map((module, index) => (
-                      <ModuleCard key={index} module={module} />
-                    ))}
-                  </SimpleGrid>
-                </div>
+              {/* Treatments and Procedures */}
+              <div>
+                <Text size="16px" fw={600} mb={12}>
+                  {t(
+                    'dashboard.sections.treatments',
+                    'Treatments and Procedures'
+                  )}
+                </Text>
+                <SimpleGrid cols={2} spacing={12}>
+                  {treatmentModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
+              </div>
 
-                {/* Treatments and Procedures */}
-                <div>
-                  <Text size="16px" fw={600} mb={12}>
-                    {t('dashboard.sections.treatments', 'Treatments and Procedures')}
-                  </Text>
-                  <SimpleGrid cols={2} spacing={12}>
-                    {treatmentModules.map((module, index) => (
-                      <ModuleCard key={index} module={module} />
-                    ))}
-                  </SimpleGrid>
-                </div>
+              {/* Health Monitoring */}
+              <div>
+                <Text size="16px" fw={600} mb={12}>
+                  {t(
+                    'dashboard.sections.healthMonitoring',
+                    'Health Monitoring'
+                  )}
+                </Text>
+                <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
+                  {monitoringModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
+              </div>
 
-                {/* Health Monitoring */}
-                <div>
-                  <Text size="16px" fw={600} mb={12}>
-                    {t('dashboard.sections.healthMonitoring', 'Health Monitoring')}
-                  </Text>
-                  <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
-                    {monitoringModules.map((module, index) => (
-                      <ModuleCard key={index} module={module} />
-                    ))}
-                  </SimpleGrid>
-                </div>
+              {/* Prevention & History */}
+              <div>
+                <Text size="16px" fw={600} mb={12}>
+                  {t('dashboard.sections.prevention', 'Prevention & History')}
+                </Text>
+                <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
+                  {preventionModules.map((module, index) => (
+                    <ModuleCard key={index} module={module} />
+                  ))}
+                </SimpleGrid>
+              </div>
+            </Stack>
+          </Grid.Col>
 
-                {/* Prevention & History */}
-                <div>
-                  <Text size="16px" fw={600} mb={12}>
-                    {t('dashboard.sections.prevention', 'Prevention & History')}
-                  </Text>
-                  <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={12}>
-                    {preventionModules.map((module, index) => (
-                      <ModuleCard key={index} module={module} />
-                    ))}
-                  </SimpleGrid>
-                </div>
-              </Stack>
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, sm: 4 }} className="dashboard-sidebar">
-              <Stack gap={16}>
-                {/* Additional Resources */}
-                <Card shadow="sm" padding={16} radius="md" withBorder>
-                  <Text size="15px" fw={600} mb={12}>
-                    {t('dashboard.sections.additionalResources', 'Additional Resources')}
-                  </Text>
-                  <Stack gap={6}>
-                    {additionalModules.map((module, index) => {
-                      const Icon = module.icon;
-                      return (
-                        <Paper
-                          key={index}
-                          className="dashboard-resource-item"
-                          p="8px 10px"
-                          radius="sm"
-                          onClick={e => {
-                            logger.info(
-                              'Additional resource clicked:',
-                              module.link
+          <Grid.Col span={{ base: 12, sm: 4 }} className="dashboard-sidebar">
+            <Stack gap={16}>
+              {/* Additional Resources */}
+              <Card shadow="sm" padding={16} radius="md" withBorder>
+                <Text size="15px" fw={600} mb={12}>
+                  {t(
+                    'dashboard.sections.additionalResources',
+                    'Additional Resources'
+                  )}
+                </Text>
+                <Stack gap={6}>
+                  {additionalModules.map((module, index) => {
+                    const Icon = module.icon;
+                    return (
+                      <Paper
+                        key={index}
+                        className="dashboard-resource-item"
+                        p="8px 10px"
+                        radius="sm"
+                        onClick={_e => {
+                          logger.info(
+                            'Additional resource clicked:',
+                            module.link
+                          );
+                          try {
+                            navigate(module.link);
+                          } catch (error) {
+                            logger.error('Navigation error:', error);
+                            frontendLogger.logError(
+                              'Navigation error from additional resource',
+                              {
+                                error: error.message,
+                                component: 'Dashboard',
+                                link: module.link,
+                              }
                             );
-                            try {
-                              navigate(module.link);
-                            } catch (error) {
-                              logger.error('Navigation error:', error);
-                              frontendLogger.logError(
-                                'Navigation error from additional resource',
-                                {
-                                  error: error.message,
-                                  component: 'Dashboard',
-                                  link: module.link,
-                                }
-                              );
-                            }
-                          }}
-                          style={{ cursor: 'pointer' }}
-                          withBorder
-                        >
-                          <Group gap="sm">
-                            <Box
-                              className="dashboard-resource-icon"
-                              style={{ background: `var(--mantine-color-${module.color}-light)` }}
-                            >
-                              <Icon size={12} color={`var(--mantine-color-${module.color}-filled)`} />
-                            </Box>
-                            <Text size="13px" fw={500} style={{ flex: 1 }}>
-                              {module.title}
-                            </Text>
-                            <IconChevronRight size={14} color="var(--mantine-color-dimmed)" />
-                          </Group>
-                        </Paper>
-                      );
-                    })}
-                  </Stack>
-                </Card>
-                {/* Invitation Notifications */}
-                <InvitationNotifications />
+                          }
+                        }}
+                        style={{ cursor: 'pointer' }}
+                        withBorder
+                      >
+                        <Group gap="sm">
+                          <Box
+                            className="dashboard-resource-icon"
+                            style={{
+                              background: `var(--mantine-color-${module.color}-light)`,
+                            }}
+                          >
+                            <Icon
+                              size={12}
+                              color={`var(--mantine-color-${module.color}-filled)`}
+                            />
+                          </Box>
+                          <Text size="13px" fw={500} style={{ flex: 1 }}>
+                            {module.title}
+                          </Text>
+                          <IconChevronRight
+                            size={14}
+                            color="var(--mantine-color-dimmed)"
+                          />
+                        </Group>
+                      </Paper>
+                    );
+                  })}
+                </Stack>
+              </Card>
+              {/* Invitation Notifications */}
+              <InvitationNotifications />
 
-                {/* Recent Activity */}
-                <RecentActivityList />
-              </Stack>
-            </Grid.Col>
-          </Grid>
+              {/* Recent Activity */}
+              <RecentActivityList />
+            </Stack>
+          </Grid.Col>
+        </Grid>
 
-          {/* Stats Row */}
-          <StatsRow />
-        </Stack>
+        {/* Stats Row */}
+        <StatsRow />
+      </Stack>
     </Container>
   );
 };

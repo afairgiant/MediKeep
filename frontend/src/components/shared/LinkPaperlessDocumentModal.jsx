@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Stack,
@@ -74,6 +74,7 @@ const LinkPaperlessDocumentModal = ({
       setSearchResults([]);
       setTotalResults(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSearch is stable in component scope; only re-search on query/page/filter changes
   }, [debouncedQuery, page, excludeLinked]);
 
   // Reset page when query changes
@@ -88,12 +89,16 @@ const LinkPaperlessDocumentModal = ({
     setError('');
 
     try {
-      logger.info('paperless_document_search', 'Searching Paperless documents', {
-        component: 'LinkPaperlessDocumentModal',
-        query,
-        page: currentPage,
-        excludeLinked,
-      });
+      logger.info(
+        'paperless_document_search',
+        'Searching Paperless documents',
+        {
+          component: 'LinkPaperlessDocumentModal',
+          query,
+          page: currentPage,
+          excludeLinked,
+        }
+      );
 
       const results = await searchPaperlessDocuments(query, {
         page: currentPage,
@@ -110,7 +115,8 @@ const LinkPaperlessDocumentModal = ({
         totalCount: results?.count || 0,
       });
     } catch (err) {
-      const errorMessage = err.message || 'Failed to search Paperless documents';
+      const errorMessage =
+        err.message || 'Failed to search Paperless documents';
       setError(errorMessage);
 
       logger.error('paperless_search_error', 'Search failed', {
@@ -122,9 +128,11 @@ const LinkPaperlessDocumentModal = ({
     }
   };
 
-  const handleSelectDocument = (doc) => {
+  const handleSelectDocument = doc => {
     setSelectedDoc(doc);
-    setDescription(`Linked from Paperless: ${doc.title || doc.original_file_name}`);
+    setDescription(
+      `Linked from Paperless: ${doc.title || doc.original_file_name}`
+    );
   };
 
   const handleConfirmLink = async () => {
@@ -152,7 +160,7 @@ const LinkPaperlessDocumentModal = ({
       });
 
       // Remove from search results
-      setSearchResults((prev) => prev.filter((d) => d.id !== selectedDoc.id));
+      setSearchResults(prev => prev.filter(d => d.id !== selectedDoc.id));
       setSelectedDoc(null);
       setDescription('');
 
@@ -190,7 +198,7 @@ const LinkPaperlessDocumentModal = ({
           placeholder="Search by title, content, or tags..."
           leftSection={<IconSearch size={16} />}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           rightSection={loading && <Loader size="xs" />}
           autoFocus
         />
@@ -200,17 +208,25 @@ const LinkPaperlessDocumentModal = ({
           label="Hide already-linked documents"
           description="Filter out documents that are already linked in MediKeep"
           checked={excludeLinked}
-          onChange={(e) => setExcludeLinked(e.currentTarget.checked)}
+          onChange={e => setExcludeLinked(e.currentTarget.checked)}
         />
 
         {/* Info Alert */}
-        <Alert variant="light" color="blue" icon={<IconAlertCircle size={16} />}>
+        <Alert
+          variant="light"
+          color="blue"
+          icon={<IconAlertCircle size={16} />}
+        >
           {t('linkPaperless.infoText', { entityType })}
         </Alert>
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="light" color="red" icon={<IconAlertCircle size={16} />}>
+          <Alert
+            variant="light"
+            color="red"
+            icon={<IconAlertCircle size={16} />}
+          >
             {error}
           </Alert>
         )}
@@ -236,77 +252,91 @@ const LinkPaperlessDocumentModal = ({
             </Center>
           ) : (
             <Stack gap="sm">
-              {searchResults.map((doc) => {
+              {searchResults.map(doc => {
                 // Prefer backend-resolved names; fall back to raw IDs if the
                 // backend couldn't enrich (older response or lookup failure).
-                const tagLabels = doc.tag_names?.length ? doc.tag_names : (doc.tags || []);
+                const tagLabels = doc.tag_names?.length
+                  ? doc.tag_names
+                  : doc.tags || [];
                 return (
-                <Card
-                  key={doc.id}
-                  withBorder
-                  p="md"
-                  style={{
-                    cursor: 'pointer',
-                    backgroundColor:
-                      selectedDoc?.id === doc.id ? '#e7f5ff' : 'transparent',
-                  }}
-                  onClick={() => handleSelectDocument(doc)}
-                >
-                  <Group justify="space-between" align="flex-start">
-                    <Group align="flex-start" gap="md" style={{ flex: 1 }}>
-                      <IconFile size={24} />
+                  <Card
+                    key={doc.id}
+                    withBorder
+                    p="md"
+                    style={{
+                      cursor: 'pointer',
+                      backgroundColor:
+                        selectedDoc?.id === doc.id ? '#e7f5ff' : 'transparent',
+                    }}
+                    onClick={() => handleSelectDocument(doc)}
+                  >
+                    <Group justify="space-between" align="flex-start">
+                      <Group align="flex-start" gap="md" style={{ flex: 1 }}>
+                        <IconFile size={24} />
 
-                      <Stack gap="xs" style={{ flex: 1 }}>
-                        <Text fw={500} size="sm">
-                          {doc.title || doc.original_file_name}
-                        </Text>
+                        <Stack gap="xs" style={{ flex: 1 }}>
+                          <Text fw={500} size="sm">
+                            {doc.title || doc.original_file_name}
+                          </Text>
 
-                        {doc.created && (
-                          <Group gap="xs">
-                            <IconCalendar size={14} />
-                            <Text size="xs" c="dimmed">
-                              {formatDate(doc.created)}
-                            </Text>
-                          </Group>
-                        )}
-
-                        {tagLabels.length > 0 && (
-                          <Group gap="xs">
-                            <IconTag size={14} />
-                            {tagLabels.slice(0, 3).map((tag, idx) => (
-                              <Badge key={`${tag}-${idx}`} size="xs" variant="light">
-                                {tag}
-                              </Badge>
-                            ))}
-                            {tagLabels.length > 3 && (
+                          {doc.created && (
+                            <Group gap="xs">
+                              <IconCalendar size={14} />
                               <Text size="xs" c="dimmed">
-                                {t('linkPaperless.moreTags', { count: tagLabels.length - 3 })}
+                                {formatDate(doc.created)}
                               </Text>
-                            )}
-                          </Group>
-                        )}
+                            </Group>
+                          )}
 
-                        {(doc.correspondent_name || doc.correspondent) && (
-                          <Text size="xs" c="dimmed">
-                            {t('linkPaperless.from', { name: doc.correspondent_name ?? doc.correspondent })}
-                          </Text>
-                        )}
+                          {tagLabels.length > 0 && (
+                            <Group gap="xs">
+                              <IconTag size={14} />
+                              {tagLabels.slice(0, 3).map((tag, idx) => (
+                                <Badge
+                                  key={`${tag}-${idx}`}
+                                  size="xs"
+                                  variant="light"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {tagLabels.length > 3 && (
+                                <Text size="xs" c="dimmed">
+                                  {t('linkPaperless.moreTags', {
+                                    count: tagLabels.length - 3,
+                                  })}
+                                </Text>
+                              )}
+                            </Group>
+                          )}
 
-                        {(doc.document_type_name || doc.document_type) && (
-                          <Text size="xs" c="dimmed">
-                            {t('linkPaperless.type', { type: doc.document_type_name ?? doc.document_type })}
-                          </Text>
-                        )}
-                      </Stack>
+                          {(doc.correspondent_name || doc.correspondent) && (
+                            <Text size="xs" c="dimmed">
+                              {t('linkPaperless.from', {
+                                name:
+                                  doc.correspondent_name ?? doc.correspondent,
+                              })}
+                            </Text>
+                          )}
+
+                          {(doc.document_type_name || doc.document_type) && (
+                            <Text size="xs" c="dimmed">
+                              {t('linkPaperless.type', {
+                                type:
+                                  doc.document_type_name ?? doc.document_type,
+                              })}
+                            </Text>
+                          )}
+                        </Stack>
+                      </Group>
+
+                      {selectedDoc?.id === doc.id && (
+                        <Badge color="blue" variant="filled">
+                          {t('linkPaperless.selected')}
+                        </Badge>
+                      )}
                     </Group>
-
-                    {selectedDoc?.id === doc.id && (
-                      <Badge color="blue" variant="filled">
-                        {t('linkPaperless.selected')}
-                      </Badge>
-                    )}
-                  </Group>
-                </Card>
+                  </Card>
                 );
               })}
             </Stack>
@@ -331,7 +361,7 @@ const LinkPaperlessDocumentModal = ({
             label="Description (optional)"
             placeholder="Add a note about this document"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             rows={2}
           />
         )}

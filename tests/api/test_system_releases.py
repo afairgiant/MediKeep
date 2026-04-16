@@ -67,9 +67,7 @@ class TestReleasesResponseStructure:
         """GET /releases returns HTTP 200."""
         mock_releases = _make_sample_releases(3)
 
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=mock_releases)
             mock_factory.return_value = mock_service
@@ -82,9 +80,7 @@ class TestReleasesResponseStructure:
         """Response body must include a 'releases' key with a list value."""
         mock_releases = _make_sample_releases(2)
 
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=mock_releases)
             mock_factory.return_value = mock_service
@@ -97,9 +93,7 @@ class TestReleasesResponseStructure:
 
     def test_response_contains_current_version_key(self, api_client: TestClient):
         """Response body must include a 'current_version' key."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=[])
             mock_factory.return_value = mock_service
@@ -110,9 +104,7 @@ class TestReleasesResponseStructure:
 
     def test_response_contains_timestamp_key(self, api_client: TestClient):
         """Response body must include a 'timestamp' key."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=[])
             mock_factory.return_value = mock_service
@@ -126,9 +118,7 @@ class TestReleasesResponseStructure:
         expected_fields = {"tag_name", "name", "body", "published_at", "html_url"}
         mock_releases = _make_sample_releases(1)
 
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=mock_releases)
             mock_factory.return_value = mock_service
@@ -150,9 +140,7 @@ class TestCurrentVersion:
 
     def test_current_version_matches_settings_version(self, api_client: TestClient):
         """The 'current_version' field must equal settings.VERSION."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=[])
             mock_factory.return_value = mock_service
@@ -172,9 +160,7 @@ class TestLimitParameter:
 
     def test_limit_parameter_is_forwarded_to_service(self, api_client: TestClient):
         """The endpoint passes the limit value on to service.get_releases."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(return_value=[])
             mock_factory.return_value = mock_service
@@ -195,11 +181,11 @@ class TestLimitParameter:
 
     def test_limit_equal_to_20_is_accepted(self, api_client: TestClient):
         """A limit of exactly 20 is passed through without modification."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
-            mock_service.get_releases = AsyncMock(return_value=_make_sample_releases(20))
+            mock_service.get_releases = AsyncMock(
+                return_value=_make_sample_releases(20)
+            )
             mock_factory.return_value = mock_service
 
             api_client.get("/api/v1/system/releases?limit=20")
@@ -208,11 +194,11 @@ class TestLimitParameter:
 
     def test_default_limit_is_10(self, api_client: TestClient):
         """When no limit is provided, the endpoint defaults to 10."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
-            mock_service.get_releases = AsyncMock(return_value=_make_sample_releases(10))
+            mock_service.get_releases = AsyncMock(
+                return_value=_make_sample_releases(10)
+            )
             mock_factory.return_value = mock_service
 
             api_client.get("/api/v1/system/releases")
@@ -232,9 +218,7 @@ class TestErrorHandling:
         self, api_client: TestClient
     ):
         """When the service raises an exception, releases is an empty list."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(
                 side_effect=Exception("GitHub unavailable")
@@ -251,9 +235,7 @@ class TestErrorHandling:
         self, api_client: TestClient
     ):
         """Even when the service fails, current_version is included in the response."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(
                 side_effect=RuntimeError("unexpected failure")
@@ -269,13 +251,9 @@ class TestErrorHandling:
         self, api_client: TestClient
     ):
         """Even when the service fails, a timestamp is included in the response."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
-            mock_service.get_releases = AsyncMock(
-                side_effect=ValueError("bad data")
-            )
+            mock_service.get_releases = AsyncMock(side_effect=ValueError("bad data"))
             mock_factory.return_value = mock_service
 
             response = api_client.get("/api/v1/system/releases")
@@ -286,9 +264,7 @@ class TestErrorHandling:
         self, api_client: TestClient
     ):
         """Service failures must never propagate a 500 to the caller."""
-        with patch(
-            _SERVICE_PATCH_TARGET
-        ) as mock_factory:
+        with patch(_SERVICE_PATCH_TARGET) as mock_factory:
             mock_service = AsyncMock()
             mock_service.get_releases = AsyncMock(
                 side_effect=Exception("network error")

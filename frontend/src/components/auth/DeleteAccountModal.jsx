@@ -1,6 +1,6 @@
 import logger from '../../services/logger';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   Button,
@@ -82,7 +82,11 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
     <Modal
       opened={isOpen}
       onClose={handleClose}
-      title={step === 1 ? t('deleteAccount.title') : t('deleteAccount.confirmAccountDeletion')}
+      title={
+        step === 1
+          ? t('deleteAccount.title')
+          : t('deleteAccount.confirmAccountDeletion')
+      }
       size="md"
       closeOnClickOutside={!isDeleting}
       closeOnEscape={!isDeleting}
@@ -100,21 +104,37 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
             <Stack spacing="sm">
               <Title order={4}>{t('deleteAccount.permanentlyDelete')}</Title>
               <List spacing="xs" size="sm">
-                <List.Item>{t('deleteAccount.userAccount', { username: user?.username })}</List.Item>
                 <List.Item>
-                  {t('deleteAccount.patientProfile')}
+                  {t('deleteAccount.userAccount', { username: user?.username })}
                 </List.Item>
+                <List.Item>{t('deleteAccount.patientProfile')}</List.Item>
                 <List.Item>
                   {t('deleteAccount.allMedicalRecords')}
                   <List withPadding spacing="xs" size="sm" mt="xs">
-                    <List.Item>{t('deleteAccount.records.medicationsAndPrescriptions')}</List.Item>
-                    <List.Item>{t('deleteAccount.records.labResultsAndFiles')}</List.Item>
-                    <List.Item>{t('deleteAccount.records.allergiesAndConditions')}</List.Item>
-                    <List.Item>{t('deleteAccount.records.proceduresAndTreatments')}</List.Item>
-                    <List.Item>{t('deleteAccount.records.immunizationRecords')}</List.Item>
-                    <List.Item>{t('deleteAccount.records.vitalSigns')}</List.Item>
-                    <List.Item>{t('deleteAccount.records.encountersAndVisits')}</List.Item>
-                    <List.Item>{t('deleteAccount.records.emergencyContacts')}</List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.medicationsAndPrescriptions')}
+                    </List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.labResultsAndFiles')}
+                    </List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.allergiesAndConditions')}
+                    </List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.proceduresAndTreatments')}
+                    </List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.immunizationRecords')}
+                    </List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.vitalSigns')}
+                    </List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.encountersAndVisits')}
+                    </List.Item>
+                    <List.Item>
+                      {t('deleteAccount.records.emergencyContacts')}
+                    </List.Item>
                   </List>
                 </List.Item>
               </List>
@@ -150,9 +170,7 @@ const DeleteAccountModal = ({ isOpen, onClose }) => {
             />
 
             <Stack spacing="sm">
-              <Text size="sm">
-                {t('deleteAccount.typeConfirmation')}
-              </Text>
+              <Text size="sm">{t('deleteAccount.typeConfirmation')}</Text>
 
               <Paper p="sm" bg="gray.2">
                 <Code color="red" fw={700}>

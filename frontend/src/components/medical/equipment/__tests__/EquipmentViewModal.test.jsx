@@ -1,6 +1,5 @@
 import { vi } from 'vitest';
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MantineProvider } from '@mantine/core';
 import '@testing-library/jest-dom';
@@ -9,7 +8,7 @@ import EquipmentViewModal from '../EquipmentViewModal';
 // Mock useDateFormat hook - return dates in consistent format
 vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDate: (date) => {
+    formatDate: date => {
       if (!date) return null;
       // Parse as UTC to avoid timezone issues
       const d = new Date(date + 'T00:00:00');
@@ -106,7 +105,9 @@ describe('EquipmentViewModal', () => {
       );
 
       // Equipment name may appear multiple times
-      expect(screen.getAllByText('ResMed AirSense 11').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('ResMed AirSense 11').length
+      ).toBeGreaterThanOrEqual(1);
     });
 
     test('renders equipment type badge', () => {
@@ -117,7 +118,9 @@ describe('EquipmentViewModal', () => {
       );
 
       // Equipment type may appear multiple times
-      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(
+        1
+      );
     });
 
     test('renders status badge', () => {
@@ -142,7 +145,9 @@ describe('EquipmentViewModal', () => {
 
       expect(screen.getByText('Equipment Name')).toBeInTheDocument();
       // Equipment name appears multiple times (header and details)
-      expect(screen.getAllByText('ResMed AirSense 11').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('ResMed AirSense 11').length
+      ).toBeGreaterThanOrEqual(1);
     });
 
     test('displays equipment type', () => {
@@ -154,7 +159,9 @@ describe('EquipmentViewModal', () => {
 
       expect(screen.getByText('Equipment Type')).toBeInTheDocument();
       // Equipment type may appear multiple times
-      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(
+        1
+      );
     });
 
     test('displays status', () => {
@@ -187,7 +194,10 @@ describe('EquipmentViewModal', () => {
 
       render(
         <MantineWrapper>
-          <EquipmentViewModal {...defaultProps} equipment={noPractitionerEquipment} />
+          <EquipmentViewModal
+            {...defaultProps}
+            equipment={noPractitionerEquipment}
+          />
         </MantineWrapper>
       );
 
@@ -304,7 +314,9 @@ describe('EquipmentViewModal', () => {
       );
 
       expect(screen.getByText('Usage Instructions')).toBeInTheDocument();
-      expect(screen.getByText('Use nightly for 7-8 hours. Clean mask weekly.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Use nightly for 7-8 hours. Clean mask weekly.')
+      ).toBeInTheDocument();
     });
 
     test('hides usage instructions section when not available', () => {
@@ -315,7 +327,10 @@ describe('EquipmentViewModal', () => {
 
       render(
         <MantineWrapper>
-          <EquipmentViewModal {...defaultProps} equipment={noInstructionsEquipment} />
+          <EquipmentViewModal
+            {...defaultProps}
+            equipment={noInstructionsEquipment}
+          />
         </MantineWrapper>
       );
 
@@ -332,7 +347,11 @@ describe('EquipmentViewModal', () => {
       );
 
       expect(screen.getByText('Notes')).toBeInTheDocument();
-      expect(screen.getByText('Patient uses nasal pillow mask. Pressure setting: 10-15 cmH2O')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Patient uses nasal pillow mask. Pressure setting: 10-15 cmH2O'
+        )
+      ).toBeInTheDocument();
     });
 
     test('hides notes section when not available', () => {
@@ -348,7 +367,7 @@ describe('EquipmentViewModal', () => {
       );
 
       // Notes header should not appear (as a section title)
-      const sections = screen.queryAllByText('Notes');
+      screen.queryAllByText('Notes');
       // May appear in form context but not as a data display section
     });
   });
@@ -438,7 +457,9 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(
+        1
+      );
     });
 
     test('displays BiPAP type correctly', () => {
@@ -453,7 +474,9 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getAllByText('BiPAP Machine').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('BiPAP Machine').length
+      ).toBeGreaterThanOrEqual(1);
     });
 
     test('displays nebulizer type correctly', () => {
@@ -464,7 +487,10 @@ describe('EquipmentViewModal', () => {
 
       render(
         <MantineWrapper>
-          <EquipmentViewModal {...defaultProps} equipment={nebulizerEquipment} />
+          <EquipmentViewModal
+            {...defaultProps}
+            equipment={nebulizerEquipment}
+          />
         </MantineWrapper>
       );
 
@@ -483,7 +509,9 @@ describe('EquipmentViewModal', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getAllByText('Glucose Monitor').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('Glucose Monitor').length
+      ).toBeGreaterThanOrEqual(1);
     });
 
     test('displays "Not specified" for unknown type', () => {
@@ -494,7 +522,10 @@ describe('EquipmentViewModal', () => {
 
       render(
         <MantineWrapper>
-          <EquipmentViewModal {...defaultProps} equipment={unknownTypeEquipment} />
+          <EquipmentViewModal
+            {...defaultProps}
+            equipment={unknownTypeEquipment}
+          />
         </MantineWrapper>
       );
 
@@ -555,12 +586,17 @@ describe('EquipmentViewModal', () => {
 
       render(
         <MantineWrapper>
-          <EquipmentViewModal {...defaultProps} equipment={needsRepairEquipment} />
+          <EquipmentViewModal
+            {...defaultProps}
+            equipment={needsRepairEquipment}
+          />
         </MantineWrapper>
       );
 
       // StatusBadge has no "needs_repair" config - falls to default, label = raw status string
-      expect(screen.getAllByText('needs_repair').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('needs_repair').length).toBeGreaterThanOrEqual(
+        1
+      );
     });
   });
 
@@ -584,7 +620,10 @@ describe('EquipmentViewModal', () => {
 
       render(
         <MantineWrapper>
-          <EquipmentViewModal {...defaultProps} equipment={equipmentWithIdOnly} />
+          <EquipmentViewModal
+            {...defaultProps}
+            equipment={equipmentWithIdOnly}
+          />
         </MantineWrapper>
       );
 
@@ -600,7 +639,10 @@ describe('EquipmentViewModal', () => {
 
       render(
         <MantineWrapper>
-          <EquipmentViewModal {...defaultProps} equipment={equipmentWithUnknownPractitioner} />
+          <EquipmentViewModal
+            {...defaultProps}
+            equipment={equipmentWithUnknownPractitioner}
+          />
         </MantineWrapper>
       );
 
@@ -619,13 +661,18 @@ describe('EquipmentViewModal', () => {
       expect(() => {
         render(
           <MantineWrapper>
-            <EquipmentViewModal {...defaultProps} equipment={minimalEquipment} />
+            <EquipmentViewModal
+              {...defaultProps}
+              equipment={minimalEquipment}
+            />
           </MantineWrapper>
         );
       }).not.toThrow();
 
       // Equipment name may appear multiple times (title and details)
-      expect(screen.getAllByText('Basic Equipment').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('Basic Equipment').length
+      ).toBeGreaterThanOrEqual(1);
     });
 
     test('handles empty practitioners list gracefully', () => {

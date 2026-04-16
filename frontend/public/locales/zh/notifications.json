@@ -67,7 +67,7 @@
       }
     },
     "empty": "未配置通知通道。",
-    "emptyHint": "添加通道以开始通过Discord、邮件、Gotify或Webhook接收通知。",
+    "emptyHint": "添加通道以开始通过Discord、邮件、Gotify, ntfy或Webhook接收通知。",
     "errors": {
       "fieldRequired": "{{field}}为必填项",
       "nameRequired": "通道名称为必填项"
@@ -117,6 +117,28 @@
     "noChannels": "未配置通知通道",
     "noChannelsHint": "添加通道以开始接收通知",
     "notificationsSent": "已发送{{count}}条通知",
+    "ntfy": {
+      "authToken": {
+        "description": "受保护主题的 Bearer 令牌(公共主题请留空)",
+        "label": "认证令牌(可选)",
+        "placeholder": "tk_..."
+      },
+      "priority": {
+        "description": "消息优先级(1=最低, 3=默认, 5=最高)",
+        "label": "优先级",
+        "placeholder": "3"
+      },
+      "serverUrl": {
+        "description": "ntfy 服务器 URL(默认:https://ntfy.sh)",
+        "label": "服务器 URL",
+        "placeholder": "https://ntfy.sh"
+      },
+      "topic": {
+        "description": "唯一的主题名称。在 ntfy.sh 或您的 ntfy 应用上订阅相同的主题。",
+        "label": "主题",
+        "placeholder": "my-alerts"
+      }
+    },
     "sentCount_one": "已发送{{count}}条",
     "sentCount_other": "已发送{{count}}条",
     "test": "测试",
@@ -128,6 +150,7 @@
     "types": {
       "discord": "Discord",
       "gotify": "Gotify",
+      "ntfy": "ntfy",
       "webhook": "Webhook"
     },
     "updateError": "更新通道失败",

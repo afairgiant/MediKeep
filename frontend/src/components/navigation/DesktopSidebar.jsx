@@ -1,14 +1,24 @@
 /**
  * DesktopSidebar - Full sidebar for desktop screens (lg+ breakpoints)
  * Persistent sidebar with all menu items visible
- * 
+ *
  * Following PR #3: Navigation & Layout System specifications
  */
 
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Stack, Group, Text, Divider, UnstyledButton } from '@mantine/core';
-import { IconChevronLeft, IconChevronRight, IconLogout } from '@tabler/icons-react';
+import {
+  Box,
+  Stack,
+  Group,
+  Text,
+  Divider,
+  UnstyledButton,
+} from '@mantine/core';
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconLogout,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
 import './DesktopSidebar.css';
@@ -20,7 +30,7 @@ const DesktopSidebar = ({
   menuItems = [],
   userInfo,
   onLogout,
-  className = ''
+  className = '',
 }) => {
   const { t } = useTranslation(['navigation', 'shared']);
   // Create responsive Mantine components
@@ -28,11 +38,11 @@ const DesktopSidebar = ({
     w: isOpen ? { lg: 280, xl: 300 } : { lg: 60, xl: 60 },
     miw: isOpen ? { lg: 280, xl: 300 } : { lg: 60, xl: 60 },
     h: '100vh',
-    p: isOpen ? { lg: 'md', xl: 'lg' } : { lg: 'xs', xl: 'sm' }
+    p: isOpen ? { lg: 'md', xl: 'lg' } : { lg: 'xs', xl: 'sm' },
   });
 
   const ResponsiveStack = ResponsiveComponentFactory.createMantine(Stack, {
-    spacing: { lg: 'sm', xl: 'md' }
+    spacing: { lg: 'sm', xl: 'md' },
   });
 
   // Check if current path matches menu item
@@ -58,7 +68,7 @@ const DesktopSidebar = ({
         borderRight: '1px solid var(--mantine-color-gray-3)',
         backgroundColor: 'var(--color-bg-primary)',
         transition: 'all 0.3s ease',
-        zIndex: 100
+        zIndex: 100,
       }}
     >
       <ResponsiveStack h="100%" justify="space-between">
@@ -70,24 +80,25 @@ const DesktopSidebar = ({
                 {t('shared:labels.admin')}
               </Text>
             )}
-            <UnstyledButton 
+            <UnstyledButton
               onClick={onToggle}
               style={{
                 padding: '8px',
                 borderRadius: '4px',
                 '&:hover': {
-                  backgroundColor: 'var(--mantine-color-gray-2)'
-                }
+                  backgroundColor: 'var(--mantine-color-gray-2)',
+                },
               }}
               aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             >
-              {isOpen ? 
-                <IconChevronLeft size={16} /> : 
+              {isOpen ? (
+                <IconChevronLeft size={16} />
+              ) : (
                 <IconChevronRight size={16} />
-              }
+              )}
             </UnstyledButton>
           </Group>
-          
+
           {isOpen && <Divider />}
 
           {/* Navigation Menu */}
@@ -99,7 +110,7 @@ const DesktopSidebar = ({
                     {section.section}
                   </Text>
                 )}
-                
+
                 <Stack spacing="xs">
                   {section.items.map((item, itemIndex) => (
                     <UnstyledButton
@@ -125,9 +136,9 @@ const DesktopSidebar = ({
                         '&:hover': {
                           backgroundColor: isActivePath(item.path, item.exact)
                             ? 'var(--mantine-color-blue-1)'
-                            : 'var(--mantine-color-gray-1)'
+                            : 'var(--mantine-color-gray-1)',
                         },
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
                       }}
                       title={!isOpen ? item.label : undefined}
                     >
@@ -148,7 +159,7 @@ const DesktopSidebar = ({
         {/* Footer Section */}
         <Stack spacing="xs">
           {isOpen && <Divider />}
-          
+
           {/* User Info */}
           {userInfo && (
             <Group justify={isOpen ? 'space-between' : 'center'} align="center">
@@ -178,9 +189,9 @@ const DesktopSidebar = ({
                 borderRadius: '6px',
                 color: 'var(--mantine-color-red-6)',
                 '&:hover': {
-                  backgroundColor: 'var(--mantine-color-red-0)'
+                  backgroundColor: 'var(--mantine-color-red-0)',
                 },
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
               }}
               title={!isOpen ? 'Logout' : undefined}
               aria-label="Logout"

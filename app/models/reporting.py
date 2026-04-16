@@ -94,7 +94,9 @@ class ReportGenerationAudit(Base):
     report_type = Column(
         String(50), nullable=False
     )  # 'custom_report', 'full_export', etc.
-    categories_included = Column(JSON, nullable=True)  # Array of category names (stored as JSON for SQLite compatibility)
+    categories_included = Column(
+        JSON, nullable=True
+    )  # Array of category names (stored as JSON for SQLite compatibility)
     total_records = Column(Integer, nullable=True)
 
     # Performance metrics

@@ -1,4 +1,5 @@
 """CRUD operations for Medical Equipment."""
+
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -11,7 +12,7 @@ from app.schemas.medical_equipment import MedicalEquipmentCreate, MedicalEquipme
 
 class CRUDMedicalEquipment(
     CRUDBase[MedicalEquipment, MedicalEquipmentCreate, MedicalEquipmentUpdate],
-    TagFilterMixin
+    TagFilterMixin,
 ):
     """
     Medical Equipment-specific CRUD operations.
@@ -98,7 +99,10 @@ class CRUDMedicalEquipment(
         """
         return self.query(
             db=db,
-            filters={"patient_id": patient_id, "equipment_type": equipment_type.lower()},
+            filters={
+                "patient_id": patient_id,
+                "equipment_type": equipment_type.lower(),
+            },
             skip=skip,
             limit=limit,
             order_by="prescribed_date",

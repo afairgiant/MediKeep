@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { MantineProvider } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useFormSubmissionWithUploads } from '../useFormSubmissionWithUploads';
@@ -30,15 +30,11 @@ vi.mock('../../constants/errorMessages', () => ({
     FORM_SAVED: 'Form saved successfully!',
   },
   WARNING_MESSAGES: {},
-  getUserFriendlyError: vi.fn((error, context) => `User friendly: ${error}`),
+  getUserFriendlyError: vi.fn((error, _context) => `User friendly: ${error}`),
 }));
 
 // Wrapper component for Mantine provider
-const wrapper = ({ children }) => (
-  <MantineProvider>
-    {children}
-  </MantineProvider>
-);
+const wrapper = ({ children }) => <MantineProvider>{children}</MantineProvider>;
 
 describe('useFormSubmissionWithUploads Hook', () => {
   const mockOnSuccess = vi.fn();
@@ -64,7 +60,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Initial State', () => {
     test('should initialize with default state', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       expect(result.current.submissionState).toEqual({
         isSubmitting: false,
@@ -88,7 +87,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Form Submission Flow', () => {
     test('should handle complete successful form submission with uploads', async () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       // Start submission
       act(() => {
@@ -102,7 +104,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
       // Complete form submission successfully
       act(() => {
-        const success = result.current.completeFormSubmission(true, 'entity-123');
+        result.current.completeFormSubmission(true, 'entity-123');
       });
 
       expect(result.current.submissionState.isSubmitting).toBe(false);
@@ -138,7 +140,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should handle form submission failure', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -154,7 +159,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should handle partial upload success (some files failed)', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       // Complete successful form submission
       act(() => {
@@ -181,7 +189,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should handle complete upload failure', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       // Complete successful form submission but upload fails
       act(() => {
@@ -205,7 +216,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Status Messages', () => {
     test('should return correct status message for form submission', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -220,7 +234,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should return correct status message for file upload', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -237,7 +254,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should return correct status message for successful completion', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -255,7 +275,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should return correct status message for partial success', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -273,16 +296,19 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should return correct status message for form failure', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
       });
-      
+
       act(() => {
         result.current.completeFormSubmission(false);
       });
-      
+
       act(() => {
         result.current.completeFileUpload(false, 0, 0);
       });
@@ -296,7 +322,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should return null status message when not active', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       const statusMessage = result.current.statusMessage;
       expect(statusMessage).toBeNull();
@@ -305,7 +334,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Error Handling', () => {
     test('should handle form submission failure with error details', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       const testError = new Error('Network connection failed');
 
@@ -324,11 +356,16 @@ describe('useFormSubmissionWithUploads Hook', () => {
         })
       );
 
-      expect(mockOnError).toHaveBeenCalledWith('User friendly: Error: Network connection failed');
+      expect(mockOnError).toHaveBeenCalledWith(
+        'User friendly: Error: Network connection failed'
+      );
     });
 
     test('should handle upload failure with error details', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       const testError = { message: 'File size too large' };
 
@@ -346,11 +383,16 @@ describe('useFormSubmissionWithUploads Hook', () => {
         })
       );
 
-      expect(mockOnError).toHaveBeenCalledWith('User friendly: [object Object]');
+      expect(mockOnError).toHaveBeenCalledWith(
+        'User friendly: [object Object]'
+      );
     });
 
     test('should handle unknown error gracefully', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.handleSubmissionFailure(null, 'form');
@@ -363,7 +405,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Reset Functionality', () => {
     test('should reset submission state correctly', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       // Start and complete a submission
       act(() => {
@@ -390,13 +435,19 @@ describe('useFormSubmissionWithUploads Hook', () => {
         canClose: true,
       });
 
-      expect(logger.info).toHaveBeenCalledWith('form_submission_reset', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'form_submission_reset',
+        expect.any(Object)
+      );
     });
   });
 
   describe('Coordination Between Form and Upload', () => {
     test('should coordinate form submission success with upload start', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -422,7 +473,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should prevent submission when already submitting or uploading', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -439,7 +493,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should handle race condition between form completion and upload start', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -460,7 +517,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Callback Integration', () => {
     test('should call onSuccess only when both form and upload succeed', async () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -473,7 +533,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should not call onSuccess when form fails', async () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -489,7 +552,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should not call onSuccess when upload fails', async () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -508,7 +574,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
     test('should handle missing onSuccess callback gracefully', async () => {
       const propsWithoutCallback = { ...defaultProps, onSuccess: undefined };
-      const { result } = renderHook(() => useFormSubmissionWithUploads(propsWithoutCallback), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(propsWithoutCallback),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -523,7 +592,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
     test('should handle missing onError callback gracefully', () => {
       const propsWithoutCallback = { ...defaultProps, onError: undefined };
-      const { result } = renderHook(() => useFormSubmissionWithUploads(propsWithoutCallback), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(propsWithoutCallback),
+        { wrapper }
+      );
 
       act(() => {
         result.current.handleSubmissionFailure(new Error('Test error'), 'form');
@@ -536,35 +608,53 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Logging', () => {
     test('should log all major state transitions', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
       });
 
-      expect(logger.info).toHaveBeenCalledWith('form_submission_started', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'form_submission_started',
+        expect.any(Object)
+      );
 
       act(() => {
         result.current.completeFormSubmission(true, 'entity-123');
       });
 
-      expect(logger.info).toHaveBeenCalledWith('form_submission_completed', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'form_submission_completed',
+        expect.any(Object)
+      );
 
       act(() => {
         result.current.startFileUpload();
       });
 
-      expect(logger.info).toHaveBeenCalledWith('form_file_upload_started', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'form_file_upload_started',
+        expect.any(Object)
+      );
 
       act(() => {
         result.current.completeFileUpload(true, 2, 0);
       });
 
-      expect(logger.info).toHaveBeenCalledWith('form_file_upload_completed', expect.any(Object));
+      expect(logger.info).toHaveBeenCalledWith(
+        'form_file_upload_completed',
+        expect.any(Object)
+      );
     });
 
     test('should log errors with appropriate context', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       const testError = new Error('Test error message');
 
@@ -572,7 +662,8 @@ describe('useFormSubmissionWithUploads Hook', () => {
         result.current.handleSubmissionFailure(testError, 'upload');
       });
 
-      expect(logger.error).toHaveBeenCalledWith('form_submission_failure', 
+      expect(logger.error).toHaveBeenCalledWith(
+        'form_submission_failure',
         expect.objectContaining({
           entityType: 'test-entity',
           stage: 'upload',
@@ -585,7 +676,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Notification Handling', () => {
     test('should show appropriate notification for single file success', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -604,7 +698,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should show appropriate notification for multiple files success', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -623,7 +720,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should show form only success when no files uploaded', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -644,7 +744,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('Edge Cases', () => {
     test('should handle multiple start submission calls', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -657,7 +760,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should handle upload start before form completion', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -669,7 +775,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should handle completion calls without start', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.completeFormSubmission(true, 'entity-123');
@@ -680,7 +789,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should handle very large numbers of completed/failed files', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       act(() => {
         result.current.startSubmission();
@@ -702,7 +814,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
   describe('State Consistency', () => {
     test('should maintain consistent blocking state throughout workflow', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       // Initial state - not blocking
       expect(result.current.isBlocking).toBe(false);
@@ -733,7 +848,10 @@ describe('useFormSubmissionWithUploads Hook', () => {
     });
 
     test('should maintain consistent canSubmit state', () => {
-      const { result } = renderHook(() => useFormSubmissionWithUploads(defaultProps), { wrapper });
+      const { result } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
 
       expect(result.current.canSubmit).toBe(true);
 

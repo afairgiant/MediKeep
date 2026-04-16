@@ -11,8 +11,7 @@ class TestEventTypes:
     def test_list_event_types(self, client, user_token_headers):
         """Test listing available event types."""
         response = client.get(
-            "/api/v1/notifications/event-types",
-            headers=user_token_headers
+            "/api/v1/notifications/event-types", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -41,8 +40,7 @@ class TestChannelManagement:
     def test_list_channels_empty(self, client, user_token_headers):
         """Test listing channels when none exist."""
         response = client.get(
-            "/api/v1/notifications/channels",
-            headers=user_token_headers
+            "/api/v1/notifications/channels", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -59,8 +57,8 @@ class TestChannelManagement:
                 "config": {
                     "webhook_url": "https://discord.com/api/webhooks/123456/abcdef"
                 },
-                "is_enabled": True
-            }
+                "is_enabled": True,
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -87,9 +85,9 @@ class TestChannelManagement:
                     "smtp_password": "apppassword",
                     "from_email": "user@gmail.com",
                     "to_email": "recipient@example.com",
-                    "use_tls": True
-                }
-            }
+                    "use_tls": True,
+                },
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -107,9 +105,9 @@ class TestChannelManagement:
                 "config": {
                     "server_url": "https://gotify.example.com",
                     "app_token": "mytoken123",
-                    "priority": 5
-                }
-            }
+                    "priority": 5,
+                },
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -124,16 +122,113 @@ class TestChannelManagement:
             json={
                 "name": "My Webhook",
                 "channel_type": "webhook",
-                "config": {
-                    "url": "https://api.example.com/webhook",
-                    "method": "POST"
-                }
-            }
+                "config": {"url": "https://api.example.com/webhook", "method": "POST"},
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
         data = response.json()
         assert data["channel_type"] == "webhook"
+
+    def test_create_ntfy_channel(self, client, user_token_headers):
+        """Test creating an ntfy channel with full config."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "My ntfy",
+                "channel_type": "ntfy",
+                "config": {
+                    "server_url": "https://ntfy.sh",
+                    "topic": "my-alerts",
+                    "auth_token": "tk_secret123",
+                    "priority": 3,
+                },
+            },
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["channel_type"] == "ntfy"
+        assert data["name"] == "My ntfy"
+
+    def test_create_ntfy_channel_invalid_url(self, client, user_token_headers):
+        """Test ntfy channel rejects URL without protocol."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Bad ntfy",
+                "channel_type": "ntfy",
+                "config": {"server_url": "ntfy.sh", "topic": "my-alerts"},
+            },
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def test_create_ntfy_channel_missing_topic(self, client, user_token_headers):
+        """Test ntfy channel requires topic field."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Bad ntfy",
+                "channel_type": "ntfy",
+                "config": {"server_url": "https://ntfy.sh"},
+            },
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def test_create_ntfy_channel_invalid_priority(self, client, user_token_headers):
+        """Test ntfy channel rejects priority outside 1-5 range."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Bad ntfy",
+                "channel_type": "ntfy",
+                "config": {
+                    "server_url": "https://ntfy.sh",
+                    "topic": "my-alerts",
+                    "priority": 10,
+                },
+            },
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def test_create_ntfy_channel_topic_with_url_reserved_chars(
+        self, client, user_token_headers
+    ):
+        """Test ntfy channel rejects topic containing URL-reserved characters."""
+        for bad_topic in ["foo?bar", "foo/bar", "foo#bar", "foo bar"]:
+            response = client.post(
+                "/api/v1/notifications/channels",
+                headers=user_token_headers,
+                json={
+                    "name": f"Bad ntfy {bad_topic}",
+                    "channel_type": "ntfy",
+                    "config": {"server_url": "https://ntfy.sh", "topic": bad_topic},
+                },
+            )
+            assert (
+                response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+            ), f"Expected 422 for topic {bad_topic!r}"
+
+    def test_create_ntfy_channel_topic_too_long(self, client, user_token_headers):
+        """Test ntfy channel rejects topic longer than 64 characters."""
+        response = client.post(
+            "/api/v1/notifications/channels",
+            headers=user_token_headers,
+            json={
+                "name": "Long topic ntfy",
+                "channel_type": "ntfy",
+                "config": {"server_url": "https://ntfy.sh", "topic": "a" * 65},
+            },
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def test_create_channel_invalid_type(self, client, user_token_headers):
         """Test creating a channel with invalid type."""
@@ -143,8 +238,8 @@ class TestChannelManagement:
             json={
                 "name": "Invalid Channel",
                 "channel_type": "invalid_type",
-                "config": {}
-            }
+                "config": {},
+            },
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -157,10 +252,8 @@ class TestChannelManagement:
             json={
                 "name": "Bad Discord",
                 "channel_type": "discord",
-                "config": {
-                    "webhook_url": "https://example.com/not-a-discord-webhook"
-                }
-            }
+                "config": {"webhook_url": "https://example.com/not-a-discord-webhook"},
+            },
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -174,10 +267,8 @@ class TestChannelManagement:
             json={
                 "name": "Duplicate Name",
                 "channel_type": "discord",
-                "config": {
-                    "webhook_url": "https://discord.com/api/webhooks/123/abc"
-                }
-            }
+                "config": {"webhook_url": "https://discord.com/api/webhooks/123/abc"},
+            },
         )
 
         # Try to create duplicate
@@ -190,9 +281,9 @@ class TestChannelManagement:
                 "config": {
                     "server_url": "https://gotify.example.com",
                     "app_token": "token",
-                    "priority": 5
-                }
-            }
+                    "priority": 5,
+                },
+            },
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -209,17 +300,14 @@ class TestChannelManagement:
             json={
                 "name": "Get Test Channel",
                 "channel_type": "discord",
-                "config": {
-                    "webhook_url": "https://discord.com/api/webhooks/123/abc"
-                }
-            }
+                "config": {"webhook_url": "https://discord.com/api/webhooks/123/abc"},
+            },
         )
         channel_id = create_response.json()["id"]
 
         # Get channel
         response = client.get(
-            f"/api/v1/notifications/channels/{channel_id}",
-            headers=user_token_headers
+            f"/api/v1/notifications/channels/{channel_id}", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -230,8 +318,7 @@ class TestChannelManagement:
     def test_get_channel_not_found(self, client, user_token_headers):
         """Test getting a non-existent channel."""
         response = client.get(
-            "/api/v1/notifications/channels/99999",
-            headers=user_token_headers
+            "/api/v1/notifications/channels/99999", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -245,10 +332,8 @@ class TestChannelManagement:
             json={
                 "name": "Update Test",
                 "channel_type": "discord",
-                "config": {
-                    "webhook_url": "https://discord.com/api/webhooks/123/abc"
-                }
-            }
+                "config": {"webhook_url": "https://discord.com/api/webhooks/123/abc"},
+            },
         )
         channel_id = create_response.json()["id"]
 
@@ -256,10 +341,7 @@ class TestChannelManagement:
         response = client.put(
             f"/api/v1/notifications/channels/{channel_id}",
             headers=user_token_headers,
-            json={
-                "name": "Updated Name",
-                "is_enabled": False
-            }
+            json={"name": "Updated Name", "is_enabled": False},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -276,25 +358,21 @@ class TestChannelManagement:
             json={
                 "name": "Delete Test",
                 "channel_type": "discord",
-                "config": {
-                    "webhook_url": "https://discord.com/api/webhooks/123/abc"
-                }
-            }
+                "config": {"webhook_url": "https://discord.com/api/webhooks/123/abc"},
+            },
         )
         channel_id = create_response.json()["id"]
 
         # Delete channel
         response = client.delete(
-            f"/api/v1/notifications/channels/{channel_id}",
-            headers=user_token_headers
+            f"/api/v1/notifications/channels/{channel_id}", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
         # Verify deletion
         get_response = client.get(
-            f"/api/v1/notifications/channels/{channel_id}",
-            headers=user_token_headers
+            f"/api/v1/notifications/channels/{channel_id}", headers=user_token_headers
         )
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -305,8 +383,7 @@ class TestPreferences:
     def test_list_preferences_empty(self, client, user_token_headers):
         """Test listing preferences when none exist."""
         response = client.get(
-            "/api/v1/notifications/preferences",
-            headers=user_token_headers
+            "/api/v1/notifications/preferences", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -321,10 +398,8 @@ class TestPreferences:
             json={
                 "name": "Pref Test Channel",
                 "channel_type": "discord",
-                "config": {
-                    "webhook_url": "https://discord.com/api/webhooks/123/abc"
-                }
-            }
+                "config": {"webhook_url": "https://discord.com/api/webhooks/123/abc"},
+            },
         )
         channel_id = channel_response.json()["id"]
 
@@ -335,8 +410,8 @@ class TestPreferences:
             json={
                 "channel_id": channel_id,
                 "event_type": "backup_completed",
-                "is_enabled": True
-            }
+                "is_enabled": True,
+            },
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -353,8 +428,8 @@ class TestPreferences:
             json={
                 "channel_id": 99999,
                 "event_type": "backup_completed",
-                "is_enabled": True
-            }
+                "is_enabled": True,
+            },
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -362,8 +437,7 @@ class TestPreferences:
     def test_get_preference_matrix(self, client, user_token_headers):
         """Test getting the preference matrix."""
         response = client.get(
-            "/api/v1/notifications/preferences/matrix",
-            headers=user_token_headers
+            "/api/v1/notifications/preferences/matrix", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -381,8 +455,7 @@ class TestHistory:
     def test_get_history_empty(self, client, user_token_headers):
         """Test getting history when empty."""
         response = client.get(
-            "/api/v1/notifications/history",
-            headers=user_token_headers
+            "/api/v1/notifications/history", headers=user_token_headers
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -397,7 +470,7 @@ class TestHistory:
         response = client.get(
             "/api/v1/notifications/history",
             headers=user_token_headers,
-            params={"page": 2, "page_size": 10}
+            params={"page": 2, "page_size": 10},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -411,7 +484,7 @@ class TestHistory:
         response = client.get(
             "/api/v1/notifications/history",
             headers=user_token_headers,
-            params={"page_size": 1000}
+            params={"page_size": 1000},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST

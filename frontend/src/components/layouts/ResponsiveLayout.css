@@ -18,8 +18,12 @@
 
 .app-footer {
   /* Footer section */
-  border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
-  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+  border-top: 1px solid
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-7)
+  );
   margin-top: auto;
 }
 

@@ -1,13 +1,21 @@
 /**
  * TabletSidebar - Collapsible sidebar for tablet screens (md breakpoint)
  * Shows with overlay when expanded, collapsible with toggle button
- * 
+ *
  * Following PR #3: Navigation & Layout System specifications
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Stack, Group, Text, Divider, UnstyledButton, Overlay } from '@mantine/core';
+import {
+  Box,
+  Stack,
+  Group,
+  Text,
+  Divider,
+  UnstyledButton,
+  Overlay,
+} from '@mantine/core';
 import { IconX, IconLogout } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { ResponsiveComponentFactory } from '../../factories/ResponsiveComponentFactory';
@@ -23,12 +31,12 @@ const TabletSidebar = ({
   menuItems = [],
   userInfo,
   onLogout,
-  className = ''
+  className = '',
 }) => {
   const { t } = useTranslation(['navigation', 'shared']);
   // Handle escape key to close sidebar
   useEffect(() => {
-    const handleEscapeKey = (event) => {
+    const handleEscapeKey = event => {
       if (event.key === 'Escape' && isOpen && onClose) {
         onClose();
       }
@@ -50,11 +58,11 @@ const TabletSidebar = ({
   const ResponsiveBox = ResponsiveComponentFactory.createMantine(Box, {
     w: { md: 280 },
     h: '100vh',
-    p: { md: 'md' }
+    p: { md: 'md' },
   });
 
   const ResponsiveStack = ResponsiveComponentFactory.createMantine(Stack, {
-    spacing: { md: 'sm' }
+    spacing: { md: 'sm' },
   });
 
   // Check if current path matches menu item
@@ -66,7 +74,7 @@ const TabletSidebar = ({
   };
 
   // Handle link click with navigation callback
-  const handleLinkClickInternal = (path) => {
+  const handleLinkClickInternal = path => {
     if (onLinkClick) {
       onLinkClick(path);
     }
@@ -75,8 +83,8 @@ const TabletSidebar = ({
   return (
     <>
       {/* Toggle Button */}
-      <NavigationToggle 
-        isOpen={isOpen} 
+      <NavigationToggle
+        isOpen={isOpen}
         onToggle={onToggle}
         className="tablet-navigation-toggle"
         style={{
@@ -88,15 +96,15 @@ const TabletSidebar = ({
           border: '1px solid var(--mantine-color-gray-3)',
           borderRadius: '6px',
           padding: '8px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
         }}
       />
 
       {/* Overlay */}
       {isOpen && (
-        <Overlay 
-          opacity={0.6} 
-          color="black" 
+        <Overlay
+          opacity={0.6}
+          color="black"
           onClick={onClose}
           style={{ zIndex: 999 }}
         />
@@ -114,7 +122,7 @@ const TabletSidebar = ({
           borderRight: '1px solid var(--mantine-color-gray-3)',
           boxShadow: '4px 0 12px rgba(0, 0, 0, 0.15)',
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.3s ease-in-out'
+          transition: 'transform 0.3s ease-in-out',
         }}
       >
         <ResponsiveStack h="100%" justify="space-between">
@@ -124,21 +132,21 @@ const TabletSidebar = ({
               <Text size="lg" fw={700} c="blue">
                 {t('shared:labels.admin')}
               </Text>
-              <UnstyledButton 
+              <UnstyledButton
                 onClick={onClose}
                 style={{
                   padding: '8px',
                   borderRadius: '4px',
                   '&:hover': {
-                    backgroundColor: 'var(--mantine-color-gray-2)'
-                  }
+                    backgroundColor: 'var(--mantine-color-gray-2)',
+                  },
                 }}
                 aria-label="Close navigation"
               >
                 <IconX size={20} />
               </UnstyledButton>
             </Group>
-            
+
             <Divider />
 
             {/* Navigation Menu */}
@@ -148,7 +156,7 @@ const TabletSidebar = ({
                   <Text size="xs" fw={600} c="dimmed" tt="uppercase" px="xs">
                     {section.section}
                   </Text>
-                  
+
                   <Stack spacing="xs">
                     {section.items.map((item, itemIndex) => (
                       <UnstyledButton
@@ -174,9 +182,9 @@ const TabletSidebar = ({
                           '&:hover': {
                             backgroundColor: isActivePath(item.path, item.exact)
                               ? 'var(--mantine-color-blue-1)'
-                              : 'var(--mantine-color-gray-1)'
+                              : 'var(--mantine-color-gray-1)',
                           },
-                          transition: 'all 0.2s ease'
+                          transition: 'all 0.2s ease',
                         }}
                       >
                         <span style={{ fontSize: '16px' }}>{item.icon}</span>
@@ -194,7 +202,7 @@ const TabletSidebar = ({
           {/* Footer Section */}
           <Stack spacing="sm">
             <Divider />
-            
+
             {/* User Info */}
             {userInfo && (
               <Group justify="space-between" align="center">
@@ -221,9 +229,9 @@ const TabletSidebar = ({
                   borderRadius: '6px',
                   color: 'var(--mantine-color-red-6)',
                   '&:hover': {
-                    backgroundColor: 'var(--mantine-color-red-0)'
+                    backgroundColor: 'var(--mantine-color-red-0)',
                   },
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
                 }}
                 aria-label="Logout"
               >

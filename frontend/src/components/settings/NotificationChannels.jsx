@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { Card, Button } from '../ui';
@@ -23,7 +23,11 @@ const CHANNEL_TYPE_INFO = {
  *
  * Manages notification channels - list, add, edit, delete, test
  */
-const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => {
+const NotificationChannels = ({
+  channels,
+  onChannelsChange,
+  onTestSuccess,
+}) => {
   const { t } = useTranslation(['notifications', 'common', 'shared']);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingChannel, setEditingChannel] = useState(null);
@@ -52,7 +56,14 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
   };
 
   const handleDeleteChannel = async channelId => {
-    if (!window.confirm(t('channels.deleteConfirm', 'Are you sure you want to delete this channel?'))) {
+    if (
+      !window.confirm(
+        t(
+          'channels.deleteConfirm',
+          'Are you sure you want to delete this channel?'
+        )
+      )
+    ) {
       return;
     }
 
@@ -60,7 +71,9 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
       setDeletingChannelId(channelId);
       await notificationApi.deleteChannel(channelId);
       onChannelsChange(channels.filter(c => c.id !== channelId));
-      notifySuccess(t('channels.deleteSuccess', 'Channel deleted successfully'));
+      notifySuccess(
+        t('channels.deleteSuccess', 'Channel deleted successfully')
+      );
     } catch (err) {
       notifyError(t('channels.deleteError', 'Failed to delete channel'));
       frontendLogger.logError('Failed to delete channel', {
@@ -119,18 +132,29 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
       let updatedChannel;
 
       if (isEditing && editingChannel) {
-        updatedChannel = await notificationApi.updateChannel(editingChannel.id, channelData);
-        onChannelsChange(channels.map(c => (c.id === editingChannel.id ? updatedChannel : c)));
-        notifySuccess(t('channels.updateSuccess', 'Channel updated successfully'));
+        updatedChannel = await notificationApi.updateChannel(
+          editingChannel.id,
+          channelData
+        );
+        onChannelsChange(
+          channels.map(c => (c.id === editingChannel.id ? updatedChannel : c))
+        );
+        notifySuccess(
+          t('channels.updateSuccess', 'Channel updated successfully')
+        );
       } else {
         updatedChannel = await notificationApi.createChannel(channelData);
         onChannelsChange([...channels, updatedChannel]);
-        notifySuccess(t('channels.createSuccess', 'Channel created successfully'));
+        notifySuccess(
+          t('channels.createSuccess', 'Channel created successfully')
+        );
       }
 
       handleModalClose();
     } catch (err) {
-      const errorKey = isEditing ? t('channels.updateError', 'Failed to update channel') : t('channels.createError', 'Failed to create channel');
+      const errorKey = isEditing
+        ? t('channels.updateError', 'Failed to update channel')
+        : t('channels.createError', 'Failed to create channel');
       notifyError(errorKey);
       frontendLogger.logError('Failed to save channel', {
         component: 'NotificationChannels',
@@ -155,7 +179,10 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
           <div className="notification-channels-empty">
             <p>{t('channels.empty', 'No notification channels configured.')}</p>
             <p className="notification-channels-empty-hint">
-              {t('channels.emptyHint', 'Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.')}
+              {t(
+                'channels.emptyHint',
+                'Add a channel to start receiving notifications via Discord, Email, Gotify, or Webhook.'
+              )}
             </p>
           </div>
         ) : (
@@ -167,15 +194,29 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
               };
 
               return (
-                <div key={channel.id} className={`notification-channel-item ${!channel.is_enabled ? 'disabled' : ''}`}>
-                  <div className="channel-icon" data-type={channel.channel_type}>
+                <div
+                  key={channel.id}
+                  className={`notification-channel-item ${!channel.is_enabled ? 'disabled' : ''}`}
+                >
+                  <div
+                    className="channel-icon"
+                    data-type={channel.channel_type}
+                  >
                     {typeInfo.icon}
                   </div>
 
                   <div className="channel-info">
                     <div className="channel-name">
                       {channel.name}
-                      {channel.is_verified && <span className="verified-badge" role="img" aria-label={t('channels.verified', 'Verified')}>V</span>}
+                      {channel.is_verified && (
+                        <span
+                          className="verified-badge"
+                          role="img"
+                          aria-label={t('channels.verified', 'Verified')}
+                        >
+                          V
+                        </span>
+                      )}
                     </div>
                     <div className="channel-type">{typeInfo.label}</div>
                     <div className="channel-stats">
@@ -187,9 +228,13 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
 
                   <div className="channel-status">
                     {channel.is_enabled ? (
-                      <span className="status-enabled">{t('shared:labels.enabled', 'Enabled')}</span>
+                      <span className="status-enabled">
+                        {t('shared:labels.enabled', 'Enabled')}
+                      </span>
                     ) : (
-                      <span className="status-disabled">{t('shared:labels.disabled', 'Disabled')}</span>
+                      <span className="status-disabled">
+                        {t('shared:labels.disabled', 'Disabled')}
+                      </span>
                     )}
                   </div>
 
@@ -198,12 +243,18 @@ const NotificationChannels = ({ channels, onChannelsChange, onTestSuccess }) => 
                       variant="secondary"
                       size="small"
                       onClick={() => handleTestChannel(channel.id)}
-                      disabled={testingChannelId === channel.id || !channel.is_enabled}
+                      disabled={
+                        testingChannelId === channel.id || !channel.is_enabled
+                      }
                       loading={testingChannelId === channel.id}
                     >
                       {t('channels.test', 'Test')}
                     </Button>
-                    <Button variant="secondary" size="small" onClick={() => handleEditChannel(channel)}>
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => handleEditChannel(channel)}
+                    >
                       {t('shared:labels.edit', 'Edit')}
                     </Button>
                     <Button

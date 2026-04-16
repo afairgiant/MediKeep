@@ -25,26 +25,34 @@ export function useCurrentPatient(autoFetch = true) {
         initialFetchDone,
         isAuthenticated,
         authLoading,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
-      fetchCurrentPatient().then(() => {
-        setInitialFetchDone(true);
-      }).catch(error => {
-        logger.warn('useCurrentPatient auto-fetch failed', {
-          component: 'useCurrentPatient',
-          error: error.message,
-          isAuthenticated,
-          authLoading,
-          timestamp: new Date().toISOString()
+
+      fetchCurrentPatient()
+        .then(() => {
+          setInitialFetchDone(true);
+        })
+        .catch(error => {
+          logger.warn('useCurrentPatient auto-fetch failed', {
+            component: 'useCurrentPatient',
+            error: error.message,
+            isAuthenticated,
+            authLoading,
+            timestamp: new Date().toISOString(),
+          });
+          setInitialFetchDone(true); // Mark as done to prevent infinite retries
         });
-        setInitialFetchDone(true); // Mark as done to prevent infinite retries
-      });
     } else if (!isAuthenticated || authLoading) {
       // Reset fetch status when auth state changes
       setInitialFetchDone(false);
     }
-  }, [autoFetch, fetchCurrentPatient, initialFetchDone, isAuthenticated, authLoading]);
+  }, [
+    autoFetch,
+    fetchCurrentPatient,
+    initialFetchDone,
+    isAuthenticated,
+    authLoading,
+  ]);
 
   // Refresh function that forces a new fetch
   const refreshPatient = useCallback(() => {
@@ -83,10 +91,14 @@ export function usePractitioners(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          logger.debug('practitioners_initial_fetch_error', 'Error in initial practitioners fetch', {
-            error: error.message,
-            component: 'useGlobalData'
-          });
+          logger.debug(
+            'practitioners_initial_fetch_error',
+            'Error in initial practitioners fetch',
+            {
+              error: error.message,
+              component: 'useGlobalData',
+            }
+          );
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }
@@ -142,11 +154,13 @@ export function usePractices(autoFetch = true) {
 
   useEffect(() => {
     if (autoFetch && !initialFetchDone) {
-      fetchPractices().then(() => {
-        setInitialFetchDone(true);
-      }).catch(() => {
-        setInitialFetchDone(true);
-      });
+      fetchPractices()
+        .then(() => {
+          setInitialFetchDone(true);
+        })
+        .catch(() => {
+          setInitialFetchDone(true);
+        });
     }
   }, [autoFetch, fetchPractices, initialFetchDone]);
 
@@ -182,10 +196,14 @@ export function usePharmacies(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          logger.debug('pharmacies_initial_fetch_error', 'Error in initial pharmacy fetch', {
-            error: error.message,
-            component: 'useGlobalData'
-          });
+          logger.debug(
+            'pharmacies_initial_fetch_error',
+            'Error in initial pharmacy fetch',
+            {
+              error: error.message,
+              component: 'useGlobalData',
+            }
+          );
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }
@@ -217,7 +235,7 @@ export function useStaticData(autoFetch = true) {
 
   const refreshAll = useCallback(async () => {
     await Promise.all([practitionersData.refresh(), pharmaciesData.refresh()]);
-  }, [practitionersData.refresh, pharmaciesData.refresh]);
+  }, [practitionersData, pharmaciesData]);
 
   return {
     practitioners: practitionersData,
@@ -244,7 +262,7 @@ export function usePatientWithStaticData(autoFetch = true) {
 
   const refreshAll = useCallback(async () => {
     await Promise.all([patientData.refresh(), staticData.refreshAll()]);
-  }, [patientData.refresh, staticData.refreshAll]);
+  }, [patientData, staticData]);
 
   return {
     patient: patientData,
@@ -283,10 +301,14 @@ export function usePatientList(autoFetch = true) {
           setInitialFetchDone(true);
         })
         .catch(error => {
-          logger.debug('patient_list_initial_fetch_error', 'Error in initial patient list fetch', {
-            error: error.message,
-            component: 'useGlobalData'
-          });
+          logger.debug(
+            'patient_list_initial_fetch_error',
+            'Error in initial patient list fetch',
+            {
+              error: error.message,
+              component: 'useGlobalData',
+            }
+          );
           setInitialFetchDone(true); // Still mark as done to prevent infinite retries
         });
     }

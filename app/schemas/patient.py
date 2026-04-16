@@ -70,13 +70,17 @@ class PatientBase(BaseModel):
     @classmethod
     def validate_first_name(cls, v):
         """Validate first name requirements."""
-        return validate_required_text(v, max_length=50, field_name="First name", normalize_case="title")
+        return validate_required_text(
+            v, max_length=50, field_name="First name", normalize_case="title"
+        )
 
     @field_validator("last_name")
     @classmethod
     def validate_last_name(cls, v):
         """Validate last name requirements."""
-        return validate_required_text(v, max_length=50, field_name="Last name", normalize_case="title")
+        return validate_required_text(
+            v, max_length=50, field_name="Last name", normalize_case="title"
+        )
 
     @field_validator("gender")
     @classmethod
@@ -94,7 +98,9 @@ class PatientBase(BaseModel):
     @classmethod
     def validate_address(cls, v):
         """Validate address requirements."""
-        return validate_text_field(v, max_length=200, min_length=5, field_name="Address")
+        return validate_text_field(
+            v, max_length=200, min_length=5, field_name="Address"
+        )
 
     @field_validator("blood_type")
     @classmethod
@@ -224,7 +230,9 @@ class PatientUpdate(BaseModel):
     @classmethod
     def validate_address(cls, v):
         """Validate address if provided."""
-        return validate_text_field(v, max_length=200, min_length=5, field_name="Address")
+        return validate_text_field(
+            v, max_length=200, min_length=5, field_name="Address"
+        )
 
     @field_validator("blood_type")
     @classmethod

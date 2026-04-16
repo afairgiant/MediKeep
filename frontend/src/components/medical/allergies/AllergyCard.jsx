@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Text, Group } from '@mantine/core';
+import { Text, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import {
   IconAlertTriangle,
@@ -24,12 +24,12 @@ const AllergyCard = ({
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('allergy_card_error', {
       message: 'Error in AllergyCard',
       allergyId: allergy?.id,
@@ -43,7 +43,7 @@ const AllergyCard = ({
   };
 
   // Helper function to get severity icon
-  const getSeverityIcon = (severity) => {
+  const getSeverityIcon = severity => {
     switch (severity) {
       case 'life-threatening':
         return IconExclamationCircle;
@@ -59,7 +59,7 @@ const AllergyCard = ({
   };
 
   // Helper function to get severity color
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     switch (severity) {
       case 'life-threatening':
         return 'red';
@@ -75,7 +75,7 @@ const AllergyCard = ({
   };
 
   // Helper function to get medication details
-  const getMedicationDetails = (medicationId) => {
+  const getMedicationDetails = medicationId => {
     if (!medicationId || medications.length === 0) return null;
     return medications.find(med => med.id === medicationId);
   };
@@ -86,11 +86,11 @@ const AllergyCard = ({
 
     // Generate badges based on allergy properties
     const badges = [];
-    
+
     if (allergy.severity) {
-      badges.push({ 
-        label: allergy.severity, 
-        color: getSeverityColor(allergy.severity)
+      badges.push({
+        label: allergy.severity,
+        color: getSeverityColor(allergy.severity),
       });
     }
 
@@ -99,13 +99,16 @@ const AllergyCard = ({
       {
         label: t('allergies.reaction.label'),
         value: allergy.reaction,
-        render: (value) => value || t('shared:labels.unknown', 'Not specified')
+        render: value => value || t('shared:labels.unknown', 'Not specified'),
       },
       {
         label: t('shared:fields.onsetDate'),
         value: allergy.onset_date,
-        render: (value) => value ? formatLongDate(value) : t('shared:labels.unknown', 'Not specified')
-      }
+        render: value =>
+          value
+            ? formatLongDate(value)
+            : t('shared:labels.unknown', 'Not specified'),
+      },
     ].filter(field => field.value); // Only show fields with values
 
     // Custom title with severity icon
@@ -132,7 +135,9 @@ const AllergyCard = ({
           fw={500}
           c="blue"
           style={{ cursor: 'pointer', textDecoration: 'underline' }}
-          onClick={() => navigateToEntity('medication', medication.id, navigate)}
+          onClick={() =>
+            navigateToEntity('medication', medication.id, navigate)
+          }
           title={t('allergies.viewMedication', 'View medication details')}
         >
           {medication.medication_name}

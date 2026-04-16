@@ -8,7 +8,7 @@ export const handlers = [
   rest.post(`${API_BASE}/auth/login/`, (req, res, ctx) => {
     // Handle different body types in MSW v1
     let username, password;
-    
+
     if (req.body && typeof req.body === 'string') {
       // URLSearchParams as string
       const params = new URLSearchParams(req.body);
@@ -23,7 +23,7 @@ export const handlers = [
       username = req.body.username;
       password = req.body.password;
     }
-    
+
     if (username === 'testuser' && password === 'password') {
       return res(
         ctx.json({
@@ -40,15 +40,12 @@ export const handlers = [
       );
     }
 
-    return res(
-      ctx.status(401),
-      ctx.json({ detail: 'Invalid credentials' })
-    );
+    return res(ctx.status(401), ctx.json({ detail: 'Invalid credentials' }));
   }),
 
   rest.post(`${API_BASE}/auth/register/`, (req, res, ctx) => {
-    const { username, email, password, full_name } = req.body;
-    
+    const { username, email, password: _password, full_name } = req.body;
+
     return res(
       ctx.status(201),
       ctx.json({
@@ -172,7 +169,7 @@ export const handlers = [
 
   rest.post(`${API_BASE}/medications/`, (req, res, ctx) => {
     const medicationData = req.body;
-    
+
     return res(
       ctx.status(201),
       ctx.json({
@@ -295,16 +292,10 @@ export const handlers = [
 
   // Error simulation handlers
   rest.get(`${API_BASE}/test/error`, (req, res, ctx) => {
-    return res(
-      ctx.status(500),
-      ctx.json({ detail: 'Internal server error' })
-    );
+    return res(ctx.status(500), ctx.json({ detail: 'Internal server error' }));
   }),
 
   rest.get(`${API_BASE}/test/unauthorized`, (req, res, ctx) => {
-    return res(
-      ctx.status(401),
-      ctx.json({ detail: 'Unauthorized' })
-    );
+    return res(ctx.status(401), ctx.json({ detail: 'Unauthorized' }));
   }),
 ];

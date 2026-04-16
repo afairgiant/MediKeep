@@ -1,4 +1,3 @@
-import React from 'react';
 import i18n from '../../i18n/config';
 import {
   Overlay,
@@ -8,9 +7,8 @@ import {
   Text,
   Paper,
   ThemeIcon,
-  Group,
 } from '@mantine/core';
-import { IconUpload, IconCheck, IconX } from '@tabler/icons-react';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 /**
  * Form loading overlay that prevents user interaction during async operations
@@ -89,12 +87,12 @@ const FormLoadingOverlay = ({
                 {getIcon()}
               </ThemeIcon>
             )}
-            
+
             <Stack gap="xs" align="center">
               <Text fw={600} size="lg">
                 {message}
               </Text>
-              
+
               {submessage && (
                 <Text size="sm" c="dimmed" ta="center">
                   {submessage}

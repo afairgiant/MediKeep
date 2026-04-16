@@ -2,6 +2,7 @@
 // Vitest setup file for responsive tests
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import React from 'react';
 import { vi } from 'vitest';
 
 // Polyfills for jsdom environment
@@ -56,11 +57,11 @@ global.IntersectionObserver = class IntersectionObserver {
 };
 
 // Mock window.requestAnimationFrame
-global.requestAnimationFrame = (cb) => {
+global.requestAnimationFrame = cb => {
   return setTimeout(cb, 16); // 60fps = 16ms
 };
 
-global.cancelAnimationFrame = (id) => {
+global.cancelAnimationFrame = id => {
   clearTimeout(id);
 };
 
@@ -72,19 +73,19 @@ global.performance = {
   memory: {
     usedJSHeapSize: 1000000,
     totalJSHeapSize: 2000000,
-    jsHeapSizeLimit: 4000000
-  }
+    jsHeapSizeLimit: 4000000,
+  },
 };
 
 // Mock window.getComputedStyle for style testing
-global.getComputedStyle = vi.fn().mockImplementation((element) => ({
+global.getComputedStyle = vi.fn().mockImplementation(element => ({
   getPropertyValue: vi.fn().mockReturnValue(''),
   minHeight: '44px',
   fontSize: '16px',
   padding: '16px',
   fontWeight: '400',
   // Add more CSS properties as needed
-  ...element.style
+  ...element.style,
 }));
 
 // Mock window dimensions
@@ -113,7 +114,7 @@ Element.prototype.getBoundingClientRect = vi.fn().mockImplementation(() => ({
   right: 120,
   x: 0,
   y: 0,
-  toJSON: vi.fn()
+  toJSON: vi.fn(),
 }));
 
 // Mock HTMLElement.scrollIntoView
@@ -126,7 +127,7 @@ HTMLElement.prototype.blur = vi.fn();
 // Mock clipboard API for copy/paste tests
 global.navigator.clipboard = {
   writeText: vi.fn().mockResolvedValue(undefined),
-  readText: vi.fn().mockResolvedValue('')
+  readText: vi.fn().mockResolvedValue(''),
 };
 
 // Mock touch events for mobile testing
@@ -149,17 +150,17 @@ global.console = {
   // Keep warnings and errors visible
   warn: originalConsole.warn,
   error: originalConsole.error,
-  info: originalConsole.info
+  info: originalConsole.info,
 };
 
 // Performance measurement utilities
-global.measureRenderTime = (renderFn) => {
+global.measureRenderTime = renderFn => {
   const start = performance.now();
   const result = renderFn();
   const end = performance.now();
   return {
     result,
-    duration: end - start
+    duration: end - start,
   };
 };
 
@@ -167,14 +168,14 @@ global.measureRenderTime = (renderFn) => {
 afterEach(() => {
   // Clear all mocks
   vi.clearAllMocks();
-  
+
   // Reset performance mock
   mockPerformanceNow.mockClear();
-  
+
   // Reset window dimensions to default
   window.innerWidth = 1024;
   window.innerHeight = 768;
-  
+
   // Clear any remaining timers
   vi.clearAllTimers();
 });
@@ -187,53 +188,53 @@ global.testUtils = {
     mobileLarge: { width: 414, height: 896 },
     tablet: { width: 768, height: 1024 },
     desktop: { width: 1280, height: 720 },
-    desktopLarge: { width: 1920, height: 1080 }
+    desktopLarge: { width: 1920, height: 1080 },
   },
-  
+
   // Common test data generators
   generateMockData: (type, count = 1) => {
     const generators = {
-      medication: (index) => ({
+      medication: index => ({
         id: index,
         medication_name: `Medication ${index}`,
         dosage: `${(index + 1) * 10}mg`,
         frequency: index % 2 === 0 ? 'Once daily' : 'Twice daily',
         prescribing_practitioner: `Dr. ${String.fromCharCode(65 + (index % 26))}`,
         start_date: '2024-01-01',
-        status: index % 3 === 0 ? 'Discontinued' : 'Active'
+        status: index % 3 === 0 ? 'Discontinued' : 'Active',
       }),
-      
-      allergy: (index) => ({
+
+      allergy: index => ({
         id: index,
         allergen: `Allergen ${index}`,
         reaction_type: 'Skin rash',
         severity: ['Mild', 'Moderate', 'Severe'][index % 3],
-        notes: `Test allergy notes ${index}`
+        notes: `Test allergy notes ${index}`,
       }),
-      
-      condition: (index) => ({
+
+      condition: index => ({
         id: index,
         condition_name: `Condition ${index}`,
         diagnosis_date: '2024-01-01',
         status: ['Active', 'Resolved', 'Chronic'][index % 3],
-        notes: `Test condition notes ${index}`
-      })
+        notes: `Test condition notes ${index}`,
+      }),
     };
-    
+
     return Array.from({ length: count }, (_, i) => generators[type](i + 1));
   },
-  
+
   // Performance assertion helpers
   assertPerformance: {
     renderTime: (duration, maxMs = 100) => {
       expect(duration).toBeLessThan(maxMs);
     },
-    
+
     memoryUsage: (before, after, maxIncreaseMB = 10) => {
       const increaseMB = (after - before) / (1024 * 1024);
       expect(increaseMB).toBeLessThan(maxIncreaseMB);
-    }
-  }
+    },
+  },
 };
 
 // Error boundary for catching React errors in tests
@@ -253,7 +254,11 @@ class TestErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      return <div data-testid="error-boundary">Test Error: {this.state.error?.message}</div>;
+      return (
+        <div data-testid="error-boundary">
+          Test Error: {this.state.error?.message}
+        </div>
+      );
     }
 
     return this.props.children;
@@ -269,13 +274,13 @@ console.warn = (...args) => {
   const suppressedWarnings = [
     'React does not recognize the',
     'componentWillReceiveProps has been renamed',
-    'componentWillMount has been renamed'
+    'componentWillMount has been renamed',
   ];
-  
+
   if (suppressedWarnings.some(warning => args[0]?.includes(warning))) {
     return;
   }
-  
+
   originalWarn.apply(console, args);
 };
 

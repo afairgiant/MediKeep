@@ -17,14 +17,15 @@ VALID_STORAGE_BACKENDS = ["local", "paperless", "papra"]
 
 # Compiled URL pattern for validation (module-level for reuse)
 _URL_PATTERN = re.compile(
-    r'^https?://'
-    r'(?:'
-    r'[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?'
-    r'|'
-    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
-    r')'
-    r'(?::\d+)?'
-    r'(?:/.*)?$', re.IGNORECASE
+    r"^https?://"
+    r"(?:"
+    r"[a-zA-Z0-9](?:[a-zA-Z0-9\-\.]*[a-zA-Z0-9])?"
+    r"|"
+    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+    r")"
+    r"(?::\d+)?"
+    r"(?:/.*)?$",
+    re.IGNORECASE,
 )
 
 
@@ -33,30 +34,32 @@ def _validate_integration_url(v: Optional[str]) -> Optional[str]:
     if v is None or v == "":
         return v
 
-    if not v.startswith(('http://', 'https://')):
-        raise ValueError('URL must start with http:// or https://')
+    if not v.startswith(("http://", "https://")):
+        raise ValueError("URL must start with http:// or https://")
 
     parsed = urlparse(v)
 
-    is_local = (
-        parsed.hostname in ['localhost', '127.0.0.1'] or
-        (parsed.hostname and (
-            parsed.hostname.startswith('192.168.') or
-            parsed.hostname.startswith('10.') or
-            (parsed.hostname.startswith('172.') and
-             len(parsed.hostname.split('.')) >= 2 and
-             parsed.hostname.split('.')[1].isdigit() and
-             16 <= int(parsed.hostname.split('.')[1]) <= 31)
-        ))
+    is_local = parsed.hostname in ["localhost", "127.0.0.1"] or (
+        parsed.hostname
+        and (
+            parsed.hostname.startswith("192.168.")
+            or parsed.hostname.startswith("10.")
+            or (
+                parsed.hostname.startswith("172.")
+                and len(parsed.hostname.split(".")) >= 2
+                and parsed.hostname.split(".")[1].isdigit()
+                and 16 <= int(parsed.hostname.split(".")[1]) <= 31
+            )
+        )
     )
 
-    if not is_local and not v.startswith('https://'):
-        raise ValueError('External URLs must use HTTPS for security')
+    if not is_local and not v.startswith("https://"):
+        raise ValueError("External URLs must use HTTPS for security")
 
     if not _URL_PATTERN.match(v):
-        raise ValueError('Invalid URL format')
+        raise ValueError("Invalid URL format")
 
-    return v.rstrip('/')
+    return v.rstrip("/")
 
 
 class UserPreferencesBase(BaseModel):
@@ -98,7 +101,9 @@ class UserPreferencesBase(BaseModel):
             if v < 5:
                 raise ValueError("Session timeout must be at least 5 minutes")
             if v > 1440:  # 24 hours
-                raise ValueError("Session timeout cannot exceed 1440 minutes (24 hours)")
+                raise ValueError(
+                    "Session timeout cannot exceed 1440 minutes (24 hours)"
+                )
         return v
 
     @field_validator("unit_system")
@@ -228,7 +233,9 @@ class UserPreferencesUpdate(BaseModel):
             if v < 5:
                 raise ValueError("Session timeout must be at least 5 minutes")
             if v > 1440:  # 24 hours
-                raise ValueError("Session timeout cannot exceed 1440 minutes (24 hours)")
+                raise ValueError(
+                    "Session timeout cannot exceed 1440 minutes (24 hours)"
+                )
         return v
 
     @field_validator("unit_system")
@@ -322,58 +329,60 @@ class PaperlessConnectionData(BaseModel):
     paperless_username: Optional[str] = None
     paperless_password: Optional[str] = None
 
-    @field_validator('paperless_url')
+    @field_validator("paperless_url")
     @classmethod
     def validate_url(cls, v):
         """Validate paperless URL format and security."""
         return _validate_integration_url(v)
 
-    @field_validator('paperless_api_token')
+    @field_validator("paperless_api_token")
     @classmethod
     def validate_api_token(cls, v):
         """Validate API token format if provided."""
         if v is not None and v.strip():
             if len(v.strip()) < 10:
-                raise ValueError('API token appears to be too short')
+                raise ValueError("API token appears to be too short")
             return v.strip()
         return v
 
-    @field_validator('paperless_username')
+    @field_validator("paperless_username")
     @classmethod
     def validate_username(cls, v, info: ValidationInfo):
         """Validate username format when provided."""
         # If token is provided, username is optional
-        if info.data.get('paperless_api_token'):
+        if info.data.get("paperless_api_token"):
             return v.strip() if v else v
 
         # If no token, username is required
         if not v or len(v.strip()) == 0:
-            raise ValueError('Username is required when no API token is provided')
+            raise ValueError("Username is required when no API token is provided")
         if len(v) < 2:
-            raise ValueError('Username too short')
+            raise ValueError("Username too short")
         return v.strip()
 
-    @field_validator('paperless_password')
+    @field_validator("paperless_password")
     @classmethod
     def validate_password(cls, v, info: ValidationInfo):
         """Validate password format when provided."""
         # If token is provided, password is optional
-        if info.data.get('paperless_api_token'):
+        if info.data.get("paperless_api_token"):
             return v
 
         # If no token, password is required
         if not v or len(v.strip()) == 0:
-            raise ValueError('Password is required when no API token is provided')
+            raise ValueError("Password is required when no API token is provided")
         if len(v) < 3:
-            raise ValueError('Password too short')
+            raise ValueError("Password too short")
 
         # Check for valid authentication method
-        token = info.data.get('paperless_api_token')
-        username = info.data.get('paperless_username')
+        token = info.data.get("paperless_api_token")
+        username = info.data.get("paperless_username")
 
         # If no token and no username/password combination
         if not token and (not username or not v):
-            raise ValueError('Either API token or username/password combination is required')
+            raise ValueError(
+                "Either API token or username/password combination is required"
+            )
 
         return v
 
@@ -385,18 +394,18 @@ class PapraConnectionData(BaseModel):
     papra_api_token: Optional[str] = None
     papra_organization_id: Optional[str] = None
 
-    @field_validator('papra_url')
+    @field_validator("papra_url")
     @classmethod
     def validate_url(cls, v):
         """Validate Papra URL format and security."""
         return _validate_integration_url(v)
 
-    @field_validator('papra_api_token')
+    @field_validator("papra_api_token")
     @classmethod
     def validate_api_token(cls, v):
         """Validate API token format if provided."""
         if v is not None and v.strip():
             if len(v.strip()) < 10:
-                raise ValueError('API token appears to be too short')
+                raise ValueError("API token appears to be too short")
             return v.strip()
         return v

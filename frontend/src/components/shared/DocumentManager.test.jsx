@@ -1,5 +1,4 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import React from 'react';
 import render, { screen, waitFor } from '../../test-utils/render';
 import DocumentManager from './DocumentManager';
 import { getPaperlessSettings } from '../../services/api/paperlessApi';
@@ -13,17 +12,19 @@ vi.mock('../../services/api', () => ({
     deleteEntityFile: vi.fn(),
     viewEntityFile: vi.fn(),
     checkPaperlessSyncStatus: vi.fn(),
-  }
+  },
 }));
 
 // Mock the paperless API
 vi.mock('../../services/api/paperlessApi', () => ({
-  getPaperlessSettings: vi.fn(() => Promise.resolve({
-    paperless_enabled: false,
-    paperless_url: '',
-    paperless_has_credentials: false,
-    default_storage_backend: 'local'
-  })),
+  getPaperlessSettings: vi.fn(() =>
+    Promise.resolve({
+      paperless_enabled: false,
+      paperless_url: '',
+      paperless_has_credentials: false,
+      default_storage_backend: 'local',
+    })
+  ),
   linkPaperlessDocument: vi.fn(),
 }));
 
@@ -78,17 +79,13 @@ describe('DocumentManager', () => {
       paperless_enabled: false,
       paperless_url: '',
       paperless_has_credentials: false,
-      default_storage_backend: 'local'
+      default_storage_backend: 'local',
     });
   });
 
   test('renders without crashing in view mode', () => {
     const { container } = render(
-      <DocumentManager
-        entityType="lab-result"
-        entityId="123"
-        mode="view"
-      />
+      <DocumentManager entityType="lab-result" entityId="123" mode="view" />
     );
 
     // Component should render without crashing
@@ -97,11 +94,7 @@ describe('DocumentManager', () => {
 
   test('renders without crashing in create mode', () => {
     const { container } = render(
-      <DocumentManager
-        entityType="lab-result"
-        entityId="123"
-        mode="create"
-      />
+      <DocumentManager entityType="lab-result" entityId="123" mode="create" />
     );
 
     // Component should render without crashing
@@ -118,11 +111,7 @@ describe('DocumentManager', () => {
     });
 
     render(
-      <DocumentManager
-        entityType="lab-result"
-        entityId="123"
-        mode="view"
-      />
+      <DocumentManager entityType="lab-result" entityId="123" mode="view" />
     );
 
     await waitFor(() => {
@@ -140,11 +129,7 @@ describe('DocumentManager', () => {
     });
 
     render(
-      <DocumentManager
-        entityType="lab-result"
-        entityId="123"
-        mode="view"
-      />
+      <DocumentManager entityType="lab-result" entityId="123" mode="view" />
     );
 
     await waitFor(() => {

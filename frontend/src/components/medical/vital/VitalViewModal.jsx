@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -7,7 +6,6 @@ import {
   Text,
   Badge,
   Button,
-  Divider,
   Grid,
   Paper,
   ActionIcon,
@@ -34,10 +32,13 @@ import {
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useUserPreferences } from '../../../contexts/UserPreferencesContext';
-import { convertForDisplay, unitLabels, convertHeight } from '../../../utils/unitConversion';
+import {
+  convertForDisplay,
+  unitLabels,
+  convertHeight,
+} from '../../../utils/unitConversion';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import StatusBadge from '../StatusBadge';
-import logger from '../../../services/logger';
 
 // BMI conversion factor for imperial units (pounds and inches)
 const BMI_IMPERIAL_CONVERSION_FACTOR = 703;
@@ -91,12 +92,15 @@ const VitalViewModal = ({
         },
         {
           label: t('shared:labels.location', 'Location'),
-          value: vital.location || t('shared:labels.notSpecified', 'Not specified'),
+          value:
+            vital.location || t('shared:labels.notSpecified', 'Not specified'),
           icon: IconMapPin,
         },
         {
           label: t('vitals:modal.deviceUsed', 'Device Used'),
-          value: vital.device_used || t('shared:labels.notSpecified', 'Not specified'),
+          value:
+            vital.device_used ||
+            t('shared:labels.notSpecified', 'Not specified'),
           icon: IconDevices,
         },
       ],
@@ -120,7 +124,11 @@ const VitalViewModal = ({
         {
           label: t('vitals:stats.temperature', 'Temperature'),
           value: vital.temperature
-            ? (convertForDisplay(vital.temperature, 'temperature', unitSystem)?.toFixed(1) ?? vital.temperature)
+            ? (convertForDisplay(
+                vital.temperature,
+                'temperature',
+                unitSystem
+              )?.toFixed(1) ?? vital.temperature)
             : t('labels.notAvailable', 'N/A'),
           icon: IconThermometer,
           unit: vital.temperature ? unitLabels[unitSystem].temperature : '',
@@ -146,7 +154,9 @@ const VitalViewModal = ({
         {
           label: t('vitals:stats.weight', 'Weight'),
           value: vital.weight
-            ? (convertForDisplay(vital.weight, 'weight', unitSystem)?.toFixed(1) ?? vital.weight)
+            ? (convertForDisplay(vital.weight, 'weight', unitSystem)?.toFixed(
+                1
+              ) ?? vital.weight)
             : t('labels.notAvailable', 'N/A'),
           icon: IconWeight,
           unit: vital.weight ? unitLabels[unitSystem].weight : '',
@@ -156,11 +166,17 @@ const VitalViewModal = ({
           value: vital.height
             ? ((unitSystem === 'imperial'
                 ? convertHeight.inchesToFeetInches(vital.height)
-                : convertForDisplay(vital.height, 'height', unitSystem)?.toFixed(1)
-              ) ?? vital.height)
+                : convertForDisplay(
+                    vital.height,
+                    'height',
+                    unitSystem
+                  )?.toFixed(1)) ?? vital.height)
             : t('labels.notAvailable', 'N/A'),
           icon: IconTrendingUp,
-          unit: vital.height && unitSystem === 'metric' ? unitLabels[unitSystem].height : '',
+          unit:
+            vital.height && unitSystem === 'metric'
+              ? unitLabels[unitSystem].height
+              : '',
         },
         {
           label: t('vitals:stats.bmi', 'BMI'),
@@ -170,7 +186,10 @@ const VitalViewModal = ({
       ],
     },
     {
-      title: t('vitals:modal.additionalMeasurements', 'Additional Measurements'),
+      title: t(
+        'vitals:modal.additionalMeasurements',
+        'Additional Measurements'
+      ),
       icon: IconDroplet,
       items: [
         {
@@ -179,13 +198,20 @@ const VitalViewModal = ({
           icon: IconDroplet,
           unit: vital.blood_glucose ? t('vitals:units.mgdl', 'mg/dL') : '',
         },
-        ...(vital.blood_glucose ? [{
-          label: t('vitals:modal.glucoseContext', 'Measurement Type'),
-          value: vital.glucose_context
-            ? t(`vitals.glucoseContext.${vital.glucose_context}`, vital.glucose_context)
-            : t('shared:labels.notSpecified', 'Not specified'),
-          icon: IconDroplet,
-        }] : []),
+        ...(vital.blood_glucose
+          ? [
+              {
+                label: t('vitals:modal.glucoseContext', 'Measurement Type'),
+                value: vital.glucose_context
+                  ? t(
+                      `vitals.glucoseContext.${vital.glucose_context}`,
+                      vital.glucose_context
+                    )
+                  : t('shared:labels.notSpecified', 'Not specified'),
+                icon: IconDroplet,
+              },
+            ]
+          : []),
         {
           label: t('vitals:modal.a1c', 'A1C'),
           value: vital.a1c || t('labels.notAvailable', 'N/A'),
@@ -194,7 +220,10 @@ const VitalViewModal = ({
         },
         {
           label: t('vitals:modal.painScale', 'Pain Scale'),
-          value: vital.pain_scale !== null ? `${vital.pain_scale}/10` : t('labels.notAvailable', 'N/A'),
+          value:
+            vital.pain_scale !== null
+              ? `${vital.pain_scale}/10`
+              : t('labels.notAvailable', 'N/A'),
           icon: IconMoodSad,
         },
       ],
@@ -212,16 +241,22 @@ const VitalViewModal = ({
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
-          overflowY: 'auto'
-        }
+          overflowY: 'auto',
+        },
       }}
     >
       <Stack gap="lg">
         {/* Header Card */}
-        <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <Paper
+          withBorder
+          p="md"
+          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3} mb="xs">{t('shared:categories.vital_signs', 'Vital Signs')}</Title>
+              <Title order={3} mb="xs">
+                {t('shared:categories.vital_signs', 'Vital Signs')}
+              </Title>
               <Group gap="xs">
                 {vital.recorded_date && (
                   <Badge variant="light" color="blue" size="sm">
@@ -238,7 +273,8 @@ const VitalViewModal = ({
             </div>
             {vital.systolic_bp && vital.diastolic_bp && (
               <Badge variant="filled" color="red" size="lg">
-                {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)} {t('vitals:units.mmHg')}
+                {getBPDisplay(vital.systolic_bp, vital.diastolic_bp)}{' '}
+                {t('vitals:units.mmHg')}
               </Badge>
             )}
           </Group>
@@ -314,7 +350,9 @@ const VitalViewModal = ({
               <ActionIcon variant="light" size="md" radius="md">
                 <IconUser size={18} />
               </ActionIcon>
-              <Title order={4}>{t('shared:labels.recordedBy', 'Recorded By')}</Title>
+              <Title order={4}>
+                {t('shared:labels.recordedBy', 'Recorded By')}
+              </Title>
             </Group>
             <Card shadow="xs" p="sm" radius="md" withBorder>
               {practitioner ? (
@@ -324,7 +362,13 @@ const VitalViewModal = ({
                     fw={600}
                     c="blue"
                     style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={() => navigateToEntity('practitioner', vital.practitioner_id, navigate)}
+                    onClick={() =>
+                      navigateToEntity(
+                        'practitioner',
+                        vital.practitioner_id,
+                        navigate
+                      )
+                    }
                   >
                     {practitioner.name}
                   </Text>
@@ -335,7 +379,8 @@ const VitalViewModal = ({
                 </>
               ) : (
                 <Text size="sm" c="dimmed">
-                  {t('vitals:modal.practitionerId', 'Practitioner ID')}: {vital.practitioner_id}
+                  {t('vitals:modal.practitionerId', 'Practitioner ID')}:{' '}
+                  {vital.practitioner_id}
                 </Text>
               )}
             </Card>
@@ -347,9 +392,17 @@ const VitalViewModal = ({
           <Button variant="default" onClick={onClose}>
             {t('shared:labels.close', 'Close')}
           </Button>
-          <Tooltip label={disableEditTooltip} disabled={!disableEdit || !disableEditTooltip}>
+          <Tooltip
+            label={disableEditTooltip}
+            disabled={!disableEdit || !disableEditTooltip}
+          >
             <span>
-              <Button variant="filled" onClick={handleEdit} leftSection={<IconEdit size={16} />} disabled={disableEdit}>
+              <Button
+                variant="filled"
+                onClick={handleEdit}
+                leftSection={<IconEdit size={16} />}
+                disabled={disableEdit}
+              >
                 {t('shared:labels.edit', 'Edit')}
               </Button>
             </span>

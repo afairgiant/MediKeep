@@ -3,7 +3,6 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
 import render, { screen, fireEvent, waitFor } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
@@ -13,15 +12,33 @@ import MantinePatientForm from '../MantinePatientForm';
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, description, ...props }) => {
     // Filter out non-DOM props
-    const { firstDayOfWeek, maxDate, minDate, popoverProps, withAsterisk, ...domProps } = props;
+    const {
+      firstDayOfWeek: _firstDayOfWeek,
+      maxDate: _maxDate,
+      minDate: _minDate,
+      popoverProps: _popoverProps,
+      withAsterisk: _withAsterisk,
+      ...domProps
+    } = props;
     return (
       <div>
-        <label htmlFor={`date-${label}`}>{label}{required && ' *'}</label>
+        <label htmlFor={`date-${label}`}>
+          {label}
+          {required && ' *'}
+        </label>
         <input
           id={`date-${label}`}
           type="date"
-          value={value ? (value instanceof Date ? value.toISOString().split('T')[0] : value) : ''}
-          onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+          value={
+            value
+              ? value instanceof Date
+                ? value.toISOString().split('T')[0]
+                : value
+              : ''
+          }
+          onChange={e =>
+            onChange(e.target.value ? new Date(e.target.value) : null)
+          }
           data-testid={`date-${label.toLowerCase().replace(/\s+/g, '-')}`}
           {...domProps}
         />
@@ -87,7 +104,9 @@ describe('MantinePatientForm - Translations', () => {
       render(<MantinePatientForm {...defaultProps} isCreating={true} />);
 
       // Component renders saveFirstMessage when isCreating is true
-      expect(screen.getByText('patients.form.saveFirstMessage')).toBeInTheDocument();
+      expect(
+        screen.getByText('patients.form.saveFirstMessage')
+      ).toBeInTheDocument();
     });
 
     it('should display medical info heading', () => {
@@ -100,11 +119,21 @@ describe('MantinePatientForm - Translations', () => {
     it('should display all field labels', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByLabelText(/shared:labels\.firstName/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:labels\.lastName/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/patients\.form\.birthDate\.label/)).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/shared:fields\.gender/).length).toBeGreaterThan(0);
-      expect(screen.getAllByLabelText(/patients\.form\.relationship\.label/).length).toBeGreaterThan(0);
+      expect(
+        screen.getByLabelText(/shared:labels\.firstName/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:labels\.lastName/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/patients\.form\.birthDate\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByLabelText(/shared:fields\.gender/).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/patients\.form\.relationship\.label/).length
+      ).toBeGreaterThan(0);
     });
 
     it('should display gender options', async () => {
@@ -123,7 +152,9 @@ describe('MantinePatientForm - Translations', () => {
     it('should display relationship options', async () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const relationshipInput = getSelectInput(/patients\.form\.relationship\.label/);
+      const relationshipInput = getSelectInput(
+        /patients\.form\.relationship\.label/
+      );
       await userEvent.click(relationshipInput);
 
       await waitFor(() => {
@@ -140,7 +171,9 @@ describe('MantinePatientForm - Translations', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
       // Create button uses i18n key
-      expect(screen.getByText('patients.form.buttons.createPatient')).toBeInTheDocument();
+      expect(
+        screen.getByText('patients.form.buttons.createPatient')
+      ).toBeInTheDocument();
       // Cancel button
       expect(screen.getByText('shared:fields.cancel')).toBeInTheDocument();
     });
@@ -148,7 +181,9 @@ describe('MantinePatientForm - Translations', () => {
     it('should display save first message for new patients', () => {
       render(<MantinePatientForm {...defaultProps} isCreating={true} />);
 
-      expect(screen.getByText('patients.form.saveFirstMessage')).toBeInTheDocument();
+      expect(
+        screen.getByText('patients.form.saveFirstMessage')
+      ).toBeInTheDocument();
     });
   });
 
@@ -188,7 +223,9 @@ describe('MantinePatientForm - Translations', () => {
     it('should handle relationship select changes', async () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const relationshipInput = getSelectInput(/patients\.form\.relationship\.label/);
+      const relationshipInput = getSelectInput(
+        /patients\.form\.relationship\.label/
+      );
       await userEvent.click(relationshipInput);
 
       const selfOption = await screen.findByText('Self');
@@ -202,7 +239,9 @@ describe('MantinePatientForm - Translations', () => {
     it('should handle date input changes', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const dateInput = screen.getByTestId('date-patients.form.birthdate.label');
+      const dateInput = screen.getByTestId(
+        'date-patients.form.birthdate.label'
+      );
       fireEvent.change(dateInput, { target: { value: '1990-01-15' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -212,7 +251,9 @@ describe('MantinePatientForm - Translations', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
       // Address textarea uses placeholder (no label prop), section header shows 'Address' as fallback
-      const addressTextarea = screen.getByPlaceholderText('patients.form.address.placeholder');
+      const addressTextarea = screen.getByPlaceholderText(
+        'patients.form.address.placeholder'
+      );
       fireEvent.change(addressTextarea, { target: { value: '123 Main St' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -239,7 +280,9 @@ describe('MantinePatientForm - Translations', () => {
       );
 
       // In edit mode, the save button shows 'saveChanges' text
-      expect(screen.getByText('patients.form.buttons.saveChanges')).toBeInTheDocument();
+      expect(
+        screen.getByText('patients.form.buttons.saveChanges')
+      ).toBeInTheDocument();
     });
 
     it('should display save changes button in edit mode', () => {
@@ -251,7 +294,9 @@ describe('MantinePatientForm - Translations', () => {
         />
       );
 
-      expect(screen.getByText('patients.form.buttons.saveChanges')).toBeInTheDocument();
+      expect(
+        screen.getByText('patients.form.buttons.saveChanges')
+      ).toBeInTheDocument();
     });
 
     it('should populate form with existing data', () => {
@@ -292,7 +337,9 @@ describe('MantinePatientForm - Translations', () => {
 
       render(<MantinePatientForm {...defaultProps} formData={dataWithDate} />);
 
-      const dateInput = screen.getByTestId('date-patients.form.birthdate.label');
+      const dateInput = screen.getByTestId(
+        'date-patients.form.birthdate.label'
+      );
       expect(dateInput).toHaveValue('1990-06-15');
     });
   });
@@ -303,7 +350,9 @@ describe('MantinePatientForm - Translations', () => {
       // and no "saving" translation key exists in the current implementation.
       render(<MantinePatientForm {...defaultProps} saving={true} />);
 
-      expect(screen.getByText('patients.form.buttons.saving')).toBeInTheDocument();
+      expect(
+        screen.getByText('patients.form.buttons.saving')
+      ).toBeInTheDocument();
     });
 
     it('should disable inputs when saving', () => {
@@ -319,7 +368,9 @@ describe('MantinePatientForm - Translations', () => {
     it('should disable cancel button when saving', () => {
       render(<MantinePatientForm {...defaultProps} saving={true} />);
 
-      const cancelButton = screen.getByText('shared:fields.cancel').closest('button');
+      const cancelButton = screen
+        .getByText('shared:fields.cancel')
+        .closest('button');
       expect(cancelButton).toBeDisabled();
     });
   });
@@ -328,15 +379,21 @@ describe('MantinePatientForm - Translations', () => {
     it('should display placeholders as i18n keys', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByPlaceholderText('patients.form.firstName.placeholder')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('patients.form.lastName.placeholder')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('patients.form.firstName.placeholder')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('patients.form.lastName.placeholder')
+      ).toBeInTheDocument();
     });
 
     it('should display gender select field', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
       // Mantine Select renders the label
-      expect(screen.getAllByLabelText(/shared:fields\.gender/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.gender/).length
+      ).toBeGreaterThan(0);
     });
   });
 
@@ -361,7 +418,9 @@ describe('MantinePatientForm - Translations', () => {
     it('should call onSave when create button is clicked', async () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      const createButton = screen.getByText('patients.form.buttons.createPatient');
+      const createButton = screen.getByText(
+        'patients.form.buttons.createPatient'
+      );
       await userEvent.click(createButton);
 
       expect(defaultProps.onSave).toHaveBeenCalled();
@@ -381,20 +440,28 @@ describe('MantinePatientForm - Translations', () => {
     it('should display blood type select', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getAllByLabelText(/shared:labels\.bloodType/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:labels\.bloodType/).length
+      ).toBeGreaterThan(0);
     });
 
     it('should display height and weight inputs', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getByLabelText(/shared:labels\.height/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:labels\.weight/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:labels\.height/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:labels\.weight/)
+      ).toBeInTheDocument();
     });
 
     it('should display physician select', () => {
       render(<MantinePatientForm {...defaultProps} />);
 
-      expect(screen.getAllByLabelText(/patients\.form\.physician\.label/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/patients\.form\.physician\.label/).length
+      ).toBeGreaterThan(0);
     });
 
     it('should display blood type options', async () => {

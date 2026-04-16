@@ -1,6 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Badge, TextInput, ActionIcon, Group, Text, Paper, ScrollArea } from '@mantine/core';
+import {
+  Badge,
+  TextInput,
+  ActionIcon,
+  Group,
+  Text,
+  Paper,
+  ScrollArea,
+} from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import apiService from '../../services/api';
@@ -8,7 +16,7 @@ import logger from '../../services/logger';
 
 interface TagInputProps {
   value: string[];
-  onChange: (tags: string[]) => void;
+  onChange: (_tags: string[]) => void;
   placeholder?: string;
   maxTags?: number;
   disabled?: boolean;
@@ -23,7 +31,7 @@ export function TagInput({
   maxTags = 15,
   disabled = false,
   error,
-  disableSuggestions = false
+  disableSuggestions = false,
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -56,7 +64,7 @@ export function TagInput({
       } catch (error) {
         logger.error('Failed to fetch popular tags', {
           component: 'TagInput',
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     };
@@ -78,7 +86,9 @@ export function TagInput({
 
       setIsLoadingSuggestions(true);
       try {
-        const response = await apiService.get(`/tags/autocomplete?q=${encodeURIComponent(debouncedInput)}&limit=10`);
+        const response = await apiService.get(
+          `/tags/autocomplete?q=${encodeURIComponent(debouncedInput)}&limit=10`
+        );
 
         // Filter out already selected tags
         const tags = response.data || response || [];
@@ -89,7 +99,7 @@ export function TagInput({
       } catch (error) {
         logger.error('Failed to fetch tag suggestions', {
           component: 'TagInput',
-          error
+          error,
         });
         setSuggestions([]);
       } finally {
@@ -102,35 +112,35 @@ export function TagInput({
 
   const addTag = (tag: string) => {
     const trimmedTag = tag.trim().toLowerCase();
-    
+
     // Validation
     if (!trimmedTag) return;
-    
+
     if (value.includes(trimmedTag)) {
       setValidationError('Tag already exists');
       logger.debug('Duplicate tag attempted', {
         tag: trimmedTag,
-        component: 'TagInput'
+        component: 'TagInput',
       });
       return;
     }
-    
+
     if (value.length >= maxTags) {
       setValidationError(`Maximum ${maxTags} tags allowed`);
       logger.debug('Max tags limit reached', {
         currentCount: value.length,
         maxTags,
-        component: 'TagInput'
+        component: 'TagInput',
       });
       return;
     }
-    
+
     if (trimmedTag.length > 50) {
       setValidationError('Tag must be 50 characters or less');
       logger.debug('Tag exceeds character limit', {
         tag: trimmedTag,
         length: trimmedTag.length,
-        component: 'TagInput'
+        component: 'TagInput',
       });
       return;
     }
@@ -167,7 +177,7 @@ export function TagInput({
       <Paper withBorder p="xs" style={{ position: 'relative' }}>
         <ScrollArea.Autosize mah={200} offsetScrollbars>
           <Group gap="xs" align="center">
-            {value.map((tag) => (
+            {value.map(tag => (
               <Badge
                 key={tag}
                 variant="filled"
@@ -191,7 +201,7 @@ export function TagInput({
               <TextInput
                 ref={inputRef}
                 value={inputValue}
-                onChange={(e) => {
+                onChange={e => {
                   setInputValue(e.target.value);
                   setShowSuggestions(true);
                   // Clear validation error when user starts typing again
@@ -207,7 +217,9 @@ export function TagInput({
                 onFocus={() => {
                   // Show popular tags if no input, otherwise show suggestions
                   if (inputValue === '' && popularTags.length > 0) {
-                    const filtered = popularTags.filter(tag => !value.includes(tag));
+                    const filtered = popularTags.filter(
+                      tag => !value.includes(tag)
+                    );
                     setSuggestions(filtered);
                     setShowSuggestions(filtered.length > 0);
                   } else if (suggestions.length > 0) {
@@ -224,7 +236,7 @@ export function TagInput({
             )}
           </Group>
         </ScrollArea.Autosize>
-        
+
         {/* Suggestions dropdown */}
         {showSuggestions && suggestions.length > 0 && (
           <Paper
@@ -238,50 +250,60 @@ export function TagInput({
               zIndex: 1000,
               marginTop: 4,
               maxHeight: 200,
-              overflowY: 'auto'
+              overflowY: 'auto',
             }}
           >
             {isLoadingSuggestions ? (
-              <Text size="sm" c="dimmed">Loading suggestions...</Text>
+              <Text size="sm" c="dimmed">
+                Loading suggestions...
+              </Text>
             ) : (
               <>
                 {inputValue === '' && suggestions.length > 0 && (
-                  <Text size="xs" c="dimmed" p="xs" style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    p="xs"
+                    style={{
+                      borderBottom: '1px solid var(--color-border-light)',
+                    }}
+                  >
                     {t('search.popularTags')}
                   </Text>
                 )}
-                {suggestions.map((suggestion) => (
-                <div
-                  key={suggestion}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  style={{
-                    padding: '8px',
-                    cursor: 'pointer',
-                    borderRadius: 4,
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f0f0f0';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <Text size="sm">{suggestion}</Text>
-                </div>
+                {suggestions.map(suggestion => (
+                  <div
+                    key={suggestion}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    style={{
+                      padding: '8px',
+                      cursor: 'pointer',
+                      borderRadius: 4,
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = '#f0f0f0';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <Text size="sm">{suggestion}</Text>
+                  </div>
                 ))}
               </>
             )}
           </Paper>
         )}
       </Paper>
-      
+
       {/* Helper text */}
       <Text size="xs" c="dimmed" mt={4}>
         {/* eslint-disable-next-line i18next/no-literal-string -- tag count format */}
-        {`${value.length}/${maxTags}`} {t('tagManagement.pressEnterToAdd', 'Press Enter to add a tag')}
+        {`${value.length}/${maxTags}`}{' '}
+        {t('tagManagement.pressEnterToAdd', 'Press Enter to add a tag')}
       </Text>
-      
+
       {(validationError || error) && (
         <Text size="xs" c="red" mt={4}>
           {validationError || error}

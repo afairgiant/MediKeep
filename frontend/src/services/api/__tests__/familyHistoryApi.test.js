@@ -36,7 +36,9 @@ describe('FamilyHistoryApi Service', () => {
 
       const result = await familyHistoryApi.getOrganizedHistory();
 
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/mine');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/mine'
+      );
       expect(result).toEqual(mockHistory);
     });
 
@@ -66,14 +68,21 @@ describe('FamilyHistoryApi Service', () => {
     it('should fetch own family history successfully', async () => {
       const mockOwnHistory = {
         family_members: [
-          { id: 'member-1', name: 'John Doe', relationship: 'father', is_owned: true },
+          {
+            id: 'member-1',
+            name: 'John Doe',
+            relationship: 'father',
+            is_owned: true,
+          },
         ],
       };
       apiService.get.mockResolvedValue(mockOwnHistory);
 
       const result = await familyHistoryApi.getMyFamilyHistory();
 
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/my-own');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/my-own'
+      );
       expect(result).toEqual(mockOwnHistory);
     });
 
@@ -82,7 +91,9 @@ describe('FamilyHistoryApi Service', () => {
       error.status = 401;
       apiService.get.mockRejectedValue(error);
 
-      await expect(familyHistoryApi.getMyFamilyHistory()).rejects.toThrow('Unauthorized');
+      await expect(familyHistoryApi.getMyFamilyHistory()).rejects.toThrow(
+        'Unauthorized'
+      );
     });
   });
 
@@ -91,7 +102,11 @@ describe('FamilyHistoryApi Service', () => {
       const mockSharedHistory = {
         shared_family_history: [
           {
-            family_member: { id: 'shared-1', name: 'Alice Wilson', relationship: 'aunt' },
+            family_member: {
+              id: 'shared-1',
+              name: 'Alice Wilson',
+              relationship: 'aunt',
+            },
             share_details: { shared_by: { name: 'Dr. Smith' } },
           },
         ],
@@ -100,7 +115,9 @@ describe('FamilyHistoryApi Service', () => {
 
       const result = await familyHistoryApi.getSharedFamilyHistory();
 
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/shared-with-me');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/shared-with-me'
+      );
       expect(result).toEqual(mockSharedHistory);
     });
 
@@ -139,7 +156,9 @@ describe('FamilyHistoryApi Service', () => {
 
       const result = await familyHistoryApi.getSharedByMe();
 
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/shared-by-me');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/shared-by-me'
+      );
       expect(result).toEqual(mockSharedByMe);
     });
 
@@ -158,7 +177,11 @@ describe('FamilyHistoryApi Service', () => {
       const mockShares = [
         {
           id: 'share-1',
-          shared_with: { id: 'user-123', name: 'Dr. Johnson', email: 'dr.johnson@hospital.com' },
+          shared_with: {
+            id: 'user-123',
+            name: 'Dr. Johnson',
+            email: 'dr.johnson@hospital.com',
+          },
           permission_level: 'view',
           created_at: '2024-01-15T10:30:00Z',
         },
@@ -167,7 +190,9 @@ describe('FamilyHistoryApi Service', () => {
 
       const result = await familyHistoryApi.getFamilyMemberShares('member-123');
 
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/member-123/shares');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/member-123/shares'
+      );
       expect(result).toEqual(mockShares);
     });
 
@@ -194,10 +219,15 @@ describe('FamilyHistoryApi Service', () => {
       apiService.get.mockResolvedValue(mockResponse);
 
       const resultWithNull = await familyHistoryApi.getFamilyMemberShares(null);
-      const resultWithUndefined = await familyHistoryApi.getFamilyMemberShares(undefined);
+      const resultWithUndefined =
+        await familyHistoryApi.getFamilyMemberShares(undefined);
 
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/null/shares');
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/undefined/shares');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/null/shares'
+      );
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/undefined/shares'
+      );
       expect(resultWithNull).toEqual(mockResponse);
       expect(resultWithUndefined).toEqual(mockResponse);
     });
@@ -211,13 +241,16 @@ describe('FamilyHistoryApi Service', () => {
         sharing_note: 'Medical consultation needed',
         expires_hours: 168,
       };
-      const mockResponse = { 
+      const mockResponse = {
         message: 'Invitation sent successfully',
         invitation_id: 'inv-123',
       };
       apiService.post.mockResolvedValue(mockResponse);
 
-      const result = await familyHistoryApi.sendShareInvitation('member-123', inviteData);
+      const result = await familyHistoryApi.sendShareInvitation(
+        'member-123',
+        inviteData
+      );
 
       expect(apiService.post).toHaveBeenCalledWith(
         '/family-history-sharing/member-123/shares',
@@ -234,7 +267,10 @@ describe('FamilyHistoryApi Service', () => {
       const mockResponse = { message: 'Invitation sent' };
       apiService.post.mockResolvedValue(mockResponse);
 
-      const result = await familyHistoryApi.sendShareInvitation('member-456', minimalData);
+      const result = await familyHistoryApi.sendShareInvitation(
+        'member-456',
+        minimalData
+      );
 
       expect(apiService.post).toHaveBeenCalledWith(
         '/family-history-sharing/member-456/shares',
@@ -288,13 +324,16 @@ describe('FamilyHistoryApi Service', () => {
 
   describe('revokeShare', () => {
     it('should revoke share successfully', async () => {
-      const mockResponse = { 
+      const mockResponse = {
         message: 'Share revoked successfully',
         revoked_at: '2024-01-15T12:00:00Z',
       };
       apiService.delete.mockResolvedValue(mockResponse);
 
-      const result = await familyHistoryApi.revokeShare('member-123', 'user-456');
+      const result = await familyHistoryApi.revokeShare(
+        'member-123',
+        'user-456'
+      );
 
       expect(apiService.delete).toHaveBeenCalledWith(
         '/family-history-sharing/member-123/shares/user-456'
@@ -331,10 +370,18 @@ describe('FamilyHistoryApi Service', () => {
       const result3 = await familyHistoryApi.revokeShare(null, 'user-456');
       const result4 = await familyHistoryApi.revokeShare('member-123', null);
 
-      expect(apiService.delete).toHaveBeenCalledWith('/family-history-sharing//shares/user-456');
-      expect(apiService.delete).toHaveBeenCalledWith('/family-history-sharing/member-123/shares/');
-      expect(apiService.delete).toHaveBeenCalledWith('/family-history-sharing/null/shares/user-456');
-      expect(apiService.delete).toHaveBeenCalledWith('/family-history-sharing/member-123/shares/null');
+      expect(apiService.delete).toHaveBeenCalledWith(
+        '/family-history-sharing//shares/user-456'
+      );
+      expect(apiService.delete).toHaveBeenCalledWith(
+        '/family-history-sharing/member-123/shares/'
+      );
+      expect(apiService.delete).toHaveBeenCalledWith(
+        '/family-history-sharing/null/shares/user-456'
+      );
+      expect(apiService.delete).toHaveBeenCalledWith(
+        '/family-history-sharing/member-123/shares/null'
+      );
       expect(result1).toEqual(mockResponse);
       expect(result2).toEqual(mockResponse);
       expect(result3).toEqual(mockResponse);
@@ -355,16 +402,31 @@ describe('FamilyHistoryApi Service', () => {
         total_sent: 3,
         total_failed: 0,
         results: [
-          { family_member_id: 'member-1', status: 'sent', invitation_id: 'inv-1' },
-          { family_member_id: 'member-2', status: 'sent', invitation_id: 'inv-2' },
-          { family_member_id: 'member-3', status: 'sent', invitation_id: 'inv-3' },
+          {
+            family_member_id: 'member-1',
+            status: 'sent',
+            invitation_id: 'inv-1',
+          },
+          {
+            family_member_id: 'member-2',
+            status: 'sent',
+            invitation_id: 'inv-2',
+          },
+          {
+            family_member_id: 'member-3',
+            status: 'sent',
+            invitation_id: 'inv-3',
+          },
         ],
       };
       apiService.post.mockResolvedValue(mockResponse);
 
       const result = await familyHistoryApi.bulkSendInvitations(bulkData);
 
-      expect(apiService.post).toHaveBeenCalledWith('/family-history-sharing/bulk-invite', bulkData);
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/family-history-sharing/bulk-invite',
+        bulkData
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -378,9 +440,21 @@ describe('FamilyHistoryApi Service', () => {
         total_sent: 2,
         total_failed: 1,
         results: [
-          { family_member_id: 'member-1', status: 'sent', invitation_id: 'inv-1' },
-          { family_member_id: 'member-2', status: 'sent', invitation_id: 'inv-2' },
-          { family_member_id: 'invalid-member', status: 'failed', error: 'Member not found' },
+          {
+            family_member_id: 'member-1',
+            status: 'sent',
+            invitation_id: 'inv-1',
+          },
+          {
+            family_member_id: 'member-2',
+            status: 'sent',
+            invitation_id: 'inv-2',
+          },
+          {
+            family_member_id: 'invalid-member',
+            status: 'failed',
+            error: 'Member not found',
+          },
         ],
       };
       apiService.post.mockResolvedValue(mockResponse);
@@ -402,9 +476,9 @@ describe('FamilyHistoryApi Service', () => {
       error.status = 400;
       apiService.post.mockRejectedValue(error);
 
-      await expect(familyHistoryApi.bulkSendInvitations(bulkData)).rejects.toThrow(
-        'No family members specified'
-      );
+      await expect(
+        familyHistoryApi.bulkSendInvitations(bulkData)
+      ).rejects.toThrow('No family members specified');
     });
 
     it('should handle bulk invitation validation errors', async () => {
@@ -417,9 +491,9 @@ describe('FamilyHistoryApi Service', () => {
       error.status = 400;
       apiService.post.mockRejectedValue(error);
 
-      await expect(familyHistoryApi.bulkSendInvitations(invalidBulkData)).rejects.toThrow(
-        'Invalid bulk invitation data'
-      );
+      await expect(
+        familyHistoryApi.bulkSendInvitations(invalidBulkData)
+      ).rejects.toThrow('Invalid bulk invitation data');
     });
 
     it('should handle user not found in bulk invitations', async () => {
@@ -432,9 +506,9 @@ describe('FamilyHistoryApi Service', () => {
       error.status = 404;
       apiService.post.mockRejectedValue(error);
 
-      await expect(familyHistoryApi.bulkSendInvitations(bulkData)).rejects.toThrow(
-        'Recipient user not found'
-      );
+      await expect(
+        familyHistoryApi.bulkSendInvitations(bulkData)
+      ).rejects.toThrow('Recipient user not found');
     });
   });
 
@@ -457,9 +531,12 @@ describe('FamilyHistoryApi Service', () => {
       };
       apiService.get.mockResolvedValue(mockDetails);
 
-      const result = await familyHistoryApi.getFamilyMemberDetails('member-123');
+      const result =
+        await familyHistoryApi.getFamilyMemberDetails('member-123');
 
-      expect(apiService.get).toHaveBeenCalledWith('/family-history-sharing/member-123/details');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/family-history-sharing/member-123/details'
+      );
       expect(result).toEqual(mockDetails);
     });
 
@@ -490,7 +567,9 @@ describe('FamilyHistoryApi Service', () => {
       timeoutError.code = 'TIMEOUT';
       apiService.get.mockRejectedValue(timeoutError);
 
-      await expect(familyHistoryApi.getOrganizedHistory()).rejects.toThrow('Request timeout');
+      await expect(familyHistoryApi.getOrganizedHistory()).rejects.toThrow(
+        'Request timeout'
+      );
     });
 
     it('should handle server errors', async () => {
@@ -614,7 +693,9 @@ describe('FamilyHistoryApi Service', () => {
       const organizedResult = await familyHistoryApi.getOrganizedHistory();
       const ownResult = await familyHistoryApi.getMyFamilyHistory();
 
-      expect(organizedResult.family_members[0]).toEqual(consistentMemberStructure);
+      expect(organizedResult.family_members[0]).toEqual(
+        consistentMemberStructure
+      );
       expect(ownResult.family_members[0]).toEqual(consistentMemberStructure);
     });
 

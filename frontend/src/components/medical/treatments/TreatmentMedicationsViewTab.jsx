@@ -1,14 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Stack,
-  Paper,
-  Group,
-  Text,
-  Badge,
-  Loader,
-  Alert,
-} from '@mantine/core';
+import { Stack, Paper, Group, Text, Badge, Loader, Alert } from '@mantine/core';
 import { IconPill, IconAlertCircle } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../../services/api';
@@ -33,7 +25,10 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
       setError(null);
 
       try {
-        const data = await apiService.getTreatmentMedications(treatmentId, controller.signal);
+        const data = await apiService.getTreatmentMedications(
+          treatmentId,
+          controller.signal
+        );
         if (isMountedRef.current && !controller.signal.aborted) {
           setMedications(Array.isArray(data) ? data : []);
         }
@@ -65,7 +60,9 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
     return (
       <Stack align="center" py="xl">
         <Loader size="sm" />
-        <Text size="sm" c="dimmed">{t('treatments.medications.loading', 'Loading medications...')}</Text>
+        <Text size="sm" c="dimmed">
+          {t('treatments.medications.loading', 'Loading medications...')}
+        </Text>
       </Stack>
     );
   }
@@ -81,16 +78,26 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
   if (medications.length === 0) {
     return (
       <Text size="sm" c="dimmed" ta="center" py="xl">
-        {t('treatments.medications.empty', 'No medications linked to this treatment plan.')}
+        {t(
+          'treatments.medications.empty',
+          'No medications linked to this treatment plan.'
+        )}
       </Text>
     );
   }
 
-  const defaultSuffix = t('treatments.medications.default', '(from medication)');
+  const defaultSuffix = t(
+    'treatments.medications.default',
+    '(from medication)'
+  );
 
   const renderValue = (specificValue, fallbackValue) => {
     if (specificValue) {
-      return <Text size="sm" fw={500}>{specificValue}</Text>;
+      return (
+        <Text size="sm" fw={500}>
+          {specificValue}
+        </Text>
+      );
     }
     if (fallbackValue) {
       return (
@@ -104,7 +111,11 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
 
   const renderDateValue = (specificDate, effectiveDate) => {
     if (specificDate) {
-      return <Text size="sm" fw={500}>{formatDate(specificDate)}</Text>;
+      return (
+        <Text size="sm" fw={500}>
+          {formatDate(specificDate)}
+        </Text>
+      );
     }
     if (effectiveDate) {
       return (
@@ -118,7 +129,11 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
 
   const renderNameValue = (specificObj, effectiveObj) => {
     if (specificObj) {
-      return <Text size="sm" fw={500}>{specificObj.name}</Text>;
+      return (
+        <Text size="sm" fw={500}>
+          {specificObj.name}
+        </Text>
+      );
     }
     if (effectiveObj) {
       return (
@@ -132,9 +147,10 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
 
   return (
     <Stack gap="sm">
-      {medications.map((rel) => {
+      {medications.map(rel => {
         const med = rel.medication;
-        const medName = med?.medication_name || `Medication #${rel.medication_id}`;
+        const medName =
+          med?.medication_name || `Medication #${rel.medication_id}`;
 
         return (
           <Paper key={rel.id} withBorder p="sm">
@@ -146,7 +162,11 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                   size="lg"
                   leftSection={<IconPill size={14} />}
                   style={onMedicationClick ? { cursor: 'pointer' } : undefined}
-                  onClick={onMedicationClick ? () => onMedicationClick(rel.medication_id) : undefined}
+                  onClick={
+                    onMedicationClick
+                      ? () => onMedicationClick(rel.medication_id)
+                      : undefined
+                  }
                 >
                   {medName}
                 </Badge>
@@ -195,7 +215,10 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                     <Text size="xs" c="dimmed" fw={500}>
                       {t('shared:labels.startDate', 'Start Date')}
                     </Text>
-                    {renderDateValue(rel.specific_start_date, rel.effective_start_date)}
+                    {renderDateValue(
+                      rel.specific_start_date,
+                      rel.effective_start_date
+                    )}
                   </Stack>
                 )}
                 {(rel.effective_end_date || rel.effective_start_date) && (
@@ -203,7 +226,10 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                     <Text size="xs" c="dimmed" fw={500}>
                       {t('shared:labels.endDate', 'End Date')}
                     </Text>
-                    {renderDateValue(rel.specific_end_date, rel.effective_end_date) || (
+                    {renderDateValue(
+                      rel.specific_end_date,
+                      rel.effective_end_date
+                    ) || (
                       <Text size="sm" c="dimmed" fs="italic">
                         {t('shared:labels.ongoing', 'Ongoing')}
                       </Text>
@@ -218,7 +244,10 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                     <Text size="xs" c="dimmed" fw={500}>
                       {t('treatments.medications.prescriber', 'Prescriber')}
                     </Text>
-                    {renderNameValue(rel.specific_prescriber, rel.effective_prescriber)}
+                    {renderNameValue(
+                      rel.specific_prescriber,
+                      rel.effective_prescriber
+                    )}
                   </Stack>
                 )}
                 {rel.effective_pharmacy && (
@@ -226,14 +255,20 @@ const TreatmentMedicationsViewTab = ({ treatmentId, onMedicationClick }) => {
                     <Text size="xs" c="dimmed" fw={500}>
                       {t('shared:fields.pharmacy', 'Pharmacy')}
                     </Text>
-                    {renderNameValue(rel.specific_pharmacy, rel.effective_pharmacy)}
+                    {renderNameValue(
+                      rel.specific_pharmacy,
+                      rel.effective_pharmacy
+                    )}
                   </Stack>
                 )}
               </Group>
 
               {rel.timing_instructions && (
                 <Text size="sm" c="dimmed">
-                  <strong>{t('treatments.medications.timing', 'Timing')}:</strong> {rel.timing_instructions}
+                  <strong>
+                    {t('treatments.medications.timing', 'Timing')}:
+                  </strong>{' '}
+                  {rel.timing_instructions}
                 </Text>
               )}
 

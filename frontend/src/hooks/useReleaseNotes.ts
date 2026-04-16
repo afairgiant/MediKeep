@@ -80,18 +80,18 @@ export function useReleaseNotes(): UseReleaseNotesReturn {
         if (!lastSeen) {
           // First-time user: show only the current release
           unseen = allReleases.filter(
-            (r) => compareVersions(r.tag_name, version) === 0
+            r => compareVersions(r.tag_name, version) === 0
           );
           if (unseen.length === 0 && allReleases.length > 0) {
             const atOrBelow = allReleases
-              .filter((r) => compareVersions(r.tag_name, version) <= 0)
+              .filter(r => compareVersions(r.tag_name, version) <= 0)
               .sort((a, b) => compareVersions(b.tag_name, a.tag_name));
             unseen = atOrBelow.length > 0 ? [atOrBelow[0]] : [];
           }
         } else {
           // Returning user: show releases between lastSeen and currentVersion
           unseen = allReleases.filter(
-            (r) =>
+            r =>
               compareVersions(r.tag_name, lastSeen) > 0 &&
               compareVersions(r.tag_name, version) <= 0
           );
@@ -107,7 +107,9 @@ export function useReleaseNotes(): UseReleaseNotesReturn {
         }
       } catch (err) {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Failed to fetch release notes');
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch release notes'
+        );
       } finally {
         if (!cancelled) {
           setLoading(false);

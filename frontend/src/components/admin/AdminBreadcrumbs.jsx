@@ -19,7 +19,9 @@ const AdminBreadcrumbs = () => {
       style={{ borderBottom: '1px solid var(--mantine-color-default-border)' }}
     >
       <Breadcrumbs
-        separator={<IconChevronRight size={14} color="var(--mantine-color-dimmed)" />}
+        separator={
+          <IconChevronRight size={14} color="var(--mantine-color-dimmed)" />
+        }
       >
         {crumbs.map((crumb, index) =>
           crumb.path ? (

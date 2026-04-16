@@ -41,7 +41,7 @@ pyasn1==0.6.3
 pycparser==3.0
 pydantic==2.12.5
 pydantic_core==2.41.5
-pytest==9.0.2
+pytest==9.0.3
 pytest-asyncio==1.3.0
 pytest-html==4.2.0
 python-dateutil>=2.8.2
@@ -77,3 +77,6 @@ pytesseract==0.3.13      # Tesseract OCR wrapper
 
 # Background task scheduling
 APScheduler>=3.10.0,<4.0.0   # Async scheduler for auto-backups
+
+# Linting (dev tooling)
+pylint==4.0.5

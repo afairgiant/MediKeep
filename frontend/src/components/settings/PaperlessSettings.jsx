@@ -27,8 +27,13 @@ const PaperlessSettings = ({
   const [connectionMessage, setConnectionMessage] = useState('');
   const [testingConnection, setTestingConnection] = useState(false);
   const [authMethod, setAuthMethod] = useState(() => {
-    if (preferences?.paperless_api_token || preferences?.paperless_has_token) return 'token';
-    if (preferences?.paperless_username || preferences?.paperless_has_credentials) return 'credentials';
+    if (preferences?.paperless_api_token || preferences?.paperless_has_token)
+      return 'token';
+    if (
+      preferences?.paperless_username ||
+      preferences?.paperless_has_credentials
+    )
+      return 'credentials';
     return 'token';
   });
 
@@ -37,11 +42,14 @@ const PaperlessSettings = ({
     return <Text c="dimmed">Loading settings...</Text>;
   }
 
-  const handleUpdate = (updates) => {
+  const handleUpdate = updates => {
     const updatedPrefs = { ...preferences, ...updates };
 
     // If disabling and currently the active backend, fall back to local
-    if (updates.paperless_enabled === false && preferences.default_storage_backend === 'paperless') {
+    if (
+      updates.paperless_enabled === false &&
+      preferences.default_storage_backend === 'paperless'
+    ) {
       updatedPrefs.default_storage_backend = 'local';
     }
 
@@ -65,13 +73,19 @@ const PaperlessSettings = ({
 
       let result;
       if (hasApiToken) {
-        frontendLogger.logInfo('Testing connection with API token', { component: 'PaperlessSettings' });
+        frontendLogger.logInfo('Testing connection with API token', {
+          component: 'PaperlessSettings',
+        });
         result = await testPaperlessConnection(url, '', '', token);
       } else if (hasCredentials) {
-        frontendLogger.logInfo('Testing connection with username/password', { component: 'PaperlessSettings' });
+        frontendLogger.logInfo('Testing connection with username/password', {
+          component: 'PaperlessSettings',
+        });
         result = await testPaperlessConnection(url, username, password);
       } else {
-        frontendLogger.logInfo('Using saved credentials for connection test', { component: 'PaperlessSettings' });
+        frontendLogger.logInfo('Using saved credentials for connection test', {
+          component: 'PaperlessSettings',
+        });
         result = await testPaperlessConnection(url, '', '', '');
       }
 
@@ -113,14 +127,20 @@ const PaperlessSettings = ({
     <IntegrationSettingsCard
       name="Paperless-ngx"
       enabled={paperlessEnabled}
-      onEnabledChange={(checked) => handleUpdate({ paperless_enabled: checked })}
+      onEnabledChange={checked => handleUpdate({ paperless_enabled: checked })}
       url={preferences.paperless_url || ''}
-      onUrlChange={(value) => handleUpdate({ paperless_url: value })}
+      onUrlChange={value => handleUpdate({ paperless_url: value })}
       urlPlaceholder="https://paperless.example.com"
-      token={authMethod === 'token' ? (preferences.paperless_api_token || '') : ''}
-      onTokenChange={(value) => handleUpdate({ paperless_api_token: value })}
+      token={
+        authMethod === 'token' ? preferences.paperless_api_token || '' : ''
+      }
+      onTokenChange={value => handleUpdate({ paperless_api_token: value })}
       hasTokenSaved={hasTokenSaved}
-      hasAlternateAuth={authMethod === 'credentials' && ((preferences.paperless_username && preferences.paperless_password) || hasCredentialsSaved)}
+      hasAlternateAuth={
+        authMethod === 'credentials' &&
+        ((preferences.paperless_username && preferences.paperless_password) ||
+          hasCredentialsSaved)
+      }
       onTestConnection={handleTestConnection}
       testingConnection={testingConnection}
       connectionStatus={connectionStatus}
@@ -135,8 +155,16 @@ const PaperlessSettings = ({
             onChange={setAuthMethod}
           >
             <Group mt="xs">
-              <Radio value="token" label="API Token (Recommended)" disabled={disabled || testing} />
-              <Radio value="credentials" label="Username & Password" disabled={disabled || testing} />
+              <Radio
+                value="token"
+                label="API Token (Recommended)"
+                disabled={disabled || testing}
+              />
+              <Radio
+                value="credentials"
+                label="Username & Password"
+                disabled={disabled || testing}
+              />
             </Group>
           </Radio.Group>
 
@@ -146,7 +174,11 @@ const PaperlessSettings = ({
                 label="Username"
                 placeholder="Enter your username"
                 value={preferences.paperless_username || ''}
-                onChange={(e) => handleUpdate({ paperless_username: e.currentTarget.value.trim() })}
+                onChange={e =>
+                  handleUpdate({
+                    paperless_username: e.currentTarget.value.trim(),
+                  })
+                }
                 disabled={disabled || testing}
               />
               <PasswordInput
@@ -157,7 +189,9 @@ const PaperlessSettings = ({
                     : 'Enter your password'
                 }
                 value={preferences.paperless_password || ''}
-                onChange={(e) => handleUpdate({ paperless_password: e.currentTarget.value })}
+                onChange={e =>
+                  handleUpdate({ paperless_password: e.currentTarget.value })
+                }
                 disabled={disabled || testing}
               />
             </>
@@ -171,13 +205,17 @@ const PaperlessSettings = ({
               label="Enable automatic sync status checking"
               description="Automatically check if documents still exist in Paperless when pages load"
               checked={preferences.paperless_auto_sync ?? false}
-              onChange={(e) => handleUpdate({ paperless_auto_sync: e.currentTarget.checked })}
+              onChange={e =>
+                handleUpdate({ paperless_auto_sync: e.currentTarget.checked })
+              }
             />
             <Switch
               label="Sync document tags and categories"
               description="Keep document metadata synchronized with Paperless (Coming Soon)"
               checked={preferences.paperless_sync_tags ?? true}
-              onChange={(e) => handleUpdate({ paperless_sync_tags: e.currentTarget.checked })}
+              onChange={e =>
+                handleUpdate({ paperless_sync_tags: e.currentTarget.checked })
+              }
               disabled
               styles={{ track: { opacity: 0.5 } }}
             />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -45,34 +45,256 @@ import logger from '../../services/logger';
 import './DataModels.css';
 
 // Enrichment data keyed by model name — provides icons, colors, categories for known models
-const getModelEnrichment = (t) => ({
-  user: { icon: IconUsers, color: 'blue', category: t('dataModels.categories.system', 'System'), description: t('dataModels.descriptions.user', 'System users and administrators') },
-  patient: { icon: IconStethoscope, color: 'green', category: t('dataModels.categories.coreMedical', 'Core Medical'), description: t('dataModels.descriptions.patient', 'Patient demographic and contact information') },
-  practitioner: { icon: IconUsers, color: 'cyan', category: t('dataModels.categories.healthcareDirectory', 'Healthcare Directory'), description: t('dataModels.descriptions.practitioner', 'Healthcare providers and specialists') },
-  pharmacy: { icon: IconBuilding, color: 'violet', category: t('dataModels.categories.healthcareDirectory', 'Healthcare Directory'), description: t('dataModels.descriptions.pharmacy', 'Pharmacy locations and contact information') },
-  medication: { icon: IconPill, color: 'orange', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.medication', 'Prescribed medications and dosages') },
-  lab_result: { icon: IconFlask, color: 'purple', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.lab_result', 'Laboratory test results and values') },
-  lab_result_file: { icon: IconFileText, color: 'indigo', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.lab_result_file', 'Lab result documents and attachments') },
-  vitals: { icon: IconHeart, color: 'red', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.vitals', 'Blood pressure, heart rate, temperature') },
-  condition: { icon: IconClipboard, color: 'teal', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.condition', 'Medical conditions and diagnoses') },
-  allergy: { icon: IconAlertTriangle, color: 'yellow', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.allergy', 'Patient allergies and reactions') },
-  immunization: { icon: IconVaccine, color: 'lime', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.immunization', 'Vaccination records and schedules') },
-  procedure: { icon: IconMicroscope, color: 'pink', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.procedure', 'Medical procedures and operations') },
-  treatment: { icon: IconBandage, color: 'grape', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.treatment', 'Treatment plans and therapies') },
-  encounter: { icon: IconNotes, color: 'dark', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.encounter', 'Patient visits and appointments') },
-  patient_share: { icon: IconUsers, color: 'blue', category: t('dataModels.categories.sharingAccess', 'Sharing & Access'), description: t('dataModels.descriptions.patient_share', 'Patient data sharing relationships between users') },
-  invitation: { icon: IconUsers, color: 'green', category: t('dataModels.categories.sharingAccess', 'Sharing & Access'), description: t('dataModels.descriptions.invitation', 'System invitations for sharing and collaboration') },
-  family_history_share: { icon: IconUsers, color: 'purple', category: t('dataModels.categories.sharingAccess', 'Sharing & Access'), description: t('dataModels.descriptions.family_history_share', 'Family medical history sharing relationships') },
-  emergency_contact: { icon: IconPhone, color: 'red', category: t('dataModels.categories.patientSupport', 'Patient Support'), description: t('dataModels.descriptions.emergency_contact', 'Emergency contact information for patients') },
-  insurance: { icon: IconShield, color: 'blue', category: t('dataModels.categories.patientSupport', 'Patient Support'), description: t('dataModels.descriptions.insurance', 'Patient insurance coverage information') },
-  family_member: { icon: IconUsers, color: 'green', category: t('shared:categories.family_history', 'Family History'), description: t('dataModels.descriptions.family_member', 'Family member records for medical history') },
-  family_condition: { icon: IconClipboard, color: 'orange', category: t('shared:categories.family_history', 'Family History'), description: t('dataModels.descriptions.family_condition', 'Medical conditions of family members') },
-  entity_file: { icon: IconFile, color: 'gray', category: t('dataModels.categories.fileManagement', 'File Management'), description: t('dataModels.descriptions.entity_file', 'File attachments for all entity types') },
-  injury: { icon: IconFirstAidKit, color: 'red', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.injury', 'Physical injuries, sprains, fractures, and burns') },
-  injury_type: { icon: IconCategory, color: 'orange', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.injury_type', 'Reusable injury type definitions for dropdowns') },
-  symptom: { icon: IconMoodSick, color: 'yellow', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.symptom', 'Symptom definitions and tracking') },
-  symptom_occurrence: { icon: IconMoodSick, color: 'orange', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.symptom_occurrence', 'Individual symptom episode records') },
-  medical_equipment: { icon: IconDeviceDesktop, color: 'cyan', category: t('shared:labels.medicalRecords', 'Medical Records'), description: t('dataModels.descriptions.medical_equipment', 'Medical devices and equipment prescribed to patients') },
+const getModelEnrichment = t => ({
+  user: {
+    icon: IconUsers,
+    color: 'blue',
+    category: t('dataModels.categories.system', 'System'),
+    description: t(
+      'dataModels.descriptions.user',
+      'System users and administrators'
+    ),
+  },
+  patient: {
+    icon: IconStethoscope,
+    color: 'green',
+    category: t('dataModels.categories.coreMedical', 'Core Medical'),
+    description: t(
+      'dataModels.descriptions.patient',
+      'Patient demographic and contact information'
+    ),
+  },
+  practitioner: {
+    icon: IconUsers,
+    color: 'cyan',
+    category: t(
+      'dataModels.categories.healthcareDirectory',
+      'Healthcare Directory'
+    ),
+    description: t(
+      'dataModels.descriptions.practitioner',
+      'Healthcare providers and specialists'
+    ),
+  },
+  pharmacy: {
+    icon: IconBuilding,
+    color: 'violet',
+    category: t(
+      'dataModels.categories.healthcareDirectory',
+      'Healthcare Directory'
+    ),
+    description: t(
+      'dataModels.descriptions.pharmacy',
+      'Pharmacy locations and contact information'
+    ),
+  },
+  medication: {
+    icon: IconPill,
+    color: 'orange',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.medication',
+      'Prescribed medications and dosages'
+    ),
+  },
+  lab_result: {
+    icon: IconFlask,
+    color: 'purple',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.lab_result',
+      'Laboratory test results and values'
+    ),
+  },
+  lab_result_file: {
+    icon: IconFileText,
+    color: 'indigo',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.lab_result_file',
+      'Lab result documents and attachments'
+    ),
+  },
+  vitals: {
+    icon: IconHeart,
+    color: 'red',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.vitals',
+      'Blood pressure, heart rate, temperature'
+    ),
+  },
+  condition: {
+    icon: IconClipboard,
+    color: 'teal',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.condition',
+      'Medical conditions and diagnoses'
+    ),
+  },
+  allergy: {
+    icon: IconAlertTriangle,
+    color: 'yellow',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.allergy',
+      'Patient allergies and reactions'
+    ),
+  },
+  immunization: {
+    icon: IconVaccine,
+    color: 'lime',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.immunization',
+      'Vaccination records and schedules'
+    ),
+  },
+  procedure: {
+    icon: IconMicroscope,
+    color: 'pink',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.procedure',
+      'Medical procedures and operations'
+    ),
+  },
+  treatment: {
+    icon: IconBandage,
+    color: 'grape',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.treatment',
+      'Treatment plans and therapies'
+    ),
+  },
+  encounter: {
+    icon: IconNotes,
+    color: 'dark',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.encounter',
+      'Patient visits and appointments'
+    ),
+  },
+  patient_share: {
+    icon: IconUsers,
+    color: 'blue',
+    category: t('dataModels.categories.sharingAccess', 'Sharing & Access'),
+    description: t(
+      'dataModels.descriptions.patient_share',
+      'Patient data sharing relationships between users'
+    ),
+  },
+  invitation: {
+    icon: IconUsers,
+    color: 'green',
+    category: t('dataModels.categories.sharingAccess', 'Sharing & Access'),
+    description: t(
+      'dataModels.descriptions.invitation',
+      'System invitations for sharing and collaboration'
+    ),
+  },
+  family_history_share: {
+    icon: IconUsers,
+    color: 'purple',
+    category: t('dataModels.categories.sharingAccess', 'Sharing & Access'),
+    description: t(
+      'dataModels.descriptions.family_history_share',
+      'Family medical history sharing relationships'
+    ),
+  },
+  emergency_contact: {
+    icon: IconPhone,
+    color: 'red',
+    category: t('dataModels.categories.patientSupport', 'Patient Support'),
+    description: t(
+      'dataModels.descriptions.emergency_contact',
+      'Emergency contact information for patients'
+    ),
+  },
+  insurance: {
+    icon: IconShield,
+    color: 'blue',
+    category: t('dataModels.categories.patientSupport', 'Patient Support'),
+    description: t(
+      'dataModels.descriptions.insurance',
+      'Patient insurance coverage information'
+    ),
+  },
+  family_member: {
+    icon: IconUsers,
+    color: 'green',
+    category: t('shared:categories.family_history', 'Family History'),
+    description: t(
+      'dataModels.descriptions.family_member',
+      'Family member records for medical history'
+    ),
+  },
+  family_condition: {
+    icon: IconClipboard,
+    color: 'orange',
+    category: t('shared:categories.family_history', 'Family History'),
+    description: t(
+      'dataModels.descriptions.family_condition',
+      'Medical conditions of family members'
+    ),
+  },
+  entity_file: {
+    icon: IconFile,
+    color: 'gray',
+    category: t('dataModels.categories.fileManagement', 'File Management'),
+    description: t(
+      'dataModels.descriptions.entity_file',
+      'File attachments for all entity types'
+    ),
+  },
+  injury: {
+    icon: IconFirstAidKit,
+    color: 'red',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.injury',
+      'Physical injuries, sprains, fractures, and burns'
+    ),
+  },
+  injury_type: {
+    icon: IconCategory,
+    color: 'orange',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.injury_type',
+      'Reusable injury type definitions for dropdowns'
+    ),
+  },
+  symptom: {
+    icon: IconMoodSick,
+    color: 'yellow',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.symptom',
+      'Symptom definitions and tracking'
+    ),
+  },
+  symptom_occurrence: {
+    icon: IconMoodSick,
+    color: 'orange',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.symptom_occurrence',
+      'Individual symptom episode records'
+    ),
+  },
+  medical_equipment: {
+    icon: IconDeviceDesktop,
+    color: 'cyan',
+    category: t('shared:labels.medicalRecords', 'Medical Records'),
+    description: t(
+      'dataModels.descriptions.medical_equipment',
+      'Medical devices and equipment prescribed to patients'
+    ),
+  },
 });
 
 const DEFAULT_ENRICHMENT = {
@@ -82,7 +304,7 @@ const DEFAULT_ENRICHMENT = {
   description: '',
 };
 
-const getCategories = (t) => [
+const getCategories = t => [
   t('dataModels.categories.system', 'System'),
   t('dataModels.categories.coreMedical', 'Core Medical'),
   t('dataModels.categories.healthcareDirectory', 'Healthcare Directory'),
@@ -94,7 +316,7 @@ const getCategories = (t) => [
   t('shared:fields.other', 'Other'),
 ];
 
-const getDisplayNames = (t) => ({
+const getDisplayNames = t => ({
   user: t('dataModels.descriptions.user', 'Users'),
   patient: t('dataModels.descriptions.patient', 'Patients'),
   practitioner: t('dataModels.descriptions.practitioner', 'Practitioners'),
@@ -111,17 +333,32 @@ const getDisplayNames = (t) => ({
   encounter: t('dataModels.descriptions.encounter', 'Encounters'),
   patient_share: t('dataModels.descriptions.patient_share', 'Patient Shares'),
   invitation: t('dataModels.descriptions.invitation', 'Invitations'),
-  family_history_share: t('dataModels.descriptions.family_history_share', 'Family History Shares'),
-  emergency_contact: t('dataModels.descriptions.emergency_contact', 'Emergency Contacts'),
+  family_history_share: t(
+    'dataModels.descriptions.family_history_share',
+    'Family History Shares'
+  ),
+  emergency_contact: t(
+    'dataModels.descriptions.emergency_contact',
+    'Emergency Contacts'
+  ),
   insurance: t('dataModels.descriptions.insurance', 'Insurance'),
   family_member: t('dataModels.descriptions.family_member', 'Family Members'),
-  family_condition: t('dataModels.descriptions.family_condition', 'Family Conditions'),
+  family_condition: t(
+    'dataModels.descriptions.family_condition',
+    'Family Conditions'
+  ),
   entity_file: t('dataModels.descriptions.entity_file', 'Entity Files'),
   injury: t('dataModels.descriptions.injury', 'Injuries'),
   injury_type: t('dataModels.descriptions.injury_type', 'Injury Types'),
   symptom: t('dataModels.descriptions.symptom', 'Symptoms'),
-  symptom_occurrence: t('dataModels.descriptions.symptom_occurrence', 'Symptom Occurrences'),
-  medical_equipment: t('dataModels.descriptions.medical_equipment', 'Medical Equipment'),
+  symptom_occurrence: t(
+    'dataModels.descriptions.symptom_occurrence',
+    'Symptom Occurrences'
+  ),
+  medical_equipment: t(
+    'dataModels.descriptions.medical_equipment',
+    'Medical Equipment'
+  ),
 });
 
 const DataModels = () => {
@@ -150,9 +387,10 @@ const DataModels = () => {
         const apiModels = await adminApiService.getAvailableModels();
 
         // Merge API response with enrichment data
-        const merged = apiModels.map((apiModel) => {
+        const merged = apiModels.map(apiModel => {
           const name = apiModel.name || apiModel;
-          const displayName = apiModel.display_name || apiModel.verbose_name_plural || name;
+          const displayName =
+            apiModel.display_name || apiModel.verbose_name_plural || name;
           const enrichment = MODEL_ENRICHMENT[name] || DEFAULT_ENRICHMENT;
 
           return {
@@ -167,21 +405,29 @@ const DataModels = () => {
 
         setModels(merged);
       } catch (err) {
-        logger.error('data_models_load_error', 'Error loading models from API', {
-          component: 'DataModels',
-          error: err.message,
-        });
+        logger.error(
+          'data_models_load_error',
+          'Error loading models from API',
+          {
+            component: 'DataModels',
+            error: err.message,
+          }
+        );
         setError(err.message);
 
         // Fallback to hardcoded enrichment list with known display names
-        const fallbackModels = Object.entries(MODEL_ENRICHMENT).map(([name, enrichment]) => ({
-          name,
-          display: DISPLAY_NAMES[name] || name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-          icon: enrichment.icon,
-          color: enrichment.color,
-          category: enrichment.category,
-          description: enrichment.description,
-        }));
+        const fallbackModels = Object.entries(MODEL_ENRICHMENT).map(
+          ([name, enrichment]) => ({
+            name,
+            display:
+              DISPLAY_NAMES[name] ||
+              name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            icon: enrichment.icon,
+            color: enrichment.color,
+            category: enrichment.category,
+            description: enrichment.description,
+          })
+        );
         setModels(fallbackModels);
       } finally {
         setLoading(false);
@@ -194,7 +440,7 @@ const DataModels = () => {
   const filterLower = filterQuery.trim().toLowerCase();
   const filteredModels = filterLower
     ? models.filter(
-        (model) =>
+        model =>
           model.display.toLowerCase().includes(filterLower) ||
           model.name.toLowerCase().includes(filterLower) ||
           model.description.toLowerCase().includes(filterLower) ||
@@ -214,7 +460,9 @@ const DataModels = () => {
   };
 
   const renderModelsByCategory = category => {
-    const categoryModels = filteredModels.filter(model => model.category === category);
+    const categoryModels = filteredModels.filter(
+      model => model.category === category
+    );
     if (categoryModels.length === 0) return null;
 
     return (
@@ -237,7 +485,7 @@ const DataModels = () => {
                   withBorder
                   className="model-card"
                   onClick={() => handleModelClick(model.name)}
-                  onKeyDown={(e) => handleModelKeyDown(e, model.name)}
+                  onKeyDown={e => handleModelKeyDown(e, model.name)}
                   role="button"
                   tabIndex={0}
                   aria-label={`${model.display} - ${model.description}`}
@@ -280,16 +528,16 @@ const DataModels = () => {
           <Group justify="space-between" align="flex-start">
             <div>
               <Group align="center" mb="xs">
-                <IconDatabase
-                  size={32}
-                  aria-hidden="true"
-                />
+                <IconDatabase size={32} aria-hidden="true" />
                 <Text size="xl" fw={700}>
                   {t('shared:labels.dataModels', 'Data Models')}
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
-                {t('dataModels.subtitle', 'Manage and view all database tables and records')}
+                {t(
+                  'dataModels.subtitle',
+                  'Manage and view all database tables and records'
+                )}
               </Text>
             </div>
           </Group>
@@ -311,7 +559,7 @@ const DataModels = () => {
             ) : null
           }
           value={filterQuery}
-          onChange={(e) => setFilterQuery(e.currentTarget.value)}
+          onChange={e => setFilterQuery(e.currentTarget.value)}
           mb="lg"
           aria-label={t('dataModels.filterAriaLabel', 'Filter data models')}
         />
@@ -329,13 +577,19 @@ const DataModels = () => {
                 variant="light"
                 mb="lg"
               >
-                {t('dataModels.fallbackWarning', 'Could not load models from server. Showing built-in model list.')}
+                {t(
+                  'dataModels.fallbackWarning',
+                  'Could not load models from server. Showing built-in model list.'
+                )}
               </Alert>
             )}
             <div className="models-content">
               {filteredModels.length === 0 ? (
                 <Text c="dimmed" ta="center" mt="xl">
-                  {t('dataModels.noMatchFilter', { query: filterQuery, defaultValue: `No models match "${filterQuery}"` })}
+                  {t('dataModels.noMatchFilter', {
+                    query: filterQuery,
+                    defaultValue: `No models match "${filterQuery}"`,
+                  })}
                 </Text>
               ) : (
                 CATEGORIES.map(category => renderModelsByCategory(category))

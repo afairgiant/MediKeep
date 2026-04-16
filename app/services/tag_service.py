@@ -30,7 +30,7 @@ class TagService:
         "immunization": "immunizations",
         "treatment": "treatments",
         "encounter": "encounters",
-        "allergy": "allergies"
+        "allergy": "allergies",
     }
 
     def _validate_entity_type(self, entity_type: str) -> str:
@@ -51,10 +51,12 @@ class TagService:
         return "patient_id IN (SELECT id FROM patients WHERE user_id = :user_id)"
 
     def get_popular_tags_across_entities(
-        self, db: Session, *,
+        self,
+        db: Session,
+        *,
         entity_types: List[str] = None,
         limit: int = 20,
-        user_id: Optional[int] = None
+        user_id: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
         """Get all user tags with their usage counts across entities.
 
@@ -62,8 +64,16 @@ class TagService:
         """
 
         if not entity_types:
-            entity_types = ["lab_result", "medication", "condition", "procedure", "immunization", "treatment", "encounter", "allergy"]
-
+            entity_types = [
+                "lab_result",
+                "medication",
+                "condition",
+                "procedure",
+                "immunization",
+                "treatment",
+                "encounter",
+                "allergy",
+            ]
 
         # Build subquery for usage counts across all entity types
         usage_subqueries = []
@@ -87,17 +97,19 @@ class TagService:
                 if user_id is not None:
                     user_filter = f"AND {self._user_patient_filter()}"
 
-                usage_subqueries.append(f"""
+                usage_subqueries.append(
+                    f"""
                     SELECT tag, COUNT(*) as usage_count, :{param_key} as entity_type
                     FROM "{table_name}", json_array_elements_text(tags) as tag
                     WHERE tags IS NOT NULL {user_filter}
                     GROUP BY tag
-                """)
+                """
+                )
             except ValueError as e:
-                logger.warning("Invalid entity type in tag search", extra={
-                    "entity_type": entity_type,
-                    "error": str(e)
-                })
+                logger.warning(
+                    "Invalid entity type in tag search",
+                    extra={"entity_type": entity_type, "error": str(e)},
+                )
                 continue
 
         if not usage_subqueries:
@@ -138,10 +150,10 @@ class TagService:
                 final_params["user_id"] = user_id
             result = db.execute(text(query), final_params).fetchall()
 
-            logger.info("Retrieved user tags with usage counts", extra={
-                "tag_count": len(result),
-                "limit": limit
-            })
+            logger.info(
+                "Retrieved user tags with usage counts",
+                extra={"tag_count": len(result), "limit": limit},
+            )
 
             return [
                 {
@@ -149,24 +161,24 @@ class TagService:
                     "tag": row[1],
                     "color": row[2],
                     "usage_count": row[3],
-                    "entity_types": row[4]
+                    "entity_types": row[4],
                 }
                 for row in result
             ]
         except Exception as e:
-            logger.error("Failed to retrieve user tags", extra={
-                "error": str(e)
-            })
+            logger.error("Failed to retrieve user tags", extra={"error": str(e)})
             # Fallback to empty list if user_tags table doesn't exist yet
             return []
 
     def search_across_entities_by_tags(
-        self, db: Session, *,
+        self,
+        db: Session,
+        *,
         tags: List[str],
         entity_types: List[str] = None,
         limit_per_entity: int = 10,
         match_mode: str = "any",
-        patient_id: Optional[int] = None
+        patient_id: Optional[int] = None,
     ) -> Dict[str, List[Any]]:
         """Search for records across entity types by tags.
 
@@ -183,7 +195,16 @@ class TagService:
             match_mode = "any"
 
         if not entity_types:
-            entity_types = ["lab_result", "medication", "condition", "procedure", "immunization", "treatment", "encounter", "allergy"]
+            entity_types = [
+                "lab_result",
+                "medication",
+                "condition",
+                "procedure",
+                "immunization",
+                "treatment",
+                "encounter",
+                "allergy",
+            ]
 
         results = {}
 
@@ -200,10 +221,10 @@ class TagService:
                 for i, tag in enumerate(tags):
                     # Validate tag input to prevent injection
                     if not isinstance(tag, str) or len(tag) > 100:
-                        logger.warning("Invalid tag in search", extra={
-                            "tag": tag,
-                            "entity_type": entity_type
-                        })
+                        logger.warning(
+                            "Invalid tag in search",
+                            extra={"tag": tag, "entity_type": entity_type},
+                        )
                         continue
 
                     param_key = f"tag_{i}"
@@ -229,45 +250,49 @@ class TagService:
                         LIMIT :limit
                     """
 
-                    rows = db.execute(
-                        text(query),
-                        query_params
-                    ).fetchall()
+                    rows = db.execute(text(query), query_params).fetchall()
 
                     results[entity_type] = [dict(row._mapping) for row in rows]
 
-                    logger.debug("Retrieved records by tags", extra={
-                        "entity_type": entity_type,
-                        "tags": tags,
-                        "result_count": len(results[entity_type])
-                    })
+                    logger.debug(
+                        "Retrieved records by tags",
+                        extra={
+                            "entity_type": entity_type,
+                            "tags": tags,
+                            "result_count": len(results[entity_type]),
+                        },
+                    )
                 else:
                     results[entity_type] = []
 
             except ValueError as e:
-                logger.error("Invalid entity type in tag search", extra={
-                    "entity_type": entity_type,
-                    "error": str(e)
-                })
+                logger.error(
+                    "Invalid entity type in tag search",
+                    extra={"entity_type": entity_type, "error": str(e)},
+                )
                 results[entity_type] = []
             except Exception as e:
-                logger.error("Failed to search entity by tags", extra={
-                    "entity_type": entity_type,
-                    "tags": tags,
-                    "error": str(e)
-                })
+                logger.error(
+                    "Failed to search entity by tags",
+                    extra={"entity_type": entity_type, "tags": tags, "error": str(e)},
+                )
                 results[entity_type] = []
 
-        logger.info("Completed cross-entity tag search", extra={
-            "tags": tags,
-            "entity_types": entity_types,
-            "match_mode": match_mode,
-            "total_results": sum(len(r) for r in results.values())
-        })
+        logger.info(
+            "Completed cross-entity tag search",
+            extra={
+                "tags": tags,
+                "entity_types": entity_types,
+                "match_mode": match_mode,
+                "total_results": sum(len(r) for r in results.values()),
+            },
+        )
 
         return results
 
-    def autocomplete_tags(self, db: Session, *, query: str, limit: int = 10) -> List[str]:
+    def autocomplete_tags(
+        self, db: Session, *, query: str, limit: int = 10
+    ) -> List[str]:
         """Get tag suggestions based on partial input from user tags"""
 
         try:
@@ -282,24 +307,23 @@ class TagService:
             """
 
             result = db.execute(
-                text(query_sql),
-                {"query": query.lower(), "limit": limit}
+                text(query_sql), {"query": query.lower(), "limit": limit}
             ).fetchall()
 
             tags = [row[0] for row in result]
 
-            logger.debug("Generated tag autocomplete suggestions from user tags", extra={
-                "query": query,
-                "suggestion_count": len(tags)
-            })
+            logger.debug(
+                "Generated tag autocomplete suggestions from user tags",
+                extra={"query": query, "suggestion_count": len(tags)},
+            )
 
             return tags
 
         except Exception as e:
-            logger.error("Failed to generate tag autocomplete", extra={
-                "query": query,
-                "error": str(e)
-            })
+            logger.error(
+                "Failed to generate tag autocomplete",
+                extra={"query": query, "error": str(e)},
+            )
             return []
 
     def rename_tag_across_entities(
@@ -334,30 +358,32 @@ class TagService:
 
                 result = db.execute(
                     text(query),
-                    {
-                        "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "user_id": user_id
-                    }
+                    {"old_tag": old_tag, "new_tag": new_tag, "user_id": user_id},
                 )
 
                 updated_count = result.rowcount
                 total_updated += updated_count
 
-                logger.debug(f"Updated {updated_count} records in {table_name}", extra={
-                    "table": table_name,
-                    "old_tag": old_tag,
-                    "new_tag": new_tag,
-                    "updated_count": updated_count
-                })
+                logger.debug(
+                    f"Updated {updated_count} records in {table_name}",
+                    extra={
+                        "table": table_name,
+                        "old_tag": old_tag,
+                        "new_tag": new_tag,
+                        "updated_count": updated_count,
+                    },
+                )
 
             except Exception as e:
-                logger.error(f"Failed to rename tag in {table_name}", extra={
-                    "table": table_name,
-                    "old_tag": old_tag,
-                    "new_tag": new_tag,
-                    "error": str(e)
-                })
+                logger.error(
+                    f"Failed to rename tag in {table_name}",
+                    extra={
+                        "table": table_name,
+                        "old_tag": old_tag,
+                        "new_tag": new_tag,
+                        "error": str(e),
+                    },
+                )
 
         # Update user_tags registry: rename old_tag to new_tag
         # If new_tag already exists in user_tags for this user, delete old_tag instead
@@ -367,10 +393,12 @@ class TagService:
                 SELECT COUNT(*) FROM user_tags
                 WHERE user_id = :user_id AND tag = :new_tag
             """
-            new_tag_exists = db.execute(
-                text(check_new_tag_query),
-                {"user_id": user_id, "new_tag": new_tag}
-            ).fetchone()[0] > 0
+            new_tag_exists = (
+                db.execute(
+                    text(check_new_tag_query), {"user_id": user_id, "new_tag": new_tag}
+                ).fetchone()[0]
+                > 0
+            )
 
             if new_tag_exists:
                 # New tag already exists, just delete the old one
@@ -379,14 +407,12 @@ class TagService:
                     WHERE user_id = :user_id AND tag = :old_tag
                 """
                 db.execute(
-                    text(delete_old_query),
-                    {"user_id": user_id, "old_tag": old_tag}
+                    text(delete_old_query), {"user_id": user_id, "old_tag": old_tag}
                 )
-                logger.debug("Deleted old tag from user_tags (new tag already exists)", extra={
-                    "user_id": user_id,
-                    "old_tag": old_tag,
-                    "new_tag": new_tag
-                })
+                logger.debug(
+                    "Deleted old tag from user_tags (new tag already exists)",
+                    extra={"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
+                )
             else:
                 # Rename old tag to new tag
                 rename_query = """
@@ -396,34 +422,37 @@ class TagService:
                 """
                 db.execute(
                     text(rename_query),
-                    {"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag}
+                    {"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
                 )
-                logger.debug("Renamed tag in user_tags", extra={
+                logger.debug(
+                    "Renamed tag in user_tags",
+                    extra={"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to update user_tags during tag rename",
+                extra={
                     "user_id": user_id,
                     "old_tag": old_tag,
-                    "new_tag": new_tag
-                })
-        except Exception as e:
-            logger.error("Failed to update user_tags during tag rename", extra={
-                "user_id": user_id,
-                "old_tag": old_tag,
-                "new_tag": new_tag,
-                "error": str(e)
-            })
+                    "new_tag": new_tag,
+                    "error": str(e),
+                },
+            )
 
         db.commit()
 
-        logger.info("Completed tag rename across entities", extra={
-            "old_tag": old_tag,
-            "new_tag": new_tag,
-            "total_updated": total_updated
-        })
+        logger.info(
+            "Completed tag rename across entities",
+            extra={
+                "old_tag": old_tag,
+                "new_tag": new_tag,
+                "total_updated": total_updated,
+            },
+        )
 
         return total_updated
 
-    def delete_tag_across_entities(
-        self, db: Session, *, tag: str, user_id: int
-    ) -> int:
+    def delete_tag_across_entities(self, db: Session, *, tag: str, user_id: int) -> int:
         """Delete a tag from all entity types, scoped to a user's patients."""
 
         total_updated = 0
@@ -447,29 +476,25 @@ class TagService:
                     AND {self._user_patient_filter()}
                 """
 
-                result = db.execute(
-                    text(query),
-                    {
-                        "tag": tag,
-                        "user_id": user_id
-                    }
-                )
+                result = db.execute(text(query), {"tag": tag, "user_id": user_id})
 
                 updated_count = result.rowcount
                 total_updated += updated_count
 
-                logger.debug(f"Removed tag from {updated_count} records in {table_name}", extra={
-                    "table": table_name,
-                    "tag": tag,
-                    "updated_count": updated_count
-                })
+                logger.debug(
+                    f"Removed tag from {updated_count} records in {table_name}",
+                    extra={
+                        "table": table_name,
+                        "tag": tag,
+                        "updated_count": updated_count,
+                    },
+                )
 
             except Exception as e:
-                logger.error(f"Failed to delete tag from {table_name}", extra={
-                    "table": table_name,
-                    "tag": tag,
-                    "error": str(e)
-                })
+                logger.error(
+                    f"Failed to delete tag from {table_name}",
+                    extra={"table": table_name, "tag": tag, "error": str(e)},
+                )
 
         # Remove the tag from user_tags registry
         try:
@@ -477,27 +502,22 @@ class TagService:
                 DELETE FROM user_tags
                 WHERE user_id = :user_id AND tag = :tag
             """
-            db.execute(
-                text(delete_user_tag_query),
-                {"user_id": user_id, "tag": tag}
+            db.execute(text(delete_user_tag_query), {"user_id": user_id, "tag": tag})
+            logger.debug(
+                "Deleted tag from user_tags", extra={"user_id": user_id, "tag": tag}
             )
-            logger.debug("Deleted tag from user_tags", extra={
-                "user_id": user_id,
-                "tag": tag
-            })
         except Exception as e:
-            logger.error("Failed to delete tag from user_tags", extra={
-                "user_id": user_id,
-                "tag": tag,
-                "error": str(e)
-            })
+            logger.error(
+                "Failed to delete tag from user_tags",
+                extra={"user_id": user_id, "tag": tag, "error": str(e)},
+            )
 
         db.commit()
 
-        logger.info("Completed tag deletion across entities", extra={
-            "tag": tag,
-            "total_updated": total_updated
-        })
+        logger.info(
+            "Completed tag deletion across entities",
+            extra={"tag": tag, "total_updated": total_updated},
+        )
 
         return total_updated
 
@@ -535,30 +555,32 @@ class TagService:
 
                 result = db.execute(
                     text(query),
-                    {
-                        "old_tag": old_tag,
-                        "new_tag": new_tag,
-                        "user_id": user_id
-                    }
+                    {"old_tag": old_tag, "new_tag": new_tag, "user_id": user_id},
                 )
 
                 updated_count = result.rowcount
                 total_updated += updated_count
 
-                logger.debug(f"Replaced tag in {updated_count} records in {table_name}", extra={
-                    "table": table_name,
-                    "old_tag": old_tag,
-                    "new_tag": new_tag,
-                    "updated_count": updated_count
-                })
+                logger.debug(
+                    f"Replaced tag in {updated_count} records in {table_name}",
+                    extra={
+                        "table": table_name,
+                        "old_tag": old_tag,
+                        "new_tag": new_tag,
+                        "updated_count": updated_count,
+                    },
+                )
 
             except Exception as e:
-                logger.error(f"Failed to replace tag in {table_name}", extra={
-                    "table": table_name,
-                    "old_tag": old_tag,
-                    "new_tag": new_tag,
-                    "error": str(e)
-                })
+                logger.error(
+                    f"Failed to replace tag in {table_name}",
+                    extra={
+                        "table": table_name,
+                        "old_tag": old_tag,
+                        "new_tag": new_tag,
+                        "error": str(e),
+                    },
+                )
 
         # Remove old tag from user_tags registry
         # The new tag should already exist in user_tags (or will be created by sync)
@@ -568,29 +590,33 @@ class TagService:
                 WHERE user_id = :user_id AND tag = :old_tag
             """
             db.execute(
-                text(delete_old_tag_query),
-                {"user_id": user_id, "old_tag": old_tag}
+                text(delete_old_tag_query), {"user_id": user_id, "old_tag": old_tag}
             )
-            logger.debug("Deleted old tag from user_tags after replacement", extra={
-                "user_id": user_id,
-                "old_tag": old_tag,
-                "new_tag": new_tag
-            })
+            logger.debug(
+                "Deleted old tag from user_tags after replacement",
+                extra={"user_id": user_id, "old_tag": old_tag, "new_tag": new_tag},
+            )
         except Exception as e:
-            logger.error("Failed to delete old tag from user_tags during replacement", extra={
-                "user_id": user_id,
-                "old_tag": old_tag,
-                "new_tag": new_tag,
-                "error": str(e)
-            })
+            logger.error(
+                "Failed to delete old tag from user_tags during replacement",
+                extra={
+                    "user_id": user_id,
+                    "old_tag": old_tag,
+                    "new_tag": new_tag,
+                    "error": str(e),
+                },
+            )
 
         db.commit()
 
-        logger.info("Completed tag replacement across entities", extra={
-            "old_tag": old_tag,
-            "new_tag": new_tag,
-            "total_updated": total_updated
-        })
+        logger.info(
+            "Completed tag replacement across entities",
+            extra={
+                "old_tag": old_tag,
+                "new_tag": new_tag,
+                "total_updated": total_updated,
+            },
+        )
 
         return total_updated
 
@@ -606,15 +632,14 @@ class TagService:
             """
 
             result = db.execute(
-                text(existing_query),
-                {"user_id": user_id, "tag": tag}
+                text(existing_query), {"user_id": user_id, "tag": tag}
             ).fetchone()
 
             if result[0] > 0:
-                logger.info("Tag already exists for user", extra={
-                    "tag": tag,
-                    "user_id": user_id
-                })
+                logger.info(
+                    "Tag already exists for user",
+                    extra={"tag": tag, "user_id": user_id},
+                )
                 return True
 
             # Insert the new tag
@@ -623,29 +648,21 @@ class TagService:
                 VALUES (:user_id, :tag, CURRENT_TIMESTAMP)
             """
 
-            db.execute(
-                text(insert_query),
-                {
-                    "user_id": user_id,
-                    "tag": tag
-                }
-            )
+            db.execute(text(insert_query), {"user_id": user_id, "tag": tag})
 
             db.commit()
 
-            logger.info("Tag created successfully", extra={
-                "tag": tag,
-                "user_id": user_id
-            })
+            logger.info(
+                "Tag created successfully", extra={"tag": tag, "user_id": user_id}
+            )
 
             return True
 
         except Exception as e:
-            logger.error("Failed to create tag", extra={
-                "tag": tag,
-                "user_id": user_id,
-                "error": str(e)
-            })
+            logger.error(
+                "Failed to create tag",
+                extra={"tag": tag, "user_id": user_id, "error": str(e)},
+            )
             db.rollback()
             raise
 
@@ -662,33 +679,30 @@ class TagService:
             """
 
             result = db.execute(
-                text(query),
-                {"color": color, "tag_id": tag_id, "user_id": user_id}
+                text(query), {"color": color, "tag_id": tag_id, "user_id": user_id}
             )
 
             if result.rowcount == 0:
-                logger.warning("Tag not found for color update", extra={
-                    "tag_id": tag_id,
-                    "user_id": user_id
-                })
+                logger.warning(
+                    "Tag not found for color update",
+                    extra={"tag_id": tag_id, "user_id": user_id},
+                )
                 return False
 
             db.commit()
 
-            logger.info("Tag color updated", extra={
-                "tag_id": tag_id,
-                "user_id": user_id,
-                "color": color
-            })
+            logger.info(
+                "Tag color updated",
+                extra={"tag_id": tag_id, "user_id": user_id, "color": color},
+            )
 
             return True
 
         except Exception as e:
-            logger.error("Failed to update tag color", extra={
-                "tag_id": tag_id,
-                "user_id": user_id,
-                "error": str(e)
-            })
+            logger.error(
+                "Failed to update tag color",
+                extra={"tag_id": tag_id, "user_id": user_id, "error": str(e)},
+            )
             db.rollback()
             raise
 
@@ -703,14 +717,16 @@ class TagService:
                 # Validate table name for security
                 self._validate_table_name(table_name)
 
-                union_queries.append(f"""
+                union_queries.append(
+                    f"""
                     SELECT DISTINCT tag
                     FROM "{table_name}" r
                     JOIN patients p ON r.patient_id = p.id
                     JOIN users u ON p.user_id = u.id,
                     json_array_elements_text(r.tags) as tag
                     WHERE r.tags IS NOT NULL AND u.id = :user_id
-                """)
+                """
+                )
 
             if not union_queries:
                 return 0
@@ -730,18 +746,18 @@ class TagService:
 
             db.commit()
 
-            logger.info("Synced tags from medical records", extra={
-                "user_id": user_id,
-                "synced_count": synced_count
-            })
+            logger.info(
+                "Synced tags from medical records",
+                extra={"user_id": user_id, "synced_count": synced_count},
+            )
 
             return synced_count
 
         except Exception as e:
-            logger.error("Failed to sync tags from medical records", extra={
-                "user_id": user_id,
-                "error": str(e)
-            })
+            logger.error(
+                "Failed to sync tags from medical records",
+                extra={"user_id": user_id, "error": str(e)},
+            )
             db.rollback()
             return 0
 

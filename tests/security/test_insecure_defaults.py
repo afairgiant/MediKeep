@@ -3,6 +3,7 @@
 Covers GHSA-xx23-8fx5-ph4q findings 3, 11, 12.
 Finding 5 (admin password) intentionally kept as-is per project decision.
 """
+
 import inspect
 
 
@@ -23,18 +24,18 @@ class TestSecretKeyDefaults:
 
         settings = Settings()
         for insecure in KNOWN_INSECURE_SECRETS:
-            assert settings.SECRET_KEY != insecure, (
-                f"SECRET_KEY must not be '{insecure}'"
-            )
+            assert (
+                settings.SECRET_KEY != insecure
+            ), f"SECRET_KEY must not be '{insecure}'"
 
     def test_secret_key_minimum_length(self):
         """SECRET_KEY must be at least 32 characters."""
         from app.core.config import Settings
 
         settings = Settings()
-        assert len(settings.SECRET_KEY) >= 32, (
-            "SECRET_KEY must be at least 32 characters"
-        )
+        assert (
+            len(settings.SECRET_KEY) >= 32
+        ), "SECRET_KEY must be at least 32 characters"
 
 
 class TestDebugDefault:
@@ -59,9 +60,9 @@ class TestEnableApiDocsDefault:
         from app.core.config import Settings
 
         settings = Settings()
-        assert settings.ENABLE_API_DOCS is False, (
-            "ENABLE_API_DOCS must default to False"
-        )
+        assert (
+            settings.ENABLE_API_DOCS is False
+        ), "ENABLE_API_DOCS must default to False"
 
 
 class TestIntegrationSaltDefaults:
@@ -72,24 +73,24 @@ class TestIntegrationSaltDefaults:
         from app.core.config import Settings
 
         settings = Settings()
-        assert settings.PAPERLESS_SALT != "paperless_integration_salt_v1", (
-            "PAPERLESS_SALT must not use the hardcoded default"
-        )
+        assert (
+            settings.PAPERLESS_SALT != "paperless_integration_salt_v1"
+        ), "PAPERLESS_SALT must not use the hardcoded default"
 
     def test_papra_salt_is_not_hardcoded_default(self):
         """PAPRA_SALT must not be the publicly known default."""
         from app.core.config import Settings
 
         settings = Settings()
-        assert settings.PAPRA_SALT != "papra_integration_salt_v1", (
-            "PAPRA_SALT must not use the hardcoded default"
-        )
+        assert (
+            settings.PAPRA_SALT != "papra_integration_salt_v1"
+        ), "PAPRA_SALT must not use the hardcoded default"
 
     def test_salts_are_different_from_each_other(self):
         """Each integration salt should be unique."""
         from app.core.config import Settings
 
         settings = Settings()
-        assert settings.PAPERLESS_SALT != settings.PAPRA_SALT, (
-            "PAPERLESS_SALT and PAPRA_SALT must be different"
-        )
+        assert (
+            settings.PAPERLESS_SALT != settings.PAPRA_SALT
+        ), "PAPERLESS_SALT and PAPRA_SALT must be different"

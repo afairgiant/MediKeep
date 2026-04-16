@@ -8,8 +8,8 @@ const GITHUB_REPO_URL = 'https://github.com/afairgiant/MediKeep';
 function convertListBlock(match: string, prefix: string): string {
   const items = match
     .split('\n')
-    .filter((line) => line.startsWith(prefix))
-    .map((line) => `<li>${line.slice(prefix.length).trim()}</li>`)
+    .filter(line => line.startsWith(prefix))
+    .map(line => `<li>${line.slice(prefix.length).trim()}</li>`)
     .join('');
   return `<ul>${items}</ul>`;
 }
@@ -48,21 +48,19 @@ export function renderReleaseMarkdown(markdown: string): string {
   );
 
   // Convert `- item` list blocks into <ul><li>
-  html = html.replace(
-    /(?:^- .+$\n?)+/gm,
-    (match) => convertListBlock(match, '- ')
+  html = html.replace(/(?:^- .+$\n?)+/gm, match =>
+    convertListBlock(match, '- ')
   );
 
   // Convert `* item` list blocks into <ul><li>
-  html = html.replace(
-    /(?:^\* .+$\n?)+/gm,
-    (match) => convertListBlock(match, '* ')
+  html = html.replace(/(?:^\* .+$\n?)+/gm, match =>
+    convertListBlock(match, '* ')
   );
 
   // Convert remaining plain text lines to paragraphs (skip empty lines and already-tagged lines)
   html = html
     .split('\n')
-    .map((line) => {
+    .map(line => {
       const trimmed = line.trim();
       if (!trimmed) return '';
       if (trimmed.startsWith('<')) return trimmed;

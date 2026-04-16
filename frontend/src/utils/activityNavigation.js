@@ -187,7 +187,7 @@ export const getActivityIcon = modelName => {
 
   const normalizedModelName = modelName.toLowerCase();
   const entityType = MODEL_TO_ENTITY_TYPE[normalizedModelName];
-  
+
   if (!entityType) {
     return null;
   }
@@ -286,7 +286,7 @@ export const getModelDisplayName = modelName => {
 
   const normalizedModelName = modelName.toLowerCase();
   const entityType = MODEL_TO_ENTITY_TYPE[normalizedModelName];
-  
+
   if (!entityType) {
     return modelName;
   }
@@ -430,9 +430,8 @@ export const filterActivities = (
   return activities.filter(activity => {
     const modelName = activity.model_name?.toLowerCase();
     const entityType = MODEL_TO_ENTITY_TYPE[modelName];
-    
-    const typeMatch =
-      typeFilter === 'all' || entityType === typeFilter;
+
+    const typeMatch = typeFilter === 'all' || entityType === typeFilter;
     const actionMatch =
       actionFilter === 'all' || activity.action?.toLowerCase() === actionFilter;
 
@@ -456,10 +455,16 @@ export const groupActivities = (activities, groupBy = 'date') => {
 
     switch (groupBy) {
       case 'date':
-        key = new Date(activity.timestamp).toLocaleDateString(timezoneService.dateLocale, {
-          timeZone: timezoneService.getTimezone(),
-          weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
-        });
+        key = new Date(activity.timestamp).toLocaleDateString(
+          timezoneService.dateLocale,
+          {
+            timeZone: timezoneService.getTimezone(),
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }
+        );
         break;
       case 'model_name':
         key = getModelDisplayName(activity.model_name);

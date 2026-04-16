@@ -40,30 +40,44 @@ const ForceChangePassword = () => {
     e.preventDefault();
     setError('');
 
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      setError(t('settings:security.password.forceChange.errors.allFieldsRequired'));
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
+      setError(
+        t('settings:security.password.forceChange.errors.allFieldsRequired')
+      );
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError(t('settings:security.password.forceChange.errors.passwordsMustMatch'));
+      setError(
+        t('settings:security.password.forceChange.errors.passwordsMustMatch')
+      );
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setError(t('settings:security.password.forceChange.errors.passwordTooShort'));
+      setError(
+        t('settings:security.password.forceChange.errors.passwordTooShort')
+      );
       return;
     }
 
     const hasLetter = /[a-zA-Z]/.test(passwordData.newPassword);
     const hasNumber = /[0-9]/.test(passwordData.newPassword);
     if (!hasLetter || !hasNumber) {
-      setError(t('settings:security.password.forceChange.errors.passwordComplexity'));
+      setError(
+        t('settings:security.password.forceChange.errors.passwordComplexity')
+      );
       return;
     }
 
     if (passwordData.currentPassword === passwordData.newPassword) {
-      setError(t('settings:security.password.forceChange.errors.passwordMustDiffer'));
+      setError(
+        t('settings:security.password.forceChange.errors.passwordMustDiffer')
+      );
       return;
     }
 
@@ -118,12 +132,22 @@ const ForceChangePassword = () => {
           {'MediKeep'}
         </h1>
         <h2>{t('settings:security.password.forceChange.title')}</h2>
-        <p style={{ color: 'var(--color-text-secondary, #666)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+        <p
+          style={{
+            color: 'var(--color-text-secondary, #666)',
+            marginBottom: '1.5rem',
+            fontSize: '0.95rem',
+          }}
+        >
           {t('settings:security.password.forceChange.subtitle')}
         </p>
 
         <div className="change-password-content">
-          {error && <Alert type="error" id="fcp-error">{error}</Alert>}
+          {error && (
+            <Alert type="error" id="fcp-error">
+              {error}
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit} className="password-form">
             <div className="form-group">
@@ -191,11 +215,7 @@ const ForceChangePassword = () => {
               >
                 {t('navigation:menu.logout')}
               </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" variant="primary" disabled={isSubmitting}>
                 {t('settings:security.password.forceChange.submit')}
               </Button>
             </div>

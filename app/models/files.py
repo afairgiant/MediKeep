@@ -46,9 +46,7 @@ class EntityFile(Base):
     )  # UUID of the task in paperless-ngx system
 
     # Papra integration fields
-    papra_document_id = Column(
-        String(255), nullable=True
-    )  # ID in Papra system
+    papra_document_id = Column(String(255), nullable=True)  # ID in Papra system
     papra_organization_id = Column(
         String(255), nullable=True
     )  # Organization ID in Papra system

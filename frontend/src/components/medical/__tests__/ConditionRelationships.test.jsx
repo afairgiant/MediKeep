@@ -3,8 +3,7 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
-import render, { screen, fireEvent, waitFor } from '../../../test-utils/render';
+import render, { screen, waitFor } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import ConditionRelationships from '../ConditionRelationships';
@@ -12,7 +11,9 @@ import ConditionRelationships from '../ConditionRelationships';
 // Mock apiService
 vi.mock('../../../services/api', () => ({
   apiService: {
-    createLabResultCondition: vi.fn(() => Promise.resolve({ id: 10, condition_id: 2, relevance_note: '' })),
+    createLabResultCondition: vi.fn(() =>
+      Promise.resolve({ id: 10, condition_id: 2, relevance_note: '' })
+    ),
     updateLabResultCondition: vi.fn(() => Promise.resolve()),
     deleteLabResultCondition: vi.fn(() => Promise.resolve()),
   },
@@ -20,13 +21,13 @@ vi.mock('../../../services/api', () => ({
 
 // Mock @tabler/icons-react
 vi.mock('@tabler/icons-react', () => ({
-  IconPlus: (props) => <span data-testid="icon-plus" {...props} />,
-  IconTrash: (props) => <span data-testid="icon-trash" {...props} />,
-  IconEdit: (props) => <span data-testid="icon-edit" {...props} />,
-  IconCheck: (props) => <span data-testid="icon-check" {...props} />,
-  IconX: (props) => <span data-testid="icon-x" {...props} />,
-  IconStethoscope: (props) => <span data-testid="icon-stethoscope" {...props} />,
-  IconInfoCircle: (props) => <span data-testid="icon-info" {...props} />,
+  IconPlus: props => <span data-testid="icon-plus" {...props} />,
+  IconTrash: props => <span data-testid="icon-trash" {...props} />,
+  IconEdit: props => <span data-testid="icon-edit" {...props} />,
+  IconCheck: props => <span data-testid="icon-check" {...props} />,
+  IconX: props => <span data-testid="icon-x" {...props} />,
+  IconStethoscope: props => <span data-testid="icon-stethoscope" {...props} />,
+  IconInfoCircle: props => <span data-testid="icon-info" {...props} />,
 }));
 
 // Mock scrollIntoView for Mantine Select/MultiSelect
@@ -34,7 +35,12 @@ Element.prototype.scrollIntoView = vi.fn();
 
 describe('ConditionRelationships Component', () => {
   const mockConditions = [
-    { id: 1, diagnosis: 'Hypertension', status: 'active', severity: 'moderate' },
+    {
+      id: 1,
+      diagnosis: 'Hypertension',
+      status: 'active',
+      severity: 'moderate',
+    },
     { id: 2, diagnosis: 'Diabetes', status: 'chronic', severity: 'moderate' },
     { id: 3, diagnosis: 'Asthma', status: 'resolved', severity: 'mild' },
   ];
@@ -78,7 +84,9 @@ describe('ConditionRelationships Component', () => {
       render(<ConditionRelationships {...defaultProps} />);
 
       expect(screen.getByText('Hypertension')).toBeInTheDocument();
-      expect(screen.getByText('Elevated blood pressure readings')).toBeInTheDocument();
+      expect(
+        screen.getByText('Elevated blood pressure readings')
+      ).toBeInTheDocument();
     });
 
     it('should show condition status badge', () => {
@@ -118,7 +126,9 @@ describe('ConditionRelationships Component', () => {
       };
       render(<ConditionRelationships {...propsAllLinked} />);
 
-      expect(screen.queryByText('buttons.linkCondition')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('buttons.linkCondition')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -130,7 +140,9 @@ describe('ConditionRelationships Component', () => {
       await userEvent.click(linkButton);
 
       await waitFor(() => {
-        expect(screen.getByText('modals.linkConditionToLabResult')).toBeInTheDocument();
+        expect(
+          screen.getByText('modals.linkConditionToLabResult')
+        ).toBeInTheDocument();
       });
     });
 
@@ -152,7 +164,9 @@ describe('ConditionRelationships Component', () => {
       await userEvent.click(linkButton);
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/modals\.relevanceNote/)).toBeInTheDocument();
+        expect(
+          screen.getByLabelText(/modals\.relevanceNote/)
+        ).toBeInTheDocument();
       });
     });
 
@@ -216,7 +230,9 @@ describe('ConditionRelationships Component', () => {
       };
       render(<ConditionRelationships {...propsNoNote} />);
 
-      expect(screen.getByText('modals.noRelevanceNoteProvided')).toBeInTheDocument();
+      expect(
+        screen.getByText('modals.noRelevanceNoteProvided')
+      ).toBeInTheDocument();
     });
   });
 

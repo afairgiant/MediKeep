@@ -62,9 +62,7 @@ def read_practices(
     """Retrieve practices with optional search and practitioner counts."""
     with handle_database_errors(request=request):
         if search:
-            practices = practice.search_by_name(
-                db, name=search, skip=skip, limit=limit
-            )
+            practices = practice.search_by_name(db, name=search, skip=skip, limit=limit)
         else:
             practices = practice.get_multi(db, skip=skip, limit=limit)
 
@@ -125,7 +123,9 @@ def read_practice(
     with handle_database_errors(request=request):
         practice_obj = practice.get_with_practitioners(db, practice_id=practice_id)
         handle_not_found(practice_obj, "Practice", request)
-        practice_obj.practitioner_count = len(practice_obj.practitioners) if practice_obj.practitioners else 0
+        practice_obj.practitioner_count = (
+            len(practice_obj.practitioners) if practice_obj.practitioners else 0
+        )
         return practice_obj
 
 

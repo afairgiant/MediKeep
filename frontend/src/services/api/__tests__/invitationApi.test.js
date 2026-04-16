@@ -37,13 +37,21 @@ describe('InvitationApi Service', () => {
 
     it('should fetch pending invitations with invitation type filter', async () => {
       const mockInvitations = [
-        { id: 'inv-1', title: 'Family History Invitation', type: 'family_history_share' },
+        {
+          id: 'inv-1',
+          title: 'Family History Invitation',
+          type: 'family_history_share',
+        },
       ];
       apiService.get.mockResolvedValue(mockInvitations);
 
-      const result = await invitationApi.getPendingInvitations('family_history_share');
+      const result = await invitationApi.getPendingInvitations(
+        'family_history_share'
+      );
 
-      expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?invitation_type=family_history_share');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/invitations/pending?invitation_type=family_history_share'
+      );
       expect(result).toEqual(mockInvitations);
     });
 
@@ -51,7 +59,9 @@ describe('InvitationApi Service', () => {
       const error = new Error('Network error');
       apiService.get.mockRejectedValue(error);
 
-      await expect(invitationApi.getPendingInvitations()).rejects.toThrow('Network error');
+      await expect(invitationApi.getPendingInvitations()).rejects.toThrow(
+        'Network error'
+      );
       expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?');
     });
 
@@ -81,13 +91,19 @@ describe('InvitationApi Service', () => {
 
     it('should fetch sent invitations with invitation type filter', async () => {
       const mockInvitations = [
-        { id: 'inv-3', title: 'Patient Share Invitation', type: 'patient_share' },
+        {
+          id: 'inv-3',
+          title: 'Patient Share Invitation',
+          type: 'patient_share',
+        },
       ];
       apiService.get.mockResolvedValue(mockInvitations);
 
       const result = await invitationApi.getSentInvitations('patient_share');
 
-      expect(apiService.get).toHaveBeenCalledWith('/invitations/sent?invitation_type=patient_share');
+      expect(apiService.get).toHaveBeenCalledWith(
+        '/invitations/sent?invitation_type=patient_share'
+      );
       expect(result).toEqual(mockInvitations);
     });
 
@@ -103,7 +119,9 @@ describe('InvitationApi Service', () => {
       const error = new Error('Unauthorized');
       apiService.get.mockRejectedValue(error);
 
-      await expect(invitationApi.getSentInvitations()).rejects.toThrow('Unauthorized');
+      await expect(invitationApi.getSentInvitations()).rejects.toThrow(
+        'Unauthorized'
+      );
     });
   });
 
@@ -112,12 +130,18 @@ describe('InvitationApi Service', () => {
       const mockResponse = { message: 'Invitation accepted successfully' };
       apiService.post.mockResolvedValue(mockResponse);
 
-      const result = await invitationApi.respondToInvitation('inv-123', 'accepted');
+      const result = await invitationApi.respondToInvitation(
+        'inv-123',
+        'accepted'
+      );
 
-      expect(apiService.post).toHaveBeenCalledWith('/invitations/inv-123/respond', {
-        response: 'accepted',
-        response_note: null,
-      });
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/invitations/inv-123/respond',
+        {
+          response: 'accepted',
+          response_note: null,
+        }
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -131,10 +155,13 @@ describe('InvitationApi Service', () => {
         'Cannot accept at this time'
       );
 
-      expect(apiService.post).toHaveBeenCalledWith('/invitations/inv-456/respond', {
-        response: 'rejected',
-        response_note: 'Cannot accept at this time',
-      });
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/invitations/inv-456/respond',
+        {
+          response: 'rejected',
+          response_note: 'Cannot accept at this time',
+        }
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -144,10 +171,13 @@ describe('InvitationApi Service', () => {
 
       await invitationApi.respondToInvitation('inv-789', 'accepted');
 
-      expect(apiService.post).toHaveBeenCalledWith('/invitations/inv-789/respond', {
-        response: 'accepted',
-        response_note: null,
-      });
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/invitations/inv-789/respond',
+        {
+          response: 'accepted',
+          response_note: null,
+        }
+      );
     });
 
     it('should handle API errors during response', async () => {
@@ -161,16 +191,21 @@ describe('InvitationApi Service', () => {
 
     it('should handle different response types', async () => {
       const responseTypes = ['accepted', 'rejected', 'maybe'];
-      
+
       for (const responseType of responseTypes) {
-        apiService.post.mockResolvedValue({ message: `Invitation ${responseType}` });
-        
-        await invitationApi.respondToInvitation('inv-test', responseType);
-        
-        expect(apiService.post).toHaveBeenCalledWith('/invitations/inv-test/respond', {
-          response: responseType,
-          response_note: null,
+        apiService.post.mockResolvedValue({
+          message: `Invitation ${responseType}`,
         });
+
+        await invitationApi.respondToInvitation('inv-test', responseType);
+
+        expect(apiService.post).toHaveBeenCalledWith(
+          '/invitations/inv-test/respond',
+          {
+            response: responseType,
+            response_note: null,
+          }
+        );
       }
     });
   });
@@ -190,29 +225,33 @@ describe('InvitationApi Service', () => {
       const error = new Error('Invitation cannot be cancelled');
       apiService.delete.mockRejectedValue(error);
 
-      await expect(invitationApi.cancelInvitation('inv-invalid')).rejects.toThrow(
-        'Invitation cannot be cancelled'
-      );
+      await expect(
+        invitationApi.cancelInvitation('inv-invalid')
+      ).rejects.toThrow('Invitation cannot be cancelled');
     });
 
     it('should handle non-existent invitation', async () => {
       const error = new Error('Invitation not found');
       apiService.delete.mockRejectedValue(error);
 
-      await expect(invitationApi.cancelInvitation('non-existent')).rejects.toThrow(
-        'Invitation not found'
-      );
+      await expect(
+        invitationApi.cancelInvitation('non-existent')
+      ).rejects.toThrow('Invitation not found');
     });
   });
 
   describe('revokeInvitation', () => {
     it('should revoke invitation successfully', async () => {
-      const mockResponse = { message: 'Invitation access revoked successfully' };
+      const mockResponse = {
+        message: 'Invitation access revoked successfully',
+      };
       apiService.post.mockResolvedValue(mockResponse);
 
       const result = await invitationApi.revokeInvitation('inv-123');
 
-      expect(apiService.post).toHaveBeenCalledWith('/invitations/inv-123/revoke');
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/invitations/inv-123/revoke'
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -220,18 +259,18 @@ describe('InvitationApi Service', () => {
       const error = new Error('Cannot revoke invitation');
       apiService.post.mockRejectedValue(error);
 
-      await expect(invitationApi.revokeInvitation('inv-invalid')).rejects.toThrow(
-        'Cannot revoke invitation'
-      );
+      await expect(
+        invitationApi.revokeInvitation('inv-invalid')
+      ).rejects.toThrow('Cannot revoke invitation');
     });
 
     it('should handle already revoked invitations', async () => {
       const error = new Error('Invitation already revoked');
       apiService.post.mockRejectedValue(error);
 
-      await expect(invitationApi.revokeInvitation('inv-revoked')).rejects.toThrow(
-        'Invitation already revoked'
-      );
+      await expect(
+        invitationApi.revokeInvitation('inv-revoked')
+      ).rejects.toThrow('Invitation already revoked');
     });
   });
 
@@ -277,7 +316,7 @@ describe('InvitationApi Service', () => {
 
   describe('cleanupExpiredInvitations', () => {
     it('should cleanup expired invitations successfully', async () => {
-      const mockResponse = { 
+      const mockResponse = {
         message: 'Cleanup completed',
         cleaned_count: 5,
       };
@@ -290,7 +329,7 @@ describe('InvitationApi Service', () => {
     });
 
     it('should handle cleanup with no expired invitations', async () => {
-      const mockResponse = { 
+      const mockResponse = {
         message: 'No expired invitations found',
         cleaned_count: 0,
       };
@@ -317,7 +356,9 @@ describe('InvitationApi Service', () => {
       timeoutError.code = 'TIMEOUT';
       apiService.get.mockRejectedValue(timeoutError);
 
-      await expect(invitationApi.getPendingInvitations()).rejects.toThrow('Network timeout');
+      await expect(invitationApi.getPendingInvitations()).rejects.toThrow(
+        'Network timeout'
+      );
     });
 
     it('should handle malformed responses', async () => {
@@ -377,12 +418,18 @@ describe('InvitationApi Service', () => {
       const mockResponse = { message: 'Success' };
       apiService.post.mockResolvedValue(mockResponse);
 
-      const result = await invitationApi.respondToInvitation(undefined, 'accepted');
+      const result = await invitationApi.respondToInvitation(
+        undefined,
+        'accepted'
+      );
 
-      expect(apiService.post).toHaveBeenCalledWith('/invitations/undefined/respond', {
-        response: 'accepted',
-        response_note: null,
-      });
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/invitations/undefined/respond',
+        {
+          response: 'accepted',
+          response_note: null,
+        }
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -392,10 +439,13 @@ describe('InvitationApi Service', () => {
 
       const result = await invitationApi.respondToInvitation(null, 'accepted');
 
-      expect(apiService.post).toHaveBeenCalledWith('/invitations/null/respond', {
-        response: 'accepted',
-        response_note: null,
-      });
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/invitations/null/respond',
+        {
+          response: 'accepted',
+          response_note: null,
+        }
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -406,10 +456,13 @@ describe('InvitationApi Service', () => {
 
       await invitationApi.respondToInvitation('inv-123', 'accepted', longNote);
 
-      expect(apiService.post).toHaveBeenCalledWith('/invitations/inv-123/respond', {
-        response: 'accepted',
-        response_note: longNote,
-      });
+      expect(apiService.post).toHaveBeenCalledWith(
+        '/invitations/inv-123/respond',
+        {
+          response: 'accepted',
+          response_note: longNote,
+        }
+      );
     });
 
     it('should handle special characters in invitation IDs', async () => {
@@ -419,10 +472,13 @@ describe('InvitationApi Service', () => {
 
       await invitationApi.respondToInvitation(specialId, 'accepted');
 
-      expect(apiService.post).toHaveBeenCalledWith(`/invitations/${specialId}/respond`, {
-        response: 'accepted',
-        response_note: null,
-      });
+      expect(apiService.post).toHaveBeenCalledWith(
+        `/invitations/${specialId}/respond`,
+        {
+          response: 'accepted',
+          response_note: null,
+        }
+      );
     });
   });
 

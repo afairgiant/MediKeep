@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Modal,
   Button,
@@ -65,7 +65,10 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
 
     try {
       setIsResetting(true);
-      await adminApiService.adminResetPassword(userId, passwordData.newPassword);
+      await adminApiService.adminResetPassword(
+        userId,
+        passwordData.newPassword
+      );
 
       setPasswordData({ newPassword: '', confirmPassword: '' });
       setError('');
@@ -122,9 +125,7 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
             mt="xs"
             p="xs"
           >
-            <Text size="xs">
-              {t('users.passwordModal.immediateReset')}
-            </Text>
+            <Text size="xs">{t('users.passwordModal.immediateReset')}</Text>
           </Alert>
         </Paper>
 
@@ -134,7 +135,12 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
               label={t('users.passwordModal.newPassword')}
               placeholder={t('users.passwordModal.enterNewPassword')}
               value={passwordData.newPassword}
-              onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.currentTarget.value }))}
+              onChange={e =>
+                setPasswordData(prev => ({
+                  ...prev,
+                  newPassword: e.currentTarget.value,
+                }))
+              }
               required
               minLength={6}
               disabled={isResetting}
@@ -145,7 +151,12 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
               label={t('settings:security.password.confirmPassword')}
               placeholder={t('users.passwordModal.confirmPlaceholder')}
               value={passwordData.confirmPassword}
-              onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.currentTarget.value }))}
+              onChange={e =>
+                setPasswordData(prev => ({
+                  ...prev,
+                  confirmPassword: e.currentTarget.value,
+                }))
+              }
               required
               disabled={isResetting}
             />
@@ -158,10 +169,7 @@ const AdminResetPasswordModal = ({ isOpen, onClose, userId, username }) => {
               >
                 {t('shared:fields.cancel')}
               </Button>
-              <Button
-                type="submit"
-                loading={isResetting}
-              >
+              <Button type="submit" loading={isResetting}>
                 {t('shared:labels.resetPassword')}
               </Button>
             </Group>

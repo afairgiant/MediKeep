@@ -25,29 +25,62 @@ logger = get_logger(__name__)
 
 # Security Limits (configurable via environment or config file)
 MAX_COMPRESSION_RATIO = float(os.getenv("MAX_COMPRESSION_RATIO", "10.0"))
-MAX_UNCOMPRESSED_SIZE = int(os.getenv("MAX_UNCOMPRESSED_SIZE", str(10 * 1024 * 1024 * 1024)))  # 10GB
+MAX_UNCOMPRESSED_SIZE = int(
+    os.getenv("MAX_UNCOMPRESSED_SIZE", str(10 * 1024 * 1024 * 1024))
+)  # 10GB
 MAX_FILES_IN_ARCHIVE = int(os.getenv("MAX_FILES_IN_ARCHIVE", "10000"))
-MAX_SINGLE_FILE_SIZE = int(os.getenv("MAX_SINGLE_FILE_SIZE", str(500 * 1024 * 1024)))  # 500MB
+MAX_SINGLE_FILE_SIZE = int(
+    os.getenv("MAX_SINGLE_FILE_SIZE", str(500 * 1024 * 1024))
+)  # 500MB
 
 # Prohibited file extensions (executables, scripts)
 # Note: .js files are JavaScript executables (blocked for security)
 # .json files are data files and are allowed elsewhere in the application
 PROHIBITED_EXTENSIONS = {
-    '.exe', '.bat', '.cmd', '.com', '.msi', '.scr',  # Windows executables
-    '.sh', '.bash', '.zsh', '.fish',  # Unix shells
-    '.ps1', '.psm1', '.psd1',  # PowerShell
-    '.vbs', '.vbe', '.js', '.jse', '.wsf', '.wsh',  # Scripts (.js = JavaScript code, NOT .json)
-    '.app', '.deb', '.rpm',  # Application packages
-    '.jar',  # Java executables
+    ".exe",
+    ".bat",
+    ".cmd",
+    ".com",
+    ".msi",
+    ".scr",  # Windows executables
+    ".sh",
+    ".bash",
+    ".zsh",
+    ".fish",  # Unix shells
+    ".ps1",
+    ".psm1",
+    ".psd1",  # PowerShell
+    ".vbs",
+    ".vbe",
+    ".js",
+    ".jse",
+    ".wsf",
+    ".wsh",  # Scripts (.js = JavaScript code, NOT .json)
+    ".app",
+    ".deb",
+    ".rpm",  # Application packages
+    ".jar",  # Java executables
 }
 
 # Archive file extensions (for nested archive detection)
-ARCHIVE_EXTENSIONS = {'.zip', '.tar', '.gz', '.bz2', '.7z', '.rar', '.iso', '.tar.gz', '.tar.bz2', '.tar.xz'}
+ARCHIVE_EXTENSIONS = {
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".7z",
+    ".rar",
+    ".iso",
+    ".tar.gz",
+    ".tar.bz2",
+    ".tar.xz",
+}
 
 
 @dataclass
 class ValidationResult:
     """Result of archive validation."""
+
     is_valid: bool
     error_message: Optional[str] = None
     warnings: List[str] = field(default_factory=list)
@@ -59,6 +92,7 @@ class ValidationResult:
 @dataclass
 class FileInfo:
     """Information about a file in an archive."""
+
     name: str
     size: int
     compressed_size: int
@@ -87,16 +121,12 @@ def validate_zip_file(file_path: str) -> ValidationResult:
     try:
         # Check if file exists
         if not os.path.exists(file_path):
-            return ValidationResult(
-                is_valid=False,
-                error_message="File does not exist"
-            )
+            return ValidationResult(is_valid=False, error_message="File does not exist")
 
         # Check ZIP integrity
         if not zipfile.is_zipfile(file_path):
             return ValidationResult(
-                is_valid=False,
-                error_message="File is not a valid ZIP archive"
+                is_valid=False, error_message="File is not a valid ZIP archive"
             )
 
         # Check ZIP bomb
@@ -109,13 +139,13 @@ def validate_zip_file(file_path: str) -> ValidationResult:
                     LogFields.EVENT: "zip_bomb_detected",
                     "compression_ratio": ratio,
                     "uncompressed_size": uncompressed_size,
-                    "file": file_path
-                }
+                    "file": file_path,
+                },
             )
             return ValidationResult(
                 is_valid=False,
                 error_message=f"Suspicious compression ratio detected ({ratio:.2f}:1). Maximum allowed: {MAX_COMPRESSION_RATIO}:1",
-                compression_ratio=ratio
+                compression_ratio=ratio,
             )
 
         # Check file count
@@ -124,7 +154,7 @@ def validate_zip_file(file_path: str) -> ValidationResult:
             return ValidationResult(
                 is_valid=False,
                 error_message=f"Archive exceeds file count limit ({file_count} files). Maximum allowed: {MAX_FILES_IN_ARCHIVE}",
-                file_count=file_count
+                file_count=file_count,
             )
 
         # Check for path traversal
@@ -136,12 +166,12 @@ def validate_zip_file(file_path: str) -> ValidationResult:
                     LogFields.CATEGORY: "security",
                     LogFields.EVENT: "path_traversal_attempt",
                     "file": file_path,
-                    "unsafe_paths": unsafe_paths[:5]  # Log first 5
-                }
+                    "unsafe_paths": unsafe_paths[:5],  # Log first 5
+                },
             )
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Invalid file paths detected in archive (possible path traversal attack)"
+                error_message=f"Invalid file paths detected in archive (possible path traversal attack)",
             )
 
         # Check for prohibited file types
@@ -154,27 +184,29 @@ def validate_zip_file(file_path: str) -> ValidationResult:
                     LogFields.EVENT: "prohibited_files_detected",
                     "file": file_path,
                     "prohibited_count": len(prohibited_files),
-                    "prohibited_files": prohibited_files[:10]  # Log first 10
-                }
+                    "prohibited_files": prohibited_files[:10],  # Log first 10
+                },
             )
             return ValidationResult(
                 is_valid=False,
-                error_message=f"Prohibited file types detected: {', '.join(prohibited_files[:5])}"
+                error_message=f"Prohibited file types detected: {', '.join(prohibited_files[:5])}",
             )
 
         # Check for nested archives (warning only)
         nested_archives = check_nested_archives(file_path)
         warnings = []
         if nested_archives:
-            warnings.append(f"Archive contains nested archives: {', '.join(nested_archives[:3])}")
+            warnings.append(
+                f"Archive contains nested archives: {', '.join(nested_archives[:3])}"
+            )
             logger.info(
                 f"Nested archives detected",
                 extra={
                     LogFields.CATEGORY: "app",
                     LogFields.EVENT: "nested_archive_detected",
                     "file": file_path,
-                    "nested_count": len(nested_archives)
-                }
+                    "nested_count": len(nested_archives),
+                },
             )
 
         # All checks passed
@@ -186,8 +218,8 @@ def validate_zip_file(file_path: str) -> ValidationResult:
                 "file": file_path,
                 "compression_ratio": ratio,
                 "file_count": file_count,
-                "uncompressed_size": uncompressed_size
-            }
+                "uncompressed_size": uncompressed_size,
+            },
         )
 
         return ValidationResult(
@@ -195,7 +227,7 @@ def validate_zip_file(file_path: str) -> ValidationResult:
             compression_ratio=ratio,
             file_count=file_count,
             total_uncompressed_size=uncompressed_size,
-            warnings=warnings
+            warnings=warnings,
         )
 
     except Exception as e:
@@ -205,12 +237,11 @@ def validate_zip_file(file_path: str) -> ValidationResult:
                 LogFields.CATEGORY: "app",
                 LogFields.EVENT: "archive_validation_error",
                 LogFields.ERROR: str(e),
-                "file": file_path
-            }
+                "file": file_path,
+            },
         )
         return ValidationResult(
-            is_valid=False,
-            error_message=f"Validation error: {str(e)}"
+            is_valid=False, error_message=f"Validation error: {str(e)}"
         )
 
 
@@ -227,7 +258,7 @@ def check_zip_bomb(file_path: str) -> Tuple[bool, float, int]:
     compressed_size = os.path.getsize(file_path)
     total_uncompressed = 0
 
-    with zipfile.ZipFile(file_path, 'r') as zf:
+    with zipfile.ZipFile(file_path, "r") as zf:
         for info in zf.infolist():
             # Skip directories
             if info.is_dir():
@@ -237,7 +268,9 @@ def check_zip_bomb(file_path: str) -> Tuple[bool, float, int]:
 
             # Early exit if exceeding limits
             if total_uncompressed > MAX_UNCOMPRESSED_SIZE:
-                ratio = total_uncompressed / compressed_size if compressed_size > 0 else 0
+                ratio = (
+                    total_uncompressed / compressed_size if compressed_size > 0 else 0
+                )
                 return False, ratio, total_uncompressed
 
             # Check individual file size
@@ -248,12 +281,14 @@ def check_zip_bomb(file_path: str) -> Tuple[bool, float, int]:
                         LogFields.CATEGORY: "security",
                         LogFields.EVENT: "large_file_in_archive",
                         "file_name": info.filename,
-                        "file_size": info.file_size
-                    }
+                        "file_size": info.file_size,
+                    },
                 )
 
     # Calculate compression ratio
-    compression_ratio = total_uncompressed / compressed_size if compressed_size > 0 else 0
+    compression_ratio = (
+        total_uncompressed / compressed_size if compressed_size > 0 else 0
+    )
 
     # Check if ratio exceeds limit
     is_safe = compression_ratio <= MAX_COMPRESSION_RATIO
@@ -271,7 +306,7 @@ def check_file_count(file_path: str) -> Tuple[bool, int]:
     Returns:
         Tuple of (is_safe, file_count)
     """
-    with zipfile.ZipFile(file_path, 'r') as zf:
+    with zipfile.ZipFile(file_path, "r") as zf:
         # Count actual files (exclude directories)
         file_count = sum(1 for info in zf.infolist() if not info.is_dir())
 
@@ -297,20 +332,20 @@ def check_path_traversal(file_path: str) -> List[str]:
     """
     unsafe_paths = []
 
-    with zipfile.ZipFile(file_path, 'r') as zf:
+    with zipfile.ZipFile(file_path, "r") as zf:
         for filename in zf.namelist():
             # Check for '..' in path
-            if '..' in filename:
+            if ".." in filename:
                 unsafe_paths.append(filename)
                 continue
 
             # Check for absolute paths
-            if filename.startswith('/') or filename.startswith('\\'):
+            if filename.startswith("/") or filename.startswith("\\"):
                 unsafe_paths.append(filename)
                 continue
 
             # Check for drive letters (Windows absolute paths)
-            if len(filename) >= 2 and filename[1] == ':':
+            if len(filename) >= 2 and filename[1] == ":":
                 unsafe_paths.append(filename)
                 continue
 
@@ -321,7 +356,7 @@ def check_path_traversal(file_path: str) -> List[str]:
     return unsafe_paths
 
 
-def validate_path_safety(file_path: str, base_dir: str = '.') -> bool:
+def validate_path_safety(file_path: str, base_dir: str = ".") -> bool:
     """
     Validate that a file path is safe for extraction.
 
@@ -370,7 +405,7 @@ def check_prohibited_files(file_path: str) -> List[str]:
     """
     prohibited_files = []
 
-    with zipfile.ZipFile(file_path, 'r') as zf:
+    with zipfile.ZipFile(file_path, "r") as zf:
         for filename in zf.namelist():
             ext = Path(filename).suffix.lower()
             if ext in PROHIBITED_EXTENSIONS:
@@ -393,7 +428,7 @@ def check_nested_archives(file_path: str) -> List[str]:
     """
     nested_archives = []
 
-    with zipfile.ZipFile(file_path, 'r') as zf:
+    with zipfile.ZipFile(file_path, "r") as zf:
         for filename in zf.namelist():
             ext = Path(filename).suffix.lower()
             if ext in ARCHIVE_EXTENSIONS:
@@ -414,18 +449,20 @@ def scan_zip_contents(file_path: str) -> List[FileInfo]:
     """
     file_list = []
 
-    with zipfile.ZipFile(file_path, 'r') as zf:
+    with zipfile.ZipFile(file_path, "r") as zf:
         for info in zf.infolist():
             # Skip directories
             if info.is_dir():
                 continue
 
-            file_list.append(FileInfo(
-                name=Path(info.filename).name,
-                size=info.file_size,
-                compressed_size=info.compress_size,
-                path=info.filename
-            ))
+            file_list.append(
+                FileInfo(
+                    name=Path(info.filename).name,
+                    size=info.file_size,
+                    compressed_size=info.compress_size,
+                    path=info.filename,
+                )
+            )
 
     return file_list
 
@@ -449,10 +486,7 @@ def validate_iso_file(file_path: str) -> ValidationResult:
     try:
         # Check if file exists
         if not os.path.exists(file_path):
-            return ValidationResult(
-                is_valid=False,
-                error_message="File does not exist"
-            )
+            return ValidationResult(is_valid=False, error_message="File does not exist")
 
         # Check file size (should not exceed max archive size)
         file_size = os.path.getsize(file_path)
@@ -460,7 +494,7 @@ def validate_iso_file(file_path: str) -> ValidationResult:
         if file_size > max_size:
             return ValidationResult(
                 is_valid=False,
-                error_message=f"ISO file too large ({file_size} bytes). Maximum: {max_size} bytes"
+                error_message=f"ISO file too large ({file_size} bytes). Maximum: {max_size} bytes",
             )
 
         # Try to import pycdlib
@@ -471,13 +505,13 @@ def validate_iso_file(file_path: str) -> ValidationResult:
                 "pycdlib not installed, skipping detailed ISO validation",
                 extra={
                     LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "iso_validation_skipped"
-                }
+                    LogFields.EVENT: "iso_validation_skipped",
+                },
             )
             # Basic validation only (file exists and size OK)
             return ValidationResult(
                 is_valid=True,
-                warnings=["Detailed ISO validation skipped (pycdlib not installed)"]
+                warnings=["Detailed ISO validation skipped (pycdlib not installed)"],
             )
 
         # Validate ISO format
@@ -487,7 +521,7 @@ def validate_iso_file(file_path: str) -> ValidationResult:
 
             # Extract volume information
             pvd = iso.pvd
-            volume_id = pvd.volume_identifier.decode('utf-8').strip()
+            volume_id = pvd.volume_identifier.decode("utf-8").strip()
 
             logger.info(
                 f"ISO validation successful",
@@ -496,16 +530,13 @@ def validate_iso_file(file_path: str) -> ValidationResult:
                     LogFields.EVENT: "iso_validated",
                     "file": file_path,
                     "volume_id": volume_id,
-                    "file_size": file_size
-                }
+                    "file_size": file_size,
+                },
             )
 
             iso.close()
 
-            return ValidationResult(
-                is_valid=True,
-                total_uncompressed_size=file_size
-            )
+            return ValidationResult(is_valid=True, total_uncompressed_size=file_size)
 
         except Exception as e:
             logger.error(
@@ -514,12 +545,11 @@ def validate_iso_file(file_path: str) -> ValidationResult:
                     LogFields.CATEGORY: "security",
                     LogFields.EVENT: "iso_validation_failed",
                     LogFields.ERROR: str(e),
-                    "file": file_path
-                }
+                    "file": file_path,
+                },
             )
             return ValidationResult(
-                is_valid=False,
-                error_message=f"Invalid ISO file format: {str(e)}"
+                is_valid=False, error_message=f"Invalid ISO file format: {str(e)}"
             )
 
     except Exception as e:
@@ -529,12 +559,11 @@ def validate_iso_file(file_path: str) -> ValidationResult:
                 LogFields.CATEGORY: "app",
                 LogFields.EVENT: "iso_validation_error",
                 LogFields.ERROR: str(e),
-                "file": file_path
-            }
+                "file": file_path,
+            },
         )
         return ValidationResult(
-            is_valid=False,
-            error_message=f"Validation error: {str(e)}"
+            is_valid=False, error_message=f"Validation error: {str(e)}"
         )
 
 
@@ -550,12 +579,12 @@ def get_archive_type(file_path: str) -> Optional[str]:
     """
     ext = Path(file_path).suffix.lower()
 
-    if ext == '.zip':
-        return 'zip'
-    elif ext == '.iso':
-        return 'iso'
+    if ext == ".zip":
+        return "zip"
+    elif ext == ".iso":
+        return "iso"
     else:
         # Try to detect by content
         if zipfile.is_zipfile(file_path):
-            return 'zip'
+            return "zip"
         return None

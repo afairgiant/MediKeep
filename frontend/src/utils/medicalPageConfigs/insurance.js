@@ -39,11 +39,15 @@ export const insurancesPageConfig = {
 
         const now = new Date();
         const currentYear = now.getFullYear();
-        const effectiveDate = item.effective_date ? new Date(item.effective_date) : null;
-        const expirationDate = item.expiration_date ? new Date(item.expiration_date) : null;
+        const effectiveDate = item.effective_date
+          ? new Date(item.effective_date)
+          : null;
+        const expirationDate = item.expiration_date
+          ? new Date(item.expiration_date)
+          : null;
 
         switch (dateRange) {
-          case 'this_year':
+          case 'this_year': {
             // Show if insurance is active during this year
             // Either started this year, or started earlier but still active (no end date or ends this year or later)
             if (!effectiveDate) return false;
@@ -52,8 +56,9 @@ export const insurancesPageConfig = {
               effectiveDate.getFullYear() <= currentYear &&
               effectiveEndDateThisYear.getFullYear() >= currentYear
             );
+          }
 
-          case 'last_year':
+          case 'last_year': {
             // Show if insurance was active during last year
             if (!effectiveDate) return false;
             const lastYear = currentYear - 1;
@@ -62,20 +67,23 @@ export const insurancesPageConfig = {
               effectiveDate.getFullYear() <= lastYear &&
               effectiveEndDateLastYear.getFullYear() >= lastYear
             );
+          }
 
-          case 'previous_years':
+          case 'previous_years': {
             // Show insurance that was only active in years before current year
             if (!effectiveDate) return false;
             const effectiveEndDatePrevious = expirationDate || now;
             return effectiveEndDatePrevious.getFullYear() < currentYear;
+          }
 
-          case 'current':
+          case 'current': {
             // Currently active insurance
             const effectiveEndDate = expirationDate || now;
             return (
               (!effectiveDate || effectiveDate <= now) &&
               effectiveEndDate >= now
             );
+          }
 
           case 'expired':
             // Expired insurance
@@ -112,13 +120,21 @@ export const insurancesPageConfig = {
         const aIsPrimary = a.insurance_type === 'medical' && a.is_primary;
         const bIsPrimary = b.insurance_type === 'medical' && b.is_primary;
         if (aIsPrimary !== bIsPrimary) {
-          return sortOrder === 'asc' ? (aIsPrimary ? 1 : -1) : (aIsPrimary ? -1 : 1);
+          return sortOrder === 'asc'
+            ? aIsPrimary
+              ? 1
+              : -1
+            : aIsPrimary
+              ? -1
+              : 1;
         }
 
         // Then by status priority: active > pending > expired > inactive
         const aStatusIndex = STATUS_PRIORITY_ORDER.indexOf(a.status);
         const bStatusIndex = STATUS_PRIORITY_ORDER.indexOf(b.status);
-        const statusDiff = (aStatusIndex === -1 ? 999 : aStatusIndex) - (bStatusIndex === -1 ? 999 : bStatusIndex);
+        const statusDiff =
+          (aStatusIndex === -1 ? 999 : aStatusIndex) -
+          (bStatusIndex === -1 ? 999 : bStatusIndex);
         if (statusDiff !== 0) {
           return sortOrder === 'asc' ? statusDiff : -statusDiff;
         }

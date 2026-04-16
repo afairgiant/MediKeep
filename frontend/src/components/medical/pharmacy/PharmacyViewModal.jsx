@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Modal,
   Stack,
@@ -17,16 +16,10 @@ import { IconEdit } from '@tabler/icons-react';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
 
-const PharmacyViewModal = ({
-  isOpen,
-  onClose,
-  pharmacy,
-  onEdit,
-  navigate,
-}) => {
+const PharmacyViewModal = ({ isOpen, onClose, pharmacy, onEdit, navigate: _navigate }) => {
   const { t } = useTranslation(['common', 'shared']);
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('pharmacy_view_modal_error', {
       message: 'Error in PharmacyViewModal',
       pharmacyId: pharmacy?.id,
@@ -65,16 +58,22 @@ const PharmacyViewModal = ({
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
-          overflowY: 'auto'
-        }
+          overflowY: 'auto',
+        },
       }}
     >
       <Stack gap="md">
         {/* Header Card */}
-        <Paper withBorder p="md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <Paper
+          withBorder
+          p="md"
+          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3} mb="xs">{pharmacy.name}</Title>
+              <Title order={3} mb="xs">
+                {pharmacy.name}
+              </Title>
               <Group gap="xs">
                 {pharmacy.brand && (
                   <Badge color="blue" variant="light" size="sm">
@@ -112,7 +111,8 @@ const PharmacyViewModal = ({
                     size="sm"
                     c={pharmacy.street_address ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.street_address || t('shared:labels.notSpecified', 'Not specified')}
+                    {pharmacy.street_address ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -120,7 +120,8 @@ const PharmacyViewModal = ({
                     {t('shared:labels.city', 'City')}:
                   </Text>
                   <Text size="sm" c={pharmacy.city ? 'inherit' : 'dimmed'}>
-                    {pharmacy.city || t('shared:labels.notSpecified', 'Not specified')}
+                    {pharmacy.city ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -128,7 +129,8 @@ const PharmacyViewModal = ({
                     {t('shared:labels.stateProvince', 'State / Province')}:
                   </Text>
                   <Text size="sm" c={pharmacy.state ? 'inherit' : 'dimmed'}>
-                    {pharmacy.state || t('shared:labels.notSpecified', 'Not specified')}
+                    {pharmacy.state ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -136,7 +138,8 @@ const PharmacyViewModal = ({
                     {t('shared:labels.postalCode', 'Postal Code')}:
                   </Text>
                   <Text size="sm" c={pharmacy.zip_code ? 'inherit' : 'dimmed'}>
-                    {pharmacy.zip_code || t('shared:labels.notSpecified', 'Not specified')}
+                    {pharmacy.zip_code ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -144,7 +147,8 @@ const PharmacyViewModal = ({
                     {t('shared:labels.country', 'Country')}:
                   </Text>
                   <Text size="sm" c={pharmacy.country ? 'inherit' : 'dimmed'}>
-                    {pharmacy.country || t('shared:labels.notSpecified', 'Not specified')}
+                    {pharmacy.country ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -155,7 +159,8 @@ const PharmacyViewModal = ({
                     size="sm"
                     c={pharmacy.store_number ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.store_number || t('shared:labels.notSpecified', 'Not specified')}
+                    {pharmacy.store_number ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
               </Stack>
@@ -177,7 +182,8 @@ const PharmacyViewModal = ({
                     size="sm"
                     c={pharmacy.phone_number ? 'inherit' : 'dimmed'}
                   >
-                    {pharmacy.phone_number || t('shared:labels.notSpecified', 'Not specified')}
+                    {pharmacy.phone_number ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
                 <Group>
@@ -208,8 +214,12 @@ const PharmacyViewModal = ({
                   <Text size="sm" fw={500} w={120} style={{ flexShrink: 0 }}>
                     {t('shared:labels.specialties', 'Specialties')}:
                   </Text>
-                  <Text size="sm" c={pharmacy.specialty_services ? 'inherit' : 'dimmed'}>
-                    {pharmacy.specialty_services || t('shared:labels.notSpecified', 'Not specified')}
+                  <Text
+                    size="sm"
+                    c={pharmacy.specialty_services ? 'inherit' : 'dimmed'}
+                  >
+                    {pharmacy.specialty_services ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 </Group>
               </Stack>

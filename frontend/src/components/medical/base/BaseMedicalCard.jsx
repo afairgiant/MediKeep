@@ -1,6 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, Stack, Group, Text, Badge, Button, Divider, Tooltip } from '@mantine/core';
+import {
+  Card,
+  Stack,
+  Group,
+  Text,
+  Badge,
+  Button,
+  Divider,
+  Tooltip,
+} from '@mantine/core';
 import StatusBadge from '../StatusBadge';
 import FileCountBadge from '../../shared/FileCountBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
@@ -28,7 +37,7 @@ const BaseMedicalCard = ({
   disableCardClick = false,
   disableActions = false,
   disableActionsTooltip,
-  getTagColor: getTagColorProp
+  getTagColor: getTagColorProp,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const [notesExpanded, setNotesExpanded] = useState(false);
@@ -41,7 +50,7 @@ const BaseMedicalCard = ({
       error: error.message,
       component: 'BaseMedicalCard',
     });
-    
+
     if (onError) {
       onError(error);
     }
@@ -78,8 +87,10 @@ const BaseMedicalCard = ({
         shadow="sm"
         radius="md"
         h="100%"
-        className={disableCardClick ? undefined : "clickable-card"}
-        onClick={disableCardClick ? undefined : createCardClickHandler(safeOnView)}
+        className={disableCardClick ? undefined : 'clickable-card'}
+        onClick={
+          disableCardClick ? undefined : createCardClickHandler(safeOnView)
+        }
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -91,28 +102,44 @@ const BaseMedicalCard = ({
             <Stack gap="xs" style={{ flex: 1 }}>
               {/* Handle title as either string or complex element */}
               {typeof title === 'string' ? (
-                <Text fw={600} size="lg">{title}</Text>
+                <Text fw={600} size="lg">
+                  {title}
+                </Text>
               ) : (
                 <div>{title}</div>
               )}
-              {subtitle && <Text size="sm" c="dimmed">{subtitle}</Text>}
+              {subtitle && (
+                <Text size="sm" c="dimmed">
+                  {subtitle}
+                </Text>
+              )}
               <Group gap="xs">
                 {badges.map((badge, index) => (
-                  <Badge key={index} variant="light" color={badge.color} size="md">
+                  <Badge
+                    key={index}
+                    variant="light"
+                    color={badge.color}
+                    size="md"
+                  >
                     {badge.label}
                   </Badge>
                 ))}
-                {tags.length > 0 && tags.slice(0, 2).map((tag) => (
-                  <ClickableTagBadge
-                    key={tag}
-                    tag={tag}
-                    color={getTagColor(tag)}
-                    size="sm"
-                    compact
-                  />
-                ))}
+                {tags.length > 0 &&
+                  tags
+                    .slice(0, 2)
+                    .map(tag => (
+                      <ClickableTagBadge
+                        key={tag}
+                        tag={tag}
+                        color={getTagColor(tag)}
+                        size="sm"
+                        compact
+                      />
+                    ))}
                 {tags.length > 2 && (
-                  <Text size="xs" c="dimmed">+{tags.length - 2}</Text>
+                  <Text size="xs" c="dimmed">
+                    +{tags.length - 2}
+                  </Text>
                 )}
                 {entityType && (
                   <FileCountBadge
@@ -137,9 +164,12 @@ const BaseMedicalCard = ({
                 <Text size="sm" fw={500} c="dimmed" w={120}>
                   {field.label}:
                 </Text>
-                {field.render ? field.render(field.value) : (
+                {field.render ? (
+                  field.render(field.value)
+                ) : (
                   <Text size="sm" style={field.style || {}}>
-                    {field.value || t('shared:labels.notSpecified', 'Not specified')}
+                    {field.value ||
+                      t('shared:labels.notSpecified', 'Not specified')}
                   </Text>
                 )}
               </Group>
@@ -152,13 +182,17 @@ const BaseMedicalCard = ({
           {notes && (
             <Stack gap="xs">
               <Divider />
-              <Text size="sm" fw={500} c="dimmed">{t('shared:tabs.notes', 'Notes')}</Text>
-              <Text size="sm" lineClamp={notesExpanded ? undefined : 2}>{notes}</Text>
+              <Text size="sm" fw={500} c="dimmed">
+                {t('shared:tabs.notes', 'Notes')}
+              </Text>
+              <Text size="sm" lineClamp={notesExpanded ? undefined : 2}>
+                {notes}
+              </Text>
               {notes.length > 120 && (
                 <Button
                   variant="subtle"
                   size="compact-xs"
-                  onClick={() => setNotesExpanded((prev) => !prev)}
+                  onClick={() => setNotesExpanded(prev => !prev)}
                   style={{ alignSelf: 'flex-start' }}
                 >
                   {notesExpanded
@@ -177,16 +211,33 @@ const BaseMedicalCard = ({
             <Button variant="filled" size="xs" onClick={safeOnView}>
               {t('buttons.view')}
             </Button>
-            <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+            <Tooltip
+              label={disableActionsTooltip}
+              disabled={!disableActions || !disableActionsTooltip}
+            >
               <span>
-                <Button variant="filled" size="xs" onClick={safeOnEdit} disabled={disableActions}>
+                <Button
+                  variant="filled"
+                  size="xs"
+                  onClick={safeOnEdit}
+                  disabled={disableActions}
+                >
                   {t('shared:labels.edit')}
                 </Button>
               </span>
             </Tooltip>
-            <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+            <Tooltip
+              label={disableActionsTooltip}
+              disabled={!disableActions || !disableActionsTooltip}
+            >
               <span>
-                <Button variant="filled" color="red" size="xs" onClick={safeOnDelete} disabled={disableActions}>
+                <Button
+                  variant="filled"
+                  color="red"
+                  size="xs"
+                  onClick={safeOnDelete}
+                  disabled={disableActions}
+                >
                   {t('buttons.delete')}
                 </Button>
               </span>
@@ -197,12 +248,15 @@ const BaseMedicalCard = ({
     );
   } catch (error) {
     handleError(error, 'render');
-    
+
     return (
       <Card withBorder shadow="sm" radius="md" h="100%">
         <Stack align="center" justify="center" h="100%">
           <Text c="red" size="sm" ta="center">
-            {t('messages.displayError', 'Unable to display this item. Please try refreshing the page.')}
+            {t(
+              'messages.displayError',
+              'Unable to display this item. Please try refreshing the page.'
+            )}
           </Text>
         </Stack>
       </Card>

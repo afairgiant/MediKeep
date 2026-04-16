@@ -1,6 +1,7 @@
 """
 Tests for Practitioner CRUD operations.
 """
+
 import pytest
 from sqlalchemy.orm import Session
 
@@ -20,7 +21,7 @@ class TestPractitionerCRUD:
             practice="Heart Health Center",
             phone_number="919-555-1234",
             email="drsmith@example.com",
-            rating=4.5
+            rating=4.5,
         )
 
         practitioner = practitioner_crud.create(db_session, obj_in=practitioner_data)
@@ -39,8 +40,7 @@ class TestPractitionerCRUD:
         """
         # Use lowercase name since query method lowercases the search value
         practitioner_data = PractitionerCreate(
-            name="dr. jane doe",
-            specialty="Internal Medicine"
+            name="dr. jane doe", specialty="Internal Medicine"
         )
         practitioner_crud.create(db_session, obj_in=practitioner_data)
 
@@ -61,8 +61,7 @@ class TestPractitionerCRUD:
         names = ["Dr. John Smith", "Dr. Jane Smith", "Dr. Bob Johnson"]
         for name in names:
             practitioner_data = PractitionerCreate(
-                name=name,
-                specialty="General Practice"
+                name=name, specialty="General Practice"
             )
             practitioner_crud.create(db_session, obj_in=practitioner_data)
 
@@ -99,8 +98,7 @@ class TestPractitionerCRUD:
 
         for i, specialty in enumerate(specialties):
             practitioner_data = PractitionerCreate(
-                name=f"Dr. Test {i+1}",
-                specialty=specialty
+                name=f"Dr. Test {i+1}", specialty=specialty
             )
             practitioner_crud.create(db_session, obj_in=practitioner_data)
 
@@ -118,13 +116,17 @@ class TestPractitionerCRUD:
         """
         # Use lowercase to match query behavior
         practitioner_data = PractitionerCreate(
-            name="dr. unique name",
-            specialty="Family Medicine"
+            name="dr. unique name", specialty="Family Medicine"
         )
         practitioner_crud.create(db_session, obj_in=practitioner_data)
 
-        assert practitioner_crud.is_name_taken(db_session, name="Dr. Unique Name") is True
-        assert practitioner_crud.is_name_taken(db_session, name="Dr. Another Name") is False
+        assert (
+            practitioner_crud.is_name_taken(db_session, name="Dr. Unique Name") is True
+        )
+        assert (
+            practitioner_crud.is_name_taken(db_session, name="Dr. Another Name")
+            is False
+        )
 
     def test_is_name_taken_with_exclude(self, db_session: Session):
         """Test is_name_taken excludes specific practitioner ID.
@@ -133,26 +135,27 @@ class TestPractitionerCRUD:
         """
         # Use lowercase to match query behavior
         practitioner_data = PractitionerCreate(
-            name="dr. test doctor",
-            specialty="Family Medicine"
+            name="dr. test doctor", specialty="Family Medicine"
         )
         created = practitioner_crud.create(db_session, obj_in=practitioner_data)
 
         # Should not be taken when excluding the same practitioner
-        assert practitioner_crud.is_name_taken(
-            db_session, name="Dr. Test Doctor", exclude_id=created.id
-        ) is False
+        assert (
+            practitioner_crud.is_name_taken(
+                db_session, name="Dr. Test Doctor", exclude_id=created.id
+            )
+            is False
+        )
 
         # Should be taken without exclusion
-        assert practitioner_crud.is_name_taken(
-            db_session, name="Dr. Test Doctor"
-        ) is True
+        assert (
+            practitioner_crud.is_name_taken(db_session, name="Dr. Test Doctor") is True
+        )
 
     def test_create_if_not_exists_creates(self, db_session: Session):
         """Test create_if_not_exists creates new practitioner."""
         practitioner_data = PractitionerCreate(
-            name="Dr. New Doctor",
-            specialty="Neurology"
+            name="Dr. New Doctor", specialty="Neurology"
         )
 
         practitioner = practitioner_crud.create_if_not_exists(
@@ -168,16 +171,12 @@ class TestPractitionerCRUD:
         Note: The query method lowercases filter values for matching.
         """
         # Create first with lowercase name
-        initial_data = PractitionerCreate(
-            name="dr. existing",
-            specialty="Orthopedics"
-        )
+        initial_data = PractitionerCreate(name="dr. existing", specialty="Orthopedics")
         initial = practitioner_crud.create(db_session, obj_in=initial_data)
 
         # Try to create again with same name (case variation)
         second_data = PractitionerCreate(
-            name="dr. existing",
-            specialty="Different Specialty"
+            name="dr. existing", specialty="Different Specialty"
         )
         second = practitioner_crud.create_if_not_exists(
             db_session, practitioner_data=second_data
@@ -208,16 +207,11 @@ class TestPractitionerCRUD:
     def test_update_practitioner(self, db_session: Session):
         """Test updating a practitioner."""
         practitioner_data = PractitionerCreate(
-            name="Dr. Original",
-            specialty="Family Medicine",
-            rating=4.0
+            name="Dr. Original", specialty="Family Medicine", rating=4.0
         )
         created = practitioner_crud.create(db_session, obj_in=practitioner_data)
 
-        update_data = PractitionerUpdate(
-            specialty="Internal Medicine",
-            rating=4.5
-        )
+        update_data = PractitionerUpdate(specialty="Internal Medicine", rating=4.5)
 
         updated = practitioner_crud.update(
             db_session, db_obj=created, obj_in=update_data
@@ -230,8 +224,7 @@ class TestPractitionerCRUD:
     def test_delete_practitioner(self, db_session: Session):
         """Test deleting a practitioner."""
         practitioner_data = PractitionerCreate(
-            name="Dr. To Delete",
-            specialty="General Practice"
+            name="Dr. To Delete", specialty="General Practice"
         )
         created = practitioner_crud.create(db_session, obj_in=practitioner_data)
         practitioner_id = created.id
@@ -250,8 +243,7 @@ class TestPractitionerCRUD:
         # Create 10 practitioners
         for i in range(10):
             practitioner_data = PractitionerCreate(
-                name=f"Dr. Test {i+1}",
-                specialty="General"
+                name=f"Dr. Test {i+1}", specialty="General"
             )
             practitioner_crud.create(db_session, obj_in=practitioner_data)
 
@@ -281,7 +273,7 @@ class TestPractitionerCRUD:
             phone_number="919-555-5555",
             email="fullinfo@example.com",
             website="drfullinfo.com",  # Will be converted to https://drfullinfo.com
-            rating=4.8
+            rating=4.8,
         )
 
         practitioner = practitioner_crud.create(db_session, obj_in=practitioner_data)

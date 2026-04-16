@@ -11,7 +11,9 @@ describe('usePagination', () => {
     });
 
     it('accepts custom default page size', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 10 }));
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 10 })
+      );
       expect(result.current.pageSize).toBe(10);
     });
 
@@ -28,21 +30,31 @@ describe('usePagination', () => {
 
   describe('paginateData', () => {
     it('returns first page of data', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 2 }));
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 2 })
+      );
       const data = [1, 2, 3, 4, 5];
       expect(result.current.paginateData(data)).toEqual([1, 2]);
     });
 
     it('returns correct slice for page 2', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 2 }));
-      act(() => { result.current.setPage(2); });
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 2 })
+      );
+      act(() => {
+        result.current.setPage(2);
+      });
       const data = [1, 2, 3, 4, 5];
       expect(result.current.paginateData(data)).toEqual([3, 4]);
     });
 
     it('returns partial last page', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 2 }));
-      act(() => { result.current.setPage(3); });
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 2 })
+      );
+      act(() => {
+        result.current.setPage(3);
+      });
       const data = [1, 2, 3, 4, 5];
       expect(result.current.paginateData(data)).toEqual([5]);
     });
@@ -55,7 +67,9 @@ describe('usePagination', () => {
 
   describe('totalPages', () => {
     it('calculates total pages correctly', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 10 }));
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 10 })
+      );
       expect(result.current.totalPages(25)).toBe(3);
       expect(result.current.totalPages(10)).toBe(1);
       expect(result.current.totalPages(0)).toBe(1);
@@ -70,29 +84,41 @@ describe('usePagination', () => {
   describe('handlePageSizeChange', () => {
     it('updates page size and resets to page 1', () => {
       const { result } = renderHook(() => usePagination());
-      act(() => { result.current.setPage(3); });
+      act(() => {
+        result.current.setPage(3);
+      });
       expect(result.current.page).toBe(3);
 
-      act(() => { result.current.handlePageSizeChange('10'); });
+      act(() => {
+        result.current.handlePageSizeChange('10');
+      });
       expect(result.current.pageSize).toBe(10);
       expect(result.current.page).toBe(1);
     });
 
     it('ignores null/undefined values', () => {
       const { result } = renderHook(() => usePagination());
-      act(() => { result.current.handlePageSizeChange(null); });
+      act(() => {
+        result.current.handlePageSizeChange(null);
+      });
       expect(result.current.pageSize).toBe(20);
 
-      act(() => { result.current.handlePageSizeChange(undefined); });
+      act(() => {
+        result.current.handlePageSizeChange(undefined);
+      });
       expect(result.current.pageSize).toBe(20);
     });
 
     it('ignores invalid numeric values', () => {
       const { result } = renderHook(() => usePagination());
-      act(() => { result.current.handlePageSizeChange('abc'); });
+      act(() => {
+        result.current.handlePageSizeChange('abc');
+      });
       expect(result.current.pageSize).toBe(20);
 
-      act(() => { result.current.handlePageSizeChange('-5'); });
+      act(() => {
+        result.current.handlePageSizeChange('-5');
+      });
       expect(result.current.pageSize).toBe(20);
     });
   });
@@ -100,38 +126,60 @@ describe('usePagination', () => {
   describe('resetPage', () => {
     it('resets page to 1', () => {
       const { result } = renderHook(() => usePagination());
-      act(() => { result.current.setPage(5); });
+      act(() => {
+        result.current.setPage(5);
+      });
       expect(result.current.page).toBe(5);
 
-      act(() => { result.current.resetPage(); });
+      act(() => {
+        result.current.resetPage();
+      });
       expect(result.current.page).toBe(1);
     });
   });
 
   describe('clampPage', () => {
     it('clamps page to max when current page exceeds total', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 10 }));
-      act(() => { result.current.setPage(5); });
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 10 })
+      );
+      act(() => {
+        result.current.setPage(5);
+      });
 
       // 15 records at pageSize 10 = 2 pages max
-      act(() => { result.current.clampPage(15); });
+      act(() => {
+        result.current.clampPage(15);
+      });
       expect(result.current.page).toBe(2);
     });
 
     it('does not change page when within range', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 10 }));
-      act(() => { result.current.setPage(2); });
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 10 })
+      );
+      act(() => {
+        result.current.setPage(2);
+      });
 
       // 30 records at pageSize 10 = 3 pages, page 2 is valid
-      act(() => { result.current.clampPage(30); });
+      act(() => {
+        result.current.clampPage(30);
+      });
       expect(result.current.page).toBe(2);
     });
 
     it('clamps to page 1 when records shrink to zero', () => {
-      const { result } = renderHook(() => usePagination({ defaultPageSize: 10 }));
-      act(() => { result.current.setPage(3); });
+      const { result } = renderHook(() =>
+        usePagination({ defaultPageSize: 10 })
+      );
+      act(() => {
+        result.current.setPage(3);
+      });
 
-      act(() => { result.current.clampPage(0); });
+      act(() => {
+        result.current.clampPage(0);
+      });
       expect(result.current.page).toBe(1);
     });
   });

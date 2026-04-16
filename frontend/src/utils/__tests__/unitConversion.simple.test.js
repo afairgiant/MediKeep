@@ -6,7 +6,7 @@ import {
   convertWeight,
   convertHeight,
   convertForDisplay,
-  convertForStorage
+  convertForStorage,
 } from '../unitConversion';
 
 describe('Weight Conversion - Core Tests', () => {
@@ -68,7 +68,7 @@ describe('Display and Storage Conversion', () => {
   test('convertForDisplay works for metric', () => {
     const heightCm = convertForDisplay(70, 'height', 'metric');
     expect(heightCm).toBeCloseTo(177.8, 0);
-    
+
     const weightKg = convertForDisplay(150, 'weight', 'metric');
     expect(weightKg).toBeCloseTo(68.0, 0);
   });
@@ -81,7 +81,7 @@ describe('Display and Storage Conversion', () => {
   test('convertForStorage works for metric', () => {
     const heightInches = convertForStorage(180, 'height', 'metric');
     expect(heightInches).toBeCloseTo(70.9, 0);
-    
+
     const weightLbs = convertForStorage(70, 'weight', 'metric');
     expect(weightLbs).toBeCloseTo(154.3, 0);
   });
@@ -106,7 +106,7 @@ describe('Real-world Scenarios', () => {
     // Convert for metric display
     const displayHeight = convertForDisplay(storedHeight, 'height', 'metric');
     const displayWeight = convertForDisplay(storedWeight, 'weight', 'metric');
-    
+
     // Should be reasonable metric values
     expect(displayHeight).toBeGreaterThan(170);
     expect(displayHeight).toBeLessThan(180);
@@ -132,9 +132,9 @@ describe('Real-world Scenarios', () => {
     // Round trip should be close to original
     const backToCm = convertForDisplay(storageHeight, 'height', 'metric');
     const backToKg = convertForDisplay(storageWeight, 'weight', 'metric');
-    
+
     expect(Math.abs(backToCm - userHeightCm)).toBeLessThan(2); // Within 2cm
-    expect(Math.abs(backToKg - userWeightKg)).toBeLessThan(2);  // Within 2kg
+    expect(Math.abs(backToKg - userWeightKg)).toBeLessThan(2); // Within 2kg
   });
 });
 

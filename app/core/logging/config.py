@@ -46,37 +46,34 @@ def _is_logrotate_available() -> bool:
 
 
 def _parse_size_string(size_str: str) -> int:
-
     """
     Convert size string (e.g., '50M', '1G') to bytes with robust error handling.
-    
+
     Args:
         size_str: Size string with optional suffix (K, M, G)
-        
+
     Returns:
         Size in bytes
-        
+
     Raises:
         ValueError: If the size string is invalid or out of reasonable bounds
     """
     if not isinstance(size_str, str):
-        raise ValueError(f"Size must be a string, got {type(size_str).__name__}: {size_str}")
-    
+        raise ValueError(
+            f"Size must be a string, got {type(size_str).__name__}: {size_str}"
+        )
+
     size_str = size_str.strip()
     if not size_str:
         raise ValueError("Size string cannot be empty")
-    
+
     # Normalize to uppercase for consistent processing
     original_size = size_str
     size_str = size_str.upper()
-    
+
     # Define multipliers and reasonable bounds
-    multipliers = {
-        'K': 1024,
-        'M': 1024 * 1024,
-        'G': 1024 * 1024 * 1024
-    }
-    
+    multipliers = {"K": 1024, "M": 1024 * 1024, "G": 1024 * 1024 * 1024}
+
     # Parse size and suffix
     try:
         if size_str[-1] in multipliers:
@@ -85,42 +82,52 @@ def _parse_size_string(size_str: str) -> int:
             multiplier = multipliers[suffix]
         else:
             # No suffix, assume bytes
-            suffix = 'B'
+            suffix = "B"
             number_part = size_str
             multiplier = 1
-        
+
         # Validate and convert the numeric part
         if not number_part:
-            raise ValueError(f"Invalid size format '{original_size}': missing numeric part")
-        
+            raise ValueError(
+                f"Invalid size format '{original_size}': missing numeric part"
+            )
+
         try:
             number = float(number_part)
             if number != int(number):
-                raise ValueError(f"Invalid size format '{original_size}': decimal numbers not supported")
+                raise ValueError(
+                    f"Invalid size format '{original_size}': decimal numbers not supported"
+                )
             number = int(number)
         except ValueError as e:
             if "decimal numbers not supported" in str(e):
                 raise
-            raise ValueError(f"Invalid size format '{original_size}': numeric part must be an integer")
-        
+            raise ValueError(
+                f"Invalid size format '{original_size}': numeric part must be an integer"
+            )
+
         if number <= 0:
             raise ValueError(f"Invalid size '{original_size}': size must be positive")
-        
+
         # Calculate result in bytes
         result_bytes = number * multiplier
-        
+
         # Validate reasonable bounds (1KB to 10GB)
         min_bytes = 1024  # 1KB minimum
         max_bytes = 10 * 1024 * 1024 * 1024  # 10GB maximum
-        
+
         if result_bytes < min_bytes:
-            raise ValueError(f"Size '{original_size}' ({result_bytes} bytes) is too small. Minimum is 1KB")
-        
+            raise ValueError(
+                f"Size '{original_size}' ({result_bytes} bytes) is too small. Minimum is 1KB"
+            )
+
         if result_bytes > max_bytes:
-            raise ValueError(f"Size '{original_size}' ({result_bytes} bytes) is too large. Maximum is 10GB")
-        
+            raise ValueError(
+                f"Size '{original_size}' ({result_bytes} bytes) is too large. Maximum is 10GB"
+            )
+
         return result_bytes
-        
+
     except (IndexError, KeyError) as e:
         raise ValueError(f"Invalid size format '{original_size}': {str(e)}")
 
@@ -128,9 +135,9 @@ def _parse_size_string(size_str: str) -> int:
 def _get_rotation_method() -> str:
     """Determine which log rotation method to use."""
     from app.core.config import settings
-    
+
     method = settings.LOG_ROTATION_METHOD.lower()
-    
+
     if method == "auto":
         # Auto-detect: prefer logrotate if available, otherwise use Python
         return "logrotate" if _is_logrotate_available() else "python"
@@ -139,7 +146,10 @@ def _get_rotation_method() -> str:
     else:
         # Use stderr for warnings during logging setup to avoid circular dependency
         import sys
-        sys.stderr.write(f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'\n")
+
+        sys.stderr.write(
+            f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'\n"
+        )
         return "logrotate" if _is_logrotate_available() else "python"
 
 
@@ -154,9 +164,15 @@ class ConsoleFormatterWithRequestID(logging.Formatter):
 
     # Extra fields to surface in console output when present
     _CONSOLE_EXTRA_FIELDS = (
-        LogFields.EVENT, LogFields.ERROR, LogFields.CATEGORY,
-        "oauth_error", "oauth_error_description", "redirect_uri",
-        "provider", "status_code", "username",
+        LogFields.EVENT,
+        LogFields.ERROR,
+        LogFields.CATEGORY,
+        "oauth_error",
+        "oauth_error_description",
+        "redirect_uri",
+        "provider",
+        "status_code",
+        "username",
     )
 
     def format(self, record: logging.LogRecord) -> str:
@@ -236,6 +252,7 @@ class LoggingConfig:
         # Determine log directory: Windows EXE -> AppData, Container -> /app/logs, Dev -> ./logs
         try:
             from app.core.platform.windows_config import is_windows_exe, get_logs_path
+
             if is_windows_exe():
                 # Windows EXE mode - use AppData path
                 default_log_dir = str(get_logs_path())
@@ -260,7 +277,8 @@ class LoggingConfig:
         # For Windows EXE, ALWAYS use the AppData path and ignore LOG_DIR env var
         # For non-EXE (dev/docker), allow LOG_DIR override
         import sys
-        if getattr(sys, 'frozen', False):
+
+        if getattr(sys, "frozen", False):
             # Windows EXE mode - use default_log_dir directly, ignore LOG_DIR
             self.log_dir = Path(default_log_dir)
         else:
@@ -337,9 +355,9 @@ class LoggingConfig:
             root_logger.setLevel(self.log_level)
 
         # Suppress verbose third-party library debug logs
-        logging.getLogger('pdfminer').setLevel(logging.WARNING)
-        logging.getLogger('PIL').setLevel(logging.WARNING)
-        logging.getLogger('pytesseract').setLevel(logging.WARNING)
+        logging.getLogger("pdfminer").setLevel(logging.WARNING)
+        logging.getLogger("PIL").setLevel(logging.WARNING)
+        logging.getLogger("pytesseract").setLevel(logging.WARNING)
 
         # Create formatters
         json_formatter = MedicalRecordsJSONFormatter()
@@ -387,6 +405,7 @@ class LoggingConfig:
 
             # Log rotation method (use stderr to avoid circular logging dependency)
             import sys
+
             sys.stderr.write(f"INFO: Using logrotate for {category}.log rotation\n")
         else:
             # Use Python's built-in rotation as fallback
@@ -395,9 +414,11 @@ class LoggingConfig:
             except ValueError as e:
                 # Use stderr for warnings during logging setup to avoid circular dependency
                 import sys
-                sys.stderr.write(f"WARNING: Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log\n")
-                max_bytes = 5 * 1024 * 1024  # 5MB default
 
+                sys.stderr.write(
+                    f"WARNING: Invalid LOG_ROTATION_SIZE '{settings.LOG_ROTATION_SIZE}': {e}. Using default size of 5MB for {category}.log\n"
+                )
+                max_bytes = 5 * 1024 * 1024  # 5MB default
 
             backup_count = settings.LOG_ROTATION_BACKUP_COUNT
 
@@ -410,8 +431,11 @@ class LoggingConfig:
 
             # Log rotation configuration (use stderr to avoid circular logging dependency)
             import sys
+
             size_mb = max_bytes / (1024 * 1024)
-            sys.stderr.write(f"INFO: Using Python rotation for {category}.log (size: {size_mb:.1f}MB, backups: {backup_count})\n")
+            sys.stderr.write(
+                f"INFO: Using Python rotation for {category}.log (size: {size_mb:.1f}MB, backups: {backup_count})\n"
+            )
 
         handler.setFormatter(formatter)
         handler.setLevel(level)

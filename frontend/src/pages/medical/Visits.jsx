@@ -1,13 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  Container,
-  Paper,
-  Stack,
-} from '@mantine/core';
-import {
-  IconPlus,
-  IconShieldCheck,
-} from '@tabler/icons-react';
+import { useState, useEffect, useRef } from 'react';
+import { Container, Paper, Stack } from '@mantine/core';
+import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -47,7 +40,17 @@ const Visits = () => {
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
   const [viewMode, setViewMode] = usePersistedViewMode('visits');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
   const navigate = useNavigate();
   const responsive = useResponsive();
 
@@ -86,7 +89,6 @@ const Visits = () => {
 
   // Form submission with uploads hook
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -118,7 +120,7 @@ const Visits = () => {
         priority: '',
         tags: [],
       });
-      
+
       // Only refresh if we created a new visit during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
       if (needsRefreshAfterSubmissionRef.current) {
@@ -126,7 +128,7 @@ const Visits = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('visits_form_error', {
         message: 'Form submission error in visits',
         error,
@@ -140,7 +142,8 @@ const Visits = () => {
   const dataManagement = useDataManagement(visits, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('visit', visits);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('visit', visits);
 
   // View modal navigation with URL deep linking
   const {
@@ -151,7 +154,7 @@ const Visits = () => {
   } = useViewModalNavigation({
     items: visits,
     loading,
-    onClose: (visit) => {
+    onClose: visit => {
       if (visit) {
         refreshFileCount(visit.id);
       }
@@ -173,7 +176,8 @@ const Visits = () => {
 
   useEffect(() => {
     if (currentPatient?.id) {
-      apiService.getPatientConditions(currentPatient.id)
+      apiService
+        .getPatientConditions(currentPatient.id)
         .then(response => {
           setConditions(response || []);
         })
@@ -187,7 +191,8 @@ const Visits = () => {
           setConditions([]);
         });
 
-      apiService.getPatientLabResults(currentPatient.id)
+      apiService
+        .getPatientLabResults(currentPatient.id)
         .then(response => {
           setPatientLabResults(response || []);
         })
@@ -203,7 +208,7 @@ const Visits = () => {
     }
   }, [currentPatient?.id]);
 
-  const fetchEncounterLabResults = async (encounterId) => {
+  const fetchEncounterLabResults = async encounterId => {
     try {
       const response = await apiService.getEncounterLabResults(encounterId);
       setEncounterLabResults(prev => ({
@@ -220,13 +225,19 @@ const Visits = () => {
     }
   };
 
-  const getConditionDetails = (conditionId) => {
+  const getConditionDetails = conditionId => {
     if (!conditionId || conditions.length === 0) return null;
     return conditions.find(cond => cond.id === conditionId);
   };
 
   // Get standardized formatters for visits with condition linking
-  const visitsBaseFormatters = getEntityFormatters('visits', practitioners, navigate, null, formatDate);
+  const visitsBaseFormatters = getEntityFormatters(
+    'visits',
+    practitioners,
+    navigate,
+    null,
+    formatDate
+  );
   const formatters = {
     ...visitsBaseFormatters,
     condition_name: (value, visit) => {
@@ -349,7 +360,9 @@ const Visits = () => {
       date: formData.date,
       notes: formData.notes || null,
       practitioner_id: formData.practitioner_id || null,
-      condition_id: formData.condition_id ? parseInt(formData.condition_id) : null,
+      condition_id: formData.condition_id
+        ? parseInt(formData.condition_id)
+        : null,
       visit_type: formData.visit_type || null,
       chief_complaint: formData.chief_complaint || null,
       diagnosis: formData.diagnosis || null,
@@ -403,8 +416,14 @@ const Visits = () => {
               component: 'Visits',
             });
             notifications.show({
-              title: t('visits.notifications.labResultLinkWarning', 'Lab Result Linking Issue'),
-              message: t('visits.notifications.labResultLinkFailed', 'Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.'),
+              title: t(
+                'visits.notifications.labResultLinkWarning',
+                'Lab Result Linking Issue'
+              ),
+              message: t(
+                'visits.notifications.labResultLinkFailed',
+                'Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.'
+              ),
               color: 'yellow',
             });
           }
@@ -417,7 +436,7 @@ const Visits = () => {
       if (success && resultId) {
         // Check if we have files to upload
         const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
-        
+
         if (hasPendingFiles) {
           logger.info('visits_starting_file_upload', {
             message: 'Starting file upload process',
@@ -462,108 +481,77 @@ const Visits = () => {
         error: error.message,
         component: 'Visits',
       });
-      
+
       handleSubmissionFailure(error, 'form');
-    }
-  };
-
-  // Helper function to get practitioner display name
-  const getPractitionerDisplay = practitionerId => {
-    if (!practitionerId) return 'No practitioner assigned';
-
-    const practitioner = practitioners.find(
-      p => p.id === parseInt(practitionerId)
-    );
-    if (practitioner) {
-      return `${practitioner.name} - ${practitioner.specialty}`;
-    }
-    return `Practitioner ID: ${practitionerId}`;
-  };
-
-  const getPriorityColor = priority => {
-    switch (priority) {
-      case 'urgent':
-        return 'red';
-      case 'high':
-        return 'orange';
-      case 'medium':
-        return 'yellow';
-      case 'low':
-        return 'blue';
-      default:
-        return 'gray';
-    }
-  };
-
-  const getVisitTypeColor = visitType => {
-    switch (visitType?.toLowerCase()) {
-      case 'emergency':
-        return 'red';
-      case 'urgent care':
-        return 'orange';
-      case 'follow-up':
-        return 'blue';
-      case 'routine':
-        return 'green';
-      case 'consultation':
-        return 'purple';
-      default:
-        return 'gray';
     }
   };
 
   const filteredVisits = dataManagement.data;
   const paginatedVisits = paginateData(filteredVisits);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredVisits.length); }, [filteredVisits.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredVisits.length);
+  }, [filteredVisits.length, clampPage]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('visits.loadingVisits', 'Loading visits...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('visits.loadingVisits', 'Loading visits...')}
+      />
+    );
   }
 
   return (
     <>
-    <Container size="xl" py="sm">
-      <PageHeader title={t('visits.title', 'Medical Visits')} icon="📅" />
+      <Container size="xl" py="sm">
+        <PageHeader title={t('visits.title', 'Medical Visits')} icon="📅" />
 
-      <Stack gap="sm" mt="md">
-        <MedicalPageAlerts
-          error={error}
-          successMessage={successMessage}
-          onClearError={clearError}
-        />
+        <Stack gap="sm" mt="md">
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
+          />
 
-        <MedicalPageActions
-          primaryAction={{
-            label: t('visits.addVisit', 'Add New Visit'),
-            onClick: handleAddVisit,
-            leftSection: <IconPlus size={16} />,
-            size: 'sm',
-            disabled: isViewOnly,
-            tooltip: viewOnlyTooltip,
-          }}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          viewToggleSize="sm"
-          mb={0}
-        />
+          <MedicalPageActions
+            primaryAction={{
+              label: t('visits.addVisit', 'Add New Visit'),
+              onClick: handleAddVisit,
+              leftSection: <IconPlus size={16} />,
+              size: 'sm',
+              disabled: isViewOnly,
+              tooltip: viewOnlyTooltip,
+            }}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            viewToggleSize="sm"
+            mb={0}
+          />
 
-        <MedicalPageFilters dataManagement={dataManagement} config={config} />
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
           {filteredVisits.length === 0 ? (
             <EmptyState
               icon={IconShieldCheck}
               title={t('visits.noVisitsFound', 'No medical visits found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('visits.clickToGetStarted', 'Click "Add New Visit" to get started.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'visits.clickToGetStarted',
+                'Click "Add New Visit" to get started.'
+              )}
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
               items={paginatedVisits}
               columns={{ base: 12, md: 6, lg: 4 }}
-              renderCard={(visit) => (
+              renderCard={visit => (
                 <VisitCard
                   visit={visit}
                   onEdit={handleEditVisit}
@@ -589,14 +577,57 @@ const Visits = () => {
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
                 columns={[
-                  { header: t('visits.table.visitDate', 'Visit Date'), accessor: 'date', priority: 'high', width: 120 },
-                  { header: t('shared:labels.reason', 'Reason'), accessor: 'reason', priority: 'high', width: 150 },
-                  { header: t('visits.table.visitType', 'Visit Type'), accessor: 'visit_type', priority: 'medium', width: 120 },
-                  { header: t('shared:labels.facility', 'Facility'), accessor: 'location', priority: 'medium', width: 150 },
-                  { header: t('shared:fields.practitioner', 'Practitioner'), accessor: 'practitioner_name', priority: 'medium', width: 200 },
-                  { header: t('shared:labels.relatedCondition', 'Related Condition'), accessor: 'condition_name', priority: 'low', width: 200 },
-                  { header: t('shared:labels.diagnosis', 'Diagnosis'), accessor: 'diagnosis', priority: 'medium', width: 150 },
-                  { header: t('shared:tabs.notes', 'Notes'), accessor: 'notes', priority: 'low', width: 200 }
+                  {
+                    header: t('visits.table.visitDate', 'Visit Date'),
+                    accessor: 'date',
+                    priority: 'high',
+                    width: 120,
+                  },
+                  {
+                    header: t('shared:labels.reason', 'Reason'),
+                    accessor: 'reason',
+                    priority: 'high',
+                    width: 150,
+                  },
+                  {
+                    header: t('visits.table.visitType', 'Visit Type'),
+                    accessor: 'visit_type',
+                    priority: 'medium',
+                    width: 120,
+                  },
+                  {
+                    header: t('shared:labels.facility', 'Facility'),
+                    accessor: 'location',
+                    priority: 'medium',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:fields.practitioner', 'Practitioner'),
+                    accessor: 'practitioner_name',
+                    priority: 'medium',
+                    width: 200,
+                  },
+                  {
+                    header: t(
+                      'shared:labels.relatedCondition',
+                      'Related Condition'
+                    ),
+                    accessor: 'condition_name',
+                    priority: 'low',
+                    width: 200,
+                  },
+                  {
+                    header: t('shared:labels.diagnosis', 'Diagnosis'),
+                    accessor: 'diagnosis',
+                    priority: 'medium',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:tabs.notes', 'Notes'),
+                    accessor: 'notes',
+                    priority: 'low',
+                    width: 200,
+                  },
                 ]}
                 patientData={currentPatient}
                 tableName="Visit History"
@@ -629,13 +660,17 @@ const Visits = () => {
               pageSizeOptions={PAGE_SIZE_OPTIONS}
             />
           )}
-      </Stack>
+        </Stack>
       </Container>
 
       <VisitFormWrapper
         isOpen={showModal}
         onClose={() => !isBlocking && setShowModal(false)}
-        title={editingVisit ? t('visits.editVisit', 'Edit Visit') : t('visits.addNewVisit', 'Add New Visit')}
+        title={
+          editingVisit
+            ? t('visits.editVisit', 'Edit Visit')
+            : t('visits.addNewVisit', 'Add New Visit')
+        }
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
@@ -643,7 +678,7 @@ const Visits = () => {
         conditions={conditions}
         editingItem={editingVisit}
         onDocumentManagerRef={setDocumentManagerMethods}
-        onFileUploadComplete={(success) => {
+        onFileUploadComplete={success => {
           if (success && editingVisit) {
             refreshFileCount(editingVisit.id);
           }
@@ -672,7 +707,7 @@ const Visits = () => {
         isBlocking={isBlocking}
         disableEdit={isViewOnly}
         disableEditTooltip={viewOnlyTooltip}
-        onFileUploadComplete={(success) => {
+        onFileUploadComplete={success => {
           if (success && viewingVisit) {
             refreshFileCount(viewingVisit.id);
           }
@@ -688,5 +723,5 @@ const Visits = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Visits, {
   injectResponsive: true,
-  displayName: 'ResponsiveVisits'
+  displayName: 'ResponsiveVisits',
 });

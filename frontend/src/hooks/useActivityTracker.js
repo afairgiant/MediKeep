@@ -1,23 +1,23 @@
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getActivityConfig } from '../config/activityConfig';
-import { 
-  createActivityThrottle, 
+import {
+  createActivityThrottle,
   createThrottleCleanupManager,
-  createRetryWrapper 
+  createRetryWrapper,
 } from '../utils/throttleUtils';
 import secureActivityLogger from '../utils/secureActivityLogger';
 
 /**
  * Enhanced custom hook for tracking user activity to prevent premature session timeouts
- * 
+ *
  * Features:
  * - Comprehensive error handling and memory leak prevention
  * - Configurable throttling aligned with session timeout
  * - Race condition safe API activity tracking
  * - Secure logging without information leakage
  * - Performance optimized with proper cleanup
- * 
+ *
  * @param {Object} options - Configuration options
  * @param {number} options.throttleMs - Override default throttle interval
  * @param {boolean} options.trackMouseMove - Whether to track mouse movements
@@ -49,17 +49,17 @@ export function useActivityTracker(options = {}) {
         if (!isComponentMounted.current || !isAuthenticated) {
           return;
         }
-        
+
         try {
           await updateActivity();
           secureActivityLogger.logActivityDetected({
             component: 'useActivityTracker',
-            throttleMs
+            throttleMs,
           });
         } catch (error) {
           secureActivityLogger.logActivityError(error, {
             component: 'useActivityTracker',
-            action: 'updateActivity'
+            action: 'updateActivity',
           });
           throw error;
         }
@@ -76,7 +76,7 @@ export function useActivityTracker(options = {}) {
     if (!cleanupManager.current || cleanupManager.current.isDestroyed) {
       cleanupManager.current = createThrottleCleanupManager();
     }
-    
+
     const throttledFunc = createActivityThrottle(
       safeUpdateActivity,
       throttleMs,
@@ -90,46 +90,49 @@ export function useActivityTracker(options = {}) {
       cleanupManager.current = createThrottleCleanupManager();
       cleanupManager.current.add(throttledFunc);
     }
-    
+
     return throttledFunc;
   }, [safeUpdateActivity, throttleMs]);
 
   // Activity event handler with comprehensive safety checks
-  const handleActivity = useCallback((event) => {
-    try {
-      // Safety checks
-      if (!isComponentMounted.current || !isAuthenticated || !enabled) {
-        return;
-      }
-      
-      // Check if target element should be ignored
-      if (event?.target) {
-        const target = event.target;
-        const shouldIgnore = config.IGNORED_SELECTORS.some(selector => {
-          try {
-            return target.closest && target.closest(selector);
-          } catch (e) {
-            return false;
-          }
-        });
-        
-        if (shouldIgnore) {
+  const handleActivity = useCallback(
+    event => {
+      try {
+        // Safety checks
+        if (!isComponentMounted.current || !isAuthenticated || !enabled) {
           return;
         }
+
+        // Check if target element should be ignored
+        if (event?.target) {
+          const target = event.target;
+          const shouldIgnore = config.IGNORED_SELECTORS.some(selector => {
+            try {
+              return target.closest && target.closest(selector);
+            } catch (e) {
+              return false;
+            }
+          });
+
+          if (shouldIgnore) {
+            return;
+          }
+        }
+
+        // Throttled activity update with error handling
+        if (throttledUpdateActivity && !throttledUpdateActivity.isDestroyed()) {
+          throttledUpdateActivity();
+        }
+      } catch (error) {
+        secureActivityLogger.logActivityError(error, {
+          component: 'useActivityTracker',
+          action: 'handleActivity',
+          eventType: event?.type,
+        });
       }
-      
-      // Throttled activity update with error handling
-      if (throttledUpdateActivity && !throttledUpdateActivity.isDestroyed()) {
-        throttledUpdateActivity();
-      }
-    } catch (error) {
-      secureActivityLogger.logActivityError(error, {
-        component: 'useActivityTracker',
-        action: 'handleActivity',
-        eventType: event?.type
-      });
-    }
-  }, [isAuthenticated, enabled, throttledUpdateActivity, config]);
+    },
+    [isAuthenticated, enabled, throttledUpdateActivity, config]
+  );
 
   // Set up event listeners with comprehensive error handling and cleanup
   useEffect(() => {
@@ -138,10 +141,10 @@ export function useActivityTracker(options = {}) {
     }
 
     let addedListeners = [];
-    
+
     try {
       const events = [];
-      
+
       // Build event list based on configuration
       if (trackClicks) {
         events.push(...config.TRACKED_EVENTS.MOUSE);
@@ -155,7 +158,7 @@ export function useActivityTracker(options = {}) {
       if (trackTouch) {
         events.push(...config.TRACKED_EVENTS.TOUCH);
       }
-      
+
       // Always add scroll and focus events
       events.push(...config.TRACKED_EVENTS.SCROLL);
       events.push(...config.TRACKED_EVENTS.FOCUS);
@@ -175,14 +178,14 @@ export function useActivityTracker(options = {}) {
             // Use capture for other events
             options = { capture: true };
           }
-          
+
           document.addEventListener(eventType, handleActivity, options);
           addedListeners.push({ eventType, options });
         } catch (error) {
           secureActivityLogger.logActivityError(error, {
             component: 'useActivityTracker',
             action: 'addEventListener',
-            eventType
+            eventType,
           });
         }
       });
@@ -198,14 +201,13 @@ export function useActivityTracker(options = {}) {
           trackMouseMove,
           trackKeyboard,
           trackClicks,
-          trackTouch
-        }
+          trackTouch,
+        },
       });
-
     } catch (error) {
       secureActivityLogger.logActivityError(error, {
         component: 'useActivityTracker',
-        action: 'setup'
+        action: 'setup',
       });
     }
 
@@ -220,26 +222,35 @@ export function useActivityTracker(options = {}) {
             secureActivityLogger.logActivityError(error, {
               component: 'useActivityTracker',
               action: 'removeEventListener',
-              eventType
+              eventType,
             });
           }
         });
-        
+
         activityListeners.current = [];
-        
+
         secureActivityLogger.logActivityCleanup({
           component: 'useActivityTracker',
-          listenersRemoved: addedListeners.length
+          listenersRemoved: addedListeners.length,
         });
-        
       } catch (error) {
         secureActivityLogger.logActivityError(error, {
           component: 'useActivityTracker',
-          action: 'cleanup'
+          action: 'cleanup',
         });
       }
     };
-  }, [isAuthenticated, enabled, handleActivity, trackMouseMove, trackKeyboard, trackClicks, trackTouch, throttleMs, config]);
+  }, [
+    isAuthenticated,
+    enabled,
+    handleActivity,
+    trackMouseMove,
+    trackKeyboard,
+    trackClicks,
+    trackTouch,
+    throttleMs,
+    config,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -253,21 +264,22 @@ export function useActivityTracker(options = {}) {
 
   // Return comprehensive tracking status and control functions
   return {
-    isTracking: isAuthenticated && enabled && activityListeners.current.length > 0,
+    isTracking:
+      isAuthenticated && enabled && activityListeners.current.length > 0,
     isEnabled: enabled,
     manualTrigger: throttledUpdateActivity,
     getStats: () => ({
       listenersCount: activityListeners.current.length,
       throttleMs,
       lastUpdate: throttledUpdateActivity?.lastUpdate || 0,
-      isPending: throttledUpdateActivity?.isPending() || false
+      isPending: throttledUpdateActivity?.isPending() || false,
     }),
     cleanup: () => {
       isComponentMounted.current = false;
       if (cleanupManager.current) {
         cleanupManager.current.cleanupAll();
       }
-    }
+    },
   };
 }
 
@@ -288,18 +300,18 @@ export function useApiActivityTracker() {
         if (!isComponentMounted.current || !isAuthenticated) {
           return;
         }
-        
+
         try {
           await updateActivity();
           secureActivityLogger.logActivityDetected({
             component: 'useApiActivityTracker',
-            ...apiInfo
+            ...apiInfo,
           });
         } catch (error) {
           secureActivityLogger.logActivityError(error, {
             component: 'useApiActivityTracker',
             action: 'updateActivity',
-            apiInfo
+            apiInfo,
           });
           throw error;
         }
@@ -316,7 +328,7 @@ export function useApiActivityTracker() {
     if (!cleanupManager.current || cleanupManager.current.isDestroyed) {
       cleanupManager.current = createThrottleCleanupManager();
     }
-    
+
     const throttledFunc = createActivityThrottle(
       safeUpdateActivity,
       config.API_ACTIVITY_THROTTLE,
@@ -330,35 +342,38 @@ export function useApiActivityTracker() {
       cleanupManager.current = createThrottleCleanupManager();
       cleanupManager.current.add(throttledFunc);
     }
-    
+
     return throttledFunc;
   }, [safeUpdateActivity, config.API_ACTIVITY_THROTTLE]);
 
   // Public API activity tracking function
-  const trackApiActivity = useCallback((apiInfo = {}) => {
-    try {
-      if (!isComponentMounted.current || !isAuthenticated) {
-        return;
-      }
+  const trackApiActivity = useCallback(
+    (apiInfo = {}) => {
+      try {
+        if (!isComponentMounted.current || !isAuthenticated) {
+          return;
+        }
 
-      // Sanitize API info to prevent logging sensitive data
-      const safeApiInfo = {
-        method: apiInfo.method,
-        status: apiInfo.status,
-        // Deliberately exclude URL and other potentially sensitive data
-        timestamp: new Date().toISOString()
-      };
+        // Sanitize API info to prevent logging sensitive data
+        const safeApiInfo = {
+          method: apiInfo.method,
+          status: apiInfo.status,
+          // Deliberately exclude URL and other potentially sensitive data
+          timestamp: new Date().toISOString(),
+        };
 
-      if (throttledTrackActivity && !throttledTrackActivity.isDestroyed()) {
-        throttledTrackActivity(safeApiInfo);
+        if (throttledTrackActivity && !throttledTrackActivity.isDestroyed()) {
+          throttledTrackActivity(safeApiInfo);
+        }
+      } catch (error) {
+        secureActivityLogger.logActivityError(error, {
+          component: 'useApiActivityTracker',
+          action: 'trackApiActivity',
+        });
       }
-    } catch (error) {
-      secureActivityLogger.logActivityError(error, {
-        component: 'useApiActivityTracker',
-        action: 'trackApiActivity'
-      });
-    }
-  }, [isAuthenticated, throttledTrackActivity]);
+    },
+    [isAuthenticated, throttledTrackActivity]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -375,8 +390,8 @@ export function useApiActivityTracker() {
     isTracking: isAuthenticated,
     getStats: () => ({
       throttleMs: config.API_ACTIVITY_THROTTLE,
-      isPending: throttledTrackActivity?.isPending() || false
-    })
+      isPending: throttledTrackActivity?.isPending() || false,
+    }),
   };
 }
 
@@ -397,18 +412,18 @@ export function useNavigationActivityTracker() {
         if (!isComponentMounted.current || !isAuthenticated) {
           return;
         }
-        
+
         try {
           await updateActivity();
           secureActivityLogger.logActivityDetected({
             component: 'useNavigationActivityTracker',
-            ...navigationInfo
+            ...navigationInfo,
           });
         } catch (error) {
           secureActivityLogger.logActivityError(error, {
             component: 'useNavigationActivityTracker',
             action: 'updateActivity',
-            navigationInfo
+            navigationInfo,
           });
           throw error;
         }
@@ -425,7 +440,7 @@ export function useNavigationActivityTracker() {
     if (!cleanupManager.current || cleanupManager.current.isDestroyed) {
       cleanupManager.current = createThrottleCleanupManager();
     }
-    
+
     const throttledFunc = createActivityThrottle(
       safeUpdateActivity,
       config.NAVIGATION_ACTIVITY_THROTTLE,
@@ -439,35 +454,38 @@ export function useNavigationActivityTracker() {
       cleanupManager.current = createThrottleCleanupManager();
       cleanupManager.current.add(throttledFunc);
     }
-    
+
     return throttledFunc;
   }, [safeUpdateActivity, config.NAVIGATION_ACTIVITY_THROTTLE]);
 
   // Public navigation activity tracking function
-  const trackNavigationActivity = useCallback((navigationInfo = {}) => {
-    try {
-      if (!isComponentMounted.current || !isAuthenticated) {
-        return;
-      }
+  const trackNavigationActivity = useCallback(
+    (navigationInfo = {}) => {
+      try {
+        if (!isComponentMounted.current || !isAuthenticated) {
+          return;
+        }
 
-      // Sanitize navigation info
-      const safeNavigationInfo = {
-        fromPath: navigationInfo.fromPath,
-        toPath: navigationInfo.toPath,
-        timestamp: new Date().toISOString()
-        // Deliberately exclude search params and hash that might contain sensitive data
-      };
+        // Sanitize navigation info
+        const safeNavigationInfo = {
+          fromPath: navigationInfo.fromPath,
+          toPath: navigationInfo.toPath,
+          timestamp: new Date().toISOString(),
+          // Deliberately exclude search params and hash that might contain sensitive data
+        };
 
-      if (throttledTrackActivity && !throttledTrackActivity.isDestroyed()) {
-        throttledTrackActivity(safeNavigationInfo);
+        if (throttledTrackActivity && !throttledTrackActivity.isDestroyed()) {
+          throttledTrackActivity(safeNavigationInfo);
+        }
+      } catch (error) {
+        secureActivityLogger.logActivityError(error, {
+          component: 'useNavigationActivityTracker',
+          action: 'trackNavigationActivity',
+        });
       }
-    } catch (error) {
-      secureActivityLogger.logActivityError(error, {
-        component: 'useNavigationActivityTracker',
-        action: 'trackNavigationActivity'
-      });
-    }
-  }, [isAuthenticated, throttledTrackActivity]);
+    },
+    [isAuthenticated, throttledTrackActivity]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -484,8 +502,8 @@ export function useNavigationActivityTracker() {
     isTracking: isAuthenticated,
     getStats: () => ({
       throttleMs: config.NAVIGATION_ACTIVITY_THROTTLE,
-      isPending: throttledTrackActivity?.isPending() || false
-    })
+      isPending: throttledTrackActivity?.isPending() || false,
+    }),
   };
 }
 

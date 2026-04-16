@@ -1,4 +1,3 @@
-import React from 'react';
 import { notifications } from '@mantine/notifications';
 import { Progress, Text, Group } from '@mantine/core';
 
@@ -11,14 +10,10 @@ export const showProgressNotification = (id, title, message, progress = 0) => {
     title,
     message: (
       <div>
-        <Text size="sm" mb="xs">{message}</Text>
-        <Progress 
-          value={progress} 
-          size="sm" 
-          color="blue"
-          striped
-          animate
-        />
+        <Text size="sm" mb="xs">
+          {message}
+        </Text>
+        <Progress value={progress} size="sm" color="blue" striped animate />
         <Group position="apart" mt="xs">
           <Text size="xs" color="dimmed">
             {/* eslint-disable-next-line i18next/no-literal-string -- progress percentage */}
@@ -36,7 +31,7 @@ export const showProgressNotification = (id, title, message, progress = 0) => {
     autoClose: progress >= 100 ? 3000 : false,
     withCloseButton: progress >= 100,
     position: 'top-right',
-    styles: (theme) => ({
+    styles: theme => ({
       root: {
         backgroundColor: theme.colors.blue[0],
         borderColor: theme.colors.blue[6],
@@ -56,14 +51,14 @@ export const showStickyNotification = (id, title, message, type = 'info') => {
     info: 'blue',
     warning: 'yellow',
     success: 'green',
-    error: 'red'
+    error: 'red',
   };
 
   const iconMap = {
     info: 'ℹ️',
     warning: '⚠️',
     success: '✅',
-    error: '❌'
+    error: '❌',
   };
 
   notifications.show({
@@ -75,16 +70,16 @@ export const showStickyNotification = (id, title, message, type = 'info') => {
     autoClose: false, // Sticky - user must close manually
     withCloseButton: true,
     position: 'top-right',
-    styles: (theme) => ({
+    styles: theme => ({
       root: {
         backgroundColor: theme.colors[colorMap[type]][0],
         borderColor: theme.colors[colorMap[type]][6],
         border: `2px solid ${theme.colors[colorMap[type]][6]}`,
         '&::before': { backgroundColor: theme.colors[colorMap[type]][6] },
       },
-      title: { 
+      title: {
         color: theme.colors[colorMap[type]][9],
-        fontWeight: 600 
+        fontWeight: 600,
       },
       description: { color: theme.colors[colorMap[type]][7] },
       closeButton: {

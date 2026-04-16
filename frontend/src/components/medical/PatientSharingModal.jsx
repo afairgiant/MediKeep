@@ -3,7 +3,7 @@
  * Interface for sharing patients with other users
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Stack,
@@ -18,11 +18,8 @@ import {
   Table,
   Paper,
   Title,
-  Divider,
   Switch,
   Textarea,
-  Box,
-  Flex,
   Tooltip,
   Card,
   Avatar,
@@ -33,11 +30,8 @@ import {
   IconTrash,
   IconEdit,
   IconAlertCircle,
-  IconCheck,
-  IconX,
   IconUser,
   IconClock,
-  IconShield,
   IconUsers,
   IconRefresh,
 } from '@tabler/icons-react';
@@ -68,21 +62,18 @@ const safeParseJSON = (jsonString, fieldName = 'custom_permissions') => {
     logger.error('json_parse_error', {
       message: `Invalid JSON in ${fieldName}`,
       jsonString: jsonString.substring(0, 100), // Log first 100 chars only
-      error: error.message
+      error: error.message,
     });
-    
+
     // Show user-friendly error
-    notifyError('notifications:toasts.sharing.invalidJson', { interpolation: { fieldName } });
+    notifyError('notifications:toasts.sharing.invalidJson', {
+      interpolation: { fieldName },
+    });
     throw new Error(`Invalid JSON format in ${fieldName}`);
   }
 };
 
-const PatientSharingModal = ({
-  opened,
-  onClose,
-  patient,
-  onShareUpdate
-}) => {
+const PatientSharingModal = ({ opened, onClose, patient, onShareUpdate }) => {
   const { t } = useTranslation(['invitations', 'shared']);
   const { invalidatePatientList } = useCacheManager();
   const { formatDate, formatDateTime } = useDateFormat();
@@ -103,7 +94,7 @@ const PatientSharingModal = ({
     message: '',
     expires_hours: 168,
   });
-  
+
   const [formErrors, setFormErrors] = useState({});
 
   // Load shares and pending invitations when modal opens
@@ -112,6 +103,7 @@ const PatientSharingModal = ({
       loadPatientShares();
       loadPendingInvitations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loaders are stable in component scope; only re-fetch when modal opens or patient changes
   }, [opened, patient]);
 
   // Reset form when modal closes
@@ -139,26 +131,26 @@ const PatientSharingModal = ({
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!formData.shared_with_user_identifier) {
       errors.shared_with_user_identifier = 'Please enter a username or email';
     }
-    
+
     if (!['view', 'edit', 'full'].includes(formData.permission_level)) {
       errors.permission_level = 'Invalid permission level';
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = e => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     if (editingShare) {
       updateShare(formData);
     } else {
@@ -175,20 +167,20 @@ const PatientSharingModal = ({
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await patientSharingApi.getPatientShares(patient.id);
       setShares(response.shares || []);
-      
+
       logger.debug('patient_sharing_modal_loaded', {
         message: 'Patient shares loaded',
         patientId: patient.id,
-        shareCount: response.shares?.length || 0
+        shareCount: response.shares?.length || 0,
       });
     } catch (error) {
       logger.error('patient_sharing_modal_error', {
         message: 'Failed to load patient shares',
         patientId: patient.id,
-        error: error.message
+        error: error.message,
       });
       setError(error.message);
     } finally {
@@ -203,11 +195,13 @@ const PatientSharingModal = ({
     if (!patient) return;
 
     try {
-      const invitations = await invitationApi.getSentInvitations('patient_share');
+      const invitations =
+        await invitationApi.getSentInvitations('patient_share');
 
-      const filtered = invitations.filter(inv =>
-        inv.context_data?.patient_id === patient.id &&
-        inv.status === 'pending'
+      const filtered = invitations.filter(
+        inv =>
+          inv.context_data?.patient_id === patient.id &&
+          inv.status === 'pending'
       );
 
       setPendingInvitations(filtered);
@@ -215,13 +209,13 @@ const PatientSharingModal = ({
       logger.debug('patient_sharing_modal_invitations_loaded', {
         message: 'Pending invitations loaded',
         patientId: patient.id,
-        invitationCount: filtered.length
+        invitationCount: filtered.length,
       });
     } catch (error) {
       logger.error('patient_sharing_modal_invitations_error', {
         message: 'Failed to load pending invitations',
         patientId: patient.id,
-        error: error.message
+        error: error.message,
       });
     }
   };
@@ -229,7 +223,7 @@ const PatientSharingModal = ({
   /**
    * Cancel a pending invitation
    */
-  const cancelInvitation = async (invitationId) => {
+  const cancelInvitation = async invitationId => {
     try {
       setLoading(true);
 
@@ -248,16 +242,18 @@ const PatientSharingModal = ({
 
       logger.info('patient_sharing_modal_invitation_cancelled', {
         message: 'Invitation cancelled',
-        invitationId
+        invitationId,
       });
     } catch (error) {
       logger.error('patient_sharing_modal_cancel_error', {
         message: 'Failed to cancel invitation',
         invitationId,
-        error: error.message
+        error: error.message,
       });
 
-      notifyError('notifications:toasts.sharing.cancelFailed', { interpolation: { message: error.message } });
+      notifyError('notifications:toasts.sharing.cancelFailed', {
+        interpolation: { message: error.message },
+      });
     } finally {
       setLoading(false);
     }
@@ -266,7 +262,7 @@ const PatientSharingModal = ({
   /**
    * Send patient share invitation
    */
-  const createShare = async (values) => {
+  const createShare = async values => {
     if (!patient) return;
 
     try {
@@ -277,14 +273,18 @@ const PatientSharingModal = ({
         shared_with_user_identifier: values.shared_with_user_identifier,
         permission_level: values.permission_level,
         expires_at: values.has_expiration ? values.expires_at : null,
-        custom_permissions: values.custom_permissions ? safeParseJSON(values.custom_permissions, 'custom permissions') : null,
+        custom_permissions: values.custom_permissions
+          ? safeParseJSON(values.custom_permissions, 'custom permissions')
+          : null,
         message: values.message || null,
         expires_hours: values.expires_hours || 168,
       };
 
       await patientSharingApi.sendInvitation(invitationData);
 
-      notifySuccess('notifications:toasts.sharing.invitationSent', { interpolation: { recipient: values.shared_with_user_identifier } });
+      notifySuccess('notifications:toasts.sharing.invitationSent', {
+        interpolation: { recipient: values.shared_with_user_identifier },
+      });
 
       // Reload invitations and reset form
       await loadPendingInvitations();
@@ -301,17 +301,19 @@ const PatientSharingModal = ({
       logger.info('patient_sharing_modal_invitation_sent', {
         message: 'Patient share invitation sent',
         patientId: patient.id,
-        sharedWithIdentifier: values.shared_with_user_identifier
+        sharedWithIdentifier: values.shared_with_user_identifier,
       });
     } catch (error) {
       logger.error('patient_sharing_modal_invitation_error', {
         message: 'Failed to send patient share invitation',
         patientId: patient.id,
         sharedWithIdentifier: values.shared_with_user_identifier,
-        error: error.message
+        error: error.message,
       });
 
-      notifyError('notifications:toasts.sharing.invitationFailed', { interpolation: { message: error.message } });
+      notifyError('notifications:toasts.sharing.invitationFailed', {
+        interpolation: { message: error.message },
+      });
     } finally {
       setLoading(false);
     }
@@ -320,49 +322,53 @@ const PatientSharingModal = ({
   /**
    * Update an existing share
    */
-  const updateShare = async (values) => {
+  const updateShare = async values => {
     if (!patient || !editingShare) return;
 
     try {
       setLoading(true);
-      
+
       const updateData = {
         permission_level: values.permission_level,
         expires_at: values.has_expiration ? values.expires_at : null,
-        custom_permissions: values.custom_permissions ? safeParseJSON(values.custom_permissions, 'custom permissions') : null,
+        custom_permissions: values.custom_permissions
+          ? safeParseJSON(values.custom_permissions, 'custom permissions')
+          : null,
       };
-      
+
       await patientSharingApi.updatePatientShare(
         patient.id,
         editingShare.shared_with_user_id,
         updateData
       );
-      
+
       notifySuccess('notifications:toasts.sharing.shareUpdated');
-      
+
       // Reload shares and reset form
       await loadPatientShares();
       resetForm();
       setEditingShare(null);
-      
+
       if (onShareUpdate) {
         onShareUpdate();
       }
-      
+
       logger.info('patient_sharing_modal_updated', {
         message: 'Patient share updated successfully',
         patientId: patient.id,
-        shareId: editingShare.id
+        shareId: editingShare.id,
       });
     } catch (error) {
       logger.error('patient_sharing_modal_update_error', {
         message: 'Failed to update patient share',
         patientId: patient.id,
         shareId: editingShare.id,
-        error: error.message
+        error: error.message,
       });
-      
-      notifyError('notifications:toasts.sharing.updateFailed', { interpolation: { message: error.message } });
+
+      notifyError('notifications:toasts.sharing.updateFailed', {
+        interpolation: { message: error.message },
+      });
     } finally {
       setLoading(false);
     }
@@ -371,37 +377,44 @@ const PatientSharingModal = ({
   /**
    * Revoke a share
    */
-  const revokeShare = async (share) => {
+  const revokeShare = async share => {
     if (!patient) return;
 
     try {
       setLoading(true);
-      
-      await patientSharingApi.revokePatientShare(patient.id, share.shared_with_user_id);
-      
-      notifySuccess('notifications:toasts.sharing.accessRevoked', { interpolation: { userId: share.shared_with_user_id } });
-      
+
+      await patientSharingApi.revokePatientShare(
+        patient.id,
+        share.shared_with_user_id
+      );
+
+      notifySuccess('notifications:toasts.sharing.accessRevoked', {
+        interpolation: { userId: share.shared_with_user_id },
+      });
+
       // Reload shares
       await loadPatientShares();
-      
+
       if (onShareUpdate) {
         onShareUpdate();
       }
-      
+
       logger.info('patient_sharing_modal_revoked', {
         message: 'Patient share revoked successfully',
         patientId: patient.id,
-        shareId: share.id
+        shareId: share.id,
       });
     } catch (error) {
       logger.error('patient_sharing_modal_revoke_error', {
         message: 'Failed to revoke patient share',
         patientId: patient.id,
         shareId: share.id,
-        error: error.message
+        error: error.message,
       });
-      
-      notifyError('notifications:toasts.sharing.revokeFailed', { interpolation: { message: error.message } });
+
+      notifyError('notifications:toasts.sharing.revokeFailed', {
+        interpolation: { message: error.message },
+      });
     } finally {
       setLoading(false);
     }
@@ -410,14 +423,19 @@ const PatientSharingModal = ({
   /**
    * Start editing a share
    */
-  const startEditShare = (share) => {
+  const startEditShare = share => {
     setEditingShare(share);
     setFormData({
-      shared_with_user_identifier: share.shared_with_username || share.shared_with_email || share.shared_with_user_id.toString(),
+      shared_with_user_identifier:
+        share.shared_with_username ||
+        share.shared_with_email ||
+        share.shared_with_user_id.toString(),
       permission_level: share.permission_level,
       expires_at: share.expires_at ? new Date(share.expires_at) : null,
       has_expiration: !!share.expires_at,
-      custom_permissions: share.custom_permissions ? JSON.stringify(share.custom_permissions) : '',
+      custom_permissions: share.custom_permissions
+        ? JSON.stringify(share.custom_permissions)
+        : '',
     });
     setShowCreateForm(true);
   };
@@ -425,19 +443,23 @@ const PatientSharingModal = ({
   /**
    * Get permission level color
    */
-  const getPermissionColor = (level) => {
+  const getPermissionColor = level => {
     switch (level) {
-      case 'view': return 'blue';
-      case 'edit': return 'orange';
-      case 'full': return 'red';
-      default: return 'gray';
+      case 'view':
+        return 'blue';
+      case 'edit':
+        return 'orange';
+      case 'full':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   /**
    * Format expiration date
    */
-  const formatExpirationDate = (dateString) => {
+  const formatExpirationDate = dateString => {
     if (!dateString) return 'Never';
     return formatDateTime(dateString, { includeTimezone: false });
   };
@@ -445,7 +467,7 @@ const PatientSharingModal = ({
   /**
    * Check if share is expired
    */
-  const isShareExpired = (share) => {
+  const isShareExpired = share => {
     if (!share.expires_at) return false;
     return new Date(share.expires_at) < new Date();
   };
@@ -461,7 +483,11 @@ const PatientSharingModal = ({
       title={
         <Group gap="sm">
           <IconShare size="1.2rem" />
-          <Text fw={500}>{t('sharing.sharePatient', { name: `${patient.first_name} ${patient.last_name}` })}</Text>
+          <Text fw={500}>
+            {t('sharing.sharePatient', {
+              name: `${patient.first_name} ${patient.last_name}`,
+            })}
+          </Text>
         </Group>
       }
       size="xl"
@@ -491,7 +517,10 @@ const PatientSharingModal = ({
                 {patient.first_name} {patient.last_name}
               </Text>
               <Text size="sm" c="dimmed">
-                {t('sharing.born', { date: patient.birth_date, level: patient.privacy_level })}
+                {t('sharing.born', {
+                  date: patient.birth_date,
+                  level: patient.privacy_level,
+                })}
               </Text>
             </div>
           </Group>
@@ -526,7 +555,9 @@ const PatientSharingModal = ({
             <form onSubmit={handleFormSubmit}>
               <Stack gap="md">
                 <Title order={5}>
-                  {editingShare ? t('sharing.editShare') : t('sharing.sendInvitation')}
+                  {editingShare
+                    ? t('sharing.editShare')
+                    : t('sharing.sendInvitation')}
                 </Title>
 
                 <TextInput
@@ -535,7 +566,12 @@ const PatientSharingModal = ({
                   required
                   disabled={!!editingShare}
                   value={formData.shared_with_user_identifier}
-                  onChange={(e) => setFormData({...formData, shared_with_user_identifier: e.target.value})}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      shared_with_user_identifier: e.target.value,
+                    })
+                  }
                   error={formErrors.shared_with_user_identifier}
                 />
 
@@ -545,11 +581,19 @@ const PatientSharingModal = ({
                   required
                   data={[
                     { value: 'view', label: 'View - Can view patient data' },
-                    { value: 'edit', label: 'Edit - Can view and edit patient data' },
-                    { value: 'full', label: 'Full - Can view, edit, and manage patient' },
+                    {
+                      value: 'edit',
+                      label: 'Edit - Can view and edit patient data',
+                    },
+                    {
+                      value: 'full',
+                      label: 'Full - Can view, edit, and manage patient',
+                    },
                   ]}
                   value={formData.permission_level}
-                  onChange={(value) => setFormData({...formData, permission_level: value})}
+                  onChange={value =>
+                    setFormData({ ...formData, permission_level: value })
+                  }
                   error={formErrors.permission_level}
                 />
 
@@ -557,7 +601,9 @@ const PatientSharingModal = ({
                   label="Message (Optional)"
                   placeholder="Add a note about why you're sharing this patient..."
                   value={formData.message}
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  onChange={e =>
+                    setFormData({ ...formData, message: e.target.value })
+                  }
                   minRows={2}
                   maxRows={4}
                 />
@@ -573,14 +619,24 @@ const PatientSharingModal = ({
                     { value: '720', label: '1 Month' },
                   ]}
                   value={String(formData.expires_hours)}
-                  onChange={(value) => setFormData({...formData, expires_hours: parseInt(value || '168')})}
+                  onChange={value =>
+                    setFormData({
+                      ...formData,
+                      expires_hours: parseInt(value || '168'),
+                    })
+                  }
                 />
 
                 <Switch
                   label="Set share expiration date (after acceptance)"
                   description="When the share itself expires (different from invitation expiration)"
                   checked={formData.has_expiration}
-                  onChange={(event) => setFormData({...formData, has_expiration: event.currentTarget.checked})}
+                  onChange={event =>
+                    setFormData({
+                      ...formData,
+                      has_expiration: event.currentTarget.checked,
+                    })
+                  }
                 />
 
                 {formData.has_expiration && (
@@ -588,8 +644,24 @@ const PatientSharingModal = ({
                     type="datetime-local"
                     label="Expires At"
                     placeholder="Select expiration date and time"
-                    value={formData.expires_at ? new Date(formData.expires_at - formData.expires_at.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setFormData({...formData, expires_at: e.target.value ? new Date(e.target.value) : null})}
+                    value={
+                      formData.expires_at
+                        ? new Date(
+                            formData.expires_at -
+                              formData.expires_at.getTimezoneOffset() * 60000
+                          )
+                            .toISOString()
+                            .slice(0, 16)
+                        : ''
+                    }
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        expires_at: e.target.value
+                          ? new Date(e.target.value)
+                          : null,
+                      })
+                    }
                     min={new Date().toISOString().slice(0, 16)}
                   />
                 )}
@@ -599,7 +671,12 @@ const PatientSharingModal = ({
                   placeholder='{"can_export": true, "can_share": false}'
                   description="Optional custom permissions as JSON object"
                   value={formData.custom_permissions}
-                  onChange={(e) => setFormData({...formData, custom_permissions: e.target.value})}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      custom_permissions: e.target.value,
+                    })
+                  }
                 />
 
                 <Group justify="flex-end">
@@ -614,11 +691,7 @@ const PatientSharingModal = ({
                   >
                     {t('shared:fields.cancel')}
                   </Button>
-                  <Button
-                    type="submit"
-                    color="blue"
-                    loading={loading}
-                  >
+                  <Button type="submit" color="blue" loading={loading}>
                     {editingShare ? 'Update Share' : 'Send Invitation'}
                   </Button>
                 </Group>
@@ -632,7 +705,9 @@ const PatientSharingModal = ({
           <div>
             <Title order={5} mb="md">
               <IconClock size="1rem" style={{ marginRight: 8 }} />
-              {t('manager.pendingInvitationsCount', { count: pendingInvitations.length })}
+              {t('manager.pendingInvitationsCount', {
+                count: pendingInvitations.length,
+              })}
             </Title>
 
             <Table striped highlightOnHover>
@@ -645,7 +720,7 @@ const PatientSharingModal = ({
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {pendingInvitations.map((invitation) => (
+                {pendingInvitations.map(invitation => (
                   <Table.Tr key={invitation.id}>
                     <Table.Td>
                       <Group gap="xs">
@@ -654,7 +729,9 @@ const PatientSharingModal = ({
                         </Avatar>
                         <div>
                           <Text size="sm" fw={500}>
-                            {invitation.sent_to?.name || invitation.sent_to?.username || 'Unknown'}
+                            {invitation.sent_to?.name ||
+                              invitation.sent_to?.username ||
+                              'Unknown'}
                           </Text>
                           <Text size="xs" c="dimmed">
                             {invitation.sent_to?.email || ''}
@@ -722,7 +799,7 @@ const PatientSharingModal = ({
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {shares.map((share) => (
+                {shares.map(share => (
                   <Table.Tr key={share.id}>
                     <Table.Td>
                       <Group gap="sm">
@@ -731,10 +808,12 @@ const PatientSharingModal = ({
                         </Avatar>
                         <div>
                           <Text size="sm" fw={500}>
-                            {share.shared_with_full_name || `User ${share.shared_with_user_id}`}
+                            {share.shared_with_full_name ||
+                              `User ${share.shared_with_user_id}`}
                           </Text>
                           <Text size="xs" c="dimmed">
-                            {share.shared_with_email || `ID: ${share.shared_with_user_id}`}
+                            {share.shared_with_email ||
+                              `ID: ${share.shared_with_user_id}`}
                           </Text>
                         </div>
                       </Group>

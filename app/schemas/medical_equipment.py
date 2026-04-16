@@ -1,8 +1,16 @@
 """Schemas for Medical Equipment."""
+
 from datetime import date, datetime
 from typing import Optional, List
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator, ValidationInfo
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+    ValidationInfo,
+)
 
 from app.schemas.base_tags import TaggedEntityMixin
 
@@ -37,6 +45,7 @@ EQUIPMENT_STATUSES = ["active", "inactive", "replaced", "returned", "lost"]
 
 class MedicalEquipmentBase(TaggedEntityMixin):
     """Base schema for medical equipment."""
+
     equipment_name: str = Field(
         ..., min_length=2, max_length=200, description="Name of the equipment"
     )
@@ -89,11 +98,13 @@ class MedicalEquipmentBase(TaggedEntityMixin):
 
 class MedicalEquipmentCreate(MedicalEquipmentBase):
     """Schema for creating medical equipment."""
+
     pass
 
 
 class MedicalEquipmentUpdate(BaseModel):
     """Schema for updating medical equipment."""
+
     equipment_name: Optional[str] = Field(None, min_length=2, max_length=200)
     equipment_type: Optional[str] = Field(None, min_length=2, max_length=100)
     manufacturer: Optional[str] = Field(None, max_length=200)
@@ -124,13 +135,16 @@ class MedicalEquipmentUpdate(BaseModel):
     def validate_status(cls, v):
         if v is not None:
             if v.lower() not in EQUIPMENT_STATUSES:
-                raise ValueError(f"Status must be one of: {', '.join(EQUIPMENT_STATUSES)}")
+                raise ValueError(
+                    f"Status must be one of: {', '.join(EQUIPMENT_STATUSES)}"
+                )
             return v.lower()
         return v
 
 
 class MedicalEquipmentResponse(MedicalEquipmentBase):
     """Schema for medical equipment response."""
+
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -140,6 +154,7 @@ class MedicalEquipmentResponse(MedicalEquipmentBase):
 
 class MedicalEquipmentWithRelations(MedicalEquipmentResponse):
     """Schema for medical equipment with related entities."""
+
     patient: Optional[dict] = None
     practitioner: Optional[dict] = None
 
@@ -148,6 +163,7 @@ class MedicalEquipmentWithRelations(MedicalEquipmentResponse):
 
 class MedicalEquipmentSummary(BaseModel):
     """Summary schema for medical equipment."""
+
     id: int
     equipment_name: str
     equipment_type: str

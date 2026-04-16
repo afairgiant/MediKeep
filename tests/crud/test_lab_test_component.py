@@ -1,6 +1,7 @@
 """
 Tests for LabTestComponent CRUD operations.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -12,7 +13,7 @@ from app.models.models import LabTestComponent
 from app.schemas.lab_test_component import (
     LabTestComponentCreate,
     LabTestComponentUpdate,
-    LabTestComponentBulkCreate
+    LabTestComponentBulkCreate,
 )
 from app.schemas.lab_result import LabResultCreate
 from app.schemas.patient import PatientCreate
@@ -29,7 +30,7 @@ class TestLabTestComponentCRUD:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         return patient_crud.create_for_user(
             db_session, user_id=test_user.id, patient_data=patient_data
@@ -43,7 +44,7 @@ class TestLabTestComponentCRUD:
             test_name="Complete Blood Count",
             test_category="blood work",
             status="completed",
-            completed_date=date(2024, 1, 15)
+            completed_date=date(2024, 1, 15),
         )
         return lab_result_crud.create(db_session, obj_in=lab_result_data)
 
@@ -58,7 +59,7 @@ class TestLabTestComponentCRUD:
             ref_range_min=12.0,
             ref_range_max=16.0,
             status="normal",
-            category="hematology"
+            category="hematology",
         )
 
         component = lab_test_component_crud.create(db_session, obj_in=component_data)
@@ -71,7 +72,9 @@ class TestLabTestComponentCRUD:
         assert component.lab_result_id == test_lab_result.id
         assert component.canonical_test_name is None  # Not set by default
 
-    def test_create_lab_test_component_with_canonical_name(self, db_session: Session, test_lab_result):
+    def test_create_lab_test_component_with_canonical_name(
+        self, db_session: Session, test_lab_result
+    ):
         """Test creating a lab test component with canonical test name."""
         component_data = LabTestComponentCreate(
             lab_result_id=test_lab_result.id,
@@ -83,7 +86,7 @@ class TestLabTestComponentCRUD:
             ref_range_max=16.0,
             status="normal",
             category="hematology",
-            canonical_test_name="Hemoglobin"
+            canonical_test_name="Hemoglobin",
         )
 
         component = lab_test_component_crud.create(db_session, obj_in=component_data)
@@ -100,22 +103,22 @@ class TestLabTestComponentCRUD:
                 test_name="Hemoglobin",
                 value=14.5,
                 unit="g/dL",
-                display_order=1
+                display_order=1,
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="White Blood Cells",
                 value=7.5,
                 unit="K/uL",
-                display_order=2
+                display_order=2,
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Platelets",
                 value=250,
                 unit="K/uL",
-                display_order=3
-            )
+                display_order=3,
+            ),
         ]
 
         for comp_data in components_data:
@@ -136,20 +139,20 @@ class TestLabTestComponentCRUD:
                 lab_result_id=test_lab_result.id,
                 test_name="Glucose",
                 value=95,
-                unit="mg/dL"
+                unit="mg/dL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Glucose Fasting",
                 value=90,
-                unit="mg/dL"
+                unit="mg/dL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Cholesterol",
                 value=180,
-                unit="mg/dL"
-            )
+                unit="mg/dL",
+            ),
         ]
 
         for comp_data in components_data:
@@ -168,7 +171,7 @@ class TestLabTestComponentCRUD:
             test_name="Hemoglobin A1c",
             abbreviation="HBA1C",
             value=5.7,
-            unit="%"
+            unit="%",
         )
         lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -187,22 +190,22 @@ class TestLabTestComponentCRUD:
                 test_name="Test 1",
                 value=10,
                 unit="unit",
-                category="hematology"
+                category="hematology",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Test 2",
                 value=20,
                 unit="unit",
-                category="chemistry"
+                category="chemistry",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Test 3",
                 value=30,
                 unit="unit",
-                category="hematology"
-            )
+                category="hematology",
+            ),
         ]
 
         for comp_data in components_data:
@@ -223,22 +226,22 @@ class TestLabTestComponentCRUD:
                 test_name="Normal Test",
                 value=10,
                 unit="unit",
-                status="normal"
+                status="normal",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="High Test",
                 value=50,
                 unit="unit",
-                status="high"
+                status="high",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Another Normal",
                 value=15,
                 unit="unit",
-                status="normal"
-            )
+                status="normal",
+            ),
         ]
 
         for comp_data in components_data:
@@ -259,29 +262,29 @@ class TestLabTestComponentCRUD:
                 test_name="Normal",
                 value=10,
                 unit="unit",
-                status="normal"
+                status="normal",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="High",
                 value=50,
                 unit="unit",
-                status="high"
+                status="high",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Low",
                 value=2,
                 unit="unit",
-                status="low"
+                status="low",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Critical",
                 value=1,
                 unit="unit",
-                status="critical"
-            )
+                status="critical",
+            ),
         ]
 
         for comp_data in components_data:
@@ -303,15 +306,15 @@ class TestLabTestComponentCRUD:
                 test_name="Normal Test",
                 value=10,
                 unit="unit",
-                status="normal"
+                status="normal",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Critical Test",
                 value=0.5,
                 unit="unit",
-                status="critical"
-            )
+                status="critical",
+            ),
         ]
 
         for comp_data in components_data:
@@ -332,20 +335,20 @@ class TestLabTestComponentCRUD:
                 test_name="Blood Glucose",
                 abbreviation="GLU",
                 value=95,
-                unit="mg/dL"
+                unit="mg/dL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Glucose Tolerance",
                 value=140,
-                unit="mg/dL"
+                unit="mg/dL",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Cholesterol",
                 value=180,
-                unit="mg/dL"
-            )
+                unit="mg/dL",
+            ),
         ]
 
         for comp_data in components_data:
@@ -364,35 +367,34 @@ class TestLabTestComponentCRUD:
                 lab_result_id=test_lab_result.id,
                 test_name="Test 1",
                 value=10,
-                unit="unit"
+                unit="unit",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Test 2",
                 value=20,
-                unit="unit"
+                unit="unit",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="Test 3",
                 value=30,
-                unit="unit"
-            )
+                unit="unit",
+            ),
         ]
 
         bulk_data = LabTestComponentBulkCreate(
-            lab_result_id=test_lab_result.id,
-            components=components
+            lab_result_id=test_lab_result.id, components=components
         )
 
-        created = lab_test_component_crud.bulk_create(
-            db_session, obj_in=bulk_data
-        )
+        created = lab_test_component_crud.bulk_create(db_session, obj_in=bulk_data)
 
         assert len(created) == 3
         assert all(c.lab_result_id == test_lab_result.id for c in created)
 
-    def test_bulk_create_with_canonical_names(self, db_session: Session, test_lab_result):
+    def test_bulk_create_with_canonical_names(
+        self, db_session: Session, test_lab_result
+    ):
         """Test bulk creating components with canonical test names."""
         components = [
             LabTestComponentCreate(
@@ -400,32 +402,29 @@ class TestLabTestComponentCRUD:
                 test_name="WBC",
                 value=7.5,
                 unit="K/uL",
-                canonical_test_name="White Blood Cell Count"
+                canonical_test_name="White Blood Cell Count",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="HGB",
                 value=14.5,
                 unit="g/dL",
-                canonical_test_name="Hemoglobin"
+                canonical_test_name="Hemoglobin",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
                 test_name="PLT",
                 value=250,
                 unit="K/uL",
-                canonical_test_name="Platelet Count"
-            )
+                canonical_test_name="Platelet Count",
+            ),
         ]
 
         bulk_data = LabTestComponentBulkCreate(
-            lab_result_id=test_lab_result.id,
-            components=components
+            lab_result_id=test_lab_result.id, components=components
         )
 
-        created = lab_test_component_crud.bulk_create(
-            db_session, obj_in=bulk_data
-        )
+        created = lab_test_component_crud.bulk_create(db_session, obj_in=bulk_data)
 
         assert len(created) == 3
         assert created[0].canonical_test_name == "White Blood Cell Count"
@@ -441,7 +440,7 @@ class TestLabTestComponentCRUD:
                 value=10,
                 unit="unit",
                 status="normal",
-                category="hematology"
+                category="hematology",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
@@ -449,7 +448,7 @@ class TestLabTestComponentCRUD:
                 value=50,
                 unit="unit",
                 status="high",
-                category="chemistry"
+                category="chemistry",
             ),
             LabTestComponentCreate(
                 lab_result_id=test_lab_result.id,
@@ -457,8 +456,8 @@ class TestLabTestComponentCRUD:
                 value=1,
                 unit="unit",
                 status="critical",
-                category="hematology"
-            )
+                category="hematology",
+            ),
         ]
 
         for comp_data in components_data:
@@ -483,7 +482,7 @@ class TestLabTestComponentCRUD:
                 lab_result_id=test_lab_result.id,
                 test_name=f"Test {i+1}",
                 value=10 + i,
-                unit="unit"
+                unit="unit",
             )
             lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -509,7 +508,7 @@ class TestLabTestComponentCRUD:
                 lab_result_id=test_lab_result.id,
                 test_name=name,
                 value=10 + i,
-                unit="unit"
+                unit="unit",
             )
             lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -524,14 +523,12 @@ class TestLabTestComponentCRUD:
             test_name="Original Test",
             value=10,
             unit="mg/dL",
-            status="normal"
+            status="normal",
         )
         created = lab_test_component_crud.create(db_session, obj_in=component_data)
 
         update_data = LabTestComponentUpdate(
-            value=15,
-            status="high",
-            notes="Updated value"
+            value=15, status="high", notes="Updated value"
         )
 
         updated = lab_test_component_crud.update(
@@ -543,13 +540,12 @@ class TestLabTestComponentCRUD:
         assert updated.notes == "Updated value"
         assert updated.test_name == "Original Test"  # Unchanged
 
-    def test_update_component_canonical_name(self, db_session: Session, test_lab_result):
+    def test_update_component_canonical_name(
+        self, db_session: Session, test_lab_result
+    ):
         """Test updating a component's canonical test name."""
         component_data = LabTestComponentCreate(
-            lab_result_id=test_lab_result.id,
-            test_name="WBC",
-            value=7.5,
-            unit="K/uL"
+            lab_result_id=test_lab_result.id, test_name="WBC", value=7.5, unit="K/uL"
         )
         created = lab_test_component_crud.create(db_session, obj_in=component_data)
 
@@ -574,7 +570,7 @@ class TestLabTestComponentCRUD:
             lab_result_id=test_lab_result.id,
             test_name="To Delete",
             value=10,
-            unit="unit"
+            unit="unit",
         )
         created = lab_test_component_crud.create(db_session, obj_in=component_data)
         component_id = created.id
@@ -597,7 +593,7 @@ class TestLabTestComponentCRUD:
             value=5,
             unit="unit",
             ref_range_min=10,
-            ref_range_max=20
+            ref_range_max=20,
         )
         low_created = lab_test_component_crud.create(db_session, obj_in=low_component)
         assert low_created.status == "low"
@@ -609,7 +605,7 @@ class TestLabTestComponentCRUD:
             value=25,
             unit="unit",
             ref_range_min=10,
-            ref_range_max=20
+            ref_range_max=20,
         )
         high_created = lab_test_component_crud.create(db_session, obj_in=high_component)
         assert high_created.status == "high"
@@ -621,7 +617,9 @@ class TestLabTestComponentCRUD:
             value=15,
             unit="unit",
             ref_range_min=10,
-            ref_range_max=20
+            ref_range_max=20,
         )
-        normal_created = lab_test_component_crud.create(db_session, obj_in=normal_component)
+        normal_created = lab_test_component_crud.create(
+            db_session, obj_in=normal_component
+        )
         assert normal_created.status == "normal"

@@ -49,11 +49,11 @@
   .tablet-sidebar {
     border-right: 2px solid var(--mantine-color-gray-9);
   }
-  
+
   .tablet-sidebar .nav-item.active {
     border: 2px solid var(--mantine-color-blue-6);
   }
-  
+
   .tablet-navigation-toggle {
     border: 2px solid var(--mantine-color-gray-9) !important;
   }
@@ -64,7 +64,7 @@
   .tablet-sidebar {
     transition: none !important;
   }
-  
+
   .tablet-sidebar .nav-item {
     transition: none !important;
   }

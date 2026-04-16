@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Stack,
@@ -100,6 +100,7 @@ const FamilyHistorySharingModal = ({
         loadShares();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when modal opens or selection changes; loadShares and error helpers are stable in component scope and would re-trigger if added
   }, [opened, familyMember, bulkMode, familyMembers]);
 
   const loadShares = async () => {
@@ -474,7 +475,9 @@ const FamilyHistorySharingModal = ({
                             {share.shared_with.email}
                           </Text>
                           <Text size="xs" c="dimmed">
-                            {t('sharing.sharedOn', { date: formatDateTime(share.created_at) })}
+                            {t('sharing.sharedOn', {
+                              date: formatDateTime(share.created_at),
+                            })}
                           </Text>
                           {share.sharing_note && (
                             <Text size="xs" c="dimmed" italic>
@@ -482,7 +485,7 @@ const FamilyHistorySharingModal = ({
                                 size="0.8rem"
                                 style={{ marginRight: 4 }}
                               />
-                              "{share.sharing_note}"
+                              &ldquo;{share.sharing_note}&rdquo;
                             </Text>
                           )}
                         </div>
@@ -517,9 +520,7 @@ const FamilyHistorySharingModal = ({
 
         {/* Footer */}
         <Alert icon={<IconInfoCircle />} color="blue" variant="light">
-          <Text size="xs">
-            {t('sharing.invitationInfo')}
-          </Text>
+          <Text size="xs">{t('sharing.invitationInfo')}</Text>
         </Alert>
       </Stack>
     </Modal>

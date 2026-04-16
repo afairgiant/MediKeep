@@ -21,10 +21,22 @@ export const insuranceFormFields = [
     descriptionKey: 'medical:insurance.form.insuranceType.description',
     gridColumn: 6,
     options: [
-      { value: 'medical', labelKey: 'medical:insurance.form.insuranceType.options.medical' },
-      { value: 'dental', labelKey: 'medical:insurance.form.insuranceType.options.dental' },
-      { value: 'vision', labelKey: 'medical:insurance.form.insuranceType.options.vision' },
-      { value: 'prescription', labelKey: 'medical:insurance.form.insuranceType.options.prescription' },
+      {
+        value: 'medical',
+        labelKey: 'medical:insurance.form.insuranceType.options.medical',
+      },
+      {
+        value: 'dental',
+        labelKey: 'medical:insurance.form.insuranceType.options.dental',
+      },
+      {
+        value: 'vision',
+        labelKey: 'medical:insurance.form.insuranceType.options.vision',
+      },
+      {
+        value: 'prescription',
+        labelKey: 'medical:insurance.form.insuranceType.options.prescription',
+      },
     ],
   },
   {
@@ -102,9 +114,19 @@ export const insuranceFormFields = [
     clearable: true,
     options: [
       { value: 'self', labelKey: 'shared:fields.self' },
-      { value: 'spouse', labelKey: 'medical:insurance.form.relationshipToHolder.options.spouse' },
-      { value: 'child', labelKey: 'medical:insurance.form.relationshipToHolder.options.child' },
-      { value: 'dependent', labelKey: 'medical:insurance.form.relationshipToHolder.options.dependent' },
+      {
+        value: 'spouse',
+        labelKey: 'medical:insurance.form.relationshipToHolder.options.spouse',
+      },
+      {
+        value: 'child',
+        labelKey: 'medical:insurance.form.relationshipToHolder.options.child',
+      },
+      {
+        value: 'dependent',
+        labelKey:
+          'medical:insurance.form.relationshipToHolder.options.dependent',
+      },
       { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },
@@ -154,7 +176,10 @@ export const insuranceFormFields = [
     options: [
       { value: 'active', labelKey: 'shared:labels.active' },
       { value: 'inactive', labelKey: 'shared:labels.inactive' },
-      { value: 'expired', labelKey: 'medical:insurance.form.status.options.expired' },
+      {
+        value: 'expired',
+        labelKey: 'medical:insurance.form.status.options.expired',
+      },
       { value: 'pending', labelKey: 'shared:fields.pending' },
     ],
   },
@@ -324,8 +349,14 @@ export const insuranceFormFields = [
       { value: 'hmo', labelKey: 'medical:insurance.form.planType.options.hmo' },
       { value: 'epo', labelKey: 'medical:insurance.form.planType.options.epo' },
       { value: 'pos', labelKey: 'medical:insurance.form.planType.options.pos' },
-      { value: 'hdhp', labelKey: 'medical:insurance.form.planType.options.hdhp' },
-      { value: 'indemnity', labelKey: 'medical:insurance.form.planType.options.indemnity' },
+      {
+        value: 'hdhp',
+        labelKey: 'medical:insurance.form.planType.options.hdhp',
+      },
+      {
+        value: 'indemnity',
+        labelKey: 'medical:insurance.form.planType.options.indemnity',
+      },
       { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },
@@ -340,10 +371,22 @@ export const insuranceFormFields = [
     gridColumn: 6,
     showFor: ['dental'],
     options: [
-      { value: 'dppo', labelKey: 'medical:insurance.form.dentalPlanType.options.dppo' },
-      { value: 'dhmo', labelKey: 'medical:insurance.form.dentalPlanType.options.dhmo' },
-      { value: 'indemnity', labelKey: 'medical:insurance.form.planType.options.indemnity' },
-      { value: 'discount', labelKey: 'medical:insurance.form.dentalPlanType.options.discount' },
+      {
+        value: 'dppo',
+        labelKey: 'medical:insurance.form.dentalPlanType.options.dppo',
+      },
+      {
+        value: 'dhmo',
+        labelKey: 'medical:insurance.form.dentalPlanType.options.dhmo',
+      },
+      {
+        value: 'indemnity',
+        labelKey: 'medical:insurance.form.planType.options.indemnity',
+      },
+      {
+        value: 'discount',
+        labelKey: 'medical:insurance.form.dentalPlanType.options.discount',
+      },
       { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },
@@ -358,9 +401,19 @@ export const insuranceFormFields = [
     gridColumn: 6,
     showFor: ['vision'],
     options: [
-      { value: 'vision_ppo', labelKey: 'medical:insurance.form.visionPlanType.options.visionPpo' },
-      { value: 'vision_hmo', labelKey: 'medical:insurance.form.visionPlanType.options.visionHmo' },
-      { value: 'vision_discount', labelKey: 'medical:insurance.form.visionPlanType.options.visionDiscount' },
+      {
+        value: 'vision_ppo',
+        labelKey: 'medical:insurance.form.visionPlanType.options.visionPpo',
+      },
+      {
+        value: 'vision_hmo',
+        labelKey: 'medical:insurance.form.visionPlanType.options.visionHmo',
+      },
+      {
+        value: 'vision_discount',
+        labelKey:
+          'medical:insurance.form.visionPlanType.options.visionDiscount',
+      },
       { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },
@@ -375,10 +428,26 @@ export const insuranceFormFields = [
     gridColumn: 6,
     showFor: ['prescription'],
     options: [
-      { value: 'formulary', labelKey: 'medical:insurance.form.prescriptionPlanType.options.formulary' },
-      { value: 'tiered_copay', labelKey: 'medical:insurance.form.prescriptionPlanType.options.tieredCopay' },
-      { value: 'medicare_part_d', labelKey: 'medical:insurance.form.prescriptionPlanType.options.medicarePartD' },
-      { value: 'integrated', labelKey: 'medical:insurance.form.prescriptionPlanType.options.integrated' },
+      {
+        value: 'formulary',
+        labelKey:
+          'medical:insurance.form.prescriptionPlanType.options.formulary',
+      },
+      {
+        value: 'tiered_copay',
+        labelKey:
+          'medical:insurance.form.prescriptionPlanType.options.tieredCopay',
+      },
+      {
+        value: 'medicare_part_d',
+        labelKey:
+          'medical:insurance.form.prescriptionPlanType.options.medicarePartD',
+      },
+      {
+        value: 'integrated',
+        labelKey:
+          'medical:insurance.form.prescriptionPlanType.options.integrated',
+      },
       { value: 'other', labelKey: 'shared:fields.other' },
     ],
   },

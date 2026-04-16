@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Stack,
@@ -14,7 +14,6 @@ import {
   ThemeIcon,
   SimpleGrid,
   ActionIcon,
-  Menu,
   Divider,
 } from '@mantine/core';
 import {
@@ -63,6 +62,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
     if (opened) {
       loadInvitations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadInvitations is stable in this component scope; only re-run when modal opens
   }, [opened]);
 
   const loadInvitations = async () => {
@@ -70,16 +70,17 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       setLoading(true);
       logger.debug('Loading invitations and family history shares', {
         component: 'InvitationManager',
-        user: authUser?.id
+        user: authUser?.id,
       });
 
-      const [pending, sent, sharedData, sharedPatients, sharedPatientsCreated] = await Promise.all([
-        invitationApi.getPendingInvitations(),
-        invitationApi.getSentInvitations(),
-        familyHistoryApi.getSharedFamilyHistory(),
-        patientSharingApi.getSharesReceived(),
-        patientSharingApi.getSharesCreated(),
-      ]);
+      const [pending, sent, sharedData, sharedPatients, sharedPatientsCreated] =
+        await Promise.all([
+          invitationApi.getPendingInvitations(),
+          invitationApi.getSentInvitations(),
+          familyHistoryApi.getSharedFamilyHistory(),
+          patientSharingApi.getSharesReceived(),
+          patientSharingApi.getSharesCreated(),
+        ]);
 
       // For received invitations, only show pending ones (since accepted ones will appear in "Shared with Me")
       const filteredReceived = pending.filter(
@@ -105,7 +106,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         sentCount: filteredSent.length,
         sharedCount: sharedData.shared_family_history?.length || 0,
         sharedPatientsCount: sharedPatients?.length || 0,
-        sharedPatientsByMeCount: sharedPatientsCreated?.length || 0
+        sharedPatientsByMeCount: sharedPatientsCreated?.length || 0,
       });
 
       // DEBUG - Patient shares received and created logged via logger
@@ -113,9 +114,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       logger.error('Failed to load invitations and shares', {
         component: 'InvitationManager',
         error: error.message,
-        user: authUser?.id
+        user: authUser?.id,
       });
-      
+
       notifications.show({
         title: 'Error',
         message: 'Failed to load invitations and shares',
@@ -133,7 +134,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         component: 'InvitationManager',
         invitationId: invitation.id,
         response,
-        user: authUser?.id
+        user: authUser?.id,
       });
 
       await invitationApi.respondToInvitation(invitation.id, response);
@@ -141,16 +142,22 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       logger.info('Successfully responded to invitation', {
         component: 'InvitationManager',
         invitationId: invitation.id,
-        response
+        response,
       });
 
       // Invalidate patient list cache if accepting a patient share invitation
-      if (response === 'accepted' && invitation.invitation_type === 'patient_share') {
+      if (
+        response === 'accepted' &&
+        invitation.invitation_type === 'patient_share'
+      ) {
         await invalidatePatientList();
-        logger.info('Invalidated patient list cache after accepting patient share', {
-          component: 'InvitationManager',
-          invitationId: invitation.id
-        });
+        logger.info(
+          'Invalidated patient list cache after accepting patient share',
+          {
+            component: 'InvitationManager',
+            invitationId: invitation.id,
+          }
+        );
       }
 
       notifications.show({
@@ -172,7 +179,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         component: 'InvitationManager',
         invitationId: invitation.id,
         response,
-        error: error.message
+        error: error.message,
       });
 
       notifications.show({
@@ -195,7 +202,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         component: 'InvitationManager',
         invitationId: invitation.id,
         status: invitation.status,
-        user: authUser?.id
+        user: authUser?.id,
       });
 
       if (invitation.status === 'pending') {
@@ -204,7 +211,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
         logger.info('Successfully cancelled pending invitation', {
           component: 'InvitationManager',
-          invitationId: invitation.id
+          invitationId: invitation.id,
         });
 
         notifications.show({
@@ -222,7 +229,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
         logger.info('Successfully revoked family history sharing access', {
           component: 'InvitationManager',
-          invitationId: invitation.id
+          invitationId: invitation.id,
         });
 
         notifications.show({
@@ -235,7 +242,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         // Already revoked - just show a message
         logger.debug('Attempted to revoke already revoked invitation', {
           component: 'InvitationManager',
-          invitationId: invitation.id
+          invitationId: invitation.id,
         });
 
         notifications.show({
@@ -253,7 +260,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         component: 'InvitationManager',
         invitationId: invitation.id,
         status: invitation.status,
-        error: error.message
+        error: error.message,
       });
 
       notifications.show({
@@ -270,12 +277,18 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
   const handleResponseModalSuccess = async () => {
     // Invalidate patient list cache if this was a patient share invitation
-    if (selectedInvitation && selectedInvitation.invitation_type === 'patient_share') {
+    if (
+      selectedInvitation &&
+      selectedInvitation.invitation_type === 'patient_share'
+    ) {
       await invalidatePatientList();
-      logger.info('Invalidated patient list cache after patient share response', {
-        component: 'InvitationManager',
-        invitationId: selectedInvitation.id
-      });
+      logger.info(
+        'Invalidated patient list cache after patient share response',
+        {
+          component: 'InvitationManager',
+          invitationId: selectedInvitation.id,
+        }
+      );
     }
 
     closeResponseModal();
@@ -293,18 +306,21 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       logger.debug('Removing own access to shared family history', {
         component: 'InvitationManager',
         familyMemberId,
-        user: authUser?.id
+        user: authUser?.id,
       });
 
       if (familyMemberId) {
         // Use the new endpoint for recipients to remove their own access
         await familyHistoryApi.removeMyAccess(familyMemberId);
 
-        logger.info('Successfully removed own access to shared family history', {
-          component: 'InvitationManager',
-          familyMemberId,
-          familyMemberName: shareItem.family_member?.name
-        });
+        logger.info(
+          'Successfully removed own access to shared family history',
+          {
+            component: 'InvitationManager',
+            familyMemberId,
+            familyMemberName: shareItem.family_member?.name,
+          }
+        );
 
         notifications.show({
           title: 'Access Removed',
@@ -314,9 +330,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         });
 
         // Immediately remove the item from local state for better UX
-        setSharedWithMe(prev => prev.filter(item =>
-          item.family_member?.id !== familyMemberId
-        ));
+        setSharedWithMe(prev =>
+          prev.filter(item => item.family_member?.id !== familyMemberId)
+        );
 
         // Also refresh from server to ensure consistency
         loadInvitations();
@@ -326,7 +342,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       logger.error('Failed to remove access to shared family history', {
         component: 'InvitationManager',
         familyMemberId: shareItem.family_member?.id,
-        error: error.message
+        error: error.message,
       });
 
       notifications.show({
@@ -346,7 +362,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       logger.debug('Removing own access to shared patient', {
         component: 'InvitationManager',
         patientId,
-        user: authUser?.id
+        user: authUser?.id,
       });
 
       if (patientId) {
@@ -355,7 +371,10 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         logger.info('Successfully removed own access to shared patient', {
           component: 'InvitationManager',
           patientId,
-          patientName: patientShare.patient?.first_name + ' ' + patientShare.patient?.last_name
+          patientName:
+            patientShare.patient?.first_name +
+            ' ' +
+            patientShare.patient?.last_name,
         });
 
         notifications.show({
@@ -369,9 +388,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         await invalidatePatientList();
 
         // Immediately remove the item from local state for better UX
-        setSharedPatientsWithMe(prev => prev.filter(item =>
-          item.patient?.id !== patientId
-        ));
+        setSharedPatientsWithMe(prev =>
+          prev.filter(item => item.patient?.id !== patientId)
+        );
 
         // Also refresh from server to ensure consistency
         loadInvitations();
@@ -381,7 +400,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       logger.error('Failed to remove access to shared patient', {
         component: 'InvitationManager',
         patientId: patientShare.patient?.id,
-        error: error.message
+        error: error.message,
       });
 
       notifications.show({
@@ -397,13 +416,14 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
   const handleRevokeMyPatientShare = async patientShare => {
     try {
       const patientId = patientShare.patient?.id;
-      const sharedWithUserId = patientShare.shared_with_user?.id || patientShare.shared_with_user_id;
+      const sharedWithUserId =
+        patientShare.shared_with_user?.id || patientShare.shared_with_user_id;
 
       logger.debug('Revoking patient share access', {
         component: 'InvitationManager',
         patientId,
         sharedWithUserId,
-        user: authUser?.id
+        user: authUser?.id,
       });
 
       if (patientId && sharedWithUserId) {
@@ -413,7 +433,10 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
           component: 'InvitationManager',
           patientId,
           sharedWithUserId,
-          patientName: patientShare.patient?.first_name + ' ' + patientShare.patient?.last_name
+          patientName:
+            patientShare.patient?.first_name +
+            ' ' +
+            patientShare.patient?.last_name,
         });
 
         notifications.show({
@@ -424,10 +447,16 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
         });
 
         // Immediately remove the item from local state for better UX
-        setSharedPatientsByMe(prev => prev.filter(item =>
-          !(item.patient?.id === patientId &&
-            (item.shared_with_user?.id === sharedWithUserId || item.shared_with_user_id === sharedWithUserId))
-        ));
+        setSharedPatientsByMe(prev =>
+          prev.filter(
+            item =>
+              !(
+                item.patient?.id === patientId &&
+                (item.shared_with_user?.id === sharedWithUserId ||
+                  item.shared_with_user_id === sharedWithUserId)
+              )
+          )
+        );
 
         // Also refresh from server to ensure consistency
         loadInvitations();
@@ -437,8 +466,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       logger.error('Failed to revoke patient share access', {
         component: 'InvitationManager',
         patientId: patientShare.patient?.id,
-        sharedWithUserId: patientShare.shared_with_user?.id || patientShare.shared_with_user_id,
-        error: error.message
+        sharedWithUserId:
+          patientShare.shared_with_user?.id || patientShare.shared_with_user_id,
+        error: error.message,
       });
 
       notifications.show({
@@ -461,7 +491,6 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
       <Text c="dimmed">{description}</Text>
     </Paper>
   );
-
 
   return (
     <>
@@ -507,7 +536,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                 leftSection={<IconUsers size="0.8rem" />}
                 rightSection={
                   <Badge size="sm" color="green" variant="filled">
-                    {sharedWithMe.length + sharedPatientsWithMe.length + receivedInvitations.length}
+                    {sharedWithMe.length +
+                      sharedPatientsWithMe.length +
+                      receivedInvitations.length}
                   </Badge>
                 }
               >
@@ -523,19 +554,30 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                     Loading sent invitations...
                   </Text>
                 </Group>
-              ) : sentInvitations.length > 0 || sharedPatientsByMe.length > 0 ? (
+              ) : sentInvitations.length > 0 ||
+                sharedPatientsByMe.length > 0 ? (
                 <Stack gap="lg">
                   {/* Sent Invitations Section */}
                   {sentInvitations.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        {t('manager.invitationsCount', { count: sentInvitations.length })}
+                        {t('manager.invitationsCount', {
+                          count: sentInvitations.length,
+                        })}
                       </Title>
-                      <Alert icon={<IconInfoCircle />} color="blue" variant="light" mb="md">
+                      <Alert
+                        icon={<IconInfoCircle />}
+                        color="blue"
+                        variant="light"
+                        mb="md"
+                      >
                         <Text size="sm">
-                          {t('manager.sentInvitationsInfo', { count: sentInvitations.length })}
-                          {sentInvitations.filter(inv => inv.status === 'pending')
-                            .length > 0 &&
+                          {t('manager.sentInvitationsInfo', {
+                            count: sentInvitations.length,
+                          })}
+                          {sentInvitations.filter(
+                            inv => inv.status === 'pending'
+                          ).length > 0 &&
                             ` ${t('manager.pendingStillCount', { count: sentInvitations.filter(inv => inv.status === 'pending').length })}`}
                         </Text>
                       </Alert>
@@ -557,11 +599,20 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {sharedPatientsByMe.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        {t('manager.patientSharesCount', { count: sharedPatientsByMe.length })}
+                        {t('manager.patientSharesCount', {
+                          count: sharedPatientsByMe.length,
+                        })}
                       </Title>
-                      <Alert icon={<IconUsers />} color="green" variant="light" mb="md">
+                      <Alert
+                        icon={<IconUsers />}
+                        color="green"
+                        variant="light"
+                        mb="md"
+                      >
                         <Text size="sm">
-                          {t('manager.sharedPatientsInfo', { count: sharedPatientsByMe.length })}
+                          {t('manager.sharedPatientsInfo', {
+                            count: sharedPatientsByMe.length,
+                          })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -576,17 +627,30 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                               <Group justify="space-between" align="flex-start">
                                 <div style={{ flex: 1 }}>
                                   <Text fw={500} size="md">
-                                    {patientShare.patient?.first_name} {patientShare.patient?.last_name}
+                                    {patientShare.patient?.first_name}{' '}
+                                    {patientShare.patient?.last_name}
                                   </Text>
                                   <Text size="sm" c="dimmed">
-                                    {t('manager.born', { date: patientShare.patient?.birth_date })}
+                                    {t('manager.born', {
+                                      date: patientShare.patient?.birth_date,
+                                    })}
                                   </Text>
                                   <Text size="xs" c="dimmed">
-                                    {t('manager.sharedWith', { name: patientShare.shared_with_user?.name || patientShare.shared_with_user?.username || `User ${patientShare.shared_with_user_id}` })}
+                                    {t('manager.sharedWith', {
+                                      name:
+                                        patientShare.shared_with_user?.name ||
+                                        patientShare.shared_with_user
+                                          ?.username ||
+                                        `User ${patientShare.shared_with_user_id}`,
+                                    })}
                                   </Text>
                                   {patientShare.created_at && (
                                     <Text size="xs" c="dimmed">
-                                      {t('manager.on', { date: formatDate(patientShare.created_at) })}
+                                      {t('manager.on', {
+                                        date: formatDate(
+                                          patientShare.created_at
+                                        ),
+                                      })}
                                     </Text>
                                   )}
                                 </div>
@@ -603,7 +667,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {patientShare.expires_at && (
                                 <Text size="xs" c="orange">
-                                  {t('manager.expires', { date: formatDate(patientShare.expires_at) })}
+                                  {t('manager.expires', {
+                                    date: formatDate(patientShare.expires_at),
+                                  })}
                                 </Text>
                               )}
 
@@ -612,7 +678,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   size="xs"
                                   variant="light"
                                   color="red"
-                                  onClick={() => handleRevokeMyPatientShare(patientShare)}
+                                  onClick={() =>
+                                    handleRevokeMyPatientShare(patientShare)
+                                  }
                                 >
                                   {t('manager.revokeAccess')}
                                 </Button>
@@ -641,13 +709,17 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                     Loading shared records...
                   </Text>
                 </Group>
-              ) : receivedInvitations.length > 0 || sharedWithMe.length > 0 || sharedPatientsWithMe.length > 0 ? (
+              ) : receivedInvitations.length > 0 ||
+                sharedWithMe.length > 0 ||
+                sharedPatientsWithMe.length > 0 ? (
                 <Stack gap="lg">
                   {/* Pending Invitations Section */}
                   {receivedInvitations.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        {t('manager.pendingInvitationsCount', { count: receivedInvitations.length })}
+                        {t('manager.pendingInvitationsCount', {
+                          count: receivedInvitations.length,
+                        })}
                       </Title>
                       <Alert
                         icon={<IconClock />}
@@ -656,7 +728,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                         mb="md"
                       >
                         <Text size="sm">
-                          {t('manager.pendingInvitationsInfo', { count: receivedInvitations.length })}
+                          {t('manager.pendingInvitationsInfo', {
+                            count: receivedInvitations.length,
+                          })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -682,7 +756,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {sharedWithMe.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        {t('manager.familySharesCount', { count: sharedWithMe.length })}
+                        {t('manager.familySharesCount', {
+                          count: sharedWithMe.length,
+                        })}
                       </Title>
                       <Alert
                         icon={<IconUsers />}
@@ -691,7 +767,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                         mb="md"
                       >
                         <Text size="sm">
-                          {t('manager.familyMembersSharedInfo', { count: sharedWithMe.length })}
+                          {t('manager.familyMembersSharedInfo', {
+                            count: sharedWithMe.length,
+                          })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -721,11 +799,18 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                       ` • Born ${shareItem.family_member.birth_year}`}
                                   </Text>
                                   <Text size="xs" c="dimmed">
-                                    {t('manager.sharedBy', { name: shareItem.share_details?.shared_by?.name })}
+                                    {t('manager.sharedBy', {
+                                      name: shareItem.share_details?.shared_by
+                                        ?.name,
+                                    })}
                                   </Text>
                                   {shareItem.share_details?.shared_at && (
                                     <Text size="xs" c="dimmed">
-                                      {t('manager.on', { date: formatDate(shareItem.share_details.shared_at) })}
+                                      {t('manager.on', {
+                                        date: formatDate(
+                                          shareItem.share_details.shared_at
+                                        ),
+                                      })}
                                     </Text>
                                   )}
                                 </div>
@@ -737,19 +822,25 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {shareItem.share_details?.sharing_note && (
                                 <Text size="sm" fs="italic" c="dimmed">
-                                  "{shareItem.share_details.sharing_note}"
+                                  &ldquo;{shareItem.share_details.sharing_note}&rdquo;
                                 </Text>
                               )}
 
                               <Group justify="space-between" mt="sm">
                                 <Text size="xs" c="dimmed">
-                                  {t('manager.conditionsCount', { count: shareItem.family_member.family_conditions?.length || 0 })}
+                                  {t('manager.conditionsCount', {
+                                    count:
+                                      shareItem.family_member.family_conditions
+                                        ?.length || 0,
+                                  })}
                                 </Text>
                                 <Button
                                   size="xs"
                                   variant="light"
                                   color="red"
-                                  onClick={() => handleRevokeFamilyHistoryShare(shareItem)}
+                                  onClick={() =>
+                                    handleRevokeFamilyHistoryShare(shareItem)
+                                  }
                                 >
                                   {t('manager.removeAccess')}
                                 </Button>
@@ -765,7 +856,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                   {sharedPatientsWithMe.length > 0 && (
                     <div>
                       <Title order={5} mb="md">
-                        {t('manager.patientSharesCount', { count: sharedPatientsWithMe.length })}
+                        {t('manager.patientSharesCount', {
+                          count: sharedPatientsWithMe.length,
+                        })}
                       </Title>
                       <Alert
                         icon={<IconUsers />}
@@ -774,7 +867,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                         mb="md"
                       >
                         <Text size="sm">
-                          {t('manager.patientsSharedInfo', { count: sharedPatientsWithMe.length })}
+                          {t('manager.patientsSharedInfo', {
+                            count: sharedPatientsWithMe.length,
+                          })}
                         </Text>
                       </Alert>
                       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
@@ -789,17 +884,28 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                               <Group justify="space-between" align="flex-start">
                                 <div style={{ flex: 1 }}>
                                   <Text fw={500} size="md">
-                                    {patientShare.patient?.first_name} {patientShare.patient?.last_name}
+                                    {patientShare.patient?.first_name}{' '}
+                                    {patientShare.patient?.last_name}
                                   </Text>
                                   <Text size="sm" c="dimmed">
-                                    {t('manager.born', { date: patientShare.patient?.birth_date })}
+                                    {t('manager.born', {
+                                      date: patientShare.patient?.birth_date,
+                                    })}
                                   </Text>
                                   <Text size="xs" c="dimmed">
-                                    {t('manager.sharedBy', { name: patientShare.shared_by_user?.name || patientShare.shared_by_user?.username })}
+                                    {t('manager.sharedBy', {
+                                      name:
+                                        patientShare.shared_by_user?.name ||
+                                        patientShare.shared_by_user?.username,
+                                    })}
                                   </Text>
                                   {patientShare.created_at && (
                                     <Text size="xs" c="dimmed">
-                                      {t('manager.on', { date: formatDate(patientShare.created_at) })}
+                                      {t('manager.on', {
+                                        date: formatDate(
+                                          patientShare.created_at
+                                        ),
+                                      })}
                                     </Text>
                                   )}
                                 </div>
@@ -816,7 +922,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
 
                               {patientShare.expires_at && (
                                 <Text size="xs" c="orange">
-                                  {t('manager.expires', { date: formatDate(patientShare.expires_at) })}
+                                  {t('manager.expires', {
+                                    date: formatDate(patientShare.expires_at),
+                                  })}
                                 </Text>
                               )}
 
@@ -825,7 +933,9 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
                                   size="xs"
                                   variant="light"
                                   color="red"
-                                  onClick={() => handleRevokePatientShare(patientShare)}
+                                  onClick={() =>
+                                    handleRevokePatientShare(patientShare)
+                                  }
                                 >
                                   {t('manager.removeAccess')}
                                 </Button>
@@ -852,7 +962,11 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
           {/* Quick Actions */}
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              {t('manager.summaryText', { sent: sentInvitations.length, pending: receivedInvitations.length, active: sharedWithMe.length + sharedPatientsWithMe.length })}
+              {t('manager.summaryText', {
+                sent: sentInvitations.length,
+                pending: receivedInvitations.length,
+                active: sharedWithMe.length + sharedPatientsWithMe.length,
+              })}
             </Text>
             <Group gap="sm">
               <Button variant="subtle" onClick={onClose}>

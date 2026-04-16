@@ -3,12 +3,11 @@
  * Allows users to switch between owned and shared patients
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Select,
   Group,
-  Avatar,
   Text,
   Button,
   ActionIcon,
@@ -33,7 +32,6 @@ import {
   IconChevronDown,
   IconUsers,
   IconShare,
-  IconCheck,
   IconAlertCircle,
   IconUserCheck,
   IconEdit,
@@ -43,7 +41,11 @@ import {
   IconChevronUp,
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { notifySuccess, notifyError, notifyInfo } from '../../utils/notifyTranslated';
+import {
+  notifySuccess,
+  notifyError,
+  notifyInfo,
+} from '../../utils/notifyTranslated';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePatientList, useCacheManager } from '../../hooks/useGlobalData';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -55,16 +57,22 @@ import PatientForm from './PatientForm';
 import PatientSharingModal from './PatientSharingModal';
 import PatientAvatar from '../shared/PatientAvatar';
 
-const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalLoading = false, compact = false }) => {
+const PatientSelector = ({
+  onPatientChange,
+  currentPatientId,
+  loading: externalLoading = false,
+  compact = false,
+}) => {
   const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
   const { user: currentUser } = useAuth();
   const { formatDate } = useDateFormat();
 
   // Strip any time component from date-only fields to prevent UTC timezone shift
-  const formatBirthDate = (birthDate) => {
+  const formatBirthDate = birthDate => {
     if (!birthDate) return '';
-    const dateOnly = typeof birthDate === 'string' ? birthDate.split('T')[0] : birthDate;
+    const dateOnly =
+      typeof birthDate === 'string' ? birthDate.split('T')[0] : birthDate;
     return formatDate(dateOnly);
   };
 
@@ -74,16 +82,21 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   };
 
   // Helper function for icon color
-  const getIconColor = (darkColor) => {
+  const getIconColor = darkColor => {
     return colorScheme === 'dark' ? darkColor : 'dark';
   };
-  
+
   // Use cached patient list from global state
-  const { patientList: patients, loading: patientListLoading, error: patientListError, refresh: refreshPatientList } = usePatientList();
-  
+  const {
+    patientList: patients,
+    loading: patientListLoading,
+    error: patientListError,
+    refresh: refreshPatientList,
+  } = usePatientList();
+
   // Use cache manager for invalidating cache when needed
   const { invalidatePatientList } = useCacheManager();
-  
+
   const [activePatient, setActivePatient] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -91,9 +104,16 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [isMinimized, setIsMinimized] = useState(compact);
   const [patientPhotos, setPatientPhotos] = useState({}); // Store patient photos by patient ID
-  const [createModalOpened, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
-  const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
-  const [sharingModalOpened, { open: openSharingModal, close: closeSharingModal }] = useDisclosure(false);
+  const [
+    createModalOpened,
+    { open: openCreateModal, close: closeCreateModal },
+  ] = useDisclosure(false);
+  const [editModalOpened, { open: openEditModal, close: closeEditModal }] =
+    useDisclosure(false);
+  const [
+    sharingModalOpened,
+    { open: openSharingModal, close: closeSharingModal },
+  ] = useDisclosure(false);
   const [editingPatient, setEditingPatient] = useState(null);
   const [sharingPatient, setSharingPatient] = useState(null);
 
@@ -106,15 +126,17 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     if (patients.length > 0 && !initialLoadComplete) {
       initializeActivePatient();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initializeActivePatient is stable in component scope; only run when patient list size or load state changes
   }, [patients.length, initialLoadComplete]);
-  
+
   // Load stats after patients are loaded (only once after initial load)
   useEffect(() => {
     if (patients.length > 0 && initialLoadComplete) {
       loadStats();
       loadPatientPhotos(); // Load photos for all patients
     }
-  }, [initialLoadComplete]); // Only depend on initialLoadComplete to run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally runs once after initial load completes; loaders are stable in component scope
+  }, [initialLoadComplete]);
 
   // Update active patient when currentPatientId changes (but not on every render)
   useEffect(() => {
@@ -124,18 +146,19 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         setActivePatient(patient);
       }
     }
-  }, [currentPatientId]); // Only depend on currentPatientId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-sync active patient when currentPatientId changes; including patients/activePatient causes redundant re-runs on every list mutation
+  }, [currentPatientId]);
 
   /**
    * Initialize active patient from cached data
    */
   const initializeActivePatient = async () => {
     if (patients.length === 0) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       // If no active patient is set and this is the initial load, try to get the active patient from API
       if (!activePatient && !initialLoadComplete) {
         try {
@@ -162,16 +185,16 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           }
         }
       }
-      
+
       logger.debug('patient_selector_initialized', {
         message: 'Active patient initialized from cached data',
         count: patients.length,
-        activePatientId: activePatient?.id
+        activePatientId: activePatient?.id,
       });
     } catch (error) {
       logger.error('patient_selector_init_error', {
         message: 'Failed to initialize active patient',
-        error: error.message
+        error: error.message,
       });
       setError(error.message);
     } finally {
@@ -191,7 +214,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     try {
       logger.debug('patient_selector_photos_start', {
         message: 'Loading patient photos for selector',
-        patientCount: patients.length
+        patientCount: patients.length,
       });
 
       // Load photos with concurrency limit to avoid overwhelming the server
@@ -200,7 +223,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
 
       for (let i = 0; i < patients.length; i += BATCH_SIZE) {
         const batch = patients.slice(i, i + BATCH_SIZE);
-        const batchPromises = batch.map(async (patient) => {
+        const batchPromises = batch.map(async patient => {
           try {
             const photoUrl = await patientApi.getPhotoUrl(patient.id);
             return { patientId: patient.id, photoUrl };
@@ -209,7 +232,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             logger.debug('patient_selector_photo_failed', {
               message: 'Failed to load photo for patient',
               patientId: patient.id,
-              error: error.message
+              error: error.message,
             });
             return { patientId: patient.id, photoUrl: null };
           }
@@ -230,12 +253,12 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       logger.debug('patient_selector_photos_loaded', {
         message: 'Patient photos loaded successfully',
         photosCount: Object.values(photoMap).filter(url => url !== null).length,
-        totalPatients: patients.length
+        totalPatients: patients.length,
       });
     } catch (error) {
       logger.error('patient_selector_photos_error', {
         message: 'Failed to load patient photos',
-        error: error.message
+        error: error.message,
       });
     }
   };
@@ -247,25 +270,26 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     try {
       // Get the latest patient list data which includes the correct counts
       const response = await patientApi.getAccessiblePatients('view');
-      
+
       // Use the counts from the patient list response
       const statsData = {
         owned_count: response.owned_count || 0,
         accessible_count: response.total_count || 0,
-        has_self_record: response.patients?.some(p => p.is_self_record) || false,
+        has_self_record:
+          response.patients?.some(p => p.is_self_record) || false,
         active_patient_id: activePatient?.id || null,
         sharing_stats: {
           owned: response.owned_count || 0,
           shared_with_me: response.shared_count || 0,
-          total_accessible: response.total_count || 0
-        }
+          total_accessible: response.total_count || 0,
+        },
       };
-      
+
       setStats(statsData);
     } catch (error) {
       logger.error('patient_selector_stats_error', {
         message: 'Failed to load patient stats',
-        error: error.message
+        error: error.message,
       });
       // Fallback stats - calculate from current patients array
       const fallbackStats = {
@@ -275,8 +299,8 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         sharing_stats: {
           owned: patients.filter(p => isPatientOwned(p)).length,
           shared_with_me: patients.filter(p => !isPatientOwned(p)).length,
-          total_accessible: patients.length
-        }
+          total_accessible: patients.length,
+        },
       };
       setStats(fallbackStats);
     }
@@ -285,35 +309,42 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Switch to a different patient
    */
-  const switchPatient = async (patientId) => {
-    if (!patientId || parseInt(patientId) === parseInt(activePatient?.id)) return;
+  const switchPatient = async patientId => {
+    if (!patientId || parseInt(patientId) === parseInt(activePatient?.id))
+      return;
 
     try {
       setLoading(true);
-      
+
       // Use the new Phase 1 API to switch active patient
       const switchedPatient = await patientApi.switchActivePatient(patientId);
       setActivePatient(switchedPatient);
-      
+
       if (onPatientChange) {
         onPatientChange(switchedPatient);
       }
-      
-      notifySuccess('notifications:toasts.patient.nowViewing', { interpolation: { name: `${switchedPatient.first_name} ${switchedPatient.last_name}` } });
-      
+
+      notifySuccess('notifications:toasts.patient.nowViewing', {
+        interpolation: {
+          name: `${switchedPatient.first_name} ${switchedPatient.last_name}`,
+        },
+      });
+
       logger.info('patient_selector_switched', {
         message: 'Patient switched successfully',
         patientId: switchedPatient.id,
-        patientName: `${switchedPatient.first_name} ${switchedPatient.last_name}`
+        patientName: `${switchedPatient.first_name} ${switchedPatient.last_name}`,
       });
     } catch (error) {
       logger.error('patient_selector_switch_error', {
         message: 'Failed to switch patient',
         patientId,
-        error: error.message
+        error: error.message,
       });
-      
-      notifyError('notifications:toasts.patient.switchFailed', { interpolation: { message: error.message } });
+
+      notifyError('notifications:toasts.patient.switchFailed', {
+        interpolation: { message: error.message },
+      });
     } finally {
       setLoading(false);
     }
@@ -326,18 +357,18 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     try {
       setLoading(true);
       setError(null);
-      
+
       // Use the cached refresh function
       await refreshPatientList();
-      
+
       logger.debug('patient_selector_refreshed', {
         message: 'Patients refreshed successfully from cache',
-        count: patients.length
+        count: patients.length,
       });
     } catch (error) {
       logger.error('patient_selector_refresh_error', {
         message: 'Failed to refresh patients',
-        error: error.message
+        error: error.message,
       });
       setError(error.message);
     } finally {
@@ -348,7 +379,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Edit a patient
    */
-  const editPatient = (patient) => {
+  const editPatient = patient => {
     setEditingPatient(patient);
     openEditModal();
   };
@@ -356,7 +387,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Open sharing modal for a patient
    */
-  const sharePatient = (patient) => {
+  const sharePatient = patient => {
     setSharingPatient(patient);
     openSharingModal();
   };
@@ -364,7 +395,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Check if the current user owns this patient
    */
-  const isPatientOwned = (patient) => {
+  const isPatientOwned = patient => {
     return currentUser && patient.owner_user_id === currentUser.id;
   };
 
@@ -375,43 +406,42 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
     try {
       // Wait a bit for the patient list to be updated after invalidation
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Trigger refresh to ensure we have the latest data
       await refreshPatientList();
-      
+
       // Get current patient list (should now exclude the removed patient)
       const currentPatients = patients || [];
       const ownedPatients = currentPatients.filter(p => isPatientOwned(p));
-      
+
       if (ownedPatients.length === 0) {
         logger.info('patient_selector_no_owned_patients', {
-          message: 'No owned patients available for fallback'
+          message: 'No owned patients available for fallback',
         });
         return null;
       }
-      
+
       // Prioritize self-record
       const selfRecord = ownedPatients.find(p => p.is_self_record);
       if (selfRecord) {
         logger.debug('patient_selector_fallback_self_record', {
           message: 'Found self-record for fallback',
-          patientId: selfRecord.id
+          patientId: selfRecord.id,
         });
         return selfRecord;
       }
-      
+
       // Fall back to first owned patient
       const firstOwned = ownedPatients[0];
       logger.debug('patient_selector_fallback_owned', {
         message: 'Found owned patient for fallback',
-        patientId: firstOwned.id
+        patientId: firstOwned.id,
       });
       return firstOwned;
-      
     } catch (error) {
       logger.error('patient_selector_fallback_error', {
         message: 'Error finding fallback patient',
-        error: error.message
+        error: error.message,
       });
       return null;
     }
@@ -420,93 +450,112 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Delete a patient (only for owned patients)
    */
-  const deletePatient = async (patient) => {
+  const deletePatient = async patient => {
     if (!isPatientOwned(patient)) {
       notifyError('notifications:toasts.patient.deleteOwnOnly');
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete ${patient.first_name} ${patient.last_name}? This action cannot be undone and will delete all medical records for this patient.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${patient.first_name} ${patient.last_name}? This action cannot be undone and will delete all medical records for this patient.`
+      )
+    ) {
       return;
     }
 
     try {
       setLoading(true);
-      
+
       logger.info('patient_selector_delete_start', {
         message: 'Starting patient deletion',
         patientId: patient.id,
-        patientName: `${patient.first_name} ${patient.last_name}`
+        patientName: `${patient.first_name} ${patient.last_name}`,
       });
-      
+
       await patientApi.deletePatient(patient.id);
-      
+
       logger.info('patient_selector_delete_api_success', {
         message: 'Patient deletion API call succeeded',
-        patientId: patient.id
+        patientId: patient.id,
       });
-      
+
       // If we deleted the active patient, find a fallback patient
       if (activePatient?.id === patient.id) {
         logger.info('patient_selector_deleting_active', {
           message: 'Deleted patient was active, finding fallback',
-          patientId: patient.id
+          patientId: patient.id,
         });
-        
+
         // Clear active patient first
         setActivePatient(null);
         if (onPatientChange) {
           onPatientChange(null);
         }
-        
+
         // Invalidate patient list cache to get updated data
         await invalidatePatientList();
-        
+
         // Find a fallback patient after the list is refreshed
         const fallbackPatient = await findFallbackPatient();
-        
+
         if (fallbackPatient) {
           logger.info('patient_selector_delete_fallback', {
             message: 'Auto-switching to fallback patient after deletion',
             deletedPatientId: patient.id,
             fallbackPatientId: fallbackPatient.id,
-            fallbackType: fallbackPatient.is_self_record ? 'self_record' : 'owned_patient'
+            fallbackType: fallbackPatient.is_self_record
+              ? 'self_record'
+              : 'owned_patient',
           });
-          
+
           setActivePatient(fallbackPatient);
           if (onPatientChange) {
             onPatientChange(fallbackPatient);
           }
-          
-          notifySuccess('notifications:toasts.patient.deletedSwitched', { interpolation: { name: `${patient.first_name} ${patient.last_name}`, fallbackName: `${fallbackPatient.first_name} ${fallbackPatient.last_name}` } });
+
+          notifySuccess('notifications:toasts.patient.deletedSwitched', {
+            interpolation: {
+              name: `${patient.first_name} ${patient.last_name}`,
+              fallbackName: `${fallbackPatient.first_name} ${fallbackPatient.last_name}`,
+            },
+          });
         } else {
           logger.info('patient_selector_delete_no_fallback', {
             message: 'No fallback patient available after deletion',
-            deletedPatientId: patient.id
+            deletedPatientId: patient.id,
           });
-          
-          notifySuccess('notifications:toasts.patient.deletedNoOthers', { interpolation: { name: `${patient.first_name} ${patient.last_name}` } });
+
+          notifySuccess('notifications:toasts.patient.deletedNoOthers', {
+            interpolation: {
+              name: `${patient.first_name} ${patient.last_name}`,
+            },
+          });
         }
       } else {
         // Just invalidate the list if we didn't delete the active patient
         await invalidatePatientList();
-        notifySuccess('notifications:toasts.patient.deletedSuccess', { interpolation: { name: `${patient.first_name} ${patient.last_name}` } });
+        notifySuccess('notifications:toasts.patient.deletedSuccess', {
+          interpolation: { name: `${patient.first_name} ${patient.last_name}` },
+        });
       }
-      
+
       logger.info('patient_selector_deleted', {
         message: 'Patient deleted successfully',
         patientId: patient.id,
-        patientName: `${patient.first_name} ${patient.last_name}`
+        patientName: `${patient.first_name} ${patient.last_name}`,
       });
     } catch (error) {
       logger.error('patient_selector_delete_error', {
         message: 'Failed to delete patient',
         patientId: patient.id,
         error: error.message,
-        errorStack: error.stack
+        errorStack: error.stack,
       });
-      
-      notifyError('notifications:toasts.patient.deleteFailed', { interpolation: { message: error.message || 'Unknown error occurred' } });
+
+      notifyError('notifications:toasts.patient.deleteFailed', {
+        interpolation: { message: error.message || 'Unknown error occurred' },
+      });
     } finally {
       setLoading(false);
     }
@@ -515,72 +564,86 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Remove shared access to a patient (only for shared patients)
    */
-  const removeSharedAccess = async (patient) => {
+  const removeSharedAccess = async patient => {
     if (isPatientOwned(patient)) {
       notifyError('notifications:toasts.patient.removeOwnOnly');
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to remove access to ${patient.first_name} ${patient.last_name}? This patient will no longer appear in your patient list.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to remove access to ${patient.first_name} ${patient.last_name}? This patient will no longer appear in your patient list.`
+      )
+    ) {
       return;
     }
 
     try {
       setLoading(true);
-      
+
       // Remove my access to the shared patient
       await patientSharingApi.removeMyAccess(patient.id);
-      
-      notifySuccess('notifications:toasts.patient.removedAccess', { interpolation: { name: `${patient.first_name} ${patient.last_name}` } });
-      
+
+      notifySuccess('notifications:toasts.patient.removedAccess', {
+        interpolation: { name: `${patient.first_name} ${patient.last_name}` },
+      });
+
       // Invalidate patient list cache to force fresh data
       await invalidatePatientList();
-      
+
       // If we removed access to the active patient, switch to a fallback patient
       if (activePatient?.id === patient.id) {
         // Find a fallback patient (prioritize self-record, then other owned patients)
         const fallbackPatient = await findFallbackPatient();
-        
+
         if (fallbackPatient) {
           logger.info('patient_selector_auto_switch', {
             message: 'Auto-switching to fallback patient after removing access',
             fromPatientId: patient.id,
             toPatientId: fallbackPatient.id,
-            fallbackType: fallbackPatient.is_self_record ? 'self_record' : 'owned_patient'
+            fallbackType: fallbackPatient.is_self_record
+              ? 'self_record'
+              : 'owned_patient',
           });
-          
+
           setActivePatient(fallbackPatient);
           if (onPatientChange) {
             onPatientChange(fallbackPatient);
           }
-          
-          notifyInfo('notifications:toasts.patient.nowViewing', { interpolation: { name: `${fallbackPatient.first_name} ${fallbackPatient.last_name}` } });
+
+          notifyInfo('notifications:toasts.patient.nowViewing', {
+            interpolation: {
+              name: `${fallbackPatient.first_name} ${fallbackPatient.last_name}`,
+            },
+          });
         } else {
           logger.info('patient_selector_no_fallback', {
             message: 'No fallback patient available, clearing active patient',
-            removedPatientId: patient.id
+            removedPatientId: patient.id,
           });
-          
+
           setActivePatient(null);
           if (onPatientChange) {
             onPatientChange(null);
           }
         }
       }
-      
+
       logger.info('patient_selector_access_removed', {
         message: 'Shared patient access removed successfully',
         patientId: patient.id,
-        patientName: `${patient.first_name} ${patient.last_name}`
+        patientName: `${patient.first_name} ${patient.last_name}`,
       });
     } catch (error) {
       logger.error('patient_selector_access_remove_error', {
         message: 'Failed to remove shared patient access',
         patientId: patient.id,
-        error: error.message
+        error: error.message,
       });
-      
-      notifyError('notifications:toasts.patient.removeAccessFailed', { interpolation: { message: error.message } });
+
+      notifyError('notifications:toasts.patient.removeAccessFailed', {
+        interpolation: { message: error.message },
+      });
     } finally {
       setLoading(false);
     }
@@ -589,21 +652,21 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Format patient display name
    */
-  const formatPatientName = (patient) => {
+  const formatPatientName = patient => {
     return `${patient.first_name} ${patient.last_name}`;
   };
 
   /**
    * Get patient photo URL or null if no photo
    */
-  const getPatientPhoto = (patient) => {
+  const getPatientPhoto = patient => {
     return patientPhotos[patient.id] || null;
   };
 
   /**
    * Get patient type badge
    */
-  const getPatientBadge = (patient) => {
+  const getPatientBadge = patient => {
     if (patient.is_self_record && isPatientOwned(patient)) {
       return (
         <Badge size="xs" color="blue" variant="light">
@@ -629,7 +692,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   /**
    * Render patient option for select
    */
-  const renderPatientOption = (patient) => {
+  const renderPatientOption = patient => {
     const photoUrl = getPatientPhoto(patient);
     return (
       <Group gap="sm" key={patient.id}>
@@ -644,7 +707,12 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           <Text size="sm" fw={500}>
             {formatPatientName(patient)}
             {patient.relationship_to_self && (
-              <Text span ml="xs" fw={400} style={{ color: getRelationshipTextColor() }}>
+              <Text
+                span
+                ml="xs"
+                fw={400}
+                style={{ color: getRelationshipTextColor() }}
+              >
                 ({formatRelationshipLabel(patient.relationship_to_self)})
               </Text>
             )}
@@ -664,14 +732,17 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   const selectData = patients.map(patient => ({
     value: patient.id.toString(),
     label: formatPatientName(patient),
-    patient: patient
+    patient: patient,
   }));
 
   if (combinedError) {
     return (
       <Alert
         icon={<IconAlertCircle size="1rem" />}
-        title={t('patientSelector.errors.loadFailed', 'Failed to load patients')}
+        title={t(
+          'patientSelector.errors.loadFailed',
+          'Failed to load patients'
+        )}
         color="red"
         variant="light"
         style={{ whiteSpace: 'pre-line' }}
@@ -694,15 +765,20 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
   if (isMinimized && activePatient) {
     const activePatientPhoto = getPatientPhoto(activePatient);
     return (
-      <Group gap="sm" p="xs"
-        styles={(theme) => ({
+      <Group
+        gap="sm"
+        p="xs"
+        styles={theme => ({
           root: {
             borderRadius: 8,
-            border: `1px solid ${colorScheme === 'dark'
-              ? theme.colors.dark[4]
-              : theme.colors.gray[3]}`
-          }
-        })}>
+            border: `1px solid ${
+              colorScheme === 'dark'
+                ? theme.colors.dark[4]
+                : theme.colors.gray[3]
+            }`,
+          },
+        })}
+      >
         <PatientAvatar
           photoUrl={activePatientPhoto}
           patient={activePatient}
@@ -721,12 +797,17 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           </Text>
         </div>
         {getPatientBadge(activePatient)}
-        
+
         {/* Loading indicator */}
         {(combinedLoading || externalLoading) && <Loader size="xs" />}
-        
+
         {/* Expand button */}
-        <Tooltip label={t('patientSelector.tooltips.expand', 'Expand patient selector')}>
+        <Tooltip
+          label={t(
+            'patientSelector.tooltips.expand',
+            'Expand patient selector'
+          )}
+        >
           <ActionIcon
             variant="subtle"
             color={getIconColor('blue')}
@@ -742,13 +823,20 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {/* Quick patient switch menu */}
         <Menu shadow="md" width={300} position="bottom-start">
           <Menu.Target>
-            <Tooltip label={t('patientSelector.tooltips.switchPatient', 'Switch patient')}>
+            <Tooltip
+              label={t(
+                'patientSelector.tooltips.switchPatient',
+                'Switch patient'
+              )}
+            >
               <ActionIcon
                 variant="subtle"
                 color={getIconColor('gray')}
                 size="sm"
                 disabled={combinedLoading || externalLoading}
-                style={colorScheme === 'light' ? { color: '#000000' } : undefined}
+                style={
+                  colorScheme === 'light' ? { color: '#000000' } : undefined
+                }
               >
                 <IconUsers size="0.8rem" />
               </ActionIcon>
@@ -756,8 +844,10 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           </Menu.Target>
 
           <Menu.Dropdown>
-            <Menu.Label>{t('patientSelector.labels.switchTo', 'Switch to Patient')}</Menu.Label>
-            {patients.map((patient) => {
+            <Menu.Label>
+              {t('patientSelector.labels.switchTo', 'Switch to Patient')}
+            </Menu.Label>
+            {patients.map(patient => {
               const patientPhoto = getPatientPhoto(patient);
               return (
                 <Menu.Item
@@ -776,11 +866,23 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                   disabled={patient.id === activePatient?.id}
                 >
                   <div>
-                    <Text size="sm" fw={patient.id === activePatient?.id ? 600 : 500}>
+                    <Text
+                      size="sm"
+                      fw={patient.id === activePatient?.id ? 600 : 500}
+                    >
                       {formatPatientName(patient)}
                       {patient.relationship_to_self && (
-                        <Text span ml="xs" fw={400} style={{ color: getRelationshipTextColor() }}>
-                          ({formatRelationshipLabel(patient.relationship_to_self)})
+                        <Text
+                          span
+                          ml="xs"
+                          fw={400}
+                          style={{ color: getRelationshipTextColor() }}
+                        >
+                          (
+                          {formatRelationshipLabel(
+                            patient.relationship_to_self
+                          )}
+                          )
                         </Text>
                       )}
                     </Text>
@@ -791,7 +893,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 </Menu.Item>
               );
             })}
-            
+
             <Menu.Divider />
             <Menu.Item
               leftSection={<IconPlus size="0.8rem" />}
@@ -817,7 +919,12 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
 
           <Group gap="xs">
             {/* Minimize button */}
-            <Tooltip label={t('patientSelector.tooltips.minimize', 'Minimize to one line')}>
+            <Tooltip
+              label={t(
+                'patientSelector.tooltips.minimize',
+                'Minimize to one line'
+              )}
+            >
               <ActionIcon
                 variant="light"
                 color="gray"
@@ -828,7 +935,9 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label={t('patientSelector.tooltips.refresh', 'Refresh patients')}>
+            <Tooltip
+              label={t('patientSelector.tooltips.refresh', 'Refresh patients')}
+            >
               <ActionIcon
                 variant="light"
                 color="blue"
@@ -840,7 +949,9 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               </ActionIcon>
             </Tooltip>
 
-            <Tooltip label={t('patientSelector.tooltips.addNew', 'Add new patient')}>
+            <Tooltip
+              label={t('patientSelector.tooltips.addNew', 'Add new patient')}
+            >
               <ActionIcon
                 variant="light"
                 color="green"
@@ -857,16 +968,24 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         {activePatient && (
           <Box>
             <Text size="sm" c="dimmed" mb="xs">
-              {t('patientSelector.labels.currentlyViewing', 'Currently viewing:')}
+              {t(
+                'patientSelector.labels.currentlyViewing',
+                'Currently viewing:'
+              )}
             </Text>
-            <Group gap="sm" p="sm" style={{ borderRadius: 8, position: 'relative' }}
-              styles={(theme) => ({
+            <Group
+              gap="sm"
+              p="sm"
+              style={{ borderRadius: 8, position: 'relative' }}
+              styles={theme => ({
                 root: {
-                  backgroundColor: colorScheme === 'dark'
-                    ? theme.colors.dark[6]
-                    : theme.colors.blue[0]
-                }
-              })}>
+                  backgroundColor:
+                    colorScheme === 'dark'
+                      ? theme.colors.dark[6]
+                      : theme.colors.blue[0],
+                },
+              })}
+            >
               <PatientAvatar
                 photoUrl={getPatientPhoto(activePatient)}
                 patient={activePatient}
@@ -878,52 +997,75 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                 <Text fw={500} size="lg">
                   {formatPatientName(activePatient)}
                   {activePatient.relationship_to_self && (
-                    <Text span ml="xs" fw={400} size="md" style={{ color: getRelationshipTextColor() }}>
-                      ({formatRelationshipLabel(activePatient.relationship_to_self)})
+                    <Text
+                      span
+                      ml="xs"
+                      fw={400}
+                      size="md"
+                      style={{ color: getRelationshipTextColor() }}
+                    >
+                      (
+                      {formatRelationshipLabel(
+                        activePatient.relationship_to_self
+                      )}
+                      )
                     </Text>
                   )}
                 </Text>
                 <Text size="sm" c="dimmed">
-                  {t('patientSelector.labels.born', 'Born')}: {formatBirthDate(activePatient.birth_date)}
+                  {t('patientSelector.labels.born', 'Born')}:{' '}
+                  {formatBirthDate(activePatient.birth_date)}
                 </Text>
               </div>
               {getPatientBadge(activePatient)}
-              
+
               {/* Loading overlay */}
               {externalLoading && (
-                <Box style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                styles={(theme) => ({
-                  root: {
-                    backgroundColor: colorScheme === 'dark' 
-                      ? 'rgba(0, 0, 0, 0.8)' 
-                      : 'rgba(255, 255, 255, 0.8)',
-                    borderRadius: 8,
-                    zIndex: 1,
-                  }
-                })}>
+                <Box
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  styles={_theme => ({
+                    root: {
+                      backgroundColor:
+                        colorScheme === 'dark'
+                          ? 'rgba(0, 0, 0, 0.8)'
+                          : 'rgba(255, 255, 255, 0.8)',
+                      borderRadius: 8,
+                      zIndex: 1,
+                    },
+                  })}
+                >
                   <Loader size="sm" />
                 </Box>
               )}
-              
+
               {/* Patient Actions Menu */}
               <Menu shadow="md" width={200} position="bottom-end">
                 <Menu.Target>
-                  <ActionIcon variant="light" color="blue" disabled={combinedLoading || externalLoading}>
+                  <ActionIcon
+                    variant="light"
+                    color="blue"
+                    disabled={combinedLoading || externalLoading}
+                  >
                     <IconDots size="1rem" />
                   </ActionIcon>
                 </Menu.Target>
 
                 <Menu.Dropdown>
-                  <Menu.Label>{t('patientSelector.labels.patientActions', 'Patient Actions')}</Menu.Label>
+                  <Menu.Label>
+                    {t(
+                      'patientSelector.labels.patientActions',
+                      'Patient Actions'
+                    )}
+                  </Menu.Label>
 
                   {/* Edit is available for owned patients only */}
                   {isPatientOwned(activePatient) && (
@@ -941,7 +1083,10 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                       leftSection={<IconShare size="0.9rem" />}
                       onClick={() => sharePatient(activePatient)}
                     >
-                      {t('patientSelector.buttons.sharePatient', 'Share Patient')}
+                      {t(
+                        'patientSelector.buttons.sharePatient',
+                        'Share Patient'
+                      )}
                     </Menu.Item>
                   )}
 
@@ -956,7 +1101,10 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                           color="red"
                           onClick={() => deletePatient(activePatient)}
                         >
-                          {t('patientSelector.buttons.deletePatient', 'Delete Patient')}
+                          {t(
+                            'patientSelector.buttons.deletePatient',
+                            'Delete Patient'
+                          )}
                         </Menu.Item>
                       </>
                     )
@@ -969,7 +1117,10 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
                         color="orange"
                         onClick={() => removeSharedAccess(activePatient)}
                       >
-                        {t('patientSelector.buttons.removeAccess', 'Remove Access')}
+                        {t(
+                          'patientSelector.buttons.removeAccess',
+                          'Remove Access'
+                        )}
                       </Menu.Item>
                     </>
                   )}
@@ -984,20 +1135,32 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
           <Text size="sm" c="dimmed" mb="xs">
             {externalLoading
               ? t('patientSelector.labels.switching', 'Switching patient...')
-              : t('patientSelector.labels.switchTo', 'Switch to another patient:')}
+              : t(
+                  'patientSelector.labels.switchTo',
+                  'Switch to another patient:'
+                )}
           </Text>
 
           <Select
-            placeholder={externalLoading
-              ? t('patientSelector.placeholders.loading', 'Loading...')
-              : t('patientSelector.placeholders.select', 'Select a patient to switch to...')}
+            placeholder={
+              externalLoading
+                ? t('patientSelector.placeholders.loading', 'Loading...')
+                : t(
+                    'patientSelector.placeholders.select',
+                    'Select a patient to switch to...'
+                  )
+            }
             data={selectData}
             value={activePatient?.id?.toString() || ''}
-            onChange={(value) => value && switchPatient(parseInt(value))}
+            onChange={value => value && switchPatient(parseInt(value))}
             searchable
             clearable
             disabled={combinedLoading || externalLoading}
-            rightSection={(combinedLoading || externalLoading) ? <Loader size="xs" /> : undefined}
+            rightSection={
+              combinedLoading || externalLoading ? (
+                <Loader size="xs" />
+              ) : undefined
+            }
             renderOption={({ option }) => renderPatientOption(option.patient)}
           />
         </Box>
@@ -1010,21 +1173,30 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               <Group gap="xs">
                 <IconUser size="1rem" />
                 <Text size="sm">
-                  {t('patientSelector.stats.owned', 'Owned')}: <Text span fw={500}>{stats.owned_count}</Text>
+                  {t('patientSelector.stats.owned', 'Owned')}:{' '}
+                  <Text span fw={500}>
+                    {stats.owned_count}
+                  </Text>
                 </Text>
               </Group>
 
               <Group gap="xs">
                 <IconShare size="1rem" />
                 <Text size="sm">
-                  {t('shared:categories.shared', 'Shared')}: <Text span fw={500}>{stats.sharing_stats?.shared_with_me || 0}</Text>
+                  {t('shared:categories.shared', 'Shared')}:{' '}
+                  <Text span fw={500}>
+                    {stats.sharing_stats?.shared_with_me || 0}
+                  </Text>
                 </Text>
               </Group>
 
               <Group gap="xs">
                 <IconUsers size="1rem" />
                 <Text size="sm">
-                  {t('patientSelector.stats.total', 'Total')}: <Text span fw={500}>{stats.accessible_count}</Text>
+                  {t('patientSelector.stats.total', 'Total')}:{' '}
+                  <Text span fw={500}>
+                    {stats.accessible_count}
+                  </Text>
                 </Text>
               </Group>
             </Flex>
@@ -1039,7 +1211,10 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             color="yellow"
             variant="light"
           >
-            {t('patientSelector.messages.noAccess', "You don't have access to any patients yet. Create a new patient to get started.")}
+            {t(
+              'patientSelector.messages.noAccess',
+              "You don't have access to any patients yet. Create a new patient to get started."
+            )}
           </Alert>
         )}
       </Stack>
@@ -1053,7 +1228,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
         padding="lg"
       >
         <PatientForm
-          onSuccess={async (newPatient) => {
+          onSuccess={async newPatient => {
             // Invalidate patient list cache to force fresh data
             await invalidatePatientList();
             setActivePatient(newPatient);
@@ -1061,7 +1236,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
               onPatientChange(newPatient);
             }
             closeCreateModal();
-            notifySuccess('notifications:toasts.patient.nowViewing', { interpolation: { name: `${newPatient.first_name} ${newPatient.last_name}` } });
+            notifySuccess('notifications:toasts.patient.nowViewing', {
+              interpolation: {
+                name: `${newPatient.first_name} ${newPatient.last_name}`,
+              },
+            });
           }}
           onCancel={closeCreateModal}
           isModal={true}
@@ -1081,7 +1260,7 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
       >
         <PatientForm
           patient={editingPatient}
-          onSuccess={async (updatedPatient) => {
+          onSuccess={async updatedPatient => {
             // Invalidate patient list cache to force fresh data
             await invalidatePatientList();
             if (activePatient?.id === updatedPatient.id) {
@@ -1092,7 +1271,11 @@ const PatientSelector = ({ onPatientChange, currentPatientId, loading: externalL
             }
             closeEditModal();
             setEditingPatient(null);
-            notifySuccess('notifications:toasts.patient.updatedSuccess', { interpolation: { name: `${updatedPatient.first_name} ${updatedPatient.last_name}` } });
+            notifySuccess('notifications:toasts.patient.updatedSuccess', {
+              interpolation: {
+                name: `${updatedPatient.first_name} ${updatedPatient.last_name}`,
+              },
+            });
           }}
           onCancel={() => {
             closeEditModal();

@@ -1,6 +1,11 @@
-import React from 'react';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 
@@ -52,9 +57,27 @@ const mockGetModelMetadata = vi.fn().mockResolvedValue({
   display_name: 'User',
   fields: [
     { name: 'id', type: 'integer', primary_key: true, nullable: false },
-    { name: 'username', type: 'string', primary_key: false, nullable: false, max_length: 100 },
-    { name: 'email', type: 'string', primary_key: false, nullable: false, max_length: 200 },
-    { name: 'role', type: 'string', primary_key: false, nullable: false, max_length: 50 },
+    {
+      name: 'username',
+      type: 'string',
+      primary_key: false,
+      nullable: false,
+      max_length: 100,
+    },
+    {
+      name: 'email',
+      type: 'string',
+      primary_key: false,
+      nullable: false,
+      max_length: 200,
+    },
+    {
+      name: 'role',
+      type: 'string',
+      primary_key: false,
+      nullable: false,
+      max_length: 50,
+    },
   ],
 });
 const mockGetModelRecord = vi.fn().mockResolvedValue({
@@ -94,7 +117,9 @@ vi.mock('../../../hooks/useFieldHandlers', () => ({
   useFieldHandlers: (setFormData, setValidationErrors) => ({
     handleFieldChange: (fieldName, value) => {
       setFormData(prev => ({ ...prev, [fieldName]: value }));
-      setValidationErrors(prev => (prev[fieldName] ? { ...prev, [fieldName]: null } : prev));
+      setValidationErrors(prev =>
+        prev[fieldName] ? { ...prev, [fieldName]: null } : prev
+      );
     },
   }),
 }));
@@ -104,7 +129,7 @@ vi.mock('../../../utils/fieldValidation', () => ({
 }));
 
 vi.mock('../../../utils/formatters', () => ({
-  formatFieldLabel: (name) => name.charAt(0).toUpperCase() + name.slice(1),
+  formatFieldLabel: name => name.charAt(0).toUpperCase() + name.slice(1),
 }));
 
 vi.mock('../../../components/admin/FieldRenderer', () => ({
@@ -112,7 +137,7 @@ vi.mock('../../../components/admin/FieldRenderer', () => ({
     <input
       data-testid={`field-${field.name}`}
       value={value || ''}
-      onChange={(e) => onFieldChange(field.name, e.target.value)}
+      onChange={e => onFieldChange(field.name, e.target.value)}
     />
   ),
 }));
@@ -143,7 +168,9 @@ const renderComponent = () =>
 // ─── Shared wait helper ───────────────────────────────────────────────────────
 
 const waitForLoad = () =>
-  waitFor(() => expect(screen.getByTestId('field-username')).toBeInTheDocument());
+  waitFor(() =>
+    expect(screen.getByTestId('field-username')).toBeInTheDocument()
+  );
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
@@ -185,7 +212,9 @@ describe('ModelEdit security', () => {
       expect(screen.getByText(/Username Change Warning/i)).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByRole('button', { name: /change username/i });
+    const confirmButton = screen.getByRole('button', {
+      name: /change username/i,
+    });
     await act(async () => {
       fireEvent.click(confirmButton);
     });
@@ -219,7 +248,9 @@ describe('ModelEdit security', () => {
       expect(screen.getByText(/Username Change Warning/i)).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByRole('button', { name: /change username/i });
+    const confirmButton = screen.getByRole('button', {
+      name: /change username/i,
+    });
     await act(async () => {
       fireEvent.click(confirmButton);
     });
@@ -228,8 +259,8 @@ describe('ModelEdit security', () => {
       expect(mockLogout).toHaveBeenCalledTimes(1);
     });
 
-    const authRemoveCalls = localStorageRemoveItemSpy.mock.calls.filter(([key]) =>
-      ['user', 'token', 'tokenExpiry'].includes(key)
+    const authRemoveCalls = localStorageRemoveItemSpy.mock.calls.filter(
+      ([key]) => ['user', 'token', 'tokenExpiry'].includes(key)
     );
     expect(authRemoveCalls).toHaveLength(0);
   });
@@ -253,7 +284,9 @@ describe('ModelEdit security', () => {
       expect(screen.getByText(/Username Change Warning/i)).toBeInTheDocument();
     });
 
-    const confirmButton = screen.getByRole('button', { name: /change username/i });
+    const confirmButton = screen.getByRole('button', {
+      name: /change username/i,
+    });
     await act(async () => {
       fireEvent.click(confirmButton);
     });

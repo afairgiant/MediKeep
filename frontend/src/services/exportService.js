@@ -9,12 +9,12 @@ export const exportService = {
     try {
       logger.debug('Fetching export summary', {
         category: 'export_service',
-        endpoint: '/export/summary'
+        endpoint: '/export/summary',
       });
       const response = await apiClient.get('/export/summary');
       logger.debug('Export summary received', {
         category: 'export_service',
-        hasData: !!response.data
+        hasData: !!response.data,
       });
       return response.data;
     } catch (error) {
@@ -22,7 +22,7 @@ export const exportService = {
         category: 'export_error',
         error: error.message,
         status: error.status,
-        endpoint: '/export/summary'
+        endpoint: '/export/summary',
       });
       throw error;
     }
@@ -40,7 +40,7 @@ export const exportService = {
         category: 'export_error',
         error: error.message,
         status: error.status,
-        endpoint: '/export/formats'
+        endpoint: '/export/formats',
       });
       throw error;
     }
@@ -84,7 +84,7 @@ export const exportService = {
         error: error.message,
         status: error.status,
         endpoint: '/export/data',
-        params: params
+        params: params,
       });
       throw error;
     }
@@ -127,7 +127,7 @@ export const exportService = {
         error: error.message,
         status: error.status,
         endpoint: '/export/bulk',
-        data_keys: data ? Object.keys(data) : []
+        data_keys: data ? Object.keys(data) : [],
       });
       throw error;
     }

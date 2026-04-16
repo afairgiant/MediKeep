@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useApi } from './useApi.js';
-import { apiService } from '../services/api/index.js';
 import { useCurrentPatient } from './useGlobalData';
 import { useAuth } from '../contexts/AuthContext';
 import logger from '../services/logger';
@@ -30,10 +29,14 @@ export const useMedicalData = config => {
   const refreshData = useCallback(async () => {
     // Don't make API calls if user is not authenticated
     if (!isAuthenticated) {
-      logger.debug('medical_data_refresh', 'Skipping refresh - user not authenticated', {
-        entityName: entityName,
-        isAuthenticated
-      });
+      logger.debug(
+        'medical_data_refresh',
+        'Skipping refresh - user not authenticated',
+        {
+          entityName: entityName,
+          isAuthenticated,
+        }
+      );
       return null;
     }
 
@@ -53,18 +56,22 @@ export const useMedicalData = config => {
         if (data) {
           // Extract data array from API response if it's wrapped in a response object
           const extractedData = data?.data || data;
-          logger.debug('medical_data_processing', 'Processing API response data', {
-            entityName: config.entityName,
-            hasRawData: !!data,
-            isArray: Array.isArray(extractedData),
-            itemCount: extractedData?.length || 0,
-            operation: 'refresh'
-          });
+          logger.debug(
+            'medical_data_processing',
+            'Processing API response data',
+            {
+              entityName: config.entityName,
+              hasRawData: !!data,
+              isArray: Array.isArray(extractedData),
+              itemCount: extractedData?.length || 0,
+              operation: 'refresh',
+            }
+          );
           logger.debug('medical_data_refresh', 'Setting items for entity', {
             entityName: config.entityName,
             hasRawData: !!data,
             isArray: Array.isArray(extractedData),
-            itemCount: extractedData?.length || 0
+            itemCount: extractedData?.length || 0,
           });
           setItems(Array.isArray(extractedData) ? extractedData : []);
 
@@ -83,12 +90,16 @@ export const useMedicalData = config => {
                 counts[item.id] = files?.length || 0;
               } catch (error) {
                 if (error.name !== 'AbortError') {
-                  logger.warn('medical_data_warning', 'Failed to load file count during refresh', {
-                    entityName: config.entityName,
-                    itemId: item.id,
-                    operation: 'refresh_file_count',
-                    error: error.message
-                  });
+                  logger.warn(
+                    'medical_data_warning',
+                    'Failed to load file count during refresh',
+                    {
+                      entityName: config.entityName,
+                      itemId: item.id,
+                      operation: 'refresh_file_count',
+                      error: error.message,
+                    }
+                  );
                 }
                 counts[item.id] = 0;
               }
@@ -110,16 +121,25 @@ export const useMedicalData = config => {
   useEffect(() => {
     const previousPatientId = currentPatientRef.current?.id;
     currentPatientRef.current = currentPatient;
-    
+
     // If patient ID actually changed (not just initial load), force refresh
-    if (currentPatient?.id && previousPatientId && currentPatient.id !== previousPatientId) {
-      logger.info('medical_data_patient_change', 'Patient changed, refreshing medical data', {
-        fromPatientId: previousPatientId,
-        toPatientId: currentPatient.id,
-        entityName
-      });
+    if (
+      currentPatient?.id &&
+      previousPatientId &&
+      currentPatient.id !== previousPatientId
+    ) {
+      logger.info(
+        'medical_data_patient_change',
+        'Patient changed, refreshing medical data',
+        {
+          fromPatientId: previousPatientId,
+          toPatientId: currentPatient.id,
+          entityName,
+        }
+      );
       refreshData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run on patient ID change; full currentPatient object would re-trigger on every parent re-render
   }, [currentPatient?.id, refreshData, entityName]);
 
   // Create item
@@ -128,14 +148,14 @@ export const useMedicalData = config => {
       logger.info('medical_data_create', 'Starting entity creation', {
         entityName,
         operation: 'create',
-        hasData: !!data
+        hasData: !!data,
       });
 
       const result = await execute(
         async signal => {
           logger.info('medical_data_create', 'Calling API create method', {
             entityName,
-            operation: 'api_call'
+            operation: 'api_call',
           });
           return await apiMethodsConfig.create(data, signal);
         },
@@ -145,7 +165,7 @@ export const useMedicalData = config => {
       logger.info('medical_data_create', 'Entity creation completed', {
         entityName,
         operation: 'create_complete',
-        success: !!result
+        success: !!result,
       });
 
       if (result) {
@@ -168,12 +188,12 @@ export const useMedicalData = config => {
 
       if (result) {
         // Update local state immediately with the updated item
-        setItems(prevItems => 
-          prevItems.map(item => 
+        setItems(prevItems =>
+          prevItems.map(item =>
             item.id === id ? { ...item, ...result } : item
           )
         );
-        
+
         setSuccessMessage(`${entityName} updated successfully!`);
         setTimeout(() => setSuccessMessage(''), 3000);
         return result;
@@ -195,8 +215,15 @@ export const useMedicalData = config => {
       const result = await execute(
         async signal => {
           // For multi-patient support, pass the current patient ID if available
-          if (entityName === 'emergency_contact' && currentPatientRef.current?.id) {
-            await apiMethodsConfig.delete(id, signal, currentPatientRef.current.id);
+          if (
+            entityName === 'emergency_contact' &&
+            currentPatientRef.current?.id
+          ) {
+            await apiMethodsConfig.delete(
+              id,
+              signal,
+              currentPatientRef.current.id
+            );
           } else {
             await apiMethodsConfig.delete(id, signal);
           }
@@ -210,7 +237,7 @@ export const useMedicalData = config => {
       if (result) {
         // Update local state to remove the deleted item
         setItems(prevItems => prevItems.filter(item => item.id !== id));
-        
+
         setSuccessMessage(`${entityName} deleted successfully!`);
         setTimeout(() => setSuccessMessage(''), 3000);
         return result;
@@ -247,32 +274,42 @@ export const useMedicalData = config => {
       if (currentPatient?.id) {
         isInitialized.current = false;
       }
-      
+
       if (isInitialized.current || !isMounted) return;
-      
+
       // Wait for authentication to complete first
       if (authLoading) {
-        logger.debug('medical_data_init', 'Waiting for authentication to complete', {
-          entityName: entityName,
-          authLoading,
-          isAuthenticated
-        });
+        logger.debug(
+          'medical_data_init',
+          'Waiting for authentication to complete',
+          {
+            entityName: entityName,
+            authLoading,
+            isAuthenticated,
+          }
+        );
         isInitialized.current = false; // Reset so it can try again when auth completes
         return;
       }
-      
+
       // Check if user is authenticated
       if (!isAuthenticated) {
-        logger.debug('medical_data_init', 'User not authenticated, skipping data initialization', {
-          entityName: entityName,
-          isAuthenticated
-        });
+        logger.debug(
+          'medical_data_init',
+          'User not authenticated, skipping data initialization',
+          {
+            entityName: entityName,
+            isAuthenticated,
+          }
+        );
         isInitialized.current = false; // Reset so it can try again when user logs in
         return;
       }
-      
+
       // Add small delay to prevent race conditions between multiple hooks
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+      await new Promise(resolve =>
+        setTimeout(resolve, Math.random() * 100 + 50)
+      );
 
       const config = configRef.current;
 
@@ -282,7 +319,7 @@ export const useMedicalData = config => {
         loadFilesCounts: config.loadFilesCounts,
         patientId: currentPatient?.id,
         isAuthenticated,
-        authLoading
+        authLoading,
       });
       isInitialized.current = true;
 
@@ -290,11 +327,15 @@ export const useMedicalData = config => {
         // Wait for patient data to be available if required
         if (config.requiresPatient) {
           if (!currentPatient?.id) {
-            logger.debug('medical_data_init', 'Waiting for patient data to become available', {
-              entityName: config.entityName,
-              requiresPatient: config.requiresPatient,
-              patientAvailable: false
-            });
+            logger.debug(
+              'medical_data_init',
+              'Waiting for patient data to become available',
+              {
+                entityName: config.entityName,
+                requiresPatient: config.requiresPatient,
+                patientAvailable: false,
+              }
+            );
             isInitialized.current = false; // Reset so it can try again when patient loads
             return;
           }
@@ -304,10 +345,14 @@ export const useMedicalData = config => {
 
         let data = [];
         if (config.requiresPatient && currentPatient?.id) {
-          logger.info('medical_data_init', 'Starting initial fetch with patient', {
-            entityName: config.entityName,
-            patientId: currentPatient.id
-          });
+          logger.info(
+            'medical_data_init',
+            'Starting initial fetch with patient',
+            {
+              entityName: config.entityName,
+              patientId: currentPatient.id,
+            }
+          );
           data = await config.apiMethodsConfig.getByPatient(
             currentPatient.id,
             abortController.signal
@@ -315,36 +360,48 @@ export const useMedicalData = config => {
           logger.debug('medical_data_init', 'Received initial API response', {
             entityName: config.entityName,
             hasData: !!data,
-            dataType: typeof data
+            dataType: typeof data,
           });
         } else if (!config.requiresPatient) {
-          logger.info('medical_data_init', 'Starting initial fetch without patient requirement', {
-            entityName: config.entityName
-          });
+          logger.info(
+            'medical_data_init',
+            'Starting initial fetch without patient requirement',
+            {
+              entityName: config.entityName,
+            }
+          );
           data = await config.apiMethodsConfig.getAll(abortController.signal);
         } else {
-          logger.warn('medical_data_init', 'No patient available for initial fetch', {
-            entityName: config.entityName,
-            hasPatient: !!currentPatient,
-            patientId: currentPatient?.id
-          });
+          logger.warn(
+            'medical_data_init',
+            'No patient available for initial fetch',
+            {
+              entityName: config.entityName,
+              hasPatient: !!currentPatient,
+              patientId: currentPatient?.id,
+            }
+          );
         }
 
         if (data && isMounted) {
           // Extract data array from API response if it's wrapped in a response object
           const extractedData = data?.data || data;
-          logger.debug('medical_data_processing', 'Processing initial API response data', {
-            entityName: config.entityName,
-            hasRawData: !!data,
-            isArray: Array.isArray(extractedData),
-            itemCount: extractedData?.length || 0,
-            operation: 'initialization'
-          });
+          logger.debug(
+            'medical_data_processing',
+            'Processing initial API response data',
+            {
+              entityName: config.entityName,
+              hasRawData: !!data,
+              isArray: Array.isArray(extractedData),
+              itemCount: extractedData?.length || 0,
+              operation: 'initialization',
+            }
+          );
           logger.debug('medical_data_init', 'Setting items for entity', {
             entityName: config.entityName,
             hasRawData: !!data,
             isArray: Array.isArray(extractedData),
-            itemCount: extractedData?.length || 0
+            itemCount: extractedData?.length || 0,
           });
           setItems(Array.isArray(extractedData) ? extractedData : []);
 
@@ -363,12 +420,16 @@ export const useMedicalData = config => {
                 counts[item.id] = files?.length || 0;
               } catch (error) {
                 if (error.name !== 'AbortError') {
-                  logger.warn('medical_data_warning', 'Failed to load file count during initialization', {
-                    entityName: config.entityName,
-                    itemId: item.id,
-                    operation: 'load_file_count',
-                    error: error.message
-                  });
+                  logger.warn(
+                    'medical_data_warning',
+                    'Failed to load file count during initialization',
+                    {
+                      entityName: config.entityName,
+                      itemId: item.id,
+                      operation: 'load_file_count',
+                      error: error.message,
+                    }
+                  );
                 }
                 counts[item.id] = 0;
               }
@@ -397,7 +458,8 @@ export const useMedicalData = config => {
       abortController.abort();
       cleanup();
     };
-  }, [setError, cleanup, currentPatient?.id, isAuthenticated, authLoading]); // Include auth state to reinitialize when auth completes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only re-init on patient ID/auth change; entityName is loop-stable for a given hook instance and currentPatient ref is updated inline
+  }, [setError, cleanup, currentPatient?.id, isAuthenticated, authLoading]);
 
   return {
     // Data

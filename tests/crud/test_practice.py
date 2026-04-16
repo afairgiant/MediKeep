@@ -1,6 +1,7 @@
 """
 Tests for Practice CRUD operations.
 """
+
 import pytest
 from sqlalchemy.orm import Session
 
@@ -120,9 +121,7 @@ class TestPracticeCRUD:
         """Test searching practices by partial name match."""
         names = ["Heart Health Center", "Heart Clinic", "Brain Institute"]
         for name in names:
-            practice_crud.create(
-                db_session, obj_in=PracticeCreate(name=name)
-            )
+            practice_crud.create(db_session, obj_in=PracticeCreate(name=name))
 
         results = practice_crud.search_by_name(db_session, name="Heart")
 
@@ -133,9 +132,7 @@ class TestPracticeCRUD:
 
     def test_search_by_name_no_results(self, db_session: Session):
         """Test search with no matching results."""
-        practice_crud.create(
-            db_session, obj_in=PracticeCreate(name="Some Practice")
-        )
+        practice_crud.create(db_session, obj_in=PracticeCreate(name="Some Practice"))
 
         results = practice_crud.search_by_name(db_session, name="NonExistent")
 
@@ -172,7 +169,9 @@ class TestPracticeCRUD:
             db_session, obj_in=PracticeCreate(name="taken practice name")
         )
 
-        assert practice_crud.is_name_taken(db_session, name="Taken Practice Name") is True
+        assert (
+            practice_crud.is_name_taken(db_session, name="Taken Practice Name") is True
+        )
         assert practice_crud.is_name_taken(db_session, name="Available Name") is False
 
     def test_is_name_taken_with_exclude(self, db_session: Session):
@@ -245,9 +244,7 @@ class TestPracticeCRUD:
             phone_number="919-555-1111",
             website="https://updated.com",
         )
-        updated = practice_crud.update(
-            db_session, db_obj=created, obj_in=update_data
-        )
+        updated = practice_crud.update(db_session, db_obj=created, obj_in=update_data)
 
         assert updated.name == "Updated Name"
         assert updated.phone_number == "919-555-1111"
@@ -263,9 +260,7 @@ class TestPracticeCRUD:
         created = practice_crud.create(db_session, obj_in=practice_data)
 
         update_data = PracticeUpdate(phone_number="919-555-1111")
-        updated = practice_crud.update(
-            db_session, db_obj=created, obj_in=update_data
-        )
+        updated = practice_crud.update(db_session, db_obj=created, obj_in=update_data)
 
         assert updated.name == "Keep This Name"
         assert updated.phone_number == "919-555-1111"
@@ -305,14 +300,10 @@ class TestPracticeCRUD:
                 obj_in=PracticeCreate(name=f"Paginated Practice {i+1}"),
             )
 
-        page1 = practice_crud.get_all_practices_summary(
-            db_session, skip=0, limit=5
-        )
+        page1 = practice_crud.get_all_practices_summary(db_session, skip=0, limit=5)
         assert len(page1) == 5
 
-        page2 = practice_crud.get_all_practices_summary(
-            db_session, skip=5, limit=5
-        )
+        page2 = practice_crud.get_all_practices_summary(db_session, skip=5, limit=5)
         assert len(page2) == 5
 
     def test_get_practitioner_count(self, db_session: Session):

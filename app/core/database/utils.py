@@ -4,6 +4,7 @@ Database utility functions for cross-database compatibility.
 Provides helper functions that work with both PostgreSQL and SQLite,
 abstracting away database-specific operations.
 """
+
 from sqlalchemy import func, String, and_, true
 from sqlalchemy.sql import ColumnElement
 from sqlalchemy.orm import Session
@@ -23,7 +24,9 @@ def get_database_type(db: Session) -> str:
     return dialect_name
 
 
-def create_text_search_condition(column: ColumnElement, search_term: str) -> ColumnElement:
+def create_text_search_condition(
+    column: ColumnElement, search_term: str
+) -> ColumnElement:
     """
     Create a text search condition that works across databases.
 

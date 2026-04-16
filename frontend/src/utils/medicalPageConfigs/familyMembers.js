@@ -20,11 +20,14 @@ export const familyMembersPageConfig = {
 
       // Additional validation: prevent extremely long search terms that could cause performance issues
       if (sanitizedTerm.length > SEARCH_TERM_MAX_LENGTH) {
-        logger.warn(`Search term too long, truncating to ${SEARCH_TERM_MAX_LENGTH} characters`, {
-          component: 'medicalPageConfigs',
-          originalLength: sanitizedTerm.length,
-          truncatedLength: SEARCH_TERM_MAX_LENGTH
-        });
+        logger.warn(
+          `Search term too long, truncating to ${SEARCH_TERM_MAX_LENGTH} characters`,
+          {
+            component: 'medicalPageConfigs',
+            originalLength: sanitizedTerm.length,
+            truncatedLength: SEARCH_TERM_MAX_LENGTH,
+          }
+        );
         sanitizedTerm = sanitizedTerm.substring(0, SEARCH_TERM_MAX_LENGTH);
       }
 
@@ -42,7 +45,7 @@ export const familyMembersPageConfig = {
             value,
             valueType: typeof value,
             error: error.message,
-            searchTerm: sanitizedTerm
+            searchTerm: sanitizedTerm,
           });
           return false;
         }
@@ -62,7 +65,7 @@ export const familyMembersPageConfig = {
               tag,
               tagType: typeof tag,
               error: error.message,
-              searchTerm: sanitizedTerm
+              searchTerm: sanitizedTerm,
             });
             return false;
           }
@@ -73,7 +76,13 @@ export const familyMembersPageConfig = {
 
       // Search in family conditions
       if (item.family_conditions && Array.isArray(item.family_conditions)) {
-        const conditionFields = ['condition_name', 'notes', 'condition_type', 'severity', 'status'];
+        const conditionFields = [
+          'condition_name',
+          'notes',
+          'condition_type',
+          'severity',
+          'status',
+        ];
         const matchesCondition = item.family_conditions.some(condition => {
           if (!condition || typeof condition !== 'object') return false;
 
@@ -83,15 +92,18 @@ export const familyMembersPageConfig = {
             try {
               return value.toString().toLowerCase().includes(sanitizedTerm);
             } catch (error) {
-              logger.warn(`Error processing condition search field "${field}"`, {
-                component: 'medicalPageConfigs',
-                field,
-                value,
-                valueType: typeof value,
-                error: error.message,
-                searchTerm: sanitizedTerm,
-                conditionId: condition?.id
-              });
+              logger.warn(
+                `Error processing condition search field "${field}"`,
+                {
+                  component: 'medicalPageConfigs',
+                  field,
+                  value,
+                  valueType: typeof value,
+                  error: error.message,
+                  searchTerm: sanitizedTerm,
+                  conditionId: condition?.id,
+                }
+              );
               return false;
             }
           });
@@ -167,15 +179,15 @@ export const familyMembersPageConfig = {
         label: 'Relationship',
         sortable: true,
         width: '100px',
-        render: (value) => value?.replace('_', ' ') || '-',
+        render: value => value?.replace('_', ' ') || '-',
       },
       {
         key: 'condition_name',
         label: 'Condition',
         sortable: true,
         width: '150px',
-        render: (value) => value || 'No conditions',
-        style: (row) => ({
+        render: value => value || 'No conditions',
+        style: row => ({
           fontStyle: row.condition_name ? 'normal' : 'italic',
           color: row.condition_name ? 'inherit' : 'var(--mantine-color-dimmed)',
         }),
@@ -185,20 +197,20 @@ export const familyMembersPageConfig = {
         label: 'Type',
         sortable: true,
         width: '120px',
-        render: (value) => value?.replace('_', ' ') || '-',
+        render: value => value?.replace('_', ' ') || '-',
       },
       {
         key: 'severity',
         label: 'Severity',
         sortable: true,
         width: '100px',
-        render: (value) => {
+        render: value => {
           if (!value) return '-';
           const colors = {
             mild: 'green',
             moderate: 'yellow',
             severe: 'red',
-            critical: 'red'
+            critical: 'red',
           };
           return {
             type: 'badge',
@@ -212,19 +224,19 @@ export const familyMembersPageConfig = {
         label: 'Diagnosis Age',
         sortable: true,
         width: '100px',
-        render: (value) => value ? `${value} years` : '-',
+        render: value => (value ? `${value} years` : '-'),
       },
       {
         key: 'status',
         label: 'Status',
         sortable: true,
         width: '100px',
-        render: (value) => {
+        render: value => {
           if (!value) return '-';
           const colors = {
             active: 'blue',
             resolved: 'green',
-            chronic: 'orange'
+            chronic: 'orange',
           };
           return {
             type: 'badge',
@@ -236,9 +248,13 @@ export const familyMembersPageConfig = {
       },
     ],
     actions: {
-      view: (row) => row.familyMemberId,
-      edit: (row) => row.conditionId ? { familyMember: row, condition: row } : null,
-      delete: (row) => row.conditionId ? { familyMemberId: row.familyMemberId, conditionId: row.conditionId } : null,
+      view: row => row.familyMemberId,
+      edit: row =>
+        row.conditionId ? { familyMember: row, condition: row } : null,
+      delete: row =>
+        row.conditionId
+          ? { familyMemberId: row.familyMemberId, conditionId: row.conditionId }
+          : null,
     },
   },
 };

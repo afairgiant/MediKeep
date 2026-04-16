@@ -21,22 +21,23 @@ A comprehensive, modular error handling system for the Medical Records applicati
 import { useErrorHandler } from '@/utils/errorHandling';
 
 const MyComponent = () => {
-    const { handleError, currentError, clearError } = useErrorHandler('MyComponent');
-    
-    const handleSubmit = async () => {
-        try {
-            await apiCall();
-        } catch (error) {
-            handleError(error);
-        }
-    };
-    
-    return (
-        <div>
-            <ErrorAlert error={currentError} onClose={clearError} />
-            <button onClick={handleSubmit}>Submit</button>
-        </div>
-    );
+  const { handleError, currentError, clearError } =
+    useErrorHandler('MyComponent');
+
+  const handleSubmit = async () => {
+    try {
+      await apiCall();
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  return (
+    <div>
+      <ErrorAlert error={currentError} onClose={clearError} />
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
+  );
 };
 ```
 
@@ -55,8 +56,8 @@ const error = formatError('User not found', { context: 'login' });
 import { ErrorBoundary } from '@/utils/errorHandling';
 
 <ErrorBoundary>
-    <MyComponent />
-</ErrorBoundary>
+  <MyComponent />
+</ErrorBoundary>;
 ```
 
 ## Architecture
@@ -115,10 +116,12 @@ Each error mapping follows this structure:
 Main hook for error handling in React components.
 
 **Parameters:**
+
 - `componentName` (string): Name of component (for logging)
 - `options` (object): Configuration options
 
 **Returns:**
+
 - `handleError(error, context)`: Handle any error
 - `handleApiError(error, context)`: Handle API-specific errors
 - `handleValidationError(error, fieldName)`: Handle form validation
@@ -134,10 +137,12 @@ Main hook for error handling in React components.
 Format raw errors into user-friendly display objects.
 
 **Parameters:**
+
 - `error` (string|Error): Raw error to format
 - `context` (object): Additional context data
 
 **Returns:**
+
 - Formatted error object with title, message, suggestions, etc.
 
 ### ErrorAlert Component
@@ -145,6 +150,7 @@ Format raw errors into user-friendly display objects.
 Displays formatted errors with consistent styling.
 
 **Props:**
+
 - `error`: Formatted error object
 - `showSuggestions`: Whether to show suggestions (default: true)
 - `showIcon`: Whether to show icon (default: true)
@@ -155,6 +161,7 @@ Displays formatted errors with consistent styling.
 Semantic icon mapping for error types.
 
 **Props:**
+
 - `icon`: Semantic icon name (e.g., 'user-not-found', 'network-error')
 - `size`: Icon size (default: '1rem')
 
@@ -165,15 +172,15 @@ Semantic icon mapping for error types.
 ```javascript
 // In errorMappings/auth.js
 export const authErrors = {
-    'new error pattern': {
-        title: 'New Error Title',
-        message: 'Description of the error',
-        color: 'red',
-        icon: 'appropriate-icon',
-        suggestions: ['What user should do'],
-        severity: 'medium',
-        domain: 'auth'
-    }
+  'new error pattern': {
+    title: 'New Error Title',
+    message: 'Description of the error',
+    color: 'red',
+    icon: 'appropriate-icon',
+    suggestions: ['What user should do'],
+    severity: 'medium',
+    domain: 'auth',
+  },
 };
 ```
 
@@ -182,8 +189,8 @@ export const authErrors = {
 ```javascript
 // In ErrorIcon.js
 const ICON_MAP = {
-    'new-icon-name': IconNewIcon,
-    // ... existing mappings
+  'new-icon-name': IconNewIcon,
+  // ... existing mappings
 };
 ```
 
@@ -211,12 +218,14 @@ Create test cases for the new error patterns.
 ### Example: Good vs Bad Error Messages
 
 ❌ **Bad:**
+
 ```
 title: "Error 422"
 message: "Validation failed on field 'email'"
 ```
 
 ✅ **Good:**
+
 ```
 title: "Invalid Email"
 message: "Please enter a valid email address."
@@ -231,24 +240,28 @@ suggestions: [
 ### From Old System
 
 1. Replace `formatErrorForDisplay` imports:
+
    ```javascript
    // Old
    import { formatErrorForDisplay } from '../../utils/errorHandling';
-   
+
    // New
    import { useErrorHandler } from '../../utils/errorHandling';
    ```
 
 2. Replace manual error state management:
+
    ```javascript
    // Old
    const [error, setError] = useState(null);
-   
+
    // New
-   const { handleError, currentError, clearError } = useErrorHandler('ComponentName');
+   const { handleError, currentError, clearError } =
+     useErrorHandler('ComponentName');
    ```
 
 3. Replace error handling in catch blocks:
+
    ```javascript
    // Old
    catch (error) {
@@ -256,7 +269,7 @@ suggestions: [
        setError(formatted);
        showNotification(formatted);
    }
-   
+
    // New
    catch (error) {
        handleError(error, { context: 'specific action' });
@@ -264,12 +277,19 @@ suggestions: [
    ```
 
 4. Replace error display JSX:
+
    ```javascript
    // Old
-   {error && <Alert color={error.color} title={error.title}>...</Alert>}
-   
+   {
+     error && (
+       <Alert color={error.color} title={error.title}>
+         ...
+       </Alert>
+     );
+   }
+
    // New
-   <ErrorAlert error={currentError} onClose={clearError} />
+   <ErrorAlert error={currentError} onClose={clearError} />;
    ```
 
 ## Future Enhancements

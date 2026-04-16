@@ -46,7 +46,7 @@ export const useAdminData = config => {
           logger.info('Loading admin data', {
             category: 'admin_data_load',
             entityName: config.entityName,
-            operation: 'load_start'
+            operation: 'load_start',
           });
           const response = await config.apiMethodsConfig.load(signal);
 
@@ -56,7 +56,7 @@ export const useAdminData = config => {
               category: 'admin_data_load',
               entityName: config.entityName,
               operation: 'load_success',
-              dataCount: Array.isArray(response) ? response.length : 1
+              dataCount: Array.isArray(response) ? response.length : 1,
             });
           }
 
@@ -82,7 +82,8 @@ export const useAdminData = config => {
         category: 'admin_data_create',
         entityName: config.entityName,
         operation: 'create_start',
-        itemData: typeof itemData === 'object' ? Object.keys(itemData) : itemData
+        itemData:
+          typeof itemData === 'object' ? Object.keys(itemData) : itemData,
       });
 
       const result = await execute(
@@ -90,7 +91,7 @@ export const useAdminData = config => {
           logger.debug('Calling API create method', {
             category: 'admin_data_create',
             entityName: config.entityName,
-            operation: 'api_call'
+            operation: 'api_call',
           });
           return await config.apiMethodsConfig.create(itemData, signal);
         },
@@ -101,7 +102,8 @@ export const useAdminData = config => {
         category: 'admin_data_create',
         entityName: config.entityName,
         operation: 'create_success',
-        result: typeof result === 'object' && result ? Object.keys(result) : !!result
+        result:
+          typeof result === 'object' && result ? Object.keys(result) : !!result,
       });
 
       if (result) {
@@ -173,7 +175,7 @@ export const useAdminData = config => {
         entityName: config.entityName,
         actionName,
         operation: 'action_start',
-        hasActionData: !!actionData
+        hasActionData: !!actionData,
       });
 
       const result = await execute(
@@ -214,7 +216,7 @@ export const useAdminData = config => {
       logger.info('Initializing admin data', {
         category: 'admin_data_init',
         entityName: configRef.current.entityName,
-        operation: 'init_start'
+        operation: 'init_start',
       });
       isInitialized.current = true;
 
@@ -227,7 +229,7 @@ export const useAdminData = config => {
             entityName: configRef.current.entityName,
             operation: 'init_error',
             error: error.message,
-            stack: error.stack
+            stack: error.stack,
           });
         }
       }
@@ -252,7 +254,7 @@ export const useAdminData = config => {
         category: 'admin_data_init',
         entityName: config.entityName,
         operation: 'auto_refresh_setup',
-        refreshInterval: config.refreshInterval
+        refreshInterval: config.refreshInterval,
       });
 
       refreshIntervalRef.current = setInterval(() => {

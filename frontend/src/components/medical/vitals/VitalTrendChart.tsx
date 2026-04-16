@@ -15,32 +15,63 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
 import { Paper, Stack, Text, Group, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
-import { VitalTrendResponse, VitalDataPoint, AggregatedDataPoint, AggregationPeriod, GlucoseContext, GLUCOSE_CONTEXT_COLORS, GLUCOSE_DEFAULT_COLOR, GLUCOSE_CONTEXT_MANTINE_COLORS, GLUCOSE_DEFAULT_MANTINE_COLOR } from './types';
+import {
+  VitalTrendResponse,
+  VitalDataPoint,
+  AggregatedDataPoint,
+  AggregationPeriod,
+  GlucoseContext,
+  GLUCOSE_CONTEXT_COLORS,
+  GLUCOSE_DEFAULT_COLOR,
+  GLUCOSE_CONTEXT_MANTINE_COLORS,
+  GLUCOSE_DEFAULT_MANTINE_COLOR,
+} from './types';
 import { convertToChartData } from '../../../utils/vitalDataAggregation';
 import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
 
 // Static dot renderers (no component state dependencies, stable references for Recharts)
 const getGlucoseDotColor = (context: string | null | undefined): string =>
-  (context && GLUCOSE_CONTEXT_COLORS[context as GlucoseContext]) || GLUCOSE_DEFAULT_COLOR;
+  (context && GLUCOSE_CONTEXT_COLORS[context as GlucoseContext]) ||
+  GLUCOSE_DEFAULT_COLOR;
 
 const renderGlucoseDot = (props: any): React.ReactElement => {
   const { cx, cy, payload } = props;
   const color = getGlucoseDotColor(payload?.glucose_context);
-  return <circle cx={cx} cy={cy} r={4} fill={color} stroke="#fff" strokeWidth={2} />;
+  return (
+    <circle cx={cx} cy={cy} r={4} fill={color} stroke="#fff" strokeWidth={2} />
+  );
 };
 
 const renderPrimaryDot = (props: any): React.ReactElement => {
   const { cx, cy } = props;
-  return <circle cx={cx} cy={cy} r={4} fill="#228be6" stroke="#fff" strokeWidth={2} />;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={4}
+      fill="#228be6"
+      stroke="#fff"
+      strokeWidth={2}
+    />
+  );
 };
 
 const renderSecondaryDot = (props: any): React.ReactElement => {
   const { cx, cy } = props;
-  return <circle cx={cx} cy={cy} r={4} fill="#fa5252" stroke="#fff" strokeWidth={2} />;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={4}
+      fill="#fa5252"
+      stroke="#fff"
+      strokeWidth={2}
+    />
+  );
 };
 
 interface VitalTrendChartProps {
@@ -54,22 +85,26 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
   trendData,
   aggregatedDataPoints = [],
   aggregationPeriod = null,
-  glucoseContextFilter
+  glucoseContextFilter,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
 
   // Determine if we're displaying aggregated data
-  const isAggregated = aggregationPeriod !== null && aggregatedDataPoints.length > 0;
+  const isAggregated =
+    aggregationPeriod !== null && aggregatedDataPoints.length > 0;
 
   // Check if this vital type has secondary values (e.g., blood pressure with systolic/diastolic)
   const hasSecondaryValue = useMemo(() => {
     if (isAggregated) {
       return aggregatedDataPoints.some(
-        (point) => point.secondaryAverage !== null && point.secondaryAverage !== undefined
+        point =>
+          point.secondaryAverage !== null &&
+          point.secondaryAverage !== undefined
       );
     }
     return trendData.data_points.some(
-      (point) => point.secondary_value !== null && point.secondary_value !== undefined
+      point =>
+        point.secondary_value !== null && point.secondary_value !== undefined
     );
   }, [trendData.data_points, aggregatedDataPoints, isAggregated]);
 
@@ -80,16 +115,18 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     }
 
     // Use raw data points
-    return trendData.data_points.map((point: VitalDataPoint) => {
-      const dateStr = point.recorded_date.split('T')[0];
+    return trendData.data_points
+      .map((point: VitalDataPoint) => {
+        const dateStr = point.recorded_date.split('T')[0];
 
-      return {
-        date: dateStr,
-        value: point.value,
-        secondaryValue: point.secondary_value,
-        glucose_context: point.glucose_context
-      };
-    }).reverse(); // Reverse to show oldest first (left to right)
+        return {
+          date: dateStr,
+          value: point.value,
+          secondaryValue: point.secondary_value,
+          glucose_context: point.glucose_context,
+        };
+      })
+      .reverse(); // Reverse to show oldest first (left to right)
   }, [trendData.data_points, aggregatedDataPoints, isAggregated]);
 
   // Calculate Y-axis configuration with nice, rounded tick values
@@ -102,21 +139,34 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     // For aggregated data, also consider min/max values for proper axis range
     let aggregatedBounds: number[] = [];
     if (isAggregated) {
-      const numericFields = ['min', 'max', 'secondaryMin', 'secondaryMax'] as const;
+      const numericFields = [
+        'min',
+        'max',
+        'secondaryMin',
+        'secondaryMax',
+      ] as const;
       aggregatedBounds = numericFields.flatMap(field =>
-        chartData.map((d: any) => d[field]).filter((v): v is number => v != null)
+        chartData
+          .map((d: any) => d[field])
+          .filter((v): v is number => v != null)
       );
     }
 
-    return generateYAxisConfig([...primaryValues, ...secondaryValues, ...aggregatedBounds]);
+    return generateYAxisConfig([
+      ...primaryValues,
+      ...secondaryValues,
+      ...aggregatedBounds,
+    ]);
   }, [chartData, isAggregated]);
 
   const isBloodGlucose = trendData.vital_type === 'blood_glucose';
 
   // When filtering by a specific glucose context, match line color to the dot color
-  const lineColor = isBloodGlucose && glucoseContextFilter && glucoseContextFilter !== 'all'
-    ? GLUCOSE_CONTEXT_COLORS[glucoseContextFilter as GlucoseContext] || '#228be6'
-    : '#228be6';
+  const lineColor =
+    isBloodGlucose && glucoseContextFilter && glucoseContextFilter !== 'all'
+      ? GLUCOSE_CONTEXT_COLORS[glucoseContextFilter as GlucoseContext] ||
+        '#228be6'
+      : '#228be6';
 
   // Get labels for blood pressure or other dual-value vitals
   const getPrimaryLabel = () => {
@@ -140,7 +190,13 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     const data = payload[0].payload;
 
     return (
-      <Paper withBorder p="sm" shadow="md" radius="md" bg="var(--mantine-color-body)">
+      <Paper
+        withBorder
+        p="sm"
+        shadow="md"
+        radius="md"
+        bg="var(--mantine-color-body)"
+      >
         <Stack gap="xs">
           <Text size="sm" fw={600}>
             {isAggregated && data.periodLabel ? data.periodLabel : data.date}
@@ -155,33 +211,51 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
           {hasSecondaryValue ? (
             <>
               <Group gap="xs" align="baseline">
-                <Text size="sm" c="blue" fw={600}>{getPrimaryLabel()}:</Text>
+                <Text size="sm" c="blue" fw={600}>
+                  {getPrimaryLabel()}:
+                </Text>
                 <Text size="lg" fw={700} c="blue">
                   {isAggregated ? Math.round(data.value) : data.value}
                 </Text>
-                <Text size="sm" c="dimmed">{trendData.unit}</Text>
-              </Group>
-              {isAggregated && data.min !== undefined && data.max !== undefined && (
-                <Text size="xs" c="dimmed">
-                  {t('vitals:trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
+                <Text size="sm" c="dimmed">
+                  {trendData.unit}
                 </Text>
-              )}
-              {data.secondaryValue !== null && data.secondaryValue !== undefined && (
-                <>
-                  <Group gap="xs" align="baseline">
-                    <Text size="sm" c="red" fw={600}>{getSecondaryLabel()}:</Text>
-                    <Text size="lg" fw={700} c="red">
-                      {isAggregated ? Math.round(data.secondaryValue) : data.secondaryValue}
-                    </Text>
-                    <Text size="sm" c="dimmed">{trendData.unit}</Text>
-                  </Group>
-                  {isAggregated && data.secondaryMin !== undefined && data.secondaryMax !== undefined && (
-                    <Text size="xs" c="dimmed">
-                      {t('vitals:trends.range', 'Range')}: {Math.round(data.secondaryMin)} - {Math.round(data.secondaryMax)}
-                    </Text>
-                  )}
-                </>
-              )}
+              </Group>
+              {isAggregated &&
+                data.min !== undefined &&
+                data.max !== undefined && (
+                  <Text size="xs" c="dimmed">
+                    {t('vitals:trends.range', 'Range')}: {Math.round(data.min)}{' '}
+                    - {Math.round(data.max)}
+                  </Text>
+                )}
+              {data.secondaryValue !== null &&
+                data.secondaryValue !== undefined && (
+                  <>
+                    <Group gap="xs" align="baseline">
+                      <Text size="sm" c="red" fw={600}>
+                        {getSecondaryLabel()}:
+                      </Text>
+                      <Text size="lg" fw={700} c="red">
+                        {isAggregated
+                          ? Math.round(data.secondaryValue)
+                          : data.secondaryValue}
+                      </Text>
+                      <Text size="sm" c="dimmed">
+                        {trendData.unit}
+                      </Text>
+                    </Group>
+                    {isAggregated &&
+                      data.secondaryMin !== undefined &&
+                      data.secondaryMax !== undefined && (
+                        <Text size="xs" c="dimmed">
+                          {t('vitals:trends.range', 'Range')}:{' '}
+                          {Math.round(data.secondaryMin)} -{' '}
+                          {Math.round(data.secondaryMax)}
+                        </Text>
+                      )}
+                  </>
+                )}
             </>
           ) : (
             <>
@@ -189,20 +263,34 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
                 <Text size="lg" fw={700} c="blue">
                   {isAggregated ? Math.round(data.value) : data.value}
                 </Text>
-                <Text size="sm" c="dimmed">{trendData.unit}</Text>
-              </Group>
-              {isAggregated && data.min !== undefined && data.max !== undefined && (
-                <Text size="xs" c="dimmed">
-                  {t('vitals:trends.range', 'Range')}: {Math.round(data.min)} - {Math.round(data.max)}
+                <Text size="sm" c="dimmed">
+                  {trendData.unit}
                 </Text>
-              )}
+              </Group>
+              {isAggregated &&
+                data.min !== undefined &&
+                data.max !== undefined && (
+                  <Text size="xs" c="dimmed">
+                    {t('vitals:trends.range', 'Range')}: {Math.round(data.min)}{' '}
+                    - {Math.round(data.max)}
+                  </Text>
+                )}
               {isBloodGlucose && data.glucose_context && (
                 <Badge
                   size="sm"
                   variant="light"
-                  color={GLUCOSE_CONTEXT_MANTINE_COLORS[data.glucose_context as GlucoseContext] ?? GLUCOSE_DEFAULT_MANTINE_COLOR}
+                  color={
+                    GLUCOSE_CONTEXT_MANTINE_COLORS[
+                      data.glucose_context as GlucoseContext
+                    ] ?? GLUCOSE_DEFAULT_MANTINE_COLOR
+                  }
                 >
-                  {String(t(`vitals.glucoseContext.${data.glucose_context}`, data.glucose_context))}
+                  {String(
+                    t(
+                      `vitals.glucoseContext.${data.glucose_context}`,
+                      data.glucose_context
+                    )
+                  )}
                 </Badge>
               )}
             </>
@@ -229,7 +317,10 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
           data={chartData}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="var(--color-border-light)"
+          />
 
           <XAxis
             dataKey="date"
@@ -247,7 +338,12 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
             tick={{ fontSize: 12 }}
             tickLine={{ stroke: '#adb5bd' }}
             stroke="#adb5bd"
-            label={{ value: trendData.unit, angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+            label={{
+              value: trendData.unit,
+              angle: -90,
+              position: 'insideLeft',
+              style: { fontSize: 12 },
+            }}
             allowDataOverflow={false}
           />
 
@@ -277,10 +373,16 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
             dataKey="value"
             stroke={lineColor}
             strokeWidth={2}
-            dot={isAggregated
-              ? { r: 3, fill: lineColor, stroke: '#fff', strokeWidth: 1 }
-              : (isBloodGlucose && !isAggregated ? renderGlucoseDot : renderPrimaryDot)}
-            name={hasSecondaryValue ? getPrimaryLabel() : trendData.vital_type_label}
+            dot={
+              isAggregated
+                ? { r: 3, fill: lineColor, stroke: '#fff', strokeWidth: 1 }
+                : isBloodGlucose && !isAggregated
+                  ? renderGlucoseDot
+                  : renderPrimaryDot
+            }
+            name={
+              hasSecondaryValue ? getPrimaryLabel() : trendData.vital_type_label
+            }
             connectNulls
           />
 
@@ -318,7 +420,11 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
               dataKey="secondaryValue"
               stroke="#fa5252"
               strokeWidth={2}
-              dot={isAggregated ? { r: 3, fill: '#fa5252', stroke: '#fff', strokeWidth: 1 } : renderSecondaryDot}
+              dot={
+                isAggregated
+                  ? { r: 3, fill: '#fa5252', stroke: '#fff', strokeWidth: 1 }
+                  : renderSecondaryDot
+              }
               name={getSecondaryLabel()}
               connectNulls
             />

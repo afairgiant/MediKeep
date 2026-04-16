@@ -21,7 +21,9 @@ def _make_quant(value, status="normal", result_type="quantitative"):
 def _make_qual(qualitative_value, status=None, result_type="qualitative"):
     """Create a mock qualitative component."""
     if status is None:
-        status = "abnormal" if qualitative_value in ("positive", "detected") else "normal"
+        status = (
+            "abnormal" if qualitative_value in ("positive", "detected") else "normal"
+        )
     return SimpleNamespace(
         qualitative_value=qualitative_value,
         status=status,
@@ -57,9 +59,9 @@ class TestQualitativeStatistics:
 
     def test_normal_abnormal_counts(self):
         components = [
-            _make_qual("positive"),   # abnormal
-            _make_qual("negative"),   # normal
-            _make_qual("negative"),   # normal
+            _make_qual("positive"),  # abnormal
+            _make_qual("negative"),  # normal
+            _make_qual("negative"),  # normal
         ]
         stats = calculate_trend_statistics(components)
         assert stats.normal_count == 2
@@ -97,10 +99,10 @@ class TestQualitativeStatistics:
         """Recent half has more abnormal than older half -> worsening."""
         # Components are ordered most-recent-first
         components = [
-            _make_qual("positive"),   # recent - abnormal
-            _make_qual("positive"),   # recent - abnormal
-            _make_qual("negative"),   # older - normal
-            _make_qual("negative"),   # older - normal
+            _make_qual("positive"),  # recent - abnormal
+            _make_qual("positive"),  # recent - abnormal
+            _make_qual("negative"),  # older - normal
+            _make_qual("negative"),  # older - normal
         ]
         stats = calculate_trend_statistics(components)
         assert stats.trend_direction == "worsening"
@@ -108,10 +110,10 @@ class TestQualitativeStatistics:
     def test_improving_trend(self):
         """Recent half has fewer abnormal than older half -> improving."""
         components = [
-            _make_qual("negative"),   # recent - normal
-            _make_qual("negative"),   # recent - normal
-            _make_qual("positive"),   # older - abnormal
-            _make_qual("positive"),   # older - abnormal
+            _make_qual("negative"),  # recent - normal
+            _make_qual("negative"),  # recent - normal
+            _make_qual("positive"),  # older - abnormal
+            _make_qual("positive"),  # older - abnormal
         ]
         stats = calculate_trend_statistics(components)
         assert stats.trend_direction == "improving"

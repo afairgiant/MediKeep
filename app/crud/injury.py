@@ -3,6 +3,7 @@ CRUD operations for Injury entity and its junction tables.
 
 Injury represents a physical injury record for a patient.
 """
+
 from typing import List, Optional
 
 from sqlalchemy import and_, nullslast
@@ -60,9 +61,7 @@ class CRUDInjury(CRUDBase[Injury, InjuryCreate, InjuryUpdate], TagFilterMixin):
             load_relations=["injury_type", "practitioner"],
         )
 
-    def get_active_injuries(
-        self, db: Session, *, patient_id: int
-    ) -> List[Injury]:
+    def get_active_injuries(self, db: Session, *, patient_id: int) -> List[Injury]:
         """
         Get all active injuries for a patient.
 
@@ -122,7 +121,7 @@ class CRUDInjury(CRUDBase[Injury, InjuryCreate, InjuryUpdate], TagFilterMixin):
             .filter(
                 and_(
                     self.model.patient_id == patient_id,
-                    self.model.body_part.ilike(f"%{body_part}%")
+                    self.model.body_part.ilike(f"%{body_part}%"),
                 )
             )
             .order_by(nullslast(self.model.date_of_injury.desc()))
@@ -151,9 +150,7 @@ class CRUDInjury(CRUDBase[Injury, InjuryCreate, InjuryUpdate], TagFilterMixin):
             load_relations=["injury_type", "practitioner"],
         )
 
-    def get_with_relations(
-        self, db: Session, *, record_id: int
-    ) -> Optional[Injury]:
+    def get_with_relations(self, db: Session, *, record_id: int) -> Optional[Injury]:
         """
         Get an injury with all its relations loaded.
 
@@ -176,30 +173,24 @@ class CRUDInjury(CRUDBase[Injury, InjuryCreate, InjuryUpdate], TagFilterMixin):
         )
 
 
-class CRUDInjuryMedication(CRUDBase[InjuryMedication, InjuryMedicationCreate, InjuryMedicationUpdate]):
+class CRUDInjuryMedication(
+    CRUDBase[InjuryMedication, InjuryMedicationCreate, InjuryMedicationUpdate]
+):
     """CRUD operations for InjuryMedication junction table"""
 
     def __init__(self):
         super().__init__(InjuryMedication)
 
-    def get_by_injury(
-        self, db: Session, *, injury_id: int
-    ) -> List[InjuryMedication]:
+    def get_by_injury(self, db: Session, *, injury_id: int) -> List[InjuryMedication]:
         """Get all medication relationships for a specific injury"""
-        return (
-            db.query(self.model)
-            .filter(self.model.injury_id == injury_id)
-            .all()
-        )
+        return db.query(self.model).filter(self.model.injury_id == injury_id).all()
 
     def get_by_medication(
         self, db: Session, *, medication_id: int
     ) -> List[InjuryMedication]:
         """Get all injury relationships for a specific medication"""
         return (
-            db.query(self.model)
-            .filter(self.model.medication_id == medication_id)
-            .all()
+            db.query(self.model).filter(self.model.medication_id == medication_id).all()
         )
 
     def get_by_injury_and_medication(
@@ -211,7 +202,7 @@ class CRUDInjuryMedication(CRUDBase[InjuryMedication, InjuryMedicationCreate, In
             .filter(
                 and_(
                     self.model.injury_id == injury_id,
-                    self.model.medication_id == medication_id
+                    self.model.medication_id == medication_id,
                 )
             )
             .first()
@@ -231,30 +222,24 @@ class CRUDInjuryMedication(CRUDBase[InjuryMedication, InjuryMedicationCreate, In
         return False
 
 
-class CRUDInjuryCondition(CRUDBase[InjuryCondition, InjuryConditionCreate, InjuryConditionCreate]):
+class CRUDInjuryCondition(
+    CRUDBase[InjuryCondition, InjuryConditionCreate, InjuryConditionCreate]
+):
     """CRUD operations for InjuryCondition junction table"""
 
     def __init__(self):
         super().__init__(InjuryCondition)
 
-    def get_by_injury(
-        self, db: Session, *, injury_id: int
-    ) -> List[InjuryCondition]:
+    def get_by_injury(self, db: Session, *, injury_id: int) -> List[InjuryCondition]:
         """Get all condition relationships for a specific injury"""
-        return (
-            db.query(self.model)
-            .filter(self.model.injury_id == injury_id)
-            .all()
-        )
+        return db.query(self.model).filter(self.model.injury_id == injury_id).all()
 
     def get_by_condition(
         self, db: Session, *, condition_id: int
     ) -> List[InjuryCondition]:
         """Get all injury relationships for a specific condition"""
         return (
-            db.query(self.model)
-            .filter(self.model.condition_id == condition_id)
-            .all()
+            db.query(self.model).filter(self.model.condition_id == condition_id).all()
         )
 
     def get_by_injury_and_condition(
@@ -266,7 +251,7 @@ class CRUDInjuryCondition(CRUDBase[InjuryCondition, InjuryConditionCreate, Injur
             .filter(
                 and_(
                     self.model.injury_id == injury_id,
-                    self.model.condition_id == condition_id
+                    self.model.condition_id == condition_id,
                 )
             )
             .first()
@@ -286,30 +271,24 @@ class CRUDInjuryCondition(CRUDBase[InjuryCondition, InjuryConditionCreate, Injur
         return False
 
 
-class CRUDInjuryTreatment(CRUDBase[InjuryTreatment, InjuryTreatmentCreate, InjuryTreatmentCreate]):
+class CRUDInjuryTreatment(
+    CRUDBase[InjuryTreatment, InjuryTreatmentCreate, InjuryTreatmentCreate]
+):
     """CRUD operations for InjuryTreatment junction table"""
 
     def __init__(self):
         super().__init__(InjuryTreatment)
 
-    def get_by_injury(
-        self, db: Session, *, injury_id: int
-    ) -> List[InjuryTreatment]:
+    def get_by_injury(self, db: Session, *, injury_id: int) -> List[InjuryTreatment]:
         """Get all treatment relationships for a specific injury"""
-        return (
-            db.query(self.model)
-            .filter(self.model.injury_id == injury_id)
-            .all()
-        )
+        return db.query(self.model).filter(self.model.injury_id == injury_id).all()
 
     def get_by_treatment(
         self, db: Session, *, treatment_id: int
     ) -> List[InjuryTreatment]:
         """Get all injury relationships for a specific treatment"""
         return (
-            db.query(self.model)
-            .filter(self.model.treatment_id == treatment_id)
-            .all()
+            db.query(self.model).filter(self.model.treatment_id == treatment_id).all()
         )
 
     def get_by_injury_and_treatment(
@@ -321,7 +300,7 @@ class CRUDInjuryTreatment(CRUDBase[InjuryTreatment, InjuryTreatmentCreate, Injur
             .filter(
                 and_(
                     self.model.injury_id == injury_id,
-                    self.model.treatment_id == treatment_id
+                    self.model.treatment_id == treatment_id,
                 )
             )
             .first()
@@ -341,30 +320,24 @@ class CRUDInjuryTreatment(CRUDBase[InjuryTreatment, InjuryTreatmentCreate, Injur
         return False
 
 
-class CRUDInjuryProcedure(CRUDBase[InjuryProcedure, InjuryProcedureCreate, InjuryProcedureCreate]):
+class CRUDInjuryProcedure(
+    CRUDBase[InjuryProcedure, InjuryProcedureCreate, InjuryProcedureCreate]
+):
     """CRUD operations for InjuryProcedure junction table"""
 
     def __init__(self):
         super().__init__(InjuryProcedure)
 
-    def get_by_injury(
-        self, db: Session, *, injury_id: int
-    ) -> List[InjuryProcedure]:
+    def get_by_injury(self, db: Session, *, injury_id: int) -> List[InjuryProcedure]:
         """Get all procedure relationships for a specific injury"""
-        return (
-            db.query(self.model)
-            .filter(self.model.injury_id == injury_id)
-            .all()
-        )
+        return db.query(self.model).filter(self.model.injury_id == injury_id).all()
 
     def get_by_procedure(
         self, db: Session, *, procedure_id: int
     ) -> List[InjuryProcedure]:
         """Get all injury relationships for a specific procedure"""
         return (
-            db.query(self.model)
-            .filter(self.model.procedure_id == procedure_id)
-            .all()
+            db.query(self.model).filter(self.model.procedure_id == procedure_id).all()
         )
 
     def get_by_injury_and_procedure(
@@ -376,7 +349,7 @@ class CRUDInjuryProcedure(CRUDBase[InjuryProcedure, InjuryProcedureCreate, Injur
             .filter(
                 and_(
                     self.model.injury_id == injury_id,
-                    self.model.procedure_id == procedure_id
+                    self.model.procedure_id == procedure_id,
                 )
             )
             .first()

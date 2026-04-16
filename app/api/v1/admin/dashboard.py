@@ -147,6 +147,7 @@ def get_dashboard_stats(
 
     except Exception as e:
         import traceback
+
         traceback_str = traceback.format_exc()
 
         log_endpoint_error(
@@ -155,7 +156,7 @@ def get_dashboard_stats(
             "Error fetching dashboard stats",
             e,
             user_id=current_user.id,
-            traceback=traceback_str
+            traceback=traceback_str,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -247,7 +248,7 @@ def get_recent_activity(
             request,
             "Error fetching recent activity",
             e,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -365,11 +366,7 @@ def get_system_health(
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Error fetching system health",
-            e,
-            user_id=current_user.id
+            logger, request, "Error fetching system health", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -651,11 +648,7 @@ def get_system_metrics(
 
     except Exception as e:
         log_endpoint_error(
-            logger,
-            request,
-            "Error fetching system metrics",
-            e,
-            user_id=current_user.id
+            logger, request, "Error fetching system metrics", e, user_id=current_user.id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -772,12 +765,8 @@ def get_storage_health(
                 overall_healthy = False
 
         # Calculate total app storage across all tracked directories
-        app_total_mb = sum(
-            d.get("size_mb", 0) for d in directory_status.values()
-        )
-        app_total_files = sum(
-            d.get("file_count", 0) for d in directory_status.values()
-        )
+        app_total_mb = sum(d.get("size_mb", 0) for d in directory_status.values())
+        app_total_files = sum(d.get("file_count", 0) for d in directory_status.values())
 
         return {
             "status": "healthy" if overall_healthy else "unhealthy",

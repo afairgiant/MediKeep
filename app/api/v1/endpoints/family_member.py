@@ -4,10 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    BusinessLogicException,
-    handle_database_errors
-)
+from app.core.http.error_handling import BusinessLogicException, handle_database_errors
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -69,7 +66,7 @@ def read_family_members(
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
 ) -> Any:
     """Retrieve family members for the current user or accessible patient."""
-    
+
     if relationship:
         family_members = family_member.get_by_relationship(
             db, patient_id=target_patient_id, relationship=relationship
@@ -108,7 +105,13 @@ def read_family_member(
         relations=["family_conditions"],
     )
     handle_not_found(family_member_obj, "Family Member", request)
-    verify_patient_ownership(family_member_obj, target_patient_id, "family_member", db=db, current_user=current_user)
+    verify_patient_ownership(
+        family_member_obj,
+        target_patient_id,
+        "family_member",
+        db=db,
+        current_user=current_user,
+    )
     return family_member_obj
 
 
@@ -182,7 +185,10 @@ def search_family_members(
 
 # Family Condition Endpoints
 
-@router.get("/{family_member_id}/conditions", response_model=List[FamilyConditionResponse])
+
+@router.get(
+    "/{family_member_id}/conditions", response_model=List[FamilyConditionResponse]
+)
 def get_family_member_conditions(
     *,
     request: Request,
@@ -196,10 +202,18 @@ def get_family_member_conditions(
         # Verify family member exists and belongs to the accessible patient
         family_member_obj = family_member.get(db, id=family_member_id)
         handle_not_found(family_member_obj, "Family Member", request)
-        verify_patient_ownership(family_member_obj, target_patient_id, "family_member", db=db, current_user=current_user)
-        
+        verify_patient_ownership(
+            family_member_obj,
+            target_patient_id,
+            "family_member",
+            db=db,
+            current_user=current_user,
+        )
+
         # Get conditions
-        conditions = family_condition.get_by_family_member(db, family_member_id=family_member_id)
+        conditions = family_condition.get_by_family_member(
+            db, family_member_id=family_member_id
+        )
         return conditions
 
 
@@ -219,11 +233,18 @@ def create_family_condition(
         # Verify family member exists and belongs to the accessible patient
         family_member_obj = family_member.get(db, id=family_member_id)
         handle_not_found(family_member_obj, "Family Member", request)
-        verify_patient_ownership(family_member_obj, target_patient_id, "family_member", db=db, current_user=current_user, permission='edit')
-        
+        verify_patient_ownership(
+            family_member_obj,
+            target_patient_id,
+            "family_member",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
         # Set family_member_id
         condition_in.family_member_id = family_member_id
-        
+
         return handle_create_with_logging(
             db=db,
             crud_obj=family_condition,
@@ -235,7 +256,10 @@ def create_family_condition(
         )
 
 
-@router.put("/{family_member_id}/conditions/{condition_id}", response_model=FamilyConditionResponse)
+@router.put(
+    "/{family_member_id}/conditions/{condition_id}",
+    response_model=FamilyConditionResponse,
+)
 def update_family_condition(
     *,
     family_member_id: int,
@@ -253,7 +277,14 @@ def update_family_condition(
         # Verify family member exists and belongs to the accessible patient
         family_member_obj = family_member.get(db, id=family_member_id)
         handle_not_found(family_member_obj, "Family Member", request)
-        verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            family_member_obj,
+            current_user_patient_id,
+            "family_member",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Get the condition
         condition_obj = family_condition.get(db, id=condition_id)
@@ -263,7 +294,7 @@ def update_family_condition(
         if condition_obj.family_member_id != family_member_id:
             raise BusinessLogicException(
                 message="Condition does not belong to the specified family member",
-                request=request
+                request=request,
             )
 
         return handle_update_with_logging(
@@ -276,7 +307,7 @@ def update_family_condition(
             entity_name="Family Condition",
             request=request,
             current_user=current_user,
-            # current_user_patient_id is intentionally omitted here because ownership 
+            # current_user_patient_id is intentionally omitted here because ownership
             # is verified via the parent FamilyMember object above.
             # FamilyCondition objects do not have a direct patient_id link.
         )
@@ -299,7 +330,14 @@ def delete_family_condition(
         # Verify family member exists and belongs to the accessible patient
         family_member_obj = family_member.get(db, id=family_member_id)
         handle_not_found(family_member_obj, "Family Member", request)
-        verify_patient_ownership(family_member_obj, current_user_patient_id, "family_member", db=db, current_user=current_user, permission='edit')
+        verify_patient_ownership(
+            family_member_obj,
+            current_user_patient_id,
+            "family_member",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
 
         # Get the condition
         condition_obj = family_condition.get(db, id=condition_id)
@@ -309,7 +347,7 @@ def delete_family_condition(
         if condition_obj.family_member_id != family_member_id:
             raise BusinessLogicException(
                 message="Condition does not belong to the specified family member",
-                request=request
+                request=request,
             )
 
         return handle_delete_with_logging(
@@ -321,6 +359,6 @@ def delete_family_condition(
             entity_name="Family Condition",
             request=request,
             current_user=current_user,
-            # current_user_patient_id is intentionally omitted here because ownership 
+            # current_user_patient_id is intentionally omitted here because ownership
             # is verified via the parent FamilyMember object above.
         )

@@ -121,12 +121,20 @@ function TreatmentLabResultRelationships({
     buildBulkPayload,
   });
 
-  const getLabResultById = (labResultId) => {
+  const getLabResultById = labResultId => {
     return safeLabResults.find(lab => lab.id === labResultId);
   };
 
-  const labResultOptions = createDateSortedOptions(safeLabResults, formatLabResultLabel, 'completed_date');
-  const availableOptions = filterAvailableOptions(labResultOptions, relationships, 'lab_result_id');
+  const labResultOptions = createDateSortedOptions(
+    safeLabResults,
+    formatLabResultLabel,
+    'completed_date'
+  );
+  const availableOptions = filterAvailableOptions(
+    labResultOptions,
+    relationships,
+    'lab_result_id'
+  );
   const selectedCount = newRelationship.lab_result_ids.length;
 
   return (
@@ -137,7 +145,9 @@ function TreatmentLabResultRelationships({
         {relationships.length > 0 ? (
           <Stack gap="sm">
             {relationships.map(relationship => {
-              const labResult = relationship.lab_result || getLabResultById(relationship.lab_result_id);
+              const labResult =
+                relationship.lab_result ||
+                getLabResultById(relationship.lab_result_id);
               const isEditing = editingRelationship?.id === relationship.id;
 
               return (
@@ -148,14 +158,30 @@ function TreatmentLabResultRelationships({
                         variant="light"
                         color="violet"
                         leftSection={<IconTestPipe size={12} />}
-                        style={isViewMode && onEntityClick ? { cursor: 'pointer' } : undefined}
-                        onClick={isViewMode && onEntityClick ? () => onEntityClick(relationship.lab_result_id) : undefined}
+                        style={
+                          isViewMode && onEntityClick
+                            ? { cursor: 'pointer' }
+                            : undefined
+                        }
+                        onClick={
+                          isViewMode && onEntityClick
+                            ? () => onEntityClick(relationship.lab_result_id)
+                            : undefined
+                        }
                       >
-                        {labResult?.test_name || `Lab Result ID: ${relationship.lab_result_id}`}
+                        {labResult?.test_name ||
+                          `Lab Result ID: ${relationship.lab_result_id}`}
                       </Badge>
                       {relationship.purpose && (
-                        <Badge variant="outline" size="sm" color={getPurposeColor(relationship.purpose)}>
-                          {getOptionLabel(relationship.purpose, PURPOSE_OPTIONS)}
+                        <Badge
+                          variant="outline"
+                          size="sm"
+                          color={getPurposeColor(relationship.purpose)}
+                        >
+                          {getOptionLabel(
+                            relationship.purpose,
+                            PURPOSE_OPTIONS
+                          )}
                         </Badge>
                       )}
                       {relationship.expected_frequency && (
@@ -167,8 +193,12 @@ function TreatmentLabResultRelationships({
 
                     {(labResult?.completed_date || labResult?.ordered_date) && (
                       <Text size="sm" c="dimmed">
-                        <strong>{t('shared:labels.date')}:</strong> {formatDateDisplay(labResult.completed_date || labResult.ordered_date)}
-                        {labResult?.labs_result && ` | Result: ${labResult.labs_result}`}
+                        <strong>{t('shared:labels.date')}:</strong>{' '}
+                        {formatDateDisplay(
+                          labResult.completed_date || labResult.ordered_date
+                        )}
+                        {labResult?.labs_result &&
+                          ` | Result: ${labResult.labs_result}`}
                       </Text>
                     )}
 
@@ -179,7 +209,9 @@ function TreatmentLabResultRelationships({
                           placeholder="Purpose"
                           data={PURPOSE_OPTIONS}
                           value={editingRelationship?.purpose || ''}
-                          onChange={(value) => updateEditingRelationship('purpose', value)}
+                          onChange={value =>
+                            updateEditingRelationship('purpose', value)
+                          }
                           clearable
                           comboboxProps={{ withinPortal: true, zIndex: 4000 }}
                         />
@@ -187,13 +219,23 @@ function TreatmentLabResultRelationships({
                           size="xs"
                           placeholder="Expected frequency (e.g., Monthly)"
                           value={editingRelationship?.expected_frequency || ''}
-                          onChange={(e) => updateEditingRelationship('expected_frequency', e.target.value)}
+                          onChange={e =>
+                            updateEditingRelationship(
+                              'expected_frequency',
+                              e.target.value
+                            )
+                          }
                         />
                         <Textarea
                           size="xs"
                           placeholder="Relevance note"
                           value={editingRelationship?.relevance_note || ''}
-                          onChange={(e) => updateEditingRelationship('relevance_note', e.target.value)}
+                          onChange={e =>
+                            updateEditingRelationship(
+                              'relevance_note',
+                              e.target.value
+                            )
+                          }
                           autosize
                           minRows={2}
                         />
@@ -210,11 +252,15 @@ function TreatmentLabResultRelationships({
                   {!isViewMode && (
                     <RelationshipRowActions
                       isEditing={isEditing}
-                      onSave={() => handleEditRelationship(relationship.id, {
-                        purpose: editingRelationship?.purpose || null,
-                        expected_frequency: editingRelationship?.expected_frequency || null,
-                        relevance_note: editingRelationship?.relevance_note || null,
-                      })}
+                      onSave={() =>
+                        handleEditRelationship(relationship.id, {
+                          purpose: editingRelationship?.purpose || null,
+                          expected_frequency:
+                            editingRelationship?.expected_frequency || null,
+                          relevance_note:
+                            editingRelationship?.relevance_note || null,
+                        })
+                      }
                       onCancel={cancelEditing}
                       onEdit={() => startEditing(relationship, EDIT_FIELDS)}
                       onDelete={() => handleDeleteRelationship(relationship.id)}
@@ -227,7 +273,10 @@ function TreatmentLabResultRelationships({
           </Stack>
         ) : (
           <RelationshipEmptyState
-            message={t('labels.noLabResultsLinked', 'No lab results linked to this treatment')}
+            message={t(
+              'labels.noLabResultsLinked',
+              'No lab results linked to this treatment'
+            )}
             description="Link lab results to track baseline, monitoring, and outcome tests."
             isViewMode={isViewMode}
           />
@@ -253,7 +302,7 @@ function TreatmentLabResultRelationships({
             placeholder="Choose lab results to link"
             data={availableOptions}
             value={newRelationship.lab_result_ids}
-            onChange={(values) => updateNewRelationship('lab_result_ids', values)}
+            onChange={values => updateNewRelationship('lab_result_ids', values)}
             searchable
             clearable
             required
@@ -267,7 +316,9 @@ function TreatmentLabResultRelationships({
                 placeholder="Select purpose"
                 data={PURPOSE_OPTIONS}
                 value={newRelationship.purpose}
-                onChange={(value) => updateNewRelationship('purpose', value || '')}
+                onChange={value =>
+                  updateNewRelationship('purpose', value || '')
+                }
                 clearable
                 comboboxProps={{ withinPortal: true, zIndex: 4000 }}
                 description="Why this lab is part of the treatment plan"
@@ -277,7 +328,9 @@ function TreatmentLabResultRelationships({
                 label="Expected Frequency (Optional)"
                 placeholder="e.g., Monthly, Weekly, As needed"
                 value={newRelationship.expected_frequency}
-                onChange={(e) => updateNewRelationship('expected_frequency', e.target.value)}
+                onChange={e =>
+                  updateNewRelationship('expected_frequency', e.target.value)
+                }
                 description="How often this test should be done"
               />
             </>
@@ -287,7 +340,9 @@ function TreatmentLabResultRelationships({
             label="Relevance Note (Optional)"
             placeholder="Describe how this lab result relates to the treatment"
             value={newRelationship.relevance_note}
-            onChange={(e) => updateNewRelationship('relevance_note', e.target.value)}
+            onChange={e =>
+              updateNewRelationship('relevance_note', e.target.value)
+            }
             autosize
             minRows={2}
           />
@@ -297,7 +352,11 @@ function TreatmentLabResultRelationships({
             onSubmit={handleAddRelationship}
             loading={loading}
             disabled={selectedCount === 0}
-            submitLabel={selectedCount > 1 ? `Link ${selectedCount} Lab Results` : 'Link Lab Result'}
+            submitLabel={
+              selectedCount > 1
+                ? `Link ${selectedCount} Lab Results`
+                : 'Link Lab Result'
+            }
           />
         </RelationshipAddModal>
       </Stack>

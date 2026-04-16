@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   Badge,
   Text,
@@ -10,17 +9,14 @@ import {
   Button,
   Menu,
   ActionIcon,
-  Tooltip
 } from '@mantine/core';
 import {
   IconChevronDown,
   IconChevronUp,
   IconStethoscope,
-  IconEdit,
-  IconTrash,
   IconDots,
   IconShare,
-  IconX
+  IconX,
 } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import { useMantineColorScheme } from '@mantine/core';
@@ -60,7 +56,7 @@ const FamilyHistoryCard = ({
   onBulkToggle,
   disableActions = false,
   disableActionsTooltip,
-  onError
+  onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { colorScheme } = useMantineColorScheme();
@@ -78,7 +74,7 @@ const FamilyHistoryCard = ({
     }
   };
 
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     switch (severity?.toLowerCase()) {
       case 'mild':
         return 'green';
@@ -93,7 +89,7 @@ const FamilyHistoryCard = ({
     }
   };
 
-  const getConditionTypeColor = (type) => {
+  const getConditionTypeColor = type => {
     switch (type?.toLowerCase()) {
       case 'cardiovascular':
         return 'red';
@@ -126,7 +122,7 @@ const FamilyHistoryCard = ({
     }
   };
 
-  const handleViewClick = (e) => {
+  const handleViewClick = e => {
     // Handle both event object and direct calls
     if (e && e.stopPropagation) {
       e.stopPropagation();
@@ -138,7 +134,7 @@ const FamilyHistoryCard = ({
     }
   };
 
-  const handleEditClick = (e) => {
+  const handleEditClick = e => {
     // Handle both event object and direct calls
     if (e && e.stopPropagation) {
       e.stopPropagation();
@@ -147,7 +143,7 @@ const FamilyHistoryCard = ({
       if (member.is_shared) {
         logger.warn('Attempted to edit shared family member', {
           memberId: member.id,
-          component: 'FamilyHistoryCard'
+          component: 'FamilyHistoryCard',
         });
         return;
       }
@@ -157,7 +153,7 @@ const FamilyHistoryCard = ({
     }
   };
 
-  const handleDeleteClick = (e) => {
+  const handleDeleteClick = e => {
     // Handle both event object and direct calls
     if (e && e.stopPropagation) {
       e.stopPropagation();
@@ -166,7 +162,7 @@ const FamilyHistoryCard = ({
       if (member.is_shared) {
         logger.warn('Attempted to delete shared family member', {
           memberId: member.id,
-          component: 'FamilyHistoryCard'
+          component: 'FamilyHistoryCard',
         });
         return;
       }
@@ -176,7 +172,7 @@ const FamilyHistoryCard = ({
     }
   };
 
-  const handleAddConditionClick = (e) => {
+  const handleAddConditionClick = e => {
     // Handle both event object and direct calls
     if (e && e.stopPropagation) {
       e.stopPropagation();
@@ -221,7 +217,7 @@ const FamilyHistoryCard = ({
     }
   };
 
-  const handleShareClick = (e) => {
+  const handleShareClick = e => {
     // Menu.Item onClick may not always provide an event object
     if (e && e.stopPropagation) {
       e.stopPropagation();
@@ -241,32 +237,36 @@ const FamilyHistoryCard = ({
   }
 
   try {
-    const isExpanded = expandedMembers?.has ? expandedMembers.has(member.id) : false;
+    const isExpanded = expandedMembers?.has
+      ? expandedMembers.has(member.id)
+      : false;
     const conditionCount = member.family_conditions?.length || 0;
     const age = calculateAge(member.birth_year, member.death_year);
     const isSelectable = bulkSelectionMode && !member.is_shared;
 
     // Generate badges for BaseMedicalCard
     const badges = [];
-    
+
     if (member.relationship) {
       badges.push({
         label: member.relationship.replace('_', ' '),
-        color: 'blue'
+        color: 'blue',
       });
     }
 
     if (member.is_shared) {
       badges.push({
-        label: bulkSelectionMode ? t('familyHistory.card.notSelectable', 'Not Selectable') : t('shared:categories.shared', 'Shared'),
-        color: bulkSelectionMode ? 'gray' : 'blue'
+        label: bulkSelectionMode
+          ? t('familyHistory.card.notSelectable', 'Not Selectable')
+          : t('shared:categories.shared', 'Shared'),
+        color: bulkSelectionMode ? 'gray' : 'blue',
       });
     }
 
     if (isSelected) {
       badges.push({
         label: t('familyHistory.card.selected', 'Selected'),
-        color: 'green'
+        color: 'green',
       });
     }
 
@@ -276,48 +276,54 @@ const FamilyHistoryCard = ({
     if (age) {
       fields.push({
         label: t('familyHistory.card.age', 'Age'),
-        value: `${age} ${t('familyHistory.card.years', 'years')}${member.is_deceased ? ' (' + t('familyHistory.card.deceased', 'Deceased') + ')' : ''}`
+        value: `${age} ${t('familyHistory.card.years', 'years')}${member.is_deceased ? ' (' + t('familyHistory.card.deceased', 'Deceased') + ')' : ''}`,
       });
     }
 
     if (member.gender) {
       fields.push({
         label: t('shared:fields.gender', 'Gender'),
-        value: member.gender
+        value: member.gender,
       });
     }
 
     if (member.birth_year) {
       fields.push({
         label: t('familyHistory.card.birthYear', 'Birth Year'),
-        value: member.birth_year
+        value: member.birth_year,
       });
     }
 
     if (member.is_deceased && member.death_year) {
       fields.push({
         label: t('familyHistory.card.deathYear', 'Death Year'),
-        value: member.death_year
+        value: member.death_year,
       });
     }
 
     if (member.is_shared && member.shared_by) {
       fields.push({
         label: t('familyHistory.card.sharedBy', 'Shared By'),
-        value: member.shared_by.name || t('shared:labels.unknown', 'Unknown')
+        value: member.shared_by.name || t('shared:labels.unknown', 'Unknown'),
       });
     }
 
     // Custom content for conditions
     const conditionsContent = (
       <Stack gap="xs">
-        <Group justify="space-between" style={{ cursor: 'pointer' }} onClick={handleCardClick}>
+        <Group
+          justify="space-between"
+          style={{ cursor: 'pointer' }}
+          onClick={handleCardClick}
+        >
           <Badge
             variant="light"
             size="sm"
             color={conditionCount > 0 ? 'blue' : 'gray'}
           >
-            {t('shared:labels.countConditions', '{{count}} Condition(s)', { count: conditionCount })}
+            {t('shared:labels.countConditions', '{{count}} Condition(s)', {
+              count: conditionCount,
+            })}
           </Badge>
           {isExpanded ? (
             <IconChevronUp size={16} />
@@ -329,7 +335,9 @@ const FamilyHistoryCard = ({
         <Collapse in={isExpanded}>
           <Divider mb="md" />
           <Group justify="space-between" mb="md">
-            <Text fw={500}>{t('shared:labels.medicalConditions', 'Medical Conditions')}</Text>
+            <Text fw={500}>
+              {t('shared:labels.medicalConditions', 'Medical Conditions')}
+            </Text>
             {!member.is_shared && !disableActions && (
               <Button
                 size="xs"
@@ -345,7 +353,10 @@ const FamilyHistoryCard = ({
           {conditionCount === 0 ? (
             <Box style={{ textAlign: 'center', padding: '1rem 0' }}>
               <Text size="sm" c="dimmed">
-                {t('familyHistory.card.noConditionsRecorded', 'No medical conditions recorded')}
+                {t(
+                  'familyHistory.card.noConditionsRecorded',
+                  'No medical conditions recorded'
+                )}
               </Text>
             </Box>
           ) : (
@@ -374,7 +385,9 @@ const FamilyHistoryCard = ({
                           <Badge
                             size="xs"
                             variant="outline"
-                            color={getConditionTypeColor(condition.condition_type)}
+                            color={getConditionTypeColor(
+                              condition.condition_type
+                            )}
                           >
                             {condition.condition_type.replace('_', ' ')}
                           </Badge>
@@ -383,7 +396,11 @@ const FamilyHistoryCard = ({
 
                       {condition.diagnosis_age && (
                         <Text size="xs" c="dimmed">
-                          {t('familyHistory.card.diagnosedAtAge', 'Diagnosed at age {{age}}', { age: condition.diagnosis_age })}
+                          {t(
+                            'familyHistory.card.diagnosedAtAge',
+                            'Diagnosed at age {{age}}',
+                            { age: condition.diagnosis_age }
+                          )}
                         </Text>
                       )}
 
@@ -399,7 +416,7 @@ const FamilyHistoryCard = ({
                         <Button
                           size="xs"
                           variant="filled"
-                          onClick={(e) => handleEditConditionClick(e, condition)}
+                          onClick={e => handleEditConditionClick(e, condition)}
                         >
                           {t('shared:labels.edit', 'Edit')}
                         </Button>
@@ -407,7 +424,9 @@ const FamilyHistoryCard = ({
                           size="xs"
                           variant="filled"
                           color="red"
-                          onClick={(e) => handleDeleteConditionClick(e, condition.id)}
+                          onClick={e =>
+                            handleDeleteConditionClick(e, condition.id)
+                          }
                         >
                           {t('buttons.delete', 'Delete')}
                         </Button>
@@ -427,7 +446,7 @@ const FamilyHistoryCard = ({
       <Group justify="flex-end" gap="xs" mt="sm">
         <Menu shadow="md" width={150} position="bottom-end">
           <Menu.Target>
-            <ActionIcon variant="light" onClick={(e) => e.stopPropagation()}>
+            <ActionIcon variant="light" onClick={e => e.stopPropagation()}>
               <IconDots size={16} />
             </ActionIcon>
           </Menu.Target>
@@ -448,7 +467,10 @@ const FamilyHistoryCard = ({
                 color="orange"
                 disabled
               >
-                {t('familyHistory.card.cannotEditSharedMember', 'Cannot Edit Shared Member')}
+                {t(
+                  'familyHistory.card.cannotEditSharedMember',
+                  'Cannot Edit Shared Member'
+                )}
               </Menu.Item>
             )}
           </Menu.Dropdown>
@@ -465,18 +487,24 @@ const FamilyHistoryCard = ({
           transition: 'all 0.2s ease',
           border: isSelected ? '2px solid var(--mantine-color-blue-6)' : 'none',
           borderRadius: '8px',
-          backgroundColor: isSelected ? 'var(--mantine-color-blue-light)' : 'transparent',
+          backgroundColor: isSelected
+            ? 'var(--mantine-color-blue-light)'
+            : 'transparent',
         }}
         onClick={isSelectable ? handleCardClick : undefined}
-        onMouseEnter={(e) => {
+        onMouseEnter={e => {
           if (isSelectable) {
-            e.currentTarget.style.transform = isSelected ? 'scale(1.02)' : 'scale(1.01)';
+            e.currentTarget.style.transform = isSelected
+              ? 'scale(1.02)'
+              : 'scale(1.01)';
             e.currentTarget.style.opacity = '1';
           }
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={e => {
           if (isSelectable) {
-            e.currentTarget.style.transform = isSelected ? 'scale(1.02)' : 'scale(1)';
+            e.currentTarget.style.transform = isSelected
+              ? 'scale(1.02)'
+              : 'scale(1)';
             e.currentTarget.style.opacity = isSelected ? '1' : '0.8';
           }
         }}

@@ -54,7 +54,7 @@ class ApiService {
     // Fallback URLs for better Docker compatibility
     // Use same environment variable for fallback, defaulting to relative path
     this.fallbackURL = isDevelopment()
-      ? baseURL  // In development, use same URL for fallback
+      ? baseURL // In development, use same URL for fallback
       : '/api/v1'; // In production, use relative path
   }
 
@@ -287,15 +287,10 @@ class ApiService {
         ? { patient_id: patientId }
         : {};
 
-    try {
-      const result = await this.get('/patients/recent-activity/', {
-        params,
-        signal,
-      });
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    return this.get('/patients/recent-activity/', {
+      params,
+      signal,
+    });
   }
 
   getDashboardStats(patientId, signal) {
@@ -642,11 +637,15 @@ class ApiService {
               withCloseButton: true,
             });
           })
-          .catch((err) => {
-            logger.warn('background_notification_import_failed', 'Failed to import Mantine notifications for background upload', {
-              error: err.message,
-              component: 'apiService'
-            });
+          .catch(err => {
+            logger.warn(
+              'background_notification_import_failed',
+              'Failed to import Mantine notifications for background upload',
+              {
+                error: err.message,
+                component: 'apiService',
+              }
+            );
           });
 
         logger.info(
@@ -779,8 +778,6 @@ class ApiService {
       // Get user-friendly error message based on error type
       const getUserFriendlyErrorMessage = (taskResult, fileName) => {
         const errorType = taskResult?.error_type;
-        const originalError = taskResult?.result || 'Upload failed';
-
         switch (errorType) {
           case 'duplicate':
             return `"${fileName}" already exists in Paperless. This document appears to be a duplicate.`;
@@ -838,9 +835,8 @@ class ApiService {
 
           try {
             // Import and call fallback search
-            const { searchDocumentByFilenameAndTime } = await import(
-              './paperlessApi'
-            );
+            const { searchDocumentByFilenameAndTime } =
+              await import('./paperlessApi');
             const fallbackDocumentId = await searchDocumentByFilenameAndTime(
               file.name
             );
@@ -947,7 +943,7 @@ class ApiService {
   }
 
   // View file in new tab (generic - file ID is enough)
-  async viewEntityFile(fileId, fileName, signal) {
+  async viewEntityFile(fileId, fileName, _signal) {
     try {
       logger.info('api_view_entity_file', 'Opening entity file for viewing', {
         fileId,
@@ -1409,7 +1405,9 @@ class ApiService {
     return this.get(`/encounters/${encounterId}/lab-results`, { signal });
   }
   linkEncounterLabResult(encounterId, data, signal) {
-    return this.post(`/encounters/${encounterId}/lab-results`, data, { signal });
+    return this.post(`/encounters/${encounterId}/lab-results`, data, {
+      signal,
+    });
   }
   linkEncounterLabResultsBulk(encounterId, data, signal) {
     return this.post(`/encounters/${encounterId}/lab-results/bulk`, data, {
@@ -1793,14 +1791,20 @@ class ApiService {
   }
 
   linkInjuryMedication(injuryId, medicationId, relevanceNote = null, signal) {
-    return this.post(`/injuries/${injuryId}/medications`, {
-      medication_id: medicationId,
-      relevance_note: relevanceNote,
-    }, { signal });
+    return this.post(
+      `/injuries/${injuryId}/medications`,
+      {
+        medication_id: medicationId,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   unlinkInjuryMedication(injuryId, medicationId, signal) {
-    return this.delete(`/injuries/${injuryId}/medications/${medicationId}`, { signal });
+    return this.delete(`/injuries/${injuryId}/medications/${medicationId}`, {
+      signal,
+    });
   }
 
   // Injury-Condition relationship methods
@@ -1809,14 +1813,20 @@ class ApiService {
   }
 
   linkInjuryCondition(injuryId, conditionId, relevanceNote = null, signal) {
-    return this.post(`/injuries/${injuryId}/conditions`, {
-      condition_id: conditionId,
-      relevance_note: relevanceNote,
-    }, { signal });
+    return this.post(
+      `/injuries/${injuryId}/conditions`,
+      {
+        condition_id: conditionId,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   unlinkInjuryCondition(injuryId, conditionId, signal) {
-    return this.delete(`/injuries/${injuryId}/conditions/${conditionId}`, { signal });
+    return this.delete(`/injuries/${injuryId}/conditions/${conditionId}`, {
+      signal,
+    });
   }
 
   // Injury-Treatment relationship methods
@@ -1825,14 +1835,20 @@ class ApiService {
   }
 
   linkInjuryTreatment(injuryId, treatmentId, relevanceNote = null, signal) {
-    return this.post(`/injuries/${injuryId}/treatments`, {
-      treatment_id: treatmentId,
-      relevance_note: relevanceNote,
-    }, { signal });
+    return this.post(
+      `/injuries/${injuryId}/treatments`,
+      {
+        treatment_id: treatmentId,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   unlinkInjuryTreatment(injuryId, treatmentId, signal) {
-    return this.delete(`/injuries/${injuryId}/treatments/${treatmentId}`, { signal });
+    return this.delete(`/injuries/${injuryId}/treatments/${treatmentId}`, {
+      signal,
+    });
   }
 
   // Injury-Procedure relationship methods
@@ -1841,14 +1857,20 @@ class ApiService {
   }
 
   linkInjuryProcedure(injuryId, procedureId, relevanceNote = null, signal) {
-    return this.post(`/injuries/${injuryId}/procedures`, {
-      procedure_id: procedureId,
-      relevance_note: relevanceNote,
-    }, { signal });
+    return this.post(
+      `/injuries/${injuryId}/procedures`,
+      {
+        procedure_id: procedureId,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   unlinkInjuryProcedure(injuryId, procedureId, signal) {
-    return this.delete(`/injuries/${injuryId}/procedures/${procedureId}`, { signal });
+    return this.delete(`/injuries/${injuryId}/procedures/${procedureId}`, {
+      signal,
+    });
   }
 
   // Symptom methods - DEPRECATED
@@ -1900,22 +1922,40 @@ class ApiService {
   }
 
   linkTreatmentMedication(treatmentId, data, signal) {
-    return this.post(`/treatments/${treatmentId}/medications`, data, { signal });
+    return this.post(`/treatments/${treatmentId}/medications`, data, {
+      signal,
+    });
   }
 
-  linkTreatmentMedicationsBulk(treatmentId, medicationIds, relevanceNote = null, signal) {
-    return this.post(`/treatments/${treatmentId}/medications/bulk`, {
-      medication_ids: medicationIds,
-      relevance_note: relevanceNote,
-    }, { signal });
+  linkTreatmentMedicationsBulk(
+    treatmentId,
+    medicationIds,
+    relevanceNote = null,
+    signal
+  ) {
+    return this.post(
+      `/treatments/${treatmentId}/medications/bulk`,
+      {
+        medication_ids: medicationIds,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   updateTreatmentMedication(treatmentId, relationshipId, data, signal) {
-    return this.put(`/treatments/${treatmentId}/medications/${relationshipId}`, data, { signal });
+    return this.put(
+      `/treatments/${treatmentId}/medications/${relationshipId}`,
+      data,
+      { signal }
+    );
   }
 
   unlinkTreatmentMedication(treatmentId, relationshipId, signal) {
-    return this.delete(`/treatments/${treatmentId}/medications/${relationshipId}`, { signal });
+    return this.delete(
+      `/treatments/${treatmentId}/medications/${relationshipId}`,
+      { signal }
+    );
   }
 
   // Treatment-Encounter relationship methods
@@ -1927,19 +1967,35 @@ class ApiService {
     return this.post(`/treatments/${treatmentId}/encounters`, data, { signal });
   }
 
-  linkTreatmentEncountersBulk(treatmentId, encounterIds, relevanceNote = null, signal) {
-    return this.post(`/treatments/${treatmentId}/encounters/bulk`, {
-      encounter_ids: encounterIds,
-      relevance_note: relevanceNote,
-    }, { signal });
+  linkTreatmentEncountersBulk(
+    treatmentId,
+    encounterIds,
+    relevanceNote = null,
+    signal
+  ) {
+    return this.post(
+      `/treatments/${treatmentId}/encounters/bulk`,
+      {
+        encounter_ids: encounterIds,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   updateTreatmentEncounter(treatmentId, relationshipId, data, signal) {
-    return this.put(`/treatments/${treatmentId}/encounters/${relationshipId}`, data, { signal });
+    return this.put(
+      `/treatments/${treatmentId}/encounters/${relationshipId}`,
+      data,
+      { signal }
+    );
   }
 
   unlinkTreatmentEncounter(treatmentId, relationshipId, signal) {
-    return this.delete(`/treatments/${treatmentId}/encounters/${relationshipId}`, { signal });
+    return this.delete(
+      `/treatments/${treatmentId}/encounters/${relationshipId}`,
+      { signal }
+    );
   }
 
   // Treatment-LabResult relationship methods
@@ -1948,23 +2004,42 @@ class ApiService {
   }
 
   linkTreatmentLabResult(treatmentId, data, signal) {
-    return this.post(`/treatments/${treatmentId}/lab-results`, data, { signal });
+    return this.post(`/treatments/${treatmentId}/lab-results`, data, {
+      signal,
+    });
   }
 
-  linkTreatmentLabResultsBulk(treatmentId, labResultIds, purpose = null, relevanceNote = null, signal) {
-    return this.post(`/treatments/${treatmentId}/lab-results/bulk`, {
-      lab_result_ids: labResultIds,
-      purpose: purpose,
-      relevance_note: relevanceNote,
-    }, { signal });
+  linkTreatmentLabResultsBulk(
+    treatmentId,
+    labResultIds,
+    purpose = null,
+    relevanceNote = null,
+    signal
+  ) {
+    return this.post(
+      `/treatments/${treatmentId}/lab-results/bulk`,
+      {
+        lab_result_ids: labResultIds,
+        purpose: purpose,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   updateTreatmentLabResult(treatmentId, relationshipId, data, signal) {
-    return this.put(`/treatments/${treatmentId}/lab-results/${relationshipId}`, data, { signal });
+    return this.put(
+      `/treatments/${treatmentId}/lab-results/${relationshipId}`,
+      data,
+      { signal }
+    );
   }
 
   unlinkTreatmentLabResult(treatmentId, relationshipId, signal) {
-    return this.delete(`/treatments/${treatmentId}/lab-results/${relationshipId}`, { signal });
+    return this.delete(
+      `/treatments/${treatmentId}/lab-results/${relationshipId}`,
+      { signal }
+    );
   }
 
   // Treatment-Equipment relationship methods
@@ -1976,19 +2051,35 @@ class ApiService {
     return this.post(`/treatments/${treatmentId}/equipment`, data, { signal });
   }
 
-  linkTreatmentEquipmentBulk(treatmentId, equipmentIds, relevanceNote = null, signal) {
-    return this.post(`/treatments/${treatmentId}/equipment/bulk`, {
-      equipment_ids: equipmentIds,
-      relevance_note: relevanceNote,
-    }, { signal });
+  linkTreatmentEquipmentBulk(
+    treatmentId,
+    equipmentIds,
+    relevanceNote = null,
+    signal
+  ) {
+    return this.post(
+      `/treatments/${treatmentId}/equipment/bulk`,
+      {
+        equipment_ids: equipmentIds,
+        relevance_note: relevanceNote,
+      },
+      { signal }
+    );
   }
 
   updateTreatmentEquipment(treatmentId, relationshipId, data, signal) {
-    return this.put(`/treatments/${treatmentId}/equipment/${relationshipId}`, data, { signal });
+    return this.put(
+      `/treatments/${treatmentId}/equipment/${relationshipId}`,
+      data,
+      { signal }
+    );
   }
 
   unlinkTreatmentEquipment(treatmentId, relationshipId, signal) {
-    return this.delete(`/treatments/${treatmentId}/equipment/${relationshipId}`, { signal });
+    return this.delete(
+      `/treatments/${treatmentId}/equipment/${relationshipId}`,
+      { signal }
+    );
   }
 
   // Medical Equipment methods
@@ -2013,7 +2104,9 @@ class ApiService {
   }
 
   updateMedicalEquipment(equipmentId, equipmentData, signal) {
-    return this.put(`/medical-equipment/${equipmentId}`, equipmentData, { signal });
+    return this.put(`/medical-equipment/${equipmentId}`, equipmentData, {
+      signal,
+    });
   }
 
   deleteMedicalEquipment(equipmentId, signal) {
@@ -2386,7 +2479,9 @@ class ApiService {
         }
       );
 
-      return this.post('/custom-reports/trend-chart-counts', chartSelection, { signal });
+      return this.post('/custom-reports/trend-chart-counts', chartSelection, {
+        signal,
+      });
     } catch (error) {
       logger.error(
         'api_trend_chart_counts_error',

@@ -1,90 +1,88 @@
-import React from 'react';
-import { 
-  Text, 
-  Progress, 
-  Group, 
-  ThemeIcon, 
-  Stack,
-  Alert
-} from '@mantine/core';
-import { 
-  IconUpload, 
-  IconFileCheck, 
-  IconAlertTriangle, 
+import { Text, Progress, Group, ThemeIcon, Stack, Alert } from '@mantine/core';
+import {
+  IconUpload,
+  IconFileCheck,
+  IconAlertTriangle,
   IconClock,
   IconCloudUpload,
   IconFileX,
-  IconInfoCircle
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
 /**
  * PaperlessUploadStatus Component
- * 
+ *
  * Displays detailed upload status for Paperless-ngx document uploads
  * with appropriate icons, progress, and user-friendly messages.
  */
-const PaperlessUploadStatus = ({ 
-  status = 'pending', 
-  progress = 0, 
+const PaperlessUploadStatus = ({
+  status = 'pending',
+  progress = 0,
   fileName = '',
   message = '',
   isDuplicate = false,
   documentId = null,
   storageBackend = 'local',
-  showDetailedStatus = true
+  showDetailedStatus = true,
 }) => {
   const { t } = useTranslation('documents');
-  
+
   // Define status configurations
   const statusConfig = {
     pending: {
       icon: IconClock,
       color: 'gray',
       label: 'Pending',
-      description: 'Waiting to upload'
+      description: 'Waiting to upload',
     },
     uploading: {
       icon: IconUpload,
       color: 'blue',
       label: 'Uploading',
-      description: 'Uploading to server...'
+      description: 'Uploading to server...',
     },
     processing: {
       icon: IconCloudUpload,
       color: 'blue',
       label: 'Processing',
-      description: storageBackend === 'paperless' ? 'Processing in Paperless...' : 'Processing file...'
+      description:
+        storageBackend === 'paperless'
+          ? 'Processing in Paperless...'
+          : 'Processing file...',
     },
     completed: {
       icon: IconFileCheck,
       color: 'green',
       label: 'Completed',
-      description: isDuplicate ? 'Document already exists' : 'Upload successful'
+      description: isDuplicate
+        ? 'Document already exists'
+        : 'Upload successful',
     },
     failed: {
       icon: IconFileX,
       color: 'red',
       label: 'Failed',
-      description: 'Upload failed'
+      description: 'Upload failed',
     },
     duplicate: {
       icon: IconAlertTriangle,
       color: 'orange',
       label: 'Duplicate',
-      description: 'Document already exists in Paperless'
-    }
+      description: 'Document already exists in Paperless',
+    },
   };
 
   // Determine the display status
-  const displayStatus = isDuplicate && status === 'failed' ? 'duplicate' : status;
+  const displayStatus =
+    isDuplicate && status === 'failed' ? 'duplicate' : status;
   const config = statusConfig[displayStatus] || statusConfig.pending;
   const Icon = config.icon;
 
   // Generate detailed status message
   const getDetailedMessage = () => {
     if (message) return message;
-    
+
     if (storageBackend === 'paperless') {
       switch (status) {
         case 'uploading':
@@ -95,9 +93,9 @@ const PaperlessUploadStatus = ({
           if (isDuplicate) {
             return 'This document already exists in Paperless. Identical documents cannot be uploaded twice.';
           }
-          return documentId ? 
-            `Document successfully added to Paperless (ID: ${documentId})` :
-            'Document successfully uploaded to Paperless';
+          return documentId
+            ? `Document successfully added to Paperless (ID: ${documentId})`
+            : 'Document successfully uploaded to Paperless';
         case 'failed':
           if (isDuplicate) {
             return 'This document already exists in Paperless. Identical documents cannot be uploaded twice.';
@@ -123,7 +121,7 @@ const PaperlessUploadStatus = ({
   // Calculate progress for different states
   const getProgressValue = () => {
     if (progress > 0) return progress;
-    
+
     switch (status) {
       case 'pending':
         return 0;
@@ -168,14 +166,14 @@ const PaperlessUploadStatus = ({
     <Stack gap="xs">
       {/* Main status row */}
       <Group gap="xs" wrap="nowrap">
-        <ThemeIcon 
-          size="sm" 
-          color={config.color} 
+        <ThemeIcon
+          size="sm"
+          color={config.color}
           variant={status === 'completed' ? 'filled' : 'light'}
         >
           <Icon size={14} />
         </ThemeIcon>
-        
+
         <Stack gap={2} style={{ flex: 1 }}>
           <Group justify="space-between" gap="xs">
             <Text size="sm" fw={500}>
@@ -185,12 +183,12 @@ const PaperlessUploadStatus = ({
               {config.label}
             </Text>
           </Group>
-          
+
           {/* Progress bar for active uploads */}
           {(status === 'uploading' || status === 'processing') && (
-            <Progress 
-              value={progressValue} 
-              size="xs" 
+            <Progress
+              value={progressValue}
+              size="xs"
               color={config.color}
               animated={status === 'uploading' || status === 'processing'}
             />
@@ -206,12 +204,16 @@ const PaperlessUploadStatus = ({
       )}
 
       {/* Additional info for completed Paperless uploads */}
-      {status === 'completed' && storageBackend === 'paperless' && documentId && showDetailedStatus && (
-        <Text size="xs" c="dimmed" ml={28}>
-          {/* eslint-disable-next-line i18next/no-literal-string -- technical ID display */}
-          {'Document ID: '}{documentId}
-        </Text>
-      )}
+      {status === 'completed' &&
+        storageBackend === 'paperless' &&
+        documentId &&
+        showDetailedStatus && (
+          <Text size="xs" c="dimmed" ml={28}>
+            {/* eslint-disable-next-line i18next/no-literal-string -- technical ID display */}
+            {'Document ID: '}
+            {documentId}
+          </Text>
+        )}
 
       {/* Error details for failed uploads */}
       {status === 'failed' && !isDuplicate && showDetailedStatus && (
@@ -221,9 +223,7 @@ const PaperlessUploadStatus = ({
           size="sm"
           variant="light"
         >
-          <Text size="xs">
-            {detailedMessage}
-          </Text>
+          <Text size="xs">{detailedMessage}</Text>
         </Alert>
       )}
     </Stack>

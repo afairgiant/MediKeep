@@ -1,4 +1,3 @@
-import React from 'react';
 import { Stack, Text, List } from '@mantine/core';
 import i18n from '../i18n/config';
 
@@ -11,18 +10,18 @@ import i18n from '../i18n/config';
  * @param {Object} invitation - The invitation object
  * @returns {JSX.Element|null} - Rendered context details or null
  */
-export const renderFamilyHistoryContextDetails = (invitation) => {
+export const renderFamilyHistoryContextDetails = invitation => {
   if (!invitation?.context_data) return null;
-  
+
   const { context_data } = invitation;
-  
+
   if (invitation.invitation_type !== 'family_history_share') return null;
-  
+
   // Handle bulk invitations
   if (context_data.is_bulk_invite && context_data.family_members) {
     return renderBulkInvitationDetails(context_data);
   }
-  
+
   // Handle single family member invitations
   return renderSingleInvitationDetails(context_data);
 };
@@ -32,25 +31,40 @@ export const renderFamilyHistoryContextDetails = (invitation) => {
  * @param {Object} contextData - The context data from invitation
  * @returns {JSX.Element} - Rendered bulk invitation details
  */
-export const renderBulkInvitationDetails = (contextData) => {
+export const renderBulkInvitationDetails = contextData => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
+      <Text size="sm" fw={500}>
+        {i18n.t('invitations:response.sharingDetails')}
+      </Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.familyMembers')}</Text> {i18n.t('invitations:utils.familyMemberCount', { count: contextData.family_member_count })}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.familyMembers')}
+          </Text>{' '}
+          {i18n.t('invitations:utils.familyMemberCount', {
+            count: contextData.family_member_count,
+          })}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.accessLevel')}
+          </Text>{' '}
+          {contextData.permission_level}
         </List.Item>
         {contextData.sharing_note && (
           <List.Item>
-            <Text span fw={500}>{i18n.t('invitations:response.note')}</Text> {contextData.sharing_note}
+            <Text span fw={500}>
+              {i18n.t('invitations:response.note')}
+            </Text>{' '}
+            {contextData.sharing_note}
           </List.Item>
         )}
       </List>
       <Stack gap="xs" mt="sm">
-        <Text size="xs" fw={500} c="dimmed">{i18n.t('invitations:response.familyMembers')}</Text>
+        <Text size="xs" fw={500} c="dimmed">
+          {i18n.t('invitations:response.familyMembers')}
+        </Text>
         <List size="xs" spacing="xs">
           {contextData.family_members.map((member, index) => (
             <List.Item key={index}>
@@ -68,23 +82,37 @@ export const renderBulkInvitationDetails = (contextData) => {
  * @param {Object} contextData - The context data from invitation
  * @returns {JSX.Element} - Rendered single invitation details
  */
-export const renderSingleInvitationDetails = (contextData) => {
+export const renderSingleInvitationDetails = contextData => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
+      <Text size="sm" fw={500}>
+        {i18n.t('invitations:response.sharingDetails')}
+      </Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.familyMember')}</Text> {contextData.family_member_name}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.familyMember')}
+          </Text>{' '}
+          {contextData.family_member_name}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.relationship')}</Text> {contextData.family_member_relationship}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.relationship')}
+          </Text>{' '}
+          {contextData.family_member_relationship}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.accessLevel')}
+          </Text>{' '}
+          {contextData.permission_level}
         </List.Item>
         {contextData.sharing_note && (
           <List.Item>
-            <Text span fw={500}>{i18n.t('invitations:response.note')}</Text> {contextData.sharing_note}
+            <Text span fw={500}>
+              {i18n.t('invitations:response.note')}
+            </Text>{' '}
+            {contextData.sharing_note}
           </List.Item>
         )}
       </List>
@@ -97,7 +125,7 @@ export const renderSingleInvitationDetails = (contextData) => {
  * @param {Object} invitation - The invitation object
  * @returns {boolean} - True if it's a bulk invitation
  */
-export const isBulkInvitation = (invitation) => {
+export const isBulkInvitation = invitation => {
   return invitation?.context_data?.is_bulk_invite === true;
 };
 
@@ -106,9 +134,13 @@ export const isBulkInvitation = (invitation) => {
  * @param {Object} invitation - The invitation object
  * @returns {number} - Number of family members
  */
-export const getFamilyMemberCount = (invitation) => {
+export const getFamilyMemberCount = invitation => {
   if (isBulkInvitation(invitation)) {
-    return invitation.context_data?.family_member_count || invitation.context_data?.family_members?.length || 0;
+    return (
+      invitation.context_data?.family_member_count ||
+      invitation.context_data?.family_members?.length ||
+      0
+    );
   }
   return 1; // Single invitation
 };
@@ -118,7 +150,7 @@ export const getFamilyMemberCount = (invitation) => {
  * @param {Object} invitation - The invitation object
  * @returns {string} - Formatted summary text
  */
-export const formatInvitationSummary = (invitation) => {
+export const formatInvitationSummary = invitation => {
   if (!invitation) return '';
 
   if (invitation.invitation_type === 'patient_share') {
@@ -145,7 +177,7 @@ export const formatInvitationSummary = (invitation) => {
  * @param {Object} invitation - The invitation object
  * @returns {JSX.Element|null} - Rendered context details or null
  */
-export const renderPatientShareContextDetails = (invitation) => {
+export const renderPatientShareContextDetails = invitation => {
   if (!invitation?.context_data) return null;
 
   const { context_data } = invitation;
@@ -164,30 +196,43 @@ export const renderPatientShareContextDetails = (invitation) => {
  * @param {Object} contextData - The context data from invitation
  * @returns {JSX.Element} - Rendered bulk patient share details
  */
-export const renderBulkPatientShareDetails = (contextData) => {
+export const renderBulkPatientShareDetails = contextData => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
+      <Text size="sm" fw={500}>
+        {i18n.t('invitations:response.sharingDetails')}
+      </Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.patients')}</Text> {i18n.t('invitations:utils.patientCount', { count: contextData.patient_count })}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.patients')}
+          </Text>{' '}
+          {i18n.t('invitations:utils.patientCount', {
+            count: contextData.patient_count,
+          })}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.accessLevel')}
+          </Text>{' '}
+          {contextData.permission_level}
         </List.Item>
         {contextData.message && (
           <List.Item>
-            <Text span fw={500}>{i18n.t('invitations:response.message')}</Text> {contextData.message}
+            <Text span fw={500}>
+              {i18n.t('invitations:response.message')}
+            </Text>{' '}
+            {contextData.message}
           </List.Item>
         )}
       </List>
       <Stack gap="xs" mt="sm">
-        <Text size="xs" fw={500} c="dimmed">{i18n.t('invitations:response.patients')}</Text>
+        <Text size="xs" fw={500} c="dimmed">
+          {i18n.t('invitations:response.patients')}
+        </Text>
         <List size="xs" spacing="xs">
           {contextData.patients.map((patient, index) => (
-            <List.Item key={index}>
-              {patient.patient_name}
-            </List.Item>
+            <List.Item key={index}>{patient.patient_name}</List.Item>
           ))}
         </List>
       </Stack>
@@ -200,20 +245,31 @@ export const renderBulkPatientShareDetails = (contextData) => {
  * @param {Object} contextData - The context data from invitation
  * @returns {JSX.Element} - Rendered single patient share details
  */
-export const renderSinglePatientShareDetails = (contextData) => {
+export const renderSinglePatientShareDetails = contextData => {
   return (
     <Stack gap="xs">
-      <Text size="sm" fw={500}>{i18n.t('invitations:response.sharingDetails')}</Text>
+      <Text size="sm" fw={500}>
+        {i18n.t('invitations:response.sharingDetails')}
+      </Text>
       <List size="sm" spacing="xs">
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.patient')}</Text> {contextData.patient_name}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.patient')}
+          </Text>{' '}
+          {contextData.patient_name}
         </List.Item>
         <List.Item>
-          <Text span fw={500}>{i18n.t('invitations:response.accessLevel')}</Text> {contextData.permission_level}
+          <Text span fw={500}>
+            {i18n.t('invitations:response.accessLevel')}
+          </Text>{' '}
+          {contextData.permission_level}
         </List.Item>
         {contextData.message && (
           <List.Item>
-            <Text span fw={500}>{i18n.t('invitations:response.message')}</Text> {contextData.message}
+            <Text span fw={500}>
+              {i18n.t('invitations:response.message')}
+            </Text>{' '}
+            {contextData.message}
           </List.Item>
         )}
       </List>
@@ -226,11 +282,15 @@ export const renderSinglePatientShareDetails = (contextData) => {
  * @param {Object} invitation - The invitation object
  * @returns {number} - Number of patients
  */
-export const getPatientShareCount = (invitation) => {
+export const getPatientShareCount = invitation => {
   if (invitation?.invitation_type !== 'patient_share') return 0;
 
   if (isBulkInvitation(invitation)) {
-    return invitation.context_data?.patient_count || invitation.context_data?.patients?.length || 0;
+    return (
+      invitation.context_data?.patient_count ||
+      invitation.context_data?.patients?.length ||
+      0
+    );
   }
   return 1;
 };
@@ -240,7 +300,7 @@ export const getPatientShareCount = (invitation) => {
  * @param {Object} invitation - The invitation object
  * @returns {string} - Formatted summary text
  */
-export const formatPatientShareSummary = (invitation) => {
+export const formatPatientShareSummary = invitation => {
   if (!invitation?.context_data) return '';
 
   if (isBulkInvitation(invitation)) {
@@ -248,5 +308,8 @@ export const formatPatientShareSummary = (invitation) => {
     return i18n.t('invitations:utils.patientCount', { count });
   }
 
-  return invitation.context_data.patient_name || i18n.t('invitations:utils.patientDefault');
+  return (
+    invitation.context_data.patient_name ||
+    i18n.t('invitations:utils.patientDefault')
+  );
 };

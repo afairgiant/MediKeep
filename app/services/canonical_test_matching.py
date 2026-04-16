@@ -35,11 +35,14 @@ class CanonicalTestMatchingService:
         """Initialize the canonical test matching service and build lookup indices."""
         self._test_library: List[Dict[str, Any]] = get_tests()
         self._build_lookup_indices()
-        logger.info("Canonical test matching service initialized", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "canonical_matching_initialized",
-            LogFields.COUNT: len(self._test_library),
-        })
+        logger.info(
+            "Canonical test matching service initialized",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "canonical_matching_initialized",
+                LogFields.COUNT: len(self._test_library),
+            },
+        )
 
     def _build_lookup_indices(self):
         """
@@ -78,7 +81,7 @@ class CanonicalTestMatchingService:
     def _normalize_input(self, test_name: str) -> str:
         """Normalize test name by stripping whitespace and trailing punctuation."""
         normalized = test_name.strip()
-        return re.sub(r'[,;:]+$', '', normalized)
+        return re.sub(r"[,;:]+$", "", normalized)
 
     def find_canonical_match(self, test_name: str) -> Optional[str]:
         """
@@ -100,44 +103,56 @@ class CanonicalTestMatchingService:
         # Priority 1: test_name match
         canonical_name = self._by_test_name.get(normalized_input)
         if canonical_name:
-            logger.debug("Matched on test_name", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "canonical_match_found",
-                "input": test_name,
-                "canonical_name": canonical_name,
-                "match_type": "test_name",
-            })
+            logger.debug(
+                "Matched on test_name",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "canonical_match_found",
+                    "input": test_name,
+                    "canonical_name": canonical_name,
+                    "match_type": "test_name",
+                },
+            )
             return canonical_name
 
         # Priority 2: abbreviation match
         canonical_name = self._by_abbreviation.get(normalized_input)
         if canonical_name:
-            logger.debug("Matched on abbreviation", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "canonical_match_found",
-                "input": test_name,
-                "canonical_name": canonical_name,
-                "match_type": "abbreviation",
-            })
+            logger.debug(
+                "Matched on abbreviation",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "canonical_match_found",
+                    "input": test_name,
+                    "canonical_name": canonical_name,
+                    "match_type": "abbreviation",
+                },
+            )
             return canonical_name
 
         # Priority 3: common_name match
         canonical_name = self._by_common_name.get(normalized_input)
         if canonical_name:
-            logger.debug("Matched on common_name", extra={
-                LogFields.CATEGORY: "app",
-                LogFields.EVENT: "canonical_match_found",
-                "input": test_name,
-                "canonical_name": canonical_name,
-                "match_type": "common_name",
-            })
+            logger.debug(
+                "Matched on common_name",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "canonical_match_found",
+                    "input": test_name,
+                    "canonical_name": canonical_name,
+                    "match_type": "common_name",
+                },
+            )
             return canonical_name
 
-        logger.debug("No canonical match found", extra={
-            LogFields.CATEGORY: "app",
-            LogFields.EVENT: "canonical_match_not_found",
-            "input": test_name,
-        })
+        logger.debug(
+            "No canonical match found",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "canonical_match_not_found",
+                "input": test_name,
+            },
+        )
         return None
 
     def get_test_info(self, test_name: str) -> Optional[Dict[str, Any]]:

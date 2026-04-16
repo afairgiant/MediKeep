@@ -30,7 +30,7 @@ export const translateField = (fieldConfig, t) => {
 
   // Translate option labels
   if (translated.options && Array.isArray(translated.options)) {
-    translated.options = translated.options.map((option) => {
+    translated.options = translated.options.map(option => {
       if (option.labelKey) {
         return { ...option, label: t(option.labelKey) };
       }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -50,13 +49,17 @@ describe('AdminHeader', () => {
     fireEvent.click(homeBtn);
 
     expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
-    expect(mockNavigate).not.toHaveBeenCalledWith(expect.stringContaining('http'));
+    expect(mockNavigate).not.toHaveBeenCalledWith(
+      expect.stringContaining('http')
+    );
   });
 
   test('pressing Enter in search input navigates to /admin/data-models with encoded query', () => {
     renderAdminHeader();
 
-    const searchInput = screen.getByRole('textbox', { name: 'Search data models' });
+    const searchInput = screen.getByRole('textbox', {
+      name: 'Search data models',
+    });
     fireEvent.change(searchInput, { target: { value: 'users' } });
     fireEvent.keyDown(searchInput, { key: 'Enter' });
 
@@ -66,19 +69,25 @@ describe('AdminHeader', () => {
   test('clicking the search button navigates to /admin/data-models with encoded query', () => {
     renderAdminHeader();
 
-    const searchInput = screen.getByRole('textbox', { name: 'Search data models' });
+    const searchInput = screen.getByRole('textbox', {
+      name: 'Search data models',
+    });
     fireEvent.change(searchInput, { target: { value: 'medications' } });
 
     const searchBtn = screen.getByRole('button', { name: 'Search' });
     fireEvent.click(searchBtn);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/admin/data-models?q=medications');
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/admin/data-models?q=medications'
+    );
   });
 
   test('empty search query does not trigger navigation', () => {
     renderAdminHeader();
 
-    const searchInput = screen.getByRole('textbox', { name: 'Search data models' });
+    const searchInput = screen.getByRole('textbox', {
+      name: 'Search data models',
+    });
     fireEvent.change(searchInput, { target: { value: '' } });
     fireEvent.keyDown(searchInput, { key: 'Enter' });
 
@@ -88,7 +97,9 @@ describe('AdminHeader', () => {
   test('whitespace-only search query does not trigger navigation', () => {
     renderAdminHeader();
 
-    const searchInput = screen.getByRole('textbox', { name: 'Search data models' });
+    const searchInput = screen.getByRole('textbox', {
+      name: 'Search data models',
+    });
     fireEvent.change(searchInput, { target: { value: '   ' } });
     fireEvent.keyDown(searchInput, { key: 'Enter' });
 
@@ -98,7 +109,9 @@ describe('AdminHeader', () => {
   test('search input is cleared after a successful navigation', () => {
     renderAdminHeader();
 
-    const searchInput = screen.getByRole('textbox', { name: 'Search data models' });
+    const searchInput = screen.getByRole('textbox', {
+      name: 'Search data models',
+    });
     fireEvent.change(searchInput, { target: { value: 'labs' } });
     fireEvent.keyDown(searchInput, { key: 'Enter' });
 
@@ -127,7 +140,9 @@ describe('AdminHeader', () => {
     const onToggleSidebar = vi.fn();
     renderAdminHeader({ onToggleSidebar });
 
-    const sidebarToggleBtn = screen.getByRole('button', { name: /toggle sidebar/i });
+    const sidebarToggleBtn = screen.getByRole('button', {
+      name: /toggle sidebar/i,
+    });
     fireEvent.click(sidebarToggleBtn);
 
     expect(onToggleSidebar).toHaveBeenCalledTimes(1);
@@ -136,7 +151,9 @@ describe('AdminHeader', () => {
   test('sidebar toggle button does not throw when onToggleSidebar is not provided', () => {
     renderAdminHeader();
 
-    const sidebarToggleBtn = screen.getByRole('button', { name: /toggle sidebar/i });
+    const sidebarToggleBtn = screen.getByRole('button', {
+      name: /toggle sidebar/i,
+    });
     expect(() => fireEvent.click(sidebarToggleBtn)).not.toThrow();
   });
 
@@ -160,7 +177,9 @@ describe('AdminHeader', () => {
   test('search query with special characters is URL-encoded in navigation path', () => {
     renderAdminHeader();
 
-    const searchInput = screen.getByRole('textbox', { name: 'Search data models' });
+    const searchInput = screen.getByRole('textbox', {
+      name: 'Search data models',
+    });
     fireEvent.change(searchInput, { target: { value: 'blood & iron' } });
     fireEvent.keyDown(searchInput, { key: 'Enter' });
 
@@ -172,7 +191,9 @@ describe('AdminHeader', () => {
   test('non-Enter keys in search input do not trigger navigation', () => {
     renderAdminHeader();
 
-    const searchInput = screen.getByRole('textbox', { name: 'Search data models' });
+    const searchInput = screen.getByRole('textbox', {
+      name: 'Search data models',
+    });
     fireEvent.change(searchInput, { target: { value: 'test' } });
     fireEvent.keyDown(searchInput, { key: 'Tab' });
     fireEvent.keyDown(searchInput, { key: 'Escape' });

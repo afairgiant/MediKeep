@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import {
@@ -32,7 +32,10 @@ import {
 } from '@tabler/icons-react';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
-import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
+import {
+  parseDateInput,
+  formatDateInputChange,
+} from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import {
   EQUIPMENT_TYPE_OPTIONS,
@@ -62,13 +65,11 @@ const INITIAL_NEW_EQUIPMENT_STATE = {
   notes: '',
 };
 
-const EDIT_FIELDS = ['usage_frequency', 'specific_settings', 'relevance_note'];
-
 function TreatmentEquipmentRelationships({
   treatmentId,
   patientId,
   equipment,
-  practitioners,
+  practitioners: _practitioners,
   isViewMode = false,
   onRelationshipsChange,
   onEquipmentCreated,
@@ -76,7 +77,6 @@ function TreatmentEquipmentRelationships({
 }) {
   // Ensure equipment is always an array
   const safeEquipment = Array.isArray(equipment) ? equipment : [];
-  const safePractitioners = Array.isArray(practitioners) ? practitioners : [];
   const { t } = useTranslation(['common', 'errors', 'shared']);
   const { dateInputFormat } = useDateFormat();
 
@@ -84,7 +84,9 @@ function TreatmentEquipmentRelationships({
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingRelationship, setEditingRelationship] = useState(null);
-  const [newRelationship, setNewRelationship] = useState(INITIAL_RELATIONSHIP_STATE);
+  const [newRelationship, setNewRelationship] = useState(
+    INITIAL_RELATIONSHIP_STATE
+  );
   const [error, setError] = useState(null);
 
   // For inline equipment creation
@@ -107,36 +109,42 @@ function TreatmentEquipmentRelationships({
   }, []);
 
   // Fetch relationships
-  const fetchRelationships = useCallback(async (signal) => {
-    if (!treatmentId) return;
+  const fetchRelationships = useCallback(
+    async signal => {
+      if (!treatmentId) return;
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      const data = await apiService.getTreatmentEquipment(treatmentId, signal);
+      try {
+        const data = await apiService.getTreatmentEquipment(
+          treatmentId,
+          signal
+        );
 
-      if (signal?.aborted) return;
+        if (signal?.aborted) return;
 
-      setRelationships(data || []);
-      if (onRelationshipsChangeRef.current) {
-        onRelationshipsChangeRef.current(data || []);
+        setRelationships(data || []);
+        if (onRelationshipsChangeRef.current) {
+          onRelationshipsChangeRef.current(data || []);
+        }
+      } catch (err) {
+        if (err.name === 'AbortError' || signal?.aborted) return;
+
+        logger.error('treatment_equipment_fetch_error', {
+          treatmentId,
+          error: err.message,
+          component: 'TreatmentEquipmentRelationships',
+        });
+        setError(err.message || 'Failed to load equipment relationships');
+      } finally {
+        if (!signal?.aborted) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      if (err.name === 'AbortError' || signal?.aborted) return;
-
-      logger.error('treatment_equipment_fetch_error', {
-        treatmentId,
-        error: err.message,
-        component: 'TreatmentEquipmentRelationships',
-      });
-      setError(err.message || 'Failed to load equipment relationships');
-    } finally {
-      if (!signal?.aborted) {
-        setLoading(false);
-      }
-    }
-  }, [treatmentId]);
+    },
+    [treatmentId]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -150,7 +158,12 @@ function TreatmentEquipmentRelationships({
   // Create new equipment and link it
   const handleCreateAndLinkEquipment = async () => {
     if (!newEquipment.equipment_name?.trim() || !newEquipment.equipment_type) {
-      setError(t('errors:form.equipmentFieldsRequired', 'Equipment name and type are required'));
+      setError(
+        t(
+          'errors:form.equipmentFieldsRequired',
+          'Equipment name and type are required'
+        )
+      );
       return;
     }
 
@@ -216,7 +229,11 @@ function TreatmentEquipmentRelationships({
         error: err.message,
         component: 'TreatmentEquipmentRelationships',
       });
-      setError(err.response?.data?.detail || err.message || 'Failed to create and link equipment');
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          'Failed to create and link equipment'
+      );
     } finally {
       setCreatingEquipment(false);
     }
@@ -228,8 +245,16 @@ function TreatmentEquipmentRelationships({
       return handleCreateAndLinkEquipment();
     }
 
-    if (!newRelationship.equipment_ids || newRelationship.equipment_ids.length === 0) {
-      setError(t('errors:form.equipmentNotSelected', 'Please select at least one equipment'));
+    if (
+      !newRelationship.equipment_ids ||
+      newRelationship.equipment_ids.length === 0
+    ) {
+      setError(
+        t(
+          'errors:form.equipmentNotSelected',
+          'Please select at least one equipment'
+        )
+      );
       return;
     }
 
@@ -260,7 +285,11 @@ function TreatmentEquipmentRelationships({
         error: err.message,
         component: 'TreatmentEquipmentRelationships',
       });
-      setError(err.response?.data?.detail || err.message || 'Failed to add equipment relationship');
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          'Failed to add equipment relationship'
+      );
     } finally {
       setLoading(false);
     }
@@ -271,7 +300,11 @@ function TreatmentEquipmentRelationships({
     setError(null);
 
     try {
-      await apiService.updateTreatmentEquipment(treatmentId, relationshipId, updates);
+      await apiService.updateTreatmentEquipment(
+        treatmentId,
+        relationshipId,
+        updates
+      );
       await fetchRelationships();
       setEditingRelationship(null);
     } catch (err) {
@@ -281,14 +314,25 @@ function TreatmentEquipmentRelationships({
         error: err.message,
         component: 'TreatmentEquipmentRelationships',
       });
-      setError(err.response?.data?.detail || err.message || 'Failed to update equipment relationship');
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          'Failed to update equipment relationship'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteRelationship = async (relationshipId) => {
-    if (!window.confirm(t('messages.confirmRemoveEquipmentRelationship', 'Are you sure you want to remove this equipment link?'))) {
+  const handleDeleteRelationship = async relationshipId => {
+    if (
+      !window.confirm(
+        t(
+          'messages.confirmRemoveEquipmentRelationship',
+          'Are you sure you want to remove this equipment link?'
+        )
+      )
+    ) {
       return;
     }
 
@@ -305,17 +349,21 @@ function TreatmentEquipmentRelationships({
         error: err.message,
         component: 'TreatmentEquipmentRelationships',
       });
-      setError(err.response?.data?.detail || err.message || 'Failed to delete equipment relationship');
+      setError(
+        err.response?.data?.detail ||
+          err.message ||
+          'Failed to delete equipment relationship'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const getEquipmentById = (equipmentId) => {
+  const getEquipmentById = equipmentId => {
     return safeEquipment.find(e => e.id === equipmentId);
   };
 
-  const startEditing = (relationship) => {
+  const startEditing = relationship => {
     setEditingRelationship({
       id: relationship.id,
       usage_frequency: relationship.usage_frequency || '',
@@ -330,7 +378,9 @@ function TreatmentEquipmentRelationships({
     label: formatEquipmentLabel(eq),
   }));
 
-  const linkedEquipmentIds = relationships.map(rel => rel.equipment_id.toString());
+  const linkedEquipmentIds = relationships.map(rel =>
+    rel.equipment_id.toString()
+  );
   const availableOptions = equipmentOptions.filter(
     option => !linkedEquipmentIds.includes(option.value)
   );
@@ -339,7 +389,11 @@ function TreatmentEquipmentRelationships({
 
   return (
     <Box pos="relative">
-      <LoadingOverlay visible={loading || creatingEquipment} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+      <LoadingOverlay
+        visible={loading || creatingEquipment}
+        zIndex={1000}
+        overlayProps={{ radius: 'sm', blur: 2 }}
+      />
 
       <Stack gap="md">
         {error && (
@@ -358,7 +412,9 @@ function TreatmentEquipmentRelationships({
         {relationships.length > 0 ? (
           <Stack gap="sm">
             {relationships.map(relationship => {
-              const eq = relationship.equipment || getEquipmentById(relationship.equipment_id);
+              const eq =
+                relationship.equipment ||
+                getEquipmentById(relationship.equipment_id);
               const isEditing = editingRelationship?.id === relationship.id;
               const typeLabel = getEquipmentTypeLabel(eq?.equipment_type);
 
@@ -371,10 +427,23 @@ function TreatmentEquipmentRelationships({
                           variant="light"
                           color="orange"
                           leftSection={<IconDeviceDesktop size={12} />}
-                          style={isViewMode && onEntityClick && relationship.equipment_id ? { cursor: 'pointer' } : undefined}
-                          onClick={isViewMode && onEntityClick && relationship.equipment_id ? () => onEntityClick(relationship.equipment_id) : undefined}
+                          style={
+                            isViewMode &&
+                            onEntityClick &&
+                            relationship.equipment_id
+                              ? { cursor: 'pointer' }
+                              : undefined
+                          }
+                          onClick={
+                            isViewMode &&
+                            onEntityClick &&
+                            relationship.equipment_id
+                              ? () => onEntityClick(relationship.equipment_id)
+                              : undefined
+                          }
                         >
-                          {eq?.equipment_name || `Equipment ID: ${relationship.equipment_id}`}
+                          {eq?.equipment_name ||
+                            `Equipment ID: ${relationship.equipment_id}`}
                         </Badge>
                         {typeLabel && (
                           <Badge variant="outline" size="sm" color="blue">
@@ -382,7 +451,11 @@ function TreatmentEquipmentRelationships({
                           </Badge>
                         )}
                         {eq?.status && (
-                          <Badge variant="outline" size="sm" color={getEquipmentStatusColor(eq.status)}>
+                          <Badge
+                            variant="outline"
+                            size="sm"
+                            color={getEquipmentStatusColor(eq.status)}
+                          >
                             {eq.status}
                           </Badge>
                         )}
@@ -395,14 +468,16 @@ function TreatmentEquipmentRelationships({
 
                       {eq?.manufacturer && (
                         <Text size="sm" c="dimmed">
-                          <strong>{t('shared:fields.manufacturer')}:</strong> {eq.manufacturer}
+                          <strong>{t('shared:fields.manufacturer')}:</strong>{' '}
+                          {eq.manufacturer}
                           {eq.model_number && ` | Model: ${eq.model_number}`}
                         </Text>
                       )}
 
                       {relationship.specific_settings && (
                         <Text size="sm" c="dimmed">
-                          <strong>{t('shared:labels.settings')}:</strong> {relationship.specific_settings}
+                          <strong>{t('shared:labels.settings')}:</strong>{' '}
+                          {relationship.specific_settings}
                         </Text>
                       )}
 
@@ -412,28 +487,34 @@ function TreatmentEquipmentRelationships({
                             size="xs"
                             placeholder="Usage frequency (e.g., Nightly, As needed)"
                             value={editingRelationship?.usage_frequency || ''}
-                            onChange={(e) => setEditingRelationship(prev => ({
-                              ...prev,
-                              usage_frequency: e.target.value,
-                            }))}
+                            onChange={e =>
+                              setEditingRelationship(prev => ({
+                                ...prev,
+                                usage_frequency: e.target.value,
+                              }))
+                            }
                           />
                           <TextInput
                             size="xs"
                             placeholder="Specific settings (e.g., Pressure: 10 cmH2O)"
                             value={editingRelationship?.specific_settings || ''}
-                            onChange={(e) => setEditingRelationship(prev => ({
-                              ...prev,
-                              specific_settings: e.target.value,
-                            }))}
+                            onChange={e =>
+                              setEditingRelationship(prev => ({
+                                ...prev,
+                                specific_settings: e.target.value,
+                              }))
+                            }
                           />
                           <Textarea
                             size="xs"
                             placeholder="Relevance note"
                             value={editingRelationship?.relevance_note || ''}
-                            onChange={(e) => setEditingRelationship(prev => ({
-                              ...prev,
-                              relevance_note: e.target.value,
-                            }))}
+                            onChange={e =>
+                              setEditingRelationship(prev => ({
+                                ...prev,
+                                relevance_note: e.target.value,
+                              }))
+                            }
                             autosize
                             minRows={2}
                           />
@@ -455,11 +536,18 @@ function TreatmentEquipmentRelationships({
                               variant="light"
                               color="green"
                               size="sm"
-                              onClick={() => handleEditRelationship(relationship.id, {
-                                usage_frequency: editingRelationship?.usage_frequency || null,
-                                specific_settings: editingRelationship?.specific_settings || null,
-                                relevance_note: editingRelationship?.relevance_note || null,
-                              })}
+                              onClick={() =>
+                                handleEditRelationship(relationship.id, {
+                                  usage_frequency:
+                                    editingRelationship?.usage_frequency ||
+                                    null,
+                                  specific_settings:
+                                    editingRelationship?.specific_settings ||
+                                    null,
+                                  relevance_note:
+                                    editingRelationship?.relevance_note || null,
+                                })
+                              }
                               disabled={loading}
                             >
                               <IconCheck size={14} />
@@ -487,7 +575,9 @@ function TreatmentEquipmentRelationships({
                               variant="light"
                               color="red"
                               size="sm"
-                              onClick={() => handleDeleteRelationship(relationship.id)}
+                              onClick={() =>
+                                handleDeleteRelationship(relationship.id)
+                              }
                               disabled={loading}
                             >
                               <IconTrash size={14} />
@@ -503,7 +593,12 @@ function TreatmentEquipmentRelationships({
           </Stack>
         ) : (
           <Paper withBorder p="md" ta="center">
-            <Text c="dimmed">{t('labels.noEquipmentLinked', 'No equipment linked to this treatment')}</Text>
+            <Text c="dimmed">
+              {t(
+                'labels.noEquipmentLinked',
+                'No equipment linked to this treatment'
+              )}
+            </Text>
             {!isViewMode && (
               <Text size="xs" c="dimmed" mt="xs">
                 {t('treatments.noEquipmentLinkedDescription')}
@@ -516,7 +611,9 @@ function TreatmentEquipmentRelationships({
         {!isViewMode && (
           <Group justify="space-between" align="center">
             <Text size="sm" c="dimmed">
-              {t('shared:labels.countTotal', { count: availableOptions.length })}
+              {t('shared:labels.countTotal', {
+                count: availableOptions.length,
+              })}
             </Text>
             <Button
               variant="light"
@@ -553,7 +650,9 @@ function TreatmentEquipmentRelationships({
 
             <Tabs value={addMode} onChange={setAddMode}>
               <Tabs.List>
-                <Tabs.Tab value="existing">{t('treatments.linkExisting')}</Tabs.Tab>
+                <Tabs.Tab value="existing">
+                  {t('treatments.linkExisting')}
+                </Tabs.Tab>
                 <Tabs.Tab value="new">{t('treatments.createNew')}</Tabs.Tab>
               </Tabs.List>
 
@@ -567,10 +666,12 @@ function TreatmentEquipmentRelationships({
                         placeholder="Choose equipment to link"
                         data={availableOptions}
                         value={newRelationship.equipment_ids}
-                        onChange={(values) => setNewRelationship(prev => ({
-                          ...prev,
-                          equipment_ids: values,
-                        }))}
+                        onChange={values =>
+                          setNewRelationship(prev => ({
+                            ...prev,
+                            equipment_ids: values,
+                          }))
+                        }
                         searchable
                         clearable
                         required
@@ -583,10 +684,12 @@ function TreatmentEquipmentRelationships({
                             label="Usage Frequency (Optional)"
                             placeholder="e.g., Nightly, As needed, 3x daily"
                             value={newRelationship.usage_frequency}
-                            onChange={(e) => setNewRelationship(prev => ({
-                              ...prev,
-                              usage_frequency: e.target.value,
-                            }))}
+                            onChange={e =>
+                              setNewRelationship(prev => ({
+                                ...prev,
+                                usage_frequency: e.target.value,
+                              }))
+                            }
                             description="How often this equipment is used for this treatment"
                           />
 
@@ -594,10 +697,12 @@ function TreatmentEquipmentRelationships({
                             label="Specific Settings (Optional)"
                             placeholder="e.g., Pressure: 10 cmH2O, Flow: 2L/min"
                             value={newRelationship.specific_settings}
-                            onChange={(e) => setNewRelationship(prev => ({
-                              ...prev,
-                              specific_settings: e.target.value,
-                            }))}
+                            onChange={e =>
+                              setNewRelationship(prev => ({
+                                ...prev,
+                                specific_settings: e.target.value,
+                              }))
+                            }
                             description="Treatment-specific equipment settings"
                           />
                         </>
@@ -607,10 +712,12 @@ function TreatmentEquipmentRelationships({
                         label="Relevance Note (Optional)"
                         placeholder="Describe how this equipment relates to the treatment"
                         value={newRelationship.relevance_note}
-                        onChange={(e) => setNewRelationship(prev => ({
-                          ...prev,
-                          relevance_note: e.target.value,
-                        }))}
+                        onChange={e =>
+                          setNewRelationship(prev => ({
+                            ...prev,
+                            relevance_note: e.target.value,
+                          }))
+                        }
                         autosize
                         minRows={2}
                       />
@@ -636,10 +743,12 @@ function TreatmentEquipmentRelationships({
                     label="Equipment Name"
                     placeholder="e.g., ResMed AirSense 11"
                     value={newEquipment.equipment_name}
-                    onChange={(e) => setNewEquipment(prev => ({
-                      ...prev,
-                      equipment_name: e.target.value,
-                    }))}
+                    onChange={e =>
+                      setNewEquipment(prev => ({
+                        ...prev,
+                        equipment_name: e.target.value,
+                      }))
+                    }
                     required
                   />
 
@@ -648,10 +757,12 @@ function TreatmentEquipmentRelationships({
                     placeholder="Select type"
                     data={EQUIPMENT_TYPE_OPTIONS}
                     value={newEquipment.equipment_type}
-                    onChange={(value) => setNewEquipment(prev => ({
-                      ...prev,
-                      equipment_type: value || '',
-                    }))}
+                    onChange={value =>
+                      setNewEquipment(prev => ({
+                        ...prev,
+                        equipment_type: value || '',
+                      }))
+                    }
                     searchable
                     required
                     comboboxProps={{ withinPortal: true, zIndex: 4000 }}
@@ -662,19 +773,23 @@ function TreatmentEquipmentRelationships({
                       label="Manufacturer"
                       placeholder="e.g., ResMed, Philips"
                       value={newEquipment.manufacturer}
-                      onChange={(e) => setNewEquipment(prev => ({
-                        ...prev,
-                        manufacturer: e.target.value,
-                      }))}
+                      onChange={e =>
+                        setNewEquipment(prev => ({
+                          ...prev,
+                          manufacturer: e.target.value,
+                        }))
+                      }
                     />
                     <TextInput
                       label="Model Number"
                       placeholder="e.g., AirSense 11"
                       value={newEquipment.model_number}
-                      onChange={(e) => setNewEquipment(prev => ({
-                        ...prev,
-                        model_number: e.target.value,
-                      }))}
+                      onChange={e =>
+                        setNewEquipment(prev => ({
+                          ...prev,
+                          model_number: e.target.value,
+                        }))
+                      }
                     />
                   </Group>
 
@@ -683,19 +798,23 @@ function TreatmentEquipmentRelationships({
                       label="Serial Number"
                       placeholder="Equipment serial number"
                       value={newEquipment.serial_number}
-                      onChange={(e) => setNewEquipment(prev => ({
-                        ...prev,
-                        serial_number: e.target.value,
-                      }))}
+                      onChange={e =>
+                        setNewEquipment(prev => ({
+                          ...prev,
+                          serial_number: e.target.value,
+                        }))
+                      }
                     />
                     <DateInput
                       label="Prescribed Date"
                       placeholder={dateInputFormat}
                       value={parseDateInput(newEquipment.prescribed_date)}
-                      onChange={(date) => setNewEquipment(prev => ({
-                        ...prev,
-                        prescribed_date: date,
-                      }))}
+                      onChange={date =>
+                        setNewEquipment(prev => ({
+                          ...prev,
+                          prescribed_date: date,
+                        }))
+                      }
                       valueFormat={dateInputFormat}
                       clearable
                       popoverProps={{ withinPortal: true, zIndex: 4000 }}
@@ -707,20 +826,24 @@ function TreatmentEquipmentRelationships({
                       label="Status"
                       data={EQUIPMENT_STATUS_OPTIONS}
                       value={newEquipment.status}
-                      onChange={(value) => setNewEquipment(prev => ({
-                        ...prev,
-                        status: value || 'active',
-                      }))}
+                      onChange={value =>
+                        setNewEquipment(prev => ({
+                          ...prev,
+                          status: value || 'active',
+                        }))
+                      }
                       comboboxProps={{ withinPortal: true, zIndex: 4000 }}
                     />
                     <TextInput
                       label="Supplier"
                       placeholder="Equipment supplier"
                       value={newEquipment.supplier}
-                      onChange={(e) => setNewEquipment(prev => ({
-                        ...prev,
-                        supplier: e.target.value,
-                      }))}
+                      onChange={e =>
+                        setNewEquipment(prev => ({
+                          ...prev,
+                          supplier: e.target.value,
+                        }))
+                      }
                     />
                   </Group>
 
@@ -728,10 +851,12 @@ function TreatmentEquipmentRelationships({
                     label="Usage Instructions"
                     placeholder="How to use this equipment"
                     value={newEquipment.usage_instructions}
-                    onChange={(e) => setNewEquipment(prev => ({
-                      ...prev,
-                      usage_instructions: e.target.value,
-                    }))}
+                    onChange={e =>
+                      setNewEquipment(prev => ({
+                        ...prev,
+                        usage_instructions: e.target.value,
+                      }))
+                    }
                     autosize
                     minRows={2}
                   />
@@ -742,30 +867,36 @@ function TreatmentEquipmentRelationships({
                     label="Usage Frequency (Optional)"
                     placeholder="e.g., Nightly, As needed"
                     value={newRelationship.usage_frequency}
-                    onChange={(e) => setNewRelationship(prev => ({
-                      ...prev,
-                      usage_frequency: e.target.value,
-                    }))}
+                    onChange={e =>
+                      setNewRelationship(prev => ({
+                        ...prev,
+                        usage_frequency: e.target.value,
+                      }))
+                    }
                   />
 
                   <TextInput
                     label="Specific Settings (Optional)"
                     placeholder="e.g., Pressure: 10 cmH2O"
                     value={newRelationship.specific_settings}
-                    onChange={(e) => setNewRelationship(prev => ({
-                      ...prev,
-                      specific_settings: e.target.value,
-                    }))}
+                    onChange={e =>
+                      setNewRelationship(prev => ({
+                        ...prev,
+                        specific_settings: e.target.value,
+                      }))
+                    }
                   />
 
                   <Textarea
                     label="Relevance Note (Optional)"
                     placeholder="How this equipment relates to the treatment"
                     value={newRelationship.relevance_note}
-                    onChange={(e) => setNewRelationship(prev => ({
-                      ...prev,
-                      relevance_note: e.target.value,
-                    }))}
+                    onChange={e =>
+                      setNewRelationship(prev => ({
+                        ...prev,
+                        relevance_note: e.target.value,
+                      }))
+                    }
                     autosize
                     minRows={2}
                   />
@@ -783,7 +914,8 @@ function TreatmentEquipmentRelationships({
                 disabled={
                   addMode === 'existing'
                     ? selectedCount === 0
-                    : !newEquipment.equipment_name?.trim() || !newEquipment.equipment_type
+                    : !newEquipment.equipment_name?.trim() ||
+                      !newEquipment.equipment_type
                 }
               >
                 {addMode === 'new'

@@ -1,4 +1,3 @@
-import React from 'react';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -158,7 +157,12 @@ vi.mock('../../../hooks/useAdminData', () => ({
           refreshData: mockRefreshAnalytics,
         };
       default:
-        return { data: null, loading: false, error: null, refreshData: vi.fn() };
+        return {
+          data: null,
+          loading: false,
+          error: null,
+          refreshData: vi.fn(),
+        };
     }
   }),
 }));
@@ -230,31 +234,41 @@ describe('AdminDashboard', () => {
   describe('stat card navigation (Item 20)', () => {
     test('clicking Total Users navigates to /admin/models/user', () => {
       renderComponent();
-      fireEvent.click(screen.getByText('Total Users').closest('[role="button"]'));
+      fireEvent.click(
+        screen.getByText('Total Users').closest('[role="button"]')
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/user');
     });
 
     test('clicking Active Patients navigates to /admin/models/patient', () => {
       renderComponent();
-      fireEvent.click(screen.getByText('Active Patients').closest('[role="button"]'));
+      fireEvent.click(
+        screen.getByText('Active Patients').closest('[role="button"]')
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/patient');
     });
 
     test('clicking Lab Results navigates to /admin/models/lab_result', () => {
       renderComponent();
-      fireEvent.click(screen.getByText('Lab Results').closest('[role="button"]'));
+      fireEvent.click(
+        screen.getByText('Lab Results').closest('[role="button"]')
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/lab_result');
     });
 
     test('clicking Medications navigates to /admin/models/medication', () => {
       renderComponent();
-      fireEvent.click(screen.getByText('Medications').closest('[role="button"]'));
+      fireEvent.click(
+        screen.getByText('Medications').closest('[role="button"]')
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/medication');
     });
 
     test('clicking Vital Signs navigates to /admin/models/vitals', () => {
       renderComponent();
-      fireEvent.click(screen.getByText('Vital Signs').closest('[role="button"]'));
+      fireEvent.click(
+        screen.getByText('Vital Signs').closest('[role="button"]')
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/vitals');
     });
 
@@ -267,7 +281,9 @@ describe('AdminDashboard', () => {
 
     test('stat cards are keyboard accessible with Space key', () => {
       renderComponent();
-      const card = screen.getByText('Active Patients').closest('[role="button"]');
+      const card = screen
+        .getByText('Active Patients')
+        .closest('[role="button"]');
       fireEvent.keyDown(card, { key: ' ' });
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/patient');
     });
@@ -331,7 +347,9 @@ describe('AdminDashboard', () => {
       expect(screen.getByText('Data Models')).toBeInTheDocument();
       expect(screen.getByText('Create New User')).toBeInTheDocument();
       // "System Health" appears in both the quick actions and the health card
-      expect(screen.getAllByText('System Health').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('System Health').length
+      ).toBeGreaterThanOrEqual(1);
       expect(screen.getByText('Backups')).toBeInTheDocument();
       // "Settings" appears in both the quick actions label and elsewhere
       expect(screen.getAllByText('Settings').length).toBeGreaterThanOrEqual(1);
@@ -342,13 +360,17 @@ describe('AdminDashboard', () => {
 
     test('clicking Data Models navigates to /admin/data-models', () => {
       renderComponent();
-      fireEvent.click(screen.getByText('Data Models').closest('[role="button"]'));
+      fireEvent.click(
+        screen.getByText('Data Models').closest('[role="button"]')
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/admin/data-models');
     });
 
     test('clicking Manage Users navigates to /admin/models/user', () => {
       renderComponent();
-      fireEvent.click(screen.getByText('Manage Users').closest('[role="button"]'));
+      fireEvent.click(
+        screen.getByText('Manage Users').closest('[role="button"]')
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/admin/models/user');
     });
 

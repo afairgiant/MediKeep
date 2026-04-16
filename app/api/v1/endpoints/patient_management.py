@@ -17,7 +17,7 @@ from app.core.http.error_handling import (
     ForbiddenException,
     BusinessLogicException,
     handle_database_errors,
-    DatabaseException
+    DatabaseException,
 )
 from app.services.patient_management import PatientManagementService
 from app.services.patient_access import PatientAccessService
@@ -34,6 +34,7 @@ logger = get_logger(__name__, "app")
 
 class PatientCreateRequest(BaseModel):
     """Request model for creating a new patient"""
+
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
     birth_date: date = Field(..., description="Birth date")
@@ -43,20 +44,29 @@ class PatientCreateRequest(BaseModel):
     weight: Optional[float] = Field(None, gt=0, description="Weight in pounds")
     address: Optional[str] = Field(None, max_length=500)
     physician_id: Optional[int] = Field(None, description="Primary care physician ID")
-    is_self_record: bool = Field(False, description="Whether this is the user's own medical record")
+    is_self_record: bool = Field(
+        False, description="Whether this is the user's own medical record"
+    )
 
 
 class PatientUpdateRequest(BaseModel):
     """Request model for updating a patient"""
+
     first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
     birth_date: Optional[date] = Field(None, description="Birth date")
     gender: Optional[str] = Field(None, max_length=20)
     blood_type: Optional[str] = Field(None, max_length=5)
-    height: Optional[float] = Field(None, gt=0, le=108, description="Height in inches (1-9 feet)")
-    weight: Optional[float] = Field(None, gt=0, le=992, description="Weight in pounds (1-992 lbs)")
+    height: Optional[float] = Field(
+        None, gt=0, le=108, description="Height in inches (1-9 feet)"
+    )
+    weight: Optional[float] = Field(
+        None, gt=0, le=992, description="Weight in pounds (1-992 lbs)"
+    )
     address: Optional[str] = Field(None, max_length=500)
-    physician_id: Optional[int] = Field(None, gt=0, description="Primary care physician ID")
+    physician_id: Optional[int] = Field(
+        None, gt=0, description="Primary care physician ID"
+    )
 
     @model_validator(mode="before")
     @classmethod
@@ -64,8 +74,15 @@ class PatientUpdateRequest(BaseModel):
         """Convert empty strings to None for optional fields to prevent validation errors"""
         if isinstance(values, dict):
             for field in [
-                "first_name", "last_name", "birth_date", "gender",
-                "blood_type", "height", "weight", "address", "physician_id"
+                "first_name",
+                "last_name",
+                "birth_date",
+                "gender",
+                "blood_type",
+                "height",
+                "weight",
+                "address",
+                "physician_id",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -120,6 +137,7 @@ class PatientUpdateRequest(BaseModel):
 
 class PatientResponse(BaseModel):
     """Response model for patient data"""
+
     id: int
     first_name: str
     last_name: str
@@ -141,6 +159,7 @@ class PatientResponse(BaseModel):
 
 class PatientListResponse(BaseModel):
     """Response model for patient list"""
+
     patients: List[PatientResponse]
     total_count: int
     owned_count: int
@@ -155,12 +174,13 @@ def _build_patient_response(
     """Build a PatientResponse with permission_level populated."""
     response = PatientResponse.model_validate(patient)
     context = access_service.get_patient_context(current_user, patient)
-    response.permission_level = context['permission_level']
+    response.permission_level = context["permission_level"]
     return response
 
 
 class SharingStatsResponse(BaseModel):
     """Response model for sharing statistics"""
+
     owned: int
     shared_with_me: int
     total_accessible: int
@@ -168,6 +188,7 @@ class SharingStatsResponse(BaseModel):
 
 class PatientStatsResponse(BaseModel):
     """Response model for patient statistics"""
+
     owned_count: int
     accessible_count: int
     has_self_record: bool
@@ -177,6 +198,7 @@ class PatientStatsResponse(BaseModel):
 
 class SwitchPatientRequest(BaseModel):
     """Request model for switching active patient"""
+
     patient_id: int = Field(..., description="ID of the patient to switch to")
 
 
@@ -190,39 +212,43 @@ def create_patient(
 ) -> Any:
     """
     Create a new patient record.
-    
+
     The user will own this patient record and can manage it.
     Only one self-record per user is allowed.
     """
     user_ip = request.client.host if request.client else "unknown"
-    
+
     with handle_database_errors(request=request):
         service = PatientManagementService(db)
-        
+
         # Check for self-record duplication
         if patient_in.is_self_record:
             existing_self = service.get_self_record(current_user)
             if existing_self:
                 raise BusinessLogicException(
                     message="You already have a self-record. Only one self-record per user is allowed.",
-                    request=request
+                    request=request,
                 )
-        
+
         patient = service.create_patient(
             user=current_user,
             patient_data=patient_in.model_dump(),
-            is_self_record=patient_in.is_self_record
+            is_self_record=patient_in.is_self_record,
         )
-        
+
         log_data_access(
-            logger, request, current_user.id, "create", "Patient",
+            logger,
+            request,
+            current_user.id,
+            "create",
+            "Patient",
             record_id=patient.id,
             patient_id=patient.id,
-            is_self_record=patient_in.is_self_record
+            is_self_record=patient_in.is_self_record,
         )
-        
+
         response = PatientResponse.model_validate(patient)
-        response.permission_level = 'full'
+        response.permission_level = "full"
         return response
 
 
@@ -236,24 +262,26 @@ def get_accessible_patients(
 ) -> Any:
     """
     Get all patients accessible to the current user.
-    
+
     Returns both owned patients and patients shared with the user.
     """
     with handle_database_errors(request=request):
         service = PatientManagementService(db)
         access_service = PatientAccessService(db)
-        
+
         # Get accessible patients
-        accessible_patients = access_service.get_accessible_patients(current_user, permission)
-        
+        accessible_patients = access_service.get_accessible_patients(
+            current_user, permission
+        )
+
         # Get owned patients for statistics
         owned_patients = service.get_owned_patients(current_user)
-        
+
         # Calculate statistics
         total_count = len(accessible_patients)
         owned_count = len(owned_patients)
         shared_count = total_count - owned_count
-        
+
         # Convert to response format with permission levels
         patient_responses = [
             _build_patient_response(access_service, current_user, p)
@@ -264,7 +292,7 @@ def get_accessible_patients(
             patients=patient_responses,
             total_count=total_count,
             owned_count=owned_count,
-            shared_count=shared_count
+            shared_count=shared_count,
         )
 
 
@@ -285,7 +313,7 @@ def get_owned_patients(
         responses = []
         for p in patients:
             response = PatientResponse.model_validate(p)
-            response.permission_level = 'full'
+            response.permission_level = "full"
             responses.append(response)
         return responses
 
@@ -308,7 +336,7 @@ def get_self_record(
 
         if patient:
             response = PatientResponse.model_validate(patient)
-            response.permission_level = 'full'
+            response.permission_level = "full"
             return response
         else:
             return None
@@ -333,19 +361,24 @@ def switch_active_patient(
         service = PatientManagementService(db)
 
         # Check if target patient exists and user has access
-        target_patient = db.query(Patient).filter(Patient.id == switch_request.patient_id).first()
+        target_patient = (
+            db.query(Patient).filter(Patient.id == switch_request.patient_id).first()
+        )
         if not target_patient:
             raise NotFoundException(
                 resource="Patient",
                 message=f"Patient with ID {switch_request.patient_id} not found",
-                request=request
+                request=request,
             )
 
         patient = service.switch_active_patient(current_user, switch_request.patient_id)
 
         log_endpoint_access(
-            logger, request, current_user.id, "patient_switched",
-            patient_id=switch_request.patient_id
+            logger,
+            request,
+            current_user.id,
+            "patient_switched",
+            patient_id=switch_request.patient_id,
         )
 
         access_service = PatientAccessService(db)
@@ -384,19 +417,19 @@ def get_patient_statistics(
 ):
     """
     Get statistics about the user's patients.
-    
+
     Returns counts and metadata about accessible patients.
     """
     with handle_database_errors(request=request):
         service = PatientManagementService(db)
         stats = service.get_patient_statistics(current_user)
-        
+
         return {
-            'owned_count': stats['owned_count'],
-            'accessible_count': stats['accessible_count'],
-            'has_self_record': stats['has_self_record'],
-            'active_patient_id': stats['active_patient_id'],
-            'sharing_stats': stats['sharing_stats']
+            "owned_count": stats["owned_count"],
+            "accessible_count": stats["accessible_count"],
+            "has_self_record": stats["has_self_record"],
+            "active_patient_id": stats["active_patient_id"],
+            "sharing_stats": stats["sharing_stats"],
         }
 
 
@@ -421,7 +454,7 @@ def get_patient(
             raise NotFoundException(
                 resource="Patient",
                 message=f"Patient with ID {patient_id} not found",
-                request=request
+                request=request,
             )
 
         access_service = PatientAccessService(db)
@@ -454,9 +487,12 @@ def update_patient(
 
     # Log the incoming request without sensitive data
     log_endpoint_access(
-        logger, request, current_user.id, "patient_update_request",
+        logger,
+        request,
+        current_user.id,
+        "patient_update_request",
         patient_id=patient_id,
-        fields_provided=list(patient_in.model_dump(exclude_unset=True).keys())
+        fields_provided=list(patient_in.model_dump(exclude_unset=True).keys()),
     )
 
     with handle_database_errors(request=request):
@@ -468,35 +504,47 @@ def update_patient(
             raise NotFoundException(
                 resource="Patient",
                 message=f"Patient with ID {patient_id} not found",
-                request=request
+                request=request,
             )
 
         # Check permissions
         from app.services.patient_access import PatientAccessService
+
         access_service = PatientAccessService(db)
-        if not access_service.can_access_patient(current_user, existing_patient, 'edit'):
+        if not access_service.can_access_patient(
+            current_user, existing_patient, "edit"
+        ):
             raise ForbiddenException(
                 message="You don't have permission to edit this patient",
-                request=request
+                request=request,
             )
 
         # Filter out None values
-        patient_data = {k: v for k, v in patient_in.model_dump().items() if v is not None}
+        patient_data = {
+            k: v for k, v in patient_in.model_dump().items() if v is not None
+        }
 
         # Log fields being updated without sensitive values
         if patient_data:
             log_endpoint_access(
-                logger, request, current_user.id, "patient_update_data_filtered",
+                logger,
+                request,
+                current_user.id,
+                "patient_update_data_filtered",
                 patient_id=patient_id,
-                fields_updated=list(patient_data.keys())
+                fields_updated=list(patient_data.keys()),
             )
 
         patient = service.update_patient(current_user, patient_id, patient_data)
 
         log_data_access(
-            logger, request, current_user.id, "update", "Patient",
+            logger,
+            request,
+            current_user.id,
+            "update",
+            "Patient",
             record_id=patient_id,
-            patient_id=patient_id
+            patient_id=patient_id,
         )
 
         return _build_patient_response(access_service, current_user, patient)
@@ -527,28 +575,32 @@ def delete_patient(
             raise NotFoundException(
                 resource="Patient",
                 message=f"Patient with ID {patient_id} not found",
-                request=request
+                request=request,
             )
 
         # Check ownership
         if patient.owner_user_id != current_user.id:
             raise ForbiddenException(
-                message="Only the patient owner can delete this record",
-                request=request
+                message="Only the patient owner can delete this record", request=request
             )
 
         success = service.delete_patient(current_user, patient_id)
 
         if success:
             log_data_access(
-                logger, request, current_user.id, "delete", "Patient",
+                logger,
+                request,
+                current_user.id,
+                "delete",
+                "Patient",
                 record_id=patient_id,
-                patient_id=patient_id
+                patient_id=patient_id,
             )
 
-            return {"message": "Patient record and all associated medical records deleted successfully"}
+            return {
+                "message": "Patient record and all associated medical records deleted successfully"
+            }
         else:
             raise DatabaseException(
-                message="Failed to delete patient record",
-                request=request
+                message="Failed to delete patient record", request=request
             )

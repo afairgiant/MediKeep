@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Button } from '../ui';
 import frontendLogger from '../../services/frontendLogger';
@@ -299,11 +299,7 @@ const ConnectionConfigCard = ({
           <div
             className={`paperless-connection-status ${statusInfo.className}`}
           >
-            <span
-              className="connection-status-icon"
-            >
-              {statusInfo.icon}
-            </span>
+            <span className="connection-status-icon">{statusInfo.icon}</span>
             <span className="connection-status-text">{statusInfo.text}</span>
           </div>
         </div>
@@ -390,7 +386,9 @@ const ConnectionConfigCard = ({
                   className="paperless-token-toggle"
                   onClick={() => setShowApiToken(!showApiToken)}
                   disabled={disabled || testingConnection}
-                  aria-label={showApiToken ? 'Hide API token' : 'Show API token'}
+                  aria-label={
+                    showApiToken ? 'Hide API token' : 'Show API token'
+                  }
                 >
                   {showApiToken ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -457,7 +455,9 @@ const ConnectionConfigCard = ({
                     className="paperless-token-toggle"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={disabled || testingConnection}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={
+                      showPassword ? 'Hide password' : 'Show password'
+                    }
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>

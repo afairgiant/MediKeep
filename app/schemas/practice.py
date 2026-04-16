@@ -67,7 +67,9 @@ class PracticeBase(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v):
-        return validate_required_text(v, max_length=150, min_length=2, field_name="Practice name")
+        return validate_required_text(
+            v, max_length=150, min_length=2, field_name="Practice name"
+        )
 
     @field_validator("phone_number", mode="before")
     @classmethod
@@ -125,7 +127,9 @@ class PracticeUpdate(BaseModel):
     def validate_name(cls, v):
         if v is None:
             return v
-        return validate_required_text(v, max_length=150, min_length=2, field_name="Practice name")
+        return validate_required_text(
+            v, max_length=150, min_length=2, field_name="Practice name"
+        )
 
     @field_validator("phone_number", mode="before")
     @classmethod

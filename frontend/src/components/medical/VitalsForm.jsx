@@ -2,7 +2,7 @@
  * VitalsForm Component - Enhanced Version with Mantine UI
  * Modern form for creating and editing patient vital signs with improved UX
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import {
@@ -65,17 +65,13 @@ const VitalsForm = ({
   onSave,
   onCancel,
   isEdit = false,
-  createItem,
-  updateItem,
-  error,
-  clearError,
 }) => {
   const { t } = useTranslation(['common', 'errors', 'shared']);
   // Fields locked from editing (e.g., glucose when editing a day with imported CGM data)
   const lockedFields = vitals?._lockedFields || [];
-  const { getCurrentTime } = useTimezone();
+  useTimezone();
   const { patient: currentPatient } = useCurrentPatient();
-  const { unitSystem, loading: preferencesLoading } = useUserPreferences();
+  const { unitSystem } = useUserPreferences();
   const {
     formatDateTimeInput,
     dateFormat,
@@ -463,7 +459,7 @@ const VitalsForm = ({
   });
 
   const [errors, setErrors] = useState({});
-  const [warnings, setWarnings] = useState([]);
+  const [warnings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState(new Set());
   // State for manual datetime text input (for copy-paste support)
@@ -586,7 +582,7 @@ const VitalsForm = ({
     }
 
     return null;
-  }, []);
+  }, [FIELD_CONFIGS, t]);
 
   // Real-time validation
   const validateForm = useCallback(() => {
@@ -601,7 +597,7 @@ const VitalsForm = ({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, validateField]);
+  }, [formData, validateField, FIELD_CONFIGS]);
 
   // Validate on form change
   useEffect(() => {
@@ -1056,15 +1052,41 @@ const VitalsForm = ({
                   <Grid.Col span={6}>{renderField('a1c')}</Grid.Col>
                   <Grid.Col span={6}>
                     <Select
-                      label={t('vitals:modal.glucoseContext', 'Measurement Type')}
-                      placeholder={t('vitals:modal.glucoseContextPlaceholder', 'Optional')}
+                      label={t(
+                        'vitals:modal.glucoseContext',
+                        'Measurement Type'
+                      )}
+                      placeholder={t(
+                        'vitals:modal.glucoseContextPlaceholder',
+                        'Optional'
+                      )}
                       value={formData.glucose_context || null}
-                      onChange={(val) => handleInputChange('glucose_context', val || '')}
+                      onChange={val =>
+                        handleInputChange('glucose_context', val || '')
+                      }
                       data={[
-                        { value: 'fasting', label: t('vitals:glucoseContext.fasting', 'Fasting') },
-                        { value: 'before_meal', label: t('vitals:glucoseContext.before_meal', 'Before Meal') },
-                        { value: 'after_meal', label: t('vitals:glucoseContext.after_meal', 'After Meal') },
-                        { value: 'random', label: t('vitals:glucoseContext.random', 'Random') },
+                        {
+                          value: 'fasting',
+                          label: t('vitals:glucoseContext.fasting', 'Fasting'),
+                        },
+                        {
+                          value: 'before_meal',
+                          label: t(
+                            'vitals:glucoseContext.before_meal',
+                            'Before Meal'
+                          ),
+                        },
+                        {
+                          value: 'after_meal',
+                          label: t(
+                            'vitals:glucoseContext.after_meal',
+                            'After Meal'
+                          ),
+                        },
+                        {
+                          value: 'random',
+                          label: t('vitals:glucoseContext.random', 'Random'),
+                        },
                       ]}
                       leftSection={<IconDropletFilled size={16} />}
                       clearable
@@ -1079,7 +1101,10 @@ const VitalsForm = ({
                     variant="light"
                     color="green"
                     icon={<IconUser size={16} />}
-                    title={t('shared:labels.patientInformation', 'Patient Information')}
+                    title={t(
+                      'shared:labels.patientInformation',
+                      'Patient Information'
+                    )}
                     mt="md"
                   >
                     {t(

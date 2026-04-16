@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
@@ -15,9 +15,6 @@ import {
   ActionIcon,
   Menu,
   Divider,
-  NumberInput,
-  Tooltip,
-  Progress,
   Center,
   ColorInput,
 } from '@mantine/core';
@@ -47,13 +44,23 @@ const TagManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  
+
   // Modal states
-  const [createModalOpened, { open: openCreateModal, close: closeCreateModal }] = useDisclosure(false);
-  const [editModalOpened, { open: openEditModal, close: closeEditModal }] = useDisclosure(false);
-  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
-  const [replaceModalOpened, { open: openReplaceModal, close: closeReplaceModal }] = useDisclosure(false);
-  
+  const [
+    createModalOpened,
+    { open: openCreateModal, close: closeCreateModal },
+  ] = useDisclosure(false);
+  const [editModalOpened, { open: openEditModal, close: closeEditModal }] =
+    useDisclosure(false);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
+  const [
+    replaceModalOpened,
+    { open: openReplaceModal, close: closeReplaceModal },
+  ] = useDisclosure(false);
+
   // Form states
   const [newTagName, setNewTagName] = useState('');
   const [newTagColor, setNewTagColor] = useState('');
@@ -63,7 +70,7 @@ const TagManagement = () => {
   const [deletingTag, setDeletingTag] = useState(null);
   const [replacingTag, setReplacingTag] = useState(null);
   const [replaceWithTag, setReplaceWithTag] = useState('');
-  
+
   // Search
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -76,13 +83,13 @@ const TagManagement = () => {
       setTags(response.data || response || []);
       logger.info('tag_management_loaded', {
         message: 'Tag management data loaded',
-        tagCount: (response.data || response || []).length
+        tagCount: (response.data || response || []).length,
       });
     } catch (err) {
       setError(t('tagManagement.errors.loadFailed'));
       logger.error('tag_management_load_error', {
         message: 'Failed to load tag management data',
-        error: err
+        error: err,
       });
     } finally {
       setLoading(false);
@@ -91,6 +98,7 @@ const TagManagement = () => {
 
   useEffect(() => {
     fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; fetchTags is stable in component scope
   }, []);
 
   // Create new tag
@@ -104,30 +112,34 @@ const TagManagement = () => {
       if (newTagColor) {
         const refreshed = await apiService.get('/tags/popular?limit=50');
         const tagList = refreshed.data || refreshed || [];
-        const created = tagList.find((t) => t.tag === newTagName.trim());
+        const created = tagList.find(t => t.tag === newTagName.trim());
         if (created) {
-          await apiService.patch(`/tags/${created.id}/color`, { color: newTagColor });
+          await apiService.patch(`/tags/${created.id}/color`, {
+            color: newTagColor,
+          });
         }
         setTags(tagList);
       } else {
         fetchTags();
       }
 
-      setSuccessMessage(t('tagManagement.success.created', { tag: newTagName }));
+      setSuccessMessage(
+        t('tagManagement.success.created', { tag: newTagName })
+      );
       setNewTagName('');
       setNewTagColor('');
       closeCreateModal();
 
       logger.info('tag_created', {
         message: 'Tag created successfully',
-        tagName: newTagName
+        tagName: newTagName,
       });
     } catch (err) {
       setError(t('tagManagement.errors.createFailed'));
       logger.error('tag_create_error', {
         message: 'Failed to create tag',
         tagName: newTagName,
-        error: err
+        error: err,
       });
     }
   };
@@ -149,22 +161,33 @@ const TagManagement = () => {
 
       if (nameChanged) {
         promises.push(
-          apiService.put(`/tags/rename?old_tag=${encodeURIComponent(editingTag.tag)}&new_tag=${encodeURIComponent(editTagName)}`)
+          apiService.put(
+            `/tags/rename?old_tag=${encodeURIComponent(editingTag.tag)}&new_tag=${encodeURIComponent(editTagName)}`
+          )
         );
       }
 
       if (colorChanged) {
         promises.push(
-          apiService.patch(`/tags/${editingTag.id}/color`, { color: editTagColor || null })
+          apiService.patch(`/tags/${editingTag.id}/color`, {
+            color: editTagColor || null,
+          })
         );
       }
 
       await Promise.all(promises);
 
       if (nameChanged) {
-        setSuccessMessage(t('tagManagement.success.renamed', { oldTag: editingTag.tag, newTag: editTagName }));
+        setSuccessMessage(
+          t('tagManagement.success.renamed', {
+            oldTag: editingTag.tag,
+            newTag: editTagName,
+          })
+        );
       } else {
-        setSuccessMessage(t('tagManagement.success.updated', { tag: editingTag.tag }));
+        setSuccessMessage(
+          t('tagManagement.success.updated', { tag: editingTag.tag })
+        );
       }
 
       closeEditModal();
@@ -181,7 +204,7 @@ const TagManagement = () => {
       logger.error('tag_edit_error', {
         message: 'Failed to edit tag',
         tag: editingTag.tag,
-        error: err
+        error: err,
       });
     }
   };
@@ -191,22 +214,26 @@ const TagManagement = () => {
     if (!deletingTag) return;
 
     try {
-      const response = await apiService.delete(`/tags/delete?tag=${encodeURIComponent(deletingTag.tag)}`);
-      setSuccessMessage(t('tagManagement.success.deleted', { tag: deletingTag.tag }));
+      const response = await apiService.delete(
+        `/tags/delete?tag=${encodeURIComponent(deletingTag.tag)}`
+      );
+      setSuccessMessage(
+        t('tagManagement.success.deleted', { tag: deletingTag.tag })
+      );
       closeDeleteModal();
       fetchTags(); // Refresh the list
 
       logger.info('tag_deleted', {
         message: 'Tag deleted successfully',
         tag: deletingTag.tag,
-        recordsUpdated: response.records_updated
+        recordsUpdated: response.records_updated,
       });
     } catch (err) {
       setError(t('tagManagement.errors.deleteFailed'));
       logger.error('tag_delete_error', {
         message: 'Failed to delete tag',
         tag: deletingTag.tag,
-        error: err
+        error: err,
       });
     }
   };
@@ -216,8 +243,15 @@ const TagManagement = () => {
     if (!replaceWithTag.trim() || !replacingTag) return;
 
     try {
-      const response = await apiService.put(`/tags/replace?old_tag=${encodeURIComponent(replacingTag.tag)}&new_tag=${encodeURIComponent(replaceWithTag)}`);
-      setSuccessMessage(t('tagManagement.success.replaced', { oldTag: replacingTag.tag, newTag: replaceWithTag }));
+      const response = await apiService.put(
+        `/tags/replace?old_tag=${encodeURIComponent(replacingTag.tag)}&new_tag=${encodeURIComponent(replaceWithTag)}`
+      );
+      setSuccessMessage(
+        t('tagManagement.success.replaced', {
+          oldTag: replacingTag.tag,
+          newTag: replaceWithTag,
+        })
+      );
       closeReplaceModal();
       fetchTags(); // Refresh the list
 
@@ -225,7 +259,7 @@ const TagManagement = () => {
         message: 'Tag replaced successfully',
         oldTag: replacingTag.tag,
         newTag: replaceWithTag,
-        recordsUpdated: response.records_updated
+        recordsUpdated: response.records_updated,
       });
     } catch (err) {
       setError(t('tagManagement.errors.replaceFailed'));
@@ -233,7 +267,7 @@ const TagManagement = () => {
         message: 'Failed to replace tag',
         oldTag: replacingTag.tag,
         newTag: replaceWithTag,
-        error: err
+        error: err,
       });
     }
   };
@@ -259,13 +293,20 @@ const TagManagement = () => {
   }, [error]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('tagManagement.loading', 'Loading tags...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('tagManagement.loading', 'Loading tags...')}
+      />
+    );
   }
 
   return (
     <Container size="xl" py="md">
-      <PageHeader title={t('tagManagement.title')} icon={t('tagManagement.icon')} />
-      
+      <PageHeader
+        title={t('tagManagement.title')}
+        icon={t('tagManagement.icon')}
+      />
+
       <Stack gap="lg">
         {error && (
           <Alert
@@ -307,7 +348,7 @@ const TagManagement = () => {
                 <TextInput
                   placeholder={t('tagManagement.searchPlaceholder')}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   leftSection={<IconSearch size={16} />}
                 />
                 <Button
@@ -343,11 +384,13 @@ const TagManagement = () => {
                     <Table.Th>{t('shared:fields.tagName')}</Table.Th>
                     <Table.Th>{t('tagManagement.table.usageCount')}</Table.Th>
                     <Table.Th>{t('tagManagement.table.usedIn')}</Table.Th>
-                    <Table.Th width="120">{t('shared:labels.actions')}</Table.Th>
+                    <Table.Th width="120">
+                      {t('shared:labels.actions')}
+                    </Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {filteredTags.map((tag) => (
+                  {filteredTags.map(tag => (
                     <Table.Tr key={tag.tag}>
                       <Table.Td>
                         <Badge
@@ -355,7 +398,11 @@ const TagManagement = () => {
                           variant="light"
                           size="md"
                           style={{ cursor: 'pointer' }}
-                          onClick={() => navigate(`/search?tags=${encodeURIComponent(tag.tag)}`)}
+                          onClick={() =>
+                            navigate(
+                              `/search?tags=${encodeURIComponent(tag.tag)}`
+                            )
+                          }
                         >
                           {tag.tag}
                         </Badge>
@@ -365,7 +412,7 @@ const TagManagement = () => {
                       </Table.Td>
                       <Table.Td>
                         <Group gap="xs">
-                          {tag.entity_types.map((entityType) => (
+                          {tag.entity_types.map(entityType => (
                             <Badge
                               key={entityType}
                               size="xs"
@@ -441,14 +488,23 @@ const TagManagement = () => {
             label={t('shared:fields.tagName')}
             placeholder={t('tagManagement.createModal.placeholder')}
             value={newTagName}
-            onChange={(e) => setNewTagName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreateTag()}
+            onChange={e => setNewTagName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleCreateTag()}
           />
           <ColorInput
             label={t('tagManagement.editModal.colorLabel')}
             value={newTagColor}
             onChange={setNewTagColor}
-            swatches={['#228be6', '#40c057', '#fab005', '#fa5252', '#7950f2', '#fd7e14', '#15aabf', '#e64980']}
+            swatches={[
+              '#228be6',
+              '#40c057',
+              '#fab005',
+              '#fa5252',
+              '#7950f2',
+              '#fd7e14',
+              '#15aabf',
+              '#e64980',
+            ]}
           />
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeCreateModal}>
@@ -472,17 +528,28 @@ const TagManagement = () => {
             label={t('shared:fields.tagName')}
             placeholder={t('tagManagement.editModal.placeholder')}
             value={editTagName}
-            onChange={(e) => setEditTagName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleEditTag()}
+            onChange={e => setEditTagName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleEditTag()}
           />
           <ColorInput
             label={t('tagManagement.editModal.colorLabel')}
             value={editTagColor}
             onChange={setEditTagColor}
-            swatches={['#228be6', '#40c057', '#fab005', '#fa5252', '#7950f2', '#fd7e14', '#15aabf', '#e64980']}
+            swatches={[
+              '#228be6',
+              '#40c057',
+              '#fab005',
+              '#fa5252',
+              '#7950f2',
+              '#fd7e14',
+              '#15aabf',
+              '#e64980',
+            ]}
           />
           <Text size="sm" c="dimmed">
-            {t('tagManagement.editModal.description', { count: editingTag?.usage_count })}
+            {t('tagManagement.editModal.description', {
+              count: editingTag?.usage_count,
+            })}
           </Text>
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeEditModal}>
@@ -506,7 +573,9 @@ const TagManagement = () => {
             {t('tagManagement.deleteModal.message', { tag: deletingTag?.tag })}
           </Text>
           <Text size="sm" c="dimmed">
-            {t('tagManagement.deleteModal.description', { count: deletingTag?.usage_count })}
+            {t('tagManagement.deleteModal.description', {
+              count: deletingTag?.usage_count,
+            })}
           </Text>
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeDeleteModal}>
@@ -530,21 +599,24 @@ const TagManagement = () => {
             label={t('tagManagement.replaceModal.label')}
             placeholder={t('tagManagement.replaceModal.placeholder')}
             value={replaceWithTag}
-            onChange={(e) => setReplaceWithTag(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleReplaceTag()}
+            onChange={e => setReplaceWithTag(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleReplaceTag()}
           />
           <Text size="sm" c="dimmed">
             {t('tagManagement.replaceModal.description', {
               oldTag: replacingTag?.tag,
               newTag: replaceWithTag,
-              count: replacingTag?.usage_count
+              count: replacingTag?.usage_count,
             })}
           </Text>
           <Group justify="flex-end">
             <Button variant="subtle" onClick={closeReplaceModal}>
               {t('shared:fields.cancel')}
             </Button>
-            <Button onClick={handleReplaceTag} disabled={!replaceWithTag.trim()}>
+            <Button
+              onClick={handleReplaceTag}
+              disabled={!replaceWithTag.trim()}
+            >
               {t('tagManagement.replaceModal.submit')}
             </Button>
           </Group>

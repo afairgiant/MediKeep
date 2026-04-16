@@ -4,7 +4,7 @@
  * Updated to use constants as suggested by reviewer feedback
  */
 
-import { ERROR_TYPES, ERROR_PATTERNS, ERROR_REGEX_PATTERNS } from './constants';
+import { ERROR_TYPES, ERROR_REGEX_PATTERNS } from './constants';
 
 /**
  * Enhanced error parser that extracts specific error information
@@ -17,7 +17,9 @@ export const parseErrorMessage = errorMessage => {
   }
 
   // Check for bulk sharing errors using robust regex
-  const bulkSharedMatch = errorMessage.match(ERROR_REGEX_PATTERNS.BULK_ALREADY_SHARED);
+  const bulkSharedMatch = errorMessage.match(
+    ERROR_REGEX_PATTERNS.BULK_ALREADY_SHARED
+  );
   if (bulkSharedMatch) {
     const names = bulkSharedMatch[1].split(',').map(name => name.trim());
     return {
@@ -187,8 +189,10 @@ export const isErrorType = (errorMessage, type) => {
     case 'permission':
       return ERROR_REGEX_PATTERNS.PERMISSION_ERRORS.test(errorMessage);
     case 'sharing':
-      return ERROR_REGEX_PATTERNS.SHARING_ERRORS.test(errorMessage) ||
-             ERROR_REGEX_PATTERNS.BULK_ALREADY_SHARED.test(errorMessage);
+      return (
+        ERROR_REGEX_PATTERNS.SHARING_ERRORS.test(errorMessage) ||
+        ERROR_REGEX_PATTERNS.BULK_ALREADY_SHARED.test(errorMessage)
+      );
     case 'user_not_found':
     case 'user':
       return ERROR_REGEX_PATTERNS.USER_NOT_FOUND.test(errorMessage);

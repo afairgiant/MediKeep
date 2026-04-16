@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,13 +23,14 @@ const SSOCallback = () => {
 
   useEffect(() => {
     handleSSOCallback();
-    
+
     // Update processing time counter
     const interval = setInterval(() => {
       setProcessingTime(prev => prev + 1);
     }, 1000);
-    
+
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; handleSSOCallback reads OAuth params and only needs to fire once per redirect
   }, []);
 
   const handleSSOCallback = async () => {
@@ -43,7 +44,7 @@ const SSOCallback = () => {
       hasCode: !!code,
       hasState: !!state,
       hasError: !!error,
-      category: 'sso_callback_component'
+      category: 'sso_callback_component',
     });
 
     // Handle SSO provider errors
@@ -51,7 +52,7 @@ const SSOCallback = () => {
       logger.error('SSO provider error', {
         error,
         errorDescription,
-        category: 'sso_callback_component'
+        category: 'sso_callback_component',
       });
       setError(errorDescription || 'SSO authentication failed');
       setProcessing(false);
@@ -63,7 +64,7 @@ const SSOCallback = () => {
       logger.error('Invalid SSO callback parameters', {
         hasCode: !!code,
         hasState: !!state,
-        category: 'sso_callback_component'
+        category: 'sso_callback_component',
       });
       setError('Invalid callback parameters');
       setProcessing(false);
@@ -73,18 +74,21 @@ const SSOCallback = () => {
     try {
       // Complete SSO authentication (code/state sent securely in POST body)
       const result = await authService.completeSSOAuth(code, state);
-      
+
       // Clear URL parameters to reduce exposure in browser history
       window.history.replaceState({}, document.title, window.location.pathname);
-      
+
       if (!result.success) {
         logger.error('SSO authentication failed', {
           error: result.error,
-          category: 'sso_callback_component'
+          category: 'sso_callback_component',
         });
-        
+
         // Handle registration disabled error
-        if (result.error.includes('registration is disabled') || result.error.includes('Registration is disabled')) {
+        if (
+          result.error.includes('registration is disabled') ||
+          result.error.includes('Registration is disabled')
+        ) {
           setError(t('sso.callback.registrationDisabled'));
         } else {
           setError(result.error);
@@ -98,9 +102,9 @@ const SSOCallback = () => {
         logger.info('SSO account conflict detected', {
           existingUser: result.existing_user_info?.email,
           ssoUser: result.sso_user_info?.email,
-          category: 'sso_callback_component'
+          category: 'sso_callback_component',
         });
-        
+
         setConflictData(result);
         setShowConflictModal(true);
         setProcessing(false);
@@ -112,9 +116,9 @@ const SSOCallback = () => {
         logger.info('GitHub manual linking required', {
           githubUsername: result.github_user_info?.github_username,
           githubId: result.github_user_info?.github_id,
-          category: 'sso_callback_component'
+          category: 'sso_callback_component',
         });
-        
+
         setGithubLinkData(result);
         setShowGithubLinkModal(true);
         setProcessing(false);
@@ -124,21 +128,21 @@ const SSOCallback = () => {
       logger.info('SSO authentication completed successfully', {
         isNewUser: result.isNewUser,
         username: result.user?.username,
-        category: 'sso_callback_component'
+        category: 'sso_callback_component',
       });
 
       // Update auth context with SSO login
       if (login) {
         login(result.user, { sso: true });
       }
-      
+
       // Determine where to redirect
       let redirectPath = '/dashboard';
-      
+
       if (result.isNewUser) {
         // New SSO users go to profile completion
         logger.info('Redirecting new SSO user to profile', {
-          category: 'sso_callback_component'
+          category: 'sso_callback_component',
         });
         redirectPath = '/patients/me?edit=true';
       } else {
@@ -152,41 +156,48 @@ const SSOCallback = () => {
 
       logger.info('Redirecting after successful SSO', {
         redirectPath,
-        category: 'sso_callback_component'
+        category: 'sso_callback_component',
       });
 
       // Add minimal delay to ensure auth state is propagated
       await new Promise(resolve => setTimeout(resolve, 50));
-      
-      navigate(redirectPath, { replace: true });
 
+      navigate(redirectPath, { replace: true });
     } catch (error) {
       logger.error('Unexpected SSO callback error', {
         error: error.message,
-        category: 'sso_callback_component'
+        category: 'sso_callback_component',
       });
       setError(t('sso.callback.unexpectedError'));
       setProcessing(false);
     }
   };
 
-  const handleConflictResolution = async ({ action, preference, tempToken }) => {
+  const handleConflictResolution = async ({
+    action,
+    preference,
+    tempToken,
+  }) => {
     setResolvingConflict(true);
-    
+
     try {
       logger.info('Resolving SSO account conflict', {
         action,
         preference,
-        category: 'sso_callback_component'
+        category: 'sso_callback_component',
       });
 
-      const result = await authService.resolveSSOConflict(tempToken, action, preference);
-      
+      const result = await authService.resolveSSOConflict(
+        tempToken,
+        action,
+        preference
+      );
+
       if (result.success) {
         logger.info('SSO conflict resolved successfully', {
           action,
           username: result.user?.username,
-          category: 'sso_callback_component'
+          category: 'sso_callback_component',
         });
 
         // Update auth context with resolved login
@@ -196,10 +207,10 @@ const SSOCallback = () => {
 
         // Hide the modal and redirect
         setShowConflictModal(false);
-        
+
         // Determine where to redirect
         let redirectPath = '/dashboard';
-        
+
         if (result.isNewUser) {
           redirectPath = '/patients/me?edit=true';
         } else {
@@ -211,16 +222,14 @@ const SSOCallback = () => {
         }
 
         navigate(redirectPath, { replace: true });
-        
       } else {
         setError(result.error || 'Failed to resolve account conflict');
         setShowConflictModal(false);
       }
-      
     } catch (error) {
       logger.error('Error resolving SSO conflict', {
         error: error.message,
-        category: 'sso_callback_component'
+        category: 'sso_callback_component',
       });
       setError(t('sso.callback.errorResolving'));
       setShowConflictModal(false);
@@ -229,10 +238,10 @@ const SSOCallback = () => {
     }
   };
 
-  const handleGithubLinkComplete = (result) => {
+  const handleGithubLinkComplete = result => {
     logger.info('GitHub manual linking completed successfully', {
       username: result.user?.username,
-      category: 'sso_callback_component'
+      category: 'sso_callback_component',
     });
 
     // Update auth context with linked login
@@ -242,10 +251,10 @@ const SSOCallback = () => {
 
     // Hide the modal and redirect
     setShowGithubLinkModal(false);
-    
+
     // Determine where to redirect
     let redirectPath = '/dashboard';
-    
+
     if (result.is_new_user) {
       redirectPath = '/patients/me?edit=true';
     } else {
@@ -259,10 +268,10 @@ const SSOCallback = () => {
     navigate(redirectPath, { replace: true });
   };
 
-  const handleGithubLinkError = (error) => {
+  const handleGithubLinkError = error => {
     logger.error('GitHub manual linking failed', {
       error: error.message,
-      category: 'sso_callback_component'
+      category: 'sso_callback_component',
     });
     setError(error.message || 'Failed to link GitHub account');
     setShowGithubLinkModal(false);
@@ -275,32 +284,48 @@ const SSOCallback = () => {
 
   if (processing) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '50vh',
-        padding: '2rem'
-      }}>
-        <div style={{
-          border: '4px solid var(--color-bg-tertiary)',
-          borderTop: '4px solid var(--mantine-color-blue-5)',
-          borderRadius: '50%',
-          width: '40px',
-          height: '40px',
-          animation: 'spin 1s linear infinite',
-          marginBottom: '1rem'
-        }}></div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '50vh',
+          padding: '2rem',
+        }}
+      >
+        <div
+          style={{
+            border: '4px solid var(--color-bg-tertiary)',
+            borderTop: '4px solid var(--mantine-color-blue-5)',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            animation: 'spin 1s linear infinite',
+            marginBottom: '1rem',
+          }}
+        ></div>
         <h2>{t('sso.callback.completingSignIn')}</h2>
         <p>{t('sso.callback.pleaseWait')}</p>
         {processingTime > 5 && (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9em', marginTop: '0.5rem' }}>
+          <p
+            style={{
+              color: 'var(--color-text-muted)',
+              fontSize: '0.9em',
+              marginTop: '0.5rem',
+            }}
+          >
             {t('sso.callback.slowResponse')}
           </p>
         )}
         {processingTime > 15 && (
-          <p style={{ color: 'var(--color-danger)', fontSize: '0.9em', marginTop: '0.5rem' }}>
+          <p
+            style={{
+              color: 'var(--color-danger)',
+              fontSize: '0.9em',
+              marginTop: '0.5rem',
+            }}
+          >
             {t('sso.callback.stillWaiting')}
           </p>
         )}
@@ -318,37 +343,52 @@ const SSOCallback = () => {
 
   if (error) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '50vh',
-        padding: '2rem',
-        maxWidth: '600px',
-        margin: '0 auto'
-      }}>
-        <div style={{
-          backgroundColor: 'var(--color-bg-secondary)',
-          border: '1px solid var(--color-border-light)',
-          borderRadius: '8px',
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '50vh',
           padding: '2rem',
-          textAlign: 'center',
-          width: '100%'
-        }}>
-          <h2 style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{t('sso.authFailed')}</h2>
-          <div style={{ 
-            backgroundColor: 'var(--color-danger-light)',
-            border: '1px solid var(--color-danger)',
-            borderRadius: '4px',
-            padding: '1rem',
-            marginBottom: '1.5rem',
-            color: 'var(--color-danger-dark)'
-          }}>
+          maxWidth: '600px',
+          margin: '0 auto',
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border-light)',
+            borderRadius: '8px',
+            padding: '2rem',
+            textAlign: 'center',
+            width: '100%',
+          }}
+        >
+          <h2 style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>
+            {t('sso.authFailed')}
+          </h2>
+          <div
+            style={{
+              backgroundColor: 'var(--color-danger-light)',
+              border: '1px solid var(--color-danger)',
+              borderRadius: '4px',
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              color: 'var(--color-danger-dark)',
+            }}
+          >
             {error}
           </div>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button 
+          <div
+            style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <button
               onClick={() => navigate('/login')}
               style={{
                 backgroundColor: 'var(--color-primary)',
@@ -357,7 +397,7 @@ const SSOCallback = () => {
                 padding: '0.5rem 1rem',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '1rem'
+                fontSize: '1rem',
               }}
             >
               {t('userCreation.backToLogin')}
@@ -371,7 +411,7 @@ const SSOCallback = () => {
                   padding: '0.5rem 1rem',
                   border: '1px solid var(--color-primary)',
                   borderRadius: '4px',
-                  fontSize: '1rem'
+                  fontSize: '1rem',
                 }}
               >
                 {t('sso.callback.contactAdmin')}
@@ -391,7 +431,7 @@ const SSOCallback = () => {
         onResolve={handleConflictResolution}
         isLoading={resolvingConflict}
       />
-      
+
       <GitHubLinkModal
         isOpen={showGithubLinkModal}
         onClose={handleGithubLinkClose}

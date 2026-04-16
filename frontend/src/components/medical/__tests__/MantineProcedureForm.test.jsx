@@ -3,8 +3,7 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
-import render, { screen, fireEvent, waitFor } from '../../../test-utils/render';
+import render, { screen, fireEvent } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import MantineProcedureForm from '../MantineProcedureForm';
@@ -13,12 +12,23 @@ import MantineProcedureForm from '../MantineProcedureForm';
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, description, ...props }) => (
     <div>
-      <label htmlFor={`date-${label}`}>{label}{required && ' *'}</label>
+      <label htmlFor={`date-${label}`}>
+        {label}
+        {required && ' *'}
+      </label>
       <input
         id={`date-${label}`}
         type="date"
-        value={value ? (value instanceof Date ? value.toISOString().split('T')[0] : value) : ''}
-        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={
+          value
+            ? value instanceof Date
+              ? value.toISOString().split('T')[0]
+              : value
+            : ''
+        }
+        onChange={e =>
+          onChange(e.target.value ? new Date(e.target.value) : null)
+        }
         data-testid={`date-${label.toLowerCase().replace(/\s+/g, '-')}`}
         {...props}
       />
@@ -74,9 +84,15 @@ describe('MantineProcedureForm', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
       // Title and button both show 'Add New Procedure'
-      expect(screen.getAllByText('Add New Procedure').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByLabelText(/medical:procedures\.procedureName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:procedures\.procedureDate\.label/)).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Add New Procedure').length
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getByLabelText(/medical:procedures\.procedureName\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:procedures\.procedureDate\.label/)
+      ).toBeInTheDocument();
     });
 
     test('does not render when closed', () => {
@@ -89,25 +105,43 @@ describe('MantineProcedureForm', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
       // Required fields
-      expect(screen.getByLabelText(/medical:procedures\.procedureName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:procedures\.procedureDate\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:procedures\.procedureName\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:procedures\.procedureDate\.label/)
+      ).toBeInTheDocument();
 
       // Optional fields - text
-      expect(screen.getByLabelText(/shared:fields\.procedureCode/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:fields\.durationMinutes/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:procedures\.facility\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:labels\.description/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.procedureCode/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.durationMinutes/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:procedures\.facility\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:labels\.description/)
+      ).toBeInTheDocument();
       expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
 
       // Optional fields - selects
-      expect(screen.getAllByLabelText(/shared:fields\.procedureType/).length).toBeGreaterThan(0);
-      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.procedureType/).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.status/).length
+      ).toBeGreaterThan(0);
     });
 
     test('renders practitioner options correctly', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const practitionerInputs = screen.getAllByLabelText(/shared:fields\.performingPractitioner/);
+      const practitionerInputs = screen.getAllByLabelText(
+        /shared:fields\.performingPractitioner/
+      );
       expect(practitionerInputs.length).toBeGreaterThan(0);
     });
 
@@ -131,8 +165,12 @@ describe('MantineProcedureForm', () => {
     test('handles text input changes', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const procedureNameInput = screen.getByLabelText(/medical:procedures\.procedureName\.label/);
-      fireEvent.change(procedureNameInput, { target: { value: 'Appendectomy' } });
+      const procedureNameInput = screen.getByLabelText(
+        /medical:procedures\.procedureName\.label/
+      );
+      fireEvent.change(procedureNameInput, {
+        target: { value: 'Appendectomy' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -144,7 +182,9 @@ describe('MantineProcedureForm', () => {
       await userEvent.click(procedureTypeInput);
 
       // Options use labelKey so i18n keys are shown
-      const surgicalOption = await screen.findByText('medical:procedures.procedureType.options.surgical');
+      const surgicalOption = await screen.findByText(
+        'medical:procedures.procedureType.options.surgical'
+      );
       await userEvent.click(surgicalOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -159,7 +199,9 @@ describe('MantineProcedureForm', () => {
       await userEvent.click(statusInput);
 
       // Status options use plain labels (from component, not field config)
-      const completedOption = await screen.findByText('Completed - Successfully finished');
+      const completedOption = await screen.findByText(
+        'Completed - Successfully finished'
+      );
       await userEvent.click(completedOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -170,7 +212,9 @@ describe('MantineProcedureForm', () => {
     test('handles date input changes', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const dateInput = screen.getByTestId('date-medical:procedures.proceduredate.label');
+      const dateInput = screen.getByTestId(
+        'date-medical:procedures.proceduredate.label'
+      );
       fireEvent.change(dateInput, { target: { value: '2024-01-15' } });
 
       // Date value may shift by timezone
@@ -184,7 +228,9 @@ describe('MantineProcedureForm', () => {
     test('handles duration input validation', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const durationInput = screen.getByLabelText(/shared:fields\.durationMinutes/);
+      const durationInput = screen.getByLabelText(
+        /shared:fields\.durationMinutes/
+      );
       fireEvent.change(durationInput, { target: { value: '90' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
@@ -193,13 +239,19 @@ describe('MantineProcedureForm', () => {
     test('handles textarea inputs for description and notes', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const descriptionTextarea = screen.getByLabelText(/shared:labels\.description/);
-      fireEvent.change(descriptionTextarea, { target: { value: 'Surgical removal of appendix' } });
+      const descriptionTextarea = screen.getByLabelText(
+        /shared:labels\.description/
+      );
+      fireEvent.change(descriptionTextarea, {
+        target: { value: 'Surgical removal of appendix' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
 
       const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
-      fireEvent.change(notesTextarea, { target: { value: 'Patient recovery was smooth' } });
+      fireEvent.change(notesTextarea, {
+        target: { value: 'Patient recovery was smooth' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -211,7 +263,9 @@ describe('MantineProcedureForm', () => {
       await userEvent.click(anesthesiaInput);
 
       // Options use labelKey so i18n keys are shown
-      const generalOption = await screen.findByText('medical:procedures.anesthesiaType.options.general');
+      const generalOption = await screen.findByText(
+        'medical:procedures.anesthesiaType.options.general'
+      );
       await userEvent.click(generalOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -277,7 +331,9 @@ describe('MantineProcedureForm', () => {
 
       expect(screen.getByDisplayValue('MRI Scan')).toBeInTheDocument();
       expect(screen.getByDisplayValue('CPT-70551')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Brain MRI with contrast')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Brain MRI with contrast')
+      ).toBeInTheDocument();
       expect(screen.getByDisplayValue('45')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Imaging Center')).toBeInTheDocument();
       expect(screen.getByDisplayValue('None reported')).toBeInTheDocument();
@@ -294,7 +350,9 @@ describe('MantineProcedureForm', () => {
 
       render(<MantineProcedureForm {...propsWithDate} />);
 
-      const dateInput = screen.getByTestId('date-medical:procedures.proceduredate.label');
+      const dateInput = screen.getByTestId(
+        'date-medical:procedures.proceduredate.label'
+      );
       expect(dateInput).toHaveValue('2024-01-15');
     });
   });
@@ -307,11 +365,21 @@ describe('MantineProcedureForm', () => {
       await userEvent.click(procedureTypeInput);
 
       // Options use labelKey - shows i18n keys
-      expect(screen.getByText('medical:procedures.procedureType.options.surgical')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureType.options.diagnostic')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureType.options.therapeutic')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureType.options.preventive')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureType.options.emergency')).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureType.options.surgical')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureType.options.diagnostic')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureType.options.therapeutic')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureType.options.preventive')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureType.options.emergency')
+      ).toBeInTheDocument();
     });
 
     test('displays correct status options', async () => {
@@ -321,24 +389,50 @@ describe('MantineProcedureForm', () => {
       await userEvent.click(statusInput);
 
       // Status options have plain labels from component
-      expect(screen.getByText('Scheduled - Planned for future')).toBeInTheDocument();
-      expect(screen.getByText('In Progress - Currently happening')).toBeInTheDocument();
-      expect(screen.getByText('Completed - Successfully finished')).toBeInTheDocument();
-      expect(screen.getByText('Cancelled - Not proceeding')).toBeInTheDocument();
+      expect(
+        screen.getByText('Scheduled - Planned for future')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('In Progress - Currently happening')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Completed - Successfully finished')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Cancelled - Not proceeding')
+      ).toBeInTheDocument();
     });
 
     test('displays correct procedure setting options', async () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
-      const settingInput = getSelectInput(/medical:procedures\.procedureSetting\.label/);
+      const settingInput = getSelectInput(
+        /medical:procedures\.procedureSetting\.label/
+      );
       await userEvent.click(settingInput);
 
       // Options use labelKey - shows i18n keys
-      expect(screen.getByText('medical:procedures.procedureSetting.options.outpatient')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureSetting.options.inpatient')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureSetting.options.office')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureSetting.options.emergency')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureSetting.options.home')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'medical:procedures.procedureSetting.options.outpatient'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'medical:procedures.procedureSetting.options.inpatient'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureSetting.options.office')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'medical:procedures.procedureSetting.options.emergency'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureSetting.options.home')
+      ).toBeInTheDocument();
     });
 
     test('displays correct anesthesia type options', async () => {
@@ -348,11 +442,21 @@ describe('MantineProcedureForm', () => {
       await userEvent.click(anesthesiaInput);
 
       // Options use labelKey - shows i18n keys
-      expect(screen.getByText('medical:procedures.anesthesiaType.options.general')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.anesthesiaType.options.local')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.anesthesiaType.options.regional')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.anesthesiaType.options.sedation')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.anesthesiaType.options.none')).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.anesthesiaType.options.general')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.anesthesiaType.options.local')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.anesthesiaType.options.regional')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.anesthesiaType.options.sedation')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.anesthesiaType.options.none')
+      ).toBeInTheDocument();
     });
   });
 
@@ -365,7 +469,9 @@ describe('MantineProcedureForm', () => {
 
       render(<MantineProcedureForm {...propsWithNoPractitioners} />);
 
-      const practitionerInputs = screen.getAllByLabelText(/shared:fields\.performingPractitioner/);
+      const practitionerInputs = screen.getAllByLabelText(
+        /shared:fields\.performingPractitioner/
+      );
       expect(practitionerInputs.length).toBeGreaterThan(0);
     });
 
@@ -390,12 +496,20 @@ describe('MantineProcedureForm', () => {
       render(<MantineProcedureForm {...defaultProps} />);
 
       // Check that required fields exist
-      expect(screen.getByLabelText(/medical:procedures\.procedureName\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:procedures\.procedureDate\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:procedures\.procedureName\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:procedures\.procedureDate\.label/)
+      ).toBeInTheDocument();
 
       // Check descriptions are present (i18n keys)
-      expect(screen.getByText('medical:procedures.procedureName.description')).toBeInTheDocument();
-      expect(screen.getByText('medical:procedures.procedureDate.description')).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureName.description')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:procedures.procedureDate.description')
+      ).toBeInTheDocument();
     });
 
     test('has proper button styling and accessibility', () => {

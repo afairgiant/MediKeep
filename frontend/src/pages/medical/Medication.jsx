@@ -1,4 +1,4 @@
-import React, {
+import {
   useState,
   useRef,
   useEffect,
@@ -15,7 +15,6 @@ import {
   Text,
   Container,
   Paper,
-  Title,
   Badge,
   Group,
 } from '@mantine/core';
@@ -36,7 +35,6 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import { ResponsiveTable } from '../../components/adapters';
 import MedicalPageFilters from '../../components/shared/MedicalPageFilters';
@@ -55,7 +53,6 @@ import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
 import { usePagination } from '../../hooks/usePagination';
 import {
   MEDICATION_TYPES,
-  MEDICATION_TYPE_LABELS,
 } from '../../constants/medicationTypes';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import logger from '../../services/logger';
@@ -68,7 +65,17 @@ const Medication = () => {
   const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('medications');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Form state - moved up to be available for refs logic
   const [showAddForm, setShowAddForm] = useState(false);
@@ -131,11 +138,14 @@ const Medication = () => {
   const [conditions, setConditions] = useState([]);
   useEffect(() => {
     if (!currentPatient?.id) return;
-    apiService.getConditionsDropdown(false).then(data => {
-      setConditions(data || []);
-    }).catch(err => {
-      logger.warn('Failed to fetch conditions dropdown:', err);
-    });
+    apiService
+      .getConditionsDropdown(false)
+      .then(data => {
+        setConditions(data || []);
+      })
+      .catch(err => {
+        logger.warn('Failed to fetch conditions dropdown:', err);
+      });
   }, [currentPatient?.id]);
 
   // Get standardized configuration
@@ -145,7 +155,8 @@ const Medication = () => {
   const dataManagement = useDataManagement(medications, config);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('medication', medications);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('medication', medications);
 
   // View modal navigation with URL deep linking
   const {
@@ -159,14 +170,20 @@ const Medication = () => {
   });
 
   // Display medication purpose (indication only, since conditions are now linked via many-to-many)
-  const getMedicationPurpose = (medication, asText = false) => {
+  const getMedicationPurpose = (medication, _asText = false) => {
     const indication = medication.indication?.trim();
     return indication || '-';
   };
 
   // Get standardized formatters for medications with linking support
   const formatters = {
-    ...getEntityFormatters('medications', practitioners, navigate, null, formatDate),
+    ...getEntityFormatters(
+      'medications',
+      practitioners,
+      navigate,
+      null,
+      formatDate
+    ),
     // Override indication formatter to use smart display (text version for tables)
     indication: (value, medication) => getMedicationPurpose(medication, true),
   };
@@ -216,7 +233,7 @@ const Medication = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('medications_form_error', {
         message: 'Form submission error in medications',
         error,
@@ -306,7 +323,7 @@ const Medication = () => {
     });
     setEditingMedication(medication);
     setShowAddForm(true);
-  }, []);
+  }, [resetSubmission]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
@@ -407,7 +424,10 @@ const Medication = () => {
                 component: 'Medication',
               });
               notifications.show({
-                title: t('medical:medications.form.conditionLinkPartialFailure', { count: failures.length }),
+                title: t(
+                  'medical:medications.form.conditionLinkPartialFailure',
+                  { count: failures.length }
+                ),
                 message: t('medical:medications.form.conditionLinkFailed'),
                 color: 'yellow',
               });
@@ -462,8 +482,6 @@ const Medication = () => {
       setError,
       updateItem,
       createItem,
-      resetForm,
-      refreshData,
       startSubmission,
       canSubmit,
       completeFormSubmission,
@@ -494,16 +512,27 @@ const Medication = () => {
 
   const paginatedMedications = paginateData(processedMedications);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(processedMedications.length); }, [processedMedications.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(processedMedications.length);
+  }, [processedMedications.length, clampPage]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('medications.loading', 'Loading medications...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('medications.loading', 'Loading medications...')}
+      />
+    );
   }
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('shared:categories.medications', 'Medications')} icon="💊" />
+      <PageHeader
+        title={t('shared:categories.medications', 'Medications')}
+        icon="💊"
+      />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -671,7 +700,7 @@ const Medication = () => {
           isLoading={isBlocking}
           statusMessage={statusMessage}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onFileUploadComplete={(success, completedCount, failedCount) => {
+          onFileUploadComplete={(success, _completedCount, _failedCount) => {
             if (success && editingMedication?.id) {
               refreshFileCount(editingMedication.id);
             }
@@ -687,16 +716,25 @@ const Medication = () => {
           {processedMedications.length === 0 ? (
             <EmptyState
               icon={IconAlertTriangle}
-              title={t('medications.noMedications', 'No medications or supplements found')}
+              title={t(
+                'medications.noMedications',
+                'No medications or supplements found'
+              )}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('medications.clickToStart', 'Click "Add New Medication" to get started.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'medications.clickToStart',
+                'Click "Add New Medication" to get started.'
+              )}
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
               items={paginatedMedications}
               staggerDelay={0.05}
-              renderCard={(medication) => (
+              renderCard={medication => (
                 <MedicationCard
                   medication={medication}
                   onView={handleViewMedication}
@@ -801,7 +839,15 @@ const Medication = () => {
             </Paper>
           )}
           {processedMedications.length > 0 && (
-            <PaginationControls page={page} totalPages={totalPages(processedMedications.length)} pageSize={pageSize} totalRecords={processedMedications.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(processedMedications.length)}
+              pageSize={pageSize}
+              totalRecords={processedMedications.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </motion.div>
 

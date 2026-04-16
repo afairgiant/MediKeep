@@ -16,9 +16,7 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
     patient-specific insurance queries, type filtering, and status management.
     """
 
-    def get_by_patient(
-        self, db: Session, *, patient_id: int
-    ) -> List[Insurance]:
+    def get_by_patient(self, db: Session, *, patient_id: int) -> List[Insurance]:
         """
         Get all insurance records for a specific patient.
 
@@ -35,9 +33,7 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
             order_by="insurance_type",
         )
 
-    def get_active_by_patient(
-        self, db: Session, *, patient_id: int
-    ) -> List[Insurance]:
+    def get_active_by_patient(self, db: Session, *, patient_id: int) -> List[Insurance]:
         """
         Get all active insurance records for a specific patient.
 
@@ -94,7 +90,7 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
                     Insurance.patient_id == patient_id,
                     Insurance.insurance_type == "medical",
                     Insurance.is_primary == True,
-                    Insurance.status == "active"
+                    Insurance.status == "active",
                 )
             )
             .first()
@@ -160,13 +156,13 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
                 and_(
                     Insurance.patient_id == patient_id,
                     Insurance.insurance_type == insurance.insurance_type,
-                    Insurance.id != insurance_id
+                    Insurance.id != insurance_id,
                 )
             ).update({"is_primary": False})
-            
+
             # Set this insurance as primary
             return self.update(db, db_obj=insurance, obj_in={"is_primary": True})
-        
+
         return None
 
     def get_expiring_soon(
@@ -184,8 +180,9 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
             List of insurance records expiring soon
         """
         from datetime import date, timedelta
+
         future_date = date.today() + timedelta(days=days)
-        
+
         return (
             db.query(Insurance)
             .filter(
@@ -193,7 +190,7 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
                     Insurance.patient_id == patient_id,
                     Insurance.status == "active",
                     Insurance.expiration_date.is_not(None),
-                    Insurance.expiration_date <= future_date
+                    Insurance.expiration_date <= future_date,
                 )
             )
             .order_by(Insurance.expiration_date)
@@ -219,7 +216,7 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
             .filter(
                 and_(
                     Insurance.patient_id == patient_id,
-                    Insurance.company_name.ilike(f"%{company_name}%")
+                    Insurance.company_name.ilike(f"%{company_name}%"),
                 )
             )
             .order_by(Insurance.company_name)

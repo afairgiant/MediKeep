@@ -1,6 +1,7 @@
 """
 Tests for UserPreferences CRUD operations.
 """
+
 import pytest
 from datetime import date
 from sqlalchemy.orm import Session
@@ -101,12 +102,18 @@ class TestUserPreferencesCRUD:
         """Test that get_by_user_id returns preferences for correct user."""
         # Create two users
         user1_data = UserCreate(
-            username="user1", email="user1@example.com",
-            password="password123", full_name="User One", role="user"
+            username="user1",
+            email="user1@example.com",
+            password="password123",
+            full_name="User One",
+            role="user",
         )
         user2_data = UserCreate(
-            username="user2", email="user2@example.com",
-            password="password123", full_name="User Two", role="user"
+            username="user2",
+            email="user2@example.com",
+            password="password123",
+            full_name="User Two",
+            role="user",
         )
 
         user1 = user_crud.create(db_session, obj_in=user1_data)

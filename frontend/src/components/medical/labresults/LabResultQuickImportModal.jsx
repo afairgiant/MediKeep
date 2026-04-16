@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Modal,
@@ -52,7 +52,12 @@ const LabResultQuickImportModal = ({
 
     // Validate required fields
     if (!patientId) {
-      setError(t('labresults:patientIdRequired', 'Patient ID is required. Please select a patient first.'));
+      setError(
+        t(
+          'labresults:patientIdRequired',
+          'Patient ID is required. Please select a patient first.'
+        )
+      );
       return;
     }
 
@@ -68,18 +73,26 @@ const LabResultQuickImportModal = ({
     // Validate sanitized value (after removing dangerous characters)
     if (sanitizedTestName.length < MIN_TEST_NAME_LENGTH) {
       setError(
-        t('labresults:testNameTooShort', 'Test name must be at least {{minLength}} characters', {
-          minLength: MIN_TEST_NAME_LENGTH,
-        })
+        t(
+          'labresults:testNameTooShort',
+          'Test name must be at least {{minLength}} characters',
+          {
+            minLength: MIN_TEST_NAME_LENGTH,
+          }
+        )
       );
       return;
     }
 
     if (sanitizedTestName.length > MAX_TEST_NAME_LENGTH) {
       setError(
-        t('labresults:testNameTooLong', 'Test name cannot exceed {{maxLength}} characters', {
-          maxLength: MAX_TEST_NAME_LENGTH,
-        })
+        t(
+          'labresults:testNameTooLong',
+          'Test name cannot exceed {{maxLength}} characters',
+          {
+            maxLength: MAX_TEST_NAME_LENGTH,
+          }
+        )
       );
       return;
     }
@@ -93,8 +106,8 @@ const LabResultQuickImportModal = ({
       const labResultData = {
         patient_id: patientId,
         test_name: sanitizedTestName,
-        status: 'completed',  // We have results, so it's completed
-        ordered_date: null,   // Will be set from PDF or defaulted
+        status: 'completed', // We have results, so it's completed
+        ordered_date: null, // Will be set from PDF or defaulted
         completed_date: null, // Will be set from PDF
         facility: null,
         practitioner_id: null,
@@ -149,9 +162,10 @@ const LabResultQuickImportModal = ({
             const message = error.msg || error.message || 'Invalid value';
 
             // Map field names to user-friendly names
-            const fieldName = field === 'test_name'
-              ? t('labresults:testNameLabel', 'Test name')
-              : field.replace(/_/g, ' ');
+            const fieldName =
+              field === 'test_name'
+                ? t('labresults:testNameLabel', 'Test name')
+                : field.replace(/_/g, ' ');
 
             return `${fieldName}: ${message}`;
           });
@@ -165,18 +179,43 @@ const LabResultQuickImportModal = ({
       }
       // Detect network errors for better user messaging
       else if (err instanceof TypeError && !navigator.onLine) {
-        errorMessage = t('labresults:networkError', 'Network error. Please check your connection and try again.');
-      } else if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT' || err.message?.toLowerCase().includes('timeout')) {
-        errorMessage = t('labresults:timeoutError', 'Request timed out. Please try again.');
-      } else if (err instanceof TypeError || err.code === 'ECONNREFUSED' || err.code === 'ECONNRESET') {
-        errorMessage = t('labresults:networkError', 'Network error. Please check your connection and try again.');
+        errorMessage = t(
+          'labresults:networkError',
+          'Network error. Please check your connection and try again.'
+        );
+      } else if (
+        err.code === 'ECONNABORTED' ||
+        err.code === 'ETIMEDOUT' ||
+        err.message?.toLowerCase().includes('timeout')
+      ) {
+        errorMessage = t(
+          'labresults:timeoutError',
+          'Request timed out. Please try again.'
+        );
+      } else if (
+        err instanceof TypeError ||
+        err.code === 'ECONNREFUSED' ||
+        err.code === 'ECONNRESET'
+      ) {
+        errorMessage = t(
+          'labresults:networkError',
+          'Network error. Please check your connection and try again.'
+        );
       }
 
-      setError(errorMessage || t('labresults:createFailedTryAgain', 'Failed to create lab result. Please try again.'));
+      setError(
+        errorMessage ||
+          t(
+            'labresults:createFailedTryAgain',
+            'Failed to create lab result. Please try again.'
+          )
+      );
 
       notifications.show({
         title: t('shared:labels.error', 'Error'),
-        message: errorMessage || t('labresults:createFailed', 'Failed to create lab result'),
+        message:
+          errorMessage ||
+          t('labresults:createFailed', 'Failed to create lab result'),
         color: 'red',
         autoClose: 5000,
       });
@@ -258,7 +297,13 @@ const LabResultQuickImportModal = ({
       resetState();
       onClose();
     }
-  }, [createdLabResultId, componentsAdded, parsedComponentCount, onClose, resetState]);
+  }, [
+    createdLabResultId,
+    componentsAdded,
+    parsedComponentCount,
+    onClose,
+    resetState,
+  ]);
 
   // Handle delete confirmation
   const handleConfirmDelete = useCallback(async () => {
@@ -349,12 +394,24 @@ const LabResultQuickImportModal = ({
           {/* Stepper */}
           <Stepper active={activeStep} size="sm">
             <Stepper.Step
-              label={t('labresults:stepperLabels.labResultInfo', 'Lab Result Info')}
-              description={t('labresults:stepperLabels.enterTestName', 'Enter test name')}
+              label={t(
+                'labresults:stepperLabels.labResultInfo',
+                'Lab Result Info'
+              )}
+              description={t(
+                'labresults:stepperLabels.enterTestName',
+                'Enter test name'
+              )}
             />
             <Stepper.Step
-              label={t('labresults:stepperLabels.uploadParse', 'Upload & Parse')}
-              description={t('labresults:stepperLabels.importFromPdf', 'Import from PDF')}
+              label={t(
+                'labresults:stepperLabels.uploadParse',
+                'Upload & Parse'
+              )}
+              description={t(
+                'labresults:stepperLabels.importFromPdf',
+                'Import from PDF'
+              )}
             />
           </Stepper>
 
@@ -437,7 +494,10 @@ const LabResultQuickImportModal = ({
 
               <FormLoadingOverlay
                 visible={isCreating}
-                message={t('labresults:creatingLabResult', 'Creating lab result...')}
+                message={t(
+                  'labresults:creatingLabResult',
+                  'Creating lab result...'
+                )}
               />
             </Stack>
           )}
@@ -473,7 +533,9 @@ const LabResultQuickImportModal = ({
 
                   notifications.show({
                     title: t('shared:labels.error', 'Error'),
-                    message: error.message || t('labresults:errorOccurred', 'An error occurred'),
+                    message:
+                      error.message ||
+                      t('labresults:errorOccurred', 'An error occurred'),
                     color: 'red',
                   });
                 }}
@@ -487,10 +549,7 @@ const LabResultQuickImportModal = ({
       <Modal
         opened={showDataLossWarning}
         onClose={handleCancelDataLoss}
-        title={t(
-          'labResults.unsavedDataWarning',
-          'Unsaved Parsed Data'
-        )}
+        title={t('labResults.unsavedDataWarning', 'Unsaved Parsed Data')}
         size="md"
         centered
         zIndex={3002}
@@ -498,11 +557,15 @@ const LabResultQuickImportModal = ({
         aria-describedby="data-loss-warning-description"
       >
         <Stack gap="md">
-          <Alert icon={<IconAlertCircle size={16} />} color="orange" role="alert">
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            color="orange"
+            role="alert"
+          >
             <Text size="sm" id="data-loss-warning-description">
               {t(
                 'labResults.unsavedDataMessage',
-                'You have {{count}} parsed test component(s) that haven\'t been added yet. If you close now, you\'ll lose this parsed data.',
+                "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
                 { count: parsedComponentCount }
               )}
             </Text>

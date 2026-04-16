@@ -1,7 +1,5 @@
 import logger from '../services/logger';
 
-import fs from 'fs';
-import path from 'path';
 
 // Configuration for each medical page
 const pageConfigs = {

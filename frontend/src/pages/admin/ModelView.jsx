@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -46,7 +46,10 @@ const ModelView = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [
+    deleteModalOpened,
+    { open: openDeleteModal, close: closeDeleteModal },
+  ] = useDisclosure(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -103,14 +106,19 @@ const ModelView = () => {
       await adminApiService.deleteModelRecord(modelName, recordId);
       notifications.show({
         title: t('models.recordDeleted', 'Record deleted'),
-        message: t('models.recordDeletedMessage', { modelName, id: recordId, defaultValue: `Successfully deleted ${modelName} record #${recordId}` }),
+        message: t('models.recordDeletedMessage', {
+          modelName,
+          id: recordId,
+          defaultValue: `Successfully deleted ${modelName} record #${recordId}`,
+        }),
         color: 'green',
       });
       navigate(`/admin/models/${modelName}`);
     } catch (err) {
       notifications.show({
         title: t('models.deleteFailed', 'Delete failed'),
-        message: err.message || t('models.failedToDelete', 'Failed to delete record'),
+        message:
+          err.message || t('models.failedToDelete', 'Failed to delete record'),
         color: 'red',
       });
     } finally {
@@ -138,11 +146,23 @@ const ModelView = () => {
       <AdminLayout>
         <Center style={{ minHeight: 'calc(100vh - 140px)' }}>
           <Stack align="center" gap="md">
-            <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" title="Error">
+            <Alert
+              icon={<IconAlertCircle size={16} />}
+              color="red"
+              variant="light"
+              title="Error"
+            >
               {error}
             </Alert>
-            <Button variant="default" leftSection={<IconArrowLeft size={16} />} onClick={handleBack}>
-              {t('models.backToModel', { modelName, defaultValue: `Back to ${modelName}` })}
+            <Button
+              variant="default"
+              leftSection={<IconArrowLeft size={16} />}
+              onClick={handleBack}
+            >
+              {t('models.backToModel', {
+                modelName,
+                defaultValue: `Back to ${modelName}`,
+              })}
             </Button>
           </Stack>
         </Center>
@@ -166,8 +186,18 @@ const ModelView = () => {
           </Button>
           <Group justify="space-between" align="flex-end">
             <div>
-              <Title order={2}>{t('models.viewRecord', { modelName: metadata?.display_name || modelName, defaultValue: `View ${metadata?.display_name || modelName}` })}</Title>
-              <Text c="dimmed" size="sm">{t('models.recordId', { id: recordId, defaultValue: `Record ID: ${recordId}` })}</Text>
+              <Title order={2}>
+                {t('models.viewRecord', {
+                  modelName: metadata?.display_name || modelName,
+                  defaultValue: `View ${metadata?.display_name || modelName}`,
+                })}
+              </Title>
+              <Text c="dimmed" size="sm">
+                {t('models.recordId', {
+                  id: recordId,
+                  defaultValue: `Record ID: ${recordId}`,
+                })}
+              </Text>
             </div>
             <Group gap="sm">
               <Button
@@ -201,10 +231,24 @@ const ModelView = () => {
                 }}
               >
                 <Group gap="xs" mb={4}>
-                  <Text size="sm" fw={600}>{field.name}</Text>
-                  {field.primary_key && <Badge size="xs" color="yellow" variant="light">PK</Badge>}
-                  {field.foreign_key && <Badge size="xs" color="violet" variant="light">FK</Badge>}
-                  {!field.nullable && <Text size="xs" c="red" fw={700}>*</Text>}
+                  <Text size="sm" fw={600}>
+                    {field.name}
+                  </Text>
+                  {field.primary_key && (
+                    <Badge size="xs" color="yellow" variant="light">
+                      PK
+                    </Badge>
+                  )}
+                  {field.foreign_key && (
+                    <Badge size="xs" color="violet" variant="light">
+                      FK
+                    </Badge>
+                  )}
+                  {!field.nullable && (
+                    <Text size="xs" c="red" fw={700}>
+                      *
+                    </Text>
+                  )}
                 </Group>
                 <Paper
                   p="sm"
@@ -219,9 +263,14 @@ const ModelView = () => {
                   {formatFieldValue(record[field.name], field.type)}
                 </Paper>
                 <Text size="xs" c="dimmed" mt={4} fs="italic">
-                  {t('models.fieldType', { type: field.type, defaultValue: `Type: ${field.type}` })}
-                  {field.max_length && ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
-                  {field.foreign_key && ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
+                  {t('models.fieldType', {
+                    type: field.type,
+                    defaultValue: `Type: ${field.type}`,
+                  })}
+                  {field.max_length &&
+                    ` | ${t('models.fieldMaxLength', { length: field.max_length, defaultValue: `Max Length: ${field.max_length}` })}`}
+                  {field.foreign_key &&
+                    ` | ${t('models.fieldReferences', { reference: field.foreign_key, defaultValue: `References: ${field.foreign_key}` })}`}
                 </Text>
               </div>
             ))}
@@ -231,7 +280,9 @@ const ModelView = () => {
         {/* Raw JSON */}
         <Paper withBorder p="md" radius="md">
           <details>
-            <summary style={{ cursor: 'pointer', fontWeight: 500, marginBottom: 8 }}>
+            <summary
+              style={{ cursor: 'pointer', fontWeight: 500, marginBottom: 8 }}
+            >
               {t('models.rawDataJson', 'Raw Data (JSON)')}
             </summary>
             <Code block>{JSON.stringify(record, null, 2)}</Code>
@@ -245,20 +296,31 @@ const ModelView = () => {
           title={
             <Group gap="xs">
               <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" />
-              <Text fw={600}>{t('models.confirmDeletion', 'Confirm Deletion')}</Text>
+              <Text fw={600}>
+                {t('models.confirmDeletion', 'Confirm Deletion')}
+              </Text>
             </Group>
           }
           centered
         >
           <Stack gap="md">
             {requiresEnhancedDeletionWarning(modelName) ? (
-              <Alert color="red" variant="light" icon={<IconAlertTriangle size={16} />}>
+              <Alert
+                color="red"
+                variant="light"
+                icon={<IconAlertTriangle size={16} />}
+              >
                 <Text size="sm" fw={500} mb="xs">
-                  {t('models.deleteWarning', { modelName, defaultValue: `This will permanently delete this ${modelName} record and all associated data:` })}
+                  {t('models.deleteWarning', {
+                    modelName,
+                    defaultValue: `This will permanently delete this ${modelName} record and all associated data:`,
+                  })}
                 </Text>
                 <ul style={{ margin: 0, paddingLeft: 20 }}>
                   {getCascadeTypes(modelName).map(type => (
-                    <li key={type}><Text size="sm">{type}</Text></li>
+                    <li key={type}>
+                      <Text size="sm">{type}</Text>
+                    </li>
                   ))}
                 </ul>
               </Alert>
@@ -268,8 +330,14 @@ const ModelView = () => {
               </Text>
             )}
             <Group justify="flex-end" gap="sm">
-              <Button variant="default" onClick={closeDeleteModal}>{t('shared:fields.cancel', 'Cancel')}</Button>
-              <Button color="red" onClick={handleConfirmDelete} loading={deleting}>
+              <Button variant="default" onClick={closeDeleteModal}>
+                {t('shared:fields.cancel', 'Cancel')}
+              </Button>
+              <Button
+                color="red"
+                onClick={handleConfirmDelete}
+                loading={deleting}
+              >
                 {t('common:buttons.delete', 'Delete')}
               </Button>
             </Group>

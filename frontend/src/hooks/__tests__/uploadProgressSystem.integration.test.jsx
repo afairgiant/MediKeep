@@ -34,25 +34,21 @@ vi.mock('../../constants/errorMessages', () => ({
     UPLOAD_MULTIPLE_SUCCESS: 'All files uploaded successfully',
   },
   WARNING_MESSAGES: {},
-  getUserFriendlyError: vi.fn((error) => `User friendly: ${error}`),
-  formatErrorWithContext: vi.fn((error) => error),
+  getUserFriendlyError: vi.fn(error => `User friendly: ${error}`),
+  formatErrorWithContext: vi.fn(error => error),
 }));
 
 // Wrapper component for Mantine provider
-const wrapper = ({ children }) => (
-  <MantineProvider>
-    {children}
-  </MantineProvider>
-);
+const wrapper = ({ children }) => <MantineProvider>{children}</MantineProvider>;
 
 // Integration test component that combines both hooks
-const UploadProgressSystem = ({ 
-  onSuccess, 
-  onError, 
+const UploadProgressSystem = ({
+  onSuccess,
+  onError,
   entityType = 'test-entity',
   simulateErrors = false,
   simulatePartialFailure = false,
-  files = []
+  files = [],
 }) => {
   const formHook = useFormSubmissionWithUploads({
     entityType,
@@ -73,12 +69,15 @@ const UploadProgressSystem = ({
       await new Promise(resolve => setTimeout(resolve, 100));
 
       if (simulateErrors) {
-        formHook.handleSubmissionFailure(new Error('Form submission failed'), 'form');
+        formHook.handleSubmissionFailure(
+          new Error('Form submission failed'),
+          'form'
+        );
         return;
       }
 
       // Complete form submission
-      const entityId = formHook.completeFormSubmission(true, 'entity-123');
+      formHook.completeFormSubmission(true, 'entity-123');
 
       if (files.length > 0) {
         // Start file upload process
@@ -89,9 +88,18 @@ const UploadProgressSystem = ({
         for (const file of files) {
           for (let progress = 0; progress <= 100; progress += 25) {
             await new Promise(resolve => setTimeout(resolve, 50));
-            
-            if (simulatePartialFailure && file.id === 'file-2' && progress === 50) {
-              uploadHook.updateFileProgress(file.id, progress, 'failed', 'Simulated upload error');
+
+            if (
+              simulatePartialFailure &&
+              file.id === 'file-2' &&
+              progress === 50
+            ) {
+              uploadHook.updateFileProgress(
+                file.id,
+                progress,
+                'failed',
+                'Simulated upload error'
+              );
               break;
             } else if (progress === 100) {
               uploadHook.updateFileProgress(file.id, progress, 'completed');
@@ -136,7 +144,9 @@ const UploadProgressSystem = ({
         })}
       </div>
       <div data-testid="status-message">
-        {formHook.statusMessage ? JSON.stringify(formHook.statusMessage) : 'null'}
+        {formHook.statusMessage
+          ? JSON.stringify(formHook.statusMessage)
+          : 'null'}
       </div>
       <button onClick={handleSubmit} data-testid="submit-button">
         Submit
@@ -156,7 +166,11 @@ describe('Upload Progress System Integration Tests', () => {
   });
 
   afterEach(() => {
-    try { vi.runOnlyPendingTimers(); } catch (e) { /* already using real timers */ }
+    try {
+      vi.runOnlyPendingTimers();
+    } catch (e) {
+      /* already using real timers */
+    }
     vi.useRealTimers();
   });
 
@@ -164,7 +178,7 @@ describe('Upload Progress System Integration Tests', () => {
     test('should handle form submission without files successfully', async () => {
       render(
         <MantineProvider>
-          <UploadProgressSystem 
+          <UploadProgressSystem
             onSuccess={mockOnSuccess}
             onError={mockOnError}
           />
@@ -180,7 +194,9 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
         expect(formState.isCompleted).toBe(true);
         expect(formState.canClose).toBe(true);
       });
@@ -196,12 +212,17 @@ describe('Upload Progress System Integration Tests', () => {
 
     test('should handle form submission with single file upload successfully', async () => {
       const testFiles = [
-        { id: 'file-1', name: 'test.pdf', size: 1000, description: 'Test file' }
+        {
+          id: 'file-1',
+          name: 'test.pdf',
+          size: 1000,
+          description: 'Test file',
+        },
       ];
 
       render(
         <MantineProvider>
-          <UploadProgressSystem 
+          <UploadProgressSystem
             onSuccess={mockOnSuccess}
             onError={mockOnError}
             files={testFiles}
@@ -217,9 +238,13 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
-        const uploadState = JSON.parse(screen.getByTestId('upload-state').textContent);
-        
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
+        const uploadState = JSON.parse(
+          screen.getByTestId('upload-state').textContent
+        );
+
         expect(formState.isCompleted).toBe(true);
         expect(uploadState.isCompleted).toBe(true);
         expect(uploadState.hasErrors).toBe(false);
@@ -230,14 +255,29 @@ describe('Upload Progress System Integration Tests', () => {
 
     test('should handle form submission with multiple files successfully', async () => {
       const testFiles = [
-        { id: 'file-1', name: 'test1.pdf', size: 1000, description: 'Test file 1' },
-        { id: 'file-2', name: 'test2.pdf', size: 2000, description: 'Test file 2' },
-        { id: 'file-3', name: 'test3.pdf', size: 1500, description: 'Test file 3' },
+        {
+          id: 'file-1',
+          name: 'test1.pdf',
+          size: 1000,
+          description: 'Test file 1',
+        },
+        {
+          id: 'file-2',
+          name: 'test2.pdf',
+          size: 2000,
+          description: 'Test file 2',
+        },
+        {
+          id: 'file-3',
+          name: 'test3.pdf',
+          size: 1500,
+          description: 'Test file 3',
+        },
       ];
 
       render(
         <MantineProvider>
-          <UploadProgressSystem 
+          <UploadProgressSystem
             onSuccess={mockOnSuccess}
             onError={mockOnError}
             files={testFiles}
@@ -254,7 +294,9 @@ describe('Upload Progress System Integration Tests', () => {
 
       // Check intermediate state
       await waitFor(() => {
-        const uploadState = JSON.parse(screen.getByTestId('upload-state').textContent);
+        const uploadState = JSON.parse(
+          screen.getByTestId('upload-state').textContent
+        );
         expect(uploadState.isUploading).toBe(true);
         expect(uploadState.overallProgress).toBeGreaterThan(0);
       });
@@ -265,9 +307,13 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
-        const uploadState = JSON.parse(screen.getByTestId('upload-state').textContent);
-        
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
+        const uploadState = JSON.parse(
+          screen.getByTestId('upload-state').textContent
+        );
+
         expect(formState.isCompleted).toBe(true);
         expect(uploadState.isCompleted).toBe(true);
         expect(uploadState.overallProgress).toBe(100);
@@ -281,7 +327,7 @@ describe('Upload Progress System Integration Tests', () => {
     test('should handle form submission failure', async () => {
       render(
         <MantineProvider>
-          <UploadProgressSystem 
+          <UploadProgressSystem
             onSuccess={mockOnSuccess}
             onError={mockOnError}
             simulateErrors={true}
@@ -296,24 +342,38 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
         expect(formState.isCompleted).toBe(true);
         expect(formState.isSubmitting).toBe(false);
       });
 
-      expect(mockOnError).toHaveBeenCalledWith('User friendly: Error: Form submission failed');
+      expect(mockOnError).toHaveBeenCalledWith(
+        'User friendly: Error: Form submission failed'
+      );
       expect(mockOnSuccess).not.toHaveBeenCalled();
     });
 
     test('should handle partial upload failure', async () => {
       const testFiles = [
-        { id: 'file-1', name: 'test1.pdf', size: 1000, description: 'Test file 1' },
-        { id: 'file-2', name: 'test2.pdf', size: 2000, description: 'Test file 2' },
+        {
+          id: 'file-1',
+          name: 'test1.pdf',
+          size: 1000,
+          description: 'Test file 1',
+        },
+        {
+          id: 'file-2',
+          name: 'test2.pdf',
+          size: 2000,
+          description: 'Test file 2',
+        },
       ];
 
       render(
         <MantineProvider>
-          <UploadProgressSystem 
+          <UploadProgressSystem
             onSuccess={mockOnSuccess}
             onError={mockOnError}
             files={testFiles}
@@ -329,7 +389,9 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
         expect(formState.isCompleted).toBe(true);
       });
 
@@ -341,12 +403,17 @@ describe('Upload Progress System Integration Tests', () => {
   describe('State Coordination', () => {
     test('should properly coordinate state transitions between form and upload', async () => {
       const testFiles = [
-        { id: 'file-1', name: 'test.pdf', size: 1000, description: 'Test file' }
+        {
+          id: 'file-1',
+          name: 'test.pdf',
+          size: 1000,
+          description: 'Test file',
+        },
       ];
 
       render(
         <MantineProvider>
-          <UploadProgressSystem 
+          <UploadProgressSystem
             onSuccess={mockOnSuccess}
             onError={mockOnError}
             files={testFiles}
@@ -362,7 +429,9 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
         expect(formState.isSubmitting).toBe(true);
         expect(formState.isUploading).toBe(false);
       });
@@ -373,8 +442,12 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
-        const uploadState = JSON.parse(screen.getByTestId('upload-state').textContent);
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
+        const uploadState = JSON.parse(
+          screen.getByTestId('upload-state').textContent
+        );
 
         expect(formState.isSubmitting).toBe(false);
         expect(formState.isUploading).toBe(true);
@@ -387,9 +460,13 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const formState = JSON.parse(screen.getByTestId('form-state').textContent);
-        const uploadState = JSON.parse(screen.getByTestId('upload-state').textContent);
-        
+        const formState = JSON.parse(
+          screen.getByTestId('form-state').textContent
+        );
+        const uploadState = JSON.parse(
+          screen.getByTestId('upload-state').textContent
+        );
+
         expect(formState.isUploading).toBe(false);
         expect(formState.isCompleted).toBe(true);
         expect(uploadState.isCompleted).toBe(true);
@@ -398,12 +475,17 @@ describe('Upload Progress System Integration Tests', () => {
 
     test('should show appropriate status messages during workflow', async () => {
       const testFiles = [
-        { id: 'file-1', name: 'test.pdf', size: 1000, description: 'Test file' }
+        {
+          id: 'file-1',
+          name: 'test.pdf',
+          size: 1000,
+          description: 'Test file',
+        },
       ];
 
       render(
         <MantineProvider>
-          <UploadProgressSystem 
+          <UploadProgressSystem
             onSuccess={mockOnSuccess}
             onError={mockOnError}
             files={testFiles}
@@ -419,7 +501,9 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const statusMessage = JSON.parse(screen.getByTestId('status-message').textContent);
+        const statusMessage = JSON.parse(
+          screen.getByTestId('status-message').textContent
+        );
         expect(statusMessage.title).toBe('Saving Form...');
         expect(statusMessage.type).toBe('loading');
       });
@@ -430,7 +514,9 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const statusMessage = JSON.parse(screen.getByTestId('status-message').textContent);
+        const statusMessage = JSON.parse(
+          screen.getByTestId('status-message').textContent
+        );
         expect(statusMessage.title).toBe('Uploading Files...');
         expect(statusMessage.type).toBe('loading');
       });
@@ -441,7 +527,9 @@ describe('Upload Progress System Integration Tests', () => {
       });
 
       await waitFor(() => {
-        const statusMessage = JSON.parse(screen.getByTestId('status-message').textContent);
+        const statusMessage = JSON.parse(
+          screen.getByTestId('status-message').textContent
+        );
         expect(statusMessage.title).toBe('Success!');
         expect(statusMessage.type).toBe('success');
       });
@@ -463,8 +551,12 @@ describe('Upload Progress System Integration Tests', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
-      expect(screen.getByText('documents:errorBoundary.uploadErrorDescription')).toBeInTheDocument();
+      expect(
+        screen.getByText('documents:errorBoundary.uploadError')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('documents:errorBoundary.uploadErrorDescription')
+      ).toBeInTheDocument();
     });
 
     test('should allow recovery from upload progress errors', () => {
@@ -477,7 +569,7 @@ describe('Upload Progress System Integration Tests', () => {
         return <div data-testid="upload-progress-system">System recovered</div>;
       };
 
-      const { rerender } = render(
+      render(
         <MantineProvider>
           <UploadProgressErrorBoundary>
             <RecoverableUploadSystem />
@@ -485,13 +577,17 @@ describe('Upload Progress System Integration Tests', () => {
         </MantineProvider>
       );
 
-      expect(screen.getByText('documents:errorBoundary.uploadError')).toBeInTheDocument();
+      expect(
+        screen.getByText('documents:errorBoundary.uploadError')
+      ).toBeInTheDocument();
 
       // Fix the error before clicking Continue, so re-render doesn't throw again
       hasError = false;
 
       // Click Continue to attempt recovery
-      fireEvent.click(screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' }));
+      fireEvent.click(
+        screen.getByRole('button', { name: 'documents:errorBoundary.tryAgain' })
+      );
 
       expect(screen.getByTestId('upload-progress-system')).toBeInTheDocument();
     });
@@ -503,15 +599,19 @@ describe('Upload Progress System Integration Tests', () => {
     });
 
     test('should handle multiple simultaneous hook operations', async () => {
-      const { result: formResult } = renderHook(() => 
-        useFormSubmissionWithUploads({
-          entityType: 'test-entity',
-          onSuccess: mockOnSuccess,
-          onError: mockOnError,
-        }), { wrapper }
+      const { result: formResult } = renderHook(
+        () =>
+          useFormSubmissionWithUploads({
+            entityType: 'test-entity',
+            onSuccess: mockOnSuccess,
+            onError: mockOnError,
+          }),
+        { wrapper }
       );
 
-      const { result: uploadResult } = renderHook(() => useUploadProgress(), { wrapper });
+      const { result: uploadResult } = renderHook(() => useUploadProgress(), {
+        wrapper,
+      });
 
       const testFiles = [
         { id: 'file-1', name: 'test1.pdf', size: 1000 },
@@ -566,7 +666,9 @@ describe('Upload Progress System Integration Tests', () => {
     });
 
     test('should clean up resources when components unmount during upload', () => {
-      const { result, unmount } = renderHook(() => useUploadProgress(), { wrapper });
+      const { result, unmount } = renderHook(() => useUploadProgress(), {
+        wrapper,
+      });
 
       const testFiles = [{ id: 'file-1', name: 'test.pdf', size: 1000 }];
 
@@ -629,7 +731,11 @@ describe('Upload Progress System Integration Tests', () => {
       // Update all files rapidly
       act(() => {
         largeFileSet.forEach((file, index) => {
-          result.current.updateFileProgress(file.id, (index + 1) * 2, 'uploading');
+          result.current.updateFileProgress(
+            file.id,
+            (index + 1) * 2,
+            'uploading'
+          );
         });
       });
 

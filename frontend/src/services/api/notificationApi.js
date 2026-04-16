@@ -58,7 +58,11 @@ class NotificationApiService extends BaseApiService {
    * @returns {Promise<Object>} Created channel
    */
   createChannel(data) {
-    return this.post('/channels', data, 'Failed to create notification channel');
+    return this.post(
+      '/channels',
+      data,
+      'Failed to create notification channel'
+    );
   }
 
   /**
@@ -71,7 +75,11 @@ class NotificationApiService extends BaseApiService {
    * @returns {Promise<Object>} Updated channel
    */
   updateChannel(channelId, data) {
-    return this.put(`/channels/${channelId}`, data, 'Failed to update notification channel');
+    return this.put(
+      `/channels/${channelId}`,
+      data,
+      'Failed to update notification channel'
+    );
   }
 
   /**
@@ -80,7 +88,10 @@ class NotificationApiService extends BaseApiService {
    * @returns {Promise<void>}
    */
   deleteChannel(channelId) {
-    return this.delete(`/channels/${channelId}`, 'Failed to delete notification channel');
+    return this.delete(
+      `/channels/${channelId}`,
+      'Failed to delete notification channel'
+    );
   }
 
   /**
@@ -91,7 +102,11 @@ class NotificationApiService extends BaseApiService {
    */
   testChannel(channelId, message = null) {
     const data = message ? { message } : {};
-    return this.post(`/channels/${channelId}/test`, data, 'Failed to send test notification');
+    return this.post(
+      `/channels/${channelId}/test`,
+      data,
+      'Failed to send test notification'
+    );
   }
 
   // =========================================================================
@@ -124,7 +139,11 @@ class NotificationApiService extends BaseApiService {
    * @returns {Promise<Object>} Updated preference
    */
   setPreference(data) {
-    return this.post('/preferences', data, 'Failed to update notification preference');
+    return this.post(
+      '/preferences',
+      data,
+      'Failed to update notification preference'
+    );
   }
 
   /**

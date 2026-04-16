@@ -5,13 +5,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Card,
-  Group,
-  Stack,
-  Text,
-  Badge,
-} from '@mantine/core';
+import { Card, Group, Stack, Text, Badge } from '@mantine/core';
 import {
   IconTrendingUp,
   IconTrendingDown,
@@ -20,33 +14,46 @@ import {
   IconArrowBigDownFilled,
 } from '@tabler/icons-react';
 import { ComponentCatalogEntry } from '../../../services/api/labTestComponentApi';
-import { getCategoryColor, getCategoryDisplayName } from '../../../constants/labCategories';
+import {
+  getCategoryColor,
+  getCategoryDisplayName,
+} from '../../../constants/labCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 
 // useDateFormat is a JS hook without TS declarations
 interface DateFormatHook {
-  formatDate: (dateValue: string | null | undefined) => string;
+  formatDate: (_dateValue: string | null | undefined) => string;
 }
 
 interface TestComponentCatalogCardProps {
   entry: ComponentCatalogEntry;
-  onClick: (testName: string) => void;
+  onClick: (_testName: string) => void;
 }
 
 function getStatusColor(status: string | null | undefined): string {
   if (!status) return 'gray';
   switch (status.toLowerCase()) {
-    case 'normal': return 'green';
-    case 'high': return 'orange';
-    case 'low': return 'orange';
-    case 'critical': return 'red';
-    case 'abnormal': return 'yellow';
-    case 'borderline': return 'yellow';
-    default: return 'gray';
+    case 'normal':
+      return 'green';
+    case 'high':
+      return 'orange';
+    case 'low':
+      return 'orange';
+    case 'critical':
+      return 'red';
+    case 'abnormal':
+      return 'yellow';
+    case 'borderline':
+      return 'yellow';
+    default:
+      return 'gray';
   }
 }
 
-function getStatusLabel(status: string | null | undefined, t: (key: string, fallback: string) => string): string {
+function getStatusLabel(
+  status: string | null | undefined,
+  t: (_key: string, _fallback: string) => string
+): string {
   if (!status) return t('shared:labels.unknown', 'Unknown');
   const key = status.toLowerCase();
   const fallbacks: Record<string, string> = {
@@ -70,29 +77,48 @@ function TrendIcon({ direction }: { direction: string }) {
     case 'decreasing':
       return <IconTrendingDown size={16} color="var(--mantine-color-blue-6)" />;
     case 'worsening':
-      return <IconArrowBigUpFilled size={16} color="var(--mantine-color-red-6)" />;
+      return (
+        <IconArrowBigUpFilled size={16} color="var(--mantine-color-red-6)" />
+      );
     case 'improving':
-      return <IconArrowBigDownFilled size={16} color="var(--mantine-color-green-6)" />;
+      return (
+        <IconArrowBigDownFilled
+          size={16}
+          color="var(--mantine-color-green-6)"
+        />
+      );
     default:
       return <IconMinus size={16} color="var(--mantine-color-gray-5)" />;
   }
 }
 
-function getTrendLabel(direction: string, t: (key: string, fallback: string) => string): string {
+function getTrendLabel(
+  direction: string,
+  t: (_key: string, _fallback: string) => string
+): string {
   switch (direction) {
-    case 'increasing': return t('medical:componentCatalog.trend.increasing', 'Increasing');
-    case 'decreasing': return t('medical:componentCatalog.trend.decreasing', 'Decreasing');
-    case 'worsening': return t('medical:componentCatalog.trend.worsening', 'Worsening');
-    case 'improving': return t('medical:componentCatalog.trend.improving', 'Improving');
-    default: return t('medical:componentCatalog.trend.stable', 'Stable');
+    case 'increasing':
+      return t('medical:componentCatalog.trend.increasing', 'Increasing');
+    case 'decreasing':
+      return t('medical:componentCatalog.trend.decreasing', 'Decreasing');
+    case 'worsening':
+      return t('medical:componentCatalog.trend.worsening', 'Worsening');
+    case 'improving':
+      return t('medical:componentCatalog.trend.improving', 'Improving');
+    default:
+      return t('medical:componentCatalog.trend.stable', 'Stable');
   }
 }
 
-const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({ entry, onClick }) => {
+const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({
+  entry,
+  onClick,
+}) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatDate } = useDateFormat() as DateFormatHook;
 
-  const isQuantitative = (entry.result_type || 'quantitative') === 'quantitative';
+  const isQuantitative =
+    (entry.result_type || 'quantitative') === 'quantitative';
 
   const formattedRefRange = (() => {
     if (entry.ref_range_text) return entry.ref_range_text;
@@ -131,15 +157,13 @@ const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({ ent
         <Group gap="xs" align="baseline">
           {isQuantitative ? (
             <>
-              <Text
-                size="xl"
-                fw={700}
-                c={getStatusColor(entry.status)}
-              >
+              <Text size="xl" fw={700} c={getStatusColor(entry.status)}>
                 {entry.latest_value != null ? entry.latest_value : '--'}
               </Text>
               {entry.unit && (
-                <Text size="xs" c="dimmed">{entry.unit}</Text>
+                <Text size="xs" c="dimmed">
+                  {entry.unit}
+                </Text>
               )}
             </>
           ) : (
@@ -187,7 +211,9 @@ const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({ ent
         {/* Footer: reading count + date */}
         <Group justify="space-between" mt={4}>
           <Text size="xs" c="dimmed">
-            {t('shared:labels.countReadings', '{{count}} readings', { count: entry.reading_count })}
+            {t('shared:labels.countReadings', '{{count}} readings', {
+              count: entry.reading_count,
+            })}
           </Text>
           {entry.latest_date && (
             <Text size="xs" c="dimmed">

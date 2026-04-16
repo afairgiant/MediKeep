@@ -3,7 +3,7 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
-import { expect, afterEach, afterAll, beforeAll, vi } from 'vitest';
+import { afterEach, afterAll, beforeAll, vi } from 'vitest';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
@@ -19,7 +19,10 @@ const mockT = (key, defaultValueOrOptions, options) => {
   if (typeof defaultValueOrOptions === 'string') {
     text = defaultValueOrOptions;
     if (typeof options === 'object') vars = options;
-  } else if (typeof defaultValueOrOptions === 'object' && defaultValueOrOptions !== null) {
+  } else if (
+    typeof defaultValueOrOptions === 'object' &&
+    defaultValueOrOptions !== null
+  ) {
     text = defaultValueOrOptions.defaultValue || key;
     vars = defaultValueOrOptions;
   } else {
@@ -177,9 +180,11 @@ beforeAll(() => {
 import { server } from './test-utils/mocks/server';
 
 // Establish API mocking before all tests
-beforeAll(() => server.listen({
-  onUnhandledRequest: 'error',
-}));
+beforeAll(() =>
+  server.listen({
+    onUnhandledRequest: 'error',
+  })
+);
 
 // Reset any request handlers that we may add during the tests,
 // so they don't affect other tests

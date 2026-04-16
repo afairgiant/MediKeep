@@ -44,7 +44,9 @@ body {
 }
 
 /* Ensure all elements use border-box sizing */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -52,4 +54,3 @@ code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
-

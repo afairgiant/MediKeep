@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Stack,
   Paper,
@@ -12,7 +12,6 @@ import {
   Modal,
   ActionIcon,
   Badge,
-  Divider,
   FileInput,
   TextInput,
   ThemeIcon,
@@ -20,12 +19,8 @@ import {
   Menu,
 } from '@mantine/core';
 import {
-  IconFile,
-  IconDownload,
-  IconTrash,
   IconUpload,
   IconX,
-  IconRestore,
   IconFileText,
   IconAlertTriangle,
   IconRefresh,
@@ -42,12 +37,13 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api';
-import { getPaperlessSettings, linkPaperlessDocument } from '../../services/api/paperlessApi.jsx';
+import {
+  getPaperlessSettings,
+  linkPaperlessDocument,
+} from '../../services/api/paperlessApi.jsx';
 import { linkPapraDocument } from '../../services/api/papraApi.jsx';
 import logger from '../../services/logger';
-import FileUploadZone from './FileUploadZone';
 import FileList from './FileList';
-import FileCountBadge from './FileCountBadge';
 import StorageBackendSelector from './StorageBackendSelector';
 import useDocumentManagerCore from './DocumentManagerCore';
 import LinkPaperlessDocumentModal from './LinkPaperlessDocumentModal';
@@ -79,16 +75,22 @@ const DocumentManager = ({
   // Helper function to get actionable error guidance
   const getErrorGuidance = (errorMessage, storageBackend) => {
     if (storageBackend !== 'paperless') return null;
-    
+
     if (errorMessage.includes('not enabled')) {
       return 'Go to Settings → Storage to enable Paperless integration.';
     } else if (errorMessage.includes('configuration is incomplete')) {
       return 'Go to Settings → Storage to complete your Paperless configuration.';
-    } else if (errorMessage.includes('duplicate') || errorMessage.includes('already exists')) {
+    } else if (
+      errorMessage.includes('duplicate') ||
+      errorMessage.includes('already exists')
+    ) {
       return 'This document already exists in Paperless. No action needed.';
     } else if (errorMessage.includes('connection')) {
       return 'Check your Paperless server connection in Settings → Storage.';
-    } else if (errorMessage.includes('authentication') || errorMessage.includes('unauthorized')) {
+    } else if (
+      errorMessage.includes('authentication') ||
+      errorMessage.includes('unauthorized')
+    ) {
       return 'Check your Paperless credentials in Settings → Storage.';
     }
     return null;
@@ -108,7 +110,10 @@ const DocumentManager = ({
 
   // File upload state for modal
   const [fileUpload, setFileUpload] = useState({ file: null, description: '' });
-  const [modalProgress, setModalProgress] = useState({ status: null, error: null });
+  const [modalProgress, setModalProgress] = useState({
+    status: null,
+    error: null,
+  });
 
   // Paperless settings state
   const [paperlessSettings, setPaperlessSettings] = useState(null);
@@ -126,29 +131,32 @@ const DocumentManager = ({
         // Refresh files list after successful upload
         loadFiles();
       }
-    }
+    },
   });
-  
+
   logger.info('DocumentManager - documentManager object:', documentManager);
-  logger.info('DocumentManager - handleImmediateUpload available:', !!documentManager.handleImmediateUpload);
-  
-  // Use refs to access current state in stable callback  
+  logger.info(
+    'DocumentManager - handleImmediateUpload available:',
+    !!documentManager.handleImmediateUpload
+  );
+
+  // Use refs to access current state in stable callback
   const pendingFilesRef = useRef(pendingFiles);
   const selectedStorageBackendRef = useRef(selectedStorageBackend);
   const paperlessSettingsRef = useRef(paperlessSettings);
-  
+
   useEffect(() => {
     pendingFilesRef.current = pendingFiles;
   }, [pendingFiles]);
-  
+
   useEffect(() => {
     selectedStorageBackendRef.current = selectedStorageBackend;
   }, [selectedStorageBackend]);
-  
+
   useEffect(() => {
     paperlessSettingsRef.current = paperlessSettings;
   }, [paperlessSettings]);
-  
+
   const [paperlessLoading, setPaperlessLoading] = useState(true);
 
   // Load paperless settings
@@ -220,101 +228,117 @@ const DocumentManager = ({
   }, [entityType, entityId, onFileCountChange, onError]);
 
   // Check sync status for Paperless documents
-  const checkSyncStatus = useCallback(async (isManualSync = false) => {
-    if (isManualSync) setSyncLoading(true);
-    
-    try {
-      logger.info('document_manager_sync_check_start', 'Starting Paperless sync status check', {
-        entityType,
-        entityId,
-        isManualSync,
-        component: 'DocumentManager',
-      });
+  const checkSyncStatus = useCallback(
+    async (isManualSync = false) => {
+      if (isManualSync) setSyncLoading(true);
 
-      const status = await apiService.checkPaperlessSyncStatus();
-      setSyncStatus(status);
-      
-      // Count missing files and errors for logging and user notification
-      const missingCount = Object.values(status).filter(exists => exists === false).length;
-      const errorCount = Object.values(status).filter(exists => exists === null).length;
-      const totalChecked = Object.keys(status).length;
-      
-      logger.info('document_manager_sync_check_completed', 'Paperless sync status check completed', {
-        entityType,
-        entityId,
-        isManualSync,
-        totalFilesChecked: totalChecked,
-        missingFilesFound: missingCount,
-        component: 'DocumentManager',
-      });
+      try {
+        logger.info(
+          'document_manager_sync_check_start',
+          'Starting Paperless sync status check',
+          {
+            entityType,
+            entityId,
+            isManualSync,
+            component: 'DocumentManager',
+          }
+        );
 
-      // Show notification for manual sync with results
-      if (isManualSync) {
-        const { notifications } = await import('@mantine/notifications');
-        const { IconCheck, IconAlertTriangle } = await import('@tabler/icons-react');
-        
-        if (missingCount > 0 || errorCount > 0) {
-          const message = [];
-          if (missingCount > 0) {
-            message.push(`${missingCount} missing document(s)`);
+        const status = await apiService.checkPaperlessSyncStatus();
+        setSyncStatus(status);
+
+        // Count missing files and errors for logging and user notification
+        const missingCount = Object.values(status).filter(
+          exists => exists === false
+        ).length;
+        const errorCount = Object.values(status).filter(
+          exists => exists === null
+        ).length;
+        const totalChecked = Object.keys(status).length;
+
+        logger.info(
+          'document_manager_sync_check_completed',
+          'Paperless sync status check completed',
+          {
+            entityType,
+            entityId,
+            isManualSync,
+            totalFilesChecked: totalChecked,
+            missingFilesFound: missingCount,
+            component: 'DocumentManager',
           }
-          if (errorCount > 0) {
-            message.push(`${errorCount} document(s) with sync errors`);
+        );
+
+        // Show notification for manual sync with results
+        if (isManualSync) {
+          const { notifications } = await import('@mantine/notifications');
+          const { IconCheck, IconAlertTriangle } =
+            await import('@tabler/icons-react');
+
+          if (missingCount > 0 || errorCount > 0) {
+            const message = [];
+            if (missingCount > 0) {
+              message.push(`${missingCount} missing document(s)`);
+            }
+            if (errorCount > 0) {
+              message.push(`${errorCount} document(s) with sync errors`);
+            }
+
+            notifications.show({
+              title: 'Sync Check Complete',
+              message: `Found ${message.join(' and ')} out of ${totalChecked} checked. Check the file list for details.`,
+              color: 'yellow',
+              icon: <IconAlertTriangle size={16} />,
+              autoClose: 8000,
+            });
+          } else {
+            notifications.show({
+              title: 'Sync Check Complete',
+              message: `All ${totalChecked} Paperless documents are synced and available.`,
+              color: 'green',
+              icon: <IconCheck size={16} />,
+              autoClose: 5000,
+            });
           }
-          
+        }
+
+        // Refresh file list to get updated sync status from database
+        await loadFiles();
+      } catch (err) {
+        logger.error('document_manager_sync_check_error', {
+          message: 'Failed to check Paperless sync status',
+          entityType,
+          entityId,
+          isManualSync,
+          error: err.message,
+          component: 'DocumentManager',
+        });
+
+        // Show error notification for manual sync
+        if (isManualSync) {
+          const { notifications } = await import('@mantine/notifications');
+          const { IconX } = await import('@tabler/icons-react');
+
           notifications.show({
-            title: 'Sync Check Complete',
-            message: `Found ${message.join(' and ')} out of ${totalChecked} checked. Check the file list for details.`,
-            color: 'yellow',
-            icon: <IconAlertTriangle size={16} />,
+            title: 'Sync Check Failed',
+            message: `Failed to check Paperless sync status: ${err.message}. Please check your Paperless connection.`,
+            color: 'red',
+            icon: <IconX size={16} />,
             autoClose: 8000,
           });
-        } else {
-          notifications.show({
-            title: 'Sync Check Complete',
-            message: `All ${totalChecked} Paperless documents are synced and available.`,
-            color: 'green',
-            icon: <IconCheck size={16} />,
-            autoClose: 5000,
-          });
         }
+      } finally {
+        if (isManualSync) setSyncLoading(false);
       }
-      
-      // Refresh file list to get updated sync status from database
-      await loadFiles();
-    } catch (err) {
-      logger.error('document_manager_sync_check_error', {
-        message: 'Failed to check Paperless sync status',
-        entityType,
-        entityId,
-        isManualSync,
-        error: err.message,
-        component: 'DocumentManager',
-      });
-      
-      // Show error notification for manual sync
-      if (isManualSync) {
-        const { notifications } = await import('@mantine/notifications');
-        const { IconX } = await import('@tabler/icons-react');
-        
-        notifications.show({
-          title: 'Sync Check Failed',
-          message: `Failed to check Paperless sync status: ${err.message}. Please check your Paperless connection.`,
-          color: 'red',
-          icon: <IconX size={16} />,
-          autoClose: 8000,
-        });
-      }
-    } finally {
-      if (isManualSync) setSyncLoading(false);
-    }
-  }, [entityType, entityId, loadFiles]);
+    },
+    [entityType, entityId, loadFiles]
+  );
 
   // Load files when component mounts or entityId changes
   useEffect(() => {
     if (entityId && mode !== 'create') {
       setLoading(true);
-      
+
       loadFiles().finally(() => {
         setLoading(false);
         // Note: Sync check now only happens manually via button to avoid UI changes
@@ -327,25 +351,23 @@ const DocumentManager = ({
     loadPaperlessSettings();
   }, [loadPaperlessSettings]);
 
-  // Add pending file for batch upload (edit/create mode)
-  const handleAddPendingFile = useCallback((file, description = '') => {
-    setPendingFiles(prev => [...prev, { file, description, id: Date.now() }]);
-  }, []);
-
   // Remove pending file
-  const handleRemovePendingFile = useCallback(fileId => {
-    const fileIndex = pendingFiles.findIndex(f => f.id === fileId);
-    setPendingFiles(prev => prev.filter(f => f.id !== fileId));
-    
-    // Clear progress for this file
-    if (fileIndex !== -1) {
-      setUploadProgress(prev => {
-        const newProgress = { ...prev };
-        delete newProgress[fileIndex];
-        return newProgress;
-      });
-    }
-  }, [pendingFiles]);
+  const handleRemovePendingFile = useCallback(
+    fileId => {
+      const fileIndex = pendingFiles.findIndex(f => f.id === fileId);
+      setPendingFiles(prev => prev.filter(f => f.id !== fileId));
+
+      // Clear progress for this file
+      if (fileIndex !== -1) {
+        setUploadProgress(prev => {
+          const newProgress = { ...prev };
+          delete newProgress[fileIndex];
+          return newProgress;
+        });
+      }
+    },
+    [pendingFiles]
+  );
 
   // Mark file for deletion (edit mode)
   const handleMarkFileForDeletion = useCallback(fileId => {
@@ -390,7 +412,7 @@ const DocumentManager = ({
         '',
         selectedStorageBackend,
         null, // signal
-        (progress) => {
+        progress => {
           // Progress callback for Paperless task monitoring
           logger.debug('upload_progress', {
             message: 'Upload progress update',
@@ -399,14 +421,14 @@ const DocumentManager = ({
             isDuplicate: progress.isDuplicate,
             component: 'DocumentManager',
           });
-          
+
           // Update modal progress state
-          setModalProgress({ 
-            status: progress.status, 
+          setModalProgress({
+            status: progress.status,
             error: progress.status === 'failed' ? progress.message : null,
             isDuplicate: progress.isDuplicate,
             errorType: progress.errorType,
-            message: progress.message
+            message: progress.message,
           });
         }
       );
@@ -415,21 +437,24 @@ const DocumentManager = ({
       if (uploadResult.taskMonitored && uploadResult.isDuplicate) {
         // Document was a duplicate - show warning but don't treat as error
         logger.warn('document_manager_duplicate_document', {
-          message: 'Document was identified as duplicate during Paperless processing',
+          message:
+            'Document was identified as duplicate during Paperless processing',
           entityType,
           entityId,
           fileName: file.name,
           component: 'DocumentManager',
         });
-        
-        setModalProgress({ 
-          status: 'completed_duplicate', 
+
+        setModalProgress({
+          status: 'completed_duplicate',
           error: null,
           isDuplicate: true,
           errorType: uploadResult.taskResult?.error_type,
-          message: uploadResult.taskResult?.message || 'Document already exists in Paperless'
+          message:
+            uploadResult.taskResult?.message ||
+            'Document already exists in Paperless',
         });
-        
+
         // For duplicates, don't reload files since no new file was created
         // The backend has already deleted the database record
         // Just show success message and close modal after a delay
@@ -438,22 +463,23 @@ const DocumentManager = ({
           setFileUpload({ file: null, description: '' });
           setModalProgress({ status: null, error: null });
         }, 3000); // Show duplicate message for 3 seconds
-        
+
         return; // Don't continue with normal success flow
       } else if (uploadResult.taskMonitored && !uploadResult.success) {
         // Task failed for other reasons (processing error, etc.)
         // Use the user-friendly error message if available, otherwise fall back to raw error
-        const errorMsg = uploadResult.taskResult?.message || 
-                        uploadResult.taskResult?.result || 
-                        uploadResult.taskResult?.error || 
-                        'Paperless document processing failed';
-        setModalProgress({ 
-          status: 'failed', 
+        const errorMsg =
+          uploadResult.taskResult?.message ||
+          uploadResult.taskResult?.result ||
+          uploadResult.taskResult?.error ||
+          'Paperless document processing failed';
+        setModalProgress({
+          status: 'failed',
           error: errorMsg,
           isDuplicate: false,
-          errorType: uploadResult.taskResult?.error_type
+          errorType: uploadResult.taskResult?.error_type,
         });
-        
+
         // For failed tasks, don't reload files since the backend deleted the record
         // Just show the error and keep the modal open so user can try again
         logger.error('document_manager_task_failed', {
@@ -464,14 +490,14 @@ const DocumentManager = ({
           error: errorMsg,
           component: 'DocumentManager',
         });
-        
+
         return; // Don't continue with success flow or throw error (stay in modal)
       } else {
         // Success
-        setModalProgress({ 
-          status: 'completed', 
+        setModalProgress({
+          status: 'completed',
           error: null,
-          isDuplicate: false 
+          isDuplicate: false,
         });
       }
 
@@ -501,20 +527,22 @@ const DocumentManager = ({
           errorMessage =
             'Paperless configuration is incomplete. Please check your settings.';
         } else if (errorMessage.includes('appears to be a duplicate')) {
-          // Duplicate error - use the detailed message from backend
-          errorMessage = errorMessage;
+          // Duplicate error: use the detailed backend message as-is.
         } else if (errorMessage.includes('Failed to upload to paperless')) {
           errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
-        } else if (!errorMessage.includes('Paperless') && !errorMessage.includes('duplicate')) {
+        } else if (
+          !errorMessage.includes('Paperless') &&
+          !errorMessage.includes('duplicate')
+        ) {
           errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
         }
       }
 
       setError(errorMessage);
-      setModalProgress({ 
-        status: 'failed', 
+      setModalProgress({
+        status: 'failed',
         error: errorMessage,
-        isDuplicate: false 
+        isDuplicate: false,
       });
 
       if (onError) {
@@ -606,7 +634,8 @@ const DocumentManager = ({
   const handleImmediateDelete = async fileId => {
     // Find the file to check if it's a linked document
     const file = files.find(f => f.id === fileId);
-    const isLinkedDocument = file?.file_path && file.file_path.startsWith('paperless://document/');
+    const isLinkedDocument =
+      file?.file_path && file.file_path.startsWith('paperless://document/');
 
     const confirmMessage = isLinkedDocument
       ? 'Are you sure you want to unlink this document? It will remain in Paperless.'
@@ -626,7 +655,9 @@ const DocumentManager = ({
       await loadFiles();
 
       logger.info('document_manager_delete_success', {
-        message: isLinkedDocument ? 'Document unlinked successfully' : 'File deleted successfully',
+        message: isLinkedDocument
+          ? 'Document unlinked successfully'
+          : 'File deleted successfully',
         entityType,
         entityId,
         fileId,
@@ -655,7 +686,7 @@ const DocumentManager = ({
   };
 
   // Handle linking existing Paperless document
-  const handleLinkPaperlessDocument = async (linkData) => {
+  const handleLinkPaperlessDocument = async linkData => {
     setLoading(true);
     setError('');
 
@@ -704,7 +735,7 @@ const DocumentManager = ({
   };
 
   // Handle linking existing Papra document
-  const handleLinkPapraDocument = async (linkData) => {
+  const handleLinkPapraDocument = async linkData => {
     setLoading(true);
     setError('');
 
@@ -753,292 +784,321 @@ const DocumentManager = ({
   };
 
   // Batch upload pending files (for create/edit mode)
-  const uploadPendingFiles = useCallback(async targetEntityId => {
-    const currentPendingFiles = pendingFilesRef.current;
-    
-    logger.info('document_manager_upload_pending_start', {
-      message: 'uploadPendingFiles function called',
-      entityType,
-      targetEntityId,
-      pendingFilesCount: currentPendingFiles.length,
-      component: 'DocumentManager',
-    });
-    
-    if (currentPendingFiles.length === 0) {
-      logger.info('document_manager_no_pending_files', {
-        message: 'No pending files to upload',
+  const uploadPendingFiles = useCallback(
+    async targetEntityId => {
+      const currentPendingFiles = pendingFilesRef.current;
+
+      logger.info('document_manager_upload_pending_start', {
+        message: 'uploadPendingFiles function called',
         entityType,
         targetEntityId,
+        pendingFilesCount: currentPendingFiles.length,
         component: 'DocumentManager',
       });
-      return true;
-    }
 
-    // Initialize progress tracking for all files
-    const initialProgress = {};
-    currentPendingFiles.forEach((file, index) => {
-      initialProgress[index] = { progress: 0, status: 'pending', error: null };
-    });
-    setUploadProgress(initialProgress);
-
-    const uploadPromises = currentPendingFiles.map(async (pendingFile, index) => {
-      logger.info('document_manager_individual_upload_start', {
-        message: 'Starting individual file upload',
-        entityType,
-        targetEntityId,
-        fileName: pendingFile.file.name,
-        fileIndex: index,
-        selectedStorageBackend,
-        component: 'DocumentManager',
-      });
-      
-      try {
-        // Mark as uploading
-        setUploadProgress(prev => ({
-          ...prev,
-          [index]: { progress: 0, status: 'uploading', error: null }
-        }));
-
-        const currentStorageBackend = selectedStorageBackendRef.current;
-        const currentPaperlessSettings = paperlessSettingsRef.current;
-        
-        logger.info('document_manager_batch_upload_attempt', {
-          message: 'Attempting batch file upload',
+      if (currentPendingFiles.length === 0) {
+        logger.info('document_manager_no_pending_files', {
+          message: 'No pending files to upload',
           entityType,
-          entityId: targetEntityId,
-          fileName: pendingFile.file.name,
-          selectedStorageBackend: currentStorageBackend,
-          paperlessEnabled: currentPaperlessSettings?.paperless_enabled,
-          paperlessHasCredentials: currentPaperlessSettings?.paperless_has_credentials,
-          paperlessUrl: currentPaperlessSettings?.paperless_url,
+          targetEntityId,
           component: 'DocumentManager',
         });
+        return true;
+      }
 
-        // Show progress updates for Paperless uploads (they take longer)
-        let progressInterval = null;
-        
-        if (currentStorageBackend === 'paperless') {
-          // Set initial progress
-          setUploadProgress(prev => ({
-            ...prev,
-            [index]: { progress: 10, status: 'uploading', error: null }
-          }));
-          
-          // Simulate progress for better UX since we don't have real progress from API
-          progressInterval = setInterval(() => {
-            setUploadProgress(prev => {
-              const current = prev[index]?.progress || 10;
-              if (current < 85) {
-                const newProgress = Math.min(current + Math.random() * 15, 85);
-                return {
-                  ...prev,
-                  [index]: { ...prev[index], progress: newProgress }
-                };
-              }
-              return prev;
-            });
-          }, 800);
-        }
+      // Initialize progress tracking for all files
+      const initialProgress = {};
+      currentPendingFiles.forEach((file, index) => {
+        initialProgress[index] = {
+          progress: 0,
+          status: 'pending',
+          error: null,
+        };
+      });
+      setUploadProgress(initialProgress);
 
-        try {
-          logger.info('document_manager_calling_api_upload', {
-            message: 'About to call apiService.uploadEntityFile',
+      const uploadPromises = currentPendingFiles.map(
+        async (pendingFile, index) => {
+          logger.info('document_manager_individual_upload_start', {
+            message: 'Starting individual file upload',
             entityType,
             targetEntityId,
             fileName: pendingFile.file.name,
-            selectedStorageBackend: currentStorageBackend,
+            fileIndex: index,
+            selectedStorageBackend,
             component: 'DocumentManager',
           });
-          
-          // Use task monitoring for Paperless uploads to handle rejections and duplicates
-          const uploadResult = await apiService.uploadEntityFileWithTaskMonitoring(
-            entityType,
-            targetEntityId,
-            pendingFile.file,
-            pendingFile.description,
-            '',
-            currentStorageBackend,
-            null, // signal
-            (progress) => {
-              // Progress callback for Paperless task monitoring
-              logger.debug('batch_upload_progress', {
-                message: 'Batch upload progress update',
-                status: progress.status,
-                fileName: pendingFile.file.name,
-                isDuplicate: progress.isDuplicate,
-                fileIndex: index,
-                component: 'DocumentManager',
-              });
 
-              // Update progress UI for this specific file
-              if (progress.status === 'processing') {
-                setUploadProgress(prev => ({
-                  ...prev,
-                  [index]: { progress: 90, status: 'processing', error: null }
-                }));
-              }
-            }
-          );
-
-          // Handle the result appropriately
-          if (uploadResult.taskMonitored && uploadResult.isDuplicate) {
-            // Document was a duplicate - mark as completed with warning
+          try {
+            // Mark as uploading
             setUploadProgress(prev => ({
               ...prev,
-              [index]: { 
-                progress: 100, 
-                status: 'completed_duplicate', 
-                error: 'Document already exists in Paperless',
-                isDuplicate: true
-              }
+              [index]: { progress: 0, status: 'uploading', error: null },
             }));
 
-            logger.warn('document_manager_batch_duplicate', {
-              message: 'Document was identified as duplicate during batch upload',
+            const currentStorageBackend = selectedStorageBackendRef.current;
+            const currentPaperlessSettings = paperlessSettingsRef.current;
+
+            logger.info('document_manager_batch_upload_attempt', {
+              message: 'Attempting batch file upload',
               entityType,
               entityId: targetEntityId,
               fileName: pendingFile.file.name,
-              fileIndex: index,
+              selectedStorageBackend: currentStorageBackend,
+              paperlessEnabled: currentPaperlessSettings?.paperless_enabled,
+              paperlessHasCredentials:
+                currentPaperlessSettings?.paperless_has_credentials,
+              paperlessUrl: currentPaperlessSettings?.paperless_url,
               component: 'DocumentManager',
             });
-            
-            // Don't throw error for duplicates - they're handled gracefully
-            return;
-          } else if (uploadResult.taskMonitored && !uploadResult.success) {
-            // Task failed for other reasons
-            const errorMessage = uploadResult.taskResult?.error || 'Paperless document processing failed';
-            throw new Error(errorMessage);
-          }
-          
-          logger.info('document_manager_api_upload_success', {
-            message: 'apiService.uploadEntityFile completed successfully',
-            entityType,
-            targetEntityId,
-            fileName: pendingFile.file.name,
-            component: 'DocumentManager',
-          });
-          
-          if (progressInterval) {
-            clearInterval(progressInterval);
-            progressInterval = null;
-          }
-        } catch (error) {
-          if (progressInterval) {
-            clearInterval(progressInterval);
-            progressInterval = null;
-          }
-          throw error;
-        }
 
-        // Mark as completed
-        setUploadProgress(prev => ({
-          ...prev,
-          [index]: { progress: 100, status: 'completed', error: null }
-        }));
+            // Show progress updates for Paperless uploads (they take longer)
+            let progressInterval = null;
 
-        logger.info('document_manager_batch_upload_success', {
-          message: 'Batch file uploaded successfully',
-          entityType,
-          entityId: targetEntityId,
-          fileName: pendingFile.file.name,
-          component: 'DocumentManager',
-        });
-      } catch (error) {
-        // Enhanced error message handling with improved context
-        let errorMessage = error.message || 'Failed to upload file';
-        let enhancedError = error;
+            if (currentStorageBackend === 'paperless') {
+              // Set initial progress
+              setUploadProgress(prev => ({
+                ...prev,
+                [index]: { progress: 10, status: 'uploading', error: null },
+              }));
 
-        // Import error handling utilities dynamically if needed
-        try {
-          if (currentStorageBackend === 'paperless') {
-            // Use the error utilities from errorMessageUtils for consistent handling
-            const { enhancePaperlessError } = await import('../../utils/errorMessageUtils');
-            errorMessage = enhancePaperlessError(errorMessage);
-          }
-        } catch (importError) {
-          // Fallback to existing error handling if import fails
-          if (currentStorageBackend === 'paperless') {
-            if (errorMessage.includes('not enabled')) {
-              errorMessage =
-                'Paperless integration is not enabled. Please enable it in Settings.';
-            } else if (errorMessage.includes('configuration is incomplete')) {
-              errorMessage =
-                'Paperless configuration is incomplete. Please check your settings.';
-            } else if (errorMessage.includes('appears to be a duplicate')) {
-              errorMessage = errorMessage;
-            } else if (errorMessage.includes('Failed to upload to paperless')) {
-              errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
-            } else if (!errorMessage.includes('Paperless') && !errorMessage.includes('duplicate')) {
-              errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
+              // Simulate progress for better UX since we don't have real progress from API
+              progressInterval = setInterval(() => {
+                setUploadProgress(prev => {
+                  const current = prev[index]?.progress || 10;
+                  if (current < 85) {
+                    const newProgress = Math.min(
+                      current + Math.random() * 15,
+                      85
+                    );
+                    return {
+                      ...prev,
+                      [index]: { ...prev[index], progress: newProgress },
+                    };
+                  }
+                  return prev;
+                });
+              }, 800);
             }
+
+            try {
+              logger.info('document_manager_calling_api_upload', {
+                message: 'About to call apiService.uploadEntityFile',
+                entityType,
+                targetEntityId,
+                fileName: pendingFile.file.name,
+                selectedStorageBackend: currentStorageBackend,
+                component: 'DocumentManager',
+              });
+
+              // Use task monitoring for Paperless uploads to handle rejections and duplicates
+              const uploadResult =
+                await apiService.uploadEntityFileWithTaskMonitoring(
+                  entityType,
+                  targetEntityId,
+                  pendingFile.file,
+                  pendingFile.description,
+                  '',
+                  currentStorageBackend,
+                  null, // signal
+                  progress => {
+                    // Progress callback for Paperless task monitoring
+                    logger.debug('batch_upload_progress', {
+                      message: 'Batch upload progress update',
+                      status: progress.status,
+                      fileName: pendingFile.file.name,
+                      isDuplicate: progress.isDuplicate,
+                      fileIndex: index,
+                      component: 'DocumentManager',
+                    });
+
+                    // Update progress UI for this specific file
+                    if (progress.status === 'processing') {
+                      setUploadProgress(prev => ({
+                        ...prev,
+                        [index]: {
+                          progress: 90,
+                          status: 'processing',
+                          error: null,
+                        },
+                      }));
+                    }
+                  }
+                );
+
+              // Handle the result appropriately
+              if (uploadResult.taskMonitored && uploadResult.isDuplicate) {
+                // Document was a duplicate - mark as completed with warning
+                setUploadProgress(prev => ({
+                  ...prev,
+                  [index]: {
+                    progress: 100,
+                    status: 'completed_duplicate',
+                    error: 'Document already exists in Paperless',
+                    isDuplicate: true,
+                  },
+                }));
+
+                logger.warn('document_manager_batch_duplicate', {
+                  message:
+                    'Document was identified as duplicate during batch upload',
+                  entityType,
+                  entityId: targetEntityId,
+                  fileName: pendingFile.file.name,
+                  fileIndex: index,
+                  component: 'DocumentManager',
+                });
+
+                // Don't throw error for duplicates - they're handled gracefully
+                return;
+              } else if (uploadResult.taskMonitored && !uploadResult.success) {
+                // Task failed for other reasons
+                const errorMessage =
+                  uploadResult.taskResult?.error ||
+                  'Paperless document processing failed';
+                throw new Error(errorMessage);
+              }
+
+              logger.info('document_manager_api_upload_success', {
+                message: 'apiService.uploadEntityFile completed successfully',
+                entityType,
+                targetEntityId,
+                fileName: pendingFile.file.name,
+                component: 'DocumentManager',
+              });
+
+              if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+              }
+            } catch (error) {
+              if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+              }
+              throw error;
+            }
+
+            // Mark as completed
+            setUploadProgress(prev => ({
+              ...prev,
+              [index]: { progress: 100, status: 'completed', error: null },
+            }));
+
+            logger.info('document_manager_batch_upload_success', {
+              message: 'Batch file uploaded successfully',
+              entityType,
+              entityId: targetEntityId,
+              fileName: pendingFile.file.name,
+              component: 'DocumentManager',
+            });
+          } catch (error) {
+            // Enhanced error message handling with improved context
+            // Re-read the ref here because the try-block's local copy is out of scope.
+            const currentStorageBackend = selectedStorageBackendRef.current;
+            let errorMessage = error.message || 'Failed to upload file';
+
+            // Import error handling utilities dynamically if needed
+            try {
+              if (currentStorageBackend === 'paperless') {
+                // Use the error utilities from errorMessageUtils for consistent handling
+                const { enhancePaperlessError } =
+                  await import('../../utils/errorMessageUtils');
+                errorMessage = enhancePaperlessError(errorMessage);
+              }
+            } catch (importError) {
+              // Fallback to existing error handling if import fails
+              if (currentStorageBackend === 'paperless') {
+                if (errorMessage.includes('not enabled')) {
+                  errorMessage =
+                    'Paperless integration is not enabled. Please enable it in Settings.';
+                } else if (
+                  errorMessage.includes('configuration is incomplete')
+                ) {
+                  errorMessage =
+                    'Paperless configuration is incomplete. Please check your settings.';
+                } else if (errorMessage.includes('appears to be a duplicate')) {
+                  // Duplicate error: use the detailed backend message as-is.
+                } else if (
+                  errorMessage.includes('Failed to upload to paperless')
+                ) {
+                  errorMessage = `Failed to upload to Paperless: ${errorMessage.replace('Failed to upload to paperless: ', '')}`;
+                } else if (
+                  !errorMessage.includes('Paperless') &&
+                  !errorMessage.includes('duplicate')
+                ) {
+                  errorMessage = `Failed to upload to Paperless: ${errorMessage}`;
+                }
+              }
+            }
+
+            // Mark as failed
+            setUploadProgress(prev => ({
+              ...prev,
+              [index]: { progress: 0, status: 'failed', error: errorMessage },
+            }));
+
+            logger.error('document_manager_batch_upload_error', {
+              message: 'Failed to upload file in batch',
+              entityType,
+              entityId: targetEntityId,
+              fileName: pendingFile.file.name,
+              selectedStorageBackend: currentStorageBackend,
+              error: error.message,
+              enhancedError: errorMessage,
+              component: 'DocumentManager',
+            });
+
+            // Create a new error with the enhanced message
+            const uploadError = new Error(errorMessage);
+            uploadError.originalError = error;
+            throw uploadError;
           }
         }
+      );
 
-        // Mark as failed
-        setUploadProgress(prev => ({
-          ...prev,
-          [index]: { progress: 0, status: 'failed', error: errorMessage }
-        }));
+      logger.info('document_manager_about_to_promise_all', {
+        message: 'About to execute Promise.all for file uploads',
+        entityType,
+        targetEntityId,
+        promiseCount: uploadPromises.length,
+        component: 'DocumentManager',
+      });
 
-        logger.error('document_manager_batch_upload_error', {
-          message: 'Failed to upload file in batch',
+      try {
+        await Promise.all(uploadPromises);
+        logger.info('document_manager_batch_upload_complete', {
+          message: 'All files uploaded successfully in batch',
           entityType,
           entityId: targetEntityId,
-          fileName: pendingFile.file.name,
-          selectedStorageBackend: currentStorageBackend,
-          error: error.message,
-          enhancedError: errorMessage,
+          fileCount: currentPendingFiles.length,
           component: 'DocumentManager',
         });
 
-        // Create a new error with the enhanced message
-        const uploadError = new Error(errorMessage);
-        uploadError.originalError = error;
-        throw uploadError;
+        setPendingFiles([]);
+
+        // Clear upload progress after a brief delay to show completion
+        setTimeout(() => {
+          setUploadProgress({});
+        }, 2000);
+
+        return true;
+      } catch (error) {
+        logger.error('document_manager_batch_upload_failed', {
+          message: 'Batch upload failed',
+          entityType,
+          entityId: targetEntityId,
+          error: error.message,
+          component: 'DocumentManager',
+        });
+
+        // Don't clear pending files if upload failed
+        // Let user see the error state and retry if needed
+        throw error;
       }
-    });
-
-    logger.info('document_manager_about_to_promise_all', {
-      message: 'About to execute Promise.all for file uploads',
-      entityType,
-      targetEntityId,
-      promiseCount: uploadPromises.length,
-      component: 'DocumentManager',
-    });
-
-    try {
-      const results = await Promise.all(uploadPromises);
-      logger.info('document_manager_batch_upload_complete', {
-        message: 'All files uploaded successfully in batch',
-        entityType,
-        entityId: targetEntityId,
-        fileCount: currentPendingFiles.length,
-        component: 'DocumentManager',
-      });
-      
-      setPendingFiles([]);
-      
-      // Clear upload progress after a brief delay to show completion
-      setTimeout(() => {
-        setUploadProgress({});
-      }, 2000);
-      
-      return true;
-    } catch (error) {
-      logger.error('document_manager_batch_upload_failed', {
-        message: 'Batch upload failed',
-        entityType,
-        entityId: targetEntityId,
-        error: error.message,
-        component: 'DocumentManager',
-      });
-      
-      // Don't clear pending files if upload failed
-      // Let user see the error state and retry if needed
-      throw error;
-    }
-  }, [entityType]);
-
+    },
+    [entityType, selectedStorageBackend]
+  );
 
   // Expose upload function to parent via callback (only once)
   useEffect(() => {
@@ -1051,7 +1111,7 @@ const DocumentManager = ({
         pendingFilesCount: pendingFilesRef.current.length,
         component: 'DocumentManager',
       });
-      
+
       onUploadPendingFiles({
         uploadPendingFiles,
         getPendingFilesCount: () => pendingFilesRef.current.length,
@@ -1059,40 +1119,7 @@ const DocumentManager = ({
         clearPendingFiles: () => setPendingFiles([]),
       });
     }
-  }, [onUploadPendingFiles, uploadPendingFiles]);
-
-  // Batch delete marked files (for edit mode)
-  const deleteMarkedFiles = async () => {
-    if (filesToDelete.length === 0) return true;
-
-    const deletePromises = filesToDelete.map(async fileId => {
-      try {
-        await apiService.deleteEntityFile(fileId);
-
-        logger.info('document_manager_batch_delete_success', {
-          message: 'Batch file deleted successfully',
-          entityType,
-          entityId,
-          fileId,
-          component: 'DocumentManager',
-        });
-      } catch (error) {
-        logger.error('document_manager_batch_delete_error', {
-          message: 'Failed to delete file in batch',
-          entityType,
-          entityId,
-          fileId,
-          error: error.message,
-          component: 'DocumentManager',
-        });
-        throw error;
-      }
-    });
-
-    await Promise.all(deletePromises);
-    setFilesToDelete([]);
-    return true;
-  };
+  }, [onUploadPendingFiles, uploadPendingFiles, entityType, entityId]);
 
   // Handle file upload form submission (view mode modal)
   const handleFileUploadSubmit = async e => {
@@ -1130,7 +1157,8 @@ const DocumentManager = ({
               paperlessConnected={
                 paperlessSettings?.paperless_enabled &&
                 paperlessSettings?.paperless_url &&
-                (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
+                (paperlessSettings?.paperless_has_credentials ||
+                  paperlessSettings?.paperless_has_token)
               }
               papraEnabled={paperlessSettings?.papra_enabled || false}
               papraConnected={
@@ -1164,22 +1192,24 @@ const DocumentManager = ({
                   >
                     {t('manager.uploadNewFile')}
                   </Menu.Item>
-                  {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
-                    <Menu.Item
-                      leftSection={<IconLink size={16} />}
-                      onClick={() => setShowLinkModal(true)}
-                    >
-                      {t('manager.linkPaperless')}
-                    </Menu.Item>
-                  )}
-                  {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
-                    <Menu.Item
-                      leftSection={<IconLink size={16} />}
-                      onClick={() => setIsPapraLinkModalOpen(true)}
-                    >
-                      {t('manager.linkPapra')}
-                    </Menu.Item>
-                  )}
+                  {selectedStorageBackend === 'paperless' &&
+                    paperlessSettings?.paperless_enabled && (
+                      <Menu.Item
+                        leftSection={<IconLink size={16} />}
+                        onClick={() => setShowLinkModal(true)}
+                      >
+                        {t('manager.linkPaperless')}
+                      </Menu.Item>
+                    )}
+                  {selectedStorageBackend === 'papra' &&
+                    paperlessSettings?.papra_enabled && (
+                      <Menu.Item
+                        leftSection={<IconLink size={16} />}
+                        onClick={() => setIsPapraLinkModalOpen(true)}
+                      >
+                        {t('manager.linkPapra')}
+                      </Menu.Item>
+                    )}
                 </Menu.Dropdown>
               </Menu>
             </Group>
@@ -1210,7 +1240,8 @@ const DocumentManager = ({
               paperlessConnected={
                 paperlessSettings?.paperless_enabled &&
                 paperlessSettings?.paperless_url &&
-                (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
+                (paperlessSettings?.paperless_has_credentials ||
+                  paperlessSettings?.paperless_has_token)
               }
               papraEnabled={paperlessSettings?.papra_enabled || false}
               papraConnected={
@@ -1273,22 +1304,24 @@ const DocumentManager = ({
                   >
                     {t('manager.uploadNewFile')}
                   </Menu.Item>
-                  {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
-                    <Menu.Item
-                      leftSection={<IconLink size={16} />}
-                      onClick={() => setShowLinkModal(true)}
-                    >
-                      {t('manager.linkPaperless')}
-                    </Menu.Item>
-                  )}
-                  {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
-                    <Menu.Item
-                      leftSection={<IconLink size={16} />}
-                      onClick={() => setIsPapraLinkModalOpen(true)}
-                    >
-                      {t('manager.linkPapra')}
-                    </Menu.Item>
-                  )}
+                  {selectedStorageBackend === 'paperless' &&
+                    paperlessSettings?.paperless_enabled && (
+                      <Menu.Item
+                        leftSection={<IconLink size={16} />}
+                        onClick={() => setShowLinkModal(true)}
+                      >
+                        {t('manager.linkPaperless')}
+                      </Menu.Item>
+                    )}
+                  {selectedStorageBackend === 'papra' &&
+                    paperlessSettings?.papra_enabled && (
+                      <Menu.Item
+                        leftSection={<IconLink size={16} />}
+                        onClick={() => setIsPapraLinkModalOpen(true)}
+                      >
+                        {t('manager.linkPapra')}
+                      </Menu.Item>
+                    )}
                 </Menu.Dropdown>
               </Menu>
             </Group>
@@ -1301,31 +1334,47 @@ const DocumentManager = ({
               <Stack gap="sm">
                 {pendingFiles.map((pendingFile, index) => {
                   const fileProgress = uploadProgress[index];
-                  const isUploading = fileProgress?.status === 'uploading' || fileProgress?.status === 'processing';
+                  const isUploading =
+                    fileProgress?.status === 'uploading' ||
+                    fileProgress?.status === 'processing';
                   const isCompleted = fileProgress?.status === 'completed';
-                  const isDuplicate = fileProgress?.status === 'completed_duplicate';
+                  const isDuplicate =
+                    fileProgress?.status === 'completed_duplicate';
                   const isFailed = fileProgress?.status === 'failed';
                   const progressValue = fileProgress?.progress || 0;
 
                   return (
-                    <Paper key={pendingFile.id} withBorder p="sm" bg={
-                      isCompleted ? "green.1" : 
-                      isDuplicate ? "orange.1" :
-                      isFailed ? "red.1" : 
-                      isUploading ? "yellow.1" : 
-                      "blue.1"
-                    }>
+                    <Paper
+                      key={pendingFile.id}
+                      withBorder
+                      p="sm"
+                      bg={
+                        isCompleted
+                          ? 'green.1'
+                          : isDuplicate
+                            ? 'orange.1'
+                            : isFailed
+                              ? 'red.1'
+                              : isUploading
+                                ? 'yellow.1'
+                                : 'blue.1'
+                      }
+                    >
                       <Group justify="space-between" align="flex-start">
                         <Group gap="xs" style={{ flex: 1 }}>
-                          <ThemeIcon 
-                            variant="light" 
+                          <ThemeIcon
+                            variant="light"
                             color={
-                              isCompleted ? "green" : 
-                              isDuplicate ? "orange" :
-                              isFailed ? "red" : 
-                              isUploading ? "yellow" : 
-                              "blue"
-                            } 
+                              isCompleted
+                                ? 'green'
+                                : isDuplicate
+                                  ? 'orange'
+                                  : isFailed
+                                    ? 'red'
+                                    : isUploading
+                                      ? 'yellow'
+                                      : 'blue'
+                            }
                             size="sm"
                           >
                             {isCompleted ? (
@@ -1335,7 +1384,10 @@ const DocumentManager = ({
                             ) : isFailed ? (
                               <IconExclamationMark size={14} />
                             ) : isUploading ? (
-                              <IconLoader size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                              <IconLoader
+                                size={14}
+                                style={{ animation: 'spin 1s linear infinite' }}
+                              />
                             ) : (
                               <IconFileText size={14} />
                             )}
@@ -1348,11 +1400,16 @@ const DocumentManager = ({
                               <Text size="xs" c="dimmed">
                                 {(pendingFile.file.size / 1024).toFixed(1)} KB
                               </Text>
-                              {isUploading && selectedStorageBackend === 'paperless' && (
-                                <Badge variant="light" color="yellow" size="xs">
-                                  {t('manager.statusUploading')}
-                                </Badge>
-                              )}
+                              {isUploading &&
+                                selectedStorageBackend === 'paperless' && (
+                                  <Badge
+                                    variant="light"
+                                    color="yellow"
+                                    size="xs"
+                                  >
+                                    {t('manager.statusUploading')}
+                                  </Badge>
+                                )}
                               {isCompleted && (
                                 <Badge variant="light" color="green" size="xs">
                                   {t('manager.statusUploaded')}
@@ -1369,32 +1426,50 @@ const DocumentManager = ({
                                 </Badge>
                               )}
                             </Group>
-                            
+
                             {/* Progress bar for uploads */}
-                            {(isUploading || isCompleted || isDuplicate || isFailed) && (
-                              <Progress 
+                            {(isUploading ||
+                              isCompleted ||
+                              isDuplicate ||
+                              isFailed) && (
+                              <Progress
                                 value={progressValue}
                                 color={
-                                  isCompleted ? "green" : 
-                                  isDuplicate ? "orange" :
-                                  isFailed ? "red" : 
-                                  "blue"
+                                  isCompleted
+                                    ? 'green'
+                                    : isDuplicate
+                                      ? 'orange'
+                                      : isFailed
+                                        ? 'red'
+                                        : 'blue'
                                 }
                                 size="sm"
                                 striped={isUploading}
                                 animated={isUploading}
                               />
                             )}
-                            
+
                             {/* Error message for failed uploads */}
                             {isFailed && fileProgress?.error && (
-                              <Alert variant="light" color="red" size="xs" p="xs">
+                              <Alert
+                                variant="light"
+                                color="red"
+                                size="xs"
+                                p="xs"
+                              >
                                 <Stack gap="xs">
                                   <Text size="xs">{fileProgress.error}</Text>
                                   {(() => {
-                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    const guidance = getErrorGuidance(
+                                      fileProgress.error,
+                                      selectedStorageBackend
+                                    );
                                     return guidance ? (
-                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        style={{ fontStyle: 'italic' }}
+                                      >
                                         💡 {guidance}
                                       </Text>
                                     ) : null;
@@ -1402,16 +1477,28 @@ const DocumentManager = ({
                                 </Stack>
                               </Alert>
                             )}
-                            
+
                             {/* Warning message for duplicate uploads */}
                             {isDuplicate && fileProgress?.error && (
-                              <Alert variant="light" color="orange" size="xs" p="xs">
+                              <Alert
+                                variant="light"
+                                color="orange"
+                                size="xs"
+                                p="xs"
+                              >
                                 <Stack gap="xs">
                                   <Text size="xs">{fileProgress.error}</Text>
                                   {(() => {
-                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    const guidance = getErrorGuidance(
+                                      fileProgress.error,
+                                      selectedStorageBackend
+                                    );
                                     return guidance ? (
-                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        style={{ fontStyle: 'italic' }}
+                                      >
                                         💡 {guidance}
                                       </Text>
                                     ) : null;
@@ -1419,7 +1506,7 @@ const DocumentManager = ({
                                 </Stack>
                               </Alert>
                             )}
-                            
+
                             {!isUploading && !isCompleted && !isDuplicate && (
                               <TextInput
                                 placeholder="Description (optional)"
@@ -1443,7 +1530,9 @@ const DocumentManager = ({
                             variant="light"
                             color="red"
                             size="sm"
-                            onClick={() => handleRemovePendingFile(pendingFile.id)}
+                            onClick={() =>
+                              handleRemovePendingFile(pendingFile.id)
+                            }
                           >
                             <IconX size={14} />
                           </ActionIcon>
@@ -1471,7 +1560,8 @@ const DocumentManager = ({
               paperlessConnected={
                 paperlessSettings?.paperless_enabled &&
                 paperlessSettings?.paperless_url &&
-                (paperlessSettings?.paperless_has_credentials || paperlessSettings?.paperless_has_token)
+                (paperlessSettings?.paperless_has_credentials ||
+                  paperlessSettings?.paperless_has_token)
               }
               papraEnabled={paperlessSettings?.papra_enabled || false}
               papraConnected={
@@ -1505,22 +1595,24 @@ const DocumentManager = ({
                   >
                     {t('manager.uploadNewFile')}
                   </Menu.Item>
-                  {selectedStorageBackend === 'paperless' && paperlessSettings?.paperless_enabled && (
-                    <Menu.Item
-                      leftSection={<IconLink size={16} />}
-                      onClick={() => setShowLinkModal(true)}
-                    >
-                      {t('manager.linkPaperless')}
-                    </Menu.Item>
-                  )}
-                  {selectedStorageBackend === 'papra' && paperlessSettings?.papra_enabled && (
-                    <Menu.Item
-                      leftSection={<IconLink size={16} />}
-                      onClick={() => setIsPapraLinkModalOpen(true)}
-                    >
-                      {t('manager.linkPapra')}
-                    </Menu.Item>
-                  )}
+                  {selectedStorageBackend === 'paperless' &&
+                    paperlessSettings?.paperless_enabled && (
+                      <Menu.Item
+                        leftSection={<IconLink size={16} />}
+                        onClick={() => setShowLinkModal(true)}
+                      >
+                        {t('manager.linkPaperless')}
+                      </Menu.Item>
+                    )}
+                  {selectedStorageBackend === 'papra' &&
+                    paperlessSettings?.papra_enabled && (
+                      <Menu.Item
+                        leftSection={<IconLink size={16} />}
+                        onClick={() => setIsPapraLinkModalOpen(true)}
+                      >
+                        {t('manager.linkPapra')}
+                      </Menu.Item>
+                    )}
                 </Menu.Dropdown>
               </Menu>
             </Group>
@@ -1533,30 +1625,46 @@ const DocumentManager = ({
               <Stack gap="sm">
                 {pendingFiles.map((pendingFile, index) => {
                   const fileProgress = uploadProgress[index];
-                  const isUploading = fileProgress?.status === 'uploading' || fileProgress?.status === 'processing';
+                  const isUploading =
+                    fileProgress?.status === 'uploading' ||
+                    fileProgress?.status === 'processing';
                   const isCompleted = fileProgress?.status === 'completed';
-                  const isDuplicate = fileProgress?.status === 'completed_duplicate';
+                  const isDuplicate =
+                    fileProgress?.status === 'completed_duplicate';
                   const isFailed = fileProgress?.status === 'failed';
                   const progressValue = fileProgress?.progress || 0;
 
                   return (
-                    <Paper key={pendingFile.id} withBorder p="sm" bg={
-                      isCompleted ? "green.1" :
-                      isDuplicate ? "orange.1" :
-                      isFailed ? "red.1" :
-                      isUploading ? "yellow.1" :
-                      "blue.1"
-                    }>
+                    <Paper
+                      key={pendingFile.id}
+                      withBorder
+                      p="sm"
+                      bg={
+                        isCompleted
+                          ? 'green.1'
+                          : isDuplicate
+                            ? 'orange.1'
+                            : isFailed
+                              ? 'red.1'
+                              : isUploading
+                                ? 'yellow.1'
+                                : 'blue.1'
+                      }
+                    >
                       <Group justify="space-between" align="flex-start">
                         <Group gap="xs" style={{ flex: 1 }}>
                           <ThemeIcon
                             variant="light"
                             color={
-                              isCompleted ? "green" :
-                              isDuplicate ? "orange" :
-                              isFailed ? "red" :
-                              isUploading ? "yellow" :
-                              "blue"
+                              isCompleted
+                                ? 'green'
+                                : isDuplicate
+                                  ? 'orange'
+                                  : isFailed
+                                    ? 'red'
+                                    : isUploading
+                                      ? 'yellow'
+                                      : 'blue'
                             }
                             size="sm"
                           >
@@ -1567,7 +1675,10 @@ const DocumentManager = ({
                             ) : isFailed ? (
                               <IconExclamationMark size={14} />
                             ) : isUploading ? (
-                              <IconLoader size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                              <IconLoader
+                                size={14}
+                                style={{ animation: 'spin 1s linear infinite' }}
+                              />
                             ) : (
                               <IconFileText size={14} />
                             )}
@@ -1580,11 +1691,16 @@ const DocumentManager = ({
                               <Text size="xs" c="dimmed">
                                 {(pendingFile.file.size / 1024).toFixed(1)} KB
                               </Text>
-                              {isUploading && selectedStorageBackend === 'paperless' && (
-                                <Badge variant="light" color="yellow" size="xs">
-                                  {t('manager.statusUploading')}
-                                </Badge>
-                              )}
+                              {isUploading &&
+                                selectedStorageBackend === 'paperless' && (
+                                  <Badge
+                                    variant="light"
+                                    color="yellow"
+                                    size="xs"
+                                  >
+                                    {t('manager.statusUploading')}
+                                  </Badge>
+                                )}
                               {isCompleted && (
                                 <Badge variant="light" color="green" size="xs">
                                   {t('manager.statusUploaded')}
@@ -1603,14 +1719,20 @@ const DocumentManager = ({
                             </Group>
 
                             {/* Progress bar for uploads */}
-                            {(isUploading || isCompleted || isDuplicate || isFailed) && (
+                            {(isUploading ||
+                              isCompleted ||
+                              isDuplicate ||
+                              isFailed) && (
                               <Progress
                                 value={progressValue}
                                 color={
-                                  isCompleted ? "green" :
-                                  isDuplicate ? "orange" :
-                                  isFailed ? "red" :
-                                  "blue"
+                                  isCompleted
+                                    ? 'green'
+                                    : isDuplicate
+                                      ? 'orange'
+                                      : isFailed
+                                        ? 'red'
+                                        : 'blue'
                                 }
                                 size="sm"
                                 striped={isUploading}
@@ -1620,13 +1742,25 @@ const DocumentManager = ({
 
                             {/* Error message for failed uploads */}
                             {isFailed && fileProgress?.error && (
-                              <Alert variant="light" color="red" size="xs" p="xs">
+                              <Alert
+                                variant="light"
+                                color="red"
+                                size="xs"
+                                p="xs"
+                              >
                                 <Stack gap="xs">
                                   <Text size="xs">{fileProgress.error}</Text>
                                   {(() => {
-                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    const guidance = getErrorGuidance(
+                                      fileProgress.error,
+                                      selectedStorageBackend
+                                    );
                                     return guidance ? (
-                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        style={{ fontStyle: 'italic' }}
+                                      >
                                         💡 {guidance}
                                       </Text>
                                     ) : null;
@@ -1637,13 +1771,25 @@ const DocumentManager = ({
 
                             {/* Warning message for duplicate uploads */}
                             {isDuplicate && fileProgress?.error && (
-                              <Alert variant="light" color="orange" size="xs" p="xs">
+                              <Alert
+                                variant="light"
+                                color="orange"
+                                size="xs"
+                                p="xs"
+                              >
                                 <Stack gap="xs">
                                   <Text size="xs">{fileProgress.error}</Text>
                                   {(() => {
-                                    const guidance = getErrorGuidance(fileProgress.error, selectedStorageBackend);
+                                    const guidance = getErrorGuidance(
+                                      fileProgress.error,
+                                      selectedStorageBackend
+                                    );
                                     return guidance ? (
-                                      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+                                      <Text
+                                        size="xs"
+                                        c="dimmed"
+                                        style={{ fontStyle: 'italic' }}
+                                      >
                                         💡 {guidance}
                                       </Text>
                                     ) : null;
@@ -1658,7 +1804,9 @@ const DocumentManager = ({
                             variant="light"
                             color="red"
                             size="sm"
-                            onClick={() => handleRemovePendingFile(pendingFile.id)}
+                            onClick={() =>
+                              handleRemovePendingFile(pendingFile.id)
+                            }
                           >
                             <IconX size={14} />
                           </ActionIcon>
@@ -1681,175 +1829,210 @@ const DocumentManager = ({
       <style>{spinKeyframes}</style>
       <Stack gap="md" className={className}>
         {/* Error Display */}
-      {error && (
-        <Alert
-          variant="light"
-          color="red"
-          title="File Operation Error"
-          icon={<IconAlertTriangle size={16} />}
-          withCloseButton
-          onClose={() => setError('')}
+        {error && (
+          <Alert
+            variant="light"
+            color="red"
+            title="File Operation Error"
+            icon={<IconAlertTriangle size={16} />}
+            withCloseButton
+            onClose={() => setError('')}
+          >
+            {error}
+          </Alert>
+        )}
+
+        {/* Main Content */}
+        {renderContent()}
+
+        {/* Upload Modal for View Mode */}
+        <Modal
+          opened={showUploadModal}
+          onClose={() => {
+            setShowUploadModal(false);
+            setFileUpload({ file: null, description: '' });
+            setModalProgress({ status: null, error: null });
+          }}
+          title="Upload File"
+          centered
         >
-          {error}
-        </Alert>
-      )}
+          <form onSubmit={handleFileUploadSubmit}>
+            <Stack gap="md">
+              <FileInput
+                placeholder="Select a file to upload"
+                value={fileUpload.file}
+                onChange={file => setFileUpload(prev => ({ ...prev, file }))}
+                accept={config.acceptedTypes?.join(',')}
+                leftSection={<IconUpload size={16} />}
+                disabled={loading}
+              />
+              <TextInput
+                placeholder="File description (optional)"
+                value={fileUpload.description}
+                onChange={e =>
+                  setFileUpload(prev => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                disabled={loading}
+              />
 
-      {/* Main Content */}
-      {renderContent()}
+              {/* Progress/Status Display */}
+              {modalProgress.status && (
+                <Stack gap="sm">
+                  {modalProgress.status === 'uploading' && (
+                    <Group gap="sm">
+                      <Loader size="sm" />
+                      <Text size="sm">Uploading file...</Text>
+                    </Group>
+                  )}
 
-      {/* Upload Modal for View Mode */}
-      <Modal
-        opened={showUploadModal}
-        onClose={() => {
-          setShowUploadModal(false);
-          setFileUpload({ file: null, description: '' });
-          setModalProgress({ status: null, error: null });
-        }}
-        title="Upload File"
-        centered
-      >
-        <form onSubmit={handleFileUploadSubmit}>
-          <Stack gap="md">
-            <FileInput
-              placeholder="Select a file to upload"
-              value={fileUpload.file}
-              onChange={file => setFileUpload(prev => ({ ...prev, file }))}
-              accept={config.acceptedTypes?.join(',')}
-              leftSection={<IconUpload size={16} />}
-              disabled={loading}
-            />
-            <TextInput
-              placeholder="File description (optional)"
-              value={fileUpload.description}
-              onChange={e =>
-                setFileUpload(prev => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-              disabled={loading}
-            />
-            
-            {/* Progress/Status Display */}
-            {modalProgress.status && (
-              <Stack gap="sm">
-                {modalProgress.status === 'uploading' && (
-                  <Group gap="sm">
-                    <Loader size="sm" />
-                    <Text size="sm">Uploading file...</Text>
-                  </Group>
-                )}
-                
-                {modalProgress.status === 'processing' && (
-                  <Group gap="sm">
-                    <Loader size="sm" />
-                    <Text size="sm">{t('manager.processingPaperless')}</Text>
-                  </Group>
-                )}
-                
-                {modalProgress.status === 'completed' && (
-                  <Alert icon={<IconCheck size={16} />} color="green">
-                    {t('manager.uploadSuccess')}
-                  </Alert>
-                )}
-                
-                {modalProgress.status === 'completed_duplicate' && (
-                  <Alert icon={<IconAlertTriangle size={16} />} color="orange">
-                    <Text size="sm" fw={500}>{t('manager.duplicateDocument')}</Text>
-                    <Text size="sm" c="dimmed" mt="xs">
-                      {modalProgress.message || 'This document already exists in Paperless and cannot be uploaded again.'}
-                    </Text>
-                  </Alert>
-                )}
-                
-                {modalProgress.status === 'failed' && (
-                  <Alert 
-                    icon={
-                      modalProgress.errorType === 'corrupted_file' ? <IconFileX size={16} /> :
-                      modalProgress.errorType === 'file_too_large' ? <IconFileOff size={16} /> :
-                      modalProgress.errorType === 'permission_error' ? <IconLock size={16} /> :
-                      modalProgress.errorType === 'storage_full' ? <IconDatabase size={16} /> :
-                      modalProgress.errorType === 'network_error' ? <IconWifi size={16} /> :
-                      <IconExclamationMark size={16} />
-                    } 
-                    color={
-                      modalProgress.errorType === 'ocr_failed' ? 'yellow' : 'red'
-                    }
-                  >
-                    <Text size="sm" fw={500}>
-                      {modalProgress.errorType === 'corrupted_file' ? 'File Error' :
-                       modalProgress.errorType === 'file_too_large' ? 'File Too Large' :
-                       modalProgress.errorType === 'permission_error' ? 'Permission Denied' :
-                       modalProgress.errorType === 'storage_full' ? 'Storage Full' :
-                       modalProgress.errorType === 'network_error' ? 'Network Error' :
-                       modalProgress.errorType === 'ocr_failed' ? 'Processing Warning' :
-                       'Upload Failed'}
-                    </Text>
-                    {modalProgress.error && (
-                      <Text size="sm" c="dimmed" mt="xs">
-                        {modalProgress.error}
+                  {modalProgress.status === 'processing' && (
+                    <Group gap="sm">
+                      <Loader size="sm" />
+                      <Text size="sm">{t('manager.processingPaperless')}</Text>
+                    </Group>
+                  )}
+
+                  {modalProgress.status === 'completed' && (
+                    <Alert icon={<IconCheck size={16} />} color="green">
+                      {t('manager.uploadSuccess')}
+                    </Alert>
+                  )}
+
+                  {modalProgress.status === 'completed_duplicate' && (
+                    <Alert
+                      icon={<IconAlertTriangle size={16} />}
+                      color="orange"
+                    >
+                      <Text size="sm" fw={500}>
+                        {t('manager.duplicateDocument')}
                       </Text>
-                    )}
-                  </Alert>
-                )}
-              </Stack>
-            )}
-            <Group justify="flex-end">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowUploadModal(false);
-                  setFileUpload({ file: null, description: '' });
-                  setModalProgress({ status: null, error: null });
-                }}
-              >
-                {t('shared:fields.cancel')}
-              </Button>
-              <Button
-                type="submit"
-                disabled={!fileUpload.file || loading || modalProgress.status === 'processing'}
-                leftSection={
-                  loading || modalProgress.status === 'processing' ? 
-                    <Loader size={16} /> : 
-                    <IconUpload size={16} />
-                }
-                color={
-                  modalProgress.status === 'completed' ? 'green' :
-                  modalProgress.status === 'completed_duplicate' ? 'orange' :
-                  modalProgress.status === 'failed' ? 'red' :
-                  undefined
-                }
-              >
-                {modalProgress.status === 'uploading' ? 'Uploading...' :
-                 modalProgress.status === 'processing' ? 'Processing...' :
-                 modalProgress.status === 'completed' ? 'Completed' :
-                 modalProgress.status === 'completed_duplicate' ? 'Duplicate Found' :
-                 modalProgress.status === 'failed' ? 'Failed' :
-                 'Upload'}
-              </Button>
-            </Group>
-          </Stack>
-        </form>
-      </Modal>
+                      <Text size="sm" c="dimmed" mt="xs">
+                        {modalProgress.message ||
+                          'This document already exists in Paperless and cannot be uploaded again.'}
+                      </Text>
+                    </Alert>
+                  )}
 
-      {/* Link Paperless Document Modal */}
-      <LinkPaperlessDocumentModal
-        opened={showLinkModal}
-        onClose={() => setShowLinkModal(false)}
-        onLinkDocument={handleLinkPaperlessDocument}
-        entityType={entityType}
-        entityId={entityId}
-      />
+                  {modalProgress.status === 'failed' && (
+                    <Alert
+                      icon={
+                        modalProgress.errorType === 'corrupted_file' ? (
+                          <IconFileX size={16} />
+                        ) : modalProgress.errorType === 'file_too_large' ? (
+                          <IconFileOff size={16} />
+                        ) : modalProgress.errorType === 'permission_error' ? (
+                          <IconLock size={16} />
+                        ) : modalProgress.errorType === 'storage_full' ? (
+                          <IconDatabase size={16} />
+                        ) : modalProgress.errorType === 'network_error' ? (
+                          <IconWifi size={16} />
+                        ) : (
+                          <IconExclamationMark size={16} />
+                        )
+                      }
+                      color={
+                        modalProgress.errorType === 'ocr_failed'
+                          ? 'yellow'
+                          : 'red'
+                      }
+                    >
+                      <Text size="sm" fw={500}>
+                        {modalProgress.errorType === 'corrupted_file'
+                          ? 'File Error'
+                          : modalProgress.errorType === 'file_too_large'
+                            ? 'File Too Large'
+                            : modalProgress.errorType === 'permission_error'
+                              ? 'Permission Denied'
+                              : modalProgress.errorType === 'storage_full'
+                                ? 'Storage Full'
+                                : modalProgress.errorType === 'network_error'
+                                  ? 'Network Error'
+                                  : modalProgress.errorType === 'ocr_failed'
+                                    ? 'Processing Warning'
+                                    : 'Upload Failed'}
+                      </Text>
+                      {modalProgress.error && (
+                        <Text size="sm" c="dimmed" mt="xs">
+                          {modalProgress.error}
+                        </Text>
+                      )}
+                    </Alert>
+                  )}
+                </Stack>
+              )}
+              <Group justify="flex-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowUploadModal(false);
+                    setFileUpload({ file: null, description: '' });
+                    setModalProgress({ status: null, error: null });
+                  }}
+                >
+                  {t('shared:fields.cancel')}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={
+                    !fileUpload.file ||
+                    loading ||
+                    modalProgress.status === 'processing'
+                  }
+                  leftSection={
+                    loading || modalProgress.status === 'processing' ? (
+                      <Loader size={16} />
+                    ) : (
+                      <IconUpload size={16} />
+                    )
+                  }
+                  color={
+                    modalProgress.status === 'completed'
+                      ? 'green'
+                      : modalProgress.status === 'completed_duplicate'
+                        ? 'orange'
+                        : modalProgress.status === 'failed'
+                          ? 'red'
+                          : undefined
+                  }
+                >
+                  {modalProgress.status === 'uploading'
+                    ? 'Uploading...'
+                    : modalProgress.status === 'processing'
+                      ? 'Processing...'
+                      : modalProgress.status === 'completed'
+                        ? 'Completed'
+                        : modalProgress.status === 'completed_duplicate'
+                          ? 'Duplicate Found'
+                          : modalProgress.status === 'failed'
+                            ? 'Failed'
+                            : 'Upload'}
+                </Button>
+              </Group>
+            </Stack>
+          </form>
+        </Modal>
 
-      {/* Link Papra Document Modal */}
-      <LinkPapraDocumentModal
-        opened={isPapraLinkModalOpen}
-        onClose={() => setIsPapraLinkModalOpen(false)}
-        onLinkDocument={handleLinkPapraDocument}
-        entityType={entityType}
-        entityId={entityId}
-      />
-    </Stack>
+        {/* Link Paperless Document Modal */}
+        <LinkPaperlessDocumentModal
+          opened={showLinkModal}
+          onClose={() => setShowLinkModal(false)}
+          onLinkDocument={handleLinkPaperlessDocument}
+          entityType={entityType}
+          entityId={entityId}
+        />
+
+        {/* Link Papra Document Modal */}
+        <LinkPapraDocumentModal
+          opened={isPapraLinkModalOpen}
+          onClose={() => setIsPapraLinkModalOpen(false)}
+          onLinkDocument={handleLinkPapraDocument}
+          entityType={entityType}
+          entityId={entityId}
+        />
+      </Stack>
     </>
   );
 };

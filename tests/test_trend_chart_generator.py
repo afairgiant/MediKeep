@@ -16,7 +16,7 @@ def _make_dates(count, start_days_ago=365):
 
 def _is_valid_png(data: bytes) -> bool:
     """Check PNG magic bytes."""
-    return data[:8] == b'\x89PNG\r\n\x1a\n'
+    return data[:8] == b"\x89PNG\r\n\x1a\n"
 
 
 class TestTrendChartGenerator:
@@ -90,8 +90,18 @@ class TestTrendChartGenerator:
             "unit": "mmHg",
             "reference_range": {"systolic": (90, 120), "diastolic": (60, 80)},
             "statistics": {
-                "systolic": {"count": 8, "latest": 124, "average": 123.3, "trend_direction": "stable"},
-                "diastolic": {"count": 8, "latest": 81, "average": 80.6, "trend_direction": "stable"},
+                "systolic": {
+                    "count": 8,
+                    "latest": 124,
+                    "average": 123.3,
+                    "trend_direction": "stable",
+                },
+                "diastolic": {
+                    "count": 8,
+                    "latest": 81,
+                    "average": 80.6,
+                    "trend_direction": "stable",
+                },
             },
         }
         png = self.generator.generate_vital_chart(data, "blood_pressure")
@@ -161,7 +171,15 @@ class TestTrendChartGenerator:
     def test_generate_lab_test_chart_all_statuses(self):
         """Test that all status colors render without error."""
         dates = _make_dates(7)
-        statuses = ["normal", "high", "low", "critical_high", "critical_low", "abnormal", "unknown"]
+        statuses = [
+            "normal",
+            "high",
+            "low",
+            "critical_high",
+            "critical_low",
+            "abnormal",
+            "unknown",
+        ]
         data = {
             "dates": dates,
             "values": [95, 110, 60, 200, 30, 105, 90],

@@ -17,6 +17,7 @@ import hashlib
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlencode
 
 from cryptography.fernet import Fernet
 from sqlalchemy import and_, desc
@@ -49,6 +50,7 @@ def _derive_encryption_key() -> bytes:
 # Channel URL Builders - Registry Pattern
 # ============================================================================
 
+
 def _build_discord_url(config: Dict) -> str:
     """Build Apprise URL for Discord webhook."""
     webhook_url = config.get("webhook_url", "")
@@ -75,33 +77,59 @@ def _build_email_url(config: Dict) -> str:
     return f"{protocol}://{smtp_user}:{smtp_password}@{smtp_host}:{smtp_port}?from={from_email}&to={to_email}"
 
 
+def _split_protocol(url: str) -> Tuple[str, str]:
+    """Split a URL into (host_path, tls_suffix) for Apprise URL assembly.
+
+    Returns host_path stripped of scheme and trailing slash, plus 's' for HTTPS
+    or '' for HTTP. Apprise schemes append this suffix to pick TLS (e.g.,
+    'gotify' + 's' -> 'gotifys').
+    """
+    url = url.rstrip("/")
+    if url.startswith("https://"):
+        return url[len("https://") :], "s"
+    if url.startswith("http://"):
+        return url[len("http://") :], ""
+    return url, ""
+
+
 def _build_gotify_url(config: Dict) -> str:
     """Build Apprise URL for Gotify."""
-    server_url = config.get("server_url", "").rstrip("/")
+    host, tls = _split_protocol(config.get("server_url", ""))
     app_token = config.get("app_token", "")
     priority = config.get("priority", 5)
 
-    # Strip protocol from server URL for Apprise format
-    host = server_url.replace("https://", "").replace("http://", "")
-    protocol = "gotifys" if "https://" in config.get("server_url", "") else "gotify"
+    # Extended timeout for services behind CDNs (rto=read timeout, cto=connect timeout)
+    return f"gotify{tls}://{host}/{app_token}?priority={priority}&rto=15&cto=15"
 
-    # Add extended timeout for services behind CDNs (rto=read timeout, cto=connect timeout)
-    return f"{protocol}://{host}/{app_token}?priority={priority}&rto=15&cto=15"
+
+def _build_ntfy_url(config: Dict) -> str:
+    """Build Apprise URL for ntfy."""
+    host, tls = _split_protocol(config.get("server_url", "https://ntfy.sh"))
+    topic = config.get("topic", "")
+    auth_token = config.get("auth_token")
+    priority = config.get("priority")
+
+    apprise_url = f"ntfy{tls}://{host}/{topic}"
+
+    params = {}
+    if auth_token:
+        params["token"] = auth_token
+    if priority is not None:
+        params["priority"] = priority
+    if params:
+        apprise_url += "?" + urlencode(params)
+
+    return apprise_url
 
 
 def _build_webhook_url(config: Dict) -> str:
     """Build Apprise URL for generic webhook."""
-    url = config.get("url", "")
+    # method is stored in config but Apprise JSON plugin uses POST by default
+    host_path, tls = _split_protocol(config.get("url", ""))
     auth_token = config.get("auth_token")
-    # Note: method is stored in config but Apprise JSON plugin uses POST by default
 
-    # Strip protocol for Apprise format
-    host_path = url.replace("https://", "").replace("http://", "")
-    protocol = "jsons" if "https://" in url else "json"
+    apprise_url = f"json{tls}://{host_path}"
 
-    apprise_url = f"{protocol}://{host_path}"
-
-    # Add auth header if provided
     if auth_token:
         apprise_url += f"?+Authorization=Bearer {auth_token}"
 
@@ -113,6 +141,7 @@ CHANNEL_BUILDERS = {
     ChannelType.DISCORD.value: _build_discord_url,
     ChannelType.EMAIL.value: _build_email_url,
     ChannelType.GOTIFY.value: _build_gotify_url,
+    ChannelType.NTFY.value: _build_ntfy_url,
     ChannelType.WEBHOOK.value: _build_webhook_url,
 }
 
@@ -120,6 +149,7 @@ CHANNEL_BUILDERS = {
 # ============================================================================
 # Notification Service
 # ============================================================================
+
 
 class NotificationService:
     """
@@ -159,12 +189,16 @@ class NotificationService:
             ValueError: If channel name already exists for user
         """
         # Check for duplicate name
-        existing = self.db.query(NotificationChannel).filter(
-            and_(
-                NotificationChannel.user_id == user_id,
-                NotificationChannel.name == name
+        existing = (
+            self.db.query(NotificationChannel)
+            .filter(
+                and_(
+                    NotificationChannel.user_id == user_id,
+                    NotificationChannel.name == name,
+                )
             )
-        ).first()
+            .first()
+        )
 
         if existing:
             raise ValueError(f"A channel named '{name}' already exists")
@@ -192,25 +226,34 @@ class NotificationService:
                 "channel_id": channel.id,
                 "channel_type": channel_type,
                 "channel_name": name,
-            }
+            },
         )
 
         return channel
 
     def get_user_channels(self, user_id: int) -> List[NotificationChannel]:
         """Get all notification channels for a user."""
-        return self.db.query(NotificationChannel).filter(
-            NotificationChannel.user_id == user_id
-        ).order_by(NotificationChannel.created_at.desc()).all()
+        return (
+            self.db.query(NotificationChannel)
+            .filter(NotificationChannel.user_id == user_id)
+            .order_by(NotificationChannel.created_at.desc())
+            .all()
+        )
 
-    def get_channel(self, user_id: int, channel_id: int) -> Optional[NotificationChannel]:
+    def get_channel(
+        self, user_id: int, channel_id: int
+    ) -> Optional[NotificationChannel]:
         """Get a specific channel for a user."""
-        return self.db.query(NotificationChannel).filter(
-            and_(
-                NotificationChannel.id == channel_id,
-                NotificationChannel.user_id == user_id
+        return (
+            self.db.query(NotificationChannel)
+            .filter(
+                and_(
+                    NotificationChannel.id == channel_id,
+                    NotificationChannel.user_id == user_id,
+                )
             )
-        ).first()
+            .first()
+        )
 
     def is_channel_config_valid(self, channel: NotificationChannel) -> tuple[bool, str]:
         """
@@ -247,13 +290,17 @@ class NotificationService:
 
         if name is not None and name != channel.name:
             # Check for duplicate name
-            existing = self.db.query(NotificationChannel).filter(
-                and_(
-                    NotificationChannel.user_id == user_id,
-                    NotificationChannel.name == name,
-                    NotificationChannel.id != channel_id
+            existing = (
+                self.db.query(NotificationChannel)
+                .filter(
+                    and_(
+                        NotificationChannel.user_id == user_id,
+                        NotificationChannel.name == name,
+                        NotificationChannel.id != channel_id,
+                    )
                 )
-            ).first()
+                .first()
+            )
             if existing:
                 raise ValueError(f"A channel named '{name}' already exists")
             channel.name = name
@@ -274,7 +321,7 @@ class NotificationService:
             extra={
                 "user_id": user_id,
                 "channel_id": channel_id,
-            }
+            },
         )
 
         return channel
@@ -298,7 +345,7 @@ class NotificationService:
             extra={
                 "user_id": user_id,
                 "channel_id": channel_id,
-            }
+            },
         )
 
         return True
@@ -331,7 +378,7 @@ class NotificationService:
         str_value = str(value)
         if len(str_value) > 12:
             return f"{str_value[:4]}...{str_value[-4:]}"
-        elif len(str_value) > 6:
+        if len(str_value) > 6:
             return f"{str_value[:2]}...{str_value[-2:]}"
         return "****"
 
@@ -371,13 +418,17 @@ class NotificationService:
             return []
 
         # Find enabled preferences for this event type (user-specific)
-        preferences = self.db.query(NotificationPreference).filter(
-            and_(
-                NotificationPreference.user_id == user_id,
-                NotificationPreference.event_type == event_type,
-                NotificationPreference.is_enabled == True
+        preferences = (
+            self.db.query(NotificationPreference)
+            .filter(
+                and_(
+                    NotificationPreference.user_id == user_id,
+                    NotificationPreference.event_type == event_type,
+                    NotificationPreference.is_enabled.is_(True),
+                )
             )
-        ).all()
+            .all()
+        )
 
         return await self._send_to_preferences(
             preferences=preferences,
@@ -415,12 +466,16 @@ class NotificationService:
             return []
 
         # Find ALL enabled preferences for this event type (across all users)
-        preferences = self.db.query(NotificationPreference).filter(
-            and_(
-                NotificationPreference.event_type == event_type,
-                NotificationPreference.is_enabled == True
+        preferences = (
+            self.db.query(NotificationPreference)
+            .filter(
+                and_(
+                    NotificationPreference.event_type == event_type,
+                    NotificationPreference.is_enabled.is_(True),
+                )
             )
-        ).all()
+            .all()
+        )
 
         history_records = await self._send_to_preferences(
             preferences=preferences,
@@ -436,7 +491,7 @@ class NotificationService:
                 extra={
                     "event_type": event_type,
                     "recipients_count": len(history_records),
-                }
+                },
             )
 
         return history_records
@@ -471,12 +526,16 @@ class NotificationService:
 
         # Get unique enabled channels
         channel_ids = list({p.channel_id for p in preferences})
-        channels = self.db.query(NotificationChannel).filter(
-            and_(
-                NotificationChannel.id.in_(channel_ids),
-                NotificationChannel.is_enabled == True
+        channels = (
+            self.db.query(NotificationChannel)
+            .filter(
+                and_(
+                    NotificationChannel.id.in_(channel_ids),
+                    NotificationChannel.is_enabled.is_(True),
+                )
             )
-        ).all()
+            .all()
+        )
 
         if not channels:
             logger.debug(f"No enabled channels for event {event_type}")
@@ -532,7 +591,9 @@ class NotificationService:
 
             apprise_url = builder(config)
             if not apprise_url:
-                raise ValueError(f"Failed to build URL for channel type: {channel.channel_type}")
+                raise ValueError(
+                    f"Failed to build URL for channel type: {channel.channel_type}"
+                )
 
             # Create Apprise instance and add URL
             apobj = apprise.Apprise()
@@ -540,8 +601,7 @@ class NotificationService:
 
             # Send notification
             result = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: apobj.notify(title=title, body=message)
+                None, lambda: apobj.notify(title=title, body=message)
             )
 
             if result:
@@ -556,7 +616,7 @@ class NotificationService:
                         "channel_id": channel.id,
                         "channel_type": channel.channel_type,
                         "event_type": history.event_type,
-                    }
+                    },
                 )
             else:
                 history.status = NotificationStatus.FAILED.value
@@ -569,7 +629,7 @@ class NotificationService:
                         "channel_type": channel.channel_type,
                         "event_type": history.event_type,
                         "error": "Apprise returned failure",
-                    }
+                    },
                 )
 
         except Exception as e:
@@ -583,7 +643,7 @@ class NotificationService:
                     "channel_type": channel.channel_type,
                     "event_type": history.event_type,
                     "error": str(e),
-                }
+                },
             )
 
         finally:
@@ -644,8 +704,7 @@ class NotificationService:
             apobj.add(apprise_url)
 
             result = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: apobj.notify(title=test_title, body=test_message)
+                None, lambda: apobj.notify(title=test_title, body=test_message)
             )
 
             # Update channel test status
@@ -661,15 +720,15 @@ class NotificationService:
 
                 logger.info(
                     "notification_test_success",
-                    extra={"channel_id": channel_id, "user_id": user_id}
+                    extra={"channel_id": channel_id, "user_id": user_id},
                 )
                 return True, "Test notification sent successfully"
-            else:
-                channel.last_test_status = "failed"
-                history.status = NotificationStatus.FAILED.value
-                history.error_message = "Apprise returned failure"
-                self.db.commit()
-                return False, "Failed to send test notification"
+
+            channel.last_test_status = "failed"
+            history.status = NotificationStatus.FAILED.value
+            history.error_message = "Apprise returned failure"
+            self.db.commit()
+            return False, "Failed to send test notification"
 
         except Exception as e:
             channel.last_test_at = datetime.now(timezone.utc)
@@ -680,7 +739,7 @@ class NotificationService:
 
             logger.error(
                 "notification_test_error",
-                extra={"channel_id": channel_id, "user_id": user_id, "error": str(e)}
+                extra={"channel_id": channel_id, "user_id": user_id, "error": str(e)},
             )
             return False, f"Error: {str(e)}"
 
@@ -690,9 +749,11 @@ class NotificationService:
 
     def get_user_preferences(self, user_id: int) -> List[NotificationPreference]:
         """Get all notification preferences for a user."""
-        return self.db.query(NotificationPreference).filter(
-            NotificationPreference.user_id == user_id
-        ).all()
+        return (
+            self.db.query(NotificationPreference)
+            .filter(NotificationPreference.user_id == user_id)
+            .all()
+        )
 
     def set_preference(
         self,
@@ -713,13 +774,17 @@ class NotificationService:
             raise ValueError("Channel not found")
 
         # Find or create preference
-        preference = self.db.query(NotificationPreference).filter(
-            and_(
-                NotificationPreference.user_id == user_id,
-                NotificationPreference.channel_id == channel_id,
-                NotificationPreference.event_type == event_type
+        preference = (
+            self.db.query(NotificationPreference)
+            .filter(
+                and_(
+                    NotificationPreference.user_id == user_id,
+                    NotificationPreference.channel_id == channel_id,
+                    NotificationPreference.event_type == event_type,
+                )
             )
-        ).first()
+            .first()
+        )
 
         if preference:
             preference.is_enabled = is_enabled
@@ -745,7 +810,7 @@ class NotificationService:
                 "channel_id": channel_id,
                 "event_type": event_type,
                 "is_enabled": is_enabled,
-            }
+            },
         )
 
         return preference
@@ -757,13 +822,17 @@ class NotificationService:
         event_type: str,
     ) -> bool:
         """Delete a notification preference."""
-        preference = self.db.query(NotificationPreference).filter(
-            and_(
-                NotificationPreference.user_id == user_id,
-                NotificationPreference.channel_id == channel_id,
-                NotificationPreference.event_type == event_type
+        preference = (
+            self.db.query(NotificationPreference)
+            .filter(
+                and_(
+                    NotificationPreference.user_id == user_id,
+                    NotificationPreference.channel_id == channel_id,
+                    NotificationPreference.event_type == event_type,
+                )
             )
-        ).first()
+            .first()
+        )
 
         if preference:
             self.db.delete(preference)
@@ -802,9 +871,12 @@ class NotificationService:
 
         total = query.count()
 
-        items = query.order_by(desc(NotificationHistory.created_at)).offset(
-            (page - 1) * page_size
-        ).limit(page_size).all()
+        items = (
+            query.order_by(desc(NotificationHistory.created_at))
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+            .all()
+        )
 
         return items, total
 
@@ -825,9 +897,9 @@ class NotificationService:
         try:
             decrypted = self._fernet.decrypt(encrypted_config.encode())
             return json.loads(decrypted.decode())
-        except InvalidToken:
+        except InvalidToken as exc:
             raise ValueError(
                 "Channel configuration is corrupted or was encrypted with a different key. "
                 "This usually happens when SECRET_KEY or NOTIFICATION_ENCRYPTION_SALT has changed. "
                 "Please delete and re-create this channel."
-            )
+            ) from exc

@@ -139,13 +139,17 @@ describe('dateFormatUtils', () => {
 
     test('uses displayLocale for month names when provided', () => {
       // With en-US displayLocale, October should be "Oct" not "okt" (Swedish)
-      const result = formatDateLong('2026-10-25', 'ymd', { displayLocale: 'en-US' });
+      const result = formatDateLong('2026-10-25', 'ymd', {
+        displayLocale: 'en-US',
+      });
       expect(result).toMatch(/Oct/);
       expect(result).not.toMatch(/okt/i);
     });
 
     test('uses German month names with de-DE displayLocale', () => {
-      const result = formatDateLong('2026-10-25', 'ymd', { displayLocale: 'de-DE' });
+      const result = formatDateLong('2026-10-25', 'ymd', {
+        displayLocale: 'de-DE',
+      });
       expect(result).toMatch(/Okt/);
     });
 
@@ -153,7 +157,9 @@ describe('dateFormatUtils', () => {
       // When displayLocale is not provided, ymd format should fall back to sv-SE,
       // producing output identical to an explicit sv-SE displayLocale.
       const omitted = formatDateLong('2026-10-25', 'ymd');
-      const explicit = formatDateLong('2026-10-25', 'ymd', { displayLocale: 'sv-SE' });
+      const explicit = formatDateLong('2026-10-25', 'ymd', {
+        displayLocale: 'sv-SE',
+      });
       expect(omitted).toBe(explicit);
     });
   });
@@ -172,20 +178,14 @@ describe('dateFormatUtils', () => {
     });
 
     test('formats datetime with mdy format', () => {
-      const result = formatDateTimeWithPreference(
-        '2026-01-25T10:30:00',
-        'mdy'
-      );
+      const result = formatDateTimeWithPreference('2026-01-25T10:30:00', 'mdy');
       // Should include both date and time
       expect(result).toMatch(/\d{2}\/\d{2}\/\d{4}/);
       expect(result).toMatch(/\d{1,2}:\d{2}/);
     });
 
     test('formats datetime with dmy format', () => {
-      const result = formatDateTimeWithPreference(
-        '2026-01-25T10:30:00',
-        'dmy'
-      );
+      const result = formatDateTimeWithPreference('2026-01-25T10:30:00', 'dmy');
       // en-GB format for date portion
       expect(result).toMatch(/\d{2}\/\d{2}\/\d{4}/);
     });
@@ -284,7 +284,7 @@ describe('dayjs customParseFormat plugin (regression for European date input bug
   test('distinguishes DD/MM/YYYY from MM/DD/YYYY for ambiguous dates', () => {
     const eu = dayjs('05/01/2026', 'DD/MM/YYYY');
     const us = dayjs('05/01/2026', 'MM/DD/YYYY');
-    expect(eu.month()).toBe(0);  // January 5th (European)
-    expect(us.month()).toBe(4);  // May 1st (US)
+    expect(eu.month()).toBe(0); // January 5th (European)
+    expect(us.month()).toBe(4); // May 1st (US)
   });
 });

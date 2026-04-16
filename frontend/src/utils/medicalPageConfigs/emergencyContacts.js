@@ -68,11 +68,23 @@ export const emergencyContactsPageConfig = {
       priority: (a, b, sortOrder) => {
         // Primary contacts first
         if (a.is_primary !== b.is_primary) {
-          return sortOrder === 'asc' ? (a.is_primary ? 1 : -1) : (a.is_primary ? -1 : 1);
+          return sortOrder === 'asc'
+            ? a.is_primary
+              ? 1
+              : -1
+            : a.is_primary
+              ? -1
+              : 1;
         }
         // Then active contacts
         if (a.is_active !== b.is_active) {
-          return sortOrder === 'asc' ? (a.is_active ? 1 : -1) : (a.is_active ? -1 : 1);
+          return sortOrder === 'asc'
+            ? a.is_active
+              ? 1
+              : -1
+            : a.is_active
+              ? -1
+              : 1;
         }
         // Always sub-sort alphabetically A-Z within each group
         return a.name.localeCompare(b.name);

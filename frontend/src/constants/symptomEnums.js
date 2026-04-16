@@ -61,7 +61,7 @@ export const SYMPTOM_STATUS_COLORS = {
  * Get all severity values as array for select options
  */
 export const getSeverityOptions = () => {
-  return Object.values(SYMPTOM_SEVERITY).map((value) => ({
+  return Object.values(SYMPTOM_SEVERITY).map(value => ({
     value,
     label: SYMPTOM_SEVERITY_LABELS[value],
   }));
@@ -71,7 +71,7 @@ export const getSeverityOptions = () => {
  * Get all status values as array for select options
  */
 export const getStatusOptions = () => {
-  return Object.values(SYMPTOM_STATUS).map((value) => ({
+  return Object.values(SYMPTOM_STATUS).map(value => ({
     value,
     label: SYMPTOM_STATUS_LABELS[value],
   }));
@@ -136,7 +136,7 @@ export const IMPACT_LEVEL_COLORS = {
  * Get all time of day values as array for select options
  */
 export const getTimeOfDayOptions = () => {
-  return Object.values(TIME_OF_DAY).map((value) => ({
+  return Object.values(TIME_OF_DAY).map(value => ({
     value,
     label: TIME_OF_DAY_LABELS[value],
   }));
@@ -146,7 +146,7 @@ export const getTimeOfDayOptions = () => {
  * Get all impact level values as array for select options
  */
 export const getImpactLevelOptions = () => {
-  return Object.values(IMPACT_LEVEL).map((value) => ({
+  return Object.values(IMPACT_LEVEL).map(value => ({
     value,
     label: IMPACT_LEVEL_LABELS[value],
   }));

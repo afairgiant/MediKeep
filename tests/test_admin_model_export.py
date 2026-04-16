@@ -57,9 +57,20 @@ class TestModelExport:
         headers = next(reader)
         # Export uses detail_fields config (more than list_fields, but curated for safety)
         expected = [
-            "Id", "Name", "Brand", "Street Address", "City", "State",
-            "Zip Code", "Phone Number", "Website", "Hours",
-            "Drive Through", "Twenty Four Hour", "Created At", "Updated At",
+            "Id",
+            "Name",
+            "Brand",
+            "Street Address",
+            "City",
+            "State",
+            "Zip Code",
+            "Phone Number",
+            "Website",
+            "Hours",
+            "Drive Through",
+            "Twenty Four Hour",
+            "Created At",
+            "Updated At",
         ]
         assert headers == expected
 

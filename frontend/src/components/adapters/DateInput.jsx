@@ -1,4 +1,3 @@
-import React from 'react';
 import { DateInput as MantineDateInput } from '@mantine/dates';
 
 export const DateInput = ({
@@ -15,7 +14,6 @@ export const DateInput = ({
   helpText,
   ...props
 }) => {
-
   // Handle the change event to match form expectations
   const handleChange = date => {
     let formattedDate = '';
@@ -37,30 +35,32 @@ export const DateInput = ({
 
   // Convert string value to Date object for Mantine
   // Handle different input formats properly to avoid timezone issues
-  const dateValue = value ? (() => {
-    // If it's already a Date object, return as-is
-    if (value instanceof Date) {
-      return value;
-    }
-    
-    // If it's a string, check the format
-    if (typeof value === 'string') {
-      const trimmedValue = value.trim();
-      
-      // Check if it's a date-only string (YYYY-MM-DD format)
-      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
-        // Parse manually to avoid timezone issues
-        const [year, month, day] = trimmedValue.split('-').map(Number);
-        return new Date(year, month - 1, day); // month is 0-indexed
-      }
-      
-      // For datetime strings or other formats, use standard Date constructor
-      return new Date(trimmedValue);
-    }
-    
-    // Fallback for other types
-    return new Date(value);
-  })() : null;
+  const dateValue = value
+    ? (() => {
+        // If it's already a Date object, return as-is
+        if (value instanceof Date) {
+          return value;
+        }
+
+        // If it's a string, check the format
+        if (typeof value === 'string') {
+          const trimmedValue = value.trim();
+
+          // Check if it's a date-only string (YYYY-MM-DD format)
+          if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
+            // Parse manually to avoid timezone issues
+            const [year, month, day] = trimmedValue.split('-').map(Number);
+            return new Date(year, month - 1, day); // month is 0-indexed
+          }
+
+          // For datetime strings or other formats, use standard Date constructor
+          return new Date(trimmedValue);
+        }
+
+        // Fallback for other types
+        return new Date(value);
+      })()
+    : null;
 
   return (
     <MantineDateInput

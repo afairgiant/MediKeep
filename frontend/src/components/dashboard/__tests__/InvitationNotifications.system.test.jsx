@@ -4,7 +4,6 @@ import { vi } from 'vitest';
  * System test for family history invitation confirmation popup
  * Tests the complete user flow from receiving invitation to confirmation
  */
-import React from 'react';
 import { screen, waitFor, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { notifications } from '@mantine/notifications';
@@ -52,15 +51,15 @@ vi.mock('../../../hooks/useGlobalData', () => ({
 
 // Helper: find accept buttons (green check icon) in the invitation list
 const findAcceptButtons = () =>
-  screen.getAllByRole('button').filter(btn =>
-    btn.querySelector('[class*="tabler-icon-check"]')
-  );
+  screen
+    .getAllByRole('button')
+    .filter(btn => btn.querySelector('[class*="tabler-icon-check"]'));
 
 // Helper: find reject buttons (red X icon) in the invitation list
 const findRejectButtons = () =>
-  screen.getAllByRole('button').filter(btn =>
-    btn.querySelector('[class*="tabler-icon-x"]')
-  );
+  screen
+    .getAllByRole('button')
+    .filter(btn => btn.querySelector('[class*="tabler-icon-x"]'));
 
 describe('Family History Invitation Confirmation System Test', () => {
   const mockInvitations = [
@@ -92,7 +91,9 @@ describe('Family History Invitation Confirmation System Test', () => {
     vi.clearAllMocks();
 
     mockInvitationApi.getPendingInvitations.mockResolvedValue(mockInvitations);
-    mockInvitationApi.respondToInvitation.mockResolvedValue({ message: 'Invitation accepted successfully' });
+    mockInvitationApi.respondToInvitation.mockResolvedValue({
+      message: 'Invitation accepted successfully',
+    });
   });
 
   describe('Invitation Acceptance Confirmation Flow', () => {
@@ -103,7 +104,9 @@ describe('Family History Invitation Confirmation System Test', () => {
 
       // Wait for invitations to load
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       // Find accept button by check icon (Mantine v8 uses CSS vars, not color DOM attribute)
@@ -112,21 +115,42 @@ describe('Family History Invitation Confirmation System Test', () => {
 
       // Assert - Confirmation modal should appear
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
       // Scope modal assertions to the dialog to avoid conflicts with list content
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByText('Are you sure you want to accept this invitation?')).toBeInTheDocument();
+      expect(
+        within(dialog).getByText(
+          'Are you sure you want to accept this invitation?'
+        )
+      ).toBeInTheDocument();
       // Title and type appear in both list and modal - use getAllByText
-      expect(screen.getAllByText('Family History: Johnson Family Medical Records').length).toBeGreaterThan(0);
-      expect(within(dialog).getByText('invitations:card.from')).toBeInTheDocument();
-      expect(within(dialog).getAllByText('Family History').length).toBeGreaterThan(0);
-      expect(within(dialog).getByText('By accepting, you will gain access to view the shared medical information.')).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Family History: Johnson Family Medical Records')
+          .length
+      ).toBeGreaterThan(0);
+      expect(
+        within(dialog).getByText('invitations:card.from')
+      ).toBeInTheDocument();
+      expect(
+        within(dialog).getAllByText('Family History').length
+      ).toBeGreaterThan(0);
+      expect(
+        within(dialog).getByText(
+          'By accepting, you will gain access to view the shared medical information.'
+        )
+      ).toBeInTheDocument();
 
       // Check for modal buttons
-      expect(within(dialog).getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-      expect(within(dialog).getByRole('button', { name: 'Accept Invitation' })).toBeInTheDocument();
+      expect(
+        within(dialog).getByRole('button', { name: /cancel/i })
+      ).toBeInTheDocument();
+      expect(
+        within(dialog).getByRole('button', { name: 'Accept Invitation' })
+      ).toBeInTheDocument();
     });
 
     it('should complete acceptance flow when user confirms in modal', async () => {
@@ -135,7 +159,9 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       // Click accept button (check icon)
@@ -143,11 +169,15 @@ describe('Family History Invitation Confirmation System Test', () => {
 
       // Wait for confirmation modal
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
       // Click the Accept Invitation button in modal
-      const confirmAcceptButton = screen.getByRole('button', { name: 'Accept Invitation' });
+      const confirmAcceptButton = screen.getByRole('button', {
+        name: 'Accept Invitation',
+      });
       await userEvent.click(confirmAcceptButton);
 
       // Assert - Success notification should be shown
@@ -162,7 +192,9 @@ describe('Family History Invitation Confirmation System Test', () => {
 
       // Modal should close
       await waitFor(() => {
-        expect(screen.queryByText('Confirm Invitation Acceptance')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Confirm Invitation Acceptance')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -172,7 +204,9 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       // Click accept button (check icon)
@@ -180,7 +214,9 @@ describe('Family History Invitation Confirmation System Test', () => {
 
       // Wait for confirmation modal
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
       // Click Cancel button (text is i18n key 'common:buttons.cancel' in test env)
@@ -189,11 +225,15 @@ describe('Family History Invitation Confirmation System Test', () => {
 
       // Assert - Modal should close without API call
       await waitFor(() => {
-        expect(screen.queryByText('Confirm Invitation Acceptance')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Confirm Invitation Acceptance')
+        ).not.toBeInTheDocument();
       });
 
       // Invitation should still be visible
-      expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+      expect(
+        screen.getByText('Family History: Johnson Family Medical Records')
+      ).toBeInTheDocument();
 
       // No success notification should be shown
       expect(notifications.show).not.toHaveBeenCalledWith(
@@ -209,14 +249,18 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       // Click reject button (X icon) - no confirmation modal for rejections
       await userEvent.click(findRejectButtons()[0]);
 
       // Assert - No confirmation modal should appear
-      expect(screen.queryByText('Confirm Invitation Acceptance')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Confirm Invitation Acceptance')
+      ).not.toBeInTheDocument();
 
       // Success notification should be shown immediately
       await waitFor(() => {
@@ -231,24 +275,32 @@ describe('Family History Invitation Confirmation System Test', () => {
 
     it('should handle API errors during confirmation acceptance', async () => {
       // Arrange - Mock API error
-      mockInvitationApi.respondToInvitation.mockRejectedValue(new Error('Server error'));
+      mockInvitationApi.respondToInvitation.mockRejectedValue(
+        new Error('Server error')
+      );
 
       await act(async () => {
         renderWithAuth(<InvitationNotifications />);
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       // Click accept and then confirm
       await userEvent.click(findAcceptButtons()[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
-      const confirmAcceptButton = screen.getByRole('button', { name: 'Accept Invitation' });
+      const confirmAcceptButton = screen.getByRole('button', {
+        name: 'Accept Invitation',
+      });
       await userEvent.click(confirmAcceptButton);
 
       // Assert - Error notification should be shown
@@ -268,8 +320,12 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
-        expect(screen.getByText('Patient Record Share: John Doe')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('Patient Record Share: John Doe')
+        ).toBeInTheDocument();
       });
 
       const acceptButtons = findAcceptButtons();
@@ -278,18 +334,26 @@ describe('Family History Invitation Confirmation System Test', () => {
       await userEvent.click(acceptButtons[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
       // Verify family history type in modal (use within to avoid list badge conflicts)
       const dialog1 = screen.getByRole('dialog');
-      expect(within(dialog1).getAllByText('Family History').length).toBeGreaterThan(0);
+      expect(
+        within(dialog1).getAllByText('Family History').length
+      ).toBeGreaterThan(0);
 
       // Close modal
-      await userEvent.click(within(dialog1).getByRole('button', { name: /cancel/i }));
+      await userEvent.click(
+        within(dialog1).getByRole('button', { name: /cancel/i })
+      );
 
       await waitFor(() => {
-        expect(screen.queryByText('Confirm Invitation Acceptance')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Confirm Invitation Acceptance')
+        ).not.toBeInTheDocument();
       });
 
       // Test patient share invitation (second check button)
@@ -297,12 +361,16 @@ describe('Family History Invitation Confirmation System Test', () => {
       await userEvent.click(acceptButtonsAfterClose[1]);
 
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
       // Verify patient record type in modal
       const dialog2 = screen.getByRole('dialog');
-      expect(within(dialog2).getAllByText('Patient Record').length).toBeGreaterThan(0);
+      expect(
+        within(dialog2).getAllByText('Patient Record').length
+      ).toBeGreaterThan(0);
     });
 
     it('should support keyboard navigation for confirmation modal', async () => {
@@ -311,7 +379,9 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       // Focus and activate accept button with keyboard
@@ -320,7 +390,9 @@ describe('Family History Invitation Confirmation System Test', () => {
       await userEvent.keyboard('{Enter}');
 
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
       // Press Escape to close
@@ -328,7 +400,9 @@ describe('Family History Invitation Confirmation System Test', () => {
 
       // Assert - Modal should close
       await waitFor(() => {
-        expect(screen.queryByText('Confirm Invitation Acceptance')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Confirm Invitation Acceptance')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -338,21 +412,27 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       // Open modal and press Escape
       await userEvent.click(findAcceptButtons()[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
       await userEvent.keyboard('{Escape}');
 
       // Assert - Modal should close
       await waitFor(() => {
-        expect(screen.queryByText('Confirm Invitation Acceptance')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Confirm Invitation Acceptance')
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -361,7 +441,13 @@ describe('Family History Invitation Confirmation System Test', () => {
     it('should handle loading state during invitation acceptance', async () => {
       // Slow API response
       mockInvitationApi.respondToInvitation.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ message: 'Invitation accepted successfully' }), 100))
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () => resolve({ message: 'Invitation accepted successfully' }),
+              100
+            )
+          )
       );
 
       await act(async () => {
@@ -369,16 +455,22 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       await userEvent.click(findAcceptButtons()[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
-      const confirmButton = screen.getByRole('button', { name: 'Accept Invitation' });
+      const confirmButton = screen.getByRole('button', {
+        name: 'Accept Invitation',
+      });
       await userEvent.click(confirmButton);
 
       await waitFor(() => {
@@ -402,24 +494,34 @@ describe('Family History Invitation Confirmation System Test', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Family History: Johnson Family Medical Records')).toBeInTheDocument();
+        expect(
+          screen.getByText('Family History: Johnson Family Medical Records')
+        ).toBeInTheDocument();
       });
 
       await userEvent.click(findAcceptButtons()[0]);
 
       await waitFor(() => {
-        expect(screen.getByText('Confirm Invitation Acceptance')).toBeInTheDocument();
+        expect(
+          screen.getByText('Confirm Invitation Acceptance')
+        ).toBeInTheDocument();
       });
 
-      await userEvent.click(screen.getByRole('button', { name: 'Accept Invitation' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Accept Invitation' })
+      );
 
       // Assert - List should refresh and accepted invitation should be removed
       await waitFor(() => {
-        expect(screen.queryByText('Family History: Johnson Family Medical Records')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Family History: Johnson Family Medical Records')
+        ).not.toBeInTheDocument();
       });
 
       // Other invitation should still be visible
-      expect(screen.getByText('Patient Record Share: John Doe')).toBeInTheDocument();
+      expect(
+        screen.getByText('Patient Record Share: John Doe')
+      ).toBeInTheDocument();
     });
   });
 });

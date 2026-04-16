@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { notifyError } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
-import { Button } from '../../components/ui';
 import { IconUser, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
 import styles from '../../styles/pages/Login.module.css';
 
@@ -163,7 +162,7 @@ const Login = () => {
                 <IconLock size={18} />
               </span>
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 name="password"
                 value={formData.password}
@@ -175,7 +174,7 @@ const Login = () => {
               <span
                 className={styles.inputIconSuffix}
                 onClick={() => setShowPassword(prev => !prev)}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     setShowPassword(prev => !prev);
@@ -183,7 +182,11 @@ const Login = () => {
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
+                aria-label={
+                  showPassword
+                    ? t('login.hidePassword')
+                    : t('login.showPassword')
+                }
               >
                 {showPassword ? (
                   <IconEyeOff size={18} />
@@ -194,8 +197,11 @@ const Login = () => {
             </div>
           </div>
 
-
-          <button type="submit" disabled={isLoading} className={styles.submitBtn}>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={styles.submitBtn}
+          >
             {isLoading ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
@@ -212,7 +218,16 @@ const Login = () => {
               onClick={handleSSOLogin}
               disabled={isLoading || ssoLoading}
             >
-              {ssoLoading ? t('common:labels.loading') : t('login.continueWith', { provider: ssoConfig.provider_type === 'google' ? 'Google' : ssoConfig.provider_type === 'github' ? 'GitHub' : 'SSO' })}
+              {ssoLoading
+                ? t('common:labels.loading')
+                : t('login.continueWith', {
+                    provider:
+                      ssoConfig.provider_type === 'google'
+                        ? 'Google'
+                        : ssoConfig.provider_type === 'github'
+                          ? 'GitHub'
+                          : 'SSO',
+                  })}
             </button>
           </div>
         )}
@@ -236,7 +251,6 @@ const Login = () => {
           </div>
         )}
       </div>
-
     </div>
   );
 };

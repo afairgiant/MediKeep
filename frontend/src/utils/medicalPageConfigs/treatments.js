@@ -26,7 +26,7 @@ export const treatmentsPageConfig = {
         const endDate = item.end_date ? new Date(item.end_date) : null;
 
         switch (dateRange) {
-          case 'today':
+          case 'today': {
             const today = now.toDateString();
             const effectiveEndDateToday = endDate || now;
             return (
@@ -34,19 +34,19 @@ export const treatmentsPageConfig = {
               effectiveEndDateToday.toDateString() === today ||
               (startDate && startDate <= now && effectiveEndDateToday >= now)
             );
+          }
 
-          case 'week':
+          case 'week': {
             const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             const effectiveEndDateWeek = endDate || now;
             return (
               (startDate && startDate >= weekAgo) ||
               effectiveEndDateWeek >= weekAgo ||
-              (startDate &&
-                startDate <= now &&
-                effectiveEndDateWeek >= weekAgo)
+              (startDate && startDate <= now && effectiveEndDateWeek >= weekAgo)
             );
+          }
 
-          case 'month':
+          case 'month': {
             // Current calendar month
             const currentMonthStart = new Date(
               now.getFullYear(),
@@ -76,8 +76,9 @@ export const treatmentsPageConfig = {
                 startDate <= currentMonthStart &&
                 effectiveEndDate >= currentMonthEnd)
             );
+          }
 
-          case 'year':
+          case 'year': {
             const yearAgo = new Date(
               now.getFullYear() - 1,
               now.getMonth(),
@@ -87,18 +88,17 @@ export const treatmentsPageConfig = {
             return (
               (startDate && startDate >= yearAgo) ||
               effectiveEndDateYear >= yearAgo ||
-              (startDate &&
-                startDate <= now &&
-                effectiveEndDateYear >= yearAgo)
+              (startDate && startDate <= now && effectiveEndDateYear >= yearAgo)
             );
+          }
 
-          case 'current':
+          case 'current': {
             // Currently active treatments
             const effectiveEndDateCurrent = endDate || now;
             return (
-              (!startDate || startDate <= now) &&
-              effectiveEndDateCurrent >= now
+              (!startDate || startDate <= now) && effectiveEndDateCurrent >= now
             );
+          }
 
           case 'past':
             // Past treatments (ended)

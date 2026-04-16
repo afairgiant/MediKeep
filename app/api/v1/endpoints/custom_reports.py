@@ -12,11 +12,19 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user_id, get_db
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_endpoint_error, log_security_event, log_validation_error
+from app.core.logging.helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+    log_validation_error,
+)
 from app.models.models import User
 from app.schemas.custom_reports import (
-    CustomReportRequest, DataSummaryResponse, ReportTemplate,
-    ReportTemplateResponse, TemplateActionResponse
+    CustomReportRequest,
+    DataSummaryResponse,
+    ReportTemplate,
+    ReportTemplateResponse,
+    TemplateActionResponse,
 )
 from app.schemas.trend_charts import TrendChartSelection
 from app.services.custom_report_service import CustomReportService
@@ -39,7 +47,7 @@ def _get_active_patient_id(db: Session, user_id: int) -> Optional[int]:
 async def get_custom_report_data_summary(
     request: Request,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Get summary of all medical data available for custom report generation.
@@ -54,7 +62,7 @@ async def get_custom_report_data_summary(
             current_user_id,
             "custom_report_data_summary_retrieved",
             total_records=summary.total_records,
-            category_count=len(summary.categories)
+            category_count=len(summary.categories),
         )
         return summary
     except Exception as e:
@@ -63,11 +71,11 @@ async def get_custom_report_data_summary(
             request,
             "Failed to retrieve custom report data summary",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve data summary"
+            detail="Failed to retrieve data summary",
         )
 
 
@@ -76,7 +84,7 @@ async def generate_custom_report(
     http_request: Request,
     request: CustomReportRequest,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Generate a custom PDF report with selected records from various categories.
@@ -86,43 +94,34 @@ async def generate_custom_report(
 
         # Validate user owns all selected records (skip if no records selected)
         if request.selected_records:
-            await service.validate_record_ownership(current_user_id, request.selected_records)
+            await service.validate_record_ownership(
+                current_user_id, request.selected_records
+            )
 
         # Generate the report
         pdf_data = await service.generate_selective_report(current_user_id, request)
-        
+
         # Return PDF response
         filename = f"custom-medical-report-{current_user_id}.pdf"
         return Response(
             content=pdf_data,
             media_type="application/pdf",
-            headers={
-                "Content-Disposition": f'attachment; filename="{filename}"'
-            }
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
         )
-        
+
     except PermissionError as e:
         log_security_event(
             logger,
             "custom_report_permission_denied",
             http_request,
             "User attempted to generate report with unauthorized records",
-            user_id=current_user_id
+            user_id=current_user_id,
         )
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except ValueError as e:
-        log_validation_error(
-            logger,
-            http_request,
-            str(e),
-            user_id=current_user_id
-        )
+        log_validation_error(logger, http_request, str(e), user_id=current_user_id)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e)
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
@@ -130,11 +129,11 @@ async def generate_custom_report(
             http_request,
             "Custom report generation failed",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Report generation failed"
+            detail="Report generation failed",
         )
 
 
@@ -142,7 +141,7 @@ async def generate_custom_report(
 async def get_available_trend_data(
     request: Request,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Get available vital types and lab test names that have data for trend charts.
@@ -163,7 +162,7 @@ async def get_available_trend_data(
             current_user_id,
             "available_trend_data_retrieved",
             vital_type_count=len(vital_types),
-            lab_test_count=len(lab_test_names)
+            lab_test_count=len(lab_test_names),
         )
 
         return {
@@ -176,11 +175,11 @@ async def get_available_trend_data(
             request,
             "Failed to retrieve available trend data",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve available trend data"
+            detail="Failed to retrieve available trend data",
         )
 
 
@@ -189,7 +188,7 @@ async def get_trend_chart_counts(
     chart_selection: TrendChartSelection,
     request: Request,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Get record counts for selected trend charts filtered by their time ranges.
@@ -204,14 +203,20 @@ async def get_trend_chart_counts(
 
         vital_counts = {
             chart.vital_type: fetcher.count_vital_records(
-                patient_id, chart.vital_type, chart.date_from, chart.date_to,
+                patient_id,
+                chart.vital_type,
+                chart.date_from,
+                chart.date_to,
             )
             for chart in chart_selection.vital_charts
         }
 
         lab_test_counts = {
             chart.test_name: fetcher.count_lab_test_records(
-                patient_id, chart.test_name, chart.date_from, chart.date_to,
+                patient_id,
+                chart.test_name,
+                chart.date_from,
+                chart.date_to,
             )
             for chart in chart_selection.lab_test_charts
         }
@@ -235,11 +240,11 @@ async def get_trend_chart_counts(
             request,
             "Failed to retrieve trend chart counts",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve trend chart counts"
+            detail="Failed to retrieve trend chart counts",
         )
 
 
@@ -248,7 +253,7 @@ async def save_report_template(
     request: Request,
     template: ReportTemplate,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Save a custom report template for future use.
@@ -263,24 +268,16 @@ async def save_report_template(
             current_user_id,
             "report_template_saved",
             template_id=template_id,
-            template_name=template.name
+            template_name=template.name,
         )
         return TemplateActionResponse(
-            success=True,
-            message="Template saved successfully",
-            template_id=template_id
+            success=True, message="Template saved successfully", template_id=template_id
         )
 
     except ValueError as e:
-        log_validation_error(
-            logger,
-            request,
-            str(e),
-            user_id=current_user_id
-        )
+        log_validation_error(logger, request, str(e), user_id=current_user_id)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(e)
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
@@ -288,11 +285,11 @@ async def save_report_template(
             request,
             "Failed to save report template",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to save template"
+            detail="Failed to save template",
         )
 
 
@@ -300,7 +297,7 @@ async def save_report_template(
 async def get_saved_templates(
     request: Request,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Get all saved report templates for the current user.
@@ -315,11 +312,11 @@ async def get_saved_templates(
             request,
             "Failed to retrieve report templates",
             e,
-            user_id=current_user_id
+            user_id=current_user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve templates"
+            detail="Failed to retrieve templates",
         )
 
 
@@ -328,7 +325,7 @@ async def get_template(
     request: Request,
     template_id: int,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Get a specific report template by ID.
@@ -339,8 +336,7 @@ async def get_template(
 
         if not template:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Template not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Template not found"
             )
 
         return template
@@ -353,11 +349,11 @@ async def get_template(
             "Failed to retrieve report template by ID",
             e,
             user_id=current_user_id,
-            template_id=template_id
+            template_id=template_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve template"
+            detail="Failed to retrieve template",
         )
 
 
@@ -367,7 +363,7 @@ async def update_template(
     template_id: int,
     template: ReportTemplate,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Update an existing report template.
@@ -378,8 +374,7 @@ async def update_template(
 
         if not updated:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Template not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Template not found"
             )
 
         log_endpoint_access(
@@ -388,12 +383,12 @@ async def update_template(
             current_user_id,
             "report_template_updated",
             template_id=template_id,
-            template_name=template.name
+            template_name=template.name,
         )
         return TemplateActionResponse(
             success=True,
             message="Template updated successfully",
-            template_id=template_id
+            template_id=template_id,
         )
 
     except HTTPException:
@@ -405,11 +400,11 @@ async def update_template(
             "Failed to update report template",
             e,
             user_id=current_user_id,
-            template_id=template_id
+            template_id=template_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update template"
+            detail="Failed to update template",
         )
 
 
@@ -418,7 +413,7 @@ async def delete_template(
     request: Request,
     template_id: int,
     current_user_id: int = Depends(get_current_user_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Delete (soft delete) a report template.
@@ -429,8 +424,7 @@ async def delete_template(
 
         if not deleted:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Template not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Template not found"
             )
 
         log_endpoint_access(
@@ -438,12 +432,12 @@ async def delete_template(
             request,
             current_user_id,
             "report_template_deleted",
-            template_id=template_id
+            template_id=template_id,
         )
         return TemplateActionResponse(
             success=True,
             message="Template deleted successfully",
-            template_id=template_id
+            template_id=template_id,
         )
 
     except HTTPException:
@@ -455,9 +449,9 @@ async def delete_template(
             "Failed to delete report template",
             e,
             user_id=current_user_id,
-            template_id=template_id
+            template_id=template_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete template"
+            detail="Failed to delete template",
         )

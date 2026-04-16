@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -24,7 +24,11 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import SubmitButton from '../../shared/SubmitButton';
 import { useFormHandlers } from '../../../hooks/useFormHandlers';
-import { parseDateInput, getTodayEndOfDay, formatDateInputChange } from '../../../utils/dateUtils';
+import {
+  parseDateInput,
+  getTodayEndOfDay,
+  formatDateInputChange,
+} from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
@@ -54,20 +58,18 @@ const AllergyFormWrapper = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form handlers
-  const {
-    handleTextInputChange,
-  } = useFormHandlers(onInputChange);
+  const { handleTextInputChange } = useFormHandlers(onInputChange);
 
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
 
-  const handleDocumentManagerRef = (methods) => {
+  const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {
       onDocumentManagerRef(methods);
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in allergies ${editingAllergy ? 'edit' : 'create'}`,
       allergyId: editingAllergy?.id,
@@ -80,7 +82,11 @@ const AllergyFormWrapper = ({
     }
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('allergies_upload_completed', {
       message: 'File upload completed in allergies form',
       allergyId: editingAllergy?.id,
@@ -106,7 +112,7 @@ const AllergyFormWrapper = ({
   }, [isOpen]);
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -149,16 +155,25 @@ const AllergyFormWrapper = ({
           {/* Tabbed Content */}
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="basic"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
-              <Tabs.Tab value="reaction" leftSection={<IconAlertTriangle size={16} />}>
+              <Tabs.Tab
+                value="reaction"
+                leftSection={<IconAlertTriangle size={16} />}
+              >
                 {t('allergies.tabs.reactionDetails')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {editingAllergy
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
@@ -184,14 +199,30 @@ const AllergyFormWrapper = ({
                       label={t('allergies.allergyType.label')}
                       value={formData.allergy_type || null}
                       data={[
-                        { value: 'food', label: t('allergies.allergyType.options.food') },
-                        { value: 'medication', label: t('allergies.allergyType.options.medication') },
-                        { value: 'environmental', label: t('allergies.allergyType.options.environmental') },
-                        { value: 'insect', label: t('allergies.allergyType.options.insect') },
+                        {
+                          value: 'food',
+                          label: t('allergies.allergyType.options.food'),
+                        },
+                        {
+                          value: 'medication',
+                          label: t('allergies.allergyType.options.medication'),
+                        },
+                        {
+                          value: 'environmental',
+                          label: t(
+                            'allergies.allergyType.options.environmental'
+                          ),
+                        },
+                        {
+                          value: 'insect',
+                          label: t('allergies.allergyType.options.insect'),
+                        },
                         { value: 'other', label: t('shared:fields.other') },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'allergy_type', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'allergy_type', value: value || '' },
+                        });
                       }}
                       placeholder={t('allergies.allergyType.placeholder')}
                       description={t('allergies.allergyType.description')}
@@ -205,12 +236,20 @@ const AllergyFormWrapper = ({
                       value={formData.severity || null}
                       data={[
                         { value: 'mild', label: t('common:severity.mild') },
-                        { value: 'moderate', label: t('common:severity.moderate') },
+                        {
+                          value: 'moderate',
+                          label: t('common:severity.moderate'),
+                        },
                         { value: 'severe', label: t('common:severity.severe') },
-                        { value: 'life-threatening', label: t('common:severity.lifeThreatening') },
+                        {
+                          value: 'life-threatening',
+                          label: t('common:severity.lifeThreatening'),
+                        },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'severity', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'severity', value: value || '' },
+                        });
                       }}
                       placeholder={t('shared:labels.selectSeverityLevel')}
                       description={t('allergies.severity.description')}
@@ -224,11 +263,19 @@ const AllergyFormWrapper = ({
                       value={formData.status || null}
                       data={[
                         { value: 'active', label: t('shared:labels.active') },
-                        { value: 'inactive', label: t('shared:labels.inactive') },
-                        { value: 'resolved', label: t('shared:labels.resolved') },
+                        {
+                          value: 'inactive',
+                          label: t('shared:labels.inactive'),
+                        },
+                        {
+                          value: 'resolved',
+                          label: t('shared:labels.resolved'),
+                        },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'status', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'status', value: value || '' },
+                        });
                       }}
                       placeholder={t('shared:fields.selectStatus')}
                       description={t('allergies.status.description')}
@@ -240,9 +287,11 @@ const AllergyFormWrapper = ({
                     <DateInput
                       label={t('shared:fields.onsetDate')}
                       value={parseDateInput(formData.onset_date)}
-                      onChange={(date) => {
+                      onChange={date => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'onset_date', value: formattedDate } });
+                        onInputChange({
+                          target: { name: 'onset_date', value: formattedDate },
+                        });
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
@@ -259,10 +308,15 @@ const AllergyFormWrapper = ({
                       value={formData.medication_id || null}
                       data={medicationsOptions.map(med => ({
                         value: med.id.toString(),
-                        label: med.medication_name || med.name || `Medication #${med.id}`,
+                        label:
+                          med.medication_name ||
+                          med.name ||
+                          `Medication #${med.id}`,
                       }))}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'medication_id', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'medication_id', value: value || '' },
+                        });
                       }}
                       placeholder={t('allergies.relatedMedication.placeholder')}
                       description={t('allergies.relatedMedication.description')}
@@ -282,8 +336,10 @@ const AllergyFormWrapper = ({
                       </Text>
                       <TagInput
                         value={formData.tags || []}
-                        onChange={(tags) => {
-                          onInputChange({ target: { name: 'tags', value: tags } });
+                        onChange={tags => {
+                          onInputChange({
+                            target: { name: 'tags', value: tags },
+                          });
                         }}
                         placeholder={t('common:fields.tags.placeholder')}
                       />
@@ -302,14 +358,34 @@ const AllergyFormWrapper = ({
                       label={t('allergies.reactionType.label')}
                       value={formData.reaction_type || null}
                       data={[
-                        { value: 'skin', label: t('allergies.reactionType.options.skin') },
-                        { value: 'respiratory', label: t('allergies.reactionType.options.respiratory') },
-                        { value: 'gastrointestinal', label: t('allergies.reactionType.options.gastrointestinal') },
-                        { value: 'anaphylaxis', label: t('allergies.reactionType.options.anaphylaxis') },
+                        {
+                          value: 'skin',
+                          label: t('allergies.reactionType.options.skin'),
+                        },
+                        {
+                          value: 'respiratory',
+                          label: t(
+                            'allergies.reactionType.options.respiratory'
+                          ),
+                        },
+                        {
+                          value: 'gastrointestinal',
+                          label: t(
+                            'allergies.reactionType.options.gastrointestinal'
+                          ),
+                        },
+                        {
+                          value: 'anaphylaxis',
+                          label: t(
+                            'allergies.reactionType.options.anaphylaxis'
+                          ),
+                        },
                         { value: 'other', label: t('shared:fields.other') },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'reaction_type', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'reaction_type', value: value || '' },
+                        });
                       }}
                       placeholder={t('allergies.reactionType.placeholder')}
                       description={t('allergies.reactionType.description')}
@@ -367,14 +443,21 @@ const AllergyFormWrapper = ({
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
+            <Button
+              variant="default"
+              onClick={onClose}
+              disabled={isLoading || isSubmitting}
+            >
               {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.allergen?.trim()}
             >
-              {editingAllergy ? t('common:buttons.update') : t('common:buttons.create')} {t('shared:categories.allergies')}
+              {editingAllergy
+                ? t('common:buttons.update')
+                : t('common:buttons.create')}{' '}
+              {t('shared:categories.allergies')}
             </SubmitButton>
           </Group>
         </Stack>

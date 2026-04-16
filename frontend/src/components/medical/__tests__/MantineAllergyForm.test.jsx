@@ -3,7 +3,6 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
 import render from '../../../test-utils/render';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -16,12 +15,23 @@ import MantineAllergyForm from '../MantineAllergyForm';
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, ...props }) => (
     <div>
-      <label htmlFor={`date-${label}`}>{label}{required && ' *'}</label>
+      <label htmlFor={`date-${label}`}>
+        {label}
+        {required && ' *'}
+      </label>
       <input
         id={`date-${label}`}
         type="date"
-        value={value ? (value instanceof Date ? value.toISOString().split('T')[0] : value) : ''}
-        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={
+          value
+            ? value instanceof Date
+              ? value.toISOString().split('T')[0]
+              : value
+            : ''
+        }
+        onChange={e =>
+          onChange(e.target.value ? new Date(e.target.value) : null)
+        }
         data-testid={`date-${label.toLowerCase().replace(/\s+/g, '-')}`}
         {...props}
       />
@@ -98,8 +108,12 @@ describe('MantineAllergyForm', () => {
       // Title appears in the modal header
       expect(screen.getAllByText('Add New Allergy').length).toBeGreaterThan(0);
       // allergen and reaction fields use i18n keys as labels
-      expect(screen.getByLabelText(/medical:allergies\.allergen\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:allergies\.reaction\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:allergies\.allergen\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:allergies\.reaction\.label/)
+      ).toBeInTheDocument();
     });
 
     test('does not render when closed', () => {
@@ -112,13 +126,23 @@ describe('MantineAllergyForm', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
       // Required fields
-      expect(screen.getByLabelText(/medical:allergies\.allergen\.label/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/medical:allergies\.reaction\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:allergies\.allergen\.label/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:allergies\.reaction\.label/)
+      ).toBeInTheDocument();
 
       // Select fields (Mantine Select renders both input and listbox with same label, so use getAllBy)
-      expect(screen.getAllByLabelText(/shared:fields\.severity/).length).toBeGreaterThan(0);
-      expect(screen.getByLabelText(/shared:fields\.onsetDate/)).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.severity/).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getByLabelText(/shared:fields\.onsetDate/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByLabelText(/shared:fields\.status/).length
+      ).toBeGreaterThan(0);
       expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
     });
 
@@ -140,7 +164,9 @@ describe('MantineAllergyForm', () => {
     test('handles allergen input changes', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const allergenInput = screen.getByLabelText(/medical:allergies\.allergen\.label/);
+      const allergenInput = screen.getByLabelText(
+        /medical:allergies\.allergen\.label/
+      );
       fireEvent.change(allergenInput, { target: { value: 'Penicillin' } });
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -151,8 +177,12 @@ describe('MantineAllergyForm', () => {
     test('handles reaction input changes', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const reactionInput = screen.getByLabelText(/medical:allergies\.reaction\.label/);
-      fireEvent.change(reactionInput, { target: { value: 'Skin rash and hives' } });
+      const reactionInput = screen.getByLabelText(
+        /medical:allergies\.reaction\.label/
+      );
+      fireEvent.change(reactionInput, {
+        target: { value: 'Skin rash and hives' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
         target: { name: 'reaction', value: 'Skin rash and hives' },
@@ -162,7 +192,9 @@ describe('MantineAllergyForm', () => {
     test('handles severity select changes', async () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const severitySelect = screen.getAllByLabelText(/shared:fields\.severity/)[0];
+      const severitySelect = screen.getAllByLabelText(
+        /shared:fields\.severity/
+      )[0];
       fireEvent.click(severitySelect);
 
       // Options are rendered as i18n keys
@@ -214,10 +246,15 @@ describe('MantineAllergyForm', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
       const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
-      fireEvent.change(notesTextarea, { target: { value: 'Patient also experiences breathing difficulty' } });
+      fireEvent.change(notesTextarea, {
+        target: { value: 'Patient also experiences breathing difficulty' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-        target: { name: 'notes', value: 'Patient also experiences breathing difficulty' },
+        target: {
+          name: 'notes',
+          value: 'Patient also experiences breathing difficulty',
+        },
       });
     });
   });
@@ -280,7 +317,9 @@ describe('MantineAllergyForm', () => {
 
       expect(screen.getByDisplayValue('Shellfish')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Anaphylaxis')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Carries EpiPen at all times')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Carries EpiPen at all times')
+      ).toBeInTheDocument();
     });
 
     test('handles date formatting correctly', () => {
@@ -303,15 +342,21 @@ describe('MantineAllergyForm', () => {
     test('displays correct severity options', async () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const severitySelect = screen.getAllByLabelText(/shared:fields\.severity/)[0];
+      const severitySelect = screen.getAllByLabelText(
+        /shared:fields\.severity/
+      )[0];
       fireEvent.click(severitySelect);
 
       // Options are i18n keys since mock returns key as value
       await waitFor(() => {
         expect(screen.getByText('common:severity.mild')).toBeInTheDocument();
-        expect(screen.getByText('common:severity.moderate')).toBeInTheDocument();
+        expect(
+          screen.getByText('common:severity.moderate')
+        ).toBeInTheDocument();
         expect(screen.getByText('common:severity.severe')).toBeInTheDocument();
-        expect(screen.getByText('common:severity.lifeThreatening')).toBeInTheDocument();
+        expect(
+          screen.getByText('common:severity.lifeThreatening')
+        ).toBeInTheDocument();
       });
     });
 
@@ -333,7 +378,9 @@ describe('MantineAllergyForm', () => {
     test('validates required allergen field', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const allergenInput = screen.getByLabelText(/medical:allergies\.allergen\.label/);
+      const allergenInput = screen.getByLabelText(
+        /medical:allergies\.allergen\.label/
+      );
       expect(allergenInput).toBeRequired();
     });
 
@@ -349,9 +396,17 @@ describe('MantineAllergyForm', () => {
     test('accepts common allergen types', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const allergenInput = screen.getByLabelText(/medical:allergies\.allergen\.label/);
+      const allergenInput = screen.getByLabelText(
+        /medical:allergies\.allergen\.label/
+      );
 
-      const allergens = ['Peanuts', 'Penicillin', 'Latex', 'Dust mites', 'Shellfish'];
+      const allergens = [
+        'Peanuts',
+        'Penicillin',
+        'Latex',
+        'Dust mites',
+        'Shellfish',
+      ];
 
       for (const allergen of allergens) {
         fireEvent.change(allergenInput, { target: { value: allergen } });
@@ -365,7 +420,9 @@ describe('MantineAllergyForm', () => {
     test('accepts various reaction descriptions', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
-      const reactionInput = screen.getByLabelText(/medical:allergies\.reaction\.label/);
+      const reactionInput = screen.getByLabelText(
+        /medical:allergies\.reaction\.label/
+      );
 
       const reactions = [
         'Hives and itching',
@@ -392,14 +449,21 @@ describe('MantineAllergyForm', () => {
         reaction: 'Anaphylaxis',
         severity: 'critical',
         status: 'active',
-        notes: 'ALERT: Patient has history of anaphylactic shock. Requires immediate medical attention if exposed.',
+        notes:
+          'ALERT: Patient has history of anaphylactic shock. Requires immediate medical attention if exposed.',
       };
 
-      render(<MantineAllergyForm {...defaultProps} formData={criticalAllergyData} />);
+      render(
+        <MantineAllergyForm {...defaultProps} formData={criticalAllergyData} />
+      );
 
       expect(screen.getByDisplayValue('Penicillin')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Anaphylaxis')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('ALERT: Patient has history of anaphylactic shock. Requires immediate medical attention if exposed.')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue(
+          'ALERT: Patient has history of anaphylactic shock. Requires immediate medical attention if exposed.'
+        )
+      ).toBeInTheDocument();
     });
 
     test('supports drug allergy documentation', () => {
@@ -412,10 +476,14 @@ describe('MantineAllergyForm', () => {
         notes: 'Avoid all sulfa-containing medications',
       };
 
-      render(<MantineAllergyForm {...defaultProps} formData={drugAllergyData} />);
+      render(
+        <MantineAllergyForm {...defaultProps} formData={drugAllergyData} />
+      );
 
       expect(screen.getByDisplayValue('Sulfonamides')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Stevens-Johnson syndrome')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Stevens-Johnson syndrome')
+      ).toBeInTheDocument();
     });
 
     test('supports food allergy documentation', () => {
@@ -427,10 +495,16 @@ describe('MantineAllergyForm', () => {
         notes: 'Patient avoids all tree nuts and products containing tree nuts',
       };
 
-      render(<MantineAllergyForm {...defaultProps} formData={foodAllergyData} />);
+      render(
+        <MantineAllergyForm {...defaultProps} formData={foodAllergyData} />
+      );
 
-      expect(screen.getByDisplayValue('Tree nuts (almonds, walnuts)')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Oral allergy syndrome, throat swelling')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Tree nuts (almonds, walnuts)')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Oral allergy syndrome, throat swelling')
+      ).toBeInTheDocument();
     });
   });
 
@@ -474,24 +548,38 @@ describe('MantineAllergyForm', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
       // allergen is required in the field config
-      const allergenInput = screen.getByLabelText(/medical:allergies\.allergen\.label/);
+      const allergenInput = screen.getByLabelText(
+        /medical:allergies\.allergen\.label/
+      );
       expect(allergenInput).toBeRequired();
 
       // reaction is NOT required per allergyFormFields config
-      expect(screen.getByLabelText(/medical:allergies\.reaction\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:allergies\.reaction\.label/)
+      ).toBeInTheDocument();
 
       // severity and status select fields are present
-      expect(screen.getAllByLabelText(/shared:fields\.severity/)[0]).toBeInTheDocument();
-      expect(screen.getAllByLabelText(/shared:fields\.status/)[0]).toBeInTheDocument();
+      expect(
+        screen.getAllByLabelText(/shared:fields\.severity/)[0]
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByLabelText(/shared:fields\.status/)[0]
+      ).toBeInTheDocument();
     });
 
     test('has proper descriptions for medical fields', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
       // Descriptions are rendered as i18n keys
-      expect(screen.getByText('medical:allergies.allergen.description')).toBeInTheDocument();
-      expect(screen.getByText('medical:allergies.reaction.description')).toBeInTheDocument();
-      expect(screen.getByText('medical:allergies.severity.description')).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:allergies.allergen.description')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:allergies.reaction.description')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:allergies.severity.description')
+      ).toBeInTheDocument();
     });
 
     test('has proper button attributes', () => {
@@ -500,7 +588,9 @@ describe('MantineAllergyForm', () => {
       // The submit button has the same text as the title ('Add New Allergy')
       // Find all matches, then locate the one that is a button element
       const allMatches = screen.getAllByText('Add New Allergy');
-      const submitButton = allMatches.find(el => el.closest('[type="submit"]') !== null);
+      const submitButton = allMatches.find(
+        el => el.closest('[type="submit"]') !== null
+      );
       expect(submitButton || allMatches[0]).toBeInTheDocument();
 
       const cancelButton = screen.getByText('shared:fields.cancel');
@@ -513,17 +603,25 @@ describe('MantineAllergyForm', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
       // Fill in a complete allergy record using fireEvent to avoid userEvent hanging
-      fireEvent.change(screen.getByLabelText(/medical:allergies\.allergen\.label/), {
-        target: { value: 'Amoxicillin' },
-      });
-      fireEvent.change(screen.getByLabelText(/medical:allergies\.reaction\.label/), {
-        target: { value: 'Rash and itching' },
-      });
+      fireEvent.change(
+        screen.getByLabelText(/medical:allergies\.allergen\.label/),
+        {
+          target: { value: 'Amoxicillin' },
+        }
+      );
+      fireEvent.change(
+        screen.getByLabelText(/medical:allergies\.reaction\.label/),
+        {
+          target: { value: 'Rash and itching' },
+        }
+      );
 
       // Set severity
       fireEvent.click(screen.getAllByLabelText(/shared:fields\.severity/)[0]);
       await waitFor(() => {
-        expect(screen.getByText('common:severity.moderate')).toBeInTheDocument();
+        expect(
+          screen.getByText('common:severity.moderate')
+        ).toBeInTheDocument();
       });
       fireEvent.click(screen.getByText('common:severity.moderate'));
 
@@ -551,12 +649,18 @@ describe('MantineAllergyForm', () => {
       render(<MantineAllergyForm {...defaultProps} />);
 
       // Only fill required fields for urgent documentation
-      fireEvent.change(screen.getByLabelText(/medical:allergies\.allergen\.label/), {
-        target: { value: 'Unknown medication' },
-      });
-      fireEvent.change(screen.getByLabelText(/medical:allergies\.reaction\.label/), {
-        target: { value: 'Severe allergic reaction' },
-      });
+      fireEvent.change(
+        screen.getByLabelText(/medical:allergies\.allergen\.label/),
+        {
+          target: { value: 'Unknown medication' },
+        }
+      );
+      fireEvent.change(
+        screen.getByLabelText(/medical:allergies\.reaction\.label/),
+        {
+          target: { value: 'Severe allergic reaction' },
+        }
+      );
 
       // Submit the form directly
       const form = document.querySelector('form');

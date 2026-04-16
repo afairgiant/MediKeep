@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -43,10 +43,10 @@ const MantineVisitForm = ({
   onSubmit,
   practitioners = [],
   conditionsOptions = [],
-  conditionsLoading = false,
+  conditionsLoading: _conditionsLoading = false,
   editingVisit = null,
   isLoading = false,
-  statusMessage,
+  statusMessage: _statusMessage,
   labResults = [],
   encounterLabResults = {},
   fetchEncounterLabResults,
@@ -65,9 +65,7 @@ const MantineVisitForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form handlers
-  const {
-    handleTextInputChange,
-  } = useFormHandlers(onInputChange);
+  const { handleTextInputChange } = useFormHandlers(onInputChange);
 
   // Reset tab when modal opens/closes
   useEffect(() => {
@@ -92,7 +90,7 @@ const MantineVisitForm = ({
   }));
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -110,7 +108,7 @@ const MantineVisitForm = ({
   };
 
   // Render a single field
-  const renderField = (field) => {
+  const renderField = field => {
     if (field.type === 'divider') {
       return null; // Skip dividers in tabbed layout
     }
@@ -152,8 +150,10 @@ const MantineVisitForm = ({
             {...commonProps}
             value={formData[translatedField.name] || null}
             data={options || []}
-            onChange={(value) => {
-              onInputChange({ target: { name: translatedField.name, value: value || '' } });
+            onChange={value => {
+              onInputChange({
+                target: { name: translatedField.name, value: value || '' },
+              });
             }}
             searchable={translatedField.searchable}
             clearable={translatedField.clearable}
@@ -167,12 +167,19 @@ const MantineVisitForm = ({
             {...commonProps}
             placeholder={dateInputFormat}
             value={parseDateInput(formData[translatedField.name])}
-            onChange={(date) => {
+            onChange={date => {
               const formattedDate = formatDateInputChange(date);
-              onInputChange({ target: { name: translatedField.name, value: formattedDate } });
+              onInputChange({
+                target: { name: translatedField.name, value: formattedDate },
+              });
             }}
             valueFormat={dateInputFormat}
-            maxDate={translatedField.maxDate && typeof translatedField.maxDate === 'function' ? translatedField.maxDate() : translatedField.maxDate}
+            maxDate={
+              translatedField.maxDate &&
+              typeof translatedField.maxDate === 'function'
+                ? translatedField.maxDate()
+                : translatedField.maxDate
+            }
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );
@@ -182,7 +189,9 @@ const MantineVisitForm = ({
           <NumberInput
             {...commonProps}
             value={formData[translatedField.name] || ''}
-            onChange={(value) => onInputChange({ target: { name: translatedField.name, value } })}
+            onChange={value =>
+              onInputChange({ target: { name: translatedField.name, value } })
+            }
             min={translatedField.min}
             max={translatedField.max}
             step={translatedField.step}
@@ -206,7 +215,9 @@ const MantineVisitForm = ({
             <Box key={translatedField.name}>
               <Text size="sm" fw={500} mb="xs">
                 {translatedField.label}
-                {translatedField.required && <span style={{ color: 'red' }}> *</span>}
+                {translatedField.required && (
+                  <span style={{ color: 'red' }}> *</span>
+                )}
               </Text>
               {translatedField.description && (
                 <Text size="xs" c="dimmed" mb="xs">
@@ -215,8 +226,10 @@ const MantineVisitForm = ({
               )}
               <TagInput
                 value={formData[translatedField.name] || []}
-                onChange={(tags) => {
-                  onInputChange({ target: { name: translatedField.name, value: tags } });
+                onChange={tags => {
+                  onInputChange({
+                    target: { name: translatedField.name, value: tags },
+                  });
                 }}
                 placeholder={translatedField.placeholder}
                 maxTags={translatedField.maxTags}
@@ -233,7 +246,18 @@ const MantineVisitForm = ({
 
   // Group fields by section for tabs
   const infoFields = visitFormFields.filter(f =>
-    ['reason', 'date', 'practitioner_id', 'visit_type', 'priority', 'condition_id', 'chief_complaint', 'duration_minutes', 'location', 'tags'].includes(f.name)
+    [
+      'reason',
+      'date',
+      'practitioner_id',
+      'visit_type',
+      'priority',
+      'condition_id',
+      'chief_complaint',
+      'duration_minutes',
+      'location',
+      'tags',
+    ].includes(f.name)
   );
 
   const clinicalFields = visitFormFields.filter(f =>
@@ -253,11 +277,14 @@ const MantineVisitForm = ({
       styles={{
         body: {
           maxHeight: 'calc(100vh - 200px)',
-          overflowY: 'auto'
-        }
+          overflowY: 'auto',
+        },
       }}
     >
-      <FormLoadingOverlay visible={isSubmitting || isLoading} message={t('common:visits.form.savingVisit', 'Saving visit...')} />
+      <FormLoadingOverlay
+        visible={isSubmitting || isLoading}
+        message={t('common:visits.form.savingVisit', 'Saving visit...')}
+      />
 
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
@@ -267,15 +294,24 @@ const MantineVisitForm = ({
               <Tabs.Tab value="info" leftSection={<IconInfoCircle size={16} />}>
                 {t('common:visits.form.tabs.visitInfo', 'Visit Info')}
               </Tabs.Tab>
-              <Tabs.Tab value="clinical" leftSection={<IconStethoscope size={16} />}>
+              <Tabs.Tab
+                value="clinical"
+                leftSection={<IconStethoscope size={16} />}
+              >
                 {t('common:visits.form.tabs.clinical', 'Clinical')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {editingVisit
                   ? t('shared:tabs.documents', 'Documents')
                   : t('shared:tabs.addFiles', 'Add Files')}
               </Tabs.Tab>
-              <Tabs.Tab value="lab-results" leftSection={<IconFlask size={16} />}>
+              <Tabs.Tab
+                value="lab-results"
+                leftSection={<IconFlask size={16} />}
+              >
                 {t('shared:categories.lab_results', 'Lab Results')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
@@ -288,7 +324,10 @@ const MantineVisitForm = ({
               <Box mt="md">
                 <Grid>
                   {infoFields.map(field => (
-                    <Grid.Col span={{ base: 12, sm: field.gridColumn || 6 }} key={field.name}>
+                    <Grid.Col
+                      span={{ base: 12, sm: field.gridColumn || 6 }}
+                      key={field.name}
+                    >
                       {renderField(field)}
                     </Grid.Col>
                   ))}
@@ -333,16 +372,30 @@ const MantineVisitForm = ({
                   />
                 ) : (
                   <MultiSelect
-                    label={t('common:visits.form.selectLabResults', 'Select Lab Results')}
-                    placeholder={t('common:visits.form.chooseLabResultsToLink', 'Choose lab results to link')}
-                    description={t('common:visits.form.labResultsDescription', 'Link lab results relevant to this visit. You can set purpose and notes after creating the visit.')}
+                    label={t(
+                      'common:visits.form.selectLabResults',
+                      'Select Lab Results'
+                    )}
+                    placeholder={t(
+                      'common:visits.form.chooseLabResultsToLink',
+                      'Choose lab results to link'
+                    )}
+                    description={t(
+                      'common:visits.form.labResultsDescription',
+                      'Link lab results relevant to this visit. You can set purpose and notes after creating the visit.'
+                    )}
                     data={(labResults || []).map(lr => ({
                       value: lr.id.toString(),
                       label: `${lr.test_name}${lr.ordered_date ? ` (${lr.ordered_date})` : ''}${lr.status ? ` - ${lr.status}` : ''}`,
                     }))}
                     value={formData.pending_lab_result_ids || []}
-                    onChange={(values) => {
-                      onInputChange({ target: { name: 'pending_lab_result_ids', value: values } });
+                    onChange={values => {
+                      onInputChange({
+                        target: {
+                          name: 'pending_lab_result_ids',
+                          value: values,
+                        },
+                      });
                     }}
                     searchable
                     clearable
@@ -354,9 +407,7 @@ const MantineVisitForm = ({
 
             {/* Notes Tab */}
             <Tabs.Panel value="notes">
-              <Box mt="md">
-                {notesField.map(field => renderField(field))}
-              </Box>
+              <Box mt="md">{notesField.map(field => renderField(field))}</Box>
             </Tabs.Panel>
           </Tabs>
 
@@ -365,11 +416,17 @@ const MantineVisitForm = ({
 
           {/* Action Buttons */}
           <Group justify="flex-end" mt="md">
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting || isLoading}>
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting || isLoading}
+            >
               {t('shared:fields.cancel', 'Cancel')}
             </Button>
             <Button type="submit" disabled={isSubmitting || isLoading}>
-              {editingVisit ? t('common:visits.form.updateVisit', 'Update Visit') : t('common:visits.form.addVisit', 'Add Visit')}
+              {editingVisit
+                ? t('common:visits.form.updateVisit', 'Update Visit')
+                : t('common:visits.form.addVisit', 'Add Visit')}
             </Button>
           </Group>
         </Stack>

@@ -13,24 +13,75 @@ export const pharmacyFormFields = [
     searchable: true,
     clearable: true,
     options: [
-      { value: 'Amazon Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.amazonPharmacy' },
+      {
+        value: 'Amazon Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.amazonPharmacy',
+      },
       { value: 'CVS', labelKey: 'medical:pharmacies.form.brand.options.cvs' },
-      { value: 'Walgreens', labelKey: 'medical:pharmacies.form.brand.options.walgreens' },
-      { value: 'Rite Aid', labelKey: 'medical:pharmacies.form.brand.options.riteAid' },
-      { value: 'Walmart Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.walmartPharmacy' },
-      { value: 'Target Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.targetPharmacy' },
-      { value: 'Costco Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.costcoPharmacy' },
-      { value: 'Kroger Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.krogerPharmacy' },
-      { value: 'Safeway Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.safewayPharmacy' },
-      { value: 'Publix Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.publixPharmacy' },
-      { value: 'Meijer Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.meijerPharmacy' },
-      { value: 'H-E-B Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.hebPharmacy' },
-      { value: 'Kaiser Permanente', labelKey: 'medical:pharmacies.form.brand.options.kaiserPermanente' },
-      { value: 'Hospital Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.hospitalPharmacy' },
-      { value: 'Independent', labelKey: 'medical:pharmacies.form.brand.options.independent' },
-      { value: 'Specialty Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.specialtyPharmacy' },
-      { value: 'Compounding Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.compoundingPharmacy' },
-      { value: 'Online Pharmacy', labelKey: 'medical:pharmacies.form.brand.options.onlinePharmacy' },
+      {
+        value: 'Walgreens',
+        labelKey: 'medical:pharmacies.form.brand.options.walgreens',
+      },
+      {
+        value: 'Rite Aid',
+        labelKey: 'medical:pharmacies.form.brand.options.riteAid',
+      },
+      {
+        value: 'Walmart Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.walmartPharmacy',
+      },
+      {
+        value: 'Target Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.targetPharmacy',
+      },
+      {
+        value: 'Costco Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.costcoPharmacy',
+      },
+      {
+        value: 'Kroger Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.krogerPharmacy',
+      },
+      {
+        value: 'Safeway Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.safewayPharmacy',
+      },
+      {
+        value: 'Publix Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.publixPharmacy',
+      },
+      {
+        value: 'Meijer Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.meijerPharmacy',
+      },
+      {
+        value: 'H-E-B Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.hebPharmacy',
+      },
+      {
+        value: 'Kaiser Permanente',
+        labelKey: 'medical:pharmacies.form.brand.options.kaiserPermanente',
+      },
+      {
+        value: 'Hospital Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.hospitalPharmacy',
+      },
+      {
+        value: 'Independent',
+        labelKey: 'medical:pharmacies.form.brand.options.independent',
+      },
+      {
+        value: 'Specialty Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.specialtyPharmacy',
+      },
+      {
+        value: 'Compounding Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.compoundingPharmacy',
+      },
+      {
+        value: 'Online Pharmacy',
+        labelKey: 'medical:pharmacies.form.brand.options.onlinePharmacy',
+      },
       { value: 'Other', labelKey: 'shared:fields.other' },
     ],
   },

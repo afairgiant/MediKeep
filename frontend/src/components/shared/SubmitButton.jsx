@@ -1,5 +1,4 @@
-import React from 'react';
-import { Button, Loader, Group, Text } from '@mantine/core';
+import { Button, Group, Text } from '@mantine/core';
 import { IconCheck, IconX, IconUpload } from '@tabler/icons-react';
 
 /**
@@ -74,7 +73,8 @@ const SubmitButton = ({
 
   const { text, icon, color: buttonColor, loading } = getButtonContent();
 
-  const isButtonDisabled = disabled || isSubmitting || isUploading || (isCompleted && !hasErrors);
+  const isButtonDisabled =
+    disabled || isSubmitting || isUploading || (isCompleted && !hasErrors);
 
   return (
     <Button

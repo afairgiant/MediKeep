@@ -5,6 +5,7 @@ Note: The InjuryTypeCreate schema doesn't allow setting is_system=True by design
 For tests that need to verify system type behavior, we create system types
 directly using the model.
 """
+
 import pytest
 from sqlalchemy.orm import Session
 
@@ -13,7 +14,9 @@ from app.models.models import InjuryType
 from app.schemas.injury_type import InjuryTypeCreate, InjuryTypeUpdate
 
 
-def create_system_injury_type(db: Session, name: str, description: str = None) -> InjuryType:
+def create_system_injury_type(
+    db: Session, name: str, description: str = None
+) -> InjuryType:
     """Helper to create system injury types directly in the database."""
     injury_type = InjuryType(name=name, description=description, is_system=True)
     db.add(injury_type)
@@ -28,8 +31,7 @@ class TestInjuryTypeCRUD:
     def test_create_injury_type(self, db_session: Session):
         """Test creating an injury type."""
         injury_type_data = InjuryTypeCreate(
-            name="Sprain",
-            description="Ligament injury from stretching"
+            name="Sprain", description="Ligament injury from stretching"
         )
 
         injury_type = injury_type_crud.create(db_session, obj_in=injury_type_data)
@@ -108,7 +110,7 @@ class TestInjuryTypeCRUD:
         # Create user types via schema
         user_types_data = [
             InjuryTypeCreate(name="User Test Type 1"),
-            InjuryTypeCreate(name="User Test Type 2")
+            InjuryTypeCreate(name="User Test Type 2"),
         ]
         for it_data in user_types_data:
             injury_type_crud.create(db_session, obj_in=it_data)
@@ -123,36 +125,32 @@ class TestInjuryTypeCRUD:
         injury_type_data = InjuryTypeCreate(name="Deletable Type")
         created = injury_type_crud.create(db_session, obj_in=injury_type_data)
 
-        assert injury_type_crud.is_deletable(
-            db_session, injury_type_id=created.id
-        ) is True
+        assert (
+            injury_type_crud.is_deletable(db_session, injury_type_id=created.id) is True
+        )
 
     def test_is_deletable_system_type(self, db_session: Session):
         """Test that system types are not deletable."""
         # Create system type directly (schema doesn't allow is_system=True)
         created = create_system_injury_type(db_session, "Non-Deletable System Type")
 
-        assert injury_type_crud.is_deletable(
-            db_session, injury_type_id=created.id
-        ) is False
+        assert (
+            injury_type_crud.is_deletable(db_session, injury_type_id=created.id)
+            is False
+        )
 
     def test_is_deletable_nonexistent(self, db_session: Session):
         """Test is_deletable for non-existent ID."""
-        assert injury_type_crud.is_deletable(
-            db_session, injury_type_id=99999
-        ) is False
+        assert injury_type_crud.is_deletable(db_session, injury_type_id=99999) is False
 
     def test_update_injury_type(self, db_session: Session):
         """Test updating an injury type."""
         injury_type_data = InjuryTypeCreate(
-            name="Original Name",
-            description="Original description"
+            name="Original Name", description="Original description"
         )
         created = injury_type_crud.create(db_session, obj_in=injury_type_data)
 
-        update_data = InjuryTypeUpdate(
-            description="Updated description"
-        )
+        update_data = InjuryTypeUpdate(description="Updated description")
 
         updated = injury_type_crud.update(
             db_session, db_obj=created, obj_in=update_data
@@ -185,7 +183,7 @@ class TestInjuryTypeCRUD:
         injury_types_data = [
             InjuryTypeCreate(name="Zebra Injury"),
             InjuryTypeCreate(name="Alpha Injury"),
-            InjuryTypeCreate(name="Beta Injury")
+            InjuryTypeCreate(name="Beta Injury"),
         ]
 
         for it_data in injury_types_data:
@@ -214,7 +212,7 @@ class TestInjuryTypeCRUD:
         injury_type = create_system_injury_type(
             db_session,
             "Detailed Injury",
-            "A detailed description of this injury type including causes and symptoms"
+            "A detailed description of this injury type including causes and symptoms",
         )
 
         assert injury_type.description is not None

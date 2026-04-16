@@ -8,11 +8,9 @@
 import {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
-  WARNING_MESSAGES,
   getUserFriendlyError,
   formatErrorWithContext,
   enhancePaperlessError,
-  getErrorCategory,
 } from '../constants/errorMessages';
 import i18n from '../i18n/config';
 import { notifications } from '@mantine/notifications';
@@ -20,7 +18,6 @@ import {
   IconCheck,
   IconX,
   IconExclamationMark,
-  IconAlertTriangle,
 } from '@tabler/icons-react';
 import logger from '../services/logger';
 
@@ -79,12 +76,18 @@ export const showErrorNotification = (
  * @param {number} options.autoClose - Auto close time in ms
  */
 export const showSuccessNotification = (message, options = {}) => {
-  const { title = i18n.t('notifications:toasts.generic.success'), context, autoClose = 5000 } = options;
+  const {
+    title = i18n.t('notifications:toasts.generic.success'),
+    context,
+    autoClose = 5000,
+  } = options;
 
   let finalMessage = message;
 
   if (context && message === SUCCESS_MESSAGES.UPLOAD_SUCCESS) {
-    finalMessage = i18n.t('notifications:toasts.upload.fileUploadedSuccess', { fileName: context });
+    finalMessage = i18n.t('notifications:toasts.upload.fileUploadedSuccess', {
+      fileName: context,
+    });
   }
 
   notifications.show({
@@ -102,7 +105,10 @@ export const showSuccessNotification = (message, options = {}) => {
  * @param {Object} options - Additional options
  */
 export const showWarningNotification = (message, options = {}) => {
-  const { title = i18n.t('notifications:toasts.generic.warning'), autoClose = 7000 } = options;
+  const {
+    title = i18n.t('notifications:toasts.generic.warning'),
+    autoClose = 7000,
+  } = options;
 
   notifications.show({
     title,
@@ -137,7 +143,11 @@ export const handleUploadCompletion = (
   } else if (completedCount > 0 && failedCount > 0) {
     // Partial success
     showWarningNotification(
-      i18n.t('notifications:toasts.upload.partialSuccess', { completed: completedCount, total: totalCount, failed: failedCount }),
+      i18n.t('notifications:toasts.upload.partialSuccess', {
+        completed: completedCount,
+        total: totalCount,
+        failed: failedCount,
+      }),
       { title: i18n.t('notifications:toasts.upload.completedWithErrors') }
     );
   } else {
@@ -189,7 +199,7 @@ export const validatePatientSelection = (currentPatient, setError) => {
  * @param {string} fieldName - Name of the field for context
  * @returns {boolean} True if date is valid, false otherwise
  */
-export const validateDate = (dateValue, setError, fieldName = 'date') => {
+export const validateDate = (dateValue, setError, _fieldName = 'date') => {
   if (!dateValue) {
     setError(ERROR_MESSAGES.INVALID_DATE);
     return false;
@@ -232,7 +242,7 @@ export const validatePhone = (phone, setError) => {
   if (!phone) return true; // Phone might be optional
 
   // Basic phone validation - digits, spaces, dashes, parentheses
-  const phoneRegex = /^[\d\s\-\(\)\+\.]+$/;
+  const phoneRegex = /^[\d\s\-()+.]+$/;
   if (!phoneRegex.test(phone) || phone.replace(/\D/g, '').length < 10) {
     setError(ERROR_MESSAGES.INVALID_PHONE);
     return false;
@@ -339,15 +349,25 @@ export const handleBatchResults = (
     const message =
       total === 1
         ? i18n.t('notifications:toasts.generic.operationSuccess', { operation })
-        : i18n.t('notifications:toasts.generic.allOperationsSuccess', { total, operation });
+        : i18n.t('notifications:toasts.generic.allOperationsSuccess', {
+            total,
+            operation,
+          });
 
     showSuccessNotification(message, options.successOptions);
   } else if (successful > 0) {
     // Partial success
     showWarningNotification(
-      i18n.t('notifications:toasts.generic.operationPartial', { success: successful, total, operation, failed }),
+      i18n.t('notifications:toasts.generic.operationPartial', {
+        success: successful,
+        total,
+        operation,
+        failed,
+      }),
       {
-        title: i18n.t('notifications:toasts.generic.operationPartialTitle', { operation }),
+        title: i18n.t('notifications:toasts.generic.operationPartialTitle', {
+          operation,
+        }),
         ...options.warningOptions,
       }
     );
@@ -357,7 +377,9 @@ export const handleBatchResults = (
       i18n.t('notifications:toasts.generic.allOperationsFailed', { operation }),
       operation,
       {
-        title: i18n.t('notifications:toasts.generic.operationFailedTitle', { operation }),
+        title: i18n.t('notifications:toasts.generic.operationFailedTitle', {
+          operation,
+        }),
         ...options.errorOptions,
       }
     );
@@ -472,7 +494,9 @@ export const handlePaperlessTaskCompletion = (
 ) => {
   // Handle background processing status
   if (taskResult?.status === 'PROCESSING_BACKGROUND') {
-    const message = i18n.t('notifications:toasts.upload.backgroundProcessing', { fileName });
+    const message = i18n.t('notifications:toasts.upload.backgroundProcessing', {
+      fileName,
+    });
 
     // Don't show duplicate notifications - the API service already handles this
     // Just return success=null to indicate "processing" state
@@ -487,7 +511,9 @@ export const handlePaperlessTaskCompletion = (
 
   if (isPaperlessTaskSuccessful(taskResult)) {
     const documentId = extractDocumentIdFromTaskResult(taskResult);
-    const message = i18n.t('notifications:toasts.upload.fileUploadedSuccess', { fileName });
+    const message = i18n.t('notifications:toasts.upload.fileUploadedSuccess', {
+      fileName,
+    });
 
     if (!options.skipNotification) {
       showSuccessNotification(message, {

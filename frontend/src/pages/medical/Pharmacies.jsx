@@ -1,12 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Stack,
-} from '@mantine/core';
-import {
-  IconPlus,
-  IconShieldCheck,
-} from '@tabler/icons-react';
+import { useState, useEffect } from 'react';
+import { Container, Stack } from '@mantine/core';
+import { IconPlus, IconShieldCheck } from '@tabler/icons-react';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -29,7 +23,17 @@ import PharmacyFormWrapper from '../../components/medical/pharmacy/PharmacyFormW
 
 const Pharmacies = () => {
   const { t } = useTranslation(['common', 'shared']);
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -70,7 +74,12 @@ const Pharmacies = () => {
   // Handle global error
   useEffect(() => {
     if (globalError) {
-      setError(t('pharmacies.errors.loadFailed', 'Failed to load pharmacies. Please try again.'));
+      setError(
+        t(
+          'pharmacies.errors.loadFailed',
+          'Failed to load pharmacies. Please try again.'
+        )
+      );
     }
   }, [globalError, t]);
 
@@ -199,8 +208,12 @@ const Pharmacies = () => {
   const filteredPharmacies = dataManagement.data;
   const paginatedPharmacies = paginateData(filteredPharmacies);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredPharmacies.length); }, [filteredPharmacies.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredPharmacies.length);
+  }, [filteredPharmacies.length, clampPage]);
 
   // Handle URL parameters for direct linking to specific pharmacies
   useEffect(() => {
@@ -223,76 +236,93 @@ const Pharmacies = () => {
   }, [location.search, filteredPharmacies, loading, showViewModal]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('pharmacies.loading', 'Loading pharmacies...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('pharmacies.loading', 'Loading pharmacies...')}
+      />
+    );
   }
 
   return (
     <>
-    <Container size="xl" py="sm">
-      <PageHeader title={t('shared:categories.pharmacies', 'Pharmacies')} icon="💊" />
-
-      <Stack gap="sm" mt="md">
-        <MedicalPageAlerts
-          error={error}
-          successMessage={successMessage}
-          onClearError={() => setError('')}
+      <Container size="xl" py="sm">
+        <PageHeader
+          title={t('shared:categories.pharmacies', 'Pharmacies')}
+          icon="💊"
         />
 
-        <MedicalPageActions
-          primaryAction={{
-            label: t('pharmacies.actions.addNew', 'Add New Pharmacy'),
-            onClick: handleAddPharmacy,
-            leftSection: <IconPlus size={16} />,
-            size: 'sm',
-          }}
-          showViewToggle={false}
-          mb={0}
-        />
+        <Stack gap="sm" mt="md">
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={() => setError('')}
+          />
 
-        <MedicalPageFilters dataManagement={dataManagement} config={config} />
+          <MedicalPageActions
+            primaryAction={{
+              label: t('pharmacies.actions.addNew', 'Add New Pharmacy'),
+              onClick: handleAddPharmacy,
+              leftSection: <IconPlus size={16} />,
+              size: 'sm',
+            }}
+            showViewToggle={false}
+            mb={0}
+          />
+
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
 
           {filteredPharmacies.length === 0 ? (
             <EmptyState
               icon={IconShieldCheck}
               title={t('pharmacies.empty.title', 'No pharmacies found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('pharmacies.empty.noData', 'Click "Add New Pharmacy" to get started.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'pharmacies.empty.noData',
+                'Click "Add New Pharmacy" to get started.'
+              )}
             />
           ) : (
             <>
-            <AnimatedCardGrid
-              items={paginatedPharmacies}
-              columns={{ base: 12, md: 6, lg: 4 }}
-              renderCard={(pharmacy) => (
-                <PharmacyCard
-                  pharmacy={pharmacy}
-                  onEdit={handleEditPharmacy}
-                  onDelete={() => handleDeletePharmacy(pharmacy.id)}
-                  onView={handleViewPharmacy}
-                  navigate={navigate}
-                  onError={setError}
-                />
-              )}
-            />
-            <PaginationControls
-              page={page}
-              totalPages={totalPages(filteredPharmacies.length)}
-              pageSize={pageSize}
-              totalRecords={filteredPharmacies.length}
-              onPageChange={setPage}
-              onPageSizeChange={handlePageSizeChange}
-              pageSizeOptions={PAGE_SIZE_OPTIONS}
-            />
+              <AnimatedCardGrid
+                items={paginatedPharmacies}
+                columns={{ base: 12, md: 6, lg: 4 }}
+                renderCard={pharmacy => (
+                  <PharmacyCard
+                    pharmacy={pharmacy}
+                    onEdit={handleEditPharmacy}
+                    onDelete={() => handleDeletePharmacy(pharmacy.id)}
+                    onView={handleViewPharmacy}
+                    navigate={navigate}
+                    onError={setError}
+                  />
+                )}
+              />
+              <PaginationControls
+                page={page}
+                totalPages={totalPages(filteredPharmacies.length)}
+                pageSize={pageSize}
+                totalRecords={filteredPharmacies.length}
+                onPageChange={setPage}
+                onPageSizeChange={handlePageSizeChange}
+                pageSizeOptions={PAGE_SIZE_OPTIONS}
+              />
             </>
           )}
-      </Stack>
+        </Stack>
       </Container>
 
       <PharmacyFormWrapper
         isOpen={showModal}
         onClose={resetForm}
-        title={editingPharmacy ? t('pharmacies.form.editTitle', 'Edit Pharmacy') : t('pharmacies.form.addTitle', 'Add New Pharmacy')}
+        title={
+          editingPharmacy
+            ? t('pharmacies.form.editTitle', 'Edit Pharmacy')
+            : t('pharmacies.form.addTitle', 'Add New Pharmacy')
+        }
         formData={formData}
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}

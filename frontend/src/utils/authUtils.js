@@ -7,11 +7,11 @@
  * @param {string} role - The user role to check
  * @returns {boolean} True if the role is admin, false otherwise
  */
-export const isAdminRole = (role) => {
+export const isAdminRole = role => {
   if (!role || typeof role !== 'string') {
     return false;
   }
-  
+
   const adminRoles = ['admin', 'administrator'];
   return adminRoles.includes(role.toLowerCase());
 };
@@ -21,6 +21,6 @@ export const isAdminRole = (role) => {
  * @param {Object} user - The user object to check
  * @returns {boolean} True if the user is an admin, false otherwise
  */
-export const isUserAdmin = (user) => {
+export const isUserAdmin = user => {
   return user?.role ? isAdminRole(user.role) : false;
 };

@@ -44,13 +44,16 @@ class Practice(Base):
 
 class Practitioner(Base):
     """Represents a healthcare practitioner (doctor, specialist, etc.)."""
+
     __tablename__ = "practitioners"
     id = Column(Integer, primary_key=True)
 
     name = Column(String, nullable=False)
     specialty = Column(String, nullable=False)
     practice = Column(String, nullable=True)  # Legacy field - kept for migration safety
-    practice_id = Column(Integer, ForeignKey("practices.id", ondelete="SET NULL"), nullable=True)
+    practice_id = Column(
+        Integer, ForeignKey("practices.id", ondelete="SET NULL"), nullable=True
+    )
     phone_number = Column(String, nullable=True)
     email = Column(String, nullable=True)
     website = Column(String, nullable=True)
@@ -74,7 +77,9 @@ class Practitioner(Base):
     conditions = orm_relationship("Condition", back_populates="practitioner")
     vitals = orm_relationship("Vitals", back_populates="practitioner")
     injuries = orm_relationship("Injury", back_populates="practitioner")
-    medical_equipment = orm_relationship("MedicalEquipment", back_populates="practitioner")
+    medical_equipment = orm_relationship(
+        "MedicalEquipment", back_populates="practitioner"
+    )
 
     # Indexes for performance
     __table_args__ = (Index("idx_practitioners_practice_id", "practice_id"),)
@@ -82,6 +87,7 @@ class Practitioner(Base):
 
 class Pharmacy(Base):
     """Represents a pharmacy where prescriptions are filled."""
+
     __tablename__ = "pharmacies"
     id = Column(Integer, primary_key=True)
 

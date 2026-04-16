@@ -9,9 +9,10 @@ import {
   Alert,
 } from '@mantine/core';
 
-const isLocalHostname = (hostname) => {
+const isLocalHostname = hostname => {
   if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
-  if (hostname.startsWith('192.168.') || hostname.startsWith('10.')) return true;
+  if (hostname.startsWith('192.168.') || hostname.startsWith('10.'))
+    return true;
   if (hostname.startsWith('172.')) {
     const second = parseInt(hostname.split('.')[1], 10);
     if (second >= 16 && second <= 31) return true;
@@ -72,7 +73,7 @@ const IntegrationSettingsCard = ({
   const [urlError, setUrlError] = useState(null);
   const [tokenError, setTokenError] = useState(null);
 
-  const defaultValidateUrl = (value) => {
+  const defaultValidateUrl = value => {
     if (!value) return 'URL is required';
     try {
       const parsed = new URL(value);
@@ -87,13 +88,13 @@ const IntegrationSettingsCard = ({
 
   const doValidateUrl = validateUrl || defaultValidateUrl;
 
-  const handleUrlChange = (event) => {
+  const handleUrlChange = event => {
     const value = event.currentTarget.value.trim();
     setUrlError(doValidateUrl(value));
     onUrlChange(value);
   };
 
-  const handleTokenChange = (event) => {
+  const handleTokenChange = event => {
     const value = event.currentTarget.value.trim();
     if (value && value.length < 10) {
       setTokenError('Token appears too short');
@@ -128,13 +129,16 @@ const IntegrationSettingsCard = ({
       <Switch
         label={`Enable ${name} integration`}
         checked={enabled}
-        onChange={(event) => onEnabledChange(event.currentTarget.checked)}
+        onChange={event => onEnabledChange(event.currentTarget.checked)}
         disabled={loading}
       />
 
       <TextInput
         label="Server URL"
-        placeholder={urlPlaceholder || `https://${name.toLowerCase().replace(/[^a-z]/g, '')}.example.com`}
+        placeholder={
+          urlPlaceholder ||
+          `https://${name.toLowerCase().replace(/[^a-z]/g, '')}.example.com`
+        }
         value={url}
         onChange={handleUrlChange}
         error={urlError}
@@ -178,11 +182,13 @@ const IntegrationSettingsCard = ({
 
       {connectionStatus === 'error' && (
         <Alert color="red" variant="light">
-          {connectionMessage || `Unable to connect to ${name}. Check your URL and credentials.`}
+          {connectionMessage ||
+            `Unable to connect to ${name}. Check your URL and credentials.`}
         </Alert>
       )}
 
-      {renderExtras && renderExtras({ disabled, testingConnection, connectionStatus })}
+      {renderExtras &&
+        renderExtras({ disabled, testingConnection, connectionStatus })}
     </Stack>
   );
 };

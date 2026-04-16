@@ -8,7 +8,9 @@ from app.models.models import Procedure
 from app.schemas.procedure import ProcedureCreate, ProcedureUpdate
 
 
-class CRUDProcedure(CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate], TagFilterMixin):
+class CRUDProcedure(
+    CRUDBase[Procedure, ProcedureCreate, ProcedureUpdate], TagFilterMixin
+):
     """
     Procedure-specific CRUD operations for medical procedures.
 

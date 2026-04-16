@@ -21,7 +21,9 @@ class AllergyBase(TaggedEntityMixin):
     )
     status: str = Field(default="active", description="Status of the allergy")
     patient_id: int = Field(..., gt=0, description="ID of the patient")
-    medication_id: Optional[int] = Field(None, gt=0, description="ID of the medication causing this allergy")
+    medication_id: Optional[int] = Field(
+        None, gt=0, description="ID of the medication causing this allergy"
+    )
 
     @field_validator("severity")
     @classmethod

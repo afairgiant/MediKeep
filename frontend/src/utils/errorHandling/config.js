@@ -10,35 +10,35 @@ import { env } from '../../config/env';
  * Default error handling configuration
  */
 export const DEFAULT_CONFIG = {
-    // Notification settings
-    notifications: {
-        enabled: true,
-        autoClose: true,
-        position: 'top-right',
-        maxNotifications: 5
-    },
-    
-    // Logging settings
-    logging: {
-        enabled: true,
-        level: 'error', // 'error', 'warn', 'info', 'debug'
-        includeContext: true,
-        includeStack: true
-    },
-    
-    // Display settings
-    display: {
-        showSuggestions: true,
-        showIcons: true,
-        compactMode: false
-    },
-    
-    // Retry settings
-    retry: {
-        enabled: false,
-        maxAttempts: 3,
-        delay: 1000 // milliseconds
-    }
+  // Notification settings
+  notifications: {
+    enabled: true,
+    autoClose: true,
+    position: 'top-right',
+    maxNotifications: 5,
+  },
+
+  // Logging settings
+  logging: {
+    enabled: true,
+    level: 'error', // 'error', 'warn', 'info', 'debug'
+    includeContext: true,
+    includeStack: true,
+  },
+
+  // Display settings
+  display: {
+    showSuggestions: true,
+    showIcons: true,
+    compactMode: false,
+  },
+
+  // Retry settings
+  retry: {
+    enabled: false,
+    maxAttempts: 3,
+    delay: 1000, // milliseconds
+  },
 };
 
 /**
@@ -46,8 +46,8 @@ export const DEFAULT_CONFIG = {
  * @param {string} pattern - Error pattern or domain
  * @returns {Object|null} Error configuration
  */
-export const getErrorConfig = (pattern) => {
-    return getErrorMapping(pattern);
+export const getErrorConfig = pattern => {
+  return getErrorMapping(pattern);
 };
 
 /**
@@ -55,7 +55,7 @@ export const getErrorConfig = (pattern) => {
  * @returns {string[]} Array of all error patterns
  */
 export const getAllErrorPatterns = () => {
-    return Object.keys(errorMappings);
+  return Object.keys(errorMappings);
 };
 
 /**
@@ -63,16 +63,16 @@ export const getAllErrorPatterns = () => {
  * @param {string} severity - Severity level ('low', 'medium', 'high')
  * @returns {Object} Errors matching the severity level
  */
-export const getErrorsBySeverity = (severity) => {
-    const filtered = {};
-    
-    Object.entries(errorMappings).forEach(([key, config]) => {
-        if (config.severity === severity) {
-            filtered[key] = config;
-        }
-    });
-    
-    return filtered;
+export const getErrorsBySeverity = severity => {
+  const filtered = {};
+
+  Object.entries(errorMappings).forEach(([key, config]) => {
+    if (config.severity === severity) {
+      filtered[key] = config;
+    }
+  });
+
+  return filtered;
 };
 
 /**
@@ -80,16 +80,16 @@ export const getErrorsBySeverity = (severity) => {
  * @param {string} domain - Domain name ('sharing', 'auth', 'network', etc.)
  * @returns {Object} Errors matching the domain
  */
-export const getErrorsByDomain = (domain) => {
-    const filtered = {};
-    
-    Object.entries(errorMappings).forEach(([key, config]) => {
-        if (config.domain === domain) {
-            filtered[key] = config;
-        }
-    });
-    
-    return filtered;
+export const getErrorsByDomain = domain => {
+  const filtered = {};
+
+  Object.entries(errorMappings).forEach(([key, config]) => {
+    if (config.domain === domain) {
+      filtered[key] = config;
+    }
+  });
+
+  return filtered;
 };
 
 /**
@@ -97,30 +97,33 @@ export const getErrorsByDomain = (domain) => {
  * @param {Object} config - Error configuration to validate
  * @returns {boolean} Whether configuration is valid
  */
-export const validateErrorConfig = (config) => {
-    const required = ['title', 'message', 'color', 'icon', 'severity'];
-    
-    return required.every(field => 
-        config.hasOwnProperty(field) && config[field] !== null && config[field] !== undefined
-    );
+export const validateErrorConfig = config => {
+  const required = ['title', 'message', 'color', 'icon', 'severity'];
+
+  return required.every(
+    field =>
+      Object.prototype.hasOwnProperty.call(config, field) &&
+      config[field] !== null &&
+      config[field] !== undefined
+  );
 };
 
 /**
  * Environment-specific configuration
  */
 export const getEnvironmentConfig = () => {
-    const isDevelopment = env.DEV;
+  const isDevelopment = env.DEV;
 
-    return {
-        ...DEFAULT_CONFIG,
-        logging: {
-            ...DEFAULT_CONFIG.logging,
-            level: isDevelopment ? 'debug' : 'error',
-            includeStack: isDevelopment
-        },
-        display: {
-            ...DEFAULT_CONFIG.display,
-            showDetailedErrors: isDevelopment
-        }
-    };
+  return {
+    ...DEFAULT_CONFIG,
+    logging: {
+      ...DEFAULT_CONFIG.logging,
+      level: isDevelopment ? 'debug' : 'error',
+      includeStack: isDevelopment,
+    },
+    display: {
+      ...DEFAULT_CONFIG.display,
+      showDetailedErrors: isDevelopment,
+    },
+  };
 };

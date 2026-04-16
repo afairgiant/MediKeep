@@ -1,4 +1,3 @@
-import React from 'react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Must be before any component imports so ResizeObserver is available
@@ -33,8 +32,8 @@ vi.mock('../../services/logger', () => ({
 // Mock useDateFormat
 vi.mock('../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDateTime: (d) => d || '-',
-    formatDate: (d) => d || '-',
+    formatDateTime: d => d || '-',
+    formatDate: d => d || '-',
   }),
 }));
 
@@ -58,7 +57,7 @@ vi.mock('../../services/api/adminApi', () => ({
 
 // Mock @mantine/dates (DatePickerInput uses complex internals)
 vi.mock('@mantine/dates', () => ({
-  DatePickerInput: ({ value, onChange, placeholder, ...props }) => (
+  DatePickerInput: ({ value: _value, onChange: _onChange, placeholder, ...props }) => (
     <input
       data-testid="date-range-input"
       placeholder={placeholder}
@@ -80,9 +79,7 @@ const mockFilters = {
     { value: 'patient', label: 'Patient' },
     { value: 'medication', label: 'Medication' },
   ],
-  users: [
-    { value: 1, label: 'admin' },
-  ],
+  users: [{ value: 1, label: 'admin' }],
 };
 
 const mockData = {
@@ -141,7 +138,9 @@ describe('AuditLog', () => {
     vi.clearAllMocks();
     mockGetActivityLogFilters.mockResolvedValue(mockFilters);
     mockGetActivityLog.mockResolvedValue(mockData);
-    mockExportActivityLog.mockResolvedValue(new Blob(['csv,data'], { type: 'text/csv' }));
+    mockExportActivityLog.mockResolvedValue(
+      new Blob(['csv,data'], { type: 'text/csv' })
+    );
 
     global.URL.createObjectURL = vi.fn(() => 'blob:test');
     global.URL.revokeObjectURL = vi.fn();
@@ -162,7 +161,9 @@ describe('AuditLog', () => {
     renderAuditLog();
 
     await waitFor(() => {
-      expect(screen.getByText('Created patient record for John Doe')).toBeInTheDocument();
+      expect(
+        screen.getByText('Created patient record for John Doe')
+      ).toBeInTheDocument();
     });
 
     expect(screen.getByText('Deleted medication record')).toBeInTheDocument();
@@ -177,7 +178,9 @@ describe('AuditLog', () => {
       expect(screen.getByText('Audit Log')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Complete activity trail for compliance and auditing')).toBeInTheDocument();
+    expect(
+      screen.getByText('Complete activity trail for compliance and auditing')
+    ).toBeInTheDocument();
   });
 
   it('renders empty state when no results', async () => {
@@ -261,7 +264,9 @@ describe('AuditLog', () => {
     renderAuditLog();
 
     await waitFor(() => {
-      expect(screen.getByText('Created patient record for John Doe')).toBeInTheDocument();
+      expect(
+        screen.getByText('Created patient record for John Doe')
+      ).toBeInTheDocument();
     });
 
     // First entry (created/patient) should have a link, second (deleted/medication) should not
@@ -285,16 +290,16 @@ describe('AuditLog', () => {
     });
 
     // entity_id should show as plain text, not a link button
-    expect(screen.queryByRole('button', { name: /^View / })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /^View / })
+    ).not.toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
   });
 
   it('renders dash for entries without entity_id', async () => {
     const dataWithNoEntityId = {
       ...mockData,
-      items: [
-        { ...mockData.items[0], entity_id: null, entity_type: 'system' },
-      ],
+      items: [{ ...mockData.items[0], entity_id: null, entity_type: 'system' }],
       total: 1,
     };
     mockGetActivityLog.mockResolvedValue(dataWithNoEntityId);
@@ -316,7 +321,9 @@ describe('AuditLog', () => {
     renderAuditLog();
 
     await waitFor(() => {
-      expect(screen.getByText('Created patient record for John Doe')).toBeInTheDocument();
+      expect(
+        screen.getByText('Created patient record for John Doe')
+      ).toBeInTheDocument();
     });
 
     const page2Button = screen.getByRole('button', { name: '2' });

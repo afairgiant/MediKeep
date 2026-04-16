@@ -238,11 +238,15 @@ class TestCrossFieldValidation:
             )
 
     def test_qualitative_rejects_ref_range_min(self):
-        with pytest.raises(ValidationError, match="Reference ranges are not applicable"):
+        with pytest.raises(
+            ValidationError, match="Reference ranges are not applicable"
+        ):
             make_qualitative_component(ref_range_min=0.0)
 
     def test_qualitative_rejects_ref_range_max(self):
-        with pytest.raises(ValidationError, match="Reference ranges are not applicable"):
+        with pytest.raises(
+            ValidationError, match="Reference ranges are not applicable"
+        ):
             make_qualitative_component(ref_range_max=1.0)
 
     def test_default_result_type_is_quantitative(self):
@@ -278,11 +282,15 @@ class TestQualitativeValueNormalization:
     def test_empty_string_normalized_to_none_in_update(self):
         """Empty string qualitative_value normalizes to None. Include result_type
         to avoid triggering the cross-field 'clearing without result_type' guard."""
-        update = LabTestComponentUpdate(qualitative_value="", result_type="quantitative", value=1.0, unit="x")
+        update = LabTestComponentUpdate(
+            qualitative_value="", result_type="quantitative", value=1.0, unit="x"
+        )
         assert update.qualitative_value is None
 
     def test_whitespace_only_normalized_to_none_in_update(self):
-        update = LabTestComponentUpdate(qualitative_value="   ", result_type="quantitative", value=1.0, unit="x")
+        update = LabTestComponentUpdate(
+            qualitative_value="   ", result_type="quantitative", value=1.0, unit="x"
+        )
         assert update.qualitative_value is None
 
     def test_padded_valid_value_accepted_in_update(self):
@@ -406,7 +414,9 @@ class TestUpdateCrossFieldValidation:
             )
 
     def test_clearing_qualitative_value_on_qualitative_rejected(self):
-        with pytest.raises(ValidationError, match="Qualitative value cannot be cleared"):
+        with pytest.raises(
+            ValidationError, match="Qualitative value cannot be cleared"
+        ):
             LabTestComponentUpdate(
                 result_type="qualitative",
                 qualitative_value="",

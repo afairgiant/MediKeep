@@ -8,7 +8,7 @@ allowing automation of backups via cron jobs or other scheduling systems.
 Usage:
     # Via docker exec (recommended for automation):
     docker exec <container_name> backup_db
-    docker exec <container_name> backup_files  
+    docker exec <container_name> backup_files
     docker exec <container_name> backup_full
 
     # Or directly on the server:

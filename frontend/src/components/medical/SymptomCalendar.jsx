@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Paper,
   Text,
@@ -47,7 +47,12 @@ const getCellBorderRadius = (hasDuration, isStart, isEnd, isMid) => {
 /**
  * Compute background color for a calendar cell
  */
-const getCellBackgroundColor = (hasOccurrences, allResolved, hasDuration, severityColor) => {
+const getCellBackgroundColor = (
+  hasOccurrences,
+  allResolved,
+  hasDuration,
+  severityColor
+) => {
   if (!hasOccurrences) return 'transparent';
   if (allResolved) return 'var(--color-bg-secondary)';
   if (hasDuration) return `var(--mantine-color-${severityColor}-1)`;
@@ -57,7 +62,7 @@ const getCellBackgroundColor = (hasOccurrences, allResolved, hasDuration, severi
 /**
  * Pure helper function for severity color calculation
  */
-const getSeverityColor = (occurrences) => {
+const getSeverityColor = occurrences => {
   if (!occurrences || occurrences.length === 0) return null;
 
   const hasCritical = occurrences.some(o => o.severity === 'critical');
@@ -203,27 +208,37 @@ const SymptomCalendar = ({ patientId, hidden }) => {
   };
 
   const handlePreviousMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+    );
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
+    );
   };
 
   const handleDateClick = day => {
     if (!day) return;
 
-    const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const clickedDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
     const dateKey = clickedDate.toISOString().split('T')[0];
     const occurrencesOnDate = occurrencesByDate[dateKey] || [];
 
     if (occurrencesOnDate.length > 0) {
-      const dateStr = capitalizeFirst(clickedDate.toLocaleDateString(locale, {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }));
+      const dateStr = capitalizeFirst(
+        clickedDate.toLocaleDateString(locale, {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      );
       setSelectedDate(dateStr);
       setSelectedOccurrences(occurrencesOnDate);
       setModalOpen(true);
@@ -251,10 +266,12 @@ const SymptomCalendar = ({ patientId, hidden }) => {
     setModalOpen(true); // Reopen occurrences modal
   };
 
-  const monthName = capitalizeFirst(currentDate.toLocaleDateString(locale, {
-    month: 'long',
-    year: 'numeric',
-  }));
+  const monthName = capitalizeFirst(
+    currentDate.toLocaleDateString(locale, {
+      month: 'long',
+      year: 'numeric',
+    })
+  );
   const days = getDaysInMonth(currentDate);
   const weekDays = [
     t('symptoms.calendar.weekDays.sun', 'Sun'),
@@ -290,9 +307,8 @@ const SymptomCalendar = ({ patientId, hidden }) => {
       const isMid = occurrencesOnDate.some(o => o.isMid);
 
       // Calculate unique symptom count
-      const uniqueSymptoms = new Set(
-        occurrencesOnDate.map(o => o.symptom_id)
-      ).size;
+      const uniqueSymptoms = new Set(occurrencesOnDate.map(o => o.symptom_id))
+        .size;
 
       return {
         day,
@@ -330,7 +346,9 @@ const SymptomCalendar = ({ patientId, hidden }) => {
     <Paper p="md" withBorder>
       <Stack gap="md">
         <Group justify="space-between">
-          <Title order={3}>{t('symptoms.calendar.title', 'Symptom Calendar')}</Title>
+          <Title order={3}>
+            {t('symptoms.calendar.title', 'Symptom Calendar')}
+          </Title>
           <Group gap="xs">
             <ActionIcon variant="subtle" onClick={handlePreviousMonth}>
               <IconChevronLeft size={18} />
@@ -377,14 +395,30 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                 p="xs"
                 style={{
                   border: '1px solid var(--color-border-light)',
-                  borderRadius: getCellBorderRadius(hasDuration, isStart, isEnd, isMid),
+                  borderRadius: getCellBorderRadius(
+                    hasDuration,
+                    isStart,
+                    isEnd,
+                    isMid
+                  ),
                   cursor: hasOccurrences ? 'pointer' : 'default',
-                  backgroundColor: getCellBackgroundColor(hasOccurrences, allResolved, hasDuration, severityColor),
+                  backgroundColor: getCellBackgroundColor(
+                    hasOccurrences,
+                    allResolved,
+                    hasDuration,
+                    severityColor
+                  ),
                   opacity: allResolved ? 0.7 : 1,
                   position: 'relative',
                   minHeight: '60px',
-                  borderLeft: hasDuration && !isStart ? 'none' : '1px solid var(--color-border-light)',
-                  borderRight: hasDuration && !isEnd ? 'none' : '1px solid var(--color-border-light)',
+                  borderLeft:
+                    hasDuration && !isStart
+                      ? 'none'
+                      : '1px solid var(--color-border-light)',
+                  borderRight:
+                    hasDuration && !isEnd
+                      ? 'none'
+                      : '1px solid var(--color-border-light)',
                 }}
                 onClick={() => handleDateClick(day)}
               >
@@ -394,7 +428,10 @@ const SymptomCalendar = ({ patientId, hidden }) => {
                   </Text>
                   {hasOccurrences && (
                     <Group gap={4} justify="center">
-                      <Badge size="xs" color={allResolved ? 'gray' : severityColor}>
+                      <Badge
+                        size="xs"
+                        color={allResolved ? 'gray' : severityColor}
+                      >
                         {uniqueSymptoms}
                       </Badge>
                       {hasOngoing && (
@@ -419,7 +456,12 @@ const SymptomCalendar = ({ patientId, hidden }) => {
           <Center p="xl">
             <Stack align="center">
               <IconStethoscope size={48} stroke={1.5} color="gray" />
-              <Text c="dimmed">{t('symptoms.calendar.noEpisodes', 'No symptom episodes recorded this month')}</Text>
+              <Text c="dimmed">
+                {t(
+                  'symptoms.calendar.noEpisodes',
+                  'No symptom episodes recorded this month'
+                )}
+              </Text>
             </Stack>
           </Center>
         )}
@@ -429,11 +471,20 @@ const SymptomCalendar = ({ patientId, hidden }) => {
       <Modal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={t('symptoms.calendar.episodesOn', 'Symptom Episodes on {{date}}', { date: selectedDate })}
+        title={t(
+          'symptoms.calendar.episodesOn',
+          'Symptom Episodes on {{date}}',
+          { date: selectedDate }
+        )}
         size="lg"
       >
         {selectedOccurrences.length === 0 ? (
-          <Text c="dimmed">{t('symptoms.calendar.noOccurrences', 'No occurrences found for this date')}</Text>
+          <Text c="dimmed">
+            {t(
+              'symptoms.calendar.noOccurrences',
+              'No occurrences found for this date'
+            )}
+          </Text>
         ) : (
           <Stack gap="md">
             {selectedOccurrences.map((occurrence, idx) => (

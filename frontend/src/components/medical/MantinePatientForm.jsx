@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Stack,
   Grid,
@@ -13,7 +13,13 @@ import {
   ThemeIcon,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconUser, IconStethoscope, IconHome, IconCheck, IconX } from '@tabler/icons-react';
+import {
+  IconUser,
+  IconStethoscope,
+  IconHome,
+  IconCheck,
+  IconX,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
@@ -60,7 +66,7 @@ const MantinePatientForm = ({
           logger.debug('photo_load_error', 'Failed to load patient photo', {
             component: 'MantinePatientForm',
             patientId: formData.id,
-            error: error.message
+            error: error.message,
           });
         }
       }
@@ -70,7 +76,7 @@ const MantinePatientForm = ({
   }, [formData.id, isCreating]);
 
   // Handle photo upload
-  const handlePhotoUpload = async (file) => {
+  const handlePhotoUpload = async file => {
     if (!formData.id) {
       throw new Error('Please save the patient first before uploading a photo');
     }
@@ -90,7 +96,7 @@ const MantinePatientForm = ({
       logger.error('photo_upload_error', 'Failed to upload photo in form', {
         component: 'MantinePatientForm',
         patientId: formData.id,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -113,7 +119,7 @@ const MantinePatientForm = ({
       logger.error('photo_delete_error', 'Failed to delete photo in form', {
         component: 'MantinePatientForm',
         patientId: formData.id,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -322,7 +328,9 @@ const MantinePatientForm = ({
             <Grid.Col span={{ base: 6, sm: 4 }}>
               <NumberInput
                 label={t('shared:labels.height')}
-                placeholder={unitSystem === 'imperial' ? 'e.g., 70' : 'e.g., 178'}
+                placeholder={
+                  unitSystem === 'imperial' ? 'e.g., 70' : 'e.g., 178'
+                }
                 value={
                   formData.height
                     ? convertForDisplay(formData.height, 'height', unitSystem)
@@ -347,7 +355,9 @@ const MantinePatientForm = ({
             <Grid.Col span={{ base: 6, sm: 4 }}>
               <NumberInput
                 label={t('shared:labels.weight')}
-                placeholder={unitSystem === 'imperial' ? 'e.g., 150' : 'e.g., 68'}
+                placeholder={
+                  unitSystem === 'imperial' ? 'e.g., 150' : 'e.g., 68'
+                }
                 value={
                   formData.weight
                     ? convertForDisplay(formData.weight, 'weight', unitSystem)
@@ -386,7 +396,12 @@ const MantinePatientForm = ({
       </Box>
 
       {/* Form Actions */}
-      <Group justify="flex-end" mt="sm" pt="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
+      <Group
+        justify="flex-end"
+        mt="sm"
+        pt="md"
+        style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}
+      >
         <Button
           variant="subtle"
           color="gray"

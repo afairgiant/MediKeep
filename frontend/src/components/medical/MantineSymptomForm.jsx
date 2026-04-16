@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Tabs,
@@ -14,13 +14,22 @@ import {
   Text,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconInfoCircle, IconClipboard, IconFileText, IconNotes } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconClipboard,
+  IconFileText,
+  IconNotes,
+} from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import SubmitButton from '../shared/SubmitButton';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
-import { parseDateInput, getTodayEndOfDay, formatDateInputChange } from '../../utils/dateUtils';
+import {
+  parseDateInput,
+  getTodayEndOfDay,
+  formatDateInputChange,
+} from '../../utils/dateUtils';
 import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
@@ -69,13 +78,13 @@ const MantineSymptomForm = ({
 
   const today = getTodayEndOfDay();
 
-  const handleDocumentManagerRef = (methods) => {
+  const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {
       onDocumentManagerRef(methods);
     }
   };
 
-  const handleDocumentError = (error) => {
+  const handleDocumentError = error => {
     logger.error('document_manager_error', {
       message: `Document manager error in symptoms ${editingSymptom ? 'edit' : 'create'}`,
       symptomId: editingSymptom?.id,
@@ -88,7 +97,11 @@ const MantineSymptomForm = ({
     }
   };
 
-  const handleDocumentUploadComplete = (success, completedCount, failedCount) => {
+  const handleDocumentUploadComplete = (
+    success,
+    completedCount,
+    failedCount
+  ) => {
     logger.info('symptoms_upload_completed', {
       message: 'File upload completed in symptoms form',
       symptomId: editingSymptom?.id,
@@ -113,7 +126,7 @@ const MantineSymptomForm = ({
     }
   }, [isOpen]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -155,13 +168,22 @@ const MantineSymptomForm = ({
         <Stack gap="lg">
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-              <Tabs.Tab value="basic" leftSection={<IconInfoCircle size={16} />}>
+              <Tabs.Tab
+                value="basic"
+                leftSection={<IconInfoCircle size={16} />}
+              >
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
-              <Tabs.Tab value="details" leftSection={<IconClipboard size={16} />}>
+              <Tabs.Tab
+                value="details"
+                leftSection={<IconClipboard size={16} />}
+              >
                 {t('shared:tabs.details')}
               </Tabs.Tab>
-              <Tabs.Tab value="documents" leftSection={<IconFileText size={16} />}>
+              <Tabs.Tab
+                value="documents"
+                leftSection={<IconFileText size={16} />}
+              >
                 {editingSymptom
                   ? t('shared:tabs.documents')
                   : t('shared:tabs.addFiles')}
@@ -200,9 +222,14 @@ const MantineSymptomForm = ({
                     <DateInput
                       label={t('symptoms.parent.firstOccurrenceDate.label')}
                       value={parseDateInput(formData.first_occurrence_date)}
-                      onChange={(date) => {
+                      onChange={date => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'first_occurrence_date', value: formattedDate } });
+                        onInputChange({
+                          target: {
+                            name: 'first_occurrence_date',
+                            value: formattedDate,
+                          },
+                        });
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
@@ -218,12 +245,23 @@ const MantineSymptomForm = ({
                       label={t('symptoms.parent.status.label')}
                       value={formData.status || null}
                       data={[
-                        { value: 'active', label: t('symptoms.parent.statusOptions.active') },
-                        { value: 'resolved', label: t('symptoms.parent.statusOptions.resolved') },
-                        { value: 'recurring', label: t('symptoms.parent.statusOptions.recurring') },
+                        {
+                          value: 'active',
+                          label: t('symptoms.parent.statusOptions.active'),
+                        },
+                        {
+                          value: 'resolved',
+                          label: t('symptoms.parent.statusOptions.resolved'),
+                        },
+                        {
+                          value: 'recurring',
+                          label: t('symptoms.parent.statusOptions.recurring'),
+                        },
                       ]}
-                      onChange={(value) => {
-                        onInputChange({ target: { name: 'status', value: value || '' } });
+                      onChange={value => {
+                        onInputChange({
+                          target: { name: 'status', value: value || '' },
+                        });
                       }}
                       placeholder={t('shared:fields.selectStatus')}
                       required
@@ -242,9 +280,14 @@ const MantineSymptomForm = ({
                     <DateInput
                       label={t('symptoms.parent.resolvedDate.label')}
                       value={parseDateInput(formData.resolved_date)}
-                      onChange={(date) => {
+                      onChange={date => {
                         const formattedDate = formatDateInputChange(date);
-                        onInputChange({ target: { name: 'resolved_date', value: formattedDate } });
+                        onInputChange({
+                          target: {
+                            name: 'resolved_date',
+                            value: formattedDate,
+                          },
+                        });
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
@@ -259,8 +302,13 @@ const MantineSymptomForm = ({
                       label={t('symptoms.parent.isChronic.label')}
                       description={t('symptoms.parent.isChronic.description')}
                       checked={formData.is_chronic || false}
-                      onChange={(e) =>
-                        onInputChange({ target: { name: 'is_chronic', value: e.currentTarget.checked } })
+                      onChange={e =>
+                        onInputChange({
+                          target: {
+                            name: 'is_chronic',
+                            value: e.currentTarget.checked,
+                          },
+                        })
                       }
                       mt="xl"
                     />
@@ -272,10 +320,14 @@ const MantineSymptomForm = ({
                       </Text>
                       <TagInput
                         value={formData.typical_triggers || []}
-                        onChange={(tags) => {
-                          onInputChange({ target: { name: 'typical_triggers', value: tags } });
+                        onChange={tags => {
+                          onInputChange({
+                            target: { name: 'typical_triggers', value: tags },
+                          });
                         }}
-                        placeholder={t('symptoms.parent.typicalTriggers.placeholder')}
+                        placeholder={t(
+                          'symptoms.parent.typicalTriggers.placeholder'
+                        )}
                       />
                     </Box>
                   </Grid.Col>
@@ -307,7 +359,9 @@ const MantineSymptomForm = ({
                       label={t('symptoms.parent.generalNotes.label')}
                       value={formData.general_notes || ''}
                       onChange={handleTextInputChange('general_notes')}
-                      placeholder={t('symptoms.parent.generalNotes.placeholder')}
+                      placeholder={t(
+                        'symptoms.parent.generalNotes.placeholder'
+                      )}
                       rows={5}
                       minRows={3}
                       autosize
@@ -324,8 +378,10 @@ const MantineSymptomForm = ({
                       </Text>
                       <TagInput
                         value={formData.tags || []}
-                        onChange={(tags) => {
-                          onInputChange({ target: { name: 'tags', value: tags } });
+                        onChange={tags => {
+                          onInputChange({
+                            target: { name: 'tags', value: tags },
+                          });
                         }}
                         placeholder={t('common:fields.tags.placeholder')}
                       />
@@ -338,14 +394,20 @@ const MantineSymptomForm = ({
 
           {/* Form Actions */}
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={onClose} disabled={isLoading || isSubmitting}>
+            <Button
+              variant="default"
+              onClick={onClose}
+              disabled={isLoading || isSubmitting}
+            >
               {t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.symptom_name?.trim()}
             >
-              {editingSymptom ? t('common:buttons.update') : t('common:buttons.create')}{' '}
+              {editingSymptom
+                ? t('common:buttons.update')
+                : t('common:buttons.create')}{' '}
               {t('shared:categories.symptoms')}
             </SubmitButton>
           </Group>

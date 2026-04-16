@@ -24,11 +24,7 @@ import {
   EQUIPMENT_STATUS_OPTIONS,
 } from '../../constants/equipmentConstants';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
-import {
-  Button,
-  Stack,
-  Container,
-} from '@mantine/core';
+import { Button, Stack, Container } from '@mantine/core';
 
 const EMPTY_FORM_DATA = {
   equipment_name: '',
@@ -49,7 +45,13 @@ const EMPTY_FORM_DATA = {
 
 // Simple filter/search configuration for equipment
 const equipmentConfig = {
-  searchFields: ['equipment_name', 'manufacturer', 'model_number', 'serial_number', 'supplier'],
+  searchFields: [
+    'equipment_name',
+    'manufacturer',
+    'model_number',
+    'serial_number',
+    'supplier',
+  ],
   filterConfigs: [
     {
       field: 'status',
@@ -115,7 +117,17 @@ const MedicalEquipment = () => {
   const { t } = useTranslation(['common', 'shared']);
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const [viewMode, setViewMode] = usePersistedViewMode('medical-equipment');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();
@@ -138,9 +150,11 @@ const MedicalEquipment = () => {
     entityName: 'equipment',
     apiMethodsConfig: {
       getAll: signal => apiService.getMedicalEquipment(signal),
-      getByPatient: (patientId, signal) => apiService.getMedicalEquipment(signal), // Equipment is patient-scoped by backend
+      getByPatient: (patientId, signal) =>
+        apiService.getMedicalEquipment(signal), // Equipment is patient-scoped by backend
       create: (data, signal) => apiService.createMedicalEquipment(data, signal),
-      update: (id, data, signal) => apiService.updateMedicalEquipment(id, data, signal),
+      update: (id, data, signal) =>
+        apiService.updateMedicalEquipment(id, data, signal),
       delete: (id, signal) => apiService.deleteMedicalEquipment(id, signal),
     },
     requiresPatient: true,
@@ -171,7 +185,7 @@ const MedicalEquipment = () => {
     setShowModal(true);
   };
 
-  const handleEditEquipment = (equip) => {
+  const handleEditEquipment = equip => {
     setEditingEquipment(equip);
     setFormData({
       equipment_name: equip.equipment_name || '',
@@ -186,20 +200,22 @@ const MedicalEquipment = () => {
       status: equip.status || 'active',
       supplier: equip.supplier || '',
       notes: equip.notes || '',
-      practitioner_id: equip.practitioner_id ? String(equip.practitioner_id) : '',
+      practitioner_id: equip.practitioner_id
+        ? String(equip.practitioner_id)
+        : '',
       tags: equip.tags || [],
     });
     setShowModal(true);
   };
 
-  const handleDeleteEquipment = async (equipmentId) => {
+  const handleDeleteEquipment = async equipmentId => {
     const success = await deleteItem(equipmentId);
     if (success) {
       await refreshData();
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     if (!formData.equipment_name.trim()) {
@@ -232,7 +248,9 @@ const MedicalEquipment = () => {
       notes: formData.notes || null,
       tags: formData.tags || [],
       patient_id: currentPatient.id,
-      practitioner_id: formData.practitioner_id ? parseInt(formData.practitioner_id) : null,
+      practitioner_id: formData.practitioner_id
+        ? parseInt(formData.practitioner_id)
+        : null,
     };
 
     let success;
@@ -248,7 +266,7 @@ const MedicalEquipment = () => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -256,14 +274,21 @@ const MedicalEquipment = () => {
   const filteredEquipment = dataManagement.data;
   const paginatedEquipment = paginateData(filteredEquipment);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredEquipment.length); }, [filteredEquipment.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredEquipment.length);
+  }, [filteredEquipment.length, clampPage]);
 
   if (loading) {
     return (
       <MedicalPageLoading
         message={t('equipment.loading', 'Loading equipment...')}
-        hint={t('shared:labels.ifThisTakesTooLongPleaseRefreshThePage', 'If this takes too long, please refresh the page')}
+        hint={t(
+          'shared:labels.ifThisTakesTooLongPleaseRefreshThePage',
+          'If this takes too long, please refresh the page'
+        )}
       />
     );
   }
@@ -271,7 +296,10 @@ const MedicalEquipment = () => {
   return (
     <>
       <Container size="xl" py="sm">
-        <PageHeader title={t('shared:categories.medical_equipment', 'Medical Equipment')} icon="🩺" />
+        <PageHeader
+          title={t('shared:categories.medical_equipment', 'Medical Equipment')}
+          icon="🩺"
+        />
 
         <Stack gap="sm" mt="md">
           <MedicalPageAlerts
@@ -295,15 +323,24 @@ const MedicalEquipment = () => {
           />
 
           {/* Search and Filter */}
-          <MedicalPageFilters dataManagement={dataManagement} config={equipmentConfig} />
+          <MedicalPageFilters
+            dataManagement={dataManagement}
+            config={equipmentConfig}
+          />
 
           {filteredEquipment.length === 0 ? (
             <EmptyState
               emoji="🩺"
               title={t('equipment.noEquipmentFound', 'No Equipment Found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('equipment.startAdding', 'Start by adding your first piece of medical equipment.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'equipment.startAdding',
+                'Start by adding your first piece of medical equipment.'
+              )}
               actionButton={
                 <Button variant="filled" onClick={handleAddEquipment}>
                   {t('equipment.addFirstEquipment', 'Add Your First Equipment')}
@@ -312,28 +349,36 @@ const MedicalEquipment = () => {
             />
           ) : (
             <>
-            <AnimatedCardGrid
-              items={paginatedEquipment}
-              columns={{ base: 12, sm: 6, lg: 4 }}
-              renderCard={(equip) => (
-                <EquipmentCard
-                  equipment={equip}
-                  onEdit={handleEditEquipment}
-                  onDelete={handleDeleteEquipment}
-                  onView={handleViewEquipment}
-                  disableActions={isViewOnly}
-                  disableActionsTooltip={viewOnlyTooltip}
-                  onError={(error) => {
-                    logger.error('EquipmentCard error', {
-                      equipmentId: equip.id,
-                      error: error.message,
-                      page: 'MedicalEquipment',
-                    });
-                  }}
-                />
-              )}
-            />
-            <PaginationControls page={page} totalPages={totalPages(filteredEquipment.length)} pageSize={pageSize} totalRecords={filteredEquipment.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+              <AnimatedCardGrid
+                items={paginatedEquipment}
+                columns={{ base: 12, sm: 6, lg: 4 }}
+                renderCard={equip => (
+                  <EquipmentCard
+                    equipment={equip}
+                    onEdit={handleEditEquipment}
+                    onDelete={handleDeleteEquipment}
+                    onView={handleViewEquipment}
+                    disableActions={isViewOnly}
+                    disableActionsTooltip={viewOnlyTooltip}
+                    onError={error => {
+                      logger.error('EquipmentCard error', {
+                        equipmentId: equip.id,
+                        error: error.message,
+                        page: 'MedicalEquipment',
+                      });
+                    }}
+                  />
+                )}
+              />
+              <PaginationControls
+                page={page}
+                totalPages={totalPages(filteredEquipment.length)}
+                pageSize={pageSize}
+                totalRecords={filteredEquipment.length}
+                onPageChange={setPage}
+                onPageSizeChange={handlePageSizeChange}
+                pageSizeOptions={PAGE_SIZE_OPTIONS}
+              />
             </>
           )}
         </Stack>
@@ -342,7 +387,11 @@ const MedicalEquipment = () => {
       <EquipmentFormWrapper
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editingEquipment ? t('equipment.editEquipment', 'Edit Equipment') : t('equipment.addEquipment', 'Add Equipment')}
+        title={
+          editingEquipment
+            ? t('equipment.editEquipment', 'Edit Equipment')
+            : t('equipment.addEquipment', 'Add Equipment')
+        }
         editingEquipment={editingEquipment}
         formData={formData}
         onInputChange={handleInputChange}
@@ -367,5 +416,5 @@ const MedicalEquipment = () => {
 
 export default withResponsive(MedicalEquipment, {
   injectResponsive: true,
-  displayName: 'ResponsiveMedicalEquipment'
+  displayName: 'ResponsiveMedicalEquipment',
 });

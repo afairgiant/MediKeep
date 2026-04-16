@@ -1,16 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-  Container,
-  Paper,
-  Stack,
-} from '@mantine/core';
-import {
-  IconBandage,
-  IconPlus,
-} from '@tabler/icons-react';
+import { Container, Paper, Stack } from '@mantine/core';
+import { IconBandage, IconPlus } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
@@ -28,9 +21,12 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import MedicalPageLoading from '../../components/shared/MedicalPageLoading';
 import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import PaginationControls from '../../components/shared/PaginationControls';
-import { InjuryCard, InjuryViewModal, InjuryFormWrapper } from '../../components/medical/injuries';
+import {
+  InjuryCard,
+  InjuryViewModal,
+  InjuryFormWrapper,
+} from '../../components/medical/injuries';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
-import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
@@ -45,7 +41,17 @@ const Injuries = () => {
   const { formatDate } = useDateFormat();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('injuries');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
 
   // Standardized data management
   const {
@@ -90,39 +96,50 @@ const Injuries = () => {
   useEffect(() => {
     // Fetch practitioners
     setPractitionersLoading(true);
-    apiService.getPractitioners()
+    apiService
+      .getPractitioners()
       .then(response => {
         // Ensure we always set an array
         setPractitioners(Array.isArray(response) ? response : []);
       })
       .catch(err => {
-        logger.error('injuries_fetch_practitioners_error', 'Failed to fetch practitioners', {
-          component: 'Injuries',
-          error: err.message,
-        });
+        logger.error(
+          'injuries_fetch_practitioners_error',
+          'Failed to fetch practitioners',
+          {
+            component: 'Injuries',
+            error: err.message,
+          }
+        );
         setPractitioners([]);
       })
       .finally(() => setPractitionersLoading(false));
 
     // Fetch injury types
     setInjuryTypesLoading(true);
-    apiService.getInjuryTypes()
+    apiService
+      .getInjuryTypes()
       .then(response => {
         // Ensure we always set an array
         setInjuryTypes(Array.isArray(response) ? response : []);
       })
       .catch(err => {
-        logger.error('injuries_fetch_types_error', 'Failed to fetch injury types', {
-          component: 'Injuries',
-          error: err.message,
-        });
+        logger.error(
+          'injuries_fetch_types_error',
+          'Failed to fetch injury types',
+          {
+            component: 'Injuries',
+            error: err.message,
+          }
+        );
         setInjuryTypes([]);
       })
       .finally(() => setInjuryTypesLoading(false));
   }, []);
 
   // File count management for cards
-  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } = useEntityFileCounts('injury', injuries);
+  const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
+    useEntityFileCounts('injury', injuries);
 
   // View modal navigation with URL deep linking
   const {
@@ -139,7 +156,9 @@ const Injuries = () => {
   const formatters = {
     ...getEntityFormatters('injuries', [], navigate, null, formatDate),
     practitioner_name: (value, injury) => {
-      const practitioner = practitioners.find(p => p.id === injury.practitioner_id);
+      const practitioner = practitioners.find(
+        p => p.id === injury.practitioner_id
+      );
       return practitioner?.name || '';
     },
     injury_type_name: (value, injury) => {
@@ -198,7 +217,7 @@ const Injuries = () => {
         refreshData();
       }
     },
-    onError: (error) => {
+    onError: error => {
       logger.error('injuries_form_error', {
         message: 'Form submission error in injuries',
         error,
@@ -357,16 +376,27 @@ const Injuries = () => {
   const processedInjuries = dataManagement.data;
   const paginatedInjuries = paginateData(processedInjuries);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(processedInjuries.length); }, [processedInjuries.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(processedInjuries.length);
+  }, [processedInjuries.length, clampPage]);
 
   if (loading) {
-    return <MedicalPageLoading message={t('injuries.messages.loading', 'Loading injuries...')} />;
+    return (
+      <MedicalPageLoading
+        message={t('injuries.messages.loading', 'Loading injuries...')}
+      />
+    );
   }
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('shared:categories.injuries', 'Injuries')} icon={<IconBandage size={24} />} />
+      <PageHeader
+        title={t('shared:categories.injuries', 'Injuries')}
+        icon={<IconBandage size={24} />}
+      />
 
       <Stack gap="sm" mt="md">
         <MedicalPageAlerts
@@ -397,7 +427,11 @@ const Injuries = () => {
         <InjuryFormWrapper
           isOpen={showAddForm}
           onClose={() => !isBlocking && resetForm()}
-          title={editingInjury ? t('injuries.editTitle', 'Edit Injury') : t('injuries.addTitle', 'Add New Injury')}
+          title={
+            editingInjury
+              ? t('injuries.editTitle', 'Edit Injury')
+              : t('injuries.addTitle', 'Add New Injury')
+          }
           formData={formData}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
@@ -409,7 +443,7 @@ const Injuries = () => {
           isLoading={isBlocking}
           statusMessage={statusMessage}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onFileUploadComplete={(success, completedCount, failedCount) => {
+          onFileUploadComplete={(success, _completedCount, _failedCount) => {
             if (success && editingInjury?.id) {
               refreshFileCount(editingInjury.id);
             }
@@ -427,13 +461,19 @@ const Injuries = () => {
               icon={IconBandage}
               title={t('injuries.emptyState.title', 'No injuries found')}
               hasActiveFilters={dataManagement.hasActiveFilters}
-              filteredMessage={t('shared:emptyStates.adjustSearch', 'Try adjusting your search or filter criteria.')}
-              noDataMessage={t('injuries.emptyState.noData', 'Click "Add New Injury" to get started.')}
+              filteredMessage={t(
+                'shared:emptyStates.adjustSearch',
+                'Try adjusting your search or filter criteria.'
+              )}
+              noDataMessage={t(
+                'injuries.emptyState.noData',
+                'Click "Add New Injury" to get started.'
+              )}
             />
           ) : viewMode === 'cards' ? (
             <AnimatedCardGrid
               items={paginatedInjuries}
-              renderCard={(injury) => (
+              renderCard={injury => (
                 <InjuryCard
                   injury={injury}
                   onView={handleViewInjury}
@@ -460,13 +500,48 @@ const Injuries = () => {
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
                 columns={[
-                  { header: t('injuries.injuryName.label', 'Injury Name'), accessor: 'injury_name', priority: 'high', width: 180 },
-                  { header: t('injuries.bodyPart.label', 'Body Part'), accessor: 'body_part', priority: 'high', width: 120 },
-                  { header: t('injuries.dateOfInjury.label', 'Date'), accessor: 'date_of_injury', priority: 'high', width: 110 },
-                  { header: t('injuries.injuryType.label', 'Type'), accessor: 'injury_type_name', priority: 'medium', width: 100 },
-                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
-                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'medium', width: 100 },
-                  { header: t('injuries.practitioner.label', 'Practitioner'), accessor: 'practitioner_name', priority: 'low', width: 150 },
+                  {
+                    header: t('injuries.injuryName.label', 'Injury Name'),
+                    accessor: 'injury_name',
+                    priority: 'high',
+                    width: 180,
+                  },
+                  {
+                    header: t('injuries.bodyPart.label', 'Body Part'),
+                    accessor: 'body_part',
+                    priority: 'high',
+                    width: 120,
+                  },
+                  {
+                    header: t('injuries.dateOfInjury.label', 'Date'),
+                    accessor: 'date_of_injury',
+                    priority: 'high',
+                    width: 110,
+                  },
+                  {
+                    header: t('injuries.injuryType.label', 'Type'),
+                    accessor: 'injury_type_name',
+                    priority: 'medium',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:fields.severity', 'Severity'),
+                    accessor: 'severity',
+                    priority: 'medium',
+                    width: 100,
+                  },
+                  {
+                    header: t('shared:fields.status', 'Status'),
+                    accessor: 'status',
+                    priority: 'medium',
+                    width: 100,
+                  },
+                  {
+                    header: t('injuries.practitioner.label', 'Practitioner'),
+                    accessor: 'practitioner_name',
+                    priority: 'low',
+                    width: 150,
+                  },
                 ]}
                 patientData={currentPatient}
                 tableName={t('shared:categories.injuries', 'Injuries')}
@@ -480,7 +555,15 @@ const Injuries = () => {
             </Paper>
           )}
           {processedInjuries.length > 0 && (
-            <PaginationControls page={page} totalPages={totalPages(processedInjuries.length)} pageSize={pageSize} totalRecords={processedInjuries.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(processedInjuries.length)}
+              pageSize={pageSize}
+              totalRecords={processedInjuries.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
         </motion.div>
 
@@ -504,5 +587,5 @@ const Injuries = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(Injuries, {
   injectResponsive: true,
-  displayName: 'ResponsiveInjuries'
+  displayName: 'ResponsiveInjuries',
 });

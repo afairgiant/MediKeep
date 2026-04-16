@@ -5,9 +5,6 @@ import { useDataManagement } from '../../hooks/useDataManagement';
 import { apiService } from '../../services/api';
 import familyHistoryApi from '../../services/api/familyHistoryApi';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
-import { usePatientWithStaticData } from '../../hooks/useGlobalData';
-import { getEntityFormatters } from '../../utils/tableFormatters';
-import { navigateToEntity } from '../../utils/linkNavigation';
 import { PageHeader } from '../../components';
 import logger from '../../services/logger';
 import { useErrorHandler, ErrorAlert } from '../../utils/errorHandling';
@@ -19,7 +16,6 @@ import AnimatedCardGrid from '../../components/shared/AnimatedCardGrid';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
-import StatusBadge from '../../components/medical/StatusBadge';
 import { InvitationManager } from '../../components/invitations';
 import FamilyHistorySharingModal from '../../components/medical/FamilyHistorySharingModal';
 import {
@@ -38,18 +34,15 @@ import {
   Alert,
   Title,
   Tabs,
-  Checkbox,
   Paper,
   useMantineColorScheme,
 } from '@mantine/core';
 // Note: Button is still needed for the Alert cancel button
 import {
   IconUsers,
-  IconPlus,
   IconUserPlus,
   IconShare,
   IconMail,
-  IconSend2,
   IconX,
   IconSend,
 } from '@tabler/icons-react';
@@ -66,7 +59,7 @@ const FamilyHistory = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
-  const { colorScheme } = useMantineColorScheme();
+  useMantineColorScheme();
   const [viewMode, setViewMode] = usePersistedViewMode('family-history');
   const [activeTab, setActiveTab] = useState('my-family');
   const [expandedMembers, setExpandedMembers] = useState(new Set());
@@ -109,12 +102,11 @@ const FamilyHistory = () => {
     updateItem,
     deleteItem,
     refreshData,
-    clearError,
     setError,
   } = useMedicalData({
     entityName: 'family_member',
     apiMethodsConfig: {
-      getAll: async signal => {
+      getAll: async _signal => {
         logger.debug('Getting organized family history (owned + shared)', {
           component: 'FamilyHistory',
         });
@@ -260,6 +252,7 @@ const FamilyHistory = () => {
     };
 
     loadSharedFamilyHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount to load shared data; handleError and currentPatient are read at call time
   }, []);
 
   // Form and UI state
@@ -358,7 +351,12 @@ const FamilyHistory = () => {
 
   const handleDeleteMember = async memberId => {
     if (
-      !window.confirm(t('familyHistory.confirmations.deleteMember', 'Are you sure you want to delete this family member?'))
+      !window.confirm(
+        t(
+          'familyHistory.confirmations.deleteMember',
+          'Are you sure you want to delete this family member?'
+        )
+      )
     ) {
       return;
     }
@@ -379,7 +377,9 @@ const FamilyHistory = () => {
     e.preventDefault();
 
     if (!currentPatient?.id) {
-      setError(t('errors:patientNotAvailable', 'Patient information not available'));
+      setError(
+        t('errors:patientNotAvailable', 'Patient information not available')
+      );
       return;
     }
 
@@ -422,8 +422,14 @@ const FamilyHistory = () => {
         });
         setError(
           editingMember
-            ? t('familyHistory.errors.updatedButFailedRefresh', 'Family member updated successfully, but failed to refresh the list. Please reload the page to see changes.')
-            : t('familyHistory.errors.createdButFailedRefresh', 'Family member created successfully, but failed to refresh the list. Please reload the page to see changes.')
+            ? t(
+                'familyHistory.errors.updatedButFailedRefresh',
+                'Family member updated successfully, but failed to refresh the list. Please reload the page to see changes.'
+              )
+            : t(
+                'familyHistory.errors.createdButFailedRefresh',
+                'Family member created successfully, but failed to refresh the list. Please reload the page to see changes.'
+              )
         );
       }
     }
@@ -463,32 +469,46 @@ const FamilyHistory = () => {
   };
 
   const handleDeleteCondition = async (familyMemberId, conditionId) => {
-    if (!window.confirm(t('familyHistory.confirmations.deleteCondition', 'Are you sure you want to delete this condition?'))) {
+    if (
+      !window.confirm(
+        t(
+          'familyHistory.confirmations.deleteCondition',
+          'Are you sure you want to delete this condition?'
+        )
+      )
+    ) {
       return;
     }
 
     try {
       // Find the family member to get its patient_id
-      const familyMember = familyMembers.find(member => member.id === familyMemberId);
+      const familyMember = familyMembers.find(
+        member => member.id === familyMemberId
+      );
       const patientId = familyMember?.patient_id;
-      
+
       logger.debug('Deleting family condition', {
         component: 'FamilyHistory',
         familyMemberId,
         conditionId,
         patientId,
-        familyMember: familyMember ? 'found' : 'not found'
+        familyMember: familyMember ? 'found' : 'not found',
       });
-      
-      const result = await apiService.deleteFamilyCondition(familyMemberId, conditionId, undefined, patientId);
-      
+
+      const result = await apiService.deleteFamilyCondition(
+        familyMemberId,
+        conditionId,
+        undefined,
+        patientId
+      );
+
       logger.debug('Family condition delete result', {
         component: 'FamilyHistory',
         result,
         familyMemberId,
         conditionId,
       });
-      
+
       await refreshData();
     } catch (error) {
       logger.error('Failed to delete family condition', {
@@ -498,7 +518,12 @@ const FamilyHistory = () => {
         error: error.message,
         patientId: currentPatient?.id,
       });
-      setError(t('familyHistory.errors.failedToDeleteCondition', 'Failed to delete condition'));
+      setError(
+        t(
+          'familyHistory.errors.failedToDeleteCondition',
+          'Failed to delete condition'
+        )
+      );
     }
   };
 
@@ -526,7 +551,12 @@ const FamilyHistory = () => {
           component: 'FamilyHistory',
         }
       );
-      setError(t('familyHistory.errors.familyMemberNotAvailable', 'Family member information not available'));
+      setError(
+        t(
+          'familyHistory.errors.familyMemberNotAvailable',
+          'Family member information not available'
+        )
+      );
       return;
     }
 
@@ -542,9 +572,11 @@ const FamilyHistory = () => {
 
     try {
       // Find the family member to get its patient_id
-      const familyMember = familyMembers.find(member => member.id === familyMemberId);
+      const familyMember = familyMembers.find(
+        member => member.id === familyMemberId
+      );
       const patientId = familyMember?.patient_id;
-      
+
       if (editingCondition) {
         await apiService.updateFamilyCondition(
           familyMemberId,
@@ -554,7 +586,12 @@ const FamilyHistory = () => {
           patientId
         );
       } else {
-        await apiService.createFamilyCondition(familyMemberId, conditionData, undefined, patientId);
+        await apiService.createFamilyCondition(
+          familyMemberId,
+          conditionData,
+          undefined,
+          patientId
+        );
       }
 
       setShowConditionModal(false);
@@ -592,7 +629,12 @@ const FamilyHistory = () => {
         error: error.message,
         patientId: currentPatient?.id,
       });
-      setError(t('familyHistory.errors.failedToSaveCondition', 'Failed to save condition'));
+      setError(
+        t(
+          'familyHistory.errors.failedToSaveCondition',
+          'Failed to save condition'
+        )
+      );
     }
   };
 
@@ -924,376 +966,400 @@ const FamilyHistory = () => {
   // Utility functions moved to extracted components
 
   if (loading) {
-    return <MedicalPageLoading message={t('familyHistory.loadingFamilyHistory', 'Loading family history...')} />;
+    return (
+      <MedicalPageLoading
+        message={t(
+          'familyHistory.loadingFamilyHistory',
+          'Loading family history...'
+        )}
+      />
+    );
   }
 
   return (
     <Container size="xl" py="sm">
-      <PageHeader title={t('shared:categories.family_history', 'Family History')} icon="👨‍👩‍👧‍👦" />
+      <PageHeader
+        title={t('shared:categories.family_history', 'Family History')}
+        icon="👨‍👩‍👧‍👦"
+      />
 
       <Stack gap="sm" mt="md">
+        {/* Enhanced error display for shared family history loading failures (addresses reviewer feedback) */}
+        <ErrorAlert error={currentError} onClose={clearSharedError} />
 
-      {/* Enhanced error display for shared family history loading failures (addresses reviewer feedback) */}
-      <ErrorAlert error={currentError} onClose={clearSharedError} />
-
-      {/* Legacy error display for backward compatibility */}
-      {error && !currentError && (
-        <Alert
-          color="red"
-          style={{ marginBottom: '1rem', whiteSpace: 'pre-line' }}
-          onClose={() => setError(null)}
-        >
-          {typeof error === 'string' ? error : error?.message || 'An error occurred'}
-        </Alert>
-      )}
-
-      {successMessage && (
-        <Alert color="green" style={{ marginBottom: '1rem' }}>
-          {successMessage}
-        </Alert>
-      )}
-
-      {/* Header Controls */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <Title order={3}>{t('familyHistory.pageTitle', 'Family Medical History')}</Title>
-        <Text size="sm" color="dimmed" mb="lg">
-          {activeTab === 'my-family'
-            ? viewMode === 'table'
-              ? t('familyHistory.conditionCountAcrossMembers', '{{conditionCount}} condition(s) across {{memberCount}} family member(s)', { conditionCount: flattenedConditions.length, memberCount: dataManagement.data.length })
-              : t('shared:labels.countFamilyMembersRecorded', '{{count}} family member(s) recorded', { count: dataManagement.data.length })
-            : viewMode === 'table'
-              ? t('familyHistory.sharedConditionCountAcrossMembers', '{{conditionCount}} condition(s) across {{memberCount}} shared family member(s)', { conditionCount: flattenedSharedConditions.length, memberCount: sharedDataManagement.filteredCount })
-              : t('familyHistory.sharedMemberCount', '{{filteredCount}} of {{totalCount}} family member(s) shared with you', { filteredCount: sharedDataManagement.filteredCount, totalCount: sharedDataManagement.totalCount })}
-        </Text>
-
-        <MedicalPageActions
-          primaryAction={{
-            label: t('familyHistory.addFamilyMember', 'Add Family Member'),
-            onClick: handleAddMember,
-            leftSection: <IconUserPlus size={16} />,
-            visible: activeTab === 'my-family',
-            size: 'sm',
-            disabled: isViewOnly,
-            tooltip: viewOnlyTooltip,
-          }}
-          secondaryActions={[
-            {
-              key: 'sharing-mode',
-              label: bulkSelectionMode ? t('familyHistory.endSharingMode', 'End Sharing Mode') : t('familyHistory.sharingMode', 'Sharing Mode'),
-              onClick: () => {
-                setBulkSelectionMode(!bulkSelectionMode);
-                setSelectedMembersForBulkSharing([]);
-              },
-              leftSection: <IconShare size={16} />,
-              variant: bulkSelectionMode ? 'filled' : 'light',
-              visible: activeTab === 'my-family',
-              size: 'sm',
-            },
-            {
-              key: 'manage-invitations',
-              label: t('familyHistory.manageInvitations', 'Manage Invitations'),
-              onClick: openInvitationManager,
-              leftSection: <IconMail size={16} />,
-              size: 'sm',
-            },
-            {
-              key: 'share-selected',
-              label: t('shared:labels.shareSelectedCount', 'Share Selected ({{count}})', { count: selectedMembersForBulkSharing.length }),
-              onClick: openBulkSharingModal,
-              leftSection: <IconSend size={16} />,
-              variant: 'filled',
-              visible: bulkSelectionMode && selectedMembersForBulkSharing.length > 0,
-              size: 'sm',
-            },
-          ]}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          viewToggleSize="sm"
-          mb={0}
-        />
-
-        {bulkSelectionMode && (
+        {/* Legacy error display for backward compatibility */}
+        {error && !currentError && (
           <Alert
-            icon={<IconShare size="1rem" />}
-            title={t('familyHistory.sharingModeActive', 'Sharing Mode Active')}
-            color="blue"
-            variant="light"
-            mb="md"
+            color="red"
+            style={{ marginBottom: '1rem', whiteSpace: 'pre-line' }}
+            onClose={() => setError(null)}
           >
-            <Group justify="space-between">
-              <div>
-                <Text size="sm" mb={4}>
-                  {t('shared:labels.clickOnFamilyMemberCardsToSelectThemForSharingCountSelected', 'Click on family member cards to select them for sharing. {{count}} selected.', { count: selectedMembersForBulkSharing.length })}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {t('familyHistory.sharedMembersCannotBeSelected', 'Shared family members cannot be selected for additional sharing.')}
-                </Text>
-              </div>
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={() => {
-                  setBulkSelectionMode(false);
-                  setSelectedMembersForBulkSharing([]);
-                }}
-              >
-                {t('buttons.cancelSelection', 'Cancel Selection')}
-              </Button>
-            </Group>
+            {typeof error === 'string'
+              ? error
+              : error?.message || 'An error occurred'}
           </Alert>
         )}
-      </div>
 
-      {/* Filters */}
-      {activeTab === 'my-family' && (
-        <MedicalPageFilters dataManagement={dataManagement} config={config} />
-      )}
+        {successMessage && (
+          <Alert color="green" style={{ marginBottom: '1rem' }}>
+            {successMessage}
+          </Alert>
+        )}
 
-      {activeTab === 'shared-with-me' && (
-        <MedicalPageFilters dataManagement={sharedDataManagement} config={config} />
-      )}
+        {/* Header Controls */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <Title order={3}>
+            {t('familyHistory.pageTitle', 'Family Medical History')}
+          </Title>
+          <Text size="sm" color="dimmed" mb="lg">
+            {activeTab === 'my-family'
+              ? viewMode === 'table'
+                ? t(
+                    'familyHistory.conditionCountAcrossMembers',
+                    '{{conditionCount}} condition(s) across {{memberCount}} family member(s)',
+                    {
+                      conditionCount: flattenedConditions.length,
+                      memberCount: dataManagement.data.length,
+                    }
+                  )
+                : t(
+                    'shared:labels.countFamilyMembersRecorded',
+                    '{{count}} family member(s) recorded',
+                    { count: dataManagement.data.length }
+                  )
+              : viewMode === 'table'
+                ? t(
+                    'familyHistory.sharedConditionCountAcrossMembers',
+                    '{{conditionCount}} condition(s) across {{memberCount}} shared family member(s)',
+                    {
+                      conditionCount: flattenedSharedConditions.length,
+                      memberCount: sharedDataManagement.filteredCount,
+                    }
+                  )
+                : t(
+                    'familyHistory.sharedMemberCount',
+                    '{{filteredCount}} of {{totalCount}} family member(s) shared with you',
+                    {
+                      filteredCount: sharedDataManagement.filteredCount,
+                      totalCount: sharedDataManagement.totalCount,
+                    }
+                  )}
+          </Text>
 
-      {/* Tabs for Family History */}
-      <Tabs
-        value={activeTab}
-        onChange={value => {
-          setActiveTab(value);
-          setBulkSelectionMode(false);
-          setSelectedMembersForBulkSharing([]);
-        }}
-        mb="lg"
-      >
-        <Tabs.List>
-          <Tabs.Tab value="my-family">
-            {t('familyHistory.tabs.myFamily', 'My Family')} ({dataManagement.filteredCount})
-          </Tabs.Tab>
-          <Tabs.Tab value="shared-with-me">
-            {t('familyHistory.tabs.sharedWithMe', 'Shared With Me')} ({sharedDataManagement.filteredCount})
-          </Tabs.Tab>
-        </Tabs.List>
+          <MedicalPageActions
+            primaryAction={{
+              label: t('familyHistory.addFamilyMember', 'Add Family Member'),
+              onClick: handleAddMember,
+              leftSection: <IconUserPlus size={16} />,
+              visible: activeTab === 'my-family',
+              size: 'sm',
+              disabled: isViewOnly,
+              tooltip: viewOnlyTooltip,
+            }}
+            secondaryActions={[
+              {
+                key: 'sharing-mode',
+                label: bulkSelectionMode
+                  ? t('familyHistory.endSharingMode', 'End Sharing Mode')
+                  : t('familyHistory.sharingMode', 'Sharing Mode'),
+                onClick: () => {
+                  setBulkSelectionMode(!bulkSelectionMode);
+                  setSelectedMembersForBulkSharing([]);
+                },
+                leftSection: <IconShare size={16} />,
+                variant: bulkSelectionMode ? 'filled' : 'light',
+                visible: activeTab === 'my-family',
+                size: 'sm',
+              },
+              {
+                key: 'manage-invitations',
+                label: t(
+                  'familyHistory.manageInvitations',
+                  'Manage Invitations'
+                ),
+                onClick: openInvitationManager,
+                leftSection: <IconMail size={16} />,
+                size: 'sm',
+              },
+              {
+                key: 'share-selected',
+                label: t(
+                  'shared:labels.shareSelectedCount',
+                  'Share Selected ({{count}})',
+                  { count: selectedMembersForBulkSharing.length }
+                ),
+                onClick: openBulkSharingModal,
+                leftSection: <IconSend size={16} />,
+                variant: 'filled',
+                visible:
+                  bulkSelectionMode && selectedMembersForBulkSharing.length > 0,
+                size: 'sm',
+              },
+            ]}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            viewToggleSize="sm"
+            mb={0}
+          />
 
-        <Tabs.Panel value="my-family">
-          {/* Family Members Display */}
-          {dataManagement.data.length === 0 ? (
-            <Card shadow="sm" p="xl" style={{ textAlign: 'center' }}>
-              <IconUsers size={48} color="var(--mantine-color-gray-5)" />
-              <Title order={4} mt="md" color="dimmed">
-                {t('familyHistory.emptyState.noFamilyMembers', 'No Family Members Yet')}
-              </Title>
-              <Text color="dimmed" mb="lg">
-                {t('familyHistory.emptyState.startBuilding', 'Start building your family medical history by adding your first family member.')}
-              </Text>
-              <Button
-                leftSection={<IconUserPlus size={16} />}
-                onClick={handleAddMember}
-                variant="filled"
-                disabled={isViewOnly}
-              >
-                {t('familyHistory.emptyState.addFirstMember', 'Add Your First Family Member')}
-              </Button>
-            </Card>
-          ) : viewMode === 'table' ? (
-            <Paper shadow="sm" radius="md" withBorder>
-              <ResponsiveTable
-                persistKey="family-history-conditions"
-                data={flattenedConditions}
-                disableEdit={isViewOnly}
-                disableDelete={isViewOnly}
-                disableActionsTooltip={viewOnlyTooltip}
-                columns={[
-                  { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
-                  { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
-                  { header: t('shared:labels.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
-                  { header: t('shared:labels.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
-                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
-                  { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
-                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
-                ]}
-                patientData={currentPatient}
-                tableName={t('shared:categories.family_history', 'Family History')}
-                onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
-                onEdit={row => {
-                  if (row.is_shared) {
-                    notifications.show({
-                      title: t('familyHistory.notifications.cannotEdit', 'Cannot Edit'),
-                      message: t('familyHistory.notifications.cannotEditShared', 'You cannot edit shared family history records'),
-                      color: 'orange',
-                      icon: <IconX size="1rem" />,
-                    });
-                    return;
-                  }
-                  const familyMember = familyMembers.find(
-                    m => m.id === row.familyMemberId
-                  );
-                  if (familyMember) {
-                    handleEditMember(familyMember);
-                  }
-                }}
-                onDelete={rowId => {
-                  const row = flattenedConditions.find(r => r.id === rowId);
-                  if (!row) return;
-                  if (row.is_shared) {
-                    notifications.show({
-                      title: t('familyHistory.notifications.cannotDelete', 'Cannot Delete'),
-                      message: t('familyHistory.notifications.cannotDeleteShared', 'You cannot delete shared family history records'),
-                      color: 'orange',
-                      icon: <IconX size="1rem" />,
-                    });
-                    return;
-                  }
-                  if (row.conditionId) {
-                    // Delete condition
-                    handleDeleteCondition(row.familyMemberId, row.conditionId);
-                  } else {
-                    // Delete family member
-                    handleDeleteMember(row.familyMemberId);
-                  }
-                }}
-                formatters={{
-                  relationship: value => value?.replace('_', ' ') || '-',
-                  condition_name: value => value || t('familyHistory.table.noConditions', 'No conditions'),
-                  condition_type: value => value?.replace('_', ' ') || '-',
-                  severity: value => value || '-',
-                  diagnosis_age: value => (value ? t('familyHistory.table.yearsOld', '{{age}} years', { age: value }) : '-'),
-                  status: value => value || '-',
-                }}
-                dataType="medical"
-                responsive={responsive}
-              />
-            </Paper>
-          ) : (
-            <Stack spacing="xl">
-              {groupedMembers.map(group => (
-                <div key={group.name}>
-                  <Group mb="md">
-                    <Title order={4} color="blue">
-                      {group.name}
-                    </Title>
-                    <Badge variant="light" size="sm">
-                      {group.members.length}
-                    </Badge>
-                  </Group>
-
-                  <AnimatedCardGrid
-                    items={group.members}
-                    columns={{ base: 12, sm: 6, md: 4 }}
-                    renderCard={(member) => (
-                      <FamilyHistoryCard
-                        member={member}
-                        onView={handleViewFamilyMember}
-                        onEdit={handleEditMember}
-                        onDelete={handleDeleteMember}
-                        onAddCondition={handleAddCondition}
-                        onEditCondition={handleEditCondition}
-                        onDeleteCondition={handleDeleteCondition}
-                        onShare={handleShareMember}
-                        expandedMembers={expandedMembers}
-                        onToggleExpanded={toggleExpanded}
-                        bulkSelectionMode={bulkSelectionMode}
-                        isSelected={selectedMembersForBulkSharing.includes(member.id)}
-                        onBulkToggle={handleBulkMemberToggle}
-                        onError={setError}
-                        disableActions={isViewOnly}
-                        disableActionsTooltip={viewOnlyTooltip}
-                      />
+          {bulkSelectionMode && (
+            <Alert
+              icon={<IconShare size="1rem" />}
+              title={t(
+                'familyHistory.sharingModeActive',
+                'Sharing Mode Active'
+              )}
+              color="blue"
+              variant="light"
+              mb="md"
+            >
+              <Group justify="space-between">
+                <div>
+                  <Text size="sm" mb={4}>
+                    {t(
+                      'shared:labels.clickOnFamilyMemberCardsToSelectThemForSharingCountSelected',
+                      'Click on family member cards to select them for sharing. {{count}} selected.',
+                      { count: selectedMembersForBulkSharing.length }
                     )}
-                  />
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {t(
+                      'familyHistory.sharedMembersCannotBeSelected',
+                      'Shared family members cannot be selected for additional sharing.'
+                    )}
+                  </Text>
                 </div>
-              ))}
-            </Stack>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={() => {
+                    setBulkSelectionMode(false);
+                    setSelectedMembersForBulkSharing([]);
+                  }}
+                >
+                  {t('buttons.cancelSelection', 'Cancel Selection')}
+                </Button>
+              </Group>
+            </Alert>
           )}
-        </Tabs.Panel>
+        </div>
 
-        <Tabs.Panel value="shared-with-me">
-          {/* Shared Family History Display */}
-          {sharedFamilyHistory.length === 0 ? (
-            <Card shadow="sm" p="xl" style={{ textAlign: 'center' }}>
-              <IconUsers size={48} color="var(--mantine-color-gray-5)" />
-              <Title order={4} mt="md" color="dimmed">
-                {t('invitations:manager.noSharedTitle')}
-              </Title>
-              <Text color="dimmed" mb="lg">
-                {t('invitations:manager.noSharedDescription')}
-              </Text>
-            </Card>
-          ) : viewMode === 'table' ? (
-            <Paper shadow="sm" radius="md" withBorder>
-              <ResponsiveTable
-                persistKey="family-history-shared"
-                data={flattenedSharedConditions}
-                disableEdit={isViewOnly}
-                disableDelete={isViewOnly}
-                disableActionsTooltip={viewOnlyTooltip}
-                columns={[
-                  { header: t('familyHistory.table.familyMember', 'Family Member'), accessor: 'familyMemberName', priority: 'high', width: 150 },
-                  { header: t('shared:labels.relationship', 'Relationship'), accessor: 'relationship', priority: 'high', width: 120 },
-                  { header: t('shared:labels.condition', 'Condition'), accessor: 'condition_name', priority: 'high', width: 200 },
-                  { header: t('shared:labels.type', 'Type'), accessor: 'condition_type', priority: 'medium', width: 120 },
-                  { header: t('shared:fields.severity', 'Severity'), accessor: 'severity', priority: 'medium', width: 100 },
-                  { header: t('familyHistory.table.diagnosisAge', 'Diagnosis Age'), accessor: 'diagnosis_age', priority: 'low', width: 120 },
-                  { header: t('shared:fields.status', 'Status'), accessor: 'status', priority: 'low', width: 100 },
-                  { header: t('familyHistory.table.sharedBy', 'Shared By'), accessor: 'shared_by', priority: 'medium', width: 150 },
-                ]}
-                patientData={currentPatient}
-                tableName={t('familyHistory.sharedTableName', 'Shared Family History')}
-                onView={row => handleViewFamilyMember({ id: row.familyMemberId })}
-                onEdit={_row => {
-                  notifications.show({
-                    title: t('familyHistory.notifications.cannotEdit', 'Cannot Edit'),
-                    message: t('familyHistory.notifications.cannotEditShared', 'You cannot edit shared family history records'),
-                    color: 'orange',
-                    icon: <IconX size="1rem" />,
-                  });
-                }}
-                onDelete={() => {
-                  notifications.show({
-                    title: t('familyHistory.notifications.cannotDelete', 'Cannot Delete'),
-                    message: t('familyHistory.notifications.cannotDeleteShared', 'You cannot delete shared family history records'),
-                    color: 'orange',
-                    icon: <IconX size="1rem" />,
-                  });
-                }}
-                formatters={{
-                  relationship: value => value?.replace('_', ' ') || '-',
-                  condition_name: value => value || t('familyHistory.table.noConditions', 'No conditions'),
-                  condition_type: value => value?.replace('_', ' ') || '-',
-                  severity: value => value || '-',
-                  diagnosis_age: value => (value ? t('familyHistory.table.yearsOld', '{{age}} years', { age: value }) : '-'),
-                  status: value => value || '-',
-                  shared_by: (value, row) => row.shared_by?.name || t('shared:labels.unknown', 'Unknown'),
-                }}
-                dataType="medical"
-                responsive={responsive}
-              />
-            </Paper>
-          ) : (
-            <Stack spacing="xl">
-              {/* Group shared family members by relationship */}
-              {groupedSharedFamilyMembers.map(group => (
-                <div key={group.relationship}>
-                  <Group mb="md">
-                    <Title order={4} color="blue">
-                      {group.relationship}
-                    </Title>
-                    <Badge variant="light" size="sm">
-                      {group.members.length}
-                    </Badge>
-                  </Group>
+        {/* Filters */}
+        {activeTab === 'my-family' && (
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
+        )}
 
-                  <AnimatedCardGrid
-                    items={group.members}
-                    columns={{ base: 12, sm: 6, md: 4 }}
-                    keyExtractor={(item) => `shared-${item.family_member.id}`}
-                    renderCard={(item) => {
-                      const member = {
-                        ...item.family_member,
-                        is_shared: true,
-                        shared_by: item.share_details?.shared_by,
-                        shared_at: item.share_details?.shared_at,
-                        sharing_note: item.share_details?.sharing_note,
-                      };
+        {activeTab === 'shared-with-me' && (
+          <MedicalPageFilters
+            dataManagement={sharedDataManagement}
+            config={config}
+          />
+        )}
 
-                      return (
+        {/* Tabs for Family History */}
+        <Tabs
+          value={activeTab}
+          onChange={value => {
+            setActiveTab(value);
+            setBulkSelectionMode(false);
+            setSelectedMembersForBulkSharing([]);
+          }}
+          mb="lg"
+        >
+          <Tabs.List>
+            <Tabs.Tab value="my-family">
+              {t('familyHistory.tabs.myFamily', 'My Family')} (
+              {dataManagement.filteredCount})
+            </Tabs.Tab>
+            <Tabs.Tab value="shared-with-me">
+              {t('familyHistory.tabs.sharedWithMe', 'Shared With Me')} (
+              {sharedDataManagement.filteredCount})
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="my-family">
+            {/* Family Members Display */}
+            {dataManagement.data.length === 0 ? (
+              <Card shadow="sm" p="xl" style={{ textAlign: 'center' }}>
+                <IconUsers size={48} color="var(--mantine-color-gray-5)" />
+                <Title order={4} mt="md" color="dimmed">
+                  {t(
+                    'familyHistory.emptyState.noFamilyMembers',
+                    'No Family Members Yet'
+                  )}
+                </Title>
+                <Text color="dimmed" mb="lg">
+                  {t(
+                    'familyHistory.emptyState.startBuilding',
+                    'Start building your family medical history by adding your first family member.'
+                  )}
+                </Text>
+                <Button
+                  leftSection={<IconUserPlus size={16} />}
+                  onClick={handleAddMember}
+                  variant="filled"
+                  disabled={isViewOnly}
+                >
+                  {t(
+                    'familyHistory.emptyState.addFirstMember',
+                    'Add Your First Family Member'
+                  )}
+                </Button>
+              </Card>
+            ) : viewMode === 'table' ? (
+              <Paper shadow="sm" radius="md" withBorder>
+                <ResponsiveTable
+                  persistKey="family-history-conditions"
+                  data={flattenedConditions}
+                  disableEdit={isViewOnly}
+                  disableDelete={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
+                  columns={[
+                    {
+                      header: t(
+                        'familyHistory.table.familyMember',
+                        'Family Member'
+                      ),
+                      accessor: 'familyMemberName',
+                      priority: 'high',
+                      width: 150,
+                    },
+                    {
+                      header: t('shared:labels.relationship', 'Relationship'),
+                      accessor: 'relationship',
+                      priority: 'high',
+                      width: 120,
+                    },
+                    {
+                      header: t('shared:labels.condition', 'Condition'),
+                      accessor: 'condition_name',
+                      priority: 'high',
+                      width: 200,
+                    },
+                    {
+                      header: t('shared:labels.type', 'Type'),
+                      accessor: 'condition_type',
+                      priority: 'medium',
+                      width: 120,
+                    },
+                    {
+                      header: t('shared:fields.severity', 'Severity'),
+                      accessor: 'severity',
+                      priority: 'medium',
+                      width: 100,
+                    },
+                    {
+                      header: t(
+                        'familyHistory.table.diagnosisAge',
+                        'Diagnosis Age'
+                      ),
+                      accessor: 'diagnosis_age',
+                      priority: 'low',
+                      width: 120,
+                    },
+                    {
+                      header: t('shared:fields.status', 'Status'),
+                      accessor: 'status',
+                      priority: 'low',
+                      width: 100,
+                    },
+                  ]}
+                  patientData={currentPatient}
+                  tableName={t(
+                    'shared:categories.family_history',
+                    'Family History'
+                  )}
+                  onView={row =>
+                    handleViewFamilyMember({ id: row.familyMemberId })
+                  }
+                  onEdit={row => {
+                    if (row.is_shared) {
+                      notifications.show({
+                        title: t(
+                          'familyHistory.notifications.cannotEdit',
+                          'Cannot Edit'
+                        ),
+                        message: t(
+                          'familyHistory.notifications.cannotEditShared',
+                          'You cannot edit shared family history records'
+                        ),
+                        color: 'orange',
+                        icon: <IconX size="1rem" />,
+                      });
+                      return;
+                    }
+                    const familyMember = familyMembers.find(
+                      m => m.id === row.familyMemberId
+                    );
+                    if (familyMember) {
+                      handleEditMember(familyMember);
+                    }
+                  }}
+                  onDelete={rowId => {
+                    const row = flattenedConditions.find(r => r.id === rowId);
+                    if (!row) return;
+                    if (row.is_shared) {
+                      notifications.show({
+                        title: t(
+                          'familyHistory.notifications.cannotDelete',
+                          'Cannot Delete'
+                        ),
+                        message: t(
+                          'familyHistory.notifications.cannotDeleteShared',
+                          'You cannot delete shared family history records'
+                        ),
+                        color: 'orange',
+                        icon: <IconX size="1rem" />,
+                      });
+                      return;
+                    }
+                    if (row.conditionId) {
+                      // Delete condition
+                      handleDeleteCondition(
+                        row.familyMemberId,
+                        row.conditionId
+                      );
+                    } else {
+                      // Delete family member
+                      handleDeleteMember(row.familyMemberId);
+                    }
+                  }}
+                  formatters={{
+                    relationship: value => value?.replace('_', ' ') || '-',
+                    condition_name: value =>
+                      value ||
+                      t('familyHistory.table.noConditions', 'No conditions'),
+                    condition_type: value => value?.replace('_', ' ') || '-',
+                    severity: value => value || '-',
+                    diagnosis_age: value =>
+                      value
+                        ? t('familyHistory.table.yearsOld', '{{age}} years', {
+                            age: value,
+                          })
+                        : '-',
+                    status: value => value || '-',
+                  }}
+                  dataType="medical"
+                  responsive={responsive}
+                />
+              </Paper>
+            ) : (
+              <Stack spacing="xl">
+                {groupedMembers.map(group => (
+                  <div key={group.name}>
+                    <Group mb="md">
+                      <Title order={4} color="blue">
+                        {group.name}
+                      </Title>
+                      <Badge variant="light" size="sm">
+                        {group.members.length}
+                      </Badge>
+                    </Group>
+
+                    <AnimatedCardGrid
+                      items={group.members}
+                      columns={{ base: 12, sm: 6, md: 4 }}
+                      renderCard={member => (
                         <FamilyHistoryCard
                           member={member}
                           onView={handleViewFamilyMember}
@@ -1303,109 +1369,310 @@ const FamilyHistory = () => {
                           onEditCondition={handleEditCondition}
                           onDeleteCondition={handleDeleteCondition}
                           onShare={handleShareMember}
+                          expandedMembers={expandedMembers}
+                          onToggleExpanded={toggleExpanded}
+                          bulkSelectionMode={bulkSelectionMode}
+                          isSelected={selectedMembersForBulkSharing.includes(
+                            member.id
+                          )}
+                          onBulkToggle={handleBulkMemberToggle}
+                          onError={setError}
                           disableActions={isViewOnly}
                           disableActionsTooltip={viewOnlyTooltip}
-                          expandedMembers={{
-                            has: (id) => expandedMembers.has(`shared-${id}`),
-                          }}
-                          onToggleExpanded={(id) => {
-                            const memberId = `shared-${id}`;
-                            setExpandedMembers(prev => {
-                              const newSet = new Set(prev);
-                              if (newSet.has(memberId)) {
-                                newSet.delete(memberId);
-                              } else {
-                                newSet.add(memberId);
-                              }
-                              return newSet;
-                            });
-                          }}
-                          bulkSelectionMode={false}
-                          isSelected={false}
-                          onBulkToggle={() => {}}
-                          onError={setError}
                         />
-                      );
-                    }}
-                  />
-                </div>
-              ))}
-            </Stack>
-          )}
-        </Tabs.Panel>
-      </Tabs>
+                      )}
+                    />
+                  </div>
+                ))}
+              </Stack>
+            )}
+          </Tabs.Panel>
 
-      {/* Family History Forms */}
-      <FamilyHistoryFormWrapper
-        // Family Member Form Props
-        memberFormOpen={showModal}
-        onMemberFormClose={handleCancel}
-        memberFormTitle={editingMember ? t('familyHistory.form.editMemberTitle', 'Edit Family Member') : t('familyHistory.form.addMemberTitle', 'Add Family Member')}
-        editingMember={editingMember}
-        memberFormData={formData}
-        onMemberInputChange={handleInputChange}
-        onMemberSubmit={handleSubmit}
-        memberFormLoading={loading}
+          <Tabs.Panel value="shared-with-me">
+            {/* Shared Family History Display */}
+            {sharedFamilyHistory.length === 0 ? (
+              <Card shadow="sm" p="xl" style={{ textAlign: 'center' }}>
+                <IconUsers size={48} color="var(--mantine-color-gray-5)" />
+                <Title order={4} mt="md" color="dimmed">
+                  {t('invitations:manager.noSharedTitle')}
+                </Title>
+                <Text color="dimmed" mb="lg">
+                  {t('invitations:manager.noSharedDescription')}
+                </Text>
+              </Card>
+            ) : viewMode === 'table' ? (
+              <Paper shadow="sm" radius="md" withBorder>
+                <ResponsiveTable
+                  persistKey="family-history-shared"
+                  data={flattenedSharedConditions}
+                  disableEdit={isViewOnly}
+                  disableDelete={isViewOnly}
+                  disableActionsTooltip={viewOnlyTooltip}
+                  columns={[
+                    {
+                      header: t(
+                        'familyHistory.table.familyMember',
+                        'Family Member'
+                      ),
+                      accessor: 'familyMemberName',
+                      priority: 'high',
+                      width: 150,
+                    },
+                    {
+                      header: t('shared:labels.relationship', 'Relationship'),
+                      accessor: 'relationship',
+                      priority: 'high',
+                      width: 120,
+                    },
+                    {
+                      header: t('shared:labels.condition', 'Condition'),
+                      accessor: 'condition_name',
+                      priority: 'high',
+                      width: 200,
+                    },
+                    {
+                      header: t('shared:labels.type', 'Type'),
+                      accessor: 'condition_type',
+                      priority: 'medium',
+                      width: 120,
+                    },
+                    {
+                      header: t('shared:fields.severity', 'Severity'),
+                      accessor: 'severity',
+                      priority: 'medium',
+                      width: 100,
+                    },
+                    {
+                      header: t(
+                        'familyHistory.table.diagnosisAge',
+                        'Diagnosis Age'
+                      ),
+                      accessor: 'diagnosis_age',
+                      priority: 'low',
+                      width: 120,
+                    },
+                    {
+                      header: t('shared:fields.status', 'Status'),
+                      accessor: 'status',
+                      priority: 'low',
+                      width: 100,
+                    },
+                    {
+                      header: t('familyHistory.table.sharedBy', 'Shared By'),
+                      accessor: 'shared_by',
+                      priority: 'medium',
+                      width: 150,
+                    },
+                  ]}
+                  patientData={currentPatient}
+                  tableName={t(
+                    'familyHistory.sharedTableName',
+                    'Shared Family History'
+                  )}
+                  onView={row =>
+                    handleViewFamilyMember({ id: row.familyMemberId })
+                  }
+                  onEdit={_row => {
+                    notifications.show({
+                      title: t(
+                        'familyHistory.notifications.cannotEdit',
+                        'Cannot Edit'
+                      ),
+                      message: t(
+                        'familyHistory.notifications.cannotEditShared',
+                        'You cannot edit shared family history records'
+                      ),
+                      color: 'orange',
+                      icon: <IconX size="1rem" />,
+                    });
+                  }}
+                  onDelete={() => {
+                    notifications.show({
+                      title: t(
+                        'familyHistory.notifications.cannotDelete',
+                        'Cannot Delete'
+                      ),
+                      message: t(
+                        'familyHistory.notifications.cannotDeleteShared',
+                        'You cannot delete shared family history records'
+                      ),
+                      color: 'orange',
+                      icon: <IconX size="1rem" />,
+                    });
+                  }}
+                  formatters={{
+                    relationship: value => value?.replace('_', ' ') || '-',
+                    condition_name: value =>
+                      value ||
+                      t('familyHistory.table.noConditions', 'No conditions'),
+                    condition_type: value => value?.replace('_', ' ') || '-',
+                    severity: value => value || '-',
+                    diagnosis_age: value =>
+                      value
+                        ? t('familyHistory.table.yearsOld', '{{age}} years', {
+                            age: value,
+                          })
+                        : '-',
+                    status: value => value || '-',
+                    shared_by: (value, row) =>
+                      row.shared_by?.name ||
+                      t('shared:labels.unknown', 'Unknown'),
+                  }}
+                  dataType="medical"
+                  responsive={responsive}
+                />
+              </Paper>
+            ) : (
+              <Stack spacing="xl">
+                {/* Group shared family members by relationship */}
+                {groupedSharedFamilyMembers.map(group => (
+                  <div key={group.relationship}>
+                    <Group mb="md">
+                      <Title order={4} color="blue">
+                        {group.relationship}
+                      </Title>
+                      <Badge variant="light" size="sm">
+                        {group.members.length}
+                      </Badge>
+                    </Group>
 
-        // Family Condition Form Props
-        conditionFormOpen={showConditionModal}
-        onConditionFormClose={
-          viewingFamilyMemberId
-            ? handleConditionCancelFromView
-            : handleConditionCancel
-        }
-        conditionFormTitle={
-          editingCondition
-            ? t('familyHistory.form.editConditionForMember', 'Edit Condition for {{name}}', { name: selectedFamilyMember?.name })
-            : t('familyHistory.form.addConditionForMember', 'Add Condition for {{name}}', { name: selectedFamilyMember?.name })
-        }
-        editingCondition={editingCondition}
-        conditionFormData={conditionFormData}
-        onConditionInputChange={handleConditionInputChange}
-        onConditionSubmit={handleConditionSubmit}
-        conditionFormLoading={loading}
-        selectedFamilyMember={selectedFamilyMember}
-      />
+                    <AnimatedCardGrid
+                      items={group.members}
+                      columns={{ base: 12, sm: 6, md: 4 }}
+                      keyExtractor={item => `shared-${item.family_member.id}`}
+                      renderCard={item => {
+                        const member = {
+                          ...item.family_member,
+                          is_shared: true,
+                          shared_by: item.share_details?.shared_by,
+                          shared_at: item.share_details?.shared_at,
+                          sharing_note: item.share_details?.sharing_note,
+                        };
 
-      {/* Family Member View Modal */}
-      <FamilyHistoryViewModal
-        isOpen={!!viewingFamilyMemberId}
-        onClose={handleCloseViewModal}
-        member={viewingFamilyMember}
-        onEdit={handleEditMember}
-        onAddCondition={handleAddConditionFromView}
-        onEditCondition={handleEditConditionFromView}
-        onDeleteCondition={handleDeleteCondition}
-        onError={setError}
-        disableEdit={isViewOnly}
-        disableEditTooltip={viewOnlyTooltip}
-      />
+                        return (
+                          <FamilyHistoryCard
+                            member={member}
+                            onView={handleViewFamilyMember}
+                            onEdit={handleEditMember}
+                            onDelete={handleDeleteMember}
+                            onAddCondition={handleAddCondition}
+                            onEditCondition={handleEditCondition}
+                            onDeleteCondition={handleDeleteCondition}
+                            onShare={handleShareMember}
+                            disableActions={isViewOnly}
+                            disableActionsTooltip={viewOnlyTooltip}
+                            expandedMembers={{
+                              has: id => expandedMembers.has(`shared-${id}`),
+                            }}
+                            onToggleExpanded={id => {
+                              const memberId = `shared-${id}`;
+                              setExpandedMembers(prev => {
+                                const newSet = new Set(prev);
+                                if (newSet.has(memberId)) {
+                                  newSet.delete(memberId);
+                                } else {
+                                  newSet.add(memberId);
+                                }
+                                return newSet;
+                              });
+                            }}
+                            bulkSelectionMode={false}
+                            isSelected={false}
+                            onBulkToggle={() => {}}
+                            onError={setError}
+                          />
+                        );
+                      }}
+                    />
+                  </div>
+                ))}
+              </Stack>
+            )}
+          </Tabs.Panel>
+        </Tabs>
 
-      {/* Invitation Manager Modal */}
-      <InvitationManager
-        opened={invitationManagerOpened}
-        onClose={closeInvitationManager}
-        onUpdate={handleInvitationUpdate}
-      />
+        {/* Family History Forms */}
+        <FamilyHistoryFormWrapper
+          // Family Member Form Props
+          memberFormOpen={showModal}
+          onMemberFormClose={handleCancel}
+          memberFormTitle={
+            editingMember
+              ? t('familyHistory.form.editMemberTitle', 'Edit Family Member')
+              : t('familyHistory.form.addMemberTitle', 'Add Family Member')
+          }
+          editingMember={editingMember}
+          memberFormData={formData}
+          onMemberInputChange={handleInputChange}
+          onMemberSubmit={handleSubmit}
+          memberFormLoading={loading}
+          // Family Condition Form Props
+          conditionFormOpen={showConditionModal}
+          onConditionFormClose={
+            viewingFamilyMemberId
+              ? handleConditionCancelFromView
+              : handleConditionCancel
+          }
+          conditionFormTitle={
+            editingCondition
+              ? t(
+                  'familyHistory.form.editConditionForMember',
+                  'Edit Condition for {{name}}',
+                  { name: selectedFamilyMember?.name }
+                )
+              : t(
+                  'familyHistory.form.addConditionForMember',
+                  'Add Condition for {{name}}',
+                  { name: selectedFamilyMember?.name }
+                )
+          }
+          editingCondition={editingCondition}
+          conditionFormData={conditionFormData}
+          onConditionInputChange={handleConditionInputChange}
+          onConditionSubmit={handleConditionSubmit}
+          conditionFormLoading={loading}
+          selectedFamilyMember={selectedFamilyMember}
+        />
 
-      {/* Family History Sharing Modal */}
-      <FamilyHistorySharingModal
-        opened={sharingModalOpened}
-        onClose={closeSharingModal}
-        familyMember={selectedMemberForSharing}
-        onSuccess={handleSharingSuccess}
-      />
+        {/* Family Member View Modal */}
+        <FamilyHistoryViewModal
+          isOpen={!!viewingFamilyMemberId}
+          onClose={handleCloseViewModal}
+          member={viewingFamilyMember}
+          onEdit={handleEditMember}
+          onAddCondition={handleAddConditionFromView}
+          onEditCondition={handleEditConditionFromView}
+          onDeleteCondition={handleDeleteCondition}
+          onError={setError}
+          disableEdit={isViewOnly}
+          disableEditTooltip={viewOnlyTooltip}
+        />
 
-      {/* Bulk Family History Sharing Modal */}
-      <FamilyHistorySharingModal
-        opened={bulkSharingModalOpened}
-        onClose={closeBulkSharingModal}
-        familyMembers={selectedMembersForBulkSharing
-          .map(id => familyMembers.find(m => m.id === id))
-          .filter(Boolean)}
-        bulkMode={true}
-        onSuccess={handleBulkSharingSuccess}
-      />
+        {/* Invitation Manager Modal */}
+        <InvitationManager
+          opened={invitationManagerOpened}
+          onClose={closeInvitationManager}
+          onUpdate={handleInvitationUpdate}
+        />
+
+        {/* Family History Sharing Modal */}
+        <FamilyHistorySharingModal
+          opened={sharingModalOpened}
+          onClose={closeSharingModal}
+          familyMember={selectedMemberForSharing}
+          onSuccess={handleSharingSuccess}
+        />
+
+        {/* Bulk Family History Sharing Modal */}
+        <FamilyHistorySharingModal
+          opened={bulkSharingModalOpened}
+          onClose={closeBulkSharingModal}
+          familyMembers={selectedMembersForBulkSharing
+            .map(id => familyMembers.find(m => m.id === id))
+            .filter(Boolean)}
+          bulkMode={true}
+          onSuccess={handleBulkSharingSuccess}
+        />
       </Stack>
     </Container>
   );
@@ -1414,5 +1681,5 @@ const FamilyHistory = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(FamilyHistory, {
   injectResponsive: true,
-  displayName: 'ResponsiveFamilyHistory'
+  displayName: 'ResponsiveFamilyHistory',
 });

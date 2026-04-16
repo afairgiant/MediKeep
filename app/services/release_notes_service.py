@@ -24,9 +24,7 @@ class ReleaseNotesService:
     data is returned rather than propagating an error to the caller.
     """
 
-    GITHUB_API_URL = (
-        "https://api.github.com/repos/afairgiant/MediKeep/releases"
-    )
+    GITHUB_API_URL = "https://api.github.com/repos/afairgiant/MediKeep/releases"
     CACHE_TTL_SECONDS = 3600  # 1 hour
 
     def __init__(self) -> None:

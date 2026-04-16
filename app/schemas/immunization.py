@@ -15,7 +15,9 @@ class ImmunizationBase(TaggedEntityMixin):
         ..., min_length=2, max_length=200, description="Name of the vaccine"
     )
     vaccine_trade_name: Optional[str] = Field(
-        None, max_length=200, description="Formal/trade name (e.g., Flublok TRIV 2025-2026 PFS)"
+        None,
+        max_length=200,
+        description="Formal/trade name (e.g., Flublok TRIV 2025-2026 PFS)",
     )
     date_administered: date = Field(
         ..., description="Date when the vaccine was administered"

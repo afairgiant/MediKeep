@@ -1,6 +1,7 @@
 """
 Tests for Component Catalog API endpoint.
 """
+
 import pytest
 from datetime import date
 from fastapi.testclient import TestClient
@@ -38,7 +39,9 @@ class TestComponentCatalogAPI:
         return create_user_token_headers(user_with_patient["user"].username)
 
     @pytest.fixture
-    def lab_result_with_components(self, client, user_with_patient, authenticated_headers):
+    def lab_result_with_components(
+        self, client, user_with_patient, authenticated_headers
+    ):
         """Create a lab result with test components."""
         patient_id = user_with_patient["patient"].id
 
@@ -106,7 +109,11 @@ class TestComponentCatalogAPI:
         return {"lab_result_id": lab_result_id, "patient_id": patient_id}
 
     def test_catalog_returns_aggregated_data(
-        self, client, user_with_patient, authenticated_headers, lab_result_with_components
+        self,
+        client,
+        user_with_patient,
+        authenticated_headers,
+        lab_result_with_components,
     ):
         """Test that catalog endpoint returns grouped test components."""
         patient_id = lab_result_with_components["patient_id"]
@@ -128,7 +135,11 @@ class TestComponentCatalogAPI:
         assert "ALT" in test_names
 
     def test_catalog_includes_trend_test_name(
-        self, client, user_with_patient, authenticated_headers, lab_result_with_components
+        self,
+        client,
+        user_with_patient,
+        authenticated_headers,
+        lab_result_with_components,
     ):
         """Test that each catalog entry includes trend_test_name for trend lookups."""
         patient_id = lab_result_with_components["patient_id"]
@@ -144,7 +155,11 @@ class TestComponentCatalogAPI:
             assert item["trend_test_name"]  # not empty
 
     def test_catalog_sorts_abnormal_first(
-        self, client, user_with_patient, authenticated_headers, lab_result_with_components
+        self,
+        client,
+        user_with_patient,
+        authenticated_headers,
+        lab_result_with_components,
     ):
         """Test that abnormal results appear before normal ones."""
         patient_id = lab_result_with_components["patient_id"]
@@ -161,7 +176,11 @@ class TestComponentCatalogAPI:
         assert items[0]["status"] == "high"
 
     def test_catalog_search_filter(
-        self, client, user_with_patient, authenticated_headers, lab_result_with_components
+        self,
+        client,
+        user_with_patient,
+        authenticated_headers,
+        lab_result_with_components,
     ):
         """Test search filter on test names."""
         patient_id = lab_result_with_components["patient_id"]
@@ -178,7 +197,11 @@ class TestComponentCatalogAPI:
         assert data["items"][0]["test_name"] == "Glucose"
 
     def test_catalog_category_filter(
-        self, client, user_with_patient, authenticated_headers, lab_result_with_components
+        self,
+        client,
+        user_with_patient,
+        authenticated_headers,
+        lab_result_with_components,
     ):
         """Test category filter."""
         patient_id = lab_result_with_components["patient_id"]
@@ -195,7 +218,11 @@ class TestComponentCatalogAPI:
         assert data["items"][0]["test_name"] == "Sodium"
 
     def test_catalog_status_filter(
-        self, client, user_with_patient, authenticated_headers, lab_result_with_components
+        self,
+        client,
+        user_with_patient,
+        authenticated_headers,
+        lab_result_with_components,
     ):
         """Test status filter returns only matching statuses."""
         patient_id = lab_result_with_components["patient_id"]
@@ -238,7 +265,11 @@ class TestComponentCatalogAPI:
         assert response.status_code == 401
 
     def test_catalog_reading_count_with_multiple_lab_results(
-        self, client, user_with_patient, authenticated_headers, lab_result_with_components
+        self,
+        client,
+        user_with_patient,
+        authenticated_headers,
+        lab_result_with_components,
     ):
         """Test that reading_count aggregates across multiple lab results."""
         patient_id = lab_result_with_components["patient_id"]

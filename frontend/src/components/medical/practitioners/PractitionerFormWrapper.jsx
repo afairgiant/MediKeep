@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ActionIcon, Group, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconEdit } from '@tabler/icons-react';
@@ -7,7 +7,10 @@ import BaseMedicalForm from '../BaseMedicalForm';
 import PracticeEditModal from './PracticeEditModal';
 import { practitionerFormFields } from '../../../utils/medicalFormFields';
 import { isValidPhoneNumber } from '../../../utils/phoneUtils';
-import { fetchMedicalSpecialties, clearSpecialtiesCache } from '../../../config/medicalSpecialties';
+import {
+  fetchMedicalSpecialties,
+  clearSpecialtiesCache,
+} from '../../../config/medicalSpecialties';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 
@@ -20,7 +23,7 @@ const PractitionerFormWrapper = ({
   onSubmit,
   editingItem,
   isLoading,
-  statusMessage,
+  statusMessage: _statusMessage,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
@@ -39,13 +42,19 @@ const PractitionerFormWrapper = ({
         setIsLoadingSpecialties(true);
         const specialties = await fetchMedicalSpecialties();
         // Remove the "Other" option as we'll allow custom input directly
-        const filteredSpecialties = specialties.filter(s => s.value !== 'Other');
+        const filteredSpecialties = specialties.filter(
+          s => s.value !== 'Other'
+        );
         setSpecialtyOptions(filteredSpecialties);
       } catch (error) {
-        logger.error('load_specialties_failed', 'Failed to load medical specialties', {
-          component: 'PractitionerFormWrapper',
-          error: error.message
-        });
+        logger.error(
+          'load_specialties_failed',
+          'Failed to load medical specialties',
+          {
+            component: 'PractitionerFormWrapper',
+            error: error.message,
+          }
+        );
       } finally {
         setIsLoadingSpecialties(false);
       }
@@ -94,7 +103,10 @@ const PractitionerFormWrapper = ({
     } catch {
       notifications.show({
         title: t('shared:labels.error'),
-        message: t('common:practitioners.editPracticeError', 'Failed to load practice for editing'),
+        message: t(
+          'common:practitioners.editPracticeError',
+          'Failed to load practice for editing'
+        ),
         color: 'red',
       });
     }
@@ -143,47 +155,70 @@ const PractitionerFormWrapper = ({
   };
 
   // Input change handler with phone validation and inline practice creation
-  const handleInputChange = async (e) => {
+  const handleInputChange = async e => {
     const { name, value } = e.target;
 
     // Clear any existing error for this field
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({
         ...prev,
-        [name]: null
+        [name]: null,
       }));
     }
 
     // Handle phone number validation
-    if (name === 'phone_number' && value.trim() !== '' && !isValidPhoneNumber(value)) {
+    if (
+      name === 'phone_number' &&
+      value.trim() !== '' &&
+      !isValidPhoneNumber(value)
+    ) {
       setFieldErrors(prev => ({
         ...prev,
-        [name]: t('medical:form.invalidPhoneDigits', 'Please enter a valid phone number')
+        [name]: t(
+          'medical:form.invalidPhoneDigits',
+          'Please enter a valid phone number'
+        ),
       }));
     }
 
     // Handle inline practice creation when user types a new practice name in the combobox
-    if (name === 'practice_id' && value && !practiceOptions.find(opt => opt.value === value)) {
+    if (
+      name === 'practice_id' &&
+      value &&
+      !practiceOptions.find(opt => opt.value === value)
+    ) {
       // User typed a new practice name - create it inline
       try {
         const newPractice = await apiService.createPractice({ name: value });
         if (newPractice && newPractice.id) {
-          const newOption = { value: String(newPractice.id), label: newPractice.name };
+          const newOption = {
+            value: String(newPractice.id),
+            label: newPractice.name,
+          };
           setPracticeOptions(prev => [...prev, newOption]);
           // Set the practice_id to the new ID
-          onInputChange({ target: { name: 'practice_id', value: String(newPractice.id) } });
+          onInputChange({
+            target: { name: 'practice_id', value: String(newPractice.id) },
+          });
           return;
         }
       } catch (error) {
-        logger.error('create_practice_inline_failed', 'Failed to create practice inline', {
-          component: 'PractitionerFormWrapper',
-          error: error.message,
-        });
+        logger.error(
+          'create_practice_inline_failed',
+          'Failed to create practice inline',
+          {
+            component: 'PractitionerFormWrapper',
+            error: error.message,
+          }
+        );
         // Revert practice_id to empty so it doesn't store a raw text string
         onInputChange({ target: { name: 'practice_id', value: '' } });
         notifications.show({
           title: t('shared:labels.error'),
-          message: t('common:practitioners.createPracticeError', 'Failed to create practice. Please try again.'),
+          message: t(
+            'common:practitioners.createPracticeError',
+            'Failed to create practice. Please try again.'
+          ),
           color: 'red',
         });
         return;
@@ -199,7 +234,7 @@ const PractitionerFormWrapper = ({
       : null;
 
   // Custom validation for submit - prevent submission if website is invalid
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     if (websiteError) {
       e.preventDefault();
       return;
@@ -209,7 +244,11 @@ const PractitionerFormWrapper = ({
 
   // Custom content for website validation error
   const customContent = websiteError ? (
-    <Text size="sm" c="red" style={{ marginTop: '-16px', marginBottom: '16px' }}>
+    <Text
+      size="sm"
+      c="red"
+      style={{ marginTop: '-16px', marginBottom: '16px' }}
+    >
       {websiteError}
     </Text>
   ) : null;
@@ -222,11 +261,19 @@ const PractitionerFormWrapper = ({
         size="xs"
         variant="subtle"
         onClick={handleEditPractice}
-        title={t('common:practitioners.viewModal.editPractice', 'Edit Practice')}
+        title={t(
+          'common:practitioners.viewModal.editPractice',
+          'Edit Practice'
+        )}
       >
         <IconEdit size={14} />
       </ActionIcon>
-      <Text size="xs" c="dimmed" style={{ cursor: 'pointer' }} onClick={handleEditPractice}>
+      <Text
+        size="xs"
+        c="dimmed"
+        style={{ cursor: 'pointer' }}
+        onClick={handleEditPractice}
+      >
         {t('common:practitioners.viewModal.editPractice', 'Edit Practice')}
       </Text>
     </Group>
@@ -253,7 +300,10 @@ const PractitionerFormWrapper = ({
 
       <PracticeEditModal
         isOpen={showPracticeEdit}
-        onClose={() => { setShowPracticeEdit(false); setPracticeEditData(null); }}
+        onClose={() => {
+          setShowPracticeEdit(false);
+          setPracticeEditData(null);
+        }}
         practiceData={practiceEditData}
         onSaved={handlePracticeEditSaved}
       />

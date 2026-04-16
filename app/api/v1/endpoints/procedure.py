@@ -4,9 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    handle_database_errors
-)
+from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
@@ -68,7 +66,9 @@ def read_procedures(
     practitioner_id: Optional[int] = Query(None),
     status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -91,7 +91,7 @@ def read_procedures(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
         elif status:
             procedures = procedure.get_by_status(
@@ -117,7 +117,7 @@ def read_procedures(
             "read",
             "Procedure",
             patient_id=target_patient_id,
-            count=len(procedures)
+            count=len(procedures),
         )
 
         return procedures
@@ -138,10 +138,18 @@ def read_procedure(
     """
     with handle_database_errors(request=request):
         procedure_obj = procedure.get_with_relations(
-            db=db, record_id=procedure_id, relations=["patient", "practitioner", "condition"]
+            db=db,
+            record_id=procedure_id,
+            relations=["patient", "practitioner", "condition"],
         )
         handle_not_found(procedure_obj, "Procedure", request)
-        verify_patient_ownership(procedure_obj, current_user_patient_id, "procedure", db=db, current_user=current_user)
+        verify_patient_ownership(
+            procedure_obj,
+            current_user_patient_id,
+            "procedure",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -150,7 +158,7 @@ def read_procedure(
             "read",
             "Procedure",
             record_id=procedure_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return procedure_obj
@@ -232,7 +240,7 @@ def get_scheduled_procedures(
             "Procedure",
             patient_id=patient_id,
             count=len(procedures),
-            status="scheduled"
+            status="scheduled",
         )
 
         return procedures
@@ -261,7 +269,7 @@ def get_recent_procedures(
             "Procedure",
             patient_id=patient_id,
             count=len(procedures),
-            days=days
+            days=days,
         )
 
         return procedures
@@ -294,7 +302,7 @@ def get_patient_procedures(
             "read",
             "Procedure",
             patient_id=patient_id,
-            count=len(procedures)
+            count=len(procedures),
         )
 
         return procedures

@@ -1,11 +1,11 @@
 /**
  * ResponsiveNavigation - Main navigation wrapper component
  * Renders appropriate navigation based on current breakpoint
- * 
+ *
  * Following PR #3: Navigation & Layout System specifications
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useResponsive } from '../../hooks/useResponsive';
 // import DesktopSidebar from './DesktopSidebar';
 import DesktopSidebarSimple from './DesktopSidebarSimple'; // Temporarily using simple version for Firefox debugging
@@ -21,18 +21,19 @@ const ResponsiveNavigation = ({
   onLogout,
   isOpen: controlledIsOpen = undefined, // Support controlled state
   onToggle: controlledOnToggle = undefined, // Support controlled toggle
-  className = ''
+  className = '',
 }) => {
   const responsive = useResponsive();
-  
+
   // Use internal state only if not controlled
   const [internalOpen, setInternalOpen] = useState(() => {
     // Default state based on breakpoint
     return responsive.isAbove('md') || responsive.matches('lg'); // Open by default on desktop
   });
-  
+
   // Use controlled state if provided, otherwise use internal state
-  const navigationOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalOpen;
+  const navigationOpen =
+    controlledIsOpen !== undefined ? controlledIsOpen : internalOpen;
 
   // Handle navigation toggle
   const handleToggle = useCallback(() => {
@@ -53,17 +54,20 @@ const ResponsiveNavigation = ({
   }, [controlledOnToggle]);
 
   // Handle navigation link click
-  const handleLinkClick = useCallback((path) => {
-    // Close navigation on mobile/tablet after link click
-    if (responsive.isBelow('lg')) {
-      if (controlledOnToggle) {
-        // If controlled, let parent handle the state
-        controlledOnToggle();
-      } else {
-        setInternalOpen(false);
+  const handleLinkClick = useCallback(
+    _path => {
+      // Close navigation on mobile/tablet after link click
+      if (responsive.isBelow('lg')) {
+        if (controlledOnToggle) {
+          // If controlled, let parent handle the state
+          controlledOnToggle();
+        } else {
+          setInternalOpen(false);
+        }
       }
-    }
-  }, [responsive.isBelow, controlledOnToggle]);
+    },
+    [responsive, controlledOnToggle]
+  );
 
   // Default admin menu items if none provided
   const defaultMenuItems = [
@@ -74,9 +78,9 @@ const ResponsiveNavigation = ({
           path: '/admin',
           label: 'Overview',
           icon: '📊',
-          exact: true
-        }
-      ]
+          exact: true,
+        },
+      ],
     },
     {
       section: 'Data Management',
@@ -84,14 +88,14 @@ const ResponsiveNavigation = ({
         {
           path: '/admin/data-models',
           label: 'Data Models',
-          icon: '🗄️'
+          icon: '🗄️',
         },
         {
           path: '/admin/models/user',
           label: 'Manage Users',
-          icon: '👥'
-        }
-      ]
+          icon: '👥',
+        },
+      ],
     },
     {
       section: 'Tools',
@@ -99,27 +103,30 @@ const ResponsiveNavigation = ({
         {
           path: '/admin/backup',
           label: 'Backup Management',
-          icon: '💾'
+          icon: '💾',
         },
         {
           path: '/admin/system-health',
           label: 'System Health',
-          icon: '🔍'
+          icon: '🔍',
         },
         {
           path: '/admin/settings',
           label: 'Settings',
-          icon: '⚙️'
-        }
-      ]
-    }
+          icon: '⚙️',
+        },
+      ],
+    },
   ];
 
   // Menu items to use - check multiple prop names for compatibility
-  const activeMenuItems = menuItems.length > 0 ? menuItems : 
-                          navigationItems.length > 0 ? navigationItems : 
-                          defaultMenuItems;
-  
+  const activeMenuItems =
+    menuItems.length > 0
+      ? menuItems
+      : navigationItems.length > 0
+        ? navigationItems
+        : defaultMenuItems;
+
   // User info to use - support both prop names
   const activeUserInfo = userInfo || user;
 
@@ -135,7 +142,7 @@ const ResponsiveNavigation = ({
     user: activeUserInfo, // Provide both for compatibility
     navigationItems: activeMenuItems, // Provide both for compatibility
     onLogout,
-    className
+    className,
   };
 
   // Render appropriate navigation based on breakpoint

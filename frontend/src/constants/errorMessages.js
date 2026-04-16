@@ -21,30 +21,42 @@
 export const ERROR_MESSAGES = {
   // Upload-related errors
   UPLOAD_FAILED: 'Failed to upload file. Please try again.',
-  CONNECTION_ERROR: 'Connection error. Please check your network and try again.',
+  CONNECTION_ERROR:
+    'Connection error. Please check your network and try again.',
   FILE_TOO_LARGE: 'File size exceeds the maximum limit.',
   INVALID_FILE_TYPE: 'File type not supported.',
-  PAPERLESS_UNAVAILABLE: 'Document management service is currently unavailable.',
-  FORM_SUBMISSION_FAILED: 'Failed to save form. Please check your input and try again.',
+  PAPERLESS_UNAVAILABLE:
+    'Document management service is currently unavailable.',
+  FORM_SUBMISSION_FAILED:
+    'Failed to save form. Please check your input and try again.',
   PERMISSION_DENIED: 'You do not have permission to perform this action.',
   SERVER_ERROR: 'Server error occurred. Please try again later.',
   TIMEOUT_ERROR: 'Request timed out. Please try again.',
   VALIDATION_ERROR: 'Please check your input and try again.',
   NETWORK_UNAVAILABLE: 'Network unavailable. Please check your connection.',
-  FILE_PROCESSING_FAILED: 'Failed to process file. Please try a different file.',
+  FILE_PROCESSING_FAILED:
+    'Failed to process file. Please try a different file.',
   DUPLICATE_FILE: 'This file has already been uploaded.',
   STORAGE_FULL: 'Storage limit reached. Please free up space and try again.',
-  
+
   // Paperless-specific errors
-  PAPERLESS_NOT_ENABLED: 'Paperless integration is not enabled. Please enable it in Settings.',
-  PAPERLESS_CONFIG_INCOMPLETE: 'Paperless configuration is incomplete. Please check your settings.',
-  PAPERLESS_UPLOAD_FAILED: 'Failed to upload to Paperless document management system.',
-  PAPERLESS_CONNECTION_FAILED: 'Unable to connect to Paperless service. Please check configuration.',
-  PAPERLESS_AUTH_FAILED: 'Authentication failed with Paperless service. Please check credentials.',
-  PAPERLESS_DUPLICATE_DOCUMENT: 'This document already exists in Paperless. Identical documents cannot be uploaded twice.',
-  PAPERLESS_TASK_FAILED: 'Document upload to Paperless failed. Please try again or contact support.',
-  PAPERLESS_TASK_TIMEOUT: 'Document processing timed out. The document may still be processing in Paperless.',
-  
+  PAPERLESS_NOT_ENABLED:
+    'Paperless integration is not enabled. Please enable it in Settings.',
+  PAPERLESS_CONFIG_INCOMPLETE:
+    'Paperless configuration is incomplete. Please check your settings.',
+  PAPERLESS_UPLOAD_FAILED:
+    'Failed to upload to Paperless document management system.',
+  PAPERLESS_CONNECTION_FAILED:
+    'Unable to connect to Paperless service. Please check configuration.',
+  PAPERLESS_AUTH_FAILED:
+    'Authentication failed with Paperless service. Please check credentials.',
+  PAPERLESS_DUPLICATE_DOCUMENT:
+    'This document already exists in Paperless. Identical documents cannot be uploaded twice.',
+  PAPERLESS_TASK_FAILED:
+    'Document upload to Paperless failed. Please try again or contact support.',
+  PAPERLESS_TASK_TIMEOUT:
+    'Document processing timed out. The document may still be processing in Paperless.',
+
   // Form submission errors
   REQUIRED_FIELD_MISSING: 'Please fill in all required fields.',
   INVALID_DATE: 'Please enter a valid date.',
@@ -52,23 +64,27 @@ export const ERROR_MESSAGES = {
   INVALID_PHONE: 'Please enter a valid phone number.',
   PATIENT_NOT_SELECTED: 'Please select a patient.',
   ENTITY_NOT_FOUND: 'The requested item could not be found.',
-  
+
   // File management errors
   FILE_DELETE_FAILED: 'Failed to delete file. Please try again.',
   FILE_DOWNLOAD_FAILED: 'Failed to download file. Please try again.',
   FILE_VIEW_FAILED: 'Failed to open file for viewing. Please try again.',
   FILE_NOT_FOUND: 'File not found.',
-  
+
   // Batch upload errors
-  BATCH_UPLOAD_FAILED: 'Some files failed to upload. Please check individual file errors.',
-  PARTIAL_UPLOAD_SUCCESS: 'Upload completed with some errors. Please review failed files.',
-  ALL_UPLOADS_FAILED: 'All file uploads failed. Please check your connection and try again.',
-  
+  BATCH_UPLOAD_FAILED:
+    'Some files failed to upload. Please check individual file errors.',
+  PARTIAL_UPLOAD_SUCCESS:
+    'Upload completed with some errors. Please review failed files.',
+  ALL_UPLOADS_FAILED:
+    'All file uploads failed. Please check your connection and try again.',
+
   // General application errors
   UNKNOWN_ERROR: 'An unexpected error occurred. Please try again.',
   SESSION_EXPIRED: 'Your session has expired. Please log in again.',
   RATE_LIMIT_EXCEEDED: 'Too many requests. Please wait a moment and try again.',
-  MAINTENANCE_MODE: 'The system is currently under maintenance. Please try again later.',
+  MAINTENANCE_MODE:
+    'The system is currently under maintenance. Please try again later.',
 };
 
 // Error categories for better organization and handling
@@ -88,7 +104,7 @@ export const ERROR_TYPE_MAPPING = {
   [ERROR_MESSAGES.NETWORK_UNAVAILABLE]: ERROR_CATEGORIES.NETWORK,
   [ERROR_MESSAGES.TIMEOUT_ERROR]: ERROR_CATEGORIES.NETWORK,
   [ERROR_MESSAGES.PAPERLESS_CONNECTION_FAILED]: ERROR_CATEGORIES.NETWORK,
-  
+
   [ERROR_MESSAGES.VALIDATION_ERROR]: ERROR_CATEGORIES.VALIDATION,
   [ERROR_MESSAGES.REQUIRED_FIELD_MISSING]: ERROR_CATEGORIES.VALIDATION,
   [ERROR_MESSAGES.INVALID_DATE]: ERROR_CATEGORIES.VALIDATION,
@@ -96,16 +112,16 @@ export const ERROR_TYPE_MAPPING = {
   [ERROR_MESSAGES.INVALID_PHONE]: ERROR_CATEGORIES.VALIDATION,
   [ERROR_MESSAGES.INVALID_FILE_TYPE]: ERROR_CATEGORIES.VALIDATION,
   [ERROR_MESSAGES.FILE_TOO_LARGE]: ERROR_CATEGORIES.VALIDATION,
-  
+
   [ERROR_MESSAGES.SERVER_ERROR]: ERROR_CATEGORIES.SYSTEM,
   [ERROR_MESSAGES.UNKNOWN_ERROR]: ERROR_CATEGORIES.SYSTEM,
   [ERROR_MESSAGES.SESSION_EXPIRED]: ERROR_CATEGORIES.SYSTEM,
   [ERROR_MESSAGES.MAINTENANCE_MODE]: ERROR_CATEGORIES.SYSTEM,
   [ERROR_MESSAGES.STORAGE_FULL]: ERROR_CATEGORIES.SYSTEM,
-  
+
   [ERROR_MESSAGES.PERMISSION_DENIED]: ERROR_CATEGORIES.PERMISSION,
   [ERROR_MESSAGES.PAPERLESS_AUTH_FAILED]: ERROR_CATEGORIES.PERMISSION,
-  
+
   [ERROR_MESSAGES.UPLOAD_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_PROCESSING_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.DUPLICATE_FILE]: ERROR_CATEGORIES.FILE,
@@ -113,7 +129,7 @@ export const ERROR_TYPE_MAPPING = {
   [ERROR_MESSAGES.FILE_DOWNLOAD_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_VIEW_FAILED]: ERROR_CATEGORIES.FILE,
   [ERROR_MESSAGES.FILE_NOT_FOUND]: ERROR_CATEGORIES.FILE,
-  
+
   [ERROR_MESSAGES.PAPERLESS_UNAVAILABLE]: ERROR_CATEGORIES.PAPERLESS,
   [ERROR_MESSAGES.PAPERLESS_NOT_ENABLED]: ERROR_CATEGORIES.PAPERLESS,
   [ERROR_MESSAGES.PAPERLESS_CONFIG_INCOMPLETE]: ERROR_CATEGORIES.PAPERLESS,
@@ -121,7 +137,7 @@ export const ERROR_TYPE_MAPPING = {
   [ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT]: ERROR_CATEGORIES.PAPERLESS,
   [ERROR_MESSAGES.PAPERLESS_TASK_FAILED]: ERROR_CATEGORIES.PAPERLESS,
   [ERROR_MESSAGES.PAPERLESS_TASK_TIMEOUT]: ERROR_CATEGORIES.PAPERLESS,
-  
+
   [ERROR_MESSAGES.FORM_SUBMISSION_FAILED]: ERROR_CATEGORIES.FORM,
   [ERROR_MESSAGES.PATIENT_NOT_SELECTED]: ERROR_CATEGORIES.FORM,
   [ERROR_MESSAGES.ENTITY_NOT_FOUND]: ERROR_CATEGORIES.FORM,
@@ -133,7 +149,8 @@ export const SUCCESS_MESSAGES = {
   UPLOAD_MULTIPLE_SUCCESS: 'All files uploaded successfully!',
   FORM_SAVED: 'Form saved successfully!',
   FILE_DELETED: 'File deleted successfully.',
-  PAPERLESS_SYNC_SUCCESS: 'Successfully synced with Paperless document management.',
+  PAPERLESS_SYNC_SUCCESS:
+    'Successfully synced with Paperless document management.',
   BATCH_UPLOAD_SUCCESS: 'All files uploaded successfully!',
 };
 
@@ -154,7 +171,7 @@ export const WARNING_MESSAGES = {
  * @param {string} errorMessage - The error message
  * @returns {string} The error category
  */
-export const getErrorCategory = (errorMessage) => {
+export const getErrorCategory = errorMessage => {
   return ERROR_TYPE_MAPPING[errorMessage] || ERROR_CATEGORIES.SYSTEM;
 };
 
@@ -166,7 +183,7 @@ export const getErrorCategory = (errorMessage) => {
  */
 export const formatErrorWithContext = (baseMessage, context) => {
   if (!context) return baseMessage;
-  
+
   // Add context to specific error types
   switch (baseMessage) {
     case ERROR_MESSAGES.UPLOAD_FAILED:
@@ -189,46 +206,53 @@ export const formatErrorWithContext = (baseMessage, context) => {
  * @param {string} originalError - The original error message
  * @returns {string} Enhanced error message
  */
-export const enhancePaperlessError = (originalError) => {
+export const enhancePaperlessError = originalError => {
   const lowerError = originalError.toLowerCase();
-  
+
   if (lowerError.includes('not enabled')) {
     return ERROR_MESSAGES.PAPERLESS_NOT_ENABLED;
   }
-  
+
   if (lowerError.includes('configuration is incomplete')) {
     return ERROR_MESSAGES.PAPERLESS_CONFIG_INCOMPLETE;
   }
-  
-  if (lowerError.includes('appears to be a duplicate') || 
-      lowerError.includes('already exists') ||
-      lowerError.includes('duplicate') ||
-      lowerError.includes('hash collision') ||
-      lowerError.includes('identical document')) {
+
+  if (
+    lowerError.includes('appears to be a duplicate') ||
+    lowerError.includes('already exists') ||
+    lowerError.includes('duplicate') ||
+    lowerError.includes('hash collision') ||
+    lowerError.includes('identical document')
+  ) {
     return ERROR_MESSAGES.PAPERLESS_DUPLICATE_DOCUMENT;
   }
-  
+
   if (lowerError.includes('task') && lowerError.includes('timeout')) {
     return ERROR_MESSAGES.PAPERLESS_TASK_TIMEOUT;
   }
-  
+
   if (lowerError.includes('task') && lowerError.includes('failed')) {
     return ERROR_MESSAGES.PAPERLESS_TASK_FAILED;
   }
-  
-  if (lowerError.includes('failed to upload to paperless') || 
-      lowerError.includes('paperless upload failed')) {
+
+  if (
+    lowerError.includes('failed to upload to paperless') ||
+    lowerError.includes('paperless upload failed')
+  ) {
     return ERROR_MESSAGES.PAPERLESS_UPLOAD_FAILED;
   }
-  
+
   if (lowerError.includes('connection') || lowerError.includes('connect')) {
     return ERROR_MESSAGES.PAPERLESS_CONNECTION_FAILED;
   }
-  
-  if (lowerError.includes('authentication') || lowerError.includes('credentials')) {
+
+  if (
+    lowerError.includes('authentication') ||
+    lowerError.includes('credentials')
+  ) {
     return ERROR_MESSAGES.PAPERLESS_AUTH_FAILED;
   }
-  
+
   // If no specific match, return generic Paperless error
   return ERROR_MESSAGES.PAPERLESS_UNAVAILABLE;
 };
@@ -238,7 +262,7 @@ export const enhancePaperlessError = (originalError) => {
  * @param {Error|string} error - The error object or message
  * @returns {string|null} Error code or null if not found
  */
-const extractErrorCode = (error) => {
+const extractErrorCode = error => {
   // Check if error object has error_code property
   if (error && typeof error === 'object' && error.error_code) {
     return error.error_code;
@@ -268,8 +292,10 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
   // Handles multiple error code formats to prevent double-processing:
   // - (Error: CODE) or (Error:CODE) - with or without space
   // - Error: CODE or Error:CODE - at start of message
-  if (/\(Error:\s*[A-Z0-9-]+\)/.test(errorMessage) ||
-      /^Error:\s*[A-Z]+-\d+/.test(errorMessage)) {
+  if (
+    /\(Error:\s*[A-Z0-9-]+\)/.test(errorMessage) ||
+    /^Error:\s*[A-Z]+-\d+/.test(errorMessage)
+  ) {
     return errorMessage;
   }
 
@@ -280,56 +306,77 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
   // Updated regex to handle single-letter fields, acronyms (ID, URL), and CamelCase
   // Supports: "X: error", "ID: error", "StartDate: error", "Patient_ID: error"
   // Excludes: "Error:", "Warning:", "Info:", "Debug:" (common log prefixes)
-  if (/^[A-Z][a-zA-Z0-9_\s]*:/.test(errorMessage) &&
-      !errorMessage.startsWith('Error:') &&
-      !errorMessage.startsWith('Warning:') &&
-      !errorMessage.startsWith('Info:') &&
-      !errorMessage.startsWith('Debug:')) {
+  if (
+    /^[A-Z][a-zA-Z0-9_\s]*:/.test(errorMessage) &&
+    !errorMessage.startsWith('Error:') &&
+    !errorMessage.startsWith('Warning:') &&
+    !errorMessage.startsWith('Info:') &&
+    !errorMessage.startsWith('Debug:')
+  ) {
     friendlyMessage = errorMessage;
     errorCode = errorCode || 'VAL-422'; // Validation errors use backend code
   }
   // Network-related errors
-  else if (lowerError.includes('network') || lowerError.includes('connection')) {
+  else if (
+    lowerError.includes('network') ||
+    lowerError.includes('connection')
+  ) {
     friendlyMessage = ERROR_MESSAGES.CONNECTION_ERROR;
     errorCode = errorCode || 'NET-503';
-  }
-  else if (lowerError.includes('timeout')) {
+  } else if (lowerError.includes('timeout')) {
     friendlyMessage = ERROR_MESSAGES.TIMEOUT_ERROR;
     errorCode = errorCode || 'NET-504';
   }
   // File-related errors
-  else if (lowerError.includes('file size') || lowerError.includes('too large')) {
+  else if (
+    lowerError.includes('file size') ||
+    lowerError.includes('too large')
+  ) {
     friendlyMessage = ERROR_MESSAGES.FILE_TOO_LARGE;
     errorCode = errorCode || 'FILE-413';
-  }
-  else if (lowerError.includes('file type') || lowerError.includes('not supported')) {
+  } else if (
+    lowerError.includes('file type') ||
+    lowerError.includes('not supported')
+  ) {
     friendlyMessage = ERROR_MESSAGES.INVALID_FILE_TYPE;
     errorCode = errorCode || 'FILE-400';
   }
   // Generic duplicate check (exclude Paperless-specific duplicates)
-  else if (lowerError.includes('duplicate') && !lowerError.includes('paperless')) {
+  else if (
+    lowerError.includes('duplicate') &&
+    !lowerError.includes('paperless')
+  ) {
     friendlyMessage = ERROR_MESSAGES.DUPLICATE_FILE;
     errorCode = errorCode || 'FILE-409';
   }
   // Login errors (check EARLY before permission check to avoid conflicts)
   // This ensures "Access denied" during login shows "Incorrect credentials" not "Permission denied"
-  else if (operation === 'login' &&
-           (lowerError.includes('incorrect') ||
-            lowerError.includes('invalid') ||
-            lowerError.includes('login failed') ||
-            lowerError.includes('unauthorized') ||
-            lowerError.includes('denied') ||
-            lowerError.includes('401'))) {
+  else if (
+    operation === 'login' &&
+    (lowerError.includes('incorrect') ||
+      lowerError.includes('invalid') ||
+      lowerError.includes('login failed') ||
+      lowerError.includes('unauthorized') ||
+      lowerError.includes('denied') ||
+      lowerError.includes('401'))
+  ) {
     friendlyMessage = 'Incorrect credentials.';
     errorCode = errorCode || 'AUTH-401';
   }
   // Permission errors (skip login operation - already handled above)
-  else if (lowerError.includes('permission') || lowerError.includes('unauthorized') || lowerError.includes('denied')) {
+  else if (
+    lowerError.includes('permission') ||
+    lowerError.includes('unauthorized') ||
+    lowerError.includes('denied')
+  ) {
     friendlyMessage = ERROR_MESSAGES.PERMISSION_DENIED;
     errorCode = errorCode || 'PERM-403';
   }
   // Server errors
-  else if (lowerError.includes('server error') || lowerError.includes('internal server')) {
+  else if (
+    lowerError.includes('server error') ||
+    lowerError.includes('internal server')
+  ) {
     friendlyMessage = ERROR_MESSAGES.SERVER_ERROR;
     errorCode = errorCode || 'ISE-500';
   }
@@ -339,7 +386,10 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
     errorCode = errorCode || 'PAPER-503';
   }
   // Validation errors
-  else if (lowerError.includes('validation') || lowerError.includes('invalid')) {
+  else if (
+    lowerError.includes('validation') ||
+    lowerError.includes('invalid')
+  ) {
     friendlyMessage = ERROR_MESSAGES.VALIDATION_ERROR;
     errorCode = errorCode || 'VAL-422';
   }
@@ -390,7 +440,7 @@ export const getUserFriendlyError = (error, operation = 'operation') => {
  * @param {string} category - Error category
  * @returns {string} Icon name for the category
  */
-export const getErrorIcon = (category) => {
+export const getErrorIcon = category => {
   switch (category) {
     case ERROR_CATEGORIES.NETWORK:
       return 'IconWifiOff';

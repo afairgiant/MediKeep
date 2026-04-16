@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   FileInput,
   Avatar,
   Group,
-  ActionIcon,
   Stack,
   Text,
   Button,
   Box,
 } from '@mantine/core';
-import { IconCamera, IconX, IconTrash } from '@tabler/icons-react';
+import { IconCamera, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { notifications } from '@mantine/notifications';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import logger from '../../services/logger';
-import { ALLOWED_PHOTO_TYPES, PHOTO_MAX_SIZE, ALLOWED_PHOTO_TYPES_DISPLAY } from '../../constants/fileTypes';
+import {
+  ALLOWED_PHOTO_TYPES,
+  PHOTO_MAX_SIZE,
+  ALLOWED_PHOTO_TYPES_DISPLAY,
+} from '../../constants/fileTypes';
 
 const PatientPhotoUpload = ({
   patientId,
@@ -46,7 +49,9 @@ const PatientPhotoUpload = ({
     try {
       // Validate file size client-side
       if (file.size > PHOTO_MAX_SIZE) {
-        throw new Error(`Photo must be less than ${Math.floor(PHOTO_MAX_SIZE / (1024 * 1024))}MB`);
+        throw new Error(
+          `Photo must be less than ${Math.floor(PHOTO_MAX_SIZE / (1024 * 1024))}MB`
+        );
       }
 
       // Validate file type

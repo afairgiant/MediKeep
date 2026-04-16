@@ -46,10 +46,10 @@ interface SearchPreviewPanelProps {
   item: SearchResultRow | null;
   query?: string;
   selectedTags?: string[];
-  getTagColor: (tag: string) => string | null;
-  onTagClick: (tag: string) => void;
-  formatDate: (date: string) => string;
-  onOpenFullRecord: (route: string) => void;
+  getTagColor: (_tag: string) => string | null;
+  onTagClick: (_tag: string) => void;
+  formatDate: (_date: string) => string;
+  onOpenFullRecord: (_route: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -93,7 +93,12 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
       title={
         <Group gap="sm">
           {EntityIcon && item && (
-            <ThemeIcon size="md" color={item.color} variant="light" aria-hidden="true">
+            <ThemeIcon
+              size="md"
+              color={item.color}
+              variant="light"
+              aria-hidden="true"
+            >
               <EntityIcon size={16} />
             </ThemeIcon>
           )}
@@ -181,7 +186,7 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
             </Text>
             {Array.isArray(item.tags) && item.tags.length > 0 ? (
               <Group gap={6} wrap="wrap">
-                {item.tags.map((tag) => (
+                {item.tags.map(tag => (
                   <ClickableTagBadge
                     key={tag}
                     tag={tag}
@@ -215,7 +220,11 @@ const SearchPreviewPanel: React.FC<SearchPreviewPanelProps> = ({
           </Paper>
         </Stack>
       ) : (
-        <Stack align="center" justify="center" style={{ height: '100%', minHeight: 200 }}>
+        <Stack
+          align="center"
+          justify="center"
+          style={{ height: '100%', minHeight: 200 }}
+        >
           <Text size="sm" c="dimmed">
             {t('search.previewRecord')}
           </Text>

@@ -45,12 +45,12 @@ class DomainEvent:
         class_name = self.__class__.__name__
 
         # Remove 'Event' suffix if present
-        if class_name.endswith('Event'):
+        if class_name.endswith("Event"):
             class_name = class_name[:-5]
 
         # Convert PascalCase to snake_case
         # Insert underscore before uppercase letters (except first)
-        snake_case = re.sub(r'(?<!^)(?=[A-Z])', '_', class_name).lower()
+        snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", class_name).lower()
 
         return snake_case
 
@@ -68,11 +68,11 @@ class DomainEvent:
         data = asdict(self)
 
         # Remove internal fields that aren't useful in notifications
-        data.pop('event_id', None)
+        data.pop("event_id", None)
 
         # Format datetime for readability if present
-        if 'occurred_at' in data and isinstance(self.occurred_at, datetime):
-            data['occurred_at'] = self.occurred_at.isoformat()
+        if "occurred_at" in data and isinstance(self.occurred_at, datetime):
+            data["occurred_at"] = self.occurred_at.isoformat()
 
         # Remove None values to keep templates clean
         return {k: v for k, v in data.items() if v is not None}

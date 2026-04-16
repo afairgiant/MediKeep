@@ -3,7 +3,6 @@
  * Displays search results with clickable items that navigate to record details
  */
 
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Paper,
@@ -12,12 +11,11 @@ import {
   Text,
   Avatar,
   Loader,
-  Alert,
   ActionIcon,
   Badge,
   Divider,
   ScrollArea,
-  Button
+  Button,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -31,7 +29,7 @@ import {
   IconSearch,
   IconX,
   IconChevronRight,
-  IconExternalLink
+  IconExternalLink,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -42,7 +40,7 @@ const SearchResults = ({
   loading = false,
   query = '',
   onClose,
-  visible = false
+  visible = false,
 }) => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
@@ -57,10 +55,10 @@ const SearchResults = ({
     IconMedicalCross,
     IconHeartbeat,
     IconCalendarEvent,
-    IconFlask
+    IconFlask,
   };
 
-  const handleResultClick = (result) => {
+  const handleResultClick = result => {
     const route = searchService.getRecordRoute(result.type, result.id);
     // Navigate to the record page with view query parameter to open the modal
     navigate(route);
@@ -85,7 +83,7 @@ const SearchResults = ({
         maxHeight: '400px',
         overflow: 'hidden',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
       }}
     >
       {/* Header */}
@@ -95,11 +93,14 @@ const SearchResults = ({
           <Text size="sm" fw={500}>
             {t('search.title')}
             {query && (
-              <Text span c="dimmed"> {t('search.forQuery', { query })}</Text>
+              <Text span c="dimmed">
+                {' '}
+                {t('search.forQuery', { query })}
+              </Text>
             )}
           </Text>
         </Group>
-        
+
         {onClose && (
           <ActionIcon variant="subtle" size="sm" onClick={onClose}>
             <IconX size="1rem" />
@@ -110,44 +111,50 @@ const SearchResults = ({
       <Divider />
 
       {/* Results */}
-      <ScrollArea 
-        style={{ 
+      <ScrollArea
+        style={{
           flex: '1 1 auto',
           minHeight: 0,
           maxHeight: '300px',
-          overflow: 'auto'
+          overflow: 'auto',
         }}
         scrollbarSize={8}
-        type="scroll">
+        type="scroll"
+      >
         {loading ? (
           <Group justify="center" p="xl">
             <Loader size="sm" />
-            <Text size="sm" c="dimmed">Searching...</Text>
+            <Text size="sm" c="dimmed">
+              Searching...
+            </Text>
           </Group>
         ) : results.length === 0 ? (
           <Stack align="center" p="xl">
             <Text size="sm" c="dimmed" ta="center">
-              {query ? 'No medical records found matching your search.' : 'Enter at least 2 characters to search.'}
+              {query
+                ? 'No medical records found matching your search.'
+                : 'Enter at least 2 characters to search.'}
             </Text>
           </Stack>
         ) : (
           <Stack gap={0}>
             {results.map((result, index) => {
               const IconComponent = iconMap[result.icon] || IconSearch;
-              
+
               return (
                 <Paper
                   key={`${result.type}-${result.id}-${index}`}
                   p="md"
-                  style={{ 
+                  style={{
                     borderRadius: 0,
                     cursor: 'pointer',
-                    transition: 'background-color 0.1s ease'
+                    transition: 'background-color 0.1s ease',
                   }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                  onMouseEnter={e => {
+                    e.target.style.backgroundColor =
+                      'var(--color-bg-secondary)';
                   }}
-                  onMouseLeave={(e) => {
+                  onMouseLeave={e => {
                     e.target.style.backgroundColor = 'transparent';
                   }}
                   onClick={() => handleResultClick(result)}
@@ -168,19 +175,19 @@ const SearchResults = ({
                           {result.type.replace('_', ' ')}
                         </Badge>
                       </Group>
-                      
+
                       {result.subtitle && (
                         <Text size="xs" c="dimmed" mb={2} truncate>
                           {result.subtitle}
                         </Text>
                       )}
-                      
+
                       {result.description && (
                         <Text size="xs" c="dimmed" lineClamp={1}>
                           {result.description}
                         </Text>
                       )}
-                      
+
                       <Text size="xs" c="dimmed" mt={4}>
                         {formatDateTime(result.date)}
                       </Text>

@@ -3,8 +3,7 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import React from 'react';
-import render, { screen, fireEvent, waitFor } from '../../../test-utils/render';
+import render, { screen, fireEvent } from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import MantineConditionForm from '../MantineConditionForm';
@@ -13,12 +12,23 @@ import MantineConditionForm from '../MantineConditionForm';
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, description, ...props }) => (
     <div>
-      <label htmlFor={`date-${label}`}>{label}{required && ' *'}</label>
+      <label htmlFor={`date-${label}`}>
+        {label}
+        {required && ' *'}
+      </label>
       <input
         id={`date-${label}`}
         type="date"
-        value={value ? (value instanceof Date ? value.toISOString().split('T')[0] : value) : ''}
-        onChange={(e) => onChange(e.target.value ? new Date(e.target.value) : null)}
+        value={
+          value
+            ? value instanceof Date
+              ? value.toISOString().split('T')[0]
+              : value
+            : ''
+        }
+        onChange={e =>
+          onChange(e.target.value ? new Date(e.target.value) : null)
+        }
         data-testid={`date-${label.toLowerCase().replace(/\s+/g, '-')}`}
         {...props}
       />
@@ -65,8 +75,12 @@ describe('MantineConditionForm', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
       // Title and button both show 'Add New Condition'
-      expect(screen.getAllByText('Add New Condition').length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByLabelText(/medical:conditions\.diagnosis\.label/)).toBeInTheDocument();
+      expect(
+        screen.getAllByText('Add New Condition').length
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getByLabelText(/medical:conditions\.diagnosis\.label/)
+      ).toBeInTheDocument();
     });
 
     test('does not render when closed', () => {
@@ -79,20 +93,36 @@ describe('MantineConditionForm', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
       // Required field - diagnosis
-      expect(screen.getByLabelText(/medical:conditions\.diagnosis\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:conditions\.diagnosis\.label/)
+      ).toBeInTheDocument();
 
       // Select fields
-      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
-      expect(screen.getAllByLabelText(/shared:fields\.severity/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.status/).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.severity/).length
+      ).toBeGreaterThan(0);
 
       // Date fields
-      expect(screen.getByLabelText(/shared:fields\.onsetDate/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:labels\.endDate/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.onsetDate/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:labels\.endDate/)
+      ).toBeInTheDocument();
 
       // Medical coding fields
-      expect(screen.getByLabelText(/shared:fields\.icd10Code/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:fields\.snomedCode/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/shared:fields\.codeDescription/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.icd10Code/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.snomedCode/)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/shared:fields\.codeDescription/)
+      ).toBeInTheDocument();
 
       // Notes
       expect(screen.getByLabelText(/shared:tabs\.notes/)).toBeInTheDocument();
@@ -118,8 +148,12 @@ describe('MantineConditionForm', () => {
     test('handles diagnosis input changes', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const diagnosisInput = screen.getByLabelText(/medical:conditions\.diagnosis\.label/);
-      fireEvent.change(diagnosisInput, { target: { value: 'Essential Hypertension' } });
+      const diagnosisInput = screen.getByLabelText(
+        /medical:conditions\.diagnosis\.label/
+      );
+      fireEvent.change(diagnosisInput, {
+        target: { value: 'Essential Hypertension' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -130,7 +164,9 @@ describe('MantineConditionForm', () => {
       const statusInput = getSelectInput(/shared:fields\.status/);
       await userEvent.click(statusInput);
 
-      const activeOption = await screen.findByText('Active - Currently being treated');
+      const activeOption = await screen.findByText(
+        'Active - Currently being treated'
+      );
       await userEvent.click(activeOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -144,7 +180,9 @@ describe('MantineConditionForm', () => {
       const severityInput = getSelectInput(/shared:fields\.severity/);
       await userEvent.click(severityInput);
 
-      const moderateOption = await screen.findByText('Moderate - Noticeable impact');
+      const moderateOption = await screen.findByText(
+        'Moderate - Noticeable impact'
+      );
       await userEvent.click(moderateOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -181,7 +219,9 @@ describe('MantineConditionForm', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
       const notesTextarea = screen.getByLabelText(/shared:tabs\.notes/);
-      fireEvent.change(notesTextarea, { target: { value: 'Patient shows mild symptoms' } });
+      fireEvent.change(notesTextarea, {
+        target: { value: 'Patient shows mild symptoms' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -240,8 +280,12 @@ describe('MantineConditionForm', () => {
       expect(screen.getByDisplayValue('Type 2 Diabetes')).toBeInTheDocument();
       expect(screen.getByDisplayValue('E11')).toBeInTheDocument();
       expect(screen.getByDisplayValue('44054006')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Type 2 diabetes mellitus')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Well controlled with medication')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Type 2 diabetes mellitus')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Well controlled with medication')
+      ).toBeInTheDocument();
     });
 
     test('handles date formatting correctly', () => {
@@ -271,11 +315,21 @@ describe('MantineConditionForm', () => {
       const statusInput = getSelectInput(/shared:fields\.status/);
       await userEvent.click(statusInput);
 
-      expect(screen.getByText('Active - Currently being treated')).toBeInTheDocument();
-      expect(screen.getByText('Inactive - Not currently treated')).toBeInTheDocument();
-      expect(screen.getByText('Resolved - No longer an issue')).toBeInTheDocument();
-      expect(screen.getByText('Chronic - Long-term condition')).toBeInTheDocument();
-      expect(screen.getByText('Recurrence - Condition has returned')).toBeInTheDocument();
+      expect(
+        screen.getByText('Active - Currently being treated')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Inactive - Not currently treated')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Resolved - No longer an issue')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Chronic - Long-term condition')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Recurrence - Condition has returned')
+      ).toBeInTheDocument();
     });
 
     test('displays correct severity options', async () => {
@@ -285,9 +339,15 @@ describe('MantineConditionForm', () => {
       await userEvent.click(severityInput);
 
       expect(screen.getByText('Mild - Minor impact')).toBeInTheDocument();
-      expect(screen.getByText('Moderate - Noticeable impact')).toBeInTheDocument();
-      expect(screen.getByText('Severe - Significant impact')).toBeInTheDocument();
-      expect(screen.getByText('Critical - Life-threatening')).toBeInTheDocument();
+      expect(
+        screen.getByText('Moderate - Noticeable impact')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Severe - Significant impact')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Critical - Life-threatening')
+      ).toBeInTheDocument();
     });
   });
 
@@ -313,8 +373,12 @@ describe('MantineConditionForm', () => {
     test('links code description with codes', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const codeDescriptionInput = screen.getByLabelText(/shared:fields\.codeDescription/);
-      fireEvent.change(codeDescriptionInput, { target: { value: 'Essential hypertension' } });
+      const codeDescriptionInput = screen.getByLabelText(
+        /shared:fields\.codeDescription/
+      );
+      fireEvent.change(codeDescriptionInput, {
+        target: { value: 'Essential hypertension' },
+      });
 
       expect(defaultProps.onInputChange).toHaveBeenCalled();
     });
@@ -348,19 +412,31 @@ describe('MantineConditionForm', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
       // Check required field exists
-      expect(screen.getByLabelText(/medical:conditions\.diagnosis\.label/)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/medical:conditions\.diagnosis\.label/)
+      ).toBeInTheDocument();
 
       // Check optional select fields exist
-      expect(screen.getAllByLabelText(/shared:fields\.status/).length).toBeGreaterThan(0);
-      expect(screen.getAllByLabelText(/shared:fields\.severity/).length).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.status/).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByLabelText(/shared:fields\.severity/).length
+      ).toBeGreaterThan(0);
     });
 
     test('has proper descriptions for medical fields', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      expect(screen.getByText('medical:conditions.diagnosis.description')).toBeInTheDocument();
-      expect(screen.getByText('medical:conditions.status.description')).toBeInTheDocument();
-      expect(screen.getByText('medical:conditions.severity.description')).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:conditions.diagnosis.description')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:conditions.status.description')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('medical:conditions.severity.description')
+      ).toBeInTheDocument();
     });
 
     test('has proper button attributes', () => {
@@ -379,7 +455,9 @@ describe('MantineConditionForm', () => {
     test('shows required field indicator for diagnosis', () => {
       render(<MantineConditionForm {...defaultProps} />);
 
-      const diagnosisInput = screen.getByLabelText(/medical:conditions\.diagnosis\.label/);
+      const diagnosisInput = screen.getByLabelText(
+        /medical:conditions\.diagnosis\.label/
+      );
       expect(diagnosisInput).toBeInTheDocument();
     });
 
@@ -409,11 +487,20 @@ describe('MantineConditionForm', () => {
         notes: 'Stage 3 CKD, requires regular monitoring',
       };
 
-      render(<MantineConditionForm {...defaultProps} formData={chronicConditionData} />);
+      render(
+        <MantineConditionForm
+          {...defaultProps}
+          formData={chronicConditionData}
+        />
+      );
 
-      expect(screen.getByDisplayValue('Chronic Kidney Disease')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Chronic Kidney Disease')
+      ).toBeInTheDocument();
       expect(screen.getByDisplayValue('N18.3')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Stage 3 CKD, requires regular monitoring')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('Stage 3 CKD, requires regular monitoring')
+      ).toBeInTheDocument();
     });
 
     test('handles resolved conditions with end dates', () => {
@@ -426,7 +513,12 @@ describe('MantineConditionForm', () => {
         notes: 'Resolved with antibiotic treatment',
       };
 
-      render(<MantineConditionForm {...defaultProps} formData={resolvedConditionData} />);
+      render(
+        <MantineConditionForm
+          {...defaultProps}
+          formData={resolvedConditionData}
+        />
+      );
 
       const endDateInput = screen.getByTestId('date-shared:labels.enddate');
       expect(endDateInput).toHaveValue('2024-01-25');

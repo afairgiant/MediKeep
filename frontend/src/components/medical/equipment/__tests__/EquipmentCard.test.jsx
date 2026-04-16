@@ -1,6 +1,5 @@
 import { vi } from 'vitest';
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MantineProvider } from '@mantine/core';
 import '@testing-library/jest-dom';
@@ -9,7 +8,14 @@ import EquipmentCard from '../EquipmentCard';
 // Mock useDateFormat hook
 vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatLongDate: (date) => date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null,
+    formatLongDate: date =>
+      date
+        ? new Date(date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : null,
   }),
 }));
 
@@ -75,7 +81,9 @@ describe('EquipmentCard', () => {
       );
 
       // Equipment type appears in multiple places (subtitle and badge)
-      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(
+        1
+      );
     });
 
     test('renders manufacturer badge', () => {
@@ -136,7 +144,9 @@ describe('EquipmentCard', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getByText('Use nightly for sleep apnea')).toBeInTheDocument();
+      expect(
+        screen.getByText('Use nightly for sleep apnea')
+      ).toBeInTheDocument();
     });
   });
 
@@ -149,7 +159,9 @@ describe('EquipmentCard', () => {
       );
 
       // Equipment type may appear multiple times
-      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('CPAP Machine').length).toBeGreaterThanOrEqual(
+        1
+      );
     });
 
     test('renders nebulizer equipment correctly', () => {
@@ -197,7 +209,9 @@ describe('EquipmentCard', () => {
         </MantineWrapper>
       );
 
-      expect(screen.getAllByText('Glucose Monitor').length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByText('Glucose Monitor').length
+      ).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -257,7 +271,10 @@ describe('EquipmentCard', () => {
       // BaseMedicalCard may use action icons or buttons - look for any clickable element
       const buttons = screen.getAllByRole('button');
       // Find the view button (usually first or has view text/icon)
-      const viewButton = buttons.find(btn => btn.getAttribute('aria-label')?.toLowerCase().includes('view')) || buttons[0];
+      const viewButton =
+        buttons.find(btn =>
+          btn.getAttribute('aria-label')?.toLowerCase().includes('view')
+        ) || buttons[0];
       if (viewButton) {
         await user.click(viewButton);
         expect(defaultProps.onView).toHaveBeenCalled();
@@ -274,7 +291,9 @@ describe('EquipmentCard', () => {
       );
 
       const buttons = screen.getAllByRole('button');
-      const editButton = buttons.find(btn => btn.getAttribute('aria-label')?.toLowerCase().includes('edit'));
+      const editButton = buttons.find(btn =>
+        btn.getAttribute('aria-label')?.toLowerCase().includes('edit')
+      );
       if (editButton) {
         await user.click(editButton);
         expect(defaultProps.onEdit).toHaveBeenCalled();
@@ -291,7 +310,9 @@ describe('EquipmentCard', () => {
       );
 
       const buttons = screen.getAllByRole('button');
-      const deleteButton = buttons.find(btn => btn.getAttribute('aria-label')?.toLowerCase().includes('delete'));
+      const deleteButton = buttons.find(btn =>
+        btn.getAttribute('aria-label')?.toLowerCase().includes('delete')
+      );
       if (deleteButton) {
         await user.click(deleteButton);
         expect(defaultProps.onDelete).toHaveBeenCalledWith(1);
@@ -389,7 +410,7 @@ describe('EquipmentCard', () => {
       // This test ensures the component handles errors gracefully
       const invalidEquipment = null;
 
-      const { container } = render(
+      render(
         <MantineWrapper>
           <EquipmentCard {...defaultProps} equipment={invalidEquipment} />
         </MantineWrapper>

@@ -6,11 +6,8 @@
  */
 import logger from '../services/logger';
 
-
 import {
   getRelationship,
-  getRelationshipEndpoint,
-  getRelationshipFilterKey,
   ENTITY_TYPES,
 } from './entityRelationships';
 
@@ -53,9 +50,7 @@ export const buildNavigationUrl = (
 ) => {
   const relationship = getRelationship(sourceEntity, relationshipKey);
   if (!relationship) {
-    logger.warn(
-      `No relationship found for ${sourceEntity}.${relationshipKey}`
-    );
+    logger.warn(`No relationship found for ${sourceEntity}.${relationshipKey}`);
     return null;
   }
 
@@ -81,7 +76,7 @@ export const buildNavigationUrl = (
 
   // Get the correct route path for the target entity type
   const routePath = ENTITY_TO_ROUTE_MAP[targetEntity] || `/${targetEntity}`;
-  
+
   return `${routePath}?${searchParams.toString()}`;
 };
 
@@ -123,7 +118,7 @@ export const buildEntityUrl = (entityType, entityId, options = {}) => {
 
   // Get the correct route path for the entity type
   const routePath = ENTITY_TO_ROUTE_MAP[entityType] || `/${entityType}`;
-  
+
   // Handle special cases for specific entity IDs
   if (entityId && entityId !== 'undefined') {
     if (entityType === ENTITY_TYPES.PATIENT && entityId === 'me') {
@@ -199,7 +194,7 @@ export const isNavigationFromRelated = (
  * @param {string} currentEntity - The current entity type
  * @returns {Object|null} Source entity info or null if not found
  */
-export const getSourceEntityFromNavigation = (searchParams, currentEntity) => {
+export const getSourceEntityFromNavigation = (_searchParams, _currentEntity) => {
   // This would need to be implemented based on your specific navigation patterns
   // For now, return null as this is a more complex reverse lookup
   return null;

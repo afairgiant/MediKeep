@@ -34,9 +34,9 @@ class APIClient {
       if (this.safeActivityTracker && this.safeActivityTracker.cleanup) {
         this.safeActivityTracker.cleanup();
       }
-      
+
       this.activityTracker = activityTracker;
-      
+
       // Create race-safe wrapper if tracker is provided
       if (activityTracker) {
         this.safeActivityTracker = createRaceSafeWrapper(
@@ -49,9 +49,9 @@ class APIClient {
     } catch (error) {
       secureActivityLogger.logActivityError(error, {
         component: 'APIClient',
-        action: 'setActivityTracker'
+        action: 'setActivityTracker',
       });
-      
+
       // Fallback to unsafe tracker to maintain functionality
       this.activityTracker = activityTracker;
       this.safeActivityTracker = null;
@@ -86,7 +86,7 @@ class APIClient {
         logger.warn('Authentication failed for non-critical endpoint', {
           category: 'api_client_warning',
           endpoint: originalConfig.url,
-          message: 'Session expired or invalid (401)'
+          message: 'Session expired or invalid (401)',
         });
       }
 
@@ -119,7 +119,7 @@ class APIClient {
           category: 'api_request_debug',
           url: url,
           method: processedConfig.method || 'GET',
-          has_params: !!processedConfig.params
+          has_params: !!processedConfig.params,
         });
       }
 
@@ -189,9 +189,9 @@ class APIClient {
             component: 'APIClient',
             action: 'trackActivity',
             method: processedConfig.method || 'GET',
-            status: response.status
+            status: response.status,
           });
-          
+
           // Fallback to direct tracker if race-safe wrapper fails
           if (this.activityTracker) {
             try {
@@ -203,7 +203,7 @@ class APIClient {
               // Log but don't throw - activity tracking failure shouldn't break API calls
               secureActivityLogger.logActivityError(fallbackError, {
                 component: 'APIClient',
-                action: 'trackActivity_fallback'
+                action: 'trackActivity_fallback',
               });
             }
           }
@@ -218,7 +218,7 @@ class APIClient {
         } catch (error) {
           secureActivityLogger.logActivityError(error, {
             component: 'APIClient',
-            action: 'trackActivity_direct'
+            action: 'trackActivity_direct',
           });
         }
       }
@@ -235,7 +235,7 @@ class APIClient {
         error: error.message,
         status: error.status,
         url: processedConfig.url,
-        method: processedConfig.method || 'GET'
+        method: processedConfig.method || 'GET',
       });
       throw error;
     }

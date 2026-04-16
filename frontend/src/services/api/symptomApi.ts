@@ -19,12 +19,20 @@ export type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
 /**
  * Impact level for symptom occurrence
  */
-export type ImpactLevel = 'no_impact' | 'mild' | 'moderate' | 'severe' | 'debilitating';
+export type ImpactLevel =
+  | 'no_impact'
+  | 'mild'
+  | 'moderate'
+  | 'severe'
+  | 'debilitating';
 
 /**
  * Medication relationship types
  */
-export type MedicationRelationshipType = 'side_effect' | 'helped_by' | 'related_to';
+export type MedicationRelationshipType =
+  | 'side_effect'
+  | 'helped_by'
+  | 'related_to';
 
 // ============================================================================
 // Symptom (Parent Definition) Interfaces
@@ -282,7 +290,10 @@ class SymptomApiService extends BaseApiService {
   /**
    * Get all symptom definitions with optional filters
    */
-  async getAll(filters: SymptomFilters = {}, signal?: AbortSignal): Promise<Symptom[]> {
+  async getAll(
+    filters: SymptomFilters = {},
+    signal?: AbortSignal
+  ): Promise<Symptom[]> {
     try {
       logger.debug('symptom_api_get_all', {
         filters,
@@ -291,7 +302,8 @@ class SymptomApiService extends BaseApiService {
 
       const params: Record<string, string> = {};
 
-      if (filters.patient_id !== undefined) params.patient_id = String(filters.patient_id);
+      if (filters.patient_id !== undefined)
+        params.patient_id = String(filters.patient_id);
       if (filters.status) params.status = filters.status;
       if (filters.search) params.search = filters.search;
       if (filters.skip !== undefined) params.skip = String(filters.skip);
@@ -376,7 +388,11 @@ class SymptomApiService extends BaseApiService {
   /**
    * Update an existing symptom definition
    */
-  async update(id: number, data: SymptomUpdate, signal?: AbortSignal): Promise<Symptom> {
+  async update(
+    id: number,
+    data: SymptomUpdate,
+    signal?: AbortSignal
+  ): Promise<Symptom> {
     try {
       logger.info('symptom_api_update', {
         id,
@@ -447,7 +463,9 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      const response = await this.post(`/${symptomId}/occurrences`, data, { signal });
+      const response = await this.post(`/${symptomId}/occurrences`, data, {
+        signal,
+      });
 
       logger.info('symptom_api_create_occurrence_success', {
         symptomId,
@@ -488,7 +506,10 @@ class SymptomApiService extends BaseApiService {
         limit: String(limit),
       };
 
-      const response = await this.get(`/${symptomId}/occurrences`, { params, signal });
+      const response = await this.get(`/${symptomId}/occurrences`, {
+        params,
+        signal,
+      });
 
       logger.info('symptom_api_get_occurrences_success', {
         symptomId,
@@ -522,7 +543,10 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      const response = await this.get(`/${symptomId}/occurrences/${occurrenceId}`, { signal });
+      const response = await this.get(
+        `/${symptomId}/occurrences/${occurrenceId}`,
+        { signal }
+      );
 
       logger.info('symptom_api_get_occurrence_success', {
         symptomId,
@@ -559,7 +583,11 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      const response = await this.put(`/${symptomId}/occurrences/${occurrenceId}`, data, { signal });
+      const response = await this.put(
+        `/${symptomId}/occurrences/${occurrenceId}`,
+        data,
+        { signal }
+      );
 
       logger.info('symptom_api_update_occurrence_success', {
         symptomId,
@@ -594,7 +622,9 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      await super.delete(`/${symptomId}/occurrences/${occurrenceId}`, { signal });
+      await super.delete(`/${symptomId}/occurrences/${occurrenceId}`, {
+        signal,
+      });
 
       logger.info('symptom_api_delete_occurrence_success', {
         symptomId,
@@ -619,7 +649,10 @@ class SymptomApiService extends BaseApiService {
   /**
    * Get symptom statistics for a patient
    */
-  async getStats(patientId?: number, signal?: AbortSignal): Promise<SymptomStats> {
+  async getStats(
+    patientId?: number,
+    signal?: AbortSignal
+  ): Promise<SymptomStats> {
     try {
       logger.debug('symptom_api_get_stats', {
         patientId,
@@ -715,7 +748,9 @@ class SymptomApiService extends BaseApiService {
         relevance_note: relevanceNote,
       };
 
-      const response = await this.post(`/${symptomId}/link-condition`, data, { signal });
+      const response = await this.post(`/${symptomId}/link-condition`, data, {
+        signal,
+      });
 
       logger.info('symptom_api_link_condition_success', {
         symptomId,
@@ -738,7 +773,10 @@ class SymptomApiService extends BaseApiService {
   /**
    * Get all conditions linked to a symptom
    */
-  async getLinkedConditions(symptomId: number, signal?: AbortSignal): Promise<SymptomCondition[]> {
+  async getLinkedConditions(
+    symptomId: number,
+    signal?: AbortSignal
+  ): Promise<SymptomCondition[]> {
     try {
       logger.debug('symptom_api_get_linked_conditions', {
         symptomId,
@@ -779,7 +817,9 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      await super.delete(`/${symptomId}/unlink-condition/${conditionId}`, { signal });
+      await super.delete(`/${symptomId}/unlink-condition/${conditionId}`, {
+        signal,
+      });
 
       logger.info('symptom_api_unlink_condition_success', {
         symptomId,
@@ -822,7 +862,9 @@ class SymptomApiService extends BaseApiService {
         relevance_note: relevanceNote,
       };
 
-      const response = await this.post(`/${symptomId}/link-medication`, data, { signal });
+      const response = await this.post(`/${symptomId}/link-medication`, data, {
+        signal,
+      });
 
       logger.info('symptom_api_link_medication_success', {
         symptomId,
@@ -845,7 +887,10 @@ class SymptomApiService extends BaseApiService {
   /**
    * Get all medications linked to a symptom
    */
-  async getLinkedMedications(symptomId: number, signal?: AbortSignal): Promise<SymptomMedication[]> {
+  async getLinkedMedications(
+    symptomId: number,
+    signal?: AbortSignal
+  ): Promise<SymptomMedication[]> {
     try {
       logger.debug('symptom_api_get_linked_medications', {
         symptomId,
@@ -886,7 +931,9 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      await super.delete(`/${symptomId}/unlink-medication/${medicationId}`, { signal });
+      await super.delete(`/${symptomId}/unlink-medication/${medicationId}`, {
+        signal,
+      });
 
       logger.info('symptom_api_unlink_medication_success', {
         symptomId,
@@ -926,7 +973,9 @@ class SymptomApiService extends BaseApiService {
         relevance_note: relevanceNote,
       };
 
-      const response = await this.post(`/${symptomId}/link-treatment`, data, { signal });
+      const response = await this.post(`/${symptomId}/link-treatment`, data, {
+        signal,
+      });
 
       logger.info('symptom_api_link_treatment_success', {
         symptomId,
@@ -949,7 +998,10 @@ class SymptomApiService extends BaseApiService {
   /**
    * Get all treatments linked to a symptom
    */
-  async getLinkedTreatments(symptomId: number, signal?: AbortSignal): Promise<SymptomTreatment[]> {
+  async getLinkedTreatments(
+    symptomId: number,
+    signal?: AbortSignal
+  ): Promise<SymptomTreatment[]> {
     try {
       logger.debug('symptom_api_get_linked_treatments', {
         symptomId,
@@ -990,7 +1042,9 @@ class SymptomApiService extends BaseApiService {
         component: 'SymptomApiService',
       });
 
-      await super.delete(`/${symptomId}/unlink-treatment/${treatmentId}`, { signal });
+      await super.delete(`/${symptomId}/unlink-treatment/${treatmentId}`, {
+        signal,
+      });
 
       logger.info('symptom_api_unlink_treatment_success', {
         symptomId,
@@ -1007,7 +1061,6 @@ class SymptomApiService extends BaseApiService {
       throw error;
     }
   }
-
 }
 
 // Export singleton instance

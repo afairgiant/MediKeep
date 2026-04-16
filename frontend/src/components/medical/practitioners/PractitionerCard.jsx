@@ -1,5 +1,4 @@
-import React from 'react';
-import { Badge, Text, Group, Anchor } from '@mantine/core';
+import { Text, Group, Anchor } from '@mantine/core';
 import { IconStethoscope, IconUser, IconStar } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import logger from '../../../services/logger';
@@ -10,12 +9,12 @@ const PractitionerCard = ({
   onEdit,
   onDelete,
   onView,
-  navigate,
-  onError
+  navigate: _navigate,
+  onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
 
-  const handleError = (error) => {
+  const handleError = error => {
     logger.error('practitioner_card_error', {
       message: 'Error in PractitionerCard',
       practitionerId: practitioner?.id,
@@ -28,7 +27,7 @@ const PractitionerCard = ({
     }
   };
 
-  const getSpecialtyColor = (specialty) => {
+  const getSpecialtyColor = specialty => {
     const specialtyColors = {
       Cardiology: 'red',
       'Emergency Medicine': 'red',
@@ -44,7 +43,7 @@ const PractitionerCard = ({
     return specialtyColors[specialty] || 'gray';
   };
 
-  const getSpecialtyIcon = (specialty) => {
+  const getSpecialtyIcon = specialty => {
     const specialtyIcons = {
       Cardiology: IconStethoscope,
       'Emergency Medicine': IconStethoscope,
@@ -64,9 +63,9 @@ const PractitionerCard = ({
     // Generate badges based on practitioner properties
     const badges = [];
     if (practitioner.specialty) {
-      badges.push({ 
-        label: practitioner.specialty, 
-        color: getSpecialtyColor(practitioner.specialty) 
+      badges.push({
+        label: practitioner.specialty,
+        color: getSpecialtyColor(practitioner.specialty),
       });
     }
 
@@ -75,45 +74,49 @@ const PractitionerCard = ({
       {
         label: t('shared:labels.practice', 'Practice'),
         value: practitioner.practice_name || practitioner.practice,
-        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value || t('shared:labels.notSpecified', 'Not specified'),
       },
       {
         label: t('shared:labels.phone', 'Phone'),
         value: practitioner.phone_number,
-        render: (value) => value || t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value || t('shared:labels.notSpecified', 'Not specified'),
       },
       {
         label: t('shared:labels.email', 'Email'),
         value: practitioner.email,
-        render: (value) => value ? (
-          <Anchor
-            href={`mailto:${value}`}
-            size="sm"
-            c="blue"
-          >
-            {value}
-          </Anchor>
-        ) : t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value ? (
+            <Anchor href={`mailto:${value}`} size="sm" c="blue">
+              {value}
+            </Anchor>
+          ) : (
+            t('shared:labels.notSpecified', 'Not specified')
+          ),
       },
       {
         label: t('shared:labels.website', 'Website'),
         value: practitioner.website,
-        render: (value) => value ? (
-          <Anchor
-            href={value}
-            target="_blank"
-            rel="noopener noreferrer"
-            size="sm"
-            c="blue"
-          >
-            {value.replace(/^https?:\/\//, '')}
-          </Anchor>
-        ) : t('shared:labels.notSpecified', 'Not specified')
+        render: value =>
+          value ? (
+            <Anchor
+              href={value}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="sm"
+              c="blue"
+            >
+              {value.replace(/^https?:\/\//, '')}
+            </Anchor>
+          ) : (
+            t('shared:labels.notSpecified', 'Not specified')
+          ),
       },
       {
         label: t('shared:labels.rating', 'Rating'),
         value: practitioner.rating,
-        render: (value) => {
+        render: value => {
           if (value !== null && value !== undefined) {
             return (
               <Group gap="xs">
@@ -129,8 +132,8 @@ const PractitionerCard = ({
             );
           }
           return t('shared:labels.notSpecified', 'Not specified');
-        }
-      }
+        },
+      },
     ];
 
     const SpecialtyIcon = getSpecialtyIcon(practitioner.specialty);

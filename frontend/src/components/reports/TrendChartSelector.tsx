@@ -27,15 +27,31 @@ interface ChartCounts {
 
 interface TrendChartSelectorProps {
   trendCharts: {
-    vital_charts: Array<{ vital_type: string; date_from: string | null; date_to: string | null }>;
-    lab_test_charts: Array<{ test_name: string; date_from: string | null; date_to: string | null }>;
+    vital_charts: Array<{
+      vital_type: string;
+      date_from: string | null;
+      date_to: string | null;
+    }>;
+    lab_test_charts: Array<{
+      test_name: string;
+      date_from: string | null;
+      date_to: string | null;
+    }>;
   };
-  addVitalChart: (vitalType: string) => void;
-  removeVitalChart: (vitalType: string) => void;
-  updateVitalChartDates: (vitalType: string, dateFrom: string | null, dateTo: string | null) => void;
-  addLabTestChart: (testName: string) => void;
-  removeLabTestChart: (testName: string) => void;
-  updateLabTestChartDates: (testName: string, dateFrom: string | null, dateTo: string | null) => void;
+  addVitalChart: (_vitalType: string) => void;
+  removeVitalChart: (_vitalType: string) => void;
+  updateVitalChartDates: (
+    _vitalType: string,
+    _dateFrom: string | null,
+    _dateTo: string | null
+  ) => void;
+  addLabTestChart: (_testName: string) => void;
+  removeLabTestChart: (_testName: string) => void;
+  updateLabTestChartDates: (
+    _testName: string,
+    _dateFrom: string | null,
+    _dateTo: string | null
+  ) => void;
   trendChartCount: number;
 }
 
@@ -66,9 +82,16 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   const [loading, setLoading] = useState(true);
   const today = new Date().toISOString().slice(0, 10);
 
-  const [availableVitals, setAvailableVitals] = useState<AvailableVitalType[]>([]);
-  const [availableLabTests, setAvailableLabTests] = useState<AvailableLabTest[]>([]);
-  const [chartCounts, setChartCounts] = useState<ChartCounts>({ vital_counts: {}, lab_test_counts: {} });
+  const [availableVitals, setAvailableVitals] = useState<AvailableVitalType[]>(
+    []
+  );
+  const [availableLabTests, setAvailableLabTests] = useState<
+    AvailableLabTest[]
+  >([]);
+  const [chartCounts, setChartCounts] = useState<ChartCounts>({
+    vital_counts: {},
+    lab_test_counts: {},
+  });
   const countsAbortRef = useRef<AbortController | null>(null);
 
   const maxReached = trendChartCount >= 10;
@@ -76,24 +99,33 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   // Fetch available data on mount
   useEffect(() => {
     const controller = new AbortController();
-    apiService.getAvailableTrendData(controller.signal)
-      .then((result) => {
+    apiService
+      .getAvailableTrendData(controller.signal)
+      .then(result => {
         if (!controller.signal.aborted && result) {
           setAvailableVitals(result.vital_types || []);
           setAvailableLabTests(result.lab_test_names || []);
-          logger.debug('trend_chart_available_data_loaded', 'Available trend data loaded', {
-            vitalTypeCount: result.vital_types?.length || 0,
-            labTestCount: result.lab_test_names?.length || 0,
-            component: 'TrendChartSelector',
-          });
+          logger.debug(
+            'trend_chart_available_data_loaded',
+            'Available trend data loaded',
+            {
+              vitalTypeCount: result.vital_types?.length || 0,
+              labTestCount: result.lab_test_names?.length || 0,
+              component: 'TrendChartSelector',
+            }
+          );
         }
       })
       .catch((err: Error) => {
         if (err.name !== 'AbortError') {
-          logger.debug('trend_chart_available_data_error', 'Failed to fetch available trend data', {
-            error: err.message,
-            component: 'TrendChartSelector',
-          });
+          logger.debug(
+            'trend_chart_available_data_error',
+            'Failed to fetch available trend data',
+            {
+              error: err.message,
+              component: 'TrendChartSelector',
+            }
+          );
         }
       })
       .finally(() => {
@@ -119,7 +151,8 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
       const controller = new AbortController();
       countsAbortRef.current = controller;
 
-      apiService.getTrendChartCounts(trendCharts, controller.signal)
+      apiService
+        .getTrendChartCounts(trendCharts, controller.signal)
         .then((result: ChartCounts) => {
           if (!controller.signal.aborted) {
             setChartCounts(result);
@@ -127,10 +160,14 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
         })
         .catch((err: Error) => {
           if (err.name !== 'AbortError') {
-            logger.debug('trend_chart_counts_error', 'Failed to fetch chart counts', {
-              error: err.message,
-              component: 'TrendChartSelector',
-            });
+            logger.debug(
+              'trend_chart_counts_error',
+              'Failed to fetch chart counts',
+              {
+                error: err.message,
+                component: 'TrendChartSelector',
+              }
+            );
           }
         });
     }, 300);
@@ -145,8 +182,12 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
 
   const emptyCounts: ChartCounts = { vital_counts: {}, lab_test_counts: {} };
   const effectiveCounts = trendChartCount === 0 ? emptyCounts : chartCounts;
-  const selectedVitalTypes = new Set(trendCharts.vital_charts.map(c => c.vital_type));
-  const selectedLabTestNames = trendCharts.lab_test_charts.map(c => c.test_name);
+  const selectedVitalTypes = new Set(
+    trendCharts.vital_charts.map(c => c.vital_type)
+  );
+  const selectedLabTestNames = trendCharts.lab_test_charts.map(
+    c => c.test_name
+  );
 
   // Deduplicate lab tests by test_name (API may return same name with different units)
   const seenLabTestNames = new Set<string>();
@@ -172,7 +213,9 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
 
   const handleLabTestChange = (selectedValues: string[]) => {
     // Find added items
-    const currentNames = new Set(selectedLabTestNames.map(n => n.toLowerCase()));
+    const currentNames = new Set(
+      selectedLabTestNames.map(n => n.toLowerCase())
+    );
     for (const name of selectedValues) {
       if (!currentNames.has(name.toLowerCase())) {
         addLabTestChart(name);
@@ -195,14 +238,19 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
     );
   }
 
-  const noDataAvailable = availableVitals.length === 0 && availableLabTests.length === 0;
+  const noDataAvailable =
+    availableVitals.length === 0 && availableLabTests.length === 0;
 
   if (noDataAvailable) {
     return (
       <Paper p="xl">
         <Center py="xl">
           <Stack align="center" gap="md">
-            <IconChartLine size={48} stroke={1} color="var(--mantine-color-gray-5)" />
+            <IconChartLine
+              size={48}
+              stroke={1}
+              color="var(--mantine-color-gray-5)"
+            />
             <Text c="dimmed" ta="center">
               {t('builder.trendCharts.emptyState')}
             </Text>
@@ -233,8 +281,12 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                 key={vital.vital_type}
                 label={`${vital.display_name} (${vital.count})`}
                 checked={selectedVitalTypes.has(vital.vital_type)}
-                onChange={(e) => handleVitalToggle(vital.vital_type, e.currentTarget.checked)}
-                disabled={maxReached && !selectedVitalTypes.has(vital.vital_type)}
+                onChange={e =>
+                  handleVitalToggle(vital.vital_type, e.currentTarget.checked)
+                }
+                disabled={
+                  maxReached && !selectedVitalTypes.has(vital.vital_type)
+                }
               />
             ))}
           </SimpleGrid>
@@ -244,7 +296,9 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
       {/* Lab Test Charts */}
       {availableLabTests.length > 0 && (
         <Stack gap="sm">
-          <Title order={5}>{t('builder.trendCharts.labTestCharts.title')}</Title>
+          <Title order={5}>
+            {t('builder.trendCharts.labTestCharts.title')}
+          </Title>
           <Text size="sm" c="dimmed">
             {t('builder.trendCharts.labTestCharts.description')}
           </Text>
@@ -253,7 +307,9 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
             value={selectedLabTestNames}
             onChange={handleLabTestChange}
             searchable
-            placeholder={t('builder.trendCharts.labTestCharts.searchPlaceholder')}
+            placeholder={t(
+              'builder.trendCharts.labTestCharts.searchPlaceholder'
+            )}
             maxDropdownHeight={200}
             disabled={maxReached && selectedLabTestNames.length === 0}
             clearable
@@ -265,21 +321,32 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
       {trendChartCount > 0 && (
         <Stack gap="sm">
           <Title order={5}>
-            {t('builder.trendCharts.selectedCharts', { count: trendChartCount })}
+            {t('builder.trendCharts.selectedCharts', {
+              count: trendChartCount,
+            })}
           </Title>
 
           {/* Vital chart rows */}
           {trendCharts.vital_charts.map(chart => {
-            const vitalInfo = availableVitals.find(v => v.vital_type === chart.vital_type);
+            const vitalInfo = availableVitals.find(
+              v => v.vital_type === chart.vital_type
+            );
             const count = effectiveCounts.vital_counts[chart.vital_type];
             return (
               <Group key={chart.vital_type} gap="sm" wrap="nowrap">
-                <Badge variant="light" color="blue" size="lg" style={{ flex: '0 0 auto' }}>
+                <Badge
+                  variant="light"
+                  color="blue"
+                  size="lg"
+                  style={{ flex: '0 0 auto' }}
+                >
                   {vitalInfo?.display_name || chart.vital_type}
                 </Badge>
                 <DatePickerInput
                   value={chart.date_from}
-                  onChange={(val) => updateVitalChartDates(chart.vital_type, val, chart.date_to)}
+                  onChange={val =>
+                    updateVitalChartDates(chart.vital_type, val, chart.date_to)
+                  }
                   size="xs"
                   style={{ width: 130 }}
                   placeholder={t('builder.trendCharts.dateFrom')}
@@ -290,7 +357,13 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                 />
                 <DatePickerInput
                   value={chart.date_to}
-                  onChange={(val) => updateVitalChartDates(chart.vital_type, chart.date_from, val)}
+                  onChange={val =>
+                    updateVitalChartDates(
+                      chart.vital_type,
+                      chart.date_from,
+                      val
+                    )
+                  }
                   size="xs"
                   style={{ width: 130 }}
                   placeholder={t('builder.trendCharts.dateTo')}
@@ -310,7 +383,9 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   color="red"
                   size="sm"
                   onClick={() => removeVitalChart(chart.vital_type)}
-                  aria-label={t('builder.trendCharts.removeChart', { name: vitalInfo?.display_name || chart.vital_type })}
+                  aria-label={t('builder.trendCharts.removeChart', {
+                    name: vitalInfo?.display_name || chart.vital_type,
+                  })}
                 >
                   <IconX size={14} />
                 </ActionIcon>
@@ -323,12 +398,19 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
             const count = effectiveCounts.lab_test_counts[chart.test_name];
             return (
               <Group key={chart.test_name} gap="sm" wrap="nowrap">
-                <Badge variant="light" color="teal" size="lg" style={{ flex: '0 0 auto' }}>
+                <Badge
+                  variant="light"
+                  color="teal"
+                  size="lg"
+                  style={{ flex: '0 0 auto' }}
+                >
                   {chart.test_name}
                 </Badge>
                 <DatePickerInput
                   value={chart.date_from}
-                  onChange={(val) => updateLabTestChartDates(chart.test_name, val, chart.date_to)}
+                  onChange={val =>
+                    updateLabTestChartDates(chart.test_name, val, chart.date_to)
+                  }
                   size="xs"
                   style={{ width: 130 }}
                   placeholder={t('builder.trendCharts.dateFrom')}
@@ -339,7 +421,13 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                 />
                 <DatePickerInput
                   value={chart.date_to}
-                  onChange={(val) => updateLabTestChartDates(chart.test_name, chart.date_from, val)}
+                  onChange={val =>
+                    updateLabTestChartDates(
+                      chart.test_name,
+                      chart.date_from,
+                      val
+                    )
+                  }
                   size="xs"
                   style={{ width: 130 }}
                   placeholder={t('builder.trendCharts.dateTo')}
@@ -359,7 +447,9 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                   color="red"
                   size="sm"
                   onClick={() => removeLabTestChart(chart.test_name)}
-                  aria-label={t('builder.trendCharts.removeChart', { name: chart.test_name })}
+                  aria-label={t('builder.trendCharts.removeChart', {
+                    name: chart.test_name,
+                  })}
                 >
                   <IconX size={14} />
                 </ActionIcon>

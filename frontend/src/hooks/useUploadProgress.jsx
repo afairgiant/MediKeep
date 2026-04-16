@@ -2,12 +2,9 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX, IconExclamationMark } from '@tabler/icons-react';
 import logger from '../services/logger';
-import { 
-  ERROR_MESSAGES, 
-  SUCCESS_MESSAGES, 
-  WARNING_MESSAGES, 
-  getUserFriendlyError,
-  formatErrorWithContext
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
 } from '../constants/errorMessages';
 
 // Configuration object for upload progress settings
@@ -16,7 +13,7 @@ const UPLOAD_CONFIG = {
   TIME_THRESHOLD_SECONDS: 60000,
   TIME_THRESHOLD_MINUTES: 3600000,
   MAX_RETRY_ATTEMPTS: 3,
-  PROGRESS_SIMULATION_RATE: 15
+  PROGRESS_SIMULATION_RATE: 15,
 };
 
 /**
@@ -42,11 +39,11 @@ export const useUploadProgress = () => {
   // Calculate estimated time remaining based on progress
   const calculateTimeRemaining = useCallback((progress, startTime) => {
     if (!startTime || progress <= 0) return null;
-    
+
     const elapsed = Date.now() - startTime;
     const rate = progress / elapsed;
     const remaining = (100 - progress) / rate;
-    
+
     if (remaining < UPLOAD_CONFIG.TIME_THRESHOLD_SECONDS) {
       return `${Math.round(remaining / 1000)}s`;
     } else if (remaining < UPLOAD_CONFIG.TIME_THRESHOLD_MINUTES) {
@@ -59,10 +56,10 @@ export const useUploadProgress = () => {
   // Calculate upload speed
   const calculateUploadSpeed = useCallback((completedBytes, startTime) => {
     if (!startTime || completedBytes <= 0) return null;
-    
+
     const elapsed = (Date.now() - startTime) / 1000;
     const bytesPerSecond = completedBytes / elapsed;
-    
+
     if (bytesPerSecond < 1024) {
       return `${Math.round(bytesPerSecond)}B/s`;
     } else if (bytesPerSecond < 1024 * 1024) {
@@ -113,87 +110,112 @@ export const useUploadProgress = () => {
   const LOG_THROTTLE_MS = 1000; // 1 second throttle for frequent logs
 
   // Update individual file progress with proper state serialization
-  const updateFileProgress = useCallback((fileId, progress, status = 'uploading', error = null) => {
-    setUploadState(prev => {
-      // Ensure progress is properly bounded (0-100)
-      const boundedProgress = Math.min(100, Math.max(0, Number(progress) || 0));
-      const currentTime = Date.now();
+  const updateFileProgress = useCallback(
+    (fileId, progress, status = 'uploading', error = null) => {
+      setUploadState(prev => {
+        // Ensure progress is properly bounded (0-100)
+        const boundedProgress = Math.min(
+          100,
+          Math.max(0, Number(progress) || 0)
+        );
+        const currentTime = Date.now();
 
-      const updatedFiles = prev.files.map(file => {
-        if (file.id === fileId) {
-          const updatedFile = {
-            ...file,
+        const updatedFiles = prev.files.map(file => {
+          if (file.id === fileId) {
+            const updatedFile = {
+              ...file,
+              progress: boundedProgress,
+              status,
+              error,
+              lastUpdate: currentTime, // Add timestamp for tracking
+            };
+
+            // Set start time when upload begins
+            if (status === 'uploading' && !file.startTime) {
+              updatedFile.startTime = currentTime;
+            }
+
+            // Set end time when upload completes or fails
+            if (
+              (status === 'completed' || status === 'failed') &&
+              !file.endTime
+            ) {
+              updatedFile.endTime = currentTime;
+            }
+
+            return updatedFile;
+          }
+          return file;
+        });
+
+        // Recalculate overall progress based on current file states
+        const validFiles = updatedFiles.filter(
+          f => f.progress !== undefined && f.progress !== null
+        );
+        const totalProgress = validFiles.reduce(
+          (sum, file) => sum + file.progress,
+          0
+        );
+        const overallProgress =
+          validFiles.length > 0
+            ? Math.min(100, Math.max(0, totalProgress / validFiles.length))
+            : 0;
+
+        // Check completion status
+        const completedFiles = updatedFiles.filter(
+          f => f.status === 'completed' || f.status === 'failed'
+        );
+        const isCompleted =
+          completedFiles.length === updatedFiles.length &&
+          updatedFiles.length > 0;
+        const hasErrors = updatedFiles.some(f => f.status === 'failed');
+
+        // Create serialized state update to prevent race conditions
+        const newState = {
+          ...prev,
+          files: updatedFiles,
+          overallProgress: Math.round(overallProgress * 100) / 100, // Round to 2 decimal places
+          isCompleted,
+          hasErrors,
+          canClose: isCompleted,
+          endTime: isCompleted && !prev.endTime ? currentTime : prev.endTime,
+        };
+
+        // Rate-limited logging - only log significant state changes
+        const now = Date.now();
+        if (
+          status === 'completed' ||
+          status === 'failed' ||
+          (status === 'uploading' && boundedProgress === 0)
+        ) {
+          // Always log important state transitions
+          logger.info('upload_progress_state_change', {
+            fileId,
             progress: boundedProgress,
             status,
-            error,
-            lastUpdate: currentTime, // Add timestamp for tracking
-          };
-
-          // Set start time when upload begins
-          if (status === 'uploading' && !file.startTime) {
-            updatedFile.startTime = currentTime;
-          }
-
-          // Set end time when upload completes or fails
-          if ((status === 'completed' || status === 'failed') && !file.endTime) {
-            updatedFile.endTime = currentTime;
-          }
-
-          return updatedFile;
+            overallProgress: newState.overallProgress,
+            isCompleted,
+            component: 'useUploadProgress',
+          });
+        } else if (now - lastLogTimeRef.current > LOG_THROTTLE_MS) {
+          // Throttled debug logging for progress updates
+          logger.debug('upload_progress_update', {
+            fileId,
+            progress: boundedProgress,
+            overallProgress: newState.overallProgress,
+            component: 'useUploadProgress',
+          });
+          lastLogTimeRef.current = now;
         }
-        return file;
+
+        return newState;
       });
-
-      // Recalculate overall progress based on current file states
-      const validFiles = updatedFiles.filter(f => f.progress !== undefined && f.progress !== null);
-      const totalProgress = validFiles.reduce((sum, file) => sum + file.progress, 0);
-      const overallProgress = validFiles.length > 0 ? Math.min(100, Math.max(0, totalProgress / validFiles.length)) : 0;
-
-      // Check completion status
-      const completedFiles = updatedFiles.filter(f => f.status === 'completed' || f.status === 'failed');
-      const isCompleted = completedFiles.length === updatedFiles.length && updatedFiles.length > 0;
-      const hasErrors = updatedFiles.some(f => f.status === 'failed');
-
-      // Create serialized state update to prevent race conditions
-      const newState = {
-        ...prev,
-        files: updatedFiles,
-        overallProgress: Math.round(overallProgress * 100) / 100, // Round to 2 decimal places
-        isCompleted,
-        hasErrors,
-        canClose: isCompleted,
-        endTime: isCompleted && !prev.endTime ? currentTime : prev.endTime,
-      };
-
-      // Rate-limited logging - only log significant state changes
-      const now = Date.now();
-      if (status === 'completed' || status === 'failed' || (status === 'uploading' && boundedProgress === 0)) {
-        // Always log important state transitions
-        logger.info('upload_progress_state_change', {
-          fileId,
-          progress: boundedProgress,
-          status,
-          overallProgress: newState.overallProgress,
-          isCompleted,
-          component: 'useUploadProgress',
-        });
-      } else if (now - lastLogTimeRef.current > LOG_THROTTLE_MS) {
-        // Throttled debug logging for progress updates
-        logger.debug('upload_progress_update', {
-          fileId,
-          progress: boundedProgress,
-          overallProgress: newState.overallProgress,
-          component: 'useUploadProgress',
-        });
-        lastLogTimeRef.current = now;
-      }
-
-      return newState;
-    });
-  }, []);
+    },
+    []
+  );
 
   // Batch update multiple files
-  const updateMultipleFiles = useCallback((updates) => {
+  const updateMultipleFiles = useCallback(updates => {
     setUploadState(prev => {
       let updatedFiles = [...prev.files];
 
@@ -206,19 +228,33 @@ export const useUploadProgress = () => {
             progress: Math.min(100, Math.max(0, progress)),
             status,
             error,
-            startTime: status === 'uploading' && !file.startTime ? Date.now() : file.startTime,
-            endTime: (status === 'completed' || status === 'failed') && !file.endTime ? Date.now() : file.endTime,
+            startTime:
+              status === 'uploading' && !file.startTime
+                ? Date.now()
+                : file.startTime,
+            endTime:
+              (status === 'completed' || status === 'failed') && !file.endTime
+                ? Date.now()
+                : file.endTime,
           };
         }
       });
 
       // Calculate overall progress
-      const totalProgress = updatedFiles.reduce((sum, file) => sum + (file.progress || 0), 0);
-      const overallProgress = updatedFiles.length > 0 ? totalProgress / updatedFiles.length : 0;
+      const totalProgress = updatedFiles.reduce(
+        (sum, file) => sum + (file.progress || 0),
+        0
+      );
+      const overallProgress =
+        updatedFiles.length > 0 ? totalProgress / updatedFiles.length : 0;
 
       // Check completion status
-      const completedFiles = updatedFiles.filter(f => f.status === 'completed' || f.status === 'failed');
-      const isCompleted = completedFiles.length === updatedFiles.length && updatedFiles.length > 0;
+      const completedFiles = updatedFiles.filter(
+        f => f.status === 'completed' || f.status === 'failed'
+      );
+      const isCompleted =
+        completedFiles.length === updatedFiles.length &&
+        updatedFiles.length > 0;
       const hasErrors = updatedFiles.some(f => f.status === 'failed');
 
       return {
@@ -236,7 +272,7 @@ export const useUploadProgress = () => {
   // Complete upload process
   const completeUpload = useCallback((success = true, finalMessage = null) => {
     const endTime = Date.now();
-    
+
     setUploadState(prev => {
       const updatedState = {
         ...prev,
@@ -247,7 +283,9 @@ export const useUploadProgress = () => {
       };
 
       // Calculate file stats for notification (but don't show yet)
-      const completedFiles = prev.files.filter(f => f.status === 'completed').length;
+      const completedFiles = prev.files.filter(
+        f => f.status === 'completed'
+      ).length;
       const failedFiles = prev.files.filter(f => f.status === 'failed').length;
       const totalFiles = prev.files.length;
 
@@ -268,20 +306,28 @@ export const useUploadProgress = () => {
     // Show notifications after state update to avoid render phase issues
     setTimeout(() => {
       const currentState = uploadStateRef.current;
-      
+
       // Check if currentState is null (component may have unmounted)
       if (!currentState || !currentState.files) {
         return;
       }
-      
-      const completedFiles = currentState.files.filter(f => f.status === 'completed').length;
-      const failedFiles = currentState.files.filter(f => f.status === 'failed').length;
+
+      const completedFiles = currentState.files.filter(
+        f => f.status === 'completed'
+      ).length;
+      const failedFiles = currentState.files.filter(
+        f => f.status === 'failed'
+      ).length;
       const totalFiles = currentState.files.length;
 
       if (success && failedFiles === 0) {
         notifications.show({
           title: 'Upload Successful',
-          message: finalMessage || (totalFiles === 1 ? SUCCESS_MESSAGES.UPLOAD_SUCCESS : SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS),
+          message:
+            finalMessage ||
+            (totalFiles === 1
+              ? SUCCESS_MESSAGES.UPLOAD_SUCCESS
+              : SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS),
           color: 'green',
           icon: <IconCheck size={16} />,
           autoClose: 5000,
@@ -289,7 +335,9 @@ export const useUploadProgress = () => {
       } else if (failedFiles > 0) {
         notifications.show({
           title: 'Upload Completed with Errors',
-          message: finalMessage || `${completedFiles}/${totalFiles} files uploaded successfully. ${failedFiles} failed.`,
+          message:
+            finalMessage ||
+            `${completedFiles}/${totalFiles} files uploaded successfully. ${failedFiles} failed.`,
           color: 'orange',
           icon: <IconExclamationMark size={16} />,
           autoClose: 7000,
@@ -312,10 +360,10 @@ export const useUploadProgress = () => {
       clearInterval(progressUpdateIntervalRef.current);
       progressUpdateIntervalRef.current = null;
     }
-    
+
     uploadStartTimeRef.current = null;
     lastLogTimeRef.current = 0;
-    
+
     setUploadState({
       isUploading: false,
       files: [],
@@ -344,7 +392,7 @@ export const useUploadProgress = () => {
   // Get derived state values - memoized to prevent frequent re-calculations
   const derivedState = useMemo(() => {
     const { files, startTime, overallProgress } = uploadState;
-    
+
     // Early return for empty state to avoid unnecessary calculations
     if (!files.length || !uploadState.isUploading) {
       return {
@@ -354,18 +402,20 @@ export const useUploadProgress = () => {
         totalBytes: 0,
       };
     }
-    
+
     const completedBytes = files.reduce((sum, file) => {
       return sum + (file.size || 0) * ((file.progress || 0) / 100);
     }, 0);
 
-    const estimatedTimeRemaining = startTime && overallProgress > 5 
-      ? calculateTimeRemaining(overallProgress, startTime)
-      : null;
+    const estimatedTimeRemaining =
+      startTime && overallProgress > 5
+        ? calculateTimeRemaining(overallProgress, startTime)
+        : null;
 
-    const uploadSpeed = startTime && completedBytes > 0
-      ? calculateUploadSpeed(completedBytes, startTime)
-      : null;
+    const uploadSpeed =
+      startTime && completedBytes > 0
+        ? calculateUploadSpeed(completedBytes, startTime)
+        : null;
 
     return {
       estimatedTimeRemaining,
@@ -373,7 +423,7 @@ export const useUploadProgress = () => {
       completedBytes,
       totalBytes: files.reduce((sum, file) => sum + (file.size || 0), 0),
     };
-  }, [uploadState.files, uploadState.startTime, uploadState.overallProgress, uploadState.isUploading, calculateTimeRemaining, calculateUploadSpeed]);
+  }, [uploadState, calculateTimeRemaining, calculateUploadSpeed]);
 
   // Keep uploadStateRef in sync with uploadState
   useEffect(() => {
@@ -395,21 +445,31 @@ export const useUploadProgress = () => {
   }, []);
 
   // Memoize computed values to prevent recalculation on every render
-  const computedValues = useMemo(() => ({
-    isModalOpen: uploadState.isUploading,
-    canRetry: uploadState.isCompleted && uploadState.hasErrors,
-    completedCount: uploadState.files.filter(f => f.status === 'completed').length,
-    failedCount: uploadState.files.filter(f => f.status === 'failed').length,
-    uploadingCount: uploadState.files.filter(f => f.status === 'uploading').length,
-  }), [uploadState.isUploading, uploadState.isCompleted, uploadState.hasErrors, uploadState.files]);
+  const computedValues = useMemo(
+    () => ({
+      isModalOpen: uploadState.isUploading,
+      canRetry: uploadState.isCompleted && uploadState.hasErrors,
+      completedCount: uploadState.files.filter(f => f.status === 'completed')
+        .length,
+      failedCount: uploadState.files.filter(f => f.status === 'failed').length,
+      uploadingCount: uploadState.files.filter(f => f.status === 'uploading')
+        .length,
+    }),
+    [
+      uploadState.isUploading,
+      uploadState.isCompleted,
+      uploadState.hasErrors,
+      uploadState.files,
+    ]
+  );
 
   return {
     // State
     uploadState,
-    
+
     // Derived state
     ...derivedState,
-    
+
     // Actions
     startUpload,
     updateFileProgress,
@@ -417,7 +477,7 @@ export const useUploadProgress = () => {
     completeUpload,
     resetUpload,
     forceClose,
-    
+
     // Computed values
     ...computedValues,
   };

@@ -8,7 +8,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.deps import BusinessLogicException, ConflictException, UnauthorizedException
+from app.api.deps import (
+    BusinessLogicException,
+    ConflictException,
+    UnauthorizedException,
+)
 from app.api.activity_logging import log_create, safe_log_activity
 from app.core.config import settings
 from app.core.events import get_event_bus
@@ -42,8 +46,11 @@ def get_registration_status():
     """Check if new user registration is enabled."""
     return {
         "registration_enabled": settings.ALLOW_USER_REGISTRATION,
-        "message": "Registration is currently disabled. Please contact an administrator." 
-                   if not settings.ALLOW_USER_REGISTRATION else None
+        "message": (
+            "Registration is currently disabled. Please contact an administrator."
+            if not settings.ALLOW_USER_REGISTRATION
+            else None
+        ),
     }
 
 
@@ -72,9 +79,9 @@ def register(
         )
         raise UnauthorizedException(
             message="New user registration is currently disabled. Please contact an administrator.",
-            request=request
+            request=request,
         )
-    
+
     user_ip = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
@@ -92,15 +99,15 @@ def register(
     if existing_user:
         raise ConflictException(
             message=f"An account with the username '{user_in.username}' already exists. Please choose a different username.",
-            request=request
+            request=request,
         )
-    
+
     # Check if email already exists
     existing_email = user.get_by_email(db, email=user_in.email)
     if existing_email:
         raise ConflictException(
             message=f"An account with the email address '{user_in.email}' already exists. Please use a different email or try logging in.",
-            request=request
+            request=request,
         )
 
     # SECURITY: Force role='user' for all public registrations (GHSA-xx23-8fx5-ph4q)
@@ -129,25 +136,25 @@ def register(
 
     # Create a basic patient record for the new user using Phase 1 approach
     # Extract first/last names from available user data
-    first_name = getattr(user_in, 'first_name', None)
-    last_name = getattr(user_in, 'last_name', None)
-    
+    first_name = getattr(user_in, "first_name", None)
+    last_name = getattr(user_in, "last_name", None)
+
     # If first/last names aren't provided, try to parse from full_name
     if not first_name or not last_name:
-        full_name = getattr(user_in, 'full_name', '')
+        full_name = getattr(user_in, "full_name", "")
         if full_name:
             name_parts = full_name.strip().split()
             if len(name_parts) >= 2:
                 first_name = first_name or name_parts[0]
-                last_name = last_name or ' '.join(name_parts[1:])
+                last_name = last_name or " ".join(name_parts[1:])
             elif len(name_parts) == 1:
                 first_name = first_name or name_parts[0]
                 last_name = last_name or name_parts[0]  # Use same name for both
-    
+
     # Final fallbacks
     first_name = first_name or "Update"
     last_name = last_name or "Your Name"
-    
+
     try:  # Get the actual user ID value from the SQLAlchemy model
         user_id = getattr(new_user, "id", None)
         if user_id is None:
@@ -155,22 +162,23 @@ def register(
 
         # Use Phase 1 patient management service to create self-record
         from app.services.patient_management import PatientManagementService
+
         patient_service = PatientManagementService(db)
-        
+
         patient_data = {
             "first_name": first_name,
             "last_name": last_name,
-            "birth_date": date.today().replace(year=date.today().year - 25),  # 25 years ago as reasonable default
+            "birth_date": date.today().replace(
+                year=date.today().year - 25
+            ),  # 25 years ago as reasonable default
             "gender": "OTHER",  # Neutral default
             "address": "Please update your address in your profile",  # Placeholder address
         }
-        
+
         # Create self-record for the new user and set as active
         # Note: PatientManagementService.create_patient() handles its own transaction
         created_patient = patient_service.create_patient(
-            user=new_user,
-            patient_data=patient_data,
-            is_self_record=True
+            user=new_user, patient_data=patient_data, is_self_record=True
         )
 
         # Try to set the newly created patient as the user's active patient
@@ -282,7 +290,7 @@ def login(
     if db_user.id is None:
         raise BusinessLogicException(
             message="User account is incomplete. Please contact support.",
-            request=request
+            request=request,
         )
 
     # Check if user account is active
@@ -302,6 +310,7 @@ def login(
     # Check if user has an active patient, if not try to set one
     if not db_user.active_patient_id:
         from app.services.patient_management import PatientManagementService
+
         try:
             patient_service = PatientManagementService(db)
             patient_service.ensure_active_patient(db_user)
@@ -321,8 +330,13 @@ def login(
 
     # Get user's timeout preference for the frontend inactivity timer
     from app.crud.user_preferences import user_preferences
+
     preferences = user_preferences.get_or_create_by_user_id(db, user_id=db_user.id)
-    session_timeout_minutes = preferences.session_timeout_minutes if preferences else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    session_timeout_minutes = (
+        preferences.session_timeout_minutes
+        if preferences
+        else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
 
     # JWT must outlive the user's inactivity timeout, otherwise the cookie
     # expires before the frontend timer fires and the user gets a hard 401.
@@ -371,12 +385,14 @@ def login(
         inactivity_timeout_minutes=session_timeout_minutes,
     )
 
-    response = JSONResponse(content={
-        "access_token": access_token,
-        "token_type": "bearer",
-        "session_timeout_minutes": session_timeout_minutes,
-        "must_change_password": bool(db_user.must_change_password),
-    })
+    response = JSONResponse(
+        content={
+            "access_token": access_token,
+            "token_type": "bearer",
+            "session_timeout_minutes": session_timeout_minutes,
+            "must_change_password": bool(db_user.must_change_password),
+        }
+    )
     set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)
     return response
 
@@ -401,7 +417,9 @@ def logout(
         username=current_user.username,
     )
 
-    response = JSONResponse(content={"status": "success", "data": {}, "message": "Logged out successfully"})
+    response = JSONResponse(
+        content={"status": "success", "data": {}, "message": "Logged out successfully"}
+    )
     clear_auth_cookie(response)
     return response
 
@@ -445,15 +463,13 @@ async def change_password(
             username=current_user.username,
         )
         raise UnauthorizedException(
-            message="Current password is incorrect",
-            request=request
+            message="Current password is incorrect", request=request
         )
 
     # Validate new password
     if len(password_data.newPassword) < 6:
         raise BusinessLogicException(
-            message="New password must be at least 6 characters long",
-            request=request
+            message="New password must be at least 6 characters long", request=request
         )
 
     has_letter = any(c.isalpha() for c in password_data.newPassword)
@@ -461,7 +477,7 @@ async def change_password(
     if not (has_letter and has_number):
         raise BusinessLogicException(
             message="New password must contain at least one letter and one number",
-            request=request
+            request=request,
         )
 
     # Update password (also clears must_change_password flag)
@@ -492,7 +508,7 @@ async def change_password(
     # Publish password changed event
     event = PasswordChangedEvent(
         user_id=current_user.id,
-        change_time=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        change_time=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
     )
     await get_event_bus().publish(event)
 

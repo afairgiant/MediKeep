@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import {
@@ -7,7 +6,6 @@ import {
   Text,
   Stack,
   Badge,
-  Button,
   ActionIcon,
   Box,
 } from '@mantine/core';
@@ -138,7 +136,8 @@ const MedicalCard = ({
             )}
             {dateInfo.updated && (
               <Text size="xs" c="dimmed">
-                {t('navigation:activity.actions.updated')}: {formatDateTime(dateInfo.updated)}
+                {t('navigation:activity.actions.updated')}:{' '}
+                {formatDateTime(dateInfo.updated)}
               </Text>
             )}
             {dateInfo.custom && (

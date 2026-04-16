@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Select, Text } from '@mantine/core';
+import { Select } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
 import IntegrationSettingsCard from './IntegrationSettingsCard';
-import { testConnection, getOrganizations } from '../../services/api/papraApi.jsx';
+import {
+  testConnection,
+  getOrganizations,
+} from '../../services/api/papraApi.jsx';
 import { PAPRA_SETTING_KEYS } from '../../constants/papraSettings.jsx';
 import logger from '../../services/logger';
 
@@ -25,19 +28,25 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
   const papraEnabled = settings?.[PAPRA_SETTING_KEYS.enabled] ?? false;
   const papraUrl = settings?.[PAPRA_SETTING_KEYS.url] ?? '';
   const papraApiToken = settings?.[PAPRA_SETTING_KEYS.apiToken] ?? '';
-  const papraOrganizationId = settings?.[PAPRA_SETTING_KEYS.organizationId] ?? '';
+  const papraOrganizationId =
+    settings?.[PAPRA_SETTING_KEYS.organizationId] ?? '';
   const papraHasSavedToken = settings?.papra_has_token ?? false;
   const isVerified = settings?.papra_connection_verified ?? false;
   const hasConnection = papraEnabled && papraUrl && papraHasSavedToken;
   const orgsLoadedRef = useRef(false);
 
-  const mapOrganizations = (orgList) =>
+  const mapOrganizations = orgList =>
     orgList
-      .map((org) => ({
+      .map(org => ({
         value: String(org.id || org.Id || org.ID || org.organizationId || ''),
-        label: org.name || org.Name || org.displayName || org.title || String(org.id || ''),
+        label:
+          org.name ||
+          org.Name ||
+          org.displayName ||
+          org.title ||
+          String(org.id || ''),
       }))
-      .filter((org) => org.value);
+      .filter(org => org.value);
 
   // Load organizations on mount if there's a saved connection
   useEffect(() => {
@@ -81,7 +90,9 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
         setConnectionMessage(t('papra.connectionSuccess'));
         // Optimistically mark verified so StoragePreferencesCard unlocks immediately
         onSettingChange('papra_connection_verified', true);
-        logger.info('papra_connection_test_success', { component: 'PapraSettings' });
+        logger.info('papra_connection_test_success', {
+          component: 'PapraSettings',
+        });
 
         const orgList = result.organizations || [];
         setOrganizations(mapOrganizations(orgList));
@@ -105,7 +116,7 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
     }
   };
 
-  const handleEnabledChange = (checked) => {
+  const handleEnabledChange = checked => {
     onSettingChange(PAPRA_SETTING_KEYS.enabled, checked);
     // If disabling and currently the active backend, fall back to local
     if (!checked && settings?.default_storage_backend === 'papra') {
@@ -119,10 +130,12 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
       enabled={papraEnabled}
       onEnabledChange={handleEnabledChange}
       url={papraUrl}
-      onUrlChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.url, value)}
+      onUrlChange={value => onSettingChange(PAPRA_SETTING_KEYS.url, value)}
       urlPlaceholder={t('papra.urlPlaceholder')}
       token={papraApiToken}
-      onTokenChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.apiToken, value)}
+      onTokenChange={value =>
+        onSettingChange(PAPRA_SETTING_KEYS.apiToken, value)
+      }
       tokenPlaceholder={t('papra.apiTokenPlaceholder')}
       hasTokenSaved={papraHasSavedToken}
       onTestConnection={handleTestConnection}
@@ -137,7 +150,9 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
             placeholder={t('papra.organizationPlaceholder')}
             data={organizations}
             value={papraOrganizationId || null}
-            onChange={(value) => onSettingChange(PAPRA_SETTING_KEYS.organizationId, value ?? '')}
+            onChange={value =>
+              onSettingChange(PAPRA_SETTING_KEYS.organizationId, value ?? '')
+            }
             disabled={!papraEnabled}
           />
         )

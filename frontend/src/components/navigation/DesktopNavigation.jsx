@@ -1,42 +1,40 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, Button } from '@mantine/core';
 import { IconChevronDown, IconUser } from '@tabler/icons-react';
-import { getNavigationSections, VIEWPORT_CONFIGS } from '../../config/navigation.config';
+import { getNavigationSections } from '../../config/navigation.config';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
 import LanguageSwitcher from '../shared/LanguageSwitcher';
 import './DesktopNavigation.css';
 
-const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
+const DesktopNavigation = ({ user: _user, isAdmin, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation(['navigation', 'shared']);
   const { viewport, width } = useViewport();
-  
+
   // Get navigation sections based on viewport (desktop or laptop)
   const navigationSections = getNavigationSections(viewport, isAdmin);
-  const config = VIEWPORT_CONFIGS[viewport];
-  
-  const isCurrentPath = (path) => {
+
+  const isCurrentPath = path => {
     if (path === '/dashboard') {
       return location.pathname === '/dashboard' || location.pathname === '/';
     }
     return location.pathname === path;
   };
-  
-  const handleNavigation = (path) => {
+
+  const handleNavigation = path => {
     navigate(path);
   };
 
-  const isSectionActive = (section) => {
+  const isSectionActive = section => {
     return section.items.some(item => isCurrentPath(item.path));
   };
 
   // Determine if we should use compact mode (for laptop)
   const isCompact = viewport === 'laptop';
-  
+
   return (
     <div className={`desktop-navigation ${isCompact ? 'compact' : ''}`}>
       <div className="desktop-nav-content">
@@ -44,7 +42,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
         {Object.entries(navigationSections).map(([key, section]) => {
           // Skip admin section from main nav (goes in account dropdown)
           if (key === 'admin') return null;
-          
+
           return (
             <Menu
               key={key}
@@ -61,7 +59,11 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
               <Menu.Target>
                 <Button
                   variant="subtle"
-                  className={isSectionActive(section) ? 'desktop-nav-trigger section-active' : 'desktop-nav-trigger'}
+                  className={
+                    isSectionActive(section)
+                      ? 'desktop-nav-trigger section-active'
+                      : 'desktop-nav-trigger'
+                  }
                   rightSection={<IconChevronDown size={14} />}
                   size={isCompact ? 'sm' : 'md'}
                 >
@@ -70,16 +72,18 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
               </Menu.Target>
 
               <Menu.Dropdown className="desktop-nav-dropdown">
-                <Menu.Label>{t(section.titleKey, section.title || section.titleKey)}</Menu.Label>
-                {section.items.map((item) => (
+                <Menu.Label>
+                  {t(section.titleKey, section.title || section.titleKey)}
+                </Menu.Label>
+                {section.items.map(item => (
                   <Menu.Item
                     key={item.id}
-                    leftSection={
-                      <span className="nav-icon">{item.icon}</span>
-                    }
+                    leftSection={<span className="nav-icon">{item.icon}</span>}
                     onClick={() => handleNavigation(item.path)}
                     color={isCurrentPath(item.path) ? 'blue' : undefined}
-                    className={isCurrentPath(item.path) ? 'nav-item-active' : ''}
+                    className={
+                      isCurrentPath(item.path) ? 'nav-item-active' : ''
+                    }
                   >
                     {t(item.nameKey, item.name || item.nameKey)}
                   </Menu.Item>
@@ -88,7 +92,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
             </Menu>
           );
         })}
-        
+
         {/* Spacer to push account to the right */}
         <div className="nav-spacer" />
 
@@ -97,7 +101,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
 
         {/* Account dropdown */}
         <Menu
-          position={width <= 1280 ? "bottom-end" : "bottom-end"}
+          position={width <= 1280 ? 'bottom-end' : 'bottom-end'}
           offset={8}
           withinPortal={true}
           transitionProps={{ transition: 'pop-top-right', duration: 150 }}
@@ -128,9 +132,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
           </Menu.Target>
 
           <Menu.Dropdown className="desktop-nav-dropdown account-dropdown">
-            <Menu.Item
-              onClick={() => navigate('/settings')}
-            >
+            <Menu.Item onClick={() => navigate('/settings')}>
               {t('shared:labels.settings', 'Settings')}
             </Menu.Item>
 
@@ -148,10 +150,7 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
               </div>
             </Menu.Item>
 
-            <Menu.Item
-              onClick={onLogout}
-              color="red"
-            >
+            <Menu.Item onClick={onLogout} color="red">
               {t('menu.logout', 'Logout')}
             </Menu.Item>
           </Menu.Dropdown>

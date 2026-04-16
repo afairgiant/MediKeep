@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { Card, Button } from '../ui';
@@ -98,42 +98,74 @@ const NotificationHistory = ({ refreshKey = 0 }) => {
         >
           <h3>
             {t('history.title', 'Notification History')}
-            <span className="expand-icon" aria-hidden="true">{expanded ? '−' : '+'}</span>
+            <span className="expand-icon" aria-hidden="true">
+              {expanded ? '−' : '+'}
+            </span>
           </h3>
         </button>
 
         {expanded && (
           <>
             {loading && history.length === 0 && (
-              <div className="notification-history-loading">{t('common:labels.loading', 'Loading...')}</div>
+              <div className="notification-history-loading">
+                {t('common:labels.loading', 'Loading...')}
+              </div>
             )}
             {!loading && history.length === 0 && (
-              <div className="notification-history-empty">{t('history.noHistory', 'No notifications sent yet.')}</div>
+              <div className="notification-history-empty">
+                {t('history.noHistory', 'No notifications sent yet.')}
+              </div>
             )}
             {history.length > 0 && (
               <>
                 <div className="history-list">
                   {history.map(item => (
-                    <div key={item.id} className={`history-item status-${item.status}`}>
+                    <div
+                      key={item.id}
+                      className={`history-item status-${item.status}`}
+                    >
                       <div className="history-item-main">
                         <div className="history-item-title">
                           <span className="history-title">{item.title}</span>
-                          <span className={`history-status ${STATUS_COLORS[item.status]}`}>{item.status}</span>
+                          <span
+                            className={`history-status ${STATUS_COLORS[item.status]}`}
+                          >
+                            {item.status}
+                          </span>
                         </div>
                         <div className="history-item-details">
                           <span className="history-event">
-                            {t(`events.${item.event_type}.name`, item.event_type.replace(/_/g, ' '))}
+                            {t(
+                              `events.${item.event_type}.name`,
+                              item.event_type.replace(/_/g, ' ')
+                            )}
                           </span>
                           {item.channel_name && (
                             <span className="history-channel">
                               {item.channel_name}
-                              {item.channel_type && <span className="channel-type">({item.channel_type})</span>}
+                              {item.channel_type && (
+                                <span className="channel-type">
+                                  ({item.channel_type})
+                                </span>
+                              )}
                             </span>
                           )}
-                          <span className="history-time">{formatRelativeTime(item.sent_at || item.created_at)}</span>
+                          <span className="history-time">
+                            {formatRelativeTime(
+                              item.sent_at || item.created_at
+                            )}
+                          </span>
                         </div>
-                        {item.message_preview && <div className="history-item-preview">{item.message_preview}</div>}
-                        {item.status === 'failed' && item.error_message && <div className="history-item-error">{item.error_message}</div>}
+                        {item.message_preview && (
+                          <div className="history-item-preview">
+                            {item.message_preview}
+                          </div>
+                        )}
+                        {item.status === 'failed' && item.error_message && (
+                          <div className="history-item-error">
+                            {item.error_message}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -141,16 +173,30 @@ const NotificationHistory = ({ refreshKey = 0 }) => {
 
                 {totalPages > 1 && (
                   <div className="history-pagination">
-                    <Button variant="secondary" size="small" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1 || loading}
+                    >
                       {t('common:pagination.previous', 'Previous')}
                     </Button>
                     <span className="pagination-info">
-                      {t('common:pagination.pageOf', 'Page {{page}} of {{total}}', {
-                        page,
-                        total: totalPages,
-                      })}
+                      {t(
+                        'common:pagination.pageOf',
+                        'Page {{page}} of {{total}}',
+                        {
+                          page,
+                          total: totalPages,
+                        }
+                      )}
                     </span>
-                    <Button variant="secondary" size="small" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages || loading}>
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages || loading}
+                    >
                       {t('common:pagination.next', 'Next')}
                     </Button>
                   </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import render from '../../test-utils/render';
@@ -9,9 +8,19 @@ vi.mock('../../services/api/index.js', () => ({
   apiService: {
     getAvailableTrendData: vi.fn().mockResolvedValue({
       vital_types: [
-        { vital_type: 'heart_rate', display_name: 'Heart Rate', unit: 'bpm', count: 15 },
+        {
+          vital_type: 'heart_rate',
+          display_name: 'Heart Rate',
+          unit: 'bpm',
+          count: 15,
+        },
         { vital_type: 'weight', display_name: 'Weight', unit: 'lbs', count: 8 },
-        { vital_type: 'systolic_bp', display_name: 'Systolic Blood Pressure', unit: 'mmHg', count: 10 },
+        {
+          vital_type: 'systolic_bp',
+          display_name: 'Systolic Blood Pressure',
+          unit: 'mmHg',
+          count: 10,
+        },
       ],
       lab_test_names: [
         { test_name: 'Glucose', unit: 'mg/dL', count: 12 },
@@ -72,8 +81,12 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...defaultProps} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: /Weight/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: /Heart Rate/ })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: /Weight/ })
+      ).toBeInTheDocument();
     });
   });
 
@@ -81,7 +94,9 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...defaultProps} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: /Heart Rate/ })
+      ).toBeInTheDocument();
     });
 
     const checkbox = screen.getByRole('checkbox', { name: /Heart Rate/ });
@@ -94,7 +109,13 @@ describe('TrendChartSelector', () => {
     const props = {
       ...defaultProps,
       trendCharts: {
-        vital_charts: [{ vital_type: 'heart_rate', date_from: '2025-03-03', date_to: '2026-03-03' }],
+        vital_charts: [
+          {
+            vital_type: 'heart_rate',
+            date_from: '2025-03-03',
+            date_to: '2026-03-03',
+          },
+        ],
         lab_test_charts: [],
       },
       trendChartCount: 1,
@@ -103,7 +124,9 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...props} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: /Heart Rate/ })
+      ).toBeInTheDocument();
     });
 
     const checkbox = screen.getByRole('checkbox', { name: /Heart Rate/ });
@@ -116,8 +139,20 @@ describe('TrendChartSelector', () => {
     const props = {
       ...defaultProps,
       trendCharts: {
-        vital_charts: [{ vital_type: 'heart_rate', date_from: '2025-03-03', date_to: '2026-03-03' }],
-        lab_test_charts: [{ test_name: 'Glucose', date_from: '2025-09-03', date_to: '2026-03-03' }],
+        vital_charts: [
+          {
+            vital_type: 'heart_rate',
+            date_from: '2025-03-03',
+            date_to: '2026-03-03',
+          },
+        ],
+        lab_test_charts: [
+          {
+            test_name: 'Glucose',
+            date_from: '2025-09-03',
+            date_to: '2026-03-03',
+          },
+        ],
       },
       trendChartCount: 2,
     };
@@ -125,11 +160,15 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...props} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByRole('checkbox', { name: /Heart Rate/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: /Heart Rate/ })
+      ).toBeInTheDocument();
     });
 
     // Should have remove buttons (aria-label uses i18n key)
-    const removeButtons = screen.getAllByRole('button', { name: /removeChart/ });
+    const removeButtons = screen.getAllByRole('button', {
+      name: /removeChart/,
+    });
     expect(removeButtons.length).toBe(2);
   });
 
@@ -150,7 +189,13 @@ describe('TrendChartSelector', () => {
     const props = {
       ...defaultProps,
       trendCharts: {
-        vital_charts: [{ vital_type: 'weight', date_from: '2025-03-03', date_to: '2026-03-03' }],
+        vital_charts: [
+          {
+            vital_type: 'weight',
+            date_from: '2025-03-03',
+            date_to: '2026-03-03',
+          },
+        ],
         lab_test_charts: [],
       },
       trendChartCount: 1,
@@ -159,7 +204,9 @@ describe('TrendChartSelector', () => {
     render(<TrendChartSelector {...props} />, { skipRouter: true });
 
     await waitFor(() => {
-      expect(screen.getByRole('checkbox', { name: /Weight/ })).toBeInTheDocument();
+      expect(
+        screen.getByRole('checkbox', { name: /Weight/ })
+      ).toBeInTheDocument();
     });
 
     // aria-label is the i18n key with the name interpolated

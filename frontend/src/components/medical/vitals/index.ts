@@ -43,7 +43,7 @@ export type {
   VitalTrendStatistics,
   VitalReferenceRange,
   VitalTrendResponse,
-  VitalTypeConfig
+  VitalTypeConfig,
 } from './types';
 
 export { VITAL_TYPE_CONFIGS } from './types';

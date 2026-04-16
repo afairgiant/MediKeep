@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { Container, Center, Stack, Loader, Text } from '@mantine/core';
 
@@ -28,7 +27,11 @@ function MedicalPageLoading({ message = 'Loading...', hint }) {
         <Stack align="center">
           <Loader size="lg" />
           <Text>{message}</Text>
-          {hint && <Text size="sm" c="dimmed">{hint}</Text>}
+          {hint && (
+            <Text size="sm" c="dimmed">
+              {hint}
+            </Text>
+          )}
         </Stack>
       </Center>
     </Container>

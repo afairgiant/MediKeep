@@ -13,7 +13,7 @@ from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_update_with_logging,
     handle_delete_with_logging,
-    handle_not_found
+    handle_not_found,
 )
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.emergency_contact import emergency_contact
@@ -50,7 +50,7 @@ def create_emergency_contact(
         record_type="emergency_contact",
         db=db,
         current_user=current_user,
-        permission='edit',
+        permission="edit",
     )
 
     # Use the specialized method that handles patient_id properly
@@ -107,7 +107,7 @@ def read_emergency_contacts(
         "read",
         "EmergencyContact",
         patient_id=target_patient_id,
-        count=len(contacts)
+        count=len(contacts),
     )
 
     return contacts
@@ -137,7 +137,7 @@ def read_emergency_contact(
             raise NotFoundException(
                 resource="Emergency Contact",
                 message="Emergency Contact not found",
-                request=request
+                request=request,
             )
 
         # Security check: ensure the contact belongs to the current user
@@ -152,7 +152,7 @@ def read_emergency_contact(
             "read",
             "EmergencyContact",
             record_id=emergency_contact_id,
-            patient_id=target_patient_id
+            patient_id=target_patient_id,
         )
 
         return contact_obj
@@ -220,12 +220,14 @@ def get_primary_emergency_contact(
 ) -> Any:
     """Get the primary emergency contact for a patient."""
     with handle_database_errors(request=request):
-        primary_contact = emergency_contact.get_primary_contact(db, patient_id=patient_id)
+        primary_contact = emergency_contact.get_primary_contact(
+            db, patient_id=patient_id
+        )
         if not primary_contact:
             raise NotFoundException(
                 resource="Emergency Contact",
                 message="Primary Emergency Contact not found",
-                request=request
+                request=request,
             )
 
         log_data_access(
@@ -235,7 +237,7 @@ def get_primary_emergency_contact(
             "read",
             "EmergencyContact",
             record_id=getattr(primary_contact, "id", None),
-            patient_id=patient_id
+            patient_id=patient_id,
         )
 
         return primary_contact
@@ -259,12 +261,14 @@ def set_primary_emergency_contact(
             raise NotFoundException(
                 resource="Emergency Contact",
                 message="Emergency Contact not found",
-                request=request
+                request=request,
             )
 
         # Security check: ensure the contact belongs to the current user
         deps.verify_patient_record_access(
-            getattr(contact_obj, "patient_id"), current_user_patient_id, "emergency contact"
+            getattr(contact_obj, "patient_id"),
+            current_user_patient_id,
+            "emergency contact",
         )
 
         # Set as primary

@@ -66,7 +66,9 @@ const Analytics = () => {
   const themeColors = useThemeColors();
 
   // Date range state
-  const [analyticsDays, setAnalyticsDays] = useState(ANALYTICS_CONFIG.DEFAULT_DAYS);
+  const [analyticsDays, setAnalyticsDays] = useState(
+    ANALYTICS_CONFIG.DEFAULT_DAYS
+  );
   const [analyticsDateRange, setAnalyticsDateRange] = useState([null, null]);
 
   // Analytics data state
@@ -76,10 +78,7 @@ const Analytics = () => {
   const analyticsAbortRef = useRef(null);
 
   // Stats for distribution chart
-  const {
-    data: stats,
-    refreshData: refreshStats,
-  } = useAdminData({
+  const { data: stats, refreshData: refreshStats } = useAdminData({
     entityName: 'Dashboard Statistics',
     apiMethodsConfig: {
       load: signal => adminApiService.getDashboardStats(signal),
@@ -124,96 +123,117 @@ const Analytics = () => {
     };
   }, [fetchAnalytics]);
 
-  const handlePresetDays = (days) => {
+  const handlePresetDays = days => {
     setAnalyticsDateRange([null, null]);
     setAnalyticsDays(days);
   };
 
-  const handleDateRangeChange = (range) => {
+  const handleDateRangeChange = range => {
     setAnalyticsDateRange(range);
   };
 
   // Chart data
-  const chartData = useMemo(() => ({
-    activity: {
-      labels: analyticsData?.weekly_activity?.labels || ANALYTICS_CONFIG.DEFAULT_LABELS,
-      datasets: [
-        {
-          label: t('analytics.chartLabels.userActivity', 'User Activity'),
-          data: analyticsData?.weekly_activity?.data || ANALYTICS_CONFIG.DEFAULT_DATA,
-          borderColor: themeColors.primary,
-          backgroundColor: `${themeColors.primary}1a`,
-          tension: 0.4,
-        },
-      ],
-    },
-    distribution: {
-      labels: [
-        t('analytics.chartLabels.patients', 'Patients'),
-        t('shared:categories.lab_results', 'Lab Results'),
-        t('shared:categories.medications', 'Medications'),
-        t('shared:categories.procedures', 'Procedures'),
-        t('shared:categories.allergies', 'Allergies'),
-        t('shared:categories.vitals', 'Vitals'),
-      ],
-      datasets: [
-        {
-          data: [
-            stats?.total_patients || 0,
-            stats?.total_lab_results || 0,
-            stats?.total_medications || 0,
-            stats?.total_procedures || 0,
-            stats?.total_allergies || 0,
-            stats?.total_vitals || 0,
-          ],
-          backgroundColor: [
-            themeColors.primary,
-            themeColors.success,
-            themeColors.warning,
-            themeColors.danger,
-            themeColors.purple,
-            themeColors.info,
-          ],
-          borderWidth: 0,
-        },
-      ],
-    },
-  }), [analyticsData, stats, themeColors, t]);
+  const chartData = useMemo(
+    () => ({
+      activity: {
+        labels:
+          analyticsData?.weekly_activity?.labels ||
+          ANALYTICS_CONFIG.DEFAULT_LABELS,
+        datasets: [
+          {
+            label: t('analytics.chartLabels.userActivity', 'User Activity'),
+            data:
+              analyticsData?.weekly_activity?.data ||
+              ANALYTICS_CONFIG.DEFAULT_DATA,
+            borderColor: themeColors.primary,
+            backgroundColor: `${themeColors.primary}1a`,
+            tension: 0.4,
+          },
+        ],
+      },
+      distribution: {
+        labels: [
+          t('analytics.chartLabels.patients', 'Patients'),
+          t('shared:categories.lab_results', 'Lab Results'),
+          t('shared:categories.medications', 'Medications'),
+          t('shared:categories.procedures', 'Procedures'),
+          t('shared:categories.allergies', 'Allergies'),
+          t('shared:categories.vitals', 'Vitals'),
+        ],
+        datasets: [
+          {
+            data: [
+              stats?.total_patients || 0,
+              stats?.total_lab_results || 0,
+              stats?.total_medications || 0,
+              stats?.total_procedures || 0,
+              stats?.total_allergies || 0,
+              stats?.total_vitals || 0,
+            ],
+            backgroundColor: [
+              themeColors.primary,
+              themeColors.success,
+              themeColors.warning,
+              themeColors.danger,
+              themeColors.purple,
+              themeColors.info,
+            ],
+            borderWidth: 0,
+          },
+        ],
+      },
+    }),
+    [analyticsData, stats, themeColors, t]
+  );
 
-  const lineChartOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-        labels: { color: themeColors.textPrimary },
+  const lineChartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+          labels: { color: themeColors.textPrimary },
+        },
       },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: { display: true, text: t('analytics.axisLabels.activities', 'Activities'), color: themeColors.textPrimary },
-        ticks: { color: themeColors.textPrimary },
-        grid: { color: themeColors.borderLight },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: t('analytics.axisLabels.activities', 'Activities'),
+            color: themeColors.textPrimary,
+          },
+          ticks: { color: themeColors.textPrimary },
+          grid: { color: themeColors.borderLight },
+        },
+        x: {
+          title: {
+            display: true,
+            text: t('shared:labels.date', 'Date'),
+            color: themeColors.textPrimary,
+          },
+          ticks: { color: themeColors.textPrimary },
+          grid: { color: themeColors.borderLight },
+        },
       },
-      x: {
-        title: { display: true, text: t('shared:labels.date', 'Date'), color: themeColors.textPrimary },
-        ticks: { color: themeColors.textPrimary },
-        grid: { color: themeColors.borderLight },
-      },
-    },
-  }), [themeColors, t]);
+    }),
+    [themeColors, t]
+  );
 
-  const doughnutChartOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: { color: themeColors.textPrimary },
+  const doughnutChartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: themeColors.textPrimary },
+        },
       },
-    },
-  }), [themeColors]);
+    }),
+    [themeColors]
+  );
 
   return (
     <AdminLayout>
@@ -231,12 +251,18 @@ const Analytics = () => {
                 </Text>
               </Group>
               <Text c="dimmed" size="md">
-                {t('analytics.subtitle', 'Activity trends, comparisons, and record distribution')}
+                {t(
+                  'analytics.subtitle',
+                  'Activity trends, comparisons, and record distribution'
+                )}
               </Text>
             </div>
             <Button
               leftSection={<IconRefresh size={16} />}
-              onClick={() => { fetchAnalytics(); refreshStats(true); }}
+              onClick={() => {
+                fetchAnalytics();
+                refreshStats(true);
+              }}
               loading={analyticsLoading}
               variant="light"
             >
@@ -253,9 +279,17 @@ const Analytics = () => {
                 <Button
                   key={d}
                   size="xs"
-                  variant={analyticsDays === d && !analyticsDateRange[0] ? 'filled' : 'light'}
+                  variant={
+                    analyticsDays === d && !analyticsDateRange[0]
+                      ? 'filled'
+                      : 'light'
+                  }
                   onClick={() => handlePresetDays(d)}
-                  aria-label={t('analytics.filterByDays', 'Filter by last {{days}} days', { days: d })}
+                  aria-label={t(
+                    'analytics.filterByDays',
+                    'Filter by last {{days}} days',
+                    { days: d }
+                  )}
                 >
                   {t('shared:labels.countDays', { count: d })}
                 </Button>
@@ -269,7 +303,10 @@ const Analytics = () => {
               clearable
               size="xs"
               leftSection={<IconCalendar size={14} />}
-              aria-label={t('analytics.analyticsDateRange', 'Analytics date range')}
+              aria-label={t(
+                'analytics.analyticsDateRange',
+                'Analytics date range'
+              )}
             />
           </Group>
         </Card>
@@ -278,7 +315,9 @@ const Analytics = () => {
           <Center h={300}>
             <Stack align="center">
               <Loader size="lg" />
-              <Text c="dimmed">{t('analytics.loading', 'Loading analytics...')}</Text>
+              <Text c="dimmed">
+                {t('analytics.loading', 'Loading analytics...')}
+              </Text>
             </Stack>
           </Center>
         ) : (
@@ -295,7 +334,10 @@ const Analytics = () => {
                   label={t('analytics.dailyAverage', 'Daily Average')}
                   value={
                     analyticsData?.date_range?.days
-                      ? Math.round(comparisonData.current_total / analyticsData.date_range.days)
+                      ? Math.round(
+                          comparisonData.current_total /
+                            analyticsData.date_range.days
+                        )
                       : 0
                   }
                   changePercent={comparisonData.change_percent}
@@ -305,7 +347,9 @@ const Analytics = () => {
                     {t('analytics.period', 'Period')}
                   </Text>
                   <Text size="lg" fw={700}>
-                    {t('shared:labels.countDays', '{{count}} days', { count: analyticsData?.date_range?.days || 0 })}
+                    {t('shared:labels.countDays', '{{count}} days', {
+                      count: analyticsData?.date_range?.days || 0,
+                    })}
                   </Text>
                   {comparisonData.previous_period && (
                     // eslint-disable-next-line i18next/no-literal-string -- date range comparison
@@ -329,11 +373,16 @@ const Analytics = () => {
                       <Text size="sm" c="dimmed">
                         {analyticsData?.date_range
                           ? `${analyticsData.date_range.start} to ${analyticsData.date_range.end}`
-                          : t('analytics.userInteractions', 'User interactions')}
+                          : t(
+                              'analytics.userInteractions',
+                              'User interactions'
+                            )}
                       </Text>
                     </div>
                     <Badge variant="light" color="blue">
-                      {t('shared:labels.countTotal', '{{count}} total', { count: analyticsData?.weekly_activity?.total || 0 })}
+                      {t('shared:labels.countTotal', '{{count}} total', {
+                        count: analyticsData?.weekly_activity?.total || 0,
+                      })}
                     </Badge>
                   </Group>
 
@@ -357,7 +406,10 @@ const Analytics = () => {
                   <Group justify="space-between" mb="md">
                     <div>
                       <Text size="lg" fw={600}>
-                        {t('analytics.recordsDistribution', 'Records Distribution')}
+                        {t(
+                          'analytics.recordsDistribution',
+                          'Records Distribution'
+                        )}
                       </Text>
                       <Text size="sm" c="dimmed">
                         {t('analytics.breakdownByType', 'Breakdown by type')}
@@ -382,27 +434,31 @@ const Analytics = () => {
             </Grid>
 
             {/* Model Activity Breakdown */}
-            {analyticsData?.model_activity && Object.keys(analyticsData.model_activity).length > 0 && (
-              <Card shadow="sm" p="lg" withBorder>
-                <Text size="lg" fw={600} mb="md">
-                  {t('analytics.activityByRecordType', 'Activity by Record Type')}
-                </Text>
-                <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }}>
-                  {Object.entries(analyticsData.model_activity)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([type, count]) => (
-                      <Paper key={type} p="sm" withBorder>
-                        <Text size="xs" c="dimmed" tt="uppercase" fw={500}>
-                          {type}
-                        </Text>
-                        <Text size="lg" fw={700}>
-                          {count}
-                        </Text>
-                      </Paper>
-                    ))}
-                </SimpleGrid>
-              </Card>
-            )}
+            {analyticsData?.model_activity &&
+              Object.keys(analyticsData.model_activity).length > 0 && (
+                <Card shadow="sm" p="lg" withBorder>
+                  <Text size="lg" fw={600} mb="md">
+                    {t(
+                      'analytics.activityByRecordType',
+                      'Activity by Record Type'
+                    )}
+                  </Text>
+                  <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }}>
+                    {Object.entries(analyticsData.model_activity)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([type, count]) => (
+                        <Paper key={type} p="sm" withBorder>
+                          <Text size="xs" c="dimmed" tt="uppercase" fw={500}>
+                            {type}
+                          </Text>
+                          <Text size="lg" fw={700}>
+                            {count}
+                          </Text>
+                        </Paper>
+                      ))}
+                  </SimpleGrid>
+                </Card>
+              )}
           </Stack>
         )}
       </div>
@@ -432,7 +488,8 @@ const KpiCard = ({ label, value, changePercent }) => {
           leftSection={<ArrowIcon size={12} />}
           size="sm"
         >
-          {isPositive ? '+' : ''}{changePercent}%
+          {isPositive ? '+' : ''}
+          {changePercent}%
         </Badge>
       </Group>
       <Text size="xs" c="dimmed" mt={4}>

@@ -19,7 +19,7 @@ class LabTestResult:
         reference_range: str = "",
         flag: str = "",
         confidence: float = 1.0,
-        test_date: str = None  # Date in YYYY-MM-DD format
+        test_date: str = None,  # Date in YYYY-MM-DD format
     ):
         self.test_name = test_name
         self.value = value
@@ -38,7 +38,7 @@ class LabTestResult:
             "reference_range": self.reference_range,
             "flag": self.flag,
             "confidence": self.confidence,
-            "test_date": self.test_date
+            "test_date": self.test_date,
         }
 
 
@@ -54,22 +54,18 @@ class BaseLabParser(ABC):
     # These handle common OCR errors found in scanned lab reports
     OCR_CORRUPTION_PATTERNS = {
         # Leading character corruption
-        r'^\^([a-z])': r'B\1',   # ^asos → Basos
-        r'^h([A-Z])': r'\1',     # hNeutrophils → Neutrophils (remove h before uppercase)
-        r'^hl': r'N',            # hleutrophils → Neutrophils (hl -> N)
-
+        r"^\^([a-z])": r"B\1",  # ^asos → Basos
+        r"^h([A-Z])": r"\1",  # hNeutrophils → Neutrophils (remove h before uppercase)
+        r"^hl": r"N",  # hleutrophils → Neutrophils (hl -> N)
         # Trailing artifacts - remove quotes and apostrophes (consolidated pattern)
         # Match one or more quotes/apostrophes after word chars or closing parenthesis
-        r'(\w|\))["\']+': r'\1',  # Remove trailing quotes/apostrophes
-
+        r'(\w|\))["\']+': r"\1",  # Remove trailing quotes/apostrophes
         # Special character cleanup in test names (consolidated pattern)
-        r'([A-Za-z]+)[<>]"?': r'\1',  # RBC<", RBC<, TEST>", TEST> → RBC, TEST
-
+        r'([A-Za-z]+)[<>]"?': r"\1",  # RBC<", RBC<, TEST>", TEST> → RBC, TEST
         # Unit corruption - OCR misreads in scientific notation units
-        r'x[lI]O(E\d+)': r'x10\1',  # xlOE3 → x10E3, xIOE6 → x10E6 (l/I → 1, O → 0)
-
+        r"x[lI]O(E\d+)": r"x10\1",  # xlOE3 → x10E3, xIOE6 → x10E6 (l/I → 1, O → 0)
         # Unicode/OCR character misreads
-        r'^lijn': 'Im',  # lijnmature → Immature (lijn -> Im)
+        r"^lijn": "Im",  # lijnmature → Immature (lijn -> Im)
     }
 
     @abstractmethod
@@ -133,9 +129,9 @@ class BaseLabParser(ABC):
         if aggressive:
             # More aggressive cleanup for badly corrupted OCR
             # Remove multiple spaces
-            cleaned = re.sub(r'\s{2,}', ' ', cleaned)
+            cleaned = re.sub(r"\s{2,}", " ", cleaned)
             # Normalize quotes (remove all remaining quotes)
-            cleaned = cleaned.replace('"', '').replace("'", '')
+            cleaned = cleaned.replace('"', "").replace("'", "")
 
         return cleaned.strip()
 
@@ -163,11 +159,11 @@ class BaseLabParser(ABC):
         name = self.clean_ocr_artifacts(name)
 
         # Remove superscript patterns (01, 02, etc.)
-        name = re.sub(r'\d{2}$', '', name)
-        name = re.sub(r'\s+\d{2}\s+', ' ', name)
+        name = re.sub(r"\d{2}$", "", name)
+        name = re.sub(r"\s+\d{2}\s+", " ", name)
 
         # Remove extra whitespace
-        name = ' '.join(name.split())
+        name = " ".join(name.split())
 
         return name.strip()
 
@@ -181,8 +177,8 @@ class BaseLabParser(ABC):
         parts = value_str.strip().split()
 
         try:
-            value = float(parts[0].replace(',', ''))
-            flag = ' '.join(parts[1:]) if len(parts) > 1 else ""
+            value = float(parts[0].replace(",", ""))
+            flag = " ".join(parts[1:]) if len(parts) > 1 else ""
             return value, flag
         except (ValueError, IndexError):
             return None, ""
@@ -191,7 +187,9 @@ class BaseLabParser(ABC):
         """Clean and standardize reference range."""
         # Remove extra whitespace and common prefixes
         range_str = range_str.strip()
-        range_str = re.sub(r'^(Ref\.?\s*Range:?|Reference:?)\s*', '', range_str, flags=re.IGNORECASE)
+        range_str = re.sub(
+            r"^(Ref\.?\s*Range:?|Reference:?)\s*", "", range_str, flags=re.IGNORECASE
+        )
         return range_str
 
     def extract_date_from_text(self, text: str) -> str:
@@ -211,12 +209,12 @@ class BaseLabParser(ABC):
 
         # Common date field patterns (prioritize collected > received > reported)
         date_patterns = [
-            r'Date\s+Collected[:\s]+(\d{1,2}/\d{1,2}/\d{4})',
-            r'Collection\s+Date[:\s]+(\d{1,2}/\d{1,2}/\d{4})',
-            r'Date\s+Received[:\s]+(\d{1,2}/\d{1,2}/\d{4})',
-            r'Date\s+Reported[:\s]+(\d{1,2}/\d{1,2}/\d{4})',
-            r'Test\s+Date[:\s]+(\d{1,2}/\d{1,2}/\d{4})',
-            r'Specimen\s+Collected[:\s]+(\d{1,2}/\d{1,2}/\d{4})',
+            r"Date\s+Collected[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+            r"Collection\s+Date[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+            r"Date\s+Received[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+            r"Date\s+Reported[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+            r"Test\s+Date[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+            r"Specimen\s+Collected[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
         ]
 
         for pattern in date_patterns:
@@ -225,9 +223,9 @@ class BaseLabParser(ABC):
                 date_str = match.group(1)
                 try:
                     # Parse MM/DD/YYYY format
-                    date_obj = datetime.strptime(date_str, '%m/%d/%Y')
+                    date_obj = datetime.strptime(date_str, "%m/%d/%Y")
                     # Return in YYYY-MM-DD format
-                    return date_obj.strftime('%Y-%m-%d')
+                    return date_obj.strftime("%Y-%m-%d")
                 except ValueError:
                     continue
 

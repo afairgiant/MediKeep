@@ -1,7 +1,4 @@
-import React from 'react';
-import {
-  Modal,
-} from '@mantine/core';
+import { Modal } from '@mantine/core';
 import MantineFamilyMemberForm from '../MantineFamilyMemberForm';
 import MantineFamilyConditionForm from '../MantineFamilyConditionForm';
 import logger from '../../../services/logger';
@@ -16,7 +13,7 @@ const FamilyHistoryFormWrapper = ({
   onMemberInputChange,
   onMemberSubmit,
   memberFormLoading,
-  
+
   // Family Condition Form Props
   conditionFormOpen,
   onConditionFormClose,
@@ -38,7 +35,7 @@ const FamilyHistoryFormWrapper = ({
     });
   };
 
-  const handleMemberFormSubmit = async (e) => {
+  const handleMemberFormSubmit = async e => {
     try {
       await onMemberSubmit(e);
     } catch (error) {
@@ -47,7 +44,7 @@ const FamilyHistoryFormWrapper = ({
     }
   };
 
-  const handleConditionFormSubmit = async (e) => {
+  const handleConditionFormSubmit = async e => {
     try {
       await onConditionSubmit(e);
     } catch (error) {

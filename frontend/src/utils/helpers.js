@@ -11,11 +11,14 @@ import { DATE_FORMATS } from './constants';
  * @param {string} format - Format string (legacy parameter, maintained for compatibility)
  * @returns {string} - Formatted date
  */
-export const formatDate = (utcDate, format = DATE_FORMATS.DISPLAY) => {
+export const formatDate = (utcDate, _format = DATE_FORMATS.DISPLAY) => {
   if (!utcDate) return 'N/A';
 
   // For date-only strings (like birth dates), parse them as local dates to avoid timezone issues
-  if (typeof utcDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(utcDate.trim())) {
+  if (
+    typeof utcDate === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(utcDate.trim())
+  ) {
     const [year, month, day] = utcDate.trim().split('-').map(Number);
     if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
       const localDate = new Date(year, month - 1, day);

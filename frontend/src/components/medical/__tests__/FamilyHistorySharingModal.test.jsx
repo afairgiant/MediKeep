@@ -4,7 +4,6 @@ import { vi } from 'vitest';
  * Comprehensive tests for FamilyHistorySharingModal component
  * Tests single sharing, bulk sharing, form validation, and error handling
  */
-import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { notifications } from '@mantine/notifications';
@@ -19,7 +18,7 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 vi.mock('../../../utils/helpers', () => ({
-  formatDateTime: (date) => new Date(date).toLocaleDateString(),
+  formatDateTime: date => new Date(date).toLocaleDateString(),
 }));
 
 const { mockFamilyHistoryApi } = vi.hoisted(() => ({
@@ -101,40 +100,48 @@ describe('FamilyHistorySharingModal Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFamilyHistoryApi.getFamilyMemberShares.mockResolvedValue(mockShares);
-    mockFamilyHistoryApi.sendShareInvitation.mockResolvedValue({ message: 'Invitation sent' });
+    mockFamilyHistoryApi.sendShareInvitation.mockResolvedValue({
+      message: 'Invitation sent',
+    });
     mockFamilyHistoryApi.bulkSendInvitations.mockResolvedValue({
       total_sent: 2,
       total_failed: 0,
       results: [],
     });
-    mockFamilyHistoryApi.revokeShare.mockResolvedValue({ message: 'Share revoked' });
+    mockFamilyHistoryApi.revokeShare.mockResolvedValue({
+      message: 'Share revoked',
+    });
   });
 
   const renderSharingModal = (props = {}) => {
     const defaultProps = { ...mockProps, ...props };
 
-    return render(
-      <FamilyHistorySharingModal {...defaultProps} />
-    );
+    return render(<FamilyHistorySharingModal {...defaultProps} />);
   };
 
   describe('Modal Display and Basic Rendering', () => {
     it('should render modal when opened with single family member', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      expect(screen.getByText("Share John Doe's Family History")).toBeInTheDocument();
+      expect(
+        screen.getByText("Share John Doe's Family History")
+      ).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('father')).toBeInTheDocument();
     });
 
     it('should render modal in bulk mode with family members', () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
-      expect(screen.getByText('Share Multiple Family Members (3 selected)')).toBeInTheDocument();
-      expect(screen.getByText('sharing.selectFamilyMembers')).toBeInTheDocument();
+      expect(
+        screen.getByText('Share Multiple Family Members (3 selected)')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('sharing.selectFamilyMembers')
+      ).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Doe')).toBeInTheDocument();
       expect(screen.getByText('Bob Smith')).toBeInTheDocument();
@@ -143,13 +150,19 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should not render when opened is false', () => {
       renderSharingModal({ opened: false, familyMember: mockFamilyMember });
 
-      expect(screen.queryByText("Share John Doe's Family History")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Share John Doe's Family History")
+      ).not.toBeInTheDocument();
     });
 
     it('should display appropriate info alerts', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      expect(screen.getByText(/Share John Doe's family medical history with another user/)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Share John Doe's family medical history with another user/
+        )
+      ).toBeInTheDocument();
       expect(screen.getByText('sharing.invitationInfo')).toBeInTheDocument();
     });
 
@@ -157,7 +170,9 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       await waitFor(() => {
-        expect(mockFamilyHistoryApi.getFamilyMemberShares).toHaveBeenCalledWith('member-123');
+        expect(mockFamilyHistoryApi.getFamilyMemberShares).toHaveBeenCalledWith(
+          'member-123'
+        );
       });
     });
   });
@@ -166,23 +181,43 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should render sharing form with all required fields', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      expect(screen.getByPlaceholderText('Enter username or email')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Add a note about why you\'re sharing this...')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Select expiration time')).toBeInTheDocument();
-      expect(screen.getByText(/Share with \(username or email\)/)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('Enter username or email')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(
+          "Add a note about why you're sharing this..."
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('Select expiration time')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Share with \(username or email\)/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Note (optional)')).toBeInTheDocument();
       expect(screen.getByText('Invitation Expiration')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Send Invitation (View Only)' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Send Invitation (View Only)' })
+      ).toBeInTheDocument();
     });
 
     it('should update form fields when typing', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      const noteInput = screen.getByPlaceholderText('Add a note about why you\'re sharing this...');
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      const noteInput = screen.getByPlaceholderText(
+        "Add a note about why you're sharing this..."
+      );
 
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
-      fireEvent.change(noteInput, { target: { value: 'Please review this family history' } });
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
+      fireEvent.change(noteInput, {
+        target: { value: 'Please review this family history' },
+      });
 
       expect(identifierInput).toHaveValue('doctor@hospital.com');
       expect(noteInput).toHaveValue('Please review this family history');
@@ -191,7 +226,9 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should handle expiration dropdown selection', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const expirationInput = screen.getByPlaceholderText('Select expiration time');
+      const expirationInput = screen.getByPlaceholderText(
+        'Select expiration time'
+      );
 
       await userEvent.click(expirationInput);
 
@@ -208,7 +245,9 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should handle never expires option', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const expirationInput = screen.getByPlaceholderText('Select expiration time');
+      const expirationInput = screen.getByPlaceholderText(
+        'Select expiration time'
+      );
 
       await userEvent.click(expirationInput);
 
@@ -224,14 +263,20 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should validate required fields before sending invitation', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const sendButton = screen.getByRole('button', { name: 'Send Invitation (View Only)' });
-      
+      const sendButton = screen.getByRole('button', {
+        name: 'Send Invitation (View Only)',
+      });
+
       // Button should be disabled when identifier is empty
       expect(sendButton).toBeDisabled();
 
       // Fill in identifier
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
 
       // Button should now be enabled
       expect(sendButton).not.toBeDisabled();
@@ -241,28 +286,43 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       // Button should be disabled when identifier is empty
-      const sendButton = screen.getByRole('button', { name: 'Send Invitation (View Only)' });
+      const sendButton = screen.getByRole('button', {
+        name: 'Send Invitation (View Only)',
+      });
       expect(sendButton).toBeDisabled();
     });
 
     it('should send invitation successfully', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      const noteInput = screen.getByPlaceholderText('Add a note about why you\'re sharing this...');
-      const sendButton = screen.getByRole('button', { name: 'Send Invitation (View Only)' });
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      const noteInput = screen.getByPlaceholderText(
+        "Add a note about why you're sharing this..."
+      );
+      const sendButton = screen.getByRole('button', {
+        name: 'Send Invitation (View Only)',
+      });
 
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
-      fireEvent.change(noteInput, { target: { value: 'Medical consultation needed' } });
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
+      fireEvent.change(noteInput, {
+        target: { value: 'Medical consultation needed' },
+      });
       await userEvent.click(sendButton);
 
       await waitFor(() => {
-        expect(mockFamilyHistoryApi.sendShareInvitation).toHaveBeenCalledWith('member-123', {
-          shared_with_identifier: 'doctor@hospital.com',
-          permission_level: 'view',
-          sharing_note: 'Medical consultation needed',
-          expires_hours: 168,
-        });
+        expect(mockFamilyHistoryApi.sendShareInvitation).toHaveBeenCalledWith(
+          'member-123',
+          {
+            shared_with_identifier: 'doctor@hospital.com',
+            permission_level: 'view',
+            sharing_note: 'Medical consultation needed',
+            expires_hours: 168,
+          }
+        );
       });
 
       expect(notifications.show).toHaveBeenCalledWith({
@@ -278,12 +338,20 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should clear form after successful submission', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      const noteInput = screen.getByPlaceholderText('Add a note about why you\'re sharing this...');
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      const noteInput = screen.getByPlaceholderText(
+        "Add a note about why you're sharing this..."
+      );
 
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
       fireEvent.change(noteInput, { target: { value: 'Test note' } });
-      await userEvent.click(screen.getByRole('button', { name: 'Send Invitation (View Only)' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Send Invitation (View Only)' })
+      );
 
       await waitFor(() => {
         expect(identifierInput).toHaveValue('');
@@ -298,9 +366,15 @@ describe('FamilyHistorySharingModal Component', () => {
 
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'nonexistent@user.com' } });
-      await userEvent.click(screen.getByRole('button', { name: 'Send Invitation (View Only)' }));
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'nonexistent@user.com' },
+      });
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Send Invitation (View Only)' })
+      );
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith(
@@ -317,11 +391,17 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       await waitFor(() => {
-        expect(screen.getByText('sharing.currentlySharedWith')).toBeInTheDocument();
+        expect(
+          screen.getByText('sharing.currentlySharedWith')
+        ).toBeInTheDocument();
         expect(screen.getByText('Dr. Sarah Johnson')).toBeInTheDocument();
-        expect(screen.getByText('sarah.johnson@hospital.com')).toBeInTheDocument();
+        expect(
+          screen.getByText('sarah.johnson@hospital.com')
+        ).toBeInTheDocument();
         expect(screen.getByText('Dr. Michael Brown')).toBeInTheDocument();
-        expect(screen.getByText('michael.brown@clinic.com')).toBeInTheDocument();
+        expect(
+          screen.getByText('michael.brown@clinic.com')
+        ).toBeInTheDocument();
       });
     });
 
@@ -329,7 +409,9 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       await waitFor(() => {
-        expect(screen.getByText('"Shared for medical consultation"')).toBeInTheDocument();
+        expect(
+          screen.getByText('\u201CShared for medical consultation\u201D')
+        ).toBeInTheDocument();
       });
     });
 
@@ -338,13 +420,15 @@ describe('FamilyHistorySharingModal Component', () => {
 
       await waitFor(() => {
         // formatDateTime uses toLocaleString with 2-digit month/day, producing e.g. "01/15/2024, 5:30 AM"
-        expect(screen.getAllByText('sharing.sharedOn').length).toBeGreaterThanOrEqual(2);
+        expect(
+          screen.getAllByText('sharing.sharedOn').length
+        ).toBeGreaterThanOrEqual(2);
       });
     });
 
     it('should show empty state when no shares exist', async () => {
       mockFamilyHistoryApi.getFamilyMemberShares.mockResolvedValue([]);
-      
+
       renderSharingModal({ familyMember: mockFamilyMember });
 
       await waitFor(() => {
@@ -354,16 +438,22 @@ describe('FamilyHistorySharingModal Component', () => {
 
     it('should show loading state while loading shares', () => {
       // Mock a slow API response
-      mockFamilyHistoryApi.getFamilyMemberShares.mockImplementation(() => new Promise(() => {}));
-      
+      mockFamilyHistoryApi.getFamilyMemberShares.mockImplementation(
+        () => new Promise(() => {})
+      );
+
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      expect(screen.getByText('Loading sharing information...')).toBeInTheDocument();
+      expect(
+        screen.getByText('Loading sharing information...')
+      ).toBeInTheDocument();
     });
 
     it('should handle errors when loading shares', async () => {
-      mockFamilyHistoryApi.getFamilyMemberShares.mockRejectedValue(new Error('API Error'));
-      
+      mockFamilyHistoryApi.getFamilyMemberShares.mockRejectedValue(
+        new Error('API Error')
+      );
+
       renderSharingModal({ familyMember: mockFamilyMember });
 
       await waitFor(() => {
@@ -384,11 +474,16 @@ describe('FamilyHistorySharingModal Component', () => {
       });
 
       // Find and click the revoke button (trash icon)
-      const revokeButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.tabler-icon-trash'));
+      const revokeButtons = screen
+        .getAllByRole('button')
+        .filter(btn => btn.querySelector('.tabler-icon-trash'));
       await userEvent.click(revokeButtons[0]);
 
       await waitFor(() => {
-        expect(mockFamilyHistoryApi.revokeShare).toHaveBeenCalledWith('member-123', 'user-456');
+        expect(mockFamilyHistoryApi.revokeShare).toHaveBeenCalledWith(
+          'member-123',
+          'user-456'
+        );
       });
 
       expect(notifications.show).toHaveBeenCalledWith({
@@ -402,7 +497,9 @@ describe('FamilyHistorySharingModal Component', () => {
     });
 
     it('should handle errors when revoking shares', async () => {
-      mockFamilyHistoryApi.revokeShare.mockRejectedValue(new Error('Revoke failed'));
+      mockFamilyHistoryApi.revokeShare.mockRejectedValue(
+        new Error('Revoke failed')
+      );
 
       renderSharingModal({ familyMember: mockFamilyMember });
 
@@ -410,7 +507,9 @@ describe('FamilyHistorySharingModal Component', () => {
         expect(screen.getByText('Dr. Sarah Johnson')).toBeInTheDocument();
       });
 
-      const revokeButtons = screen.getAllByRole('button').filter(btn => btn.querySelector('.tabler-icon-trash'));
+      const revokeButtons = screen
+        .getAllByRole('button')
+        .filter(btn => btn.querySelector('.tabler-icon-trash'));
       await userEvent.click(revokeButtons[0]);
 
       await waitFor(() => {
@@ -425,86 +524,112 @@ describe('FamilyHistorySharingModal Component', () => {
 
   describe('Bulk Mode - Family Member Selection', () => {
     it('should initialize with all family members selected', () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
       mockFamilyMembers.forEach(member => {
-        const checkbox = screen.getByRole('checkbox', { name: new RegExp(member.name) });
+        const checkbox = screen.getByRole('checkbox', {
+          name: new RegExp(member.name),
+        });
         expect(checkbox).toBeChecked();
       });
 
-      expect(screen.getByText('Share Multiple Family Members (3 selected)')).toBeInTheDocument();
+      expect(
+        screen.getByText('Share Multiple Family Members (3 selected)')
+      ).toBeInTheDocument();
     });
 
     it('should handle individual member selection toggle', async () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
       const johnCheckbox = screen.getByRole('checkbox', { name: /John Doe/ });
-      
+
       await userEvent.click(johnCheckbox);
 
       expect(johnCheckbox).not.toBeChecked();
-      expect(screen.getByText('Share Multiple Family Members (2 selected)')).toBeInTheDocument();
+      expect(
+        screen.getByText('Share Multiple Family Members (2 selected)')
+      ).toBeInTheDocument();
 
       await userEvent.click(johnCheckbox);
 
       expect(johnCheckbox).toBeChecked();
-      expect(screen.getByText('Share Multiple Family Members (3 selected)')).toBeInTheDocument();
+      expect(
+        screen.getByText('Share Multiple Family Members (3 selected)')
+      ).toBeInTheDocument();
     });
 
     it('should handle select all / deselect all functionality', async () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
-      const selectAllButton = screen.getByRole('button', { name: 'Deselect All' });
-      
+      const selectAllButton = screen.getByRole('button', {
+        name: 'Deselect All',
+      });
+
       await userEvent.click(selectAllButton);
 
       // All checkboxes should be unchecked
       mockFamilyMembers.forEach(member => {
-        const checkbox = screen.getByRole('checkbox', { name: new RegExp(member.name) });
+        const checkbox = screen.getByRole('checkbox', {
+          name: new RegExp(member.name),
+        });
         expect(checkbox).not.toBeChecked();
       });
 
-      expect(screen.getByText('Share Multiple Family Members (0 selected)')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Select All' })).toBeInTheDocument();
+      expect(
+        screen.getByText('Share Multiple Family Members (0 selected)')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Select All' })
+      ).toBeInTheDocument();
 
       await userEvent.click(screen.getByRole('button', { name: 'Select All' }));
 
       // All checkboxes should be checked again
       mockFamilyMembers.forEach(member => {
-        const checkbox = screen.getByRole('checkbox', { name: new RegExp(member.name) });
+        const checkbox = screen.getByRole('checkbox', {
+          name: new RegExp(member.name),
+        });
         expect(checkbox).toBeChecked();
       });
     });
 
     it('should disable send button when no members are selected in bulk mode', async () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
 
       // Deselect all members
-      await userEvent.click(screen.getByRole('button', { name: 'Deselect All' }));
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Deselect All' })
+      );
 
-      const sendButton = screen.getByRole('button', { name: 'Send 0 Invitation(s) (View Only)' });
+      const sendButton = screen.getByRole('button', {
+        name: 'Send 0 Invitation(s) (View Only)',
+      });
       expect(sendButton).toBeDisabled();
     });
 
     it('should display relationship badges for family members', () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
       expect(screen.getByText('father')).toBeInTheDocument();
@@ -515,17 +640,27 @@ describe('FamilyHistorySharingModal Component', () => {
 
   describe('Bulk Mode - Invitation Sending', () => {
     it('should send bulk invitations successfully', async () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      const noteInput = screen.getByPlaceholderText('Add a note about why you\'re sharing this...');
-      const sendButton = screen.getByRole('button', { name: 'Send 3 Invitation(s) (View Only)' });
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      const noteInput = screen.getByPlaceholderText(
+        "Add a note about why you're sharing this..."
+      );
+      const sendButton = screen.getByRole('button', {
+        name: 'Send 3 Invitation(s) (View Only)',
+      });
 
-      fireEvent.change(identifierInput, { target: { value: 'specialist@hospital.com' } });
-      fireEvent.change(noteInput, { target: { value: 'Family consultation needed' } });
+      fireEvent.change(identifierInput, {
+        target: { value: 'specialist@hospital.com' },
+      });
+      fireEvent.change(noteInput, {
+        target: { value: 'Family consultation needed' },
+      });
       await userEvent.click(sendButton);
 
       await waitFor(() => {
@@ -555,14 +690,20 @@ describe('FamilyHistorySharingModal Component', () => {
         results: [],
       });
 
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
-      await userEvent.click(screen.getByRole('button', { name: 'Send 3 Invitation(s) (View Only)' }));
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Send 3 Invitation(s) (View Only)' })
+      );
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith({
@@ -582,18 +723,24 @@ describe('FamilyHistorySharingModal Component', () => {
     });
 
     it('should send invitations only for selected members', async () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: mockFamilyMembers 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: mockFamilyMembers,
       });
 
       // Deselect one member
       const janeCheckbox = screen.getByRole('checkbox', { name: /Jane Doe/ });
       await userEvent.click(janeCheckbox);
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
-      await userEvent.click(screen.getByRole('button', { name: 'Send 2 Invitation(s) (View Only)' }));
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Send 2 Invitation(s) (View Only)' })
+      );
 
       await waitFor(() => {
         expect(mockFamilyHistoryApi.bulkSendInvitations).toHaveBeenCalledWith({
@@ -607,16 +754,24 @@ describe('FamilyHistorySharingModal Component', () => {
     });
 
     it('should handle bulk invitation API errors', async () => {
-      mockFamilyHistoryApi.bulkSendInvitations.mockRejectedValue(new Error('Bulk send failed'));
+      mockFamilyHistoryApi.bulkSendInvitations.mockRejectedValue(
+        new Error('Bulk send failed')
+      );
 
       renderSharingModal({
         bulkMode: true,
-        familyMembers: mockFamilyMembers
+        familyMembers: mockFamilyMembers,
       });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
-      await userEvent.click(screen.getByRole('button', { name: 'Send 3 Invitation(s) (View Only)' }));
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Send 3 Invitation(s) (View Only)' })
+      );
 
       await waitFor(() => {
         expect(notifications.show).toHaveBeenCalledWith(
@@ -632,25 +787,35 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should clear form and close modal when handleClose is called', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'test@example.com' } });
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'test@example.com' },
+      });
 
       // Close modal (this would typically be triggered by clicking X or pressing Escape)
       // For testing purposes, we can't easily trigger the modal close, but we can verify
       // that the form data gets cleared through other interactions
-      
+
       expect(identifierInput).toHaveValue('test@example.com');
     });
 
     it('should not call onSuccess if not provided', async () => {
-      renderSharingModal({ 
-        familyMember: mockFamilyMember, 
-        onSuccess: undefined 
+      renderSharingModal({
+        familyMember: mockFamilyMember,
+        onSuccess: undefined,
       });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
-      await userEvent.click(screen.getByRole('button', { name: 'Send Invitation (View Only)' }));
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Send Invitation (View Only)' })
+      );
 
       await waitFor(() => {
         expect(mockFamilyHistoryApi.sendShareInvitation).toHaveBeenCalled();
@@ -661,8 +826,12 @@ describe('FamilyHistorySharingModal Component', () => {
 
     it('should display correct title based on mode and selection', () => {
       // Single mode
-      const { rerender } = renderSharingModal({ familyMember: mockFamilyMember });
-      expect(screen.getByText("Share John Doe's Family History")).toBeInTheDocument();
+      const { rerender } = renderSharingModal({
+        familyMember: mockFamilyMember,
+      });
+      expect(
+        screen.getByText("Share John Doe's Family History")
+      ).toBeInTheDocument();
 
       // Bulk mode with all selected
       rerender(
@@ -672,7 +841,9 @@ describe('FamilyHistorySharingModal Component', () => {
           familyMembers={mockFamilyMembers}
         />
       );
-      expect(screen.getByText('Share Multiple Family Members (3 selected)')).toBeInTheDocument();
+      expect(
+        screen.getByText('Share Multiple Family Members (3 selected)')
+      ).toBeInTheDocument();
     });
 
     it('should show loading state on buttons during API calls', async () => {
@@ -685,10 +856,16 @@ describe('FamilyHistorySharingModal Component', () => {
 
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      const sendButton = screen.getByRole('button', { name: 'Send Invitation (View Only)' });
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      const sendButton = screen.getByRole('button', {
+        name: 'Send Invitation (View Only)',
+      });
 
-      fireEvent.change(identifierInput, { target: { value: 'doctor@hospital.com' } });
+      fireEvent.change(identifierInput, {
+        target: { value: 'doctor@hospital.com' },
+      });
       // Use fireEvent.click because userEvent.click waits for async handler completion
       fireEvent.click(sendButton);
 
@@ -712,17 +889,25 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should have proper form labels and descriptions', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      expect(screen.getByText(/Share with \(username or email\)/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Share with \(username or email\)/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Note (optional)')).toBeInTheDocument();
       expect(screen.getByText('Invitation Expiration')).toBeInTheDocument();
-      expect(screen.getByText('How long the recipient has to accept the invitation')).toBeInTheDocument();
+      expect(
+        screen.getByText('How long the recipient has to accept the invitation')
+      ).toBeInTheDocument();
     });
 
     it('should support keyboard navigation', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      const noteInput = screen.getByPlaceholderText('Add a note about why you\'re sharing this...');
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      const noteInput = screen.getByPlaceholderText(
+        "Add a note about why you're sharing this..."
+      );
 
       identifierInput.focus();
       expect(identifierInput).toHaveFocus();
@@ -734,7 +919,11 @@ describe('FamilyHistorySharingModal Component', () => {
     it('should provide clear user feedback through alerts', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      expect(screen.getByText(/This only shares family history data, not your personal medical records/)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /This only shares family history data, not your personal medical records/
+        )
+      ).toBeInTheDocument();
       expect(screen.getByText('sharing.invitationInfo')).toBeInTheDocument();
     });
 
@@ -742,9 +931,13 @@ describe('FamilyHistorySharingModal Component', () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
       // Icons should be present in the form (though specific icon testing is limited)
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
-      const noteInput = screen.getByPlaceholderText('Add a note about why you\'re sharing this...');
-      
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
+      const noteInput = screen.getByPlaceholderText(
+        "Add a note about why you're sharing this..."
+      );
+
       expect(identifierInput).toBeInTheDocument();
       expect(noteInput).toBeInTheDocument();
     });
@@ -752,13 +945,17 @@ describe('FamilyHistorySharingModal Component', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty family members array in bulk mode', () => {
-      renderSharingModal({ 
-        bulkMode: true, 
-        familyMembers: [] 
+      renderSharingModal({
+        bulkMode: true,
+        familyMembers: [],
       });
 
-      expect(screen.getByText('Share Multiple Family Members (0 selected)')).toBeInTheDocument();
-      expect(screen.getByText('sharing.selectFamilyMembers')).toBeInTheDocument();
+      expect(
+        screen.getByText('Share Multiple Family Members (0 selected)')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('sharing.selectFamilyMembers')
+      ).toBeInTheDocument();
     });
 
     it('should handle missing family member data', () => {
@@ -773,7 +970,9 @@ describe('FamilyHistorySharingModal Component', () => {
         ...share,
         sharing_note: undefined,
       }));
-      mockFamilyHistoryApi.getFamilyMemberShares.mockResolvedValue(sharesWithoutNotes);
+      mockFamilyHistoryApi.getFamilyMemberShares.mockResolvedValue(
+        sharesWithoutNotes
+      );
 
       renderSharingModal({ familyMember: mockFamilyMember });
 
@@ -781,16 +980,22 @@ describe('FamilyHistorySharingModal Component', () => {
         expect(screen.getByText('Dr. Sarah Johnson')).toBeInTheDocument();
       });
 
-      expect(screen.queryByText('"Shared for medical consultation"')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('\u201CShared for medical consultation\u201D')
+      ).not.toBeInTheDocument();
     });
 
     it('should handle whitespace-only input validation', async () => {
       renderSharingModal({ familyMember: mockFamilyMember });
 
-      const identifierInput = screen.getByPlaceholderText('Enter username or email');
+      const identifierInput = screen.getByPlaceholderText(
+        'Enter username or email'
+      );
       fireEvent.change(identifierInput, { target: { value: '   ' } }); // Only whitespace
 
-      const sendButton = screen.getByRole('button', { name: 'Send Invitation (View Only)' });
+      const sendButton = screen.getByRole('button', {
+        name: 'Send Invitation (View Only)',
+      });
       expect(sendButton).toBeDisabled();
     });
   });

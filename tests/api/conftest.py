@@ -1,6 +1,7 @@
 """
 Shared fixtures for API tests.
 """
+
 import pytest
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
@@ -24,7 +25,7 @@ def user_with_patient(db_session: Session):
         last_name="User",
         birth_date=date(1990, 1, 1),
         gender="M",
-        address="123 Test St"
+        address="123 Test St",
     )
     patient = patient_crud.create_for_user(
         db_session, user_id=user_data["user"].id, patient_data=patient_data
@@ -46,7 +47,9 @@ def authenticated_headers(user_with_patient):
 
 
 @pytest.fixture
-def populated_patient_data(client: TestClient, user_with_patient, authenticated_headers):
+def populated_patient_data(
+    client: TestClient, user_with_patient, authenticated_headers
+):
     """Create various medical records for testing search and reports.
 
     This fixture populates the patient with:
@@ -68,9 +71,9 @@ def populated_patient_data(client: TestClient, user_with_patient, authenticated_
             "indication": "Hypertension",
             "status": "active",
             "effective_period_start": str(date.today() - timedelta(days=30)),
-            "patient_id": patient_id
+            "patient_id": patient_id,
         },
-        headers=authenticated_headers
+        headers=authenticated_headers,
     )
 
     client.post(
@@ -81,9 +84,9 @@ def populated_patient_data(client: TestClient, user_with_patient, authenticated_
             "indication": "Type 2 Diabetes",
             "status": "active",
             "effective_period_start": str(date.today() - timedelta(days=60)),
-            "patient_id": patient_id
+            "patient_id": patient_id,
         },
-        headers=authenticated_headers
+        headers=authenticated_headers,
     )
 
     # Create conditions
@@ -94,9 +97,9 @@ def populated_patient_data(client: TestClient, user_with_patient, authenticated_
             "diagnosis": "Essential hypertension, stage 1",
             "status": "active",
             "diagnosed_date": str(date.today() - timedelta(days=365)),
-            "patient_id": patient_id
+            "patient_id": patient_id,
         },
-        headers=authenticated_headers
+        headers=authenticated_headers,
     )
 
     client.post(
@@ -106,9 +109,9 @@ def populated_patient_data(client: TestClient, user_with_patient, authenticated_
             "diagnosis": "Diabetes type 2, well controlled",
             "status": "active",
             "diagnosed_date": str(date.today() - timedelta(days=180)),
-            "patient_id": patient_id
+            "patient_id": patient_id,
         },
-        headers=authenticated_headers
+        headers=authenticated_headers,
     )
 
     # Create allergy
@@ -119,9 +122,9 @@ def populated_patient_data(client: TestClient, user_with_patient, authenticated_
             "severity": "severe",
             "reaction": "Anaphylaxis",
             "status": "active",
-            "patient_id": patient_id
+            "patient_id": patient_id,
         },
-        headers=authenticated_headers
+        headers=authenticated_headers,
     )
 
     # Create immunization
@@ -131,9 +134,9 @@ def populated_patient_data(client: TestClient, user_with_patient, authenticated_
             "vaccine_name": "COVID-19 Vaccine",
             "date_administered": str(date.today() - timedelta(days=90)),
             "status": "completed",
-            "patient_id": patient_id
+            "patient_id": patient_id,
         },
-        headers=authenticated_headers
+        headers=authenticated_headers,
     )
 
     return user_with_patient

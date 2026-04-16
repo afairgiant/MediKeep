@@ -1,4 +1,3 @@
-import React from 'react';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -66,7 +65,10 @@ vi.mock('../../../services/api/adminApi', () => ({
       { name: 'encounter', verbose_name_plural: 'Encounters' },
       { name: 'patient_share', verbose_name_plural: 'Patient Shares' },
       { name: 'invitation', verbose_name_plural: 'Invitations' },
-      { name: 'family_history_share', verbose_name_plural: 'Family History Shares' },
+      {
+        name: 'family_history_share',
+        verbose_name_plural: 'Family History Shares',
+      },
       { name: 'emergency_contact', verbose_name_plural: 'Emergency Contacts' },
       { name: 'insurance', verbose_name_plural: 'Insurance' },
       { name: 'family_member', verbose_name_plural: 'Family Members' },
@@ -75,7 +77,10 @@ vi.mock('../../../services/api/adminApi', () => ({
       { name: 'injury', verbose_name_plural: 'Injuries' },
       { name: 'injury_type', verbose_name_plural: 'Injury Types' },
       { name: 'symptom', verbose_name_plural: 'Symptoms' },
-      { name: 'symptom_occurrence', verbose_name_plural: 'Symptom Occurrences' },
+      {
+        name: 'symptom_occurrence',
+        verbose_name_plural: 'Symptom Occurrences',
+      },
       { name: 'medical_equipment', verbose_name_plural: 'Medical Equipment' },
     ]),
   },
@@ -362,8 +367,12 @@ describe('DataModels', () => {
       fireEvent.click(screen.getByLabelText('Clear filter'));
 
       await waitFor(() => {
-        expect(screen.getAllByText('Medical Records').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getAllByText('File Management').length).toBeGreaterThanOrEqual(1);
+        expect(
+          screen.getAllByText('Medical Records').length
+        ).toBeGreaterThanOrEqual(1);
+        expect(
+          screen.getAllByText('File Management').length
+        ).toBeGreaterThanOrEqual(1);
       });
     });
   });
@@ -376,7 +385,9 @@ describe('DataModels', () => {
       fireEvent.change(input, { target: { value: 'xyznonexistent' } });
       await waitFor(() => {
         // Mock t() returns the key when second arg is an object
-        expect(screen.getByText('dataModels.noMatchFilter')).toBeInTheDocument();
+        expect(
+          screen.getByText('dataModels.noMatchFilter')
+        ).toBeInTheDocument();
       });
     });
 
@@ -385,7 +396,9 @@ describe('DataModels', () => {
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'xyznonexistent' } });
       await waitFor(() => {
-        expect(screen.getByText('dataModels.noMatchFilter')).toBeInTheDocument();
+        expect(
+          screen.getByText('dataModels.noMatchFilter')
+        ).toBeInTheDocument();
       });
       expect(input.value).toBe('xyznonexistent');
     });
@@ -405,13 +418,17 @@ describe('DataModels', () => {
       const input = screen.getByLabelText('Filter data models');
       fireEvent.change(input, { target: { value: 'xyznonexistent' } });
       await waitFor(() => {
-        expect(screen.getByText('dataModels.noMatchFilter')).toBeInTheDocument();
+        expect(
+          screen.getByText('dataModels.noMatchFilter')
+        ).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByLabelText('Clear filter'));
 
       await waitFor(() => {
-        expect(screen.queryByText('dataModels.noMatchFilter')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('dataModels.noMatchFilter')
+        ).not.toBeInTheDocument();
         expect(screen.getByText('Users')).toBeInTheDocument();
       });
     });
@@ -446,7 +463,9 @@ describe('DataModels', () => {
     test('clicking the Emergency Contacts card navigates to /admin/models/emergency_contact', async () => {
       await renderComponent();
       fireEvent.click(screen.getByText('Emergency Contacts'));
-      expect(mockNavigate).toHaveBeenCalledWith('/admin/models/emergency_contact');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/admin/models/emergency_contact'
+      );
     });
 
     test('navigate is not called before any card is clicked', async () => {

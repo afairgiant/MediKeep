@@ -26,7 +26,13 @@ const TYPE_FALLBACKS = {
   [MEDICATION_TYPES.HERBAL]: 'Herbal/Natural',
 };
 
-const INACTIVE_STATUSES = ['inactive', 'stopped', 'completed', 'cancelled', 'on-hold'];
+const INACTIVE_STATUSES = [
+  'inactive',
+  'stopped',
+  'completed',
+  'cancelled',
+  'on-hold',
+];
 
 const MedicationCard = ({
   medication,
@@ -38,31 +44,33 @@ const MedicationCard = ({
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
-  onError,
+  onError: _onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();
   const { getTagColor } = useTagColors();
 
-  const getMedicationPurpose = (medication) => {
+  const getMedicationPurpose = medication => {
     const indication = medication.indication?.trim();
     return indication || t('shared:labels.notSpecified');
   };
 
-  const getMedicationTypeLabel = (type) => {
+  const getMedicationTypeLabel = type => {
     const fallback = TYPE_FALLBACKS[type];
     if (!fallback) return type;
     return t(`common:medications.types.${type}`, fallback);
   };
 
-  const isInactive = INACTIVE_STATUSES.includes(medication.status?.toLowerCase());
+  const isInactive = INACTIVE_STATUSES.includes(
+    medication.status?.toLowerCase()
+  );
 
-  const handleEntityClick = (entityType, entityId) => (e) => {
+  const handleEntityClick = (entityType, entityId) => e => {
     e.stopPropagation();
     navigateToEntity(entityType, entityId, navigate);
   };
 
-  const handleEntityKeyDown = (entityType, entityId) => (e) => {
+  const handleEntityKeyDown = (entityType, entityId) => e => {
     if (e.key === 'Enter') {
       e.stopPropagation();
       navigateToEntity(entityType, entityId, navigate);
@@ -78,10 +86,16 @@ const MedicationCard = ({
       className="clickable-card"
       role="button"
       tabIndex={0}
-      aria-label={t('common:labels.viewDetails', { name: medication.medication_name, defaultValue: `View ${medication.medication_name} details` })}
+      aria-label={t('common:labels.viewDetails', {
+        name: medication.medication_name,
+        defaultValue: `View ${medication.medication_name} details`,
+      })}
       onClick={createCardClickHandler(onView, medication)}
-      onKeyDown={(e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && e.currentTarget === e.target) {
+      onKeyDown={e => {
+        if (
+          (e.key === 'Enter' || e.key === ' ') &&
+          e.currentTarget === e.target
+        ) {
           e.preventDefault();
           onView(medication);
         }
@@ -91,7 +105,7 @@ const MedicationCard = ({
         flexDirection: 'column',
         borderLeft: isInactive
           ? '4px solid var(--mantine-color-red-6)'
-          : '4px solid var(--mantine-color-green-6)'
+          : '4px solid var(--mantine-color-green-6)',
       }}
     >
       <Stack gap="sm" style={{ flex: 1 }}>
@@ -106,24 +120,31 @@ const MedicationCard = ({
                   {medication.dosage}
                 </Badge>
               )}
-              {medication.medication_type && medication.medication_type !== 'prescription' && (
-                <Badge variant="light" color="grape" size="sm">
-                  {getMedicationTypeLabel(medication.medication_type)}
-                </Badge>
-              )}
+              {medication.medication_type &&
+                medication.medication_type !== 'prescription' && (
+                  <Badge variant="light" color="grape" size="sm">
+                    {getMedicationTypeLabel(medication.medication_type)}
+                  </Badge>
+                )}
             </Group>
             <Group gap="xs">
-              {medication.tags && medication.tags.length > 0 && medication.tags.slice(0, 2).map((tag) => (
-                <ClickableTagBadge
-                  key={tag}
-                  tag={tag}
-                  color={getTagColor(tag)}
-                  size="sm"
-                  compact
-                />
-              ))}
+              {medication.tags &&
+                medication.tags.length > 0 &&
+                medication.tags
+                  .slice(0, 2)
+                  .map(tag => (
+                    <ClickableTagBadge
+                      key={tag}
+                      tag={tag}
+                      color={getTagColor(tag)}
+                      size="sm"
+                      compact
+                    />
+                  ))}
               {medication.tags && medication.tags.length > 2 && (
-                <Text size="xs" c="dimmed">+{medication.tags.length - 2}</Text>
+                <Text size="xs" c="dimmed">
+                  +{medication.tags.length - 2}
+                </Text>
               )}
               <FileCountBadge
                 count={fileCount}
@@ -176,8 +197,14 @@ const MedicationCard = ({
                 role="link"
                 tabIndex={0}
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={handleEntityClick('practitioner', medication.practitioner.id)}
-                onKeyDown={handleEntityKeyDown('practitioner', medication.practitioner.id)}
+                onClick={handleEntityClick(
+                  'practitioner',
+                  medication.practitioner.id
+                )}
+                onKeyDown={handleEntityKeyDown(
+                  'practitioner',
+                  medication.practitioner.id
+                )}
                 aria-label={t('shared:labels.viewPractitionerDetails')}
               >
                 {medication.practitioner.name}
@@ -196,8 +223,14 @@ const MedicationCard = ({
                 tabIndex={0}
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={handleEntityClick('pharmacy', medication.pharmacy.id)}
-                onKeyDown={handleEntityKeyDown('pharmacy', medication.pharmacy.id)}
-                aria-label={t('common:labels.viewPharmacyDetails', 'View pharmacy details')}
+                onKeyDown={handleEntityKeyDown(
+                  'pharmacy',
+                  medication.pharmacy.id
+                )}
+                aria-label={t(
+                  'common:labels.viewPharmacyDetails',
+                  'View pharmacy details'
+                )}
               >
                 {medication.pharmacy.name}
               </Text>
@@ -232,30 +265,45 @@ const MedicationCard = ({
           <Button
             variant="filled"
             size="xs"
-            onClick={(e) => { e.stopPropagation(); onView(medication); }}
+            onClick={e => {
+              e.stopPropagation();
+              onView(medication);
+            }}
           >
             {t('common:buttons.view')}
           </Button>
-          <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+          <Tooltip
+            label={disableActionsTooltip}
+            disabled={!disableActions || !disableActionsTooltip}
+          >
             <span onClick={e => e.stopPropagation()}>
               <Button
                 variant="filled"
                 size="xs"
                 disabled={disableActions}
-                onClick={(e) => { e.stopPropagation(); onEdit(medication); }}
+                onClick={e => {
+                  e.stopPropagation();
+                  onEdit(medication);
+                }}
               >
                 {t('shared:labels.edit')}
               </Button>
             </span>
           </Tooltip>
-          <Tooltip label={disableActionsTooltip} disabled={!disableActions || !disableActionsTooltip}>
+          <Tooltip
+            label={disableActionsTooltip}
+            disabled={!disableActions || !disableActionsTooltip}
+          >
             <span onClick={e => e.stopPropagation()}>
               <Button
                 variant="filled"
                 color="red"
                 size="xs"
                 disabled={disableActions}
-                onClick={(e) => { e.stopPropagation(); onDelete(medication.id); }}
+                onClick={e => {
+                  e.stopPropagation();
+                  onDelete(medication.id);
+                }}
               >
                 {t('common:buttons.delete')}
               </Button>

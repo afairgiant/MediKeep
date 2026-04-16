@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
@@ -16,11 +16,7 @@ import {
   Modal,
   Button,
 } from '@mantine/core';
-import {
-  IconPlus,
-  IconShieldCheck,
-  IconStar,
-} from '@tabler/icons-react';
+import { IconPlus, IconShieldCheck, IconStar } from '@tabler/icons-react';
 import MedicalPageActions from '../../components/shared/MedicalPageActions';
 import { useMedicalData, useDataManagement } from '../../hooks';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -48,7 +44,17 @@ const EmergencyContacts = () => {
   const { t } = useTranslation(['common', 'shared']);
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const [viewMode, setViewMode] = usePersistedViewMode('emergency-contacts');
-  const { page, setPage, pageSize, handlePageSizeChange, paginateData, totalPages, resetPage, clampPage, PAGE_SIZE_OPTIONS } = usePagination();
+  const {
+    page,
+    setPage,
+    pageSize,
+    handlePageSizeChange,
+    paginateData,
+    totalPages,
+    resetPage,
+    clampPage,
+    PAGE_SIZE_OPTIONS,
+  } = usePagination();
   const navigate = useNavigate();
   const location = useLocation();
   const responsive = useResponsive();
@@ -65,7 +71,6 @@ const EmergencyContacts = () => {
     deleteItem,
     refreshData,
     clearError,
-    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'emergency_contact',
@@ -76,7 +81,8 @@ const EmergencyContacts = () => {
       create: (data, signal) => apiService.createEmergencyContact(data, signal),
       update: (id, data, signal) =>
         apiService.updateEmergencyContact(id, data, signal),
-      delete: (id, signal, patientId) => apiService.deleteEmergencyContact(id, signal, patientId),
+      delete: (id, signal, patientId) =>
+        apiService.deleteEmergencyContact(id, signal, patientId),
     },
     requiresPatient: true,
   });
@@ -218,8 +224,12 @@ const EmergencyContacts = () => {
   const filteredContacts = dataManagement.data;
   const paginatedContacts = paginateData(filteredContacts);
 
-  useEffect(() => { resetPage(); }, [dataManagement.hasActiveFilters, resetPage]);
-  useEffect(() => { clampPage(filteredContacts.length); }, [filteredContacts.length, clampPage]);
+  useEffect(() => {
+    resetPage();
+  }, [dataManagement.hasActiveFilters, resetPage]);
+  useEffect(() => {
+    clampPage(filteredContacts.length);
+  }, [filteredContacts.length, clampPage]);
 
   // Helper function to get relationship icon
   const getRelationshipIcon = relationship => {
@@ -265,34 +275,37 @@ const EmergencyContacts = () => {
   return (
     <>
       <Container size="xl" py="sm">
-      <PageHeader title={t('shared:categories.emergency_contacts')} icon="📞" />
-
-      <Stack gap="sm" mt="md">
-        <MedicalPageAlerts
-          error={error}
-          successMessage={successMessage}
-          onClearError={clearError}
+        <PageHeader
+          title={t('shared:categories.emergency_contacts')}
+          icon="📞"
         />
 
-        <MedicalPageActions
-          primaryAction={{
-            label: t('emergencyContacts.actions.addNew'),
-            onClick: handleAddContact,
-            leftSection: <IconPlus size={16} />,
-            size: 'sm',
-            disabled: isViewOnly,
-            tooltip: viewOnlyTooltip,
-          }}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          viewToggleSize="sm"
-          mb={0}
-        />
+        <Stack gap="sm" mt="md">
+          <MedicalPageAlerts
+            error={error}
+            successMessage={successMessage}
+            onClearError={clearError}
+          />
 
-        {/* Mantine Filter Controls */}
-        <MedicalPageFilters dataManagement={dataManagement} config={config} />
+          <MedicalPageActions
+            primaryAction={{
+              label: t('emergencyContacts.actions.addNew'),
+              onClick: handleAddContact,
+              leftSection: <IconPlus size={16} />,
+              size: 'sm',
+              disabled: isViewOnly,
+              tooltip: viewOnlyTooltip,
+            }}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            viewToggleSize="sm"
+            mb={0}
+          />
 
-        {/* Content */}
+          {/* Mantine Filter Controls */}
+          <MedicalPageFilters dataManagement={dataManagement} config={config} />
+
+          {/* Content */}
           {filteredContacts.length === 0 ? (
             <Paper shadow="sm" p="xl" radius="md">
               <Center py="xl">
@@ -303,7 +316,9 @@ const EmergencyContacts = () => {
                     color="var(--mantine-color-gray-5)"
                   />
                   <Stack align="center" gap="xs">
-                    <Title order={3}>{t('emergencyContacts.page.noContacts')}</Title>
+                    <Title order={3}>
+                      {t('emergencyContacts.page.noContacts')}
+                    </Title>
                     <Text c="dimmed" ta="center">
                       {dataManagement.hasActiveFilters
                         ? t('shared:emptyStates.adjustSearch')
@@ -317,7 +332,7 @@ const EmergencyContacts = () => {
             <AnimatedCardGrid
               items={paginatedContacts}
               columns={{ base: 12, md: 6, lg: 4 }}
-              renderCard={(contact) => (
+              renderCard={contact => (
                 <Card
                   shadow="sm"
                   padding="lg"
@@ -344,11 +359,7 @@ const EmergencyContacts = () => {
                       </Group>
                       <Group gap="xs">
                         {contact.is_primary && (
-                          <Badge
-                            color="yellow"
-                            variant="filled"
-                            size="sm"
-                          >
+                          <Badge color="yellow" variant="filled" size="sm">
                             <Group gap="xs">
                               <IconStar size={12} />
                               {t('emergencyContacts.card.primary')}
@@ -360,7 +371,9 @@ const EmergencyContacts = () => {
                           variant="light"
                           size="sm"
                         >
-                          {contact.is_active ? t('shared:labels.active') : t('shared:labels.inactive')}
+                          {contact.is_active
+                            ? t('shared:labels.active')
+                            : t('shared:labels.inactive')}
                         </Badge>
                       </Group>
                     </Group>
@@ -441,16 +454,13 @@ const EmergencyContacts = () => {
                       mt="md"
                       pt="md"
                       style={{
-                        borderTop:
-                          '1px solid var(--mantine-color-gray-3)',
+                        borderTop: '1px solid var(--mantine-color-gray-3)',
                       }}
                     >
                       <Text size="sm" c="dimmed" mb="xs">
                         {t('emergencyContacts.card.notes')}
                       </Text>
-                      <Text size="sm">
-                        {contact.notes}
-                      </Text>
+                      <Text size="sm">{contact.notes}</Text>
                     </Box>
                   )}
 
@@ -496,12 +506,42 @@ const EmergencyContacts = () => {
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
                 columns={[
-                  { header: t('shared:labels.name'), accessor: 'name', priority: 'high', width: 200 },
-                  { header: t('shared:labels.relationship'), accessor: 'relationship', priority: 'high', width: 150 },
-                  { header: t('shared:labels.phone'), accessor: 'phone_number', priority: 'low', width: 150 },
-                  { header: t('shared:labels.email'), accessor: 'email', priority: 'medium', width: 150 },
-                  { header: t('emergencyContacts.table.primary'), accessor: 'is_primary', priority: 'high', width: 150 },
-                  { header: t('shared:fields.status'), accessor: 'is_active', priority: 'low', width: 150 }
+                  {
+                    header: t('shared:labels.name'),
+                    accessor: 'name',
+                    priority: 'high',
+                    width: 200,
+                  },
+                  {
+                    header: t('shared:labels.relationship'),
+                    accessor: 'relationship',
+                    priority: 'high',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:labels.phone'),
+                    accessor: 'phone_number',
+                    priority: 'low',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:labels.email'),
+                    accessor: 'email',
+                    priority: 'medium',
+                    width: 150,
+                  },
+                  {
+                    header: t('emergencyContacts.table.primary'),
+                    accessor: 'is_primary',
+                    priority: 'high',
+                    width: 150,
+                  },
+                  {
+                    header: t('shared:fields.status'),
+                    accessor: 'is_active',
+                    priority: 'low',
+                    width: 150,
+                  },
                 ]}
                 patientData={currentPatient}
                 tableName={t('shared:categories.emergency_contacts')}
@@ -556,7 +596,9 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {value ? t('shared:labels.active') : t('shared:labels.inactive')}
+                      {value
+                        ? t('shared:labels.active')
+                        : t('shared:labels.inactive')}
                     </Badge>
                   ),
                 }}
@@ -566,16 +608,26 @@ const EmergencyContacts = () => {
             </Paper>
           )}
           {filteredContacts.length > 0 && (
-            <PaginationControls page={page} totalPages={totalPages(filteredContacts.length)} pageSize={pageSize} totalRecords={filteredContacts.length} onPageChange={setPage} onPageSizeChange={handlePageSizeChange} pageSizeOptions={PAGE_SIZE_OPTIONS} />
+            <PaginationControls
+              page={page}
+              totalPages={totalPages(filteredContacts.length)}
+              pageSize={pageSize}
+              totalRecords={filteredContacts.length}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+            />
           )}
-      </Stack>
+        </Stack>
       </Container>
 
       <MantineEmergencyContactForm
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title={
-          editingContact ? t('emergencyContacts.form.editTitle') : t('emergencyContacts.form.addTitle')
+          editingContact
+            ? t('emergencyContacts.form.editTitle')
+            : t('emergencyContacts.form.addTitle')
         }
         formData={formData}
         onInputChange={handleInputChange}
@@ -635,7 +687,9 @@ const EmergencyContacts = () => {
                       variant="light"
                       size="sm"
                     >
-                      {viewingContact.is_active ? t('shared:labels.active') : t('shared:labels.inactive')}
+                      {viewingContact.is_active
+                        ? t('shared:labels.active')
+                        : t('shared:labels.inactive')}
                     </Badge>
                   </Group>
                 </Stack>
@@ -730,9 +784,7 @@ const EmergencyContacts = () => {
                 {t('emergencyContacts.viewModal.notes')}
               </Title>
               {viewingContact.notes ? (
-                <Text size="md">
-                  {viewingContact.notes}
-                </Text>
+                <Text size="md">{viewingContact.notes}</Text>
               ) : (
                 <Text size="md" c="dimmed">
                   {t('shared:labels.noNotesAvailable')}
@@ -767,5 +819,5 @@ const EmergencyContacts = () => {
 // Wrap with responsive HOC for enhanced responsive capabilities
 export default withResponsive(EmergencyContacts, {
   injectResponsive: true,
-  displayName: 'ResponsiveEmergencyContacts'
+  displayName: 'ResponsiveEmergencyContacts',
 });

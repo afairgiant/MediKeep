@@ -3,7 +3,6 @@
  * Provides consistent status display across all medical pages using Mantine Badge
  */
 
-import React from 'react';
 import { Badge } from '@mantine/core';
 
 const StatusBadge = ({
@@ -82,7 +81,9 @@ const StatusBadge = ({
       {...props}
     >
       {showIcon && statusConfig.icon && (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        <span
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+        >
           <span>{statusConfig.icon}</span>
           <span>{statusConfig.label}</span>
         </span>

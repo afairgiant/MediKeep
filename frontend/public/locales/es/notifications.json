@@ -67,7 +67,7 @@
       }
     },
     "empty": "No hay canales de notificación configurados.",
-    "emptyHint": "Agregue un canal para comenzar a recibir notificaciones por Discord, correo electrónico, Gotify o Webhook.",
+    "emptyHint": "Agregue un canal para comenzar a recibir notificaciones por Discord, correo electrónico, Gotify, ntfy o Webhook.",
     "errors": {
       "fieldRequired": "{{field}} es obligatorio",
       "nameRequired": "El nombre del canal es obligatorio"
@@ -117,6 +117,28 @@
     "noChannels": "No hay canales de notificación configurados",
     "noChannelsHint": "Añada un canal para empezar a recibir notificaciones",
     "notificationsSent": "{{count}} notificaciones enviadas",
+    "ntfy": {
+      "authToken": {
+        "description": "Token Bearer para temas protegidos (dejar en blanco para temas públicos)",
+        "label": "Token de autenticación (opcional)",
+        "placeholder": "tk_..."
+      },
+      "priority": {
+        "description": "Prioridad del mensaje (1=mín, 3=predeterminado, 5=máx)",
+        "label": "Prioridad",
+        "placeholder": "3"
+      },
+      "serverUrl": {
+        "description": "URL del servidor ntfy (por defecto: https://ntfy.sh)",
+        "label": "URL del servidor",
+        "placeholder": "https://ntfy.sh"
+      },
+      "topic": {
+        "description": "Nombre único del tema. Suscríbase al mismo tema en ntfy.sh o en su aplicación ntfy.",
+        "label": "Tema",
+        "placeholder": "my-alerts"
+      }
+    },
     "sentCount_one": "{{count}} enviado",
     "sentCount_other": "{{count}} enviados",
     "test": "Probar",
@@ -128,6 +150,7 @@
     "types": {
       "discord": "Discord",
       "gotify": "Gotify",
+      "ntfy": "ntfy",
       "webhook": "Webhook"
     },
     "updateError": "Error al actualizar el canal",

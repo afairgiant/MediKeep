@@ -1,6 +1,7 @@
 """
 Tests for Treatments API endpoints.
 """
+
 import pytest
 from datetime import date, timedelta
 from fastapi.testclient import TestClient
@@ -23,7 +24,7 @@ class TestTreatmentsAPI:
             last_name="Doe",
             birth_date=date(1990, 1, 1),
             gender="M",
-            address="123 Main St"
+            address="123 Main St",
         )
         patient = patient_crud.create_for_user(
             db_session, user_id=user_data["user"].id, patient_data=patient_data
@@ -39,7 +40,9 @@ class TestTreatmentsAPI:
         """Create authentication headers."""
         return create_user_token_headers(user_with_patient["user"].username)
 
-    def test_create_treatment_success(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_treatment_success(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test successful treatment creation."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -48,13 +51,11 @@ class TestTreatmentsAPI:
             "start_date": "2024-01-15",
             "status": "active",
             "frequency": "3 times per week",
-            "notes": "Post-surgery rehabilitation program"
+            "notes": "Post-surgery rehabilitation program",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -64,19 +65,19 @@ class TestTreatmentsAPI:
         assert data["status"] == "active"
         assert data["patient_id"] == user_with_patient["patient"].id
 
-    def test_create_treatment_minimal_data(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_create_treatment_minimal_data(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test treatment creation with minimal required data."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
             "treatment_name": "Wound Care",
             "treatment_type": "Medical",
-            "start_date": "2024-01-15"
+            "start_date": "2024-01-15",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -85,7 +86,9 @@ class TestTreatmentsAPI:
         assert data["start_date"] == "2024-01-15"
         assert data["status"] == "active"  # Default status
 
-    def test_get_treatments_list(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_get_treatments_list(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test getting list of treatments."""
         # Create multiple treatments
         treatments = [
@@ -94,29 +97,29 @@ class TestTreatmentsAPI:
                 "treatment_name": "Chemotherapy",
                 "treatment_type": "Oncology",
                 "start_date": "2024-01-10",
-                "status": "active"
+                "status": "active",
             },
             {
                 "patient_id": user_with_patient["patient"].id,
                 "treatment_name": "Radiation Therapy",
                 "treatment_type": "Oncology",
                 "start_date": "2024-01-20",
-                "status": "planned"
+                "status": "planned",
             },
             {
                 "patient_id": user_with_patient["patient"].id,
                 "treatment_name": "Physical Therapy",
                 "treatment_type": "Rehabilitation",
                 "start_date": "2024-02-15",
-                "status": "completed"
-            }
+                "status": "completed",
+            },
         ]
 
         for treatment_data in treatments:
             client.post(
                 "/api/v1/treatments/",
                 json=treatment_data,
-                headers=authenticated_headers
+                headers=authenticated_headers,
             )
 
         # Get treatments list
@@ -131,7 +134,9 @@ class TestTreatmentsAPI:
         assert "Radiation Therapy" in treatment_names
         assert "Physical Therapy" in treatment_names
 
-    def test_get_treatment_by_id(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_get_treatment_by_id(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test getting a specific treatment by ID."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -139,21 +144,18 @@ class TestTreatmentsAPI:
             "treatment_type": "Diabetes Management",
             "start_date": "2024-01-15",
             "status": "active",
-            "frequency": "Daily"
+            "frequency": "Daily",
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         treatment_id = create_response.json()["id"]
 
         # Get treatment by ID
         response = client.get(
-            f"/api/v1/treatments/{treatment_id}",
-            headers=authenticated_headers
+            f"/api/v1/treatments/{treatment_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -162,7 +164,9 @@ class TestTreatmentsAPI:
         assert data["treatment_name"] == "Insulin Therapy"
         assert data["frequency"] == "Daily"
 
-    def test_update_treatment(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_update_treatment(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test updating a treatment."""
         # Create treatment
         treatment_data = {
@@ -174,9 +178,7 @@ class TestTreatmentsAPI:
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         treatment_id = create_response.json()["id"]
@@ -191,7 +193,7 @@ class TestTreatmentsAPI:
         response = client.put(
             f"/api/v1/treatments/{treatment_id}",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -201,40 +203,40 @@ class TestTreatmentsAPI:
         assert data["notes"] == "Started therapy program as planned"
         assert data["treatment_name"] == "Occupational Therapy"  # Unchanged
 
-    def test_delete_treatment(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_delete_treatment(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test deleting a treatment."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
             "treatment_name": "Test Treatment to Delete",
             "treatment_type": "Test",
             "start_date": "2024-01-15",
-            "status": "planned"
+            "status": "planned",
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         treatment_id = create_response.json()["id"]
 
         # Delete treatment
         response = client.delete(
-            f"/api/v1/treatments/{treatment_id}",
-            headers=authenticated_headers
+            f"/api/v1/treatments/{treatment_id}", headers=authenticated_headers
         )
 
         assert response.status_code == 200
 
         # Verify deletion
         get_response = client.get(
-            f"/api/v1/treatments/{treatment_id}",
-            headers=authenticated_headers
+            f"/api/v1/treatments/{treatment_id}", headers=authenticated_headers
         )
         assert get_response.status_code == 404
 
-    def test_treatment_validation_errors(self, client: TestClient, authenticated_headers):
+    def test_treatment_validation_errors(
+        self, client: TestClient, authenticated_headers
+    ):
         """Test various validation error scenarios."""
         # Test missing required fields
         invalid_data = {
@@ -243,9 +245,7 @@ class TestTreatmentsAPI:
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=invalid_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=invalid_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -255,18 +255,20 @@ class TestTreatmentsAPI:
             "treatment_name": "Test",
             "treatment_type": "Test",
             "start_date": "2024-01-15",
-            "status": "invalid_status"
+            "status": "invalid_status",
         }
 
         response = client.post(
             "/api/v1/treatments/",
             json=invalid_status_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 422
 
-    def test_treatment_end_date_validation(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_treatment_end_date_validation(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that end date cannot be before start date."""
         treatment_data = {
             "patient_id": user_with_patient["patient"].id,
@@ -274,13 +276,11 @@ class TestTreatmentsAPI:
             "treatment_type": "Test",
             "start_date": "2024-02-15",
             "end_date": "2024-01-15",  # Before start date
-            "status": "active"
+            "status": "active",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
@@ -289,7 +289,9 @@ class TestTreatmentsAPI:
 
     # Date validation tests for planned/on_hold statuses
 
-    def test_planned_treatment_future_date_allowed(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_planned_treatment_future_date_allowed(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that planned treatments can have future start dates."""
         future_date = (date.today() + timedelta(days=30)).isoformat()
 
@@ -298,13 +300,11 @@ class TestTreatmentsAPI:
             "treatment_name": "Future Planned Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "planned"
+            "status": "planned",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -312,7 +312,9 @@ class TestTreatmentsAPI:
         assert data["start_date"] == future_date
         assert data["status"] == "planned"
 
-    def test_planned_treatment_within_10_year_limit(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_planned_treatment_within_10_year_limit(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that planned treatments can be up to 10 years in the future."""
         # Set date to 9 years in future (within limit)
         future_date = (date.today() + timedelta(days=3285)).isoformat()  # ~9 years
@@ -322,20 +324,20 @@ class TestTreatmentsAPI:
             "treatment_name": "Long-term Planned Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "planned"
+            "status": "planned",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
         data = response.json()
         assert data["start_date"] == future_date
 
-    def test_planned_treatment_beyond_10_year_limit_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_planned_treatment_beyond_10_year_limit_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that planned treatments beyond 10 years are rejected."""
         # Set date to 11 years in future (beyond limit)
         future_date = (date.today() + timedelta(days=4015)).isoformat()  # ~11 years
@@ -345,20 +347,20 @@ class TestTreatmentsAPI:
             "treatment_name": "Too Far Future Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "planned"
+            "status": "planned",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
         # Just check for 422 status - validation errors can have different formats
         # The important part is that the validation rejects the request
 
-    def test_on_hold_treatment_future_date_allowed(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_on_hold_treatment_future_date_allowed(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that on_hold treatments can have future start dates."""
         future_date = (date.today() + timedelta(days=60)).isoformat()
 
@@ -367,13 +369,11 @@ class TestTreatmentsAPI:
             "treatment_name": "On Hold Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "on_hold"
+            "status": "on_hold",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -381,7 +381,9 @@ class TestTreatmentsAPI:
         assert data["start_date"] == future_date
         assert data["status"] == "on_hold"
 
-    def test_active_treatment_future_date_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_active_treatment_future_date_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that active treatments cannot have future start dates."""
         future_date = (date.today() + timedelta(days=1)).isoformat()
 
@@ -390,20 +392,20 @@ class TestTreatmentsAPI:
             "treatment_name": "Active Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "active"
+            "status": "active",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
         # Just check for 422 status - validation errors can have different formats
         # The important part is that the validation rejects the request
 
-    def test_in_progress_treatment_future_date_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_in_progress_treatment_future_date_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that in_progress treatments cannot have future start dates."""
         future_date = (date.today() + timedelta(days=1)).isoformat()
 
@@ -412,20 +414,20 @@ class TestTreatmentsAPI:
             "treatment_name": "In Progress Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "in_progress"
+            "status": "in_progress",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
         # Just check for 422 status - validation errors can have different formats
         # The important part is that the validation rejects the request
 
-    def test_completed_treatment_future_date_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_completed_treatment_future_date_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that completed treatments cannot have future start dates."""
         future_date = (date.today() + timedelta(days=1)).isoformat()
 
@@ -434,20 +436,20 @@ class TestTreatmentsAPI:
             "treatment_name": "Completed Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "completed"
+            "status": "completed",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
         # Just check for 422 status - validation errors can have different formats
         # The important part is that the validation rejects the request
 
-    def test_cancelled_treatment_future_date_rejected(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_cancelled_treatment_future_date_rejected(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that cancelled treatments cannot have future start dates."""
         future_date = (date.today() + timedelta(days=1)).isoformat()
 
@@ -456,20 +458,20 @@ class TestTreatmentsAPI:
             "treatment_name": "Cancelled Treatment",
             "treatment_type": "Medical",
             "start_date": future_date,
-            "status": "cancelled"
+            "status": "cancelled",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 422
         # Just check for 422 status - validation errors can have different formats
         # The important part is that the validation rejects the request
 
-    def test_partial_update_start_date_without_status(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_partial_update_start_date_without_status(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that start_date can be updated without re-specifying status (partial update)."""
         # Create a planned treatment with future date
         initial_date = (date.today() + timedelta(days=30)).isoformat()
@@ -478,13 +480,11 @@ class TestTreatmentsAPI:
             "treatment_name": "Planned Treatment",
             "treatment_type": "Medical",
             "start_date": initial_date,
-            "status": "planned"
+            "status": "planned",
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         treatment_id = create_response.json()["id"]
@@ -499,7 +499,7 @@ class TestTreatmentsAPI:
         response = client.put(
             f"/api/v1/treatments/{treatment_id}",
             json=update_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200
@@ -507,7 +507,9 @@ class TestTreatmentsAPI:
         assert data["start_date"] == new_date
         assert data["status"] == "planned"  # Status unchanged
 
-    def test_planned_treatment_past_date_allowed(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_planned_treatment_past_date_allowed(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test that planned treatments can have past dates (e.g., rescheduled from past)."""
         past_date = (date.today() - timedelta(days=10)).isoformat()
 
@@ -516,13 +518,11 @@ class TestTreatmentsAPI:
             "treatment_name": "Rescheduled from Past",
             "treatment_type": "Medical",
             "start_date": past_date,
-            "status": "planned"
+            "status": "planned",
         }
 
         response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=treatment_data, headers=authenticated_headers
         )
 
         assert response.status_code == 200
@@ -535,10 +535,7 @@ class TestTreatmentsAPI:
         # Create two users with patients
         user1_data = create_random_user(db_session)
         patient1_data = PatientCreate(
-            first_name="User",
-            last_name="One",
-            birth_date=date(1990, 1, 1),
-            gender="M"
+            first_name="User", last_name="One", birth_date=date(1990, 1, 1), gender="M"
         )
         patient1 = patient_crud.create_for_user(
             db_session, user_id=user1_data["user"].id, patient_data=patient1_data
@@ -550,10 +547,7 @@ class TestTreatmentsAPI:
 
         user2_data = create_random_user(db_session)
         patient2_data = PatientCreate(
-            first_name="User",
-            last_name="Two",
-            birth_date=date(1990, 1, 1),
-            gender="F"
+            first_name="User", last_name="Two", birth_date=date(1990, 1, 1), gender="F"
         )
         patient2 = patient_crud.create_for_user(
             db_session, user_id=user2_data["user"].id, patient_data=patient2_data
@@ -569,25 +563,22 @@ class TestTreatmentsAPI:
             "treatment_name": "Private Treatment",
             "treatment_type": "Medical",
             "start_date": "2024-01-15",
-            "status": "active"
+            "status": "active",
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=treatment_data,
-            headers=headers1
+            "/api/v1/treatments/", json=treatment_data, headers=headers1
         )
 
         treatment_id = create_response.json()["id"]
 
         # User2 tries to access User1's treatment - should fail
-        response = client.get(
-            f"/api/v1/treatments/{treatment_id}",
-            headers=headers2
-        )
+        response = client.get(f"/api/v1/treatments/{treatment_id}", headers=headers2)
         assert response.status_code == 404
 
-    def test_treatment_planned_to_active_workflow(self, client: TestClient, user_with_patient, authenticated_headers):
+    def test_treatment_planned_to_active_workflow(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
         """Test workflow from planned to active treatment."""
         # Create planned treatment
         planned_data = {
@@ -599,9 +590,7 @@ class TestTreatmentsAPI:
         }
 
         create_response = client.post(
-            "/api/v1/treatments/",
-            json=planned_data,
-            headers=authenticated_headers
+            "/api/v1/treatments/", json=planned_data, headers=authenticated_headers
         )
 
         treatment_id = create_response.json()["id"]
@@ -611,13 +600,13 @@ class TestTreatmentsAPI:
             "status": "active",
             "start_date": date.today().isoformat(),
             "frequency": "3 times per week",
-            "notes": "Treatment started as planned"
+            "notes": "Treatment started as planned",
         }
 
         response = client.put(
             f"/api/v1/treatments/{treatment_id}",
             json=activation_data,
-            headers=authenticated_headers
+            headers=authenticated_headers,
         )
 
         assert response.status_code == 200

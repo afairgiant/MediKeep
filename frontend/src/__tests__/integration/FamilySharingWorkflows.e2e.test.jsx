@@ -5,10 +5,9 @@ import { vi } from 'vitest';
  * Tests complete user workflows for family history sharing from start to finish
  */
 import React from 'react';
-import render, { screen, waitFor, act } from '../../test-utils/render';
+import render, { screen, waitFor } from '../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { notifications } from '@mantine/notifications';
 
 // Components for complete workflow testing
 import Dashboard from '../../pages/Dashboard';
@@ -23,35 +22,37 @@ vi.mock('@mantine/notifications', () => ({
 }));
 
 // Mock API services with comprehensive workflow simulation
-const { mockApiService, mockFamilyHistoryApi, mockInvitationApi } = vi.hoisted(() => ({
-  mockApiService: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  },
-  mockFamilyHistoryApi: {
-    getOrganizedHistory: vi.fn(),
-    getMyFamilyHistory: vi.fn(),
-    getSharedFamilyHistory: vi.fn(),
-    getSharedByMe: vi.fn(),
-    getFamilyMemberShares: vi.fn(),
-    getFamilyMemberDetails: vi.fn(),
-    sendShareInvitation: vi.fn(),
-    bulkSendInvitations: vi.fn(),
-    revokeShare: vi.fn(),
-    removeMyAccess: vi.fn(),
-  },
-  mockInvitationApi: {
-    getPendingInvitations: vi.fn(),
-    getSentInvitations: vi.fn(),
-    respondToInvitation: vi.fn(),
-    cancelInvitation: vi.fn(),
-    revokeInvitation: vi.fn(),
-    getInvitationSummary: vi.fn(),
-    cleanupExpiredInvitations: vi.fn(),
-  },
-}));
+const { mockApiService, mockFamilyHistoryApi, mockInvitationApi } = vi.hoisted(
+  () => ({
+    mockApiService: {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+    },
+    mockFamilyHistoryApi: {
+      getOrganizedHistory: vi.fn(),
+      getMyFamilyHistory: vi.fn(),
+      getSharedFamilyHistory: vi.fn(),
+      getSharedByMe: vi.fn(),
+      getFamilyMemberShares: vi.fn(),
+      getFamilyMemberDetails: vi.fn(),
+      sendShareInvitation: vi.fn(),
+      bulkSendInvitations: vi.fn(),
+      revokeShare: vi.fn(),
+      removeMyAccess: vi.fn(),
+    },
+    mockInvitationApi: {
+      getPendingInvitations: vi.fn(),
+      getSentInvitations: vi.fn(),
+      respondToInvitation: vi.fn(),
+      cancelInvitation: vi.fn(),
+      revokeInvitation: vi.fn(),
+      getInvitationSummary: vi.fn(),
+      cleanupExpiredInvitations: vi.fn(),
+    },
+  })
+);
 
 vi.mock('../../services/api', () => ({
   apiService: mockApiService,
@@ -71,7 +72,12 @@ vi.mock('../../services/api/invitationApi', () => ({
 vi.mock('../../hooks/useMedicalData', () => ({
   useMedicalData: () => ({
     items: [],
-    currentPatient: { id: 'patient-123', first_name: 'John', last_name: 'Doe', owner_user_id: 'user-1' },
+    currentPatient: {
+      id: 'patient-123',
+      first_name: 'John',
+      last_name: 'Doe',
+      owner_user_id: 'user-1',
+    },
     loading: false,
     error: null,
     successMessage: null,
@@ -140,8 +146,8 @@ vi.mock('../../hooks/usePersistedViewMode', () => ({
 
 vi.mock('../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
-    formatDate: (date) => date || '',
-    formatDateTime: (date) => date || '',
+    formatDate: date => date || '',
+    formatDateTime: date => date || '',
     dateFormat: 'MM/DD/YYYY',
   }),
 }));
@@ -174,7 +180,7 @@ vi.mock('../../utils/linkNavigation', () => ({
 }));
 
 vi.mock('../../hoc/withResponsive', () => ({
-  withResponsive: (Component) => Component,
+  withResponsive: Component => Component,
 }));
 
 vi.mock('../../hooks/useEntityFileCounts', () => ({
@@ -226,7 +232,13 @@ vi.mock('../../components/medical/family-history', () => ({
 }));
 
 vi.mock('../../components/invitations/InvitationCard', () => ({
-  default: function MockInvitationCard({ invitation, variant, onRespond, onCancel, onRevoke }) {
+  default: function MockInvitationCard({
+    invitation,
+    variant,
+    onRespond,
+    onCancel,
+    onRevoke,
+  }) {
     return (
       <div data-testid={`invitation-card-${invitation.id}`}>
         <div>Invitation: {invitation.title}</div>
@@ -234,20 +246,32 @@ vi.mock('../../components/invitations/InvitationCard', () => ({
         <div>Status: {invitation.status}</div>
         {variant === 'received' && (
           <div>
-            <button onClick={() => onRespond('accepted')} data-testid={`accept-${invitation.id}`}>
+            <button
+              onClick={() => onRespond('accepted')}
+              data-testid={`accept-${invitation.id}`}
+            >
               Accept
             </button>
-            <button onClick={() => onRespond('rejected')} data-testid={`reject-${invitation.id}`}>
+            <button
+              onClick={() => onRespond('rejected')}
+              data-testid={`reject-${invitation.id}`}
+            >
               Reject
             </button>
           </div>
         )}
         {variant === 'sent' && (
           <div>
-            <button onClick={() => onCancel(invitation.id)} data-testid={`cancel-${invitation.id}`}>
+            <button
+              onClick={() => onCancel(invitation.id)}
+              data-testid={`cancel-${invitation.id}`}
+            >
               Cancel
             </button>
-            <button onClick={() => onRevoke(invitation.id)} data-testid={`revoke-${invitation.id}`}>
+            <button
+              onClick={() => onRevoke(invitation.id)}
+              data-testid={`revoke-${invitation.id}`}
+            >
               Revoke
             </button>
           </div>
@@ -264,7 +288,7 @@ vi.mock('../../components/medical/FamilyHistorySharingModal', () => ({
     familyMember,
     familyMembers,
     bulkMode,
-    onSuccess
+    onSuccess,
   }) {
     const [email, setEmail] = React.useState('');
     const [permission, setPermission] = React.useState('view');
@@ -278,20 +302,19 @@ vi.mock('../../components/medical/FamilyHistorySharingModal', () => ({
         expires_hours: 168,
       };
 
-      try {
-        if (bulkMode) {
-          const bulkData = {
-            family_member_ids: familyMembers.map(m => m.id),
-            ...inviteData,
-          };
-          await mockFamilyHistoryApi.bulkSendInvitations(bulkData);
-        } else {
-          await mockFamilyHistoryApi.sendShareInvitation(familyMember.id, inviteData);
-        }
-        onSuccess();
-      } catch (error) {
-        throw error;
+      if (bulkMode) {
+        const bulkData = {
+          family_member_ids: familyMembers.map(m => m.id),
+          ...inviteData,
+        };
+        await mockFamilyHistoryApi.bulkSendInvitations(bulkData);
+      } else {
+        await mockFamilyHistoryApi.sendShareInvitation(
+          familyMember.id,
+          inviteData
+        );
       }
+      onSuccess();
     };
 
     return opened ? (
@@ -299,19 +322,21 @@ vi.mock('../../components/medical/FamilyHistorySharingModal', () => ({
         <h3>Share Family History</h3>
         <div>Mode: {bulkMode ? 'Bulk' : 'Single'}</div>
         {familyMember && <div>Family Member: {familyMember.name}</div>}
-        {familyMembers && <div>Family Members Count: {familyMembers.length}</div>}
+        {familyMembers && (
+          <div>Family Members Count: {familyMembers.length}</div>
+        )}
 
         <input
           data-testid="email-input"
           placeholder="Recipient email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
         />
 
         <select
           data-testid="permission-select"
           value={permission}
-          onChange={(e) => setPermission(e.target.value)}
+          onChange={e => setPermission(e.target.value)}
         >
           <option value="view">View</option>
           <option value="edit">Edit</option>
@@ -321,7 +346,7 @@ vi.mock('../../components/medical/FamilyHistorySharingModal', () => ({
           data-testid="note-input"
           placeholder="Sharing note"
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={e => setNote(e.target.value)}
         />
 
         <button onClick={handleSubmit} data-testid="submit-sharing">
@@ -336,13 +361,19 @@ vi.mock('../../components/medical/FamilyHistorySharingModal', () => ({
 }));
 
 vi.mock('../../components/dashboard/InvitationNotifications', () => ({
-  default: function MockInvitationNotifications({ invitations, onQuickResponse }) {
+  default: function MockInvitationNotifications({
+    invitations,
+    onQuickResponse,
+  }) {
     if (!invitations || !invitations.length) return null;
     return (
       <div data-testid="invitation-notifications">
         <h3>Invitation Notifications</h3>
         {invitations.map(invitation => (
-          <div key={invitation.id} data-testid={`notification-${invitation.id}`}>
+          <div
+            key={invitation.id}
+            data-testid={`notification-${invitation.id}`}
+          >
             <div>Title: {invitation.title}</div>
             <div>Type: {invitation.invitation_type}</div>
             <button
@@ -370,7 +401,9 @@ vi.mock('../../components', () => ({
 
 vi.mock('../../components/ui', () => ({
   Button: ({ children, onClick, ...props }) => (
-    <button onClick={onClick} {...props}>{children}</button>
+    <button onClick={onClick} {...props}>
+      {children}
+    </button>
   ),
 }));
 
@@ -397,9 +430,7 @@ describe('Family Sharing Workflows - End-to-End Integration Tests', () => {
       relationship: 'mother',
       birth_year: 1965,
       is_shared: false,
-      family_conditions: [
-        { condition: 'Heart Disease', status: 'active' },
-      ],
+      family_conditions: [{ condition: 'Heart Disease', status: 'active' }],
     },
   ];
 
@@ -468,7 +499,9 @@ describe('Family Sharing Workflows - End-to-End Integration Tests', () => {
       shared_by_me: [],
     });
 
-    mockInvitationApi.getPendingInvitations.mockResolvedValue(mockPendingInvitations);
+    mockInvitationApi.getPendingInvitations.mockResolvedValue(
+      mockPendingInvitations
+    );
     mockInvitationApi.getSentInvitations.mockResolvedValue(mockSentInvitations);
     mockInvitationApi.getInvitationSummary.mockResolvedValue({
       pending_count: 2,
@@ -486,8 +519,16 @@ describe('Family Sharing Workflows - End-to-End Integration Tests', () => {
       total_sent: 2,
       total_failed: 0,
       results: [
-        { family_member_id: 'member-1', status: 'sent', invitation_id: 'bulk-inv-1' },
-        { family_member_id: 'member-2', status: 'sent', invitation_id: 'bulk-inv-2' },
+        {
+          family_member_id: 'member-1',
+          status: 'sent',
+          invitation_id: 'bulk-inv-1',
+        },
+        {
+          family_member_id: 'member-2',
+          status: 'sent',
+          invitation_id: 'bulk-inv-2',
+        },
       ],
     });
 
@@ -580,7 +621,13 @@ describe('Family Sharing Workflows - End-to-End Integration Tests', () => {
   describe('Complete Invitation Management Workflow', () => {
     it('should complete invitation management workflow: view invitations → manage responses → track status', async () => {
       // Step 1: Open invitation manager
-      render(<InvitationManager opened={true} onClose={() => {}} onUpdate={() => {}} />);
+      render(
+        <InvitationManager
+          opened={true}
+          onClose={() => {}}
+          onUpdate={() => {}}
+        />
+      );
 
       await waitFor(() => {
         if (mockInvitationApi.getPendingInvitations.mock.calls.length > 0) {
@@ -647,7 +694,10 @@ describe('Family Sharing Workflows - End-to-End Integration Tests', () => {
       ).rejects.toThrow('Network error');
 
       // Retry succeeds
-      const result = await mockInvitationApi.respondToInvitation('inv-pending-1', 'accepted');
+      const result = await mockInvitationApi.respondToInvitation(
+        'inv-pending-1',
+        'accepted'
+      );
       expect(result.message).toBe('Response recorded successfully');
       expect(mockInvitationApi.respondToInvitation).toHaveBeenCalledTimes(2);
     });
@@ -728,7 +778,13 @@ describe('Family Sharing Workflows - End-to-End Integration Tests', () => {
     });
 
     it('should provide comprehensive screen reader support throughout workflow', async () => {
-      render(<InvitationManager opened={true} onClose={() => {}} onUpdate={() => {}} />);
+      render(
+        <InvitationManager
+          opened={true}
+          onClose={() => {}}
+          onUpdate={() => {}}
+        />
+      );
 
       await waitFor(() => {
         if (mockInvitationApi.getPendingInvitations.mock.calls.length > 0) {

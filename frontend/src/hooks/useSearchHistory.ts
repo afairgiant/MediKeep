@@ -12,8 +12,8 @@ export interface SearchHistoryEntry {
 
 interface UseSearchHistoryReturn {
   entries: SearchHistoryEntry[];
-  addEntry: (query: string, tags: string[], matchMode: string) => void;
-  removeEntry: (index: number) => void;
+  addEntry: (_query: string, _tags: string[], _matchMode: string) => void;
+  removeEntry: (_index: number) => void;
   clearHistory: () => void;
 }
 
@@ -67,9 +67,9 @@ export function useSearchHistory(): UseSearchHistoryReturn {
       const newKey = buildDedupeKey(trimmedQuery, tags);
       const now = Date.now();
 
-      setEntries((prev) => {
+      setEntries(prev => {
         const existingIndex = prev.findIndex(
-          (entry) => buildDedupeKey(entry.query, entry.tags) === newKey
+          entry => buildDedupeKey(entry.query, entry.tags) === newKey
         );
 
         let updated: SearchHistoryEntry[];
@@ -99,7 +99,7 @@ export function useSearchHistory(): UseSearchHistoryReturn {
   );
 
   const removeEntry = useCallback((index: number): void => {
-    setEntries((prev) => prev.filter((_, idx) => idx !== index));
+    setEntries(prev => prev.filter((_, idx) => idx !== index));
   }, []);
 
   const clearHistory = useCallback((): void => {

@@ -11,7 +11,7 @@ interface TagColorEntry {
 }
 
 interface UseTagColorsReturn {
-  getTagColor: (tagName: string) => string | null;
+  getTagColor: (_tagName: string) => string | null;
   tagColors: Record<string, string>;
   tagEntries: TagColorEntry[];
   isLoading: boolean;
@@ -24,7 +24,8 @@ let cacheTimestamp = 0;
 const CACHE_TTL_MS = 60_000; // 1 minute
 
 export function useTagColors(): UseTagColorsReturn {
-  const [tagColorMap, setTagColorMap] = useState<Record<string, string>>(cachedTagColors);
+  const [tagColorMap, setTagColorMap] =
+    useState<Record<string, string>>(cachedTagColors);
   const [entries, setEntries] = useState<TagColorEntry[]>(cachedEntries);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,7 +40,7 @@ export function useTagColors(): UseTagColorsReturn {
     setIsLoading(true);
     try {
       const data: TagColorEntry[] = await api.get('/tags/popular', {
-        params: { limit: 50 }
+        params: { limit: 50 },
       });
       const colors: Record<string, string> = {};
       for (const entry of data) {
@@ -55,7 +56,7 @@ export function useTagColors(): UseTagColorsReturn {
     } catch (error) {
       logger.error('Failed to fetch tag colors', {
         component: 'useTagColors',
-        error
+        error,
       });
     } finally {
       setIsLoading(false);
@@ -76,7 +77,13 @@ export function useTagColors(): UseTagColorsReturn {
   }, [fetchColors]);
 
   return useMemo(
-    () => ({ getTagColor, tagColors: tagColorMap, tagEntries: entries, isLoading, refresh }),
+    () => ({
+      getTagColor,
+      tagColors: tagColorMap,
+      tagEntries: entries,
+      isLoading,
+      refresh,
+    }),
     [getTagColor, tagColorMap, entries, isLoading, refresh]
   );
 }

@@ -1,7 +1,9 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { UserPreferencesProvider, useUserPreferences } from './UserPreferencesContext';
+import {
+  UserPreferencesProvider,
+  useUserPreferences,
+} from './UserPreferencesContext';
 import * as userPrefsApi from '../services/api/userPreferencesApi';
 import frontendLogger from '../services/frontendLogger';
 import i18n from '../i18n';
@@ -65,7 +67,9 @@ describe('UserPreferencesContext — language sync on load', () => {
   });
 
   test('calls i18n.changeLanguage with backend language when it differs from current', async () => {
-    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(makePrefs({ language: 'fr' }));
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'fr' })
+    );
 
     renderProvider();
 
@@ -76,7 +80,9 @@ describe('UserPreferencesContext — language sync on load', () => {
   });
 
   test('does not call i18n.changeLanguage when backend language matches current', async () => {
-    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(makePrefs({ language: 'en' }));
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'en' })
+    );
 
     renderProvider();
 
@@ -87,8 +93,12 @@ describe('UserPreferencesContext — language sync on load', () => {
   });
 
   test('logs error and still sets preferences when i18n.changeLanguage throws', async () => {
-    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(makePrefs({ language: 'de' }));
-    vi.mocked(i18n.changeLanguage).mockRejectedValueOnce(new Error('translation load failed'));
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'de' })
+    );
+    vi.mocked(i18n.changeLanguage).mockRejectedValueOnce(
+      new Error('translation load failed')
+    );
 
     renderProvider();
 

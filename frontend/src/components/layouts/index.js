@@ -4,4 +4,9 @@
  */
 
 export { default as ResponsiveLayout } from './ResponsiveLayout';
-export { default as ResponsiveGrid, CardGrid, ThumbnailGrid, DashboardGrid } from './ResponsiveGrid';
+export {
+  default as ResponsiveGrid,
+  CardGrid,
+  ThumbnailGrid,
+  DashboardGrid,
+} from './ResponsiveGrid';

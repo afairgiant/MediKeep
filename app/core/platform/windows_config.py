@@ -4,6 +4,7 @@ Windows-specific configuration for EXE deployment.
 Handles AppData directory setup, path configuration, and Windows-specific
 file operations for standalone executable distribution.
 """
+
 import os
 import sys
 from pathlib import Path
@@ -13,11 +14,13 @@ from typing import Optional
 # logging_config imports this module to detect Windows EXE mode
 _logger = None
 
+
 def _get_logger():
     """Lazy load logger to avoid circular import."""
     global _logger
     if _logger is None:
         from app.core.logging.config import get_logger
+
         _logger = get_logger(__name__, "app")
     return _logger
 
@@ -29,7 +32,7 @@ def is_windows_exe() -> bool:
     Returns:
         True if running as bundled EXE, False otherwise
     """
-    return getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+    return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 
 def get_windows_appdata_path() -> Optional[Path]:
@@ -42,15 +45,15 @@ def get_windows_appdata_path() -> Optional[Path]:
     Example:
         C:\Users\Username\AppData\Roaming\MediKeep
     """
-    if not sys.platform.startswith('win'):
+    if not sys.platform.startswith("win"):
         return None
 
-    appdata = os.getenv('APPDATA')
+    appdata = os.getenv("APPDATA")
     if not appdata:
         # Can't log here - might cause circular import during logging setup
         return None
 
-    medikeep_dir = Path(appdata) / 'MediKeep'
+    medikeep_dir = Path(appdata) / "MediKeep"
     return medikeep_dir
 
 
@@ -78,12 +81,12 @@ def ensure_windows_directories() -> dict:
         raise OSError("Could not determine Windows AppData path")
 
     directories = {
-        'base': base_path,
-        'database': base_path / 'database',
-        'uploads': base_path / 'uploads',
-        'logs': base_path / 'logs',
-        'temp': base_path / 'temp',
-        'backups': base_path / 'backups'
+        "base": base_path,
+        "database": base_path / "database",
+        "uploads": base_path / "uploads",
+        "logs": base_path / "logs",
+        "temp": base_path / "temp",
+        "backups": base_path / "backups",
     }
 
     # Create all directories (no logging to avoid circular import)
@@ -107,10 +110,10 @@ def get_database_path() -> Path:
     """
     if is_windows_exe():
         dirs = ensure_windows_directories()
-        db_path = dirs['database'] / 'medikeep.db'
+        db_path = dirs["database"] / "medikeep.db"
         return db_path
     else:
-        db_path = Path('./medikeep.db')
+        db_path = Path("./medikeep.db")
         return db_path
 
 
@@ -125,10 +128,10 @@ def get_uploads_path() -> Path:
     """
     if is_windows_exe():
         dirs = ensure_windows_directories()
-        uploads_path = dirs['uploads']
+        uploads_path = dirs["uploads"]
         return uploads_path
     else:
-        uploads_path = Path('./uploads')
+        uploads_path = Path("./uploads")
         uploads_path.mkdir(exist_ok=True)
         return uploads_path
 
@@ -144,10 +147,10 @@ def get_logs_path() -> Path:
     """
     if is_windows_exe():
         dirs = ensure_windows_directories()
-        logs_path = dirs['logs']
+        logs_path = dirs["logs"]
         return logs_path
     else:
-        logs_path = Path('./logs')
+        logs_path = Path("./logs")
         logs_path.mkdir(exist_ok=True)
         return logs_path
 
@@ -163,10 +166,10 @@ def get_temp_path() -> Path:
     """
     if is_windows_exe():
         dirs = ensure_windows_directories()
-        temp_path = dirs['temp']
+        temp_path = dirs["temp"]
         return temp_path
     else:
-        temp_path = Path('./temp')
+        temp_path = Path("./temp")
         temp_path.mkdir(exist_ok=True)
         return temp_path
 
@@ -182,9 +185,9 @@ def get_backups_path() -> Path:
     """
     if is_windows_exe():
         dirs = ensure_windows_directories()
-        backups_path = dirs['backups']
+        backups_path = dirs["backups"]
         return backups_path
     else:
-        backups_path = Path('./backups')
+        backups_path = Path("./backups")
         backups_path.mkdir(exist_ok=True)
         return backups_path

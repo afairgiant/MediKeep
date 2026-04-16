@@ -15,7 +15,7 @@ from app.core.http.error_handling import (
     NotFoundException,
     ForbiddenException,
     BusinessLogicException,
-    handle_database_errors
+    handle_database_errors,
 )
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -65,7 +65,9 @@ def create_medication(
     medication_id = getattr(medication_obj, "id", None)
     if medication_id:
         return medication.get_with_relations(
-            db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
+            db=db,
+            record_id=medication_id,
+            relations=["practitioner", "pharmacy", "condition"],
         )
     return medication_obj
 
@@ -80,7 +82,9 @@ def read_medications(
     name: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
-    tag_match_all: bool = Query(False, description="Match all tags (AND) vs any tag (OR)"),
+    tag_match_all: bool = Query(
+        False, description="Match all tags (AND) vs any tag (OR)"
+    ),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
@@ -98,15 +102,15 @@ def read_medications(
                 tag_match_all=tag_match_all,
                 skip=skip,
                 limit=limit,
-                **filters
+                **filters,
             )
             # Load relationships manually for tag-filtered results
             for med in medications:
-                if hasattr(med, 'practitioner_id') and med.practitioner_id:
+                if hasattr(med, "practitioner_id") and med.practitioner_id:
                     db.refresh(med, ["practitioner"])
-                if hasattr(med, 'pharmacy_id') and med.pharmacy_id:
+                if hasattr(med, "pharmacy_id") and med.pharmacy_id:
                     db.refresh(med, ["pharmacy"])
-                if hasattr(med, 'condition_id') and med.condition_id:
+                if hasattr(med, "condition_id") and med.condition_id:
                     db.refresh(med, ["condition"])
             # Apply name filter manually if both tags and name are specified
             if name:
@@ -157,7 +161,7 @@ def read_medications(
             "read",
             "Medication",
             patient_id=target_patient_id,
-            count=len(medications)
+            count=len(medications),
         )
 
         return medications
@@ -176,10 +180,18 @@ def read_medication(
     """Get medication by ID - only allows access to user's own medications."""
     with handle_database_errors(request=request):
         medication_obj = medication.get_with_relations(
-            db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
+            db=db,
+            record_id=medication_id,
+            relations=["practitioner", "pharmacy", "condition"],
         )
         handle_not_found(medication_obj, "Medication", request)
-        verify_patient_ownership(medication_obj, current_user_patient_id, "medication", db=db, current_user=current_user)
+        verify_patient_ownership(
+            medication_obj,
+            current_user_patient_id,
+            "medication",
+            db=db,
+            current_user=current_user,
+        )
 
         log_data_access(
             logger,
@@ -188,7 +200,7 @@ def read_medication(
             "read",
             "Medication",
             record_id=medication_id,
-            patient_id=current_user_patient_id
+            patient_id=current_user_patient_id,
         )
 
         return medication_obj
@@ -221,7 +233,9 @@ def update_medication(
 
     # Return with relationships loaded
     return medication.get_with_relations(
-        db=db, record_id=medication_id, relations=["practitioner", "pharmacy", "condition"]
+        db=db,
+        record_id=medication_id,
+        relations=["practitioner", "pharmacy", "condition"],
     )
 
 
@@ -280,13 +294,15 @@ def read_patient_medications(
             "read",
             "Medication",
             patient_id=patient_id,
-            count=len(medications)
+            count=len(medications),
         )
 
         return medications
 
 
-@router.get("/{medication_id}/treatments", response_model=list[MedicationTreatmentResponse])
+@router.get(
+    "/{medication_id}/treatments", response_model=list[MedicationTreatmentResponse]
+)
 def get_medication_treatments(
     *,
     medication_id: int,
@@ -306,11 +322,16 @@ def get_medication_treatments(
                 request=request,
             )
         verify_patient_ownership(
-            medication_obj, current_user_patient_id, "medication",
-            db=db, current_user=current_user,
+            medication_obj,
+            current_user_patient_id,
+            "medication",
+            db=db,
+            current_user=current_user,
         )
 
-        relationships = treatment_medication.get_by_medication(db, medication_id=medication_id)
+        relationships = treatment_medication.get_by_medication(
+            db, medication_id=medication_id
+        )
 
         result = []
         for rel in relationships:

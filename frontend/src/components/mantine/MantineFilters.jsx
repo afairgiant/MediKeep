@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Group,
@@ -9,7 +9,6 @@ import {
   Text,
   Badge,
   Stack,
-  Flex,
   Collapse,
   ActionIcon,
   useMantineColorScheme,
@@ -50,8 +49,6 @@ const MantineFilters = ({
   const { t } = useTranslation(['common', 'shared']);
   const {
     searchPlaceholder = 'searchPlaceholders.generic',
-    title = 'Filters & Search',
-    description,
     showStatus = true,
     showCategory = false,
     showMedicationType = false,
@@ -96,6 +93,7 @@ const MantineFilters = ({
     if (filters?.search !== localSearch) {
       setLocalSearch(filters?.search || '');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-way sync from external prop; localSearch is read only to avoid redundant set
   }, [filters?.search]);
 
   // Cleanup debounce timeout on unmount
