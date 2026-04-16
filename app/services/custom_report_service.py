@@ -1269,8 +1269,13 @@ class CustomReportService:
                     )
                     if condition:
                         entry = {
-                            "condition_name": condition.condition_name
-                            or f"Condition #{condition.id}"
+                            "condition_name": (
+                                condition.condition_name
+                                or getattr(condition, "diagnosis", None)
+                                or getattr(condition, "description", None)
+                                or getattr(condition, "icd_code", None)
+                                or f"Condition #{condition.id}"
+                            )
                         }
                         if rel.relevance_note:
                             entry["relevance_note"] = rel.relevance_note
@@ -1301,8 +1306,12 @@ class CustomReportService:
                     )
                     if medication:
                         entry = {
-                            "medication_name": medication.medication_name
-                            or f"Medication #{medication.id}"
+                            "medication_name": (
+                                medication.medication_name
+                                or getattr(medication, "alternative_name", None)
+                                or getattr(medication, "indication", None)
+                                or f"Medication #{medication.id}"
+                            )
                         }
                         if medication.dosage:
                             entry["dosage"] = medication.dosage
