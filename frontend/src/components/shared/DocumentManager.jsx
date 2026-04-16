@@ -1097,7 +1097,7 @@ const DocumentManager = ({
         throw error;
       }
     },
-    [entityType]
+    [entityType, selectedStorageBackend]
   );
 
   // Expose upload function to parent via callback (only once)
@@ -1119,7 +1119,7 @@ const DocumentManager = ({
         clearPendingFiles: () => setPendingFiles([]),
       });
     }
-  }, [onUploadPendingFiles, uploadPendingFiles]);
+  }, [onUploadPendingFiles, uploadPendingFiles, entityType, entityId]);
 
   // Handle file upload form submission (view mode modal)
   const handleFileUploadSubmit = async e => {

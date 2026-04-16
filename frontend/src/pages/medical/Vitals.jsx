@@ -339,7 +339,7 @@ const Vitals = () => {
         replace: true,
       });
     },
-    [location.search, navigate]
+    [location.search, location.pathname, navigate]
   );
 
   const handleCloseViewModal = useCallback(() => {
@@ -352,7 +352,7 @@ const Vitals = () => {
     navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
       replace: true,
     });
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, location.search]);
 
   const handleEdit = useCallback(
     vitals => {

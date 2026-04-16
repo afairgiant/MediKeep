@@ -323,7 +323,7 @@ const Medication = () => {
     });
     setEditingMedication(medication);
     setShowAddForm(true);
-  }, []);
+  }, [resetSubmission]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
@@ -482,8 +482,6 @@ const Medication = () => {
       setError,
       updateItem,
       createItem,
-      resetForm,
-      refreshData,
       startSubmission,
       canSubmit,
       completeFormSubmission,

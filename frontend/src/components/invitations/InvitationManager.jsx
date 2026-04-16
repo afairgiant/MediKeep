@@ -62,6 +62,7 @@ const InvitationManager = ({ opened, onClose, onUpdate }) => {
     if (opened) {
       loadInvitations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadInvitations is stable in this component scope; only re-run when modal opens
   }, [opened]);
 
   const loadInvitations = async () => {

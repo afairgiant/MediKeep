@@ -235,7 +235,7 @@ export function useStaticData(autoFetch = true) {
 
   const refreshAll = useCallback(async () => {
     await Promise.all([practitionersData.refresh(), pharmaciesData.refresh()]);
-  }, [practitionersData.refresh, pharmaciesData.refresh]);
+  }, [practitionersData, pharmaciesData]);
 
   return {
     practitioners: practitionersData,
@@ -262,7 +262,7 @@ export function usePatientWithStaticData(autoFetch = true) {
 
   const refreshAll = useCallback(async () => {
     await Promise.all([patientData.refresh(), staticData.refreshAll()]);
-  }, [patientData.refresh, staticData.refreshAll]);
+  }, [patientData, staticData]);
 
   return {
     patient: patientData,

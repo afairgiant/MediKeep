@@ -61,6 +61,7 @@ const EncounterLabResultRelationships = ({
     if (encounterId && fetchEncounterLabResults) {
       fetchEncounterLabResults(encounterId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchEncounterLabResults identity changes on every render; including it would cause infinite reload loop
   }, [encounterId]);
 
   const handleAddRelationship = async () => {

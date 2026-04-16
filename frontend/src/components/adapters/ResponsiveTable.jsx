@@ -217,6 +217,7 @@ export const ResponsiveTable = memo(
     // Log component mount only (reduced logging for performance)
     useEffect(() => {
       logger.debug('ResponsiveTable mounted', componentContext);
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only log; componentContext changes every render
     }, []);
 
     // Table layout strategy context
@@ -265,14 +266,7 @@ export const ResponsiveTable = memo(
       // Removed frequent configuration logging for performance
 
       return config;
-    }, [
-      breakpoint,
-      strategyContext,
-      maxHeight,
-      fullWidth,
-      virtualization,
-      componentContext,
-    ]);
+    }, [breakpoint, strategyContext, maxHeight, fullWidth, virtualization]);
 
     // Get print-specific table configuration (always use desktop/xl settings)
     const printTableConfig = useMemo(() => {
@@ -362,13 +356,7 @@ export const ResponsiveTable = memo(
           onSort(columnKey, newDirection);
         }
       },
-      [
-        sortable,
-        internalSortBy,
-        internalSortDirection,
-        onSort,
-        componentContext,
-      ]
+      [sortable, internalSortBy, internalSortDirection, onSort]
     );
 
     // Handle row selection
@@ -384,7 +372,7 @@ export const ResponsiveTable = memo(
           onRowSelect(row, !selectedRows.includes(row.id || index));
         }
       },
-      [onRowClick, selectable, onRowSelect, selectedRows, componentContext]
+      [onRowClick, selectable, onRowSelect, selectedRows]
     );
 
     // Handle pagination
@@ -396,7 +384,7 @@ export const ResponsiveTable = memo(
           onPageChange(newPage);
         }
       },
-      [onPageChange, page, pageSize, componentContext]
+      [onPageChange]
     );
 
     // Render action buttons for a row
@@ -668,6 +656,8 @@ export const ResponsiveTable = memo(
       selectable,
       hasActions,
       renderActionButtons,
+      formatters,
+      medicalContext,
     ]);
 
     // Render card layout for mobile
@@ -787,6 +777,8 @@ export const ResponsiveTable = memo(
       columns.length,
       hasActions,
       renderActionButtons,
+      medicalContext,
+      t,
     ]);
 
     // Render loading state

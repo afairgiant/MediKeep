@@ -582,7 +582,7 @@ const VitalsForm = ({
     }
 
     return null;
-  }, []);
+  }, [FIELD_CONFIGS, t]);
 
   // Real-time validation
   const validateForm = useCallback(() => {
@@ -597,7 +597,7 @@ const VitalsForm = ({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, validateField]);
+  }, [formData, validateField, FIELD_CONFIGS]);
 
   // Validate on form change
   useEffect(() => {

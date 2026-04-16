@@ -170,6 +170,7 @@ const Symptoms = () => {
 
     // Cleanup: invalidate any in-flight fetch when dependencies change or on unmount
     return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchIdRef is a fetch-id counter; we intentionally increment the live ref so any in-flight fetch sees the latest value
       fetchIdRef.current++;
     };
   }, [patientId, fetchSymptoms]);

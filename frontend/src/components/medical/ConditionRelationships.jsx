@@ -55,7 +55,8 @@ const ConditionRelationships = ({
     if (labResultId && fetchLabResultConditions) {
       fetchLabResultConditions(labResultId);
     }
-  }, [labResultId]); // Remove fetchLabResultConditions from dependencies to prevent infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchLabResultConditions identity changes on every render; including it would cause infinite reload loop
+  }, [labResultId]);
 
   const handleAddRelationship = async () => {
     if (!newRelationship.condition_id) {

@@ -252,6 +252,7 @@ const FamilyHistory = () => {
     };
 
     loadSharedFamilyHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount to load shared data; handleError and currentPatient are read at call time
   }, []);
 
   // Form and UI state

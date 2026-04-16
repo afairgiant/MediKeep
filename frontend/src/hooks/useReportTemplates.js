@@ -184,7 +184,7 @@ export const useReportTemplates = () => {
         abortControllerRef.current = null;
       }
     },
-    [execute, setError, clearError, fetchTemplates]
+    [setError, clearError, fetchTemplates]
   );
 
   // Update an existing template
@@ -292,7 +292,7 @@ export const useReportTemplates = () => {
         abortControllerRef.current = null;
       }
     },
-    [execute, setError, clearError, fetchTemplates]
+    [setError, clearError, fetchTemplates]
   );
 
   // Delete a template

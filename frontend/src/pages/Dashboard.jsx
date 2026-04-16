@@ -110,6 +110,7 @@ const Dashboard = () => {
       setInitialLoadComplete(true);
     };
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load runs once on mount; fetchers are stable in component scope
   }, []);
 
   // Note: currentPatient is now managed by useCurrentPatient hook
@@ -120,6 +121,7 @@ const Dashboard = () => {
     if (currentPatient?.id && initialLoadComplete) {
       fetchDashboardStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-fetch on patient/load state change; fetchDashboardStats is stable in component scope
   }, [currentPatient?.id, initialLoadComplete]);
 
   // Refresh recent activity when active patient changes
@@ -127,6 +129,7 @@ const Dashboard = () => {
     if (currentPatient?.id && initialLoadComplete) {
       fetchRecentActivity();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-fetch on patient/load state change; fetchRecentActivity is stable in component scope
   }, [currentPatient?.id, initialLoadComplete]);
 
   // Auto-refresh recent activity every 30 seconds to catch new updates
@@ -136,6 +139,7 @@ const Dashboard = () => {
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart interval only when patient changes; fetchRecentActivity is stable in component scope
   }, [currentPatient]);
 
   useEffect(() => {

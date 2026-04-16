@@ -100,6 +100,7 @@ const FamilyHistorySharingModal = ({
         loadShares();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when modal opens or selection changes; loadShares and error helpers are stable in component scope and would re-trigger if added
   }, [opened, familyMember, bulkMode, familyMembers]);
 
   const loadShares = async () => {

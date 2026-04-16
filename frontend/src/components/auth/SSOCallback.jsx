@@ -30,6 +30,7 @@ const SSOCallback = () => {
     }, 1000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; handleSSOCallback reads OAuth params and only needs to fire once per redirect
   }, []);
 
   const handleSSOCallback = async () => {

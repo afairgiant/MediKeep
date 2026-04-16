@@ -238,6 +238,11 @@ function ThemedToastContainer() {
   );
 }
 
+// API calls (background polling, etc.) should NOT reset the inactivity timer.
+// Only real user interactions (mouse, keyboard, touch, scroll) count as activity.
+// Hoisted to module scope so its identity is stable across renders.
+const getApiStats = () => ({});
+
 // Component to initialize global activity tracking with enhanced error handling
 // eslint-disable-next-line unused-imports/no-unused-vars -- Reserved for future use, referenced in commented JSX
 function ActivityTracker() {
@@ -248,10 +253,6 @@ function ActivityTracker() {
     trackTouch: true,
     enabled: true,
   });
-
-  // API calls (background polling, etc.) should NOT reset the inactivity timer.
-  // Only real user interactions (mouse, keyboard, touch, scroll) count as activity.
-  const getApiStats = () => ({});
 
   // Log activity tracking status changes
   useEffect(() => {
@@ -303,7 +304,7 @@ function ActivityTracker() {
     ); // Every 5 minutes
 
     return () => clearInterval(performanceTimer);
-  }, [isTracking, getStats, getApiStats]);
+  }, [isTracking, getStats]);
 
   return null;
 }

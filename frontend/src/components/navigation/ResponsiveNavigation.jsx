@@ -66,7 +66,7 @@ const ResponsiveNavigation = ({
         }
       }
     },
-    [responsive.isBelow, controlledOnToggle]
+    [responsive, controlledOnToggle]
   );
 
   // Default admin menu items if none provided

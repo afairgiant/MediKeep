@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Center,
@@ -105,9 +105,11 @@ const ReportBuilder = () => {
   }, [location.search, templates, loadTemplateForReport]);
 
   // Get available categories from data summary
-  const availableCategories = dataSummary?.categories
-    ? Object.keys(dataSummary.categories)
-    : [];
+  const availableCategories = useMemo(
+    () =>
+      dataSummary?.categories ? Object.keys(dataSummary.categories) : [],
+    [dataSummary?.categories]
+  );
 
   // Debug logging for development
   useEffect(() => {

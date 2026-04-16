@@ -133,7 +133,8 @@ export const UserPreferencesProvider = ({ children }) => {
         component: 'UserPreferencesContext',
       });
     }
-  }, [isAuthenticated, user?.id, authLoading]); // Depend on authentication state, user ID, and auth loading state
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-load on auth state or user ID change; full user object would re-trigger on every refresh
+  }, [isAuthenticated, user?.id, authLoading]);
 
   // Function to update preferences and save to server
   const updatePreferences = useCallback(async newPreferences => {

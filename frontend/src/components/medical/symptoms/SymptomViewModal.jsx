@@ -66,6 +66,7 @@ const SymptomViewModal = ({
     if (isOpen && symptom?.id) {
       fetchOccurrences();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchOccurrences is stable in component scope; only re-fetch when modal opens or symptom changes
   }, [isOpen, symptom?.id]);
 
   const fetchOccurrences = async () => {

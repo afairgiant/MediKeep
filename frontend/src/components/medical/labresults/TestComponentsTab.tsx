@@ -127,8 +127,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         setRefreshing(false);
         loadingRef.current = false;
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- filters is read inside but excluded intentionally; including it would refetch on every filter object identity change rather than via the explicit reload trigger
     [labResultId, currentPatient?.id, handleError]
   );
 
@@ -245,7 +245,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         handleError(error as Error, 'delete_component');
       }
     },
-    [currentPatient?.id, handleError]
+    [currentPatient?.id, handleError, t]
   );
 
   const handleRefresh = useCallback(() => {

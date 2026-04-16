@@ -385,7 +385,7 @@ const LabResults = () => {
 
     // Refresh the lab results list
     await refreshData();
-  }, [viewingLabResult, refreshData]);
+  }, [viewingLabResult, refreshData, setViewingLabResult]);
 
   const handleQuickImportSuccess = useCallback(
     async labResultId => {
@@ -426,7 +426,14 @@ const LabResults = () => {
         });
       }
     },
-    [refreshData, navigate, location.pathname, location.search]
+    [
+      refreshData,
+      navigate,
+      location.pathname,
+      location.search,
+      setViewingLabResult,
+      setShowViewModal,
+    ]
   );
 
   const handleDeleteLabResult = useCallback(

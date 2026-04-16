@@ -93,6 +93,7 @@ const MantineFilters = ({
     if (filters?.search !== localSearch) {
       setLocalSearch(filters?.search || '');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-way sync from external prop; localSearch is read only to avoid redundant set
   }, [filters?.search]);
 
   // Cleanup debounce timeout on unmount

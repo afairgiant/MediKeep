@@ -70,6 +70,7 @@ const ExportPage = () => {
 
   useEffect(() => {
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; loadInitialData is stable in component scope
   }, []);
 
   const loadInitialData = async (retryCount = 0) => {

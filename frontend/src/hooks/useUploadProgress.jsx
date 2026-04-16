@@ -423,14 +423,7 @@ export const useUploadProgress = () => {
       completedBytes,
       totalBytes: files.reduce((sum, file) => sum + (file.size || 0), 0),
     };
-  }, [
-    uploadState.files,
-    uploadState.startTime,
-    uploadState.overallProgress,
-    uploadState.isUploading,
-    calculateTimeRemaining,
-    calculateUploadSpeed,
-  ]);
+  }, [uploadState, calculateTimeRemaining, calculateUploadSpeed]);
 
   // Keep uploadStateRef in sync with uploadState
   useEffect(() => {

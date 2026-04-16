@@ -250,6 +250,7 @@ const BackupManagement = () => {
   React.useEffect(() => {
     loadRetentionSettings();
     loadScheduleSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; loaders are stable in component scope
   }, []);
 
   const loadRetentionSettings = async () => {

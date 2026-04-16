@@ -191,7 +191,8 @@ export function ResponsiveProvider({
         }
       );
     }
-  }, []); // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only initialization log; reading current snapshot of breakpoint/dimensions/etc is the intent
+  }, []);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(

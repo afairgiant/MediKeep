@@ -92,6 +92,7 @@ export const ResponsiveSelect = memo(
     // Log component mount and responsive changes
     useEffect(() => {
       logger.debug('ResponsiveSelect mounted', componentContext);
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only log; componentContext changes every render
     }, []);
 
     useEffect(() => {
@@ -99,6 +100,7 @@ export const ResponsiveSelect = memo(
         ...componentContext,
         previousBreakpoint: breakpoint,
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally fires only on breakpoint change; componentContext changes every render
     }, [breakpoint]);
 
     // Responsive configuration based on breakpoint
@@ -150,7 +152,7 @@ export const ResponsiveSelect = memo(
       if (isMobile) return config.mobile;
       if (isTablet) return config.tablet;
       return config.desktop;
-    }, [isMobile, isTablet, isDesktop, searchable, options.length, size]);
+    }, [isMobile, isTablet, searchable, options.length, size]);
 
     // Handle onChange with logging and validation
     const handleChange = useCallback(

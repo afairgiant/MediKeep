@@ -97,6 +97,9 @@ const createPerformanceMonitor = () => {
   return performanceMonitorInstance;
 };
 
+// Module-scope singleton — stable across renders so hook dep arrays don't churn.
+const performanceMonitor = createPerformanceMonitor();
+
 /**
  * DocumentManagerCore - Main coordination and state management hook
  * Handles all business logic, API calls, and state management for document operations
@@ -116,7 +119,6 @@ const useDocumentManagerCore = ({
   resetUpload: _resetUpload,
 }) => {
   // Performance monitoring: Track component renders (throttled in view mode)
-  const performanceMonitor = createPerformanceMonitor();
   // PERFORMANCE FIX: Reduce logging frequency in view mode
   const now = Date.now();
   const shouldLogRender =
@@ -357,7 +359,7 @@ const useDocumentManagerCore = ({
         component: 'DocumentManagerCore',
       });
     }
-  }, [entityType, entityId, onFileCountChange, onError]);
+  }, [entityType, entityId, onFileCountChange, onError, monitoredSetFiles]);
 
   // Check sync status for Paperless documents
   // Performance optimization: Use stable references to prevent infinite loops
@@ -573,6 +575,7 @@ const useDocumentManagerCore = ({
         if (isManualSync) setSyncLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- files is read via filesRef.current to keep callback stable; including files would cause sync loop on every file change
     [entityType, entityId, loadFiles, paperlessSettings]
   );
 
@@ -590,6 +593,7 @@ const useDocumentManagerCore = ({
   // Load paperless settings only once on mount
   useEffect(() => {
     loadPaperlessSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally runs once on mount; loadPaperlessSettings has stable behavior in component scope
   }, []);
 
   // Performance optimization: Memoize sync check to prevent infinite loops
@@ -628,12 +632,7 @@ const useDocumentManagerCore = ({
         component: 'DocumentManagerCore',
       });
     }
-  }, [
-    paperlessSettings?.paperless_enabled,
-    checkSyncStatus,
-    entityType,
-    entityId,
-  ]);
+  }, [checkSyncStatus, entityType, entityId]);
 
   // Run auto-sync check when files or settings change (debounced)
   // Performance optimization: Skip in view mode to prevent frequent triggers
@@ -703,6 +702,7 @@ const useDocumentManagerCore = ({
         periodicSyncIntervalRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- files.length is the meaningful change signal; including the full files array would re-evaluate on every list mutation unnecessarily
   }, [
     mode,
     paperlessSettings?.paperless_auto_sync,
@@ -1369,6 +1369,8 @@ const useDocumentManagerCore = ({
       uploadState.files,
       loadFiles,
       onUploadComplete,
+      debouncedUpdateProgress,
+      monitoredSetPendingFiles,
     ]
   );
 
@@ -1539,17 +1541,18 @@ const useDocumentManagerCore = ({
 
   // Cleanup function to clear all intervals on component unmount
   useEffect(() => {
+    const intervals = progressIntervalsRef.current;
     return () => {
       // Clear all tracked progress intervals
-      progressIntervalsRef.current.forEach(interval => {
+      intervals.forEach(interval => {
         clearInterval(interval);
       });
-      progressIntervalsRef.current.clear();
+      intervals.clear();
 
       // Performance monitoring: Log final component stats
       logger.info('document_manager_cleanup', {
         message: 'Component unmounting with performance stats',
-        intervalCount: progressIntervalsRef.current.size,
+        intervalCount: intervals.size,
         totalRenders: performanceMonitorInstance?.renderCount || 0,
         totalStateUpdates: performanceMonitorInstance?.stateUpdateCount || 0,
         component: 'DocumentManagerCore',

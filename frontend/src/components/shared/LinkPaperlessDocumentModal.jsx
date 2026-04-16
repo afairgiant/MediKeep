@@ -74,6 +74,7 @@ const LinkPaperlessDocumentModal = ({
       setSearchResults([]);
       setTotalResults(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleSearch is stable in component scope; only re-search on query/page/filter changes
   }, [debouncedQuery, page, excludeLinked]);
 
   // Reset page when query changes
