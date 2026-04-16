@@ -1448,7 +1448,7 @@ class CustomReportPDFGenerator:
 
         # Group by status for medical clarity, then sort each group most-recent first
         active = self._sort_records(
-            [r for r in records if (r.get("status") or "").lower() in ["active", "ongoing", "chronic", ""]],
+            [r for r in records if (r.get("status") or "").lower() in ["active", "ongoing", "chronic", "recurrence", "relapse", ""]],
             "onset_date",
             "condition_name",
         )

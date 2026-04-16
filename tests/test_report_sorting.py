@@ -243,6 +243,34 @@ class TestConditionSorting:
         text = _extract_text(story)
         assert _ordered(text, "CurrentActive", "OldResolved")
 
+    def test_recurrence_appears_in_active_bucket(self, gen):
+        records = [
+            {"condition_name": "RecurringGout", "status": "recurrence", "onset_date": "2023-01-01"},
+            {"condition_name": "OldResolved", "status": "resolved", "onset_date": "2020-01-01"},
+        ]
+        story = gen._format_conditions(records)
+        text = _extract_text(story)
+        assert _ordered(text, "RecurringGout", "OldResolved")
+
+    def test_relapse_appears_in_active_bucket(self, gen):
+        records = [
+            {"condition_name": "RelapsingMS", "status": "relapse", "onset_date": "2024-03-01"},
+            {"condition_name": "OldResolved", "status": "resolved", "onset_date": "2015-06-01"},
+        ]
+        story = gen._format_conditions(records)
+        text = _extract_text(story)
+        assert _ordered(text, "RelapsingMS", "OldResolved")
+
+    def test_recurrence_and_relapse_not_silently_dropped(self, gen):
+        records = [
+            {"condition_name": "RecurringGout", "status": "recurrence", "onset_date": "2023-01-01"},
+            {"condition_name": "RelapsingMS", "status": "relapse", "onset_date": "2024-03-01"},
+        ]
+        story = gen._format_conditions(records)
+        text = _extract_text(story)
+        assert "RecurringGout" in text
+        assert "RelapsingMS" in text
+
 
 # ---------------------------------------------------------------------------
 # _format_treatments
