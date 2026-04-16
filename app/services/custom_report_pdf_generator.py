@@ -1611,15 +1611,11 @@ class CustomReportPDFGenerator:
 
             # Provider and facility
             provider_info = []
-            if record.get("performing_practitioner"):
-                provider_info.append(
-                    f"{self.translator.field('performed_by')}: {record['performing_practitioner']}"
-                )
-            if record.get("facility"):
-                facility_text = (
-                    f"{self.translator.field('facility')}: {record['facility']}"
-                )
-                if record.get("procedure_setting"):
+            if record.get('practitioner_name'):
+                provider_info.append(f"{self.translator.field('performed_by')}: {record['practitioner_name']}")
+            if record.get('facility'):
+                facility_text = f"{self.translator.field('facility')}: {record['facility']}"
+                if record.get('procedure_setting'):
                     facility_text += f" ({record['procedure_setting']})"
                 provider_info.append(facility_text)
             elif record.get("procedure_setting"):
@@ -1670,27 +1666,14 @@ class CustomReportPDFGenerator:
                     story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
 
             # Detailed notes
-            if record.get("findings"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('findings')}:</b> {record['findings']}",
-                        self.styles["CustomBody"],
-                    )
-                )
-            if record.get("notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('procedure_notes')}:</b> {record['notes']}",
-                        self.styles["CustomBody"],
-                    )
-                )
-            if record.get("anesthesia_notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('anesthesia_notes')}:</b> {record['anesthesia_notes']}",
-                        self.styles["CustomBody"],
-                    )
-                )
+            if record.get('description'):
+                story.append(Paragraph(f"    <b>{self.translator.field('description')}:</b> {record['description']}", self.styles['CustomBody']))
+            if record.get('findings'):
+                story.append(Paragraph(f"    <b>{self.translator.field('findings')}:</b> {record['findings']}", self.styles['CustomBody']))
+            if record.get('notes'):
+                story.append(Paragraph(f"    <b>{self.translator.field('procedure_notes')}:</b> {record['notes']}", self.styles['CustomBody']))
+            if record.get('anesthesia_notes'):
+                story.append(Paragraph(f"    <b>{self.translator.field('anesthesia_notes')}:</b> {record['anesthesia_notes']}", self.styles['CustomBody']))
 
             if record.get("tags"):
                 tags = (
