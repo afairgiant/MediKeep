@@ -25,7 +25,7 @@ const NavigationWrapper = ({
   onMobileNavClose,
 }) => {
   const navigate = useNavigate();
-  const { viewport, isMobile, isTablet } = useViewport();
+  const { isMobile, isTablet } = useViewport();
 
   const isMobileNavOpen = mobileNavOpen || false;
   const closeMobileNav = useCallback(() => {

@@ -443,7 +443,7 @@ const Injuries = () => {
           isLoading={isBlocking}
           statusMessage={statusMessage}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onFileUploadComplete={(success, completedCount, failedCount) => {
+          onFileUploadComplete={(success, _completedCount, _failedCount) => {
             if (success && editingInjury?.id) {
               refreshFileCount(editingInjury.id);
             }

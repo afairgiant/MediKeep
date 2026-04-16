@@ -195,7 +195,7 @@ export class ResponsiveComponentFactory {
 
     // Apply layout-specific transformations
     const layoutTransformer = (props, responsive) => {
-      const { breakpoint, isMobile, isTablet, isDesktop } = responsive;
+      const { breakpoint } = responsive;
 
       // Get configured values for current breakpoint
       const enhancedProps = { ...props };
@@ -237,7 +237,7 @@ export class ResponsiveComponentFactory {
 
     // Form-specific responsive transformations
     const formTransformer = (props, responsive) => {
-      const { isMobile, isTablet } = responsive;
+      const { isMobile } = responsive;
 
       const enhancedProps = { ...props };
 
@@ -316,8 +316,7 @@ export class ResponsiveComponentFactory {
     }
 
     const tableTransformer = (props, responsive) => {
-      const { breakpoint, deviceType, isMobile, isTablet, isDesktop } =
-        responsive;
+      const { breakpoint, isMobile } = responsive;
 
       const enhancedProps = { ...props };
 
@@ -374,15 +373,7 @@ export class ResponsiveComponentFactory {
     }
 
     const modalTransformer = (props, responsive) => {
-      const {
-        breakpoint,
-        deviceType,
-        isMobile,
-        isTablet,
-        isDesktop,
-        width,
-        height,
-      } = responsive;
+      const { breakpoint, isMobile, width } = responsive;
 
       const enhancedProps = { ...props };
 

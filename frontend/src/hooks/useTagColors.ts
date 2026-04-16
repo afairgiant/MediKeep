@@ -11,7 +11,7 @@ interface TagColorEntry {
 }
 
 interface UseTagColorsReturn {
-  getTagColor: (tagName: string) => string | null;
+  getTagColor: (_tagName: string) => string | null;
   tagColors: Record<string, string>;
   tagEntries: TagColorEntry[];
   isLoading: boolean;

@@ -61,6 +61,7 @@ export const useDebouncedCallback = (callback, delay, dependencies = []) => {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dependencies array is provided by caller; ESLint cannot statically verify caller-supplied deps
   }, dependencies);
 
   return debouncedCallback;

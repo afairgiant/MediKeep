@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { notifications } from '@mantine/notifications';
 import {
   Center,
   Badge,
@@ -73,10 +72,7 @@ const ReportBuilder = () => {
     templates,
     loading: templatesLoading,
     error: templatesError,
-    isSaving,
     fetchTemplates,
-    saveTemplate,
-    deleteTemplate,
     loadTemplateForReport,
     clearError: clearTemplatesError,
   } = useReportTemplates();
@@ -109,9 +105,11 @@ const ReportBuilder = () => {
   }, [location.search, templates, loadTemplateForReport]);
 
   // Get available categories from data summary
-  const availableCategories = dataSummary?.categories
-    ? Object.keys(dataSummary.categories)
-    : [];
+  const availableCategories = useMemo(
+    () =>
+      dataSummary?.categories ? Object.keys(dataSummary.categories) : [],
+    [dataSummary?.categories]
+  );
 
   // Debug logging for development
   useEffect(() => {
@@ -142,44 +140,6 @@ const ReportBuilder = () => {
     symptoms: t('shared:categories.symptoms'),
     injuries: t('shared:categories.injuries'),
     insurance: t('shared:categories.insurance'),
-  };
-
-  // Handle template save
-  const handleSaveTemplate = async templateFormData => {
-    // Convert selected records to API format
-    const selectedRecordsArray = Object.entries(selectedRecords).map(
-      ([category, records]) => ({
-        category,
-        record_ids: Object.keys(records).map(id => parseInt(id, 10)),
-      })
-    );
-
-    const templateData = {
-      ...templateFormData,
-      selected_records: selectedRecordsArray,
-      report_settings: reportSettings,
-    };
-
-    return await saveTemplate(templateData);
-  };
-
-  // Handle template load
-  const handleLoadTemplate = async templateId => {
-    const template = await loadTemplateForReport(templateId);
-    if (template) {
-      // Clear current selections first
-      clearSelections();
-
-      // Load template selections (this would need to be implemented in the hook)
-      notifications.show({
-        title: t('builder.notifications.templateLoaded'),
-        message: t('builder.notifications.templateLoadedMessage', {
-          name: template.name,
-        }),
-        color: 'blue',
-        autoClose: 5000,
-      });
-    }
   };
 
   // Build generate button label

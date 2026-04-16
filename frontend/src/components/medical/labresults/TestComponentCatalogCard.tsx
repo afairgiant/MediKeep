@@ -22,12 +22,12 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 
 // useDateFormat is a JS hook without TS declarations
 interface DateFormatHook {
-  formatDate: (dateValue: string | null | undefined) => string;
+  formatDate: (_dateValue: string | null | undefined) => string;
 }
 
 interface TestComponentCatalogCardProps {
   entry: ComponentCatalogEntry;
-  onClick: (testName: string) => void;
+  onClick: (_testName: string) => void;
 }
 
 function getStatusColor(status: string | null | undefined): string {
@@ -52,7 +52,7 @@ function getStatusColor(status: string | null | undefined): string {
 
 function getStatusLabel(
   status: string | null | undefined,
-  t: (key: string, fallback: string) => string
+  t: (_key: string, _fallback: string) => string
 ): string {
   if (!status) return t('shared:labels.unknown', 'Unknown');
   const key = status.toLowerCase();
@@ -94,7 +94,7 @@ function TrendIcon({ direction }: { direction: string }) {
 
 function getTrendLabel(
   direction: string,
-  t: (key: string, fallback: string) => string
+  t: (_key: string, _fallback: string) => string
 ): string {
   switch (direction) {
     case 'increasing':

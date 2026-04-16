@@ -139,6 +139,7 @@ export const useMedicalData = config => {
       );
       refreshData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run on patient ID change; full currentPatient object would re-trigger on every parent re-render
   }, [currentPatient?.id, refreshData, entityName]);
 
   // Create item
@@ -457,7 +458,8 @@ export const useMedicalData = config => {
       abortController.abort();
       cleanup();
     };
-  }, [setError, cleanup, currentPatient?.id, isAuthenticated, authLoading]); // Include auth state to reinitialize when auth completes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only re-init on patient ID/auth change; entityName is loop-stable for a given hook instance and currentPatient ref is updated inline
+  }, [setError, cleanup, currentPatient?.id, isAuthenticated, authLoading]);
 
   return {
     // Data

@@ -73,11 +73,7 @@ const Dashboard = () => {
   const { formatDateTime } = useDateFormat();
   const { colorScheme } = useMantineColorScheme();
   const { isMobile } = useViewport();
-  const {
-    user: authUser,
-    shouldShowProfilePrompts,
-    checkIsFirstLogin,
-  } = useAuth();
+  const { user: authUser } = useAuth();
 
   // Using global state for patient data
   const { patient: currentPatient, loading: patientLoading } =
@@ -114,6 +110,7 @@ const Dashboard = () => {
       setInitialLoadComplete(true);
     };
     loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load runs once on mount; fetchers are stable in component scope
   }, []);
 
   // Note: currentPatient is now managed by useCurrentPatient hook
@@ -124,6 +121,7 @@ const Dashboard = () => {
     if (currentPatient?.id && initialLoadComplete) {
       fetchDashboardStats();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-fetch on patient/load state change; fetchDashboardStats is stable in component scope
   }, [currentPatient?.id, initialLoadComplete]);
 
   // Refresh recent activity when active patient changes
@@ -131,6 +129,7 @@ const Dashboard = () => {
     if (currentPatient?.id && initialLoadComplete) {
       fetchRecentActivity();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-fetch on patient/load state change; fetchRecentActivity is stable in component scope
   }, [currentPatient?.id, initialLoadComplete]);
 
   // Auto-refresh recent activity every 30 seconds to catch new updates
@@ -140,6 +139,7 @@ const Dashboard = () => {
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- restart interval only when patient changes; fetchRecentActivity is stable in component scope
   }, [currentPatient]);
 
   useEffect(() => {
@@ -440,7 +440,7 @@ const Dashboard = () => {
   const ModuleCard = ({ module }) => {
     const Icon = module.icon;
 
-    const handleClick = e => {
+    const handleClick = _e => {
       logger.info('ModuleCard clicked:', module.link);
       try {
         navigate(module.link);
@@ -488,7 +488,7 @@ const Dashboard = () => {
     );
   };
 
-  const ActivityItem = ({ activity, index }) => {
+  const ActivityItem = ({ activity, index: _index }) => {
     const isClickable = isActivityClickable(activity);
     const navigationUrl = getActivityNavigationUrl(activity);
     const ActivityIcon = getActivityIcon(activity.model_name);
@@ -501,7 +501,7 @@ const Dashboard = () => {
       activity.action
     );
 
-    const handleClick = e => {
+    const handleClick = _e => {
       if (isClickable && navigationUrl) {
         navigate(navigationUrl);
         frontendLogger.logInfo('Activity item clicked', {
@@ -914,7 +914,7 @@ const Dashboard = () => {
                         className="dashboard-resource-item"
                         p="8px 10px"
                         radius="sm"
-                        onClick={e => {
+                        onClick={_e => {
                           logger.info(
                             'Additional resource clicked:',
                             module.link

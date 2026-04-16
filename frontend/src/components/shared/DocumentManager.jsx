@@ -351,11 +351,6 @@ const DocumentManager = ({
     loadPaperlessSettings();
   }, [loadPaperlessSettings]);
 
-  // Add pending file for batch upload (edit/create mode)
-  const handleAddPendingFile = useCallback((file, description = '') => {
-    setPendingFiles(prev => [...prev, { file, description, id: Date.now() }]);
-  }, []);
-
   // Remove pending file
   const handleRemovePendingFile = useCallback(
     fileId => {
@@ -1002,7 +997,6 @@ const DocumentManager = ({
             // Re-read the ref here because the try-block's local copy is out of scope.
             const currentStorageBackend = selectedStorageBackendRef.current;
             let errorMessage = error.message || 'Failed to upload file';
-            let enhancedError = error;
 
             // Import error handling utilities dynamically if needed
             try {
@@ -1072,7 +1066,7 @@ const DocumentManager = ({
       });
 
       try {
-        const results = await Promise.all(uploadPromises);
+        await Promise.all(uploadPromises);
         logger.info('document_manager_batch_upload_complete', {
           message: 'All files uploaded successfully in batch',
           entityType,
@@ -1103,7 +1097,7 @@ const DocumentManager = ({
         throw error;
       }
     },
-    [entityType]
+    [entityType, selectedStorageBackend]
   );
 
   // Expose upload function to parent via callback (only once)
@@ -1125,40 +1119,7 @@ const DocumentManager = ({
         clearPendingFiles: () => setPendingFiles([]),
       });
     }
-  }, [onUploadPendingFiles, uploadPendingFiles]);
-
-  // Batch delete marked files (for edit mode)
-  const deleteMarkedFiles = async () => {
-    if (filesToDelete.length === 0) return true;
-
-    const deletePromises = filesToDelete.map(async fileId => {
-      try {
-        await apiService.deleteEntityFile(fileId);
-
-        logger.info('document_manager_batch_delete_success', {
-          message: 'Batch file deleted successfully',
-          entityType,
-          entityId,
-          fileId,
-          component: 'DocumentManager',
-        });
-      } catch (error) {
-        logger.error('document_manager_batch_delete_error', {
-          message: 'Failed to delete file in batch',
-          entityType,
-          entityId,
-          fileId,
-          error: error.message,
-          component: 'DocumentManager',
-        });
-        throw error;
-      }
-    });
-
-    await Promise.all(deletePromises);
-    setFilesToDelete([]);
-    return true;
-  };
+  }, [onUploadPendingFiles, uploadPendingFiles, entityType, entityId]);
 
   // Handle file upload form submission (view mode modal)
   const handleFileUploadSubmit = async e => {

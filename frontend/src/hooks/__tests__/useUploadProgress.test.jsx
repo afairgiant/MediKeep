@@ -214,7 +214,7 @@ describe('useUploadProgress Hook', () => {
       // Test various invalid inputs
       const invalidInputs = [null, undefined, NaN, 'invalid', {}, []];
 
-      invalidInputs.forEach((invalidInput, index) => {
+      invalidInputs.forEach((invalidInput, _index) => {
         act(() => {
           result.current.updateFileProgress(
             'file-1',

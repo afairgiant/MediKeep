@@ -170,7 +170,7 @@ const Medication = () => {
   });
 
   // Display medication purpose (indication only, since conditions are now linked via many-to-many)
-  const getMedicationPurpose = (medication, asText = false) => {
+  const getMedicationPurpose = (medication, _asText = false) => {
     const indication = medication.indication?.trim();
     return indication || '-';
   };
@@ -323,7 +323,7 @@ const Medication = () => {
     });
     setEditingMedication(medication);
     setShowAddForm(true);
-  }, []);
+  }, [resetSubmission]);
 
   const handleDeleteMedication = async medicationId => {
     const success = await deleteItem(medicationId);
@@ -482,8 +482,6 @@ const Medication = () => {
       setError,
       updateItem,
       createItem,
-      resetForm,
-      refreshData,
       startSubmission,
       canSubmit,
       completeFormSubmission,
@@ -702,7 +700,7 @@ const Medication = () => {
           isLoading={isBlocking}
           statusMessage={statusMessage}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onFileUploadComplete={(success, completedCount, failedCount) => {
+          onFileUploadComplete={(success, _completedCount, _failedCount) => {
             if (success && editingMedication?.id) {
               refreshFileCount(editingMedication.id);
             }

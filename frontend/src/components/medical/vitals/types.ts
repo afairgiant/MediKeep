@@ -110,8 +110,8 @@ export interface VitalTypeConfig {
   unit: string;
   color: string;
   referenceRange: VitalReferenceRange | null;
-  getValue: (vital: any) => number | null;
-  getSecondaryValue?: (vital: any) => number | null;
+  getValue: (_vital: any) => number | null;
+  getSecondaryValue?: (_vital: any) => number | null;
 }
 
 // Vital type configurations with reference ranges

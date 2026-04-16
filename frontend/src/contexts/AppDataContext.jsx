@@ -610,6 +610,7 @@ export function AppDataProvider({ children }) {
       localStorage.removeItem('medikeep_viewmode');
       localStorage.removeItem('medikeep_practitioners_groupby');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchers and user are stable in context scope; we only re-run on auth state or user ID change to avoid redundant fetches
   }, [
     isAuthenticated,
     isLoading, // Add isLoading to dependencies

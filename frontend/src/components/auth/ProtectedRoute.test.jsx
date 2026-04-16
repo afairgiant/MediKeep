@@ -36,7 +36,7 @@ vi.mock('react-router-dom', async () => ({
     search: '',
     hash: '',
   }),
-  Navigate: ({ to, state, replace }) => (
+  Navigate: ({ to, state: _state, replace }) => (
     <div data-testid="navigate" data-to={to} data-replace={replace} />
   ),
 }));

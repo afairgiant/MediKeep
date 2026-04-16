@@ -12,17 +12,17 @@ vi.mock('../contexts/UserPreferencesContext', () => ({
 
 // Mock the dateFormatUtils
 vi.mock('../utils/dateFormatUtils', () => ({
-  formatDateWithPreference: vi.fn((dateValue, formatCode, options) => {
+  formatDateWithPreference: vi.fn((dateValue, formatCode, _options) => {
     if (!dateValue) return 'N/A';
     return `formatted-${formatCode}-${dateValue}`;
   }),
   formatDateLong: vi.fn(
-    (dateValue, formatCode, { longMonth, displayLocale } = {}) => {
+    (dateValue, formatCode, { longMonth: _longMonth, displayLocale } = {}) => {
       if (!dateValue) return 'N/A';
       return `long-${formatCode}-${dateValue}-${displayLocale || 'no-locale'}`;
     }
   ),
-  formatDateTimeWithPreference: vi.fn((dateValue, formatCode, options) => {
+  formatDateTimeWithPreference: vi.fn((dateValue, formatCode, _options) => {
     if (!dateValue) return 'N/A';
     return `datetime-${formatCode}-${dateValue}`;
   }),
@@ -88,7 +88,7 @@ vi.mock('../utils/constants', () => ({
 // Mock dateUtils
 vi.mock('../utils/dateUtils', () => ({
   formatDateTimeForInputWithPreference: vi.fn(
-    (date, formatCode, includeSeconds) => {
+    (date, formatCode, _includeSeconds) => {
       if (!date || !(date instanceof Date)) return '';
       const formattedDate =
         formatCode === 'dmy'

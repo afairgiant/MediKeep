@@ -2,16 +2,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, Button } from '@mantine/core';
 import { IconChevronDown, IconUser } from '@tabler/icons-react';
-import {
-  getNavigationSections,
-  VIEWPORT_CONFIGS,
-} from '../../config/navigation.config';
+import { getNavigationSections } from '../../config/navigation.config';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
 import LanguageSwitcher from '../shared/LanguageSwitcher';
 import './DesktopNavigation.css';
 
-const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
+const DesktopNavigation = ({ user: _user, isAdmin, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation(['navigation', 'shared']);
@@ -19,7 +16,6 @@ const DesktopNavigation = ({ user, isAdmin, onLogout }) => {
 
   // Get navigation sections based on viewport (desktop or laptop)
   const navigationSections = getNavigationSections(viewport, isAdmin);
-  const config = VIEWPORT_CONFIGS[viewport];
 
   const isCurrentPath = path => {
     if (path === '/dashboard') {

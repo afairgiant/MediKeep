@@ -77,7 +77,7 @@ const UploadProgressSystem = ({
       }
 
       // Complete form submission
-      const entityId = formHook.completeFormSubmission(true, 'entity-123');
+      formHook.completeFormSubmission(true, 'entity-123');
 
       if (files.length > 0) {
         // Start file upload process
@@ -569,7 +569,7 @@ describe('Upload Progress System Integration Tests', () => {
         return <div data-testid="upload-progress-system">System recovered</div>;
       };
 
-      const { rerender } = render(
+      render(
         <MantineProvider>
           <UploadProgressErrorBoundary>
             <RecoverableUploadSystem />

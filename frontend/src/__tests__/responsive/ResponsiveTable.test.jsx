@@ -568,7 +568,7 @@ describe('ResponsiveTable Component Tests', () => {
 
       // Should show "+X more fields" text for cards with hidden fields
       // The actual text pattern is "+N more field" or "+N more fields"
-      const moreFieldsText = screen.queryByText(/\+\d+ more field/);
+      screen.queryByText(/\+\d+ more field/);
       // This is optional based on how many fields are displayed vs total columns
       // Just verify it renders without error
       expect(screen.getAllByText('Lisinopril').length).toBeGreaterThan(0);

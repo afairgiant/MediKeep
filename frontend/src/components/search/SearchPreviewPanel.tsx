@@ -46,10 +46,10 @@ interface SearchPreviewPanelProps {
   item: SearchResultRow | null;
   query?: string;
   selectedTags?: string[];
-  getTagColor: (tag: string) => string | null;
-  onTagClick: (tag: string) => void;
-  formatDate: (date: string) => string;
-  onOpenFullRecord: (route: string) => void;
+  getTagColor: (_tag: string) => string | null;
+  onTagClick: (_tag: string) => void;
+  formatDate: (_date: string) => string;
+  onOpenFullRecord: (_route: string) => void;
 }
 
 // ---------------------------------------------------------------------------

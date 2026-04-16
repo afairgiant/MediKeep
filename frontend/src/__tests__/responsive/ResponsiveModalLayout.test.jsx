@@ -295,7 +295,7 @@ describe('Responsive Modal and Layout Tests', () => {
       });
 
       it('supports styles as a callback function', () => {
-        const stylesCallback = vi.fn(theme => ({
+        const stylesCallback = vi.fn(_theme => ({
           body: { padding: '2rem' },
         }));
 

@@ -45,7 +45,7 @@ export const ResponsiveModal = memo(
     // Responsive behavior
     responsiveSize = 'auto',
     forceFullScreen = false,
-    adaptToContent = true,
+    adaptToContent: _adaptToContent = true,
 
     // Scroll behavior
     scrollAreaComponent: ScrollAreaComponent = ScrollArea,
@@ -139,6 +139,7 @@ export const ResponsiveModal = memo(
         ...componentContext,
         previousBreakpoint: breakpoint,
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally fires only on breakpoint change; componentContext changes every render
     }, [breakpoint]);
 
     // Medical form layout strategy context
@@ -385,13 +386,7 @@ export const ResponsiveModal = memo(
           {children}
         </ScrollAreaComponent>
       );
-    }, [
-      shouldUseScrollArea,
-      children,
-      ScrollAreaComponent,
-      responsiveMaxHeight,
-      isMobile,
-    ]);
+    }, [shouldUseScrollArea, children, responsiveMaxHeight, isMobile]);
 
     // Error handling for invalid props
     if (typeof opened !== 'boolean') {

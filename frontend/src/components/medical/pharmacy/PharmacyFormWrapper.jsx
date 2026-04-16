@@ -10,7 +10,7 @@ const PharmacyFormWrapper = ({
   onSubmit,
   editingPharmacy,
   isLoading,
-  statusMessage,
+  statusMessage: _statusMessage,
 }) => {
   const handleError = error => {
     logger.error('pharmacy_form_wrapper_error', {

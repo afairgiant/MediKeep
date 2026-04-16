@@ -38,7 +38,7 @@ const InvitationResponseModal = ({
   const { formatDateTime } = useDateFormat();
   const [loading, setLoading] = useState(false);
   const [responseNote, setResponseNote] = useState('');
-  const [selectedResponse, setSelectedResponse] = useState(null);
+  const [, setSelectedResponse] = useState(null);
 
   const handleResponse = async response => {
     if (!invitation) return;

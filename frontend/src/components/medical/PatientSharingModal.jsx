@@ -103,6 +103,7 @@ const PatientSharingModal = ({ opened, onClose, patient, onShareUpdate }) => {
       loadPatientShares();
       loadPendingInvitations();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loaders are stable in component scope; only re-fetch when modal opens or patient changes
   }, [opened, patient]);
 
   // Reset form when modal closes

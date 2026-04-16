@@ -43,10 +43,10 @@ interface TestComponentDisplayProps {
   error?: string | null;
   groupByCategory?: boolean;
   showActions?: boolean;
-  onEdit?: (component: LabTestComponent) => void;
-  onDelete?: (component: LabTestComponent) => void;
-  onTrendClick?: (testName: string) => void;
-  onError?: (error: Error) => void;
+  onEdit?: (_component: LabTestComponent) => void;
+  onDelete?: (_component: LabTestComponent) => void;
+  onTrendClick?: (_testName: string) => void;
+  onError?: (_error: Error) => void;
 }
 
 const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
@@ -125,8 +125,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
 
   const EditDeleteActions: React.FC<{
     component: LabTestComponent;
-    onEdit?: (component: LabTestComponent) => void;
-    onDelete?: (component: LabTestComponent) => void;
+    onEdit?: (_component: LabTestComponent) => void;
+    onDelete?: (_component: LabTestComponent) => void;
   }> = React.memo(({ component, onEdit, onDelete }) => {
     const handleEdit = React.useCallback(
       (e: React.MouseEvent) => {

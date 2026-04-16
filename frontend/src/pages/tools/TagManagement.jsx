@@ -98,6 +98,7 @@ const TagManagement = () => {
 
   useEffect(() => {
     fetchTags();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; fetchTags is stable in component scope
   }, []);
 
   // Create new tag

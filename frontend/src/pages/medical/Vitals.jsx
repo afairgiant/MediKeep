@@ -260,18 +260,7 @@ const Vitals = () => {
 
   // Data management with filtering and sorting
   const dataManagement = useDataManagement(vitalsData || [], pageConfig);
-  const {
-    filteredData: filteredVitals = [],
-    filters,
-    updateFilter,
-    clearFilters,
-    hasActiveFilters,
-    sortBy,
-    sortOrder,
-    handleSortChange,
-    totalCount,
-    filteredCount,
-  } = dataManagement || {};
+  const { filteredData: filteredVitals = [] } = dataManagement || {};
 
   // Load stats with enhanced error handling
   const loadStats = useCallback(async () => {
@@ -333,23 +322,6 @@ const Vitals = () => {
     setSelectedVitalType(null);
   }, []);
 
-  // Generate filter options from vitalsData
-  const statusOptions = useMemo(() => {
-    return pageConfig.filtering?.statusOptions || [];
-  }, [pageConfig.filtering?.statusOptions]);
-
-  const categoryOptions = useMemo(() => {
-    return pageConfig.filtering?.categoryOptions || [];
-  }, [pageConfig.filtering?.categoryOptions]);
-
-  const dateRangeOptions = useMemo(() => {
-    return pageConfig.filtering.dateRangeOptions;
-  }, [pageConfig.filtering.dateRangeOptions]);
-
-  const sortOptions = useMemo(() => {
-    return pageConfig.sorting.sortOptions;
-  }, [pageConfig.sorting.sortOptions]);
-
   // Form handlers
   const handleAddNew = useCallback(() => {
     setEditingVitals(null);
@@ -367,7 +339,7 @@ const Vitals = () => {
         replace: true,
       });
     },
-    [location.search, navigate]
+    [location.search, location.pathname, navigate]
   );
 
   const handleCloseViewModal = useCallback(() => {
@@ -380,7 +352,7 @@ const Vitals = () => {
     navigate(`${location.pathname}${newSearch ? `?${newSearch}` : ''}`, {
       replace: true,
     });
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, location.search]);
 
   const handleEdit = useCallback(
     vitals => {

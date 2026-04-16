@@ -29,7 +29,7 @@ interface TestComponentEditModalProps {
   component: LabTestComponent | null;
   opened: boolean;
   onClose: () => void;
-  onSubmit: (updatedData: Partial<LabTestComponent>) => Promise<void>;
+  onSubmit: (_updatedData: Partial<LabTestComponent>) => Promise<void>;
 }
 
 const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({

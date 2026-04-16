@@ -44,7 +44,7 @@ const MedicationCard = ({
   fileCountLoading = false,
   disableActions = false,
   disableActionsTooltip,
-  onError,
+  onError: _onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const { formatLongDate } = useDateFormat();

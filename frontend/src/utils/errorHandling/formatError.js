@@ -127,7 +127,7 @@ const formatListMessage = (names, template, options = {}) => {
  * @param {Object} context - Additional context
  * @returns {Object} Formatted error
  */
-const formatBulkAlreadySharedError = (parsed, context) => {
+const formatBulkAlreadySharedError = (parsed, _context) => {
   const { names, count } = parsed;
 
   // Use the reusable formatter to create the message

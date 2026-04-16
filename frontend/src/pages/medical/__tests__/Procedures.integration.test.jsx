@@ -139,7 +139,7 @@ vi.mock('react-router-dom', async () => {
 // i18n
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key, fallback) => key,
+    t: (key, _fallback) => key,
     i18n: { language: 'en' },
   }),
 }));
@@ -225,7 +225,7 @@ vi.mock('../../../components/shared/MedicalPageFilters', () => ({
   default: () => <div data-testid="filters">Filters</div>,
 }));
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, viewMode, onViewModeChange }) => (
+  default: ({ primaryAction, viewMode, onViewModeChange: _onViewModeChange }) => (
     <div data-testid="page-actions">
       <button onClick={primaryAction?.onClick}>{primaryAction?.label}</button>
       <span data-testid="view-mode">{viewMode}</span>
@@ -241,7 +241,7 @@ vi.mock('../../../components/shared/EmptyState', () => ({
   ),
 }));
 vi.mock('../../../components/shared/MedicalPageAlerts', () => ({
-  default: ({ error, successMessage, onClearError }) => (
+  default: ({ error, successMessage, onClearError: _onClearError }) => (
     <div data-testid="alerts">
       {error && <span data-testid="error-alert">{error}</span>}
       {successMessage && (
@@ -256,7 +256,7 @@ vi.mock('../../../components/shared/MedicalPageLoading', () => ({
 vi.mock('../../../components/shared/AnimatedCardGrid', () => ({
   default: ({ items, renderCard }) => (
     <div data-testid="card-grid">
-      {items.map((item, i) => (
+      {items.map((item, _i) => (
         <div key={item.id} data-testid={`card-wrapper-${item.id}`}>
           {renderCard(item)}
         </div>

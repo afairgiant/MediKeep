@@ -130,7 +130,7 @@ export function createActivityThrottle(activityFunc, delay, activityType) {
     leading: true,
     trailing: false,
     debugName: `activity-${activityType}`,
-    onError: (error, debugName, args) => {
+    onError: (error, debugName, _args) => {
       // Log activity tracking errors without exposing sensitive data
       logger.error(`Activity tracking error in ${debugName}:`, {
         error: error.message,

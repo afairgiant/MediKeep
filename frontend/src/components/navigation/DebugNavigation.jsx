@@ -4,7 +4,7 @@
  */
 
 
-const DebugNavigation = ({ currentPath, userInfo, className = '' }) => {
+const DebugNavigation = ({ currentPath, userInfo, className: _className = '' }) => {
   // Very basic HTML navigation for testing
   return (
     <div

@@ -32,21 +32,21 @@ import { RECORD_TYPES } from './SearchFilterSidebar';
 
 interface SearchResultsHeaderProps {
   query: string;
-  onQueryChange: (query: string) => void;
-  onSearch: (e: React.FormEvent) => void;
+  onQueryChange: (_query: string) => void;
+  onSearch: (_e: React.FormEvent) => void;
   loading: boolean;
   selectedTypes: string[];
-  onTypeToggle: (type: string) => void;
+  onTypeToggle: (_type: string) => void;
   selectedTags: string[];
-  onTagRemove: (tag: string) => void;
+  onTagRemove: (_tag: string) => void;
   matchMode: string;
   hasActiveFilters: boolean;
-  getTagColor: (tag: string) => string | null;
+  getTagColor: (_tag: string) => string | null;
   resultCount: number;
   isSearching: boolean;
   hasPatient: boolean;
   viewMode: string;
-  onViewModeChange: (mode: string) => void;
+  onViewModeChange: (_mode: string) => void;
 }
 
 // ---------------------------------------------------------------------------

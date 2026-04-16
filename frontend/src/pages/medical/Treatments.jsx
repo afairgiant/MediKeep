@@ -662,7 +662,7 @@ const Treatments = () => {
         isLoading={isBlocking}
         statusMessage={statusMessage}
         onDocumentManagerRef={setDocumentManagerMethods}
-        onFileUploadComplete={(success, completedCount, failedCount) => {
+        onFileUploadComplete={(success, _completedCount, _failedCount) => {
           if (success && editingTreatment?.id) {
             refreshFileCount(editingTreatment.id);
           }

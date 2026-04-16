@@ -245,7 +245,7 @@ const BaseMedicalForm = ({
         />
       );
     },
-    [handleSelectChange, getDropdownHeight]
+    [handleSelectChange, getDropdownHeight, t]
   );
 
   // Callback for number input fields
@@ -483,10 +483,11 @@ const BaseMedicalForm = ({
 
             const [search, setSearch] = useState(formData[name] || '');
             const [value, setValue] = useState(formData[name] || '');
+            const formValue = formData[name];
 
             // Sync local state when formData changes
             useEffect(() => {
-              const currentValue = formData[name] || '';
+              const currentValue = formValue || '';
               setValue(currentValue);
 
               // Find if it's a known option to display the label instead of value
@@ -498,7 +499,8 @@ const BaseMedicalForm = ({
               } else {
                 setSearch(currentValue);
               }
-            }, [formData[name], name]);
+              // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally re-syncs only when formValue changes; selectOptions is read-only in callback
+            }, [formValue]);
 
             // Option filtering
             const exactOptionMatch = selectOptions.find(
@@ -720,6 +722,7 @@ const BaseMedicalForm = ({
       handleCheckboxChange,
       onInputChange,
       t,
+      getDropdownHeight,
     ]
   );
 
@@ -755,7 +758,7 @@ const BaseMedicalForm = ({
 
       return rows;
     },
-    [layoutConfig.columns, responsiveState.breakpoint]
+    [layoutConfig.columns]
   );
 
   // Memoize field rows

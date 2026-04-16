@@ -4,6 +4,22 @@ import { apiService } from '../services/api/index.js';
 import { notifications } from '@mantine/notifications';
 import logger from '../services/logger';
 
+// Pure date helpers hoisted to module scope so their identity is stable
+const formatLocalDate = d => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const getDefaultDateFrom = () => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 1);
+  return formatLocalDate(d);
+};
+
+const getDefaultDateTo = () => formatLocalDate(new Date());
+
 /**
  * Custom hook for managing custom report generation
  * Provides data fetching, report generation, and download functionality
@@ -161,21 +177,6 @@ export const useCustomReports = () => {
   }, []);
 
   // --- Trend chart actions ---
-
-  const formatLocalDate = d => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
-
-  const getDefaultDateFrom = () => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() - 1);
-    return formatLocalDate(d);
-  };
-
-  const getDefaultDateTo = () => formatLocalDate(new Date());
 
   const addVitalChart = useCallback(vitalType => {
     setTrendCharts(prev => {

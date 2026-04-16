@@ -37,7 +37,7 @@ const InsuranceViewModal = ({
   insurance,
   onEdit,
   onPrint,
-  onSetPrimary,
+  onSetPrimary: _onSetPrimary,
   onFileUploadComplete,
   disableEdit = false,
   disableEditTooltip,
@@ -576,7 +576,7 @@ const InsuranceViewModal = ({
                   entityType="insurance"
                   entityId={insurance.id}
                   mode="view"
-                  onUploadComplete={(success, completedCount, failedCount) => {
+                  onUploadComplete={(success, _completedCount, _failedCount) => {
                     if (onFileUploadComplete) {
                       onFileUploadComplete(success);
                     }

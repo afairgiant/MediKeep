@@ -107,6 +107,7 @@ export const useErrorQueue = (componentName, options = {}) => {
 
       return errorWithId;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- removeFromQueue is defined below and is stable (empty deps); avoiding circular declaration
     [componentName, maxErrors, autoClearAfter, generateErrorId]
   );
 
@@ -354,9 +355,10 @@ export const useErrorQueue = (componentName, options = {}) => {
 
   // Cleanup timers on unmount
   useEffect(() => {
+    const timers = clearTimers.current;
     return () => {
-      clearTimers.current.forEach(timer => clearTimeout(timer));
-      clearTimers.current.clear();
+      timers.forEach(timer => clearTimeout(timer));
+      timers.clear();
     };
   }, []);
 

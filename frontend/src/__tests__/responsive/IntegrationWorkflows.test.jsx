@@ -122,7 +122,7 @@ vi.mock('../../components/adapters/ResponsiveTable', () => {
 
 // Mock ResponsiveModal - simple dialog wrapper
 vi.mock('../../components/adapters/ResponsiveModal', () => {
-  function MockResponsiveModal({ opened, onClose, title, children }) {
+  function MockResponsiveModal({ opened, onClose: _onClose, title, children }) {
     if (!opened) return null;
     return (
       <div role="dialog" aria-label={title}>
@@ -144,7 +144,7 @@ vi.mock('../../components/adapters/ResponsiveSelect', () => {
     value,
     options = [],
     onChange,
-    searchable,
+    searchable: _searchable,
   }) {
     const normalizedOptions = options.map(opt =>
       typeof opt === 'string' ? { value: opt, label: opt } : opt
@@ -837,7 +837,7 @@ describe('Responsive Integration Workflow Tests', () => {
     // Inline mock components used within the test App components
     // These mirror the vi.mock'd components but are used directly in test JSX
     const ResponsiveTableInline = ({ data = [], columns = [] }) => {
-      const responsive = mockUseResponsive();
+      mockUseResponsive();
       if (!data || data.length === 0) return <div>No data</div>;
 
       return (
@@ -862,7 +862,7 @@ describe('Responsive Integration Workflow Tests', () => {
       );
     };
 
-    const ResponsiveModalInline = ({ opened, onClose, title, children }) => {
+    const ResponsiveModalInline = ({ opened, onClose: _onClose, title, children }) => {
       if (!opened) return null;
       return (
         <div role="dialog" aria-label={title}>
@@ -878,7 +878,7 @@ describe('Responsive Integration Workflow Tests', () => {
       onSubmit,
       onInputChange,
       formData = {},
-      practitionersOptions = [],
+      practitionersOptions: _practitionersOptions = [],
     }) => {
       if (!isOpen) return null;
       return (
@@ -1306,7 +1306,7 @@ describe('Responsive Integration Workflow Tests', () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredMedications.map((row, i) => (
+                {filteredMedications.map((row, _i) => (
                   <tr key={row.id}>
                     {sampleColumns.map(c => (
                       <td key={c.key}>{row[c.key]}</td>
@@ -1327,7 +1327,7 @@ describe('Responsive Integration Workflow Tests', () => {
                 </tr>
               </thead>
               <tbody>
-                {allergies.map((row, i) => (
+                {allergies.map((row, _i) => (
                   <tr key={row.id}>
                     {allergyColumns.map(c => (
                       <td key={c.key}>{row[c.key]}</td>
@@ -1536,7 +1536,7 @@ function ResponsiveTableDirect({
   totalRecords,
   pageSize = 20,
 }) {
-  const responsive = mockUseResponsive();
+  mockUseResponsive();
 
   if (!data || data.length === 0) {
     return <div>No data</div>;

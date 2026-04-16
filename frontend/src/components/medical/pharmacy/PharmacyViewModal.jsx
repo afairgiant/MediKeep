@@ -16,7 +16,7 @@ import { IconEdit } from '@tabler/icons-react';
 import logger from '../../../services/logger';
 import { useTranslation } from 'react-i18next';
 
-const PharmacyViewModal = ({ isOpen, onClose, pharmacy, onEdit, navigate }) => {
+const PharmacyViewModal = ({ isOpen, onClose, pharmacy, onEdit, navigate: _navigate }) => {
   const { t } = useTranslation(['common', 'shared']);
 
   const handleError = error => {

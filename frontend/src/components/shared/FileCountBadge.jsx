@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 const FileCountBadge = ({
   count = 0,
-  entityType = '',
+  entityType: _entityType = '',
   variant = 'badge', // 'badge', 'text', 'icon'
   size = 'sm',
   onClick,

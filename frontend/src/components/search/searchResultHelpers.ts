@@ -23,8 +23,8 @@ import {
 
 /** Translation function type accepted by helper functions. */
 export type TFunc = (
-  key: string,
-  defaultValueOrOptions?: string | Record<string, unknown>
+  _key: string,
+  _defaultValueOrOptions?: string | Record<string, unknown>
 ) => string;
 
 export interface SearchResultRow {

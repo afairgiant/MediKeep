@@ -11,6 +11,8 @@ const useThemeColors = () => {
   const { theme } = useTheme();
 
   const colors = useMemo(() => {
+    // Reference theme so memo re-evaluates when it changes (CSS variables update with theme)
+    void theme;
     const rootStyles = getComputedStyle(document.documentElement);
 
     return {

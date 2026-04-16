@@ -44,5 +44,6 @@ export function usePatientPermissions() {
       isViewOnly,
       viewOnlyTooltip,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally selecting only the fields that affect permission evaluation; full patient/user objects would re-compute on unrelated changes
   }, [patient?.owner_user_id, patient?.permission_level, user?.id, t]);
 }

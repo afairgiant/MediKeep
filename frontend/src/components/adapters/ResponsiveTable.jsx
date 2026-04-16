@@ -69,8 +69,8 @@ export const ResponsiveTable = memo(
     sortBy = null,
     sortDirection = 'asc',
     onSort,
-    filterable = false,
-    onFilter,
+    filterable: _filterable = false,
+    onFilter: _onFilter,
 
     // Pagination
     pagination = true,
@@ -83,7 +83,7 @@ export const ResponsiveTable = memo(
     selectable = false,
     selectedRows = [],
     onRowSelect,
-    onRowsSelect,
+    onRowsSelect: _onRowsSelect,
 
     // Row actions
     onRowClick,
@@ -105,12 +105,12 @@ export const ResponsiveTable = memo(
 
     // Virtualization
     virtualization = 'auto',
-    rowHeight,
+    rowHeight: _rowHeight,
 
     // Medical context specific
     medicalContext = 'general',
     showSecondaryInfo = true,
-    compactCards = false,
+    compactCards: _compactCards = false,
 
     // Data formatting
     formatters = {},
@@ -120,7 +120,7 @@ export const ResponsiveTable = memo(
     fullWidth = false,
 
     // Loading states
-    loadingText = 'Loading data...',
+    loadingText: _loadingText = 'Loading data...',
     emptyText = 'No data available',
     errorText = 'Error loading data',
 
@@ -133,8 +133,7 @@ export const ResponsiveTable = memo(
 
     ...props
   }) => {
-    const { breakpoint, deviceType, isMobile, isTablet, isDesktop } =
-      useResponsive();
+    const { breakpoint, deviceType, isMobile } = useResponsive();
     const { t } = useTranslation(['common', 'shared']);
     const hasActions = Boolean(onView || onEdit || onDelete);
 
@@ -218,6 +217,7 @@ export const ResponsiveTable = memo(
     // Log component mount only (reduced logging for performance)
     useEffect(() => {
       logger.debug('ResponsiveTable mounted', componentContext);
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only log; componentContext changes every render
     }, []);
 
     // Table layout strategy context
@@ -266,14 +266,7 @@ export const ResponsiveTable = memo(
       // Removed frequent configuration logging for performance
 
       return config;
-    }, [
-      breakpoint,
-      strategyContext,
-      maxHeight,
-      fullWidth,
-      virtualization,
-      componentContext,
-    ]);
+    }, [breakpoint, strategyContext, maxHeight, fullWidth, virtualization]);
 
     // Get print-specific table configuration (always use desktop/xl settings)
     const printTableConfig = useMemo(() => {
@@ -363,13 +356,7 @@ export const ResponsiveTable = memo(
           onSort(columnKey, newDirection);
         }
       },
-      [
-        sortable,
-        internalSortBy,
-        internalSortDirection,
-        onSort,
-        componentContext,
-      ]
+      [sortable, internalSortBy, internalSortDirection, onSort]
     );
 
     // Handle row selection
@@ -385,7 +372,7 @@ export const ResponsiveTable = memo(
           onRowSelect(row, !selectedRows.includes(row.id || index));
         }
       },
-      [onRowClick, selectable, onRowSelect, selectedRows, componentContext]
+      [onRowClick, selectable, onRowSelect, selectedRows]
     );
 
     // Handle pagination
@@ -397,7 +384,7 @@ export const ResponsiveTable = memo(
           onPageChange(newPage);
         }
       },
-      [onPageChange, page, pageSize, componentContext]
+      [onPageChange]
     );
 
     // Render action buttons for a row
@@ -669,6 +656,8 @@ export const ResponsiveTable = memo(
       selectable,
       hasActions,
       renderActionButtons,
+      formatters,
+      medicalContext,
     ]);
 
     // Render card layout for mobile
@@ -788,6 +777,8 @@ export const ResponsiveTable = memo(
       columns.length,
       hasActions,
       renderActionButtons,
+      medicalContext,
+      t,
     ]);
 
     // Render loading state

@@ -104,7 +104,7 @@ describe('InvitationCard Component', () => {
 
       expect(
         screen.getByText(
-          '"Please review this family medical history for consultation."'
+          '\u201CPlease review this family medical history for consultation.\u201D'
         )
       ).toBeInTheDocument();
     });

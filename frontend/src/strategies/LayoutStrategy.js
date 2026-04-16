@@ -30,7 +30,7 @@ export class LayoutStrategy {
    * @param {Object} context - Additional context (itemCount, containerWidth, etc.)
    * @returns {number} Number of columns
    */
-  getColumns(breakpoint, context = {}) {
+  getColumns(breakpoint, _context = {}) {
     throw new Error(
       'LayoutStrategy.getColumns() must be implemented by subclass'
     );
@@ -44,7 +44,7 @@ export class LayoutStrategy {
    * @param {Object} context - Additional context
    * @returns {string|number} Spacing value
    */
-  getSpacing(breakpoint, context = {}) {
+  getSpacing(breakpoint, _context = {}) {
     throw new Error(
       'LayoutStrategy.getSpacing() must be implemented by subclass'
     );
@@ -58,7 +58,7 @@ export class LayoutStrategy {
    * @param {Object} context - Additional context
    * @returns {Object} Container configuration
    */
-  getContainer(breakpoint, context = {}) {
+  getContainer(breakpoint, _context = {}) {
     throw new Error(
       'LayoutStrategy.getContainer() must be implemented by subclass'
     );
@@ -113,7 +113,7 @@ export class LayoutStrategy {
    * @param {Object} context - Context to check
    * @returns {boolean} True if strategy should be used
    */
-  shouldUse(context = {}) {
+  shouldUse(_context = {}) {
     return true;
   }
 

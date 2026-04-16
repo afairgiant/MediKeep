@@ -13,11 +13,11 @@ vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, description, ...props }) => {
     // Filter out non-DOM props
     const {
-      firstDayOfWeek,
-      maxDate,
-      minDate,
-      popoverProps,
-      withAsterisk,
+      firstDayOfWeek: _firstDayOfWeek,
+      maxDate: _maxDate,
+      minDate: _minDate,
+      popoverProps: _popoverProps,
+      withAsterisk: _withAsterisk,
       ...domProps
     } = props;
     return (

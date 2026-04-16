@@ -8,7 +8,7 @@ const ConditionCard = ({
   onEdit,
   onDelete,
   onView,
-  navigate,
+  navigate: _navigate,
   fileCount = 0,
   fileCountLoading = false,
   disableActions = false,
@@ -77,21 +77,6 @@ const ConditionCard = ({
         return 'yellow';
       case 'mild':
         return 'blue';
-      default:
-        return 'gray';
-    }
-  };
-
-  const getStatusColor = status => {
-    switch (status) {
-      case 'active':
-        return 'green';
-      case 'inactive':
-        return 'gray';
-      case 'resolved':
-        return 'blue';
-      case 'chronic':
-        return 'orange';
       default:
         return 'gray';
     }

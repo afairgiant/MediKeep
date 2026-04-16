@@ -30,7 +30,7 @@ vi.mock('../../constants/errorMessages', () => ({
     FORM_SAVED: 'Form saved successfully!',
   },
   WARNING_MESSAGES: {},
-  getUserFriendlyError: vi.fn((error, context) => `User friendly: ${error}`),
+  getUserFriendlyError: vi.fn((error, _context) => `User friendly: ${error}`),
 }));
 
 // Wrapper component for Mantine provider
@@ -104,10 +104,7 @@ describe('useFormSubmissionWithUploads Hook', () => {
 
       // Complete form submission successfully
       act(() => {
-        const success = result.current.completeFormSubmission(
-          true,
-          'entity-123'
-        );
+        result.current.completeFormSubmission(true, 'entity-123');
       });
 
       expect(result.current.submissionState.isSubmitting).toBe(false);

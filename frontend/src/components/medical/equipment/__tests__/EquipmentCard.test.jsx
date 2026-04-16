@@ -410,7 +410,7 @@ describe('EquipmentCard', () => {
       // This test ensures the component handles errors gracefully
       const invalidEquipment = null;
 
-      const { container } = render(
+      render(
         <MantineWrapper>
           <EquipmentCard {...defaultProps} equipment={invalidEquipment} />
         </MantineWrapper>

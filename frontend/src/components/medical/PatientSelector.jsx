@@ -126,6 +126,7 @@ const PatientSelector = ({
     if (patients.length > 0 && !initialLoadComplete) {
       initializeActivePatient();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initializeActivePatient is stable in component scope; only run when patient list size or load state changes
   }, [patients.length, initialLoadComplete]);
 
   // Load stats after patients are loaded (only once after initial load)
@@ -134,7 +135,8 @@ const PatientSelector = ({
       loadStats();
       loadPatientPhotos(); // Load photos for all patients
     }
-  }, [initialLoadComplete]); // Only depend on initialLoadComplete to run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally runs once after initial load completes; loaders are stable in component scope
+  }, [initialLoadComplete]);
 
   // Update active patient when currentPatientId changes (but not on every render)
   useEffect(() => {
@@ -144,7 +146,8 @@ const PatientSelector = ({
         setActivePatient(patient);
       }
     }
-  }, [currentPatientId]); // Only depend on currentPatientId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-sync active patient when currentPatientId changes; including patients/activePatient causes redundant re-runs on every list mutation
+  }, [currentPatientId]);
 
   /**
    * Initialize active patient from cached data
@@ -1029,7 +1032,7 @@ const PatientSelector = ({
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
-                  styles={theme => ({
+                  styles={_theme => ({
                     root: {
                       backgroundColor:
                         colorScheme === 'dark'

@@ -74,7 +74,6 @@ const LabResults = () => {
     deleteItem,
     refreshData,
     clearError,
-    setSuccessMessage,
     setError,
   } = useMedicalData({
     entityName: 'lab-result',
@@ -102,7 +101,6 @@ const LabResults = () => {
 
   // Form submission with uploads hook
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -264,8 +262,6 @@ const LabResults = () => {
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] =
-    useState(null);
 
   // Test component inline entry state (create mode only)
   const [testComponentMethods, setTestComponentMethods] = useState(null);
@@ -389,7 +385,7 @@ const LabResults = () => {
 
     // Refresh the lab results list
     await refreshData();
-  }, [viewingLabResult, refreshData]);
+  }, [viewingLabResult, refreshData, setViewingLabResult]);
 
   const handleQuickImportSuccess = useCallback(
     async labResultId => {
@@ -430,7 +426,14 @@ const LabResults = () => {
         });
       }
     },
-    [refreshData, navigate, location.pathname, location.search]
+    [
+      refreshData,
+      navigate,
+      location.pathname,
+      location.search,
+      setViewingLabResult,
+      setShowViewModal,
+    ]
   );
 
   const handleDeleteLabResult = useCallback(

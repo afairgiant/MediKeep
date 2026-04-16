@@ -47,7 +47,7 @@ const PageHeader = ({
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
-  const [navOpened, setNavOpened] = useState(false);
+  const [, setNavOpened] = useState(false);
 
   // Check if user is admin
   const isAdmin = () => {
@@ -172,8 +172,6 @@ const PageHeader = ({
       window.location.href = '/login';
     }
   };
-
-  const isDashboard = variant === 'dashboard';
 
   return (
     <>

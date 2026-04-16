@@ -65,13 +65,11 @@ const INITIAL_NEW_EQUIPMENT_STATE = {
   notes: '',
 };
 
-const EDIT_FIELDS = ['usage_frequency', 'specific_settings', 'relevance_note'];
-
 function TreatmentEquipmentRelationships({
   treatmentId,
   patientId,
   equipment,
-  practitioners,
+  practitioners: _practitioners,
   isViewMode = false,
   onRelationshipsChange,
   onEquipmentCreated,
@@ -79,7 +77,6 @@ function TreatmentEquipmentRelationships({
 }) {
   // Ensure equipment is always an array
   const safeEquipment = Array.isArray(equipment) ? equipment : [];
-  const safePractitioners = Array.isArray(practitioners) ? practitioners : [];
   const { t } = useTranslation(['common', 'errors', 'shared']);
   const { dateInputFormat } = useDateFormat();
 

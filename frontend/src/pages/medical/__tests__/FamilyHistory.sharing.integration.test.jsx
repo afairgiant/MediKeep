@@ -225,7 +225,7 @@ vi.mock('../../../components/medical/FamilyHistorySharingModal', () => ({
     opened,
     onClose,
     familyMember,
-    familyMembers,
+    familyMembers: _familyMembers,
     bulkMode,
     onSuccess,
   }) =>
@@ -267,8 +267,8 @@ vi.mock('../../../components/medical/family-history', () => ({
     isOpen,
     onClose,
     title,
-    formData,
-    onInputChange,
+    formData: _formData,
+    onInputChange: _onInputChange,
     onSubmit,
   }) => {
     if (!isOpen) return null;

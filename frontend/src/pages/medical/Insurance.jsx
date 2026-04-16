@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useMedicalData } from '../../hooks/useMedicalData';
 import { useDataManagement } from '../../hooks/useDataManagement';
 import { useEntityFileCounts } from '../../hooks/useEntityFileCounts';
@@ -53,7 +52,6 @@ const Insurance = () => {
   const { t } = useTranslation(['common', 'shared']);
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
   const { formatDate } = useDateFormat();
-  const navigate = useNavigate();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('insurance');
   const {
@@ -122,7 +120,6 @@ const Insurance = () => {
 
   // Form submission with uploads hook
   const {
-    submissionState,
     startSubmission,
     completeFormSubmission,
     startFileUpload,
@@ -167,20 +164,11 @@ const Insurance = () => {
 
   const {
     data: processedInsurances = [],
-    filters = {},
-    updateFilter = () => {},
-    clearFilters = () => {},
     hasActiveFilters = false,
-    statusOptions = [],
-    categoryOptions = [],
-    dateRangeOptions = [],
-    sortOptions = [],
     handleSortChange = () => {},
     sortBy = '',
     sortOrder = 'asc',
     getSortIndicator = () => '',
-    totalCount = 0,
-    filteredCount = 0,
   } = dataManagement;
 
   const paginatedInsurances = paginateData(processedInsurances);
@@ -199,8 +187,6 @@ const Insurance = () => {
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-  const [viewDocumentManagerMethods, setViewDocumentManagerMethods] =
-    useState(null);
 
   // Table formatters - consistent with medication table approach
   const formatters = {
@@ -482,20 +468,6 @@ const Insurance = () => {
     setIsFormOpen(true);
   };
 
-  // Handle close form
-  const handleCloseForm = () => {
-    // Prevent closing during upload
-    if (isBlocking) {
-      return;
-    }
-
-    resetSubmission(); // Reset submission state
-    setIsFormOpen(false);
-    setEditingInsurance(null);
-    setDocumentManagerMethods(null); // Reset document manager methods
-    setFormData(initializeFormData());
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -699,7 +671,7 @@ const Insurance = () => {
         isLoading={isBlocking}
         statusMessage={statusMessage}
         onDocumentManagerRef={setDocumentManagerMethods}
-        onFileUploadComplete={(success, completedCount, failedCount) => {
+        onFileUploadComplete={(success, _completedCount, _failedCount) => {
           if (success && editingInsurance?.id) {
             refreshFileCount(editingInsurance.id);
           }
@@ -732,7 +704,7 @@ const Insurance = () => {
                 color: 'blue',
               });
             },
-            error => {
+            _error => {
               notifications.show({
                 title: 'Print Error',
                 message: ERROR_MESSAGES.FILE_PROCESSING_FAILED,

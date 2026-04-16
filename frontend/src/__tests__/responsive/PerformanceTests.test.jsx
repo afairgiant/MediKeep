@@ -1,7 +1,6 @@
 import { vi } from 'vitest';
 import React from 'react';
 import { screen, waitFor, act, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 // Import test utilities
 import {
@@ -134,7 +133,7 @@ vi.mock('../../components/adapters/ResponsiveSelect', () => {
     onChange,
     error,
     value,
-    ...rest
+    ..._rest
   }) {
     const normalizedOptions = options.map(opt =>
       typeof opt === 'string' ? { value: opt, label: opt } : opt
@@ -173,7 +172,7 @@ vi.mock('../../components/medical/MantineMedicationForm', () => ({
     onSubmit,
     onInputChange,
     formData = {},
-    practitionersOptions = [],
+    practitionersOptions: _practitionersOptions = [],
   }) {
     if (!isOpen) return null;
     return (
@@ -702,7 +701,6 @@ describe('Responsive Component Performance Tests', () => {
     });
 
     it('maintains performance during form validation', async () => {
-      const user = userEvent.setup();
       const mockValidation = vi.fn().mockImplementation(() => {
         return Math.random() > 0.5 ? null : 'Validation error';
       });

@@ -123,6 +123,7 @@ const PatientForm = ({
         relationship_to_self: patient.relationship_to_self || '',
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-initialize form when patient prop changes; unitSystem changes would discard in-progress edits
   }, [patient]);
 
   const handleSubmit = async e => {

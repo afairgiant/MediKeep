@@ -165,7 +165,7 @@ describe('Upload Progress Performance Tests', () => {
         act(() => {
           // Update all 50 files simultaneously multiple times
           for (let round = 0; round < 20; round++) {
-            testFiles.forEach((file, index) => {
+            testFiles.forEach((file, _index) => {
               const progress = Math.min(100, (round + 1) * 5);
               result.current.updateFileProgress(file.id, progress, 'uploading');
             });
@@ -220,7 +220,7 @@ describe('Upload Progress Performance Tests', () => {
 
         // Simulate upload progress
         act(() => {
-          testFiles.forEach((file, index) => {
+          testFiles.forEach((file, _index) => {
             result.current.updateFileProgress(file.id, 100, 'completed');
           });
         });
@@ -468,7 +468,7 @@ describe('Upload Progress Performance Tests', () => {
       // Perform extensive updates
       act(() => {
         for (let round = 0; round < 100; round++) {
-          testFiles.forEach((file, index) => {
+          testFiles.forEach((file, _index) => {
             result.current.updateFileProgress(file.id, round, 'uploading');
           });
         }

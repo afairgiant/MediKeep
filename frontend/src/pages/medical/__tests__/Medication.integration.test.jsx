@@ -133,7 +133,7 @@ vi.mock('../../../components', () => ({
   PageHeader: ({ title }) => <div data-testid="page-header">{title}</div>,
 }));
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, viewMode, onViewModeChange }) => (
+  default: ({ primaryAction, viewMode: _viewMode, onViewModeChange }) => (
     <div data-testid="page-actions">
       {primaryAction && (
         <button onClick={primaryAction.onClick} data-testid="add-button">
@@ -269,7 +269,7 @@ vi.mock('../../../components/medical/medications', () => ({
     onInputChange,
     onSubmit,
     conditions,
-    navigate,
+    navigate: _navigate,
   }) => {
     if (!isOpen) return null;
     return (

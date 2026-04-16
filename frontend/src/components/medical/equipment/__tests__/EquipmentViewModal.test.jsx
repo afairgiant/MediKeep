@@ -367,7 +367,7 @@ describe('EquipmentViewModal', () => {
       );
 
       // Notes header should not appear (as a section title)
-      const sections = screen.queryAllByText('Notes');
+      screen.queryAllByText('Notes');
       // May appear in form context but not as a data display section
     });
   });

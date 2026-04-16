@@ -511,7 +511,7 @@ export const testMedicalFormAtAllBreakpoints = async (
       rerender(formComponent);
 
       // Verify data is still there
-      for (const [fieldName, value] of Object.entries(formData)) {
+      for (const [_fieldName, value] of Object.entries(formData)) {
         const field = screen.queryByDisplayValue(value.toString());
         expect(field).toBeInTheDocument();
       }

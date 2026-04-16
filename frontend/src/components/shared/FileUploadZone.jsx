@@ -34,7 +34,7 @@ const FileUploadZone = ({
   disabled = false,
   className = '',
   selectedStorageBackend = 'local',
-  paperlessSettings = null,
+  paperlessSettings: _paperlessSettings = null,
   mode = 'view',
   autoUpload = false,
 }) => {
@@ -167,13 +167,6 @@ const FileUploadZone = ({
   // Remove file from selected list
   const removeFile = useCallback(fileId => {
     setSelectedFiles(prev => prev.filter(f => f.id !== fileId));
-  }, []);
-
-  // Update file description
-  const updateDescription = useCallback((fileId, description) => {
-    setSelectedFiles(prev =>
-      prev.map(f => (f.id === fileId ? { ...f, description } : f))
-    );
   }, []);
 
   // Storage backend info

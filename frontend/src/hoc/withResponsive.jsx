@@ -43,7 +43,6 @@ export function withResponsive(WrappedComponent, config = {}) {
   const ResponsiveComponent = memo(
     forwardRef((props, ref) => {
       const responsive = useResponsive();
-      const { breakpoint } = responsive;
 
       // Transform props based on breakpoint
       const transformedProps = useMemo(() => {
@@ -113,7 +112,7 @@ export function withResponsive(WrappedComponent, config = {}) {
         }
 
         return enhanced;
-      }, [props, responsive, breakpoint]);
+      }, [props, responsive]);
 
       return <WrappedComponent {...transformedProps} ref={ref} />;
     })

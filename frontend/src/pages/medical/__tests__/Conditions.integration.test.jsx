@@ -155,7 +155,7 @@ vi.mock('../../../components/adapters', () => ({
 }));
 
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, viewMode, onViewModeChange }) => (
+  default: ({ primaryAction, viewMode: _viewMode, onViewModeChange }) => (
     <div data-testid="page-actions">
       {primaryAction && (
         <button onClick={primaryAction.onClick} data-testid="add-button">

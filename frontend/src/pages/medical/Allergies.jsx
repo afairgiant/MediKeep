@@ -395,7 +395,7 @@ const Allergies = () => {
           isLoading={isBlocking}
           statusMessage={statusMessage}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onFileUploadComplete={(success, completedCount, failedCount) => {
+          onFileUploadComplete={(success, _completedCount, _failedCount) => {
             if (success && editingAllergy?.id) {
               refreshFileCount(editingAllergy.id);
             }

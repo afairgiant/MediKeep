@@ -25,7 +25,7 @@ const PractitionerViewModal = ({
   onClose,
   practitioner,
   onEdit,
-  navigate,
+  navigate: _navigate,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const [practiceDetails, setPracticeDetails] = useState(null);

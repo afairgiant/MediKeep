@@ -8,7 +8,7 @@ import ThemeToggle from '../ui/ThemeToggle';
 import LanguageSwitcher from '../shared/LanguageSwitcher';
 import './TabletNavigation.css';
 
-const TabletNavigation = ({ user, isAdmin, onLogout }) => {
+const TabletNavigation = ({ user: _user, isAdmin, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation(['navigation', 'shared']);

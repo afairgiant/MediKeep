@@ -78,7 +78,7 @@ vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }) => <>{children}</>,
 }));
 vi.mock('@mantine/dates', () => ({
-  DateInput: ({ label, ...props }) => <input data-testid={`date-${label}`} />,
+  DateInput: ({ label, ..._props }) => <input data-testid={`date-${label}`} />,
 }));
 
 // ─── Component mocks (simple HTML for reliable testing) ──────────────────────
@@ -116,7 +116,7 @@ vi.mock('../../../components/adapters', () => ({
 }));
 
 vi.mock('../../../components/shared/MedicalPageActions', () => ({
-  default: ({ primaryAction, viewMode, onViewModeChange }) => (
+  default: ({ primaryAction, viewMode: _viewMode, onViewModeChange }) => (
     <div data-testid="page-actions">
       {primaryAction && (
         <button onClick={primaryAction.onClick} data-testid="add-button">
