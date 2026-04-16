@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import handle_database_errors
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
 )
+from app.core.http.error_handling import handle_database_errors
 from app.crud.practitioner import practitioner
 from app.models.activity_log import EntityType
 from app.schemas.practitioner import (

@@ -1,18 +1,17 @@
+from collections.abc import Mapping
+from dataclasses import asdict, is_dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
-from collections.abc import Mapping
-from dataclasses import is_dataclass, asdict
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, asc, desc, or_, text
+from sqlalchemy import and_, asc, desc, text
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy.exc import IntegrityError, DataError, OperationalError
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import (
     LogFields,
     format_log_message,
-    get_log_category,
     sanitize_log_input,
 )
 
@@ -571,12 +570,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                 raise IntegrityError(
                     f"Duplicate {self.model_name} record", orig=e.orig, params=None
                 )
-            elif "foreign key" in error_msg.lower():
+            if "foreign key" in error_msg.lower():
                 raise IntegrityError(
                     f"Invalid reference in {self.model_name}", orig=e.orig, params=None
                 )
-            else:
-                raise
+            raise
         except DataError as e:
             db.rollback()
             self.logger.error(f"Data error creating {self.model_name}: {str(e)}")
@@ -698,14 +696,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                     orig=e.orig,
                     params=None,
                 )
-            elif "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
+            if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 raise IntegrityError(
                     f"Duplicate value in {self.model_name} update",
                     orig=e.orig,
                     params=None,
                 )
-            else:
-                raise
+            raise
         except DataError as e:
             db.rollback()
             self.logger.error(
@@ -799,8 +796,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType], QueryMixi
                     orig=e.orig,
                     params=None,
                 )
-            else:
-                raise
+            raise
         except Exception as e:
             db.rollback()
             self.logger.error(

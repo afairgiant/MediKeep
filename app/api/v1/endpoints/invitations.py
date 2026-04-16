@@ -206,18 +206,17 @@ async def respond_to_invitation(
                             "share_count": len(share_result),
                             "status": "accepted",
                         }
-                    else:
-                        # Single invitation - one share created
-                        context_data = invitation.context_data or {}
-                        member_name = context_data.get(
-                            "family_member_name", "family member"
-                        )
-                        return {
-                            "message": f"Successfully accepted family history sharing for {member_name}",
-                            "invitation_id": invitation.id,
-                            "share_id": share_result.id,
-                            "status": "accepted",
-                        }
+                    # Single invitation - one share created
+                    context_data = invitation.context_data or {}
+                    member_name = context_data.get(
+                        "family_member_name", "family member"
+                    )
+                    return {
+                        "message": f"Successfully accepted family history sharing for {member_name}",
+                        "invitation_id": invitation.id,
+                        "share_id": share_result.id,
+                        "status": "accepted",
+                    }
                 except ValueError as ve:
                     # Handle specific family sharing errors with user-friendly messages
                     error_msg = str(ve)
@@ -226,21 +225,20 @@ async def respond_to_invitation(
                             status_code=status.HTTP_404_NOT_FOUND,
                             detail="The invitation or family history record could not be found",
                         )
-                    elif "expired" in error_msg.lower():
+                    if "expired" in error_msg.lower():
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
                             detail="This invitation has expired and can no longer be accepted",
                         )
-                    elif "already shared" in error_msg.lower():
+                    if "already shared" in error_msg.lower():
                         raise HTTPException(
                             status_code=status.HTTP_409_CONFLICT,
                             detail="This family history is already shared with you",
                         )
-                    else:
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Unable to accept family history sharing: {error_msg}",
-                        )
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Unable to accept family history sharing: {error_msg}",
+                    )
                 except Exception as e:
                     log_endpoint_error(
                         logger,
@@ -297,21 +295,20 @@ async def respond_to_invitation(
                             "share_count": len(shares),
                             "status": "accepted",
                         }
-                    else:
-                        # Single invitation
-                        share = patient_service.accept_patient_share_invitation(
-                            current_user, invitation_id, response_data.response_note
-                        )
+                    # Single invitation
+                    share = patient_service.accept_patient_share_invitation(
+                        current_user, invitation_id, response_data.response_note
+                    )
 
-                        patient_name = invitation.context_data.get(
-                            "patient_name", "patient"
-                        )
-                        return {
-                            "message": f"Successfully accepted patient share for {patient_name}",
-                            "invitation_id": invitation.id,
-                            "share_id": share.id,
-                            "status": "accepted",
-                        }
+                    patient_name = invitation.context_data.get(
+                        "patient_name", "patient"
+                    )
+                    return {
+                        "message": f"Successfully accepted patient share for {patient_name}",
+                        "invitation_id": invitation.id,
+                        "share_id": share.id,
+                        "status": "accepted",
+                    }
                 except ValueError as ve:
                     error_msg = str(ve)
                     if "not found" in error_msg.lower():
@@ -319,21 +316,20 @@ async def respond_to_invitation(
                             status_code=status.HTTP_404_NOT_FOUND,
                             detail="The invitation or patient record could not be found",
                         )
-                    elif "expired" in error_msg.lower():
+                    if "expired" in error_msg.lower():
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
                             detail="This invitation has expired and can no longer be accepted",
                         )
-                    elif "already shared" in error_msg.lower():
+                    if "already shared" in error_msg.lower():
                         raise HTTPException(
                             status_code=status.HTTP_409_CONFLICT,
                             detail="This patient is already shared with you",
                         )
-                    else:
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Unable to accept patient share: {error_msg}",
-                        )
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Unable to accept patient share: {error_msg}",
+                    )
                 except Exception as e:
                     log_endpoint_error(
                         logger,
@@ -371,20 +367,17 @@ async def respond_to_invitation(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="The invitation could not be found or may have already been responded to",
             )
-        elif "expired" in error_msg.lower():
+        if "expired" in error_msg.lower():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This invitation has expired and can no longer be responded to",
             )
-        elif "already responded" in error_msg.lower():
+        if "already responded" in error_msg.lower():
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="You have already responded to this invitation",
             )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg
-            )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg)
     except HTTPException:
         # Re-raise HTTP exceptions (these are already properly formatted)
         raise
@@ -558,32 +551,30 @@ def revoke_invitation(
                     "revoked_share_count": len(revoked_shares),
                     "status": "revoked",
                 }
-            else:
-                # Handle single invitation
-                family_member_id = invitation.context_data.get("family_member_id")
+            # Handle single invitation
+            family_member_id = invitation.context_data.get("family_member_id")
 
-                if not family_member_id:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Invalid invitation context data - missing family_member_id",
-                    )
-
-                # Revoke the share (this will also update the invitation status)
-                share = family_service.revoke_family_history_share(
-                    current_user, family_member_id, shared_with_user_id
+            if not family_member_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid invitation context data - missing family_member_id",
                 )
 
-                return {
-                    "message": "Family history sharing revoked successfully",
-                    "invitation_id": invitation.id,
-                    "share_id": share.id,
-                    "status": "revoked",
-                }
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Can only revoke accepted family history share invitations",
+            # Revoke the share (this will also update the invitation status)
+            share = family_service.revoke_family_history_share(
+                current_user, family_member_id, shared_with_user_id
             )
+
+            return {
+                "message": "Family history sharing revoked successfully",
+                "invitation_id": invitation.id,
+                "share_id": share.id,
+                "status": "revoked",
+            }
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Can only revoke accepted family history share invitations",
+        )
 
     except HTTPException:
         raise

@@ -3,14 +3,15 @@ API endpoints for standardized test search and autocomplete
 """
 
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.orm import Session
-from app.api import deps
-from app.crud import standardized_test
-from app.models.models import StandardizedTest
-from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_data_access
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy.orm import Session
+
+from app.api import deps
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_data_access, log_endpoint_access
+from app.crud import standardized_test
 
 logger = get_logger(__name__, "app")
 

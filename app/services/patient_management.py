@@ -2,16 +2,17 @@
 Patient Management Service - Enhanced patient CRUD operations with V1 ownership
 """
 
+from datetime import date, datetime
 from typing import List, Optional
-from datetime import datetime, date
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 
-from app.models.models import User, Patient, PatientShare
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
 from app.core.logging.config import get_logger, log_security_event
 from app.core.logging.constants import LogFields
-from app.services.patient_access import PatientAccessService
 from app.core.utils.activity_tracker import activity_tracking_disabled_var
+from app.models.models import Patient, PatientShare, User
+from app.services.patient_access import PatientAccessService
 
 security_logger = get_logger(__name__, "security")
 
@@ -69,7 +70,7 @@ class PatientManagementService:
             existing_self_record = (
                 self.db.query(Patient)
                 .filter(
-                    Patient.owner_user_id == user.id, Patient.is_self_record == True
+                    Patient.owner_user_id == user.id, Patient.is_self_record.is_(True)
                 )
                 .first()
             )
@@ -121,10 +122,9 @@ class PatientManagementService:
 
             if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 raise ValueError("A patient with this information already exists")
-            elif "foreign key" in error_msg.lower():
+            if "foreign key" in error_msg.lower():
                 raise ValueError("Invalid physician ID specified")
-            else:
-                raise ValueError("Failed to create patient due to database constraint")
+            raise ValueError("Failed to create patient due to database constraint")
 
     def get_patient(self, user: User, patient_id: int) -> Patient:
         """
@@ -218,12 +218,10 @@ class PatientManagementService:
             if "foreign key" in error_msg.lower():
                 if "physician" in error_msg.lower():
                     raise ValueError("The specified physician does not exist")
-                else:
-                    raise ValueError("Invalid reference in patient update")
-            elif "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
+                raise ValueError("Invalid reference in patient update")
+            if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 raise ValueError("This update would create a duplicate patient record")
-            else:
-                raise ValueError("Failed to update patient due to database constraint")
+            raise ValueError("Failed to update patient due to database constraint")
 
     def delete_patient(self, user: User, patient_id: int) -> bool:
         """
@@ -258,8 +256,6 @@ class PatientManagementService:
             # Temporarily disable activity tracking to prevent new logs during deletion
             activity_tracking_disabled_var.set(True)
             # Step 1: Clear active_patient_id for any users who have this patient as active
-            from app.models.models import User
-
             users_with_active_patient = (
                 self.db.query(User).filter(User.active_patient_id == patient_id).all()
             )
@@ -269,8 +265,6 @@ class PatientManagementService:
                 active_user.active_patient_id = None
 
             # Step 2: Remove patient sharing relationships
-            from app.models.models import PatientShare
-
             sharing_records = (
                 self.db.query(PatientShare)
                 .filter(PatientShare.patient_id == patient_id)
@@ -324,8 +318,7 @@ class PatientManagementService:
                 raise ValueError(
                     "Cannot delete patient: there are still medical records associated with this patient"
                 )
-            else:
-                raise ValueError(f"Failed to delete patient due to database constraint")
+            raise ValueError("Failed to delete patient due to database constraint")
         except Exception as e:
             self.db.rollback()
             logger.error(f"Unexpected error during patient deletion: {str(e)}")
@@ -372,7 +365,7 @@ class PatientManagementService:
         """
         return (
             self.db.query(Patient)
-            .filter(Patient.owner_user_id == user.id, Patient.is_self_record == True)
+            .filter(Patient.owner_user_id == user.id, Patient.is_self_record.is_(True))
             .first()
         )
 

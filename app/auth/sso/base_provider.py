@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
-from pydantic import BaseModel
+
 import httpx
+from pydantic import BaseModel
 
 
 class SSOUserInfo(BaseModel):
@@ -26,22 +27,18 @@ class SSOProvider(ABC):
     @abstractmethod
     def get_auth_url(self, state: str) -> str:
         """Get OAuth authorization URL"""
-        pass
 
     @abstractmethod
     def get_token_url(self) -> str:
         """Get token exchange endpoint"""
-        pass
 
     @abstractmethod
     def get_user_info_url(self) -> str:
         """Get user info endpoint"""
-        pass
 
     @abstractmethod
     def format_user_info(self, raw_data: Dict) -> SSOUserInfo:
         """Convert provider-specific data to standard format"""
-        pass
 
     # Shared methods (DRY benefit)
     async def exchange_code_for_token(self, code: str) -> Dict:

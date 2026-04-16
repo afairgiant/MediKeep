@@ -151,8 +151,6 @@ class PatientCreate(PatientBase):
         )
     """
 
-    pass
-
 
 class PatientUpdate(BaseModel):
     """
@@ -340,8 +338,6 @@ class PatientResponse(Patient):
 
     This provides consistency with other model Response schemas.
     """
-
-    pass
 
 
 class PatientSearch(BaseModel):

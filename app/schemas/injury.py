@@ -12,13 +12,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.enums import (
     get_all_injury_statuses,
-    get_all_severity_levels,
     get_all_laterality_values,
+    get_all_severity_levels,
 )
 from app.schemas.base_tags import TaggedEntityMixin
-from app.schemas.validators import validate_date_not_future, validate_text_field
 from app.schemas.injury_type import InjuryTypeResponse
-
+from app.schemas.validators import validate_date_not_future, validate_text_field
 
 # Pre-fetch valid values for reuse
 VALID_INJURY_STATUSES = get_all_injury_statuses()

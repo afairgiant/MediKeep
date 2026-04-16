@@ -14,9 +14,9 @@ See docs/ZIP_ISO_SECURITY_REQUIREMENTS.md for detailed security requirements.
 
 import os
 import zipfile
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
-from dataclasses import dataclass, field
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
@@ -581,10 +581,9 @@ def get_archive_type(file_path: str) -> Optional[str]:
 
     if ext == ".zip":
         return "zip"
-    elif ext == ".iso":
+    if ext == ".iso":
         return "iso"
-    else:
-        # Try to detect by content
-        if zipfile.is_zipfile(file_path):
-            return "zip"
-        return None
+    # Try to detect by content
+    if zipfile.is_zipfile(file_path):
+        return "zip"
+    return None

@@ -3,11 +3,13 @@ CRUD operations for standardized tests
 """
 
 from typing import List, Optional
+
+from sqlalchemy import String, and_, case, func, or_
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func, case, and_, String
-from app.models.models import StandardizedTest
+
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
+from app.models.models import StandardizedTest
 
 logger = get_logger(__name__, "app")
 
@@ -73,7 +75,7 @@ def search_tests(
     """
     if not query or not query.strip():
         # Return common tests if no query
-        q = db.query(StandardizedTest).filter(StandardizedTest.is_common == True)
+        q = db.query(StandardizedTest).filter(StandardizedTest.is_common.is_(True))
         if category:
             q = q.filter(StandardizedTest.category == category)
         return q.order_by(StandardizedTest.display_order).limit(limit).all()
@@ -220,7 +222,7 @@ def get_common_tests(
     db: Session, category: Optional[str] = None, limit: int = 100
 ) -> List[StandardizedTest]:
     """Get common/frequently used tests."""
-    q = db.query(StandardizedTest).filter(StandardizedTest.is_common == True)
+    q = db.query(StandardizedTest).filter(StandardizedTest.is_common.is_(True))
 
     if category:
         q = q.filter(StandardizedTest.category == category)

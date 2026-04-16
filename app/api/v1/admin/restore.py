@@ -7,16 +7,14 @@ Phase 2 implementation: Basic restore functionality with safety checks.
 
 import shutil
 import tempfile
-import zipfile
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
-from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_error,

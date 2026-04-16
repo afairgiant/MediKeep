@@ -137,9 +137,8 @@ class LabResultBase(TaggedEntityMixin):
                     # Handle ISO format with time (e.g., "2024-01-15T00:00:00")
                     dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
                     return dt.date()
-                else:
-                    # Handle date-only format (e.g., "2024-01-15")
-                    return datetime.strptime(v, "%Y-%m-%d").date()
+                # Handle date-only format (e.g., "2024-01-15")
+                return datetime.strptime(v, "%Y-%m-%d").date()
             except ValueError:
                 raise ValueError(
                     "Invalid date format for ordered_date. Use YYYY-MM-DD format."
@@ -168,9 +167,8 @@ class LabResultBase(TaggedEntityMixin):
                     # Handle ISO format with time (e.g., "2024-01-15T00:00:00")
                     dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
                     return dt.date()
-                else:
-                    # Handle date-only format (e.g., "2024-01-15")
-                    return datetime.strptime(v, "%Y-%m-%d").date()
+                # Handle date-only format (e.g., "2024-01-15")
+                return datetime.strptime(v, "%Y-%m-%d").date()
             except ValueError:
                 raise ValueError(
                     "Invalid date format for completed_date. Use YYYY-MM-DD format."
@@ -307,9 +305,8 @@ class LabResultUpdate(BaseModel):
                     # Handle ISO format with time (e.g., "2024-01-15T00:00:00")
                     dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
                     return dt.date()
-                else:
-                    # Handle date-only format (e.g., "2024-01-15")
-                    return datetime.strptime(v, "%Y-%m-%d").date()
+                # Handle date-only format (e.g., "2024-01-15")
+                return datetime.strptime(v, "%Y-%m-%d").date()
             except ValueError:
                 raise ValueError(
                     "Invalid date format for ordered_date. Use YYYY-MM-DD format."
@@ -338,9 +335,8 @@ class LabResultUpdate(BaseModel):
                     # Handle ISO format with time (e.g., "2024-01-15T00:00:00")
                     dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
                     return dt.date()
-                else:
-                    # Handle date-only format (e.g., "2024-01-15")
-                    return datetime.strptime(v, "%Y-%m-%d").date()
+                # Handle date-only format (e.g., "2024-01-15")
+                return datetime.strptime(v, "%Y-%m-%d").date()
             except ValueError:
                 raise ValueError(
                     "Invalid date format for completed_date. Use YYYY-MM-DD format."
@@ -400,8 +396,6 @@ class LabResultConditionBase(BaseModel):
 
 class LabResultConditionCreate(LabResultConditionBase):
     """Schema for creating a lab result condition relationship"""
-
-    pass
 
 
 class LabResultConditionUpdate(BaseModel):

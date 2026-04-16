@@ -50,25 +50,17 @@ def _build_title_fallback_query(query: str, user_id: Optional[int] = None) -> st
 class PaperlessError(Exception):
     """Base exception for paperless service errors."""
 
-    pass
-
 
 class PaperlessConnectionError(PaperlessError):
     """Exception raised for connection-related errors."""
-
-    pass
 
 
 class PaperlessAuthenticationError(PaperlessError):
     """Exception raised for authentication errors."""
 
-    pass
-
 
 class PaperlessUploadError(PaperlessError):
     """Exception raised for upload errors."""
-
-    pass
 
 
 class PaperlessServiceBase(ABC):
@@ -143,12 +135,10 @@ class PaperlessServiceBase(ABC):
     @abstractmethod
     async def _create_session(self):
         """Create HTTP session with authentication - must be implemented by subclasses."""
-        pass
 
     @abstractmethod
     def get_auth_type(self) -> str:
         """Return authentication type for logging."""
-        pass
 
     async def _close_session(self):
         """Close HTTP session."""
@@ -232,7 +222,7 @@ class PaperlessServiceBase(ABC):
             logger.debug(f"Paperless request - User ID: {self.user_id}")
 
             logger.info(
-                f"Making Paperless HTTP request",
+                "Making Paperless HTTP request",
                 extra={
                     "user_id": self.user_id,
                     "method": method,
@@ -263,7 +253,7 @@ class PaperlessServiceBase(ABC):
 
                 # Log request for audit trail
                 logger.info(
-                    f"Paperless API request completed",
+                    "Paperless API request completed",
                     extra={
                         "user_id": self.user_id,
                         "method": method,
@@ -278,7 +268,7 @@ class PaperlessServiceBase(ABC):
         except aiohttp.ClientError as e:
             logger.debug(f"Paperless ClientError: {type(e).__name__}: {str(e)}")
             logger.error(
-                f"Paperless API request failed",
+                "Paperless API request failed",
                 extra={
                     "user_id": self.user_id,
                     "method": method,
@@ -370,24 +360,23 @@ class PaperlessServiceBase(ABC):
                         "test_timestamp": datetime.utcnow().isoformat(),
                         "note": "Connection successful",
                     }
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed - invalid username or password"
                     )
-                elif response.status == 403:
+                if response.status == 403:
                     raise PaperlessAuthenticationError(
                         "Access forbidden - check user permissions"
                     )
-                else:
-                    raise PaperlessConnectionError(
-                        f"Server returned HTTP {response.status}"
-                    )
+                raise PaperlessConnectionError(
+                    f"Server returned HTTP {response.status}"
+                )
 
         except PaperlessConnectionError:
             raise
         except Exception as e:
             logger.error(
-                f"Connection test failed unexpectedly",
+                "Connection test failed unexpectedly",
                 extra={"user_id": self.user_id, "error": str(e)},
             )
             raise PaperlessConnectionError(f"Connection test failed: {str(e)}")
@@ -418,22 +407,21 @@ class PaperlessServiceBase(ABC):
                         },
                     )
                     return task_data
-                elif response.status == 404:
+                if response.status == 404:
                     raise PaperlessError(f"Task {task_id} not found")
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during task status check"
                     )
-                else:
-                    raise PaperlessError(
-                        f"Task status check failed: HTTP {response.status}"
-                    )
+                raise PaperlessError(
+                    f"Task status check failed: HTTP {response.status}"
+                )
 
         except PaperlessError:
             raise
         except Exception as e:
             logger.error(
-                f"Task status check failed unexpectedly",
+                "Task status check failed unexpectedly",
                 extra={"user_id": self.user_id, "task_id": task_id, "error": str(e)},
             )
             raise PaperlessError(f"Task status check failed: {str(e)}")
@@ -469,7 +457,7 @@ class PaperlessServiceBase(ABC):
                     raise PaperlessAuthenticationError(
                         "Authentication failed during search"
                     )
-                elif response.status != 200:
+                if response.status != 200:
                     raise PaperlessError(f"Search failed: HTTP {response.status}")
                 results = await response.json()
 
@@ -658,7 +646,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
 
         # Debug logging to verify headers
         logger.info(
-            f"Creating Paperless session with token auth",
+            "Creating Paperless session with token auth",
             extra={
                 "user_id": self.user_id,
                 "base_url": self.base_url,
@@ -686,7 +674,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
         """Return authentication type for logging."""
         return "token"
 
-    async def upload_document(
+    async def upload_document(  # pylint: disable=unused-argument
         self,
         file_data: bytes,
         filename: str,
@@ -730,13 +718,6 @@ class PaperlessServiceToken(PaperlessServiceBase):
             # Add metadata
             if description:
                 form_data.add_field("title", description)
-
-            # Add medical record context as custom fields
-            custom_fields = {
-                "medical_record_user_id": str(self.user_id),
-                "medical_record_entity_type": entity_type,
-                "medical_record_entity_id": str(entity_id),
-            }
 
             # Add tags including entity context
             # TODO: Implement proper tag creation/lookup for Paperless
@@ -847,7 +828,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
             raise
         except Exception as e:
             logger.error(
-                f"Document upload failed unexpectedly",
+                "Document upload failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "entity_type": entity_type,
@@ -1076,7 +1057,6 @@ class PaperlessServiceToken(PaperlessServiceBase):
                             document_id = result.get("document_id") or result.get("id")
                         elif isinstance(result, str):
                             # Parse document ID from string like "Success. New document id 2677 created"
-                            import re
 
                             match = re.search(r"document id (\d+)", result)
                             if match:
@@ -1091,19 +1071,18 @@ class PaperlessServiceToken(PaperlessServiceBase):
                                 f"Task completed successfully: document_id={document_id}"
                             )
                             return str(document_id)
-                        else:
-                            raise PaperlessUploadError(
-                                f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
-                            )
+                        raise PaperlessUploadError(
+                            f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
+                        )
 
-                    elif status == "failure":
+                    if status == "failure":
                         # Task failed
                         error_info = task_data.get("result", "Unknown error")
                         raise PaperlessUploadError(
                             f"Document processing failed for '{filename}': {error_info}"
                         )
 
-                    elif status in ["pending", "started", "retry"]:
+                    if status in ["pending", "started", "retry"]:
                         # Task still in progress
                         elapsed = (datetime.utcnow() - start_time).total_seconds()
                         if elapsed > max_wait_time:
@@ -1152,17 +1131,17 @@ class PaperlessServiceToken(PaperlessServiceBase):
 
                 if response.status == 404:
                     raise PaperlessError(f"Document {document_id} not found")
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during download"
                     )
-                elif response.status != 200:
+                if response.status != 200:
                     raise PaperlessError(f"Download failed: HTTP {response.status}")
 
                 content = await response.read()
 
                 logger.info(
-                    f"Document downloaded from paperless",
+                    "Document downloaded from paperless",
                     extra={
                         "user_id": self.user_id,
                         "document_id": document_id,
@@ -1176,7 +1155,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
             raise
         except Exception as e:
             logger.error(
-                f"Document download failed unexpectedly",
+                "Document download failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "document_id": document_id,
@@ -1270,11 +1249,11 @@ class PaperlessServiceToken(PaperlessServiceBase):
                             },
                         )
                     return False
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during document check"
                     )
-                elif response.status == 403:
+                if response.status == 403:
                     # Try to get more details about the 403 error
                     try:
                         error_data = await response.json()
@@ -1298,7 +1277,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
                             },
                         )
                     return False
-                elif response.status == 200:
+                if response.status == 200:
                     # HTTP 200 means document exists - that's all we need to check
                     logger.debug(
                         f"Document {numeric_id} exists in paperless (200 OK)",
@@ -1308,22 +1287,21 @@ class PaperlessServiceToken(PaperlessServiceBase):
                         },
                     )
                     return True
-                else:
-                    logger.warning(
-                        f"Unexpected status code when checking document existence: {response.status}",
-                        extra={
-                            "user_id": self.user_id,
-                            "document_id": numeric_id,
-                            "status": response.status,
-                        },
-                    )
-                    return False
+                logger.warning(
+                    f"Unexpected status code when checking document existence: {response.status}",
+                    extra={
+                        "user_id": self.user_id,
+                        "document_id": numeric_id,
+                        "status": response.status,
+                    },
+                )
+                return False
 
         except PaperlessAuthenticationError:
             raise
         except Exception as e:
             logger.error(
-                f"Document existence check failed unexpectedly",
+                "Document existence check failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "document_id": document_id,
@@ -1335,9 +1313,8 @@ class PaperlessServiceToken(PaperlessServiceBase):
             # Only return False for actual 404 responses (document truly doesn't exist)
             if "404" in str(e) or "not found" in str(e).lower():
                 return False
-            else:
-                # Re-raise other errors so they can be handled at a higher level
-                raise PaperlessError(f"Document existence check failed: {str(e)}")
+            # Re-raise other errors so they can be handled at a higher level
+            raise PaperlessError(f"Document existence check failed: {str(e)}")
 
     async def delete_document(self, document_id: int) -> bool:
         """
@@ -1363,15 +1340,15 @@ class PaperlessServiceToken(PaperlessServiceBase):
                         extra={"user_id": self.user_id, "document_id": document_id},
                     )
                     return True  # Already deleted
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during deletion"
                     )
-                elif response.status not in [200, 204]:
+                if response.status not in [200, 204]:
                     raise PaperlessError(f"Deletion failed: HTTP {response.status}")
 
                 logger.info(
-                    f"Document deleted from paperless",
+                    "Document deleted from paperless",
                     extra={"user_id": self.user_id, "document_id": document_id},
                 )
 
@@ -1381,7 +1358,7 @@ class PaperlessServiceToken(PaperlessServiceBase):
             raise
         except Exception as e:
             logger.error(
-                f"Document deletion failed unexpectedly",
+                "Document deletion failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "document_id": document_id,
@@ -1432,7 +1409,7 @@ class PaperlessService(PaperlessServiceBase):
         """Return authentication type for logging."""
         return "basic_auth"
 
-    async def upload_document(
+    async def upload_document(  # pylint: disable=unused-argument
         self,
         file_data: bytes,
         filename: str,
@@ -1476,13 +1453,6 @@ class PaperlessService(PaperlessServiceBase):
             # Add metadata
             if description:
                 form_data.add_field("title", description)
-
-            # Add medical record context as custom fields
-            custom_fields = {
-                "medical_record_user_id": str(self.user_id),
-                "medical_record_entity_type": entity_type,
-                "medical_record_entity_id": str(entity_id),
-            }
 
             # Add tags including entity context
             # TODO: Implement proper tag creation/lookup for Paperless
@@ -1593,7 +1563,7 @@ class PaperlessService(PaperlessServiceBase):
             raise
         except Exception as e:
             logger.error(
-                f"Document upload failed unexpectedly",
+                "Document upload failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "entity_type": entity_type,
@@ -1822,7 +1792,6 @@ class PaperlessService(PaperlessServiceBase):
                             document_id = result.get("document_id") or result.get("id")
                         elif isinstance(result, str):
                             # Parse document ID from string like "Success. New document id 2677 created"
-                            import re
 
                             match = re.search(r"document id (\d+)", result)
                             if match:
@@ -1837,19 +1806,18 @@ class PaperlessService(PaperlessServiceBase):
                                 f"Task completed successfully: document_id={document_id}"
                             )
                             return str(document_id)
-                        else:
-                            raise PaperlessUploadError(
-                                f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
-                            )
+                        raise PaperlessUploadError(
+                            f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
+                        )
 
-                    elif status == "failure":
+                    if status == "failure":
                         # Task failed
                         error_info = task_data.get("result", "Unknown error")
                         raise PaperlessUploadError(
                             f"Document processing failed for '{filename}': {error_info}"
                         )
 
-                    elif status in ["pending", "started", "retry"]:
+                    if status in ["pending", "started", "retry"]:
                         # Task still in progress
                         elapsed = (datetime.utcnow() - start_time).total_seconds()
                         if elapsed > max_wait_time:
@@ -1898,17 +1866,17 @@ class PaperlessService(PaperlessServiceBase):
 
                 if response.status == 404:
                     raise PaperlessError(f"Document {document_id} not found")
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during download"
                     )
-                elif response.status != 200:
+                if response.status != 200:
                     raise PaperlessError(f"Download failed: HTTP {response.status}")
 
                 content = await response.read()
 
                 logger.info(
-                    f"Document downloaded from paperless",
+                    "Document downloaded from paperless",
                     extra={
                         "user_id": self.user_id,
                         "document_id": document_id,
@@ -1922,7 +1890,7 @@ class PaperlessService(PaperlessServiceBase):
             raise
         except Exception as e:
             logger.error(
-                f"Document download failed unexpectedly",
+                "Document download failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "document_id": document_id,
@@ -2016,11 +1984,11 @@ class PaperlessService(PaperlessServiceBase):
                             },
                         )
                     return False
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during document check"
                     )
-                elif response.status == 403:
+                if response.status == 403:
                     # Try to get more details about the 403 error
                     try:
                         error_data = await response.json()
@@ -2044,7 +2012,7 @@ class PaperlessService(PaperlessServiceBase):
                             },
                         )
                     return False
-                elif response.status == 200:
+                if response.status == 200:
                     # HTTP 200 means document exists - that's all we need to check
                     logger.debug(
                         f"Document {numeric_id} exists in paperless (200 OK)",
@@ -2054,22 +2022,21 @@ class PaperlessService(PaperlessServiceBase):
                         },
                     )
                     return True
-                else:
-                    logger.warning(
-                        f"Unexpected status code when checking document existence: {response.status}",
-                        extra={
-                            "user_id": self.user_id,
-                            "document_id": numeric_id,
-                            "status": response.status,
-                        },
-                    )
-                    return False
+                logger.warning(
+                    f"Unexpected status code when checking document existence: {response.status}",
+                    extra={
+                        "user_id": self.user_id,
+                        "document_id": numeric_id,
+                        "status": response.status,
+                    },
+                )
+                return False
 
         except PaperlessAuthenticationError:
             raise
         except Exception as e:
             logger.error(
-                f"Document existence check failed unexpectedly",
+                "Document existence check failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "document_id": document_id,
@@ -2081,9 +2048,8 @@ class PaperlessService(PaperlessServiceBase):
             # Only return False for actual 404 responses (document truly doesn't exist)
             if "404" in str(e) or "not found" in str(e).lower():
                 return False
-            else:
-                # Re-raise other errors so they can be handled at a higher level
-                raise PaperlessError(f"Document existence check failed: {str(e)}")
+            # Re-raise other errors so they can be handled at a higher level
+            raise PaperlessError(f"Document existence check failed: {str(e)}")
 
     async def delete_document(self, document_id: int) -> bool:
         """
@@ -2109,15 +2075,15 @@ class PaperlessService(PaperlessServiceBase):
                         extra={"user_id": self.user_id, "document_id": document_id},
                     )
                     return True  # Already deleted
-                elif response.status == 401:
+                if response.status == 401:
                     raise PaperlessAuthenticationError(
                         "Authentication failed during deletion"
                     )
-                elif response.status not in [200, 204]:
+                if response.status not in [200, 204]:
                     raise PaperlessError(f"Deletion failed: HTTP {response.status}")
 
                 logger.info(
-                    f"Document deleted from paperless",
+                    "Document deleted from paperless",
                     extra={"user_id": self.user_id, "document_id": document_id},
                 )
 
@@ -2127,7 +2093,7 @@ class PaperlessService(PaperlessServiceBase):
             raise
         except Exception as e:
             logger.error(
-                f"Document deletion failed unexpectedly",
+                "Document deletion failed unexpectedly",
                 extra={
                     "user_id": self.user_id,
                     "document_id": document_id,
@@ -2170,7 +2136,7 @@ def create_paperless_service_with_username_password(
 
     except Exception as e:
         logger.error(
-            f"Failed to create paperless service",
+            "Failed to create paperless service",
             extra={"user_id": user_id, "error": str(e)},
         )
         raise PaperlessError(f"Service creation failed: {str(e)}")
@@ -2205,7 +2171,7 @@ def create_paperless_service_with_token(
 
     except Exception as e:
         logger.error(
-            f"Failed to create paperless service with token",
+            "Failed to create paperless service with token",
             extra={"user_id": user_id, "error": str(e)},
         )
         raise PaperlessError(f"Service creation failed: {str(e)}")
@@ -2343,7 +2309,7 @@ def create_paperless_service(
         raise
     except Exception as e:
         logger.error(
-            f"Failed to create paperless service",
+            "Failed to create paperless service",
             extra={"user_id": user_id, "error": str(e)},
         )
         raise PaperlessError(f"Service creation failed: {str(e)}")

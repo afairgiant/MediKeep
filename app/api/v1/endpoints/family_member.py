@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import BusinessLogicException, handle_database_errors
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -12,21 +11,21 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.crud.family_member import family_member
+from app.core.http.error_handling import BusinessLogicException, handle_database_errors
 from app.crud.family_condition import family_condition
+from app.crud.family_member import family_member
 from app.models.activity_log import EntityType
 from app.models.models import User
-from app.schemas.family_member import (
-    FamilyMemberCreate,
-    FamilyMemberDropdownOption,
-    FamilyMemberResponse,
-    FamilyMemberSummary,
-    FamilyMemberUpdate,
-)
 from app.schemas.family_condition import (
     FamilyConditionCreate,
     FamilyConditionResponse,
     FamilyConditionUpdate,
+)
+from app.schemas.family_member import (
+    FamilyMemberCreate,
+    FamilyMemberDropdownOption,
+    FamilyMemberResponse,
+    FamilyMemberUpdate,
 )
 
 router = APIRouter()

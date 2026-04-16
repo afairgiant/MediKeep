@@ -10,7 +10,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
-
 # Vital types that can be charted (must match Vitals model columns)
 SUPPORTED_VITAL_TYPES = [
     "blood_pressure",

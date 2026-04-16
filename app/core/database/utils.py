@@ -5,9 +5,9 @@ Provides helper functions that work with both PostgreSQL and SQLite,
 abstracting away database-specific operations.
 """
 
-from sqlalchemy import func, String, and_, true
-from sqlalchemy.sql import ColumnElement
+from sqlalchemy import and_, func, true
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import ColumnElement
 
 
 def get_database_type(db: Session) -> str:

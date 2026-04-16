@@ -7,21 +7,20 @@ Includes lab-specific parsing for structured extraction.
 import io
 import re
 from typing import Dict, Optional
-from pathlib import Path
 
 import pdfplumber
+import pytesseract
 from pdf2image import convert_from_bytes
 from PIL import Image
-import pytesseract
 
-from app.core.logging.config import get_logger
 from app.core.config import Settings
-from app.services.lab_parsers import lab_parser_registry
+from app.core.logging.config import get_logger
 from app.core.platform.external_binaries import (
+    configure_environment_for_binaries,
     get_poppler_path,
     get_tesseract_path,
-    configure_environment_for_binaries,
 )
+from app.services.lab_parsers import lab_parser_registry
 
 logger = get_logger(__name__, "app")
 
@@ -252,18 +251,17 @@ class PDFTextExtractionService:
                     },
                 )
                 return parsed_result
-            else:
-                logger.warning(
-                    f"OCR fallback did not improve results: {ocr_test_count} tests "
-                    f"(vs {native_test_count} from native)",
-                    extra={
-                        "component": "PDFTextExtractionService",
-                        "pdf_filename": filename,
-                        "native_count": native_test_count,
-                        "ocr_count": ocr_test_count,
-                    },
-                )
-                return None
+            logger.warning(
+                f"OCR fallback did not improve results: {ocr_test_count} tests "
+                f"(vs {native_test_count} from native)",
+                extra={
+                    "component": "PDFTextExtractionService",
+                    "pdf_filename": filename,
+                    "native_count": native_test_count,
+                    "ocr_count": ocr_test_count,
+                },
+            )
+            return None
 
         except Exception as e:
             logger.error(
@@ -335,7 +333,7 @@ class PDFTextExtractionService:
 
                         # OCR fallback didn't improve results - return native
                         logger.info(
-                            f"OCR fallback did not improve results, returning native extraction",
+                            "OCR fallback did not improve results, returning native extraction",
                             extra={
                                 "component": "PDFTextExtractionService",
                                 "pdf_filename": filename,

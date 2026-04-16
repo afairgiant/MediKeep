@@ -1,17 +1,17 @@
 from datetime import date, datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    ValidationInfo,
     field_validator,
     model_validator,
-    ValidationInfo,
 )
 
-from app.schemas.base_tags import TaggedEntityMixin
 from app.models.enums import TreatmentStatus
+from app.schemas.base_tags import TaggedEntityMixin
 
 
 # Helper function for validating relevance notes

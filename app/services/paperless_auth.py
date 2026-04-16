@@ -7,7 +7,9 @@ without the complexity of multiple inheritance patterns.
 
 from typing import Optional, Tuple
 from urllib.parse import urlparse
+
 import aiohttp
+
 from app.core.logging.config import get_logger
 
 logger = get_logger(__name__)
@@ -41,7 +43,7 @@ class PaperlessAuth:
         """Get the authentication type being used."""
         if self.token:
             return "token"
-        elif self.username and self.password:
+        if self.username and self.password:
             return "basic"
         return "none"
 
@@ -85,24 +87,23 @@ class PaperlessAuth:
                 async with session.get(f"{self.url}/api/ui_settings/") as response:
                     if response.status == 200:
                         return True, "Connection successful"
-                    elif response.status == 401:
+                    if response.status == 401:
                         return False, "Authentication failed - check credentials"
-                    elif response.status == 403:
+                    if response.status == 403:
                         return False, "Access forbidden - check permissions"
-                    else:
-                        # Use structured logging without exposing sensitive details
-                        logger.warning(
-                            "Paperless connection failed",
-                            extra={
-                                "status_code": response.status,
-                                "auth_type": self.get_auth_type(),
-                                "url_host": urlparse(self.url).hostname,
-                            },
-                        )
-                        return (
-                            False,
-                            "Unable to connect to document service. Please verify your settings.",
-                        )
+                    # Use structured logging without exposing sensitive details
+                    logger.warning(
+                        "Paperless connection failed",
+                        extra={
+                            "status_code": response.status,
+                            "auth_type": self.get_auth_type(),
+                            "url_host": urlparse(self.url).hostname,
+                        },
+                    )
+                    return (
+                        False,
+                        "Unable to connect to document service. Please verify your settings.",
+                    )
 
         except aiohttp.ClientError as e:
             # Use structured logging without exposing sensitive connection details
@@ -163,7 +164,7 @@ def create_paperless_auth(
         try:
             token = credential_encryption.decrypt_token(encrypted_token)
             logger.debug("Token decryption successful")
-        except Exception as e:
+        except Exception:
             # Don't log exception details that might reveal crypto info
             logger.warning("Token decryption failed", exc_info=False)
 
@@ -172,7 +173,7 @@ def create_paperless_auth(
             username = credential_encryption.decrypt_token(encrypted_username)
             password = credential_encryption.decrypt_token(encrypted_password)
             logger.debug("Username/password decryption successful")
-        except Exception as e:
+        except Exception:
             # Don't log exception details that might reveal crypto info
             logger.warning("Username/password decryption failed", exc_info=False)
 

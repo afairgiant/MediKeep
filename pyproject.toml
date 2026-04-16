@@ -18,6 +18,10 @@ jobs = 0  # use all CPU cores
 [tool.pylint.format]
 max-line-length = 120
 
+[tool.isort]
+profile = "black"
+line_length = 120
+
 [tool.pylint."messages control"]
 # Disabled: stylistic rules that conflict with framework conventions (Pydantic, FastAPI, structured logging).
 # Bug-finding rules (unused-import, undefined-variable, raise-missing-from, no-else-return, etc.) stay enabled.

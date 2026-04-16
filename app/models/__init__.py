@@ -1,97 +1,84 @@
-from .base import Base, get_utc_now
 from .activity_log import ActivityLog
-
-from .user import (
-    User,
-    UserPreferences,
-    UserTag,
-    SystemSetting,
+from .associations import (
+    ConditionMedication,
+    EncounterLabResult,
+    InjuryCondition,
+    InjuryMedication,
+    InjuryProcedure,
+    InjuryTreatment,
+    LabResultCondition,
+    SymptomCondition,
+    SymptomMedication,
+    SymptomTreatment,
+    TreatmentEncounter,
+    TreatmentEquipment,
+    TreatmentLabResult,
+    TreatmentMedication,
 )
-
-from .patient import (
-    Patient,
-    PatientPhoto,
-    EmergencyContact,
-    Insurance,
-)
-
-from .practice import (
-    Practice,
-    Practitioner,
-    Pharmacy,
-)
-
+from .base import Base, get_utc_now
 from .clinical import (
-    Medication,
-    Encounter,
-    Condition,
-    Immunization,
     Allergy,
-    Vitals,
+    Condition,
+    Encounter,
+    Immunization,
+    Medication,
     Symptom,
     SymptomOccurrence,
+    Vitals,
 )
-
+from .family import (
+    FamilyCondition,
+    FamilyMember,
+)
+from .files import (
+    BackupRecord,
+    EntityFile,
+)
+from .injuries import (
+    Injury,
+    InjuryType,
+)
 from .labs import (
     LabResult,
     LabResultFile,
     LabTestComponent,
     StandardizedTest,
 )
-
-from .procedures import (
-    Procedure,
-    Treatment,
-    MedicalEquipment,
-)
-
-from .injuries import (
-    Injury,
-    InjuryType,
-)
-
-from .family import (
-    FamilyMember,
-    FamilyCondition,
-)
-
-from .sharing import (
-    PatientShare,
-    Invitation,
-    FamilyHistoryShare,
-)
-
-from .files import (
-    EntityFile,
-    BackupRecord,
-)
-
-from .reporting import (
-    ReportTemplate,
-    ReportGenerationAudit,
-)
-
 from .notifications import (
     NotificationChannel,
-    NotificationPreference,
     NotificationHistory,
+    NotificationPreference,
 )
-
-from .associations import (
-    LabResultCondition,
-    ConditionMedication,
-    SymptomCondition,
-    SymptomMedication,
-    SymptomTreatment,
-    InjuryMedication,
-    InjuryCondition,
-    InjuryTreatment,
-    InjuryProcedure,
-    TreatmentMedication,
-    TreatmentEncounter,
-    TreatmentLabResult,
-    TreatmentEquipment,
-    EncounterLabResult,
+from .patient import (
+    EmergencyContact,
+    Insurance,
+    Patient,
+    PatientPhoto,
+)
+from .practice import (
+    Pharmacy,
+    Practice,
+    Practitioner,
+)
+from .procedures import (
+    MedicalEquipment,
+    Procedure,
+    Treatment,
+)
+from .reporting import (
+    ReportGenerationAudit,
+    ReportTemplate,
+)
+from .sharing import (
+    FamilyHistoryShare,
+    Invitation,
+    PatientShare,
+)
+from .user import (
+    SystemSetting,
+    User,
+    UserPreferences,
+    UserTag,
 )
 
 __all__ = [

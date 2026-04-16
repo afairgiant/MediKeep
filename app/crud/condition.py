@@ -1,17 +1,17 @@
 from typing import List, Optional, Tuple
 
 from sqlalchemy import and_
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import Condition, ConditionMedication
 from app.schemas.condition import (
     ConditionCreate,
-    ConditionUpdate,
+    ConditionMedicationBulkCreate,
     ConditionMedicationCreate,
     ConditionMedicationUpdate,
-    ConditionMedicationBulkCreate,
+    ConditionUpdate,
 )
 
 

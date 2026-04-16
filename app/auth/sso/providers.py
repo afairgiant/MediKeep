@@ -1,6 +1,7 @@
-from urllib.parse import urlencode, urlparse
-from typing import Dict, Optional
 import re
+from typing import Dict
+from urllib.parse import urlencode, urlparse
+
 from app.auth.sso.base_provider import SSOProvider, SSOUserInfo
 from app.core.config import settings
 from app.core.logging.config import get_logger
@@ -111,9 +112,9 @@ class GitHubProvider(SSOProvider):
 
     async def exchange_code_for_token(self, code: str) -> Dict:
         """GitHub-specific token exchange that handles form-encoded response"""
-        import httpx
         from urllib.parse import parse_qs
-        import logging
+
+        import httpx
 
         # Log token exchange attempt without sensitive data
         logger.info(
@@ -158,45 +159,44 @@ class GitHubProvider(SSOProvider):
                 # Now check status after parsing
                 response.raise_for_status()
                 return data
-            else:
-                # Parse form-encoded response
-                text = response.text
-                parsed = parse_qs(text)
+            # Parse form-encoded response
+            text = response.text
+            parsed = parse_qs(text)
 
-                # Check for error in form-encoded response
-                if "error" in parsed:
-                    error_desc = (
-                        parsed.get("error_description", [None])[0]
-                        or parsed.get("error", [None])[0]
-                    )
-                    logger.error(
-                        "GitHub OAuth error",
-                        extra={
-                            "provider": "github",
-                            "error_description": error_desc,
-                            "action": "token_exchange",
-                            "response_type": "form-encoded",
-                        },
-                    )
-                    raise ValueError(f"GitHub OAuth error: {error_desc}")
+            # Check for error in form-encoded response
+            if "error" in parsed:
+                error_desc = (
+                    parsed.get("error_description", [None])[0]
+                    or parsed.get("error", [None])[0]
+                )
+                logger.error(
+                    "GitHub OAuth error",
+                    extra={
+                        "provider": "github",
+                        "error_description": error_desc,
+                        "action": "token_exchange",
+                        "response_type": "form-encoded",
+                    },
+                )
+                raise ValueError(f"GitHub OAuth error: {error_desc}")
 
-                # Now check status after parsing
-                response.raise_for_status()
+            # Now check status after parsing
+            response.raise_for_status()
 
-                # Extract access token
-                access_token = parsed.get("access_token", [None])[0]
-                if not access_token:
-                    logger.error(
-                        "GitHub OAuth missing access token",
-                        extra={"provider": "github", "action": "token_exchange"},
-                    )
-                    raise ValueError("No access token in GitHub OAuth response")
+            # Extract access token
+            access_token = parsed.get("access_token", [None])[0]
+            if not access_token:
+                logger.error(
+                    "GitHub OAuth missing access token",
+                    extra={"provider": "github", "action": "token_exchange"},
+                )
+                raise ValueError("No access token in GitHub OAuth response")
 
-                return {
-                    "access_token": access_token,
-                    "token_type": parsed.get("token_type", ["bearer"])[0],
-                    "scope": parsed.get("scope", [None])[0],
-                }
+            return {
+                "access_token": access_token,
+                "token_type": parsed.get("token_type", ["bearer"])[0],
+                "scope": parsed.get("scope", [None])[0],
+            }
 
 
 class OIDCProvider(SSOProvider):
@@ -228,11 +228,10 @@ class OIDCProvider(SSOProvider):
 
     def _discover_endpoints(self):
         """Attempt OIDC discovery, fall back to provider-specific defaults"""
-        import httpx
-        import time
-
         # Configurable timeout for discovery (default 15 seconds, can be overridden via env)
         import os
+
+        import httpx
 
         discovery_timeout = float(os.getenv("SSO_DISCOVERY_TIMEOUT", "15"))
 
@@ -281,19 +280,18 @@ class OIDCProvider(SSOProvider):
                                 },
                             )
                             return
-                        else:
-                            logger.warning(
-                                "Incomplete OIDC discovery response",
-                                extra={
-                                    "provider_type": self.provider_type,
-                                    "discovery_url": discovery_url,
-                                    "has_auth": bool(self.authorization_endpoint),
-                                    "has_token": bool(self.token_endpoint),
-                                    "has_userinfo": bool(self.userinfo_endpoint),
-                                    "action": "endpoint_discovery",
-                                },
-                            )
-            except httpx.TimeoutException as e:
+                        logger.warning(
+                            "Incomplete OIDC discovery response",
+                            extra={
+                                "provider_type": self.provider_type,
+                                "discovery_url": discovery_url,
+                                "has_auth": bool(self.authorization_endpoint),
+                                "has_token": bool(self.token_endpoint),
+                                "has_userinfo": bool(self.userinfo_endpoint),
+                                "action": "endpoint_discovery",
+                            },
+                        )
+            except httpx.TimeoutException:
                 logger.warning(
                     "OIDC discovery timed out",
                     extra={
@@ -544,13 +542,13 @@ def create_sso_provider() -> SSOProvider:
             settings.SSO_CLIENT_SECRET,
             settings.SSO_REDIRECT_URI,
         )
-    elif provider_type == "github":
+    if provider_type == "github":
         return GitHubProvider(
             settings.SSO_CLIENT_ID,
             settings.SSO_CLIENT_SECRET,
             settings.SSO_REDIRECT_URI,
         )
-    elif provider_type in [
+    if provider_type in [
         "oidc",
         "authentik",
         "authelia",
@@ -565,5 +563,4 @@ def create_sso_provider() -> SSOProvider:
             settings.SSO_REDIRECT_URI,
             settings.SSO_ISSUER_URL,
         )
-    else:
-        raise ValueError(f"Unsupported SSO provider: {provider_type}")
+    raise ValueError(f"Unsupported SSO provider: {provider_type}")

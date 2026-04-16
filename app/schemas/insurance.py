@@ -3,10 +3,10 @@ from typing import Any, Dict, Optional
 
 from pydantic import (
     BaseModel,
-    model_validator,
-    field_validator,
-    ValidationInfo,
     ConfigDict,
+    ValidationInfo,
+    field_validator,
+    model_validator,
 )
 
 from app.models.enums import InsuranceStatus, InsuranceType

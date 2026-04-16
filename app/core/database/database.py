@@ -1,4 +1,3 @@
-import os
 from typing import Generator
 
 from sqlalchemy import create_engine, event, text
@@ -26,8 +25,8 @@ class DatabaseConfig:
         # Check if running as Windows EXE (uses SQLite in AppData)
         try:
             from app.core.platform.windows_config import (
-                is_windows_exe,
                 get_database_path,
+                is_windows_exe,
             )
 
             if is_windows_exe():
@@ -60,7 +59,7 @@ class DatabaseConfig:
                 "poolclass": StaticPool,
                 "echo": False,
             }
-        elif self.database_url.startswith("postgresql"):
+        if self.database_url.startswith("postgresql"):
             return {
                 "pool_pre_ping": True,
                 "pool_recycle": 1800,
@@ -68,8 +67,7 @@ class DatabaseConfig:
                 "max_overflow": 20,
                 "echo": False,
             }
-        else:
-            return {"pool_pre_ping": True, "pool_recycle": 300, "echo": False}
+        return {"pool_pre_ping": True, "pool_recycle": 300, "echo": False}
 
 
 # Initialize database configuration
@@ -82,7 +80,7 @@ engine = create_engine(db_config.database_url, **db_config.engine_kwargs)
 if db_config.database_url.startswith("sqlite"):
 
     @event.listens_for(engine, "connect")
-    def set_sqlite_pragma(dbapi_connection, connection_record):
+    def set_sqlite_pragma(dbapi_connection, _connection_record):
         """Set SQLite pragmas for better concurrency"""
         cursor = dbapi_connection.cursor()
         # Enable WAL mode for better concurrent access
@@ -380,14 +378,11 @@ def database_migrations() -> bool:
                 if result.stdout:
                     logger.debug(f"Migration output: {result.stdout}")
                 return True
-            else:
-                logger.error(
-                    f"❌ Migration failed with return code {result.returncode}"
-                )
-                logger.error(f"Migration stderr: {result.stderr}")
-                if result.stdout:
-                    logger.error(f"Migration stdout: {result.stdout}")
-                return False
+            logger.error(f"❌ Migration failed with return code {result.returncode}")
+            logger.error(f"Migration stderr: {result.stderr}")
+            if result.stdout:
+                logger.error(f"Migration stdout: {result.stdout}")
+            return False
 
     except FileNotFoundError as e:
         logger.error(f"❌ Alembic not found. Make sure it's installed. Error: {e}")

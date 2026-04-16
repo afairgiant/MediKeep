@@ -2,23 +2,24 @@ import datetime
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
+from pydantic import BaseModel
+from sqlalchemy import func, or_, text
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, func, text
+
 from app.api import deps
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_data_access
+from app.core.logging.helpers import log_data_access, log_endpoint_access
 from app.models.models import (
-    Medication,
-    Condition,
-    LabResult,
-    Procedure,
-    Immunization,
-    Treatment,
-    Encounter,
     Allergy,
+    Condition,
+    Encounter,
+    Immunization,
+    LabResult,
+    Medication,
+    Procedure,
+    Treatment,
     Vitals,
 )
-from pydantic import BaseModel
 
 logger = get_logger(__name__, "app")
 
@@ -68,13 +69,12 @@ def _apply_sort(query_obj, sort: str, date_col, title_col=None):
     """Apply sorting to a query. Falls back to date desc for unknown sort values."""
     if sort == "date_asc":
         return query_obj.order_by(date_col.asc())
-    elif sort == "title" and title_col is not None:
+    if sort == "title" and title_col is not None:
         return query_obj.order_by(title_col.asc())
-    elif sort == "title_desc" and title_col is not None:
+    if sort == "title_desc" and title_col is not None:
         return query_obj.order_by(title_col.desc())
-    else:
-        # date_desc is the default (including for "relevance")
-        return query_obj.order_by(date_col.desc())
+    # date_desc is the default (including for "relevance")
+    return query_obj.order_by(date_col.desc())
 
 
 def _windowed_query(query_obj, model_id_col, skip: int, limit: int):

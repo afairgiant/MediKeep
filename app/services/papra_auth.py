@@ -7,7 +7,9 @@ Bearer token authentication only.
 
 from typing import Tuple
 from urllib.parse import urlparse
+
 import aiohttp
+
 from app.core.logging.config import get_logger
 
 logger = get_logger(__name__)
@@ -65,22 +67,21 @@ class PapraAuth:
                 async with session.get(f"{self.url}/api/organizations") as response:
                     if response.status == 200:
                         return True, "Connection successful"
-                    elif response.status == 401:
+                    if response.status == 401:
                         return False, "Authentication failed - check API token"
-                    elif response.status == 403:
+                    if response.status == 403:
                         return False, "Access forbidden - check token permissions"
-                    else:
-                        logger.warning(
-                            "Papra connection failed",
-                            extra={
-                                "status_code": response.status,
-                                "url_host": urlparse(self.url).hostname,
-                            },
-                        )
-                        return (
-                            False,
-                            "Unable to connect to Papra. Please verify your settings.",
-                        )
+                    logger.warning(
+                        "Papra connection failed",
+                        extra={
+                            "status_code": response.status,
+                            "url_host": urlparse(self.url).hostname,
+                        },
+                    )
+                    return (
+                        False,
+                        "Unable to connect to Papra. Please verify your settings.",
+                    )
 
         except aiohttp.ClientError as e:
             logger.error(
@@ -121,11 +122,11 @@ class PapraAuth:
                     # Papra returns {"organizations": [...]}
                     if isinstance(data, dict) and "organizations" in data:
                         return data["organizations"]
-                    elif isinstance(data, list):
+                    if isinstance(data, list):
                         return data
-                    elif isinstance(data, dict) and "items" in data:
+                    if isinstance(data, dict) and "items" in data:
                         return data["items"]
-                    elif isinstance(data, dict) and "results" in data:
+                    if isinstance(data, dict) and "results" in data:
                         return data["results"]
                     return []
 

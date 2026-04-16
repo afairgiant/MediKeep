@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 from app.models.enums import SymptomSeverity, SymptomStatus
 from app.schemas.validators import (
@@ -10,7 +10,6 @@ from app.schemas.validators import (
     validate_required_text,
     validate_text_field,
 )
-
 
 # Valid values extracted for reuse
 VALID_SYMPTOM_STATUSES = [s.value for s in SymptomStatus]
@@ -385,8 +384,6 @@ class SymptomConditionBase(BaseModel):
 class SymptomConditionCreate(SymptomConditionBase):
     """Schema for creating symptom-condition relationship"""
 
-    pass
-
 
 class SymptomConditionUpdate(BaseModel):
     """Schema for updating symptom-condition relationship"""
@@ -433,8 +430,6 @@ class SymptomMedicationBase(BaseModel):
 class SymptomMedicationCreate(SymptomMedicationBase):
     """Schema for creating symptom-medication relationship"""
 
-    pass
-
 
 class SymptomMedicationUpdate(BaseModel):
     """Schema for updating symptom-medication relationship"""
@@ -478,8 +473,6 @@ class SymptomTreatmentBase(BaseModel):
 
 class SymptomTreatmentCreate(SymptomTreatmentBase):
     """Schema for creating symptom-treatment relationship"""
-
-    pass
 
 
 class SymptomTreatmentUpdate(BaseModel):

@@ -100,8 +100,6 @@ class PracticeBase(BaseModel):
 class PracticeCreate(PracticeBase):
     """Schema for creating a new practice."""
 
-    pass
-
 
 class PracticeUpdate(BaseModel):
     """Schema for updating an existing practice. All fields optional."""
@@ -186,5 +184,3 @@ class PracticeWithPractitioners(Practice):
 
 class PracticeResponse(Practice):
     """Schema for practice response (alias for Practice)."""
-
-    pass

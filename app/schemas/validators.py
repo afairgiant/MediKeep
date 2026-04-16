@@ -19,7 +19,7 @@ Usage:
 
 import re
 from datetime import date
-from typing import Optional, List
+from typing import List, Optional
 
 
 def validate_text_field(
@@ -95,9 +95,9 @@ def validate_required_text(
 
     if normalize_case == "title":
         return stripped.title()
-    elif normalize_case == "upper":
+    if normalize_case == "upper":
         return stripped.upper()
-    elif normalize_case == "lower":
+    if normalize_case == "lower":
         return stripped.lower()
 
     return stripped

@@ -15,12 +15,15 @@ import matplotlib
 
 matplotlib.use("Agg")  # Non-interactive backend, must be set before importing Figure
 
+# pylint: disable=wrong-import-position  # matplotlib.use() must precede submodule imports
 import numpy as np
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.dates import date2num
 from matplotlib.figure import Figure
 
 from app.core.logging.config import get_logger
+
+# pylint: enable=wrong-import-position
 
 logger = get_logger(__name__, "app")
 
@@ -374,8 +377,6 @@ def _format_date_axis(ax, date_from=None, date_to=None):
     interior = _calendar_ticks(dt_min, dt_max, span)
 
     # Always anchor with data start/end; drop interior ticks too close to them
-    from matplotlib.dates import date2num
-
     margin = span * 0.06
     ticks = [x_min]
     for t in interior:
@@ -499,7 +500,7 @@ def _add_trend_line(ax, dates: List, values: List[float]) -> None:
     )
 
 
-def _figure_to_png(fig: Figure, canvas: FigureCanvasAgg) -> bytes:
+def _figure_to_png(_fig: Figure, canvas: FigureCanvasAgg) -> bytes:
     """Render figure to PNG bytes."""
     buf = io.BytesIO()
     canvas.print_png(buf)

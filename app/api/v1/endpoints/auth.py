@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -8,12 +8,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.api.activity_logging import log_create, safe_log_activity
 from app.api.deps import (
     BusinessLogicException,
     ConflictException,
     UnauthorizedException,
 )
-from app.api.activity_logging import log_create, safe_log_activity
 from app.core.config import settings
 from app.core.events import get_event_bus
 from app.core.http.error_handling import handle_database_errors
@@ -23,15 +23,13 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
 )
-from app.core.utils.cookie_auth import set_auth_cookie, clear_auth_cookie
+from app.core.utils.cookie_auth import clear_auth_cookie, set_auth_cookie
 from app.core.utils.security import create_access_token, verify_password
-from app.crud.patient import patient
 from app.crud.user import user
 from app.events.security_events import PasswordChangedEvent
 from app.models.activity_log import ActionType, EntityType
 from app.models.base import get_utc_now
-from app.models.models import Patient, User as DBUser
-from app.schemas.patient import PatientCreate
+from app.models.models import User as DBUser
 from app.schemas.user import Token, User, UserCreate, UserRegistration
 
 router = APIRouter()

@@ -13,26 +13,25 @@ from typing import Any, Dict, List, Optional
 from PIL import Image as PILImage
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
-from reportlab.lib.pagesizes import A4, letter
+from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
+    Image,
+    KeepTogether,
     PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
     Table,
     TableStyle,
-    KeepTogether,
-    Image,
 )
-from reportlab.platypus.tableofcontents import TableOfContents
 
 from app.core.logging.config import get_logger
-from app.services.export_service import UnitConverter, UNIT_LABELS
-from app.services.report_translations import get_translator, ReportTranslator
+from app.services.export_service import UnitConverter
+from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
 
@@ -196,7 +195,6 @@ class CustomReportPDFGenerator:
         critical_red = colors.HexColor("#D32F2F")
         warning_orange = colors.HexColor("#F57C00")
         info_blue = colors.HexColor("#1976D2")
-        success_green = colors.HexColor("#388E3C")
         neutral_gray = colors.HexColor("#616161")
         dark_text = colors.HexColor("#212121")
 
@@ -551,7 +549,6 @@ class CustomReportPDFGenerator:
     def _create_emergency_information_section(self, data: Dict[str, Any]) -> List:
         """Create emergency information section with critical alerts"""
         story = []
-        emergency_items = []
 
         # Check for severe allergies
         allergies = data.get("allergies", [])
@@ -681,12 +678,9 @@ class CustomReportPDFGenerator:
         story = []
 
         # Three-column summary layout
-        summary_info = []
-
         t = self.translator
 
         # Column 1: Record counts
-        category_counts = summary_data.get("category_counts", {})
         active_meds = len(
             [
                 m

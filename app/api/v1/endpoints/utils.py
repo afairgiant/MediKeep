@@ -1,21 +1,20 @@
 from pathlib import Path
-from typing import Any, Optional, Type
-import traceback
+from typing import Any, Optional
 
-from fastapi import APIRouter, Request, status, HTTPException
+from fastapi import APIRouter, HTTPException, Request, status
+from sqlalchemy.exc import DatabaseError, IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DatabaseError
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
-from app.core.utils.datetime_utils import get_timezone_info
-from app.core.logging.config import get_logger
+from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.core.http.error_handling import (
+    DatabaseException,
     NotFoundException,
     handle_database_errors,
-    DatabaseException,
 )
-from app.core.constants import LAB_TEST_COMPONENT_LIMITS
+from app.core.logging.config import get_logger
+from app.core.utils.datetime_utils import get_timezone_info
 
 logger = get_logger(__name__, "app")
 

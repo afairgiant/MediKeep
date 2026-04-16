@@ -10,12 +10,12 @@ import traceback
 from contextlib import contextmanager
 from typing import Any, Optional
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import (
-    IntegrityError,
     DisconnectionError,
+    IntegrityError,
     OperationalError,
     SQLAlchemyError,
 )
@@ -596,7 +596,7 @@ def setup_error_handling(app: FastAPI):
     """
 
     @app.exception_handler(APIException)
-    async def api_exception_handler(request: Request, exc: APIException):
+    async def api_exception_handler(_request: Request, exc: APIException):
         return JSONResponse(
             status_code=exc.http_status_code,
             content=exc.to_response_model().model_dump(exclude_none=False),

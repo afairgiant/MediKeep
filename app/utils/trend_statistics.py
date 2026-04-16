@@ -49,7 +49,7 @@ def compute_trend_direction(values: List[float]) -> str:
     threshold = baseline * 0.10
     if total_change > threshold:
         return "increasing"
-    elif total_change < -threshold:
+    if total_change < -threshold:
         return "decreasing"
 
     return "stable"

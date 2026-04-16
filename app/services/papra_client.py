@@ -6,6 +6,7 @@ Unlike Paperless, Papra uploads are synchronous - no task polling needed.
 """
 
 from typing import Optional, Tuple
+
 import aiohttp
 
 from app.core.logging.config import get_logger
@@ -17,19 +18,13 @@ logger = get_logger(__name__)
 class PapraClientError(Exception):
     """Base exception for Papra client errors."""
 
-    pass
-
 
 class PapraConnectionError(PapraClientError):
     """Connection-related errors."""
 
-    pass
-
 
 class PapraUploadError(PapraClientError):
     """Upload-related errors."""
-
-    pass
 
 
 class PapraClient:
@@ -189,9 +184,9 @@ class PapraClient:
             async with self._session.get(url) as response:
                 if response.status == 404:
                     raise PapraClientError(f"Document {document_id} not found")
-                elif response.status == 403:
+                if response.status == 403:
                     raise PapraClientError(f"Access denied to document {document_id}")
-                elif response.status != 200:
+                if response.status != 200:
                     raise PapraClientError(
                         f"Download failed with status {response.status}"
                     )
@@ -230,7 +225,7 @@ class PapraClient:
                         f"Papra document {document_id} not found for deletion"
                     )
                     return True  # Already gone
-                elif response.status not in [200, 204]:
+                if response.status not in [200, 204]:
                     raise PapraClientError(
                         f"Delete failed with status {response.status}"
                     )
@@ -320,7 +315,7 @@ class PapraClient:
             async with self._session.get(url) as response:
                 if response.status == 404:
                     return None
-                elif response.status != 200:
+                if response.status != 200:
                     raise PapraClientError(
                         f"Get info failed with status {response.status}"
                     )

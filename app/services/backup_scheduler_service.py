@@ -169,15 +169,14 @@ class BackupSchedulerService:
 
         if preset == "every_6_hours":
             return IntervalTrigger(hours=6)
-        elif preset == "every_12_hours":
+        if preset == "every_12_hours":
             return IntervalTrigger(hours=12)
-        elif preset == "daily":
+        if preset == "daily":
             return CronTrigger(hour=hour, minute=minute)
-        elif preset == "weekly":
+        if preset == "weekly":
             day = config.get("day_of_week", "sun")
             return CronTrigger(day_of_week=day, hour=hour, minute=minute)
-        else:
-            raise ValueError(f"Cannot build trigger for preset: {preset}")
+        raise ValueError(f"Cannot build trigger for preset: {preset}")
 
     async def _run_backup(self) -> None:
         """Execute a scheduled backup. Creates its own DB session."""

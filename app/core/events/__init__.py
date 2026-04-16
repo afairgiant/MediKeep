@@ -8,7 +8,7 @@ metadata and notification templates.
 
 from app.core.events.base import DomainEvent
 from app.core.events.bus import EventBus, get_event_bus
-from app.core.events.registry import EventRegistry, EventMetadata, get_event_registry
+from app.core.events.registry import EventMetadata, EventRegistry, get_event_registry
 from app.services.notification_templates import (
     backup_completed_template,
     backup_failed_template,

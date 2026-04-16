@@ -5,9 +5,9 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    ValidationInfo,
     field_validator,
     model_validator,
-    ValidationInfo,
 )
 
 # Import enums for validation
@@ -58,9 +58,7 @@ class FamilyMemberBase(BaseModel):
             }
             normalized = v.lower().strip()
             if normalized not in gender_mapping:
-                raise ValueError(
-                    f"Gender must be one of: male, female, other (or M, F)"
-                )
+                raise ValueError("Gender must be one of: male, female, other (or M, F)")
             return gender_mapping[normalized]
         return v
 
@@ -127,9 +125,7 @@ class FamilyMemberUpdate(BaseModel):
             }
             normalized = v.lower().strip()
             if normalized not in gender_mapping:
-                raise ValueError(
-                    f"Gender must be one of: male, female, other (or M, F)"
-                )
+                raise ValueError("Gender must be one of: male, female, other (or M, F)")
             return gender_mapping[normalized]
         return v
 
@@ -187,6 +183,7 @@ class FamilyMemberDropdownOption(BaseModel):
 
 
 # Import this here to avoid circular imports
+# pylint: disable-next=wrong-import-position
 from .family_condition import FamilyConditionResponse
 
 FamilyMemberResponse.model_rebuild()

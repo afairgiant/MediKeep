@@ -53,7 +53,6 @@ sys.path.insert(0, str(project_root))
 
 try:
     from app.api.activity_logging import safe_log_activity
-    from app.core.config import settings
     from app.core.database.database import SessionLocal
     from app.core.logging.config import get_logger, log_security_event
     from app.crud.user import user

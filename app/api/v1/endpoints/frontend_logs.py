@@ -6,9 +6,10 @@ error tracking and user interaction logging.
 """
 
 from datetime import datetime
+from typing import Any, Dict, Optional
+
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
-from typing import Any, Dict, Optional
 from sqlalchemy.orm import Session
 
 from app.api import deps

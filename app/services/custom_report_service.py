@@ -10,10 +10,10 @@ import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.logging.config import get_logger
+from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.models.models import (
     Allergy,
     Condition,
@@ -35,7 +35,6 @@ from app.models.models import (
     ReportGenerationAudit,
     ReportTemplate,
     Symptom,
-    SymptomOccurrence,
     Treatment,
     User,
     Vitals,
@@ -47,12 +46,13 @@ from app.schemas.custom_reports import (
     CustomReportRequest,
     DataSummaryResponse,
     RecordSummary,
-    ReportTemplate as ReportTemplateSchema,
+)
+from app.schemas.custom_reports import ReportTemplate as ReportTemplateSchema
+from app.schemas.custom_reports import (
     SelectiveRecordRequest,
 )
-from app.crud.user_preferences import user_preferences as user_preferences_crud
-from app.services.export_service import ExportService, UnitConverter
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
+from app.services.export_service import ExportService, UnitConverter
 
 logger = get_logger(__name__, "app")
 
@@ -115,7 +115,7 @@ class CustomReportService:
             self_record = (
                 self.db.query(Patient)
                 .filter(
-                    Patient.owner_user_id == user_id, Patient.is_self_record == True
+                    Patient.owner_user_id == user_id, Patient.is_self_record.is_(True)
                 )
                 .first()
             )
@@ -344,8 +344,6 @@ class CustomReportService:
     ) -> Optional[RecordSummary]:
         """Convert a database model instance to RecordSummary"""
         try:
-            item_id = getattr(item, "id", "unknown")
-
             # Use a generic approach that works for all models
             # Try to find the main name/title field
             title_field = self._get_title_field(item, category)
@@ -464,8 +462,6 @@ class CustomReportService:
             value = getattr(item, field_name, None)
             if value and str(value).strip():
                 logger.debug(f"Using fallback field '{field_name}' for {category}")
-                # Add a prefix to indicate this is a fallback field
-                field_display = field_name.replace("_", " ").title()
                 return f"{str(value).strip()}"
 
         # Final fallback to common generic fields
@@ -537,7 +533,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Medication details"
 
-            elif category == "conditions":
+            if category == "conditions":
                 parts = []
                 severity = getattr(item, "severity", None)
                 verification_status = getattr(item, "verification_status", None)
@@ -549,7 +545,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Condition details"
 
-            elif category == "procedures":
+            if category == "procedures":
                 parts = []
                 procedure_code = getattr(item, "procedure_code", None)
                 status = getattr(item, "status", None)
@@ -561,7 +557,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Procedure details"
 
-            elif category == "lab_results":
+            if category == "lab_results":
                 parts = []
                 test_type = getattr(item, "test_type", None)
                 labs_result = getattr(item, "labs_result", None)
@@ -576,7 +572,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Lab result details"
 
-            elif category == "immunizations":
+            if category == "immunizations":
                 parts = []
                 site = getattr(item, "site", None)
                 lot_number = getattr(item, "lot_number", None)
@@ -591,7 +587,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Immunization details"
 
-            elif category == "treatments":
+            if category == "treatments":
                 parts = []
                 dosage = getattr(item, "dosage", None)
                 frequency = getattr(item, "frequency", None)
@@ -606,12 +602,12 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Treatment details"
 
-            elif category == "vitals":
+            if category == "vitals":
                 return self._format_vitals_info(
                     item, unit_system=self._user_unit_system
                 )
 
-            elif category == "encounters":
+            if category == "encounters":
                 parts = []
                 reason = getattr(item, "reason", None)
                 visit_type = getattr(item, "visit_type", None)
@@ -629,7 +625,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Visit details"
 
-            elif category == "allergies":
+            if category == "allergies":
                 parts = []
                 severity = getattr(item, "severity", None)
                 reaction = getattr(item, "reaction", None)
@@ -641,7 +637,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Allergy details"
 
-            elif category == "practitioners":
+            if category == "practitioners":
                 parts = []
                 practice = getattr(item, "practice", None)
                 specialty = getattr(item, "specialty", None)
@@ -656,7 +652,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Practitioner details"
 
-            elif category == "pharmacies":
+            if category == "pharmacies":
                 parts = []
                 brand = getattr(item, "brand", None)
                 address = getattr(item, "address", None)
@@ -675,7 +671,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Pharmacy details"
 
-            elif category == "emergency_contacts":
+            if category == "emergency_contacts":
                 parts = []
                 relationship = getattr(item, "relationship", None)
                 phone = getattr(item, "phone_number", None)
@@ -687,7 +683,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Contact details"
 
-            elif category == "family_history":
+            if category == "family_history":
                 parts = []
                 relationship = getattr(item, "relationship", None)
                 birth_year = getattr(item, "birth_year", None)
@@ -724,7 +720,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Family member details"
 
-            elif category == "symptoms":
+            if category == "symptoms":
                 parts = []
                 category_val = getattr(item, "category", None)
                 status = getattr(item, "status", None)
@@ -751,7 +747,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Symptom details"
 
-            elif category == "injuries":
+            if category == "injuries":
                 parts = []
                 body_part = getattr(item, "body_part", None)
                 severity = getattr(item, "severity", None)
@@ -774,7 +770,7 @@ class CustomReportService:
 
                 return " | ".join(parts) if parts else "Injury details"
 
-            elif category == "insurance":
+            if category == "insurance":
                 parts = []
                 insurance_type = getattr(item, "insurance_type", None)
                 plan_name = getattr(item, "plan_name", None)
@@ -1050,9 +1046,9 @@ class CustomReportService:
         date_format: str = "mdy",
     ) -> List[Dict[str, Any]]:
         """Generate trend chart images and collect their data for PDF inclusion."""
-        from app.services.trend_data_fetcher import TrendDataFetcher
-        from app.services.trend_chart_generator import TrendChartGenerator
         from app.services.report_translations import get_translator
+        from app.services.trend_chart_generator import TrendChartGenerator
+        from app.services.trend_data_fetcher import TrendDataFetcher
 
         fetcher = TrendDataFetcher(self.db)
         generator = TrendChartGenerator()
@@ -1437,7 +1433,7 @@ class CustomReportService:
             self.db.query(ReportTemplate)
             .filter(ReportTemplate.user_id == user_id)
             .filter(ReportTemplate.name == template_data.name)
-            .filter(ReportTemplate.is_active == True)
+            .filter(ReportTemplate.is_active.is_(True))
             .first()
         )
 
@@ -1474,7 +1470,7 @@ class CustomReportService:
         templates = (
             self.db.query(ReportTemplate)
             .filter(ReportTemplate.user_id == user_id)
-            .filter(ReportTemplate.is_active == True)
+            .filter(ReportTemplate.is_active.is_(True))
             .all()
         )
 
@@ -1511,7 +1507,7 @@ class CustomReportService:
             self.db.query(ReportTemplate)
             .filter(ReportTemplate.id == template_id)
             .filter(ReportTemplate.user_id == user_id)
-            .filter(ReportTemplate.is_active == True)
+            .filter(ReportTemplate.is_active.is_(True))
             .first()
         )
 
@@ -1544,7 +1540,7 @@ class CustomReportService:
             self.db.query(ReportTemplate)
             .filter(ReportTemplate.id == template_id)
             .filter(ReportTemplate.user_id == user_id)
-            .filter(ReportTemplate.is_active == True)
+            .filter(ReportTemplate.is_active.is_(True))
             .first()
         )
 
@@ -1579,7 +1575,7 @@ class CustomReportService:
             self.db.query(ReportTemplate)
             .filter(ReportTemplate.id == template_id)
             .filter(ReportTemplate.user_id == user_id)
-            .filter(ReportTemplate.is_active == True)
+            .filter(ReportTemplate.is_active.is_(True))
             .first()
         )
 

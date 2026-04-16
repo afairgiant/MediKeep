@@ -8,13 +8,14 @@ by checking the database connection and type.
 
 import os
 import sys
-from sqlalchemy import text, inspect
-from typing import Dict, Any
+from typing import Any, Dict
+
+from sqlalchemy import inspect, text
 
 # Add the app directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "app"))
 
-from app.core.database.database import engine, db_config
+from app.core.database.database import db_config, engine
 
 
 def check_database_type() -> Dict[str, Any]:

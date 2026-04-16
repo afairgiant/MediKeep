@@ -10,7 +10,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.schemas.validators import validate_text_field, validate_required_text
+from app.schemas.validators import validate_required_text, validate_text_field
 
 
 class InjuryTypeBase(BaseModel):

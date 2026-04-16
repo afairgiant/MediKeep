@@ -219,8 +219,6 @@ class PractitionerCreate(PractitionerBase):
         )
     """
 
-    pass
-
 
 class PractitionerUpdate(BaseModel):
     """
@@ -389,8 +387,6 @@ class PractitionerResponse(Practitioner):
 
     This provides consistency with other model Response schemas.
     """
-
-    pass
 
 
 class PractitionerSearch(BaseModel):

@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import handle_database_errors
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -13,28 +12,29 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
+from app.core.http.error_handling import handle_database_errors
 from app.crud.symptom import (
-    symptom_parent,
-    symptom_occurrence,
     symptom_condition,
     symptom_medication,
+    symptom_occurrence,
+    symptom_parent,
     symptom_treatment,
 )
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.symptom import (
+    SymptomConditionCreate,
+    SymptomConditionResponse,
     SymptomCreate,
-    SymptomResponse,
-    SymptomUpdate,
+    SymptomMedicationCreate,
+    SymptomMedicationResponse,
     SymptomOccurrenceCreate,
     SymptomOccurrenceResponse,
     SymptomOccurrenceUpdate,
-    SymptomConditionCreate,
-    SymptomConditionResponse,
-    SymptomMedicationCreate,
-    SymptomMedicationResponse,
+    SymptomResponse,
     SymptomTreatmentCreate,
     SymptomTreatmentResponse,
+    SymptomUpdate,
 )
 
 router = APIRouter()

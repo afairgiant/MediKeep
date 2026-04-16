@@ -7,15 +7,16 @@ This middleware logs all API requests with timing, user context, and security in
 import time
 import uuid
 from typing import Callable, Optional
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response as StarletteResponse
 
 from app.core.logging.config import (
     get_logger,
-    set_correlation_id,
-    log_security_event,
     log_performance_event,
+    log_security_event,
+    set_correlation_id,
 )
 
 

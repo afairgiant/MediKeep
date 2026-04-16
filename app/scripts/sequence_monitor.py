@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional
@@ -179,7 +178,7 @@ class SequenceValidator:
                 f"for sequence {sequence_name}. Using max_value."
             )
             return max_val
-        elif value < min_val:
+        if value < min_val:
             logger.warning(
                 f"Sequence value {value} is below min_value {min_val} "
                 f"for sequence {sequence_name}. Using min_value."
@@ -213,15 +212,14 @@ class SequenceHealthAssessor:
             or remaining_values < self.config.CRITICAL_REMAINING_THRESHOLD
         ):
             return self.config.HEALTH_CRITICAL
-        elif (
+        if (
             percentage_used >= self.config.WARNING_USAGE_THRESHOLD
             or remaining_values < self.config.WARNING_REMAINING_THRESHOLD
         ):
             return self.config.HEALTH_WARNING
-        elif percentage_used >= self.config.GOOD_USAGE_THRESHOLD:
+        if percentage_used >= self.config.GOOD_USAGE_THRESHOLD:
             return self.config.HEALTH_GOOD
-        else:
-            return self.config.HEALTH_EXCELLENT
+        return self.config.HEALTH_EXCELLENT
 
 
 class SequenceMonitor:
@@ -284,8 +282,7 @@ class SequenceMonitor:
 
             if result:
                 return {"last_value": result.last_value, "is_called": result.is_called}
-            else:
-                return {"last_value": 0, "is_called": False}
+            return {"last_value": 0, "is_called": False}
 
         except SQLAlchemyError:
             logger.debug(f"Could not get current state for sequence {sequence_name}")
@@ -428,9 +425,8 @@ class SequenceMonitor:
                 f"set to {new_sequence_value} (table max: {max_value})"
             )
             return True
-        else:
-            logger.error(f"setval returned unexpected value for {sequence_name}")
-            return False
+        logger.error(f"setval returned unexpected value for {sequence_name}")
+        return False
 
     @database_operation()
     def reset_sequence_to_start(self, sequence_name: str) -> bool:
@@ -558,7 +554,7 @@ class SequenceMonitor:
                 }
             )
             return issue_data
-        elif current_val < 0:
+        if current_val < 0:
             issue_data.update(
                 {
                     "issue_type": self.config.ISSUE_BELOW_MINIMUM,
@@ -567,7 +563,7 @@ class SequenceMonitor:
                 }
             )
             return issue_data
-        elif not issue_data["is_synced"]:
+        if not issue_data["is_synced"]:
             issue_data.update(
                 {
                     "issue_type": self.config.ISSUE_SYNC_ISSUE,
@@ -792,34 +788,32 @@ class SequenceMonitor:
                         else 0
                     ),
                 }
-            else:
-                # Fallback to simpler query if pg_sequences view fails
-                simple_query = text(
-                    f"""
+            # Fallback to simpler query if pg_sequences view fails
+            simple_query = text(
+                f"""
                     SELECT 
                         last_value, 
                         is_called,
                         log_cnt
                     FROM {sequence_name}
                 """
-                )
-                simple_result = db.execute(simple_query).fetchone()
+            )
+            simple_result = db.execute(simple_query).fetchone()
 
-                if simple_result:
-                    return {
-                        "sequence_name": sequence_name,
-                        "last_value": simple_result.last_value,
-                        "is_called": simple_result.is_called,
-                        "log_count": simple_result.log_cnt,
-                        "effective_current_value": (
-                            simple_result.last_value
-                            if simple_result.is_called
-                            else simple_result.last_value - 1
-                        ),
-                        "note": "Limited info - using fallback query",
-                    }
-                else:
-                    return {"error": f"Sequence {sequence_name} not found"}
+            if simple_result:
+                return {
+                    "sequence_name": sequence_name,
+                    "last_value": simple_result.last_value,
+                    "is_called": simple_result.is_called,
+                    "log_count": simple_result.log_cnt,
+                    "effective_current_value": (
+                        simple_result.last_value
+                        if simple_result.is_called
+                        else simple_result.last_value - 1
+                    ),
+                    "note": "Limited info - using fallback query",
+                }
+            return {"error": f"Sequence {sequence_name} not found"}
 
         except SQLAlchemyError as e:
             logger.error(f"Error getting sequence info for {sequence_name}: {e}")

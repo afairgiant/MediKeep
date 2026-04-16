@@ -1,11 +1,11 @@
 from sqlalchemy import (
+    JSON,
     Column,
     Date,
     DateTime,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
 )
 from sqlalchemy.orm import relationship as orm_relationship

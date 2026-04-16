@@ -7,7 +7,7 @@ in parallel with error isolation.
 """
 
 import asyncio
-from typing import Dict, List, Callable, Awaitable
+from typing import Awaitable, Callable, Dict, List
 
 from app.core.events.base import DomainEvent
 from app.core.logging.config import get_logger

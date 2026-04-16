@@ -4,14 +4,6 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    handle_database_errors,
-    NotFoundException,
-    BusinessLogicException,
-)
-from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
-from app.core.logging.helpers import log_data_access, log_security_event
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -19,48 +11,51 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.crud.treatment import (
-    treatment,
-    treatment_medication,
-    treatment_encounter,
-    treatment_lab_result,
-    treatment_equipment,
+from app.core.http.error_handling import (
+    BusinessLogicException,
+    NotFoundException,
+    handle_database_errors,
 )
-from app.crud.medication import medication as medication_crud
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_data_access, log_security_event
 from app.crud.encounter import encounter as encounter_crud
 from app.crud.lab_result import lab_result as lab_result_crud
 from app.crud.medical_equipment import medical_equipment as equipment_crud
+from app.crud.medication import medication as medication_crud
+from app.crud.treatment import (
+    treatment,
+    treatment_encounter,
+    treatment_equipment,
+    treatment_lab_result,
+    treatment_medication,
+)
 from app.models.activity_log import EntityType
 from app.models.models import User
-from app.schemas.treatment import (
+from app.schemas.treatment import (  # Treatment-Medication schemas; Treatment-Encounter schemas; Treatment-LabResult schemas; Treatment-Equipment schemas
     TreatmentCreate,
+    TreatmentEncounterBulkCreate,
+    TreatmentEncounterCreate,
+    TreatmentEncounterResponse,
+    TreatmentEncounterUpdate,
+    TreatmentEncounterWithDetails,
+    TreatmentEquipmentBulkCreate,
+    TreatmentEquipmentCreate,
+    TreatmentEquipmentResponse,
+    TreatmentEquipmentUpdate,
+    TreatmentEquipmentWithDetails,
+    TreatmentLabResultBulkCreate,
+    TreatmentLabResultCreate,
+    TreatmentLabResultResponse,
+    TreatmentLabResultUpdate,
+    TreatmentLabResultWithDetails,
+    TreatmentMedicationBulkCreate,
+    TreatmentMedicationCreate,
+    TreatmentMedicationResponse,
+    TreatmentMedicationUpdate,
+    TreatmentMedicationWithDetails,
     TreatmentResponse,
     TreatmentUpdate,
     TreatmentWithRelations,
-    # Treatment-Medication schemas
-    TreatmentMedicationCreate,
-    TreatmentMedicationUpdate,
-    TreatmentMedicationResponse,
-    TreatmentMedicationWithDetails,
-    TreatmentMedicationBulkCreate,
-    # Treatment-Encounter schemas
-    TreatmentEncounterCreate,
-    TreatmentEncounterUpdate,
-    TreatmentEncounterResponse,
-    TreatmentEncounterWithDetails,
-    TreatmentEncounterBulkCreate,
-    # Treatment-LabResult schemas
-    TreatmentLabResultCreate,
-    TreatmentLabResultUpdate,
-    TreatmentLabResultResponse,
-    TreatmentLabResultWithDetails,
-    TreatmentLabResultBulkCreate,
-    # Treatment-Equipment schemas
-    TreatmentEquipmentCreate,
-    TreatmentEquipmentUpdate,
-    TreatmentEquipmentResponse,
-    TreatmentEquipmentWithDetails,
-    TreatmentEquipmentBulkCreate,
 )
 
 router = APIRouter()

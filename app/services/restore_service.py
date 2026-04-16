@@ -13,7 +13,7 @@ import tempfile
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -217,7 +217,6 @@ class RestoreService:
             components = []
             total_files = 0
             total_size = 0
-            has_database = False
             has_files = False
 
             with zipfile.ZipFile(backup_path, "r") as zipf:
@@ -231,7 +230,6 @@ class RestoreService:
 
                 # Check components
                 if "database.sql" in file_list:
-                    has_database = True
                     components.append("Database")
 
                 # Count files in uploads directory
@@ -680,7 +678,7 @@ class RestoreService:
                 "ON_ERROR_STOP=on",  # Stop on first error
             ]
 
-            self._debug_print(f"RESTORE DEBUG: Running Docker psql command")
+            self._debug_print("RESTORE DEBUG: Running Docker psql command")
             logger.debug("Executing Docker psql restore command")
 
             # Execute Docker psql with the backup file
@@ -1040,7 +1038,7 @@ class RestoreService:
 
             if filename.endswith(".sql"):
                 return "database"
-            elif filename.endswith(".zip"):
+            if filename.endswith(".zip"):
                 # Check ZIP contents to determine if it's files or full backup
                 with zipfile.ZipFile(file_path, "r") as zipf:
                     file_list = zipf.namelist()
@@ -1054,11 +1052,10 @@ class RestoreService:
 
                     if has_database and (has_manifest or has_uploads):
                         return "full"
-                    elif has_uploads or any("/" in name for name in file_list):
+                    if has_uploads or any("/" in name for name in file_list):
                         return "files"
-                    else:
-                        # Default to files for ZIP without clear indicators
-                        return "files"
+                    # Default to files for ZIP without clear indicators
+                    return "files"
             else:
                 raise ValueError(f"Unsupported file type: {filename}")
 

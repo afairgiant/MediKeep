@@ -1,11 +1,10 @@
 from datetime import date as DateType
-from typing import Optional, List
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from app.schemas.base_tags import TaggedEntityMixin
 from app.models.enums import ProcedureStatus, get_all_procedure_outcomes
-
+from app.schemas.base_tags import TaggedEntityMixin
 
 # Pre-fetch valid values for reuse
 VALID_PROCEDURE_STATUSES = [s.value for s in ProcedureStatus]
@@ -216,7 +215,10 @@ class ProcedureSummary(BaseModel):
 
 
 # Late imports to avoid circular dependencies; must come after all class definitions.
+# pylint: disable=wrong-import-position
 from app.schemas.patient import PatientResponse  # noqa: E402
 from app.schemas.practitioner import PractitionerSummary  # noqa: E402
+
+# pylint: enable=wrong-import-position
 
 ProcedureWithRelations.model_rebuild()

@@ -4,15 +4,14 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import handle_database_errors
-from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
-from app.core.logging.helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_not_found,
     handle_update_with_logging,
 )
+from app.core.http.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_data_access
 from app.crud.pharmacy import pharmacy
 from app.models.activity_log import EntityType
 from app.schemas.pharmacy import Pharmacy, PharmacyCreate, PharmacyUpdate

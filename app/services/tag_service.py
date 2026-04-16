@@ -1,7 +1,7 @@
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import text
 from sqlalchemy.orm import Session
-from sqlalchemy import text, or_
-from sqlalchemy.sql import quoted_name
 
 from app.core.logging.config import get_logger
 

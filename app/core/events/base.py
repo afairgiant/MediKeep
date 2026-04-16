@@ -7,9 +7,9 @@ Events are immutable records of something that happened in the system.
 
 import re
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 
 @dataclass(frozen=True)

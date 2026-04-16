@@ -1,7 +1,7 @@
 from typing import List, Optional
 
-from sqlalchemy.orm import Session
 from sqlalchemy import and_
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.models.models import Insurance
@@ -89,7 +89,7 @@ class CRUDInsurance(CRUDBase[Insurance, InsuranceCreate, InsuranceUpdate]):
                 and_(
                     Insurance.patient_id == patient_id,
                     Insurance.insurance_type == "medical",
-                    Insurance.is_primary == True,
+                    Insurance.is_primary.is_(True),
                     Insurance.status == "active",
                 )
             )

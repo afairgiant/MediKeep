@@ -17,30 +17,33 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    NotFoundException,
-    ForbiddenException,
-    BusinessLogicException,
-    DatabaseException,
-    handle_database_errors,
-)
 from app.api.v1.endpoints.utils import (
     ensure_directory_with_permissions,
     handle_create_with_logging,
-    handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
     verify_patient_ownership,
 )
 from app.core.config import settings
 from app.core.database.database import get_db
+from app.core.http.error_handling import (
+    BusinessLogicException,
+    DatabaseException,
+    ForbiddenException,
+    NotFoundException,
+    handle_database_errors,
+)
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import (
+    log_endpoint_access,
+)
 from app.crud.condition import condition as condition_crud
-from app.crud.encounter import encounter as encounter_crud, encounter_lab_result
+from app.crud.encounter import encounter as encounter_crud
+from app.crud.encounter import encounter_lab_result
 from app.crud.lab_result import lab_result, lab_result_condition
 from app.crud.lab_result_file import lab_result_file
 from app.models.activity_log import EntityType
-from app.models.models import EntityFile, User
-from app.services.generic_entity_file_service import GenericEntityFileService
+from app.models.models import User
 from app.schemas.encounter import (
     EncounterLabResultResponse,
     EncounterLabResultUpdate,
@@ -61,15 +64,7 @@ from app.schemas.lab_result import (
     PDFExtractionResponse,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
-from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
-from app.core.logging.helpers import (
-    log_endpoint_access,
-    log_endpoint_error,
-    log_security_event,
-    log_data_access,
-    log_validation_error,
-)
+from app.services.generic_entity_file_service import GenericEntityFileService
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
@@ -167,7 +162,6 @@ def get_lab_result(
 ):
     """Get a specific lab result by ID with related data."""
     from app.services.patient_access import PatientAccessService
-    from app.models.models import Patient
 
     with handle_database_errors(request=request):
         db_lab_result = lab_result.get_with_relations(
@@ -525,8 +519,8 @@ def get_lab_result_files(
     current_user: User = Depends(deps.get_current_user),
 ):
     """Get all files for a specific lab result."""
-    from app.services.patient_access import PatientAccessService
     from app.models.models import Patient
+    from app.services.patient_access import PatientAccessService
 
     with handle_database_errors(request=request):
         # Verify lab result exists
@@ -563,8 +557,8 @@ async def upload_lab_result_file(
     current_user: User = Depends(deps.get_current_user),
 ):
     """Upload a new file for a lab result."""
-    from app.services.patient_access import PatientAccessService
     from app.models.models import Patient
+    from app.services.patient_access import PatientAccessService
 
     # Verify lab result exists
     db_lab_result = lab_result.get(db, id=lab_result_id)
@@ -712,8 +706,8 @@ def delete_lab_result_file(
     current_user: User = Depends(deps.get_current_user),
 ):
     """Delete a specific file from a lab result."""
-    from app.services.patient_access import PatientAccessService
     from app.models.models import Patient
+    from app.services.patient_access import PatientAccessService
 
     with handle_database_errors(request=request):
         # Verify lab result exists
@@ -850,8 +844,8 @@ def get_lab_result_conditions(
         handle_not_found(db_lab_result, "Lab result", request)
 
         # Verify user has access to this lab result's patient
-        from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
+        from app.services.patient_access import PatientAccessService
 
         patient_record = (
             db.query(Patient).filter(Patient.id == db_lab_result.patient_id).first()
@@ -1388,10 +1382,10 @@ async def parse_lab_pdf_with_ocr(
             )
 
         # 4. Extract text using hybrid service
-        from app.services.pdf_text_extraction_service import pdf_extraction_service
-
         # Hash filename to avoid logging PHI (filenames may contain patient names)
         import hashlib
+
+        from app.services.pdf_text_extraction_service import pdf_extraction_service
 
         filename_hash = hashlib.sha256(file.filename.encode()).hexdigest()[:16]
 

@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, field_validator, ValidationInfo, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 # Supported languages - single source of truth
 SUPPORTED_LANGUAGES = ["en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl", "zh"]
@@ -202,8 +202,6 @@ class UserPreferencesBase(BaseModel):
 
 class UserPreferencesCreate(UserPreferencesBase):
     """Schema for creating user preferences."""
-
-    pass
 
 
 class UserPreferencesUpdate(BaseModel):

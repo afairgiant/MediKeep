@@ -7,10 +7,8 @@ if graceful shutdown fails.
 
 import logging
 import os
-import signal
 import sys
 import threading
-import time
 from typing import Callable, List, Optional
 
 from app.core.logging.config import get_logger

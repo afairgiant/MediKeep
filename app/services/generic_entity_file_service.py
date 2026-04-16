@@ -5,7 +5,7 @@ Supports lab-results, insurance, visits, procedures, and future entity types.
 
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -22,15 +22,19 @@ from app.schemas.entity_file import (
     FileOperationResult,
 )
 from app.services.file_management_service import FileManagementService
-from app.services.paperless_service import (
-    create_paperless_service_with_username_password,
-)
 
 # New simplified architecture
 from app.services.paperless_client import (
-    create_paperless_client,
     PaperlessClientError,
+)
+from app.services.paperless_client import (
     PaperlessConnectionError as NewPaperlessConnectionError,
+)
+from app.services.paperless_client import (
+    create_paperless_client,
+)
+from app.services.paperless_service import (
+    create_paperless_service_with_username_password,
 )
 
 logger = get_logger(__name__, "app")
@@ -244,7 +248,7 @@ class GenericEntityFileService:
                 )
                 logger.info(f"Paperless upload completed: file_id={result.id}")
                 return result
-            elif storage_backend == "papra":
+            if storage_backend == "papra":
                 result = await self._upload_to_papra(
                     db,
                     entity_type,
@@ -258,7 +262,7 @@ class GenericEntityFileService:
                 )
                 logger.info(f"Papra upload completed: file_id={result.id}")
                 return result
-            elif storage_backend == "local":
+            if storage_backend == "local":
                 result = await self._upload_to_local(
                     db,
                     entity_type,
@@ -271,11 +275,10 @@ class GenericEntityFileService:
                 )
                 logger.info(f"Local upload completed: file_id={result.id}")
                 return result
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Unsupported storage backend: {storage_backend}",
-                )
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported storage backend: {storage_backend}",
+            )
 
         except HTTPException:
             raise
@@ -714,11 +717,11 @@ class GenericEntityFileService:
                 return await self._get_paperless_download_info(
                     db, file_record, current_user_id
                 )
-            elif file_record.storage_backend == "papra":
+            if file_record.storage_backend == "papra":
                 return await self._get_papra_download_info(
                     db, file_record, current_user_id
                 )
-            elif file_record.storage_backend == "local":
+            if file_record.storage_backend == "local":
                 # Handle local file download
                 if not os.path.exists(file_record.file_path):
                     raise HTTPException(
@@ -731,11 +734,10 @@ class GenericEntityFileService:
                     file_record.file_name,
                     file_record.file_type or "application/octet-stream",
                 )
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Unsupported storage backend: {file_record.storage_backend}",
-                )
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported storage backend: {file_record.storage_backend}",
+            )
 
         except HTTPException:
             raise
@@ -866,17 +868,17 @@ class GenericEntityFileService:
                             f"Download failed for document {document_id}: {download_error}"
                         )
                         logger.error(
-                            f"Document owner in search results might be different from authenticated user"
+                            "Document owner in search results might be different from authenticated user"
                         )
                         raise
 
                 return file_content, file_record.file_name, file_record.file_type
-            elif file_record.storage_backend == "papra":
+            if file_record.storage_backend == "papra":
                 # Handle Papra files - same pattern as download
                 return await self._get_papra_download_info(
                     db, file_record, current_user_id
                 )
-            elif file_record.storage_backend == "local":
+            if file_record.storage_backend == "local":
                 # Handle local files
                 file_path = file_record.file_path
                 if not os.path.exists(file_path):
@@ -885,11 +887,10 @@ class GenericEntityFileService:
                     )
 
                 return file_path, file_record.file_name, file_record.file_type
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Unsupported storage backend: {file_record.storage_backend}",
-                )
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported storage backend: {file_record.storage_backend}",
+            )
 
         except HTTPException:
             raise
@@ -1489,7 +1490,7 @@ class GenericEntityFileService:
         # Get user preferences to create paperless service
         if not current_user_id:
             logger.warning(
-                f"Cannot delete from paperless: no user ID provided for authentication"
+                "Cannot delete from paperless: no user ID provided for authentication"
             )
             return False
 
@@ -1534,11 +1535,10 @@ class GenericEntityFileService:
                         f"File successfully deleted from paperless: document_id={file_record.paperless_document_id}"
                     )
                     return True
-                else:
-                    logger.error(
-                        f"Paperless client reported deletion failed for document {file_record.paperless_document_id}"
-                    )
-                    return False
+                logger.error(
+                    f"Paperless client reported deletion failed for document {file_record.paperless_document_id}"
+                )
+                return False
 
         except (PaperlessClientError, NewPaperlessConnectionError) as e:
             logger.error(
@@ -1664,7 +1664,6 @@ class GenericEntityFileService:
         """
         try:
             from app.models.models import LabResult, Procedure
-            from sqlalchemy import or_
 
             logger.info(
                 f"🔍 ORPHAN CHECK - Checking orphaned paperless records for user {current_user_id}"
@@ -1771,7 +1770,6 @@ class GenericEntityFileService:
         try:
             # Get all paperless files for the user by joining with entity tables
             from app.models.models import LabResult, Procedure
-            from sqlalchemy import or_
 
             # First, let's see what entity types actually exist for paperless files
             all_paperless_files = (
@@ -2234,9 +2232,14 @@ class GenericEntityFileService:
             (True = exists, False = missing, None = error)
         """
         try:
+            from app.models.models import (
+                Encounter,
+                Insurance,
+                LabResult,
+                Patient,
+                Procedure,
+            )
             from app.services.papra_client import create_papra_client
-            from app.models.models import Patient, LabResult, Procedure
-            from app.models.models import Insurance, Encounter
 
             # Scope query to current user by joining through entity -> Patient -> User
             papra_files = []
@@ -2774,10 +2777,9 @@ class GenericEntityFileService:
                 doc_id_int = int(document_id)
                 if doc_id_int > 0:
                     return str(doc_id_int)
-                else:
-                    logger.warning(
-                        f"Document ID {document_id} is not a positive integer for file {file_record.file_name}"
-                    )
+                logger.warning(
+                    f"Document ID {document_id} is not a positive integer for file {file_record.file_name}"
+                )
             except (ValueError, TypeError):
                 logger.warning(
                     f"Document ID '{document_id}' is not numeric for file {file_record.file_name}"
@@ -2798,11 +2800,10 @@ class GenericEntityFileService:
                     f"Fallback search found document ID {fallback_doc_id} for file {file_record.file_name}"
                 )
                 return str(fallback_doc_id)
-            else:
-                logger.error(
-                    f"Fallback search failed to find document for file {file_record.file_name}"
-                )
-                return None
+            logger.error(
+                f"Fallback search failed to find document for file {file_record.file_name}"
+            )
+            return None
 
         except Exception as e:
             logger.error(
@@ -2826,8 +2827,6 @@ class GenericEntityFileService:
             Document ID if found, None otherwise
         """
         try:
-            from datetime import datetime, timedelta
-
             # Convert upload_time to datetime if needed
             if isinstance(upload_time, str):
                 upload_time = datetime.fromisoformat(upload_time.replace("Z", "+00:00"))

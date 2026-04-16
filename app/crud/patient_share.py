@@ -6,8 +6,10 @@ crud.patient_share. New code should use PatientAccessService directly.
 """
 
 from typing import Optional
+
 from sqlalchemy.orm import Session
-from app.models.models import Patient, User, PatientShare
+
+from app.models.models import Patient, PatientShare, User
 
 
 class CRUDPatientShare:
@@ -65,7 +67,7 @@ class CRUDPatientShare:
             .filter(
                 PatientShare.patient_id == patient_id,
                 PatientShare.shared_with_user_id == user_id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .first()
         )

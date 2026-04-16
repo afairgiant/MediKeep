@@ -13,24 +13,20 @@ from app.api.v1.endpoints.utils import (
 )
 from app.core.http.error_handling import (
     NotFoundException,
-    ForbiddenException,
-    BusinessLogicException,
     handle_database_errors,
 )
 from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
 from app.crud.medication import medication
 from app.crud.treatment import treatment_medication
 from app.models.activity_log import EntityType
-from app.schemas.treatment import MedicationTreatmentResponse
 from app.models.models import User
 from app.schemas.medication import (
     MedicationCreate,
-    MedicationResponse,
     MedicationResponseWithNested,
     MedicationUpdate,
 )
+from app.schemas.treatment import MedicationTreatmentResponse
 
 router = APIRouter()
 

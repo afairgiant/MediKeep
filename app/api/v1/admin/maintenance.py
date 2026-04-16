@@ -18,8 +18,8 @@ from app.core.logging.helpers import (
 from app.models.models import LabTestComponent, User
 from app.services.canonical_test_matching import canonical_test_matching
 from app.services.test_library_loader import (
-    get_tests,
     get_library_version,
+    get_tests,
     reload_test_library,
 )
 

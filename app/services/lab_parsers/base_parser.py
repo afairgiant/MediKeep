@@ -3,9 +3,9 @@ Base class for lab-specific PDF parsers.
 Each lab (LabCorp, Quest, etc.) will have its own parser implementation.
 """
 
+import re
 from abc import ABC, abstractmethod
 from typing import Dict, List
-import re
 
 
 class LabTestResult:
@@ -79,7 +79,6 @@ class BaseLabParser(ABC):
         Returns:
             True if this parser recognizes the lab format
         """
-        pass
 
     @abstractmethod
     def parse(self, text: str) -> List[LabTestResult]:
@@ -92,7 +91,6 @@ class BaseLabParser(ABC):
         Returns:
             List of structured lab test results
         """
-        pass
 
     def clean_ocr_artifacts(self, text: str, aggressive: bool = False) -> str:
         """

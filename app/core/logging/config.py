@@ -11,22 +11,18 @@ import logging
 import logging.handlers
 import os
 import shutil
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 from .constants import (
-    CATEGORIES,
     CONSOLE_LOG_FORMAT,
     CONTAINER_APP_PATH,
     CONTAINER_LOG_DIR,
     DEFAULT_CATEGORY,
     DEFAULT_LOG_LEVEL,
     LOCAL_DEV_LOG_DIR,
-    LOG_FILE_BACKUP_COUNT,
     LOG_FILE_ENCODING,
-    LOG_FILE_MAX_BYTES,
     SECURITY_CATEGORY,
     VALID_LOG_LEVELS,
     LogFields,
@@ -141,16 +137,15 @@ def _get_rotation_method() -> str:
     if method == "auto":
         # Auto-detect: prefer logrotate if available, otherwise use Python
         return "logrotate" if _is_logrotate_available() else "python"
-    elif method in ["logrotate", "python"]:
+    if method in ["logrotate", "python"]:
         return method
-    else:
-        # Use stderr for warnings during logging setup to avoid circular dependency
-        import sys
+    # Use stderr for warnings during logging setup to avoid circular dependency
+    import sys
 
-        sys.stderr.write(
-            f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'\n"
-        )
-        return "logrotate" if _is_logrotate_available() else "python"
+    sys.stderr.write(
+        f"WARNING: Invalid LOG_ROTATION_METHOD '{method}', defaulting to 'auto'\n"
+    )
+    return "logrotate" if _is_logrotate_available() else "python"
 
 
 class ConsoleFormatterWithRequestID(logging.Formatter):
@@ -251,7 +246,7 @@ class LoggingConfig:
     def __init__(self):
         # Determine log directory: Windows EXE -> AppData, Container -> /app/logs, Dev -> ./logs
         try:
-            from app.core.platform.windows_config import is_windows_exe, get_logs_path
+            from app.core.platform.windows_config import get_logs_path, is_windows_exe
 
             if is_windows_exe():
                 # Windows EXE mode - use AppData path
@@ -358,9 +353,6 @@ class LoggingConfig:
         logging.getLogger("pdfminer").setLevel(logging.WARNING)
         logging.getLogger("PIL").setLevel(logging.WARNING)
         logging.getLogger("pytesseract").setLevel(logging.WARNING)
-
-        # Create formatters
-        json_formatter = MedicalRecordsJSONFormatter()
 
         # Enhanced console formatter with request ID support for docker logs
         console_formatter = ConsoleFormatterWithRequestID(CONSOLE_LOG_FORMAT)

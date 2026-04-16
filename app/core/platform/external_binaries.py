@@ -9,6 +9,7 @@ import os
 import sys
 from pathlib import Path
 from typing import Optional
+
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.platform.windows_config import is_windows_exe
@@ -62,23 +63,21 @@ def get_poppler_path() -> Optional[Path]:
                 },
             )
             return poppler_bin
-        else:
-            logger.warning(
-                f"Poppler not found at expected path: {poppler_bin}",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "poppler_not_found",
-                    "expected_path": str(poppler_bin),
-                },
-            )
-            return None
-    else:
-        # Development mode - return None (will use system PATH)
-        logger.debug(
-            "Development mode - using system Poppler from PATH",
-            extra={LogFields.CATEGORY: "app", LogFields.EVENT: "poppler_system_path"},
+        logger.warning(
+            f"Poppler not found at expected path: {poppler_bin}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "poppler_not_found",
+                "expected_path": str(poppler_bin),
+            },
         )
         return None
+    # Development mode - return None (will use system PATH)
+    logger.debug(
+        "Development mode - using system Poppler from PATH",
+        extra={LogFields.CATEGORY: "app", LogFields.EVENT: "poppler_system_path"},
+    )
+    return None
 
 
 def get_tesseract_path() -> Optional[Path]:
@@ -127,23 +126,21 @@ def get_tesseract_path() -> Optional[Path]:
                 },
             )
             return tesseract_exe
-        else:
-            logger.warning(
-                f"Tesseract not found at expected path: {tesseract_exe}",
-                extra={
-                    LogFields.CATEGORY: "app",
-                    LogFields.EVENT: "tesseract_not_found",
-                    "expected_path": str(tesseract_exe),
-                },
-            )
-            return None
-    else:
-        # Development mode - return None (will use system PATH)
-        logger.debug(
-            "Development mode - using system Tesseract from PATH",
-            extra={LogFields.CATEGORY: "app", LogFields.EVENT: "tesseract_system_path"},
+        logger.warning(
+            f"Tesseract not found at expected path: {tesseract_exe}",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "tesseract_not_found",
+                "expected_path": str(tesseract_exe),
+            },
         )
         return None
+    # Development mode - return None (will use system PATH)
+    logger.debug(
+        "Development mode - using system Tesseract from PATH",
+        extra={LogFields.CATEGORY: "app", LogFields.EVENT: "tesseract_system_path"},
+    )
+    return None
 
 
 def get_tessdata_path() -> Optional[Path]:
@@ -174,21 +171,18 @@ def get_tessdata_path() -> Optional[Path]:
                     },
                 )
                 return tessdata_dir
-            else:
-                logger.warning(
-                    f"Tessdata not found at expected path: {tessdata_dir}",
-                    extra={
-                        LogFields.CATEGORY: "app",
-                        LogFields.EVENT: "tessdata_not_found",
-                        "expected_path": str(tessdata_dir),
-                    },
-                )
-                return None
-        else:
+            logger.warning(
+                f"Tessdata not found at expected path: {tessdata_dir}",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "tessdata_not_found",
+                    "expected_path": str(tessdata_dir),
+                },
+            )
             return None
-    else:
-        # Development mode - return None (will use system tessdata)
         return None
+    # Development mode - return None (will use system tessdata)
+    return None
 
 
 def verify_external_binaries() -> dict:

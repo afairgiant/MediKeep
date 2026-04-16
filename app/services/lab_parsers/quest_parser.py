@@ -5,8 +5,10 @@ Handles Quest Diagnostics lab result format.
 
 import re
 from typing import List, Optional
-from .base_parser import BaseLabParser, LabTestResult
+
 from app.core.logging.config import get_logger
+
+from .base_parser import BaseLabParser, LabTestResult
 
 logger = get_logger(__name__, "app")
 

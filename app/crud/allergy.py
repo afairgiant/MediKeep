@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
@@ -76,7 +76,7 @@ class CRUDAllergy(CRUDBase[Allergy, AllergyCreate, AllergyUpdate], TagFilterMixi
         Returns:
             List of critical allergies ordered by severity (life-threatening first)
         """
-        from sqlalchemy import or_, case
+        from sqlalchemy import case, or_
 
         # Create a case statement to order by severity priority
         severity_order = case(

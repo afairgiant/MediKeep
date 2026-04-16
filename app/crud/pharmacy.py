@@ -199,7 +199,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        elif city:
+        if city:
             return self.query(
                 db=db,
                 filters=filters,
@@ -207,7 +207,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        elif state:
+        if state:
             return self.query(
                 db=db,
                 filters=filters,
@@ -215,16 +215,15 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        elif zip_code:
+        if zip_code:
             return self.query(
                 db=db,
                 filters={"zip_code": zip_code},
                 skip=skip,
                 limit=limit,
             )
-        else:
-            # No filters provided, return all with pagination
-            return self.get_multi(db, skip=skip, limit=limit)
+        # No filters provided, return all with pagination
+        return self.get_multi(db, skip=skip, limit=limit)
 
     def get_by_store_number(
         self, db: Session, *, brand: str, store_number: str
@@ -465,8 +464,6 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         Example:
             popular = pharmacy_crud.get_most_referenced(db, limit=5)
         """
-        from sqlalchemy import func
-
         from app.models.models import Medication
 
         return (
@@ -483,7 +480,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
         db: Session,
         *,
         zip_code: str,
-        radius_miles: int = 10,
+        radius_miles: int = 10,  # pylint: disable=unused-argument
         skip: int = 0,
         limit: int = 20
     ) -> List[PharmacyModel]:
@@ -560,7 +557,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        elif brand:
+        if brand:
             return self.query(
                 db=db,
                 filters=filters,
@@ -568,7 +565,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        elif city:
+        if city:
             return self.query(
                 db=db,
                 filters=filters,
@@ -576,7 +573,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        elif state:
+        if state:
             return self.query(
                 db=db,
                 filters=filters,
@@ -584,7 +581,7 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        elif filters:
+        if filters:
             # Only exact filters provided, use query with filters
             return self.query(
                 db=db,
@@ -592,9 +589,8 @@ class CRUDPharmacy(CRUDBase[PharmacyModel, PharmacyCreate, PharmacyUpdate]):
                 skip=skip,
                 limit=limit,
             )
-        else:
-            # No filters provided, return all with pagination
-            return self.get_multi(db, skip=skip, limit=limit)
+        # No filters provided, return all with pagination
+        return self.get_multi(db, skip=skip, limit=limit)
 
 
 # Create the pharmacy CRUD instance

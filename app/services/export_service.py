@@ -19,13 +19,11 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.logging.config import get_logger
-from app.services.report_translations import get_translator
 from app.models.models import (
     Allergy,
     Condition,
     EmergencyContact,
     Encounter,
-    FamilyCondition,
     FamilyMember,
     Immunization,
     Injury,
@@ -37,11 +35,11 @@ from app.models.models import (
     Practitioner,
     Procedure,
     Symptom,
-    SymptomOccurrence,
     Treatment,
     User,
     Vitals,
 )
+from app.services.report_translations import get_translator
 
 logger = get_logger(__name__, "app")
 
@@ -461,7 +459,6 @@ class ExportService:
         include_files: bool = False,
     ) -> List[Dict[str, Any]]:
         """Export lab results data."""
-        from app.models.models import LabResultFile
 
         query = (
             self.db.query(LabResult)
@@ -963,7 +960,7 @@ class ExportService:
         ]
 
     def _export_practitioners(
-        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+        self, patient: Patient, _start_date: Optional[date], _end_date: Optional[date]
     ) -> List[Dict[str, Any]]:
         """Export practitioners related to a patient's care."""
         # Get practitioners that are related to this patient through various associations
@@ -1035,7 +1032,7 @@ class ExportService:
         ]
 
     def _export_pharmacies(
-        self, patient: Patient, start_date: Optional[date], end_date: Optional[date]
+        self, patient: Patient, _start_date: Optional[date], _end_date: Optional[date]
     ) -> List[Dict[str, Any]]:
         """Export pharmacies related to a patient's medications."""
         # Get pharmacies that are related to this patient through medications
@@ -1612,7 +1609,7 @@ class ExportService:
             str_value = str(value)
             if "T" in str_value:
                 return str_value.split("T")[0]
-            elif len(str_value) > 10 and ":" in str_value:
+            if len(str_value) > 10 and ":" in str_value:
                 return str_value.split(" ")[0]
 
         # Format boolean values
@@ -1627,7 +1624,7 @@ class ExportService:
         ]:
             if isinstance(value, bool):
                 return "Yes" if value else "No"
-            elif str(value).lower() in ["true", "false"]:
+            if str(value).lower() in ["true", "false"]:
                 return "Yes" if str(value).lower() == "true" else "No"
 
         # Format tags (list of strings)
@@ -1679,7 +1676,9 @@ class ExportService:
             writer.writerow(clean_record)
 
     async def convert_to_pdf(
-        self, export_data: Dict[str, Any], include_files: bool = False
+        self,
+        export_data: Dict[str, Any],
+        include_files: bool = False,  # pylint: disable=unused-argument
     ) -> bytes:
         """Convert export data to PDF format with translated labels."""
         try:
@@ -1901,11 +1900,6 @@ class ExportService:
         self, story, section_data, section_name, styles, translator=None
     ):
         """Add a section using card-based format instead of tables for better readability."""
-        from reportlab.lib import colors
-        from reportlab.lib.units import inch
-        from reportlab.platypus import Paragraph, Table, TableStyle
-        from reportlab.lib.styles import ParagraphStyle
-
         t = translator
 
         # Create styles for wrapping text in table cells
@@ -1966,7 +1960,7 @@ class ExportService:
                 str_value = str(value)
                 if "T" in str_value:
                     return str_value.split("T")[0]
-                elif len(str_value) > 10 and ":" in str_value:
+                if len(str_value) > 10 and ":" in str_value:
                     return str_value.split(" ")[0]
                 return str_value
 
@@ -1984,7 +1978,7 @@ class ExportService:
             ]:
                 if isinstance(value, bool):
                     return "Yes" if value else "No"
-                elif str_value.lower() in ["true", "false"]:
+                if str_value.lower() in ["true", "false"]:
                     return "Yes" if str_value.lower() == "true" else "No"
 
             # Format rating

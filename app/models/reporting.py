@@ -1,11 +1,11 @@
 from sqlalchemy import (
+    JSON,
     Boolean,
     Column,
     DateTime,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -62,12 +62,12 @@ class ReportTemplate(Base):
         Index(
             "idx_report_template_is_active",
             "is_active",
-            postgresql_where=(column("is_active") == True),
+            postgresql_where=(column("is_active").is_(True)),
         ),
         Index(
             "idx_report_template_shared_family",
             "shared_with_family",
-            postgresql_where=(column("shared_with_family") == True),
+            postgresql_where=(column("shared_with_family").is_(True)),
         ),
         Index(
             "idx_report_template_selected_records",

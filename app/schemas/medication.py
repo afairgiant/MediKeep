@@ -1,12 +1,12 @@
 from datetime import date
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import (
     BaseModel,
     ConfigDict,
-    model_validator,
-    field_validator,
     ValidationInfo,
+    field_validator,
+    model_validator,
 )
 
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
@@ -365,10 +365,12 @@ class MedicationResponseWithNested(MedicationBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+# Late imports to resolve forward references; must come after class definitions.
+# pylint: disable=wrong-import-position
 from app.schemas.pharmacy import Pharmacy
-
-# Import here to avoid circular imports
 from app.schemas.practitioner import Practitioner
+
+# pylint: enable=wrong-import-position
 
 # Rebuild the model to resolve forward references
 MedicationResponseWithNested.model_rebuild()

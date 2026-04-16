@@ -8,32 +8,32 @@ and searching patients across the system.
 from datetime import date
 
 from fastapi import APIRouter, Depends, Query, Request
-from sqlalchemy import or_, func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.api.activity_logging import log_create
+from app.api.deps import (
+    ConflictException,
+    NotFoundException,
+    get_current_admin_user,
+)
 from app.core.database.database import get_db
+from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
     log_security_event,
 )
-from app.core.http.error_handling import handle_database_errors
-from app.api.deps import (
-    get_current_admin_user,
-    NotFoundException,
-    ConflictException,
-)
 from app.crud.user import user as user_crud
-from app.models.activity_log import ActionType, EntityType, ActivityLog
-from app.models.models import User, Patient
-from app.schemas.user import UserCreate
+from app.models.activity_log import ActionType, ActivityLog, EntityType
+from app.models.models import Patient, User
 from app.schemas.admin import (
-    AdminUserCreateRequest,
-    AdminPatientSearchResult,
     AdminPatientSearchResponse,
+    AdminPatientSearchResult,
+    AdminUserCreateRequest,
 )
+from app.schemas.user import UserCreate
 from app.services.patient_management import PatientManagementService
 
 router = APIRouter()

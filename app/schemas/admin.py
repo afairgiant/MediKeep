@@ -2,10 +2,10 @@
 Admin-specific schemas for user management and patient linking.
 """
 
-from typing import Optional
 from datetime import date
+from typing import Optional
 
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 ALLOWED_ROLES = ("admin", "user", "guest", "doctor", "nurse", "staff")
 

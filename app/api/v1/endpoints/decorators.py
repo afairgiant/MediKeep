@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, cast
 
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
@@ -63,7 +63,7 @@ def crud_endpoint(
                     entity_type,
                     entity_name,
                 )
-            elif operation == "read":
+            if operation == "read":
                 return _handle_read_operation(
                     func,
                     args,
@@ -74,7 +74,7 @@ def crud_endpoint(
                     load_relations,
                     verify_ownership,
                 )
-            elif operation == "update":
+            if operation == "update":
                 return _handle_update_operation(
                     func,
                     args,
@@ -87,7 +87,7 @@ def crud_endpoint(
                     verify_ownership,
                     current_user_patient_id,
                 )
-            elif operation == "delete":
+            if operation == "delete":
                 return _handle_delete_operation(
                     func,
                     args,
@@ -100,13 +100,12 @@ def crud_endpoint(
                     verify_ownership,
                     current_user_patient_id,
                 )
-            elif operation == "list":
+            if operation == "list":
                 return _handle_list_operation(
                     func, args, kwargs, db, current_user_patient_id, entity_name
                 )
-            else:
-                # For custom operations, just call the function
-                return func(*args, **kwargs)
+            # For custom operations, just call the function
+            return func(*args, **kwargs)
 
         return wrapper
 

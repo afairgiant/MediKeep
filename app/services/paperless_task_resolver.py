@@ -6,7 +6,9 @@ Replaces the complex task resolution logic with a single, clear method.
 
 import re
 from typing import Optional, Tuple
+
 import aiohttp
+
 from app.core.logging.config import get_logger
 from app.services.paperless_auth import PaperlessAuth
 
@@ -55,24 +57,20 @@ class PaperlessTaskResolver:
                             f"Task {task_uuid} resolved to document {document_id}"
                         )
                         return "success", document_id
-                    else:
-                        logger.warning(
-                            f"Task {task_uuid} claims success but document {document_id} doesn't exist"
-                        )
-                        return "failed", None
-                else:
                     logger.warning(
-                        f"Task {task_uuid} successful but no document ID found"
+                        f"Task {task_uuid} claims success but document {document_id} doesn't exist"
                     )
                     return "failed", None
+                logger.warning(f"Task {task_uuid} successful but no document ID found")
+                return "failed", None
 
-            elif status in ["failure", "failed"]:
+            if status in ["failure", "failed"]:
                 logger.debug(f"Task {task_uuid} failed")
                 return "failed", None
 
-            else:  # pending, started, retry, etc.
-                logger.debug(f"Task {task_uuid} still processing")
-                return "processing", None
+            # pending, started, retry, etc.
+            logger.debug(f"Task {task_uuid} still processing")
+            return "processing", None
 
         except Exception as e:
             logger.error(f"Error resolving task {task_uuid}: {e}")
@@ -97,10 +95,10 @@ class PaperlessTaskResolver:
                     # Handle different response formats
                     if isinstance(data, list) and data:
                         return data[0]
-                    elif isinstance(data, dict):
+                    if isinstance(data, dict):
                         if "results" in data and data["results"]:
                             return data["results"][0]
-                        elif "status" in data:  # Direct task object
+                        if "status" in data:  # Direct task object
                             return data
 
                     return None
