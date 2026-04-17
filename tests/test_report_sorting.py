@@ -380,10 +380,10 @@ class TestInjurySorting:
 
 class TestVitalsSorting:
 
-    def test_sorted_by_measurement_date_desc(self, gen):
+    def test_sorted_by_recorded_date_desc(self, gen):
         records = [
-            {"measurement_date": "2021-01-15", "heart_rate": 60},
-            {"measurement_date": "2024-06-01", "heart_rate": 75},
+            {"recorded_date": "2021-01-15", "heart_rate": 60},
+            {"recorded_date": "2024-06-01", "heart_rate": 75},
         ]
         story = gen._format_vitals(records)
         text = _extract_text(story)
@@ -391,10 +391,10 @@ class TestVitalsSorting:
         pos_2021 = text.find("01/15/2021")
         assert pos_2024 < pos_2021
 
-    def test_recorded_date_fallback(self, gen):
+    def test_date_key_fallback(self, gen):
         records = [
-            {"recorded_date": "2021-01-15", "heart_rate": 60},
-            {"recorded_date": "2024-06-01", "heart_rate": 75},
+            {"date": "2021-01-15", "heart_rate": 60},
+            {"date": "2024-06-01", "heart_rate": 75},
         ]
         story = gen._format_vitals(records)
         text = _extract_text(story)

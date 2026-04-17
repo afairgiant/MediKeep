@@ -1112,10 +1112,10 @@ class CustomReportPDFGenerator:
         t = self.translator
         unit_labels = UnitConverter.get_unit_labels(self.unit_system)
 
-        records = self._sort_records(records, "measurement_date")
+        records = self._sort_records(records, "recorded_date")
         for i, record in enumerate(records, 1):
             # Header: date of recording
-            rec_date = record.get("measurement_date") or record.get("recorded_date") or record.get("date")
+            rec_date = record.get("recorded_date") or record.get("date")
             date_str = (
                 self._format_date(rec_date) if rec_date else f"{t.field('record')} {i}"
             )
