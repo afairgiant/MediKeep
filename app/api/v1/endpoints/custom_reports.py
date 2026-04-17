@@ -23,6 +23,7 @@ from app.schemas.custom_reports import (
     CustomReportRequest,
     DataSummaryResponse,
     ReportTemplate,
+    ReportTemplateResponse,
     TemplateActionResponse,
 )
 from app.schemas.trend_charts import TrendChartSelection
