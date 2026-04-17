@@ -6,10 +6,11 @@ detect and parse different lab formats (LabCorp, Quest, etc.).
 """
 
 from typing import List, Optional
+
 from .base_parser import BaseLabParser, LabTestResult
+from .epic_mychart_parser import EpicMyChartParser
 from .labcorp_parser_v2 import LabCorpParserV2
 from .quest_parser import QuestParser
-from .epic_mychart_parser import EpicMyChartParser
 
 
 class LabParserRegistry:

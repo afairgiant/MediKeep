@@ -5,14 +5,15 @@ Provides bulk operations like delete, update status, and batch modifications
 across multiple records of the same model type.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.models.models import User
 from app.api.v1.admin.models import MODEL_REGISTRY
+from app.models.models import User
 
 router = APIRouter()
 

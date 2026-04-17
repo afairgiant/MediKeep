@@ -3,21 +3,22 @@ User Deletion Service
 Handles safe deletion of users and all associated data with proper transaction management.
 """
 
-from typing import Dict, Any, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from typing import Any, Dict, Optional
 
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
+
+from app.core.constants import get_admin_roles_filter, is_admin_role
 from app.core.logging.config import get_logger
-from app.core.constants import is_admin_role, get_admin_roles_filter
+from app.models.activity_log import ActivityLog
 from app.models.models import (
-    User,
-    Patient,
-    UserPreferences,
-    PatientShare,
     FamilyHistoryShare,
     Invitation,
+    Patient,
+    PatientShare,
+    User,
+    UserPreferences,
 )
-from app.models.activity_log import ActivityLog
 
 logger = get_logger(__name__, "app")
 

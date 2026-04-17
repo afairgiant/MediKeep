@@ -5,10 +5,10 @@ This module provides reusable query patterns and helper functions
 that can be used across different CRUD classes to reduce code duplication.
 """
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Type, TypeVar
 
-from sqlalchemy import and_, asc, desc, or_
+from sqlalchemy import asc, desc
 from sqlalchemy.orm import Query, Session
 from sqlalchemy.sql.functions import count
 

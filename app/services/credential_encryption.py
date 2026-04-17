@@ -22,8 +22,6 @@ logger = get_logger(__name__)
 class SecurityError(Exception):
     """Exception raised for security-related errors."""
 
-    pass
-
 
 class CredentialEncryption:
     """Secure encryption/decryption of paperless API tokens."""

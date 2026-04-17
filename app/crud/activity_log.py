@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import and_, desc, func
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import desc, func
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app.models.activity_log import ActionType, ActivityLog, EntityType
+from app.models.activity_log import ActivityLog
 
 
 class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
@@ -282,7 +282,7 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
                 .limit(limit)
                 .all()
             )
-        elif filters:
+        if filters:
             # Use the new query method for simple field filters
             return self.query(
                 db=db,
@@ -292,9 +292,8 @@ class CRUDActivityLog(CRUDBase[ActivityLog, Dict[str, Any], Dict[str, Any]]):
                 order_by="timestamp",
                 order_desc=True,
             )
-        else:
-            # No filters, return recent activities
-            return self.get_multi(db, skip=skip, limit=limit)
+        # No filters, return recent activities
+        return self.get_multi(db, skip=skip, limit=limit)
 
     def get_activity_summary(
         self, db: Session, *, user_id: Optional[int] = None, days: int = 30

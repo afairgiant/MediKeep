@@ -5,14 +5,14 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import handle_database_errors
-from app.core.logging.config import get_logger
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
     handle_not_found,
     handle_update_with_logging,
 )
+from app.core.http.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
 from app.crud.practice import practice
 from app.models.activity_log import EntityType
 from app.models.models import Practitioner as PractitionerModel

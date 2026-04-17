@@ -1,11 +1,11 @@
 from sqlalchemy import (
+    JSON,
     Boolean,
     Column,
     DateTime,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -157,6 +157,6 @@ class FamilyHistoryShare(Base):
             "family_member_id",
             "shared_with_user_id",
             unique=True,
-            postgresql_where=(column("is_active") == True),
+            postgresql_where=(column("is_active").is_(True)),
         ),
     )

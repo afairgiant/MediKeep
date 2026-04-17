@@ -259,10 +259,7 @@ def remove_my_access_to_family_history(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No active sharing found for this family history record",
             )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg
-            )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg)
     except Exception as e:
         log_endpoint_error(
             logger,

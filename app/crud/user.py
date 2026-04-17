@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -364,11 +365,8 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 sso_provider="google"
             )
         """
-        from datetime import datetime
-
         # Generate a random password hash for SSO users (they won't use it)
         import secrets
-        from app.core.utils.security import get_password_hash
 
         random_password = secrets.token_urlsafe(32)
         hashed_password = get_password_hash(random_password)

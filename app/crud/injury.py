@@ -13,19 +13,19 @@ from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import (
     Injury,
-    InjuryMedication,
     InjuryCondition,
-    InjuryTreatment,
+    InjuryMedication,
     InjuryProcedure,
+    InjuryTreatment,
 )
 from app.schemas.injury import (
+    InjuryConditionCreate,
     InjuryCreate,
-    InjuryUpdate,
     InjuryMedicationCreate,
     InjuryMedicationUpdate,
-    InjuryConditionCreate,
-    InjuryTreatmentCreate,
     InjuryProcedureCreate,
+    InjuryTreatmentCreate,
+    InjuryUpdate,
 )
 
 

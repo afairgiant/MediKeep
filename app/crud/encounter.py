@@ -1,16 +1,16 @@
 from typing import List, Optional
 
 from sqlalchemy import and_
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import Encounter, EncounterLabResult, LabResult
 from app.schemas.encounter import (
     EncounterCreate,
-    EncounterUpdate,
     EncounterLabResultCreate,
     EncounterLabResultUpdate,
+    EncounterUpdate,
 )
 
 

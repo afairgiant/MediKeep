@@ -3,20 +3,18 @@ Patient Photo Service for managing profile photos.
 Handles upload, processing, storage, and deletion of patient photos.
 """
 
-import os
-import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple
-from datetime import datetime
 
-from fastapi import UploadFile, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import HTTPException, UploadFile
 from PIL import Image
 from PIL.ExifTags import TAGS
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.models.models import PatientPhoto, Patient
+from app.models.models import Patient, PatientPhoto
 from app.schemas.patient_photo import PatientPhotoCreate, PatientPhotoResponse
 
 logger = get_logger(__name__, "app")

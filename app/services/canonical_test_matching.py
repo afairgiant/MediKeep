@@ -8,12 +8,12 @@ to canonical standardized test names from the test library.
 This ensures consistency across lab results from different sources.
 """
 
-from typing import List, Dict, Any, Optional
 import re
+from typing import Any, Dict, List, Optional
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
-from app.services.test_library_loader import get_tests, get_all_canonical_names
+from app.services.test_library_loader import get_all_canonical_names, get_tests
 
 logger = get_logger(__name__, "app")
 

@@ -1,4 +1,4 @@
-from typing import Optional, NamedTuple
+from typing import NamedTuple, Optional
 
 from fastapi import Depends, Query, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -6,24 +6,24 @@ from jose import JWTError, jwt
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.api.v1.endpoints.system import get_client_ip
 from app.core.config import settings
 from app.core.database.database import get_db
-from app.core.utils.cookie_auth import get_token_from_cookie
-from app.core.logging.config import get_logger, log_security_event
 from app.core.http.error_handling import (
-    MedicalRecordsAPIException,
-    ValidationException,
-    UnauthorizedException,
-    ForbiddenException,
-    NotFoundException,
+    BusinessLogicException,
     ConflictException,
     DatabaseException,
-    BusinessLogicException,
+    ForbiddenException,
+    MedicalRecordsAPIException,
+    NotFoundException,
     ServiceUnavailableException,
+    UnauthorizedException,
+    ValidationException,
 )
 from app.core.http.response_models import ExceptionCode
-from app.api.v1.endpoints.system import get_client_ip
+from app.core.logging.config import get_logger, log_security_event
 from app.core.logging.constants import LogFields, sanitize_log_input
+from app.core.utils.cookie_auth import get_token_from_cookie
 from app.crud.user import user
 from app.models.models import User
 
@@ -520,7 +520,7 @@ def get_current_user_patient_id(
     Raises:
         NotFoundException: If no patient records found or active patient not accessible
     """
-    from app.models.models import User, Patient
+    from app.models.models import Patient
 
     # Get user with active patient ID (multi-patient system)
     user = db.query(User).filter(User.id == current_user_id).first()
@@ -721,9 +721,8 @@ def get_accessible_patient_id(
             raise ForbiddenException(message="Access denied to patient", request=None)
 
         return patient_id
-    else:
-        # Fall back to user's own patient ID
-        return get_current_user_patient_id(db, current_user.id)
+    # Fall back to user's own patient ID
+    return get_current_user_patient_id(db, current_user.id)
 
 
 # Export all dependencies and exceptions for convenient importing

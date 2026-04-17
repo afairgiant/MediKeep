@@ -20,8 +20,8 @@ try:
 except ImportError:
     TRAY_AVAILABLE = False
 
-from app.core.logging.config import get_logger
 from app.core.config import settings
+from app.core.logging.config import get_logger
 
 logger = get_logger(__name__, "app")
 
@@ -120,12 +120,12 @@ class MediKeepTrayApp:
 
         return image
 
-    def open_browser(self, icon=None, item=None):
+    def open_browser(self, _icon=None, _item=None):
         """Open the MediKeep web interface in the default browser."""
         logger.info(f"Opening MediKeep in browser: {self.server_url}")
         webbrowser.open(self.server_url)
 
-    def show_logs_folder(self, icon=None, item=None):
+    def show_logs_folder(self, _icon=None, _item=None):
         """Open the logs folder in Windows Explorer."""
         from app.core.platform.windows_config import get_logs_path
 
@@ -136,7 +136,7 @@ class MediKeepTrayApp:
         else:
             logger.warning("Logs folder not found")
 
-    def show_data_folder(self, icon=None, item=None):
+    def show_data_folder(self, _icon=None, _item=None):
         """Open the data folder in Windows Explorer."""
         from app.core.platform.windows_config import get_windows_appdata_path
 
@@ -147,7 +147,7 @@ class MediKeepTrayApp:
         else:
             logger.warning("Data folder not found")
 
-    def quit_app(self, icon=None, item=None):
+    def quit_app(self, _icon=None, _item=None):
         """
         Initiate graceful application shutdown.
 

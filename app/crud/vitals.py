@@ -8,7 +8,6 @@ from app.crud.base import CRUDBase
 from app.models.models import Vitals
 from app.schemas.vitals import VitalsCreate, VitalsUpdate
 
-
 # Valid vital types for filtering
 VALID_VITAL_TYPES = {
     "blood_pressure",
@@ -297,12 +296,6 @@ class CRUDVitals(CRUDBase[Vitals, VitalsCreate, VitalsUpdate]):
         temperature_avg = (
             db.query(func.avg(Vitals.temperature))
             .filter(Vitals.patient_id == patient_id, Vitals.temperature.isnot(None))
-            .scalar()
-        )
-
-        weight_avg = (
-            db.query(func.avg(Vitals.weight))
-            .filter(Vitals.patient_id == patient_id, Vitals.weight.isnot(None))
             .scalar()
         )
 

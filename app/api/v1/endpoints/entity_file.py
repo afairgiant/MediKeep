@@ -17,60 +17,61 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.api.v1.endpoints.utils import handle_not_found, verify_patient_ownership
-from app.core.http.error_handling import NotFoundException, MedicalRecordsAPIException
+from app.core.http.error_handling import MedicalRecordsAPIException, NotFoundException
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
+    log_data_access,
+    log_debug,
     log_endpoint_access,
     log_endpoint_error,
-    log_data_access,
-    log_security_event,
-    log_debug,
 )
+from app.core.utils.datetime_utils import get_utc_now
 from app.crud import (
-    lab_result,
-    insurance,
-    encounter,
-    procedure,
-    medication,
-    immunization,
     allergy,
     condition,
-    treatment,
-    symptom_parent,
+    encounter,
+    immunization,
     injury,
+    insurance,
+    lab_result,
+    medication,
+    procedure,
+    symptom_parent,
+    treatment,
 )
+from app.crud.user_preferences import user_preferences
 from app.models.activity_log import EntityType as ActivityEntityType
 from app.models.models import EntityFile, User
 from app.schemas.entity_file import (
-    EntityFileResponse,
-    EntityType,
     EntityFileLinkPaperlessRequest,
     EntityFileLinkPapraRequest,
+    EntityFileResponse,
     FileBatchCountRequest,
     FileBatchCountResponse,
     FileOperationResult,
-    FileUploadRequest,
 )
 from app.services.generic_entity_file_service import GenericEntityFileService
 from app.services.paperless_client import (
-    create_paperless_client,
     PaperlessClientError,
+)
+from app.services.paperless_client import (
     PaperlessConnectionError as NewPaperlessConnectionError,
 )
+from app.services.paperless_client import (
+    create_paperless_client,
+)
 from app.services.papra_client import (
-    create_papra_client,
     PapraClientError,
     PapraConnectionError,
+    create_papra_client,
 )
-from app.crud.user_preferences import user_preferences
-from app.core.utils.datetime_utils import get_utc_now
 
 router = APIRouter()
 
@@ -1108,8 +1109,9 @@ async def download_file(
             )
 
             # Paperless file - return as StreamingResponse with proper binary handling
-            from fastapi.responses import Response
             import mimetypes
+
+            from fastapi.responses import Response
 
             # Ensure proper content type - use corrected filename for guessing
             if not content_type or content_type == "application/octet-stream":
@@ -1147,11 +1149,8 @@ async def download_file(
                 media_type=content_type or "application/octet-stream",
                 headers=headers,
             )
-        else:
-            # Local file - return as FileResponse
-            return FileResponse(
-                path=file_info, filename=filename, media_type=content_type
-            )
+        # Local file - return as FileResponse
+        return FileResponse(path=file_info, filename=filename, media_type=content_type)
 
     except HTTPException:
         raise
@@ -1239,8 +1238,9 @@ async def view_file(
             )
 
             # Paperless file - return as StreamingResponse with proper binary handling
-            from fastapi.responses import Response
             import mimetypes
+
+            from fastapi.responses import Response
 
             # Ensure proper content type - use corrected filename for guessing
             if not content_type or content_type == "application/octet-stream":
@@ -1280,20 +1280,19 @@ async def view_file(
                 media_type=content_type or "application/octet-stream",
                 headers=headers,
             )
-        else:
-            # Local file - return as FileResponse with inline disposition and security headers
-            headers = {
-                "Content-Disposition": f"inline; filename={filename}",
-                "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
-                "X-Frame-Options": "SAMEORIGIN",  # Prevent embedding in frames from other domains
-            }
+        # Local file - return as FileResponse with inline disposition and security headers
+        headers = {
+            "Content-Disposition": f"inline; filename={filename}",
+            "X-Content-Type-Options": "nosniff",  # Prevent MIME sniffing
+            "X-Frame-Options": "SAMEORIGIN",  # Prevent embedding in frames from other domains
+        }
 
-            return FileResponse(
-                path=file_info,
-                filename=filename,
-                media_type=content_type,
-                headers=headers,
-            )
+        return FileResponse(
+            path=file_info,
+            filename=filename,
+            media_type=content_type,
+            headers=headers,
+        )
 
     except HTTPException:
         raise

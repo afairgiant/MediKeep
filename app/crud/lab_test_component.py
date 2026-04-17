@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session, joinedload
 from app.crud.base import CRUDBase
 from app.models.models import LabTestComponent
 from app.schemas.lab_test_component import (
+    LabTestComponentBulkCreate,
     LabTestComponentCreate,
     LabTestComponentUpdate,
-    LabTestComponentBulkCreate,
 )
 
 
@@ -202,7 +202,6 @@ class CRUDLabTestComponent(
         Date filtering prefers lab_result.completed_date, falls back to created_at.
         """
         from app.models.models import LabResult
-        from sqlalchemy import func
 
         query = (
             db.query(self.model)

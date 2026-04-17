@@ -4,10 +4,6 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import handle_database_errors
-from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
-from app.core.logging.helpers import log_data_access
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -15,6 +11,9 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
+from app.core.http.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_data_access
 from app.crud.immunization import immunization
 from app.models.activity_log import EntityType
 from app.models.models import User
@@ -22,7 +21,6 @@ from app.schemas.immunization import (
     ImmunizationCreate,
     ImmunizationResponse,
     ImmunizationUpdate,
-    ImmunizationWithRelations,
 )
 
 router = APIRouter()

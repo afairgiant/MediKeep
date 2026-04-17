@@ -12,7 +12,8 @@ Usage:
 """
 
 import logging
-from typing import Optional, Any, Dict
+from typing import Any, Optional
+
 from fastapi import Request
 
 from app.core.logging.constants import LogFields

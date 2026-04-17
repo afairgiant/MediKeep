@@ -7,7 +7,7 @@ and generate user-friendly notification messages.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Callable, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields

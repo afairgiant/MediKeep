@@ -12,17 +12,17 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.deps import NotFoundException, BusinessLogicException
+from app.api.deps import BusinessLogicException, NotFoundException
+from app.api.v1.endpoints.utils import handle_create_with_logging
 from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_data_access, log_security_event
-from app.api.v1.endpoints.utils import handle_create_with_logging
 from app.crud.injury_type import injury_type
 from app.models.activity_log import EntityType
 from app.schemas.injury_type import (
     InjuryTypeCreate,
-    InjuryTypeResponse,
     InjuryTypeDropdownOption,
+    InjuryTypeResponse,
 )
 
 router = APIRouter()

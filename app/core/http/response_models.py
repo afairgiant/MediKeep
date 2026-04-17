@@ -7,7 +7,8 @@ with exception code definitions for standardized error handling.
 
 from enum import Enum
 from typing import Any, Optional
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExceptionStatus(str, Enum):

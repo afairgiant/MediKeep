@@ -6,9 +6,9 @@ activity logging code across all API endpoints.
 """
 
 from functools import wraps
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
-from fastapi import HTTPException, Request
+from fastapi import Request
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
@@ -358,7 +358,7 @@ def safe_log_activity(
 def activity_logger(
     action: str,
     entity_type: str,
-    description_field: Optional[str] = None,
+    description_field: Optional[str] = None,  # pylint: disable=unused-argument
 ):
     """
     Decorator to automatically log activities for CRUD operations.

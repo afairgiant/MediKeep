@@ -7,7 +7,7 @@ from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
@@ -505,8 +505,7 @@ def remove_my_access(
             )
 
             return {"message": "Successfully removed your access to this patient"}
-        else:
-            return {"message": "No active access found to remove"}
+        return {"message": "No active access found to remove"}
 
     except Exception as e:
         log_endpoint_error(
@@ -520,10 +519,9 @@ def remove_my_access(
 
         if "not found" in str(e).lower():
             raise HTTPException(status_code=404, detail=str(e))
-        elif "cannot remove" in str(e).lower() or "not shared" in str(e).lower():
+        if "cannot remove" in str(e).lower() or "not shared" in str(e).lower():
             raise HTTPException(status_code=400, detail=str(e))
-        else:
-            raise HTTPException(status_code=500, detail="Failed to remove access")
+        raise HTTPException(status_code=500, detail="Failed to remove access")
 
 
 @router.delete("/revoke", response_model=dict)
@@ -561,8 +559,7 @@ async def revoke_patient_share(
             )
 
             return {"message": "Patient sharing access revoked successfully"}
-        else:
-            return {"message": "No active share found to revoke"}
+        return {"message": "No active share found to revoke"}
 
     except Exception as e:
         log_endpoint_error(
@@ -577,10 +574,7 @@ async def revoke_patient_share(
 
         if "not found" in str(e).lower():
             raise HTTPException(status_code=404, detail=str(e))
-        else:
-            raise HTTPException(
-                status_code=500, detail="Failed to revoke patient sharing"
-            )
+        raise HTTPException(status_code=500, detail="Failed to revoke patient sharing")
 
 
 @router.put("/", response_model=ShareResponse)
@@ -637,8 +631,7 @@ def update_patient_share(
 
         if "not found" in str(e).lower():
             raise HTTPException(status_code=404, detail=str(e))
-        else:
-            raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/shared-with-me", response_model=None)
@@ -805,10 +798,7 @@ def get_patient_shares(
 
         if "not found" in str(e).lower():
             raise HTTPException(status_code=404, detail=str(e))
-        else:
-            raise HTTPException(
-                status_code=500, detail="Failed to retrieve patient shares"
-            )
+        raise HTTPException(status_code=500, detail="Failed to retrieve patient shares")
 
 
 @router.get("/stats/user", response_model=UserSharingStatsResponse)

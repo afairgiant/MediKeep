@@ -1,7 +1,8 @@
-from pydantic import BaseModel, ConfigDict, field_validator
-from typing import Optional
 from datetime import datetime
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class EntityType(str, Enum):

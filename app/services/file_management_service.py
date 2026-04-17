@@ -197,7 +197,7 @@ class FileManagementService:
             deleted_dirs = 0
 
             # Walk through trash directory
-            for root, dirs, files in os.walk(self.trash_dir, topdown=False):
+            for root, _dirs, files in os.walk(self.trash_dir, topdown=False):
                 root_path = Path(root)
 
                 # Check if this is a daily directory (YYYY-MM-DD format)
@@ -247,7 +247,7 @@ class FileManagementService:
 
             trash_contents = []
 
-            for root, dirs, files in os.walk(self.trash_dir):
+            for root, _dirs, files in os.walk(self.trash_dir):
                 for file in files:
                     if file.endswith(".meta"):
                         continue  # Skip metadata files

@@ -7,17 +7,18 @@ and user activity feeds.
 """
 
 import contextvars
-from typing import Optional, Dict, Any, Type
-from sqlalchemy import event
 from datetime import datetime
+from typing import Any, Dict, Optional, Type
 
-from app.models.activity_log import (
-    ActivityLog,
-    EntityType,
-    ActionType,
-    ActivityPriority,
-)
+from sqlalchemy import event
+
 from app.core.logging.config import get_logger
+from app.models.activity_log import (
+    ActionType,
+    ActivityLog,
+    ActivityPriority,
+    EntityType,
+)
 
 # Context variables for tracking user context across requests
 current_user_id_var: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar(
@@ -65,19 +66,19 @@ class ActivityTracker:
         # Import models locally to avoid circular imports
         try:
             from app.models.models import (
-                User,
-                Patient,
-                Practitioner,
-                Medication,
+                Allergy,
+                Condition,
+                Encounter,
+                Immunization,
+                Insurance,
                 LabResult,
                 LabResultFile,
-                Condition,
-                Treatment,
-                Immunization,
-                Allergy,
+                Medication,
+                Patient,
+                Practitioner,
                 Procedure,
-                Encounter,
-                Insurance,
+                Treatment,
+                User,
             )
 
             self._entity_type_mapping = {
@@ -189,51 +190,51 @@ class ActivityTracker:
             name = f"{getattr(instance, 'first_name', '')} {getattr(instance, 'last_name', '')}".strip()
             return f"{action.title()} patient: {name or f'ID {entity_id}'}"
 
-        elif entity_type == EntityType.MEDICATION:
+        if entity_type == EntityType.MEDICATION:
             med_name = getattr(instance, "medication_name", f"ID {entity_id}")
             return f"{action.title()} medication: {med_name}"
 
-        elif entity_type == EntityType.LAB_RESULT:
+        if entity_type == EntityType.LAB_RESULT:
             test_name = getattr(instance, "test_name", f"ID {entity_id}")
             return f"{action.title()} lab result: {test_name}"
 
-        elif entity_type == EntityType.LAB_RESULT_FILE:
+        if entity_type == EntityType.LAB_RESULT_FILE:
             file_name = getattr(instance, "file_name", f"ID {entity_id}")
             return f"{action.title()} lab result file: {file_name}"
 
-        elif entity_type == EntityType.CONDITION:
+        if entity_type == EntityType.CONDITION:
             diagnosis = getattr(instance, "diagnosis", f"ID {entity_id}")
             return f"{action.title()} condition: {diagnosis}"
 
-        elif entity_type == EntityType.TREATMENT:
+        if entity_type == EntityType.TREATMENT:
             treatment_name = getattr(instance, "treatment_name", f"ID {entity_id}")
             return f"{action.title()} treatment: {treatment_name}"
 
-        elif entity_type == EntityType.IMMUNIZATION:
+        if entity_type == EntityType.IMMUNIZATION:
             vaccine_name = getattr(instance, "vaccine_name", f"ID {entity_id}")
             return f"{action.title()} immunization: {vaccine_name}"
 
-        elif entity_type == EntityType.ALLERGY:
+        if entity_type == EntityType.ALLERGY:
             allergen = getattr(instance, "allergen", f"ID {entity_id}")
             return f"{action.title()} allergy: {allergen}"
 
-        elif entity_type == EntityType.PROCEDURE:
+        if entity_type == EntityType.PROCEDURE:
             procedure_name = getattr(instance, "procedure_name", f"ID {entity_id}")
             return f"{action.title()} procedure: {procedure_name}"
 
-        elif entity_type == EntityType.ENCOUNTER:
+        if entity_type == EntityType.ENCOUNTER:
             reason = getattr(instance, "reason", f"ID {entity_id}")
             return f"{action.title()} encounter: {reason}"
 
-        elif entity_type == EntityType.USER:
+        if entity_type == EntityType.USER:
             username = getattr(instance, "username", f"ID {entity_id}")
             return f"{action.title()} user: {username}"
 
-        elif entity_type == EntityType.PRACTITIONER:
+        if entity_type == EntityType.PRACTITIONER:
             name = getattr(instance, "name", f"ID {entity_id}")
             return f"{action.title()} practitioner: {name}"
 
-        elif entity_type == EntityType.INSURANCE:
+        if entity_type == EntityType.INSURANCE:
             company_name = getattr(instance, "company_name", f"ID {entity_id}")
             return f"{action.title()} insurance: {company_name}"
 
@@ -305,35 +306,35 @@ class ActivityTracker:
 
         return metadata
 
-    def _handle_after_insert(self, mapper, connection, target) -> None:
+    def _handle_after_insert(self, _mapper, _connection, target) -> None:
         """
         Handle after_insert SQLAlchemy event.
 
         Args:
-            mapper: SQLAlchemy mapper
-            connection: Database connection
+            _mapper: SQLAlchemy mapper (required by event signature)
+            _connection: Database connection (required by event signature)
             target: The inserted instance
         """
         self._log_activity(target, ActionType.CREATED)
 
-    def _handle_after_update(self, mapper, connection, target) -> None:
+    def _handle_after_update(self, _mapper, _connection, target) -> None:
         """
         Handle after_update SQLAlchemy event.
 
         Args:
-            mapper: SQLAlchemy mapper
-            connection: Database connection
+            _mapper: SQLAlchemy mapper (required by event signature)
+            _connection: Database connection (required by event signature)
             target: The updated instance
         """
         self._log_activity(target, ActionType.UPDATED)
 
-    def _handle_after_delete(self, mapper, connection, target) -> None:
+    def _handle_after_delete(self, _mapper, _connection, target) -> None:
         """
         Handle after_delete SQLAlchemy event.
 
         Args:
-            mapper: SQLAlchemy mapper
-            connection: Database connection
+            _mapper: SQLAlchemy mapper (required by event signature)
+            _connection: Database connection (required by event signature)
             target: The deleted instance
         """
         self._log_activity(target, ActionType.DELETED)

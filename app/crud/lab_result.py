@@ -1,17 +1,16 @@
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import LabResult, LabResultCondition
 from app.schemas.lab_result import (
-    LabResultCreate,
-    LabResultUpdate,
     LabResultConditionCreate,
     LabResultConditionUpdate,
+    LabResultCreate,
+    LabResultUpdate,
 )
 
 

@@ -52,7 +52,7 @@ class CRUDInjuryType(CRUDBase[InjuryType, InjuryTypeCreate, InjuryTypeUpdate]):
         """
         return (
             db.query(self.model)
-            .filter(self.model.is_system == True)
+            .filter(self.model.is_system.is_(True))
             .order_by(self.model.name)
             .all()
         )
@@ -66,7 +66,7 @@ class CRUDInjuryType(CRUDBase[InjuryType, InjuryTypeCreate, InjuryTypeUpdate]):
         """
         return (
             db.query(self.model)
-            .filter(self.model.is_system == False)
+            .filter(self.model.is_system.is_(False))
             .order_by(self.model.name)
             .all()
         )

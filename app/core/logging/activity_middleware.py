@@ -1,15 +1,15 @@
 from typing import Callable
 
 from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware
 from jose import JWTError, jwt
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.core.utils.activity_tracker import (
-    set_current_user_context,
-    clear_current_user_context,
-)
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.utils.activity_tracker import (
+    clear_current_user_context,
+    set_current_user_context,
+)
 
 logger = get_logger(__name__, "app")
 

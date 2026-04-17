@@ -4,18 +4,15 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.api.activity_logging import log_create
 from app.api.deps import NotFoundException
+from app.api.v1.endpoints.utils import (
+    handle_delete_with_logging,
+    handle_update_with_logging,
+)
 from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
-from app.api.v1.endpoints.utils import (
-    handle_create_with_logging,
-    handle_update_with_logging,
-    handle_delete_with_logging,
-    handle_not_found,
-)
-from app.api.activity_logging import log_create, log_delete, log_update
 from app.crud.emergency_contact import emergency_contact
 from app.models.activity_log import EntityType
 from app.models.models import EmergencyContact, User

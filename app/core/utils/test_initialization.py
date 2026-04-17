@@ -5,10 +5,12 @@ Loads LOINC tests into database on startup if needed
 
 import csv
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
+
 from sqlalchemy.orm import Session
-from app.crud import standardized_test
+
 from app.core.logging.config import get_logger
+from app.crud import standardized_test
 
 logger = get_logger(__name__, "app")
 

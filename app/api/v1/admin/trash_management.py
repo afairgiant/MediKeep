@@ -5,9 +5,8 @@ Admin API endpoints for trash management.
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_admin_user, get_db
+from app.api.deps import get_current_admin_user
 from app.models.models import User
 from app.services.file_management_service import file_management_service
 

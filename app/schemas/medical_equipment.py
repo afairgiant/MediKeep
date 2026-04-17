@@ -1,7 +1,7 @@
 """Schemas for Medical Equipment."""
 
 from datetime import date, datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from pydantic import (
     BaseModel,
@@ -9,11 +9,9 @@ from pydantic import (
     Field,
     field_validator,
     model_validator,
-    ValidationInfo,
 )
 
 from app.schemas.base_tags import TaggedEntityMixin
-
 
 # Valid equipment types
 EQUIPMENT_TYPES = [
@@ -98,8 +96,6 @@ class MedicalEquipmentBase(TaggedEntityMixin):
 
 class MedicalEquipmentCreate(MedicalEquipmentBase):
     """Schema for creating medical equipment."""
-
-    pass
 
 
 class MedicalEquipmentUpdate(BaseModel):

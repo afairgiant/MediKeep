@@ -7,12 +7,11 @@ from app.core.database.database import (
     create_default_user,
     database_migrations,
 )
-from app.core.utils.datetime_utils import set_application_startup_time
-from app.core.logging.config import get_logger
-from app.core.utils.activity_tracker import initialize_activity_tracking
 from app.core.database.migrations import run_startup_data_migrations
 from app.core.events import get_event_registry, setup_event_system
+from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
+from app.core.utils.datetime_utils import set_application_startup_time
 from app.services.notification_handlers import create_notification_handler
 
 logger = get_logger(__name__, "app")
@@ -127,7 +126,6 @@ async def startup_event():
     # Initialize standardized tests from LOINC
     try:
         from app.core.utils.test_initialization import ensure_tests_initialized
-        from app.core.database.database import SessionLocal
 
         db = SessionLocal()
         try:

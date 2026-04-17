@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date
 from typing import List, Optional
 
 from sqlalchemy import and_, desc, func
@@ -7,25 +7,24 @@ from sqlalchemy.orm import Session, joinedload
 from app.crud.base import CRUDBase
 from app.models.models import (
     Symptom,
-    SymptomOccurrence,
     SymptomCondition,
     SymptomMedication,
+    SymptomOccurrence,
     SymptomTreatment,
     get_utc_now,
 )
 from app.schemas.symptom import (
-    SymptomCreate,
-    SymptomUpdate,
-    SymptomOccurrenceCreate,
-    SymptomOccurrenceUpdate,
     SymptomConditionCreate,
     SymptomConditionUpdate,
+    SymptomCreate,
     SymptomMedicationCreate,
     SymptomMedicationUpdate,
+    SymptomOccurrenceCreate,
+    SymptomOccurrenceUpdate,
     SymptomTreatmentCreate,
     SymptomTreatmentUpdate,
+    SymptomUpdate,
 )
-
 
 # ============================================================================
 # NEW TWO-LEVEL HIERARCHY CRUD OPERATIONS
@@ -153,7 +152,9 @@ class CRUDSymptomParent(CRUDBase[Symptom, SymptomCreate, SymptomUpdate]):
         return (
             db.query(self.model)
             .filter(
-                and_(self.model.patient_id == patient_id, self.model.is_chronic == True)
+                and_(
+                    self.model.patient_id == patient_id, self.model.is_chronic.is_(True)
+                )
             )
             .order_by(desc(self.model.last_occurrence_date))
             .all()

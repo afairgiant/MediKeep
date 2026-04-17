@@ -6,18 +6,17 @@ while Paperless is actively processing documents.
 """
 
 import asyncio
-import time
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, Tuple
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional, Tuple
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.services.paperless_service import (
+    PaperlessAuthenticationError,
+    PaperlessConnectionError,
     PaperlessServiceBase,
     PaperlessUploadError,
-    PaperlessConnectionError,
-    PaperlessAuthenticationError,
 )
 
 logger = get_logger(__name__)
@@ -189,7 +188,7 @@ class SmartPaperlessUploadManager:
                         "status_checks": status_check_count,
                     }
 
-                elif current_status == ProcessingStatus.FAILURE:
+                if current_status == ProcessingStatus.FAILURE:
                     logger.error(f"Document processing failed for {filename}: {result}")
                     raise PaperlessUploadError(f"Document processing failed: {result}")
 
@@ -290,17 +289,15 @@ class SmartPaperlessUploadManager:
                     # Extract document ID
                     document_id = await self._extract_document_id(task_data)
                     return ProcessingStatus.SUCCESS, document_id
-                elif status_str == "failure":
+                if status_str == "failure":
                     error_msg = task_data.get("result", "Unknown error")
                     return ProcessingStatus.FAILURE, error_msg
-                elif status_str in ["pending", "started", "retry"]:
+                if status_str in ["pending", "started", "retry"]:
                     # Map to appropriate processing status
                     if status_str == "started":
                         return ProcessingStatus.STARTED, None
-                    else:
-                        return ProcessingStatus.PENDING, None
-                else:
-                    return ProcessingStatus.UNKNOWN, None
+                    return ProcessingStatus.PENDING, None
+                return ProcessingStatus.UNKNOWN, None
 
         except Exception as e:
             logger.warning(f"Error getting task status for {task_uuid}: {e}")

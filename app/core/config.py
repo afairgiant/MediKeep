@@ -35,12 +35,11 @@ def _get_windows_path_helper(path_type: str):
 
         if path_type == "uploads":
             return get_uploads_path()
-        elif path_type == "logs":
+        if path_type == "logs":
             return str(get_logs_path())
-        elif path_type == "backups":
+        if path_type == "backups":
             return get_backups_path()
-        else:
-            return None
+        return None
     except ImportError:
         # If windows_config can't be imported, fall back to default paths
         return None

@@ -4,14 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.core.http.error_handling import (
-    NotFoundException,
-    BusinessLogicException,
-    handle_database_errors,
-)
-from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
-from app.core.logging.helpers import log_data_access
+from app.api.activity_logging import log_update
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -19,7 +12,12 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
-from app.api.activity_logging import log_update
+from app.core.http.error_handling import (
+    BusinessLogicException,
+    handle_database_errors,
+)
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_data_access
 from app.crud.insurance import insurance
 from app.models.activity_log import EntityType
 from app.models.models import User

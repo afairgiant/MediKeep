@@ -3,15 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.core.http.error_handling import setup_error_handling
+from app.core.http.middleware import TrailingSlashMiddleware
+from app.core.http.static_files import setup_static_files
+from app.core.logging.activity_middleware import ActivityTrackingMiddleware
 from app.core.logging.config import LoggingConfig, get_logger
 from app.core.logging.middleware import RequestLoggingMiddleware
-from app.core.http.middleware import TrailingSlashMiddleware
-from app.core.logging.activity_middleware import ActivityTrackingMiddleware
 from app.core.logging.request_id_middleware import RequestIDMiddleware
-from app.core.startup import startup_event
-from app.core.http.static_files import setup_static_files
 from app.core.logging.uvicorn_logging import configure_uvicorn_logging
-from app.core.http.error_handling import setup_error_handling
+from app.core.startup import startup_event
 
 # Initialize logging configuration
 logging_config = LoggingConfig()

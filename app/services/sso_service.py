@@ -1,14 +1,15 @@
-from typing import Dict, Optional
 import secrets
-import asyncio
 from datetime import datetime, timedelta
+from typing import Dict, Optional
+
 import httpx
-from app.auth.sso.providers import create_sso_provider
+from sqlalchemy.orm import Session
+
 from app.auth.sso.exceptions import *
+from app.auth.sso.providers import create_sso_provider
 from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.crud.user import user as user_crud
-from sqlalchemy.orm import Session
 
 logger = get_logger(__name__, "sso")
 
@@ -192,7 +193,7 @@ class SSOService:
         allowed_domains = [d.lower() for d in settings.SSO_ALLOWED_DOMAINS]
         return domain in allowed_domains
 
-    def _validate_sso_linking(self, existing_user, sso_user_info) -> bool:
+    def _validate_sso_linking(self, existing_user, _sso_user_info) -> bool:
         """Detect corrupted SSO linking data"""
 
         # Check for partial corruption - has external_id but missing sso_provider
@@ -289,43 +290,42 @@ class SSOService:
 
             if preference == "auto_link":
                 return self._link_existing_user(existing_user, user_info, db)
-            elif preference == "create_separate":
+            if preference == "create_separate":
                 # User preference is to always create separate accounts
                 return self._create_new_separate_user(user_info, db)
-            else:  # always_ask or any other value
-                return self._return_account_conflict(existing_user, user_info)
-        else:
-            # Check if registration is allowed (integration with existing system)
-            if not settings.ALLOW_USER_REGISTRATION:
-                logger.warning(
-                    f"SSO registration blocked for {user_info.email} - registration disabled",
-                    extra={
-                        "category": "security",
-                        "event": "sso_registration_blocked",
-                        "email": user_info.email,
-                    },
-                )
-                raise SSORegistrationBlockedError(
-                    "New user registration is currently disabled. "
-                    "Please contact an administrator to create an account."
-                )
-
-            # Create new user from SSO
-            new_user = user_crud.create_from_sso(
-                db,
-                email=user_info.email,
-                username=user_info.email.split("@")[0],
-                full_name=user_info.name or "",
-                external_id=user_info.sub,
-                sso_provider=settings.SSO_PROVIDER_TYPE,
+            # always_ask or any other value
+            return self._return_account_conflict(existing_user, user_info)
+        # Check if registration is allowed (integration with existing system)
+        if not settings.ALLOW_USER_REGISTRATION:
+            logger.warning(
+                f"SSO registration blocked for {user_info.email} - registration disabled",
+                extra={
+                    "category": "security",
+                    "event": "sso_registration_blocked",
+                    "email": user_info.email,
+                },
+            )
+            raise SSORegistrationBlockedError(
+                "New user registration is currently disabled. "
+                "Please contact an administrator to create an account."
             )
 
-            logger.info(
-                f"New user created via SSO: {user_info.email}",
-                extra={"category": "sso", "event": "user_created"},
-            )
+        # Create new user from SSO
+        new_user = user_crud.create_from_sso(
+            db,
+            email=user_info.email,
+            username=user_info.email.split("@")[0],
+            full_name=user_info.name or "",
+            external_id=user_info.sub,
+            sso_provider=settings.SSO_PROVIDER_TYPE,
+        )
 
-            return {"user": new_user, "is_new_user": True, "auth_method": "sso"}
+        logger.info(
+            f"New user created via SSO: {user_info.email}",
+            extra={"category": "sso", "event": "user_created"},
+        )
+
+        return {"user": new_user, "is_new_user": True, "auth_method": "sso"}
 
     def _create_new_separate_user(self, user_info, db: Session) -> Dict:
         """Create a new separate user account even when email matches existing user"""
@@ -477,7 +477,7 @@ class SSOService:
             del _state_storage[conflict_key]
             return result
 
-        elif action == "create_separate":
+        if action == "create_separate":
             # Create new separate user account
             sso_info = conflict_data["sso_user_info"]
 
@@ -495,10 +495,9 @@ class SSOService:
             del _state_storage[conflict_key]
             return result
 
-        else:
-            raise SSOAuthenticationError(
-                "Invalid action. Must be 'link' or 'create_separate'"
-            )
+        raise SSOAuthenticationError(
+            "Invalid action. Must be 'link' or 'create_separate'"
+        )
 
     def resolve_github_manual_link(
         self, temp_token: str, username: str, password: str, db: Session
@@ -626,24 +625,23 @@ class SSOService:
                     "success": True,
                     "message": "SSO configuration is valid. Client credentials and redirect URI verified.",
                 }
-            elif error == "invalid_client":
+            if error == "invalid_client":
                 return {
                     "success": False,
                     "message": "Invalid client credentials. Check SSO_CLIENT_ID and SSO_CLIENT_SECRET.",
                 }
-            elif error == "redirect_uri_mismatch":
+            if error == "redirect_uri_mismatch":
                 return {
                     "success": False,
                     "message": f"Redirect URI mismatch. The URI '{provider.redirect_uri}' is not registered with your OAuth provider.",
                 }
-            elif error:
+            if error:
                 detail = f"{error}: {error_description}" if error_description else error
                 return {"success": False, "message": f"Provider error: {detail}"}
-            else:
-                return {
-                    "success": False,
-                    "message": f"Unexpected response (HTTP {response.status_code})",
-                }
+            return {
+                "success": False,
+                "message": f"Unexpected response (HTTP {response.status_code})",
+            }
 
         except httpx.TimeoutException:
             logger.error("SSO test connection timed out", extra=log_extra)

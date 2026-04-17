@@ -76,19 +76,16 @@ def to_utc(local_datetime: Union[str, datetime]) -> Optional[datetime]:
             if parsed_dt.tzinfo is not None:
                 # Already has timezone info - convert to UTC properly
                 return parsed_dt.astimezone(timezone.utc)
-            else:
-                # Naive datetime from string - assume facility timezone
-                localized_dt = parsed_dt.replace(tzinfo=get_facility_timezone())
-                return localized_dt.astimezone(timezone.utc)
-        else:
-            # Handle datetime objects
-            if local_datetime.tzinfo is not None:
-                # Already timezone-aware - convert to UTC
-                return local_datetime.astimezone(timezone.utc)
-            else:
-                # Naive datetime - assume facility timezone
-                localized_dt = local_datetime.replace(tzinfo=get_facility_timezone())
-                return localized_dt.astimezone(timezone.utc)
+            # Naive datetime from string - assume facility timezone
+            localized_dt = parsed_dt.replace(tzinfo=get_facility_timezone())
+            return localized_dt.astimezone(timezone.utc)
+        # Handle datetime objects
+        if local_datetime.tzinfo is not None:
+            # Already timezone-aware - convert to UTC
+            return local_datetime.astimezone(timezone.utc)
+        # Naive datetime - assume facility timezone
+        localized_dt = local_datetime.replace(tzinfo=get_facility_timezone())
+        return localized_dt.astimezone(timezone.utc)
 
     except Exception as e:
         logger.error(f"Failed to convert datetime to UTC: {local_datetime}, error: {e}")
@@ -273,9 +270,8 @@ def parse_date_string(date_str: str) -> date:
                 # For datetime formats, parse as datetime then extract date
                 dt = datetime.strptime(clean_str.split("T")[0], "%Y-%m-%d")
                 return dt.date()
-            else:
-                dt = datetime.strptime(clean_str, fmt)
-                return dt.date()
+            dt = datetime.strptime(clean_str, fmt)
+            return dt.date()
         except ValueError:
             continue
 
@@ -576,7 +572,6 @@ def get_application_uptime_string() -> str:
 
     if uptime_days > 0:
         return f"{uptime_days} days, {uptime_hours} hours"
-    elif uptime_hours > 0:
+    if uptime_hours > 0:
         return f"{uptime_hours} hours, {uptime_minutes} minutes"
-    else:
-        return f"{uptime_minutes} minutes"
+    return f"{uptime_minutes} minutes"

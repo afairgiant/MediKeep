@@ -7,26 +7,26 @@ from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import (
     Treatment,
-    TreatmentMedication,
     TreatmentEncounter,
-    TreatmentLabResult,
     TreatmentEquipment,
+    TreatmentLabResult,
+    TreatmentMedication,
 )
 from app.schemas.treatment import (
     TreatmentCreate,
-    TreatmentUpdate,
-    TreatmentMedicationCreate,
-    TreatmentMedicationUpdate,
-    TreatmentMedicationBulkCreate,
+    TreatmentEncounterBulkCreate,
     TreatmentEncounterCreate,
     TreatmentEncounterUpdate,
-    TreatmentEncounterBulkCreate,
-    TreatmentLabResultCreate,
-    TreatmentLabResultUpdate,
-    TreatmentLabResultBulkCreate,
+    TreatmentEquipmentBulkCreate,
     TreatmentEquipmentCreate,
     TreatmentEquipmentUpdate,
-    TreatmentEquipmentBulkCreate,
+    TreatmentLabResultBulkCreate,
+    TreatmentLabResultCreate,
+    TreatmentLabResultUpdate,
+    TreatmentMedicationBulkCreate,
+    TreatmentMedicationCreate,
+    TreatmentMedicationUpdate,
+    TreatmentUpdate,
 )
 
 

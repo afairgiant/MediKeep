@@ -5,54 +5,41 @@ Provides API endpoints for paperless-ngx integration including connection testin
 settings management, and document operations.
 """
 
-import os
 import json
+import os
 import re
 import traceback
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any, Dict
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
-from app.core.database.database import get_db
 from app.api.deps import get_current_user
+from app.core.database.database import get_db
+from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
+from app.core.logging.helpers import (
+    log_debug,
+    log_endpoint_access,
+    log_external_service,
+    log_security_event,
+)
+from app.crud.user_preferences import user_preferences
 from app.models.models import User
 from app.schemas.user_preferences import PaperlessConnectionData
-from app.services.paperless_service import (
-    _build_title_fallback_query,
-    create_paperless_service,
-    create_paperless_service_with_username_password,
-    create_paperless_service_with_token,
-    PaperlessConnectionError,
-    PaperlessAuthenticationError,
-    PaperlessUploadError,
-    PaperlessError,
-)
+from app.services.credential_encryption import SecurityError, credential_encryption
 
 # New simplified architecture
-from app.services.paperless_client import (
-    create_paperless_client,
-    PaperlessClient,
-    PaperlessClientError,
-    PaperlessConnectionError as NewPaperlessConnectionError,
-    PaperlessUploadError as NewPaperlessUploadError,
-)
 from app.services.paperless_auth import create_paperless_auth
-from app.crud.user_preferences import user_preferences
-from app.services.credential_encryption import credential_encryption, SecurityError
-from app.core.logging.config import get_logger
-from app.core.logging.helpers import (
-    log_endpoint_access,
-    log_endpoint_error,
-    log_security_event,
-    log_data_access,
-    log_validation_error,
-    log_external_service,
-    log_debug,
+from app.services.paperless_service import (
+    PaperlessAuthenticationError,
+    PaperlessConnectionError,
+    _build_title_fallback_query,
+    create_paperless_service,
 )
-from app.core.logging.constants import LogFields
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -69,7 +56,7 @@ def get_preferred_auth_method(user_prefs) -> str:
     """Determine the preferred authentication method based on available credentials."""
     if user_prefs.paperless_api_token_encrypted:
         return "token"
-    elif (
+    if (
         user_prefs.paperless_username_encrypted
         and user_prefs.paperless_password_encrypted
     ):
@@ -176,9 +163,8 @@ def _update_entity_file_from_task_result(
                     },
                 )
                 return  # Exit early since we deleted the record
-            else:
-                # For non-Paperless files, just mark as failed (shouldn't happen for task monitoring)
-                entity_file.sync_status = "failed"
+            # For non-Paperless files, just mark as failed (shouldn't happen for task monitoring)
+            entity_file.sync_status = "failed"
 
         # Update last_sync timestamp
         from datetime import datetime
@@ -511,8 +497,9 @@ async def get_storage_usage_stats(
         request = MockRequest()
     try:
         # Query file statistics scoped to the current user's patients
+        from sqlalchemy import and_
+
         from app.models.models import EntityFile, Patient
-        from sqlalchemy import func, and_
 
         # Get patient IDs belonging to the current user
         user_patient_ids = [
@@ -537,7 +524,7 @@ async def get_storage_usage_stats(
         # Build a subquery for entity files belonging to the user's patients
         # EntityFile links to entities via entity_type + entity_id
         # All entities have patient_id, so we join through each entity type
-        from app.models.models import LabResult, Procedure, Insurance, Encounter
+        from app.models.models import Encounter, Insurance, LabResult, Procedure
 
         entity_models = {
             "lab-result": LabResult,
@@ -1133,9 +1120,6 @@ async def get_paperless_task_status(
         )
 
         # Import the same method used by upload
-        from app.services.paperless_service import (
-            create_paperless_service_with_username_password,
-        )
 
         # Create paperless service using SAME method as upload - supports both token and username/password
         async with create_paperless_service(
@@ -1280,7 +1264,7 @@ async def get_paperless_task_status(
 
                                 return result
 
-                            elif task["status"] == "FAILURE":
+                            if task["status"] == "FAILURE":
                                 # Task failed - extract error information
                                 error_message = task.get("result", "Task failed")
 
@@ -1376,31 +1360,29 @@ async def get_paperless_task_status(
                                 )
 
                                 return result
-                            else:
-                                # Task is still pending/processing
-                                result = {
-                                    "status": "PENDING",
-                                    "result": None,
-                                    "task_id": task_uuid,
-                                    "timestamp": datetime.utcnow().isoformat(),
-                                }
+                            # Task is still pending/processing
+                            result = {
+                                "status": "PENDING",
+                                "result": None,
+                                "task_id": task_uuid,
+                                "timestamp": datetime.utcnow().isoformat(),
+                            }
 
-                                logger.debug(
-                                    f"Paperless task {task_uuid} still processing",
-                                    extra={
-                                        "user_id": current_user.id,
-                                        "task_uuid": task_uuid,
-                                    },
-                                )
-
-                                return result
-                        else:
-                            # Task not found
-                            raise HTTPException(
-                                status_code=status.HTTP_404_NOT_FOUND,
-                                detail=f"Task {task_uuid} not found",
+                            logger.debug(
+                                f"Paperless task {task_uuid} still processing",
+                                extra={
+                                    "user_id": current_user.id,
+                                    "task_uuid": task_uuid,
+                                },
                             )
-                    elif response.status == 403:
+
+                            return result
+                        # Task not found
+                        raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Task {task_uuid} not found",
+                        )
+                    if response.status == 403:
                         logger.warning(
                             f"Permission denied checking task {task_uuid} - auth may have failed"
                         )
@@ -1408,15 +1390,14 @@ async def get_paperless_task_status(
                             status_code=status.HTTP_403_FORBIDDEN,
                             detail=f"Permission denied accessing task status",
                         )
-                    else:
-                        response_text = await response.text()
-                        logger.warning(
-                            f"Task status check failed: HTTP {response.status} - {response_text[:100]}"
-                        )
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Failed to check task status: HTTP {response.status}",
-                        )
+                    response_text = await response.text()
+                    logger.warning(
+                        f"Task status check failed: HTTP {response.status} - {response_text[:100]}"
+                    )
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Failed to check task status: HTTP {response.status}",
+                    )
 
             except HTTPException:
                 # Re-raise HTTP exceptions as-is
@@ -1778,14 +1759,11 @@ async def test_paperless_connection_v2(
             )
 
             return result
-        else:
-            # Connection failed
-            logger.warning(
-                f"Connection test failed for user {current_user.id}: {message}"
-            )
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST, f"Connection failed: {message}"
-            )
+        # Connection failed
+        logger.warning(f"Connection test failed for user {current_user.id}: {message}")
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, f"Connection failed: {message}"
+        )
 
     except HTTPException:
         raise

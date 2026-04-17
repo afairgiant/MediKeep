@@ -4,10 +4,10 @@ from typing import Any, List, Optional
 from fastapi import (
     APIRouter,
     Depends,
+    File,
     HTTPException,
     Query,
     Request,
-    File,
     UploadFile,
     status,
 )
@@ -17,13 +17,12 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
-from app.api.activity_logging import log_create, log_delete, log_update
+from app.api.activity_logging import log_create, log_delete
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
-    log_data_access,
     log_security_event,
 )
 from app.crud.patient import patient
@@ -33,7 +32,7 @@ from app.models.models import Patient as PatientModel
 from app.models.models import User
 from app.schemas.medication import MedicationCreate, MedicationResponse
 from app.schemas.patient import Patient, PatientCreate, PatientUpdate
-from app.schemas.patient_photo import PatientPhotoResponse, PatientPhotoWithUrl
+from app.schemas.patient_photo import PatientPhotoResponse
 from app.services.patient_photo_service import patient_photo_service
 
 router = APIRouter()

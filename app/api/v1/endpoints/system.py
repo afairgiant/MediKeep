@@ -8,14 +8,13 @@ Provides system configuration and logging level information for frontend integra
 import os
 import time
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_security_event
 from app.core.logging.constants import (
     CATEGORIES,
     DEFAULT_LOG_LEVEL,
@@ -25,6 +24,7 @@ from app.core.logging.constants import (
     sanitize_log_input,
     validate_log_level,
 )
+from app.core.logging.helpers import log_security_event
 from app.services.release_notes_service import get_release_notes_service
 
 # Constants
@@ -373,11 +373,12 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
         )
 
         # Get rotation configuration
+        from pathlib import Path
+
         from app.core.logging.config import (
             _get_rotation_method,
             _is_logrotate_available,
         )
-        from pathlib import Path
 
         rotation_method = _get_rotation_method()
         log_dir = Path(settings.LOG_DIR)

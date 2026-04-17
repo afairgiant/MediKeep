@@ -90,7 +90,7 @@ def ensure_windows_directories() -> dict:
     }
 
     # Create all directories (no logging to avoid circular import)
-    for name, path in directories.items():
+    for _name, path in directories.items():
         try:
             path.mkdir(parents=True, exist_ok=True)
         except OSError:
@@ -112,9 +112,8 @@ def get_database_path() -> Path:
         dirs = ensure_windows_directories()
         db_path = dirs["database"] / "medikeep.db"
         return db_path
-    else:
-        db_path = Path("./medikeep.db")
-        return db_path
+    db_path = Path("./medikeep.db")
+    return db_path
 
 
 def get_uploads_path() -> Path:
@@ -130,10 +129,9 @@ def get_uploads_path() -> Path:
         dirs = ensure_windows_directories()
         uploads_path = dirs["uploads"]
         return uploads_path
-    else:
-        uploads_path = Path("./uploads")
-        uploads_path.mkdir(exist_ok=True)
-        return uploads_path
+    uploads_path = Path("./uploads")
+    uploads_path.mkdir(exist_ok=True)
+    return uploads_path
 
 
 def get_logs_path() -> Path:
@@ -149,10 +147,9 @@ def get_logs_path() -> Path:
         dirs = ensure_windows_directories()
         logs_path = dirs["logs"]
         return logs_path
-    else:
-        logs_path = Path("./logs")
-        logs_path.mkdir(exist_ok=True)
-        return logs_path
+    logs_path = Path("./logs")
+    logs_path.mkdir(exist_ok=True)
+    return logs_path
 
 
 def get_temp_path() -> Path:
@@ -168,10 +165,9 @@ def get_temp_path() -> Path:
         dirs = ensure_windows_directories()
         temp_path = dirs["temp"]
         return temp_path
-    else:
-        temp_path = Path("./temp")
-        temp_path.mkdir(exist_ok=True)
-        return temp_path
+    temp_path = Path("./temp")
+    temp_path.mkdir(exist_ok=True)
+    return temp_path
 
 
 def get_backups_path() -> Path:
@@ -187,7 +183,6 @@ def get_backups_path() -> Path:
         dirs = ensure_windows_directories()
         backups_path = dirs["backups"]
         return backups_path
-    else:
-        backups_path = Path("./backups")
-        backups_path.mkdir(exist_ok=True)
-        return backups_path
+    backups_path = Path("./backups")
+    backups_path.mkdir(exist_ok=True)
+    return backups_path

@@ -16,13 +16,13 @@ from sqlalchemy.sql import func
 
 from app.api import deps
 from app.core.config import settings
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import log_endpoint_error
 from app.core.utils.datetime_utils import (
     get_application_startup_time,
     get_application_uptime_seconds,
     get_application_uptime_string,
 )
-from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_error
 from app.models.activity_log import ActivityLog, get_utc_now
 from app.models.models import (
     Allergy,

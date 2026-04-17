@@ -1,5 +1,6 @@
 from datetime import date
-from typing import Optional, List
+from typing import List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
@@ -118,7 +119,10 @@ class AllergySummary(BaseModel):
 
 
 # Late imports to avoid circular dependencies; must come after all class definitions.
+# pylint: disable=wrong-import-position
 from app.schemas.medication import MedicationResponse  # noqa: E402
 from app.schemas.patient import PatientResponse  # noqa: E402
+
+# pylint: enable=wrong-import-position
 
 AllergyWithRelations.model_rebuild()

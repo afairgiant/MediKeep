@@ -2,27 +2,26 @@
 V1 Patient Management API Endpoints - Netflix-style patient switching and management
 """
 
-from typing import Any, List, Optional
 from datetime import date
+from typing import Any, List, Optional
+
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.exceptions import RequestValidationError
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app.core.http.error_handling import (
+    BusinessLogicException,
+    DatabaseException,
+    ForbiddenException,
+    NotFoundException,
+    handle_database_errors,
+)
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_data_access, log_endpoint_access
-from app.core.http.error_handling import (
-    NotFoundException,
-    ForbiddenException,
-    BusinessLogicException,
-    handle_database_errors,
-    DatabaseException,
-)
-from app.services.patient_management import PatientManagementService
+from app.models.models import Patient, User
 from app.services.patient_access import PatientAccessService
-from app.schemas.patient import PatientCreate, PatientUpdate
-from app.models.models import User, Patient
+from app.services.patient_management import PatientManagementService
 
 router = APIRouter()
 logger = get_logger(__name__, "app")
@@ -338,8 +337,7 @@ def get_self_record(
             response = PatientResponse.model_validate(patient)
             response.permission_level = "full"
             return response
-        else:
-            return None
+        return None
 
 
 @router.post("/switch", response_model=PatientResponse)
@@ -404,8 +402,7 @@ def get_active_patient(
         if patient:
             access_service = PatientAccessService(db)
             return _build_patient_response(access_service, current_user, patient)
-        else:
-            return None
+        return None
 
 
 @router.get("/stats")
@@ -600,7 +597,6 @@ def delete_patient(
             return {
                 "message": "Patient record and all associated medical records deleted successfully"
             }
-        else:
-            raise DatabaseException(
-                message="Failed to delete patient record", request=request
-            )
+        raise DatabaseException(
+            message="Failed to delete patient record", request=request
+        )

@@ -7,14 +7,12 @@ from app.api import deps
 from app.api.activity_logging import log_delete, log_update
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_error, log_security_event
-from app.crud.patient import patient
 from app.crud.user import user
 from app.crud.user_preferences import user_preferences
-from app.models.activity_log import ActivityLog, EntityType
+from app.models.activity_log import EntityType
 from app.models.models import User as UserModel
 from app.schemas.user import User, UserSelfUpdate
 from app.schemas.user_preferences import (
-    UserPreferences,
     UserPreferencesResponse,
     UserPreferencesUpdate,
 )

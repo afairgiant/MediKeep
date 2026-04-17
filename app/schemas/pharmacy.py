@@ -141,8 +141,6 @@ class PharmacyCreate(PharmacyBase):
         )
     """
 
-    pass
-
 
 class PharmacyUpdate(BaseModel):
     """
@@ -328,8 +326,6 @@ class PharmacyResponse(Pharmacy):
 
     This provides consistency with other model Response schemas.
     """
-
-    pass
 
 
 class PharmacySearch(BaseModel):

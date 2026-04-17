@@ -2,9 +2,10 @@
 Pydantic schemas for invitation system
 """
 
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional, List, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class InvitationCreate(BaseModel):

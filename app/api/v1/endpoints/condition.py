@@ -4,17 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.api.deps import NotFoundException, ForbiddenException, BusinessLogicException
-from app.core.http.error_handling import handle_database_errors
-from app.core.logging.config import get_logger
-from app.core.logging.constants import LogFields
-from app.core.logging.helpers import (
-    log_endpoint_access,
-    log_endpoint_error,
-    log_data_access,
-    log_security_event,
-)
-from app.models.models import User
+from app.api.deps import BusinessLogicException, ForbiddenException, NotFoundException
 from app.api.v1.endpoints.utils import (
     handle_create_with_logging,
     handle_delete_with_logging,
@@ -22,20 +12,27 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
+from app.core.http.error_handling import handle_database_errors
+from app.core.logging.config import get_logger
+from app.core.logging.helpers import (
+    log_data_access,
+    log_security_event,
+)
 from app.crud.condition import condition, condition_medication
 from app.crud.medication import medication as medication_crud
 from app.models.activity_log import EntityType
+from app.models.models import User
 from app.schemas.condition import (
     ConditionCreate,
     ConditionDropdownOption,
-    ConditionResponse,
-    ConditionUpdate,
-    ConditionWithRelations,
+    ConditionMedicationBulkCreate,
     ConditionMedicationCreate,
     ConditionMedicationResponse,
     ConditionMedicationUpdate,
     ConditionMedicationWithDetails,
-    ConditionMedicationBulkCreate,
+    ConditionResponse,
+    ConditionUpdate,
+    ConditionWithRelations,
 )
 
 router = APIRouter()
@@ -451,8 +448,8 @@ def update_condition_medication(
             )
 
         # Verify access using multi-patient system
-        from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
+        from app.services.patient_access import PatientAccessService
 
         patient_record = (
             db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
@@ -563,8 +560,8 @@ def delete_condition_medication(
             )
 
         # Verify access using multi-patient system
-        from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
+        from app.services.patient_access import PatientAccessService
 
         patient_record = (
             db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
@@ -827,8 +824,8 @@ def get_medication_conditions(
             )
 
         # Verify access using multi-patient system
-        from app.services.patient_access import PatientAccessService
         from app.models.models import Patient
+        from app.services.patient_access import PatientAccessService
 
         patient_record = (
             db.query(Patient).filter(Patient.id == db_medication.patient_id).first()

@@ -1,14 +1,14 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, HTTPException, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 from app.api import deps
-from app.api.deps import UnauthorizedException
 from app.api.activity_logging import safe_log_activity
+from app.api.deps import UnauthorizedException
 from app.auth.sso.exceptions import *
 from app.core.config import settings
 from app.core.logging.config import get_logger

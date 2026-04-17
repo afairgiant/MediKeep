@@ -111,21 +111,20 @@ class PatientSharingService:
         if existing_share:
             if existing_share.is_active:
                 raise AlreadySharedError("Patient is already shared with this user")
-            else:
-                # Reactivate existing share
-                existing_share.is_active = True
-                existing_share.permission_level = permission_level
-                existing_share.expires_at = expires_at
-                existing_share.custom_permissions = custom_permissions
-                self.db.commit()
-                logger.info(
-                    "Reactivated existing share",
-                    extra={
-                        "share_id": existing_share.id,
-                        "component": "patient_sharing",
-                    },
-                )
-                return existing_share
+            # Reactivate existing share
+            existing_share.is_active = True
+            existing_share.permission_level = permission_level
+            existing_share.expires_at = expires_at
+            existing_share.custom_permissions = custom_permissions
+            self.db.commit()
+            logger.info(
+                "Reactivated existing share",
+                extra={
+                    "share_id": existing_share.id,
+                    "component": "patient_sharing",
+                },
+            )
+            return existing_share
 
         # Create new share
         try:
@@ -200,7 +199,7 @@ class PatientSharingService:
             .filter(
                 PatientShare.patient_id == patient_id,
                 PatientShare.shared_with_user_id == shared_with_user_id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .first()
         )
@@ -295,7 +294,7 @@ class PatientSharingService:
             .filter(
                 PatientShare.patient_id == patient_id,
                 PatientShare.shared_with_user_id == shared_with_user_id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .first()
         )
@@ -351,7 +350,7 @@ class PatientSharingService:
         shares = (
             self.db.query(PatientShare)
             .filter(
-                PatientShare.patient_id == patient_id, PatientShare.is_active == True
+                PatientShare.patient_id == patient_id, PatientShare.is_active.is_(True)
             )
             .all()
         )
@@ -373,7 +372,7 @@ class PatientSharingService:
             self.db.query(PatientShare)
             .filter(
                 PatientShare.shared_by_user_id == user.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .count()
         )
@@ -383,7 +382,7 @@ class PatientSharingService:
             self.db.query(PatientShare)
             .filter(
                 PatientShare.shared_with_user_id == user.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .count()
         )
@@ -402,7 +401,8 @@ class PatientSharingService:
         expired_shares = (
             self.db.query(PatientShare)
             .filter(
-                PatientShare.expires_at < get_utc_now(), PatientShare.is_active == True
+                PatientShare.expires_at < get_utc_now(),
+                PatientShare.is_active.is_(True),
             )
             .all()
         )
@@ -456,7 +456,7 @@ class PatientSharingService:
             .filter(
                 PatientShare.patient_id == patient_id,
                 PatientShare.shared_with_user_id == user.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .first()
         )
@@ -567,7 +567,7 @@ class PatientSharingService:
             .filter(
                 PatientShare.patient_id == patient_id,
                 PatientShare.shared_with_user_id == recipient.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .first()
         )
@@ -767,7 +767,7 @@ class PatientSharingService:
                 .filter(
                     PatientShare.patient_id == patient_id,
                     PatientShare.shared_with_user_id == user.id,
-                    PatientShare.is_active == True,
+                    PatientShare.is_active.is_(True),
                 )
                 .first()
             )
@@ -780,18 +780,17 @@ class PatientSharingService:
                 invitation.updated_at = get_utc_now()
                 self.db.commit()
                 return existing_share
-            else:
-                # Unexpected: constraint violation but no existing share found
-                logger.error(
-                    "IntegrityError but no existing share found",
-                    extra={
-                        "error": str(e),
-                        "patient_id": patient_id,
-                        "user_id": user.id,
-                        "component": "patient_sharing",
-                    },
-                )
-                raise
+            # Unexpected: constraint violation but no existing share found
+            logger.error(
+                "IntegrityError but no existing share found",
+                extra={
+                    "error": str(e),
+                    "patient_id": patient_id,
+                    "user_id": user.id,
+                    "component": "patient_sharing",
+                },
+            )
+            raise
 
     def accept_bulk_patient_share_invitation(
         self, user: User, invitation: Invitation, response_note: Optional[str] = None
@@ -866,7 +865,7 @@ class PatientSharingService:
                     .filter(
                         PatientShare.patient_id == patient_id,
                         PatientShare.shared_with_user_id == user.id,
-                        PatientShare.is_active == True,
+                        PatientShare.is_active.is_(True),
                     )
                     .first()
                 )
@@ -1075,7 +1074,7 @@ class PatientSharingService:
             .filter(
                 PatientShare.patient_id.in_(patient_ids),
                 PatientShare.shared_with_user_id == recipient.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .all()
         )

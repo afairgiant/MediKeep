@@ -2,14 +2,13 @@
 Patient Access Service - Unified access control logic for all phases
 """
 
-from typing import List, Optional
-from datetime import datetime
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from typing import List
 
-from app.models.models import User, Patient, PatientShare
-from app.core.utils.datetime_utils import get_utc_now
+from sqlalchemy.orm import Session
+
 from app.core.logging.config import get_logger
+from app.core.utils.datetime_utils import get_utc_now
+from app.models.models import Patient, PatientShare, User
 
 logger = get_logger(__name__, "app")
 
@@ -142,7 +141,7 @@ class PatientAccessService:
                 .filter(
                     PatientShare.patient_id == patient.id,
                     PatientShare.shared_with_user_id == user.id,
-                    PatientShare.is_active == True,
+                    PatientShare.is_active.is_(True),
                 )
                 .first()
             )
@@ -166,7 +165,7 @@ class PatientAccessService:
             self.db.query(PatientShare)
             .filter(
                 PatientShare.shared_with_user_id == user.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .all()
         )
@@ -187,7 +186,7 @@ class PatientAccessService:
             .filter(
                 PatientShare.patient_id == patient.id,
                 PatientShare.shared_with_user_id == user.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .first()
         )
@@ -222,7 +221,7 @@ class PatientAccessService:
             self.db.query(PatientShare)
             .filter(
                 PatientShare.shared_with_user_id == user.id,
-                PatientShare.is_active == True,
+                PatientShare.is_active.is_(True),
             )
             .count()
         )

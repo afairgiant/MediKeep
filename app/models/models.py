@@ -16,7 +16,7 @@ Existing imports from this file continue to work:
 from app.models import *  # noqa: F401, F403
 
 # Re-export enums for backward compatibility (not included in __init__.__all__)
-from .enums import (  # noqa: F401
+from .enums import (  # noqa: F401  # pylint: disable=unused-import
     AllergyStatus,
     ConditionStatus,
     ConditionType,

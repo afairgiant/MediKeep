@@ -1,13 +1,12 @@
 from datetime import date
-from typing import Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from app.schemas.base_tags import TaggedEntityMixin
 
 if TYPE_CHECKING:
-    from app.schemas.patient import PatientResponse
-    from app.schemas.practitioner import PractitionerResponse
+    pass
 
 
 class ImmunizationBase(TaggedEntityMixin):

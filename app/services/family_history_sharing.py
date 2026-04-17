@@ -66,7 +66,7 @@ class FamilyHistoryService:
                 .join(Invitation, FamilyHistoryShare.invitation_id == Invitation.id)
                 .filter(
                     FamilyHistoryShare.shared_with_user_id == user.id,
-                    FamilyHistoryShare.is_active == True,
+                    FamilyHistoryShare.is_active.is_(True),
                     Invitation.status == "accepted",  # Only show accepted shares
                 )
                 .order_by(FamilyMember.name)
@@ -202,7 +202,7 @@ class FamilyHistoryService:
                 .filter(
                     FamilyHistoryShare.family_member_id == family_member_id,
                     FamilyHistoryShare.shared_with_user_id == recipient_user.id,
-                    FamilyHistoryShare.is_active == True,
+                    FamilyHistoryShare.is_active.is_(True),
                 )
                 .first()
             )
@@ -307,7 +307,7 @@ class FamilyHistoryService:
                         .filter(
                             FamilyHistoryShare.family_member_id == family_member_id,
                             FamilyHistoryShare.shared_with_user_id == user.id,
-                            FamilyHistoryShare.is_active == True,
+                            FamilyHistoryShare.is_active.is_(True),
                         )
                         .first()
                     )
@@ -325,7 +325,7 @@ class FamilyHistoryService:
                         .filter(
                             FamilyHistoryShare.family_member_id == family_member_id,
                             FamilyHistoryShare.shared_with_user_id == user.id,
-                            FamilyHistoryShare.is_active == False,
+                            FamilyHistoryShare.is_active.is_(False),
                         )
                         .count()
                     )
@@ -357,56 +357,55 @@ class FamilyHistoryService:
                     f"Created {len(shares)} family history shares from bulk invitation: {invitation.id}"
                 )
                 return shares
-            else:
-                # Handle single invitation
-                family_member_id = context_data.get("family_member_id")
-                if not family_member_id:
-                    raise ValueError("Single invitation missing family_member_id")
+            # Handle single invitation
+            family_member_id = context_data.get("family_member_id")
+            if not family_member_id:
+                raise ValueError("Single invitation missing family_member_id")
 
-                # Check if an active share already exists
-                existing_active_share = (
-                    self.db.query(FamilyHistoryShare)
-                    .filter(
-                        FamilyHistoryShare.family_member_id == family_member_id,
-                        FamilyHistoryShare.shared_with_user_id == user.id,
-                        FamilyHistoryShare.is_active == True,
-                    )
-                    .first()
+            # Check if an active share already exists
+            existing_active_share = (
+                self.db.query(FamilyHistoryShare)
+                .filter(
+                    FamilyHistoryShare.family_member_id == family_member_id,
+                    FamilyHistoryShare.shared_with_user_id == user.id,
+                    FamilyHistoryShare.is_active.is_(True),
                 )
+                .first()
+            )
 
-                if existing_active_share:
-                    logger.info(
-                        f"Active share already exists for family_member_id={family_member_id}, user_id={user.id}, using existing share"
-                    )
-                    # Update invitation status even if share already exists
-                    invitation.status = "accepted"
-                    invitation.responded_at = get_utc_now()
-                    invitation.response_note = response_note
-                    invitation.updated_at = get_utc_now()
-                    self.db.commit()
-                    return existing_active_share
-
-                share = FamilyHistoryShare(
-                    invitation_id=invitation.id,
-                    family_member_id=family_member_id,
-                    shared_by_user_id=invitation.sent_by_user_id,
-                    shared_with_user_id=user.id,
-                    permission_level=permission_level,
-                    sharing_note=sharing_note,
+            if existing_active_share:
+                logger.info(
+                    f"Active share already exists for family_member_id={family_member_id}, user_id={user.id}, using existing share"
                 )
-
-                self.db.add(share)
-
-                # Update invitation status after share is created
+                # Update invitation status even if share already exists
                 invitation.status = "accepted"
                 invitation.responded_at = get_utc_now()
                 invitation.response_note = response_note
                 invitation.updated_at = get_utc_now()
-
                 self.db.commit()
+                return existing_active_share
 
-                logger.info(f"Created family history share from invitation: {share.id}")
-                return share
+            share = FamilyHistoryShare(
+                invitation_id=invitation.id,
+                family_member_id=family_member_id,
+                shared_by_user_id=invitation.sent_by_user_id,
+                shared_with_user_id=user.id,
+                permission_level=permission_level,
+                sharing_note=sharing_note,
+            )
+
+            self.db.add(share)
+
+            # Update invitation status after share is created
+            invitation.status = "accepted"
+            invitation.responded_at = get_utc_now()
+            invitation.response_note = response_note
+            invitation.updated_at = get_utc_now()
+
+            self.db.commit()
+
+            logger.info(f"Created family history share from invitation: {share.id}")
+            return share
 
         except Exception as e:
             self.db.rollback()
@@ -462,7 +461,7 @@ class FamilyHistoryService:
                 .join(User, FamilyHistoryShare.shared_with_user_id == User.id)
                 .filter(
                     FamilyHistoryShare.family_member_id == family_member_id,
-                    FamilyHistoryShare.is_active == True,
+                    FamilyHistoryShare.is_active.is_(True),
                     Invitation.status == "accepted",
                 )
                 .all()
@@ -508,7 +507,7 @@ class FamilyHistoryService:
                     FamilyHistoryShare.shared_with_user_id == shared_with_user_id,
                     Patient.owner_user_id
                     == user.id,  # Ensure user owns the family member
-                    FamilyHistoryShare.is_active == True,
+                    FamilyHistoryShare.is_active.is_(True),
                 )
                 .first()
             )
@@ -534,7 +533,7 @@ class FamilyHistoryService:
                                 self.db.query(FamilyHistoryShare)
                                 .filter(
                                     FamilyHistoryShare.invitation_id == invitation.id,
-                                    FamilyHistoryShare.is_active == True,
+                                    FamilyHistoryShare.is_active.is_(True),
                                 )
                                 .count()
                             )
@@ -613,12 +612,11 @@ class FamilyHistoryService:
                 return (
                     existing_share  # Return the existing share instead of raising error
                 )
-            else:
-                # No share found at all
-                logger.warning(
-                    f"No family history share found for family_member_id={family_member_id}, shared_with_user_id={shared_with_user_id}, owner={user.id}"
-                )
-                raise ValueError("Share not found or not authorized")
+            # No share found at all
+            logger.warning(
+                f"No family history share found for family_member_id={family_member_id}, shared_with_user_id={shared_with_user_id}, owner={user.id}"
+            )
+            raise ValueError("Share not found or not authorized")
 
         except Exception as e:
             self.db.rollback()
@@ -639,7 +637,7 @@ class FamilyHistoryService:
                     FamilyHistoryShare.family_member_id == family_member_id,
                     FamilyHistoryShare.shared_with_user_id
                     == user.id,  # Current user is the recipient
-                    FamilyHistoryShare.is_active == True,
+                    FamilyHistoryShare.is_active.is_(True),
                 )
                 .first()
             )
@@ -672,7 +670,7 @@ class FamilyHistoryService:
                         .filter(
                             FamilyHistoryShare.invitation_id == invitation.id,
                             FamilyHistoryShare.shared_with_user_id == user.id,
-                            FamilyHistoryShare.is_active == True,
+                            FamilyHistoryShare.is_active.is_(True),
                         )
                         .count()
                     )
@@ -767,7 +765,7 @@ class FamilyHistoryService:
                     .filter(
                         FamilyHistoryShare.family_member_id == family_member.id,
                         FamilyHistoryShare.shared_with_user_id == recipient_user.id,
-                        FamilyHistoryShare.is_active == True,
+                        FamilyHistoryShare.is_active.is_(True),
                     )
                     .first()
                 )
@@ -861,7 +859,7 @@ class FamilyHistoryService:
                 .filter(
                     FamilyMember.id == family_member_id,
                     FamilyHistoryShare.shared_with_user_id == user.id,
-                    FamilyHistoryShare.is_active == True,
+                    FamilyHistoryShare.is_active.is_(True),
                     Invitation.status == "accepted",
                 )
                 .first()
@@ -886,7 +884,7 @@ class FamilyHistoryService:
                 .join(User, FamilyHistoryShare.shared_with_user_id == User.id)
                 .filter(
                     FamilyHistoryShare.shared_by_user_id == user.id,
-                    FamilyHistoryShare.is_active == True,
+                    FamilyHistoryShare.is_active.is_(True),
                 )
                 .all()
             )

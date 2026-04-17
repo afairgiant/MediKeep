@@ -8,10 +8,8 @@ Simplified version using centralized security validation.
 import hashlib
 import json
 import os
-import shutil
 import subprocess
 import tempfile
-import urllib.parse
 import zipfile
 from datetime import datetime
 from pathlib import Path
@@ -600,7 +598,6 @@ class BackupService:
 
             # Step 1: Protect the N most recent backups (regardless of age)
             protected_backups = all_backups[:min_count]
-            protected_ids = {backup.id for backup in protected_backups}
 
             # Step 2: Apply time-based retention to remaining backups
             eligible_for_deletion = all_backups[min_count:]

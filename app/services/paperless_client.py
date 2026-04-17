@@ -5,9 +5,9 @@ A clean, maintainable client for Paperless operations without the complexity
 of the original inheritance-based architecture.
 """
 
-from typing import Optional, Tuple, BinaryIO
+from typing import Optional, Tuple
+
 import aiohttp
-from pathlib import Path
 
 from app.core.logging.config import get_logger
 from app.services.paperless_auth import PaperlessAuth
@@ -19,19 +19,13 @@ logger = get_logger(__name__)
 class PaperlessClientError(Exception):
     """Base exception for Paperless client errors."""
 
-    pass
-
 
 class PaperlessConnectionError(PaperlessClientError):
     """Connection-related errors."""
 
-    pass
-
 
 class PaperlessUploadError(PaperlessClientError):
     """Upload-related errors."""
-
-    pass
 
 
 class PaperlessClient:
@@ -197,11 +191,11 @@ class PaperlessClient:
             async with self._session.get(url) as response:
                 if response.status == 404:
                     raise PaperlessClientError(f"Document {document_id} not found")
-                elif response.status == 403:
+                if response.status == 403:
                     raise PaperlessClientError(
                         f"Access denied to document {document_id}"
                     )
-                elif response.status != 200:
+                if response.status != 200:
                     raise PaperlessClientError(
                         f"Download failed with status {response.status}"
                     )
@@ -236,7 +230,7 @@ class PaperlessClient:
                 if response.status == 404:
                     logger.warning(f"Document {document_id} not found for deletion")
                     return True  # Already gone
-                elif response.status not in [200, 204]:
+                if response.status not in [200, 204]:
                     raise PaperlessClientError(
                         f"Delete failed with status {response.status}"
                     )
@@ -266,7 +260,7 @@ class PaperlessClient:
             async with self._session.get(url) as response:
                 if response.status == 404:
                     return None
-                elif response.status != 200:
+                if response.status != 200:
                     raise PaperlessClientError(
                         f"Get info failed with status {response.status}"
                     )
