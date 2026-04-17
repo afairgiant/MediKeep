@@ -588,7 +588,7 @@ class CustomReportPDFGenerator:
                 "liver",
             ]
             if (
-                status in ["active", "ongoing", "chronic"]
+                status in ["active", "ongoing", "chronic", "recurrence", "relapse"]
                 or severity in ["critical", "severe"]
                 or (
                     name
@@ -1106,6 +1106,7 @@ class CustomReportPDFGenerator:
         t = self.translator
         unit_labels = UnitConverter.get_unit_labels(self.unit_system)
 
+        records = self._sort_records(records, "recorded_date")
         for i, record in enumerate(records, 1):
             # Header: date of recording
             rec_date = record.get("recorded_date") or record.get("date")
@@ -1249,17 +1250,17 @@ class CustomReportPDFGenerator:
         """Format medication records with comprehensive medical information"""
         story = []
 
-        # Group medications by status
-        active_meds = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() in ["active", "ongoing", ""]
-        ]
-        inactive_meds = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() not in ["active", "ongoing", ""]
-        ]
+        # Group medications by status, then sort each group most-recent first
+        active_meds = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() in ["active", "ongoing", ""]],
+            "effective_period_start",
+            "medication_name",
+        )
+        inactive_meds = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() not in ["active", "ongoing", ""]],
+            "effective_period_start",
+            "medication_name",
+        )
 
         if active_meds:
             story.append(
@@ -1439,17 +1440,17 @@ class CustomReportPDFGenerator:
         """Format condition records with comprehensive medical information"""
         story = []
 
-        # Group by status for medical clarity
-        active = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() in ["active", "ongoing", "chronic", ""]
-        ]
-        resolved = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() in ["resolved", "inactive", "cured"]
-        ]
+        # Group by status for medical clarity, then sort each group most-recent first
+        active = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() in ["active", "ongoing", "chronic", "recurrence", "relapse", ""]],
+            "onset_date",
+            "condition_name",
+        )
+        resolved = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() in ["resolved", "inactive", "cured"]],
+            "onset_date",
+            "condition_name",
+        )
 
         if active:
             story.append(
@@ -1605,15 +1606,11 @@ class CustomReportPDFGenerator:
 
             # Provider and facility
             provider_info = []
-            if record.get("performing_practitioner"):
-                provider_info.append(
-                    f"{self.translator.field('performed_by')}: {record['performing_practitioner']}"
-                )
-            if record.get("facility"):
-                facility_text = (
-                    f"{self.translator.field('facility')}: {record['facility']}"
-                )
-                if record.get("procedure_setting"):
+            if record.get('practitioner_name'):
+                provider_info.append(f"{self.translator.field('performed_by')}: {record['practitioner_name']}")
+            if record.get('facility'):
+                facility_text = f"{self.translator.field('facility')}: {record['facility']}"
+                if record.get('procedure_setting'):
                     facility_text += f" ({record['procedure_setting']})"
                 provider_info.append(facility_text)
             elif record.get("procedure_setting"):
@@ -1664,27 +1661,14 @@ class CustomReportPDFGenerator:
                     story.append(Paragraph(f"    {detail}", self.styles["CustomBody"]))
 
             # Detailed notes
-            if record.get("findings"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('findings')}:</b> {record['findings']}",
-                        self.styles["CustomBody"],
-                    )
-                )
-            if record.get("notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('procedure_notes')}:</b> {record['notes']}",
-                        self.styles["CustomBody"],
-                    )
-                )
-            if record.get("anesthesia_notes"):
-                story.append(
-                    Paragraph(
-                        f"    <b>{self.translator.field('anesthesia_notes')}:</b> {record['anesthesia_notes']}",
-                        self.styles["CustomBody"],
-                    )
-                )
+            if record.get('description'):
+                story.append(Paragraph(f"    <b>{self.translator.field('description')}:</b> {record['description']}", self.styles['CustomBody']))
+            if record.get('findings'):
+                story.append(Paragraph(f"    <b>{self.translator.field('findings')}:</b> {record['findings']}", self.styles['CustomBody']))
+            if record.get('notes'):
+                story.append(Paragraph(f"    <b>{self.translator.field('procedure_notes')}:</b> {record['notes']}", self.styles['CustomBody']))
+            if record.get('anesthesia_notes'):
+                story.append(Paragraph(f"    <b>{self.translator.field('anesthesia_notes')}:</b> {record['anesthesia_notes']}", self.styles['CustomBody']))
 
             if record.get("tags"):
                 tags = (
@@ -2116,6 +2100,7 @@ class CustomReportPDFGenerator:
         """Format treatment records with comprehensive treatment information"""
         story = []
 
+        records = self._sort_records(records, "start_date", "treatment_name")
         for record in records:
             name = record.get("treatment_name", "Unnamed Treatment")
             treatment_type = record.get("treatment_type", "")
@@ -2343,6 +2328,7 @@ class CustomReportPDFGenerator:
         """Format practitioner records"""
         story = []
 
+        records = sorted(records, key=lambda r: (r.get("name") or "").lower())
         for record in records:
             name = record.get("name", "Unnamed Practitioner")
             practice = record.get("practice", "")
@@ -2381,6 +2367,7 @@ class CustomReportPDFGenerator:
         """Format pharmacy records"""
         story = []
 
+        records = sorted(records, key=lambda r: (r.get("name") or "").lower())
         for record in records:
             name = record.get("name", "Unnamed Pharmacy")
             story.append(Paragraph(f"<b>{name}</b>", self.styles["SubsectionHeader"]))
@@ -2410,6 +2397,7 @@ class CustomReportPDFGenerator:
         """Format emergency contact records"""
         story = []
 
+        records = sorted(records, key=lambda r: (r.get("name") or "").lower())
         for record in records:
             # The field is 'name' not 'contact_name'
             name = record.get("name", "Unnamed Contact")
@@ -2510,6 +2498,7 @@ class CustomReportPDFGenerator:
         # Since we only have the family member data here, we'll display what we have
         # and note that conditions need to be fetched separately if needed
 
+        records = sorted(records, key=lambda r: (r.get("name") or "").lower())
         for record in records:
             name = record.get("name", "Unnamed Family Member")
             relationship = record.get("relationship", "")
@@ -2617,6 +2606,28 @@ class CustomReportPDFGenerator:
 
         return story
 
+    @staticmethod
+    def _sort_records(
+        records: List[Dict[str, Any]],
+        date_field: str,
+        name_field: str = "",
+    ) -> List[Dict[str, Any]]:
+        """Sort records by date descending, then by name ascending as tiebreaker.
+
+        Records without a date value sort to the end of the list, then
+        alphabetically by name among themselves.
+        """
+        # Two-pass stable sort: name first (secondary key), then date (primary key)
+        if name_field:
+            records = sorted(
+                records, key=lambda r: (r.get(name_field) or "").lower()
+            )
+        return sorted(
+            records,
+            key=lambda r: str(r.get(date_field) or ""),
+            reverse=True,
+        )
+
     def _format_date(self, date_value: Any) -> str:
         """Format date values using the user's date_format preference"""
         if date_value is None:
@@ -2628,16 +2639,17 @@ class CustomReportPDFGenerator:
         story = []
 
         # Group symptoms by status (chronic symptoms are ongoing, so include with active)
-        active_symptoms = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() in ["active", "ongoing", "chronic", ""]
-        ]
-        resolved_symptoms = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() in ["resolved", "inactive"]
-        ]
+        # Sort each group most-recent first, then A→Z by name
+        active_symptoms = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() in ["active", "ongoing", "chronic", ""]],
+            "first_occurrence_date",
+            "symptom_name",
+        )
+        resolved_symptoms = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() in ["resolved", "inactive"]],
+            "first_occurrence_date",
+            "symptom_name",
+        )
 
         if active_symptoms:
             story.append(
@@ -2735,17 +2747,17 @@ class CustomReportPDFGenerator:
         """Format injury records with recovery information"""
         story = []
 
-        # Group injuries by status
-        active_injuries = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() in ["active", "healing", "ongoing", ""]
-        ]
-        healed_injuries = [
-            r
-            for r in records
-            if (r.get("status") or "").lower() in ["healed", "resolved", "recovered"]
-        ]
+        # Group injuries by status, then sort each group most-recent first
+        active_injuries = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() in ["active", "healing", "ongoing", ""]],
+            "date_of_injury",
+            "injury_name",
+        )
+        healed_injuries = self._sort_records(
+            [r for r in records if (r.get("status") or "").lower() in ["healed", "resolved", "recovered"]],
+            "date_of_injury",
+            "injury_name",
+        )
 
         if active_injuries:
             story.append(

@@ -42,7 +42,7 @@ def _resolve_locales_dir() -> Path:
     candidates.append(project_root / "frontend" / "public" / "locales")
 
     for candidate in candidates:
-        if candidate.is_dir():
+        if candidate.is_dir() and (candidate / "en" / "reportPdf.json").exists():
             return candidate
 
     return candidates[-1]

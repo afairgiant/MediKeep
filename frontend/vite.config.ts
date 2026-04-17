@@ -32,10 +32,35 @@ export default defineConfig({
         const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'));
         const entries = files.map((f) => {
           const ns = f.replace(/\.json$/, '');
-          const content = fs.readFileSync(path.join(dir, f), 'utf-8');
+          const fullPath = path.join(dir, f);
+          // Register each locale JSON as a Rollup/Vite watched file so edits
+          // invalidate this virtual module in dev instead of silently showing
+          // stale keys until the dev server is restarted.
+          this.addWatchFile(fullPath);
+          const content = fs.readFileSync(fullPath, 'utf-8');
           return `  ${JSON.stringify(ns)}: ${content}`;
         });
         return `export default {\n${entries.join(',\n')}\n};\n`;
+      },
+      handleHotUpdate({ file, server }) {
+        // Normalize both paths to forward slashes without trailing separator so
+        // the boundary check can't match sibling directories like `.../en-GB/`.
+        const localesDir = path
+          .resolve(__dirname, 'public/locales/en')
+          .replace(/\\/g, '/')
+          .replace(/\/$/, '');
+        const normalized = file.replace(/\\/g, '/');
+        const isInsideLocalesDir = normalized.startsWith(localesDir + '/');
+        if (!isInsideLocalesDir || !normalized.endsWith('.json')) {
+          return;
+        }
+        const mod = server.moduleGraph.getModuleById(
+          '\0virtual:bundled-en-locales'
+        );
+        if (mod) {
+          server.moduleGraph.invalidateModule(mod);
+          server.ws.send({ type: 'full-reload' });
+        }
       },
     },
     // Inject build version into service-worker.js so the browser detects SW updates

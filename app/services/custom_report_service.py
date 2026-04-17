@@ -46,11 +46,12 @@ from app.schemas.custom_reports import (
     CustomReportRequest,
     DataSummaryResponse,
     RecordSummary,
-)
-from app.schemas.custom_reports import ReportTemplate as ReportTemplateSchema
-from app.schemas.custom_reports import (
+    ReportTemplate as ReportTemplateSchema,
+    ReportTemplateResponse,
     SelectiveRecordRequest,
 )
+from app.schemas.trend_charts import TrendChartSelection
+from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
 from app.services.export_service import ExportService, UnitConverter
 
@@ -1265,8 +1266,7 @@ class CustomReportService:
                     )
                     if condition:
                         entry = {
-                            "condition_name": condition.condition_name
-                            or f"Condition #{condition.id}"
+                            "condition_name": self._format_condition_name(condition)
                         }
                         if rel.relevance_note:
                             entry["relevance_note"] = rel.relevance_note
@@ -1297,8 +1297,12 @@ class CustomReportService:
                     )
                     if medication:
                         entry = {
-                            "medication_name": medication.medication_name
-                            or f"Medication #{medication.id}"
+                            "medication_name": (
+                                medication.medication_name
+                                or getattr(medication, "alternative_name", None)
+                                or getattr(medication, "indication", None)
+                                or f"Medication #{medication.id}"
+                            )
                         }
                         if medication.dosage:
                             entry["dosage"] = medication.dosage
@@ -1329,6 +1333,16 @@ class CustomReportService:
         )
         return practitioner.name if practitioner else None
 
+    @staticmethod
+    def _format_condition_name(condition) -> str:
+        return (
+            condition.condition_name
+            or condition.diagnosis
+            or condition.code_description
+            or condition.icd10_code
+            or f"Condition #{condition.id}"
+        )
+
     def _resolve_condition_display(self, record) -> Optional[str]:
         """Look up a display name for a record with a condition_id foreign key."""
         condition_id = getattr(record, "condition_id", None)
@@ -1339,13 +1353,7 @@ class CustomReportService:
         )
         if not condition:
             return None
-        return (
-            condition.condition_name
-            or getattr(condition, "diagnosis", None)
-            or getattr(condition, "description", None)
-            or getattr(condition, "icd_code", None)
-            or f"Condition #{condition.id}"
-        )
+        return self._format_condition_name(condition)
 
     @staticmethod
     def _build_reference_range(component) -> Optional[str]:
@@ -1421,6 +1429,56 @@ class CustomReportService:
 
         return summary
 
+    @staticmethod
+    def _pack_template_settings(template_data: ReportTemplateSchema) -> str:
+        """Combine report_settings and trend_charts into a single JSON blob for storage."""
+        packed = dict(template_data.report_settings or {})
+        if template_data.trend_charts is not None:
+            packed["trend_charts"] = template_data.trend_charts.model_dump(mode="json")
+        return json.dumps(packed)
+
+    @staticmethod
+    def _unpack_template_settings(raw: Optional[str]):
+        """Split stored report_settings JSON back into (report_settings, trend_charts)."""
+        stored = json.loads(raw or "{}") if raw else {}
+        trend_charts_data = stored.pop("trend_charts", None)
+        trend_charts = None
+        if trend_charts_data:
+            try:
+                trend_charts = TrendChartSelection(**trend_charts_data)
+            except Exception as exc:  # stored blob from older schema; ignore
+                logger.warning(
+                    "Failed to deserialize trend_charts from template: %s", exc
+                )
+                trend_charts = None
+        return stored, trend_charts
+
+    @classmethod
+    def _to_template_response(cls, template: ReportTemplate) -> ReportTemplateResponse:
+        """Build a ReportTemplateResponse from a DB row with id + timestamps."""
+        selected_records_raw = json.loads(template.selected_records or "[]")
+        report_settings, trend_charts = cls._unpack_template_settings(
+            template.report_settings
+        )
+        return ReportTemplateResponse(
+            id=template.id,
+            user_id=template.user_id,
+            name=template.name,
+            description=template.description,
+            selected_records=[
+                SelectiveRecordRequest(
+                    category=sr["category"], record_ids=sr["record_ids"]
+                )
+                for sr in selected_records_raw
+            ],
+            trend_charts=trend_charts,
+            report_settings=report_settings,
+            is_public=template.is_public,
+            shared_with_family=template.shared_with_family,
+            created_at=template.created_at,
+            updated_at=template.updated_at,
+        )
+
     async def save_report_template(
         self, user_id: int, template_data: ReportTemplateSchema
     ) -> int:
@@ -1453,7 +1511,7 @@ class CustomReportService:
                     for sr in template_data.selected_records
                 ]
             ),
-            report_settings=json.dumps(template_data.report_settings or {}),
+            report_settings=self._pack_template_settings(template_data),
             is_public=template_data.is_public,
             shared_with_family=template_data.shared_with_family,
         )
@@ -1465,43 +1523,23 @@ class CustomReportService:
         logger.info(f"Template '{template_data.name}' saved by user {user_id}")
         return db_template.id
 
-    async def get_saved_templates(self, user_id: int) -> List[ReportTemplateSchema]:
+    async def get_saved_templates(
+        self, user_id: int
+    ) -> List[ReportTemplateResponse]:
         """Get all templates accessible to user"""
         templates = (
             self.db.query(ReportTemplate)
             .filter(ReportTemplate.user_id == user_id)
             .filter(ReportTemplate.is_active.is_(True))
+            .order_by(ReportTemplate.updated_at.desc())
             .all()
         )
 
-        result = []
-        for template in templates:
-            # Parse JSON fields
-            selected_records = json.loads(template.selected_records)
-            report_settings = json.loads(template.report_settings)
-
-            # Convert to schema
-            result.append(
-                ReportTemplateSchema(
-                    name=template.name,
-                    description=template.description,
-                    selected_records=[
-                        SelectiveRecordRequest(
-                            category=sr["category"], record_ids=sr["record_ids"]
-                        )
-                        for sr in selected_records
-                    ],
-                    report_settings=report_settings,
-                    is_public=template.is_public,
-                    shared_with_family=template.shared_with_family,
-                )
-            )
-
-        return result
+        return [self._to_template_response(t) for t in templates]
 
     async def get_template(
         self, user_id: int, template_id: int
-    ) -> Optional[ReportTemplateSchema]:
+    ) -> Optional[ReportTemplateResponse]:
         """Get a specific template"""
         template = (
             self.db.query(ReportTemplate)
@@ -1514,23 +1552,7 @@ class CustomReportService:
         if not template:
             return None
 
-        # Parse and return
-        selected_records = json.loads(template.selected_records)
-        report_settings = json.loads(template.report_settings)
-
-        return ReportTemplateSchema(
-            name=template.name,
-            description=template.description,
-            selected_records=[
-                SelectiveRecordRequest(
-                    category=sr["category"], record_ids=sr["record_ids"]
-                )
-                for sr in selected_records
-            ],
-            report_settings=report_settings,
-            is_public=template.is_public,
-            shared_with_family=template.shared_with_family,
-        )
+        return self._to_template_response(template)
 
     async def update_template(
         self, user_id: int, template_id: int, template_data: ReportTemplateSchema
@@ -1547,6 +1569,21 @@ class CustomReportService:
         if not template:
             return False
 
+        # If renaming, reject collisions with another active template of this user.
+        if template_data.name != template.name:
+            conflict = (
+                self.db.query(ReportTemplate)
+                .filter(ReportTemplate.user_id == user_id)
+                .filter(ReportTemplate.name == template_data.name)
+                .filter(ReportTemplate.is_active == True)
+                .filter(ReportTemplate.id != template_id)
+                .first()
+            )
+            if conflict:
+                raise ValueError(
+                    f"Template with name '{template_data.name}' already exists"
+                )
+
         # Validate ownership of new records
         await self.validate_record_ownership(user_id, template_data.selected_records)
 
@@ -1559,7 +1596,7 @@ class CustomReportService:
                 for sr in template_data.selected_records
             ]
         )
-        template.report_settings = json.dumps(template_data.report_settings or {})
+        template.report_settings = self._pack_template_settings(template_data)
         template.is_public = template_data.is_public
         template.shared_with_family = template_data.shared_with_family
         template.updated_at = datetime.utcnow()

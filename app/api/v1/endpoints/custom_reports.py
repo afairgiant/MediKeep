@@ -292,7 +292,7 @@ async def save_report_template(
         )
 
 
-@router.get("/templates", response_model=List[ReportTemplate])
+@router.get("/templates", response_model=List[ReportTemplateResponse])
 async def get_saved_templates(
     request: Request,
     current_user_id: int = Depends(get_current_user_id),
@@ -319,7 +319,7 @@ async def get_saved_templates(
         )
 
 
-@router.get("/templates/{template_id}", response_model=ReportTemplate)
+@router.get("/templates/{template_id}", response_model=ReportTemplateResponse)
 async def get_template(
     request: Request,
     template_id: int,
@@ -392,6 +392,11 @@ async def update_template(
 
     except HTTPException:
         raise
+    except ValueError as e:
+        log_validation_error(logger, request, str(e), user_id=current_user_id)
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+        )
     except Exception as e:
         log_endpoint_error(
             logger,
