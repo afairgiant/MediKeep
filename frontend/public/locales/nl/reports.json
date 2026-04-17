@@ -210,9 +210,11 @@
     "noSaved": "Geen opgeslagen sjablonen",
     "records": "{{count}} dossiers",
     "reportTemplates": "Rapportsjablonen",
+    "saveAsNew": "Opslaan als nieuw sjabloon",
     "saveAsTemplate": "Opslaan als sjabloon",
     "saveDescription": "Dit sjabloon slaat uw huidige rapportinstellingen, geselecteerde dossiers en geselecteerde trendgrafieken op.",
     "savedTemplates": "Opgeslagen sjablonen",
+    "updateCurrent": "\"{{name}}\" bijwerken",
     "updateTemplate": "Sjabloon bijwerken"
   }
 }

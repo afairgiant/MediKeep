@@ -210,9 +210,11 @@
     "noSaved": "No saved templates",
     "records": "{{count}} records",
     "reportTemplates": "Report Templates",
+    "saveAsNew": "Save as new template",
     "saveAsTemplate": "Save as Template",
     "saveDescription": "This template will save your current report settings, selected records, and selected trend charts.",
     "savedTemplates": "Saved Templates",
+    "updateCurrent": "Update \"{{name}}\"",
     "updateTemplate": "Update Template"
   }
 }

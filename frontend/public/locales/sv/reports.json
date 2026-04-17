@@ -210,9 +210,11 @@
     "noSaved": "Inga sparade mallar",
     "records": "{{count}} handlingar",
     "reportTemplates": "Rapportmallar",
+    "saveAsNew": "Spara som ny mall",
     "saveAsTemplate": "Spara som mall",
     "saveDescription": "Denna mall sparar dina aktuella rapportinställningar, valda handlingar och valda trenddiagram.",
     "savedTemplates": "Sparade mallar",
+    "updateCurrent": "Uppdatera \"{{name}}\"",
     "updateTemplate": "Uppdatera mall"
   }
 }

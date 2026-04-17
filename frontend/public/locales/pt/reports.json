@@ -210,9 +210,11 @@
     "noSaved": "Nenhuns modelos guardados",
     "records": "{{count}} registos",
     "reportTemplates": "Modelos de Relatório",
+    "saveAsNew": "Guardar como novo modelo",
     "saveAsTemplate": "Guardar como Modelo",
     "saveDescription": "Este modelo irá guardar as suas configurações atuais do relatório, registos selecionados e gráficos de tendência selecionados.",
     "savedTemplates": "Modelos Guardados",
+    "updateCurrent": "Atualizar \"{{name}}\"",
     "updateTemplate": "Atualizar Modelo"
   }
 }

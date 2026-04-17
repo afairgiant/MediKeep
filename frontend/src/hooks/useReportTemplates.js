@@ -95,11 +95,20 @@ export const useReportTemplates = () => {
         return false;
       }
 
-      if (
-        !templateData.selected_records ||
-        templateData.selected_records.length === 0
-      ) {
-        setError('Template must have at least one selected record category');
+      const hasRecords =
+        Array.isArray(templateData.selected_records) &&
+        templateData.selected_records.length > 0;
+      const tc = templateData.trend_charts;
+      const hasCharts =
+        !!tc &&
+        ((Array.isArray(tc.vital_charts) && tc.vital_charts.length > 0) ||
+          (Array.isArray(tc.lab_test_charts) &&
+            tc.lab_test_charts.length > 0));
+
+      if (!hasRecords && !hasCharts) {
+        setError(
+          'Template must include at least one record or trend chart'
+        );
         return false;
       }
 
@@ -196,11 +205,20 @@ export const useReportTemplates = () => {
         return false;
       }
 
-      if (
-        !templateData.selected_records ||
-        templateData.selected_records.length === 0
-      ) {
-        setError('Template must have at least one selected record category');
+      const hasRecords =
+        Array.isArray(templateData.selected_records) &&
+        templateData.selected_records.length > 0;
+      const tc = templateData.trend_charts;
+      const hasCharts =
+        !!tc &&
+        ((Array.isArray(tc.vital_charts) && tc.vital_charts.length > 0) ||
+          (Array.isArray(tc.lab_test_charts) &&
+            tc.lab_test_charts.length > 0));
+
+      if (!hasRecords && !hasCharts) {
+        setError(
+          'Template must include at least one record or trend chart'
+        );
         return false;
       }
 

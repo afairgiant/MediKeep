@@ -210,9 +210,11 @@
     "noSaved": "No hay plantillas guardadas",
     "records": "{{count}} registros",
     "reportTemplates": "Plantillas de Informes",
+    "saveAsNew": "Guardar como nueva plantilla",
     "saveAsTemplate": "Guardar como Plantilla",
     "saveDescription": "Esta plantilla guardará la configuración actual del informe, los registros seleccionados y los gráficos de tendencias seleccionados.",
     "savedTemplates": "Plantillas Guardadas",
+    "updateCurrent": "Actualizar \"{{name}}\"",
     "updateTemplate": "Actualizar Plantilla"
   }
 }

@@ -176,6 +176,50 @@ export const useCustomReports = () => {
     });
   }, []);
 
+  // Apply a saved template to the builder state. Uses dataSummary to rehydrate
+  // record objects (selection map stores full record objects keyed by id).
+  const applyTemplate = useCallback((template, summary) => {
+    if (!template) return;
+
+    // Rehydrate selectedRecords: {category: {recordId: recordObject}}
+    const nextSelected = {};
+    (template.selected_records || []).forEach(({ category, record_ids }) => {
+      const categoryData = summary?.categories?.[category];
+      if (!categoryData?.records || !Array.isArray(record_ids)) return;
+      const byId = new Map(categoryData.records.map(r => [r.id, r]));
+      const picked = {};
+      record_ids.forEach(id => {
+        const record = byId.get(id);
+        if (record) picked[id] = record;
+      });
+      if (Object.keys(picked).length > 0) {
+        nextSelected[category] = picked;
+      }
+    });
+    setSelectedRecords(nextSelected);
+
+    // Apply report settings (title, include_*, date_range). Backend returns
+    // trend_charts as a sibling field, but older blobs may still carry it
+    // nested under report_settings — strip defensively.
+    const rawSettings = { ...(template.report_settings || {}) };
+    delete rawSettings.trend_charts;
+    setReportSettings(prev => ({ ...prev, ...rawSettings }));
+
+    // Apply trend charts
+    const tc = template.trend_charts;
+    setTrendCharts({
+      vital_charts: Array.isArray(tc?.vital_charts) ? tc.vital_charts : [],
+      lab_test_charts: Array.isArray(tc?.lab_test_charts) ? tc.lab_test_charts : [],
+    });
+
+    logger.info('custom_reports_template_applied', 'Template applied to builder', {
+      templateId: template.id,
+      templateName: template.name,
+      categoriesApplied: Object.keys(nextSelected).length,
+      component: 'useCustomReports',
+    });
+  }, []);
+
   // --- Trend chart actions ---
 
   const addVitalChart = useCallback(vitalType => {
@@ -505,6 +549,7 @@ export const useCustomReports = () => {
     toggleCategorySelection,
     clearSelections,
     updateReportSettings,
+    applyTemplate,
     generateReport,
     cancelGeneration,
     clearError,

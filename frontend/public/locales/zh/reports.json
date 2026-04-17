@@ -210,9 +210,11 @@
     "noSaved": "无已保存的模板",
     "records": "{{count}} 条记录",
     "reportTemplates": "报告模板",
+    "saveAsNew": "另存为新模板",
     "saveAsTemplate": "另存为模板",
     "saveDescription": "此模板将保存您当前的报告设置、选定记录和选定趋势图表。",
     "savedTemplates": "已保存的模板",
+    "updateCurrent": "更新 \"{{name}}\"",
     "updateTemplate": "更新模板"
   }
 }

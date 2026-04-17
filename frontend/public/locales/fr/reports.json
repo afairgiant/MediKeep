@@ -210,9 +210,11 @@
     "noSaved": "Aucun modèle enregistré",
     "records": "{{count}} dossiers",
     "reportTemplates": "Modèles de rapport",
+    "saveAsNew": "Enregistrer comme nouveau modèle",
     "saveAsTemplate": "Enregistrer comme modèle",
     "saveDescription": "Ce modèle enregistrera vos paramètres de rapport actuels, les dossiers sélectionnés et les graphiques de tendances sélectionnés.",
     "savedTemplates": "Modèles enregistrés",
+    "updateCurrent": "Mettre à jour \"{{name}}\"",
     "updateTemplate": "Mettre à jour le modèle"
   }
 }

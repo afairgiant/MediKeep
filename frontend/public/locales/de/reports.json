@@ -210,9 +210,11 @@
     "noSaved": "Keine gespeicherten Vorlagen",
     "records": "{{count}} Datensätze",
     "reportTemplates": "Berichtvorlagen",
+    "saveAsNew": "Als neue Vorlage speichern",
     "saveAsTemplate": "Als Vorlage speichern",
     "saveDescription": "Diese Vorlage speichert Ihre aktuellen Berichteinstellungen, ausgewählte Datensätze und ausgewählte Trenddiagramme.",
     "savedTemplates": "Gespeicherte Vorlagen",
+    "updateCurrent": "„{{name}}\" aktualisieren",
     "updateTemplate": "Vorlage aktualisieren"
   }
 }

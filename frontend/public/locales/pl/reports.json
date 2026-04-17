@@ -210,9 +210,11 @@
     "noSaved": "Brak zapisanych szablonów",
     "records": "{{count}} rekordów",
     "reportTemplates": "Szablony raportów",
+    "saveAsNew": "Zapisz jako nowy szablon",
     "saveAsTemplate": "Zapisz jako szablon",
     "saveDescription": "Ten szablon zapisze Twoje bieżące ustawienia raportu, wybrane rekordy i wybrane wykresy trendów.",
     "savedTemplates": "Zapisane szablony",
+    "updateCurrent": "Aktualizuj \"{{name}}\"",
     "updateTemplate": "Aktualizuj szablon"
   }
 }

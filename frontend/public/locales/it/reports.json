@@ -210,9 +210,11 @@
     "noSaved": "Nessun modello salvato",
     "records": "{{count}} record",
     "reportTemplates": "Modelli di report",
+    "saveAsNew": "Salva come nuovo modello",
     "saveAsTemplate": "Salva come modello",
     "saveDescription": "Questo modello salverà le tue impostazioni attuali del report, i record selezionati e i grafici di tendenza selezionati.",
     "savedTemplates": "Modelli salvati",
+    "updateCurrent": "Aggiorna \"{{name}}\"",
     "updateTemplate": "Aggiorna modello"
   }
 }
