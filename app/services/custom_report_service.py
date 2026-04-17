@@ -48,8 +48,10 @@ from app.schemas.custom_reports import (
     DataSummaryResponse,
     RecordSummary,
     ReportTemplate as ReportTemplateSchema,
+    ReportTemplateResponse,
     SelectiveRecordRequest,
 )
+from app.schemas.trend_charts import TrendChartSelection
 from app.crud.user_preferences import user_preferences as user_preferences_crud
 from app.services.export_service import ExportService, UnitConverter
 from app.services.custom_report_pdf_generator import CustomReportPDFGenerator
@@ -1432,6 +1434,56 @@ class CustomReportService:
 
         return summary
 
+    @staticmethod
+    def _pack_template_settings(template_data: ReportTemplateSchema) -> str:
+        """Combine report_settings and trend_charts into a single JSON blob for storage."""
+        packed = dict(template_data.report_settings or {})
+        if template_data.trend_charts is not None:
+            packed["trend_charts"] = template_data.trend_charts.model_dump(mode="json")
+        return json.dumps(packed)
+
+    @staticmethod
+    def _unpack_template_settings(raw: Optional[str]):
+        """Split stored report_settings JSON back into (report_settings, trend_charts)."""
+        stored = json.loads(raw or "{}") if raw else {}
+        trend_charts_data = stored.pop("trend_charts", None)
+        trend_charts = None
+        if trend_charts_data:
+            try:
+                trend_charts = TrendChartSelection(**trend_charts_data)
+            except Exception as exc:  # stored blob from older schema; ignore
+                logger.warning(
+                    "Failed to deserialize trend_charts from template: %s", exc
+                )
+                trend_charts = None
+        return stored, trend_charts
+
+    @classmethod
+    def _to_template_response(cls, template: ReportTemplate) -> ReportTemplateResponse:
+        """Build a ReportTemplateResponse from a DB row with id + timestamps."""
+        selected_records_raw = json.loads(template.selected_records or "[]")
+        report_settings, trend_charts = cls._unpack_template_settings(
+            template.report_settings
+        )
+        return ReportTemplateResponse(
+            id=template.id,
+            user_id=template.user_id,
+            name=template.name,
+            description=template.description,
+            selected_records=[
+                SelectiveRecordRequest(
+                    category=sr["category"], record_ids=sr["record_ids"]
+                )
+                for sr in selected_records_raw
+            ],
+            trend_charts=trend_charts,
+            report_settings=report_settings,
+            is_public=template.is_public,
+            shared_with_family=template.shared_with_family,
+            created_at=template.created_at,
+            updated_at=template.updated_at,
+        )
+
     async def save_report_template(
         self, user_id: int, template_data: ReportTemplateSchema
     ) -> int:
@@ -1464,7 +1516,7 @@ class CustomReportService:
                     for sr in template_data.selected_records
                 ]
             ),
-            report_settings=json.dumps(template_data.report_settings or {}),
+            report_settings=self._pack_template_settings(template_data),
             is_public=template_data.is_public,
             shared_with_family=template_data.shared_with_family,
         )
@@ -1476,43 +1528,23 @@ class CustomReportService:
         logger.info(f"Template '{template_data.name}' saved by user {user_id}")
         return db_template.id
 
-    async def get_saved_templates(self, user_id: int) -> List[ReportTemplateSchema]:
+    async def get_saved_templates(
+        self, user_id: int
+    ) -> List[ReportTemplateResponse]:
         """Get all templates accessible to user"""
         templates = (
             self.db.query(ReportTemplate)
             .filter(ReportTemplate.user_id == user_id)
             .filter(ReportTemplate.is_active == True)
+            .order_by(ReportTemplate.updated_at.desc())
             .all()
         )
 
-        result = []
-        for template in templates:
-            # Parse JSON fields
-            selected_records = json.loads(template.selected_records)
-            report_settings = json.loads(template.report_settings)
-
-            # Convert to schema
-            result.append(
-                ReportTemplateSchema(
-                    name=template.name,
-                    description=template.description,
-                    selected_records=[
-                        SelectiveRecordRequest(
-                            category=sr["category"], record_ids=sr["record_ids"]
-                        )
-                        for sr in selected_records
-                    ],
-                    report_settings=report_settings,
-                    is_public=template.is_public,
-                    shared_with_family=template.shared_with_family,
-                )
-            )
-
-        return result
+        return [self._to_template_response(t) for t in templates]
 
     async def get_template(
         self, user_id: int, template_id: int
-    ) -> Optional[ReportTemplateSchema]:
+    ) -> Optional[ReportTemplateResponse]:
         """Get a specific template"""
         template = (
             self.db.query(ReportTemplate)
@@ -1525,23 +1557,7 @@ class CustomReportService:
         if not template:
             return None
 
-        # Parse and return
-        selected_records = json.loads(template.selected_records)
-        report_settings = json.loads(template.report_settings)
-
-        return ReportTemplateSchema(
-            name=template.name,
-            description=template.description,
-            selected_records=[
-                SelectiveRecordRequest(
-                    category=sr["category"], record_ids=sr["record_ids"]
-                )
-                for sr in selected_records
-            ],
-            report_settings=report_settings,
-            is_public=template.is_public,
-            shared_with_family=template.shared_with_family,
-        )
+        return self._to_template_response(template)
 
     async def update_template(
         self, user_id: int, template_id: int, template_data: ReportTemplateSchema
@@ -1558,6 +1574,21 @@ class CustomReportService:
         if not template:
             return False
 
+        # If renaming, reject collisions with another active template of this user.
+        if template_data.name != template.name:
+            conflict = (
+                self.db.query(ReportTemplate)
+                .filter(ReportTemplate.user_id == user_id)
+                .filter(ReportTemplate.name == template_data.name)
+                .filter(ReportTemplate.is_active == True)
+                .filter(ReportTemplate.id != template_id)
+                .first()
+            )
+            if conflict:
+                raise ValueError(
+                    f"Template with name '{template_data.name}' already exists"
+                )
+
         # Validate ownership of new records
         await self.validate_record_ownership(user_id, template_data.selected_records)
 
@@ -1570,7 +1601,7 @@ class CustomReportService:
                 for sr in template_data.selected_records
             ]
         )
-        template.report_settings = json.dumps(template_data.report_settings or {})
+        template.report_settings = self._pack_template_settings(template_data)
         template.is_public = template_data.is_public
         template.shared_with_family = template_data.shared_with_family
         template.updated_at = datetime.utcnow()

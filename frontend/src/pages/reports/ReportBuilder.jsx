@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Center,
@@ -31,6 +31,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { PageHeader } from '../../components';
 import { CategoryTabs } from '../../components/reports';
 import TrendChartSelector from '../../components/reports/TrendChartSelector';
+import TemplateManager from '../../components/reports/TemplateManager';
 import { useCustomReports } from '../../hooks/useCustomReports';
 import { useReportTemplates } from '../../hooks/useReportTemplates';
 import logger from '../../services/logger';
@@ -58,6 +59,7 @@ const ReportBuilder = () => {
     toggleCategorySelection,
     clearSelections,
     updateReportSettings,
+    applyTemplate,
     generateReport,
     clearError,
     addVitalChart,
@@ -66,16 +68,25 @@ const ReportBuilder = () => {
     addLabTestChart,
     removeLabTestChart,
     updateLabTestChartDates,
+    getSelectedRecordsForAPI,
   } = useCustomReports();
 
   const {
     templates,
     loading: templatesLoading,
     error: templatesError,
+    isSaving: isSavingTemplate,
     fetchTemplates,
     loadTemplateForReport,
+    saveTemplate,
+    updateTemplate,
+    deleteTemplate,
     clearError: clearTemplatesError,
   } = useReportTemplates();
+
+  // Track which template (if any) is currently loaded into the builder,
+  // so the user can choose between "Update this one" and "Save as new".
+  const [loadedTemplate, setLoadedTemplate] = useState(null);
 
   // UI state
   const [activeTab, setActiveTab] = useState('medications');
@@ -91,18 +102,34 @@ const ReportBuilder = () => {
     fetchTemplates();
   }, [fetchDataSummary, fetchTemplates]);
 
-  // Handle URL parameter for template loading
+  // Load a template into the builder: fetch, apply to state, remember it so
+  // the user can choose to update it or save-as-new later.
+  const handleLoadTemplate = useCallback(
+    async templateId => {
+      const template = await loadTemplateForReport(templateId);
+      if (template) {
+        applyTemplate(template, dataSummary);
+        setLoadedTemplate(template);
+      }
+    },
+    [applyTemplate, dataSummary, loadTemplateForReport]
+  );
+
+  // If arriving with ?template=<id>, apply that template once both the data
+  // summary and the template list have loaded.
+  const [urlTemplateApplied, setUrlTemplateApplied] = useState(false);
   useEffect(() => {
+    if (urlTemplateApplied || !dataSummary) return;
     const searchParams = new URLSearchParams(location.search);
     const templateId = searchParams.get('template');
+    if (!templateId) return;
 
-    if (templateId && templates.length > 0) {
-      const template = templates.find(t => t.id.toString() === templateId);
-      if (template) {
-        loadTemplateForReport(parseInt(templateId, 10));
-      }
+    const parsedId = parseInt(templateId, 10);
+    if (Number.isFinite(parsedId)) {
+      handleLoadTemplate(parsedId);
+      setUrlTemplateApplied(true);
     }
-  }, [location.search, templates, loadTemplateForReport]);
+  }, [location.search, dataSummary, handleLoadTemplate, urlTemplateApplied]);
 
   // Get available categories from data summary
   const availableCategories = useMemo(
@@ -142,6 +169,119 @@ const ReportBuilder = () => {
     insurance: t('shared:categories.insurance'),
   };
 
+  // Snapshot the builder's current state into a payload the templates API
+  // accepts. Used by both "Save as new" and "Update current".
+  const buildTemplatePayload = useCallback(
+    metadata => ({
+      name: metadata.name?.trim() || '',
+      description: metadata.description?.trim() || null,
+      is_public: !!metadata.is_public,
+      shared_with_family: !!metadata.shared_with_family,
+      selected_records: getSelectedRecordsForAPI(),
+      trend_charts:
+        trendChartCount > 0
+          ? {
+              vital_charts: trendCharts.vital_charts,
+              lab_test_charts: trendCharts.lab_test_charts,
+            }
+          : null,
+      report_settings: {
+        report_title: reportSettings.report_title,
+        include_patient_info: reportSettings.include_patient_info,
+        include_profile_picture: reportSettings.include_profile_picture,
+        include_summary: reportSettings.include_summary,
+        date_range: reportSettings.date_range,
+      },
+    }),
+    [
+      getSelectedRecordsForAPI,
+      trendChartCount,
+      trendCharts.vital_charts,
+      trendCharts.lab_test_charts,
+      reportSettings.report_title,
+      reportSettings.include_patient_info,
+      reportSettings.include_profile_picture,
+      reportSettings.include_summary,
+      reportSettings.date_range,
+    ]
+  );
+
+  // "Save as new" — fresh template from the save modal.
+  const handleSaveTemplate = useCallback(
+    async metadata => {
+      const payload = buildTemplatePayload(metadata);
+      const result = await saveTemplate(payload);
+      if (result?.success && result.template_id) {
+        // Adopt the new template as the "currently loaded" one, so subsequent
+        // edits update it rather than creating another new template.
+        setLoadedTemplate({
+          ...payload,
+          id: result.template_id,
+        });
+        return true;
+      }
+      return false;
+    },
+    [buildTemplatePayload, saveTemplate]
+  );
+
+  // "Update current" — overwrite the loaded template with current builder
+  // state, preserving existing metadata (name, description, sharing flags).
+  const handleUpdateCurrent = useCallback(async () => {
+    if (!loadedTemplate) return false;
+    const payload = buildTemplatePayload({
+      name: loadedTemplate.name,
+      description: loadedTemplate.description,
+      is_public: loadedTemplate.is_public,
+      shared_with_family: loadedTemplate.shared_with_family,
+    });
+    const result = await updateTemplate(loadedTemplate.id, payload);
+    if (result?.success) {
+      setLoadedTemplate(prev => (prev ? { ...prev, ...payload } : prev));
+      return true;
+    }
+    return false;
+  }, [buildTemplatePayload, loadedTemplate, updateTemplate]);
+
+  // Metadata-only edit from the pencil-icon modal. Preserves the template's
+  // existing selections/trend_charts/settings (they're passed through in the
+  // payload the modal hands us).
+  const handleUpdateTemplateMetadata = useCallback(
+    async (templateId, payload) => {
+      const result = await updateTemplate(templateId, payload);
+      if (
+        result?.success &&
+        loadedTemplate &&
+        loadedTemplate.id === templateId
+      ) {
+        // Keep the in-memory loaded template in sync so the menu label
+        // reflects the new name immediately.
+        setLoadedTemplate(prev => (prev ? { ...prev, ...payload } : prev));
+      }
+      return !!result?.success;
+    },
+    [updateTemplate, loadedTemplate]
+  );
+
+  const handleDeleteTemplate = useCallback(
+    async (templateId, templateName) => {
+      const result = await deleteTemplate(templateId, templateName);
+      if (result?.success && loadedTemplate?.id === templateId) {
+        setLoadedTemplate(null);
+      }
+      return !!result?.success;
+    },
+    [deleteTemplate, loadedTemplate]
+  );
+
+  // When the user clears selections, also forget the loaded template — they
+  // are explicitly starting from scratch, so "Update current" shouldn't
+  // target a template whose selections are no longer represented.
+  const handleClearSelections = useCallback(() => {
+    clearSelections();
+    setLoadedTemplate(null);
+  }, [clearSelections]);
+
   // Build generate button label
   const getGenerateButtonLabel = () => {
     if (selectedCount > 0 && trendChartCount > 0) {
@@ -158,7 +298,10 @@ const ReportBuilder = () => {
     return t('builder.buttons.generateReport', { count: selectedCount });
   };
 
-  if (loading || templatesLoading) {
+  // Only block the whole page on the initial data load. Once dataSummary is
+  // present, subsequent background loads (template fetch/delete) shouldn't
+  // blank the UI.
+  if (!dataSummary && (loading || templatesLoading)) {
     return (
       <MedicalPageLoading
         message={t('builder.loading', 'Loading reports...')}
@@ -199,6 +342,19 @@ const ReportBuilder = () => {
             </Stack>
 
             <Group>
+              <TemplateManager
+                templates={templates}
+                hasSelections={hasSelections}
+                loadedTemplateId={loadedTemplate?.id ?? null}
+                loadedTemplateName={loadedTemplate?.name ?? ''}
+                isSaving={isSavingTemplate}
+                onSaveTemplate={handleSaveTemplate}
+                onLoadTemplate={handleLoadTemplate}
+                onUpdateTemplate={handleUpdateTemplateMetadata}
+                onUpdateCurrent={handleUpdateCurrent}
+                onDeleteTemplate={handleDeleteTemplate}
+              />
+
               <Button
                 leftSection={<IconSettings size={16} />}
                 variant="outline"
@@ -274,7 +430,7 @@ const ReportBuilder = () => {
                 size="xs"
                 variant="subtle"
                 color="red"
-                onClick={clearSelections}
+                onClick={handleClearSelections}
               >
                 {t('builder.buttons.clearSelections')}
               </Button>

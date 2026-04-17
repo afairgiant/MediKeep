@@ -667,6 +667,233 @@ class TestReportTemplatesAPI:
 
         assert response.status_code == 422
 
+    def test_template_response_includes_id_and_timestamps(
+        self, client: TestClient, authenticated_headers, user_with_patient
+    ):
+        """Regression: GET endpoints must return id/user_id/created_at/updated_at.
+
+        Previously the endpoint used the plain ``ReportTemplate`` schema which
+        has none of those fields, so the frontend could not identify loaded
+        templates.
+        """
+        patient_id = user_with_patient["patient"].id
+        med_response = client.post(
+            "/api/v1/medications/",
+            json={
+                "medication_name": "Meta Test Med",
+                "dosage": "10mg",
+                "status": "active",
+                "patient_id": patient_id,
+            },
+            headers=authenticated_headers,
+        )
+        med_id = med_response.json()["id"]
+
+        template = {
+            "name": "Template With Metadata",
+            "selected_records": [{"category": "medications", "record_ids": [med_id]}],
+        }
+        save_response = client.post(
+            "/api/v1/custom-reports/templates",
+            json=template,
+            headers=authenticated_headers,
+        )
+        assert save_response.status_code == 200
+        template_id = save_response.json()["template_id"]
+
+        # GET by id returns full metadata.
+        single = client.get(
+            f"/api/v1/custom-reports/templates/{template_id}",
+            headers=authenticated_headers,
+        )
+        assert single.status_code == 200
+        body = single.json()
+        assert body["id"] == template_id
+        assert isinstance(body["user_id"], int)
+        assert "created_at" in body and body["created_at"]
+        assert "updated_at" in body and body["updated_at"]
+
+        # LIST also carries id/timestamps for each template.
+        listing = client.get(
+            "/api/v1/custom-reports/templates", headers=authenticated_headers
+        )
+        assert listing.status_code == 200
+        entries = listing.json()
+        assert isinstance(entries, list)
+        match = next((e for e in entries if e["id"] == template_id), None)
+        assert match is not None, "Saved template missing from list"
+        assert "created_at" in match and match["created_at"]
+        assert "updated_at" in match and match["updated_at"]
+
+    def test_template_round_trip_preserves_trend_charts_and_settings(
+        self, client: TestClient, authenticated_headers, user_with_patient
+    ):
+        """Regression: trend_charts + report_settings must survive save→load."""
+        patient_id = user_with_patient["patient"].id
+        med_response = client.post(
+            "/api/v1/medications/",
+            json={
+                "medication_name": "Round Trip Med",
+                "dosage": "10mg",
+                "status": "active",
+                "patient_id": patient_id,
+            },
+            headers=authenticated_headers,
+        )
+        med_id = med_response.json()["id"]
+
+        trend_charts = {
+            "vital_charts": [
+                {
+                    "vital_type": "blood_pressure",
+                    "date_from": "2025-01-01",
+                    "date_to": "2025-06-30",
+                }
+            ],
+            "lab_test_charts": [
+                {
+                    "test_name": "Glucose",
+                    "date_from": "2025-01-01",
+                    "date_to": "2025-06-30",
+                }
+            ],
+        }
+        report_settings = {
+            "report_title": "My Custom Title",
+            "include_patient_info": False,
+            "include_profile_picture": False,
+            "include_summary": True,
+            "date_range": {"start_date": "2025-01-01", "end_date": "2025-12-31"},
+        }
+
+        template = {
+            "name": "Round-trip Template",
+            "description": "Verifies trend_charts + settings persist",
+            "selected_records": [
+                {"category": "medications", "record_ids": [med_id]}
+            ],
+            "trend_charts": trend_charts,
+            "report_settings": report_settings,
+        }
+        save_response = client.post(
+            "/api/v1/custom-reports/templates",
+            json=template,
+            headers=authenticated_headers,
+        )
+        assert save_response.status_code == 200
+        template_id = save_response.json()["template_id"]
+
+        fetched = client.get(
+            f"/api/v1/custom-reports/templates/{template_id}",
+            headers=authenticated_headers,
+        ).json()
+
+        # Selections preserved.
+        assert fetched["selected_records"] == [
+            {"category": "medications", "record_ids": [med_id]}
+        ]
+
+        # Trend charts come back as a sibling field (not nested in settings).
+        assert fetched["trend_charts"] is not None
+        assert len(fetched["trend_charts"]["vital_charts"]) == 1
+        assert (
+            fetched["trend_charts"]["vital_charts"][0]["vital_type"]
+            == "blood_pressure"
+        )
+        assert len(fetched["trend_charts"]["lab_test_charts"]) == 1
+        assert (
+            fetched["trend_charts"]["lab_test_charts"][0]["test_name"].lower()
+            == "glucose"
+        )
+
+        # Report settings preserved and do not leak trend_charts back into them.
+        assert "trend_charts" not in fetched["report_settings"]
+        assert fetched["report_settings"]["report_title"] == "My Custom Title"
+        assert fetched["report_settings"]["include_patient_info"] is False
+        assert fetched["report_settings"]["include_summary"] is True
+
+    def test_duplicate_template_name_rejected(
+        self, client: TestClient, authenticated_headers, user_with_patient
+    ):
+        """Saving a second active template with the same name must return 422."""
+        patient_id = user_with_patient["patient"].id
+        med_response = client.post(
+            "/api/v1/medications/",
+            json={
+                "medication_name": "Dup Test Med",
+                "dosage": "10mg",
+                "status": "active",
+                "patient_id": patient_id,
+            },
+            headers=authenticated_headers,
+        )
+        med_id = med_response.json()["id"]
+
+        payload = {
+            "name": "Duplicate Template",
+            "selected_records": [
+                {"category": "medications", "record_ids": [med_id]}
+            ],
+        }
+
+        first = client.post(
+            "/api/v1/custom-reports/templates",
+            json=payload,
+            headers=authenticated_headers,
+        )
+        assert first.status_code == 200
+
+        second = client.post(
+            "/api/v1/custom-reports/templates",
+            json=payload,
+            headers=authenticated_headers,
+        )
+        assert second.status_code == 422
+
+    def test_update_template_rename_collision_rejected(
+        self, client: TestClient, authenticated_headers, user_with_patient
+    ):
+        """Renaming a template to another active template's name must 422."""
+        patient_id = user_with_patient["patient"].id
+        med_response = client.post(
+            "/api/v1/medications/",
+            json={
+                "medication_name": "Rename Test Med",
+                "dosage": "10mg",
+                "status": "active",
+                "patient_id": patient_id,
+            },
+            headers=authenticated_headers,
+        )
+        med_id = med_response.json()["id"]
+
+        base = {
+            "selected_records": [
+                {"category": "medications", "record_ids": [med_id]}
+            ]
+        }
+
+        a = client.post(
+            "/api/v1/custom-reports/templates",
+            json={"name": "Rename A", **base},
+            headers=authenticated_headers,
+        )
+        b = client.post(
+            "/api/v1/custom-reports/templates",
+            json={"name": "Rename B", **base},
+            headers=authenticated_headers,
+        )
+        assert a.status_code == 200
+        assert b.status_code == 200
+        b_id = b.json()["template_id"]
+
+        collision = client.put(
+            f"/api/v1/custom-reports/templates/{b_id}",
+            json={"name": "Rename A", **base},
+            headers=authenticated_headers,
+        )
+        assert collision.status_code == 422
+
     def test_save_template_invalid_report_settings(
         self, client: TestClient, authenticated_headers, user_with_patient
     ):
