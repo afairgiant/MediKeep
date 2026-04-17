@@ -1269,8 +1269,7 @@ class CustomReportService:
                     )
                     if condition:
                         entry = {
-                            "condition_name": condition.condition_name
-                            or f"Condition #{condition.id}"
+                            "condition_name": self._format_condition_name(condition)
                         }
                         if rel.relevance_note:
                             entry["relevance_note"] = rel.relevance_note
@@ -1301,8 +1300,12 @@ class CustomReportService:
                     )
                     if medication:
                         entry = {
-                            "medication_name": medication.medication_name
-                            or f"Medication #{medication.id}"
+                            "medication_name": (
+                                medication.medication_name
+                                or getattr(medication, "alternative_name", None)
+                                or getattr(medication, "indication", None)
+                                or f"Medication #{medication.id}"
+                            )
                         }
                         if medication.dosage:
                             entry["dosage"] = medication.dosage
@@ -1333,6 +1336,16 @@ class CustomReportService:
         )
         return practitioner.name if practitioner else None
 
+    @staticmethod
+    def _format_condition_name(condition) -> str:
+        return (
+            condition.condition_name
+            or condition.diagnosis
+            or condition.code_description
+            or condition.icd10_code
+            or f"Condition #{condition.id}"
+        )
+
     def _resolve_condition_display(self, record) -> Optional[str]:
         """Look up a display name for a record with a condition_id foreign key."""
         condition_id = getattr(record, "condition_id", None)
@@ -1343,13 +1356,7 @@ class CustomReportService:
         )
         if not condition:
             return None
-        return (
-            condition.condition_name
-            or getattr(condition, "diagnosis", None)
-            or getattr(condition, "description", None)
-            or getattr(condition, "icd_code", None)
-            or f"Condition #{condition.id}"
-        )
+        return self._format_condition_name(condition)
 
     @staticmethod
     def _build_reference_range(component) -> Optional[str]:

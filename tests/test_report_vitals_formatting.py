@@ -76,7 +76,7 @@ class TestVitalsFormatting:
         story = generator._format_vitals([sample_vital_record])
         all_text = _extract_table_text(story)
 
-        assert "Pression artérielle" in all_text
+        assert "Tension artérielle" in all_text
         assert "Fréquence cardiaque" in all_text
         assert "Température" in all_text
 
