@@ -57,8 +57,8 @@ const TemplateManager = ({
   const handleSaveNew = () => {
     if (!hasSelections) {
       notifications.show({
-        title: 'No Records Selected',
-        message: 'Please select at least one record before saving a template.',
+        title: t('templates.noSelectionsTitle'),
+        message: t('templates.noSelectionsMessage'),
         color: 'orange',
         autoClose: 5000,
       });
@@ -88,8 +88,8 @@ const TemplateManager = ({
   const handleSubmitSave = async () => {
     if (!templateForm.name.trim()) {
       notifications.show({
-        title: 'Validation Error',
-        message: 'Template name is required.',
+        title: t('shared:labels.error'),
+        message: t('templates.nameRequired'),
         color: 'red',
         autoClose: 5000,
       });
@@ -113,8 +113,8 @@ const TemplateManager = ({
   const handleSubmitEdit = async () => {
     if (!templateForm.name.trim()) {
       notifications.show({
-        title: 'Validation Error',
-        message: 'Template name is required.',
+        title: t('shared:labels.error'),
+        message: t('templates.nameRequired'),
         color: 'red',
         autoClose: 5000,
       });
@@ -154,8 +154,8 @@ const TemplateManager = ({
     const success = await onDeleteTemplate(template.id, template.name);
     if (success) {
       notifications.show({
-        title: 'Template Deleted',
-        message: `Template "${template.name}" has been deleted.`,
+        title: t('templates.deletedTitle'),
+        message: t('templates.deletedMessage', { name: template.name }),
         color: 'green',
         autoClose: 5000,
       });
@@ -261,13 +261,13 @@ const TemplateManager = ({
       <Modal
         opened={showSaveModal}
         onClose={closeSaveModal}
-        title="Save Report Template"
+        title={t('templates.saveModalTitle')}
         size="md"
       >
         <Stack gap="md">
           <TextInput
-            label="Template Name"
-            placeholder="Enter template name"
+            label={t('shared:fields.name')}
+            placeholder={t('templates.namePlaceholder')}
             value={templateForm.name}
             onChange={event =>
               setTemplateForm(prev => ({
@@ -280,8 +280,8 @@ const TemplateManager = ({
           />
 
           <Textarea
-            label="Description"
-            placeholder="Optional description"
+            label={t('shared:fields.description')}
+            placeholder={t('templates.descriptionPlaceholder')}
             value={templateForm.description}
             onChange={event =>
               setTemplateForm(prev => ({
@@ -311,13 +311,13 @@ const TemplateManager = ({
       <Modal
         opened={showEditModal}
         onClose={closeEditModal}
-        title="Edit Template"
+        title={t('templates.editTemplate')}
         size="md"
       >
         <Stack gap="md">
           <TextInput
-            label="Template Name"
-            placeholder="Enter template name"
+            label={t('shared:fields.name')}
+            placeholder={t('templates.namePlaceholder')}
             value={templateForm.name}
             onChange={event =>
               setTemplateForm(prev => ({
@@ -329,8 +329,8 @@ const TemplateManager = ({
           />
 
           <Textarea
-            label="Description"
-            placeholder="Optional description"
+            label={t('shared:fields.description')}
+            placeholder={t('templates.descriptionPlaceholder')}
             value={templateForm.description}
             onChange={event =>
               setTemplateForm(prev => ({

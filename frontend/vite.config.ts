@@ -43,11 +43,15 @@ export default defineConfig({
         return `export default {\n${entries.join(',\n')}\n};\n`;
       },
       handleHotUpdate({ file, server }) {
+        // Normalize both paths to forward slashes without trailing separator so
+        // the boundary check can't match sibling directories like `.../en-GB/`.
         const localesDir = path
           .resolve(__dirname, 'public/locales/en')
-          .replace(/\\/g, '/');
+          .replace(/\\/g, '/')
+          .replace(/\/$/, '');
         const normalized = file.replace(/\\/g, '/');
-        if (!normalized.startsWith(localesDir) || !normalized.endsWith('.json')) {
+        const isInsideLocalesDir = normalized.startsWith(localesDir + '/');
+        if (!isInsideLocalesDir || !normalized.endsWith('.json')) {
           return;
         }
         const mod = server.moduleGraph.getModuleById(

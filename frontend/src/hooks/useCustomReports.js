@@ -20,6 +20,17 @@ const getDefaultDateFrom = () => {
 
 const getDefaultDateTo = () => formatLocalDate(new Date());
 
+// Default report settings shape. Exposed as a module constant so applyTemplate
+// can reset to these values (not to whatever was previously in state) when a
+// template has only partial settings.
+const DEFAULT_REPORT_SETTINGS = Object.freeze({
+  report_title: 'Custom Medical Report',
+  include_patient_info: true,
+  include_summary: true,
+  include_profile_picture: true,
+  date_range: null,
+});
+
 /**
  * Custom hook for managing custom report generation
  * Provides data fetching, report generation, and download functionality
@@ -30,11 +41,7 @@ export const useCustomReports = () => {
   const [selectedRecords, setSelectedRecords] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportSettings, setReportSettings] = useState({
-    report_title: 'Custom Medical Report',
-    include_patient_info: true,
-    include_summary: true,
-    include_profile_picture: true,
-    date_range: null,
+    ...DEFAULT_REPORT_SETTINGS,
   });
 
   // Trend chart state
@@ -181,29 +188,36 @@ export const useCustomReports = () => {
   const applyTemplate = useCallback((template, summary) => {
     if (!template) return;
 
-    // Rehydrate selectedRecords: {category: {recordId: recordObject}}
+    // Rehydrate selectedRecords: {category: {recordId: recordObject}}.
+    // The data-summary endpoint truncates each category to 100 records for UI
+    // performance, so a saved id may not appear in `summary.categories[...]`.
+    // Preserve those ids as minimal stubs so the selection — and the eventual
+    // report-generation payload built from Object.keys(records) — still covers
+    // every id the user originally saved. The UI only renders records that
+    // appear in the summary, so stubs are invisible (a separate UX concern).
     const nextSelected = {};
     (template.selected_records || []).forEach(({ category, record_ids }) => {
+      if (!Array.isArray(record_ids) || record_ids.length === 0) return;
       const categoryData = summary?.categories?.[category];
-      if (!categoryData?.records || !Array.isArray(record_ids)) return;
-      const byId = new Map(categoryData.records.map(r => [r.id, r]));
+      const byId = new Map(
+        (categoryData?.records || []).map(r => [r.id, r])
+      );
       const picked = {};
       record_ids.forEach(id => {
-        const record = byId.get(id);
-        if (record) picked[id] = record;
+        picked[id] = byId.get(id) || { id };
       });
-      if (Object.keys(picked).length > 0) {
-        nextSelected[category] = picked;
-      }
+      nextSelected[category] = picked;
     });
     setSelectedRecords(nextSelected);
 
-    // Apply report settings (title, include_*, date_range). Backend returns
-    // trend_charts as a sibling field, but older blobs may still carry it
-    // nested under report_settings — strip defensively.
+    // Apply report settings: replace state entirely with the template's
+    // values, falling back to DEFAULT_REPORT_SETTINGS for any key the template
+    // omits. Merging with prior state would leak in-progress edits into the
+    // loaded template. Backend returns trend_charts as a sibling field, but
+    // older blobs may carry it nested under report_settings — strip defensively.
     const rawSettings = { ...(template.report_settings || {}) };
     delete rawSettings.trend_charts;
-    setReportSettings(prev => ({ ...prev, ...rawSettings }));
+    setReportSettings({ ...DEFAULT_REPORT_SETTINGS, ...rawSettings });
 
     // Apply trend charts
     const tc = template.trend_charts;

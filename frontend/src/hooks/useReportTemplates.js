@@ -126,7 +126,9 @@ export const useReportTemplates = () => {
 
         logger.info('report_template_save', 'Saving new report template', {
           templateName: templateData.name,
-          categoriesCount: templateData.selected_records.length,
+          categoriesCount: Array.isArray(templateData.selected_records)
+            ? templateData.selected_records.length
+            : 0,
           component: 'useReportTemplates',
         });
 
@@ -237,7 +239,9 @@ export const useReportTemplates = () => {
         logger.info('report_template_update', 'Updating report template', {
           templateId,
           templateName: templateData.name,
-          categoriesCount: templateData.selected_records.length,
+          categoriesCount: Array.isArray(templateData.selected_records)
+            ? templateData.selected_records.length
+            : 0,
           component: 'useReportTemplates',
         });
 

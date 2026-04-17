@@ -77,12 +77,12 @@ describe('useCustomReports', () => {
       expect(result.current.selectedCount).toBe(3);
     });
 
-    it('silently drops record ids that no longer exist in the summary', () => {
+    it('keeps ids missing from the summary as stubs so they still reach the report', () => {
       const { result } = renderHook(() => useCustomReports());
 
       const template = {
         id: 1,
-        name: 'Stale',
+        name: 'Beyond Summary',
         selected_records: [
           { category: 'medications', record_ids: [101, 999] },
         ],
@@ -94,9 +94,16 @@ describe('useCustomReports', () => {
         result.current.applyTemplate(template, dataSummary);
       });
 
-      // Only the still-existing record should appear in state.
-      expect(Object.keys(result.current.selectedRecords.medications)).toEqual([
-        '101',
+      // Both the summary-known record and the stub must be retained.
+      const meds = result.current.selectedRecords.medications;
+      expect(Object.keys(meds).sort()).toEqual(['101', '999']);
+      // Known id gets the full record; unknown id gets a minimal placeholder.
+      expect(meds[101]).toMatchObject({ id: 101, title: 'Med A' });
+      expect(meds[999]).toEqual({ id: 999 });
+      // getSelectedRecordsForAPI must carry the stub id through to the
+      // generation payload.
+      expect(result.current.getSelectedRecordsForAPI()).toEqual([
+        { category: 'medications', record_ids: [101, 999] },
       ]);
     });
 
@@ -166,6 +173,42 @@ describe('useCustomReports', () => {
       expect(result.current.reportSettings.include_patient_info).toBe(false);
       expect(result.current.reportSettings.include_summary).toBe(true);
       expect(result.current.reportSettings).not.toHaveProperty('trend_charts');
+    });
+
+    it('resets report_settings to defaults rather than merging prior in-progress edits', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      // Simulate user edits before applying the template.
+      act(() => {
+        result.current.updateReportSettings({
+          report_title: 'Mid-edit Title',
+          include_patient_info: false,
+        });
+      });
+
+      const template = {
+        id: 1,
+        name: 'Partial',
+        selected_records: [],
+        trend_charts: null,
+        // Template only defines report_title; everything else must fall back
+        // to DEFAULT_REPORT_SETTINGS, not to the user's pre-apply values.
+        report_settings: { report_title: 'From Template' },
+      };
+
+      act(() => {
+        result.current.applyTemplate(template, dataSummary);
+      });
+
+      expect(result.current.reportSettings.report_title).toBe(
+        'From Template'
+      );
+      // User had toggled this to false; applying the template must restore
+      // the default of true because the template omitted the key.
+      expect(result.current.reportSettings.include_patient_info).toBe(true);
+      expect(result.current.reportSettings.include_summary).toBe(true);
+      expect(result.current.reportSettings.include_profile_picture).toBe(true);
+      expect(result.current.reportSettings.date_range).toBeNull();
     });
 
     it('is a no-op when template is falsy', () => {
