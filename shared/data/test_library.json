@@ -1536,11 +1536,11 @@
     },
     {
       "test_name": "Thyroid Peroxidase Antibody",
-      "abbreviation": "AKMI",
+      "abbreviation": "Anti-TPO",
       "test_code": "8099-4",
       "default_unit": "U/mL",
       "category": "immunology",
-      "common_names": ["TPO Antibody", "Anti-TPO"],
+      "common_names": ["TPO Antibody"],
       "is_common": false,
       "display_order": 138
     },
