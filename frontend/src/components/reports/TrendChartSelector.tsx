@@ -34,6 +34,7 @@ interface TrendChartSelectorProps {
     }>;
     lab_test_charts: Array<{
       test_name: string;
+      unit: string | null;
       date_from: string | null;
       date_to: string | null;
     }>;
@@ -45,10 +46,11 @@ interface TrendChartSelectorProps {
     _dateFrom: string | null,
     _dateTo: string | null
   ) => void;
-  addLabTestChart: (_testName: string) => void;
-  removeLabTestChart: (_testName: string) => void;
+  addLabTestChart: (_testName: string, _unit: string | null) => void;
+  removeLabTestChart: (_testName: string, _unit: string | null) => void;
   updateLabTestChartDates: (
     _testName: string,
+    _unit: string | null,
     _dateFrom: string | null,
     _dateTo: string | null
   ) => void;
@@ -185,23 +187,35 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   const selectedVitalTypes = new Set(
     trendCharts.vital_charts.map(c => c.vital_type)
   );
-  const selectedLabTestNames = trendCharts.lab_test_charts.map(
-    c => c.test_name
+
+  // Composite (test_name, unit) key — same test with different units must not
+  // merge into a single trend. Empty string represents the null/no-unit bucket.
+  const makeLabKey = (testName: string, unit: string | null | undefined) =>
+    `${testName.toLowerCase()}::${(unit ?? '').trim().toLowerCase()}`;
+
+  const selectedLabTestKeys = trendCharts.lab_test_charts.map(c =>
+    makeLabKey(c.test_name, c.unit)
   );
 
-  // Deduplicate lab tests by test_name (API may return same name with different units)
-  const seenLabTestNames = new Set<string>();
-  const labTestSelectData = availableLabTests
-    .filter(lt => {
-      const key = lt.test_name.toLowerCase();
-      if (seenLabTestNames.has(key)) return false;
-      seenLabTestNames.add(key);
-      return true;
-    })
-    .map(lt => ({
-      value: lt.test_name,
-      label: `${lt.test_name}${lt.unit ? ` (${lt.unit})` : ''} - ${lt.count} results`,
-    }));
+  // One select option per (test_name, unit) pair. Retain the original test_name
+  // casing from the API so user-facing values aren't lowercased, but encode the
+  // key with lowercased components so dedup matches regardless of casing.
+  const labTestSelectData = availableLabTests.map(lt => ({
+    value: `${lt.test_name}::${(lt.unit ?? '').trim()}`,
+    label: `${lt.test_name}${lt.unit ? ` (${lt.unit})` : ''} - ${lt.count} results`,
+  }));
+
+  const decodeSelectValue = (
+    value: string
+  ): { testName: string; unit: string | null } => {
+    const [testName, ...unitParts] = value.split('::');
+    const rawUnit = unitParts.join('::');
+    return { testName, unit: rawUnit === '' ? null : rawUnit };
+  };
+
+  const selectedLabSelectValues = trendCharts.lab_test_charts.map(
+    c => `${c.test_name}::${(c.unit ?? '').trim()}`
+  );
 
   const handleVitalToggle = (vitalType: string, checked: boolean) => {
     if (checked) {
@@ -212,20 +226,25 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   };
 
   const handleLabTestChange = (selectedValues: string[]) => {
-    // Find added items
-    const currentNames = new Set(
-      selectedLabTestNames.map(n => n.toLowerCase())
+    const currentKeys = new Set(selectedLabTestKeys);
+    const nextKeys = new Set(
+      selectedValues.map(v => {
+        const { testName, unit } = decodeSelectValue(v);
+        return makeLabKey(testName, unit);
+      })
     );
-    for (const name of selectedValues) {
-      if (!currentNames.has(name.toLowerCase())) {
-        addLabTestChart(name);
+
+    // Add new selections
+    for (const value of selectedValues) {
+      const { testName, unit } = decodeSelectValue(value);
+      if (!currentKeys.has(makeLabKey(testName, unit))) {
+        addLabTestChart(testName, unit);
       }
     }
-    // Find removed items
-    const newNames = new Set(selectedValues.map(n => n.toLowerCase()));
-    for (const name of selectedLabTestNames) {
-      if (!newNames.has(name.toLowerCase())) {
-        removeLabTestChart(name);
+    // Remove deselected charts
+    for (const chart of trendCharts.lab_test_charts) {
+      if (!nextKeys.has(makeLabKey(chart.test_name, chart.unit))) {
+        removeLabTestChart(chart.test_name, chart.unit);
       }
     }
   };
@@ -304,14 +323,14 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
           </Text>
           <MultiSelect
             data={labTestSelectData}
-            value={selectedLabTestNames}
+            value={selectedLabSelectValues}
             onChange={handleLabTestChange}
             searchable
             placeholder={t(
               'builder.trendCharts.labTestCharts.searchPlaceholder'
             )}
             maxDropdownHeight={200}
-            disabled={maxReached && selectedLabTestNames.length === 0}
+            disabled={maxReached && selectedLabSelectValues.length === 0}
             clearable
           />
         </Stack>
@@ -395,65 +414,93 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
 
           {/* Lab test chart rows */}
           {trendCharts.lab_test_charts.map(chart => {
-            const count = effectiveCounts.lab_test_counts[chart.test_name];
+            // Counts are keyed by composite "test_name::unit" so same-named tests
+            // with different units have distinct counts.
+            const countKey = `${chart.test_name}::${chart.unit ?? ''}`;
+            const count = effectiveCounts.lab_test_counts[countKey];
+            const rowKey = makeLabKey(chart.test_name, chart.unit);
+            const isLegacy = chart.unit == null;
             return (
-              <Group key={chart.test_name} gap="sm" wrap="nowrap">
-                <Badge
-                  variant="light"
-                  color="teal"
-                  size="lg"
-                  style={{ flex: '0 0 auto' }}
-                >
-                  {chart.test_name}
-                </Badge>
-                <DatePickerInput
-                  value={chart.date_from}
-                  onChange={val =>
-                    updateLabTestChartDates(chart.test_name, val, chart.date_to)
-                  }
-                  size="xs"
-                  style={{ width: 130 }}
-                  placeholder={t('builder.trendCharts.dateFrom')}
-                  aria-label={t('builder.trendCharts.dateFrom')}
-                  clearable
-                  maxDate={chart.date_to || undefined}
-                  popoverProps={{ withinPortal: true }}
-                />
-                <DatePickerInput
-                  value={chart.date_to}
-                  onChange={val =>
-                    updateLabTestChartDates(
-                      chart.test_name,
-                      chart.date_from,
-                      val
-                    )
-                  }
-                  size="xs"
-                  style={{ width: 130 }}
-                  placeholder={t('builder.trendCharts.dateTo')}
-                  aria-label={t('builder.trendCharts.dateTo')}
-                  clearable
-                  minDate={chart.date_from || undefined}
-                  maxDate={today}
-                  popoverProps={{ withinPortal: true }}
-                />
-                {count !== undefined && (
-                  <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                    {t('builder.trendCharts.recordCount', { count })}
-                  </Text>
+              <Stack key={rowKey} gap={4}>
+                <Group gap="sm" wrap="nowrap">
+                  <Badge
+                    variant="light"
+                    color="teal"
+                    size="lg"
+                    style={{ flex: '0 0 auto' }}
+                  >
+                    {chart.test_name}
+                    {chart.unit ? ` (${chart.unit})` : ''}
+                  </Badge>
+                  <DatePickerInput
+                    value={chart.date_from}
+                    onChange={val =>
+                      updateLabTestChartDates(
+                        chart.test_name,
+                        chart.unit,
+                        val,
+                        chart.date_to
+                      )
+                    }
+                    size="xs"
+                    style={{ width: 130 }}
+                    placeholder={t('builder.trendCharts.dateFrom')}
+                    aria-label={t('builder.trendCharts.dateFrom')}
+                    clearable
+                    maxDate={chart.date_to || undefined}
+                    popoverProps={{ withinPortal: true }}
+                  />
+                  <DatePickerInput
+                    value={chart.date_to}
+                    onChange={val =>
+                      updateLabTestChartDates(
+                        chart.test_name,
+                        chart.unit,
+                        chart.date_from,
+                        val
+                      )
+                    }
+                    size="xs"
+                    style={{ width: 130 }}
+                    placeholder={t('builder.trendCharts.dateTo')}
+                    aria-label={t('builder.trendCharts.dateTo')}
+                    clearable
+                    minDate={chart.date_from || undefined}
+                    maxDate={today}
+                    popoverProps={{ withinPortal: true }}
+                  />
+                  {count !== undefined && (
+                    <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+                      {t('builder.trendCharts.recordCount', { count })}
+                    </Text>
+                  )}
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    size="sm"
+                    onClick={() =>
+                      removeLabTestChart(chart.test_name, chart.unit)
+                    }
+                    aria-label={t('builder.trendCharts.removeChart', {
+                      name: chart.test_name,
+                    })}
+                  >
+                    <IconX size={14} />
+                  </ActionIcon>
+                </Group>
+                {isLegacy && (
+                  <Alert
+                    color="yellow"
+                    variant="light"
+                    icon={<IconInfoCircle size={14} />}
+                    p="xs"
+                  >
+                    <Text size="xs">
+                      {t('builder.trendCharts.legacyUnitWarning')}
+                    </Text>
+                  </Alert>
                 )}
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  size="sm"
-                  onClick={() => removeLabTestChart(chart.test_name)}
-                  aria-label={t('builder.trendCharts.removeChart', {
-                    name: chart.test_name,
-                  })}
-                >
-                  <IconX size={14} />
-                </ActionIcon>
-              </Group>
+              </Stack>
             );
           })}
         </Stack>

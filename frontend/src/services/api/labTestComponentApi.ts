@@ -623,6 +623,10 @@ class LabTestComponentApi {
       dateFrom?: string; // YYYY-MM-DD
       dateTo?: string; // YYYY-MM-DD
       limit?: number;
+      // Scope the trend to a single unit so values recorded in different units
+      // (e.g. mg/L vs mmol/L) don't merge into one series. Use empty string to
+      // explicitly request the null/empty-unit bucket; omit for legacy merged.
+      unit?: string | null;
     },
     signal?: AbortSignal
   ): Promise<TrendResponse> {
@@ -632,6 +636,9 @@ class LabTestComponentApi {
       if (options?.dateFrom) params.date_from = options.dateFrom;
       if (options?.dateTo) params.date_to = options.dateTo;
       if (options?.limit) params.limit = options.limit;
+      if (options?.unit !== undefined && options.unit !== null) {
+        params.unit = options.unit;
+      }
 
       // Normalize test name by removing trailing punctuation
       const normalizedTestName = testName.trim().replace(/[,;:]+$/, '');

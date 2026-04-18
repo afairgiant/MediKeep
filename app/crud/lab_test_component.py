@@ -191,6 +191,7 @@ class CRUDLabTestComponent(
         date_from: Optional[Any] = None,
         date_to: Optional[Any] = None,
         limit: Optional[int] = None,
+        unit: Optional[str] = None,
     ) -> List[LabTestComponent]:
         """
         Get all test components for a patient by test name (case-insensitive).
@@ -198,6 +199,11 @@ class CRUDLabTestComponent(
         Exclusive matching ensures each component appears in only one trend:
         - Components WITH canonical_test_name: match only on canonical_test_name
         - Components WITHOUT canonical_test_name: match only on exact test_name (normalized)
+
+        Unit filter semantics:
+        - None: no unit filter (legacy behavior, all units merged).
+        - Non-empty string: case-insensitive, whitespace-trimmed match on unit.
+        - Empty string: match rows where unit is NULL or empty after trimming.
 
         Date filtering prefers lab_result.completed_date, falls back to created_at.
         """
@@ -224,6 +230,20 @@ class CRUDLabTestComponent(
                 )
             )
         )
+
+        if unit is not None:
+            normalized_unit = unit.strip().lower()
+            if normalized_unit:
+                query = query.filter(
+                    func.lower(func.trim(self.model.unit)) == normalized_unit
+                )
+            else:
+                query = query.filter(
+                    or_(
+                        self.model.unit.is_(None),
+                        func.trim(self.model.unit) == "",
+                    )
+                )
 
         if date_from or date_to:
             recorded_date_expr = func.coalesce(
@@ -368,15 +388,18 @@ class CRUDLabTestComponent(
 
         components = query.all()
 
-        # Group by normalized test name
-        groups: Dict[str, list] = {}
+        # Group by (normalized test name, normalized unit) so the same analyte
+        # recorded in different units (e.g. Calcium mg/L vs mmol/L) produces
+        # separate catalog entries instead of merging into a single misleading trend.
+        groups: Dict[tuple, list] = {}
         for comp in components:
-            key = (
+            name_key = (
                 comp.canonical_test_name.lower()
                 if comp.canonical_test_name
                 else comp.test_name.strip().rstrip(",;: ").lower()
             )
-            groups.setdefault(key, []).append(comp)
+            unit_key = (comp.unit or "").strip().lower()
+            groups.setdefault((name_key, unit_key), []).append(comp)
 
         # Build catalog entries
         from app.schemas.lab_test_component import ComponentCatalogEntry

@@ -55,6 +55,7 @@
         "searchPlaceholder": "搜索实验室检查...",
         "title": "实验室检查图表"
       },
+      "legacyUnitWarning": "未指定单位 — 结果可能混合多种单位。请重新选择该检测并指定具体单位。",
       "maxReached": "已达到最多 10 个图表",
       "recordCount": "{{count}} 条记录",
       "recordCount_one": "{{count}} 条记录",

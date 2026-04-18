@@ -211,12 +211,16 @@ async def get_trend_chart_counts(
             for chart in chart_selection.vital_charts
         }
 
+        # Key by composite "test_name::unit" so the same analyte recorded in
+        # different units (e.g. Calcium mg/L vs mmol/L) has distinct counts.
+        # Legacy chart selections with no unit use an empty unit suffix.
         lab_test_counts = {
-            chart.test_name: fetcher.count_lab_test_records(
+            f"{chart.test_name}::{chart.unit or ''}": fetcher.count_lab_test_records(
                 patient_id,
                 chart.test_name,
                 chart.date_from,
                 chart.date_to,
+                unit=chart.unit,
             )
             for chart in chart_selection.lab_test_charts
         }

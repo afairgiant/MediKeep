@@ -55,6 +55,7 @@
         "searchPlaceholder": "Wyszukaj badania laboratoryjne...",
         "title": "Wykresy badań laboratoryjnych"
       },
+      "legacyUnitWarning": "Nie określono jednostki — wyniki mogą łączyć wiele jednostek. Wybierz ten test ponownie, wskazując konkretną jednostkę.",
       "maxReached": "Osiągnięto maksimum 10 wykresów",
       "recordCount": "{{count}} rekordów",
       "recordCount_one": "{{count}} rekord",

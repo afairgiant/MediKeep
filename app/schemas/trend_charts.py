@@ -57,6 +57,15 @@ class LabTestChartRequest(BaseModel):
     test_name: str = Field(
         ..., min_length=1, max_length=500, description="Lab test name"
     )
+    unit: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description=(
+            "Lab test unit (e.g. mg/dL). Scopes the trend to a single unit so "
+            "values recorded in different units are not merged. Omit on legacy "
+            "templates for backward-compatible merged behavior."
+        ),
+    )
     date_from: Optional[date] = Field(default=None, description="Start date filter")
     date_to: Optional[date] = Field(default=None, description="End date filter")
 
@@ -92,9 +101,14 @@ class TrendChartSelection(BaseModel):
         if len(vital_types) != len(set(vital_types)):
             raise ValueError("Duplicate vital types are not allowed")
 
-        # Check for duplicate lab test names (case-insensitive)
-        lab_names = [lc.test_name.lower() for lc in self.lab_test_charts]
-        if len(lab_names) != len(set(lab_names)):
-            raise ValueError("Duplicate lab test names are not allowed")
+        # Check for duplicate lab test (test_name, unit) pairs — case-insensitive.
+        # Same test_name with different units is allowed (and is the whole reason
+        # unit is part of the key).
+        lab_keys = [
+            (lc.test_name.lower(), (lc.unit or "").strip().lower())
+            for lc in self.lab_test_charts
+        ]
+        if len(lab_keys) != len(set(lab_keys)):
+            raise ValueError("Duplicate lab test charts are not allowed")
 
         return self

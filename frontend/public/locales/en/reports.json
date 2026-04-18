@@ -55,6 +55,7 @@
         "searchPlaceholder": "Search lab tests...",
         "title": "Lab Test Charts"
       },
+      "legacyUnitWarning": "Unit not specified — results may combine multiple units. Re-select this test with a specific unit.",
       "maxReached": "Maximum of 10 charts reached",
       "recordCount": "{{count}} records",
       "recordCount_one": "{{count}} record",

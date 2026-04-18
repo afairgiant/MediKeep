@@ -55,6 +55,7 @@
         "searchPlaceholder": "Procurar exames laboratoriais...",
         "title": "Gráficos de Exames Laboratoriais"
       },
+      "legacyUnitWarning": "Unidade não especificada — os resultados podem combinar várias unidades. Selecione novamente este teste com uma unidade específica.",
       "maxReached": "Máximo de 10 gráficos atingido",
       "recordCount": "{{count}} registos",
       "recordCount_one": "{{count}} registo",

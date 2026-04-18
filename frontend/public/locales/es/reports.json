@@ -55,6 +55,7 @@
         "searchPlaceholder": "Buscar pruebas de laboratorio...",
         "title": "Gráficos de Pruebas de Laboratorio"
       },
+      "legacyUnitWarning": "Unidad no especificada: los resultados pueden combinar varias unidades. Vuelva a seleccionar esta prueba con una unidad específica.",
       "maxReached": "Se alcanzó el máximo de 10 gráficos",
       "recordCount": "{{count}} registros",
       "recordCount_one": "{{count}} registro",

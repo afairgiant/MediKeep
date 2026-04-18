@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import TestComponentCatalog from '../TestComponentCatalog';
 
 // Mock Mantine components to avoid MantineProvider requirement
@@ -103,20 +103,23 @@ vi.mock('../TestComponentCatalogCard', () => ({
     <div
       data-testid="catalog-card"
       data-test-name={entry.test_name}
-      onClick={() => onClick(entry.trend_test_name)}
+      data-unit={entry.unit ?? ''}
+      onClick={() => onClick(entry.trend_test_name, entry.unit ?? null)}
     >
       {entry.test_name}
     </div>
   ),
 }));
 
-// Mock TestComponentTrendsPanel
+// Mock TestComponentTrendsPanel — captures both testName and unit so tests
+// can verify unit-scoped trend requests.
 vi.mock('../TestComponentTrendsPanel', () => ({
-  default: ({ opened, testName }: any) => (
+  default: ({ opened, testName, unit }: any) => (
     <div
       data-testid="trends-panel"
       data-opened={opened}
       data-test-name={testName}
+      data-unit={unit ?? ''}
     />
   ),
 }));
@@ -284,6 +287,43 @@ describe('TestComponentCatalog', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('trends-panel')).toBeInTheDocument();
+    });
+  });
+
+  it('passes both testName and unit to the trends panel when a card is clicked', async () => {
+    // Two Calcium entries recorded in different units must open independent
+    // trend panels — merging them would hide the unit mismatch bug this
+    // feature fixes.
+    const multiUnitItems = [
+      {
+        ...sampleCatalogItems[0],
+        test_name: 'Calcium',
+        trend_test_name: 'Calcium',
+        unit: 'mg/L',
+      },
+      {
+        ...sampleCatalogItems[0],
+        test_name: 'Calcium',
+        trend_test_name: 'Calcium',
+        unit: 'mmol/L',
+        latest_value: 2.43,
+      },
+    ];
+    mockGetComponentCatalog.mockResolvedValue({
+      items: multiUnitItems,
+      total: 2,
+    });
+
+    render(<TestComponentCatalog patientId={1} />);
+
+    const cards = await screen.findAllByTestId('catalog-card');
+    expect(cards).toHaveLength(2);
+
+    fireEvent.click(cards[1]); // mmol/L card
+    await waitFor(() => {
+      const panel = screen.getByTestId('trends-panel');
+      expect(panel.getAttribute('data-test-name')).toBe('Calcium');
+      expect(panel.getAttribute('data-unit')).toBe('mmol/L');
     });
   });
 });

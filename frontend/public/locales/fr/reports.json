@@ -55,6 +55,7 @@
         "searchPlaceholder": "Rechercher des analyses...",
         "title": "Graphiques des analyses de laboratoire"
       },
+      "legacyUnitWarning": "Unité non spécifiée — les résultats peuvent mélanger plusieurs unités. Sélectionnez à nouveau ce test avec une unité spécifique.",
       "maxReached": "Maximum de 10 graphiques atteint",
       "recordCount": "{{count}} dossiers",
       "recordCount_one": "{{count}} dossier",

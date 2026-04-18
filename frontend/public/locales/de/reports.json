@@ -55,6 +55,7 @@
         "searchPlaceholder": "Labortests suchen...",
         "title": "Labortest-Diagramme"
       },
+      "legacyUnitWarning": "Einheit nicht angegeben — Ergebnisse können mehrere Einheiten vermischen. Wählen Sie diesen Test mit einer bestimmten Einheit erneut aus.",
       "maxReached": "Maximum von 10 Diagrammen erreicht",
       "recordCount": "{{count}} Datensätze",
       "recordCount_one": "{{count}} Datensatz",

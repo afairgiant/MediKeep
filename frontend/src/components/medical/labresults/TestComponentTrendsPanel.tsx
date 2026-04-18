@@ -51,6 +51,9 @@ interface TestComponentTrendsPanelProps {
   opened: boolean;
   onClose: () => void;
   testName: string | null;
+  // Unit scopes the trend to a single unit so values recorded in different units
+  // (e.g. mg/L vs mmol/L) don't merge. `null` or omitted = legacy merged behavior.
+  unit?: string | null;
   patientId: number;
 }
 
@@ -58,6 +61,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   opened,
   onClose,
   testName,
+  unit = null,
   patientId,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
@@ -123,6 +127,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           dateFrom: dateRange.dateFrom,
           dateTo: dateRange.dateTo,
           limit: 100,
+          unit,
         }
       );
 
@@ -157,7 +162,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [testName, patientId, timeRange]);
+  }, [testName, unit, patientId, timeRange]);
 
   useEffect(() => {
     if (opened && testName) {
@@ -370,7 +375,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
             </Text>
             {testName && (
               <Text size="sm" c="dimmed">
-                {testName}
+                {unit ? `${testName} (${unit})` : testName}
               </Text>
             )}
           </div>
