@@ -1743,7 +1743,7 @@
       "test_code": "59261-8",
       "default_unit": "mmol/mol",
       "category": "endocrinology",
-      "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin", "Glycated Hemoglobin (IFCC)"],
+      "common_names": ["HbA1c IFCC", "A1c IFCC", "Glycated Hemoglobin (IFCC)"],
       "is_common": false,
       "display_order": 158
     }
