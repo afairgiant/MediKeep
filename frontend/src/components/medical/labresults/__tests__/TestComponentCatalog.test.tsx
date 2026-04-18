@@ -291,9 +291,6 @@ describe('TestComponentCatalog', () => {
   });
 
   it('passes both testName and unit to the trends panel when a card is clicked', async () => {
-    // Two Calcium entries recorded in different units must open independent
-    // trend panels — merging them would hide the unit mismatch bug this
-    // feature fixes.
     const multiUnitItems = [
       {
         ...sampleCatalogItems[0],

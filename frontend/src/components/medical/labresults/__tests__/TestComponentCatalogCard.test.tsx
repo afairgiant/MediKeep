@@ -172,9 +172,6 @@ describe('TestComponentCatalogCard', () => {
 
     fireEvent.click(screen.getByTestId('catalog-card'));
     expect(onClick).toHaveBeenCalledTimes(1);
-    // Unit must accompany the test name so the trend panel can scope the
-    // series; without it, same-named tests recorded in different units
-    // would merge into a single misleading chart.
     expect(onClick).toHaveBeenCalledWith('Glucose', 'mg/dL');
   });
 

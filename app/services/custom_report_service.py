@@ -1076,14 +1076,14 @@ class CustomReportService:
             chart_tasks.append(
                 (
                     label,
-                    lambda l=lc: fetcher.fetch_lab_test_trend(
+                    lambda chart=lc: fetcher.fetch_lab_test_trend(
                         patient_id,
-                        l.test_name,
-                        l.date_from,
-                        l.date_to,
-                        unit=l.unit,
+                        chart.test_name,
+                        chart.date_from,
+                        chart.date_to,
+                        unit=chart.unit,
                     ),
-                    lambda data, l=lc: generator.generate_lab_test_chart(data),
+                    lambda data, chart=lc: generator.generate_lab_test_chart(data),
                     "lab_test",
                 )
             )

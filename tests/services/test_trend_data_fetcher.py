@@ -127,6 +127,37 @@ class TestGetAvailableLabTestNames:
         assert counts["mg/L"] == 2
         assert counts["mmol/L"] == 2
 
+    def test_casing_and_whitespace_variants_merge(
+        self, db_session: Session, test_patient
+    ):
+        """`mg/dL`, ` mg/dl `, and `MG/DL` should all merge into one entry."""
+        lab = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Chem C",
+                test_category="blood work",
+                status="completed",
+                completed_date=date(2026, 3, 1),
+            ),
+        )
+        for value, unit in [(90.0, "mg/dL"), (95.0, " mg/dl "), (100.0, "MG/DL")]:
+            lab_test_component_crud.create(
+                db_session,
+                obj_in=LabTestComponentCreate(
+                    lab_result_id=lab.id,
+                    test_name="Glucose",
+                    value=value,
+                    unit=unit,
+                ),
+            )
+
+        fetcher = TrendDataFetcher(db_session)
+        available = fetcher.get_available_lab_test_names(patient_id=test_patient.id)
+        glucose = [a for a in available if a["test_name"].lower() == "glucose"]
+        assert len(glucose) == 1
+        assert glucose[0]["count"] == 3
+
 
 class TestCountLabTestRecords:
     def test_count_with_unit_filter(self, db_session: Session, seeded_multi_unit):

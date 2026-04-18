@@ -55,7 +55,7 @@
         "searchPlaceholder": "Sök laboratorietester...",
         "title": "Laboratorietestdiagram"
       },
-      "legacyUnitWarning": "Enhet ej angiven — resultaten kan blanda flera enheter. Välj om detta test med en specifik enhet.",
+      "legacyUnitWarning": "Enhet ej angiven — resultaten kan blanda flera enheter. Välj en specifik enhet för detta test.",
       "maxReached": "Maximalt 10 diagram uppnått",
       "recordCount": "{{count}} handlingar",
       "recordCount_one": "{{count}} handling",

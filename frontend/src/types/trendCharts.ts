@@ -11,9 +11,7 @@ export interface VitalChartRequest {
 
 export interface LabTestChartRequest {
   test_name: string;
-  // Scopes the chart to a single unit so values in different units (e.g.
-  // mg/L vs mmol/L) do not merge into one trend. `null` = legacy pre-unit
-  // template (backend falls back to merged behavior).
+  // `null` = pre-unit saved template; backend falls back to merged behavior.
   unit: string | null;
   date_from: string | null;
   date_to: string | null;

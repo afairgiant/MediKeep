@@ -183,9 +183,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
       );
       const referenceRange = formatReferenceRange(component);
 
-      // Use canonical_test_name for trend matching if available, otherwise use test_name.
-      // The component's own unit scopes the trend to a single unit so mixed-unit
-      // histories (e.g. Calcium mg/L vs mmol/L) don't merge into one chart.
+      // Prefer canonical_test_name so synonyms (e.g. "WBC" + "White Blood Cell")
+      // resolve to the same trend series.
       const trendTestName =
         component.canonical_test_name || component.test_name;
       const trendUnit = component.unit ?? null;
@@ -224,7 +223,7 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
           onKeyDown={handleKeyDown}
           tabIndex={0}
           role="button"
-          aria-label={`View trends for ${trendTestName}`}
+          aria-label={`View trends for ${trendTestName}${trendUnit ? ` (${trendUnit})` : ''}`}
         >
           <Stack gap="sm">
             {/* Header */}

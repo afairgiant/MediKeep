@@ -155,8 +155,6 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [trendPanelOpen, setTrendPanelOpen] = useState(false);
   const [selectedTestName, setSelectedTestName] = useState<string | null>(null);
-  // Paired with selectedTestName so the trend panel scopes results to a single
-  // unit (e.g. Calcium mg/L vs Calcium mmol/L never merge into one chart).
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const trendClickDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
     null

@@ -191,8 +191,6 @@ describe('TrendChartSelector', () => {
     fireEvent.change(labInput, { target: { value: 'Calcium' } });
 
     await waitFor(() => {
-      // Each unit gets its own labeled option — dedup by test_name alone
-      // would collapse these into one and re-introduce the original bug.
       expect(screen.getByText(/Calcium \(mg\/L\) - 4 results/)).toBeInTheDocument();
       expect(
         screen.getByText(/Calcium \(mmol\/L\) - 3 results/)

@@ -3,6 +3,7 @@ import { useApi } from './useApi.js';
 import { apiService } from '../services/api/index.js';
 import { notifications } from '@mantine/notifications';
 import logger from '../services/logger';
+import { labChartMatches } from '../utils/labChartKey';
 
 // Pure date helpers hoisted to module scope so their identity is stable
 const formatLocalDate = d => {
@@ -19,13 +20,6 @@ const getDefaultDateFrom = () => {
 };
 
 const getDefaultDateTo = () => formatLocalDate(new Date());
-
-// Lab chart identity helpers — hoisted so useCallback deps stay stable and the
-// same (test_name, unit) comparison is shared across add/remove/update.
-const normalizeUnit = u => (u == null ? '' : String(u).trim().toLowerCase());
-const labChartMatches = (c, testName, unit) =>
-  c.test_name.toLowerCase() === testName.toLowerCase() &&
-  normalizeUnit(c.unit) === normalizeUnit(unit);
 
 // Default report settings shape. Exposed as a module constant so applyTemplate
 // can reset to these values (not to whatever was previously in state) when a
@@ -292,8 +286,6 @@ export const useCustomReports = () => {
     }));
   }, []);
 
-  // Chart identity is (test_name, unit). Same test with different units is
-  // allowed. See module-level labChartMatches/normalizeUnit helpers.
   const addLabTestChart = useCallback((testName, unit = null) => {
     setTrendCharts(prev => {
       if (prev.lab_test_charts.some(c => labChartMatches(c, testName, unit))) {

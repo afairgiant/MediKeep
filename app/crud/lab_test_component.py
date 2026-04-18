@@ -12,6 +12,20 @@ from app.schemas.lab_test_component import (
 )
 
 
+def apply_unit_filter(query, unit_column, unit: Optional[str]):
+    """Scope a query to a lab-test unit.
+
+    None = no filter (legacy merged-across-units). Non-empty = case-insensitive,
+    trimmed match. Empty string = rows with NULL or empty unit.
+    """
+    if unit is None:
+        return query
+    normalized = unit.strip().lower()
+    if normalized:
+        return query.filter(func.lower(func.trim(unit_column)) == normalized)
+    return query.filter(or_(unit_column.is_(None), func.trim(unit_column) == ""))
+
+
 class CRUDLabTestComponent(
     CRUDBase[LabTestComponent, LabTestComponentCreate, LabTestComponentUpdate]
 ):
@@ -231,19 +245,7 @@ class CRUDLabTestComponent(
             )
         )
 
-        if unit is not None:
-            normalized_unit = unit.strip().lower()
-            if normalized_unit:
-                query = query.filter(
-                    func.lower(func.trim(self.model.unit)) == normalized_unit
-                )
-            else:
-                query = query.filter(
-                    or_(
-                        self.model.unit.is_(None),
-                        func.trim(self.model.unit) == "",
-                    )
-                )
+        query = apply_unit_filter(query, self.model.unit, unit)
 
         if date_from or date_to:
             recorded_date_expr = func.coalesce(
@@ -388,9 +390,6 @@ class CRUDLabTestComponent(
 
         components = query.all()
 
-        # Group by (normalized test name, normalized unit) so the same analyte
-        # recorded in different units (e.g. Calcium mg/L vs mmol/L) produces
-        # separate catalog entries instead of merging into a single misleading trend.
         groups: Dict[tuple, list] = {}
         for comp in components:
             name_key = (

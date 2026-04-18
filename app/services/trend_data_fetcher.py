@@ -12,7 +12,10 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
-from app.crud.lab_test_component import lab_test_component as crud_lab_test_component
+from app.crud.lab_test_component import (
+    apply_unit_filter,
+    lab_test_component as crud_lab_test_component,
+)
 from app.models.models import LabResult, LabTestComponent, Vitals
 from app.schemas.trend_charts import SUPPORTED_VITAL_TYPES
 from app.utils.trend_statistics import compute_trend_direction
@@ -233,8 +236,6 @@ class TrendDataFetcher:
             values.append(comp.value)
             statuses.append(comp.status or "unknown")
 
-        # When the caller provided a unit filter, prefer it (components all share it).
-        # Otherwise fall back to the most recent component's recorded unit (legacy path).
         resolved_unit = unit if unit is not None else (components[0].unit or "")
         ref_min = components[0].ref_range_min
         ref_max = components[0].ref_range_max
@@ -293,21 +294,26 @@ class TrendDataFetcher:
         return available
 
     def get_available_lab_test_names(self, patient_id: int) -> List[Dict[str, Any]]:
-        """Return lab test names that have quantitative data for the patient.
+        """Return (test_name, unit) pairs with quantitative data for the patient.
 
-        Grouped by (test_name, unit) so the same analyte recorded in different
-        units appears as separate selectable entries — mg/L and mmol/L should
-        never be merged into a single trend.
+        Grouping is done on the normalized unit (trimmed, lowercased) so that
+        casing/whitespace variants like 'mg/dL' and ' mg/dl ' merge — matching
+        apply_unit_filter's comparison rules. The display unit returned is a
+        representative raw value (MAX) from the group so conventional casing
+        (e.g. the capital L in 'mg/L') is preserved.
         """
         name_expr = func.coalesce(
             LabTestComponent.canonical_test_name,
             LabTestComponent.test_name,
         )
+        unit_group_expr = func.lower(
+            func.trim(func.coalesce(LabTestComponent.unit, ""))
+        )
 
         results = (
             self.db.query(
                 name_expr.label("name"),
-                LabTestComponent.unit.label("unit"),
+                func.max(LabTestComponent.unit).label("unit"),
                 func.count(LabTestComponent.id).label("count"),
             )
             .join(LabTestComponent.lab_result)
@@ -317,16 +323,16 @@ class TrendDataFetcher:
                 name_expr.isnot(None),
                 func.length(func.trim(name_expr)) >= 2,
             )
-            .group_by(name_expr, LabTestComponent.unit)
+            .group_by(name_expr, unit_group_expr)
             .having(func.count(LabTestComponent.id) >= 2)
-            .order_by(name_expr, LabTestComponent.unit)
+            .order_by(name_expr, unit_group_expr)
             .all()
         )
 
         return [
             {
                 "test_name": row.name.strip(),
-                "unit": row.unit or "",
+                "unit": (row.unit or "").strip(),
                 "count": row.count,
             }
             for row in results
@@ -386,19 +392,7 @@ class TrendDataFetcher:
             )
         )
 
-        if unit is not None:
-            normalized_unit = unit.strip().lower()
-            if normalized_unit:
-                query = query.filter(
-                    func.lower(func.trim(LabTestComponent.unit)) == normalized_unit
-                )
-            else:
-                query = query.filter(
-                    or_(
-                        LabTestComponent.unit.is_(None),
-                        func.trim(LabTestComponent.unit) == "",
-                    )
-                )
+        query = apply_unit_filter(query, LabTestComponent.unit, unit)
 
         if date_from or date_to:
             recorded_date_expr = func.coalesce(

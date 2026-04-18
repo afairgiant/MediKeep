@@ -623,9 +623,8 @@ class LabTestComponentApi {
       dateFrom?: string; // YYYY-MM-DD
       dateTo?: string; // YYYY-MM-DD
       limit?: number;
-      // Scope the trend to a single unit so values recorded in different units
-      // (e.g. mg/L vs mmol/L) don't merge into one series. Use empty string to
-      // explicitly request the null/empty-unit bucket; omit for legacy merged.
+      // Empty string explicitly selects the null/empty-unit bucket; omit for
+      // the backend's legacy merged-across-units behavior.
       unit?: string | null;
     },
     signal?: AbortSignal

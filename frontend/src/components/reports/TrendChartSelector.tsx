@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Stack,
   Group,
@@ -19,6 +19,11 @@ import { IconChartLine, IconX, IconInfoCircle } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { apiService } from '../../services/api/index.js';
 import logger from '../../services/logger';
+import {
+  decodeLabChartValue,
+  encodeLabChartValue,
+  labChartKey,
+} from '../../utils/labChartKey';
 
 interface ChartCounts {
   vital_counts: Record<string, number>;
@@ -184,37 +189,33 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
 
   const emptyCounts: ChartCounts = { vital_counts: {}, lab_test_counts: {} };
   const effectiveCounts = trendChartCount === 0 ? emptyCounts : chartCounts;
-  const selectedVitalTypes = new Set(
-    trendCharts.vital_charts.map(c => c.vital_type)
+
+  const selectedVitalTypes = useMemo(
+    () => new Set(trendCharts.vital_charts.map(c => c.vital_type)),
+    [trendCharts.vital_charts]
   );
 
-  // Composite (test_name, unit) key — same test with different units must not
-  // merge into a single trend. Empty string represents the null/no-unit bucket.
-  const makeLabKey = (testName: string, unit: string | null | undefined) =>
-    `${testName.toLowerCase()}::${(unit ?? '').trim().toLowerCase()}`;
-
-  const selectedLabTestKeys = trendCharts.lab_test_charts.map(c =>
-    makeLabKey(c.test_name, c.unit)
+  const selectedLabTestKeys = useMemo(
+    () =>
+      trendCharts.lab_test_charts.map(c => labChartKey(c.test_name, c.unit)),
+    [trendCharts.lab_test_charts]
   );
 
-  // One select option per (test_name, unit) pair. Retain the original test_name
-  // casing from the API so user-facing values aren't lowercased, but encode the
-  // key with lowercased components so dedup matches regardless of casing.
-  const labTestSelectData = availableLabTests.map(lt => ({
-    value: `${lt.test_name}::${(lt.unit ?? '').trim()}`,
-    label: `${lt.test_name}${lt.unit ? ` (${lt.unit})` : ''} - ${lt.count} results`,
-  }));
+  const selectedLabSelectValues = useMemo(
+    () =>
+      trendCharts.lab_test_charts.map(c =>
+        encodeLabChartValue(c.test_name, c.unit)
+      ),
+    [trendCharts.lab_test_charts]
+  );
 
-  const decodeSelectValue = (
-    value: string
-  ): { testName: string; unit: string | null } => {
-    const [testName, ...unitParts] = value.split('::');
-    const rawUnit = unitParts.join('::');
-    return { testName, unit: rawUnit === '' ? null : rawUnit };
-  };
-
-  const selectedLabSelectValues = trendCharts.lab_test_charts.map(
-    c => `${c.test_name}::${(c.unit ?? '').trim()}`
+  const labTestSelectData = useMemo(
+    () =>
+      availableLabTests.map(lt => ({
+        value: encodeLabChartValue(lt.test_name, lt.unit),
+        label: `${lt.test_name}${lt.unit ? ` (${lt.unit})` : ''} - ${lt.count} results`,
+      })),
+    [availableLabTests]
   );
 
   const handleVitalToggle = (vitalType: string, checked: boolean) => {
@@ -226,24 +227,20 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
   };
 
   const handleLabTestChange = (selectedValues: string[]) => {
+    const decoded = selectedValues.map(v => {
+      const { testName, unit } = decodeLabChartValue(v);
+      return { testName, unit, key: labChartKey(testName, unit) };
+    });
     const currentKeys = new Set(selectedLabTestKeys);
-    const nextKeys = new Set(
-      selectedValues.map(v => {
-        const { testName, unit } = decodeSelectValue(v);
-        return makeLabKey(testName, unit);
-      })
-    );
+    const nextKeys = new Set(decoded.map(d => d.key));
 
-    // Add new selections
-    for (const value of selectedValues) {
-      const { testName, unit } = decodeSelectValue(value);
-      if (!currentKeys.has(makeLabKey(testName, unit))) {
+    for (const { testName, unit, key } of decoded) {
+      if (!currentKeys.has(key)) {
         addLabTestChart(testName, unit);
       }
     }
-    // Remove deselected charts
     for (const chart of trendCharts.lab_test_charts) {
-      if (!nextKeys.has(makeLabKey(chart.test_name, chart.unit))) {
+      if (!nextKeys.has(labChartKey(chart.test_name, chart.unit))) {
         removeLabTestChart(chart.test_name, chart.unit);
       }
     }
@@ -414,14 +411,12 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
 
           {/* Lab test chart rows */}
           {trendCharts.lab_test_charts.map(chart => {
-            // Counts are keyed by composite "test_name::unit" so same-named tests
-            // with different units have distinct counts.
-            const countKey = `${chart.test_name}::${chart.unit ?? ''}`;
+            const countKey = encodeLabChartValue(chart.test_name, chart.unit);
             const count = effectiveCounts.lab_test_counts[countKey];
-            const rowKey = makeLabKey(chart.test_name, chart.unit);
+            const rowKey = labChartKey(chart.test_name, chart.unit);
             const isLegacy = chart.unit == null;
             return (
-              <Stack key={rowKey} gap={4}>
+              <React.Fragment key={rowKey}>
                 <Group gap="sm" wrap="nowrap">
                   <Badge
                     variant="light"
@@ -500,7 +495,7 @@ const TrendChartSelector: React.FC<TrendChartSelectorProps> = ({
                     </Text>
                   </Alert>
                 )}
-              </Stack>
+              </React.Fragment>
             );
           })}
         </Stack>

@@ -48,6 +48,7 @@ import EmptyState from '../../shared/EmptyState';
 import TestComponentCatalogCard from './TestComponentCatalogCard';
 import TestComponentTrendsPanel from './TestComponentTrendsPanel';
 import logger from '../../../services/logger';
+import { labChartKey } from '../../../utils/labChartKey';
 
 interface TestComponentCatalogProps {
   patientId: number;
@@ -98,8 +99,6 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
     Record<string, boolean>
   >({});
 
-  // Trend panel. Unit accompanies the test name so the panel scopes the trend
-  // to a single unit (e.g. mg/L vs mmol/L never merge into one chart).
   const [trendTestName, setTrendTestName] = useState<string | null>(null);
   const [trendUnit, setTrendUnit] = useState<string | null>(null);
   const [trendOpen, setTrendOpen] = useState(false);
@@ -389,7 +388,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
                     items={catItems}
                     columns={{ base: 12, md: 6, lg: 4 }}
                     keyExtractor={(entry: ComponentCatalogEntry) =>
-                      `${entry.trend_test_name}::${entry.unit ?? ''}`
+                      labChartKey(entry.trend_test_name, entry.unit)
                     }
                     renderCard={(entry: ComponentCatalogEntry) => (
                       <TestComponentCatalogCard
