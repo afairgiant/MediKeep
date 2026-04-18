@@ -1756,6 +1756,46 @@
       "common_names": ["Angiotensin-1 Converting Enzyme", "SACE"],
       "is_common": false,
       "display_order": 159
+    },
+    {
+      "test_name": "Alpha-1 Globulin",
+      "abbreviation": "A1GL",
+      "test_code": "2865-4",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["α1-Globulin", "Alpha 1 globulin"],
+      "is_common": false,
+      "display_order": 160
+    },
+    {
+      "test_name": "Alpha-2 Globulin",
+      "abbreviation": "A2GL",
+      "test_code": "2868-8",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["α2-Globulin", "Alpha 2 globulin"],
+      "is_common": false,
+      "display_order": 161
+    },
+    {
+      "test_name": "Beta Globulin",
+      "abbreviation": "BGL",
+      "test_code": "2871-2",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["β-Globulin", "Beta globulin"],
+      "is_common": false,
+      "display_order": 162
+    },
+    {
+      "test_name": "Gamma Globulin",
+      "abbreviation": "GGL",
+      "test_code": "2874-6",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["γ-Globulin", "Gamma globulin"],
+      "is_common": false,
+      "display_order": 163
     }
   ]
 }
