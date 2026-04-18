@@ -1719,7 +1719,7 @@
     },
     {
       "test_name": "Lipoprotein(a)",
-      "abbreviation": "LPAS",
+      "abbreviation": "LPA",
       "test_code": "43583-4",
       "default_unit": "nmol/L",
       "category": "lipids",
