@@ -1720,8 +1720,8 @@
     {
       "test_name": "Lipoprotein(a)",
       "abbreviation": "LPAS",
-      "test_code": "10835-7",
-      "default_unit": "mmol/L",
+      "test_code": "43583-4",
+      "default_unit": "nmol/L",
       "category": "lipids",
       "common_names": ["AK38", "APOA", "LP", "LPA", "Lp(a)"],
       "is_common": false,
