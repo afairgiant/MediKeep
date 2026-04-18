@@ -1746,6 +1746,16 @@
       "common_names": ["HbA1c IFCC", "A1c IFCC", "Glycated Hemoglobin (IFCC)"],
       "is_common": false,
       "display_order": 158
+    },
+    {
+      "test_name": "Angiotensin Converting Enzyme",
+      "abbreviation": "ACE",
+      "test_code": "2742-5",
+      "default_unit": "U/L",
+      "category": "other",
+      "common_names": ["Angiotensin-1 Converting Enzyme", "SACE"],
+      "is_common": false,
+      "display_order": 159
     }
   ]
 }
