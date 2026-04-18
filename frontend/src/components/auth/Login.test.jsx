@@ -22,14 +22,20 @@ vi.mock('react-toastify', () => ({
 // Spy on authService config endpoints (keeps prototype methods intact)
 import { authService } from '../../services/auth/simpleAuthService';
 
-vi.spyOn(authService, 'checkRegistrationEnabled').mockResolvedValue({
-  registration_enabled: true,
-});
-vi.spyOn(authService, 'getSSOConfig').mockResolvedValue({ enabled: false });
+vi.spyOn(authService, 'checkRegistrationEnabled');
+vi.spyOn(authService, 'getSSOConfig');
 
 describe('Login Component', () => {
+  // Re-apply default implementations every test. clearAllMocks() only clears
+  // call history, so a mockImplementation set in one test would otherwise leak
+  // into the next test that doesn't override it (especially risky for the
+  // deferred-promise test, which would hang a subsequent test forever).
   beforeEach(() => {
     vi.clearAllMocks();
+    authService.checkRegistrationEnabled.mockResolvedValue({
+      registration_enabled: true,
+    });
+    authService.getSSOConfig.mockResolvedValue({ enabled: false });
   });
 
   describe('Login Form', () => {

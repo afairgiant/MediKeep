@@ -59,32 +59,34 @@ class SimpleAuthService {
         // Return response regardless of status (let caller handle HTTP errors)
         return response;
       } catch (error) {
-        // Enriched failure log: browser-level context lets us later distinguish
-        // AbortError / CSP block / server-unreachable / timeout from each other
+        // The backend FrontendLogRequest schema ignores unknown top-level fields,
+        // so enrichment goes under `details` (captured as-is) and the stack goes
+        // under the declared `stack_trace` field.
         logger.warn(`Failed to connect to ${url}`, {
-          url,
-          error: error.message,
-          errorName: error.name,
-          errorCause: error.cause?.message,
-          errorStack: error.stack,
-          elapsedMs: Math.round(performance.now() - started),
-          navigatorOnline:
-            typeof navigator !== 'undefined' ? navigator.onLine : null,
-          hasServiceWorker:
-            typeof navigator !== 'undefined' &&
-            !!navigator.serviceWorker?.controller,
-          pageOrigin:
-            typeof window !== 'undefined' ? window.location.origin : null,
           category: 'auth_connection_failure',
+          stack_trace: error.stack,
+          details: {
+            url,
+            error: error.message,
+            errorName: error.name,
+            errorCause: error.cause?.message,
+            elapsedMs: Math.round(performance.now() - started),
+            navigatorOnline:
+              typeof navigator !== 'undefined' ? navigator.onLine : null,
+            hasServiceWorker:
+              typeof navigator !== 'undefined' &&
+              !!navigator.serviceWorker?.controller,
+            pageOrigin:
+              typeof window !== 'undefined' ? window.location.origin : null,
+          },
         });
         lastError = error;
 
         // Continue to next URL if this one fails
         if (i < urls.length - 1) {
           logger.info(`Trying next URL in fallback sequence`, {
-            failedUrl: url,
-            nextAttempt: i + 2,
             category: 'auth_connection',
+            details: { failedUrl: url, nextAttempt: i + 2 },
           });
           continue;
         }
@@ -92,33 +94,57 @@ class SimpleAuthService {
     }
 
     // All fallback URLs failed. Fire a short correlation ping to /health
-    // (no /api prefix, no credentials) to distinguish "server unreachable" from
-    // "only /api/v1/auth/* is blocked". Never let the ping block the real throw.
-    let pingStatus = 'not_attempted';
-    let pingElapsedMs = null;
+    // (no credentials, backend's root /health endpoint) to distinguish
+    // "server unreachable" from "only /api/v1/auth/* is blocked". Derive the
+    // ping origin from urls[0] (primary attempt) so this works in dev mode
+    // where that URL is absolute to the backend; in prod urls[0] is relative
+    // and resolves to the same origin as the page.
+    let pingURL = '/health';
     try {
-      const pingStarted = performance.now();
-      const pingPromise = fetch('/health', {
-        method: 'GET',
-        credentials: 'omit',
-      });
-      const pingTimeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Ping timeout')), 3000);
-      });
-      const pingResponse = await Promise.race([pingPromise, pingTimeout]);
-      pingElapsedMs = Math.round(performance.now() - pingStarted);
-      pingStatus = `ok_${pingResponse.status}`;
-    } catch (pingError) {
-      pingStatus = `failed_${pingError.name || 'Error'}`;
+      const baseOrigin =
+        typeof window !== 'undefined' ? window.location.origin : undefined;
+      const targetOrigin = new URL(urls[0], baseOrigin).origin;
+      pingURL = `${targetOrigin}/health`;
+    } catch {
+      // Fall through with relative /health as a best-effort
     }
 
+    // Fire-and-forget: the ping is purely diagnostic and must not delay the
+    // throw (or block the caller's await for up to the 3s ping timeout). It
+    // logs its own result, correlated with the failure below by `endpoint`.
+    void (async () => {
+      const pingStarted = performance.now();
+      let pingStatus = 'not_attempted';
+      let pingElapsedMs = null;
+      try {
+        const pingPromise = fetch(pingURL, {
+          method: 'GET',
+          credentials: 'omit',
+        });
+        const pingTimeout = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Ping timeout')), 3000);
+        });
+        const pingResponse = await Promise.race([pingPromise, pingTimeout]);
+        pingStatus = `ok_${pingResponse.status}`;
+      } catch (pingError) {
+        pingStatus = `failed_${pingError.name || 'Error'}`;
+      } finally {
+        pingElapsedMs = Math.round(performance.now() - pingStarted);
+      }
+      logger.info('Connectivity ping result after auth endpoint failure', {
+        category: 'auth_connection_failure',
+        details: { endpoint, pingURL, pingStatus, pingElapsedMs },
+      });
+    })();
+
     logger.error('All API endpoints failed', {
-      endpoint,
-      lastError: lastError?.message,
-      lastErrorName: lastError?.name,
-      pingStatus,
-      pingElapsedMs,
       category: 'auth_connection_failure',
+      details: {
+        endpoint,
+        lastError: lastError?.message,
+        lastErrorName: lastError?.name,
+        pingURL,
+      },
     });
 
     throw new Error(
