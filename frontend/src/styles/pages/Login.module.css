@@ -297,6 +297,37 @@
   font-size: var(--font-size-sm);
 }
 
+.configWarning {
+  background-color: var(--color-warning-light, #fff8e1);
+  color: var(--color-warning-dark, #8a5a00);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  margin: var(--spacing-lg) 0;
+  border: 1px solid var(--color-warning, #e5b84b);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.retryBtn {
+  background: transparent;
+  color: var(--color-primary-dark);
+  border: 1px solid var(--color-border-medium);
+  padding: var(--spacing-xs) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.retryBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+}
+
 .ssoSection {
   margin: var(--spacing-xl) 0;
 }

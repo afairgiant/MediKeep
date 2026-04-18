@@ -22,14 +22,20 @@ vi.mock('react-toastify', () => ({
 // Spy on authService config endpoints (keeps prototype methods intact)
 import { authService } from '../../services/auth/simpleAuthService';
 
-vi.spyOn(authService, 'checkRegistrationEnabled').mockResolvedValue({
-  registration_enabled: true,
-});
-vi.spyOn(authService, 'getSSOConfig').mockResolvedValue({ enabled: false });
+vi.spyOn(authService, 'checkRegistrationEnabled');
+vi.spyOn(authService, 'getSSOConfig');
 
 describe('Login Component', () => {
+  // Re-apply default implementations every test. clearAllMocks() only clears
+  // call history, so a mockImplementation set in one test would otherwise leak
+  // into the next test that doesn't override it (especially risky for the
+  // deferred-promise test, which would hang a subsequent test forever).
   beforeEach(() => {
     vi.clearAllMocks();
+    authService.checkRegistrationEnabled.mockResolvedValue({
+      registration_enabled: true,
+    });
+    authService.getSSOConfig.mockResolvedValue({ enabled: false });
   });
 
   describe('Login Form', () => {
@@ -73,6 +79,65 @@ describe('Login Component', () => {
       expect(
         await screen.findByText('login.createAccount')
       ).toBeInTheDocument();
+    });
+
+    test('shows SSO button when backend returns enabled:true', async () => {
+      authService.checkRegistrationEnabled.mockResolvedValue({
+        registration_enabled: true,
+      });
+      authService.getSSOConfig.mockResolvedValue({
+        enabled: true,
+        provider_type: 'github',
+      });
+
+      render(<Login />);
+
+      // SSO section wrapper should appear once config resolves
+      const ssoSection = await screen.findByTestId('sso-section');
+      expect(ssoSection).toBeInTheDocument();
+      // No config-error notice on the happy path
+      expect(screen.queryByTestId('config-error')).not.toBeInTheDocument();
+    });
+
+    test('shows retry notice when SSO config fetch fails (not the SSO button)', async () => {
+      // Simulate the service layer's new error contract: fetch failed,
+      // not "backend said SSO is off"
+      authService.checkRegistrationEnabled.mockResolvedValue({
+        registration_enabled: false,
+        error: true,
+      });
+      authService.getSSOConfig.mockResolvedValue({
+        enabled: false,
+        error: true,
+      });
+
+      render(<Login />);
+
+      // Config-error notice is visible; SSO section is not
+      expect(await screen.findByTestId('config-error')).toBeInTheDocument();
+      expect(screen.queryByTestId('sso-section')).not.toBeInTheDocument();
+      // Registration-disabled message should NOT be shown in the error state
+      // (we don't actually know whether registration is disabled)
+      expect(
+        screen.queryByText('login.registrationDisabled')
+      ).not.toBeInTheDocument();
+    });
+
+    test('does NOT show retry notice when backend genuinely returns SSO disabled', async () => {
+      authService.checkRegistrationEnabled.mockResolvedValue({
+        registration_enabled: true,
+      });
+      authService.getSSOConfig.mockResolvedValue({ enabled: false });
+
+      render(<Login />);
+
+      // Create-account button appears (registration is enabled)
+      expect(
+        await screen.findByText('login.createAccount')
+      ).toBeInTheDocument();
+      // No SSO section, no error notice — genuine disabled state
+      expect(screen.queryByTestId('sso-section')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('config-error')).not.toBeInTheDocument();
     });
 
     test('renders with MediKeep title', () => {

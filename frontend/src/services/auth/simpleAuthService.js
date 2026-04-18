@@ -29,6 +29,7 @@ class SimpleAuthService {
 
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
+      const started = performance.now();
       try {
         logger.info(`Attempting request ${i + 1}/${urls.length}`, {
           url,
@@ -51,32 +52,101 @@ class SimpleAuthService {
           url,
           status: response.status,
           statusText: response.statusText,
+          elapsedMs: Math.round(performance.now() - started),
           category: 'auth_connection',
         });
 
         // Return response regardless of status (let caller handle HTTP errors)
         return response;
       } catch (error) {
+        // The backend FrontendLogRequest schema ignores unknown top-level fields,
+        // so enrichment goes under `details` (captured as-is) and the stack goes
+        // under the declared `stack_trace` field.
         logger.warn(`Failed to connect to ${url}`, {
-          url,
-          error: error.message,
           category: 'auth_connection_failure',
+          stack_trace: error.stack,
+          details: {
+            url,
+            error: error.message,
+            errorName: error.name,
+            errorCause: error.cause?.message,
+            elapsedMs: Math.round(performance.now() - started),
+            navigatorOnline:
+              typeof navigator !== 'undefined' ? navigator.onLine : null,
+            hasServiceWorker:
+              typeof navigator !== 'undefined' &&
+              !!navigator.serviceWorker?.controller,
+            pageOrigin:
+              typeof window !== 'undefined' ? window.location.origin : null,
+          },
         });
         lastError = error;
 
         // Continue to next URL if this one fails
         if (i < urls.length - 1) {
           logger.info(`Trying next URL in fallback sequence`, {
-            failedUrl: url,
-            nextAttempt: i + 2,
             category: 'auth_connection',
+            details: { failedUrl: url, nextAttempt: i + 2 },
           });
           continue;
         }
       }
     }
 
-    // If all URLs failed, throw the last error
+    // All fallback URLs failed. Fire a short correlation ping to /health
+    // (no credentials, backend's root /health endpoint) to distinguish
+    // "server unreachable" from "only /api/v1/auth/* is blocked". Derive the
+    // ping origin from urls[0] (primary attempt) so this works in dev mode
+    // where that URL is absolute to the backend; in prod urls[0] is relative
+    // and resolves to the same origin as the page.
+    let pingURL = '/health';
+    try {
+      const baseOrigin =
+        typeof window !== 'undefined' ? window.location.origin : undefined;
+      const targetOrigin = new URL(urls[0], baseOrigin).origin;
+      pingURL = `${targetOrigin}/health`;
+    } catch {
+      // Fall through with relative /health as a best-effort
+    }
+
+    // Fire-and-forget: the ping is purely diagnostic and must not delay the
+    // throw (or block the caller's await for up to the 3s ping timeout). It
+    // logs its own result, correlated with the failure below by `endpoint`.
+    void (async () => {
+      const pingStarted = performance.now();
+      let pingStatus = 'not_attempted';
+      let pingElapsedMs = null;
+      try {
+        const pingPromise = fetch(pingURL, {
+          method: 'GET',
+          credentials: 'omit',
+        });
+        const pingTimeout = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Ping timeout')), 3000);
+        });
+        const pingResponse = await Promise.race([pingPromise, pingTimeout]);
+        pingStatus = `ok_${pingResponse.status}`;
+      } catch (pingError) {
+        pingStatus = `failed_${pingError.name || 'Error'}`;
+      } finally {
+        pingElapsedMs = Math.round(performance.now() - pingStarted);
+      }
+      logger.info('Connectivity ping result after auth endpoint failure', {
+        category: 'auth_connection_failure',
+        details: { endpoint, pingURL, pingStatus, pingElapsedMs },
+      });
+    })();
+
+    logger.error('All API endpoints failed', {
+      category: 'auth_connection_failure',
+      details: {
+        endpoint,
+        lastError: lastError?.message,
+        lastErrorName: lastError?.name,
+        pingURL,
+      },
+    });
+
     throw new Error(
       `All API endpoints failed. Last error: ${lastError?.message || 'Unknown error'}`
     );
@@ -335,8 +405,8 @@ class SimpleAuthService {
           status: response.status,
           category: 'auth_registration_check',
         });
-        // Default to disabled if check fails (safe default -- don't expose registration UI on error)
-        return { registration_enabled: false };
+        // error:true lets the caller distinguish "fetch failed" from "backend says disabled"
+        return { registration_enabled: false, error: true };
       }
 
       const data = await response.json();
@@ -350,8 +420,7 @@ class SimpleAuthService {
         error: error.message,
         category: 'auth_registration_check',
       });
-      // Default to disabled if check fails (safe default -- don't expose registration UI on error)
-      return { registration_enabled: false };
+      return { registration_enabled: false, error: true };
     }
   }
 
@@ -374,7 +443,8 @@ class SimpleAuthService {
           status: response.status,
           category: 'sso_config_check',
         });
-        return { enabled: false };
+        // error:true lets the caller distinguish "fetch failed" from "backend says SSO off"
+        return { enabled: false, error: true };
       }
 
       const data = await response.json();
@@ -390,7 +460,7 @@ class SimpleAuthService {
         error: error.message,
         category: 'sso_config_check',
       });
-      return { enabled: false };
+      return { enabled: false, error: true };
     }
   }
 

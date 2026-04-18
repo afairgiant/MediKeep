@@ -20,6 +20,7 @@ const Login = () => {
   const [ssoConfig, setSSOConfig] = useState({ enabled: false });
   const [ssoLoading, setSSOLoading] = useState(false);
   const [configLoaded, setConfigLoaded] = useState(false);
+  const [configError, setConfigError] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +35,29 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
+  // One-shot environment snapshot. If a later auth fetch fails, pairing this
+  // log with the failure tells us whether a stale service worker, insecure
+  // context, mixed protocol, or cookies-disabled state was already in play.
+  useEffect(() => {
+    frontendLogger.logInfo('Login page environment snapshot', {
+      category: 'login_env_snapshot',
+      hasServiceWorker:
+        typeof navigator !== 'undefined' &&
+        !!navigator.serviceWorker?.controller,
+      swScriptUrl:
+        typeof navigator !== 'undefined'
+          ? navigator.serviceWorker?.controller?.scriptURL
+          : null,
+      isSecureContext:
+        typeof window !== 'undefined' ? window.isSecureContext : null,
+      origin: typeof window !== 'undefined' ? window.location.origin : null,
+      protocol:
+        typeof window !== 'undefined' ? window.location.protocol : null,
+      cookieEnabled:
+        typeof navigator !== 'undefined' ? navigator.cookieEnabled : null,
+    });
+  }, []);
+
   // Check registration status and SSO config on mount
   useEffect(() => {
     const loadConfig = async () => {
@@ -44,6 +68,9 @@ const Login = () => {
       setRegistrationEnabled(status.registration_enabled);
       setRegistrationMessage(status.message || '');
       setSSOConfig(config);
+      // error:true means the fetch itself failed -- do not confuse that with
+      // "backend returned SSO/registration disabled", which is a valid state
+      setConfigError(status.error === true || config.error === true);
       setConfigLoaded(true);
     };
 
@@ -206,9 +233,30 @@ const Login = () => {
           </button>
         </form>
 
-        {/* SSO Login Option - only shown after server config is loaded */}
-        {configLoaded && ssoConfig.enabled && (
-          <div className={styles.ssoSection}>
+        {/* Config-fetch failed -- show retry instead of silently hiding SSO */}
+        {configLoaded && configError && (
+          <div
+            className={styles.configWarning}
+            data-testid="config-error"
+            role="status"
+          >
+            <span>{t('login.configLoadFailed')}</span>
+            <button
+              type="button"
+              className={styles.retryBtn}
+              onClick={() => window.location.reload()}
+            >
+              {t('login.retry')}
+            </button>
+          </div>
+        )}
+
+        {/* SSO Login Option -- only when config loaded successfully AND backend says SSO is on */}
+        {configLoaded && !configError && ssoConfig.enabled && (
+          <div
+            className={styles.ssoSection}
+            data-testid="sso-section"
+          >
             <div className={styles.divider}>
               <span>{t('login.or')}</span>
             </div>
@@ -232,7 +280,7 @@ const Login = () => {
           </div>
         )}
 
-        {configLoaded && (
+        {configLoaded && !configError && (
           <div className={styles.loginActions}>
             {registrationEnabled ? (
               <button
@@ -248,6 +296,16 @@ const Login = () => {
                 {registrationMessage || t('login.registrationDisabled')}
               </div>
             )}
+          </div>
+        )}
+
+        {/* When config fails, we don't actually know whether registration is on --
+            show a neutral notice instead of a misleading "disabled" message */}
+        {configLoaded && configError && (
+          <div className={styles.loginActions}>
+            <div className={styles.registrationDisabledMessage}>
+              {t('login.registrationStatusUnavailable')}
+            </div>
           </div>
         )}
       </div>
