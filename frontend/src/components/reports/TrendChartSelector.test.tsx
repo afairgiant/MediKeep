@@ -22,14 +22,18 @@ vi.mock('../../services/api/index.js', () => ({
           count: 10,
         },
       ],
+      // Same test name in two units must render as two distinct options.
       lab_test_names: [
         { test_name: 'Glucose', unit: 'mg/dL', count: 12 },
         { test_name: 'TSH', unit: 'mIU/L', count: 5 },
+        { test_name: 'Calcium', unit: 'mg/L', count: 4 },
+        { test_name: 'Calcium', unit: 'mmol/L', count: 3 },
       ],
     }),
     getTrendChartCounts: vi.fn().mockResolvedValue({
       vital_counts: { heart_rate: 15, weight: 8 },
-      lab_test_counts: { Glucose: 12 },
+      // Backend now keys counts by composite "test_name::unit".
+      lab_test_counts: { 'Glucose::mg/dL': 12 },
     }),
   },
 }));
@@ -149,6 +153,7 @@ describe('TrendChartSelector', () => {
         lab_test_charts: [
           {
             test_name: 'Glucose',
+            unit: 'mg/dL',
             date_from: '2025-09-03',
             date_to: '2026-03-03',
           },
@@ -170,6 +175,90 @@ describe('TrendChartSelector', () => {
       name: /removeChart/,
     });
     expect(removeButtons.length).toBe(2);
+  });
+
+  it('renders Calcium as two distinct options — one per unit', async () => {
+    render(<TrendChartSelector {...defaultProps} />, { skipRouter: true });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('checkbox', { name: /Heart Rate/ })
+      ).toBeInTheDocument();
+    });
+
+    // Mantine MultiSelect renders options lazily on search. Type to trigger.
+    const labInput = screen.getByPlaceholderText(/searchPlaceholder/);
+    fireEvent.change(labInput, { target: { value: 'Calcium' } });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Calcium \(mg\/L\) - 4 results/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Calcium \(mmol\/L\) - 3 results/)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows a legacy-unit warning on lab charts with no unit', async () => {
+    const props = {
+      ...defaultProps,
+      trendCharts: {
+        vital_charts: [],
+        lab_test_charts: [
+          {
+            test_name: 'Glucose',
+            unit: null, // rehydrated from a pre-unit template
+            date_from: null,
+            date_to: null,
+          },
+        ],
+      },
+      trendChartCount: 1,
+    };
+
+    render(<TrendChartSelector {...props} />, { skipRouter: true });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/legacyUnitWarning/)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('passes (testName, unit) to removeLabTestChart when the row X is clicked', async () => {
+    const props = {
+      ...defaultProps,
+      trendCharts: {
+        vital_charts: [],
+        lab_test_charts: [
+          {
+            test_name: 'Calcium',
+            unit: 'mg/L',
+            date_from: '2025-01-01',
+            date_to: '2025-06-30',
+          },
+        ],
+      },
+      trendChartCount: 1,
+    };
+
+    render(<TrendChartSelector {...props} />, { skipRouter: true });
+
+    // Wait for the remove button (rendered per selected chart row) rather than
+    // the text "Calcium (mg/L)" — the MultiSelect dropdown also renders that
+    // text on matching options, so getByText would match multiple nodes.
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /removeChart/ })
+      ).toBeInTheDocument();
+    });
+
+    const removeButton = screen.getByRole('button', { name: /removeChart/ });
+    fireEvent.click(removeButton);
+
+    expect(defaultProps.removeLabTestChart).toHaveBeenCalledWith(
+      'Calcium',
+      'mg/L'
+    );
   });
 
   it('shows max reached alert when 10 charts selected', async () => {

@@ -26,7 +26,7 @@ from app.schemas.custom_reports import (
     ReportTemplateResponse,
     TemplateActionResponse,
 )
-from app.schemas.trend_charts import TrendChartSelection
+from app.schemas.trend_charts import TrendChartSelection, encode_lab_chart_key
 from app.services.custom_report_service import CustomReportService
 from app.services.trend_data_fetcher import TrendDataFetcher
 
@@ -212,11 +212,14 @@ async def get_trend_chart_counts(
         }
 
         lab_test_counts = {
-            chart.test_name: fetcher.count_lab_test_records(
-                patient_id,
-                chart.test_name,
-                chart.date_from,
-                chart.date_to,
+            encode_lab_chart_key(chart.test_name, chart.unit): (
+                fetcher.count_lab_test_records(
+                    patient_id,
+                    chart.test_name,
+                    chart.date_from,
+                    chart.date_to,
+                    unit=chart.unit,
+                )
             )
             for chart in chart_selection.lab_test_charts
         }

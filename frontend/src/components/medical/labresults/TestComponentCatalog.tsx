@@ -48,6 +48,7 @@ import EmptyState from '../../shared/EmptyState';
 import TestComponentCatalogCard from './TestComponentCatalogCard';
 import TestComponentTrendsPanel from './TestComponentTrendsPanel';
 import logger from '../../../services/logger';
+import { labChartKey } from '../../../utils/labChartKey';
 
 interface TestComponentCatalogProps {
   patientId: number;
@@ -98,8 +99,8 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
     Record<string, boolean>
   >({});
 
-  // Trend panel
   const [trendTestName, setTrendTestName] = useState<string | null>(null);
+  const [trendUnit, setTrendUnit] = useState<string | null>(null);
   const [trendOpen, setTrendOpen] = useState(false);
 
   // Debounce ref
@@ -181,14 +182,19 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
     };
   }, []);
 
-  const handleCardClick = useCallback((testName: string) => {
-    setTrendTestName(testName);
-    setTrendOpen(true);
-  }, []);
+  const handleCardClick = useCallback(
+    (testName: string, unit: string | null) => {
+      setTrendTestName(testName);
+      setTrendUnit(unit);
+      setTrendOpen(true);
+    },
+    []
+  );
 
   const handleCloseTrend = useCallback(() => {
     setTrendOpen(false);
     setTrendTestName(null);
+    setTrendUnit(null);
   }, []);
 
   const toggleGroup = useCallback((cat: string) => {
@@ -382,7 +388,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
                     items={catItems}
                     columns={{ base: 12, md: 6, lg: 4 }}
                     keyExtractor={(entry: ComponentCatalogEntry) =>
-                      entry.trend_test_name
+                      labChartKey(entry.trend_test_name, entry.unit)
                     }
                     renderCard={(entry: ComponentCatalogEntry) => (
                       <TestComponentCatalogCard
@@ -402,6 +408,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
         opened={trendOpen}
         onClose={handleCloseTrend}
         testName={trendTestName}
+        unit={trendUnit}
         patientId={patientId}
       />
     </>

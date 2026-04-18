@@ -155,6 +155,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [trendPanelOpen, setTrendPanelOpen] = useState(false);
   const [selectedTestName, setSelectedTestName] = useState<string | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const trendClickDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
@@ -253,9 +254,13 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   }, [loadComponents]);
 
   const handleTrendClick = useCallback(
-    (testName: string) => {
-      // Prevent opening if already opening or open with same test
-      if (trendPanelOpen && selectedTestName === testName) {
+    (testName: string, unit: string | null = null) => {
+      // Prevent opening if already opening or open with same (test, unit) pair
+      if (
+        trendPanelOpen &&
+        selectedTestName === testName &&
+        selectedUnit === unit
+      ) {
         return;
       }
 
@@ -267,6 +272,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
       // Immediately update state to ensure responsive UI
       setSelectedTestName(testName);
+      setSelectedUnit(unit);
       setTrendPanelOpen(true);
 
       // Log after state update to not block UI
@@ -274,11 +280,12 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         logger.info('test_component_trend_requested', {
           message: 'Test component trend view requested',
           testName,
+          unit,
           component: 'TestComponentsTab',
         });
       });
     },
-    [trendPanelOpen, selectedTestName]
+    [trendPanelOpen, selectedTestName, selectedUnit]
   );
 
   // Load components on mount and when labResultId changes
@@ -582,8 +589,10 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           onClose={() => {
             setTrendPanelOpen(false);
             setSelectedTestName(null);
+            setSelectedUnit(null);
           }}
           testName={selectedTestName}
+          unit={selectedUnit}
           patientId={currentPatient.id}
         />
       )}

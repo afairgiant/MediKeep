@@ -162,12 +162,36 @@ class TestTrendChartSelection:
                 ]
             )
 
-    def test_duplicate_lab_names_rejected(self):
-        with pytest.raises(ValidationError, match="Duplicate lab test names"):
+    def test_duplicate_lab_charts_rejected(self):
+        """Duplicate (test_name, unit) pairs are rejected (case-insensitive)."""
+        with pytest.raises(ValidationError, match="Duplicate lab test charts"):
+            TrendChartSelection(
+                lab_test_charts=[
+                    LabTestChartRequest(test_name="Glucose", unit="mg/dL"),
+                    LabTestChartRequest(test_name="glucose", unit="MG/DL"),
+                ]
+            )
+
+    def test_same_name_different_units_allowed(self):
+        """Same test name with different units should be allowed — that's the
+        whole point of unit-scoped trending (e.g. Calcium mg/L vs mmol/L).
+        """
+        sel = TrendChartSelection(
+            lab_test_charts=[
+                LabTestChartRequest(test_name="Calcium", unit="mg/L"),
+                LabTestChartRequest(test_name="Calcium", unit="mmol/L"),
+            ]
+        )
+        assert len(sel.lab_test_charts) == 2
+        assert {c.unit for c in sel.lab_test_charts} == {"mg/L", "mmol/L"}
+
+    def test_duplicate_lab_same_name_no_unit_rejected(self):
+        """Legacy entries with no unit still dedupe on test_name alone."""
+        with pytest.raises(ValidationError, match="Duplicate lab test charts"):
             TrendChartSelection(
                 lab_test_charts=[
                     LabTestChartRequest(test_name="Glucose"),
-                    LabTestChartRequest(test_name="glucose"),  # case-insensitive
+                    LabTestChartRequest(test_name="GLUCOSE"),
                 ]
             )
 

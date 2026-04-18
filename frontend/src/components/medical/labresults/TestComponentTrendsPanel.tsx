@@ -51,6 +51,8 @@ interface TestComponentTrendsPanelProps {
   opened: boolean;
   onClose: () => void;
   testName: string | null;
+  // `null` falls through to the backend's legacy merged-across-units path.
+  unit?: string | null;
   patientId: number;
 }
 
@@ -58,6 +60,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
   opened,
   onClose,
   testName,
+  unit = null,
   patientId,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
@@ -123,6 +126,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           dateFrom: dateRange.dateFrom,
           dateTo: dateRange.dateTo,
           limit: 100,
+          unit,
         }
       );
 
@@ -157,7 +161,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [testName, patientId, timeRange]);
+  }, [testName, unit, patientId, timeRange]);
 
   useEffect(() => {
     if (opened && testName) {
@@ -277,9 +281,12 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
       });
 
       // Build CSV string
+      const titleLabel = unit
+        ? `${trendData.test_name} (${unit})`
+        : trendData.test_name;
       const csvContent = [
         // Title row
-        [`Test Component Trend Data: ${trendData.test_name}`],
+        [`Test Component Trend Data: ${titleLabel}`],
         [`Export Date: ${formatPreferredDate(new Date())}`],
         [''],
         // Statistics
@@ -313,9 +320,15 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
       const url = URL.createObjectURL(blob);
 
       link.setAttribute('href', url);
+      // Include unit in the filename so same-named tests in different units
+      // (e.g. Calcium mg/L vs mmol/L) don't collide on export.
+      const unitSlug = unit
+        ? `_${unit.replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '')}`
+        : '';
+      const datePart = new Date().toISOString().split('T')[0];
       link.setAttribute(
         'download',
-        `trend_${trendData.test_name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`
+        `trend_${trendData.test_name.replace(/\s+/g, '_')}${unitSlug}_${datePart}.csv`
       );
       link.style.visibility = 'hidden';
 
@@ -370,7 +383,7 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
             </Text>
             {testName && (
               <Text size="sm" c="dimmed">
-                {testName}
+                {unit ? `${testName} (${unit})` : testName}
               </Text>
             )}
           </div>

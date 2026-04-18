@@ -11,6 +11,8 @@ export interface VitalChartRequest {
 
 export interface LabTestChartRequest {
   test_name: string;
+  // `null` = pre-unit saved template; backend falls back to merged behavior.
+  unit: string | null;
   date_from: string | null;
   date_to: string | null;
 }

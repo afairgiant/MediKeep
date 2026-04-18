@@ -623,6 +623,9 @@ class LabTestComponentApi {
       dateFrom?: string; // YYYY-MM-DD
       dateTo?: string; // YYYY-MM-DD
       limit?: number;
+      // Empty string explicitly selects the null/empty-unit bucket; omit for
+      // the backend's legacy merged-across-units behavior.
+      unit?: string | null;
     },
     signal?: AbortSignal
   ): Promise<TrendResponse> {
@@ -632,6 +635,9 @@ class LabTestComponentApi {
       if (options?.dateFrom) params.date_from = options.dateFrom;
       if (options?.dateTo) params.date_to = options.dateTo;
       if (options?.limit) params.limit = options.limit;
+      if (options?.unit !== undefined && options.unit !== null) {
+        params.unit = options.unit;
+      }
 
       // Normalize test name by removing trailing punctuation
       const normalizedTestName = testName.trim().replace(/[,;:]+$/, '');

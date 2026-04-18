@@ -623,3 +623,157 @@ class TestLabTestComponentCRUD:
             db_session, obj_in=normal_component
         )
         assert normal_created.status == "normal"
+
+
+class TestUnitScopedTrending:
+    """
+    Trend grouping must key on (test_name, unit), not test_name alone, so the
+    same analyte recorded in different units (e.g. Calcium mg/L vs mmol/L) is
+    not merged into a misleading single series.
+    """
+
+    @pytest.fixture
+    def test_patient(self, db_session: Session, test_user):
+        patient_data = PatientCreate(
+            first_name="Unit",
+            last_name="Tester",
+            birth_date=date(1985, 5, 5),
+            gender="M",
+            address="Unit St",
+        )
+        return patient_crud.create_for_user(
+            db_session, user_id=test_user.id, patient_data=patient_data
+        )
+
+    @pytest.fixture
+    def seeded_calcium(self, db_session: Session, test_patient):
+        """Seed three Calcium readings: two mg/L, one mmol/L, across two lab results."""
+        lab1 = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Chem Panel A",
+                test_category="blood work",
+                status="completed",
+                completed_date=date(2026, 1, 10),
+            ),
+        )
+        lab2 = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Chem Panel B",
+                test_category="blood work",
+                status="completed",
+                completed_date=date(2026, 2, 10),
+            ),
+        )
+        lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lab1.id, test_name="Calcium", value=97.0, unit="mg/L"
+            ),
+        )
+        lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lab1.id, test_name="Calcium", value=2.43, unit="mmol/L"
+            ),
+        )
+        lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lab2.id, test_name="Calcium", value=100.0, unit="mg/L"
+            ),
+        )
+        return test_patient
+
+    def test_get_by_patient_and_test_name_filters_by_unit(
+        self, db_session: Session, seeded_calcium
+    ):
+        """Providing a unit filter returns only rows with that unit."""
+        mg_rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=seeded_calcium.id,
+            test_name="Calcium",
+            unit="mg/L",
+        )
+        mmol_rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=seeded_calcium.id,
+            test_name="Calcium",
+            unit="mmol/L",
+        )
+        assert {r.value for r in mg_rows} == {97.0, 100.0}
+        assert {r.value for r in mmol_rows} == {2.43}
+
+    def test_get_by_patient_and_test_name_unit_is_case_insensitive(
+        self, db_session: Session, seeded_calcium
+    ):
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=seeded_calcium.id,
+            test_name="Calcium",
+            unit="MG/L",
+        )
+        assert {r.value for r in rows} == {97.0, 100.0}
+
+    def test_get_by_patient_and_test_name_legacy_no_unit_returns_all(
+        self, db_session: Session, seeded_calcium
+    ):
+        """Passing unit=None is the legacy path and still merges all units."""
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=seeded_calcium.id,
+            test_name="Calcium",
+        )
+        assert len(rows) == 3
+
+    def test_get_by_patient_and_test_name_empty_unit_matches_null(
+        self, db_session: Session, test_patient
+    ):
+        """Empty-string unit filter matches rows with no recorded unit."""
+        lab = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Qual Panel",
+                test_category="blood work",
+                status="completed",
+                completed_date=date(2026, 3, 1),
+            ),
+        )
+        # Qualitative component has no unit
+        lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lab.id,
+                test_name="HIV Screen",
+                result_type="qualitative",
+                qualitative_value="negative",
+            ),
+        )
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=test_patient.id,
+            test_name="HIV Screen",
+            unit="",
+        )
+        assert len(rows) == 1
+        assert rows[0].unit in (None, "")
+
+    def test_component_catalog_splits_entries_by_unit(
+        self, db_session: Session, seeded_calcium
+    ):
+        """Catalog groups by (name, unit) so each unit gets its own entry."""
+        result = lab_test_component_crud.get_component_catalog(
+            db_session, patient_id=seeded_calcium.id
+        )
+        calcium_entries = [
+            e for e in result["items"] if e.test_name.lower() == "calcium"
+        ]
+        assert len(calcium_entries) == 2
+        by_unit = {e.unit: e for e in calcium_entries}
+        assert set(by_unit) == {"mg/L", "mmol/L"}
+        assert by_unit["mg/L"].reading_count == 2
+        assert by_unit["mmol/L"].reading_count == 1

@@ -698,6 +698,13 @@ def get_lab_test_component_trends(
     date_from: Optional[date_type] = Query(None, description="Start date (YYYY-MM-DD)"),
     date_to: Optional[date_type] = Query(None, description="End date (YYYY-MM-DD)"),
     limit: int = Query(100, ge=1, le=100, description="Max results (max 100)"),
+    unit: Optional[str] = Query(
+        None,
+        description=(
+            "Filter by unit (case-insensitive). Omit for legacy merged-across-units behavior. "
+            "Empty string matches rows with no unit recorded."
+        ),
+    ),
     db: Session = Depends(get_db),
     current_user: User = Depends(deps.get_current_user),
 ):
@@ -707,7 +714,8 @@ def get_lab_test_component_trends(
 
     Decision: Uses exact test name matching (no fuzzy matching).
     Decision: Uses lab_result.completed_date if available, otherwise created_at.
-    Decision: Shows warnings in response for unit mismatches or missing dates (handled client-side).
+    Decision: Optional `unit` filter keeps each trend scoped to a single unit so values
+    recorded in different units (e.g. mg/L vs mmol/L) are not merged into the same series.
     """
 
     with handle_database_errors(request=request):
@@ -718,7 +726,7 @@ def get_lab_test_component_trends(
         validated_test_name = validate_search_input(test_name)
 
         # Get test components with database-level filtering for better performance
-        # Date filtering and ordering are pushed into the database query
+        # Date and unit filtering and ordering are pushed into the database query
         components = lab_test_component.get_by_patient_and_test_name(
             db,
             patient_id=patient_id,
@@ -726,6 +734,7 @@ def get_lab_test_component_trends(
             date_from=date_from,
             date_to=date_to,
             limit=limit,
+            unit=unit,
         )
 
         # Detect unit mismatches (only for quantitative tests)

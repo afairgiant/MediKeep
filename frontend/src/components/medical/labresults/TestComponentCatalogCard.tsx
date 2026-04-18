@@ -27,7 +27,7 @@ interface DateFormatHook {
 
 interface TestComponentCatalogCardProps {
   entry: ComponentCatalogEntry;
-  onClick: (_testName: string) => void;
+  onClick: (_testName: string, _unit: string | null) => void;
 }
 
 function getStatusColor(status: string | null | undefined): string {
@@ -137,7 +137,7 @@ const TestComponentCatalogCard: React.FC<TestComponentCatalogCardProps> = ({
       radius="md"
       padding="md"
       style={{ cursor: 'pointer' }}
-      onClick={() => onClick(entry.trend_test_name)}
+      onClick={() => onClick(entry.trend_test_name, entry.unit ?? null)}
       data-testid="catalog-card"
     >
       <Stack gap="xs">

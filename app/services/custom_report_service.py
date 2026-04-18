@@ -1072,13 +1072,18 @@ class CustomReportService:
                 )
             )
         for lc in trend_charts.lab_test_charts:
+            label = f"{lc.test_name} ({lc.unit})" if lc.unit else lc.test_name
             chart_tasks.append(
                 (
-                    lc.test_name,
-                    lambda l=lc: fetcher.fetch_lab_test_trend(
-                        patient_id, l.test_name, l.date_from, l.date_to
+                    label,
+                    lambda chart=lc: fetcher.fetch_lab_test_trend(
+                        patient_id,
+                        chart.test_name,
+                        chart.date_from,
+                        chart.date_to,
+                        unit=chart.unit,
                     ),
-                    lambda data, l=lc: generator.generate_lab_test_chart(data),
+                    lambda data, chart=lc: generator.generate_lab_test_chart(data),
                     "lab_test",
                 )
             )
@@ -1523,9 +1528,7 @@ class CustomReportService:
         logger.info(f"Template '{template_data.name}' saved by user {user_id}")
         return db_template.id
 
-    async def get_saved_templates(
-        self, user_id: int
-    ) -> List[ReportTemplateResponse]:
+    async def get_saved_templates(self, user_id: int) -> List[ReportTemplateResponse]:
         """Get all templates accessible to user"""
         templates = (
             self.db.query(ReportTemplate)

@@ -3,6 +3,7 @@ import { useApi } from './useApi.js';
 import { apiService } from '../services/api/index.js';
 import { notifications } from '@mantine/notifications';
 import logger from '../services/logger';
+import { labChartMatches } from '../utils/labChartKey';
 
 // Pure date helpers hoisted to module scope so their identity is stable
 const formatLocalDate = d => {
@@ -219,11 +220,17 @@ export const useCustomReports = () => {
     delete rawSettings.trend_charts;
     setReportSettings({ ...DEFAULT_REPORT_SETTINGS, ...rawSettings });
 
-    // Apply trend charts
+    // Apply trend charts. Legacy templates (pre unit-aware trending) may store
+    // lab_test_charts without a `unit` field — hydrate to `unit: null` so the
+    // UI can flag them and the backend gets legacy merged-across-units behavior.
     const tc = template.trend_charts;
+    const rawLab = Array.isArray(tc?.lab_test_charts) ? tc.lab_test_charts : [];
     setTrendCharts({
       vital_charts: Array.isArray(tc?.vital_charts) ? tc.vital_charts : [],
-      lab_test_charts: Array.isArray(tc?.lab_test_charts) ? tc.lab_test_charts : [],
+      lab_test_charts: rawLab.map(c => ({
+        ...c,
+        unit: c.unit ?? null,
+      })),
     });
 
     logger.info('custom_reports_template_applied', 'Template applied to builder', {
@@ -279,14 +286,9 @@ export const useCustomReports = () => {
     }));
   }, []);
 
-  const addLabTestChart = useCallback(testName => {
+  const addLabTestChart = useCallback((testName, unit = null) => {
     setTrendCharts(prev => {
-      // Don't add duplicate (case-insensitive)
-      if (
-        prev.lab_test_charts.some(
-          c => c.test_name.toLowerCase() === testName.toLowerCase()
-        )
-      ) {
+      if (prev.lab_test_charts.some(c => labChartMatches(c, testName, unit))) {
         return prev;
       }
       const totalCharts =
@@ -300,6 +302,7 @@ export const useCustomReports = () => {
           ...prev.lab_test_charts,
           {
             test_name: testName,
+            unit: unit ?? null,
             date_from: getDefaultDateFrom(),
             date_to: getDefaultDateTo(),
           },
@@ -308,25 +311,28 @@ export const useCustomReports = () => {
     });
   }, []);
 
-  const removeLabTestChart = useCallback(testName => {
+  const removeLabTestChart = useCallback((testName, unit = null) => {
     setTrendCharts(prev => ({
       ...prev,
       lab_test_charts: prev.lab_test_charts.filter(
-        c => c.test_name.toLowerCase() !== testName.toLowerCase()
+        c => !labChartMatches(c, testName, unit)
       ),
     }));
   }, []);
 
-  const updateLabTestChartDates = useCallback((testName, dateFrom, dateTo) => {
-    setTrendCharts(prev => ({
-      ...prev,
-      lab_test_charts: prev.lab_test_charts.map(c =>
-        c.test_name.toLowerCase() === testName.toLowerCase()
-          ? { ...c, date_from: dateFrom, date_to: dateTo }
-          : c
-      ),
-    }));
-  }, []);
+  const updateLabTestChartDates = useCallback(
+    (testName, unit, dateFrom, dateTo) => {
+      setTrendCharts(prev => ({
+        ...prev,
+        lab_test_charts: prev.lab_test_charts.map(c =>
+          labChartMatches(c, testName, unit)
+            ? { ...c, date_from: dateFrom, date_to: dateTo }
+            : c
+        ),
+      }));
+    },
+    []
+  );
 
   const clearTrendCharts = useCallback(() => {
     setTrendCharts({ vital_charts: [], lab_test_charts: [] });

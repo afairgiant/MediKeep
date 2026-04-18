@@ -12,7 +12,10 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
-from app.crud.lab_test_component import lab_test_component as crud_lab_test_component
+from app.crud.lab_test_component import (
+    apply_unit_filter,
+    lab_test_component as crud_lab_test_component,
+)
 from app.models.models import LabResult, LabTestComponent, Vitals
 from app.schemas.trend_charts import SUPPORTED_VITAL_TYPES
 from app.utils.trend_statistics import compute_trend_direction
@@ -175,10 +178,16 @@ class TrendDataFetcher:
         test_name: str,
         date_from: Optional[date] = None,
         date_to: Optional[date] = None,
+        unit: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Fetch lab test trend data for a specific test name.
         Delegates to existing CRUD function and reuses statistics calculation.
+
+        When `unit` is provided, the returned series is scoped to that unit so
+        values recorded in different units (e.g. mg/L vs mmol/L) do not merge.
+        Legacy callers omitting `unit` get the historical merged-across-units
+        behavior.
 
         Returns dict with keys: dates, values, statuses, display_name, unit,
                                 ref_range_min, ref_range_max, statistics
@@ -189,15 +198,18 @@ class TrendDataFetcher:
             test_name=test_name,
             date_from=date_from,
             date_to=date_to,
+            unit=unit,
         )
+
+        display_name = f"{test_name} ({unit})" if unit else test_name
 
         if not components:
             return {
                 "dates": [],
                 "values": [],
                 "statuses": [],
-                "display_name": test_name,
-                "unit": "",
+                "display_name": display_name,
+                "unit": unit or "",
                 "ref_range_min": None,
                 "ref_range_max": None,
                 "statistics": {},
@@ -224,7 +236,7 @@ class TrendDataFetcher:
             values.append(comp.value)
             statuses.append(comp.status or "unknown")
 
-        unit = components[0].unit or ""
+        resolved_unit = unit if unit is not None else (components[0].unit or "")
         ref_min = components[0].ref_range_min
         ref_max = components[0].ref_range_max
 
@@ -232,8 +244,8 @@ class TrendDataFetcher:
             "dates": dates,
             "values": values,
             "statuses": statuses,
-            "display_name": test_name,
-            "unit": unit,
+            "display_name": display_name,
+            "unit": resolved_unit,
             "ref_range_min": ref_min,
             "ref_range_max": ref_max,
             "date_from": date_from,
@@ -282,18 +294,27 @@ class TrendDataFetcher:
         return available
 
     def get_available_lab_test_names(self, patient_id: int) -> List[Dict[str, Any]]:
-        """Return lab test names that have quantitative data for the patient."""
+        """Return (test_name, unit) pairs with quantitative data for the patient.
+
+        Grouping is done on the normalized unit (trimmed, lowercased) so that
+        casing/whitespace variants like 'mg/dL' and ' mg/dl ' merge — matching
+        apply_unit_filter's comparison rules. The display unit returned is a
+        representative raw value (MAX) from the group so conventional casing
+        (e.g. the capital L in 'mg/L') is preserved.
+        """
         name_expr = func.coalesce(
             LabTestComponent.canonical_test_name,
             LabTestComponent.test_name,
         )
+        unit_group_expr = func.lower(
+            func.trim(func.coalesce(LabTestComponent.unit, ""))
+        )
 
-        # Group by test name only (not unit) to avoid duplicates
         results = (
             self.db.query(
                 name_expr.label("name"),
-                func.count(LabTestComponent.id).label("count"),
                 func.max(LabTestComponent.unit).label("unit"),
+                func.count(LabTestComponent.id).label("count"),
             )
             .join(LabTestComponent.lab_result)
             .filter(
@@ -302,16 +323,16 @@ class TrendDataFetcher:
                 name_expr.isnot(None),
                 func.length(func.trim(name_expr)) >= 2,
             )
-            .group_by(name_expr)
+            .group_by(name_expr, unit_group_expr)
             .having(func.count(LabTestComponent.id) >= 2)
-            .order_by(name_expr)
+            .order_by(name_expr, unit_group_expr)
             .all()
         )
 
         return [
             {
                 "test_name": row.name.strip(),
-                "unit": row.unit or "",
+                "unit": (row.unit or "").strip(),
                 "count": row.count,
             }
             for row in results
@@ -340,8 +361,15 @@ class TrendDataFetcher:
         test_name: str,
         date_from: Optional[date] = None,
         date_to: Optional[date] = None,
+        unit: Optional[str] = None,
     ) -> int:
-        """Count lab test component records for a test name within a date range."""
+        """Count lab test component records for a (test_name, unit) within a date range.
+
+        Unit semantics match `get_by_patient_and_test_name`:
+          - None: no unit filter (legacy).
+          - Non-empty string: case-insensitive, whitespace-trimmed match.
+          - Empty string: rows with NULL or empty unit.
+        """
         query = (
             self.db.query(func.count(LabTestComponent.id))
             .join(LabTestComponent.lab_result)
@@ -363,6 +391,8 @@ class TrendDataFetcher:
                 )
             )
         )
+
+        query = apply_unit_filter(query, LabTestComponent.unit, unit)
 
         if date_from or date_to:
             recorded_date_expr = func.coalesce(

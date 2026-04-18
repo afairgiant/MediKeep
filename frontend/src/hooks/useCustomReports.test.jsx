@@ -142,7 +142,47 @@ describe('useCustomReports', () => {
         'blood_pressure'
       );
       expect(result.current.trendCharts.lab_test_charts).toHaveLength(1);
+      // Legacy templates (no unit field) must hydrate to unit: null so the UI
+      // can surface the "unit not specified" warning instead of silently
+      // dropping data.
+      expect(result.current.trendCharts.lab_test_charts[0].unit).toBeNull();
       expect(result.current.trendChartCount).toBe(2);
+    });
+
+    it('preserves explicit units when rehydrating a modern template', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      const template = {
+        id: 2,
+        name: 'Calcium trends',
+        selected_records: [],
+        trend_charts: {
+          vital_charts: [],
+          lab_test_charts: [
+            {
+              test_name: 'Calcium',
+              unit: 'mg/L',
+              date_from: null,
+              date_to: null,
+            },
+            {
+              test_name: 'Calcium',
+              unit: 'mmol/L',
+              date_from: null,
+              date_to: null,
+            },
+          ],
+        },
+        report_settings: {},
+      };
+
+      act(() => {
+        result.current.applyTemplate(template, dataSummary);
+      });
+
+      const charts = result.current.trendCharts.lab_test_charts;
+      expect(charts).toHaveLength(2);
+      expect(charts.map(c => c.unit).sort()).toEqual(['mg/L', 'mmol/L']);
     });
 
     it('applies report_settings without leaking a nested trend_charts blob', () => {
@@ -220,6 +260,75 @@ describe('useCustomReports', () => {
       });
 
       expect(result.current.selectedRecords).toBe(before);
+    });
+  });
+
+  describe('lab test chart actions (unit-scoped)', () => {
+    it('allows the same test_name with different units', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.addLabTestChart('Calcium', 'mg/L');
+        result.current.addLabTestChart('Calcium', 'mmol/L');
+      });
+
+      expect(result.current.trendCharts.lab_test_charts).toHaveLength(2);
+      const pairs = result.current.trendCharts.lab_test_charts.map(c => [
+        c.test_name,
+        c.unit,
+      ]);
+      expect(pairs).toEqual([
+        ['Calcium', 'mg/L'],
+        ['Calcium', 'mmol/L'],
+      ]);
+    });
+
+    it('dedupes same (test_name, unit) case-insensitively', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.addLabTestChart('Calcium', 'mg/L');
+        result.current.addLabTestChart('CALCIUM', 'MG/L');
+      });
+
+      expect(result.current.trendCharts.lab_test_charts).toHaveLength(1);
+    });
+
+    it('removes only the matching unit', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.addLabTestChart('Calcium', 'mg/L');
+        result.current.addLabTestChart('Calcium', 'mmol/L');
+        result.current.removeLabTestChart('Calcium', 'mg/L');
+      });
+
+      expect(result.current.trendCharts.lab_test_charts).toHaveLength(1);
+      expect(result.current.trendCharts.lab_test_charts[0].unit).toBe('mmol/L');
+    });
+
+    it('updates dates only on the matching unit', () => {
+      const { result } = renderHook(() => useCustomReports());
+
+      act(() => {
+        result.current.addLabTestChart('Calcium', 'mg/L');
+        result.current.addLabTestChart('Calcium', 'mmol/L');
+        result.current.updateLabTestChartDates(
+          'Calcium',
+          'mg/L',
+          '2025-01-01',
+          '2025-12-31'
+        );
+      });
+
+      const charts = result.current.trendCharts.lab_test_charts;
+      const mg = charts.find(c => c.unit === 'mg/L');
+      const mmol = charts.find(c => c.unit === 'mmol/L');
+      expect(mg.date_from).toBe('2025-01-01');
+      expect(mg.date_to).toBe('2025-12-31');
+      // The mmol/L chart still has the defaults the hook set on add; what
+      // matters is that updating mg/L didn't touch it.
+      expect(mmol.date_from).not.toBe('2025-01-01');
     });
   });
 });

@@ -12,6 +12,20 @@ from app.schemas.lab_test_component import (
 )
 
 
+def apply_unit_filter(query, unit_column, unit: Optional[str]):
+    """Scope a query to a lab-test unit.
+
+    None = no filter (legacy merged-across-units). Non-empty = case-insensitive,
+    trimmed match. Empty string = rows with NULL or empty unit.
+    """
+    if unit is None:
+        return query
+    normalized = unit.strip().lower()
+    if normalized:
+        return query.filter(func.lower(func.trim(unit_column)) == normalized)
+    return query.filter(or_(unit_column.is_(None), func.trim(unit_column) == ""))
+
+
 class CRUDLabTestComponent(
     CRUDBase[LabTestComponent, LabTestComponentCreate, LabTestComponentUpdate]
 ):
@@ -191,6 +205,7 @@ class CRUDLabTestComponent(
         date_from: Optional[Any] = None,
         date_to: Optional[Any] = None,
         limit: Optional[int] = None,
+        unit: Optional[str] = None,
     ) -> List[LabTestComponent]:
         """
         Get all test components for a patient by test name (case-insensitive).
@@ -198,6 +213,11 @@ class CRUDLabTestComponent(
         Exclusive matching ensures each component appears in only one trend:
         - Components WITH canonical_test_name: match only on canonical_test_name
         - Components WITHOUT canonical_test_name: match only on exact test_name (normalized)
+
+        Unit filter semantics:
+        - None: no unit filter (legacy behavior, all units merged).
+        - Non-empty string: case-insensitive, whitespace-trimmed match on unit.
+        - Empty string: match rows where unit is NULL or empty after trimming.
 
         Date filtering prefers lab_result.completed_date, falls back to created_at.
         """
@@ -224,6 +244,8 @@ class CRUDLabTestComponent(
                 )
             )
         )
+
+        query = apply_unit_filter(query, self.model.unit, unit)
 
         if date_from or date_to:
             recorded_date_expr = func.coalesce(
@@ -368,15 +390,15 @@ class CRUDLabTestComponent(
 
         components = query.all()
 
-        # Group by normalized test name
-        groups: Dict[str, list] = {}
+        groups: Dict[tuple, list] = {}
         for comp in components:
-            key = (
+            name_key = (
                 comp.canonical_test_name.lower()
                 if comp.canonical_test_name
                 else comp.test_name.strip().rstrip(",;: ").lower()
             )
-            groups.setdefault(key, []).append(comp)
+            unit_key = (comp.unit or "").strip().lower()
+            groups.setdefault((name_key, unit_key), []).append(comp)
 
         # Build catalog entries
         from app.schemas.lab_test_component import ComponentCatalogEntry

@@ -55,6 +55,7 @@
         "searchPlaceholder": "Laboratoriumtests zoeken...",
         "title": "Laboratoriumtestgrafieken"
       },
+      "legacyUnitWarning": "Eenheid niet opgegeven — resultaten kunnen meerdere eenheden combineren. Selecteer deze test opnieuw met een specifieke eenheid.",
       "maxReached": "Maximum van 10 grafieken bereikt",
       "recordCount": "{{count}} dossiers",
       "recordCount_one": "{{count}} dossier",

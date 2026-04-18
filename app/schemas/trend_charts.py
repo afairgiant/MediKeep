@@ -10,6 +10,16 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
+# Composite lab-chart identity separator. Mirrored by the frontend at
+# frontend/src/utils/labChartKey.ts — change both together.
+LAB_CHART_KEY_SEP = "::"
+
+
+def encode_lab_chart_key(test_name: str, unit: Optional[str]) -> str:
+    """Build the composite key used on /trend-chart-counts response dicts."""
+    return f"{test_name}{LAB_CHART_KEY_SEP}{unit or ''}"
+
+
 # Vital types that can be charted (must match Vitals model columns)
 SUPPORTED_VITAL_TYPES = [
     "blood_pressure",
@@ -57,8 +67,32 @@ class LabTestChartRequest(BaseModel):
     test_name: str = Field(
         ..., min_length=1, max_length=500, description="Lab test name"
     )
+    unit: Optional[str] = Field(
+        default=None,
+        max_length=50,
+        description=(
+            "Lab test unit (e.g. mg/dL). Scopes the trend to a single unit so "
+            "values recorded in different units are not merged. Omit on legacy "
+            "templates for backward-compatible merged behavior."
+        ),
+    )
     date_from: Optional[date] = Field(default=None, description="Start date filter")
     date_to: Optional[date] = Field(default=None, description="End date filter")
+
+    # The backend does case-insensitive matching against a trimmed column, but
+    # passes the request value through unstripped — so leading/trailing
+    # whitespace on the incoming request misses valid rows. Normalize on parse.
+    @field_validator("test_name")
+    @classmethod
+    def strip_test_name(cls, v: str) -> str:
+        return v.strip()
+
+    @field_validator("unit")
+    @classmethod
+    def strip_unit(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return None
+        return v.strip()
 
     @field_validator("date_to")
     @classmethod
@@ -92,9 +126,11 @@ class TrendChartSelection(BaseModel):
         if len(vital_types) != len(set(vital_types)):
             raise ValueError("Duplicate vital types are not allowed")
 
-        # Check for duplicate lab test names (case-insensitive)
-        lab_names = [lc.test_name.lower() for lc in self.lab_test_charts]
-        if len(lab_names) != len(set(lab_names)):
-            raise ValueError("Duplicate lab test names are not allowed")
+        lab_keys = [
+            (lc.test_name.lower(), (lc.unit or "").strip().lower())
+            for lc in self.lab_test_charts
+        ]
+        if len(lab_keys) != len(set(lab_keys)):
+            raise ValueError("Duplicate lab test charts are not allowed")
 
         return self

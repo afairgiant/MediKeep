@@ -159,19 +159,35 @@ describe('TestComponentCatalogCard', () => {
     expect(screen.getByText('{{count}} readings')).toBeInTheDocument();
   });
 
-  it('calls onClick with trend_test_name when card is clicked', () => {
+  it('calls onClick with trend_test_name and unit when card is clicked', () => {
     const onClick = vi.fn();
     const entry = {
       ...quantEntry,
       test_name: 'Glucose (Fasting)',
       trend_test_name: 'Glucose',
+      unit: 'mg/dL',
     };
 
     render(<TestComponentCatalogCard entry={entry} onClick={onClick} />);
 
     fireEvent.click(screen.getByTestId('catalog-card'));
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledWith('Glucose');
+    expect(onClick).toHaveBeenCalledWith('Glucose', 'mg/dL');
+  });
+
+  it('passes null unit when the catalog entry has no unit', () => {
+    const onClick = vi.fn();
+    const entry = {
+      ...quantEntry,
+      test_name: 'HIV Screen',
+      trend_test_name: 'HIV Screen',
+      unit: null,
+    };
+
+    render(<TestComponentCatalogCard entry={entry} onClick={onClick} />);
+
+    fireEvent.click(screen.getByTestId('catalog-card'));
+    expect(onClick).toHaveBeenCalledWith('HIV Screen', null);
   });
 
   it('handles missing abbreviation gracefully', () => {
