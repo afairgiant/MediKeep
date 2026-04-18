@@ -29,6 +29,7 @@ class SimpleAuthService {
 
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
+      const started = performance.now();
       try {
         logger.info(`Attempting request ${i + 1}/${urls.length}`, {
           url,
@@ -51,15 +52,29 @@ class SimpleAuthService {
           url,
           status: response.status,
           statusText: response.statusText,
+          elapsedMs: Math.round(performance.now() - started),
           category: 'auth_connection',
         });
 
         // Return response regardless of status (let caller handle HTTP errors)
         return response;
       } catch (error) {
+        // Enriched failure log: browser-level context lets us later distinguish
+        // AbortError / CSP block / server-unreachable / timeout from each other
         logger.warn(`Failed to connect to ${url}`, {
           url,
           error: error.message,
+          errorName: error.name,
+          errorCause: error.cause?.message,
+          errorStack: error.stack,
+          elapsedMs: Math.round(performance.now() - started),
+          navigatorOnline:
+            typeof navigator !== 'undefined' ? navigator.onLine : null,
+          hasServiceWorker:
+            typeof navigator !== 'undefined' &&
+            !!navigator.serviceWorker?.controller,
+          pageOrigin:
+            typeof window !== 'undefined' ? window.location.origin : null,
           category: 'auth_connection_failure',
         });
         lastError = error;
@@ -76,7 +91,36 @@ class SimpleAuthService {
       }
     }
 
-    // If all URLs failed, throw the last error
+    // All fallback URLs failed. Fire a short correlation ping to /health
+    // (no /api prefix, no credentials) to distinguish "server unreachable" from
+    // "only /api/v1/auth/* is blocked". Never let the ping block the real throw.
+    let pingStatus = 'not_attempted';
+    let pingElapsedMs = null;
+    try {
+      const pingStarted = performance.now();
+      const pingPromise = fetch('/health', {
+        method: 'GET',
+        credentials: 'omit',
+      });
+      const pingTimeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Ping timeout')), 3000);
+      });
+      const pingResponse = await Promise.race([pingPromise, pingTimeout]);
+      pingElapsedMs = Math.round(performance.now() - pingStarted);
+      pingStatus = `ok_${pingResponse.status}`;
+    } catch (pingError) {
+      pingStatus = `failed_${pingError.name || 'Error'}`;
+    }
+
+    logger.error('All API endpoints failed', {
+      endpoint,
+      lastError: lastError?.message,
+      lastErrorName: lastError?.name,
+      pingStatus,
+      pingElapsedMs,
+      category: 'auth_connection_failure',
+    });
+
     throw new Error(
       `All API endpoints failed. Last error: ${lastError?.message || 'Unknown error'}`
     );
@@ -335,8 +379,8 @@ class SimpleAuthService {
           status: response.status,
           category: 'auth_registration_check',
         });
-        // Default to disabled if check fails (safe default -- don't expose registration UI on error)
-        return { registration_enabled: false };
+        // error:true lets the caller distinguish "fetch failed" from "backend says disabled"
+        return { registration_enabled: false, error: true };
       }
 
       const data = await response.json();
@@ -350,8 +394,7 @@ class SimpleAuthService {
         error: error.message,
         category: 'auth_registration_check',
       });
-      // Default to disabled if check fails (safe default -- don't expose registration UI on error)
-      return { registration_enabled: false };
+      return { registration_enabled: false, error: true };
     }
   }
 
@@ -374,7 +417,8 @@ class SimpleAuthService {
           status: response.status,
           category: 'sso_config_check',
         });
-        return { enabled: false };
+        // error:true lets the caller distinguish "fetch failed" from "backend says SSO off"
+        return { enabled: false, error: true };
       }
 
       const data = await response.json();
@@ -390,7 +434,7 @@ class SimpleAuthService {
         error: error.message,
         category: 'sso_config_check',
       });
-      return { enabled: false };
+      return { enabled: false, error: true };
     }
   }
 
