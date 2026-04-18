@@ -1708,8 +1708,8 @@
     },
     {
       "test_name": "Treponema pallidum Antibody",
-      "abbreviation": "TPAK",
-      "test_code": "17723-8",
+      "abbreviation": "TP-Ab",
+      "test_code": "24312-1",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["Syphilis Antibody"],
