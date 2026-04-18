@@ -443,7 +443,7 @@
       "test_code": "4548-4",
       "default_unit": "%",
       "category": "endocrinology",
-      "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin"],
+      "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin", "Glycated Hemoglobin (NGSP)"],
       "is_common": true,
       "display_order": 41
     },
@@ -1537,6 +1537,7 @@
     {
       "test_name": "Thyroid Peroxidase Antibody",
       "abbreviation": "AKMI",
+      "test_code": "8099-4",
       "default_unit": "U/mL",
       "category": "immunology",
       "common_names": ["TPO Antibody", "Anti-TPO"],
@@ -1546,14 +1547,17 @@
     {
       "test_name": "Rheumatoid Factor",
       "abbreviation": "RF",
+      "test_code": "15205-8",
       "default_unit": "IU/mL",
       "category": "immunology",
+      "common_names": ["Rheumatoid Factor (quant.)"],
       "is_common": false,
       "display_order": 139
     },
     {
       "test_name": "Cyclic Citrullinated Peptide Antibody",
-      "abbreviation": "AKCCP",
+      "abbreviation": "CCPS",
+      "test_code": "57093-7",
       "default_unit": "U/mL",
       "category": "immunology",
       "common_names": ["CCP Antibody", "Anti-CCP"],
@@ -1562,7 +1566,8 @@
     },
     {
       "test_name": "Zika Virus IgG Antibody",
-      "abbreviation": "ZIKAKG",
+      "abbreviation": "ZIKAG",
+      "test_code": "91080-2",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["Zika IgG"],
@@ -1572,7 +1577,8 @@
     },
     {
       "test_name": "Zika Virus IgM Antibody",
-      "abbreviation": "ZIKAKM",
+      "abbreviation": "ZIKAM",
+      "test_code": "80824-6",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["Zika IgM"],
@@ -1631,18 +1637,20 @@
     },
     {
       "test_name": "Borrelia Immunoblot IgG",
-      "abbreviation": "BORRBG",
+      "abbreviation": "BORGB",
       "default_unit": "",
       "category": "immunology",
+      "common_names": ["Borrelia IgG (Blot)"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 148
     },
     {
       "test_name": "Borrelia Immunoblot IgM",
-      "abbreviation": "BORRBM",
+      "abbreviation": "BORMB",
       "default_unit": "",
       "category": "immunology",
+      "common_names": ["Borrelia IgM (Blot)"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 149
@@ -1680,6 +1688,7 @@
     {
       "test_name": "Borrelia p41 Antibody",
       "abbreviation": "BGP41",
+      "test_code": "12891-8",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["p41", "Borrelia p41"],
@@ -1700,12 +1709,43 @@
     {
       "test_name": "Treponema pallidum Antibody",
       "abbreviation": "TPAK",
+      "test_code": "17723-8",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["Syphilis Antibody"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 155
+    },
+    {
+      "test_name": "Lipoprotein(a)",
+      "abbreviation": "LPAS",
+      "test_code": "10835-7",
+      "default_unit": "mmol/L",
+      "category": "lipids",
+      "common_names": ["AK38", "APOA", "LP", "LPA", "Lp(a)"],
+      "is_common": false,
+      "display_order": 156
+    },
+    {
+      "test_name": "Creatine Kinase-MB",
+      "abbreviation": "CK-MB",
+      "test_code": "32673-6",
+      "default_unit": "U/L",
+      "category": "cardiology",
+      "common_names": ["MB", "CPK-MB", "Creatine Phosphokinase-MB"],
+      "is_common": false,
+      "display_order": 157
+    },
+    {
+      "test_name": "Hemoglobin A1c (IFCC)",
+      "abbreviation": "HbA1c (IFCC)",
+      "test_code": "59261-8",
+      "default_unit": "mmol/mol",
+      "category": "endocrinology",
+      "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin", "Glycated Hemoglobin (IFCC)"],
+      "is_common": false,
+      "display_order": 158
     }
   ]
 }
