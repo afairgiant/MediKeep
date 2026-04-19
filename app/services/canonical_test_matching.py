@@ -51,27 +51,57 @@ class CanonicalTestMatchingService:
         Three separate dicts are used to preserve matching priority:
         test_name matches take precedence over abbreviation matches,
         which take precedence over common_name matches.
+
+        Logs a warning on any dict-key overwrite to surface data drift at
+        startup. The CI validator (scripts/validate_test_library.py) should
+        catch these before merge; the log is defense in depth.
         """
-        # Maps lowercased key -> (canonical_name, match_type)
         self._by_test_name: Dict[str, str] = {}
         self._by_abbreviation: Dict[str, str] = {}
         self._by_common_name: Dict[str, str] = {}
-        # Maps lowercased canonical name -> full test dict
         self._info_by_name: Dict[str, Dict[str, Any]] = {}
+
+        def _assign(
+            mapping: Dict[str, str], key: str, canonical_name: str, collision_type: str
+        ):
+            previous = mapping.get(key)
+            if previous is not None and previous != canonical_name:
+                logger.warning(
+                    "Test library collision detected at startup",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "test_library_collision",
+                        "collision_type": collision_type,
+                        "key": key,
+                        "previous_canonical": previous,
+                        "new_canonical": canonical_name,
+                    },
+                )
+            mapping[key] = canonical_name
 
         for test in self._test_library:
             canonical_name = test["test_name"]
             canonical_lower = canonical_name.lower()
 
-            self._by_test_name[canonical_lower] = canonical_name
+            _assign(self._by_test_name, canonical_lower, canonical_name, "test_name")
             self._info_by_name[canonical_lower] = test
 
             abbreviation = test.get("abbreviation")
             if abbreviation:
-                self._by_abbreviation[abbreviation.lower()] = canonical_name
+                _assign(
+                    self._by_abbreviation,
+                    abbreviation.lower(),
+                    canonical_name,
+                    "abbreviation",
+                )
 
             for common_name in test.get("common_names", []):
-                self._by_common_name[common_name.lower()] = canonical_name
+                _assign(
+                    self._by_common_name,
+                    common_name.lower(),
+                    canonical_name,
+                    "common_name",
+                )
 
     @property
     def test_library(self) -> List[Dict[str, Any]]:
