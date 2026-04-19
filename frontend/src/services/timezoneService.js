@@ -1,5 +1,10 @@
 import { apiClient } from './apiClient';
 import logger from './logger';
+import {
+  formatDateFromPattern,
+  getPatternForFormat,
+  shiftDateToTimezone,
+} from '../utils/dateUtils';
 
 class TimezoneService {
   constructor() {
@@ -60,30 +65,28 @@ class TimezoneService {
 
     try {
       const date = new Date(utcString);
+      if (Number.isNaN(date.getTime())) return 'Invalid Date';
 
-      if (dateOnly) {
-        return date.toLocaleDateString(this.dateLocale, {
-          timeZone: this.timezone,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        });
-      }
+      // Pattern-driven so the separator reflects the user's stored
+      // preference (dmy_dot → dots, dmy → slashes) rather than the locale's
+      // default.
+      const datePart = formatDateFromPattern(
+        shiftDateToTimezone(date, this.timezone),
+        getPatternForFormat(this.dateFormatCode)
+      );
 
-      const dateTimeOptions = {
+      if (dateOnly) return datePart || 'Invalid Date';
+
+      const timeOptions = {
         timeZone: this.timezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
         hour: 'numeric',
         minute: '2-digit',
       };
+      if (includeTimezone) timeOptions.timeZoneName = 'short';
+      const timePart = date.toLocaleTimeString(this.dateLocale, timeOptions);
 
-      if (includeTimezone) {
-        dateTimeOptions.timeZoneName = 'short';
-      }
-
-      return date.toLocaleString(this.dateLocale, dateTimeOptions);
+      if (!datePart) return 'Invalid Date';
+      return `${datePart} ${timePart}`;
     } catch (error) {
       logger.debug('timezone_service_format_error', 'Date formatting failed', {
         utcString,

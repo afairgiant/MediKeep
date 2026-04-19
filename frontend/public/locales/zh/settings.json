@@ -60,7 +60,8 @@
   "preferences": {
     "dateFormat": {
       "description": "选择在整个应用程序中如何显示日期",
-      "dmy": "DD/MM/YYYY（欧洲格式）",
+      "dmy": "DD/MM/YYYY（英国/国际）",
+      "dmy_dot": "DD.MM.YYYY（欧洲格式）",
       "mdy": "MM/DD/YYYY（美国格式）",
       "title": "日期格式",
       "ymd": "YYYY-MM-DD（ISO 格式）"

@@ -23,7 +23,8 @@ import {
   Checkbox,
   Divider,
 } from '@mantine/core';
-import { DateInput, TimeInput } from '@mantine/dates';
+import { TimeInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import { useTranslation } from 'react-i18next';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { ResponsiveModal } from '../adapters';

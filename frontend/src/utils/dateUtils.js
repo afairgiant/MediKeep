@@ -3,6 +3,143 @@
  */
 
 import { timezoneService } from '../services/timezoneService';
+import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from './constants';
+
+const parserCache = new Map();
+
+const buildDateParser = pattern => {
+  const order = (pattern || '').toUpperCase().match(/YYYY|MM|DD/g) || [];
+  if (order.length !== 3) return () => null;
+
+  return input => {
+    if (!input || typeof input !== 'string') return null;
+    const trimmed = input.trim();
+    if (!trimmed) return null;
+
+    const parts = trimmed.split(/[./\- ]+/).filter(Boolean);
+    if (parts.length !== 3) return null;
+
+    const nums = parts.map(p => (/^\d+$/.test(p) ? parseInt(p, 10) : NaN));
+    if (nums.some(Number.isNaN)) return null;
+
+    let day;
+    let month;
+    let year;
+    order.forEach((token, idx) => {
+      if (token === 'DD') day = nums[idx];
+      else if (token === 'MM') month = nums[idx];
+      else if (token === 'YYYY') year = nums[idx];
+    });
+
+    if (day === undefined || month === undefined || year === undefined) {
+      return null;
+    }
+    if (year < 100) year += 2000;
+    if (month < 1 || month > 12) return null;
+    if (day < 1 || day > 31) return null;
+
+    const date = new Date(year, month - 1, day);
+    if (
+      Number.isNaN(date.getTime()) ||
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+    return date;
+  };
+};
+
+/**
+ * Permissive date parser keyed on a user-preference pattern.
+ *
+ * Accepts 1- or 2-digit day/month and any of `.` `/` `-` ` ` as separators,
+ * so `16.1.2018`, `16/01/2018` and `16-1-2018` all resolve to the same
+ * date when the pattern is a DMY variant. Parsers are cached per pattern
+ * since there are only a handful of them and DateInput instances mount
+ * in bulk inside medical forms.
+ *
+ * @param {string} pattern - A pattern from DATE_FORMAT_OPTIONS (e.g. 'DD.MM.YYYY')
+ * @returns {(input: string) => Date|null}
+ */
+export const createDateParser = pattern => {
+  let parser = parserCache.get(pattern);
+  if (!parser) {
+    parser = buildDateParser(pattern);
+    parserCache.set(pattern, parser);
+  }
+  return parser;
+};
+
+/**
+ * Render a Date using a pattern template (pattern-driven, not locale-driven).
+ *
+ * Tokens recognised: `YYYY`, `MM`, `DD`. Everything else is kept verbatim,
+ * so the chosen separator (`.`, `/`, `-`) survives into the output.
+ *
+ * @param {Date} date - Must be a valid Date; falsy/invalid returns ''
+ * @param {string} pattern - e.g. 'DD.MM.YYYY'
+ * @returns {string}
+ */
+export const formatDateFromPattern = (date, pattern) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+  if (!pattern) return '';
+
+  const pad2 = n => String(n).padStart(2, '0');
+  return pattern
+    .replace('YYYY', String(date.getFullYear()))
+    .replace('MM', pad2(date.getMonth() + 1))
+    .replace('DD', pad2(date.getDate()));
+};
+
+/**
+ * Resolve the pattern string for a user's date_format preference code.
+ * Falls back to the default when the code is unknown.
+ */
+export const getPatternForFormat = formatCode => {
+  const opt =
+    DATE_FORMAT_OPTIONS[formatCode] || DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT];
+  return opt.pattern;
+};
+
+const tzFormatterCache = new Map();
+
+const getTzDateFormatter = timezone => {
+  const key = timezone || '__local__';
+  let formatter = tzFormatterCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-US', {
+      ...(timezone ? { timeZone: timezone } : {}),
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    tzFormatterCache.set(key, formatter);
+  }
+  return formatter;
+};
+
+/**
+ * Return a Date whose local Y/M/D match the given moment *as seen in* the
+ * target timezone. Lets callers do pattern-based token substitution on
+ * `dateForPattern.getFullYear()` etc. without locale-specific separators
+ * from toLocaleDateString sneaking back in.
+ */
+export const shiftDateToTimezone = (date, timezone) => {
+  if (!timezone) return date;
+  try {
+    const parts = getTzDateFormatter(timezone).formatToParts(date);
+    const lookup = Object.fromEntries(parts.map(p => [p.type, p.value]));
+    return new Date(
+      Number(lookup.year),
+      Number(lookup.month) - 1,
+      Number(lookup.day)
+    );
+  } catch {
+    return date;
+  }
+};
 
 /**
  * Parse a date input value to a JavaScript Date object
@@ -172,12 +309,10 @@ export const formatDateForDisplay = dateValue => {
   const date = parseDateInput(dateValue);
   if (!date) return '';
 
-  // Use timezoneService locale to respect user's date format preference
-  return date.toLocaleDateString(timezoneService.dateLocale, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
+  // Pattern-driven so the separator (dot vs slash vs dash) matches the
+  // user's stored preference rather than whatever the locale defaults to.
+  const pattern = getPatternForFormat(timezoneService.dateFormatCode);
+  return formatDateFromPattern(date, pattern);
 };
 
 /**
@@ -371,31 +506,19 @@ export const formatDateTimeForInput = (date, includeSeconds = true) => {
  */
 export const formatDateTimeForInputWithPreference = (
   date,
-  formatCode = 'mdy',
+  formatCode = DEFAULT_DATE_FORMAT,
   includeSeconds = false
 ) => {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
     return '';
   }
 
-  const day = padNumber(date.getDate());
-  const month = padNumber(date.getMonth() + 1);
-  const year = date.getFullYear();
   const hours = padNumber(date.getHours());
   const minutes = padNumber(date.getMinutes());
 
-  let datePart;
-  switch (formatCode) {
-    case 'dmy':
-      datePart = `${day}/${month}/${year}`;
-      break;
-    case 'ymd':
-      datePart = `${year}-${month}-${day}`;
-      break;
-    case 'mdy':
-    default:
-      datePart = `${month}/${day}/${year}`;
-  }
+  // Pattern-driven so new format codes (e.g. dmy_dot → 'DD.MM.YYYY') flow
+  // through automatically without touching this function.
+  const datePart = formatDateFromPattern(date, getPatternForFormat(formatCode));
 
   const timePart = includeSeconds
     ? `${hours}:${minutes}:${padNumber(date.getSeconds())}`
@@ -407,17 +530,13 @@ export const formatDateTimeForInputWithPreference = (
 /**
  * Get placeholder text for datetime input based on user's date format preference
  *
- * @param {string} formatCode - User's preferred format: 'mdy' (US), 'dmy' (European), or 'ymd' (ISO)
+ * @param {string} formatCode - User's preferred format code from DATE_FORMAT_OPTIONS
  * @returns {string} - Example placeholder text
  */
-export const getDateTimePlaceholder = (formatCode = 'mdy') => {
-  switch (formatCode) {
-    case 'dmy':
-      return 'e.g., 29/07/2015 23:58';
-    case 'ymd':
-      return 'e.g., 2015-07-29 23:58';
-    case 'mdy':
-    default:
-      return 'e.g., 07/29/2015 23:58';
-  }
+export const getDateTimePlaceholder = (formatCode = DEFAULT_DATE_FORMAT) => {
+  // Render a fixed example date through the user's pattern so dmy_dot etc.
+  // produce the right separator without per-code branching.
+  const example = new Date(2015, 6, 29, 23, 58);
+  const datePart = formatDateFromPattern(example, getPatternForFormat(formatCode));
+  return `e.g., ${datePart} 23:58`;
 };

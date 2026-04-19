@@ -60,7 +60,8 @@
   "preferences": {
     "dateFormat": {
       "description": "Escolha como as datas são exibidas em todo o aplicativo",
-      "dmy": "DD/MM/AAAA (Europeu)",
+      "dmy": "DD/MM/AAAA (Reino Unido/Internacional)",
+      "dmy_dot": "DD.MM.AAAA (Europeu)",
       "mdy": "MM/DD/AAAA (EUA)",
       "title": "Formato de Data",
       "ymd": "AAAA-MM-DD (ISO)"

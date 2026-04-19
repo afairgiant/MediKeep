@@ -57,8 +57,14 @@ describe('dateFormatUtils', () => {
 
     test('formats YYYY-MM-DD string correctly for dmy format', () => {
       const result = formatDateWithPreference('2026-01-25', 'dmy');
-      // en-GB format: DD/MM/YYYY
+      // dmy pattern: DD/MM/YYYY
       expect(result).toBe('25/01/2026');
+    });
+
+    test('formats YYYY-MM-DD string correctly for dmy_dot (European) format', () => {
+      const result = formatDateWithPreference('2026-01-25', 'dmy_dot');
+      // dmy_dot pattern: DD.MM.YYYY
+      expect(result).toBe('25.01.2026');
     });
 
     test('formats YYYY-MM-DD string correctly for ymd format', () => {
@@ -207,7 +213,11 @@ describe('dateFormatUtils', () => {
     });
 
     test('returns correct label for dmy', () => {
-      expect(getDateFormatLabel('dmy')).toBe('DD/MM/YYYY (European)');
+      expect(getDateFormatLabel('dmy')).toBe('DD/MM/YYYY (UK/International)');
+    });
+
+    test('returns correct label for dmy_dot', () => {
+      expect(getDateFormatLabel('dmy_dot')).toBe('DD.MM.YYYY (European)');
     });
 
     test('returns correct label for ymd', () => {
@@ -226,6 +236,10 @@ describe('dateFormatUtils', () => {
 
     test('returns correct example for dmy', () => {
       expect(getDateFormatExample('dmy')).toBe('25/01/2026');
+    });
+
+    test('returns correct example for dmy_dot', () => {
+      expect(getDateFormatExample('dmy_dot')).toBe('25.01.2026');
     });
 
     test('returns correct example for ymd', () => {

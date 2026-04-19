@@ -103,7 +103,8 @@ export const DATE_FORMATS = {
 };
 
 // User-selectable date format preferences
-// mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (European), ymd = YYYY-MM-DD (ISO)
+// mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (UK/International),
+// dmy_dot = DD.MM.YYYY (European / German convention), ymd = YYYY-MM-DD (ISO)
 export const DATE_FORMAT_OPTIONS = {
   mdy: {
     code: 'mdy',
@@ -114,10 +115,17 @@ export const DATE_FORMAT_OPTIONS = {
   },
   dmy: {
     code: 'dmy',
-    label: 'DD/MM/YYYY (European)',
+    label: 'DD/MM/YYYY (UK/International)',
     locale: 'en-GB',
     pattern: 'DD/MM/YYYY',
     example: '25/01/2026',
+  },
+  dmy_dot: {
+    code: 'dmy_dot',
+    label: 'DD.MM.YYYY (European)',
+    locale: 'de-DE',
+    pattern: 'DD.MM.YYYY',
+    example: '25.01.2026',
   },
   ymd: {
     code: 'ymd',

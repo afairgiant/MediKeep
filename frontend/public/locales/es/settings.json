@@ -60,7 +60,8 @@
   "preferences": {
     "dateFormat": {
       "description": "Elija cómo se muestran las fechas en toda la aplicación",
-      "dmy": "DD/MM/AAAA (Europeo)",
+      "dmy": "DD/MM/AAAA (R. Unido/Internacional)",
+      "dmy_dot": "DD.MM.AAAA (Europeo)",
       "mdy": "MM/DD/AAAA (EE. UU.)",
       "title": "Formato de fecha",
       "ymd": "AAAA-MM-DD (ISO)"

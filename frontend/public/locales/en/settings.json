@@ -60,7 +60,8 @@
   "preferences": {
     "dateFormat": {
       "description": "Choose how dates are displayed throughout the application",
-      "dmy": "DD/MM/YYYY (European)",
+      "dmy": "DD/MM/YYYY (UK/International)",
+      "dmy_dot": "DD.MM.YYYY (European)",
       "mdy": "MM/DD/YYYY (US)",
       "title": "Date Format",
       "ymd": "YYYY-MM-DD (ISO)"

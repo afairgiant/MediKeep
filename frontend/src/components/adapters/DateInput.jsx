@@ -1,83 +1,32 @@
 import { DateInput as MantineDateInput } from '@mantine/dates';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { createDateParser } from '../../utils/dateUtils';
 
+/**
+ * Shared date input that defaults `valueFormat` and `dateParser` from the
+ * user's `date_format` preference. All medical forms import this so the
+ * permissive parsing (accepts `16.1.2018`, `16/01/2018`, etc.) and the
+ * separator choice (dots vs slashes vs dashes) live in one place.
+ *
+ * Props are forwarded to Mantine's DateInput unchanged; callers only need
+ * to override `valueFormat` / `dateParser` / `placeholder` when the default
+ * preference-driven behavior isn't wanted.
+ */
 export const DateInput = ({
-  label,
-  name,
-  value,
-  onChange,
-  onBlur,
-  error,
-  required = false,
-  disabled = false,
+  valueFormat,
+  dateParser,
   placeholder,
-  className = '',
-  helpText,
   ...props
 }) => {
-  // Handle the change event to match form expectations
-  const handleChange = date => {
-    let formattedDate = '';
-    if (date) {
-      // Use local date formatting to avoid timezone issues with toISOString()
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      formattedDate = `${year}-${month}-${day}`;
-    }
-    const syntheticEvent = {
-      target: {
-        name: name,
-        value: formattedDate,
-      },
-    };
-    onChange(syntheticEvent);
-  };
-
-  // Convert string value to Date object for Mantine
-  // Handle different input formats properly to avoid timezone issues
-  const dateValue = value
-    ? (() => {
-        // If it's already a Date object, return as-is
-        if (value instanceof Date) {
-          return value;
-        }
-
-        // If it's a string, check the format
-        if (typeof value === 'string') {
-          const trimmedValue = value.trim();
-
-          // Check if it's a date-only string (YYYY-MM-DD format)
-          if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
-            // Parse manually to avoid timezone issues
-            const [year, month, day] = trimmedValue.split('-').map(Number);
-            return new Date(year, month - 1, day); // month is 0-indexed
-          }
-
-          // For datetime strings or other formats, use standard Date constructor
-          return new Date(trimmedValue);
-        }
-
-        // Fallback for other types
-        return new Date(value);
-      })()
-    : null;
+  const { dateInputFormat } = useDateFormat();
+  const effectiveFormat = valueFormat || dateInputFormat;
 
   return (
     <MantineDateInput
-      label={label}
-      name={name}
-      value={dateValue}
-      onChange={handleChange}
-      onBlur={onBlur}
-      error={error}
-      required={required}
-      disabled={disabled}
-      placeholder={placeholder}
-      description={helpText}
-      className={className}
-      withAsterisk={required}
-      clearable
       {...props}
+      valueFormat={effectiveFormat}
+      dateParser={dateParser || createDateParser(effectiveFormat)}
+      placeholder={placeholder || effectiveFormat}
     />
   );
 };
