@@ -65,6 +65,7 @@ class TimezoneService {
 
     try {
       const date = new Date(utcString);
+      if (Number.isNaN(date.getTime())) return 'Invalid Date';
 
       // Pattern-driven so the separator reflects the user's stored
       // preference (dmy_dot → dots, dmy → slashes) rather than the locale's
@@ -74,7 +75,7 @@ class TimezoneService {
         getPatternForFormat(this.dateFormatCode)
       );
 
-      if (dateOnly) return datePart;
+      if (dateOnly) return datePart || 'Invalid Date';
 
       const timeOptions = {
         timeZone: this.timezone,
@@ -84,6 +85,7 @@ class TimezoneService {
       if (includeTimezone) timeOptions.timeZoneName = 'short';
       const timePart = date.toLocaleTimeString(this.dateLocale, timeOptions);
 
+      if (!datePart) return 'Invalid Date';
       return `${datePart} ${timePart}`;
     } catch (error) {
       logger.debug('timezone_service_format_error', 'Date formatting failed', {

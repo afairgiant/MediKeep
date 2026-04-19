@@ -506,31 +506,19 @@ export const formatDateTimeForInput = (date, includeSeconds = true) => {
  */
 export const formatDateTimeForInputWithPreference = (
   date,
-  formatCode = 'mdy',
+  formatCode = DEFAULT_DATE_FORMAT,
   includeSeconds = false
 ) => {
   if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
     return '';
   }
 
-  const day = padNumber(date.getDate());
-  const month = padNumber(date.getMonth() + 1);
-  const year = date.getFullYear();
   const hours = padNumber(date.getHours());
   const minutes = padNumber(date.getMinutes());
 
-  let datePart;
-  switch (formatCode) {
-    case 'dmy':
-      datePart = `${day}/${month}/${year}`;
-      break;
-    case 'ymd':
-      datePart = `${year}-${month}-${day}`;
-      break;
-    case 'mdy':
-    default:
-      datePart = `${month}/${day}/${year}`;
-  }
+  // Pattern-driven so new format codes (e.g. dmy_dot → 'DD.MM.YYYY') flow
+  // through automatically without touching this function.
+  const datePart = formatDateFromPattern(date, getPatternForFormat(formatCode));
 
   const timePart = includeSeconds
     ? `${hours}:${minutes}:${padNumber(date.getSeconds())}`
@@ -542,17 +530,13 @@ export const formatDateTimeForInputWithPreference = (
 /**
  * Get placeholder text for datetime input based on user's date format preference
  *
- * @param {string} formatCode - User's preferred format: 'mdy' (US), 'dmy' (European), or 'ymd' (ISO)
+ * @param {string} formatCode - User's preferred format code from DATE_FORMAT_OPTIONS
  * @returns {string} - Example placeholder text
  */
-export const getDateTimePlaceholder = (formatCode = 'mdy') => {
-  switch (formatCode) {
-    case 'dmy':
-      return 'e.g., 29/07/2015 23:58';
-    case 'ymd':
-      return 'e.g., 2015-07-29 23:58';
-    case 'mdy':
-    default:
-      return 'e.g., 07/29/2015 23:58';
-  }
+export const getDateTimePlaceholder = (formatCode = DEFAULT_DATE_FORMAT) => {
+  // Render a fixed example date through the user's pattern so dmy_dot etc.
+  // produce the right separator without per-code branching.
+  const example = new Date(2015, 6, 29, 23, 58);
+  const datePart = formatDateFromPattern(example, getPatternForFormat(formatCode));
+  return `e.g., ${datePart} 23:58`;
 };

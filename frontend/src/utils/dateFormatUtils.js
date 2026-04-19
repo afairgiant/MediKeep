@@ -7,6 +7,7 @@ import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from './constants';
 import {
   formatDateFromPattern,
   getPatternForFormat,
+  parseDateInput,
   shiftDateToTimezone,
 } from './dateUtils';
 
@@ -157,8 +158,10 @@ export const formatDateTimeWithPreference = (
   const locale = getLocaleForFormat(formatCode);
 
   try {
-    const date = new Date(dateValue);
-    if (isNaN(date.getTime())) return 'Invalid Date';
+    // parseDateInput handles YYYY-MM-DD as a local date so the day doesn't
+    // shift under non-UTC timezones; full ISO timestamps go through new Date.
+    const date = parseDateInput(dateValue);
+    if (!date) return 'Invalid Date';
 
     const datePart = formatDateFromPattern(
       shiftDateToTimezone(date, timezone),
