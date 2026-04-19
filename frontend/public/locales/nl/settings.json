@@ -60,7 +60,8 @@
   "preferences": {
     "dateFormat": {
       "description": "Kies hoe datums in de applicatie worden weergegeven",
-      "dmy": "DD/MM/JJJJ (Europees)",
+      "dmy": "DD/MM/JJJJ (VK/Internationaal)",
+      "dmy_dot": "DD.MM.JJJJ (Europees)",
       "mdy": "MM/DD/JJJJ (VS)",
       "title": "Datumnotatie",
       "ymd": "JJJJ-MM-DD (ISO)"

@@ -17,7 +17,7 @@ import {
   Container,
   Divider,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import {
   IconDownload,
   IconFileExport,

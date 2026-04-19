@@ -12,7 +12,7 @@ import {
   Box,
   ThemeIcon,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import {
   IconUser,
   IconStethoscope,

@@ -84,12 +84,14 @@ def _load_locale(language: str) -> Dict[str, Any]:
 _DATE_FORMATS = {
     "mdy": "%m/%d/%Y",
     "dmy": "%d/%m/%Y",
+    "dmy_dot": "%d.%m.%Y",
     "ymd": "%Y-%m-%d",
 }
 
 _DATETIME_FORMATS = {
     "mdy": "%m/%d/%Y %H:%M",
     "dmy": "%d/%m/%Y %H:%M",
+    "dmy_dot": "%d.%m.%Y %H:%M",
     "ymd": "%Y-%m-%d %H:%M",
 }
 
