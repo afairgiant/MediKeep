@@ -1,0 +1,112 @@
+name: Bug report
+description: Report a problem with MediKeep so it can be fixed
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the fields below so the issue can be reproduced and triaged quickly.
+
+        **Before submitting:** please scrub any Protected Health Information (PHI), personal data, or secrets from screenshots, logs, and descriptions.
+
+  - type: input
+    id: version
+    attributes:
+      label: MediKeep version
+      description: Found in the app footer or Settings page (e.g. `0.64.0`).
+      placeholder: "0.64.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: docker-tag
+    attributes:
+      label: Docker tag
+      description: Which image tag are you running?
+      options:
+        - latest
+        - develop
+        - specific version tag
+        - custom build
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: Host OS running the Docker container, and the OS of the machine used to access the UI if different.
+      placeholder: "Ubuntu 22.04 (host), Windows 11 (client)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the unexpected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps that reliably trigger the bug.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or screen recording
+      description: Drag and drop images or videos here. Remember to remove any PHI.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: |
+        Paste any relevant logs. Common sources:
+        - Container logs: `docker logs <container-name>`
+        - Browser console: F12 → Console tab
+        - Browser network tab: F12 → Network tab (useful for API errors)
+      render: shell
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: I removed any PHI, personal data, and secrets from logs, screenshots, and descriptions.
+          required: true
+        - label: I am running a supported version of MediKeep.
+          required: true
