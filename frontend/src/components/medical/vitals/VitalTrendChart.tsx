@@ -19,6 +19,7 @@ import {
 } from 'recharts';
 import { Paper, Stack, Text, Group, Badge } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
+import useDateFormat from '../../../hooks/useDateFormat';
 import {
   VitalTrendResponse,
   VitalDataPoint,
@@ -32,6 +33,21 @@ import {
 } from './types';
 import { convertToChartData } from '../../../utils/vitalDataAggregation';
 import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
+
+const toTimestamp = (dateValue?: string | null): number | null => {
+  if (!dateValue) return null;
+  const ts = new Date(dateValue).getTime();
+  return Number.isNaN(ts) ? null : ts;
+};
+
+const buildTimeDomain = (values: number[]) => {
+  if (!values.length) return ['auto', 'auto'] as const;
+  if (values.length === 1) {
+    const dayMs = 24 * 60 * 60 * 1000;
+    return [values[0] - dayMs, values[0] + dayMs] as const;
+  }
+  return ['dataMin', 'dataMax'] as const;
+};
 
 // Static dot renderers (no component state dependencies, stable references for Recharts)
 const getGlucoseDotColor = (context: string | null | undefined): string =>
@@ -88,6 +104,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
   glucoseContextFilter,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
+  const { formatDate } = useDateFormat();
 
   // Determine if we're displaying aggregated data
   const isAggregated =
@@ -117,17 +134,25 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
     // Use raw data points
     return trendData.data_points
       .map((point: VitalDataPoint) => {
-        const dateStr = point.recorded_date.split('T')[0];
+        const timestamp = toTimestamp(point.recorded_date);
+        if (timestamp === null) return null;
 
         return {
-          date: dateStr,
+          date: point.recorded_date,
+          timestamp,
           value: point.value,
           secondaryValue: point.secondary_value,
           glucose_context: point.glucose_context,
         };
       })
-      .reverse(); // Reverse to show oldest first (left to right)
+      .filter((point): point is NonNullable<typeof point> => point !== null)
+      .reverse();
   }, [trendData.data_points, aggregatedDataPoints, isAggregated]);
+
+  const timeValues = useMemo(
+    () => chartData.map((point: any) => point.timestamp).filter(Boolean),
+    [chartData]
+  );
 
   // Calculate Y-axis configuration with nice, rounded tick values
   const yAxisConfig = useMemo(() => {
@@ -323,7 +348,11 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
           />
 
           <XAxis
-            dataKey="date"
+            dataKey="timestamp"
+            type="number"
+            scale="time"
+            domain={buildTimeDomain(timeValues)}
+            tickFormatter={(value: number) => formatDate(new Date(value))}
             tick={{ fontSize: 12 }}
             tickLine={{ stroke: '#adb5bd' }}
             stroke="#adb5bd"

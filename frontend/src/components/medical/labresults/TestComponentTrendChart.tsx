@@ -23,12 +23,33 @@ import {
 } from 'recharts';
 import { Paper, Stack, Text, Badge, Group } from '@mantine/core';
 import { useTranslation } from 'react-i18next';
+import useDateFormat from '../../../hooks/useDateFormat';
 import { TrendResponse } from '../../../services/api/labTestComponentApi';
 import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
 import {
   getQualitativeDisplayName,
   getQualitativeColor,
 } from '../../../constants/labCategories';
+
+const toTimestamp = (dateValue?: string | null): number | null => {
+  if (!dateValue) return null;
+  const ts = new Date(dateValue).getTime();
+  return Number.isNaN(ts) ? null : ts;
+};
+
+const formatAxisDate = (
+  value: number,
+  formatDate: (dateValue: string | Date, options?: any) => string
+) => formatDate(new Date(value), { includeTime: false });
+
+const buildTimeDomain = (values: number[]) => {
+  if (!values.length) return ['auto', 'auto'] as const;
+  if (values.length === 1) {
+    const dayMs = 24 * 60 * 60 * 1000;
+    return [values[0] - dayMs, values[0] + dayMs] as const;
+  }
+  return ['dataMin', 'dataMax'] as const;
+};
 
 interface TestComponentTrendChartProps {
   trendData: TrendResponse;
@@ -38,16 +59,19 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
   trendData,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
+  const { formatDate } = useDateFormat();
   const chartData = useMemo(() => {
     return trendData.data_points
       .map(point => {
-        const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const rawDate = point.recorded_date || point.created_at;
+        const timestamp = toTimestamp(rawDate);
+        if (timestamp === null) return null;
         const qv = point.qualitative_value || 'unknown';
-        // Map to binary: positive/detected = 1, negative/undetected = 0
         const numericValue = qv === 'positive' || qv === 'detected' ? 1 : 0;
 
         return {
-          date: dateStr,
+          date: rawDate,
+          timestamp,
           value: numericValue,
           qualitativeValue: qv,
           status: point.status,
@@ -55,8 +79,14 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
           id: point.id,
         };
       })
+      .filter((point): point is NonNullable<typeof point> => point !== null)
       .reverse();
   }, [trendData.data_points]);
+
+  const timeValues = useMemo(
+    () => chartData.map(point => point.timestamp),
+    [chartData]
+  );
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null;
@@ -71,7 +101,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
       >
         <Stack gap="xs">
           <Text size="sm" fw={600}>
-            {data.date}
+            {formatDate(data.date)}
           </Text>
           <Badge
             size="lg"
@@ -108,14 +138,19 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
               stroke="var(--color-border-light)"
             />
             <XAxis
-              dataKey="date"
-              type="category"
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={buildTimeDomain(timeValues)}
+              tickFormatter={(value: number) =>
+                formatAxisDate(value, formatDate)
+              }
               tick={{ fontSize: 12 }}
               angle={-45}
               textAnchor="end"
               height={80}
               stroke="#adb5bd"
-              allowDuplicatedCategory={false}
+              allowDuplicatedCategory
             />
             <YAxis
               dataKey="value"
@@ -158,14 +193,17 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
   trendData,
 }) => {
   const { t } = useTranslation(['medical', 'shared']);
+  const { formatDate } = useDateFormat();
   const chartData = useMemo(() => {
     return trendData.data_points
       .map(point => {
-        // Use recorded_date if available, otherwise use created_at date
-        const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const rawDate = point.recorded_date || point.created_at;
+        const timestamp = toTimestamp(rawDate);
+        if (timestamp === null) return null;
 
         return {
-          date: dateStr,
+          date: rawDate,
+          timestamp,
           value: point.value,
           refMin: point.ref_range_min,
           refMax: point.ref_range_max,
@@ -174,8 +212,14 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
           id: point.id,
         };
       })
-      .reverse(); // Reverse to show oldest first (left to right)
+      .filter((point): point is NonNullable<typeof point> => point !== null)
+      .reverse();
   }, [trendData.data_points]);
+
+  const timeValues = useMemo(
+    () => chartData.map(point => point.timestamp),
+    [chartData]
+  );
 
   // Get the most recent reference range for display
   const referenceRange = useMemo(() => {
@@ -249,7 +293,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
       >
         <Stack gap="xs">
           <Text size="sm" fw={600}>
-            {data.date}
+            {formatDate(data.date)}
           </Text>
           <Group gap="xs" align="baseline">
             <Text size="lg" fw={700} c="blue">
@@ -332,7 +376,13 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
             />
 
             <XAxis
-              dataKey="date"
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={buildTimeDomain(timeValues)}
+              tickFormatter={(value: number) =>
+                formatAxisDate(value, formatDate)
+              }
               tick={{ fontSize: 12 }}
               tickLine={{ stroke: '#adb5bd' }}
               stroke="#adb5bd"
