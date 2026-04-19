@@ -443,7 +443,7 @@
       "test_code": "4548-4",
       "default_unit": "%",
       "category": "endocrinology",
-      "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin", "Glycated Hemoglobin (NGSP)"],
+      "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin"],
       "is_common": true,
       "display_order": 41
     },
@@ -1738,16 +1738,6 @@
       "display_order": 157
     },
     {
-      "test_name": "Hemoglobin A1c (IFCC)",
-      "abbreviation": "HbA1c (IFCC)",
-      "test_code": "59261-8",
-      "default_unit": "mmol/mol",
-      "category": "endocrinology",
-      "common_names": ["HbA1c IFCC", "A1c IFCC", "Glycated Hemoglobin (IFCC)"],
-      "is_common": false,
-      "display_order": 158
-    },
-    {
       "test_name": "Angiotensin Converting Enzyme",
       "abbreviation": "ACE",
       "test_code": "2742-5",
@@ -1755,7 +1745,7 @@
       "category": "other",
       "common_names": ["Angiotensin-1 Converting Enzyme", "SACE"],
       "is_common": false,
-      "display_order": 159
+      "display_order": 158
     },
     {
       "test_name": "Alpha-1 Globulin",
@@ -1765,7 +1755,7 @@
       "category": "hepatology",
       "common_names": ["α1-Globulin", "Alpha 1 globulin"],
       "is_common": false,
-      "display_order": 160
+      "display_order": 159
     },
     {
       "test_name": "Alpha-2 Globulin",
@@ -1775,7 +1765,7 @@
       "category": "hepatology",
       "common_names": ["α2-Globulin", "Alpha 2 globulin"],
       "is_common": false,
-      "display_order": 161
+      "display_order": 160
     },
     {
       "test_name": "Beta Globulin",
@@ -1785,7 +1775,7 @@
       "category": "hepatology",
       "common_names": ["β-Globulin", "Beta globulin"],
       "is_common": false,
-      "display_order": 162
+      "display_order": 161
     },
     {
       "test_name": "Gamma Globulin",
@@ -1795,7 +1785,7 @@
       "category": "hepatology",
       "common_names": ["γ-Globulin", "Gamma globulin"],
       "is_common": false,
-      "display_order": 163
+      "display_order": 162
     }
   ]
 }
