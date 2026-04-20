@@ -2,6 +2,9 @@
 Tests for Canonical Test Matching Service.
 """
 
+import logging
+from unittest.mock import patch
+
 import pytest
 
 from app.services.canonical_test_matching import (
@@ -346,3 +349,54 @@ class TestCanonicalTestMatchingService:
 
         result = matching_service.find_canonical_match("K")
         assert result == "Potassium"
+
+
+class TestLookupCollisionWarning:
+    """The matcher must log a warning when data drift causes a silent remap."""
+
+    def test_duplicate_abbreviation_logs_warning(self, caplog):
+        from app.services.canonical_test_matching import CanonicalTestMatchingService
+
+        fake_library = [
+            {"test_name": "Test A", "abbreviation": "X", "common_names": []},
+            {"test_name": "Test B", "abbreviation": "X", "common_names": []},
+        ]
+
+        with patch(
+            "app.services.canonical_test_matching.get_tests", return_value=fake_library
+        ), patch(
+            "app.services.canonical_test_matching.get_all_canonical_names",
+            return_value=["Test A", "Test B"],
+        ), caplog.at_level(
+            logging.WARNING, logger="app.services.canonical_test_matching"
+        ):
+            CanonicalTestMatchingService()
+
+        assert any(
+            "Test library collision detected at startup" in record.message
+            and getattr(record, "collision_type", None) == "abbreviation"
+            for record in caplog.records
+        )
+
+    def test_clean_library_logs_no_collision_warnings(self, caplog):
+        from app.services.canonical_test_matching import CanonicalTestMatchingService
+
+        fake_library = [
+            {"test_name": "Test A", "abbreviation": "A", "common_names": ["alpha"]},
+            {"test_name": "Test B", "abbreviation": "B", "common_names": ["beta"]},
+        ]
+
+        with patch(
+            "app.services.canonical_test_matching.get_tests", return_value=fake_library
+        ), patch(
+            "app.services.canonical_test_matching.get_all_canonical_names",
+            return_value=["Test A", "Test B"],
+        ), caplog.at_level(
+            logging.WARNING, logger="app.services.canonical_test_matching"
+        ):
+            CanonicalTestMatchingService()
+
+        assert not any(
+            "Test library collision detected at startup" in record.message
+            for record in caplog.records
+        )

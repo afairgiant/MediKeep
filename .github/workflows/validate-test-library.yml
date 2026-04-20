@@ -1,0 +1,33 @@
+name: Validate Test Library
+
+on:
+  pull_request:
+    paths:
+      - 'shared/data/test_library.json'
+      - 'app/services/test_library_validator.py'
+      - 'scripts/validate_test_library.py'
+      - '.github/workflows/validate-test-library.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'shared/data/test_library.json'
+      - 'app/services/test_library_validator.py'
+      - 'scripts/validate_test_library.py'
+      - '.github/workflows/validate-test-library.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Check for alias collisions
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate test library
+        run: python scripts/validate_test_library.py
