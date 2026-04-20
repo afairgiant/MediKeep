@@ -654,7 +654,7 @@ def _calculate_quantitative_statistics(
     # Trend direction using linear regression slope
     from app.utils.trend_statistics import compute_trend_direction
 
-    trend = compute_trend_direction(values)
+    trend = compute_trend_direction(list(reversed(values)))
 
     # Time in range
     normal_count = sum(1 for c in components if c.status == "normal")
