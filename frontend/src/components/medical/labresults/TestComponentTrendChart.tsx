@@ -42,13 +42,14 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
     return trendData.data_points
       .map(point => {
         const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const dateOnly = dateStr.split('T')[0];
         const qv = point.qualitative_value || 'unknown';
         // Map to binary: positive/detected = 1, negative/undetected = 0
         const numericValue = qv === 'positive' || qv === 'detected' ? 1 : 0;
 
         return {
           date: dateStr,
-          timestamp: new Date(dateStr + 'T00:00:00').getTime(),
+          timestamp: dateOnly ? new Date(dateOnly + 'T00:00:00').getTime() : 0,
           value: numericValue,
           qualitativeValue: qv,
           status: point.status,
@@ -175,10 +176,11 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
       .map(point => {
         // Use recorded_date if available, otherwise use created_at date
         const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const dateOnly = dateStr.split('T')[0];
 
         return {
           date: dateStr,
-          timestamp: new Date(dateStr + 'T00:00:00').getTime(),
+          timestamp: dateOnly ? new Date(dateOnly + 'T00:00:00').getTime() : 0,
           value: point.value,
           refMin: point.ref_range_min,
           refMax: point.ref_range_max,
