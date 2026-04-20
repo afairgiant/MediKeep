@@ -81,8 +81,7 @@ describe('getDateParseFormats — dmy parsing', () => {
     expect(tryParse('', 'dmy')).toBeNull();
   });
 
-  test('does not mis-parse MM/DD/YYYY as dmy (month > 12 would be invalid)', () => {
-    // 13/01/2018 is valid dmy (day=13) but not valid mdy (month=13)
+  test('parses valid dmy date 13/01/2018 as day=13, month=January', () => {
     const parsed = tryParse('13/01/2018', 'dmy');
     expect(parsed?.date()).toBe(13);
     expect(parsed?.month()).toBe(0);

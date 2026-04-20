@@ -17,7 +17,6 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, defaultValue) => defaultValue || key,
-    i18n: { language: 'en' },
   }),
 }));
 
