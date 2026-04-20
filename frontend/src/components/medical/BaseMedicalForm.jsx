@@ -355,7 +355,7 @@ const BaseMedicalForm = ({
         />
       );
     },
-    [handleDateChange, formData, dateInputFormat]
+    [handleDateChange, formData, dateInputFormat, dateParser]
   );
 
   // Callback for time input fields
