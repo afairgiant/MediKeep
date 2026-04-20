@@ -15,6 +15,9 @@ on:
       - 'scripts/validate_test_library.py'
       - '.github/workflows/validate-test-library.yml'
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest

@@ -56,8 +56,9 @@ def validate_test_library(tests: List[Dict[str, Any]]) -> List[CollisionResult]:
                 common_names of the same test).
 
     Returns results sorted by (severity, collision_type, key) for stable output.
-    Raises TypeError if `tests` is not a list, ValueError if an entry lacks
-    `test_name`.
+    Raises TypeError if `tests` is not a list. Raises ValueError if an entry is
+    not a dict, lacks `test_name`, or contains non-string values where strings
+    are expected.
     """
     if not isinstance(tests, list):
         raise TypeError(f"tests must be a list, got {type(tests).__name__}")
@@ -70,22 +71,47 @@ def validate_test_library(tests: List[Dict[str, Any]]) -> List[CollisionResult]:
     test_code_owners: Dict[str, List[str]] = defaultdict(list)
 
     for idx, entry in enumerate(tests):
+        if not isinstance(entry, dict):
+            raise ValueError(
+                f"Entry at index {idx} must be a dict, got {type(entry).__name__}"
+            )
         if "test_name" not in entry:
             raise ValueError(f"Entry at index {idx} missing required field 'test_name'")
 
         canonical = entry["test_name"]
+        if not isinstance(canonical, str):
+            raise ValueError(
+                f"Entry at index {idx}: 'test_name' must be a string, "
+                f"got {type(canonical).__name__}"
+            )
         tn_key = _normalize(canonical)
         if not tn_key:
             raise ValueError(f"Entry at index {idx} has empty 'test_name'")
         test_name_owners[tn_key].append(canonical)
 
         abbrev_raw = entry.get("abbreviation")
-        if abbrev_raw:
+        if abbrev_raw is not None:
+            if not isinstance(abbrev_raw, str):
+                raise ValueError(
+                    f"Entry at index {idx}: 'abbreviation' must be a string, "
+                    f"got {type(abbrev_raw).__name__}"
+                )
             abbrev_key = _normalize(abbrev_raw)
             if abbrev_key:
                 abbrev_owners[abbrev_key].append(canonical)
 
         raw_common = entry.get("common_names") or []
+        if not isinstance(raw_common, list):
+            raise ValueError(
+                f"Entry at index {idx}: 'common_names' must be a list, "
+                f"got {type(raw_common).__name__}"
+            )
+        for c_idx, c in enumerate(raw_common):
+            if not isinstance(c, str):
+                raise ValueError(
+                    f"Entry at index {idx}: 'common_names[{c_idx}]' must be a "
+                    f"string, got {type(c).__name__}"
+                )
         normalized_commons = _dedup_preserve_order(
             k for k in (_normalize(c) for c in raw_common) if k
         )
@@ -93,7 +119,12 @@ def validate_test_library(tests: List[Dict[str, Any]]) -> List[CollisionResult]:
             common_name_owners[c_key].append(canonical)
 
         tc = entry.get("test_code")
-        if tc:
+        if tc is not None:
+            if not isinstance(tc, str):
+                raise ValueError(
+                    f"Entry at index {idx}: 'test_code' must be a string, "
+                    f"got {type(tc).__name__}"
+                )
             tc_key = _normalize(tc)
             if tc_key:
                 test_code_owners[tc_key].append(canonical)

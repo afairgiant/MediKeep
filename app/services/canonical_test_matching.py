@@ -81,7 +81,7 @@ class CanonicalTestMatchingService:
 
         for test in self._test_library:
             canonical_name = test["test_name"]
-            canonical_lower = canonical_name.lower()
+            canonical_lower = canonical_name.strip().lower()
 
             _assign(self._by_test_name, canonical_lower, canonical_name, "test_name")
             self._info_by_name[canonical_lower] = test
@@ -90,7 +90,7 @@ class CanonicalTestMatchingService:
             if abbreviation:
                 _assign(
                     self._by_abbreviation,
-                    abbreviation.lower(),
+                    abbreviation.strip().lower(),
                     canonical_name,
                     "abbreviation",
                 )
@@ -98,7 +98,7 @@ class CanonicalTestMatchingService:
             for common_name in test.get("common_names", []):
                 _assign(
                     self._by_common_name,
-                    common_name.lower(),
+                    common_name.strip().lower(),
                     canonical_name,
                     "common_name",
                 )
