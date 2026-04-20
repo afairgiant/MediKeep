@@ -25,7 +25,7 @@ import {
   Tabs,
   Progress,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import { Dropzone } from '@mantine/dropzone';
 import { useDebouncedValue } from '@mantine/hooks';
 import {

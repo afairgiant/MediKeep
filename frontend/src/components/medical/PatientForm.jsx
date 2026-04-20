@@ -28,7 +28,7 @@ import {
   IconDeviceFloppy,
   IconX,
 } from '@tabler/icons-react';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import patientApi from '../../services/api/patientApi';
 import logger from '../../services/logger';
