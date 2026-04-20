@@ -277,6 +277,7 @@ export function convertToChartData(aggregatedPoints: AggregatedDataPoint[]): {
   // Data is already sorted oldest-first from aggregateDataPoints
   return aggregatedPoints.map(point => ({
     date: point.date.split('T')[0],
+    // point.date is always a full ISO datetime from Date.toISOString() — never date-only, no UTC-midnight date-shift risk
     timestamp: new Date(point.date).getTime(),
     value: point.average,
     min: point.min,

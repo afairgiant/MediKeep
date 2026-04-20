@@ -121,6 +121,7 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
 
         return {
           date: dateStr,
+          // recorded_date is always a full UTC datetime ("YYYY-MM-DDTHH:MM:SSZ") from the Pydantic serializer — never date-only
           timestamp: new Date(point.recorded_date).getTime(),
           value: point.value,
           secondaryValue: point.secondary_value,
