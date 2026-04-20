@@ -70,7 +70,7 @@ const TreatmentFormWrapper = ({
   onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -706,6 +706,7 @@ const TreatmentFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t(
                         'treatments.form.startDateDesc',
                         'When treatment is planned to begin or began'
@@ -727,6 +728,7 @@ const TreatmentFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t(
                         'treatments.form.endDateDesc',
                         'When treatment ends (if applicable)'

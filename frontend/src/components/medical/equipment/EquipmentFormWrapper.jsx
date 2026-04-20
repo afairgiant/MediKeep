@@ -49,7 +49,7 @@ const EquipmentFormWrapper = ({
   statusMessage,
 }) => {
   const { t } = useTranslation(['common', 'medical', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -279,6 +279,7 @@ const EquipmentFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       clearable
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -301,6 +302,7 @@ const EquipmentFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       clearable
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
@@ -323,6 +325,7 @@ const EquipmentFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       clearable
                       minDate={
                         parseDateInput(formData.last_service_date) || undefined

@@ -30,7 +30,7 @@ import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 
 const DataExport = () => {
   const { t } = useTranslation('reports');
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
   const { unitSystem } = useUserPreferences();
 
   const [loading, setLoading] = useState(false);
@@ -300,6 +300,7 @@ const DataExport = () => {
                   onChange={setStartDate}
                   placeholder={dateInputFormat}
                   valueFormat={dateInputFormat}
+                  dateParser={dateParser}
                   clearable
                 />
               </Grid.Col>
@@ -312,6 +313,7 @@ const DataExport = () => {
                   onChange={setEndDate}
                   placeholder={dateInputFormat}
                   valueFormat={dateInputFormat}
+                  dateParser={dateParser}
                   clearable
                 />
               </Grid.Col>

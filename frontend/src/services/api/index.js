@@ -163,7 +163,7 @@ class ApiService {
       config.body = data;
     } else if (data instanceof URLSearchParams) {
       config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      config.body = data;
+      config.body = data.toString();
     } else if (data) {
       config.body = JSON.stringify(data);
     }

@@ -54,7 +54,7 @@ const MantineMedicationForm = ({
 }) => {
   // Translation
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -225,6 +225,7 @@ const MantineMedicationForm = ({
               });
             }}
             valueFormat={dateInputFormat}
+            dateParser={dateParser}
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );

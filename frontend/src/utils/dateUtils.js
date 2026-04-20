@@ -528,6 +528,27 @@ export const formatDateTimeForInputWithPreference = (
 };
 
 /**
+ * Returns ordered list of dayjs format strings to try when parsing user-typed date input.
+ * Accepts single-digit day/month variants (e.g. "5/1/2026") in addition to zero-padded versions.
+ * Only the separator for the active format is accepted: slash for mdy/dmy, dash for ymd.
+ *
+ * @param {string} formatCode - 'mdy', 'dmy', or 'ymd'
+ * @returns {string[]} dayjs format strings, most specific first
+ */
+export const getDateParseFormats = (formatCode = 'mdy') => {
+  switch (formatCode) {
+    case 'dmy':
+      return ['DD/MM/YYYY', 'D/M/YYYY', 'D/MM/YYYY', 'DD/M/YYYY'];
+    case 'dmy_dot':
+      return ['DD.MM.YYYY', 'D.M.YYYY', 'D.MM.YYYY', 'DD.M.YYYY'];
+    case 'ymd':
+      return ['YYYY-MM-DD'];
+    default: // mdy
+      return ['MM/DD/YYYY', 'M/D/YYYY', 'M/DD/YYYY', 'MM/D/YYYY'];
+  }
+};
+
+/**
  * Get placeholder text for datetime input based on user's date format preference
  *
  * @param {string} formatCode - User's preferred format code from DATE_FORMAT_OPTIONS

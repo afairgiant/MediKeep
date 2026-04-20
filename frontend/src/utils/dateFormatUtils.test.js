@@ -301,4 +301,34 @@ describe('dayjs customParseFormat plugin (regression for European date input bug
     expect(eu.month()).toBe(0); // January 5th (European)
     expect(us.month()).toBe(4); // May 1st (US)
   });
+
+  test('DD/MM/YYYY strict format rejects single-digit month (confirms parser fallback is needed)', () => {
+    // dayjs with DD/MM/YYYY rejects '16/1/2018' even in non-strict mode —
+    // this is why dateParser tries D/M/YYYY as a fallback.
+    expect(dayjs('16/1/2018', 'DD/MM/YYYY').isValid()).toBe(false);
+  });
+
+  test('D/M/YYYY format parses single-digit month correctly', () => {
+    const parsed = dayjs('16/1/2018', 'D/M/YYYY', true);
+    expect(parsed.isValid()).toBe(true);
+    expect(parsed.date()).toBe(16);
+    expect(parsed.month()).toBe(0); // January
+    expect(parsed.year()).toBe(2018);
+  });
+
+  test('parses European date with dot separator and single-digit month', () => {
+    const parsed = dayjs('16.1.2018', 'D.M.YYYY', true);
+    expect(parsed.isValid()).toBe(true);
+    expect(parsed.date()).toBe(16);
+    expect(parsed.month()).toBe(0);
+    expect(parsed.year()).toBe(2018);
+  });
+
+  test('parses European date with dot separator and zero-padded month', () => {
+    const parsed = dayjs('16.01.2018', 'DD.MM.YYYY', true);
+    expect(parsed.isValid()).toBe(true);
+    expect(parsed.date()).toBe(16);
+    expect(parsed.month()).toBe(0);
+    expect(parsed.year()).toBe(2018);
+  });
 });

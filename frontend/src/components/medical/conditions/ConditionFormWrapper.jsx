@@ -53,7 +53,7 @@ const ConditionFormWrapper = ({
   navigate,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -303,6 +303,7 @@ const ConditionFormWrapper = ({
                       onChange={handleDateChange('onset_date')}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t(
                         'conditions.form.descriptions.onsetDate',
                         'When the condition started'
@@ -320,6 +321,7 @@ const ConditionFormWrapper = ({
                       onChange={handleDateChange('end_date')}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t(
                         'conditions.form.descriptions.endDate',
                         'When the condition ended (if applicable)'

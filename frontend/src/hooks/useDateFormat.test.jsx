@@ -85,29 +85,33 @@ vi.mock('../utils/constants', () => ({
   },
 }));
 
-// Mock dateUtils
-vi.mock('../utils/dateUtils', () => ({
-  formatDateTimeForInputWithPreference: vi.fn(
-    (date, formatCode, _includeSeconds) => {
-      if (!date || !(date instanceof Date)) return '';
-      const formattedDate =
-        formatCode === 'dmy'
-          ? '25/01/2026'
-          : formatCode === 'ymd'
-            ? '2026-01-25'
-            : '01/25/2026';
-      return `${formattedDate} 10:30`;
-    }
-  ),
-  getDateTimePlaceholder: vi.fn(formatCode => {
-    const placeholders = {
-      mdy: 'e.g., 07/29/2015 23:58',
-      dmy: 'e.g., 29/07/2015 23:58',
-      ymd: 'e.g., 2015-07-29 23:58',
-    };
-    return placeholders[formatCode] || 'e.g., 07/29/2015 23:58';
-  }),
-}));
+// Mock dateUtils — use actual getDateParseFormats so dateParser behaviour is testable
+vi.mock('../utils/dateUtils', async importActual => {
+  const actual = await importActual();
+  return {
+    ...actual,
+    formatDateTimeForInputWithPreference: vi.fn(
+      (date, formatCode, _includeSeconds) => {
+        if (!date || !(date instanceof Date)) return '';
+        const formattedDate =
+          formatCode === 'dmy'
+            ? '25/01/2026'
+            : formatCode === 'ymd'
+              ? '2026-01-25'
+              : '01/25/2026';
+        return `${formattedDate} 10:30`;
+      }
+    ),
+    getDateTimePlaceholder: vi.fn(formatCode => {
+      const placeholders = {
+        mdy: 'e.g., 07/29/2015 23:58',
+        dmy: 'e.g., 29/07/2015 23:58',
+        ymd: 'e.g., 2015-07-29 23:58',
+      };
+      return placeholders[formatCode] || 'e.g., 07/29/2015 23:58';
+    }),
+  };
+});
 
 describe('useDateFormat', () => {
   beforeEach(() => {
@@ -128,6 +132,7 @@ describe('useDateFormat', () => {
     expect(result.current).toHaveProperty('formatExample');
     expect(result.current).toHaveProperty('dateTimePlaceholder');
     expect(result.current).toHaveProperty('dateInputFormat');
+    expect(result.current).toHaveProperty('dateParser');
     expect(result.current).toHaveProperty('formatOptions');
   });
 
@@ -236,6 +241,47 @@ describe('useDateFormat with different format preferences', () => {
     expect(result.current.dateFormat).toBe('mdy');
   });
 });
+
+describe('useDateFormat dateParser', () => {
+  test('dateParser is a function', () => {
+    const { result } = renderHook(() => useDateFormat());
+    expect(typeof result.current.dateParser).toBe('function');
+  });
+
+  test('dateParser returns undefined for null', () => {
+    const { result } = renderHook(() => useDateFormat());
+    expect(result.current.dateParser(null)).toBeUndefined();
+  });
+
+  test('dateParser returns undefined for empty string', () => {
+    const { result } = renderHook(() => useDateFormat());
+    expect(result.current.dateParser('')).toBeUndefined();
+  });
+
+  test('dateParser returns undefined for unparseable input', () => {
+    const { result } = renderHook(() => useDateFormat());
+    expect(result.current.dateParser('not-a-date')).toBeUndefined();
+  });
+
+  test('dateParser (mdy) parses zero-padded MM/DD/YYYY', () => {
+    const { result } = renderHook(() => useDateFormat());
+    const date = result.current.dateParser('01/25/2026');
+    expect(date).toBeInstanceOf(Date);
+    expect(date.getMonth()).toBe(0); // January
+    expect(date.getDate()).toBe(25);
+    expect(date.getFullYear()).toBe(2026);
+  });
+
+  test('dateParser (mdy) parses single-digit M/D/YYYY', () => {
+    const { result } = renderHook(() => useDateFormat());
+    const date = result.current.dateParser('1/5/2026');
+    expect(date).toBeInstanceOf(Date);
+    expect(date.getMonth()).toBe(0); // January
+    expect(date.getDate()).toBe(5);
+    expect(date.getFullYear()).toBe(2026);
+  });
+});
+
 
 describe('useDateFormat memoization', () => {
   test('returns stable function references', () => {
