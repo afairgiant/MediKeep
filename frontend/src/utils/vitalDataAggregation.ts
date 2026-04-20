@@ -264,6 +264,7 @@ export function smartAggregateVitalData(
  */
 export function convertToChartData(aggregatedPoints: AggregatedDataPoint[]): {
   date: string;
+  timestamp: number;
   value: number;
   min: number;
   max: number;
@@ -276,6 +277,7 @@ export function convertToChartData(aggregatedPoints: AggregatedDataPoint[]): {
   // Data is already sorted oldest-first from aggregateDataPoints
   return aggregatedPoints.map(point => ({
     date: point.date.split('T')[0],
+    timestamp: new Date(point.date).getTime(),
     value: point.average,
     min: point.min,
     max: point.max,

@@ -48,6 +48,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
 
         return {
           date: dateStr,
+          timestamp: new Date(dateStr + 'T00:00:00').getTime(),
           value: numericValue,
           qualitativeValue: qv,
           status: point.status,
@@ -108,14 +109,25 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
               stroke="var(--color-border-light)"
             />
             <XAxis
-              dataKey="date"
-              type="category"
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={[
+                (dataMin: number) => dataMin - 86400000,
+                (dataMax: number) => dataMax + 86400000,
+              ]}
               tick={{ fontSize: 12 }}
               angle={-45}
               textAnchor="end"
               height={80}
               stroke="#adb5bd"
-              allowDuplicatedCategory={false}
+              tickFormatter={(ts: number) =>
+                new Date(ts).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: '2-digit',
+                })
+              }
             />
             <YAxis
               dataKey="value"
@@ -166,6 +178,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
 
         return {
           date: dateStr,
+          timestamp: new Date(dateStr + 'T00:00:00').getTime(),
           value: point.value,
           refMin: point.ref_range_min,
           refMax: point.ref_range_max,
@@ -332,13 +345,26 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
             />
 
             <XAxis
-              dataKey="date"
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={[
+                (dataMin: number) => dataMin - 86400000,
+                (dataMax: number) => dataMax + 86400000,
+              ]}
               tick={{ fontSize: 12 }}
               tickLine={{ stroke: '#adb5bd' }}
               stroke="#adb5bd"
               angle={-45}
               textAnchor="end"
               height={80}
+              tickFormatter={(ts: number) =>
+                new Date(ts).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: '2-digit',
+                })
+              }
             />
 
             <YAxis
