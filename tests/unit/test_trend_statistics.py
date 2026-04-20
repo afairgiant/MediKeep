@@ -185,3 +185,27 @@ class TestQuantitativeStatsUnchanged:
         stats = calculate_trend_statistics([comp])
         assert stats.count == 1
         assert stats.result_type == "quantitative"
+
+    def test_trend_direction_uses_chronological_order(self):
+        """Regression: components arrive newest-first (DESC) but trend must reflect
+        oldest-to-newest direction so that a rising series is 'increasing', not
+        'decreasing' (issue #820)."""
+        # Values ordered newest-first: 30, 20, 10 — actually increasing over time
+        components = [
+            _make_quant(30.0, "normal"),
+            _make_quant(20.0, "normal"),
+            _make_quant(10.0, "normal"),
+        ]
+        stats = calculate_trend_statistics(components)
+        assert stats.trend_direction == "increasing"
+
+    def test_trend_direction_decreasing_newest_first(self):
+        """Regression: a falling series passed newest-first must report 'decreasing'."""
+        # Values ordered newest-first: 10, 20, 30 — actually decreasing over time
+        components = [
+            _make_quant(10.0, "normal"),
+            _make_quant(20.0, "normal"),
+            _make_quant(30.0, "normal"),
+        ]
+        stats = calculate_trend_statistics(components)
+        assert stats.trend_direction == "decreasing"
