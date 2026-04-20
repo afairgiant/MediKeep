@@ -1,6 +1,6 @@
 {
-  "version": "1.6.0",
-  "lastUpdated": "2026-04-13",
+  "version": "1.7.0",
+  "lastUpdated": "2026-04-18",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -1536,24 +1536,28 @@
     },
     {
       "test_name": "Thyroid Peroxidase Antibody",
-      "abbreviation": "AKMI",
+      "abbreviation": "Anti-TPO",
+      "test_code": "8099-4",
       "default_unit": "U/mL",
       "category": "immunology",
-      "common_names": ["TPO Antibody", "Anti-TPO"],
+      "common_names": ["TPO Antibody"],
       "is_common": false,
       "display_order": 138
     },
     {
       "test_name": "Rheumatoid Factor",
       "abbreviation": "RF",
+      "test_code": "15205-8",
       "default_unit": "IU/mL",
       "category": "immunology",
+      "common_names": ["Rheumatoid Factor (quant.)"],
       "is_common": false,
       "display_order": 139
     },
     {
       "test_name": "Cyclic Citrullinated Peptide Antibody",
-      "abbreviation": "AKCCP",
+      "abbreviation": "CCPS",
+      "test_code": "57093-7",
       "default_unit": "U/mL",
       "category": "immunology",
       "common_names": ["CCP Antibody", "Anti-CCP"],
@@ -1562,7 +1566,8 @@
     },
     {
       "test_name": "Zika Virus IgG Antibody",
-      "abbreviation": "ZIKAKG",
+      "abbreviation": "ZIKAG",
+      "test_code": "91080-2",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["Zika IgG"],
@@ -1572,7 +1577,8 @@
     },
     {
       "test_name": "Zika Virus IgM Antibody",
-      "abbreviation": "ZIKAKM",
+      "abbreviation": "ZIKAM",
+      "test_code": "80824-6",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["Zika IgM"],
@@ -1631,18 +1637,20 @@
     },
     {
       "test_name": "Borrelia Immunoblot IgG",
-      "abbreviation": "BORRBG",
+      "abbreviation": "BORGB",
       "default_unit": "",
       "category": "immunology",
+      "common_names": ["Borrelia IgG (Blot)"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 148
     },
     {
       "test_name": "Borrelia Immunoblot IgM",
-      "abbreviation": "BORRBM",
+      "abbreviation": "BORMB",
       "default_unit": "",
       "category": "immunology",
+      "common_names": ["Borrelia IgM (Blot)"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 149
@@ -1680,6 +1688,7 @@
     {
       "test_name": "Borrelia p41 Antibody",
       "abbreviation": "BGP41",
+      "test_code": "12891-8",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["p41", "Borrelia p41"],
@@ -1699,13 +1708,84 @@
     },
     {
       "test_name": "Treponema pallidum Antibody",
-      "abbreviation": "TPAK",
+      "abbreviation": "TP-Ab",
+      "test_code": "24312-1",
       "default_unit": "",
       "category": "immunology",
       "common_names": ["Syphilis Antibody"],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 155
+    },
+    {
+      "test_name": "Lipoprotein(a)",
+      "abbreviation": "LPA",
+      "test_code": "43583-4",
+      "default_unit": "nmol/L",
+      "category": "lipids",
+      "common_names": ["AK38", "APOA", "LP", "LPA", "Lp(a)"],
+      "is_common": false,
+      "display_order": 156
+    },
+    {
+      "test_name": "Creatine Kinase-MB",
+      "abbreviation": "CK-MB",
+      "test_code": "32673-6",
+      "default_unit": "U/L",
+      "category": "cardiology",
+      "common_names": ["MB", "CPK-MB", "Creatine Phosphokinase-MB"],
+      "is_common": false,
+      "display_order": 157
+    },
+    {
+      "test_name": "Angiotensin Converting Enzyme",
+      "abbreviation": "ACE",
+      "test_code": "2742-5",
+      "default_unit": "U/L",
+      "category": "other",
+      "common_names": ["Angiotensin-1 Converting Enzyme", "SACE"],
+      "is_common": false,
+      "display_order": 158
+    },
+    {
+      "test_name": "Alpha-1 Globulin",
+      "abbreviation": "A1GL",
+      "test_code": "2865-4",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["α1-Globulin", "Alpha 1 globulin"],
+      "is_common": false,
+      "display_order": 159
+    },
+    {
+      "test_name": "Alpha-2 Globulin",
+      "abbreviation": "A2GL",
+      "test_code": "2868-8",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["α2-Globulin", "Alpha 2 globulin"],
+      "is_common": false,
+      "display_order": 160
+    },
+    {
+      "test_name": "Beta Globulin",
+      "abbreviation": "BGL",
+      "test_code": "2871-2",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["β-Globulin", "Beta globulin"],
+      "is_common": false,
+      "display_order": 161
+    },
+    {
+      "test_name": "Gamma Globulin",
+      "abbreviation": "GGL",
+      "test_code": "2874-6",
+      "default_unit": "g/L",
+      "category": "hepatology",
+      "common_names": ["γ-Globulin", "Gamma globulin"],
+      "is_common": false,
+      "display_order": 162
     }
   ]
 }
