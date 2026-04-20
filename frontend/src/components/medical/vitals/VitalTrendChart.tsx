@@ -33,6 +33,7 @@ import {
 } from './types';
 import { convertToChartData } from '../../../utils/vitalDataAggregation';
 import { generateYAxisConfig } from '../../../utils/chartAxisUtils';
+import { formatDate } from '../../../utils/helpers';
 
 const toTimestamp = (dateValue?: string | null): number | null => {
   if (!dateValue) return null;
@@ -224,7 +225,9 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
       >
         <Stack gap="xs">
           <Text size="sm" fw={600}>
-            {isAggregated && data.periodLabel ? data.periodLabel : data.date}
+            {isAggregated && data.periodLabel
+              ? data.periodLabel
+              : formatDate(data.date)}
           </Text>
 
           {isAggregated && data.count && (
