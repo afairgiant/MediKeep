@@ -121,6 +121,8 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
 
         return {
           date: dateStr,
+          // recorded_date is always a full UTC datetime ("YYYY-MM-DDTHH:MM:SSZ") from the Pydantic serializer — never date-only
+          timestamp: new Date(point.recorded_date).getTime(),
           value: point.value,
           secondaryValue: point.secondary_value,
           glucose_context: point.glucose_context,
@@ -158,6 +160,14 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
       ...aggregatedBounds,
     ]);
   }, [chartData, isAggregated]);
+
+  const periodLabelMap = useMemo(() => {
+    const map = new Map<number, string>();
+    chartData.forEach((d: any) => {
+      if (d.periodLabel) map.set(d.timestamp, d.periodLabel);
+    });
+    return map;
+  }, [chartData]);
 
   const isBloodGlucose = trendData.vital_type === 'blood_glucose';
 
@@ -323,13 +333,33 @@ const VitalTrendChart: React.FC<VitalTrendChartProps> = ({
           />
 
           <XAxis
-            dataKey="date"
+            dataKey="timestamp"
+            type="number"
+            scale="time"
+            domain={[
+              (dataMin: number) => dataMin - 86400000,
+              (dataMax: number) => dataMax + 86400000,
+            ]}
+            ticks={
+              isAggregated
+                ? chartData.map((d: any) => d.timestamp)
+                : undefined
+            }
             tick={{ fontSize: 12 }}
             tickLine={{ stroke: '#adb5bd' }}
             stroke="#adb5bd"
             angle={-45}
             textAnchor="end"
             height={80}
+            tickFormatter={(ts: number) =>
+              isAggregated && periodLabelMap.has(ts)
+                ? periodLabelMap.get(ts)!
+                : new Date(ts).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: '2-digit',
+                  })
+            }
           />
 
           <YAxis

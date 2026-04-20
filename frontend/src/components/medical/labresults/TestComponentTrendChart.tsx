@@ -42,12 +42,14 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
     return trendData.data_points
       .map(point => {
         const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const dateOnly = dateStr.split('T')[0];
         const qv = point.qualitative_value || 'unknown';
         // Map to binary: positive/detected = 1, negative/undetected = 0
         const numericValue = qv === 'positive' || qv === 'detected' ? 1 : 0;
 
         return {
           date: dateStr,
+          timestamp: dateOnly ? new Date(dateOnly + 'T00:00:00').getTime() : 0,
           value: numericValue,
           qualitativeValue: qv,
           status: point.status,
@@ -108,14 +110,25 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
               stroke="var(--color-border-light)"
             />
             <XAxis
-              dataKey="date"
-              type="category"
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={[
+                (dataMin: number) => dataMin - 86400000,
+                (dataMax: number) => dataMax + 86400000,
+              ]}
               tick={{ fontSize: 12 }}
               angle={-45}
               textAnchor="end"
               height={80}
               stroke="#adb5bd"
-              allowDuplicatedCategory={false}
+              tickFormatter={(ts: number) =>
+                new Date(ts).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: '2-digit',
+                })
+              }
             />
             <YAxis
               dataKey="value"
@@ -163,9 +176,11 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
       .map(point => {
         // Use recorded_date if available, otherwise use created_at date
         const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const dateOnly = dateStr.split('T')[0];
 
         return {
           date: dateStr,
+          timestamp: dateOnly ? new Date(dateOnly + 'T00:00:00').getTime() : 0,
           value: point.value,
           refMin: point.ref_range_min,
           refMax: point.ref_range_max,
@@ -332,13 +347,26 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
             />
 
             <XAxis
-              dataKey="date"
+              dataKey="timestamp"
+              type="number"
+              scale="time"
+              domain={[
+                (dataMin: number) => dataMin - 86400000,
+                (dataMax: number) => dataMax + 86400000,
+              ]}
               tick={{ fontSize: 12 }}
               tickLine={{ stroke: '#adb5bd' }}
               stroke="#adb5bd"
               angle={-45}
               textAnchor="end"
               height={80}
+              tickFormatter={(ts: number) =>
+                new Date(ts).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: '2-digit',
+                })
+              }
             />
 
             <YAxis
