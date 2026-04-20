@@ -20,7 +20,7 @@ import {
   Tabs,
   Divider,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import {
   IconDeviceDesktop,
   IconPlus,
@@ -78,7 +78,7 @@ function TreatmentEquipmentRelationships({
   // Ensure equipment is always an array
   const safeEquipment = Array.isArray(equipment) ? equipment : [];
   const { t } = useTranslation(['common', 'errors', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -816,6 +816,7 @@ function TreatmentEquipmentRelationships({
                         }))
                       }
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       clearable
                       popoverProps={{ withinPortal: true, zIndex: 4000 }}
                     />

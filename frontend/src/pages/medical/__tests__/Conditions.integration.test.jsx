@@ -62,7 +62,12 @@ vi.mock('../../../hooks/usePersistedViewMode', () => ({
   usePersistedViewMode,
 }));
 vi.mock('../../../hooks/useDateFormat', () => ({
-  useDateFormat: () => ({ formatDate: d => d, formatLongDate: d => d }),
+  useDateFormat: () => ({
+    formatDate: d => d,
+    formatLongDate: d => d,
+    dateInputFormat: 'MM/DD/YYYY',
+    dateParser: vi.fn(),
+  }),
 }));
 vi.mock('../../../hooks/useResponsive', () => ({
   useResponsive: () => ({ isMobile: false, isTablet: false, isDesktop: true }),

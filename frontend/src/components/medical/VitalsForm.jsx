@@ -42,7 +42,8 @@ import {
   IconMoodSad,
   IconDropletFilled,
 } from '@tabler/icons-react';
-import { DateInput, DatePicker, TimeInput } from '@mantine/dates';
+import { DatePicker, TimeInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import { vitalsService } from '../../services/medical/vitalsService';
 import { useTimezone } from '../../hooks';
 import { useCurrentPatient } from '../../hooks/useGlobalData';
@@ -77,6 +78,7 @@ const VitalsForm = ({
     dateFormat,
     dateTimePlaceholder,
     dateInputFormat,
+    dateParser,
   } = useDateFormat();
 
   const FIELD_CONFIGS = useMemo(() => {
@@ -788,6 +790,7 @@ const VitalsForm = ({
           value={value}
           onChange={val => handleInputChange(fieldName, val)}
           valueFormat={dateInputFormat}
+          dateParser={dateParser}
           leftSection={<IconComponent size={16} />}
           required={config.required}
           error={error}

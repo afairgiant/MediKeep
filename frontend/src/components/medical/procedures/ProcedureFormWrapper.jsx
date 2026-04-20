@@ -13,7 +13,7 @@ import {
   Text,
   NumberInput,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconStethoscope,
@@ -49,7 +49,7 @@ const ProcedureFormWrapper = ({
   onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -246,6 +246,7 @@ const ProcedureFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t(
                         'procedures.form.procedureDateDesc',
                         'When the procedure is scheduled or was performed'

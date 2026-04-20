@@ -12,7 +12,7 @@ import {
   Box,
   ThemeIcon,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import {
   IconUser,
   IconStethoscope,
@@ -46,7 +46,7 @@ const MantinePatientForm = ({
   onPhotoChange, // New callback for photo changes
 }) => {
   const { unitSystem } = useUserPreferences();
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Photo state
   const [photoUrl, setPhotoUrl] = useState(null);
@@ -236,6 +236,7 @@ const MantinePatientForm = ({
                 }
                 onChange={handleDateChange('birth_date')}
                 valueFormat={dateInputFormat}
+                dateParser={dateParser}
                 firstDayOfWeek={0}
                 required
                 withAsterisk

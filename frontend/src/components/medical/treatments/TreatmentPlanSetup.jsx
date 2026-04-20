@@ -15,7 +15,7 @@ import {
   Collapse,
   UnstyledButton,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import {
   IconPill,
   IconStethoscope,
@@ -118,7 +118,7 @@ const TreatmentPlanSetup = ({
   onRelationshipsChange,
 }) => {
   const { t } = useTranslation('medical');
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
   const [loading, setLoading] = useState(true);
 
   // Available entities for selection
@@ -463,6 +463,7 @@ const TreatmentPlanSetup = ({
                             )
                           }
                           valueFormat={dateInputFormat}
+                          dateParser={dateParser}
                           clearable
                           firstDayOfWeek={0}
                           popoverProps={{ withinPortal: true, zIndex: 4000 }}
@@ -484,6 +485,7 @@ const TreatmentPlanSetup = ({
                             )
                           }
                           valueFormat={dateInputFormat}
+                          dateParser={dateParser}
                           clearable
                           firstDayOfWeek={0}
                           minDate={

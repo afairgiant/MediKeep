@@ -28,7 +28,7 @@ import {
   isPaperlessSetting,
 } from '../constants/paperlessSettings';
 import { isPapraSetting } from '../constants/papraSettings';
-import { DEFAULT_DATE_FORMAT } from '../utils/constants';
+import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
 import {
   notifySuccess,
   notifyError,
@@ -643,65 +643,39 @@ const Settings = () => {
                     </div>
                   ) : (
                     <div className="settings-radio-group">
-                      <label className="settings-radio-option">
-                        <input
-                          type="radio"
-                          name="date-format"
-                          value="mdy"
-                          checked={
-                            localPreferences?.date_format === 'mdy' ||
-                            !localPreferences?.date_format
-                          }
-                          onChange={() => handleDateFormatChange('mdy')}
-                          disabled={savingPreferences}
-                        />
-                        <span className="settings-radio-label">
-                          {t('preferences.dateFormat.mdy', 'MM/DD/YYYY (US)')}
-                          {/* eslint-disable-next-line i18next/no-literal-string -- date format example */}
-                          <span className="settings-radio-example">
-                            {' - e.g., 01/25/2026'}
-                          </span>
-                        </span>
-                      </label>
-
-                      <label className="settings-radio-option">
-                        <input
-                          type="radio"
-                          name="date-format"
-                          value="dmy"
-                          checked={localPreferences?.date_format === 'dmy'}
-                          onChange={() => handleDateFormatChange('dmy')}
-                          disabled={savingPreferences}
-                        />
-                        <span className="settings-radio-label">
-                          {t(
-                            'preferences.dateFormat.dmy',
-                            'DD/MM/YYYY (European)'
-                          )}
-                          {/* eslint-disable-next-line i18next/no-literal-string -- date format example */}
-                          <span className="settings-radio-example">
-                            {' - e.g., 25/01/2026'}
-                          </span>
-                        </span>
-                      </label>
-
-                      <label className="settings-radio-option">
-                        <input
-                          type="radio"
-                          name="date-format"
-                          value="ymd"
-                          checked={localPreferences?.date_format === 'ymd'}
-                          onChange={() => handleDateFormatChange('ymd')}
-                          disabled={savingPreferences}
-                        />
-                        <span className="settings-radio-label">
-                          {t('preferences.dateFormat.ymd', 'YYYY-MM-DD (ISO)')}
-                          {/* eslint-disable-next-line i18next/no-literal-string -- date format example */}
-                          <span className="settings-radio-example">
-                            {' - e.g., 2026-01-25'}
-                          </span>
-                        </span>
-                      </label>
+                      {Object.values(DATE_FORMAT_OPTIONS).map(option => {
+                        const selected =
+                          localPreferences?.date_format === option.code ||
+                          (!localPreferences?.date_format &&
+                            option.code === DEFAULT_DATE_FORMAT);
+                        return (
+                          <label
+                            key={option.code}
+                            className="settings-radio-option"
+                          >
+                            <input
+                              type="radio"
+                              name="date-format"
+                              value={option.code}
+                              checked={selected}
+                              onChange={() =>
+                                handleDateFormatChange(option.code)
+                              }
+                              disabled={savingPreferences}
+                            />
+                            <span className="settings-radio-label">
+                              {t(
+                                `preferences.dateFormat.${option.code}`,
+                                option.label
+                              )}
+                              {/* eslint-disable-next-line i18next/no-literal-string -- date format example */}
+                              <span className="settings-radio-example">
+                                {` - e.g., ${option.example}`}
+                              </span>
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

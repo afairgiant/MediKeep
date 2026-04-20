@@ -5,6 +5,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import {
   formatDateWithPreference,
@@ -18,6 +19,7 @@ import { timezoneService } from '../services/timezoneService';
 import {
   formatDateTimeForInputWithPreference,
   getDateTimePlaceholder,
+  getDateParseFormats,
 } from '../utils/dateUtils';
 import {
   DATE_FORMAT_OPTIONS,
@@ -117,6 +119,21 @@ export const useDateFormat = () => {
     [effectiveFormat]
   );
 
+  // Custom parser for Mantine DateInput: slash separators for mdy/dmy, dash for ymd.
+  // Accepts single-digit day/month variants (e.g. 5/1/2026) in addition to zero-padded.
+  const dateParser = useCallback(
+    (value) => {
+      if (!value) return undefined;
+      const formats = getDateParseFormats(effectiveFormat);
+      for (const fmt of formats) {
+        const parsed = dayjs(value, fmt, true);
+        if (parsed.isValid()) return parsed.toDate();
+      }
+      return undefined;
+    },
+    [effectiveFormat]
+  );
+
   return {
     formatDate,
     formatDateWithTime,
@@ -125,6 +142,7 @@ export const useDateFormat = () => {
     formatDateTimeInput,
     dateFormat: effectiveFormat,
     dateInputFormat,
+    dateParser,
     locale,
     formatLabel,
     formatExample,

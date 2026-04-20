@@ -11,7 +11,7 @@ import {
   Textarea,
   TextInput,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import { IconPill } from '@tabler/icons-react';
 import {
   parseDateInput,
@@ -101,7 +101,7 @@ function TreatmentMedicationRelationships({
   onEntityClick,
 }) {
   const { t } = useTranslation('common');
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
   // Ensure medications is always an array
   const safeMedications = Array.isArray(medications) ? medications : [];
 
@@ -294,6 +294,7 @@ function TreatmentMedicationRelationships({
                               )
                             }
                             valueFormat={dateInputFormat}
+                            dateParser={dateParser}
                             clearable
                             popoverProps={{ withinPortal: true, zIndex: 4000 }}
                           />
@@ -310,6 +311,7 @@ function TreatmentMedicationRelationships({
                               )
                             }
                             valueFormat={dateInputFormat}
+                            dateParser={dateParser}
                             clearable
                             popoverProps={{ withinPortal: true, zIndex: 4000 }}
                           />
@@ -489,6 +491,7 @@ function TreatmentMedicationRelationships({
                     )
                   }
                   valueFormat={dateInputFormat}
+                  dateParser={dateParser}
                   clearable
                   popoverProps={{ withinPortal: true, zIndex: 4000 }}
                 />
@@ -503,6 +506,7 @@ function TreatmentMedicationRelationships({
                     )
                   }
                   valueFormat={dateInputFormat}
+                  dateParser={dateParser}
                   clearable
                   popoverProps={{ withinPortal: true, zIndex: 4000 }}
                 />

@@ -9,8 +9,9 @@ from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 SUPPORTED_LANGUAGES = ["en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl", "zh"]
 
 # Supported date formats - single source of truth
-# mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (European), ymd = YYYY-MM-DD (ISO)
-SUPPORTED_DATE_FORMATS = ["mdy", "dmy", "ymd"]
+# mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (UK/International),
+# dmy_dot = DD.MM.YYYY (European), ymd = YYYY-MM-DD (ISO)
+SUPPORTED_DATE_FORMATS = ["mdy", "dmy", "dmy_dot", "ymd"]
 
 # Valid storage backends
 VALID_STORAGE_BACKENDS = ["local", "paperless", "papra"]

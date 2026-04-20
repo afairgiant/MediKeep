@@ -28,15 +28,12 @@ import {
   IconDeviceFloppy,
   IconX,
 } from '@tabler/icons-react';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 import patientApi from '../../services/api/patientApi';
 import logger from '../../services/logger';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
-import {
-  DATE_FORMAT_OPTIONS,
-  DEFAULT_DATE_FORMAT,
-} from '../../utils/constants';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   unitLabels,
   validationRanges,
@@ -73,13 +70,11 @@ const PatientForm = ({
   isModal = true,
 }) => {
   const { t } = useTranslation(['common', 'errors', 'shared']);
-  const { unitSystem, dateFormat } = useUserPreferences();
+  const { unitSystem } = useUserPreferences();
   const labels = unitLabels[unitSystem];
   const ranges = validationRanges[unitSystem];
 
-  const dateInputFormat =
-    DATE_FORMAT_OPTIONS[dateFormat]?.pattern ||
-    DATE_FORMAT_OPTIONS[DEFAULT_DATE_FORMAT].pattern;
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -381,6 +376,7 @@ const PatientForm = ({
                 placeholder={dateInputFormat}
                 required
                 valueFormat={dateInputFormat}
+                dateParser={dateParser}
                 leftSection={<IconCalendar size="1rem" />}
                 value={formData.birth_date}
                 onChange={date =>

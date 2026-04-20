@@ -16,7 +16,7 @@ import {
   Badge,
   ActionIcon,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconChartBar,
@@ -320,7 +320,7 @@ const LabResultFormWrapper = ({
   children,
 }) => {
   const { t } = useTranslation(['medical', 'common']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { handleTextInputChange } = useFormHandlers(onInputChange);
@@ -726,6 +726,7 @@ const LabResultFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t('labresults:orderedDate.description')}
                       clearable
                       firstDayOfWeek={0}
@@ -747,6 +748,7 @@ const LabResultFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t('labresults:completedDate.description')}
                       clearable
                       firstDayOfWeek={0}

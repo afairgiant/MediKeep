@@ -13,7 +13,7 @@ import {
   Checkbox,
   Text,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import {
   IconInfoCircle,
   IconClipboard,
@@ -69,7 +69,7 @@ const MantineSymptomForm = ({
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -233,6 +233,7 @@ const MantineSymptomForm = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       required
                       maxDate={today}
                       clearable
@@ -291,6 +292,7 @@ const MantineSymptomForm = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       maxDate={today}
                       clearable
                       firstDayOfWeek={0}

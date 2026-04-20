@@ -12,7 +12,7 @@ import {
   Select,
   Text,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconAlertTriangle,
@@ -51,7 +51,7 @@ const AllergyFormWrapper = ({
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -295,6 +295,7 @@ const AllergyFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t('allergies.onsetDate.description')}
                       clearable
                       firstDayOfWeek={0}

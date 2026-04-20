@@ -16,7 +16,7 @@ import {
   Divider,
   Title,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconUser,
@@ -55,7 +55,7 @@ const InsuranceFormWrapper = ({
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Get insurance form fields
   const fields = getFormFields('insurance');
@@ -408,6 +408,7 @@ const InsuranceFormWrapper = ({
               });
             }}
             valueFormat={dateInputFormat}
+            dateParser={dateParser}
             popoverProps={{ withinPortal: true, zIndex: 3000 }}
           />
         );

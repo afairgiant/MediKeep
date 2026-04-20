@@ -4,6 +4,12 @@
  */
 
 import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from './constants';
+import {
+  formatDateFromPattern,
+  getPatternForFormat,
+  parseDateInput,
+  shiftDateToTimezone,
+} from './dateUtils';
 
 /**
  * Capitalize the first character of a string.
@@ -45,6 +51,7 @@ export const formatDateWithPreference = (
   if (!dateValue) return 'N/A';
 
   const { includeTime = false, timezone } = options;
+  const pattern = getPatternForFormat(formatCode);
   const locale = getLocaleForFormat(formatCode);
 
   try {
@@ -66,22 +73,17 @@ export const formatDateWithPreference = (
 
     if (isNaN(date.getTime())) return 'Invalid Date';
 
-    const dateOptions = {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    };
+    const datePart = formatDateFromPattern(
+      shiftDateToTimezone(date, timezone),
+      pattern
+    );
 
-    if (timezone) {
-      dateOptions.timeZone = timezone;
-    }
+    if (!includeTime) return datePart;
 
-    if (includeTime) {
-      dateOptions.hour = 'numeric';
-      dateOptions.minute = '2-digit';
-    }
-
-    return date.toLocaleDateString(locale, dateOptions);
+    const timeOptions = { hour: 'numeric', minute: '2-digit' };
+    if (timezone) timeOptions.timeZone = timezone;
+    const timePart = date.toLocaleTimeString(locale, timeOptions);
+    return `${datePart} ${timePart}`;
   } catch {
     return 'Invalid Date';
   }
@@ -152,30 +154,26 @@ export const formatDateTimeWithPreference = (
   if (!dateValue) return 'N/A';
 
   const { timezone, includeTimezone = false } = options;
+  const pattern = getPatternForFormat(formatCode);
   const locale = getLocaleForFormat(formatCode);
 
   try {
-    const date = new Date(dateValue);
+    // parseDateInput handles YYYY-MM-DD as a local date so the day doesn't
+    // shift under non-UTC timezones; full ISO timestamps go through new Date.
+    const date = parseDateInput(dateValue);
+    if (!date) return 'Invalid Date';
 
-    if (isNaN(date.getTime())) return 'Invalid Date';
+    const datePart = formatDateFromPattern(
+      shiftDateToTimezone(date, timezone),
+      pattern
+    );
 
-    const dateTimeOptions = {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: 'numeric',
-      minute: '2-digit',
-    };
+    const timeOptions = { hour: 'numeric', minute: '2-digit' };
+    if (timezone) timeOptions.timeZone = timezone;
+    if (includeTimezone) timeOptions.timeZoneName = 'short';
 
-    if (timezone) {
-      dateTimeOptions.timeZone = timezone;
-    }
-
-    if (includeTimezone) {
-      dateTimeOptions.timeZoneName = 'short';
-    }
-
-    return date.toLocaleString(locale, dateTimeOptions);
+    const timePart = date.toLocaleTimeString(locale, timeOptions);
+    return `${datePart} ${timePart}`;
   } catch {
     return 'Invalid Date';
   }

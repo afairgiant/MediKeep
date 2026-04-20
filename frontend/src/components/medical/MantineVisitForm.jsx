@@ -14,7 +14,7 @@ import {
   Text,
   MultiSelect,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import {
   IconInfoCircle,
   IconStethoscope,
@@ -58,7 +58,7 @@ const MantineVisitForm = ({
 }) => {
   // Translation hooks - medical for field translations, common for UI elements
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('info');
@@ -174,6 +174,7 @@ const MantineVisitForm = ({
               });
             }}
             valueFormat={dateInputFormat}
+            dateParser={dateParser}
             maxDate={
               translatedField.maxDate &&
               typeof translatedField.maxDate === 'function'

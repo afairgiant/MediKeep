@@ -23,7 +23,8 @@ import {
   Checkbox,
   Divider,
 } from '@mantine/core';
-import { DateInput, TimeInput } from '@mantine/dates';
+import { TimeInput } from '@mantine/dates';
+import { DateInput } from '../adapters/DateInput';
 import { useTranslation } from 'react-i18next';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { ResponsiveModal } from '../adapters';
@@ -102,7 +103,7 @@ const BaseMedicalForm = ({
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const {
     handleTextInputChange,
@@ -345,6 +346,7 @@ const BaseMedicalForm = ({
           value={dateValue}
           onChange={handleDateChange(name)}
           valueFormat={dateInputFormat}
+          dateParser={dateParser}
           placeholder={dateInputFormat}
           firstDayOfWeek={0}
           clearable
@@ -354,7 +356,7 @@ const BaseMedicalForm = ({
         />
       );
     },
-    [handleDateChange, formData, dateInputFormat]
+    [handleDateChange, formData, dateInputFormat, dateParser]
   );
 
   // Callback for time input fields

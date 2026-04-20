@@ -13,7 +13,7 @@ import {
   Text,
   NumberInput,
 } from '@mantine/core';
-import { DateInput } from '@mantine/dates';
+import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconNeedle,
@@ -50,7 +50,7 @@ const ImmunizationFormWrapper = ({
   onError,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const handleDocumentManagerRef = methods => {
     if (onDocumentManagerRef) {
@@ -309,6 +309,7 @@ const ImmunizationFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t(
                         'immunizations.form.expirationDateDesc',
                         'When the vaccine expires'
@@ -366,6 +367,7 @@ const ImmunizationFormWrapper = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       description={t(
                         'immunizations.form.dateAdministeredDesc',
                         'When the vaccine was administered'

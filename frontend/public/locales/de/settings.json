@@ -60,7 +60,8 @@
   "preferences": {
     "dateFormat": {
       "description": "Wählen Sie, wie Datumsangaben in der gesamten Anwendung angezeigt werden",
-      "dmy": "TT/MM/JJJJ (Europäisch)",
+      "dmy": "TT/MM/JJJJ (Vereinigtes Königreich/International)",
+      "dmy_dot": "TT.MM.JJJJ (Europäisch)",
       "mdy": "MM/TT/JJJJ (US)",
       "title": "Datumsformat",
       "ymd": "JJJJ-MM-TT (ISO)"
