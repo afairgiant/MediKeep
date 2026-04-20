@@ -69,7 +69,7 @@ const MantineSymptomForm = ({
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -233,6 +233,7 @@ const MantineSymptomForm = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       required
                       maxDate={today}
                       clearable
@@ -291,6 +292,7 @@ const MantineSymptomForm = ({
                       }}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       maxDate={today}
                       clearable
                       firstDayOfWeek={0}

@@ -77,6 +77,7 @@ const VitalsForm = ({
     dateFormat,
     dateTimePlaceholder,
     dateInputFormat,
+    dateParser,
   } = useDateFormat();
 
   const FIELD_CONFIGS = useMemo(() => {
@@ -788,6 +789,7 @@ const VitalsForm = ({
           value={value}
           onChange={val => handleInputChange(fieldName, val)}
           valueFormat={dateInputFormat}
+          dateParser={dateParser}
           leftSection={<IconComponent size={16} />}
           required={config.required}
           error={error}

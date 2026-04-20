@@ -25,6 +25,7 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
     dateInputFormat: 'MM/DD/YYYY',
     dateFormat: 'mdy',
     formatDate: d => d,
+    dateParser: vi.fn(),
   }),
 }));
 

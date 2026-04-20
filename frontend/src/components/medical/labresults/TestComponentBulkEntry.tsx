@@ -425,7 +425,7 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
   onError,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   const [rawText, setRawText] = useState('');
   const [debouncedText] = useDebouncedValue(rawText, 300);
@@ -1478,6 +1478,7 @@ SARS-CoV-2: Not Detected`,
                   label={t('labresults:bulkEntry.completedDate')}
                   placeholder={dateInputFormat}
                   valueFormat={dateInputFormat}
+                  dateParser={dateParser}
                   clearable
                   required
                   allowDeselect={false}

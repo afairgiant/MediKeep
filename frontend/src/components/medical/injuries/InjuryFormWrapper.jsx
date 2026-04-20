@@ -49,7 +49,7 @@ const InjuryFormWrapper = ({
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
-  const { dateInputFormat } = useDateFormat();
+  const { dateInputFormat, dateParser } = useDateFormat();
 
   // Tab state management
   const [activeTab, setActiveTab] = useState('basic');
@@ -290,6 +290,7 @@ const InjuryFormWrapper = ({
                       onChange={handleDateChange('date_of_injury')}
                       placeholder={dateInputFormat}
                       valueFormat={dateInputFormat}
+                      dateParser={dateParser}
                       maxDate={today}
                       clearable
                       firstDayOfWeek={0}

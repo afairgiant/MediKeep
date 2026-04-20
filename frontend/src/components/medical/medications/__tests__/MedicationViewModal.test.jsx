@@ -17,6 +17,7 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, defaultValue) => defaultValue || key,
+    i18n: { language: 'en' },
   }),
 }));
 
@@ -37,7 +38,7 @@ vi.mock('../../../shared/DocumentManagerWithProgress', () => ({
 }));
 vi.mock('../MedicationTreatmentsList', () => ({ default: () => null }));
 vi.mock('../../MedicationRelationships', () => ({ default: () => null }));
-vi.mock('../StatusBadge', () => ({
+vi.mock('../../StatusBadge', () => ({
   default: ({ status }) => <span>{status}</span>,
 }));
 vi.mock('../../../common/ClickableTagBadge', () => ({
