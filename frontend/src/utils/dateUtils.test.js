@@ -18,6 +18,7 @@ describe('getDateParseFormats', () => {
   test('returns an array for each format code', () => {
     expect(Array.isArray(getDateParseFormats('mdy'))).toBe(true);
     expect(Array.isArray(getDateParseFormats('dmy'))).toBe(true);
+    expect(Array.isArray(getDateParseFormats('dmy_dot'))).toBe(true);
     expect(Array.isArray(getDateParseFormats('ymd'))).toBe(true);
   });
 
@@ -85,6 +86,46 @@ describe('getDateParseFormats — dmy parsing', () => {
     const parsed = tryParse('13/01/2018', 'dmy');
     expect(parsed?.date()).toBe(13);
     expect(parsed?.month()).toBe(0);
+  });
+});
+
+describe('getDateParseFormats — dmy_dot parsing', () => {
+  test('parses zero-padded DD.MM.YYYY with dot separator', () => {
+    const parsed = tryParse('16.01.2018', 'dmy_dot');
+    expect(parsed?.isValid()).toBe(true);
+    expect(parsed?.date()).toBe(16);
+    expect(parsed?.month()).toBe(0); // January
+    expect(parsed?.year()).toBe(2018);
+  });
+
+  test('parses single-digit D.M.YYYY', () => {
+    const parsed = tryParse('5.1.2018', 'dmy_dot');
+    expect(parsed?.isValid()).toBe(true);
+    expect(parsed?.date()).toBe(5);
+    expect(parsed?.month()).toBe(0);
+    expect(parsed?.year()).toBe(2018);
+  });
+
+  test('parses D.MM.YYYY (single-digit day, two-digit month)', () => {
+    const parsed = tryParse('5.01.2018', 'dmy_dot');
+    expect(parsed?.isValid()).toBe(true);
+    expect(parsed?.date()).toBe(5);
+    expect(parsed?.month()).toBe(0);
+  });
+
+  test('parses DD.M.YYYY (two-digit day, single-digit month)', () => {
+    const parsed = tryParse('16.1.2018', 'dmy_dot');
+    expect(parsed?.isValid()).toBe(true);
+    expect(parsed?.date()).toBe(16);
+    expect(parsed?.month()).toBe(0);
+  });
+
+  test('rejects slash-separated input when dmy_dot is active', () => {
+    expect(tryParse('16/01/2018', 'dmy_dot')).toBeNull();
+  });
+
+  test('returns null for invalid input', () => {
+    expect(tryParse('not-a-date', 'dmy_dot')).toBeNull();
   });
 });
 

@@ -539,6 +539,8 @@ export const getDateParseFormats = (formatCode = 'mdy') => {
   switch (formatCode) {
     case 'dmy':
       return ['DD/MM/YYYY', 'D/M/YYYY', 'D/MM/YYYY', 'DD/M/YYYY'];
+    case 'dmy_dot':
+      return ['DD.MM.YYYY', 'D.M.YYYY', 'D.MM.YYYY', 'DD.M.YYYY'];
     case 'ymd':
       return ['YYYY-MM-DD'];
     default: // mdy
