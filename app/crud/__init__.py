@@ -11,6 +11,7 @@ from .insurance import insurance
 from .lab_result import lab_result
 from .lab_result_file import lab_result_file
 from .lab_test_component import lab_test_component
+from .medical_specialty import medical_specialty
 from .medication import medication
 from .patient import patient
 from .pharmacy import pharmacy
@@ -31,6 +32,7 @@ __all__ = [
     "lab_result",
     "lab_result_file",
     "lab_test_component",
+    "medical_specialty",
     "encounter",
     "encounter_lab_result",
     "condition",
