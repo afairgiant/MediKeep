@@ -26,7 +26,7 @@
     "detectRangesDesc": "Analyse les plages de référence à partir du texte",
     "detectUnits": "Auto-détection des unités",
     "detectUnitsDesc": "Tente d'identifier automatiquement les unités de mesure",
-    "dropPdf": "Faites glisser le PDF ici pour cliquez pour le sélectionner",
+    "dropPdf": "Faites glisser le PDF ici ou cliquez pour le sélectionner",
     "errorProcessingPdf": "Erreur lors du traitement du PDF",
     "examples": "Exemples",
     "extractedChars": "{{charCount}} caractères sur {{pageCount}} page(s)",
@@ -115,7 +115,7 @@
     "trendAvailable": "Données de tendances disponibles"
   },
   "editTitle": "Editer le résultat d'analyse",
-  "emptyLabResultMessage": "Vous avez créé un résulatt d'analyse, mais n'avez pas ajouté de composants d'analyse. Souhaitez-vous supprimer ce résultat d'analyse ?",
+  "emptyLabResultMessage": "Vous avez créé un résultat d'analyse, mais n'avez pas ajouté de composants d'analyse. Souhaitez-vous supprimer ce résultat d'analyse ?",
   "emptyLabResultWarning": "Résultat d'analyse créé, mais vide",
   "errorOccurred": "Une erreur est survenue",
   "form": {
@@ -136,7 +136,7 @@
     "relationshipCreationWarning": "Résultat d'analyse sauvegardé, mais certaines connexions n'ont pas pu être créées. Vous pouvez les ajouter depuis la page d'édition.",
     "removeRow": "Retirer la ligne",
     "result": "Résultat",
-    "resultIndicator": "Indicateu de résultat :",
+    "resultIndicator": "Indicateur de résultat :",
     "searchTests": "Saisissez pour rechercher dans les résultats...",
     "selectResult": "Sélectionner le résultat",
     "statusIndicator": "Indicateur de statut :",

@@ -95,7 +95,7 @@
     "exportInfo": "Informations d'exportation",
     "exportTitle": "Exporter des données médicales",
     "includeFilesNote": "Ceci peut significativement augmenter la taille du téléchargement",
-    "jsonDescription": "Le format JSON offre une stucture de données complète",
+    "jsonDescription": "Le format JSON offre une structure de données complète",
     "pdfDescription": "Le format PDF crée des rapports imprimables",
     "singleExport": "Exportation à l'unité",
     "zipDescription": "Les exportations de masse sont rangées dans un fichier ZIP"
@@ -199,7 +199,7 @@
   },
   "templates": {
     "categories": "{{count}} catégorie(s)",
-    "categories_one": "{{count}} catégories",
+    "categories_one": "{{count}} catégorie",
     "categories_other": "{{count}} catégories",
     "deleteConfirm": "Voulez-vous vraiment supprimer ce modèle ?",
     "deletedMessage": "Le modèle \"{{name}}\" a été supprimé.",
@@ -213,7 +213,7 @@
     "moreTemplates_other": "... et {{count}} autres modèles",
     "namePlaceholder": "Saisissez le nom du modèle",
     "nameRequired": "Le nom du modèle est requis.",
-    "noSaved": "NAucun modèle sauvegardé",
+    "noSaved": "Aucun modèle sauvegardé",
     "noSelectionsMessage": "Veuillez sélectionner au moins une entrée avant de sauvegarder un modèle.",
     "noSelectionsTitle": "Aucune entrée sélectionnée",
     "records": "{{count}} entrées",

@@ -41,7 +41,7 @@
     "actionFilter": "Action",
     "dateRange": "Plage temporelle",
     "entityTypeFilter": "Type d'entité",
-    "errorLoading": "Erreur lors du chagement du journal d'audit",
+    "errorLoading": "Erreur lors du chargement du journal d'audit",
     "filterByAction": "Filtrer par action",
     "filterByDateRange": "Filtrer par plage temporelle",
     "filterByEntityType": "Filtrer par type d'entité",
@@ -319,7 +319,7 @@
       "symptom_occurrence": "Entrées de crises symptômatiques individuelles",
       "treatment": "Plans de traitement et thérapies",
       "user": "Utilisateurs et administrateurs système",
-      "vitals": "Tension artérielle,fréquence cardiaque, température"
+      "vitals": "Tension artérielle, fréquence cardiaque, température"
     },
     "fallbackWarning": "Impossible de charger les modèles depuis le serveur. Affichage de la liste de modèle intégrée.",
     "filterAriaLabel": "Filtrer les modèles de données",

@@ -46,7 +46,7 @@
         "codeDescription": "Description des codes lisible par un humain",
         "conditionName": "Nom alternatif optionnel",
         "diagnosis": "Diagnostic ou condition primaire",
-        "endDate": "Quand la conditoin a pris fin (si applicable)",
+        "endDate": "Quand la condition a pris fin (si applicable)",
         "icd10Code": "Code de la Classification internationale des maladies",
         "notes": "Informations supplémentaires sur cette condition",
         "onsetDate": "Quand la condition s'est déclarée",
@@ -148,29 +148,29 @@
       "lastService": "Dernière date de service",
       "manufacturerPlaceholder": "ex : ResMed, Philips",
       "modelNumber": "Numéro de modèle",
-      "modelPlaceholder": "ex AirSense 11",
+      "modelPlaceholder": "ex : AirSense 11",
       "namePlaceholder": "ex : ResMed AirSense 11",
       "nextService": "Prochaine date de service",
       "notesPlaceholder": "Notes supplémentaires sur cet équipement",
       "practitioner": "Prescrit par",
       "prescribedDate": "Date de prescription",
       "saving": "Sauvegarde de l'équipment...",
-      "serialPlaceholder": "Numéro de série de l'éuipement",
+      "serialPlaceholder": "Numéro de série de l'équipement",
       "supplierPlaceholder": "Fournisseur de l'équipement",
       "type": "Type d'équipement",
       "update": "Mettre à jour l'équipement",
-      "usageInstructions": "Instuctions d'usage",
+      "usageInstructions": "Instructions d'usage",
       "usagePlaceholder": "Comment utiliser ces équipement"
     },
     "loading": "Chargement de l'équipment...",
     "noEquipmentFound": "Aucun équipement trouvé",
     "startAdding": "Commencez par ajouter votre premier équipement médical.",
     "viewModal": {
-      "dates": "Date simportantes",
+      "dates": "Dates importantes",
       "lastService": "Dernier service",
       "manufacturerDetails": "Détails du fabricant",
       "modelNumber": "Numéro de modèle",
-      "nextService": "Prochains service",
+      "nextService": "Prochain service",
       "prescribedBy": "Prescrit par",
       "prescribedDate": "Date de prescription",
       "title": "Détails de l'équipement",
@@ -274,7 +274,7 @@
     },
     "notes": {
       "description": "Tout détail ou note supplémentaire",
-      "placeholder": "AInformations supplémentaires..."
+      "placeholder": "Informations supplémentaires..."
     },
     "startDate": {
       "description": "Quand cela a commencé",
@@ -285,7 +285,7 @@
       "description": "Statut actuel"
     },
     "tags": {
-      "description": "joutez des étiquettes pour vous aider à organiser et rechercher cette entrée ultérieurement",
+      "description": "Ajoutez des étiquettes pour vous aider à organiser et rechercher cette entrée ultérieurement",
       "placeholder": "Ajoutez des étiquettes pour organiser et trouver cette entrée"
     }
   },
@@ -342,7 +342,7 @@
       "tradeNameDesc": "Nom formel complet de la documentation du vaccin",
       "tradeNamePlaceholder": "ex : INFLUVAC INJ SRG0,5ML A/AIG 1",
       "updateImmunization": "Mettre à jour l'immunisation",
-      "vaccineNameDesc": "Nom commun pour le vaccinex : vaccin contre la grippe, COVID-19, DTP",
+      "vaccineNameDesc": "Nom commun pour le vaccin",
       "vaccineNamePlaceholder": "ex : vaccin contre la grippe, COVID-19, DTP"
     },
     "loadingImmunizations": "Chargement des immunisations...",
@@ -353,8 +353,8 @@
     "viewModal": {
       "adminDetails": "Détails d'administration",
       "doseHash": "Dose n°{{number}}",
-      "locationFacility": "Location/Facility",
-      "title": "Lieu/Etablissement",
+      "locationFacility": "Lieu/Etablissement",
+      "title": "Détails de l'immunisation",
       "tradeName": "Nom commercial",
       "vaccineInfo": "Informations sur le vaccin"
     }
@@ -517,7 +517,7 @@
     },
     "types": {
       "herbal": "A base de plantes/Naturel",
-      "otc": "ans ordonnance",
+      "otc": "Sans ordonnance",
       "prescription": "Prescription",
       "supplement": "Supplément/Vitamines"
     }
@@ -719,7 +719,7 @@
       "storeNumber": "Numéro de la pharmacie"
     },
     "empty": {
-      "noData": "liquez sur \"Ajouter une pharmacie\" pour commencer.",
+      "noData": "Cliquez sur \"Ajouter une pharmacie\" pour commencer.",
       "title": "Aucune pharmacie trouvée"
     },
     "errors": {
@@ -775,9 +775,9 @@
       "totalCount": "{{count}} établissement(s) au total",
       "totalCount_one": "{{count}} établissement au total",
       "totalCount_other": "{{count}} établissements au total",
-      "unusedCount": "{{count}} unused",
-      "unusedCount_one": "{{count}} unused",
-      "unusedCount_other": "{{count}} unused"
+      "unusedCount": "{{count}} inutilisé(s)",
+      "unusedCount_one": "{{count}} inutilisé",
+      "unusedCount_other": "{{count}} inutilisés"
     },
     "tabs": {
       "practices": "Etablissements"
@@ -932,7 +932,7 @@
     "sortBy": "Trier par",
     "sortDateNewest": "Date (plus récent d'abord)",
     "sortDateOldest": "Date (plus ancien d'abord)",
-    "sortRelevance": "Pertinenec",
+    "sortRelevance": "Pertinence",
     "sortTitle": "Titre",
     "subtitle": "Recherchez dans toutes les données de santé",
     "subtitles": {
@@ -998,7 +998,7 @@
   },
   "symptoms": {
     "addSymptom": "Ajouter un symptôme",
-    "addSymptomTitle": "Ajouter un nouveau syptôme",
+    "addSymptomTitle": "Ajouter un nouveau symptôme",
     "calendar": {
       "episodesOn": "Crises symptomatiques le {{date}}",
       "noEpisodes": "Aucune crise symptomatique enregistrée ce mois-ci",
@@ -1019,7 +1019,7 @@
     },
     "chronic": "Chronique",
     "commonTriggers": "Déclencheurs communs",
-    "confirmDeleteSymptom": "Voulez-vous vraiment supprimer ce syptôme et toutes ses occurrences ?",
+    "confirmDeleteSymptom": "Voulez-vous vraiment supprimer ce symptôme et toutes ses occurrences ?",
     "editEpisodeTitle": "Editer la crise",
     "editSymptomTitle": "Editer le symptôme",
     "episode": "crise",
@@ -1157,8 +1157,8 @@
       "createTreatment": "Créer un traitement",
       "createWithLinks": "Création du plan de traitement et connexion des objets...",
       "creatingWithLinks": "Création du traitement et connexion des objets...",
-      "descriptionDesc": "Brief description of the treatment",
-      "descriptionPlaceholder": "Brève description du traitement",
+      "descriptionDesc": "Brève description du traitement",
+      "descriptionPlaceholder": "Décrivez le traitement",
       "dosageAmount": "Dosage/Quantité",
       "dosageDesc": "Quantité ou dosage par traitement",
       "dosagePlaceholder": "ex : 10mg, 1 session",
@@ -1281,10 +1281,10 @@
       "lockedByImport": "Géré par l'importation système",
       "missingPatientInfo": "Informations sur le patient manquantes",
       "notesPlaceholder": "Notes supplémentaires sur les mesures des signes vitaux..",
-      "pasteDateTimeDescription": "TSaisissez ou collez la date/l'heure, ou cliquez sur le calendrier pour la sélectionner",
+      "pasteDateTimeDescription": "Saisissez ou collez la date/l'heure, ou cliquez sur le calendrier pour la sélectionner",
       "patientHeight": "Taille du patient : {{height}} pouces (d'après le profil)",
       "validation": {
-        "a1cMax": "L'A1C ne peut ps dépasser 20 %",
+        "a1cMax": "L'A1C ne peut pas dépasser 20 %",
         "a1cMin": "L'A1C doit valoir au moins 0 %",
         "bloodGlucoseMax": "Le taux de glucose dans le sang ne peut pas dépasser 800 mg/dL",
         "bloodGlucoseMin": "Le taux de glucose dans le sang doit valoir au moins 20 mg/dL",

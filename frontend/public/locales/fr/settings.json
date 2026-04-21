@@ -15,10 +15,10 @@
     "cleanup": {
       "button": "Nettoyer les fichiers",
       "cleaning": "Nettoyage...",
-      "description": "Nettoie les fichiers désynchronisés et résoud les incohérences de stockage de documents. Cette action réinitialisera les téléversements en échec, nettoiera les tâches orphelines, et corrigera les problèmes de synchronisation de la base de données.",
+      "description": "Nettoie les fichiers désynchronisés et résout les incohérences de stockage de documents. Cette action réinitialisera les téléversements en échec, nettoiera les tâches orphelines, et corrigera les problèmes de synchronisation de la base de données.",
       "title": "Nettoyage des fichiers"
     },
-    "paperlessDescription": "Configurez l'intégration au gestionnaie de documents Paperless-ngx"
+    "paperlessDescription": "Configurez l'intégration au gestionnaire de documents Paperless-ngx"
   },
   "help": {
     "documentation": {
@@ -72,7 +72,7 @@
       "title": "Durée de session"
     },
     "unitSystem": {
-      "description": "Choisissez si les mesures doivent être affichées en unités impériales (livres, pieds, degrés Farenheit) ou métriques (kilogrammes, centimètres, degrés Celsius)",
+      "description": "Choisissez si les mesures doivent être affichées en unités impériales (livres, pieds, degrés Fahrenheit) ou métriques (kilogrammes, centimètres, degrés Celsius)",
       "imperial": "Impérial (livres, pieds, °F)",
       "metric": "Métrique (kg, cm, °C)",
       "title": "Système de mesure"
@@ -91,7 +91,7 @@
     "whatsNewTitle": "Quoi de neuf ?"
   },
   "sections": {
-    "accountManagement": "AGestion des comptes",
+    "accountManagement": "Gestion des comptes",
     "gettingHelp": "Obtenir de l'aide",
     "preferences": "Préférences d'application",
     "releaseNotes": "Notes de nouvelle version",

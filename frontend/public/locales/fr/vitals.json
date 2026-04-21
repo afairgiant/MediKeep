@@ -15,7 +15,7 @@
   },
   "detailsTitle": "Détails des signes vitaux",
   "diastolic": "Diastolique",
-  "editTitle": "Editter les signes vitaux",
+  "editTitle": "Editer les signes vitaux",
   "form": {
     "dateTimePlaceholder": "",
     "devicePlaceholder": "ex : tensiomètre digital, modèle de thermomètre...",
@@ -79,7 +79,7 @@
   "glucoseContext": {
     "after_meal": "Après un repas",
     "before_meal": "Avant un repas",
-    "fasting": "A jeûn",
+    "fasting": "A jeun",
     "random": "Au hasard"
   },
   "healthSummary": "Résumé de santé",
@@ -162,7 +162,7 @@
     "average": "Moyenne",
     "chart": "Tableau",
     "chooseTimeRange": "Choisissez la plage temporelle",
-    "dataPoints": "points de donnée",
+    "dataPoints": "points de données",
     "dataTable": "Tableau de données",
     "exportCsv": "Exporter en CSV",
     "exportError": "Echec de l'exportation des données. Veuillez réessayer.",
@@ -170,8 +170,8 @@
     "glucoseContextFilter": "Type de taux de sucre dans le sang",
     "latest": "Plus récent",
     "noData": "Aucune donnée de tendance disponible",
-    "noDataDesc": "Il n'y a pas de points de donnée historiques pour ce signe vital.",
-    "noDataPoints": "Aucun point de donnée à afficher",
+    "noDataDesc": "Il n'y a pas de points de données historiques pour ce signe vital.",
+    "noDataPoints": "Aucun point de données à afficher",
     "noHeightForBMI": "La taille du patient est requise pour calculer les tendances de l'IMC. Veuillez mettre à jour le profil du patient avec sa taille.",
     "past2Years": "2 dernières années",
     "past3Months": "3 derniers mois",

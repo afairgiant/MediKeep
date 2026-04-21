@@ -87,7 +87,7 @@
     "reject": "Rejeter",
     "relationship": "Lien de parenté :",
     "responseInfo": "Une fois que vous aurez répondu, l'expéditeur sera notifié et cette invitation sera marquée comme ayant reçu une réponse.",
-    "responseNote": "Note de répons (Optionnelle)",
+    "responseNote": "Note de réponse (Optionnelle)",
     "sent": "Envoyé le : {{date}}",
     "sharingDetails": "Détails de partage :",
     "title": "Réponse à l'invitation"
