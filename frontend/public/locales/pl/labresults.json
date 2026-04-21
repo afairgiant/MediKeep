@@ -144,7 +144,8 @@
     "testComponents": "Składniki Badania (Opcjonalne)",
     "testComponentsDescription": "Opcjonalnie dodaj poszczególne wartości badań. Możesz też dodać więcej później.",
     "testDetails": "Szczegóły Badania",
-    "unit": "Jednostka"
+    "unit": "Jednostka",
+    "matchedCommonName": "dopasowanie: {{name}}"
   },
   "keepEmptyLabResult": "Zachowaj Wynik Laboratoryjny",
   "labResult": {

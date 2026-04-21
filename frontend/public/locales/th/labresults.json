@@ -144,7 +144,8 @@
     "testComponents": "รายการตรวจ (ไม่บังคับ)",
     "testComponentsDescription": "สามารถเพิ่มค่าการตรวจแต่ละรายการได้ หรือเพิ่มภายหลังก็ได้",
     "testDetails": "รายละเอียดการตรวจ",
-    "unit": "หน่วย"
+    "unit": "หน่วย",
+    "matchedCommonName": "ตรงกับ: {{name}}"
   },
   "keepEmptyLabResult": "เก็บผลแลป",
   "labResult": {

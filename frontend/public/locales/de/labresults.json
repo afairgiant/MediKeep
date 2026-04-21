@@ -144,7 +144,8 @@
     "testComponents": "Testkomponenten (Optional)",
     "testComponentsDescription": "Optional einzelne Testwerte hinzufügen. Sie können später weitere hinzufügen.",
     "testDetails": "Testdetails",
-    "unit": "Einheit"
+    "unit": "Einheit",
+    "matchedCommonName": "Treffer: {{name}}"
   },
   "keepEmptyLabResult": "Laborergebnis behalten",
   "labResult": {

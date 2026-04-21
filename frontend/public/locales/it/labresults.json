@@ -144,7 +144,8 @@
     "testComponents": "Componenti dell'esame (facoltativo)",
     "testComponentsDescription": "Aggiungi facoltativamente i singoli valori dell'esame. Potrai aggiungerne altri in seguito.",
     "testDetails": "Dettagli dell'esame",
-    "unit": "Unità"
+    "unit": "Unità",
+    "matchedCommonName": "corrispondenza: {{name}}"
   },
   "keepEmptyLabResult": "Mantieni risultato di laboratorio",
   "labResult": {

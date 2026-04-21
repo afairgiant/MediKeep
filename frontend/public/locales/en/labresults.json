@@ -144,7 +144,8 @@
     "testComponents": "Test Components (Optional)",
     "testComponentsDescription": "Optionally add individual test values. You can also add more later.",
     "testDetails": "Test Details",
-    "unit": "Unit"
+    "unit": "Unit",
+    "matchedCommonName": "matched: {{name}}"
   },
   "keepEmptyLabResult": "Keep Lab Result",
   "labResult": {

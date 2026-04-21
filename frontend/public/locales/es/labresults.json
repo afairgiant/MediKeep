@@ -144,7 +144,8 @@
     "testComponents": "Componentes de prueba (opcional)",
     "testComponentsDescription": "Opcionalmente agregue valores de prueba individuales. También puede agregar más después.",
     "testDetails": "Detalles de la prueba",
-    "unit": "Unidad"
+    "unit": "Unidad",
+    "matchedCommonName": "coincidencia: {{name}}"
   },
   "keepEmptyLabResult": "Conservar resultado de laboratorio",
   "labResult": {
