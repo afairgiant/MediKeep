@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from sqlalchemy import inspect as sql_inspect
 from sqlalchemy.orm import Session, joinedload
 
@@ -218,8 +218,9 @@ FIELD_DISPLAY_CONFIG = {
             "website",
             "rating",
         ],
-        # Keep "specialty" in search_fields during PR1 — dual-write keeps the
-        # legacy string column synced, so searching it continues to work.
+        # NOTE: _resolve_search_field only uses the first entry today, so only
+        # "name" is actually searchable. The rest are listed for when the
+        # generic admin search grows to support multiple fields.
         "search_fields": ["name", "specialty", "practice"],
     },
     "patient": {
@@ -1453,8 +1454,16 @@ def _get_model_records(
         search_field = _resolve_search_field(model_name, model_info["model"])
         if search_field:
             search_param = {"field": search_field, "term": search.strip()}
+            # Eager-load the same relationships as the non-search path so
+            # record_to_dict() doesn't trigger per-row lazy loads on
+            # derived attributes like specialty_name / practice_name.
+            load_relations = EAGER_LOAD_FIELDS.get(model_name, []) or None
             records = crud_instance.query(
-                db=db, search=search_param, skip=skip, limit=limit
+                db=db,
+                search=search_param,
+                skip=skip,
+                limit=limit,
+                load_relations=load_relations,
             )
             all_matched = crud_instance.query(db=db, search=search_param)
             return records, len(all_matched)
@@ -1887,6 +1896,11 @@ def create_model_record(
 
     except (HTTPException, APIException):
         raise
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=e.errors(),
+        ) from e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

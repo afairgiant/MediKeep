@@ -103,7 +103,10 @@ class CRUDMedicalSpecialty(
         Delete a specialty, but only when no practitioners reference it.
 
         Mirrors the 409 enforcement used by the Practice delete endpoint so
-        admins must reassign practitioners before removing a specialty.
+        admins must reassign practitioners before removing a specialty. The
+        pre-check covers the normal case; the IntegrityError fallback handles
+        the race where a practitioner is inserted between the count and the
+        delete.
         """
         count = self.get_practitioner_count(db, specialty_id=id)
         if count > 0:
@@ -114,7 +117,17 @@ class CRUDMedicalSpecialty(
                     "practitioner(s). Reassign them first."
                 ),
             )
-        return super().delete(db, id=id)
+        try:
+            return super().delete(db, id=id)
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(
+                status_code=409,
+                detail=(
+                    "Cannot delete specialty: a practitioner was linked to it "
+                    "concurrently. Reassign dependents and retry."
+                ),
+            )
 
 
 medical_specialty = CRUDMedicalSpecialty(MedicalSpecialtyModel)

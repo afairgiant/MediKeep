@@ -49,10 +49,15 @@ class CRUDPractitioner(
         Removed during PR2 when the legacy ``specialty`` column is dropped.
         """
         id_key_present = "specialty_id" in data
+        str_key_present = "specialty" in data
         spec_id = data.get("specialty_id")
         spec_str = data.get("specialty")
 
-        if id_key_present and spec_id is None and not spec_str:
+        attempting_clear = (
+            (id_key_present and spec_id is None)
+            or (str_key_present and spec_str is None)
+        )
+        if attempting_clear and not spec_id and not spec_str:
             raise HTTPException(
                 status_code=400,
                 detail=(

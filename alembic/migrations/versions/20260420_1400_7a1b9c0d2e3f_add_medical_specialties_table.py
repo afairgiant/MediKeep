@@ -65,13 +65,14 @@ def upgrade() -> None:
 
     # Query distinct specialty strings ordered by usage count so the most common
     # casing wins the canonical form (e.g. "ENT" stays uppercase if dominant).
-    # LOWER(specialty) ASC as a tie-breaker makes the chosen canonical casing
-    # deterministic when two raw variants have equal usage counts.
+    # LOWER() groups case-variants; the raw `specialty` tie-breaker makes the
+    # ordering deterministic for case-only ties like "ENT" vs "ent".
     rows = connection.execute(
         text(
             "SELECT specialty, COUNT(*) AS c FROM practitioners "
             "WHERE specialty IS NOT NULL AND TRIM(specialty) != '' "
-            "GROUP BY specialty ORDER BY c DESC, LOWER(specialty) ASC"
+            "GROUP BY specialty "
+            "ORDER BY c DESC, LOWER(specialty) ASC, specialty ASC"
         )
     ).fetchall()
 
