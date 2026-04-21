@@ -30,7 +30,6 @@ from app.crud import (
     lab_result,
     lab_result_file,
     lab_test_component,
-    medical_specialty,
     medication,
     patient,
     pharmacy,
@@ -42,7 +41,6 @@ from app.crud import (
 )
 from app.crud.base import CRUDBase
 from app.crud.emergency_contact import emergency_contact
-from app.crud.practice import practice
 from app.crud.injury import injury
 from app.crud.injury_type import injury_type
 from app.crud.medical_equipment import medical_equipment
@@ -66,12 +64,10 @@ from app.models.models import (
     LabResult,
     LabResultFile,
     MedicalEquipment,
-    MedicalSpecialty,
     Medication,
     Patient,
     PatientShare,
     Pharmacy,
-    Practice,
     Practitioner,
     Procedure,
     Symptom,
@@ -95,11 +91,9 @@ from app.schemas.lab_result import LabResultCreate
 from app.schemas.lab_result_file import LabResultFileCreate
 from app.schemas.lab_test_component import LabTestComponentCreate
 from app.schemas.medical_equipment import MedicalEquipmentCreate
-from app.schemas.medical_specialty import MedicalSpecialtyCreate
 from app.schemas.medication import MedicationCreate
 from app.schemas.patient import PatientCreate
 from app.schemas.pharmacy import PharmacyCreate
-from app.schemas.practice import PracticeCreate
 from app.schemas.practitioner import PractitionerCreate
 from app.schemas.procedure import ProcedureCreate
 from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
@@ -121,7 +115,6 @@ DATETIME_FIELD_MAP = {
     "patient": ["created_at", "updated_at"],
     "practitioner": ["created_at", "updated_at"],
     "pharmacy": ["created_at", "updated_at"],
-    "practice": ["created_at", "updated_at"],
     "lab_result": [
         "ordered_date",
         "completed_date",
@@ -146,7 +139,6 @@ DATETIME_FIELD_MAP = {
     "symptom": ["created_at", "updated_at"],
     "symptom_occurrence": ["created_at", "updated_at"],
     "medical_equipment": ["created_at", "updated_at"],
-    "medical_specialty": ["created_at", "updated_at"],
 }
 
 DATE_FIELD_MAP = {
@@ -201,8 +193,7 @@ FIELD_DISPLAY_CONFIG = {
         "list_fields": [
             "id",
             "name",
-            "specialty_id",
-            "specialty_name",
+            "specialty",
             "practice",
             "phone_number",
             "rating",
@@ -210,15 +201,12 @@ FIELD_DISPLAY_CONFIG = {
         "detail_fields": [
             "id",
             "name",
-            "specialty_id",
-            "specialty_name",
+            "specialty",
             "practice",
             "phone_number",
             "website",
             "rating",
         ],
-        # Keep "specialty" in search_fields during PR1 — dual-write keeps the
-        # legacy string column synced, so searching it continues to work.
         "search_fields": ["name", "specialty", "practice"],
     },
     "patient": {
@@ -950,45 +938,6 @@ FIELD_DISPLAY_CONFIG = {
             "supplier",
         ],
     },
-    "medical_specialty": {
-        "list_fields": [
-            "id",
-            "name",
-            "is_active",
-            "created_at",
-        ],
-        "detail_fields": [
-            "id",
-            "name",
-            "description",
-            "is_active",
-            "created_at",
-            "updated_at",
-        ],
-        "search_fields": ["name", "description"],
-    },
-    "practice": {
-        "list_fields": [
-            "id",
-            "name",
-            "phone_number",
-            "website",
-            "created_at",
-        ],
-        "detail_fields": [
-            "id",
-            "name",
-            "phone_number",
-            "fax_number",
-            "website",
-            "patient_portal_url",
-            "notes",
-            "locations",
-            "created_at",
-            "updated_at",
-        ],
-        "search_fields": ["name"],
-    },
 }
 
 
@@ -1150,16 +1099,6 @@ MODEL_REGISTRY = {
         "model": MedicalEquipment,
         "crud": medical_equipment,
         "create_schema": MedicalEquipmentCreate,
-    },
-    "medical_specialty": {
-        "model": MedicalSpecialty,
-        "crud": medical_specialty,
-        "create_schema": MedicalSpecialtyCreate,
-    },
-    "practice": {
-        "model": Practice,
-        "crud": practice,
-        "create_schema": PracticeCreate,
     },
 }
 

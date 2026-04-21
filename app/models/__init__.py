@@ -56,7 +56,6 @@ from .patient import (
     PatientPhoto,
 )
 from .practice import (
-    MedicalSpecialty,
     Pharmacy,
     Practice,
     Practitioner,
@@ -96,7 +95,6 @@ __all__ = [
     "Insurance",
     "Practice",
     "Practitioner",
-    "MedicalSpecialty",
     "Pharmacy",
     "Medication",
     "Encounter",

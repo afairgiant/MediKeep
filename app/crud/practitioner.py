@@ -1,10 +1,8 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app.models.models import MedicalSpecialty as MedicalSpecialtyModel
 from app.models.models import Practitioner as PractitionerModel
 from app.schemas.practitioner import PractitionerCreate, PractitionerUpdate
 
@@ -18,76 +16,6 @@ class CRUDPractitioner(
     Practitioners are independent entities representing healthcare providers.
     They are not tied to specific users and can be referenced by any medical record.
     """
-
-    def _normalize_input_dict(
-        self, obj_in: Any, *, exclude_unset: bool = False
-    ) -> Dict[str, Any]:
-        """Convert Pydantic models or mappings to a mutable dict."""
-        if hasattr(obj_in, "model_dump"):
-            return obj_in.model_dump(exclude_unset=exclude_unset)
-        if isinstance(obj_in, dict):
-            return dict(obj_in)
-        return dict(obj_in)
-
-    def _apply_specialty_dual_write(
-        self, db: Session, data: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Keep the legacy ``specialty`` string column in sync with ``specialty_id``.
-
-        - If only ``specialty_id`` is provided, resolve the canonical name and
-          write it to ``specialty``.
-        - If only ``specialty`` string is provided, find-or-create the matching
-          MedicalSpecialty row and set ``specialty_id``; also normalize the
-          string to the canonical casing so reads stay consistent.
-        - If both are provided, ``specialty_id`` wins (the FK is authoritative)
-          and the string is overwritten with the canonical name.
-
-        Removed during PR2 when the legacy ``specialty`` column is dropped.
-        """
-        spec_id = data.get("specialty_id")
-        spec_str = data.get("specialty")
-
-        if spec_id:
-            spec = (
-                db.query(MedicalSpecialtyModel)
-                .filter(MedicalSpecialtyModel.id == spec_id)
-                .first()
-            )
-            if spec is None:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Unknown specialty_id {spec_id}",
-                )
-            data["specialty"] = spec.name
-        elif spec_str:
-            # Avoid a circular import by doing this lookup inline.
-            from app.crud.medical_specialty import medical_specialty
-
-            spec = medical_specialty.get_or_create(db, name=spec_str)
-            data["specialty_id"] = spec.id
-            data["specialty"] = spec.name
-
-        return data
-
-    def create(
-        self, db: Session, *, obj_in: Union[PractitionerCreate, Dict[str, Any]]
-    ) -> PractitionerModel:
-        data = self._normalize_input_dict(obj_in)
-        data = self._apply_specialty_dual_write(db, data)
-        return super().create(db, obj_in=data)
-
-    def update(
-        self,
-        db: Session,
-        *,
-        db_obj: PractitionerModel,
-        obj_in: Union[PractitionerUpdate, Dict[str, Any]],
-    ) -> PractitionerModel:
-        data = self._normalize_input_dict(obj_in, exclude_unset=True)
-        if "specialty_id" in data or "specialty" in data:
-            data = self._apply_specialty_dual_write(db, data)
-        return super().update(db, db_obj=db_obj, obj_in=data)
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[PractitionerModel]:
         """

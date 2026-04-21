@@ -71,7 +71,6 @@ class PractitionerBase(BaseModel):
 
     name: str
     specialty: str
-    specialty_id: Optional[int] = None
     practice: Optional[str] = None  # Legacy field - kept for backward compatibility
     practice_id: Optional[int] = None
     phone_number: Optional[str] = None
@@ -235,7 +234,6 @@ class PractitionerUpdate(BaseModel):
 
     name: Optional[str] = None
     specialty: Optional[str] = None
-    specialty_id: Optional[int] = None
     practice: Optional[str] = None  # Legacy field
     practice_id: Optional[int] = None
     phone_number: Optional[str] = None
@@ -356,7 +354,6 @@ class Practitioner(PractitionerBase):
 
     id: int
     practice_name: Optional[str] = None
-    specialty_name: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

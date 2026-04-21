@@ -42,30 +42,6 @@ class Practice(Base):
     practitioners = orm_relationship("Practitioner", back_populates="practice_rel")
 
 
-class MedicalSpecialty(Base):
-    """
-    Represents a medical specialty (e.g. Cardiology, Pediatrics) used to
-    classify practitioners. Managed as a lookup table so admins can curate
-    canonical names and avoid free-text duplicates.
-    """
-
-    __tablename__ = "medical_specialties"
-    id = Column(Integer, primary_key=True)
-
-    name = Column(String, nullable=False, unique=True)
-    description = Column(Text, nullable=True)
-    is_active = Column(Boolean, nullable=False, default=True)
-
-    # Timestamps
-    created_at = Column(DateTime, default=get_utc_now, nullable=False)
-    updated_at = Column(
-        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
-    )
-
-    # Table Relationships
-    practitioners = orm_relationship("Practitioner", back_populates="specialty_rel")
-
-
 class Practitioner(Base):
     """Represents a healthcare practitioner (doctor, specialist, etc.)."""
 
@@ -73,14 +49,7 @@ class Practitioner(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String, nullable=False)
-    # specialty string kept in PR1 for dual-write backwards compatibility;
-    # scheduled for removal in PR2 after verification window.
     specialty = Column(String, nullable=False)
-    specialty_id = Column(
-        Integer,
-        ForeignKey("medical_specialties.id", ondelete="RESTRICT"),
-        nullable=True,
-    )
     practice = Column(String, nullable=True)  # Legacy field - kept for migration safety
     practice_id = Column(
         Integer, ForeignKey("practices.id", ondelete="SET NULL"), nullable=True
@@ -98,7 +67,6 @@ class Practitioner(Base):
 
     # Table Relationships
     practice_rel = orm_relationship("Practice", back_populates="practitioners")
-    specialty_rel = orm_relationship("MedicalSpecialty", back_populates="practitioners")
     patients = orm_relationship("Patient", back_populates="practitioner")
     medications = orm_relationship("Medication", back_populates="practitioner")
     encounters = orm_relationship("Encounter", back_populates="practitioner")
@@ -114,22 +82,7 @@ class Practitioner(Base):
     )
 
     # Indexes for performance
-    __table_args__ = (
-        Index("idx_practitioners_practice_id", "practice_id"),
-        Index("idx_practitioners_specialty_id", "specialty_id"),
-    )
-
-    @property
-    def specialty_name(self):
-        """
-        Resolved specialty name from the managed MedicalSpecialty table.
-
-        Endpoints that want this populated without triggering lazy-load should
-        eager-load ``specialty_rel`` (e.g. via ``joinedload``).
-        """
-        if self.specialty_rel is not None:
-            return self.specialty_rel.name
-        return None
+    __table_args__ = (Index("idx_practitioners_practice_id", "practice_id"),)
 
 
 class Pharmacy(Base):

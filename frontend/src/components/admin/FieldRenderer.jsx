@@ -7,7 +7,6 @@ import {
   PASSWORD_VALIDATION,
 } from '../../constants/validationConstants';
 import { MEDICATION_TYPE_OPTIONS } from '../../constants/medicationTypes';
-import SpecialtySelect from './SpecialtySelect';
 
 /**
  * FieldRenderer Component
@@ -184,50 +183,6 @@ const FieldRenderer = ({
         </div>
       );
     }
-  }
-
-  // Special handling for practitioner.specialty_id — FK dropdown populated
-  // from the MedicalSpecialty admin endpoint, with quick-add support.
-  if (field.name === 'specialty_id' && modelName === 'practitioner') {
-    return (
-      <SpecialtySelect
-        value={value}
-        onChange={next => onFieldChange(field.name, next)}
-        disabled={saving}
-        hasError={hasError}
-      />
-    );
-  }
-
-  // Hide the legacy practitioner.specialty string — it's dual-written from
-  // specialty_id during PR1 and scheduled for removal in PR2.
-  if (field.name === 'specialty' && modelName === 'practitioner') {
-    return (
-      <div className="field-value readonly">
-        {value || '—'}
-        <small className="field-note">
-          {t(
-            'fieldRenderer.legacySpecialty',
-            'Legacy field — managed via Specialty dropdown'
-          )}
-        </small>
-      </div>
-    );
-  }
-
-  // specialty_name is a computed/read-only projection of specialty_rel.name.
-  if (field.name === 'specialty_name') {
-    return (
-      <div className="field-value readonly">
-        {value || '—'}
-        <small className="field-note">
-          {t(
-            'fieldRenderer.computedField',
-            'Computed from related record (read-only)'
-          )}
-        </small>
-      </div>
-    );
   }
 
   // Special handling for medication_type field
