@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from fastapi import HTTPException
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
@@ -75,16 +76,27 @@ class CRUDMedicalSpecialty(
         """
         Return an existing specialty by case-insensitive name, or create one.
 
+        Race-safe: a concurrent create between our get_by_name and create will
+        trigger the unique constraint; we rollback and re-query so the winner
+        gets the row.
+
         Used by the Practitioner dual-write path when legacy callers submit
-        only the free-text `specialty` string.
+        only the free-text ``specialty`` string.
         """
         existing = self.get_by_name(db, name=name)
         if existing:
             return existing
-        return self.create(
-            db,
-            obj_in=MedicalSpecialtyCreate(name=name.strip()),
-        )
+        try:
+            return self.create(
+                db,
+                obj_in=MedicalSpecialtyCreate(name=name.strip()),
+            )
+        except IntegrityError:
+            db.rollback()
+            existing = self.get_by_name(db, name=name)
+            if existing:
+                return existing
+            raise
 
     def delete(self, db: Session, *, id: int) -> MedicalSpecialtyModel:
         """

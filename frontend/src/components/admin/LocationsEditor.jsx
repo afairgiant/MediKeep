@@ -28,7 +28,7 @@ const emptyLocation = () => ({
 });
 
 const LocationsEditor = ({ value, onChange }) => {
-  const { t } = useTranslation(['common', 'shared', 'medical']);
+  const { t } = useTranslation(['admin', 'common', 'shared', 'medical']);
   const locations = useMemo(() => (Array.isArray(value) ? value : []), [value]);
 
   const updateLocation = useCallback(
@@ -101,6 +101,7 @@ const LocationsEditor = ({ value, onChange }) => {
                     <ActionIcon
                       size="sm"
                       variant="subtle"
+                      aria-label={t('admin:practices.locations.moveUp', 'Move up')}
                       onClick={() => moveLocation(index, -1)}
                       disabled={index === 0}
                     >
@@ -113,6 +114,10 @@ const LocationsEditor = ({ value, onChange }) => {
                     <ActionIcon
                       size="sm"
                       variant="subtle"
+                      aria-label={t(
+                        'admin:practices.locations.moveDown',
+                        'Move down'
+                      )}
                       onClick={() => moveLocation(index, 1)}
                       disabled={index === locations.length - 1}
                     >
@@ -124,6 +129,7 @@ const LocationsEditor = ({ value, onChange }) => {
                       size="sm"
                       variant="subtle"
                       color="red"
+                      aria-label={t('shared:labels.remove', 'Remove')}
                       onClick={() => removeLocation(index)}
                     >
                       <IconTrash size={14} />

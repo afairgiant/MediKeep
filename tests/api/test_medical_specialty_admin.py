@@ -37,9 +37,11 @@ class TestMedicalSpecialtyAdminCRUD:
         response = admin_client.post(
             f"{BASE}/", json={"name": "Dermatology"}
         )
-        # Either 400 (unique integrity) or 500 depending on error translation.
-        # Accept any non-2xx — the exact code is less important than the rejection.
-        assert response.status_code >= 400
+        # Must be a client error (4xx) — a 500 would indicate an unhandled
+        # exception and shouldn't satisfy this test.
+        assert 400 <= response.status_code < 500, (
+            f"expected 4xx for duplicate name, got {response.status_code}"
+        )
 
     def test_update_specialty(self, admin_client, db_session):
         spec = MedicalSpecialty(name="Neurology", is_active=True)

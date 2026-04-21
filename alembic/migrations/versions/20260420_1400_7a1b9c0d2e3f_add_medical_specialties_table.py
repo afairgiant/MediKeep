@@ -33,7 +33,9 @@ def upgrade() -> None:
     backfill via most-common-casing-wins dedupe. Does NOT drop the existing
     practitioners.specialty string column — that happens in PR2.
     """
-    # 1. Create the medical_specialties lookup table
+    # 1. Create the medical_specialties lookup table.
+    # Uniqueness is enforced on lower(trim(name)) via a functional index below
+    # so "Cardiology", "cardiology", and "Cardiology " cannot coexist.
     op.create_table(
         'medical_specialties',
         sa.Column('id', sa.Integer(), nullable=False),
@@ -44,7 +46,12 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('name', name='uq_medical_specialties_name'),
+    )
+    op.create_index(
+        'uq_medical_specialties_name_lower',
+        'medical_specialties',
+        [sa.text('lower(trim(name))')],
+        unique=True,
     )
 
     # 2. Add nullable specialty_id column (FK constraint added after backfill)
@@ -58,11 +65,13 @@ def upgrade() -> None:
 
     # Query distinct specialty strings ordered by usage count so the most common
     # casing wins the canonical form (e.g. "ENT" stays uppercase if dominant).
+    # LOWER(specialty) ASC as a tie-breaker makes the chosen canonical casing
+    # deterministic when two raw variants have equal usage counts.
     rows = connection.execute(
         text(
             "SELECT specialty, COUNT(*) AS c FROM practitioners "
             "WHERE specialty IS NOT NULL AND TRIM(specialty) != '' "
-            "GROUP BY specialty ORDER BY c DESC"
+            "GROUP BY specialty ORDER BY c DESC, LOWER(specialty) ASC"
         )
     ).fetchall()
 

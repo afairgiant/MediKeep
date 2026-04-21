@@ -42,11 +42,24 @@ class CRUDPractitioner(
           string to the canonical casing so reads stay consistent.
         - If both are provided, ``specialty_id`` wins (the FK is authoritative)
           and the string is overwritten with the canonical name.
+        - Explicit ``specialty_id: None`` with no replacement string is
+          rejected: Practitioner.specialty is NOT NULL during PR1, so we can't
+          clear both columns. (PR2 drops the string column and removes this.)
 
         Removed during PR2 when the legacy ``specialty`` column is dropped.
         """
+        id_key_present = "specialty_id" in data
         spec_id = data.get("specialty_id")
         spec_str = data.get("specialty")
+
+        if id_key_present and spec_id is None and not spec_str:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "specialty cannot be cleared: provide a specialty_id or "
+                    "specialty name"
+                ),
+            )
 
         if spec_id:
             spec = (
