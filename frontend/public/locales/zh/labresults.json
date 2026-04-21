@@ -144,7 +144,8 @@
     "testComponents": "检验组件（可选）",
     "testComponentsDescription": "可选择添加单个检验值。您也可以稍后添加更多。",
     "testDetails": "检验详情",
-    "unit": "单位"
+    "unit": "单位",
+    "matchedCommonName": "匹配：{{name}}"
   },
   "keepEmptyLabResult": "保留检验结果",
   "labResult": {

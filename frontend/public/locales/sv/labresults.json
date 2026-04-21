@@ -144,7 +144,8 @@
     "testComponents": "Testkomponenter (valfritt)",
     "testComponentsDescription": "Lägg gärna till individuella testvärden. Du kan också lägga till fler senare.",
     "testDetails": "Testdetaljer",
-    "unit": "Enhet"
+    "unit": "Enhet",
+    "matchedCommonName": "matchning: {{name}}"
   },
   "keepEmptyLabResult": "Behåll laboratorieresultat",
   "labResult": {

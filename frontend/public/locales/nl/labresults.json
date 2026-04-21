@@ -144,7 +144,8 @@
     "testComponents": "Testcomponenten (optioneel)",
     "testComponentsDescription": "Voeg optioneel individuele testwaarden toe. U kunt later ook meer toevoegen.",
     "testDetails": "Testdetails",
-    "unit": "Eenheid"
+    "unit": "Eenheid",
+    "matchedCommonName": "overeenkomst: {{name}}"
   },
   "keepEmptyLabResult": "Labresultaat behouden",
   "labResult": {

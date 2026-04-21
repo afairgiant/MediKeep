@@ -167,3 +167,24 @@ export function isQualitativeTest(testName: string): boolean {
   const test = getTestByName(testName);
   return test?.result_type === 'qualitative';
 }
+
+/**
+ * Returns the common_name that matched the query, but only when the match did
+ * NOT also come from test_name or abbreviation. Used by autocomplete UIs to
+ * show users why an unexpected-looking result appeared (e.g. searching
+ * "Thrombocytes" surfacing "Platelet Count").
+ */
+export function getMatchedCommonName(
+  testName: string,
+  query: string
+): string | undefined {
+  if (!query.trim()) return undefined;
+  const test = getTestByName(testName);
+  if (!test?.common_names?.length) return undefined;
+  const q = query.toLowerCase().trim();
+  const nameOrAbbrMatches =
+    test.test_name.toLowerCase().includes(q) ||
+    (test.abbreviation?.toLowerCase().includes(q) ?? false);
+  if (nameOrAbbrMatches) return undefined;
+  return test.common_names.find(name => name.toLowerCase().includes(q));
+}

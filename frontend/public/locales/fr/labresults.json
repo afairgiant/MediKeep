@@ -144,7 +144,8 @@
     "testComponents": "Composants du test (facultatif)",
     "testComponentsDescription": "Ajoutez optionnellement des valeurs de test individuelles. Vous pourrez en ajouter d'autres ultérieurement.",
     "testDetails": "Détails du test",
-    "unit": "Unité"
+    "unit": "Unité",
+    "matchedCommonName": "correspondance : {{name}}"
   },
   "keepEmptyLabResult": "Conserver le résultat de laboratoire",
   "labResult": {

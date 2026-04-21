@@ -34,6 +34,7 @@ import {
   getAutocompleteOptions,
   extractTestName,
   getTestByName,
+  getMatchedCommonName,
 } from '../../../constants/testLibrary';
 import {
   CATEGORY_SELECT_OPTIONS,
@@ -251,6 +252,27 @@ function InlineTestComponentEntry({
                         200
                       )}
                       limit={200}
+                      filter={({ options, limit }) => options.slice(0, limit)}
+                      renderOption={({ option }) => {
+                        const matched = getMatchedCommonName(
+                          extractTestName(option.value),
+                          component.test_name || ''
+                        );
+                        return (
+                          <Stack gap={0}>
+                            <Text size="sm">{option.value}</Text>
+                            {matched && (
+                              <Text size="xs" c="dimmed">
+                                {t(
+                                  'labresults:form.matchedCommonName',
+                                  'matched: {{name}}',
+                                  { name: matched }
+                                )}
+                              </Text>
+                            )}
+                          </Stack>
+                        );
+                      }}
                       maxDropdownHeight={300}
                       comboboxProps={{
                         zIndex: 3003,
