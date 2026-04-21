@@ -416,7 +416,7 @@
       "description": "La date où a eu lieu la blessure (optionnelle si inconnue)",
       "label": "Date de la blessure"
     },
-    "editTitle": "Editer  la blessure",
+    "editTitle": "Editer la blessure",
     "emptyState": {
       "noData": "Cliquez sur \"Ajouter une nouvelle blessure\" pour commencer.",
       "title": "Aucune blessure trouvée"
