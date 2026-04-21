@@ -486,7 +486,7 @@
       "options": {
         "active": "Active - En cours de traitement",
         "chronic": "Chronique - Effets à long terme",
-        "healing": "Guérissant - En cours de convalescence"
+        "healing": "Guérissant - En cours de convalescence",
         "resolved": "Résolue - Pleinement guérie"
       }
     },
