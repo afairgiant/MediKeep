@@ -33,11 +33,11 @@ class TestImmunizationCRUD:
         )
 
     @pytest.fixture
-    def test_practitioner(self, db_session: Session):
+    def test_practitioner(self, db_session: Session, default_specialty):
         """Create a test practitioner for immunization tests."""
         practitioner_data = PractitionerCreate(
             name="Dr. Sarah Johnson",
-            specialty="Immunology",
+            specialty_id=default_specialty.id,
             practice="City Health Center",
             phone_number="555-555-0123",
         )

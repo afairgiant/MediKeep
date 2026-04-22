@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session, joinedload
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import (
+    Medication,
+    Practitioner,
     Treatment,
     TreatmentEncounter,
     TreatmentEquipment,
@@ -145,8 +147,12 @@ class CRUDTreatmentMedication(
         return (
             db.query(self.model)
             .options(
-                joinedload(TreatmentMedication.medication),
-                joinedload(TreatmentMedication.specific_prescriber),
+                joinedload(TreatmentMedication.medication).joinedload(
+                    Medication.practitioner
+                ).joinedload(Practitioner.specialty_rel),
+                joinedload(TreatmentMedication.specific_prescriber).joinedload(
+                    Practitioner.specialty_rel
+                ),
                 joinedload(TreatmentMedication.specific_pharmacy),
             )
             .filter(self.model.treatment_id == treatment_id)
@@ -160,8 +166,12 @@ class CRUDTreatmentMedication(
         return (
             db.query(self.model)
             .options(
-                joinedload(TreatmentMedication.medication),
-                joinedload(TreatmentMedication.specific_prescriber),
+                joinedload(TreatmentMedication.medication).joinedload(
+                    Medication.practitioner
+                ).joinedload(Practitioner.specialty_rel),
+                joinedload(TreatmentMedication.specific_prescriber).joinedload(
+                    Practitioner.specialty_rel
+                ),
                 joinedload(TreatmentMedication.specific_pharmacy),
             )
             .filter(self.model.medication_id == medication_id)

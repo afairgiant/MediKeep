@@ -221,7 +221,7 @@ FIELD_DISPLAY_CONFIG = {
         # NOTE: _resolve_search_field only uses the first entry today, so only
         # "name" is actually searchable. The rest are listed for when the
         # generic admin search grows to support multiple fields.
-        "search_fields": ["name", "specialty", "practice"],
+        "search_fields": ["name", "practice"],
     },
     "patient": {
         "list_fields": [

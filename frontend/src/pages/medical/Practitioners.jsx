@@ -89,7 +89,7 @@ const Practitioners = () => {
   const [showPracticeEditModal, setShowPracticeEditModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    specialty: '',
+    specialty_id: null,
     practice_id: '',
     phone_number: '',
     email: '',
@@ -115,7 +115,7 @@ const Practitioners = () => {
     setEditingPractitioner(null);
     setFormData({
       name: '',
-      specialty: '',
+      specialty_id: null,
       practice_id: '',
       phone_number: '',
       email: '',
@@ -152,7 +152,7 @@ const Practitioners = () => {
     setEditingPractitioner(practitioner);
     setFormData({
       name: practitioner.name || '',
-      specialty: practitioner.specialty || '',
+      specialty_id: practitioner.specialty_id || null,
       practice_id: practitioner.practice_id
         ? String(practitioner.practice_id)
         : '',

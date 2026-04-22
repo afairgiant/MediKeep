@@ -293,11 +293,23 @@ def sample_lab_result_data():
 
 
 @pytest.fixture
-def sample_practitioner_data():
+def default_specialty(db_session: Session):
+    """Provide a MedicalSpecialty row tests can reference via specialty_id."""
+    from app.crud.medical_specialty import medical_specialty
+    from app.schemas.medical_specialty import MedicalSpecialtyCreate
+
+    return medical_specialty.create(
+        db_session,
+        obj_in=MedicalSpecialtyCreate(name="Family Medicine"),
+    )
+
+
+@pytest.fixture
+def sample_practitioner_data(default_specialty):
     """Sample practitioner data for testing."""
     return {
         "name": "Dr. Test Smith",
-        "specialty": "Family Medicine",
+        "specialty_id": default_specialty.id,
         "phone_number": "555-0123",
         "email": "dr.test@example.com",
         "address": "123 Medical Center Dr",

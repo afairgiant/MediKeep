@@ -1,5 +1,5 @@
 """
-Tests for MedicalSpecialty CRUD operations and Practitioner dual-write behavior.
+Tests for MedicalSpecialty CRUD operations.
 """
 
 import pytest
@@ -12,7 +12,7 @@ from app.schemas.medical_specialty import (
     MedicalSpecialtyCreate,
     MedicalSpecialtyUpdate,
 )
-from app.schemas.practitioner import PractitionerCreate, PractitionerUpdate
+from app.schemas.practitioner import PractitionerCreate
 
 
 class TestMedicalSpecialtyCRUD:
@@ -101,7 +101,6 @@ class TestMedicalSpecialtyCRUD:
             db_session,
             obj_in=PractitionerCreate(
                 name="Dr. Reference",
-                specialty="Psychiatry",
                 specialty_id=spec.id,
             ),
         )
@@ -128,71 +127,18 @@ class TestMedicalSpecialtyCRUD:
         assert inactive.id not in ids
 
 
-class TestPractitionerSpecialtyDualWrite:
-    """Practitioner.specialty <-> specialty_id dual-write behavior."""
+class TestPractitionerSpecialtyProperty:
+    """Practitioner.specialty resolves from the FK-linked MedicalSpecialty row."""
 
-    def test_create_with_specialty_id_populates_string(self, db_session: Session):
+    def test_specialty_property_reads_from_fk(self, db_session: Session):
         spec = specialty_crud.create(
             db_session,
             obj_in=MedicalSpecialtyCreate(name="Cardiology"),
         )
         practitioner = practitioner_crud.create(
             db_session,
-            obj_in=PractitionerCreate(
-                name="Dr. FK",
-                specialty="placeholder",
-                specialty_id=spec.id,
-            ),
+            obj_in=PractitionerCreate(name="Dr. FK", specialty_id=spec.id),
         )
         assert practitioner.specialty_id == spec.id
-        # Specialty string is normalized to the canonical name from MedicalSpecialty
         assert practitioner.specialty == "Cardiology"
-
-    def test_create_with_legacy_specialty_string_backfills_fk(
-        self, db_session: Session
-    ):
-        practitioner = practitioner_crud.create(
-            db_session,
-            obj_in=PractitionerCreate(
-                name="Dr. Legacy",
-                specialty="Gastroenterology",
-            ),
-        )
-        assert practitioner.specialty == "Gastroenterology"
-        assert practitioner.specialty_id is not None
-        # The get_or_create path should have created the MedicalSpecialty row
-        linked = specialty_crud.get(db_session, id=practitioner.specialty_id)
-        assert linked is not None
-        assert linked.name == "Gastroenterology"
-
-    def test_update_changes_both_columns_in_sync(self, db_session: Session):
-        practitioner = practitioner_crud.create(
-            db_session,
-            obj_in=PractitionerCreate(
-                name="Dr. Reassign",
-                specialty="Neurology",
-            ),
-        )
-        new_spec = specialty_crud.create(
-            db_session, obj_in=MedicalSpecialtyCreate(name="Oncology")
-        )
-
-        updated = practitioner_crud.update(
-            db_session,
-            db_obj=practitioner,
-            obj_in=PractitionerUpdate(specialty_id=new_spec.id),
-        )
-        assert updated.specialty_id == new_spec.id
-        assert updated.specialty == "Oncology"
-
-    def test_invalid_specialty_id_raises_400(self, db_session: Session):
-        with pytest.raises(HTTPException) as excinfo:
-            practitioner_crud.create(
-                db_session,
-                obj_in=PractitionerCreate(
-                    name="Dr. Bad",
-                    specialty="Irrelevant",
-                    specialty_id=99999,
-                ),
-            )
-        assert excinfo.value.status_code == 400
+        assert practitioner.specialty_name == "Cardiology"

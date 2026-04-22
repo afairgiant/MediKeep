@@ -7,10 +7,6 @@ import BaseMedicalForm from '../BaseMedicalForm';
 import PracticeEditModal from './PracticeEditModal';
 import { practitionerFormFields } from '../../../utils/medicalFormFields';
 import { isValidPhoneNumber } from '../../../utils/phoneUtils';
-import {
-  fetchMedicalSpecialties,
-  clearSpecialtiesCache,
-} from '../../../config/medicalSpecialties';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
 
@@ -27,39 +23,11 @@ const PractitionerFormWrapper = ({
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
-  // State for dynamic specialties
-  const [specialtyOptions, setSpecialtyOptions] = useState([]);
-  const [isLoadingSpecialties, setIsLoadingSpecialties] = useState(true);
-
-  // State for dynamic practices
+  // State for dynamic practices (specialties are loaded directly by SpecialtySelect)
   const [practiceOptions, setPracticeOptions] = useState([]);
   const [isLoadingPractices, setIsLoadingPractices] = useState(true);
 
-  // Load specialties and practices on component mount
   useEffect(() => {
-    const loadSpecialties = async () => {
-      try {
-        setIsLoadingSpecialties(true);
-        const specialties = await fetchMedicalSpecialties();
-        // Remove the "Other" option as we'll allow custom input directly
-        const filteredSpecialties = specialties.filter(
-          s => s.value !== 'Other'
-        );
-        setSpecialtyOptions(filteredSpecialties);
-      } catch (error) {
-        logger.error(
-          'load_specialties_failed',
-          'Failed to load medical specialties',
-          {
-            component: 'PractitionerFormWrapper',
-            error: error.message,
-          }
-        );
-      } finally {
-        setIsLoadingSpecialties(false);
-      }
-    };
-
     const loadPractices = async () => {
       try {
         setIsLoadingPractices(true);
@@ -82,9 +50,6 @@ const PractitionerFormWrapper = ({
     };
 
     if (isOpen) {
-      // Clear cache to get fresh data including any newly added specialties
-      clearSpecialtiesCache();
-      loadSpecialties();
       loadPractices();
     }
   }, [isOpen]);
@@ -129,7 +94,6 @@ const PractitionerFormWrapper = ({
   };
 
   const dynamicOptions = {
-    specialties: specialtyOptions,
     practices: practiceOptions,
   };
 
@@ -293,7 +257,7 @@ const PractitionerFormWrapper = ({
         dynamicOptions={dynamicOptions}
         fieldErrors={fieldErrors}
         fieldExtras={{ practice_id: practiceFieldExtra }}
-        isLoading={isLoading || isLoadingSpecialties || isLoadingPractices}
+        isLoading={isLoading || isLoadingPractices}
       >
         {customContent}
       </BaseMedicalForm>

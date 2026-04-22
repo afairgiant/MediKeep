@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Button, Group, Modal, Select, Stack, TextInput, Textarea } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
-import { adminApiService } from '../../services/api/adminApi';
+import specialtyApi from '../../services/api/specialtyApi';
 import logger from '../../services/logger';
 
 const QUICK_ADD_FOOTER_VALUE = '__add_new__';
@@ -25,11 +25,9 @@ const SpecialtySelect = ({
   const loadSpecialties = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await adminApiService.getModelRecords('medical_specialty', {
-        per_page: 100,
-      });
-      const items = response?.items || [];
-      setSpecialties(items.filter(item => item.is_active));
+      await specialtyApi.migrateLegacyCustomSpecialties();
+      const items = await specialtyApi.list();
+      setSpecialties(Array.isArray(items) ? items : []);
     } catch (err) {
       logger.error(
         'specialty_select_load_error',
@@ -46,7 +44,10 @@ const SpecialtySelect = ({
   }, [loadSpecialties]);
 
   const data = [
-    ...specialties.map(s => ({ value: String(s.id), label: s.name })),
+    ...specialties.map(s => ({
+      value: String(s.id),
+      label: s.description ? `${s.name} - ${s.description}` : s.name,
+    })),
     {
       value: QUICK_ADD_FOOTER_VALUE,
       label: t('admin:practitioner.quickAddSpecialty', '+ Add new specialty…'),
@@ -66,10 +67,9 @@ const SpecialtySelect = ({
     if (!trimmed) return;
     setSaving(true);
     try {
-      const created = await adminApiService.createModelRecord('medical_specialty', {
+      const created = await specialtyApi.create({
         name: trimmed,
         description: newDescription.trim() || null,
-        is_active: true,
       });
       await loadSpecialties();
       onChange(created.id);

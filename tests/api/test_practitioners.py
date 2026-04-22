@@ -108,7 +108,7 @@ class TestPractitionerCreateSchema:
         """Test creating practitioner with all fields."""
         practitioner = PractitionerCreate(
             name="Dr. Jane Smith",
-            specialty="Cardiology",
+            specialty_id=1,
             practice="City Medical Center",
             phone_number="555-123-4567",
             email="jane.smith@hospital.com",
@@ -122,7 +122,7 @@ class TestPractitionerCreateSchema:
     def test_create_without_practice(self):
         """Test creating practitioner without practice (optional field)."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe", specialty="General Practice"
+            name="Dr. John Doe", specialty_id=1
         )
         assert practitioner.name == "Dr. John Doe"
         assert practitioner.practice is None
@@ -130,21 +130,21 @@ class TestPractitionerCreateSchema:
     def test_create_without_email(self):
         """Test creating practitioner without email (optional field)."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe", specialty="General Practice", practice="Local Clinic"
+            name="Dr. John Doe", specialty_id=1, practice="Local Clinic"
         )
         assert practitioner.email is None
 
     def test_create_with_empty_practice_converts_to_none(self):
         """Test that empty practice string converts to None."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe", specialty="General Practice", practice=""
+            name="Dr. John Doe", specialty_id=1, practice=""
         )
         assert practitioner.practice is None
 
     def test_create_with_empty_email_converts_to_none(self):
         """Test that empty email string converts to None."""
         practitioner = PractitionerCreate(
-            name="Dr. John Doe", specialty="General Practice", email=""
+            name="Dr. John Doe", specialty_id=1, email=""
         )
         assert practitioner.email is None
 
@@ -152,7 +152,7 @@ class TestPractitionerCreateSchema:
         """Test that email is normalized on create."""
         practitioner = PractitionerCreate(
             name="Dr. John Doe",
-            specialty="General Practice",
+            specialty_id=1,
             email="  DR.DOE@HOSPITAL.COM  ",
         )
         assert practitioner.email == "dr.doe@hospital.com"
@@ -201,12 +201,12 @@ class TestPractitionerAPI:
     """Test practitioner API endpoints."""
 
     def test_create_practitioner_with_all_fields(
-        self, authenticated_client: TestClient
+        self, authenticated_client: TestClient, default_specialty
     ):
         """Test creating practitioner with all fields including email."""
         practitioner_data = {
             "name": "Dr. Sarah Johnson",
-            "specialty": "Internal Medicine",
+            "specialty_id": default_specialty.id,
             "practice": "City Medical Center",
             "phone_number": "555-555-0123",
             "email": "sarah.johnson@citymed.com",
@@ -226,12 +226,12 @@ class TestPractitionerAPI:
         assert data["rating"] == 4.8
 
     def test_create_practitioner_without_practice(
-        self, authenticated_client: TestClient
+        self, authenticated_client: TestClient, default_specialty
     ):
         """Test creating practitioner without practice (Italian use case)."""
         practitioner_data = {
             "name": "Dr. Marco Rossi",
-            "specialty": "Cardiologia",
+            "specialty_id": default_specialty.id,
             "phone_number": "555-555-0124",
             "email": "marco.rossi@email.it",
         }
@@ -246,11 +246,13 @@ class TestPractitionerAPI:
         assert data["practice"] is None
         assert data["email"] == "marco.rossi@email.it"
 
-    def test_create_practitioner_without_email(self, authenticated_client: TestClient):
+    def test_create_practitioner_without_email(
+        self, authenticated_client: TestClient, default_specialty
+    ):
         """Test creating practitioner without email."""
         practitioner_data = {
             "name": "Dr. Emily Chen",
-            "specialty": "Pediatrics",
+            "specialty_id": default_specialty.id,
             "practice": "Children's Hospital",
         }
 
@@ -264,12 +266,12 @@ class TestPractitionerAPI:
         assert data["email"] is None
 
     def test_create_practitioner_email_normalized(
-        self, authenticated_client: TestClient
+        self, authenticated_client: TestClient, default_specialty
     ):
         """Test that email is normalized to lowercase on creation."""
         practitioner_data = {
             "name": "Dr. Test Doctor",
-            "specialty": "Testing",
+            "specialty_id": default_specialty.id,
             "email": "  TEST@HOSPITAL.COM  ",
         }
 
@@ -282,12 +284,12 @@ class TestPractitionerAPI:
         assert data["email"] == "test@hospital.com"
 
     def test_create_practitioner_invalid_email_rejected(
-        self, authenticated_client: TestClient
+        self, authenticated_client: TestClient, default_specialty
     ):
         """Test that invalid email is rejected."""
         practitioner_data = {
             "name": "Dr. Bad Email",
-            "specialty": "Testing",
+            "specialty_id": default_specialty.id,
             "email": "not-a-valid-email",
         }
 
@@ -297,12 +299,14 @@ class TestPractitionerAPI:
 
         assert response.status_code == 422  # Validation error
 
-    def test_update_practitioner_add_email(self, authenticated_client: TestClient):
+    def test_update_practitioner_add_email(
+        self, authenticated_client: TestClient, default_specialty
+    ):
         """Test adding email to existing practitioner."""
         # First create without email
         create_data = {
             "name": "Dr. Update Test",
-            "specialty": "Testing",
+            "specialty_id": default_specialty.id,
             "practice": "Test Clinic",
         }
         create_response = authenticated_client.post(
@@ -322,13 +326,13 @@ class TestPractitionerAPI:
         assert data["email"] == "update.test@clinic.com"
 
     def test_update_practitioner_remove_practice(
-        self, authenticated_client: TestClient
+        self, authenticated_client: TestClient, default_specialty
     ):
         """Test removing practice from existing practitioner."""
         # First create with practice
         create_data = {
             "name": "Dr. Remove Practice",
-            "specialty": "Testing",
+            "specialty_id": default_specialty.id,
             "practice": "Old Hospital",
         }
         create_response = authenticated_client.post(
@@ -347,12 +351,14 @@ class TestPractitionerAPI:
         data = update_response.json()
         assert data["practice"] is None
 
-    def test_update_practitioner_remove_email(self, authenticated_client: TestClient):
+    def test_update_practitioner_remove_email(
+        self, authenticated_client: TestClient, default_specialty
+    ):
         """Test removing email from existing practitioner."""
         # First create with email
         create_data = {
             "name": "Dr. Remove Email",
-            "specialty": "Testing",
+            "specialty_id": default_specialty.id,
             "email": "to.remove@test.com",
         }
         create_response = authenticated_client.post(
@@ -372,11 +378,11 @@ class TestPractitionerAPI:
         assert data["email"] is None
 
     def test_get_practitioner_with_optional_fields(
-        self, authenticated_client: TestClient
+        self, authenticated_client: TestClient, default_specialty
     ):
         """Test getting practitioner displays optional fields correctly."""
         # Create practitioner without optional fields
-        create_data = {"name": "Dr. Minimal", "specialty": "Minimal Testing"}
+        create_data = {"name": "Dr. Minimal", "specialty_id": default_specialty.id}
         create_response = authenticated_client.post(
             "/api/v1/practitioners/", json=create_data
         )
@@ -395,13 +401,13 @@ class TestPractitionerAPI:
         assert data["email"] is None
 
     def test_list_practitioners_includes_optional_fields(
-        self, authenticated_client: TestClient
+        self, authenticated_client: TestClient, default_specialty
     ):
         """Test listing practitioners includes optional fields in response."""
         # Create a practitioner with all fields
         create_data = {
             "name": "Dr. Full Fields",
-            "specialty": "Complete",
+            "specialty_id": default_specialty.id,
             "practice": "Full Hospital",
             "email": "full@test.com",
         }

@@ -58,9 +58,15 @@ class CRUDMedicalSpecialty(
         )
 
     def get_active(
-        self, db: Session, *, skip: int = 0, limit: int = 100
+        self, db: Session, *, skip: int = 0, limit: int = 500
     ) -> List[MedicalSpecialtyModel]:
-        """Return only active specialties (used to populate dropdowns)."""
+        """
+        Return only active specialties (used to populate dropdowns).
+
+        Default limit is 500 because the dropdown has no client-side
+        pagination — silently truncating the list at 100 would hide
+        specialties from users.
+        """
         return (
             db.query(MedicalSpecialtyModel)
             .filter(MedicalSpecialtyModel.is_active.is_(True))
@@ -76,12 +82,9 @@ class CRUDMedicalSpecialty(
         """
         Return an existing specialty by case-insensitive name, or create one.
 
-        Race-safe: a concurrent create between our get_by_name and create will
-        trigger the unique constraint; we rollback and re-query so the winner
-        gets the row.
-
-        Used by the Practitioner dual-write path when legacy callers submit
-        only the free-text ``specialty`` string.
+        Race-safe: a concurrent create between our get_by_name and create
+        will trigger the unique constraint; we rollback and re-query so
+        the winner gets the row.
         """
         existing = self.get_by_name(db, name=name)
         if existing:

@@ -32,6 +32,7 @@ import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { MedicalFormLayoutStrategy } from '../../strategies/MedicalFormLayoutStrategy';
 import { TagInput } from '../common/TagInput';
+import SpecialtySelect from '../admin/SpecialtySelect';
 import { translateField } from '../../utils/translateField';
 import logger from '../../services/logger';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -535,18 +536,6 @@ const BaseMedicalForm = ({
                   if (val === '$create') {
                     setValue(search);
                     onInputChange({ target: { name, value: search } });
-
-                    // If this is the specialty field, add it to the cache for future use
-                    if (name === 'specialty') {
-                      // Dynamically import to avoid circular dependencies
-                      import('../../config/medicalSpecialties').then(
-                        ({ addSpecialtyToCache, clearSpecialtiesCache }) => {
-                          addSpecialtyToCache(search);
-                          // Also clear cache to force fresh load next time
-                          clearSpecialtiesCache();
-                        }
-                      );
-                    }
                   } else {
                     const selectedOption = selectOptions.find(
                       item => item.value === val
@@ -620,6 +609,34 @@ const BaseMedicalForm = ({
 
           return <ComboboxField />;
         }
+
+        case 'specialty-select':
+          return (
+            <div>
+              <Text size="sm" fw={500} mb={5}>
+                {label}
+                {required && <span style={{ color: 'red' }}> *</span>}
+              </Text>
+              {description && (
+                <Text size="xs" c="dimmed" mb={5}>
+                  {description}
+                </Text>
+              )}
+              <SpecialtySelect
+                value={formData[name]}
+                onChange={next =>
+                  onInputChange({ target: { name, value: next } })
+                }
+                placeholder={placeholder}
+                hasError={Boolean(fieldErrors[name])}
+              />
+              {fieldErrors[name] && (
+                <Text size="xs" c="red" mt={4}>
+                  {fieldErrors[name]}
+                </Text>
+              )}
+            </div>
+          );
 
         case 'rating':
           return (

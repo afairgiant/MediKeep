@@ -17,12 +17,14 @@ class TestConditionAPI:
     """Test condition API endpoints."""
 
     @pytest.fixture
-    def test_patient_with_practitioner(self, db_session: Session, test_user):
+    def test_patient_with_practitioner(
+        self, db_session: Session, test_user, default_specialty
+    ):
         """Create test patient and practitioner."""
         # Create practitioner
         practitioner_data = PractitionerCreate(
             name="Dr. Sarah Johnson",
-            specialty="Internal Medicine",
+            specialty_id=default_specialty.id,
             practice="City Medical Center",
             phone_number="555-555-0123",
         )

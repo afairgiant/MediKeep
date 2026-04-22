@@ -70,8 +70,7 @@ class PractitionerBase(BaseModel):
     """
 
     name: str
-    specialty: str
-    specialty_id: Optional[PositiveInt] = None
+    specialty_id: PositiveInt
     practice: Optional[str] = None  # Legacy field - kept for backward compatibility
     practice_id: Optional[int] = None
     phone_number: Optional[str] = None
@@ -98,27 +97,6 @@ class PractitionerBase(BaseModel):
             raise ValueError("Practitioner name must be at least 2 characters long")
         if len(v) > 100:
             raise ValueError("Practitioner name must be less than 100 characters")
-        return v.strip()
-
-    @field_validator("specialty")
-    @classmethod
-    def validate_specialty(cls, v):
-        """
-        Validate specialty field.
-
-        Args:
-            v: The specialty value to validate
-
-        Returns:
-            Cleaned specialty (stripped whitespace)
-
-        Raises:
-            ValueError: If specialty is empty or too long
-        """
-        if not v or len(v.strip()) < 2:
-            raise ValueError("Specialty must be at least 2 characters long")
-        if len(v) > 100:
-            raise ValueError("Specialty must be less than 100 characters")
         return v.strip()
 
     @field_validator("practice")
@@ -216,7 +194,7 @@ class PractitionerCreate(PractitionerBase):
     Example:
         practitioner_data = PractitionerCreate(
             name="Dr. John Smith",
-            specialty="Cardiology"
+            specialty_id=3,
         )
     """
 
@@ -229,12 +207,11 @@ class PractitionerUpdate(BaseModel):
 
     Example:
         update_data = PractitionerUpdate(
-            specialty="Internal Medicine"
+            specialty_id=3
         )
     """
 
     name: Optional[str] = None
-    specialty: Optional[str] = None
     specialty_id: Optional[PositiveInt] = None
     practice: Optional[str] = None  # Legacy field
     practice_id: Optional[int] = None
@@ -260,18 +237,6 @@ class PractitionerUpdate(BaseModel):
                 raise ValueError("Practitioner name must be at least 2 characters long")
             if len(v) > 100:
                 raise ValueError("Practitioner name must be less than 100 characters")
-            return v.strip()
-        return v
-
-    @field_validator("specialty")
-    @classmethod
-    def validate_specialty(cls, v):
-        """Validate specialty if provided."""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError("Specialty must be at least 2 characters long")
-            if len(v) > 100:
-                raise ValueError("Specialty must be less than 100 characters")
             return v.strip()
         return v
 
@@ -355,6 +320,7 @@ class Practitioner(PractitionerBase):
     """
 
     id: int
+    specialty: Optional[str] = None
     practice_name: Optional[str] = None
     specialty_name: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -379,7 +345,7 @@ class PractitionerSummary(BaseModel):
 
     id: int
     name: str
-    specialty: str
+    specialty: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -401,12 +367,12 @@ class PractitionerSearch(BaseModel):
     Example:
         search_params = PractitionerSearch(
             name="Smith",
-            specialty="Cardiology"
+            specialty_id=3,
         )
     """
 
     name: Optional[str] = None
-    specialty: Optional[str] = None
+    specialty_id: Optional[PositiveInt] = None
 
     @field_validator("name")
     @classmethod
@@ -414,14 +380,6 @@ class PractitionerSearch(BaseModel):
         """Validate search name parameter."""
         if v is not None and len(v.strip()) < 1:
             raise ValueError("Search name must not be empty")
-        return v.strip() if v else v
-
-    @field_validator("specialty")
-    @classmethod
-    def validate_specialty_search(cls, v):
-        """Validate search specialty parameter."""
-        if v is not None and len(v.strip()) < 1:
-            raise ValueError("Search specialty must not be empty")
         return v.strip() if v else v
 
 

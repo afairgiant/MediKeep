@@ -140,6 +140,7 @@ class EntityType:
     EMERGENCY_CONTACT = "emergency_contact"
     PHARMACY = "pharmacy"
     PRACTICE = "practice"
+    MEDICAL_SPECIALTY = "medical_specialty"
     FAMILY_MEMBER = "family_member"
     INSURANCE = "insurance"
     FAMILY_CONDITION = "family_condition"
@@ -174,6 +175,7 @@ class EntityType:
             cls.EMERGENCY_CONTACT,
             cls.PHARMACY,
             cls.PRACTICE,
+            cls.MEDICAL_SPECIALTY,
             cls.FAMILY_MEMBER,
             cls.INSURANCE,
             cls.FAMILY_CONDITION,

@@ -73,13 +73,10 @@ class Practitioner(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String, nullable=False)
-    # specialty string kept in PR1 for dual-write backwards compatibility;
-    # scheduled for removal in PR2 after verification window.
-    specialty = Column(String, nullable=False)
     specialty_id = Column(
         Integer,
         ForeignKey("medical_specialties.id", ondelete="RESTRICT"),
-        nullable=True,
+        nullable=False,
     )
     practice = Column(String, nullable=True)  # Legacy field - kept for migration safety
     practice_id = Column(
@@ -120,16 +117,21 @@ class Practitioner(Base):
     )
 
     @property
-    def specialty_name(self):
+    def specialty(self):
         """
         Resolved specialty name from the managed MedicalSpecialty table.
 
-        Endpoints that want this populated without triggering lazy-load should
-        eager-load ``specialty_rel`` (e.g. via ``joinedload``).
+        Endpoints that want this populated without triggering a per-row
+        lazy-load should eager-load ``specialty_rel`` via ``joinedload``.
         """
         if self.specialty_rel is not None:
             return self.specialty_rel.name
         return None
+
+    @property
+    def specialty_name(self):
+        """Alias of :attr:`specialty` used by the admin model registry."""
+        return self.specialty
 
 
 class Pharmacy(Base):

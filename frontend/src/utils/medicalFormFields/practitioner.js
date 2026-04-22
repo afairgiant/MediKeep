@@ -13,15 +13,13 @@ export const practitionerFormFields = [
     gridColumn: 12,
   },
   {
-    name: 'specialty',
-    type: 'combobox',
+    name: 'specialty_id',
+    type: 'specialty-select',
     labelKey: 'medical:practitioners.form.specialty.label',
     placeholderKey: 'medical:practitioners.form.specialty.placeholder',
     descriptionKey: 'medical:practitioners.form.specialty.description',
     required: true,
     gridColumn: 6,
-    maxDropdownHeight: 200,
-    dynamicOptions: 'specialties',
   },
   {
     name: 'practice_id',

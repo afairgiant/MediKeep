@@ -16,17 +16,21 @@ from app.models.models import Practitioner as PractitionerModel
 
 
 @pytest.fixture
-def practice_with_practitioners(db_session: Session):
+def practice_with_practitioners(db_session: Session, default_specialty):
     """Create a practice with two practitioners."""
     practice = PracticeModel(name="Busy Clinic")
     db_session.add(practice)
     db_session.flush()
 
     p1 = PractitionerModel(
-        name="Dr. Alpha", specialty="Cardiology", practice_id=practice.id
+        name="Dr. Alpha",
+        specialty_id=default_specialty.id,
+        practice_id=practice.id,
     )
     p2 = PractitionerModel(
-        name="Dr. Beta", specialty="Neurology", practice_id=practice.id
+        name="Dr. Beta",
+        specialty_id=default_specialty.id,
+        practice_id=practice.id,
     )
     db_session.add_all([p1, p2])
     db_session.commit()
