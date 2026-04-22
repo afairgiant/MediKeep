@@ -91,6 +91,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AuditLog from './pages/admin/AuditLog';
 import TrashManagement from './pages/admin/TrashManagement';
 import DataModels from './pages/admin/DataModels';
+import PracticesAdmin from './pages/admin/PracticesAdmin';
 import UserManagement from './pages/admin/UserManagement';
 import ToolsMaintenance from './pages/admin/ToolsMaintenance';
 import Analytics from './pages/admin/Analytics';
@@ -582,6 +583,14 @@ function App() {
                             element={
                               <AdminRoute>
                                 <UserManagement />
+                              </AdminRoute>
+                            }
+                          />
+                          <Route
+                            path="/admin/practices"
+                            element={
+                              <AdminRoute>
+                                <PracticesAdmin />
                               </AdminRoute>
                             }
                           />

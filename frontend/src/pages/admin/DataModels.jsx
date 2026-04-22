@@ -295,6 +295,30 @@ const getModelEnrichment = t => ({
       'Medical devices and equipment prescribed to patients'
     ),
   },
+  medical_specialty: {
+    icon: IconStethoscope,
+    color: 'teal',
+    category: t(
+      'dataModels.categories.healthcareDirectory',
+      'Healthcare Directory'
+    ),
+    description: t(
+      'dataModels.descriptions.medical_specialty',
+      'Medical specialties (e.g. Cardiology) assigned to practitioners'
+    ),
+  },
+  practice: {
+    icon: IconBuilding,
+    color: 'blue',
+    category: t(
+      'dataModels.categories.healthcareDirectory',
+      'Healthcare Directory'
+    ),
+    description: t(
+      'dataModels.descriptions.practice',
+      'Medical practices — contact details and multiple locations'
+    ),
+  },
 });
 
 const DEFAULT_ENRICHMENT = {
@@ -359,6 +383,11 @@ const getDisplayNames = t => ({
     'dataModels.descriptions.medical_equipment',
     'Medical Equipment'
   ),
+  medical_specialty: t(
+    'dataModels.displayNames.medical_specialty',
+    'Medical Specialties'
+  ),
+  practice: t('dataModels.displayNames.practice', 'Practices'),
 });
 
 const DataModels = () => {
@@ -448,14 +477,19 @@ const DataModels = () => {
       )
     : models;
 
+  // Practice has a dedicated admin page because its JSON "locations" field
+  // needs a custom editor the generic ModelEdit flow doesn't provide.
+  const getModelRoute = modelName =>
+    modelName === 'practice' ? '/admin/practices' : `/admin/models/${modelName}`;
+
   const handleModelClick = modelName => {
-    navigate(`/admin/models/${modelName}`);
+    navigate(getModelRoute(modelName));
   };
 
   const handleModelKeyDown = (event, modelName) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      navigate(`/admin/models/${modelName}`);
+      navigate(getModelRoute(modelName));
     }
   };
 

@@ -9,13 +9,14 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from sqlalchemy import inspect as sql_inspect
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.api import deps
 from app.api.activity_logging import safe_log_activity
 from app.api.v1.admin.csv_utils import stream_csv
+from app.core.http.error_handling import APIException, handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
 from app.core.utils.datetime_utils import convert_date_fields, convert_datetime_fields
@@ -30,6 +31,7 @@ from app.crud import (
     lab_result,
     lab_result_file,
     lab_test_component,
+    medical_specialty,
     medication,
     patient,
     pharmacy,
@@ -41,6 +43,7 @@ from app.crud import (
 )
 from app.crud.base import CRUDBase
 from app.crud.emergency_contact import emergency_contact
+from app.crud.practice import practice
 from app.crud.injury import injury
 from app.crud.injury_type import injury_type
 from app.crud.medical_equipment import medical_equipment
@@ -64,10 +67,12 @@ from app.models.models import (
     LabResult,
     LabResultFile,
     MedicalEquipment,
+    MedicalSpecialty,
     Medication,
     Patient,
     PatientShare,
     Pharmacy,
+    Practice,
     Practitioner,
     Procedure,
     Symptom,
@@ -91,9 +96,11 @@ from app.schemas.lab_result import LabResultCreate
 from app.schemas.lab_result_file import LabResultFileCreate
 from app.schemas.lab_test_component import LabTestComponentCreate
 from app.schemas.medical_equipment import MedicalEquipmentCreate
+from app.schemas.medical_specialty import MedicalSpecialtyCreate
 from app.schemas.medication import MedicationCreate
 from app.schemas.patient import PatientCreate
 from app.schemas.pharmacy import PharmacyCreate
+from app.schemas.practice import PracticeCreate
 from app.schemas.practitioner import PractitionerCreate
 from app.schemas.procedure import ProcedureCreate
 from app.schemas.symptom import SymptomCreate, SymptomOccurrenceCreate
@@ -115,6 +122,7 @@ DATETIME_FIELD_MAP = {
     "patient": ["created_at", "updated_at"],
     "practitioner": ["created_at", "updated_at"],
     "pharmacy": ["created_at", "updated_at"],
+    "practice": ["created_at", "updated_at"],
     "lab_result": [
         "ordered_date",
         "completed_date",
@@ -139,6 +147,7 @@ DATETIME_FIELD_MAP = {
     "symptom": ["created_at", "updated_at"],
     "symptom_occurrence": ["created_at", "updated_at"],
     "medical_equipment": ["created_at", "updated_at"],
+    "medical_specialty": ["created_at", "updated_at"],
 }
 
 DATE_FIELD_MAP = {
@@ -193,7 +202,8 @@ FIELD_DISPLAY_CONFIG = {
         "list_fields": [
             "id",
             "name",
-            "specialty",
+            "specialty_id",
+            "specialty_name",
             "practice",
             "phone_number",
             "rating",
@@ -201,12 +211,16 @@ FIELD_DISPLAY_CONFIG = {
         "detail_fields": [
             "id",
             "name",
-            "specialty",
+            "specialty_id",
+            "specialty_name",
             "practice",
             "phone_number",
             "website",
             "rating",
         ],
+        # NOTE: _resolve_search_field only uses the first entry today, so only
+        # "name" is actually searchable. The rest are listed for when the
+        # generic admin search grows to support multiple fields.
         "search_fields": ["name", "specialty", "practice"],
     },
     "patient": {
@@ -938,6 +952,55 @@ FIELD_DISPLAY_CONFIG = {
             "supplier",
         ],
     },
+    "medical_specialty": {
+        "list_fields": [
+            "id",
+            "name",
+            "is_active",
+            "created_at",
+        ],
+        "detail_fields": [
+            "id",
+            "name",
+            "description",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["name", "description"],
+    },
+    "practice": {
+        "list_fields": [
+            "id",
+            "name",
+            "phone_number",
+            "website",
+            "created_at",
+        ],
+        # NOTE: "locations" (JSON array) is intentionally excluded from
+        # detail_fields. The generic ModelEdit/FieldRenderer flow can't edit
+        # JSON arrays; the dedicated /admin/practices page uses LocationsEditor
+        # for that field.
+        "detail_fields": [
+            "id",
+            "name",
+            "phone_number",
+            "fax_number",
+            "website",
+            "patient_portal_url",
+            "notes",
+            "created_at",
+            "updated_at",
+        ],
+        "search_fields": ["name"],
+    },
+}
+
+# Relationships to eager-load for generic admin list/detail queries. Prevents
+# N+1 when detail_fields include computed attributes like "specialty_name"
+# (which reads from Practitioner.specialty_rel).
+EAGER_LOAD_FIELDS: Dict[str, List[str]] = {
+    "practitioner": ["specialty_rel", "practice_rel"],
 }
 
 
@@ -1099,6 +1162,16 @@ MODEL_REGISTRY = {
         "model": MedicalEquipment,
         "crud": medical_equipment,
         "create_schema": MedicalEquipmentCreate,
+    },
+    "medical_specialty": {
+        "model": MedicalSpecialty,
+        "crud": medical_specialty,
+        "create_schema": MedicalSpecialtyCreate,
+    },
+    "practice": {
+        "model": Practice,
+        "crud": practice,
+        "create_schema": PracticeCreate,
     },
 }
 
@@ -1320,9 +1393,34 @@ def _resolve_search_field(model_name: str, model_class) -> Optional[str]:
 
 
 def _fetch_records(
-    db: Session, model_info: dict, crud_instance, skip: int = None, limit: int = None
+    db: Session,
+    model_info: dict,
+    crud_instance,
+    skip: int = None,
+    limit: int = None,
+    model_name: Optional[str] = None,
 ):
-    """Fetch records using get_multi or a raw query, with optional pagination."""
+    """Fetch records using get_multi or a raw query, with optional pagination.
+
+    When the model has eager-load relationships configured in
+    ``EAGER_LOAD_FIELDS``, bypass ``get_multi`` and build a query with
+    ``joinedload`` so downstream ``record_to_dict()`` access to relationship
+    properties (e.g. ``specialty_name``) doesn't trigger per-row lazy loads.
+    """
+    eager_rels = EAGER_LOAD_FIELDS.get(model_name or "", [])
+
+    if eager_rels:
+        model_cls = model_info["model"]
+        q = db.query(model_cls)
+        for rel in eager_rels:
+            if hasattr(model_cls, rel):
+                q = q.options(joinedload(getattr(model_cls, rel)))
+        if skip is not None:
+            q = q.offset(skip)
+        if limit is not None:
+            q = q.limit(limit)
+        return q.all()
+
     if hasattr(crud_instance, "get_multi"):
         effective_skip = skip if skip is not None else 0
         effective_limit = limit if limit is not None else 999999
@@ -1356,14 +1454,24 @@ def _get_model_records(
         search_field = _resolve_search_field(model_name, model_info["model"])
         if search_field:
             search_param = {"field": search_field, "term": search.strip()}
+            # Eager-load the same relationships as the non-search path so
+            # record_to_dict() doesn't trigger per-row lazy loads on
+            # derived attributes like specialty_name / practice_name.
+            load_relations = EAGER_LOAD_FIELDS.get(model_name, []) or None
             records = crud_instance.query(
-                db=db, search=search_param, skip=skip, limit=limit
+                db=db,
+                search=search_param,
+                skip=skip,
+                limit=limit,
+                load_relations=load_relations,
             )
             all_matched = crud_instance.query(db=db, search=search_param)
             return records, len(all_matched)
 
     # Fallback: fetch all records (ignoring unsearchable search terms)
-    records = _fetch_records(db, model_info, crud_instance, skip=skip, limit=limit)
+    records = _fetch_records(
+        db, model_info, crud_instance, skip=skip, limit=limit, model_name=model_name
+    )
     total = db.query(model_info["model"]).count()
     return records, total
 
@@ -1765,17 +1873,15 @@ def create_model_record(
     crud_instance = model_info["crud"]
 
     try:
-        # Process date and datetime fields using centralized mapping
         create_data = process_field_mappings(create_data, model_name)
 
-        # Create Pydantic schema object from the processed data
         create_schema = model_info["create_schema"]
-        create_obj = create_schema(
-            **create_data
-        )  # Create the record using CRUD create method
-        created_record = crud_instance.create(
-            db, obj_in=create_obj
-        )  # Log the creation activity
+        create_obj = create_schema(**create_data)
+        with handle_database_errors(
+            context={"operation": "admin_create", "model": model_name}
+        ):
+            created_record = crud_instance.create(db, obj_in=create_obj)
+
         current_user_id = getattr(current_user, "id", None)
         if current_user_id is not None:
             safe_log_activity(
@@ -1788,8 +1894,13 @@ def create_model_record(
 
         return record_to_dict(created_record, model_info["model"])
 
-    except HTTPException:
+    except (HTTPException, APIException):
         raise
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=e.errors(),
+        ) from e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -6,11 +6,13 @@ import {
   Textarea,
   Group,
   Button,
+  Divider,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
 import apiService from '../../../services/api';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
+import LocationsEditor from '../../admin/LocationsEditor';
 
 const emptyForm = {
   name: '',
@@ -19,6 +21,7 @@ const emptyForm = {
   website: '',
   patient_portal_url: '',
   notes: '',
+  locations: [],
 };
 
 const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
@@ -37,9 +40,12 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
           website: practiceData.website || '',
           patient_portal_url: practiceData.patient_portal_url || '',
           notes: practiceData.notes || '',
+          locations: Array.isArray(practiceData.locations)
+            ? practiceData.locations
+            : [],
         });
       } else {
-        setFormData(emptyForm);
+        setFormData({ ...emptyForm, locations: [] });
       }
     }
   }, [practiceData, isOpen]);
@@ -61,6 +67,21 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
         }
       });
       payload.name = formData.name.trim();
+      // Drop empty locations (nothing-entered rows) before submitting.
+      payload.locations = (formData.locations || [])
+        .map(loc => {
+          const trimmed = Object.fromEntries(
+            Object.entries(loc).map(([k, v]) => [
+              k,
+              typeof v === 'string' ? v.trim() : v,
+            ])
+          );
+          return trimmed;
+        })
+        .filter(loc => Object.values(loc).some(v => v));
+      if (payload.locations.length === 0) {
+        payload.locations = null;
+      }
 
       if (isEditing) {
         await apiService.updatePractice(practiceData.id, payload);
@@ -107,7 +128,7 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
           ? t('common:practitioners.viewModal.editPractice', 'Edit Practice')
           : t('common:practitioners.practices.createTitle', 'Add Practice')
       }
-      size="md"
+      size="lg"
       centered
       zIndex={2100}
     >
@@ -159,6 +180,11 @@ const PracticeEditModal = ({ isOpen, onClose, practiceData, onSaved }) => {
           value={formData.notes}
           onChange={handleChange('notes')}
           minRows={3}
+        />
+        <Divider />
+        <LocationsEditor
+          value={formData.locations}
+          onChange={next => setFormData(prev => ({ ...prev, locations: next }))}
         />
         <Group justify="flex-end" gap="sm">
           <Button variant="default" onClick={onClose}>
