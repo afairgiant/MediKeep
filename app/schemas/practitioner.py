@@ -61,6 +61,46 @@ def _validate_email_value(v: Optional[str]) -> Optional[str]:
     return email
 
 
+_WEBSITE_URL_PATTERN = re.compile(
+    r"^https?://"  # http:// or https://
+    r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
+    r"localhost|"  # localhost...
+    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+    r"(?::\d+)?"  # optional port
+    r"(?:/?|[/?]\S+)$",
+    re.IGNORECASE,
+)
+
+
+def _validate_website_value(v: Optional[str]) -> Optional[str]:
+    """Shared website URL validation; returns cleaned https-prefixed URL or None."""
+    if v is None or v.strip() == "":
+        return None
+
+    cleaned_url = v.strip()
+    if not cleaned_url.startswith(("http://", "https://")):
+        cleaned_url = "https://" + cleaned_url
+
+    if not _WEBSITE_URL_PATTERN.match(cleaned_url):
+        raise ValueError("Please enter a valid website URL")
+
+    return cleaned_url
+
+
+def _validate_rating_value(v):
+    """Shared rating validation; returns rating rounded to 1 decimal or None."""
+    if v is None:
+        return None
+
+    if not isinstance(v, (int, float)):
+        raise ValueError("Rating must be a number")
+
+    if v < 0 or v > 5:
+        raise ValueError("Rating must be between 0 and 5")
+
+    return round(float(v), 1)
+
+
 class PractitionerBase(BaseModel):
     """
     Base Practitioner schema with common fields.
@@ -70,8 +110,7 @@ class PractitionerBase(BaseModel):
     """
 
     name: str
-    specialty: str
-    specialty_id: Optional[PositiveInt] = None
+    specialty_id: PositiveInt
     practice: Optional[str] = None  # Legacy field - kept for backward compatibility
     practice_id: Optional[int] = None
     phone_number: Optional[str] = None
@@ -100,27 +139,6 @@ class PractitionerBase(BaseModel):
             raise ValueError("Practitioner name must be less than 100 characters")
         return v.strip()
 
-    @field_validator("specialty")
-    @classmethod
-    def validate_specialty(cls, v):
-        """
-        Validate specialty field.
-
-        Args:
-            v: The specialty value to validate
-
-        Returns:
-            Cleaned specialty (stripped whitespace)
-
-        Raises:
-            ValueError: If specialty is empty or too long
-        """
-        if not v or len(v.strip()) < 2:
-            raise ValueError("Specialty must be at least 2 characters long")
-        if len(v) > 100:
-            raise ValueError("Specialty must be less than 100 characters")
-        return v.strip()
-
     @field_validator("practice")
     @classmethod
     def validate_practice(cls, v):
@@ -142,68 +160,14 @@ class PractitionerBase(BaseModel):
     @field_validator("website")
     @classmethod
     def validate_website(cls, v):
-        """
-        Validate website URL field.
-
-        Args:
-            v: The website URL value to validate
-
-        Returns:
-            Cleaned website URL
-
-        Raises:
-            ValueError: If website URL format is invalid
-        """
-        if v is None or v.strip() == "":
-            return None
-
-        # Basic URL validation
-        url_pattern = re.compile(
-            r"^https?://"  # http:// or https://
-            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
-            r"localhost|"  # localhost...
-            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
-            r"(?::\d+)?"  # optional port
-            r"(?:/?|[/?]\S+)$",
-            re.IGNORECASE,
-        )
-
-        cleaned_url = v.strip()
-
-        # Add https:// if no protocol specified
-        if not cleaned_url.startswith(("http://", "https://")):
-            cleaned_url = "https://" + cleaned_url
-
-        if not url_pattern.match(cleaned_url):
-            raise ValueError("Please enter a valid website URL")
-
-        return cleaned_url
+        """Validate website URL using shared helper."""
+        return _validate_website_value(v)
 
     @field_validator("rating")
     @classmethod
     def validate_rating(cls, v):
-        """
-        Validate rating field.
-
-        Args:
-            v: The rating value to validate
-
-        Returns:
-            Validated rating
-
-        Raises:
-            ValueError: If rating is not between 0 and 5
-        """
-        if v is None:
-            return None
-
-        if not isinstance(v, (int, float)):
-            raise ValueError("Rating must be a number")
-
-        if v < 0 or v > 5:
-            raise ValueError("Rating must be between 0 and 5")
-
-        return round(float(v), 1)  # Round to 1 decimal place
+        """Validate rating using shared helper."""
+        return _validate_rating_value(v)
 
 
 class PractitionerCreate(PractitionerBase):
@@ -216,7 +180,7 @@ class PractitionerCreate(PractitionerBase):
     Example:
         practitioner_data = PractitionerCreate(
             name="Dr. John Smith",
-            specialty="Cardiology"
+            specialty_id=3,
         )
     """
 
@@ -229,12 +193,11 @@ class PractitionerUpdate(BaseModel):
 
     Example:
         update_data = PractitionerUpdate(
-            specialty="Internal Medicine"
+            specialty_id=3
         )
     """
 
     name: Optional[str] = None
-    specialty: Optional[str] = None
     specialty_id: Optional[PositiveInt] = None
     practice: Optional[str] = None  # Legacy field
     practice_id: Optional[int] = None
@@ -263,18 +226,6 @@ class PractitionerUpdate(BaseModel):
             return v.strip()
         return v
 
-    @field_validator("specialty")
-    @classmethod
-    def validate_specialty(cls, v):
-        """Validate specialty if provided."""
-        if v is not None:
-            if len(v.strip()) < 2:
-                raise ValueError("Specialty must be at least 2 characters long")
-            if len(v) > 100:
-                raise ValueError("Specialty must be less than 100 characters")
-            return v.strip()
-        return v
-
     @field_validator("practice")
     @classmethod
     def validate_practice(cls, v):
@@ -296,46 +247,14 @@ class PractitionerUpdate(BaseModel):
     @field_validator("website")
     @classmethod
     def validate_website_update(cls, v):
-        """Validate website URL if provided."""
-        if v is None or v.strip() == "":
-            return None
-
-        # Basic URL validation
-        url_pattern = re.compile(
-            r"^https?://"  # http:// or https://
-            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
-            r"localhost|"  # localhost...
-            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
-            r"(?::\d+)?"  # optional port
-            r"(?:/?|[/?]\S+)$",
-            re.IGNORECASE,
-        )
-
-        cleaned_url = v.strip()
-
-        # Add https:// if no protocol specified
-        if not cleaned_url.startswith(("http://", "https://")):
-            cleaned_url = "https://" + cleaned_url
-
-        if not url_pattern.match(cleaned_url):
-            raise ValueError("Please enter a valid website URL")
-
-        return cleaned_url
+        """Validate website URL if provided using shared helper."""
+        return _validate_website_value(v)
 
     @field_validator("rating")
     @classmethod
     def validate_rating_update(cls, v):
-        """Validate rating if provided."""
-        if v is None:
-            return None
-
-        if not isinstance(v, (int, float)):
-            raise ValueError("Rating must be a number")
-
-        if v < 0 or v > 5:
-            raise ValueError("Rating must be between 0 and 5")
-
-        return round(float(v), 1)  # Round to 1 decimal place
+        """Validate rating if provided using shared helper."""
+        return _validate_rating_value(v)
 
 
 class Practitioner(PractitionerBase):
@@ -349,12 +268,14 @@ class Practitioner(PractitionerBase):
         {
             "id": 1,
             "name": "Dr. John Smith",
+            "specialty_id": 3,
             "specialty": "Cardiology",
             "practice_name": "City General Hospital"
         }
     """
 
     id: int
+    specialty: Optional[str] = None
     practice_name: Optional[str] = None
     specialty_name: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -379,7 +300,7 @@ class PractitionerSummary(BaseModel):
 
     id: int
     name: str
-    specialty: str
+    specialty: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -401,12 +322,12 @@ class PractitionerSearch(BaseModel):
     Example:
         search_params = PractitionerSearch(
             name="Smith",
-            specialty="Cardiology"
+            specialty_id=3,
         )
     """
 
     name: Optional[str] = None
-    specialty: Optional[str] = None
+    specialty_id: Optional[PositiveInt] = None
 
     @field_validator("name")
     @classmethod
@@ -414,14 +335,6 @@ class PractitionerSearch(BaseModel):
         """Validate search name parameter."""
         if v is not None and len(v.strip()) < 1:
             raise ValueError("Search name must not be empty")
-        return v.strip() if v else v
-
-    @field_validator("specialty")
-    @classmethod
-    def validate_specialty_search(cls, v):
-        """Validate search specialty parameter."""
-        if v is not None and len(v.strip()) < 1:
-            raise ValueError("Search specialty must not be empty")
         return v.strip() if v else v
 
 

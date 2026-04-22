@@ -111,12 +111,18 @@ FAMILY HISTORY
 
 REFERENCE DATA
 ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
-│  Practices   │────────>│Practitioners │         │  Pharmacies  │
-│              │   1:N   │              │         │              │
-│ - name       │         │ - specialty  │         │ - brand      │
-│ - locations  │         │ - practice_id│         │ - address    │
-│ - website    │         │ - rating     │         │              │
+│  Practices   │────────>│Practitioners │<────────│MedicalSpec.  │
+│              │   1:N   │              │   N:1   │              │
+│ - name       │         │ - specialty_id│        │ - name       │
+│ - locations  │         │ - practice_id│         │ - description│
+│ - website    │         │ - rating     │         │ - is_active  │
 └──────────────┘         └──────────────┘         └──────────────┘
+                                                  ┌──────────────┐
+                                                  │  Pharmacies  │
+                                                  │              │
+                                                  │ - brand      │
+                                                  │ - address    │
+                                                  └──────────────┘
                                                   ┌──────────────┐
                                                   │  User Tags   │
                                                   │              │
@@ -1023,6 +1029,30 @@ JUNCTION TABLES (Many-to-Many)
 - Deleting a practice sets `practice_id` to NULL on linked practitioners (ON DELETE SET NULL)
 - Shared across all users (global reference data)
 
+### medical_specialties
+**Purpose**: Lookup table of medical specialties (Cardiology, Pediatrics, etc.) referenced by practitioners. Promoted from a free-text string column to a managed entity so duplicate-casing variants can be curated.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique specialty ID |
+| name | String | NOT NULL | Canonical specialty name |
+| description | Text | | Short descriptive blurb |
+| is_active | Boolean | NOT NULL, default TRUE | Whether the specialty appears in dropdowns |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Indexes**:
+- `uq_medical_specialties_name_lower` (UNIQUE) on `lower(trim(name))` — enforces case-insensitive name uniqueness
+
+**Relationships**:
+- `practitioners`: One-to-many with Practitioner (via `specialty_id` FK, ON DELETE RESTRICT)
+
+**Business Rules**:
+- Name is required, 2–100 characters, case-insensitively unique
+- Deletes are blocked (409) when any practitioner still references the row
+- Any authenticated user can list active specialties and quick-create new ones via `POST /api/v1/medical-specialties/` (rate-limited); full CRUD (update, deactivate, delete) is admin-only
+- Seeded with ~50 canonical specialties by migration `b4c5d6e7f8a9`
+
 ### practitioners
 **Purpose**: Healthcare provider directory
 
@@ -1030,7 +1060,7 @@ JUNCTION TABLES (Many-to-Many)
 |--------|------|-------------|-------------|
 | id | Integer | PRIMARY KEY | Unique practitioner ID |
 | name | String | NOT NULL | Practitioner's name |
-| specialty | String | NOT NULL | Medical specialty |
+| specialty_id | Integer | NOT NULL, FK(medical_specialties.id), ON DELETE RESTRICT | Linked specialty |
 | practice | String | | Legacy practice name (kept for migration safety) |
 | practice_id | Integer | FK(practices.id), ON DELETE SET NULL | Linked practice |
 | phone_number | String | | Contact phone |
@@ -1041,6 +1071,7 @@ JUNCTION TABLES (Many-to-Many)
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 
 **Relationships**:
+- `specialty_rel`: Many-to-one with MedicalSpecialty
 - `practice_rel`: Many-to-one with Practice
 - `patients`: One-to-many with Patient (as PCP)
 - `medications`: One-to-many with Medication
@@ -1056,11 +1087,14 @@ JUNCTION TABLES (Many-to-Many)
 
 **Indexes**:
 - `idx_practitioners_practice_id` on practice_id
+- `idx_practitioners_specialty_id` on specialty_id
 
 **Business Rules**:
-- Name and specialty are required
+- Name and `specialty_id` are required
+- `specialty_id` must reference an existing `medical_specialties` row
 - `practice_id` links to the practices table (optional)
 - The `practice` string field is a legacy field kept for backward compatibility
+- `specialty` and `specialty_name` on API responses are computed from `specialty_rel.name` (the legacy `specialty` string column was dropped in migration `a3b4c5d6e7f8`)
 - Shared across all users (global reference data)
 - Rating optional for user feedback (0.0-5.0)
 

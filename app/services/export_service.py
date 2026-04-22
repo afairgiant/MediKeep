@@ -139,6 +139,11 @@ class ExportService:
 
             patient = (
                 self.db.query(Patient)
+                .options(
+                    joinedload(Patient.practitioner).joinedload(
+                        Practitioner.specialty_rel
+                    )
+                )
                 .filter(Patient.id == user.active_patient_id)
                 .first()
             )
@@ -1012,6 +1017,7 @@ class ExportService:
 
         practitioners = (
             self.db.query(Practitioner)
+            .options(joinedload(Practitioner.specialty_rel))
             .filter(Practitioner.id.in_(practitioner_ids))
             .order_by(Practitioner.name)
             .all()

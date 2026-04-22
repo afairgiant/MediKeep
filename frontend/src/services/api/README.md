@@ -144,9 +144,17 @@ The comprehensive API service that provides all medical record management functi
 
 - `getPractitioners(signal)` - Get all practitioners
 - `getPractitioner(practitionerId, signal)` - Get single practitioner
-- `createPractitioner(practitionerData, signal)` - Create practitioner
+- `createPractitioner(practitionerData, signal)` - Create practitioner (body must include `specialty_id`)
 - `updatePractitioner(practitionerId, practitionerData, signal)` - Update practitioner
 - `deletePractitioner(practitionerId, signal)` - Delete practitioner
+
+## Specialty API Service (`specialtyApi.js`)
+
+Non-admin wrapper around `/api/v1/medical-specialties/`. Backs the `SpecialtySelect` dropdown used in the practitioner form.
+
+- `list()` - GET active specialties `[{id, name, description, is_active}]` for dropdown population.
+- `create({ name, description })` - POST a new specialty. Returns the new row on 201, or the existing row on 200 if a case-insensitive name match already exists. Rate-limited to 20/hour per user.
+- `migrateLegacyCustomSpecialties()` - One-shot localStorage → DB migrator. Reads any names left in `customMedicalSpecialties` from the pre-FK dropdown, POSTs each via `create()`, then clears the key and writes `customMedicalSpecialtiesMigratedAt` as a re-run guard. Called transparently by `SpecialtySelect` on first mount.
 
 ## Admin API Service (`adminApi.js`)
 

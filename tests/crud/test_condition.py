@@ -33,11 +33,11 @@ class TestConditionCRUD:
         )
 
     @pytest.fixture
-    def test_practitioner(self, db_session: Session):
+    def test_practitioner(self, db_session: Session, default_specialty):
         """Create a test practitioner for condition tests."""
         practitioner_data = PractitionerCreate(
             name="Dr. Sarah Smith",
-            specialty="Internal Medicine",
+            specialty_id=default_specialty.id,
             practice="City Medical Center",
             phone_number="555-555-0123",
         )

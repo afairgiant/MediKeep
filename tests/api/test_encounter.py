@@ -23,11 +23,13 @@ class TestEncounterAPI:
     """
 
     @pytest.fixture
-    def test_practitioner(self, db_session: Session, user_with_patient):
+    def test_practitioner(
+        self, db_session: Session, user_with_patient, default_specialty
+    ):
         """Create a test practitioner."""
         practitioner_data = PractitionerCreate(
             name="Dr. Smith",
-            specialty="Family Medicine",
+            specialty_id=default_specialty.id,
             phone_number="555-123-4567",
             email="dr.smith@example.com",
             address="456 Medical Center Dr",
@@ -167,11 +169,12 @@ class TestEncounterAPI:
         authenticated_headers,
         db_session: Session,
         test_practitioner,
+        default_specialty,
     ):
         """Test filtering encounters by practitioner."""
         practitioner2_data = PractitionerCreate(
             name="Dr. Jones",
-            specialty="Cardiology",
+            specialty_id=default_specialty.id,
             patient_id=user_with_patient["patient"].id,
         )
         practitioner2 = practitioner_crud.create(db_session, obj_in=practitioner2_data)
@@ -627,7 +630,7 @@ class TestEncounterAPI:
         assert "chronic" in data.get("tags", [])
 
     def test_encounter_practitioner_authorization(
-        self, client: TestClient, db_session: Session
+        self, client: TestClient, db_session: Session, default_specialty
     ):
         """Test that practitioner_id must belong to the same patient."""
         # Create user1 with patient1 and practitioner1
@@ -644,7 +647,9 @@ class TestEncounterAPI:
         headers1 = create_user_token_headers(user1_data["user"].username)
 
         practitioner1_data = PractitionerCreate(
-            name="Dr. One", specialty="Family Medicine", patient_id=patient1.id
+            name="Dr. One",
+            specialty_id=default_specialty.id,
+            patient_id=patient1.id,
         )
         practitioner1 = practitioner_crud.create(db_session, obj_in=practitioner1_data)
 

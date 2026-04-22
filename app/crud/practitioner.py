@@ -1,10 +1,8 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app.models.models import MedicalSpecialty as MedicalSpecialtyModel
 from app.models.models import Practitioner as PractitionerModel
 from app.schemas.practitioner import PractitionerCreate, PractitionerUpdate
 
@@ -18,94 +16,6 @@ class CRUDPractitioner(
     Practitioners are independent entities representing healthcare providers.
     They are not tied to specific users and can be referenced by any medical record.
     """
-
-    def _normalize_input_dict(
-        self, obj_in: Any, *, exclude_unset: bool = False
-    ) -> Dict[str, Any]:
-        """Convert Pydantic models or mappings to a mutable dict."""
-        if hasattr(obj_in, "model_dump"):
-            return obj_in.model_dump(exclude_unset=exclude_unset)
-        if isinstance(obj_in, dict):
-            return dict(obj_in)
-        return dict(obj_in)
-
-    def _apply_specialty_dual_write(
-        self, db: Session, data: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Keep the legacy ``specialty`` string column in sync with ``specialty_id``.
-
-        - If only ``specialty_id`` is provided, resolve the canonical name and
-          write it to ``specialty``.
-        - If only ``specialty`` string is provided, find-or-create the matching
-          MedicalSpecialty row and set ``specialty_id``; also normalize the
-          string to the canonical casing so reads stay consistent.
-        - If both are provided, ``specialty_id`` wins (the FK is authoritative)
-          and the string is overwritten with the canonical name.
-        - Explicit ``specialty_id: None`` with no replacement string is
-          rejected: Practitioner.specialty is NOT NULL during PR1, so we can't
-          clear both columns. (PR2 drops the string column and removes this.)
-
-        Removed during PR2 when the legacy ``specialty`` column is dropped.
-        """
-        id_key_present = "specialty_id" in data
-        str_key_present = "specialty" in data
-        spec_id = data.get("specialty_id")
-        spec_str = data.get("specialty")
-
-        attempting_clear = (
-            (id_key_present and spec_id is None)
-            or (str_key_present and spec_str is None)
-        )
-        if attempting_clear and not spec_id and not spec_str:
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    "specialty cannot be cleared: provide a specialty_id or "
-                    "specialty name"
-                ),
-            )
-
-        if spec_id:
-            spec = (
-                db.query(MedicalSpecialtyModel)
-                .filter(MedicalSpecialtyModel.id == spec_id)
-                .first()
-            )
-            if spec is None:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Unknown specialty_id {spec_id}",
-                )
-            data["specialty"] = spec.name
-        elif spec_str:
-            # Avoid a circular import by doing this lookup inline.
-            from app.crud.medical_specialty import medical_specialty
-
-            spec = medical_specialty.get_or_create(db, name=spec_str)
-            data["specialty_id"] = spec.id
-            data["specialty"] = spec.name
-
-        return data
-
-    def create(
-        self, db: Session, *, obj_in: Union[PractitionerCreate, Dict[str, Any]]
-    ) -> PractitionerModel:
-        data = self._normalize_input_dict(obj_in)
-        data = self._apply_specialty_dual_write(db, data)
-        return super().create(db, obj_in=data)
-
-    def update(
-        self,
-        db: Session,
-        *,
-        db_obj: PractitionerModel,
-        obj_in: Union[PractitionerUpdate, Dict[str, Any]],
-    ) -> PractitionerModel:
-        data = self._normalize_input_dict(obj_in, exclude_unset=True)
-        if "specialty_id" in data or "specialty" in data:
-            data = self._apply_specialty_dual_write(db, data)
-        return super().update(db, db_obj=db_obj, obj_in=data)
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[PractitionerModel]:
         """
@@ -153,54 +63,27 @@ class CRUDPractitioner(
             limit=limit,
         )
 
-    def get_by_specialty(
-        self, db: Session, *, specialty: str, skip: int = 0, limit: int = 20
+    def get_by_specialty_id(
+        self, db: Session, *, specialty_id: int, skip: int = 0, limit: int = 20
     ) -> List[PractitionerModel]:
         """
-        Retrieve practitioners by specialty.
+        Retrieve practitioners belonging to a specific MedicalSpecialty.
 
         Args:
             db: SQLAlchemy database session
-            specialty: Medical specialty to filter by
+            specialty_id: Primary key of the MedicalSpecialty to filter by
             skip: Number of records to skip
             limit: Maximum number of records to return
 
         Returns:
             List of Practitioner objects with matching specialty
-
-        Example:
-            cardiologists = practitioner_crud.get_by_specialty(db, specialty="Cardiology")
         """
         return self.query(
             db=db,
-            search={"field": "specialty", "term": specialty},
+            filters={"specialty_id": specialty_id},
             skip=skip,
             limit=limit,
         )
-
-    def get_all_specialties(self, db: Session) -> List[str]:
-        """
-        Get a list of all unique specialties in the system.
-
-        Args:
-            db: SQLAlchemy database session
-
-        Returns:
-            List of unique specialty strings
-
-        Example:
-            specialties = practitioner_crud.get_all_specialties(db)
-            # Returns: ["Cardiology", "Dermatology", "Internal Medicine", ...]
-        """
-        from sqlalchemy import distinct
-
-        result = (
-            db.query(distinct(PractitionerModel.specialty))
-            .filter(PractitionerModel.specialty.isnot(None))
-            .all()
-        )
-
-        return sorted([row[0] for row in result if row[0]])
 
     def get_with_medical_records(
         self, db: Session, practitioner_id: int
@@ -277,10 +160,6 @@ class CRUDPractitioner(
 
         Returns:
             New or existing Practitioner object
-
-        Example:
-            practitioner_data = PractitionerCreate(name="Dr. Smith", specialty="Cardiology")
-            practitioner = practitioner_crud.create_if_not_exists(db, practitioner_data=practitioner_data)
         """
         # Check if practitioner already exists
         existing = self.get_by_name(db, name=practitioner_data.name)
@@ -311,31 +190,6 @@ class CRUDPractitioner(
             skip=skip,
             limit=limit,
         )
-
-    def count_by_specialty(self, db: Session) -> dict:
-        """
-        Count practitioners by specialty.
-
-        Args:
-            db: SQLAlchemy database session
-
-        Returns:
-            Dictionary mapping specialty names to counts
-
-        Example:
-            counts = practitioner_crud.count_by_specialty(db)
-            # Returns: {"Cardiology": 15, "Dermatology": 12, ...}
-        """
-        from sqlalchemy import func
-
-        result = (
-            db.query(PractitionerModel.specialty, func.count(PractitionerModel.id))
-            .filter(PractitionerModel.specialty.isnot(None))
-            .group_by(PractitionerModel.specialty)
-            .all()
-        )
-
-        return {specialty: count for specialty, count in result}
 
     def get_most_referenced(
         self, db: Session, *, limit: int = 10

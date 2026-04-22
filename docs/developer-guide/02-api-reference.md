@@ -2973,7 +2973,7 @@ Base path: `/api/v1/practitioners`
 ```json
 {
   "name": "Dr. Sarah Smith",
-  "specialty": "Cardiology",
+  "specialty_id": 3,
   "practice_id": 1,
   "phone_number": "+1234567890",
   "email": "dr.smith@clinic.com",
@@ -2982,7 +2982,7 @@ Base path: `/api/v1/practitioners`
 }
 ```
 
-- **Notes**: `practice_id` links the practitioner to a Practice entity (optional). The legacy `practice` string field is still accepted for backward compatibility.
+- **Notes**: `specialty_id` is required and must reference an existing `medical_specialties` row (see Medical Specialties section below for how to list or create them). `practice_id` links the practitioner to a Practice entity (optional). The legacy `practice` string field is still accepted for backward compatibility.
 
 #### List Practitioners
 
@@ -2991,21 +2991,21 @@ Base path: `/api/v1/practitioners`
 - **Query Parameters**:
   - `skip` (integer, optional, default: 0): Number of records to skip
   - `limit` (integer, optional, default: 100, max: 100): Maximum records to return
-  - `specialty` (string, optional): Filter by specialty
+  - `specialty_id` (integer, optional): Filter by specialty FK
   - `practice_id` (integer, optional): Filter by practice
-- **Response** includes `practice_name` (resolved from the linked Practice entity) and timestamps (`created_at`, `updated_at`).
+- **Response**: Each practitioner includes `specialty` (the resolved name from the FK), `specialty_name` (alias of `specialty`), `practice_name`, and timestamps.
 
 #### Get Practitioner
 
 `GET /practitioners/{practitioner_id}`
 
-- **Response**: Full practitioner details with `practice_name` from linked Practice.
+- **Response**: Full practitioner details with `specialty`/`specialty_name` (resolved from the FK) and `practice_name`.
 
 #### Update Practitioner
 
 `PUT /practitioners/{practitioner_id}`
 
-- **Request Body**: Same fields as create, all optional.
+- **Request Body**: Same fields as create, all optional. `specialty_id` can be changed to point at a different `MedicalSpecialty`.
 
 #### Delete Practitioner
 
@@ -3018,13 +3018,46 @@ Base path: `/api/v1/practitioners`
 - **Query Parameters**:
   - `name` (string, required, min: 2): Search term
 
-#### Get All Specialties
+### 7.6 Medical Specialties
 
-`GET /practitioners/specialties`
+Base path: `/api/v1/medical-specialties`
 
-- **Response**: `{ "specialties": ["Cardiology", "Dermatology", ...] }`
+**Purpose**: Lookup table of medical specialties referenced by the `practitioners.specialty_id` FK. Any authenticated user can list or quick-create specialties; full admin CRUD (update, deactivate, delete) is available via `/api/v1/admin/models/medical_specialty/`.
 
-### 7.6 Practices
+#### List Active Specialties
+
+`GET /medical-specialties/`
+
+- **Auth**: Any authenticated user.
+- **Response** (200): Array of active specialty summaries for populating dropdowns.
+
+```json
+[
+  { "id": 3, "name": "Cardiology", "description": "Heart & cardiovascular system", "is_active": true },
+  { "id": 5, "name": "Dermatology", "description": "Skin, hair & nails", "is_active": true }
+]
+```
+
+#### Create or Get Specialty
+
+`POST /medical-specialties/`
+
+- **Auth**: Any authenticated user. Rate-limited to 20 creates per hour per user.
+- **Request Body**:
+
+```json
+{
+  "name": "Pulmonology",
+  "description": "Lung & respiratory care"
+}
+```
+
+- **Response**:
+  - `201 Created` — new specialty inserted; body is the new row.
+  - `200 OK` — case-insensitive match on `name` already existed; body is the existing row.
+  - `429 Too Many Requests` — per-user rate limit exceeded; `Retry-After` header set.
+
+### 7.7 Practices
 
 Base path: `/api/v1/practices`
 

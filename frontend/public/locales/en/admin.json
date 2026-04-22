@@ -344,7 +344,6 @@
     "computedField": "Computed from related record (read-only)",
     "enterField": "Enter {{field}}...",
     "enterPassword": "Enter password for new user...",
-    "legacySpecialty": "Legacy field — managed via Specialty dropdown",
     "notApplicable": "Not applicable",
     "passwordHash": "Password hash (read-only for security)",
     "passwordNote": "Enter a plain text password (minimum {{minLength}} characters with letter and number) - it will be securely hashed",
@@ -520,8 +519,8 @@
   },
   "practitioner": {
     "quickAddSpecialty": "+ Add new specialty…",
-    "specialtyCreated": "Specialty created",
-    "specialtyPlaceholder": "Select a specialty"
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   },
   "settings": {
     "dataRetention": {

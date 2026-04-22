@@ -17,12 +17,14 @@ class TestVitalsAPI:
     """Test vitals API endpoints."""
 
     @pytest.fixture
-    def test_patient_with_practitioner(self, db_session: Session, test_user):
+    def test_patient_with_practitioner(
+        self, db_session: Session, test_user, default_specialty
+    ):
         """Create test patient and practitioner for vitals tests."""
         # Create practitioner
         practitioner_data = PractitionerCreate(
             name="Dr. Emily Chen",
-            specialty="Family Medicine",
+            specialty_id=default_specialty.id,
             practice="Community Health Center",
             phone_number="555-555-0123",
         )

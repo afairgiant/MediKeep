@@ -73,7 +73,6 @@ class TestMedicalSpecialtyAdminCRUD:
         db_session.flush()
         practitioner = Practitioner(
             name="Dr. Ref",
-            specialty="Oncology",
             specialty_id=spec.id,
         )
         db_session.add(practitioner)
@@ -92,7 +91,6 @@ class TestPractitionerAdminExposesSpecialtyId:
         db_session.flush()
         practitioner = Practitioner(
             name="Dr. Lung",
-            specialty="Pulmonology",
             specialty_id=spec.id,
         )
         db_session.add(practitioner)

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from fastapi import HTTPException
 from sqlalchemy import func
@@ -58,9 +58,15 @@ class CRUDMedicalSpecialty(
         )
 
     def get_active(
-        self, db: Session, *, skip: int = 0, limit: int = 100
+        self, db: Session, *, skip: int = 0, limit: int = 500
     ) -> List[MedicalSpecialtyModel]:
-        """Return only active specialties (used to populate dropdowns)."""
+        """
+        Return only active specialties (used to populate dropdowns).
+
+        Default limit is 500 because the dropdown has no client-side
+        pagination — silently truncating the list at 100 would hide
+        specialties from users.
+        """
         return (
             db.query(MedicalSpecialtyModel)
             .filter(MedicalSpecialtyModel.is_active.is_(True))
@@ -71,31 +77,26 @@ class CRUDMedicalSpecialty(
         )
 
     def get_or_create(
-        self, db: Session, *, name: str
-    ) -> MedicalSpecialtyModel:
+        self, db: Session, *, obj_in: MedicalSpecialtyCreate
+    ) -> Tuple[MedicalSpecialtyModel, bool]:
         """
-        Return an existing specialty by case-insensitive name, or create one.
+        Return a tuple of (specialty, created).
 
-        Race-safe: a concurrent create between our get_by_name and create will
-        trigger the unique constraint; we rollback and re-query so the winner
-        gets the row.
-
-        Used by the Practitioner dual-write path when legacy callers submit
-        only the free-text ``specialty`` string.
+        - ``created=True`` means a new row was inserted.
+        - ``created=False`` means an existing case-insensitive name match
+          was found (either before the insert attempt, or via the race
+          fallback after an IntegrityError from a concurrent writer).
         """
-        existing = self.get_by_name(db, name=name)
+        existing = self.get_by_name(db, name=obj_in.name)
         if existing:
-            return existing
+            return existing, False
         try:
-            return self.create(
-                db,
-                obj_in=MedicalSpecialtyCreate(name=name.strip()),
-            )
+            return self.create(db, obj_in=obj_in), True
         except IntegrityError:
             db.rollback()
-            existing = self.get_by_name(db, name=name)
+            existing = self.get_by_name(db, name=obj_in.name)
             if existing:
-                return existing
+                return existing, False
             raise
 
     def delete(self, db: Session, *, id: int) -> MedicalSpecialtyModel:

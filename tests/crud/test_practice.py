@@ -306,7 +306,7 @@ class TestPracticeCRUD:
         page2 = practice_crud.get_all_practices_summary(db_session, skip=5, limit=5)
         assert len(page2) == 5
 
-    def test_get_practitioner_count(self, db_session: Session):
+    def test_get_practitioner_count(self, db_session: Session, default_specialty):
         """Test counting practitioners belonging to a practice."""
         practice_data = PracticeCreate(name="Counting Practice")
         practice_obj = practice_crud.create(db_session, obj_in=practice_data)
@@ -317,7 +317,7 @@ class TestPracticeCRUD:
                 db_session,
                 obj_in=PractitionerCreate(
                     name=f"Dr. Count {i+1}",
-                    specialty="General",
+                    specialty_id=default_specialty.id,
                     practice_id=practice_obj.id,
                 ),
             )
@@ -338,7 +338,7 @@ class TestPracticeCRUD:
         count = practice_crud.get_practitioner_count(db_session, 99999)
         assert count == 0
 
-    def test_get_with_practitioners(self, db_session: Session):
+    def test_get_with_practitioners(self, db_session: Session, default_specialty):
         """Test getting practice with practitioners loaded."""
         practice_data = PracticeCreate(name="Full Practice")
         practice_obj = practice_crud.create(db_session, obj_in=practice_data)
@@ -348,7 +348,7 @@ class TestPracticeCRUD:
                 db_session,
                 obj_in=PractitionerCreate(
                     name=f"Dr. Full {i+1}",
-                    specialty="General",
+                    specialty_id=default_specialty.id,
                     practice_id=practice_obj.id,
                 ),
             )

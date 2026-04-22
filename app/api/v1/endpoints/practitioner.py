@@ -49,35 +49,25 @@ def read_practitioners(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = Query(default=100, le=100),
-    specialty: Optional[str] = Query(None),
+    specialty_id: Optional[int] = Query(None),
     practice_id: Optional[int] = Query(None),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
-    """Retrieve practitioners with optional filtering by specialty or practice."""
+    """Retrieve practitioners with optional filtering by specialty_id or practice."""
     with handle_database_errors(request=request):
+        filters: dict = {}
         if practice_id:
-            practitioners_list = practitioner.query(
-                db,
-                filters={"practice_id": practice_id},
-                skip=skip,
-                limit=limit,
-                load_relations=["practice_rel"],
-            )
-        elif specialty:
-            practitioners_list = practitioner.query(
-                db,
-                filters={"specialty": specialty},
-                skip=skip,
-                limit=limit,
-                load_relations=["practice_rel"],
-            )
-        else:
-            practitioners_list = practitioner.query(
-                db,
-                skip=skip,
-                limit=limit,
-                load_relations=["practice_rel"],
-            )
+            filters["practice_id"] = practice_id
+        if specialty_id:
+            filters["specialty_id"] = specialty_id
+
+        practitioners_list = practitioner.query(
+            db,
+            filters=filters or None,
+            skip=skip,
+            limit=limit,
+            load_relations=["practice_rel", "specialty_rel"],
+        )
 
         # Populate practice_name from eagerly-loaded relationship
         for p in practitioners_list:
@@ -111,6 +101,7 @@ def read_practitioner(
                 "immunizations",
                 "vitals",
                 "practice_rel",
+                "specialty_rel",
             ],
         )
         handle_not_found(practitioner_obj, "Practitioner", request)
@@ -176,13 +167,3 @@ def search_practitioners_by_name(
     with handle_database_errors(request=request):
         practitioners = practitioner.search_by_name(db, name=name)
         return practitioners
-
-
-@router.get("/specialties")
-def get_all_specialties(
-    db: Session = Depends(deps.get_db),
-    current_user_id: int = Depends(deps.get_current_user_id),
-) -> Any:
-    """Get all unique medical specialties from the database."""
-    specialties = practitioner.get_all_specialties(db)
-    return {"specialties": specialties}

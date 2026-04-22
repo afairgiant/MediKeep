@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session, joinedload
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
 from app.models.models import (
+    Medication,
+    Practitioner,
     Treatment,
     TreatmentEncounter,
     TreatmentEquipment,
@@ -130,6 +132,17 @@ class CRUDTreatment(
 # =============================================================================
 
 
+_TREATMENT_MEDICATION_EAGER_OPTIONS = (
+    joinedload(TreatmentMedication.medication)
+    .joinedload(Medication.practitioner)
+    .joinedload(Practitioner.specialty_rel),
+    joinedload(TreatmentMedication.specific_prescriber).joinedload(
+        Practitioner.specialty_rel
+    ),
+    joinedload(TreatmentMedication.specific_pharmacy),
+)
+
+
 class CRUDTreatmentMedication(
     CRUDBase[TreatmentMedication, TreatmentMedicationCreate, TreatmentMedicationUpdate]
 ):
@@ -144,11 +157,7 @@ class CRUDTreatmentMedication(
         """Get all medication relationships for a specific treatment."""
         return (
             db.query(self.model)
-            .options(
-                joinedload(TreatmentMedication.medication),
-                joinedload(TreatmentMedication.specific_prescriber),
-                joinedload(TreatmentMedication.specific_pharmacy),
-            )
+            .options(*_TREATMENT_MEDICATION_EAGER_OPTIONS)
             .filter(self.model.treatment_id == treatment_id)
             .all()
         )
@@ -159,11 +168,7 @@ class CRUDTreatmentMedication(
         """Get all treatment relationships for a specific medication."""
         return (
             db.query(self.model)
-            .options(
-                joinedload(TreatmentMedication.medication),
-                joinedload(TreatmentMedication.specific_prescriber),
-                joinedload(TreatmentMedication.specific_pharmacy),
-            )
+            .options(*_TREATMENT_MEDICATION_EAGER_OPTIONS)
             .filter(self.model.medication_id == medication_id)
             .all()
         )

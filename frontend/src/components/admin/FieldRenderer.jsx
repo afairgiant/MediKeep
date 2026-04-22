@@ -199,22 +199,6 @@ const FieldRenderer = ({
     );
   }
 
-  // Hide the legacy practitioner.specialty string — it's dual-written from
-  // specialty_id during PR1 and scheduled for removal in PR2.
-  if (field.name === 'specialty' && modelName === 'practitioner') {
-    return (
-      <div className="field-value readonly">
-        {value || '—'}
-        <small className="field-note">
-          {t(
-            'fieldRenderer.legacySpecialty',
-            'Legacy field — managed via Specialty dropdown'
-          )}
-        </small>
-      </div>
-    );
-  }
-
   // specialty_name is a computed/read-only projection of specialty_rel.name.
   if (field.name === 'specialty_name') {
     return (
