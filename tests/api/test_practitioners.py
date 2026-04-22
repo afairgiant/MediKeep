@@ -221,6 +221,7 @@ class TestPractitionerAPI:
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Dr. Sarah Johnson"
+        assert data["specialty_id"] == default_specialty.id
         assert data["practice"] == "City Medical Center"
         assert data["email"] == "sarah.johnson@citymed.com"
         assert data["rating"] == 4.8

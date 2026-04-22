@@ -612,30 +612,17 @@ const BaseMedicalForm = ({
 
         case 'specialty-select':
           return (
-            <div>
-              <Text size="sm" fw={500} mb={5}>
-                {label}
-                {required && <span style={{ color: 'red' }}> *</span>}
-              </Text>
-              {description && (
-                <Text size="xs" c="dimmed" mb={5}>
-                  {description}
-                </Text>
-              )}
-              <SpecialtySelect
-                value={formData[name]}
-                onChange={next =>
-                  onInputChange({ target: { name, value: next } })
-                }
-                placeholder={placeholder}
-                hasError={Boolean(fieldErrors[name])}
-              />
-              {fieldErrors[name] && (
-                <Text size="xs" c="red" mt={4}>
-                  {fieldErrors[name]}
-                </Text>
-              )}
-            </div>
+            <SpecialtySelect
+              value={formData[name]}
+              onChange={next =>
+                onInputChange({ target: { name, value: next } })
+              }
+              label={label}
+              description={description}
+              required={required}
+              placeholder={placeholder}
+              error={fieldErrors[name] || null}
+            />
           );
 
         case 'rating':

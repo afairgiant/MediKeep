@@ -314,6 +314,7 @@ class Practitioner(PractitionerBase):
         {
             "id": 1,
             "name": "Dr. John Smith",
+            "specialty_id": 3,
             "specialty": "Cardiology",
             "practice_name": "City General Hospital"
         }

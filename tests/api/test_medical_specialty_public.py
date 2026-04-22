@@ -1,6 +1,6 @@
-"""API tests for the non-admin /medical-specialties router added in PR2.
+"""API tests for the non-admin /medical-specialties router.
 
-Covers list, create (including dedup), and per-user rate limiting.
+Covers list and create, including case-insensitive name dedup.
 """
 from fastapi.testclient import TestClient
 

@@ -84,6 +84,15 @@ def test_db_engine():
         echo=False,  # Set to True for SQL debugging
     )
 
+    # SQLite defaults to foreign_keys=OFF, which silently hides FK violations
+    # (e.g. a bogus specialty_id). Production Postgres enforces FKs, so turn
+    # them on for every test connection to keep behavior aligned.
+    @event.listens_for(engine, "connect")
+    def _enable_sqlite_foreign_keys(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
 

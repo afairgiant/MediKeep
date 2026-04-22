@@ -10,7 +10,7 @@ Create is rate-limited per user to prevent form-abuse spam since this is the
 only write path non-admins have.
 """
 import time
-from collections import defaultdict, deque
+from collections import deque
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -45,20 +45,30 @@ class _UserRateLimiter:
     def __init__(self, max_requests: int, window_seconds: int):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self.requests: Dict[int, deque] = defaultdict(deque)
+        # Plain dict — entries are only created when we actually record a
+        # request, and pruned-to-empty entries are deleted so idle users
+        # don't accumulate forever.
+        self.requests: Dict[int, deque] = {}
 
     def allow(self, user_id: int) -> bool:
         now = time.time()
-        window = self.requests[user_id]
-        while window and window[0] <= now - self.window_seconds:
-            window.popleft()
+        window = self.requests.get(user_id)
+        if window is not None:
+            while window and window[0] <= now - self.window_seconds:
+                window.popleft()
+            if not window:
+                del self.requests[user_id]
+                window = None
+        if window is None:
+            window = deque()
         if len(window) < self.max_requests:
             window.append(now)
+            self.requests[user_id] = window
             return True
         return False
 
     def retry_after(self, user_id: int) -> int:
-        window = self.requests[user_id]
+        window = self.requests.get(user_id)
         if not window:
             return 0
         return max(1, int(window[0] + self.window_seconds - time.time()))
@@ -97,23 +107,25 @@ def create_or_get_specialty(
     """
     Create a new specialty or return an existing one by case-insensitive name.
 
-    Rate-limited per user. Responds 200 when an existing specialty is
-    matched and 201 when a new row is inserted so the frontend can treat
-    both uniformly (select the returned row by id).
+    The rate limit only counts actual creates — name matches short-circuit
+    before consuming a slot so users aren't punished for repeatedly
+    requesting an already-known specialty. Responds 200 when an existing
+    specialty is matched and 201 when a new row is inserted so the
+    frontend can treat both uniformly (select the returned row by id).
     """
-    if not _create_limiter.allow(current_user_id):
-        retry_after = _create_limiter.retry_after(current_user_id)
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Too many specialty create requests. Try again later.",
-            headers={"Retry-After": str(retry_after)},
-        )
-
     with handle_database_errors(request=request):
         existing = medical_specialty.get_by_name(db, name=specialty_in.name)
         if existing:
             response.status_code = status.HTTP_200_OK
             return existing
+
+        if not _create_limiter.allow(current_user_id):
+            retry_after = _create_limiter.retry_after(current_user_id)
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many specialty create requests. Try again later.",
+                headers={"Retry-After": str(retry_after)},
+            )
 
         created = medical_specialty.create(db, obj_in=specialty_in)
 

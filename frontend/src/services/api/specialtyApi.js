@@ -6,7 +6,13 @@ const MIGRATION_FLAG_KEY = 'customMedicalSpecialtiesMigratedAt';
 
 class SpecialtyApi {
   async list() {
-    return apiService.get('/medical-specialties/');
+    const items = await apiService.get('/medical-specialties/');
+    if (!Array.isArray(items)) {
+      throw new Error(
+        `specialtyApi.list: expected array, got ${typeof items}`
+      );
+    }
+    return items;
   }
 
   async create({ name, description }) {
@@ -65,7 +71,7 @@ class SpecialtyApi {
         // Abort on auth failure so we retry next time the user loads the
         // app while authenticated. All other errors are per-item and
         // shouldn't prevent the remaining names from migrating.
-        if (err?.message?.includes('401')) {
+        if (/401|unauthorized/i.test(err?.message || '')) {
           return;
         }
         logger.warn(

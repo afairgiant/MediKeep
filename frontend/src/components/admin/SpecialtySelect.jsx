@@ -13,6 +13,10 @@ const SpecialtySelect = ({
   disabled,
   placeholder,
   hasError,
+  label,
+  description,
+  required,
+  error,
 }) => {
   const { t } = useTranslation(['admin', 'common', 'shared']);
   const [specialties, setSpecialties] = useState([]);
@@ -27,7 +31,7 @@ const SpecialtySelect = ({
     try {
       await specialtyApi.migrateLegacyCustomSpecialties();
       const items = await specialtyApi.list();
-      setSpecialties(Array.isArray(items) ? items : []);
+      setSpecialties(items);
     } catch (err) {
       logger.error(
         'specialty_select_load_error',
@@ -111,7 +115,11 @@ const SpecialtySelect = ({
           placeholder ||
           t('admin:practitioner.specialtyPlaceholder', 'Select a specialty')
         }
-        error={hasError}
+        label={label}
+        description={description}
+        required={required}
+        withAsterisk={required}
+        error={error || hasError || null}
         searchable
         clearable
       />

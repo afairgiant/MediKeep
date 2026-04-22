@@ -170,9 +170,7 @@ class TestPractitionerCRUD:
         assert practitioner is not None
         assert practitioner.name == "Dr. New Doctor"
 
-    def test_create_if_not_exists_returns_existing(
-        self, db_session: Session, db_session_clean=None
-    ):
+    def test_create_if_not_exists_returns_existing(self, db_session: Session):
         orthopedics = specialty_crud.create(
             db_session, obj_in=MedicalSpecialtyCreate(name="Orthopedics")
         )
