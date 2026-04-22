@@ -107,35 +107,36 @@ def create_or_get_specialty(
     """
     Create a new specialty or return an existing one by case-insensitive name.
 
-    The rate limit only counts actual creates — name matches short-circuit
-    before consuming a slot so users aren't punished for repeatedly
-    requesting an already-known specialty. Responds 200 when an existing
-    specialty is matched and 201 when a new row is inserted so the
-    frontend can treat both uniformly (select the returned row by id).
+    Delegates to ``medical_specialty.get_or_create`` so concurrent creates
+    resolve via its IntegrityError fallback instead of racing here.
+    Responds 200 when an existing specialty is matched and 201 when a new
+    row is inserted so the frontend can treat both uniformly (select the
+    returned row by id).
     """
+    if not _create_limiter.allow(current_user_id):
+        retry_after = _create_limiter.retry_after(current_user_id)
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many specialty create requests. Try again later.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
     with handle_database_errors(request=request):
-        existing = medical_specialty.get_by_name(db, name=specialty_in.name)
-        if existing:
+        specialty, created = medical_specialty.get_or_create(
+            db, obj_in=specialty_in
+        )
+
+        if not created:
             response.status_code = status.HTTP_200_OK
-            return existing
-
-        if not _create_limiter.allow(current_user_id):
-            retry_after = _create_limiter.retry_after(current_user_id)
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Too many specialty create requests. Try again later.",
-                headers={"Retry-After": str(retry_after)},
-            )
-
-        created = medical_specialty.create(db, obj_in=specialty_in)
+            return specialty
 
         safe_log_activity(
             db=db,
             action=ActionType.CREATED,
             entity_type=EntityType.MEDICAL_SPECIALTY,
-            entity_obj=created,
+            entity_obj=specialty,
             user_id=current_user_id,
             request=request,
         )
 
-        return created
+        return specialty

@@ -64,13 +64,19 @@ class TestMedicalSpecialtyCRUD:
         first = specialty_crud.create(
             db_session, obj_in=MedicalSpecialtyCreate(name="Pediatrics")
         )
-        second = specialty_crud.get_or_create(db_session, name="pediatrics")
+        second, was_created = specialty_crud.get_or_create(
+            db_session, obj_in=MedicalSpecialtyCreate(name="pediatrics")
+        )
         assert second.id == first.id
+        assert was_created is False
 
     def test_get_or_create_creates_new(self, db_session: Session):
-        created = specialty_crud.get_or_create(db_session, name="Radiology")
+        created, was_created = specialty_crud.get_or_create(
+            db_session, obj_in=MedicalSpecialtyCreate(name="Radiology")
+        )
         assert created.id is not None
         assert created.name == "Radiology"
+        assert was_created is True
 
     def test_update_specialty(self, db_session: Session):
         spec = specialty_crud.create(

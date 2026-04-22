@@ -80,8 +80,8 @@ const SpecialtySelect = ({
       notifications.show({
         title: t('shared:labels.success', 'Success'),
         message: t(
-          'admin:practitioner.specialtyCreated',
-          'Specialty created'
+          'admin:practitioner.specialtySaved',
+          'Specialty ready to use'
         ),
         color: 'green',
       });

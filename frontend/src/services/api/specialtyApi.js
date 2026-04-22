@@ -61,6 +61,7 @@ class SpecialtyApi {
     }
 
     let migrated = 0;
+    const failed = [];
     for (const rawName of names) {
       const name = typeof rawName === 'string' ? rawName.trim() : '';
       if (!name) continue;
@@ -74,6 +75,7 @@ class SpecialtyApi {
         if (/401|unauthorized/i.test(err?.message || '')) {
           return;
         }
+        failed.push(name);
         logger.warn(
           'legacy_specialty_migration_item_failed',
           'Failed to migrate a legacy specialty',
@@ -85,9 +87,21 @@ class SpecialtyApi {
     logger.info(
       'legacy_specialty_migration_complete',
       'Migrated legacy custom specialties from localStorage',
-      { migrated, total: names.length, component: 'SpecialtyApi' }
+      {
+        migrated,
+        failed: failed.length,
+        total: names.length,
+        component: 'SpecialtyApi',
+      }
     );
-    markComplete();
+
+    if (failed.length === 0) {
+      markComplete();
+    } else {
+      // Retain failed names so a future run can retry them; do not flip
+      // the migration flag or the retries would never happen.
+      localStorage.setItem(LEGACY_LOCALSTORAGE_KEY, JSON.stringify(failed));
+    }
   }
 }
 

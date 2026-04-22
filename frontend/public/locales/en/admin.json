@@ -519,8 +519,8 @@
   },
   "practitioner": {
     "quickAddSpecialty": "+ Add new specialty…",
-    "specialtyCreated": "Specialty created",
-    "specialtyPlaceholder": "Select a specialty"
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   },
   "settings": {
     "dataRetention": {

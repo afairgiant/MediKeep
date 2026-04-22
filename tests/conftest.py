@@ -133,14 +133,21 @@ def db_session(test_db_engine) -> Generator[Session, None, None]:
 
     yield session
 
-    # Clean up: Delete all data but keep schema intact
-    # This is faster than dropping/recreating tables and avoids FK constraint issues
-    session.rollback()  # Rollback any uncommitted changes
+    # Clean up: delete all data but keep schema intact. FK enforcement is
+    # turned on for test execution (see test_db_engine) but the users<->patients
+    # cycle makes topological deletion impossible, so drop FKs just for the
+    # teardown sweep and restore immediately after.
+    session.rollback()
 
-    # Delete all rows from all tables (in reverse order to handle FKs)
-    for table in reversed(Base.metadata.sorted_tables):
-        session.execute(table.delete())
-    session.commit()
+    from sqlalchemy import text as _sql_text
+
+    session.execute(_sql_text("PRAGMA foreign_keys=OFF"))
+    try:
+        for table in reversed(Base.metadata.sorted_tables):
+            session.execute(table.delete())
+        session.commit()
+    finally:
+        session.execute(_sql_text("PRAGMA foreign_keys=ON"))
 
     session.close()
 
@@ -321,10 +328,8 @@ def sample_practitioner_data(default_specialty):
         "specialty_id": default_specialty.id,
         "phone_number": "555-0123",
         "email": "dr.test@example.com",
-        "address": "123 Medical Center Dr",
         "website": "https://drtest.com",
         "rating": 4.5,
-        "status": "active",
     }
 
 

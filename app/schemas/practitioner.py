@@ -61,6 +61,46 @@ def _validate_email_value(v: Optional[str]) -> Optional[str]:
     return email
 
 
+_WEBSITE_URL_PATTERN = re.compile(
+    r"^https?://"  # http:// or https://
+    r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
+    r"localhost|"  # localhost...
+    r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+    r"(?::\d+)?"  # optional port
+    r"(?:/?|[/?]\S+)$",
+    re.IGNORECASE,
+)
+
+
+def _validate_website_value(v: Optional[str]) -> Optional[str]:
+    """Shared website URL validation; returns cleaned https-prefixed URL or None."""
+    if v is None or v.strip() == "":
+        return None
+
+    cleaned_url = v.strip()
+    if not cleaned_url.startswith(("http://", "https://")):
+        cleaned_url = "https://" + cleaned_url
+
+    if not _WEBSITE_URL_PATTERN.match(cleaned_url):
+        raise ValueError("Please enter a valid website URL")
+
+    return cleaned_url
+
+
+def _validate_rating_value(v):
+    """Shared rating validation; returns rating rounded to 1 decimal or None."""
+    if v is None:
+        return None
+
+    if not isinstance(v, (int, float)):
+        raise ValueError("Rating must be a number")
+
+    if v < 0 or v > 5:
+        raise ValueError("Rating must be between 0 and 5")
+
+    return round(float(v), 1)
+
+
 class PractitionerBase(BaseModel):
     """
     Base Practitioner schema with common fields.
@@ -120,68 +160,14 @@ class PractitionerBase(BaseModel):
     @field_validator("website")
     @classmethod
     def validate_website(cls, v):
-        """
-        Validate website URL field.
-
-        Args:
-            v: The website URL value to validate
-
-        Returns:
-            Cleaned website URL
-
-        Raises:
-            ValueError: If website URL format is invalid
-        """
-        if v is None or v.strip() == "":
-            return None
-
-        # Basic URL validation
-        url_pattern = re.compile(
-            r"^https?://"  # http:// or https://
-            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
-            r"localhost|"  # localhost...
-            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
-            r"(?::\d+)?"  # optional port
-            r"(?:/?|[/?]\S+)$",
-            re.IGNORECASE,
-        )
-
-        cleaned_url = v.strip()
-
-        # Add https:// if no protocol specified
-        if not cleaned_url.startswith(("http://", "https://")):
-            cleaned_url = "https://" + cleaned_url
-
-        if not url_pattern.match(cleaned_url):
-            raise ValueError("Please enter a valid website URL")
-
-        return cleaned_url
+        """Validate website URL using shared helper."""
+        return _validate_website_value(v)
 
     @field_validator("rating")
     @classmethod
     def validate_rating(cls, v):
-        """
-        Validate rating field.
-
-        Args:
-            v: The rating value to validate
-
-        Returns:
-            Validated rating
-
-        Raises:
-            ValueError: If rating is not between 0 and 5
-        """
-        if v is None:
-            return None
-
-        if not isinstance(v, (int, float)):
-            raise ValueError("Rating must be a number")
-
-        if v < 0 or v > 5:
-            raise ValueError("Rating must be between 0 and 5")
-
-        return round(float(v), 1)  # Round to 1 decimal place
+        """Validate rating using shared helper."""
+        return _validate_rating_value(v)
 
 
 class PractitionerCreate(PractitionerBase):
@@ -261,46 +247,14 @@ class PractitionerUpdate(BaseModel):
     @field_validator("website")
     @classmethod
     def validate_website_update(cls, v):
-        """Validate website URL if provided."""
-        if v is None or v.strip() == "":
-            return None
-
-        # Basic URL validation
-        url_pattern = re.compile(
-            r"^https?://"  # http:// or https://
-            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
-            r"localhost|"  # localhost...
-            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
-            r"(?::\d+)?"  # optional port
-            r"(?:/?|[/?]\S+)$",
-            re.IGNORECASE,
-        )
-
-        cleaned_url = v.strip()
-
-        # Add https:// if no protocol specified
-        if not cleaned_url.startswith(("http://", "https://")):
-            cleaned_url = "https://" + cleaned_url
-
-        if not url_pattern.match(cleaned_url):
-            raise ValueError("Please enter a valid website URL")
-
-        return cleaned_url
+        """Validate website URL if provided using shared helper."""
+        return _validate_website_value(v)
 
     @field_validator("rating")
     @classmethod
     def validate_rating_update(cls, v):
-        """Validate rating if provided."""
-        if v is None:
-            return None
-
-        if not isinstance(v, (int, float)):
-            raise ValueError("Rating must be a number")
-
-        if v < 0 or v > 5:
-            raise ValueError("Rating must be between 0 and 5")
-
-        return round(float(v), 1)  # Round to 1 decimal place
+        """Validate rating if provided using shared helper."""
+        return _validate_rating_value(v)
 
 
 class Practitioner(PractitionerBase):
