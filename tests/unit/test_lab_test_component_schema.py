@@ -481,3 +481,34 @@ class TestUpdateCrossFieldValidation:
         """Updating value (not clearing) without result_type is fine."""
         update = LabTestComponentUpdate(value=42.0)
         assert update.value == 42.0
+
+
+class TestUpdateCanonicalTestNameNormalization:
+    """Empty / whitespace canonical_test_name must normalize to None on update.
+
+    Regression: the TestComponentEditModal always submits
+    ``canonical_test_name: ''`` when the user hasn't linked to a standard test.
+    Without this validator, the DB stored "" and the trend-grouping query
+    excluded the row from its own trend, delinking it from sibling components.
+    """
+
+    def test_empty_string_normalized_to_none(self):
+        update = LabTestComponentUpdate(canonical_test_name="")
+        assert update.canonical_test_name is None
+
+    def test_whitespace_only_normalized_to_none(self):
+        update = LabTestComponentUpdate(canonical_test_name="   ")
+        assert update.canonical_test_name is None
+
+    def test_none_stays_none(self):
+        update = LabTestComponentUpdate(canonical_test_name=None)
+        assert update.canonical_test_name is None
+
+    def test_valid_value_preserved_and_stripped(self):
+        update = LabTestComponentUpdate(canonical_test_name="  Hemoglobin  ")
+        assert update.canonical_test_name == "Hemoglobin"
+
+    def test_unset_field_stays_unset(self):
+        """If the caller doesn't include the field, exclude_unset still skips it."""
+        update = LabTestComponentUpdate(value=10.0)
+        assert "canonical_test_name" not in update.model_dump(exclude_unset=True)

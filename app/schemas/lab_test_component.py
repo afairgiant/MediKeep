@@ -394,6 +394,25 @@ class LabTestComponentUpdate(BaseModel):
             return normalized
         return v
 
+    @field_validator("canonical_test_name")
+    @classmethod
+    def validate_canonical_test_name(cls, v):
+        """Mirror the Create-side validator: strip, treat empty as None.
+
+        Without this, an edit form submitting "" overwrites NULL and breaks
+        the trend grouping query that checks ``canonical_test_name IS NULL``.
+        """
+        if v is None:
+            return None
+        stripped = v.strip()
+        if not stripped:
+            return None
+        if len(stripped) > LAB_TEST_COMPONENT_LIMITS["MAX_TEST_NAME_LENGTH"]:
+            raise ValueError(
+                f"Canonical test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters"
+            )
+        return stripped
+
     @model_validator(mode="after")
     def validate_ref_range(self):
         """Validate that ref_range_max is greater than ref_range_min"""

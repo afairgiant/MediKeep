@@ -777,3 +777,122 @@ class TestUnitScopedTrending:
         assert set(by_unit) == {"mg/L", "mmol/L"}
         assert by_unit["mg/L"].reading_count == 2
         assert by_unit["mmol/L"].reading_count == 1
+
+
+class TestCanonicalTestNameEmptyStringFallback:
+    """
+    Components with canonical_test_name equal to "" must behave the same as
+    NULL in the trend-grouping query — both should fall back to matching on
+    raw test_name. The sync service intentionally writes "" to mark
+    "processed but unmatched" (see app/services/test_library_sync.py), and
+    the TestComponentEditModal previously submitted "" on save.
+
+    Pre-fix regression: an edited custom-named component had canonical="" and
+    was excluded from its own trend, breaking the chart and delinking it from
+    sibling components with canonical=NULL.
+    """
+
+    @pytest.fixture
+    def test_patient(self, db_session: Session, test_user):
+        patient_data = PatientCreate(
+            first_name="Canon",
+            last_name="Tester",
+            birth_date=date(1990, 1, 1),
+            gender="F",
+            address="Canonical Ave",
+        )
+        return patient_crud.create_for_user(
+            db_session, user_id=test_user.id, patient_data=patient_data
+        )
+
+    @pytest.fixture
+    def seeded_custom_and_canonical(self, db_session: Session, test_patient):
+        """Seed three components sharing test_name='MyCustomTest' in distinct states.
+
+        - null_comp: canonical_test_name = NULL (newly created, never synced)
+        - empty_comp: canonical_test_name = "" (processed, no library match;
+          also the state produced by the edit modal pre-fix)
+        - linked_comp: canonical_test_name = "Hemoglobin" (linked to standard)
+        """
+        lab = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=test_patient.id,
+                test_name="Custom Panel",
+                test_category="blood work",
+                status="completed",
+                completed_date=date(2026, 1, 10),
+            ),
+        )
+        null_comp = lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lab.id,
+                test_name="MyCustomTest",
+                value=10.0,
+                unit="mg/dL",
+            ),
+        )
+        empty_comp = lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lab.id,
+                test_name="MyCustomTest",
+                value=20.0,
+                unit="mg/dL",
+            ),
+        )
+        # Bypass the schema validator to simulate the sync service writing ""
+        # directly to the column (the schema now normalizes "" -> None, so we
+        # can't produce this state via the ORM's update path).
+        db_session.query(LabTestComponent).filter(
+            LabTestComponent.id == empty_comp.id
+        ).update({LabTestComponent.canonical_test_name: ""})
+        db_session.commit()
+        db_session.refresh(empty_comp)
+        assert empty_comp.canonical_test_name == ""
+
+        linked_comp = lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(
+                lab_result_id=lab.id,
+                test_name="MyCustomTest",  # Same raw name as the other two
+                value=14.0,
+                unit="g/dL",
+                canonical_test_name="Hemoglobin",
+            ),
+        )
+        return {
+            "patient": test_patient,
+            "null": null_comp,
+            "empty": empty_comp,
+            "linked": linked_comp,
+        }
+
+    def test_query_for_custom_name_includes_null_and_empty(
+        self, db_session: Session, seeded_custom_and_canonical
+    ):
+        """Querying by the custom test_name returns both the NULL and the
+        empty-canonical components, excluding the one linked elsewhere."""
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=seeded_custom_and_canonical["patient"].id,
+            test_name="MyCustomTest",
+        )
+        returned_ids = {r.id for r in rows}
+        assert seeded_custom_and_canonical["null"].id in returned_ids
+        assert seeded_custom_and_canonical["empty"].id in returned_ids
+        assert seeded_custom_and_canonical["linked"].id not in returned_ids
+
+    def test_query_for_canonical_name_excludes_fallback_rows(
+        self, db_session: Session, seeded_custom_and_canonical
+    ):
+        """Querying by the canonical name returns only the linked component,
+        not the NULL/empty ones that share the same raw test_name."""
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=seeded_custom_and_canonical["patient"].id,
+            test_name="Hemoglobin",
+        )
+        returned_ids = {r.id for r in rows}
+        assert returned_ids == {seeded_custom_and_canonical["linked"].id}
