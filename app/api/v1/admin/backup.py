@@ -21,6 +21,14 @@ from app.core.logging.helpers import (
     log_endpoint_error,
     log_security_event,
 )
+from app.core.persisted_settings import (
+    KEY_ALLOW_USER_REGISTRATION,
+    KEY_BACKUP_MAX_COUNT,
+    KEY_BACKUP_MIN_COUNT,
+    KEY_BACKUP_RETENTION_DAYS,
+    KEY_TRASH_RETENTION_DAYS,
+    persist_setting,
+)
 from app.models.models import User
 from app.services.backup_scheduler_service import (
     TIME_FORMAT_RE,
@@ -625,6 +633,7 @@ async def update_retention_settings(
     settings_update: RetentionSettingsUpdate,
     request: Request,
     current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
 ):
     """Update admin settings including retention and user management."""
     try:
@@ -636,6 +645,9 @@ async def update_retention_settings(
                     status_code=400, detail="Backup retention days must be at least 1"
                 )
             settings.BACKUP_RETENTION_DAYS = settings_update.backup_retention_days
+            persist_setting(
+                db, KEY_BACKUP_RETENTION_DAYS, settings_update.backup_retention_days
+            )
             updated_settings["backup_retention_days"] = (
                 settings_update.backup_retention_days
             )
@@ -646,6 +658,9 @@ async def update_retention_settings(
                     status_code=400, detail="Trash retention days must be at least 1"
                 )
             settings.TRASH_RETENTION_DAYS = settings_update.trash_retention_days
+            persist_setting(
+                db, KEY_TRASH_RETENTION_DAYS, settings_update.trash_retention_days
+            )
             updated_settings["trash_retention_days"] = (
                 settings_update.trash_retention_days
             )
@@ -667,6 +682,7 @@ async def update_retention_settings(
                     detail="Minimum backup count must be less than or equal to maximum backup count",
                 )
             settings.BACKUP_MIN_COUNT = settings_update.backup_min_count
+            persist_setting(db, KEY_BACKUP_MIN_COUNT, settings_update.backup_min_count)
             updated_settings["backup_min_count"] = settings_update.backup_min_count
 
         if settings_update.backup_max_count is not None:
@@ -686,10 +702,16 @@ async def update_retention_settings(
                     detail="Maximum backup count must be greater than or equal to minimum backup count",
                 )
             settings.BACKUP_MAX_COUNT = settings_update.backup_max_count
+            persist_setting(db, KEY_BACKUP_MAX_COUNT, settings_update.backup_max_count)
             updated_settings["backup_max_count"] = settings_update.backup_max_count
 
         if settings_update.allow_user_registration is not None:
             settings.ALLOW_USER_REGISTRATION = settings_update.allow_user_registration
+            persist_setting(
+                db,
+                KEY_ALLOW_USER_REGISTRATION,
+                settings_update.allow_user_registration,
+            )
             updated_settings["allow_user_registration"] = (
                 settings_update.allow_user_registration
             )
