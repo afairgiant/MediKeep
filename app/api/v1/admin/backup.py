@@ -728,11 +728,21 @@ async def update_retention_settings(
                 )
             )
 
-        # Phase 2: apply — every entry in `pending` has already been validated.
+        # Phase 2: persist — stage every row in a single transaction so a
+        # mid-loop failure can't leave system_settings half-written or drift
+        # from the in-memory `settings` object.
+        try:
+            for _, key, value, _ in pending:
+                persist_setting(db, key, value, commit=False)
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+
+        # Phase 3: mirror to in-memory only after the DB transaction committed.
         updated_settings = {}
         for attr, key, value, response_name in pending:
             setattr(settings, attr, value)
-            persist_setting(db, key, value)
             updated_settings[response_name] = value
 
         if settings_update.allow_user_registration is not None:

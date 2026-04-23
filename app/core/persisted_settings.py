@@ -11,7 +11,7 @@ value is written to the DB, the DB wins on subsequent startups via
 """
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from sqlalchemy.orm import Session
 
@@ -43,12 +43,22 @@ def _serialize_bool(value: bool) -> str:
     return "true" if value else "false"
 
 
+def _require_positive_int(value: int) -> None:
+    if value < 1:
+        raise ValueError(f"must be >= 1, got {value}")
+
+
 @dataclass(frozen=True)
 class PersistedSetting:
     key: str
     attr: str
     parse: Callable[[str], Any]
     serialize: Callable[[Any], str]
+    # Optional semantic check applied after `parse` succeeds. Raise ValueError
+    # to reject the DB value (the in-memory default is kept instead). Used to
+    # defend `load_persisted_settings` against invalid rows that somehow
+    # bypassed API-level validation.
+    validate: Optional[Callable[[Any], None]] = None
 
 
 PERSISTED_SETTINGS: dict[str, PersistedSetting] = {
@@ -65,24 +75,28 @@ PERSISTED_SETTINGS: dict[str, PersistedSetting] = {
             attr="BACKUP_RETENTION_DAYS",
             parse=int,
             serialize=str,
+            validate=_require_positive_int,
         ),
         PersistedSetting(
             key=KEY_TRASH_RETENTION_DAYS,
             attr="TRASH_RETENTION_DAYS",
             parse=int,
             serialize=str,
+            validate=_require_positive_int,
         ),
         PersistedSetting(
             key=KEY_BACKUP_MIN_COUNT,
             attr="BACKUP_MIN_COUNT",
             parse=int,
             serialize=str,
+            validate=_require_positive_int,
         ),
         PersistedSetting(
             key=KEY_BACKUP_MAX_COUNT,
             attr="BACKUP_MAX_COUNT",
             parse=int,
             serialize=str,
+            validate=_require_positive_int,
         ),
     )
 }
@@ -111,6 +125,20 @@ def load_persisted_settings(db: Session) -> None:
                 },
             )
             continue
+        if entry.validate is not None:
+            try:
+                entry.validate(parsed)
+            except ValueError as exc:
+                logger.warning(
+                    "Skipping semantically invalid persisted setting",
+                    extra={
+                        LogFields.CATEGORY: "app",
+                        LogFields.EVENT: "persisted_setting_invalid",
+                        "setting_key": entry.key,
+                        LogFields.ERROR: str(exc),
+                    },
+                )
+                continue
         setattr(settings, entry.attr, parsed)
         logger.info(
             "Loaded persisted admin setting",
@@ -122,14 +150,17 @@ def load_persisted_settings(db: Session) -> None:
         )
 
 
-def persist_setting(db: Session, key: str, value: Any) -> None:
+def persist_setting(
+    db: Session, key: str, value: Any, commit: bool = True
+) -> None:
     """Persist a runtime-configurable setting to `system_settings`.
 
     Caller is responsible for updating the in-memory `settings.X` attribute;
-    this function only writes to the DB.
+    this function only writes to the DB. Pass `commit=False` to stage the
+    write as part of a larger transaction the caller commits itself.
     """
     try:
         entry = PERSISTED_SETTINGS[key]
     except KeyError as exc:
         raise KeyError(f"Unknown persisted setting key: {key}") from exc
-    system_setting.set_setting(db, key, entry.serialize(value))
+    system_setting.set_setting(db, key, entry.serialize(value), commit=commit)

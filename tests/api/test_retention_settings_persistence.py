@@ -129,6 +129,38 @@ class TestEndpointPersistsToDb:
         assert system_setting.get_setting(db_session, KEY_BACKUP_RETENTION_DAYS) is None
         assert system_setting.get_setting(db_session, KEY_BACKUP_MIN_COUNT) is None
 
+    def test_mid_loop_db_failure_rolls_back_all_rows(
+        self, admin_client, db_session, restore_settings, monkeypatch
+    ):
+        """A DB-level failure after the first row must not commit earlier rows
+        and must not mutate in-memory `settings` for any row."""
+        from app.api.v1.admin import backup as backup_module
+
+        call_count = {"n": 0}
+        real_persist = backup_module.persist_setting
+
+        def flaky_persist(db, key, value, commit=True):
+            call_count["n"] += 1
+            if call_count["n"] == 2:
+                raise RuntimeError("simulated DB failure")
+            return real_persist(db, key, value, commit=commit)
+
+        monkeypatch.setattr(backup_module, "persist_setting", flaky_persist)
+
+        before_retention = settings.BACKUP_RETENTION_DAYS
+        before_trash = settings.TRASH_RETENTION_DAYS
+
+        response = admin_client.post(
+            RETENTION_URL,
+            json={"backup_retention_days": 77, "trash_retention_days": 33},
+        )
+        assert response.status_code == 500
+
+        assert system_setting.get_setting(db_session, KEY_BACKUP_RETENTION_DAYS) is None
+        assert system_setting.get_setting(db_session, KEY_TRASH_RETENTION_DAYS) is None
+        assert settings.BACKUP_RETENTION_DAYS == before_retention
+        assert settings.TRASH_RETENTION_DAYS == before_trash
+
 
 class TestLoadPersistedSettings:
     """load_persisted_settings() rehydrates the in-memory Settings on startup."""
@@ -171,6 +203,18 @@ class TestLoadPersistedSettings:
         load_persisted_settings(db_session)
 
         assert settings.ALLOW_USER_REGISTRATION is True
+
+    def test_semantically_invalid_int_is_skipped(
+        self, db_session, restore_settings
+    ):
+        """A parseable-but-invalid row (e.g. BACKUP_RETENTION_DAYS=0) must be
+        ignored at startup so corrupt values can't override the default."""
+        system_setting.set_setting(db_session, KEY_BACKUP_RETENTION_DAYS, "0")
+        settings.BACKUP_RETENTION_DAYS = 30
+
+        load_persisted_settings(db_session)
+
+        assert settings.BACKUP_RETENTION_DAYS == 30
 
     def test_persist_setting_rejects_unknown_key(self, db_session, restore_settings):
         with pytest.raises(KeyError):
