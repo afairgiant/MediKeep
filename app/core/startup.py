@@ -123,6 +123,22 @@ async def startup_event():
     # Run data migrations (after users/database setup is complete)
     run_startup_data_migrations()
 
+    # Load admin-toggleable settings persisted in system_settings (e.g.
+    # allow_user_registration, backup/trash retention). The env-var defaults
+    # from app.core.config.Settings were already loaded at import time; any
+    # persisted value overrides them here.
+    try:
+        from app.core.persisted_settings import load_persisted_settings
+
+        db = SessionLocal()
+        try:
+            load_persisted_settings(db)
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"Could not load persisted admin settings: {e}")
+        # Non-fatal - app falls back to env-var defaults already in memory
+
     # Initialize standardized tests from LOINC
     try:
         from app.core.utils.test_initialization import ensure_tests_initialized

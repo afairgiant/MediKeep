@@ -22,7 +22,9 @@ class CRUDSystemSetting:
         setting = db.query(SystemSetting).filter(SystemSetting.key == key).first()
         return setting.value if setting else None
 
-    def set_setting(self, db: Session, key: str, value: str) -> SystemSetting:
+    def set_setting(
+        self, db: Session, key: str, value: str, commit: bool = True
+    ) -> SystemSetting:
         """
         Set a system setting value. Creates new or updates existing.
 
@@ -30,6 +32,9 @@ class CRUDSystemSetting:
             db: Database session
             key: Setting key
             value: Setting value
+            commit: If True (default) commit immediately. Set False to stage
+                the write inside a larger transaction; the caller is then
+                responsible for `db.commit()` / `db.rollback()`.
 
         Returns:
             SystemSetting object
@@ -44,8 +49,11 @@ class CRUDSystemSetting:
             setting = SystemSetting(key=key, value=value)
             db.add(setting)
 
-        db.commit()
-        db.refresh(setting)
+        if commit:
+            db.commit()
+            db.refresh(setting)
+        else:
+            db.flush()
         return setting
 
     def delete_setting(self, db: Session, key: str) -> bool:
