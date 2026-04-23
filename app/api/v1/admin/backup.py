@@ -637,19 +637,23 @@ async def update_retention_settings(
 ):
     """Update admin settings including retention and user management."""
     try:
-        updated_settings = {}
+        # Phase 1: validate every submitted field before any side effects.
+        # Staging changes first keeps the endpoint atomic: if any field fails
+        # validation, no earlier field gets persisted to system_settings.
+        pending: list[tuple[str, str, object, str]] = []
 
         if settings_update.backup_retention_days is not None:
             if settings_update.backup_retention_days < 1:
                 raise HTTPException(
                     status_code=400, detail="Backup retention days must be at least 1"
                 )
-            settings.BACKUP_RETENTION_DAYS = settings_update.backup_retention_days
-            persist_setting(
-                db, KEY_BACKUP_RETENTION_DAYS, settings_update.backup_retention_days
-            )
-            updated_settings["backup_retention_days"] = (
-                settings_update.backup_retention_days
+            pending.append(
+                (
+                    "BACKUP_RETENTION_DAYS",
+                    KEY_BACKUP_RETENTION_DAYS,
+                    settings_update.backup_retention_days,
+                    "backup_retention_days",
+                )
             )
 
         if settings_update.trash_retention_days is not None:
@@ -657,12 +661,13 @@ async def update_retention_settings(
                 raise HTTPException(
                     status_code=400, detail="Trash retention days must be at least 1"
                 )
-            settings.TRASH_RETENTION_DAYS = settings_update.trash_retention_days
-            persist_setting(
-                db, KEY_TRASH_RETENTION_DAYS, settings_update.trash_retention_days
-            )
-            updated_settings["trash_retention_days"] = (
-                settings_update.trash_retention_days
+            pending.append(
+                (
+                    "TRASH_RETENTION_DAYS",
+                    KEY_TRASH_RETENTION_DAYS,
+                    settings_update.trash_retention_days,
+                    "trash_retention_days",
+                )
             )
 
         if settings_update.backup_min_count is not None:
@@ -670,7 +675,6 @@ async def update_retention_settings(
                 raise HTTPException(
                     status_code=400, detail="Minimum backup count must be at least 1"
                 )
-            # Validate that min count is not greater than max count
             current_max = (
                 settings_update.backup_max_count
                 if settings_update.backup_max_count is not None
@@ -681,16 +685,20 @@ async def update_retention_settings(
                     status_code=400,
                     detail="Minimum backup count must be less than or equal to maximum backup count",
                 )
-            settings.BACKUP_MIN_COUNT = settings_update.backup_min_count
-            persist_setting(db, KEY_BACKUP_MIN_COUNT, settings_update.backup_min_count)
-            updated_settings["backup_min_count"] = settings_update.backup_min_count
+            pending.append(
+                (
+                    "BACKUP_MIN_COUNT",
+                    KEY_BACKUP_MIN_COUNT,
+                    settings_update.backup_min_count,
+                    "backup_min_count",
+                )
+            )
 
         if settings_update.backup_max_count is not None:
             if settings_update.backup_max_count < 1:
                 raise HTTPException(
                     status_code=400, detail="Maximum backup count must be at least 1"
                 )
-            # Validate that max count is greater than or equal to min count
             current_min = (
                 settings_update.backup_min_count
                 if settings_update.backup_min_count is not None
@@ -701,20 +709,33 @@ async def update_retention_settings(
                     status_code=400,
                     detail="Maximum backup count must be greater than or equal to minimum backup count",
                 )
-            settings.BACKUP_MAX_COUNT = settings_update.backup_max_count
-            persist_setting(db, KEY_BACKUP_MAX_COUNT, settings_update.backup_max_count)
-            updated_settings["backup_max_count"] = settings_update.backup_max_count
+            pending.append(
+                (
+                    "BACKUP_MAX_COUNT",
+                    KEY_BACKUP_MAX_COUNT,
+                    settings_update.backup_max_count,
+                    "backup_max_count",
+                )
+            )
 
         if settings_update.allow_user_registration is not None:
-            settings.ALLOW_USER_REGISTRATION = settings_update.allow_user_registration
-            persist_setting(
-                db,
-                KEY_ALLOW_USER_REGISTRATION,
-                settings_update.allow_user_registration,
+            pending.append(
+                (
+                    "ALLOW_USER_REGISTRATION",
+                    KEY_ALLOW_USER_REGISTRATION,
+                    settings_update.allow_user_registration,
+                    "allow_user_registration",
+                )
             )
-            updated_settings["allow_user_registration"] = (
-                settings_update.allow_user_registration
-            )
+
+        # Phase 2: apply — every entry in `pending` has already been validated.
+        updated_settings = {}
+        for attr, key, value, response_name in pending:
+            setattr(settings, attr, value)
+            persist_setting(db, key, value)
+            updated_settings[response_name] = value
+
+        if settings_update.allow_user_registration is not None:
             log_security_event(
                 logger,
                 "user_registration_toggled",

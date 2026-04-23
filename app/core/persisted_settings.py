@@ -31,7 +31,12 @@ KEY_BACKUP_MAX_COUNT = "backup_max_count"
 
 
 def _parse_bool(raw: str) -> bool:
-    return raw.strip().lower() == "true"
+    normalized = raw.strip().lower()
+    if normalized == "true":
+        return True
+    if normalized == "false":
+        return False
+    raise ValueError(f"Expected 'true' or 'false', got {raw!r}")
 
 
 def _serialize_bool(value: bool) -> str:

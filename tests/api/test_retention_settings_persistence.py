@@ -105,6 +105,30 @@ class TestEndpointPersistsToDb:
         assert response.status_code == 400
         assert system_setting.get_setting(db_session, KEY_BACKUP_RETENTION_DAYS) is None
 
+    def test_wrong_type_for_bool_rejected(
+        self, admin_client, db_session, restore_settings
+    ):
+        """Pydantic rejects non-bool for allow_user_registration; nothing persisted."""
+        response = admin_client.post(
+            RETENTION_URL, json={"allow_user_registration": "not-a-bool"}
+        )
+        assert response.status_code == 422
+        assert (
+            system_setting.get_setting(db_session, KEY_ALLOW_USER_REGISTRATION) is None
+        )
+
+    def test_mid_update_validation_failure_is_atomic(
+        self, admin_client, db_session, restore_settings
+    ):
+        """A valid field plus a later invalid field must not partially persist."""
+        response = admin_client.post(
+            RETENTION_URL,
+            json={"backup_retention_days": 7, "backup_min_count": 0},
+        )
+        assert response.status_code == 400
+        assert system_setting.get_setting(db_session, KEY_BACKUP_RETENTION_DAYS) is None
+        assert system_setting.get_setting(db_session, KEY_BACKUP_MIN_COUNT) is None
+
 
 class TestLoadPersistedSettings:
     """load_persisted_settings() rehydrates the in-memory Settings on startup."""
@@ -130,7 +154,7 @@ class TestLoadPersistedSettings:
         assert settings.ALLOW_USER_REGISTRATION is True
         assert settings.BACKUP_RETENTION_DAYS == 7
 
-    def test_malformed_value_is_skipped(self, db_session, restore_settings):
+    def test_malformed_int_is_skipped(self, db_session, restore_settings):
         """Bad stored data must not crash startup."""
         system_setting.set_setting(db_session, KEY_BACKUP_RETENTION_DAYS, "not-an-int")
         settings.BACKUP_RETENTION_DAYS = 30
@@ -138,6 +162,15 @@ class TestLoadPersistedSettings:
         load_persisted_settings(db_session)
 
         assert settings.BACKUP_RETENTION_DAYS == 30
+
+    def test_malformed_bool_is_skipped(self, db_session, restore_settings):
+        """Bool parser rejects non-'true'/'false' strings; the prior default is kept."""
+        system_setting.set_setting(db_session, KEY_ALLOW_USER_REGISTRATION, "nope")
+        settings.ALLOW_USER_REGISTRATION = True
+
+        load_persisted_settings(db_session)
+
+        assert settings.ALLOW_USER_REGISTRATION is True
 
     def test_persist_setting_rejects_unknown_key(self, db_session, restore_settings):
         with pytest.raises(KeyError):
