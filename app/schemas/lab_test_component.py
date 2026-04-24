@@ -394,6 +394,21 @@ class LabTestComponentUpdate(BaseModel):
             return normalized
         return v
 
+    @field_validator("canonical_test_name")
+    @classmethod
+    def validate_canonical_test_name(cls, v):
+        """Normalize empty/whitespace to None — grouping query treats only NULL as 'unlinked'."""
+        if v is None:
+            return None
+        stripped = v.strip()
+        if not stripped:
+            return None
+        if len(stripped) > LAB_TEST_COMPONENT_LIMITS["MAX_TEST_NAME_LENGTH"]:
+            raise ValueError(
+                f"Canonical test name must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_TEST_NAME_LENGTH']} characters"
+            )
+        return stripped
+
     @model_validator(mode="after")
     def validate_ref_range(self):
         """Validate that ref_range_max is greater than ref_range_min"""

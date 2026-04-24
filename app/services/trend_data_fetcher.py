@@ -302,8 +302,9 @@ class TrendDataFetcher:
         representative raw value (MAX) from the group so conventional casing
         (e.g. the capital L in 'mg/L') is preserved.
         """
+        # Treat empty / whitespace-only canonical_test_name as NULL (sync service uses "" for "no library match").
         name_expr = func.coalesce(
-            LabTestComponent.canonical_test_name,
+            func.nullif(func.trim(LabTestComponent.canonical_test_name), ""),
             LabTestComponent.test_name,
         )
         unit_group_expr = func.lower(
@@ -379,11 +380,15 @@ class TrendDataFetcher:
                     or_(
                         and_(
                             LabTestComponent.canonical_test_name.isnot(None),
-                            func.lower(LabTestComponent.canonical_test_name)
-                            == func.lower(test_name),
+                            func.trim(LabTestComponent.canonical_test_name) != "",
+                            func.lower(func.trim(LabTestComponent.canonical_test_name))
+                            == func.lower(func.trim(test_name)),
                         ),
                         and_(
-                            LabTestComponent.canonical_test_name.is_(None),
+                            or_(
+                                LabTestComponent.canonical_test_name.is_(None),
+                                func.trim(LabTestComponent.canonical_test_name) == "",
+                            ),
                             func.lower(func.rtrim(LabTestComponent.test_name, ",;: "))
                             == func.lower(test_name),
                         ),
