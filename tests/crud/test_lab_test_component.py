@@ -894,3 +894,20 @@ class TestCanonicalTestNameEmptyStringFallback:
         )
         returned_ids = {r.id for r in rows}
         assert returned_ids == {seeded_custom_and_canonical["linked"].id}
+
+    def test_whitespace_only_canonical_treated_as_empty(
+        self, db_session: Session, seeded_custom_and_canonical
+    ):
+        """Whitespace-only canonical_test_name falls back to test_name matching,
+        same as NULL / "". Defends against direct DB writes that bypass validators."""
+        db_session.query(LabTestComponent).filter(
+            LabTestComponent.id == seeded_custom_and_canonical["empty"].id
+        ).update({LabTestComponent.canonical_test_name: "   "})
+        db_session.commit()
+
+        rows = lab_test_component_crud.get_by_patient_and_test_name(
+            db_session,
+            patient_id=seeded_custom_and_canonical["patient"].id,
+            test_name="MyCustomTest",
+        )
+        assert seeded_custom_and_canonical["empty"].id in {r.id for r in rows}

@@ -212,11 +212,12 @@ class CRUDLabTestComponent(
 
         Exclusive matching ensures each component appears in only one trend:
         - Components with a non-empty canonical_test_name: match only on canonical_test_name
-        - Components with NULL or empty canonical_test_name: match only on exact test_name (normalized)
+        - Components with NULL, empty, or whitespace-only canonical_test_name: match only on exact test_name (normalized)
 
-        Empty string is treated as equivalent to NULL here. The sync service
-        (test_library_sync) writes "" to mark components it processed without
-        finding a library match; those components should still group by test_name.
+        Empty / whitespace-only canonical_test_name is treated as equivalent to
+        NULL here. The sync service (test_library_sync) writes "" to mark
+        components it processed without finding a library match; those
+        components should still group by test_name.
 
         Unit filter semantics:
         - None: no unit filter (legacy behavior, all units merged).
@@ -236,14 +237,14 @@ class CRUDLabTestComponent(
                     or_(
                         and_(
                             self.model.canonical_test_name.isnot(None),
-                            self.model.canonical_test_name != "",
-                            func.lower(self.model.canonical_test_name)
-                            == func.lower(test_name),
+                            func.trim(self.model.canonical_test_name) != "",
+                            func.lower(func.trim(self.model.canonical_test_name))
+                            == func.lower(func.trim(test_name)),
                         ),
                         and_(
                             or_(
                                 self.model.canonical_test_name.is_(None),
-                                self.model.canonical_test_name == "",
+                                func.trim(self.model.canonical_test_name) == "",
                             ),
                             func.lower(func.rtrim(self.model.test_name, ",;: "))
                             == func.lower(test_name),
