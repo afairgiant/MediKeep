@@ -302,9 +302,7 @@ class TrendDataFetcher:
         representative raw value (MAX) from the group so conventional casing
         (e.g. the capital L in 'mg/L') is preserved.
         """
-        # nullif treats empty-string canonical_test_name as NULL so components
-        # marked as "processed but unmatched" (see test_library_sync) still
-        # group under their raw test_name.
+        # Treat empty canonical_test_name as NULL (sync service uses "" for "no library match").
         name_expr = func.coalesce(
             func.nullif(LabTestComponent.canonical_test_name, ""),
             LabTestComponent.test_name,

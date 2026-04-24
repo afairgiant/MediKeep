@@ -397,11 +397,7 @@ class LabTestComponentUpdate(BaseModel):
     @field_validator("canonical_test_name")
     @classmethod
     def validate_canonical_test_name(cls, v):
-        """Mirror the Create-side validator: strip, treat empty as None.
-
-        Without this, an edit form submitting "" overwrites NULL and breaks
-        the trend grouping query that checks ``canonical_test_name IS NULL``.
-        """
+        """Normalize empty/whitespace to None — grouping query treats only NULL as 'unlinked'."""
         if v is None:
             return None
         stripped = v.strip()

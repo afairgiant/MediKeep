@@ -842,9 +842,7 @@ class TestCanonicalTestNameEmptyStringFallback:
                 unit="mg/dL",
             ),
         )
-        # Bypass the schema validator to simulate the sync service writing ""
-        # directly to the column (the schema now normalizes "" -> None, so we
-        # can't produce this state via the ORM's update path).
+        # Raw UPDATE: schema normalizes "" -> None, so we must bypass it to simulate sync state.
         db_session.query(LabTestComponent).filter(
             LabTestComponent.id == empty_comp.id
         ).update({LabTestComponent.canonical_test_name: ""})
