@@ -20,6 +20,9 @@ class SimpleAuthService {
     this.userKey = 'user';
   } // Make API request with fallback
   async makeRequest(endpoint, options = {}) {
+    // Pull `signal` out so we can react to AbortError separately from other
+    // fetch errors (don't log, don't fire /health ping on intentional abort).
+    const { signal, ...fetchOptions } = options;
     const urls = [
       `${this.directBackendURL}${endpoint}`, // Try direct backend first
       `${this.baseURL}${endpoint}`, // Then try proxy
@@ -45,7 +48,11 @@ class SimpleAuthService {
           setTimeout(() => reject(new Error('Request timeout')), timeout);
         });
 
-        const fetchPromise = fetch(url, { ...options, credentials: 'include' });
+        const fetchPromise = fetch(url, {
+          ...fetchOptions,
+          credentials: 'include',
+          signal,
+        });
         const response = await Promise.race([fetchPromise, timeoutPromise]);
 
         logger.info(`Response received from ${url}`, {
@@ -59,6 +66,12 @@ class SimpleAuthService {
         // Return response regardless of status (let caller handle HTTP errors)
         return response;
       } catch (error) {
+        // Intentional abort (component unmount, auto-retry supersede, manual
+        // retry click) -- propagate immediately without logging, pinging, or
+        // trying the next URL. The caller is responsible for the cleanup.
+        if (error.name === 'AbortError' || signal?.aborted) {
+          throw error;
+        }
         // The backend FrontendLogRequest schema ignores unknown top-level fields,
         // so enrichment goes under `details` (captured as-is) and the stack goes
         // under the declared `stack_trace` field.
@@ -393,11 +406,12 @@ class SimpleAuthService {
   }
 
   // Check if user registration is enabled
-  async checkRegistrationEnabled() {
+  async checkRegistrationEnabled({ signal } = {}) {
     try {
       const response = await this.makeRequest('/auth/registration-status', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
+        signal,
       });
 
       if (!response.ok) {
@@ -416,6 +430,11 @@ class SimpleAuthService {
       });
       return data;
     } catch (error) {
+      // Let AbortError propagate so the caller's retry/cleanup can distinguish
+      // "fetch aborted intentionally" from "fetch failed for real".
+      if (error.name === 'AbortError') {
+        throw error;
+      }
       logger.error('Error checking registration status', {
         error: error.message,
         category: 'auth_registration_check',
@@ -427,7 +446,7 @@ class SimpleAuthService {
   // SSO Methods
 
   // Check if SSO is available and get configuration
-  async getSSOConfig() {
+  async getSSOConfig({ signal } = {}) {
     try {
       logger.info('Checking SSO configuration', {
         category: 'sso_config_check',
@@ -436,6 +455,7 @@ class SimpleAuthService {
       const response = await this.makeRequest('/auth/sso/config', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
+        signal,
       });
 
       if (!response.ok) {
@@ -456,6 +476,11 @@ class SimpleAuthService {
       });
       return data;
     } catch (error) {
+      // Let AbortError propagate so the caller's retry/cleanup can distinguish
+      // "fetch aborted intentionally" from "fetch failed for real".
+      if (error.name === 'AbortError') {
+        throw error;
+      }
       logger.error('Error checking SSO config', {
         error: error.message,
         category: 'sso_config_check',
