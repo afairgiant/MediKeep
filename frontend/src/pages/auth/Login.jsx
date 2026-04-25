@@ -86,13 +86,17 @@ const Login = () => {
       if (delay > 0) {
         try {
           await new Promise((resolve, reject) => {
-            const timer = setTimeout(resolve, delay);
-            ac.signal.addEventListener('abort', () => {
+            const handleAbort = () => {
               clearTimeout(timer);
               const err = new Error('aborted');
               err.name = 'AbortError';
               reject(err);
-            });
+            };
+            const timer = setTimeout(() => {
+              ac.signal.removeEventListener('abort', handleAbort);
+              resolve();
+            }, delay);
+            ac.signal.addEventListener('abort', handleAbort, { once: true });
           });
         } catch {
           return; // backoff was aborted -- superseded or unmounted
@@ -130,17 +134,27 @@ const Login = () => {
     setConfigLoaded(true);
   }, []);
 
+  // Initial load + unmount cleanup. Kept separate from the online-listener
+  // effect so adding configLoaded/configError as deps there can't accidentally
+  // re-trigger loadConfig (which would loop, since loadConfig writes both).
   useEffect(() => {
     loadConfig();
-    // If the OS reports connectivity is back, short-circuit any in-progress
-    // backoff and re-fetch immediately.
-    const onOnline = () => loadConfig();
-    window.addEventListener('online', onOnline);
     return () => {
-      window.removeEventListener('online', onOnline);
       abortRef.current?.abort();
     };
   }, [loadConfig]);
+
+  // If the OS reports connectivity is back, short-circuit any in-progress
+  // backoff and re-fetch immediately. Skip when config has already loaded
+  // successfully -- otherwise a stray WiFi flap on a working page would
+  // briefly hide the SSO/registration UI and fire two redundant requests.
+  useEffect(() => {
+    const onOnline = () => {
+      if (!configLoaded || configError) loadConfig();
+    };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [loadConfig, configLoaded, configError]);
 
   const handleChange = e => {
     clearError(); // Clear any existing errors

@@ -229,14 +229,25 @@ describe('Login Component', () => {
         expect(authService.getSSOConfig).toHaveBeenCalledTimes(1);
       });
 
-      // Fire online before the 500ms backoff elapses.
+      // Confirm we're still inside the 500ms backoff (no second call yet).
+      // If the backoff elapses on its own, the test would still pass without
+      // the online wiring -- the timing assertion below is what makes it
+      // load-bearing.
+      expect(authService.getSSOConfig).toHaveBeenCalledTimes(1);
+
+      // Fire online before the 500ms backoff elapses, then measure recovery.
+      const t0 = performance.now();
       window.dispatchEvent(new Event('online'));
 
-      // The SSO section should appear fast -- the online-triggered new
-      // generation runs attempt #1 immediately (delay=0).
-      expect(
-        await screen.findByTestId('sso-section', {}, { timeout: 2000 })
-      ).toBeInTheDocument();
+      const ssoSection = await screen.findByTestId(
+        'sso-section',
+        {},
+        { timeout: 2000 }
+      );
+      expect(ssoSection).toBeInTheDocument();
+      // Recovery must be well under the 500ms backoff -- proves online
+      // drove the retry, not the regular timer.
+      expect(performance.now() - t0).toBeLessThan(400);
       expect(screen.queryByTestId('config-error')).not.toBeInTheDocument();
     });
 

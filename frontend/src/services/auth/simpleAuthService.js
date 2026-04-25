@@ -69,8 +69,18 @@ class SimpleAuthService {
         // Intentional abort (component unmount, auto-retry supersede, manual
         // retry click) -- propagate immediately without logging, pinging, or
         // trying the next URL. The caller is responsible for the cleanup.
-        if (error.name === 'AbortError' || signal?.aborted) {
+        if (error.name === 'AbortError') {
           throw error;
+        }
+        // If the external signal was aborted but the timeout race won first,
+        // the rejected error won't carry name === 'AbortError'. Normalize so
+        // downstream callers that key off error.name treat this as an abort.
+        if (signal?.aborted) {
+          throw typeof DOMException === 'function'
+            ? new DOMException('The operation was aborted.', 'AbortError')
+            : Object.assign(new Error('The operation was aborted.'), {
+                name: 'AbortError',
+              });
         }
         // The backend FrontendLogRequest schema ignores unknown top-level fields,
         // so enrichment goes under `details` (captured as-is) and the stack goes
