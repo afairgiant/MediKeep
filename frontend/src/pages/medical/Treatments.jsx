@@ -310,12 +310,13 @@ const Treatments = () => {
     try {
       let success;
       let resultId;
+      let result;
 
       if (editingTreatment) {
         success = await updateItem(editingTreatment.id, treatmentData);
         resultId = editingTreatment.id;
       } else {
-        const result = await createItem(treatmentData);
+        result = await createItem(treatmentData);
         success = !!result;
         resultId = result?.id;
         if (success) {
@@ -358,6 +359,8 @@ const Treatments = () => {
       } else {
         handleSubmissionFailure(new Error('Form submission failed'), 'form');
       }
+
+      return result;
     } catch (error) {
       logger.error('treatments_submission_error', {
         message: 'Form submission failed',
