@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
@@ -58,24 +58,103 @@ const Login = () => {
     });
   }, []);
 
-  // Check registration status and SSO config on mount
-  useEffect(() => {
-    const loadConfig = async () => {
-      const [status, config] = await Promise.all([
-        authService.checkRegistrationEnabled(),
-        authService.getSSOConfig(),
-      ]);
-      setRegistrationEnabled(status.registration_enabled);
-      setRegistrationMessage(status.message || '');
-      setSSOConfig(config);
-      // error:true means the fetch itself failed -- do not confuse that with
-      // "backend returned SSO/registration disabled", which is a valid state
-      setConfigError(status.error === true || config.error === true);
-      setConfigLoaded(true);
-    };
+  // Retry generation counter: a new generation supersedes any pending
+  // backoff timer or in-flight fetch from a previous attempt (e.g. when
+  // `window.online` fires mid-backoff, or the user clicks Retry).
+  const attemptRef = useRef(0);
+  const abortRef = useRef(null);
 
-    loadConfig();
+  // Check registration status and SSO config, with silent exponential-backoff
+  // retry so a transient network blip or cookie-clear race during auto-logout
+  // recovers invisibly. Only shows the Retry button once all attempts exhaust.
+  const loadConfig = useCallback(async () => {
+    attemptRef.current += 1;
+    const thisAttempt = attemptRef.current;
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+
+    // Reset UI to the pre-load state. configLoaded stays false through the
+    // auto-retry window so neither SSO nor the error notice render yet.
+    setConfigLoaded(false);
+    setConfigError(false);
+
+    // First attempt is immediate; three retries at 0.5s, 1.5s, 3s (~5s total).
+    const delays = [0, 500, 1500, 3000];
+    for (const delay of delays) {
+      if (thisAttempt !== attemptRef.current || ac.signal.aborted) return;
+      if (delay > 0) {
+        try {
+          await new Promise((resolve, reject) => {
+            const handleAbort = () => {
+              clearTimeout(timer);
+              const err = new Error('aborted');
+              err.name = 'AbortError';
+              reject(err);
+            };
+            const timer = setTimeout(() => {
+              ac.signal.removeEventListener('abort', handleAbort);
+              resolve();
+            }, delay);
+            ac.signal.addEventListener('abort', handleAbort, { once: true });
+          });
+        } catch {
+          return; // backoff was aborted -- superseded or unmounted
+        }
+      }
+      if (thisAttempt !== attemptRef.current || ac.signal.aborted) return;
+
+      try {
+        const [status, config] = await Promise.all([
+          authService.checkRegistrationEnabled({ signal: ac.signal }),
+          authService.getSSOConfig({ signal: ac.signal }),
+        ]);
+        if (thisAttempt !== attemptRef.current || ac.signal.aborted) return;
+
+        // error:true means the fetch itself failed -- do not confuse that
+        // with "backend returned SSO/registration disabled", which is valid.
+        const failed = status.error === true || config.error === true;
+        if (!failed) {
+          setRegistrationEnabled(status.registration_enabled);
+          setRegistrationMessage(status.message || '');
+          setSSOConfig(config);
+          setConfigError(false);
+          setConfigLoaded(true);
+          return;
+        }
+        // Soft failure -- fall through to next backoff delay.
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        // Any other unexpected error: treat as soft failure and keep retrying.
+      }
+    }
+
+    if (thisAttempt !== attemptRef.current || ac.signal.aborted) return;
+    setConfigError(true);
+    setConfigLoaded(true);
   }, []);
+
+  // Initial load + unmount cleanup. Kept separate from the online-listener
+  // effect so adding configLoaded/configError as deps there can't accidentally
+  // re-trigger loadConfig (which would loop, since loadConfig writes both).
+  useEffect(() => {
+    loadConfig();
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, [loadConfig]);
+
+  // If the OS reports connectivity is back, short-circuit any in-progress
+  // backoff and re-fetch immediately. Skip when config has already loaded
+  // successfully -- otherwise a stray WiFi flap on a working page would
+  // briefly hide the SSO/registration UI and fire two redundant requests.
+  useEffect(() => {
+    const onOnline = () => {
+      if (!configLoaded || configError) loadConfig();
+    };
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [loadConfig, configLoaded, configError]);
 
   const handleChange = e => {
     clearError(); // Clear any existing errors
@@ -244,7 +323,7 @@ const Login = () => {
             <button
               type="button"
               className={styles.retryBtn}
-              onClick={() => window.location.reload()}
+              onClick={loadConfig}
             >
               {t('login.retry')}
             </button>
