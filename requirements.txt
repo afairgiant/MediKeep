@@ -52,7 +52,8 @@ python-multipart==0.0.26
 tzdata>=2024.1
 PyYAML==6.0.3
 reportlab==4.4.10
-matplotlib>=3.8.0
+matplotlib>=3.8.0,<3.11
+numpy>=1.26,<2.4
 requests==2.33.1
 rsa==4.9.1
 six==1.17.0
