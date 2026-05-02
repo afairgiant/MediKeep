@@ -116,7 +116,7 @@ class AdminApiService extends BaseApiService {
     const queryParams = { page, per_page };
     if (search) queryParams.search = search;
 
-    return this.get(`/models/${modelName}/`, queryParams);
+    return this.get(`/models/${modelName}/`, { params: queryParams });
   }
 
   async getModelRecord(modelName, recordId) {
@@ -149,14 +149,6 @@ class AdminApiService extends BaseApiService {
       record_ids: recordIds,
       update_data: updateData,
     });
-  }
-
-  // Search across models
-  async globalSearch(query, models = null) {
-    const params = { query };
-    if (models) params.models = models.join(',');
-
-    return this.get('/search', params);
   }
 
   // Export model data as CSV

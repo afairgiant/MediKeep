@@ -183,7 +183,6 @@ Specialized service for administrative functions, extending the base API service
 
 - `bulkDeleteRecords(modelName, recordIds)` - Delete multiple records
 - `bulkUpdateRecords(modelName, recordIds, updateData)` - Update multiple records
-- `globalSearch(query, models)` - Search across multiple models
 - `exportModelData(modelName, format)` - Export data in various formats
 
 ### System Administration
@@ -240,7 +239,6 @@ const patients = await adminApiService.getModelRecords('Patient', {
 
 // Bulk operations
 await adminApiService.bulkDeleteRecords('Patient', [1, 2, 3]);
-const searchResults = await adminApiService.globalSearch('diabetes');
 ```
 
 ### Legacy API Service (Backward Compatibility)
