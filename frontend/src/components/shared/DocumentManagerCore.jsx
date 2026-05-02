@@ -8,7 +8,11 @@ import {
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
-import { getPaperlessSettings } from '../../services/api/paperlessApi.jsx';
+import {
+  getPaperlessSettings,
+  linkPaperlessDocument,
+} from '../../services/api/paperlessApi.jsx';
+import { linkPapraDocument } from '../../services/api/papraApi.jsx';
 import logger from '../../services/logger';
 import {
   SUCCESS_MESSAGES,
@@ -16,6 +20,7 @@ import {
   enhancePaperlessError,
   formatErrorWithContext,
 } from '../../constants/errorMessages';
+import { generateId } from '../../utils/helpers';
 
 // Import configuration from upload progress hook
 const UPLOAD_CONFIG = {
@@ -136,6 +141,7 @@ const useDocumentManagerCore = ({
   // State management
   const [files, setFiles] = useState([]);
   const [pendingFiles, setPendingFiles] = useState([]);
+  const [pendingLinks, setPendingLinks] = useState([]);
   const [filesToDelete, setFilesToDelete] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -151,6 +157,11 @@ const useDocumentManagerCore = ({
   const monitoredSetPendingFiles = useCallback(newPendingFiles => {
     performanceMonitor.logStateUpdate('pendingFiles', newPendingFiles);
     setPendingFiles(newPendingFiles);
+  }, []);
+
+  const monitoredSetPendingLinks = useCallback(newPendingLinks => {
+    performanceMonitor.logStateUpdate('pendingLinks', newPendingLinks);
+    setPendingLinks(newPendingLinks);
   }, []);
 
   // Paperless settings state
@@ -218,6 +229,7 @@ const useDocumentManagerCore = ({
   // Refs for stable callbacks
   const filesRef = useRef(files);
   const pendingFilesRef = useRef(pendingFiles);
+  const pendingLinksRef = useRef(pendingLinks);
   const selectedStorageBackendRef = useRef(selectedStorageBackend);
   const paperlessSettingsRef = useRef(paperlessSettings);
   const paperlessAutoSyncRef = useRef(paperlessSettings?.paperless_auto_sync);
@@ -229,10 +241,17 @@ const useDocumentManagerCore = ({
   useEffect(() => {
     filesRef.current = files;
     pendingFilesRef.current = pendingFiles;
+    pendingLinksRef.current = pendingLinks;
     selectedStorageBackendRef.current = selectedStorageBackend;
     paperlessSettingsRef.current = paperlessSettings;
     paperlessAutoSyncRef.current = paperlessSettings?.paperless_auto_sync;
-  }, [files, pendingFiles, selectedStorageBackend, paperlessSettings]);
+  }, [
+    files,
+    pendingFiles,
+    pendingLinks,
+    selectedStorageBackend,
+    paperlessSettings,
+  ]);
 
   // Load paperless settings
   const loadPaperlessSettings = useCallback(async () => {
@@ -731,6 +750,52 @@ const useDocumentManagerCore = ({
     [monitoredSetPendingFiles]
   );
 
+  // In create mode the entity has no id yet, so /entity-files/{type}/{id}/link-{backend}
+  // can't be called. Queue here and flush after save via uploadPendingFiles(targetEntityId).
+  const handleAddPendingLink = useCallback(
+    linkData => {
+      const source = linkData?.paperless_document_id ? 'paperless' : 'papra';
+      const fallbackTitle =
+        source === 'paperless'
+          ? `Paperless document #${linkData?.paperless_document_id || ''}`
+          : `Papra document ${linkData?.papra_document_id || ''}`;
+      monitoredSetPendingLinks(prev => [
+        ...prev,
+        {
+          id: `link-${generateId()}`,
+          source,
+          linkData,
+          displayTitle: linkData?.description || fallbackTitle,
+        },
+      ]);
+    },
+    [monitoredSetPendingLinks]
+  );
+
+  const handleRemovePendingLink = useCallback(
+    linkId => {
+      monitoredSetPendingLinks(prev => prev.filter(l => l.id !== linkId));
+    },
+    [monitoredSetPendingLinks]
+  );
+
+  const handlePendingLinkDescriptionChange = useCallback(
+    (linkId, description) => {
+      monitoredSetPendingLinks(prev =>
+        prev.map(l =>
+          l.id === linkId
+            ? {
+                ...l,
+                linkData: { ...l.linkData, description },
+                displayTitle: description || l.displayTitle,
+              }
+            : l
+        )
+      );
+    },
+    [monitoredSetPendingLinks]
+  );
+
   // Mark file for deletion
   const handleMarkFileForDeletion = useCallback(fileId => {
     setFilesToDelete(prev => [...prev, fileId]);
@@ -1022,24 +1087,31 @@ const useDocumentManagerCore = ({
     ]
   );
 
-  // Batch upload pending files with progress tracking
+  // Batch upload pending files with progress tracking. Also flushes any
+  // pending "link existing remote document" operations queued in create mode.
   const uploadPendingFiles = useCallback(
     async targetEntityId => {
       const currentPendingFiles = pendingFilesRef.current;
+      const currentPendingLinks = pendingLinksRef.current;
 
       logger.info('document_manager_batch_upload_start', {
         message: 'Starting batch upload with progress tracking',
         entityType,
         targetEntityId,
         pendingFilesCount: currentPendingFiles.length,
+        pendingLinksCount: currentPendingLinks.length,
         component: 'DocumentManagerCore',
       });
 
-      if (currentPendingFiles.length === 0) {
+      if (
+        currentPendingFiles.length === 0 &&
+        currentPendingLinks.length === 0
+      ) {
         return true;
       }
 
-      // Start progress tracking
+      // Start progress tracking. Pending links share the same progress
+      // surface so the user sees one combined batch report.
       if (showProgressModal) {
         const progressFiles = currentPendingFiles.map((pf, index) => ({
           id: `batch-${index}`,
@@ -1047,7 +1119,13 @@ const useDocumentManagerCore = ({
           size: pf.file.size,
           description: pf.description,
         }));
-        startUpload(progressFiles);
+        const progressLinks = currentPendingLinks.map((pl, index) => ({
+          id: `link-${index}`,
+          name: pl.displayTitle,
+          size: 0,
+          description: pl.linkData?.description || '',
+        }));
+        startUpload([...progressFiles, ...progressLinks]);
       }
 
       const uploadPromises = currentPendingFiles.map(
@@ -1298,24 +1376,85 @@ const useDocumentManagerCore = ({
         }
       );
 
+      const linkPromises = currentPendingLinks.map(async (pendingLink, index) => {
+        const fileId = `link-${index}`;
+        try {
+          if (showProgressModal) {
+            debouncedUpdateProgress(fileId, 30, 'uploading');
+          }
+
+          if (pendingLink.source === 'paperless') {
+            await linkPaperlessDocument(
+              entityType,
+              targetEntityId,
+              pendingLink.linkData
+            );
+          } else if (pendingLink.source === 'papra') {
+            await linkPapraDocument(
+              entityType,
+              targetEntityId,
+              pendingLink.linkData
+            );
+          } else {
+            throw new Error(`Unknown link source: ${pendingLink.source}`);
+          }
+
+          if (showProgressModal) {
+            updateFileProgress(fileId, 100, 'completed');
+          }
+
+          logger.info('document_manager_pending_link_success', {
+            message: 'Pending document link processed',
+            entityType,
+            targetEntityId,
+            source: pendingLink.source,
+            component: 'DocumentManagerCore',
+          });
+        } catch (error) {
+          const errorMessage =
+            pendingLink.source === 'paperless'
+              ? enhancePaperlessError(error?.message || '')
+              : getUserFriendlyError(error, 'link');
+
+          if (showProgressModal) {
+            updateFileProgress(fileId, 0, 'failed', errorMessage);
+          }
+
+          logger.error('document_manager_pending_link_error', {
+            message: 'Failed to flush pending document link',
+            entityType,
+            targetEntityId,
+            source: pendingLink.source,
+            error: error?.message,
+            component: 'DocumentManagerCore',
+          });
+
+          throw new Error(errorMessage);
+        }
+      });
+
+      const totalCount =
+        currentPendingFiles.length + currentPendingLinks.length;
+
       try {
-        await Promise.all(uploadPromises);
+        await Promise.all([...uploadPromises, ...linkPromises]);
 
         // Complete successfully
         if (showProgressModal) {
           completeUpload(
             true,
-            `All ${currentPendingFiles.length} file(s) uploaded successfully!`
+            `All ${totalCount} document(s) processed successfully!`
           );
         }
 
         monitoredSetPendingFiles([]);
+        monitoredSetPendingLinks([]);
 
         // Refresh data
         await loadFiles();
 
         if (onUploadComplete) {
-          onUploadComplete(true, currentPendingFiles.length, 0);
+          onUploadComplete(true, totalCount, 0);
         }
 
         logger.info('document_manager_batch_upload_complete', {
@@ -1323,12 +1462,13 @@ const useDocumentManagerCore = ({
           entityType,
           targetEntityId,
           fileCount: currentPendingFiles.length,
+          linkCount: currentPendingLinks.length,
           component: 'DocumentManagerCore',
         });
 
         return true;
       } catch (error) {
-        // Some files failed
+        // Some files / links failed
         const completedCount = uploadState.files.filter(
           f => f.status === 'completed'
         ).length;
@@ -1339,7 +1479,7 @@ const useDocumentManagerCore = ({
         if (showProgressModal) {
           completeUpload(
             false,
-            `Upload completed with errors: ${completedCount} succeeded, ${failedCount} failed.`
+            `Operation completed with errors: ${completedCount} succeeded, ${failedCount} failed.`
           );
         }
 
@@ -1371,6 +1511,7 @@ const useDocumentManagerCore = ({
       onUploadComplete,
       debouncedUpdateProgress,
       monitoredSetPendingFiles,
+      monitoredSetPendingLinks,
     ]
   );
 
@@ -1566,6 +1707,7 @@ const useDocumentManagerCore = ({
       // State
       files,
       pendingFiles,
+      pendingLinks,
       filesToDelete,
       loading,
       error,
@@ -1585,6 +1727,9 @@ const useDocumentManagerCore = ({
       // Handlers
       handleAddPendingFile,
       handleRemovePendingFile,
+      handleAddPendingLink,
+      handleRemovePendingLink,
+      handlePendingLinkDescriptionChange,
       handleMarkFileForDeletion,
       handleUnmarkFileForDeletion,
       handleImmediateUpload,
@@ -1597,14 +1742,22 @@ const useDocumentManagerCore = ({
       loadFiles,
       checkSyncStatus,
 
-      // API
-      getPendingFilesCount: () => pendingFilesRef.current.length,
-      hasPendingFiles: () => pendingFilesRef.current.length > 0,
-      clearPendingFiles: () => monitoredSetPendingFiles([]),
+      // API: counts and presence checks include both files and queued links so
+      // existing callers (12 medical entity pages) Just Work without per-page changes.
+      getPendingFilesCount: () =>
+        pendingFilesRef.current.length + pendingLinksRef.current.length,
+      hasPendingFiles: () =>
+        pendingFilesRef.current.length > 0 ||
+        pendingLinksRef.current.length > 0,
+      clearPendingFiles: () => {
+        monitoredSetPendingFiles([]);
+        monitoredSetPendingLinks([]);
+      },
     }),
     [
       files,
       pendingFiles,
+      pendingLinks,
       filesToDelete,
       loading,
       error,
@@ -1618,6 +1771,9 @@ const useDocumentManagerCore = ({
       pendingStats,
       handleAddPendingFile,
       handleRemovePendingFile,
+      handleAddPendingLink,
+      handleRemovePendingLink,
+      handlePendingLinkDescriptionChange,
       handleMarkFileForDeletion,
       handleUnmarkFileForDeletion,
       handleImmediateUpload,
@@ -1630,6 +1786,7 @@ const useDocumentManagerCore = ({
       loadFiles,
       checkSyncStatus,
       monitoredSetPendingFiles,
+      monitoredSetPendingLinks,
     ]
   );
 

@@ -73,9 +73,11 @@
   "manager": {
     "addDocument": "Document toevoegen",
     "currentFiles": "Huidige bestanden:",
+    "documentsToLink": "Te koppelen documenten:",
     "duplicateDocument": "Duplicaat document",
     "duplicateExists": "Dit document bestaat al in Paperless en kan niet opnieuw worden geüpload.",
     "filesToUpload": "Te uploaden bestanden:",
+    "linkDescriptionPlaceholder": "Beschrijving (optioneel)",
     "linkPaperless": "Bestaand Paperless-document koppelen",
     "linkPapra": "Bestaand Papra-document koppelen",
     "manageDocuments": "Documenten beheren",

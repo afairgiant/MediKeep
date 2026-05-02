@@ -73,9 +73,11 @@
   "manager": {
     "addDocument": "Lägg till dokument",
     "currentFiles": "Aktuella filer:",
+    "documentsToLink": "Dokument att länka:",
     "duplicateDocument": "Duplicerat dokument",
     "duplicateExists": "Detta dokument finns redan i Paperless och kan inte laddas upp igen.",
     "filesToUpload": "Filer att ladda upp:",
+    "linkDescriptionPlaceholder": "Beskrivning (valfritt)",
     "linkPaperless": "Länka befintligt Paperless-dokument",
     "linkPapra": "Länka befintligt Papra-dokument",
     "manageDocuments": "Hantera dokument",

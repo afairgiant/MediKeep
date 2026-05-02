@@ -73,9 +73,11 @@
   "manager": {
     "addDocument": "添加文档",
     "currentFiles": "当前文件：",
+    "documentsToLink": "待链接文档：",
     "duplicateDocument": "重复文档",
     "duplicateExists": "此文档在 Paperless 中已存在，无法重复上传。",
     "filesToUpload": "待上传文件：",
+    "linkDescriptionPlaceholder": "描述（可选）",
     "linkPaperless": "链接现有 Paperless 文档",
     "linkPapra": "链接现有 Papra 文档",
     "manageDocuments": "管理文档",

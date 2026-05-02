@@ -109,6 +109,7 @@ const DocumentManagerContent = ({
           syncStatus={coreHandlers.syncStatus}
           syncLoading={coreHandlers.syncLoading}
           pendingFiles={coreHandlers.pendingFiles}
+          pendingLinks={coreHandlers.pendingLinks}
           filesToDelete={coreHandlers.filesToDelete}
           config={config}
           onUploadModalOpen={() => setShowUploadModal(true)}
@@ -124,6 +125,10 @@ const DocumentManagerContent = ({
           onRemovePendingFile={coreHandlers.handleRemovePendingFile}
           onPendingFileDescriptionChange={
             coreHandlers.handlePendingFileDescriptionChange
+          }
+          onRemovePendingLink={coreHandlers.handleRemovePendingLink}
+          onPendingLinkDescriptionChange={
+            coreHandlers.handlePendingLinkDescriptionChange
           }
           handleImmediateUpload={coreHandlers.handleImmediateUpload}
         />
@@ -237,11 +242,31 @@ const DocumentManagerWithProgress = React.memo(
       handleUploadModalClose();
     }, [mode, handleUploadModalClose]);
 
-    // Shared handler for linking documents from remote backends (Paperless, Papra)
+    // Shared handler for linking documents from remote backends (Paperless, Papra).
+    // When the entity has not been saved yet (create mode / no entityId), the
+    // operation is queued via the core hook's pending-link queue and flushed
+    // after save by uploadPendingFiles(savedEntityId). Otherwise it is POSTed
+    // immediately, mirroring the existing edit-mode behavior.
     const createLinkHandler = useCallback(
       (backendName, linkApiFn) => {
         return async linkData => {
-          const eventPrefix = `document_manager_link_${backendName.toLowerCase()}`;
+          const source = backendName.toLowerCase();
+          const eventPrefix = `document_manager_link_${source}`;
+
+          if (!entityId && handlersRef.current?.handleAddPendingLink) {
+            handlersRef.current.handleAddPendingLink(linkData);
+            logger.info(
+              `${eventPrefix}_queued`,
+              `${backendName} document queued for linking after entity save`,
+              {
+                component: 'DocumentManagerWithProgress',
+                entityType,
+                entityId,
+              }
+            );
+            return;
+          }
+
           try {
             logger.info(eventPrefix, `Linking ${backendName} document`, {
               component: 'DocumentManagerWithProgress',

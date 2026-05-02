@@ -73,9 +73,11 @@
   "manager": {
     "addDocument": "Добавить документ",
     "currentFiles": "Текущие файлы:",
+    "documentsToLink": "Документы для связывания:",
     "duplicateDocument": "Дублированный документ",
     "duplicateExists": "Этот документ уже существует в Paperless и не может быть загружен повторно.",
     "filesToUpload": "Файлы для загрузки:",
+    "linkDescriptionPlaceholder": "Описание (необязательно)",
     "linkPaperless": "Связать существующий документ Paperless",
     "linkPapra": "Связать существующий документ Papra",
     "manageDocuments": "Управление документами",

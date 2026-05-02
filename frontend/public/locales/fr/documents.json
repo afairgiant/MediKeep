@@ -73,9 +73,11 @@
   "manager": {
     "addDocument": "Ajouter un document",
     "currentFiles": "Fichiers actuels :",
+    "documentsToLink": "Documents à lier :",
     "duplicateDocument": "Document en double",
     "duplicateExists": "Ce document existe déjà dans Paperless et ne peut pas être téléversé à nouveau.",
     "filesToUpload": "Fichiers à téléverser :",
+    "linkDescriptionPlaceholder": "Description (facultative)",
     "linkPaperless": "Connecter un document existant dans Paperless",
     "linkPapra": "Connecter un document existant dans Papra",
     "manageDocuments": "Gérer les documents",

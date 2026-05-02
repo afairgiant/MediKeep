@@ -45,6 +45,7 @@ const RenderModeContent = memo(
     syncStatus,
     syncLoading,
     pendingFiles,
+    pendingLinks = [],
     filesToDelete,
     onUploadModalOpen,
     onLinkModalOpen,
@@ -57,6 +58,8 @@ const RenderModeContent = memo(
     onUnmarkFileForDeletion,
     onRemovePendingFile,
     onPendingFileDescriptionChange,
+    onRemovePendingLink,
+    onPendingLinkDescriptionChange,
   }) => {
     const { t } = useTranslation('documents');
     if (loading && files.length === 0) {
@@ -215,6 +218,58 @@ const RenderModeContent = memo(
       </Stack>
     );
 
+    const pendingLinksList = pendingLinks.length > 0 && (
+      <Stack gap="md">
+        <Title order={5}>{t('manager.documentsToLink')}</Title>
+        <Stack gap="sm">
+          {pendingLinks.map(pendingLink => (
+            <Paper key={pendingLink.id} withBorder p="sm" bg="grape.1">
+              <Group justify="space-between" align="flex-start">
+                <Group gap="xs" style={{ flex: 1 }}>
+                  <ThemeIcon variant="light" color="grape" size="sm">
+                    <IconLink size={14} />
+                  </ThemeIcon>
+                  <Stack gap="xs" style={{ flex: 1 }}>
+                    <Group gap="md">
+                      <Text fw={500} size="sm">
+                        {pendingLink.displayTitle}
+                      </Text>
+                      <Badge size="xs" color="grape" variant="light">
+                        {pendingLink.source === 'papra' ? 'Papra' : 'Paperless'}
+                      </Badge>
+                    </Group>
+                    {onPendingLinkDescriptionChange && (
+                      <TextInput
+                        placeholder={t('manager.linkDescriptionPlaceholder')}
+                        value={pendingLink.linkData?.description || ''}
+                        onChange={e =>
+                          onPendingLinkDescriptionChange(
+                            pendingLink.id,
+                            e.target.value
+                          )
+                        }
+                        size="xs"
+                      />
+                    )}
+                  </Stack>
+                </Group>
+                {onRemovePendingLink && (
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemovePendingLink(pendingLink.id)}
+                  >
+                    <IconX size={14} />
+                  </ActionIcon>
+                )}
+              </Group>
+            </Paper>
+          ))}
+        </Stack>
+      </Stack>
+    );
+
     if (mode === 'view') {
       return (
         <Stack gap="md">
@@ -266,6 +321,7 @@ const RenderModeContent = memo(
 
           {addDocumentMenu('Manage Documents')}
           {pendingFilesList}
+          {pendingLinksList}
         </Stack>
       );
     }
@@ -276,6 +332,7 @@ const RenderModeContent = memo(
           {storageBackendSelector}
           {addDocumentMenu('Manage Documents')}
           {pendingFilesList}
+          {pendingLinksList}
         </Stack>
       );
     }

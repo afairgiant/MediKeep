@@ -73,9 +73,11 @@
   "manager": {
     "addDocument": "เพิ่มเอกสาร",
     "currentFiles": "ไฟล์ปัจจุบัน:",
+    "documentsToLink": "เอกสารที่จะเชื่อมโยง:",
     "duplicateDocument": "เอกสารซ้ำซ้อน",
     "duplicateExists": "เอกสารนี้มีอยู่แล้วใน Paperless และไม่สามารถอัปโหลดอีกครั้งได้",
     "filesToUpload": "ไฟล์ที่จะอัปโหลด:",
+    "linkDescriptionPlaceholder": "คำอธิบาย (ไม่บังคับ)",
     "linkPaperless": "เชื่อมโยงเอกสาร Paperless ที่มีอยู่",
     "linkPapra": "เชื่อมโยงเอกสาร Papra ที่มีอยู่",
     "manageDocuments": "จัดการเอกสาร",
