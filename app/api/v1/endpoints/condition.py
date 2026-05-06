@@ -71,7 +71,7 @@ def read_conditions(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     status: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(
@@ -770,7 +770,7 @@ def get_patient_conditions(
     patient_id: int = Depends(deps.verify_patient_access),
     current_user_id: int = Depends(deps.get_current_user_id),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
 ) -> Any:
     """Get all conditions for a specific patient."""
     with handle_database_errors(request=request):

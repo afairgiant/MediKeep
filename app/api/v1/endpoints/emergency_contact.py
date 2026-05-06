@@ -71,7 +71,7 @@ def read_emergency_contacts(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     is_active: Optional[bool] = Query(None),
     is_primary: Optional[bool] = Query(None),
     target_patient_id: int = Depends(deps.get_accessible_patient_id),

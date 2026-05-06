@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
+from app.models.clinical import Medication
 from app.schemas.patient import PatientCreate
 from tests.utils.user import create_random_user, create_user_token_headers
 
@@ -119,6 +120,40 @@ class TestMedicationAPI:
         data = response.json()
         assert len(data) >= 1
         assert data[0]["medication_name"] == "Aspirin"
+
+    def test_get_medications_returns_more_than_100(
+        self,
+        client: TestClient,
+        user_with_patient,
+        authenticated_headers,
+        db_session: Session,
+    ):
+        """Regression test for issue #843: list endpoint must not cap at 100 records."""
+        patient_id = user_with_patient["patient"].id
+        # Must exceed the previous 100-record cap that caused the bug.
+        bulk_count = 105
+        db_session.add_all(
+            [
+                Medication(
+                    medication_name=f"BulkMed{i:03d}",
+                    patient_id=patient_id,
+                    status="active",
+                )
+                for i in range(bulk_count)
+            ]
+        )
+        db_session.commit()
+
+        response = client.get(
+            "/api/v1/medications/", headers=authenticated_headers
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == bulk_count, (
+            f"Expected {bulk_count} medications, got {len(data)} - "
+            "pagination cap may have regressed"
+        )
 
     def test_get_medication_by_id(
         self, client: TestClient, user_with_patient, authenticated_headers

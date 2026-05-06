@@ -98,7 +98,7 @@ def read_injuries(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     status: Optional[str] = Query(
         None, description="Filter by status (active/healing/resolved/chronic)"
     ),

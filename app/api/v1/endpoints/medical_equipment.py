@@ -62,7 +62,7 @@ def read_medical_equipment(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     status: Optional[str] = Query(None),
     equipment_type: Optional[str] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),

@@ -70,7 +70,7 @@ def read_symptoms(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     status: Optional[str] = None,
     search: Optional[str] = None,
     target_patient_id: int = Depends(deps.get_accessible_patient_id),
@@ -288,7 +288,7 @@ def read_symptom_occurrences(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
     current_user: User = Depends(deps.get_current_user),
 ) -> Any:

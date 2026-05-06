@@ -55,7 +55,7 @@ def read_practices(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     search: str = Query(None, min_length=1),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:

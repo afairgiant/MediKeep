@@ -69,7 +69,7 @@ def read_encounters(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     practitioner_id: Optional[int] = Query(None),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     tag_match_all: bool = Query(
@@ -246,7 +246,7 @@ def get_patient_encounters(
     db: Session = Depends(deps.get_db),
     patient_id: int = Depends(deps.verify_patient_access),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     current_user_id: int = Depends(deps.get_current_user_id),
 ) -> Any:
     """Get all encounters for a specific patient."""

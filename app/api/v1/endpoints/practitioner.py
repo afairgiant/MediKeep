@@ -48,7 +48,7 @@ def read_practitioners(
     request: Request,
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = Query(default=100, le=100),
+    limit: int = Query(default=10000, le=10000),
     specialty_id: Optional[int] = Query(None),
     practice_id: Optional[int] = Query(None),
     current_user_id: int = Depends(deps.get_current_user_id),
