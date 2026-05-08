@@ -22,8 +22,10 @@ export const cssVariablesResolver = theme => ({
     '--input-placeholder-color': '#3f4a59',
     '--input-section-color': '#000000',
     '--input-bd': '#6b7280',
-    '--mantine-color-body': '#ffffff',
+    '--mantine-color-body': '#e2e8f0',
     '--mantine-color-default': '#ffffff',
+    '--mantine-color-default-border': '#1e293b',
+    '--mantine-color-default-border-hover': '#0f172a',
   },
   dark: {
     '--mantine-color-text': '#f7fafc',
@@ -35,6 +37,8 @@ export const cssVariablesResolver = theme => ({
     '--input-bd': '#4a5568',
     '--mantine-color-body': '#1a202c',
     '--mantine-color-default': '#2d3748',
+    '--mantine-color-default-border': '#718096',
+    '--mantine-color-default-border-hover': '#a0aec0',
   },
 });
 
@@ -118,6 +122,16 @@ export const theme = createTheme({
       styles: {
         root: {
           fontWeight: 'var(--button-font-weight)',
+        },
+      },
+    },
+    Paper: {
+      styles: {
+        root: {
+          // Mantine v8 defaults Paper bg to --mantine-color-body, which matches
+          // the page background. Pin it to --mantine-color-default so panels stay
+          // distinct from the body in both light and dark modes.
+          backgroundColor: 'var(--mantine-color-default)',
         },
       },
     },

@@ -768,14 +768,11 @@ const PatientSelector = ({
       <Group
         gap="sm"
         p="xs"
-        styles={theme => ({
+        styles={() => ({
           root: {
             borderRadius: 8,
-            border: `1px solid ${
-              colorScheme === 'dark'
-                ? theme.colors.dark[4]
-                : theme.colors.gray[3]
-            }`,
+            backgroundColor: 'var(--mantine-color-default)',
+            border: '1px solid var(--mantine-color-default-border)',
           },
         })}
       >
