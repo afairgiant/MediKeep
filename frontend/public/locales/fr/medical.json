@@ -391,9 +391,9 @@
       "description": "Nom du vaccin administré",
       "label": "Nom du vaccin",
       "placeholder": "ex : COVID-19 à ARN messager, Grippe, ROR",
-      "searchPlaceholder": "Type to search vaccines...",
-      "combinedHint": "Combined vaccine — components: {{components}}",
-      "matchedCommonName": "matched: {{name}}"
+      "searchPlaceholder": "Tapez pour rechercher des vaccins...",
+      "combinedHint": "Vaccin combiné — composants : {{components}}",
+      "matchedCommonName": "correspondance : {{name}}"
     }
   },
   "injuries": {

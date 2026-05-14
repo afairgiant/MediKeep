@@ -391,9 +391,9 @@
       "description": "Название введённой вакцины",
       "label": "Название вакцины",
       "placeholder": "например, COVID-19 мРНК, Грипп, КПК",
-      "searchPlaceholder": "Type to search vaccines...",
-      "combinedHint": "Combined vaccine — components: {{components}}",
-      "matchedCommonName": "matched: {{name}}"
+      "searchPlaceholder": "Введите название для поиска вакцин...",
+      "combinedHint": "Комбинированная вакцина — компоненты: {{components}}",
+      "matchedCommonName": "совпадение: {{name}}"
     }
   },
   "injuries": {

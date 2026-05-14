@@ -24,6 +24,10 @@ def json_array_text_contains(column, search_term: str):
       `LOWER(jsonb_array_elements_text(column))`.
     - SQLite: a generated text column holding the joined values.
     """
+    # autoescape=True so LIKE meta-characters (%, _, /) in the user query
+    # are treated literally; explicit \" escape so internal quotes can't
+    # break the surrounding JSON-string match.
+    safe_term = search_term.lower().replace('"', '\\"')
     return func.lower(func.cast(column, String)).contains(
-        f'"{search_term.lower()}"'
+        f'"{safe_term}"', autoescape=True
     )

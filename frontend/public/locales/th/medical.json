@@ -391,9 +391,9 @@
       "description": "ชื่อวัคซีนที่ได้รับ",
       "label": "ชื่อวัคซีน",
       "placeholder": "เช่น วัคซีนโควิด-19 mRNA, วัคซีนไข้หวัดใหญ่, MMR",
-      "searchPlaceholder": "Type to search vaccines...",
-      "combinedHint": "Combined vaccine — components: {{components}}",
-      "matchedCommonName": "matched: {{name}}"
+      "searchPlaceholder": "พิมพ์เพื่อค้นหาวัคซีน...",
+      "combinedHint": "วัคซีนรวม — ส่วนประกอบ: {{components}}",
+      "matchedCommonName": "ตรงกับ: {{name}}"
     }
   },
   "injuries": {

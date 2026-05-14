@@ -87,7 +87,10 @@ def _seed(db: Session) -> List[StandardizedVaccine]:
             "vaccine_name": "BCG",
             "short_name": "BCG",
             "category": "Bacterial",
-            "common_names": ["Tuberculosis vaccine"],
+            # Bare "vaccine" entry lets the tie-break test match this row at
+            # the same relevance tier as Rabies below (which also has it),
+            # giving the common/uncommon ordering check something to verify.
+            "common_names": ["Tuberculosis vaccine", "vaccine"],
             "is_combined": False,
             "components": None,
             "default_manufacturer": None,
@@ -99,7 +102,7 @@ def _seed(db: Session) -> List[StandardizedVaccine]:
             "vaccine_name": "Rabies",
             "short_name": "Rabies",
             "category": "Viral",
-            "common_names": ["Imovax"],
+            "common_names": ["Imovax", "vaccine"],
             "is_combined": False,
             "components": None,
             "default_manufacturer": None,
@@ -219,20 +222,21 @@ class TestStandardizedVaccineRanking:
         self, db_session: Session, vaccines
     ):
         """
-        When two entries match at the same relevance tier (e.g., both via
-        a 'contains' on category-style word), is_common should sort first.
+        When entries match at the same relevance tier (here: all via a
+        common_names 'contains' on the word "vaccine"), is_common rows must
+        sort before is_common=False rows. The fixture has both — BCG/Cholera
+        (common) and Rabies (uncommon) — so this exercises the ordering
+        rather than no-op'ing when only one match exists.
         """
         results = crud.search_vaccines(db_session, "vaccine")
-        if len(results) >= 2:
-            common_before_uncommon = True
-            seen_uncommon = False
-            for v in results:
-                if not v.is_common:
-                    seen_uncommon = True
-                elif seen_uncommon:
-                    common_before_uncommon = False
-                    break
-            assert common_before_uncommon
+        assert len(results) >= 2, "fixture must produce at least 2 hits"
+        common_hits = [v for v in results if v.is_common]
+        uncommon_hits = [v for v in results if not v.is_common]
+        assert common_hits, "fixture must include at least one is_common hit"
+        assert uncommon_hits, "fixture must include at least one uncommon hit"
+        last_common_idx = max(results.index(v) for v in common_hits)
+        first_uncommon_idx = min(results.index(v) for v in uncommon_hits)
+        assert last_common_idx < first_uncommon_idx
 
 
 class TestAutocompleteOutputShape:
@@ -240,27 +244,37 @@ class TestAutocompleteOutputShape:
         self, db_session: Session, vaccines
     ):
         opts = crud.get_autocomplete_options(db_session, "MMR", limit=10)
-        mmr_opt = next(o for o in opts if o["label"] == "Measles, Mumps and Rubella")
+        mmr_opt = next(
+            (o for o in opts if o["label"] == "Measles, Mumps and Rubella"),
+            None,
+        )
+        assert mmr_opt is not None, "MMR option missing from autocomplete results"
         assert mmr_opt["value"] == "Measles, Mumps and Rubella (MMR)"
 
     def test_value_omits_short_name_when_identical(
         self, db_session: Session, vaccines
     ):
         opts = crud.get_autocomplete_options(db_session, "BCG", limit=5)
-        bcg = next(o for o in opts if o["label"] == "BCG")
+        bcg = next((o for o in opts if o["label"] == "BCG"), None)
+        assert bcg is not None, "BCG option missing from autocomplete results"
         assert bcg["value"] == "BCG"
 
     def test_combined_flag_and_components_carried_through(
         self, db_session: Session, vaccines
     ):
         opts = crud.get_autocomplete_options(db_session, "MMR", limit=10)
-        mmr = next(o for o in opts if o["label"] == "Measles, Mumps and Rubella")
+        mmr = next(
+            (o for o in opts if o["label"] == "Measles, Mumps and Rubella"),
+            None,
+        )
+        assert mmr is not None, "MMR option missing from autocomplete results"
         assert mmr["is_combined"] is True
         assert mmr["components"] == ["Measles", "Mumps", "Rubella"]
 
     def test_non_combined_components_is_none(self, db_session: Session, vaccines):
         opts = crud.get_autocomplete_options(db_session, "Covid", limit=5)
-        covid = next(o for o in opts if o["label"] == "Covid-19")
+        covid = next((o for o in opts if o["label"] == "Covid-19"), None)
+        assert covid is not None, "Covid-19 option missing from autocomplete results"
         assert covid["is_combined"] is False
         assert covid["components"] is None
 

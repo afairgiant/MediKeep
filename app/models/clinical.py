@@ -292,16 +292,18 @@ class StandardizedVaccine(Base):
 
     __tablename__ = "standardized_vaccines"
 
-    id = Column(Integer, primary_key=True, index=True)
-    who_code = Column(String(100), unique=True, index=True, nullable=True)
-    vaccine_name = Column(String(255), nullable=False, index=True)
-    short_name = Column(String(100), nullable=True, index=True)
-    category = Column(String(50), nullable=True, index=True)
+    # All indexes (including the UNIQUE on who_code) are declared in
+    # __table_args__ below — single source of truth, matches the migration.
+    id = Column(Integer, primary_key=True)
+    who_code = Column(String(100), nullable=True)
+    vaccine_name = Column(String(255), nullable=False)
+    short_name = Column(String(100), nullable=True)
+    category = Column(String(50), nullable=True)
     common_names = Column(JSON, nullable=True)
-    is_combined = Column(Boolean, default=False, nullable=False, index=True)
+    is_combined = Column(Boolean, default=False, nullable=False)
     components = Column(JSON, nullable=True)
     default_manufacturer = Column(String(100), nullable=True)
-    is_common = Column(Boolean, default=False, nullable=False, index=True)
+    is_common = Column(Boolean, default=False, nullable=False)
     display_order = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=get_utc_now, nullable=False)
     updated_at = Column(

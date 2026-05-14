@@ -391,9 +391,9 @@
       "description": "Name des verabreichten Impfstoffs",
       "label": "Impfstoffname",
       "placeholder": "z.B. COVID-19 mRNA, Influenza, MMR",
-      "searchPlaceholder": "Type to search vaccines...",
-      "combinedHint": "Combined vaccine — components: {{components}}",
-      "matchedCommonName": "matched: {{name}}"
+      "searchPlaceholder": "Zum Suchen von Impfstoffen eingeben...",
+      "combinedHint": "Kombinierter Impfstoff — Bestandteile: {{components}}",
+      "matchedCommonName": "Treffer: {{name}}"
     }
   },
   "injuries": {

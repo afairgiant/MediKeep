@@ -391,9 +391,9 @@
       "description": "接种的疫苗名称",
       "label": "疫苗名称",
       "placeholder": "如：新冠mRNA疫苗、流感疫苗、MMR疫苗",
-      "searchPlaceholder": "Type to search vaccines...",
-      "combinedHint": "Combined vaccine — components: {{components}}",
-      "matchedCommonName": "matched: {{name}}"
+      "searchPlaceholder": "输入以搜索疫苗...",
+      "combinedHint": "联合疫苗 — 成分：{{components}}",
+      "matchedCommonName": "匹配：{{name}}"
     }
   },
   "injuries": {

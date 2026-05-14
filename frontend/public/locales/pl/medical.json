@@ -391,9 +391,9 @@
       "description": "Nazwa podanej szczepionki",
       "label": "Nazwa szczepionki",
       "placeholder": "np. COVID-19 mRNA, Grypa, MMR",
-      "searchPlaceholder": "Type to search vaccines...",
-      "combinedHint": "Combined vaccine — components: {{components}}",
-      "matchedCommonName": "matched: {{name}}"
+      "searchPlaceholder": "Wpisz, aby wyszukać szczepionki...",
+      "combinedHint": "Szczepionka złożona — składniki: {{components}}",
+      "matchedCommonName": "dopasowano: {{name}}"
     }
   },
   "injuries": {

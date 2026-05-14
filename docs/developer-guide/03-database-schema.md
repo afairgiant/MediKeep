@@ -1771,7 +1771,8 @@ JUNCTION TABLES (Many-to-Many)
 - `idx_standardized_vaccines_is_combined` on is_combined
 
 **Business Rules**:
-- Seed data sourced from `shared/data/vaccine_library.json` (WHO PCMT + curated additions). Re-seeding is idempotent: the table is dropped and recreated on migration downgrade.
+- Seed data is sourced from `shared/data/vaccine_library.json` (WHO PCMT + curated additions). Seeding runs once during the initial `alembic upgrade`; alembic's revision tracking prevents a second seed from duplicating rows on subsequent upgrades.
+- Migration downgrade is destructive: it drops the table entirely (along with any post-seed edits or custom rows). The next `alembic upgrade` recreates and re-seeds from the current JSON.
 - `is_common` flag prioritizes frequently administered vaccines in autocomplete defaults.
 - `is_combined` + `components` powers the "combined vaccine" hint on the form selector.
 - WHO codes are unique but nullable to allow curated entries (e.g., Tdap Adult Booster) not yet in the WHO catalog.
@@ -2349,6 +2350,14 @@ def get_utc_now():
 - `idx_standardized_tests_is_common` on is_common
 - `idx_standardized_tests_short_name` on short_name
 
+**Standardized Vaccines**:
+- `idx_standardized_vaccines_who_code` on who_code (UNIQUE)
+- `idx_standardized_vaccines_vaccine_name` on vaccine_name
+- `idx_standardized_vaccines_short_name` on short_name
+- `idx_standardized_vaccines_category` on category
+- `idx_standardized_vaccines_is_common` on is_common
+- `idx_standardized_vaccines_is_combined` on is_combined
+
 ### Query Performance Recommendations
 
 1. **Always filter by patient_id first** for patient-specific queries
@@ -2432,6 +2441,7 @@ lab_results = session.query(LabResult)\
 | injury_treatments | (injury_id, treatment_id) | uq_injury_treatment |
 | injury_procedures | (injury_id, procedure_id) | uq_injury_procedure |
 | standardized_tests | loinc_code | Built-in UNIQUE |
+| standardized_vaccines | who_code | idx_standardized_vaccines_who_code |
 
 ### Check Constraints
 
