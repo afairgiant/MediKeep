@@ -4,35 +4,15 @@ CRUD operations for standardized tests
 
 from typing import List, Optional
 
-from sqlalchemy import String, and_, case, func, or_
+from sqlalchemy import and_, case, func, or_
 from sqlalchemy.orm import Session
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
+from app.crud._search_helpers import json_array_text_contains
 from app.models.models import StandardizedTest
 
 logger = get_logger(__name__, "app")
-
-
-def _get_json_array_search_condition(column, search_term: str):
-    """
-    Helper to create JSON array search condition.
-
-    Uses text-based matching that works on both PostgreSQL and SQLite.
-    For production optimization, consider:
-    - PostgreSQL: Creating a functional GIN index on LOWER(jsonb_array_elements_text(column))
-    - SQLite: Adding a generated column for searchable text
-
-    Args:
-        column: The JSON array column to search
-        search_term: Search value (will be lowercased)
-
-    Returns:
-        SQLAlchemy condition for filtering
-    """
-    # Cast JSON to text and search for quoted value (case-insensitive)
-    # Works on both databases but doesn't use specialized indexes
-    return func.lower(func.cast(column, String)).contains(f'"{search_term.lower()}"')
 
 
 def get_test_by_id(db: Session, test_id: int) -> Optional[StandardizedTest]:
@@ -99,7 +79,7 @@ def search_tests(
 
     # 2. Search in common_names JSON array (cross-database compatible)
     conditions.append(
-        _get_json_array_search_condition(StandardizedTest.common_names, search_term)
+        json_array_text_contains(StandardizedTest.common_names, search_term)
     )
 
     # 3. Starts with query (with LIKE escaping)
@@ -155,7 +135,7 @@ def search_tests(
         (func.lower(StandardizedTest.loinc_code) == search_term, 1),
         # High priority: exact match in common_names JSON array (dialect-aware)
         (
-            _get_json_array_search_condition(
+            json_array_text_contains(
                 StandardizedTest.common_names, search_term
             ),
             2,

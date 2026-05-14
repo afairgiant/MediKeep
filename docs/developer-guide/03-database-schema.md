@@ -1740,6 +1740,42 @@ JUNCTION TABLES (Many-to-Many)
 - is_common flag prioritizes frequently used tests
 - Enables consistent trending across different lab results
 
+### standardized_vaccines
+**Purpose**: WHO PreQualVaccineType vaccine definitions plus curated additions (Tdap booster, Shingles/RZV, MMRV, Twinrix, etc.) for autocomplete on the Immunization form. Free-text `vaccine_name` on immunization records is still accepted for entries not in this catalog.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique vaccine definition ID |
+| who_code | String(100) | UNIQUE, NULLABLE | WHO PCMT PreQualVaccineType code (null for curated additions outside the WHO list) |
+| vaccine_name | String(255) | NOT NULL | Full vaccine name |
+| short_name | String(100) | | Abbreviation / display short name (e.g., "MMR", "DTaP") |
+| category | String(50) | | Viral, Bacterial, Combined, Toxoid, Parasitic, Other |
+| common_names | JSON | | Brand and alternative names for fuzzy search |
+| is_combined | Boolean | NOT NULL, DEFAULT FALSE | Multi-component formulation flag |
+| components | JSON | | Component list when is_combined (e.g., ["Measles","Mumps","Rubella"]) |
+| default_manufacturer | String(100) | | Optional manufacturer hint |
+| is_common | Boolean | NOT NULL, DEFAULT FALSE | Boost in search ranking; surfaces in default suggestions |
+| display_order | Integer | | Sort order for the common subset |
+| created_at | DateTime | NOT NULL | Record creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- None directly. `immunizations.vaccine_name` is intentionally not a foreign key — free-text entries are still permitted.
+
+**Indexes**:
+- `idx_standardized_vaccines_who_code` on who_code (UNIQUE)
+- `idx_standardized_vaccines_vaccine_name` on vaccine_name
+- `idx_standardized_vaccines_short_name` on short_name
+- `idx_standardized_vaccines_category` on category
+- `idx_standardized_vaccines_is_common` on is_common
+- `idx_standardized_vaccines_is_combined` on is_combined
+
+**Business Rules**:
+- Seed data sourced from `shared/data/vaccine_library.json` (WHO PCMT + curated additions). Re-seeding is idempotent: the table is dropped and recreated on migration downgrade.
+- `is_common` flag prioritizes frequently administered vaccines in autocomplete defaults.
+- `is_combined` + `components` powers the "combined vaccine" hint on the form selector.
+- WHO codes are unique but nullable to allow curated entries (e.g., Tdap Adult Booster) not yet in the WHO catalog.
+
 ## Junction Tables
 
 ### lab_result_conditions

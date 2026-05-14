@@ -390,7 +390,10 @@
     "vaccineName": {
       "description": "Nombre de la vacuna administrada",
       "label": "Nombre de la Vacuna",
-      "placeholder": "p. ej., COVID-19 ARNm, Influenza, SRP"
+      "placeholder": "p. ej., COVID-19 ARNm, Influenza, SRP",
+      "searchPlaceholder": "Type to search vaccines...",
+      "combinedHint": "Combined vaccine — components: {{components}}",
+      "matchedCommonName": "matched: {{name}}"
     }
   },
   "injuries": {

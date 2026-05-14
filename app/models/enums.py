@@ -220,6 +220,17 @@ class Laterality(Enum):
     NOT_APPLICABLE = "not_applicable"
 
 
+class VaccineCategory(str, Enum):
+    """Vaccine categories — mirrors frontend VaccineCategory union."""
+
+    VIRAL = "Viral"
+    BACTERIAL = "Bacterial"
+    COMBINED = "Combined"
+    TOXOID = "Toxoid"
+    PARASITIC = "Parasitic"
+    OTHER = "Other"
+
+
 # Helper functions to get status lists for validation
 def get_status_values(status_enum):
     """Get list of status values from enum"""

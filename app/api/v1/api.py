@@ -37,6 +37,7 @@ from app.api.v1.endpoints import (
     search,
     sso,
     standardized_tests,
+    standardized_vaccine,
     symptom,
     system,
     tags,
@@ -94,6 +95,13 @@ api_router.include_router(search.router, prefix="/search", tags=["search"])
 # Standardized tests (LOINC)
 api_router.include_router(
     standardized_tests.router, prefix="/standardized-tests", tags=["standardized-tests"]
+)
+
+# Standardized vaccines (WHO PCMT + curated)
+api_router.include_router(
+    standardized_vaccine.router,
+    prefix="/standardized-vaccines",
+    tags=["standardized-vaccines"],
 )
 
 # Cross-entity tag management

@@ -77,9 +77,11 @@ describe('MantineImmunizationForm', () => {
       expect(
         screen.getAllByText('Add New Immunization').length
       ).toBeGreaterThanOrEqual(1);
+      // Vaccine name is a Mantine Autocomplete; it renders 2 inputs sharing the label
       expect(
-        screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)
-      ).toBeInTheDocument();
+        screen.getAllByLabelText(/medical:immunizations\.vaccineName\.label/)
+          .length
+      ).toBeGreaterThan(0);
       // Date field from mock
       expect(
         screen.getByLabelText(/shared:fields\.dateAdministered/)
@@ -97,10 +99,11 @@ describe('MantineImmunizationForm', () => {
     test('renders all form fields', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      // Required fields
+      // Required fields (vaccine_name is now an Autocomplete with 2 inputs)
       expect(
-        screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)
-      ).toBeInTheDocument();
+        screen.getAllByLabelText(/medical:immunizations\.vaccineName\.label/)
+          .length
+      ).toBeGreaterThan(0);
       expect(
         screen.getByLabelText(/shared:fields\.dateAdministered/)
       ).toBeInTheDocument();
@@ -153,9 +156,10 @@ describe('MantineImmunizationForm', () => {
     test('handles vaccine name input changes', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const vaccineNameInput = screen.getByLabelText(
+      // Mantine Autocomplete renders 2 inputs; the first is the visible search input
+      const vaccineNameInput = screen.getAllByLabelText(
         /medical:immunizations\.vaccineName\.label/
-      );
+      )[0];
       fireEvent.change(vaccineNameInput, {
         target: { value: 'COVID-19 Vaccine' },
       });
@@ -398,9 +402,10 @@ describe('MantineImmunizationForm', () => {
     test('validates required vaccine name field', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const vaccineNameInput = screen.getByLabelText(
+      // Visible input is the first of the Autocomplete's two label-linked inputs
+      const vaccineNameInput = screen.getAllByLabelText(
         /medical:immunizations\.vaccineName\.label/
-      );
+      )[0];
       expect(vaccineNameInput).toBeRequired();
     });
 
@@ -417,9 +422,9 @@ describe('MantineImmunizationForm', () => {
     test('accepts common vaccine names', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      const vaccineNameInput = screen.getByLabelText(
+      const vaccineNameInput = screen.getAllByLabelText(
         /medical:immunizations\.vaccineName\.label/
-      );
+      )[0];
 
       const commonVaccines = [
         'COVID-19 Vaccine',
@@ -581,10 +586,11 @@ describe('MantineImmunizationForm', () => {
     test('has proper form labels and required indicators', () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      // Check required fields exist
+      // Check required fields exist (vaccine_name is an Autocomplete with 2 inputs)
       expect(
-        screen.getByLabelText(/medical:immunizations\.vaccineName\.label/)
-      ).toBeInTheDocument();
+        screen.getAllByLabelText(/medical:immunizations\.vaccineName\.label/)
+          .length
+      ).toBeGreaterThan(0);
       expect(
         screen.getByLabelText(/shared:fields\.dateAdministered/)
       ).toBeInTheDocument();
@@ -627,10 +633,10 @@ describe('MantineImmunizationForm', () => {
     test('supports complete immunization record creation', async () => {
       render(<MantineImmunizationForm {...defaultProps} />);
 
-      // Fill text fields
-      const vaccineInput = screen.getByLabelText(
+      // Fill text fields (vaccine_name is now an Autocomplete; pick the visible input)
+      const vaccineInput = screen.getAllByLabelText(
         /medical:immunizations\.vaccineName\.label/
-      );
+      )[0];
       fireEvent.change(vaccineInput, {
         target: { value: 'Tetanus-Diphtheria-Pertussis (Tdap)' },
       });

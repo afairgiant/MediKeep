@@ -91,6 +91,13 @@ const BaseMedicalForm = ({
   // Extra content to render after specific fields (keyed by field name)
   fieldExtras = {},
 
+  // Per-field render overrides: { fieldName: (fieldConfig, baseProps) => ReactNode }
+  // Lets a parent form supply a bespoke renderer (e.g., a library-backed
+  // autocomplete) without forcing every special case into the generic switch.
+  // Renderers close over their parent's formData/onInputChange directly;
+  // BaseMedicalForm internals stay encapsulated.
+  customFieldRenderers = {},
+
   // Form type for responsive optimization
   formType = 'standard',
 
@@ -420,6 +427,12 @@ const BaseMedicalForm = ({
         error: fieldErrors[name] || null,
       };
 
+      // Per-field render override hatch (used for library-backed autocompletes
+      // and similar bespoke widgets that don't fit the generic field switch).
+      if (customFieldRenderers[name]) {
+        return customFieldRenderers[name](translatedFieldConfig, baseProps);
+      }
+
       switch (type) {
         case 'text':
         case 'email':
@@ -718,6 +731,7 @@ const BaseMedicalForm = ({
       dynamicOptions,
       loadingStates,
       fieldErrors,
+      customFieldRenderers,
       renderTextInputField,
       renderTextareaField,
       renderSelectField,
@@ -947,6 +961,10 @@ const MemoizedBaseMedicalForm = memo(
 
     // Check dynamicOptions object (should be stable from parent)
     if (prevProps.dynamicOptions !== nextProps.dynamicOptions) {
+      return false;
+    }
+
+    if (prevProps.customFieldRenderers !== nextProps.customFieldRenderers) {
       return false;
     }
 

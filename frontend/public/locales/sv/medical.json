@@ -390,7 +390,10 @@
     "vaccineName": {
       "description": "Namn på det administrerade vaccinet",
       "label": "Vaccinnamn",
-      "placeholder": "t.ex. COVID-19 mRNA, Influensa, MPR"
+      "placeholder": "t.ex. COVID-19 mRNA, Influensa, MPR",
+      "searchPlaceholder": "Type to search vaccines...",
+      "combinedHint": "Combined vaccine — components: {{components}}",
+      "matchedCommonName": "matched: {{name}}"
     }
   },
   "injuries": {

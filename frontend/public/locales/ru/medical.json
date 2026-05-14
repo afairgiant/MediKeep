@@ -390,7 +390,10 @@
     "vaccineName": {
       "description": "Название введённой вакцины",
       "label": "Название вакцины",
-      "placeholder": "например, COVID-19 мРНК, Грипп, КПК"
+      "placeholder": "например, COVID-19 мРНК, Грипп, КПК",
+      "searchPlaceholder": "Type to search vaccines...",
+      "combinedHint": "Combined vaccine — components: {{components}}",
+      "matchedCommonName": "matched: {{name}}"
     }
   },
   "injuries": {

@@ -2730,6 +2730,112 @@ Base path: `/api/v1/standardized-tests`
 
 ---
 
+### 6.13 Standardized Vaccines (WHO PCMT + curated)
+
+Base path: `/api/v1/standardized-vaccines`
+
+**Purpose**: Search and autocomplete for standardized vaccines, backed by WHO PreQualVaccineType codes plus curated additions for common Western vaccines (Tdap booster, Shingles/RZV, MMRV, Twinrix, etc.). Powers the vaccine selector on the Immunization form. Free-text `vaccine_name` on immunization records is still accepted for entries not in this catalog.
+
+#### Search Vaccines
+
+`GET /standardized-vaccines/search`
+
+- **Purpose**: Full-text + fuzzy search across vaccine_name, short_name, WHO code, and common brand names
+- **Query Parameters**:
+  - `query`: Search term
+  - `category`: Filter by category (`Viral`, `Bacterial`, `Combined`, `Toxoid`, `Parasitic`, `Other`)
+  - `limit`: Max items (default 200, max 1000)
+- **Success Response** (200):
+
+```json
+{
+  "vaccines": [
+    {
+      "id": 42,
+      "who_code": "MeaslesMumpsandRubella",
+      "vaccine_name": "Measles, Mumps and Rubella",
+      "short_name": "MMR",
+      "category": "Combined",
+      "common_names": ["MMR", "M-M-R II", "Priorix"],
+      "is_combined": true,
+      "components": ["Measles", "Mumps", "Rubella"],
+      "default_manufacturer": null,
+      "is_common": true
+    }
+  ],
+  "total": 1
+}
+```
+
+#### Autocomplete
+
+`GET /standardized-vaccines/autocomplete`
+
+- **Purpose**: Autocomplete suggestions formatted for the frontend dropdown
+- **Query Parameters**:
+  - `query`: Autocomplete query
+  - `category`: Optional category filter
+  - `limit`: Max suggestions (default 50, max 200)
+- **Success Response** (200):
+
+```json
+[
+  {
+    "value": "Measles, Mumps and Rubella (MMR)",
+    "label": "Measles, Mumps and Rubella",
+    "who_code": "MeaslesMumpsandRubella",
+    "short_name": "MMR",
+    "category": "Combined",
+    "is_combined": true,
+    "components": ["Measles", "Mumps", "Rubella"]
+  }
+]
+```
+
+#### Get Common Vaccines
+
+`GET /standardized-vaccines/common`
+
+- **Purpose**: Frequently administered vaccines, ordered by `display_order`
+- **Success Response** (200): Array of vaccine objects
+
+#### Get Vaccines by Category
+
+`GET /standardized-vaccines/by-category/{category}`
+
+- **Purpose**: All vaccines in a category
+- **Success Response** (200): Array of vaccine objects
+
+#### Get Vaccine by WHO Code
+
+`GET /standardized-vaccines/by-who-code/{who_code}`
+
+- **Purpose**: Look up by WHO PCMT PreQualVaccineType code
+- **Success Response** (200): Vaccine object
+
+#### Get Vaccine by Name
+
+`GET /standardized-vaccines/by-name/{vaccine_name}`
+
+- **Purpose**: Case-insensitive exact-name lookup
+- **Success Response** (200): Vaccine object
+
+#### Get Vaccine Count
+
+`GET /standardized-vaccines/count`
+
+- **Purpose**: Total count of standardized vaccines in the catalog
+- **Success Response** (200):
+
+```json
+{
+  "category": null,
+  "count": 66
+}
+```
+
+---
+
 ## 7. Related Information
 
 ### 7.1 Insurance

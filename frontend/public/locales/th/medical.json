@@ -390,7 +390,10 @@
     "vaccineName": {
       "description": "ชื่อวัคซีนที่ได้รับ",
       "label": "ชื่อวัคซีน",
-      "placeholder": "เช่น วัคซีนโควิด-19 mRNA, วัคซีนไข้หวัดใหญ่, MMR"
+      "placeholder": "เช่น วัคซีนโควิด-19 mRNA, วัคซีนไข้หวัดใหญ่, MMR",
+      "searchPlaceholder": "Type to search vaccines...",
+      "combinedHint": "Combined vaccine — components: {{components}}",
+      "matchedCommonName": "matched: {{name}}"
     }
   },
   "injuries": {

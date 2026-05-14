@@ -281,6 +281,43 @@ class Immunization(Base):
     __table_args__ = (Index("idx_immunizations_patient_id", "patient_id"),)
 
 
+class StandardizedVaccine(Base):
+    """
+    Standardized vaccine definitions sourced from WHO PreQualVaccineType plus
+    curated additions for common Western vaccines (Tdap booster, Shingles, MMRV,
+    Twinrix, etc.). Used for autocomplete suggestions and consistent vaccine
+    naming on the Immunization form. Free-text vaccine_name on Immunization is
+    still accepted for entries not in this catalog.
+    """
+
+    __tablename__ = "standardized_vaccines"
+
+    id = Column(Integer, primary_key=True, index=True)
+    who_code = Column(String(100), unique=True, index=True, nullable=True)
+    vaccine_name = Column(String(255), nullable=False, index=True)
+    short_name = Column(String(100), nullable=True, index=True)
+    category = Column(String(50), nullable=True, index=True)
+    common_names = Column(JSON, nullable=True)
+    is_combined = Column(Boolean, default=False, nullable=False, index=True)
+    components = Column(JSON, nullable=True)
+    default_manufacturer = Column(String(100), nullable=True)
+    is_common = Column(Boolean, default=False, nullable=False, index=True)
+    display_order = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    __table_args__ = (
+        Index("idx_standardized_vaccines_who_code", "who_code", unique=True),
+        Index("idx_standardized_vaccines_vaccine_name", "vaccine_name"),
+        Index("idx_standardized_vaccines_short_name", "short_name"),
+        Index("idx_standardized_vaccines_category", "category"),
+        Index("idx_standardized_vaccines_is_common", "is_common"),
+        Index("idx_standardized_vaccines_is_combined", "is_combined"),
+    )
+
+
 class Allergy(Base):
     """Represents a patient allergy with reaction details and severity."""
 

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Autocomplete,
   Modal,
   Tabs,
   Box,
@@ -33,6 +34,11 @@ import {
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
+import {
+  getAutocompleteEntries,
+  getVaccineByName,
+  extractVaccineName,
+} from '../../../constants/vaccineLibrary';
 
 const ImmunizationFormWrapper = ({
   isOpen,
@@ -96,6 +102,57 @@ const ImmunizationFormWrapper = ({
 
   // Form handlers
   const { handleTextInputChange } = useFormHandlers(onInputChange);
+
+  const setField = useCallback(
+    (name, value) => onInputChange({ target: { name, value } }),
+    [onInputChange]
+  );
+
+  // Library-ranked vaccine suggestions for the autocomplete. Recomputed per
+  // keystroke so brand-name matches via common_names (e.g. "Shingrix") surface
+  // — Mantine's default substring filter alone would miss them. The lookup
+  // map lets renderOption resolve {entry, matched} for each option in O(1)
+  // instead of re-parsing the display string and re-querying the library.
+  const { vaccineOptions, optionLookup } = useMemo(() => {
+    const entries = getAutocompleteEntries(formData?.vaccine_name || '', 50);
+    return {
+      vaccineOptions: entries.map(e => e.value),
+      optionLookup: new Map(entries.map(e => [e.value, e])),
+    };
+  }, [formData?.vaccine_name]);
+
+  const handleVaccineOptionSubmit = useCallback(
+    selectedValue => {
+      const canonicalName = extractVaccineName(selectedValue);
+      const libraryEntry = getVaccineByName(canonicalName);
+
+      if (!libraryEntry) {
+        // Free-text fallback — keep whatever the user picked verbatim.
+        setField('vaccine_name', canonicalName);
+        return;
+      }
+
+      // vaccine_name holds the casual/common name (e.g. "MMR"); the formal
+      // descriptor lives only in our library for now. vaccine_trade_name is
+      // left untouched — for many single-organism vaccines (BCG, Rabies) the
+      // formal name is identical to the common name, so auto-filling it just
+      // duplicates data. Users can fill in a specific brand manually.
+      const commonName = libraryEntry.short_name || libraryEntry.vaccine_name;
+      setField('vaccine_name', commonName);
+
+      if (libraryEntry.default_manufacturer) {
+        setField('manufacturer', libraryEntry.default_manufacturer);
+      }
+
+      if (libraryEntry.category) {
+        const currentTags = Array.isArray(formData?.tags) ? formData.tags : [];
+        if (!currentTags.includes(libraryEntry.category)) {
+          setField('tags', [...currentTags, libraryEntry.category]);
+        }
+      }
+    },
+    [setField, formData?.tags]
+  );
 
   // Get today's date for date picker constraints
   const today = getTodayEndOfDay();
@@ -192,19 +249,56 @@ const ImmunizationFormWrapper = ({
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <TextInput
+                    <Autocomplete
                       label={t('shared:fields.vaccineName', 'Vaccine Name')}
                       value={formData.vaccine_name || ''}
-                      onChange={handleTextInputChange('vaccine_name')}
+                      onChange={value => setField('vaccine_name', value)}
+                      onOptionSubmit={handleVaccineOptionSubmit}
+                      data={vaccineOptions}
+                      limit={50}
+                      filter={({ options, limit }) => options.slice(0, limit)}
+                      renderOption={({ option }) => {
+                        const info = optionLookup.get(option.value);
+                        const entry = info?.entry;
+                        const matched = info?.matched;
+                        const isCombined =
+                          entry?.is_combined && entry?.components?.length;
+                        let hint = null;
+                        if (matched) {
+                          hint = t(
+                            'medical:immunizations.vaccineName.matchedCommonName',
+                            'matched: {{name}}',
+                            { name: matched }
+                          );
+                        } else if (isCombined) {
+                          hint = t(
+                            'medical:immunizations.vaccineName.combinedHint',
+                            'Combined vaccine — components: {{components}}',
+                            { components: entry.components.join(', ') }
+                          );
+                        }
+                        return (
+                          <Stack gap={0}>
+                            <Text size="sm">{option.value}</Text>
+                            {hint && (
+                              <Text size="xs" c="dimmed">
+                                {hint}
+                              </Text>
+                            )}
+                          </Stack>
+                        );
+                      }}
                       placeholder={t(
-                        'immunizations.form.vaccineNamePlaceholder',
-                        'e.g., Flu Shot, COVID-19, Tdap'
+                        'medical:immunizations.vaccineName.searchPlaceholder',
+                        'Type to search vaccines...'
                       )}
                       required
                       description={t(
                         'immunizations.form.vaccineNameDesc',
                         'Common name for the vaccine'
                       )}
+                      maxDropdownHeight={300}
+                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

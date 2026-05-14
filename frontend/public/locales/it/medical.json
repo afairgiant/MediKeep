@@ -390,7 +390,10 @@
     "vaccineName": {
       "description": "Nome del vaccino somministrato",
       "label": "Nome del vaccino",
-      "placeholder": "ad es., COVID-19 mRNA, Influenza, MMR"
+      "placeholder": "ad es., COVID-19 mRNA, Influenza, MMR",
+      "searchPlaceholder": "Type to search vaccines...",
+      "combinedHint": "Combined vaccine — components: {{components}}",
+      "matchedCommonName": "matched: {{name}}"
     }
   },
   "injuries": {

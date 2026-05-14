@@ -390,7 +390,10 @@
     "vaccineName": {
       "description": "Nome da vacina administrada",
       "label": "Nome da Vacina",
-      "placeholder": "p. ex., COVID-19 mRNA, Influenza, Tríplice Viral"
+      "placeholder": "p. ex., COVID-19 mRNA, Influenza, Tríplice Viral",
+      "searchPlaceholder": "Type to search vaccines...",
+      "combinedHint": "Combined vaccine — components: {{components}}",
+      "matchedCommonName": "matched: {{name}}"
     }
   },
   "injuries": {
