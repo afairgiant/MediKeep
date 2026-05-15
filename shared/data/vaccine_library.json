@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2026-05-11",
+  "version": "1.1.0",
+  "lastUpdated": "2026-05-15",
   "_source": "WHO PreQualVaccineType FHIR CodeSystem (https://smart.who.int/pcmt-vaxprequal/CodeSystem-PreQualVaccineType.html) plus curated entries for common US/Western vaccines not in WHO PCMT (Tdap booster, Shingles, MMRV, Twinrix, etc.).",
   "vaccines": [
     {
@@ -794,6 +794,42 @@
       "default_manufacturer": null,
       "is_common": true,
       "display_order": 51
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Typhoid Ps",
+      "short_name": "ViCPS",
+      "category": "Bacterial",
+      "common_names": ["Typhoid polysaccharide", "Vi capsular polysaccharide vaccine", "Typhoid Ps", "Typhym-Vi", "Typhim Vi", "Typherix"],
+      "is_combined": false,
+      "components": null,
+      "default_manufacturer": null,
+      "is_common": true,
+      "display_order": null
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Tick-borne encephalitis (Adult)",
+      "short_name": "TBE (adult)",
+      "category": "Viral",
+      "common_names": ["Tick-borne encephalitis", "Tick-Borne Encephalitis vaccine", "TBE", "Encepur Adult", "FSME-IMMUN"],
+      "is_combined": false,
+      "components": null,
+      "default_manufacturer": null,
+      "is_common": true,
+      "display_order": null
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Tick-borne encephalitis (Paediatric)",
+      "short_name": "TBE (ped.)",
+      "category": "Viral",
+      "common_names": ["Tick-borne encephalitis", "Tick-Borne Encephalitis vaccine", "TBE", "Encepur Paediatric", "FSME-IMMUN"],
+      "is_combined": false,
+      "components": null,
+      "default_manufacturer": null,
+      "is_common": true,
+      "display_order": null
     }
   ]
 }
