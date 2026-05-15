@@ -830,6 +830,18 @@
       "default_manufacturer": null,
       "is_common": false,
       "display_order": null
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Meningococcal A+C (Polysaccharide)",
+      "short_name": "MenAC",
+      "category": "Bacterial",
+      "common_names": ["MenAC", "A+C Mérieux", "Meningococcal A+C"],
+      "is_combined": true,
+      "components": ["Meningococcal A", "Meningococcal C"],
+      "default_manufacturer": null,
+      "is_common": false,
+      "display_order": null
     }
   ]
 }
