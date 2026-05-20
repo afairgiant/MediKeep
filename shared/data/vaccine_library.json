@@ -1,6 +1,6 @@
 {
-  "version": "1.1.0",
-  "lastUpdated": "2026-05-15",
+  "version": "1.2.0",
+  "lastUpdated": "2026-05-16",
   "_source": "WHO PreQualVaccineType FHIR CodeSystem (https://smart.who.int/pcmt-vaxprequal/CodeSystem-PreQualVaccineType.html) plus curated entries for common US/Western vaccines not in WHO PCMT (Tdap booster, Shingles, MMRV, Twinrix, etc.).",
   "vaccines": [
     {
@@ -839,6 +839,30 @@
       "common_names": ["MenAC", "A+C Mérieux", "Meningococcal AC"],
       "is_combined": true,
       "components": ["Meningococcal A", "Meningococcal C"],
+      "default_manufacturer": null,
+      "is_common": false,
+      "display_order": null
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Diphtheria-Tetanus-Polio (Inactivated)",
+      "short_name": "DT-IPV",
+      "category": "Combined",
+      "common_names": ["Td-IPV", "Diphtheria-Tetanus-Polio", "DT Polio", "Revaxis"],
+      "is_combined": true,
+      "components": ["Diphtheria toxoid", "Tetanus toxoid", "Polio (Inactivated)"],
+      "default_manufacturer": null,
+      "is_common": false,
+      "display_order": null
+    },
+    {
+      "who_code": null,
+      "vaccine_name": "Diphtheria-Tetanus-Pertussis (acellular)-Haemophilus influenzae type b",
+      "short_name": "DTaP-Hib",
+      "category": "Combined",
+      "common_names": ["DTaP/Hib", "Tetramune", "Infanrix-Hib"],
+      "is_combined": true,
+      "components": ["Diphtheria toxoid", "Tetanus toxoid", "Pertussis (acellular)", "Haemophilus influenzae type b"],
       "default_manufacturer": null,
       "is_common": false,
       "display_order": null
