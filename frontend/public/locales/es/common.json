@@ -66,7 +66,7 @@
       },
       "saving": "Guardando condición...",
       "severity": {
-        "critical": "Crítica",
+        "lifeThreatening": "Amenaza para la vida",
         "mild": "Leve",
         "moderate": "Moderada",
         "severe": "Grave"

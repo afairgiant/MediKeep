@@ -66,7 +66,7 @@
       },
       "saving": "Erkrankung wird gespeichert...",
       "severity": {
-        "critical": "Kritisch",
+        "lifeThreatening": "Lebensbedrohlich",
         "mild": "Leicht",
         "moderate": "Mäßig",
         "severe": "Schwer"

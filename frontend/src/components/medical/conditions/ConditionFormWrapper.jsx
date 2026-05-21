@@ -249,10 +249,10 @@ const ConditionFormWrapper = ({
                           label: t('conditions.form.severity.severe', 'Severe'),
                         },
                         {
-                          value: 'critical',
+                          value: 'life-threatening',
                           label: t(
-                            'conditions.form.severity.critical',
-                            'Critical'
+                            'conditions.form.severity.lifeThreatening',
+                            'Life-threatening'
                           ),
                         },
                       ]}
