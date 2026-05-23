@@ -69,7 +69,7 @@ const ConditionCard = ({
 
   const getSeverityColor = severity => {
     switch (severity) {
-      case 'critical':
+      case 'life-threatening':
         return 'red';
       case 'severe':
         return 'orange';
