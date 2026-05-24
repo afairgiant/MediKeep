@@ -1,6 +1,6 @@
 {
-  "version": "1.7.0",
-  "lastUpdated": "2026-04-18",
+  "version": "1.8.0",
+  "lastUpdated": "2026-05-23",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -1786,6 +1786,16 @@
       "common_names": ["γ-Globulin", "Gamma globulin"],
       "is_common": false,
       "display_order": 162
+    },
+    {
+      "test_name": "Tuberculin Skin Test",
+      "abbreviation": "TST",
+      "default_unit": "",
+      "category": "immunology",
+      "common_names": ["Tuberculosis antigen"],
+      "is_common": false,
+      "result_type": "qualitative",
+      "display_order": 163
     }
   ]
 }
