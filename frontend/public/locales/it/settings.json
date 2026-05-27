@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Seleziona un'organizzazione",
     "urlPlaceholder": "https://la-tua-istanza-papra.com"
   },
+  "profile": {
+    "description": "Aggiorna l'identità del tuo account. Modificare il nome utente ti disconnetterà -- accederai di nuovo con il nuovo nome.",
+    "errors": {
+      "emailInvalid": "Inserisci un indirizzo email valido",
+      "nameRequired": "Questo campo non può essere vuoto",
+      "nameTooLong": "Deve essere di {{max}} caratteri o meno",
+      "updateFailed": "Impossibile aggiornare il profilo. Riprova.",
+      "usernameChars": "Il nome utente può contenere solo lettere, numeri, underscore e trattini",
+      "usernameLength": "Il nome utente deve essere tra 3 e 50 caratteri"
+    },
+    "fields": {
+      "email": "Email",
+      "firstName": "Nome",
+      "fullName": "Nome completo",
+      "lastName": "Cognome",
+      "username": "Nome utente"
+    },
+    "save": "Salva profilo",
+    "title": "Informazioni profilo",
+    "updateSuccess": "Profilo aggiornato",
+    "usernameChangedLogoutWarning": "Il salvataggio ti disconnetterà affinché il nuovo nome utente abbia effetto. Accedi nuovamente con il nuovo nome utente.",
+    "usernameChangedNotice": "Nome utente modificato. Accedi con il tuo nuovo nome utente."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Scegli come vengono visualizzate le date nell'applicazione",

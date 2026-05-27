@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Wybierz organizację",
     "urlPlaceholder": "https://twoja-instancja-papra.com"
   },
+  "profile": {
+    "description": "Zaktualizuj tożsamość swojego konta. Zmiana nazwy użytkownika spowoduje wylogowanie -- zalogujesz się ponownie z nową nazwą.",
+    "errors": {
+      "emailInvalid": "Podaj prawidłowy adres e-mail",
+      "nameRequired": "To pole nie może być puste",
+      "nameTooLong": "Musi mieć {{max}} znaków lub mniej",
+      "updateFailed": "Nie udało się zaktualizować profilu. Spróbuj ponownie.",
+      "usernameChars": "Nazwa użytkownika może zawierać tylko litery, cyfry, podkreślenia i myślniki",
+      "usernameLength": "Nazwa użytkownika musi mieć od 3 do 50 znaków"
+    },
+    "fields": {
+      "email": "E-mail",
+      "firstName": "Imię",
+      "fullName": "Pełne imię i nazwisko",
+      "lastName": "Nazwisko",
+      "username": "Nazwa użytkownika"
+    },
+    "save": "Zapisz profil",
+    "title": "Informacje o profilu",
+    "updateSuccess": "Profil zaktualizowany",
+    "usernameChangedLogoutWarning": "Zapisanie spowoduje wylogowanie, aby nowa nazwa użytkownika zaczęła obowiązywać. Zaloguj się ponownie z nową nazwą użytkownika.",
+    "usernameChangedNotice": "Nazwa użytkownika została zmieniona. Zaloguj się ponownie z nową nazwą użytkownika."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Wybierz sposób wyświetlania dat w całej aplikacji",

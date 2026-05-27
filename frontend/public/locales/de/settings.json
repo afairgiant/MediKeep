@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Organisation auswählen",
     "urlPlaceholder": "https://ihre-papra-instanz.com"
   },
+  "profile": {
+    "description": "Aktualisieren Sie Ihre Kontoidentität. Wenn Sie Ihren Benutzernamen ändern, werden Sie abgemeldet -- melden Sie sich mit dem neuen Namen wieder an.",
+    "errors": {
+      "emailInvalid": "Geben Sie eine gültige E-Mail-Adresse ein",
+      "nameRequired": "Dieses Feld darf nicht leer sein",
+      "nameTooLong": "Darf höchstens {{max}} Zeichen lang sein",
+      "updateFailed": "Profil konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+      "usernameChars": "Benutzername darf nur Buchstaben, Zahlen, Unterstriche und Bindestriche enthalten",
+      "usernameLength": "Benutzername muss zwischen 3 und 50 Zeichen lang sein"
+    },
+    "fields": {
+      "email": "E-Mail",
+      "firstName": "Vorname",
+      "fullName": "Vollständiger Name",
+      "lastName": "Nachname",
+      "username": "Benutzername"
+    },
+    "save": "Profil speichern",
+    "title": "Profilinformationen",
+    "updateSuccess": "Profil aktualisiert",
+    "usernameChangedLogoutWarning": "Beim Speichern werden Sie abgemeldet, damit der neue Benutzername wirksam wird. Melden Sie sich mit dem neuen Benutzernamen wieder an.",
+    "usernameChangedNotice": "Benutzername geändert. Bitte melden Sie sich mit Ihrem neuen Benutzernamen an."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Wählen Sie, wie Datumsangaben in der gesamten Anwendung angezeigt werden",
