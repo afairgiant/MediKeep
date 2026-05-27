@@ -164,6 +164,14 @@ describe('ProfileSettings', () => {
     expect(logout).not.toHaveBeenCalled();
   });
 
+  it('treats a case-only username edit as no change', () => {
+    renderProfile();
+    fireEvent.change(screen.getByLabelText(/profile\.fields\.username/), {
+      target: { value: 'JaneDoe' },
+    });
+    expect(screen.getByRole('button', { name: 'profile.save' })).toBeDisabled();
+  });
+
   it('reset button clears unsaved changes', () => {
     renderProfile();
     fireEvent.change(screen.getByLabelText(/profile\.fields\.fullName/), {

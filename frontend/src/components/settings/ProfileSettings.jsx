@@ -30,13 +30,17 @@ const EDITABLE_FIELDS = [
 const fieldsToFormValues = user =>
   Object.fromEntries(EDITABLE_FIELDS.map(field => [field, user?.[field] ?? '']));
 
+const normalizeForCompare = (field, value) => {
+  const trimmed = (value ?? '').trim();
+  return field === 'username' ? trimmed.toLowerCase() : trimmed;
+};
+
 const diffPayload = (form, original) =>
   EDITABLE_FIELDS.reduce((payload, field) => {
-    const next = (form[field] ?? '').trim();
-    const prev = (original[field] ?? '').trim();
+    const next = normalizeForCompare(field, form[field]);
+    const prev = normalizeForCompare(field, original[field]);
     if (next !== prev) {
-      payload[field] =
-        field === 'username' ? next.toLowerCase() : next || null;
+      payload[field] = field === 'username' ? next : next || null;
     }
     return payload;
   }, {});
