@@ -1,3 +1,5 @@
+from collections import defaultdict
+from datetime import date as date_type
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -16,12 +18,16 @@ from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_data_access
 from app.crud.immunization import immunization
 from app.models.activity_log import EntityType
+from app.models.clinical import Immunization
 from app.models.models import User
 from app.schemas.immunization import (
     ImmunizationCreate,
+    ImmunizationHistoryItem,
+    ImmunizationHistoryResponse,
     ImmunizationResponse,
     ImmunizationUpdate,
 )
+from app.services.vaccine_resolver import build_library_index, resolve_components
 
 router = APIRouter()
 
@@ -307,3 +313,86 @@ def get_patient_immunizations(
         )
 
         return immunizations
+
+
+@router.get(
+    "/patient/{patient_id}/history",
+    response_model=ImmunizationHistoryResponse,
+)
+def get_immunization_history(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    patient_id: int = Depends(deps.verify_patient_access),
+    start_date: Optional[date_type] = Query(None),
+    end_date: Optional[date_type] = Query(None),
+    current_user_id: int = Depends(deps.get_current_user_id),
+) -> Any:
+    """Return immunizations for a patient enriched with disease components.
+
+    Combined vaccines are expanded via the StandardizedVaccine library so the
+    history can be presented either chronologically or grouped by disease. The
+    ``diseases_index`` is pre-aggregated server-side so the client doesn't
+    re-derive it on each render.
+    """
+    with handle_database_errors(request=request):
+        query = (
+            db.query(Immunization)
+            .filter(Immunization.patient_id == patient_id)
+        )
+        if start_date is not None:
+            query = query.filter(Immunization.date_administered >= start_date)
+        if end_date is not None:
+            query = query.filter(Immunization.date_administered <= end_date)
+        records = query.order_by(Immunization.date_administered.desc()).all()
+
+        library_index = build_library_index(db)
+
+        items: list[ImmunizationHistoryItem] = []
+        diseases_index: dict[str, list[int]] = defaultdict(list)
+        unmatched_count = 0
+
+        for record in records:
+            components, matched = resolve_components(record, library_index)
+
+            # Determine is_combined: derive from the matched library entry
+            matched_vaccine = None
+            if record.standardized_vaccine_id is not None:
+                matched_vaccine = library_index["by_id"].get(record.standardized_vaccine_id)
+            if matched_vaccine is None and record.vaccine_name:
+                matched_vaccine = library_index["by_name"].get(record.vaccine_name.lower())
+            is_combined = bool(matched_vaccine and matched_vaccine.is_combined)
+
+            base = ImmunizationResponse.model_validate(record).model_dump()
+            items.append(
+                ImmunizationHistoryItem(
+                    **base,
+                    components=components,
+                    is_combined=is_combined,
+                    is_library_matched=matched,
+                )
+            )
+
+            if matched:
+                for disease in components:
+                    diseases_index[disease].append(record.id)
+            else:
+                unmatched_count += 1
+
+        log_data_access(
+            logger,
+            request,
+            current_user_id,
+            "read",
+            "Immunization",
+            patient_id=patient_id,
+            count=len(items),
+            unmatched_count=unmatched_count,
+            event="immunization_history_read",
+        )
+
+        return ImmunizationHistoryResponse(
+            items=items,
+            diseases_index=dict(diseases_index),
+            unmatched_count=unmatched_count,
+        )
