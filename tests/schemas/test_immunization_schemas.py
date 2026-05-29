@@ -67,3 +67,25 @@ def test_history_response_shape():
     )
     assert resp.unmatched_count == 0
     assert "Tetanus" in resp.diseases_index
+
+
+def test_create_rejects_standardized_vaccine_id_as_client_input():
+    """The FK is server-set via who_code resolution; clients must not be able
+    to set it directly through ImmunizationCreate or ImmunizationUpdate."""
+    create_obj = ImmunizationCreate(
+        vaccine_name="MMR",
+        date_administered=date(2024, 1, 1),
+        patient_id=1,
+        standardized_vaccine_id=999,  # type: ignore[call-arg]
+    )
+    # Pydantic v2 silently ignores unknown fields by default; verify it's not
+    # present in the dumped dict (so it can't reach the SQLAlchemy constructor)
+    assert "standardized_vaccine_id" not in create_obj.model_dump()
+
+
+def test_update_rejects_standardized_vaccine_id_as_client_input():
+    update_obj = ImmunizationUpdate(
+        vaccine_name="MMR",
+        standardized_vaccine_id=999,  # type: ignore[call-arg]
+    )
+    assert "standardized_vaccine_id" not in update_obj.model_dump(exclude_unset=True)

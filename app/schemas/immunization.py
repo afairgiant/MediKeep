@@ -1,5 +1,5 @@
 from datetime import date
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
@@ -47,11 +47,6 @@ class ImmunizationBase(TaggedEntityMixin):
     patient_id: int = Field(..., gt=0, description="ID of the patient")
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the administering practitioner"
-    )
-    standardized_vaccine_id: Optional[int] = Field(
-        None,
-        gt=0,
-        description="FK to standardized_vaccines.id if this record is linked to the library",
     )
 
     @field_validator("date_administered", mode="before")
@@ -185,6 +180,11 @@ class ImmunizationUpdate(BaseModel):
 
 class ImmunizationResponse(ImmunizationBase):
     id: int
+    standardized_vaccine_id: Optional[int] = Field(
+        None,
+        gt=0,
+        description="FK to standardized_vaccines.id if this record is linked to the library",
+    )
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -223,12 +223,10 @@ class ImmunizationHistoryItem(ImmunizationResponse):
 
 class ImmunizationHistoryResponse(BaseModel):
     items: List[ImmunizationHistoryItem]
-    diseases_index: dict[str, List[int]] = Field(
+    diseases_index: Dict[str, List[int]] = Field(
         default_factory=dict,
         description="Mapping of disease name to immunization IDs covering that disease",
     )
     unmatched_count: int = Field(
         0, ge=0, description="Number of records that could not be matched to the library"
     )
-
-    model_config = ConfigDict(from_attributes=True)
