@@ -280,7 +280,6 @@ class Immunization(Base):
         Integer,
         ForeignKey("standardized_vaccines.id", ondelete="SET NULL"),
         nullable=True,
-        index=True,
     )
 
     # Table Relationships
@@ -292,7 +291,10 @@ class Immunization(Base):
     )
 
     # Indexes for performance
-    __table_args__ = (Index("idx_immunizations_patient_id", "patient_id"),)
+    __table_args__ = (
+        Index("idx_immunizations_patient_id", "patient_id"),
+        Index("idx_immunizations_standardized_vaccine_id", "standardized_vaccine_id"),
+    )
 
 
 class StandardizedVaccine(Base):
