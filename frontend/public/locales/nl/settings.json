@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Selecteer een organisatie",
     "urlPlaceholder": "https://uw-papra-instantie.com"
   },
+  "profile": {
+    "description": "Werk de identiteit van uw account bij. Het wijzigen van uw gebruikersnaam logt u uit -- u meldt zich opnieuw aan met de nieuwe naam.",
+    "errors": {
+      "emailInvalid": "Voer een geldig e-mailadres in",
+      "nameRequired": "Dit veld mag niet leeg zijn",
+      "nameTooLong": "Mag maximaal {{max}} tekens bevatten",
+      "updateFailed": "Bijwerken van profiel mislukt. Probeer het opnieuw.",
+      "usernameChars": "Gebruikersnaam mag alleen letters, cijfers, onderstrepingstekens en koppeltekens bevatten",
+      "usernameLength": "Gebruikersnaam moet tussen 3 en 50 tekens lang zijn"
+    },
+    "fields": {
+      "email": "E-mail",
+      "firstName": "Voornaam",
+      "fullName": "Volledige naam",
+      "lastName": "Achternaam",
+      "username": "Gebruikersnaam"
+    },
+    "save": "Profiel opslaan",
+    "title": "Profielinformatie",
+    "updateSuccess": "Profiel bijgewerkt",
+    "usernameChangedLogoutWarning": "Opslaan logt u uit zodat de nieuwe gebruikersnaam van kracht wordt. Meld u opnieuw aan met de nieuwe gebruikersnaam.",
+    "usernameChangedNotice": "Gebruikersnaam gewijzigd. Meld u aan met uw nieuwe gebruikersnaam."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Kies hoe datums in de applicatie worden weergegeven",

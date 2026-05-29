@@ -16,9 +16,14 @@ from sqlalchemy.orm import Session, joinedload
 from app.api import deps
 from app.api.activity_logging import safe_log_activity
 from app.api.v1.admin.csv_utils import stream_csv
+from app.core.constants import get_admin_roles_filter, is_admin_role
 from app.core.http.error_handling import APIException, handle_database_errors
 from app.core.logging.config import get_logger
-from app.core.logging.helpers import log_endpoint_access, log_endpoint_error
+from app.core.logging.helpers import (
+    log_endpoint_access,
+    log_endpoint_error,
+    log_security_event,
+)
 from app.core.utils.datetime_utils import convert_date_fields, convert_datetime_fields
 from app.crud import (
     allergy,
@@ -1789,11 +1794,119 @@ def delete_model_record(
         )
 
 
+def _block_user_update(
+    *,
+    request: Request,
+    current_user: User,
+    record: User,
+    event: str,
+    log_message: str,
+    detail: str,
+) -> None:
+    log_security_event(
+        logger,
+        event,
+        request,
+        log_message,
+        user_id=current_user.id,
+        target_user_id=record.id,
+    )
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=detail,
+    )
+
+
+def _has_other_admin(db: Session, exclude_id: int, *, active_only: bool) -> bool:
+    query = db.query(User.id).filter(
+        User.role.in_(get_admin_roles_filter()),
+        User.id != exclude_id,
+    )
+    if active_only:
+        query = query.filter(User.is_active.is_(True))
+    return db.query(query.exists()).scalar()
+
+
+def _enforce_user_update_guards(
+    *,
+    db: Session,
+    record: User,
+    update_data: Dict[str, Any],
+    current_user: User,
+    request: Request,
+) -> None:
+    """Block admin updates that would lock out admin access or self-disable.
+
+    Mirrors the protections on user DELETE (last admin / self) so role and
+    is_active changes cannot bypass them via the generic PUT endpoint.
+    """
+    is_self = record.id == current_user.id
+    current_role = record.role
+
+    demoting_admin = (
+        "role" in update_data
+        and is_admin_role(current_role)
+        and not is_admin_role(update_data.get("role"))
+    )
+    deactivating = (
+        "is_active" in update_data
+        and update_data["is_active"] is False
+        and record.is_active is True
+    )
+
+    if is_self and demoting_admin:
+        _block_user_update(
+            request=request,
+            current_user=current_user,
+            record=record,
+            event="admin_self_demotion_blocked",
+            log_message="Admin attempted to remove their own admin role",
+            detail="Cannot remove your own admin role",
+        )
+
+    if is_self and deactivating:
+        _block_user_update(
+            request=request,
+            current_user=current_user,
+            record=record,
+            event="admin_self_deactivation_blocked",
+            log_message="Admin attempted to deactivate their own account",
+            detail="Cannot deactivate your own user account",
+        )
+
+    if demoting_admin and not _has_other_admin(
+        db, record.id, active_only=False
+    ):
+        _block_user_update(
+            request=request,
+            current_user=current_user,
+            record=record,
+            event="last_admin_demotion_blocked",
+            log_message="Attempt to demote the last remaining admin user",
+            detail="Cannot remove admin role from the last remaining admin user",
+        )
+
+    if (
+        is_admin_role(current_role)
+        and deactivating
+        and not _has_other_admin(db, record.id, active_only=True)
+    ):
+        _block_user_update(
+            request=request,
+            current_user=current_user,
+            record=record,
+            event="last_active_admin_deactivation_blocked",
+            log_message="Attempt to deactivate the last remaining active admin user",
+            detail="Cannot deactivate the last remaining active admin user",
+        )
+
+
 @router.put("/{model_name}/{record_id}")
 def update_model_record(
     model_name: str,
     record_id: int,
     update_data: Dict[str, Any],
+    request: Request,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_admin_user),
 ):
@@ -1826,6 +1939,14 @@ def update_model_record(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"Password cannot be updated through this endpoint. Use the password reset functionality instead.",
                     )
+
+            _enforce_user_update_guards(
+                db=db,
+                record=record,
+                update_data=update_data,
+                current_user=current_user,
+                request=request,
+            )
 
         # Process date and datetime fields using centralized mapping
         update_data = process_field_mappings(update_data, model_name)

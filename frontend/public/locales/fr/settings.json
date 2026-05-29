@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Sélectionnez une organisation",
     "urlPlaceholder": "https://votre-instance-papra.com"
   },
+  "profile": {
+    "description": "Mettez à jour l'identité de votre compte. Modifier votre nom d'utilisateur vous déconnectera -- vous vous reconnecterez avec le nouveau nom.",
+    "errors": {
+      "emailInvalid": "Saisissez une adresse e-mail valide",
+      "nameRequired": "Ce champ ne peut pas être vide",
+      "nameTooLong": "Doit comporter au maximum {{max}} caractères",
+      "updateFailed": "Échec de la mise à jour du profil. Veuillez réessayer.",
+      "usernameChars": "Le nom d'utilisateur ne peut contenir que des lettres, chiffres, soulignements et tirets",
+      "usernameLength": "Le nom d'utilisateur doit comporter entre 3 et 50 caractères"
+    },
+    "fields": {
+      "email": "E-mail",
+      "firstName": "Prénom",
+      "fullName": "Nom complet",
+      "lastName": "Nom",
+      "username": "Nom d'utilisateur"
+    },
+    "save": "Enregistrer le profil",
+    "title": "Informations du profil",
+    "updateSuccess": "Profil mis à jour",
+    "usernameChangedLogoutWarning": "L'enregistrement vous déconnectera afin que le nouveau nom d'utilisateur soit pris en compte. Reconnectez-vous avec le nouveau nom d'utilisateur.",
+    "usernameChangedNotice": "Nom d'utilisateur modifié. Veuillez vous connecter avec votre nouveau nom d'utilisateur."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Choisissez comment les dates sont affichées dans l'application",

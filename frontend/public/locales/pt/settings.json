@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Selecione uma organização",
     "urlPlaceholder": "https://sua-instancia-papra.com"
   },
+  "profile": {
+    "description": "Atualize a identidade da sua conta. Alterar seu nome de usuário fará seu logout -- você entrará novamente com o novo nome.",
+    "errors": {
+      "emailInvalid": "Digite um endereço de email válido",
+      "nameRequired": "Este campo não pode estar vazio",
+      "nameTooLong": "Deve ter {{max}} caracteres ou menos",
+      "updateFailed": "Falha ao atualizar perfil. Por favor, tente novamente.",
+      "usernameChars": "O nome de usuário só pode conter letras, números, sublinhados e hífens",
+      "usernameLength": "O nome de usuário deve ter entre 3 e 50 caracteres"
+    },
+    "fields": {
+      "email": "Email",
+      "firstName": "Nome",
+      "fullName": "Nome completo",
+      "lastName": "Sobrenome",
+      "username": "Nome de usuário"
+    },
+    "save": "Salvar perfil",
+    "title": "Informações do perfil",
+    "updateSuccess": "Perfil atualizado",
+    "usernameChangedLogoutWarning": "Salvar fará seu logout para que o novo nome de usuário entre em vigor. Entre novamente com o novo nome de usuário.",
+    "usernameChangedNotice": "Nome de usuário alterado. Por favor, entre com seu novo nome de usuário."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Escolha como as datas são exibidas em todo o aplicativo",

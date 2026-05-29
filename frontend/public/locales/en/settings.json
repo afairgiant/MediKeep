@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Select an organization",
     "urlPlaceholder": "https://your-papra-instance.com"
   },
+  "profile": {
+    "description": "Update your account identity. Changing your username will log you out -- you will sign back in with the new name.",
+    "errors": {
+      "emailInvalid": "Enter a valid email address",
+      "nameRequired": "This field cannot be empty",
+      "nameTooLong": "Must be {{max}} characters or less",
+      "updateFailed": "Failed to update profile. Please try again.",
+      "usernameChars": "Username can only contain letters, numbers, underscores, and hyphens",
+      "usernameLength": "Username must be between 3 and 50 characters"
+    },
+    "fields": {
+      "email": "Email",
+      "firstName": "First name",
+      "fullName": "Full name",
+      "lastName": "Last name",
+      "username": "Username"
+    },
+    "save": "Save profile",
+    "title": "Profile information",
+    "updateSuccess": "Profile updated",
+    "usernameChangedLogoutWarning": "Saving will log you out so the new username takes effect. Sign back in with the new username.",
+    "usernameChangedNotice": "Username changed. Please sign in with your new username."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Choose how dates are displayed throughout the application",

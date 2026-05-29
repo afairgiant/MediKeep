@@ -57,6 +57,29 @@
     "organizationPlaceholder": "选择组织",
     "urlPlaceholder": "https://your-papra-instance.com"
   },
+  "profile": {
+    "description": "更新您的账户身份。更改用户名将使您登出 -- 您需要使用新名称重新登录。",
+    "errors": {
+      "emailInvalid": "请输入有效的电子邮件地址",
+      "nameRequired": "此字段不能为空",
+      "nameTooLong": "长度不能超过 {{max}} 个字符",
+      "updateFailed": "更新个人资料失败，请重试。",
+      "usernameChars": "用户名只能包含字母、数字、下划线和连字符",
+      "usernameLength": "用户名长度必须在 3 到 50 个字符之间"
+    },
+    "fields": {
+      "email": "电子邮件",
+      "firstName": "名字",
+      "fullName": "全名",
+      "lastName": "姓氏",
+      "username": "用户名"
+    },
+    "save": "保存个人资料",
+    "title": "个人资料信息",
+    "updateSuccess": "个人资料已更新",
+    "usernameChangedLogoutWarning": "保存后将登出您以使新用户名生效。请使用新用户名重新登录。",
+    "usernameChangedNotice": "用户名已更改。请使用您的新用户名登录。"
+  },
   "preferences": {
     "dateFormat": {
       "description": "选择在整个应用程序中如何显示日期",

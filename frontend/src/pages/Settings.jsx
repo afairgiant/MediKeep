@@ -17,6 +17,7 @@ import PaperlessSettings from '../components/settings/PaperlessSettings';
 import PapraSettings from '../components/settings/PapraSettings';
 import StoragePreferencesCard from '../components/settings/StoragePreferencesCard';
 import NotificationSettings from '../components/settings/NotificationSettings';
+import ProfileSettings from '../components/settings/ProfileSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserPreferences } from '../contexts/UserPreferencesContext';
 import { getVersionInfo } from '../services/systemService';
@@ -497,6 +498,8 @@ const Settings = () => {
           id="settings-tabpanel-general"
           aria-labelledby="settings-tab-general"
         >
+          <ProfileSettings />
+
           {/* Security Settings Section */}
           <Card>
             <div className="settings-section">

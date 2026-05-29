@@ -57,6 +57,29 @@
     "organizationPlaceholder": "Välj en organisation",
     "urlPlaceholder": "https://din-papra-instans.com"
   },
+  "profile": {
+    "description": "Uppdatera din kontoidentitet. Att ändra ditt användarnamn loggar ut dig -- du loggar in igen med det nya namnet.",
+    "errors": {
+      "emailInvalid": "Ange en giltig e-postadress",
+      "nameRequired": "Detta fält kan inte vara tomt",
+      "nameTooLong": "Får vara högst {{max}} tecken",
+      "updateFailed": "Det gick inte att uppdatera profilen. Försök igen.",
+      "usernameChars": "Användarnamnet får endast innehålla bokstäver, siffror, understreck och bindestreck",
+      "usernameLength": "Användarnamnet måste vara mellan 3 och 50 tecken"
+    },
+    "fields": {
+      "email": "E-post",
+      "firstName": "Förnamn",
+      "fullName": "Fullständigt namn",
+      "lastName": "Efternamn",
+      "username": "Användarnamn"
+    },
+    "save": "Spara profil",
+    "title": "Profilinformation",
+    "updateSuccess": "Profilen uppdaterad",
+    "usernameChangedLogoutWarning": "Att spara loggar ut dig så att det nya användarnamnet träder i kraft. Logga in igen med det nya användarnamnet.",
+    "usernameChangedNotice": "Användarnamnet har ändrats. Logga in med ditt nya användarnamn."
+  },
   "preferences": {
     "dateFormat": {
       "description": "Välj hur datum visas genom hela applikationen",
