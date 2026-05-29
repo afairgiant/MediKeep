@@ -34,7 +34,7 @@ def upgrade() -> None:
         ondelete="SET NULL",
     )
     op.create_index(
-        "ix_immunizations_standardized_vaccine_id",
+        "idx_immunizations_standardized_vaccine_id",
         "immunizations",
         ["standardized_vaccine_id"],
     )
@@ -42,7 +42,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_index(
-        "ix_immunizations_standardized_vaccine_id",
+        "idx_immunizations_standardized_vaccine_id",
         table_name="immunizations",
     )
     op.drop_constraint(
