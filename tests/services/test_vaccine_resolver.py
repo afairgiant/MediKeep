@@ -143,3 +143,47 @@ def test_build_library_index_populates_name_and_id_maps():
     assert index["by_name"]["mmr"] is mmr
     assert index["by_name"]["mmr ii"] is mmr  # common name indexed
     assert index["by_name"]["polio"] is polio
+
+
+def test_canonical_name_always_wins_over_alias_collision():
+    """A common-name alias must never displace another vaccine's canonical name,
+    regardless of iteration order in the catalog."""
+    # Vaccine A has "Fluzone" as a common alias
+    a = make_library_entry(1, "Flu", common_names=["Fluzone"])
+    # Vaccine B has "Fluzone" as its CANONICAL name
+    b = make_library_entry(2, "Fluzone")
+
+    class StubQuery:
+        def __init__(self, vs): self._vs = vs
+        def all(self): return self._vs
+
+    class StubDB:
+        def __init__(self, vs): self._vs = vs
+        def query(self, _model): return StubQuery(self._vs)
+
+    # Try both iteration orders - canonical entry B must win either way
+    index_a_first = build_library_index(StubDB([a, b]))
+    assert index_a_first["by_name"]["fluzone"] is b, (
+        "B's canonical name 'Fluzone' must beat A's common-name alias"
+    )
+
+    index_b_first = build_library_index(StubDB([b, a]))
+    assert index_b_first["by_name"]["fluzone"] is b, (
+        "B's canonical name 'Fluzone' must beat A's common-name alias "
+        "regardless of iteration order"
+    )
+
+
+def test_empty_canonical_name_is_skipped():
+    """Defensive: an empty vaccine_name string must not pollute by_name with a blank key."""
+    bad = make_library_entry(99, "")
+
+    class StubQuery:
+        def all(self): return [bad]
+
+    class StubDB:
+        def query(self, _model): return StubQuery()
+
+    index = build_library_index(StubDB())
+    assert "" not in index["by_name"]
+    assert 99 in index["by_id"]  # id index still populated

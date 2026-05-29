@@ -28,18 +28,27 @@ class LibraryIndex(TypedDict):
 def build_library_index(db: Session) -> LibraryIndex:
     """Build O(1) id and lower-cased name lookups for the full vaccine library.
 
-    common_names are indexed alongside vaccine_name so brand-name records
-    ("Shingrix") still match their canonical library entry.
+    Canonical ``vaccine_name`` is indexed first; ``common_names`` are then
+    added via ``setdefault`` so a brand alias never displaces another
+    vaccine's canonical name, regardless of iteration order.
     """
     vaccines = db.query(StandardizedVaccine).all()
     by_id: dict[int, StandardizedVaccine] = {}
     by_name: dict[str, StandardizedVaccine] = {}
+
+    # Pass 1: canonical names (and id index). Canonical entries always win.
     for vaccine in vaccines:
         by_id[vaccine.id] = vaccine
-        by_name[vaccine.vaccine_name.lower()] = vaccine
+        if vaccine.vaccine_name:
+            by_name[vaccine.vaccine_name.lower()] = vaccine
+
+    # Pass 2: common-name aliases. setdefault ensures they cannot displace
+    # any canonical entry indexed in pass 1.
+    for vaccine in vaccines:
         for alt in vaccine.common_names or []:
             if alt:
                 by_name.setdefault(alt.lower(), vaccine)
+
     return {"by_id": by_id, "by_name": by_name}
 
 
