@@ -26,6 +26,10 @@ class CRUDImmunization(
         # Convert Pydantic model to dict while preserving date objects
         obj_data = obj_in.model_dump()
 
+        # who_code is a virtual write-only field; Task 5 resolves it to FK.
+        # Dropping it here keeps the SQLAlchemy constructor happy until then.
+        obj_data.pop("standardized_vaccine_who_code", None)
+
         # Create the database object directly from the dict
         db_obj = self.model(**obj_data)
         db.add(db_obj)
@@ -43,6 +47,8 @@ class CRUDImmunization(
         """
         # Get the data as dict, excluding None values
         update_data = obj_in.model_dump(exclude_unset=True)
+
+        update_data.pop("standardized_vaccine_who_code", None)
 
         # Update the database object
         for field, value in update_data.items():

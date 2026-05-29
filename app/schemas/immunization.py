@@ -48,6 +48,11 @@ class ImmunizationBase(TaggedEntityMixin):
     practitioner_id: Optional[int] = Field(
         None, gt=0, description="ID of the administering practitioner"
     )
+    standardized_vaccine_id: Optional[int] = Field(
+        None,
+        gt=0,
+        description="FK to standardized_vaccines.id if this record is linked to the library",
+    )
 
     @field_validator("date_administered", mode="before")
     @classmethod
@@ -98,7 +103,15 @@ class ImmunizationBase(TaggedEntityMixin):
 
 
 class ImmunizationCreate(ImmunizationBase):
-    pass
+    standardized_vaccine_who_code: Optional[str] = Field(
+        None,
+        max_length=100,
+        description=(
+            "WHO PCMT code of the standardized vaccine the user picked from the "
+            "autocomplete. Backend resolves this to standardized_vaccine_id; "
+            "ignored if not found in the library."
+        ),
+    )
 
 
 class ImmunizationUpdate(BaseModel):
@@ -116,6 +129,14 @@ class ImmunizationUpdate(BaseModel):
     notes: Optional[str] = Field(None, max_length=5000)
     practitioner_id: Optional[int] = Field(None, gt=0)
     tags: Optional[List[str]] = None
+    standardized_vaccine_who_code: Optional[str] = Field(
+        None,
+        max_length=100,
+        description=(
+            "WHO PCMT code of the standardized vaccine the user picked. Pass "
+            "explicit null to clear the link (e.g., user converted to free-text)."
+        ),
+    )
 
     @field_validator("date_administered", mode="before")
     @classmethod
@@ -182,5 +203,32 @@ class ImmunizationSummary(BaseModel):
     dose_number: Optional[int]
     patient_name: Optional[str] = None
     practitioner_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ImmunizationHistoryItem(ImmunizationResponse):
+    components: List[str] = Field(
+        default_factory=list,
+        description="Disease components this immunization covers",
+    )
+    is_combined: bool = Field(
+        False, description="True if the linked vaccine is a combination vaccine"
+    )
+    is_library_matched: bool = Field(
+        False,
+        description="True if the record was successfully matched to a library entry",
+    )
+
+
+class ImmunizationHistoryResponse(BaseModel):
+    items: List[ImmunizationHistoryItem]
+    diseases_index: dict[str, List[int]] = Field(
+        default_factory=dict,
+        description="Mapping of disease name to immunization IDs covering that disease",
+    )
+    unmatched_count: int = Field(
+        0, ge=0, description="Number of records that could not be matched to the library"
+    )
 
     model_config = ConfigDict(from_attributes=True)
