@@ -273,9 +273,23 @@ class Immunization(Base):
     # Tagging system
     tags = Column(JSON, nullable=True, default=list)
 
+    # Optional link to standardized vaccine library entry. Captured when the
+    # user picks from the Immunization form's autocomplete. Free-text entries
+    # leave this null; the history view falls back to name-based matching.
+    standardized_vaccine_id = Column(
+        Integer,
+        ForeignKey("standardized_vaccines.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="immunizations")
     practitioner = orm_relationship("Practitioner", back_populates="immunizations")
+    standardized_vaccine = orm_relationship(
+        "StandardizedVaccine",
+        foreign_keys=[standardized_vaccine_id],
+    )
 
     # Indexes for performance
     __table_args__ = (Index("idx_immunizations_patient_id", "patient_id"),)
