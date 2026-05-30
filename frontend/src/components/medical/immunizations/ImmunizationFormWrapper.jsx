@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Autocomplete,
   Modal,
@@ -100,6 +100,11 @@ const ImmunizationFormWrapper = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Tracks whether the next onChange is from a picker selection (where Mantine
+  // re-fires onChange with the option label after onOptionSubmit). We must not
+  // null the who_code in that case — handleVaccineOptionSubmit just set it.
+  const pickerJustFiredRef = useRef(false);
+
   // Form handlers
   const { handleTextInputChange } = useFormHandlers(onInputChange);
 
@@ -123,6 +128,7 @@ const ImmunizationFormWrapper = ({
 
   const handleVaccineOptionSubmit = useCallback(
     selectedValue => {
+      pickerJustFiredRef.current = true;
       const canonicalName = extractVaccineName(selectedValue);
       const libraryEntry = getVaccineByName(canonicalName);
 
@@ -256,8 +262,14 @@ const ImmunizationFormWrapper = ({
                       value={formData.vaccine_name || ''}
                       onChange={value => {
                         setField('vaccine_name', value);
-                        // Typing after picking invalidates the link; the picker
-                        // re-populates the FK only when an option is submitted.
+                        // Mantine fires onChange synchronously after
+                        // onOptionSubmit with the picked option's label — skip
+                        // the clear in that case so the who_code that the
+                        // picker just set isn't immediately nulled out.
+                        if (pickerJustFiredRef.current) {
+                          pickerJustFiredRef.current = false;
+                          return;
+                        }
                         setField('standardized_vaccine_who_code', null);
                       }}
                       onOptionSubmit={handleVaccineOptionSubmit}

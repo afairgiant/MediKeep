@@ -186,6 +186,7 @@ const Immunization = () => {
       location: '',
       notes: '',
       practitioner_id: null,
+      standardized_vaccine_who_code: null,
       tags: [],
     });
     setEditingImmunization(null);
