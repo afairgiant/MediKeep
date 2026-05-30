@@ -6,6 +6,8 @@ import {
   Container,
   Paper,
   Stack,
+  Tabs,
+  Text,
 } from '@mantine/core';
 import { IconPlus, IconVaccine } from '@tabler/icons-react';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -38,6 +40,7 @@ import {
   ImmunizationViewModal,
   ImmunizationFormWrapper,
 } from '../../components/medical/immunizations';
+import { ImmunizationHistoryTab } from '../../components/medical/immunizations/history';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const Immunization = () => {
@@ -110,6 +113,7 @@ const Immunization = () => {
   // Form and UI state
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingImmunization, setEditingImmunization] = useState(null);
+  const [activeTab, setActiveTab] = useState('records');
   const [formData, setFormData] = useState({
     vaccine_name: '',
     vaccine_trade_name: '',
@@ -379,24 +383,7 @@ const Immunization = () => {
           onClearError={clearError}
         />
 
-        <MedicalPageActions
-          primaryAction={{
-            label: t('immunizations.addImmunization', 'Add New Immunization'),
-            onClick: handleAddImmunization,
-            leftSection: <IconPlus size={16} />,
-            size: 'sm',
-            disabled: isViewOnly,
-            tooltip: viewOnlyTooltip,
-          }}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          viewToggleSize="sm"
-          mb={0}
-        />
-
-        {/* Mantine Filter Controls */}
-        <MedicalPageFilters dataManagement={dataManagement} config={config} />
-
+        {/* Modals stay outside Tabs so switching tabs doesn't unmount them */}
         {/* Form Modal */}
         <ImmunizationFormWrapper
           isOpen={showAddForm}
@@ -433,143 +420,204 @@ const Immunization = () => {
           disableEditTooltip={viewOnlyTooltip}
         />
 
-        {/* Content */}
-        {processedImmunizations.length === 0 ? (
-          <EmptyState
-            icon={IconVaccine}
-            title={t(
-              'immunizations.noImmunizationsFound',
-              'No immunizations found'
-            )}
-            hasActiveFilters={dataManagement.hasActiveFilters}
-            filteredMessage={t(
-              'shared:emptyStates.adjustSearch',
-              'Try adjusting your search or filter criteria.'
-            )}
-            noDataMessage={t(
-              'immunizations.clickToGetStarted',
-              'Click "Add New Immunization" to get started.'
-            )}
-          />
-        ) : viewMode === 'cards' ? (
-          <AnimatedCardGrid
-            items={paginatedImmunizations}
-            renderCard={immunization => (
-              <ImmunizationCard
-                immunization={immunization}
-                onView={handleViewImmunization}
-                onEdit={handleEditImmunization}
-                onDelete={handleDeleteImmunization}
-                practitioners={practitioners}
-                navigate={navigate}
-                fileCount={fileCounts[immunization.id] || 0}
-                fileCountLoading={fileCountsLoading[immunization.id] || false}
-                disableActions={isViewOnly}
-                disableActionsTooltip={viewOnlyTooltip}
-              />
-            )}
-          />
-        ) : (
-          <Paper shadow="sm" radius="md" withBorder>
-            <ResponsiveTable
-              persistKey="immunizations"
-              data={paginatedImmunizations}
-              pagination={false}
-              disableEdit={isViewOnly}
-              disableDelete={isViewOnly}
-              disableActionsTooltip={viewOnlyTooltip}
-              columns={[
-                {
-                  header: t('shared:fields.vaccineName', 'Vaccine Name'),
-                  accessor: 'vaccine_name',
-                  priority: 'high',
-                  width: 200,
-                },
-                {
-                  header: t(
-                    'shared:fields.dateAdministered',
-                    'Date Administered'
+        <Tabs value={activeTab} onChange={setActiveTab} keepMounted={false}>
+          <Tabs.List>
+            <Tabs.Tab value="records">
+              {t('immunizations.tabs.records', 'Records')}
+            </Tabs.Tab>
+            <Tabs.Tab value="history">
+              {t('immunizations.tabs.history', 'History')}
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="records" pt="md">
+            <Stack gap="sm">
+              <MedicalPageActions
+                primaryAction={{
+                  label: t(
+                    'immunizations.addImmunization',
+                    'Add New Immunization'
                   ),
-                  accessor: 'date_administered',
-                  priority: 'high',
-                  width: 150,
-                },
-                {
-                  header: t('shared:fields.doseNumber', 'Dose Number'),
-                  accessor: 'dose_number',
-                  priority: 'medium',
-                  width: 100,
-                },
-                {
-                  header: t('shared:fields.manufacturer', 'Manufacturer'),
-                  accessor: 'manufacturer',
-                  priority: 'medium',
-                  width: 150,
-                },
-                {
-                  header: t('immunizations.table.site', 'Site'),
-                  accessor: 'site',
-                  priority: 'low',
-                  width: 100,
-                },
-                {
-                  header: t('shared:labels.route', 'Route'),
-                  accessor: 'route',
-                  priority: 'low',
-                  width: 100,
-                },
-                {
-                  header: t('shared:fields.lotNumber', 'Lot Number'),
-                  accessor: 'lot_number',
-                  priority: 'low',
-                  width: 120,
-                },
-                {
-                  header: t('shared:fields.expirationDate', 'Expiration Date'),
-                  accessor: 'expiration_date',
-                  priority: 'medium',
-                  width: 130,
-                },
-                {
-                  header: t('shared:tabs.notes', 'Notes'),
-                  accessor: 'notes',
-                  priority: 'low',
-                  width: 200,
-                },
-              ]}
-              patientData={currentPatient}
-              tableName={t('shared:categories.immunizations', 'Immunizations')}
-              onView={handleViewImmunization}
-              onEdit={handleEditImmunization}
-              onDelete={handleDeleteImmunization}
-              formatters={{
-                vaccine_name: (value, item) =>
-                  immunizationFormatters.immunization_name(value, item),
-                date_administered: immunizationFormatters.administration_date,
-                expiration_date: immunizationFormatters.date,
-                site: immunizationFormatters.simple,
-                dose_number: immunizationFormatters.simple,
-                manufacturer: immunizationFormatters.simple,
-                route: immunizationFormatters.simple,
-                lot_number: immunizationFormatters.lot_number,
-                notes: immunizationFormatters.notes,
-              }}
-              dataType="medical"
-              responsive={responsive}
-            />
-          </Paper>
-        )}
-        {processedImmunizations.length > 0 && (
-          <PaginationControls
-            page={page}
-            totalPages={totalPages(processedImmunizations.length)}
-            pageSize={pageSize}
-            totalRecords={processedImmunizations.length}
-            onPageChange={setPage}
-            onPageSizeChange={handlePageSizeChange}
-            pageSizeOptions={PAGE_SIZE_OPTIONS}
-          />
-        )}
+                  onClick: handleAddImmunization,
+                  leftSection: <IconPlus size={16} />,
+                  size: 'sm',
+                  disabled: isViewOnly,
+                  tooltip: viewOnlyTooltip,
+                }}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                viewToggleSize="sm"
+                mb={0}
+              />
+
+              {/* Mantine Filter Controls */}
+              <MedicalPageFilters
+                dataManagement={dataManagement}
+                config={config}
+              />
+
+              {/* Content */}
+              {processedImmunizations.length === 0 ? (
+                <EmptyState
+                  icon={IconVaccine}
+                  title={t(
+                    'immunizations.noImmunizationsFound',
+                    'No immunizations found'
+                  )}
+                  hasActiveFilters={dataManagement.hasActiveFilters}
+                  filteredMessage={t(
+                    'shared:emptyStates.adjustSearch',
+                    'Try adjusting your search or filter criteria.'
+                  )}
+                  noDataMessage={t(
+                    'immunizations.clickToGetStarted',
+                    'Click "Add New Immunization" to get started.'
+                  )}
+                />
+              ) : viewMode === 'cards' ? (
+                <AnimatedCardGrid
+                  items={paginatedImmunizations}
+                  renderCard={immunization => (
+                    <ImmunizationCard
+                      immunization={immunization}
+                      onView={handleViewImmunization}
+                      onEdit={handleEditImmunization}
+                      onDelete={handleDeleteImmunization}
+                      practitioners={practitioners}
+                      navigate={navigate}
+                      fileCount={fileCounts[immunization.id] || 0}
+                      fileCountLoading={
+                        fileCountsLoading[immunization.id] || false
+                      }
+                      disableActions={isViewOnly}
+                      disableActionsTooltip={viewOnlyTooltip}
+                    />
+                  )}
+                />
+              ) : (
+                <Paper shadow="sm" radius="md" withBorder>
+                  <ResponsiveTable
+                    persistKey="immunizations"
+                    data={paginatedImmunizations}
+                    pagination={false}
+                    disableEdit={isViewOnly}
+                    disableDelete={isViewOnly}
+                    disableActionsTooltip={viewOnlyTooltip}
+                    columns={[
+                      {
+                        header: t('shared:fields.vaccineName', 'Vaccine Name'),
+                        accessor: 'vaccine_name',
+                        priority: 'high',
+                        width: 200,
+                      },
+                      {
+                        header: t(
+                          'shared:fields.dateAdministered',
+                          'Date Administered'
+                        ),
+                        accessor: 'date_administered',
+                        priority: 'high',
+                        width: 150,
+                      },
+                      {
+                        header: t('shared:fields.doseNumber', 'Dose Number'),
+                        accessor: 'dose_number',
+                        priority: 'medium',
+                        width: 100,
+                      },
+                      {
+                        header: t('shared:fields.manufacturer', 'Manufacturer'),
+                        accessor: 'manufacturer',
+                        priority: 'medium',
+                        width: 150,
+                      },
+                      {
+                        header: t('immunizations.table.site', 'Site'),
+                        accessor: 'site',
+                        priority: 'low',
+                        width: 100,
+                      },
+                      {
+                        header: t('shared:labels.route', 'Route'),
+                        accessor: 'route',
+                        priority: 'low',
+                        width: 100,
+                      },
+                      {
+                        header: t('shared:fields.lotNumber', 'Lot Number'),
+                        accessor: 'lot_number',
+                        priority: 'low',
+                        width: 120,
+                      },
+                      {
+                        header: t(
+                          'shared:fields.expirationDate',
+                          'Expiration Date'
+                        ),
+                        accessor: 'expiration_date',
+                        priority: 'medium',
+                        width: 130,
+                      },
+                      {
+                        header: t('shared:tabs.notes', 'Notes'),
+                        accessor: 'notes',
+                        priority: 'low',
+                        width: 200,
+                      },
+                    ]}
+                    patientData={currentPatient}
+                    tableName={t(
+                      'shared:categories.immunizations',
+                      'Immunizations'
+                    )}
+                    onView={handleViewImmunization}
+                    onEdit={handleEditImmunization}
+                    onDelete={handleDeleteImmunization}
+                    formatters={{
+                      vaccine_name: (value, item) =>
+                        immunizationFormatters.immunization_name(value, item),
+                      date_administered:
+                        immunizationFormatters.administration_date,
+                      expiration_date: immunizationFormatters.date,
+                      site: immunizationFormatters.simple,
+                      dose_number: immunizationFormatters.simple,
+                      manufacturer: immunizationFormatters.simple,
+                      route: immunizationFormatters.simple,
+                      lot_number: immunizationFormatters.lot_number,
+                      notes: immunizationFormatters.notes,
+                    }}
+                    dataType="medical"
+                    responsive={responsive}
+                  />
+                </Paper>
+              )}
+              {processedImmunizations.length > 0 && (
+                <PaginationControls
+                  page={page}
+                  totalPages={totalPages(processedImmunizations.length)}
+                  pageSize={pageSize}
+                  totalRecords={processedImmunizations.length}
+                  onPageChange={setPage}
+                  onPageSizeChange={handlePageSizeChange}
+                  pageSizeOptions={PAGE_SIZE_OPTIONS}
+                />
+              )}
+            </Stack>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="history" pt="md">
+            {currentPatient?.id ? (
+              <ImmunizationHistoryTab patientId={currentPatient.id} />
+            ) : (
+              <Text c="dimmed">
+                {t(
+                  'immunizations.history.noPatient',
+                  'Select a patient to view history.'
+                )}
+              </Text>
+            )}
+          </Tabs.Panel>
+        </Tabs>
       </Stack>
     </Container>
   );
