@@ -10,7 +10,7 @@ interface Props {
 }
 
 const HistoryByDateView = ({ items }: Props) => {
-  const { t } = useTranslation(['medical', 'shared']);
+  const { t } = useTranslation(['medical']);
   const { formatDate } = useDateFormat();
 
   return (
@@ -44,6 +44,8 @@ const HistoryByDateView = ({ items }: Props) => {
                   </Text>
                   <Text fw={600}>{displayName}</Text>
                 </Group>
+                {/* Backend invariant: is_library_matched implies components.length > 0,
+                    so this check doubles as a defensive guard. */}
                 {item.is_library_matched && item.components.length > 0 && (
                   <Group gap="xs">
                     {item.components.map(component => (
