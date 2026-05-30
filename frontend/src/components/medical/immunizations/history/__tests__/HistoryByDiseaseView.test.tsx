@@ -99,6 +99,8 @@ describe('HistoryByDiseaseView', () => {
 
   it('renders helpful empty state when diseasesIndex is empty', () => {
     render(<HistoryByDiseaseView items={[]} diseasesIndex={{}} />);
-    expect(screen.getByText(/no linked vaccinations/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/no vaccinations are linked to the library/i)
+    ).toBeInTheDocument();
   });
 });

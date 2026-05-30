@@ -25,7 +25,7 @@ const HistoryByDiseaseView = ({ items, diseasesIndex }: Props) => {
       <Text c="dimmed" ta="center" py="md">
         {t(
           'medical:immunizations.history.noDiseaseData',
-          'No linked vaccinations to group by disease.'
+          'No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.'
         )}
       </Text>
     );
