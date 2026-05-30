@@ -36,6 +36,7 @@ const ImmunizationHistoryTab = ({ patientId }: Props) => {
   const [data, setData] = useState<ImmunizationHistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [unmatchedDismissed, setUnmatchedDismissed] = useState(false);
 
   useEffect(() => {
     if (!patientId) return;
@@ -52,6 +53,7 @@ const ImmunizationHistoryTab = ({ patientId }: Props) => {
         controller.signal
       )
       .then((response: ImmunizationHistoryResponse) => {
+        if (controller.signal.aborted) return;
         setData(response);
         setLoading(false);
       })
@@ -185,7 +187,7 @@ const ImmunizationHistoryTab = ({ patientId }: Props) => {
         </Group>
       </Group>
 
-      {data.unmatched_count > 0 && (
+      {data.unmatched_count > 0 && !unmatchedDismissed && (
         <Alert
           color="blue"
           icon={<IconInfoCircle size={16} />}
@@ -194,6 +196,7 @@ const ImmunizationHistoryTab = ({ patientId }: Props) => {
             "Some records aren't linked to the vaccine library"
           )}
           withCloseButton
+          onClose={() => setUnmatchedDismissed(true)}
         >
           {t(
             'medical:immunizations.history.unmatchedBanner',

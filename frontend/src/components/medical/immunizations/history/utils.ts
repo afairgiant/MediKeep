@@ -20,6 +20,11 @@ export function groupItemsByDisease(
     }));
 }
 
-export function formatDoseLabel(item: ImmunizationHistoryItem): string {
-  return item.dose_number ? `Dose ${item.dose_number}` : '';
+/**
+ * Return the dose number if set, otherwise null.
+ * Callers should wrap with `t('medical:immunizations.history.doseLabel', 'Dose {{n}}', { n })`
+ * for the display label.
+ */
+export function getDoseNumber(item: ImmunizationHistoryItem): number | null {
+  return item.dose_number ?? null;
 }

@@ -1,11 +1,17 @@
 export interface ImmunizationHistoryItem {
   id: number;
+  patient_id: number;
   vaccine_name: string;
   vaccine_trade_name: string | null;
   date_administered: string; // YYYY-MM-DD
   dose_number: number | null;
   lot_number: string | null;
+  ndc_number: string | null;
   manufacturer: string | null;
+  site: string | null;
+  route: string | null;
+  expiration_date: string | null;
+  location: string | null;
   notes: string | null;
   practitioner_id: number | null;
   tags: string[] | null;
