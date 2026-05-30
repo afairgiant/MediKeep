@@ -215,6 +215,7 @@ const Immunization = () => {
       location: immunization.location || '',
       notes: immunization.notes || '',
       practitioner_id: immunization.practitioner_id || null,
+      standardized_vaccine_who_code: null,
       tags: immunization.tags || [],
     });
     setEditingImmunization(immunization);
@@ -254,6 +255,8 @@ const Immunization = () => {
       practitioner_id: formData.practitioner_id
         ? parseInt(formData.practitioner_id, 10)
         : null,
+      standardized_vaccine_who_code:
+        formData.standardized_vaccine_who_code || null,
       tags: formData.tags || [],
     };
 

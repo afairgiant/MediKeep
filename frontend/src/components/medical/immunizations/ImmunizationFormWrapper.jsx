@@ -129,6 +129,7 @@ const ImmunizationFormWrapper = ({
       if (!libraryEntry) {
         // Free-text fallback — keep whatever the user picked verbatim.
         setField('vaccine_name', canonicalName);
+        setField('standardized_vaccine_who_code', null);
         return;
       }
 
@@ -139,6 +140,7 @@ const ImmunizationFormWrapper = ({
       // duplicates data. Users can fill in a specific brand manually.
       const commonName = libraryEntry.short_name || libraryEntry.vaccine_name;
       setField('vaccine_name', commonName);
+      setField('standardized_vaccine_who_code', libraryEntry.who_code || null);
 
       if (libraryEntry.default_manufacturer) {
         setField('manufacturer', libraryEntry.default_manufacturer);
@@ -252,7 +254,12 @@ const ImmunizationFormWrapper = ({
                     <Autocomplete
                       label={t('shared:fields.vaccineName', 'Vaccine Name')}
                       value={formData.vaccine_name || ''}
-                      onChange={value => setField('vaccine_name', value)}
+                      onChange={value => {
+                        setField('vaccine_name', value);
+                        // Typing after picking invalidates the link; the picker
+                        // re-populates the FK only when an option is submitted.
+                        setField('standardized_vaccine_who_code', null);
+                      }}
                       onOptionSubmit={handleVaccineOptionSubmit}
                       data={vaccineOptions}
                       limit={50}
