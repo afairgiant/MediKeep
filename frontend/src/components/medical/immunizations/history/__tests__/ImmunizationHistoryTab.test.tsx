@@ -54,7 +54,7 @@ describe('ImmunizationHistoryTab', () => {
     mockedApi.getImmunizationHistory.mockReset();
   });
 
-  it.skip('renders the By Date view by default and lists immunizations [enable after Task 10]', async () => {
+  it('renders the By Date view by default and lists immunizations', async () => {
     mockedApi.getImmunizationHistory.mockResolvedValue(sampleResponse);
 
     render(<ImmunizationHistoryTab patientId={42} />);
