@@ -1261,9 +1261,21 @@ Base path: `/api/v1/immunizations`
   "expiration_date": "2026-01-15",
   "site": "Left arm",
   "route": "Intramuscular",
-  "notes": "No adverse reactions"
+  "notes": "No adverse reactions",
+  "standardized_vaccine_who_code": "XM1NL1"
 }
 ```
+
+- **Optional fields**:
+  - `standardized_vaccine_who_code` (string): WHO PCMT code of the standardized vaccine the user picked from the autocomplete. The backend resolves this to `standardized_vaccine_id`. Unknown codes are silently ignored (the record saves with NULL FK).
+
+#### Update Immunization
+
+`PUT /immunizations/{immunization_id}`
+
+- **Purpose**: Update an existing immunization record. Accepts the same fields as Create (all optional on update).
+- **Optional fields**:
+  - `standardized_vaccine_who_code` (string or null): WHO PCMT code of the standardized vaccine the user picked from the autocomplete. The backend resolves this to `standardized_vaccine_id`. Unknown codes are silently ignored (the record saves with NULL FK). Pass explicit `null` to clear an existing link.
 
 #### List Immunizations
 
@@ -1274,6 +1286,63 @@ Base path: `/api/v1/immunizations`
 `GET /immunizations/patient/{patient_id}/upcoming`
 
 - **Purpose**: Get immunizations scheduled for the future
+
+#### Get Immunization History
+
+`GET /immunizations/patient/{patient_id}/history`
+
+- **Purpose**: Returns immunizations enriched with disease components, suitable for the History view in the UI. Combined vaccines (e.g., DTaP) are expanded via the StandardizedVaccine library so a single record can be surfaced under each disease it covers.
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `start_date` (string, optional, ISO date): include records with `date_administered >= start_date`
+  - `end_date` (string, optional, ISO date): include records with `date_administered <= end_date`
+- **Success Response** (200):
+
+```json
+{
+  "items": [
+    {
+      "id": 12,
+      "patient_id": 42,
+      "vaccine_name": "DTaP",
+      "vaccine_trade_name": "Daptacel",
+      "date_administered": "2024-03-15",
+      "dose_number": 4,
+      "lot_number": "ABC123",
+      "ndc_number": null,
+      "manufacturer": null,
+      "site": null,
+      "route": null,
+      "expiration_date": null,
+      "location": null,
+      "notes": null,
+      "practitioner_id": null,
+      "tags": [],
+      "standardized_vaccine_id": 10,
+      "components": ["Diphtheria", "Tetanus", "Pertussis"],
+      "is_combined": true,
+      "is_library_matched": true
+    }
+  ],
+  "diseases_index": {
+    "Diphtheria": [12],
+    "Tetanus": [12],
+    "Pertussis": [12]
+  },
+  "unmatched_count": 0
+}
+```
+
+- **Response fields specific to this endpoint**:
+  - `components`: array of disease component names this immunization covers (empty for unmatched records)
+  - `is_combined`: true if the linked vaccine is a combination vaccine
+  - `is_library_matched`: true if the record was successfully matched to a library entry (either via `standardized_vaccine_id` FK or case-insensitive name match against `StandardizedVaccine.vaccine_name` or `common_names`)
+  - `diseases_index`: mapping of disease name → list of immunization IDs covering that disease (only populated for matched records)
+  - `unmatched_count`: number of records that could not be resolved to a library entry
+- **Status codes**:
+  - `200` — success (including empty result)
+  - `403` — patient access denied
+  - `404` — patient not found
 
 ### 6.5 Vitals
 

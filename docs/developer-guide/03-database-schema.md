@@ -590,19 +590,23 @@ JUNCTION TABLES (Many-to-Many)
 | location | String | | Where administered |
 | notes | Text | | Additional notes |
 | tags | JSONB | DEFAULT [] | User tags |
+| standardized_vaccine_id | Integer | FK(standardized_vaccines.id) ON DELETE SET NULL, NULLABLE | Optional link to the StandardizedVaccine library entry the user picked from the form autocomplete. NULL for free-text records or records created before the vaccine library was introduced. |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 
 **Relationships**:
 - `patient`: Many-to-one with Patient
 - `practitioner`: Many-to-one with Practitioner
+- `standardized_vaccine`: Many-to-one with StandardizedVaccine (optional; SET NULL on parent delete)
 
 **Indexes**:
 - `idx_immunizations_patient_id` on patient_id
+- `idx_immunizations_standardized_vaccine_id` on standardized_vaccine_id
 
 **Business Rules**:
 - Vaccine name and administration date required
 - Lot number and expiration important for recall tracking
+- `standardized_vaccine_id` is optional; free-text `vaccine_name` is still accepted for entries not in the vaccine library
 
 ### procedures
 **Purpose**: Medical procedures performed on patient
@@ -1760,7 +1764,7 @@ JUNCTION TABLES (Many-to-Many)
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 
 **Relationships**:
-- None directly. `immunizations.vaccine_name` is intentionally not a foreign key — free-text entries are still permitted.
+- `immunizations`: One-to-many with Immunization via `immunizations.standardized_vaccine_id` (ON DELETE SET NULL). The link is optional — `immunizations.vaccine_name` remains free-text so entries not in this catalog are still permitted.
 
 **Indexes**:
 - `idx_standardized_vaccines_who_code` on who_code (UNIQUE)
@@ -2260,6 +2264,7 @@ def get_utc_now():
 
 **Immunizations**:
 - `idx_immunizations_patient_id` on patient_id
+- `idx_immunizations_standardized_vaccine_id` on standardized_vaccine_id
 
 **Procedures**:
 - `idx_procedures_patient_id` on patient_id
