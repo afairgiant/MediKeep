@@ -68,17 +68,21 @@ def _components_for(vaccine: StandardizedVaccine) -> list[str]:
 def resolve_components(
     immunization: Immunization,
     library_index: LibraryIndex,
-) -> tuple[list[str], bool]:
+) -> tuple[list[str], bool, StandardizedVaccine | None]:
     """Resolve an immunization to its disease components.
 
-    Returns ``(components, was_matched)``. Matching order:
+    Returns ``(components, was_matched, matched_vaccine)``. Matching order:
       1. FK lookup via ``standardized_vaccine_id``.
       2. Exact (case-insensitive) match on ``vaccine_name`` or a library
          entry's ``common_names``.
-      3. No match → empty list, ``was_matched=False``.
+      3. No match → ``([], False, None)``.
 
-    A combined vaccine with empty ``components`` is reported as unmatched so
-    the UI can flag the data issue rather than silently rendering nothing.
+    ``matched_vaccine`` is returned so callers needing additional fields on
+    the library entry (e.g., ``is_combined`` for response shaping) don't have
+    to repeat the lookup. A combined vaccine with empty ``components`` is
+    reported as ``([], False, vaccine)`` — the match exists but the data is
+    incomplete, so the caller can distinguish "no library entry" from
+    "library entry but missing components."
     """
     vaccine: StandardizedVaccine | None = None
 
@@ -89,9 +93,9 @@ def resolve_components(
         vaccine = library_index["by_name"].get(immunization.vaccine_name.lower())
 
     if vaccine is None:
-        return [], False
+        return [], False, None
 
     components = _components_for(vaccine)
     if not components:
-        return [], False
-    return components, True
+        return [], False, vaccine  # match exists but data incomplete
+    return components, True, vaccine

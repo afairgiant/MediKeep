@@ -222,4 +222,4 @@ class TestImmunizationHistory:
             f"/api/v1/immunizations/patient/{other_patient.id}/history",
             headers=auth_headers,
         )
-        assert resp.status_code in (403, 404)
+        assert resp.status_code == 403

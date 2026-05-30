@@ -353,14 +353,7 @@ def get_immunization_history(
         unmatched_count = 0
 
         for record in records:
-            components, matched = resolve_components(record, library_index)
-
-            # Determine is_combined: derive from the matched library entry
-            matched_vaccine = None
-            if record.standardized_vaccine_id is not None:
-                matched_vaccine = library_index["by_id"].get(record.standardized_vaccine_id)
-            if matched_vaccine is None and record.vaccine_name:
-                matched_vaccine = library_index["by_name"].get(record.vaccine_name.lower())
+            components, matched, matched_vaccine = resolve_components(record, library_index)
             is_combined = bool(matched_vaccine and matched_vaccine.is_combined)
 
             base = ImmunizationResponse.model_validate(record).model_dump()

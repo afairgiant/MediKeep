@@ -42,7 +42,7 @@ def test_fk_present_returns_components_for_combined():
     )
     index = {"by_id": {10: dtap}, "by_name": {"dtap": dtap}}
     imm = make_immunization("anything", standardized_vaccine_id=10)
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == ["Diphtheria", "Tetanus", "Pertussis"]
     assert matched is True
 
@@ -51,7 +51,7 @@ def test_fk_present_returns_vaccine_name_for_single_disease():
     polio = make_library_entry(11, "Polio (IPV)")
     index = {"by_id": {11: polio}, "by_name": {"polio (ipv)": polio}}
     imm = make_immunization("Polio (IPV)", standardized_vaccine_id=11)
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == ["Polio (IPV)"]
     assert matched is True
 
@@ -63,7 +63,7 @@ def test_fk_missing_falls_back_to_exact_name_match():
     )
     index = {"by_id": {12: mmr}, "by_name": {"mmr": mmr}}
     imm = make_immunization("MMR")
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == ["Measles", "Mumps", "Rubella"]
     assert matched is True
 
@@ -72,7 +72,7 @@ def test_name_match_is_case_insensitive():
     flu = make_library_entry(13, "Influenza")
     index = {"by_id": {13: flu}, "by_name": {"influenza": flu}}
     imm = make_immunization("INFLUENZA")
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == ["Influenza"]
     assert matched is True
 
@@ -89,7 +89,7 @@ def test_common_name_match():
         },
     }
     imm = make_immunization("Shingrix")
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == ["Recombinant Zoster Vaccine"]
     assert matched is True
 
@@ -97,7 +97,7 @@ def test_common_name_match():
 def test_no_match_returns_empty():
     index = {"by_id": {}, "by_name": {}}
     imm = make_immunization("Bigfoot Vaccine")
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == []
     assert matched is False
 
@@ -108,7 +108,7 @@ def test_fk_pointing_to_missing_entry_falls_back_to_name():
     )
     index = {"by_id": {12: mmr}, "by_name": {"mmr": mmr}}
     imm = make_immunization("MMR", standardized_vaccine_id=999)
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == ["Measles", "Mumps", "Rubella"]
     assert matched is True
 
@@ -117,9 +117,33 @@ def test_combined_vaccine_with_null_components_treated_as_unmatched():
     bad = make_library_entry(15, "BadCombo", is_combined=True, components=None)
     index = {"by_id": {15: bad}, "by_name": {"badcombo": bad}}
     imm = make_immunization("BadCombo", standardized_vaccine_id=15)
-    components, matched = resolve_components(imm, index)
+    components, matched, _ = resolve_components(imm, index)
     assert components == []
     assert matched is False
+
+
+def test_resolve_returns_matched_vaccine_object():
+    """The matched vaccine should be returned so callers can read extra fields
+    (e.g., is_combined) without repeating the lookup."""
+    dtap = make_library_entry(
+        10, "DTaP", is_combined=True,
+        components=["Diphtheria", "Tetanus", "Pertussis"],
+    )
+    index = {"by_id": {10: dtap}, "by_name": {"dtap": dtap}}
+    imm = make_immunization("anything", standardized_vaccine_id=10)
+
+    components, matched, vaccine = resolve_components(imm, index)
+    assert vaccine is dtap
+    assert vaccine.is_combined is True
+
+
+def test_resolve_returns_none_vaccine_when_unmatched():
+    index = {"by_id": {}, "by_name": {}}
+    imm = make_immunization("Unknown")
+
+    _, matched, vaccine = resolve_components(imm, index)
+    assert matched is False
+    assert vaccine is None
 
 
 def test_build_library_index_populates_name_and_id_maps():
