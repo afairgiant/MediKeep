@@ -394,6 +394,25 @@
       "searchPlaceholder": "Введите название для поиска вакцин...",
       "combinedHint": "Комбинированная вакцина — компоненты: {{components}}",
       "matchedCommonName": "совпадение: {{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "By Date",
+        "byDisease": "By Disease"
+      },
+      "recordCount": "{{count}} vaccinations",
+      "recordCountSingular": "1 vaccination",
+      "dosesCount": "{{count}} doses",
+      "dosesCountSingular": "1 dose",
+      "doseLabel": "Dose {{n}}",
+      "lotLabel": "Lot {{lot}}",
+      "unlinkedTag": "Unlinked",
+      "emptyAll": "No vaccinations recorded yet.",
+      "emptyRange": "No vaccinations in this range.",
+      "dateRangePlaceholder": "Filter by date range",
+      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
+      "unmatchedTitle": "Some records aren't linked to the vaccine library",
+      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
     }
   },
   "injuries": {

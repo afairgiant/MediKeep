@@ -357,6 +357,13 @@
       "title": "Подробности прививки",
       "tradeName": "Торговое название",
       "vaccineInfo": "Информация о вакцине"
+    },
+    "tabs": {
+      "records": "Records",
+      "history": "History"
+    },
+    "history": {
+      "noPatient": "Select a patient to view history."
     }
   },
   "insurance": {

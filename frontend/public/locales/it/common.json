@@ -357,6 +357,13 @@
       "title": "Dettagli vaccinazione",
       "tradeName": "Nome commerciale",
       "vaccineInfo": "Informazioni sul vaccino"
+    },
+    "tabs": {
+      "records": "Records",
+      "history": "History"
+    },
+    "history": {
+      "noPatient": "Select a patient to view history."
     }
   },
   "insurance": {

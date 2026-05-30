@@ -357,6 +357,13 @@
       "title": "รายละเอียดการฉีดวัคซีน",
       "tradeName": "ชื่อทางการค้า",
       "vaccineInfo": "ข้อมูลวัคซีน"
+    },
+    "tabs": {
+      "records": "Records",
+      "history": "History"
+    },
+    "history": {
+      "noPatient": "Select a patient to view history."
     }
   },
   "insurance": {
