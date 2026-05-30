@@ -65,7 +65,7 @@ describe('ImmunizationHistoryTab', () => {
     expect(screen.getByText('Pertussis')).toBeInTheDocument();
   });
 
-  it.skip('switches to By Disease view when toggled [enable after Task 11]', async () => {
+  it('switches to By Disease view when toggled', async () => {
     mockedApi.getImmunizationHistory.mockResolvedValue(sampleResponse);
     const user = userEvent.setup();
 
