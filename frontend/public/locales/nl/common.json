@@ -360,10 +360,10 @@
     },
     "tabs": {
       "records": "Records",
-      "history": "History"
+      "history": "Geschiedenis"
     },
     "history": {
-      "noPatient": "Select a patient to view history."
+      "noPatient": "Selecteer een patiënt om de geschiedenis te bekijken."
     }
   },
   "insurance": {

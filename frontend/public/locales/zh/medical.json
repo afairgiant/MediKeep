@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "按日期",
+        "byDisease": "按疾病"
       },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "recordCount": "{{count}} 次接种",
+      "recordCountSingular": "1 次接种",
+      "dosesCount": "{{count}} 剂",
+      "dosesCountSingular": "1 剂",
+      "doseLabel": "第 {{n}} 剂",
+      "lotLabel": "批号 {{lot}}",
+      "unlinkedTag": "未关联",
+      "emptyAll": "暂无接种记录。",
+      "emptyRange": "此范围内无接种记录。",
+      "dateRangePlaceholder": "按日期范围筛选",
+      "noDiseaseData": "暂无接种记录关联到疫苗库。切换到「按日期」视图以查看所有记录，或编辑记录并从自动完成中重新选择疫苗以建立关联。",
+      "unmatchedTitle": "部分记录未关联到疫苗库",
+      "unmatchedBanner": "{{count}} 条记录未关联。编辑记录并从自动完成中重新选择以建立关联。"
     }
   },
   "injuries": {

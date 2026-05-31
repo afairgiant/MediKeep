@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "Nach Datum",
+        "byDisease": "Nach Krankheit"
       },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "recordCount": "{{count}} Impfungen",
+      "recordCountSingular": "1 Impfung",
+      "dosesCount": "{{count}} Dosen",
+      "dosesCountSingular": "1 Dosis",
+      "doseLabel": "Dosis {{n}}",
+      "lotLabel": "Charge {{lot}}",
+      "unlinkedTag": "Nicht verknüpft",
+      "emptyAll": "Noch keine Impfungen erfasst.",
+      "emptyRange": "Keine Impfungen in diesem Zeitraum.",
+      "dateRangePlaceholder": "Nach Zeitraum filtern",
+      "noDiseaseData": "Es sind keine Impfungen mit der Bibliothek verknüpft. Wechseln Sie zur Ansicht „Nach Datum“, um alle Einträge zu sehen, oder bearbeiten Sie einen Eintrag und wählen Sie erneut einen Impfstoff aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
+      "unmatchedTitle": "Einige Einträge sind nicht mit der Impfstoffbibliothek verknüpft",
+      "unmatchedBanner": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der automatischen Vervollständigung, um ihn zu verknüpfen."
     }
   },
   "injuries": {

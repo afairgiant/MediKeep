@@ -359,11 +359,11 @@
       "vaccineInfo": "Informazioni sul vaccino"
     },
     "tabs": {
-      "records": "Records",
-      "history": "History"
+      "records": "Cartelle",
+      "history": "Cronologia"
     },
     "history": {
-      "noPatient": "Select a patient to view history."
+      "noPatient": "Seleziona un paziente per visualizzare la cronologia."
     }
   },
   "insurance": {

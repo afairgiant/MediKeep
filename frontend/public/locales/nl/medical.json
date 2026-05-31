@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "Op datum",
+        "byDisease": "Op ziekte"
       },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
+      "recordCount": "{{count}} vaccinaties",
+      "recordCountSingular": "1 vaccinatie",
       "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "dosesCountSingular": "1 dosis",
+      "doseLabel": "Dosis {{n}}",
+      "lotLabel": "Charge {{lot}}",
+      "unlinkedTag": "Niet gekoppeld",
+      "emptyAll": "Nog geen vaccinaties geregistreerd.",
+      "emptyRange": "Geen vaccinaties in deze periode.",
+      "dateRangePlaceholder": "Filter op periode",
+      "noDiseaseData": "Er zijn geen vaccinaties gekoppeld aan de bibliotheek. Schakel over naar de weergave 'Op datum' om alle records te zien, of bewerk een record en selecteer opnieuw een vaccin uit de autocomplete om het te koppelen.",
+      "unmatchedTitle": "Sommige records zijn niet gekoppeld aan de vaccinbibliotheek",
+      "unmatchedBanner": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw uit de autocomplete om het te koppelen."
     }
   },
   "injuries": {

@@ -359,11 +359,11 @@
       "vaccineInfo": "ข้อมูลวัคซีน"
     },
     "tabs": {
-      "records": "Records",
-      "history": "History"
+      "records": "บันทึก",
+      "history": "ประวัติ"
     },
     "history": {
-      "noPatient": "Select a patient to view history."
+      "noPatient": "เลือกผู้ป่วยเพื่อดูประวัติ"
     }
   },
   "insurance": {

@@ -359,11 +359,11 @@
       "vaccineInfo": "Vaccininformation"
     },
     "tabs": {
-      "records": "Records",
-      "history": "History"
+      "records": "Poster",
+      "history": "Historik"
     },
     "history": {
-      "noPatient": "Select a patient to view history."
+      "noPatient": "Välj en patient för att visa historik."
     }
   },
   "insurance": {

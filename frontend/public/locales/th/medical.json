@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "ตามวันที่",
+        "byDisease": "ตามโรค"
       },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "recordCount": "การฉีดวัคซีน {{count}} ครั้ง",
+      "recordCountSingular": "การฉีดวัคซีน 1 ครั้ง",
+      "dosesCount": "{{count}} โดส",
+      "dosesCountSingular": "1 โดส",
+      "doseLabel": "โดสที่ {{n}}",
+      "lotLabel": "ล็อต {{lot}}",
+      "unlinkedTag": "ไม่ได้เชื่อมโยง",
+      "emptyAll": "ยังไม่มีการบันทึกการฉีดวัคซีน",
+      "emptyRange": "ไม่มีการฉีดวัคซีนในช่วงนี้",
+      "dateRangePlaceholder": "กรองตามช่วงวันที่",
+      "noDiseaseData": "ไม่มีการฉีดวัคซีนที่เชื่อมโยงกับคลัง สลับไปยังมุมมอง \"ตามวันที่\" เพื่อดูบันทึกทั้งหมด หรือแก้ไขบันทึกและเลือกวัคซีนใหม่จากระบบเติมข้อความอัตโนมัติเพื่อเชื่อมโยง",
+      "unmatchedTitle": "บางบันทึกไม่ได้เชื่อมโยงกับคลังวัคซีน",
+      "unmatchedBanner": "{{count}} บันทึกไม่ได้เชื่อมโยง แก้ไขบันทึกและเลือกใหม่จากระบบเติมข้อความอัตโนมัติเพื่อเชื่อมโยง"
     }
   },
   "injuries": {

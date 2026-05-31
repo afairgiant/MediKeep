@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "Według daty",
+        "byDisease": "Według choroby"
       },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "recordCount": "Liczba szczepień: {{count}}",
+      "recordCountSingular": "1 szczepienie",
+      "dosesCount": "Liczba dawek: {{count}}",
+      "dosesCountSingular": "1 dawka",
+      "doseLabel": "Dawka {{n}}",
+      "lotLabel": "Partia {{lot}}",
+      "unlinkedTag": "Niepowiązane",
+      "emptyAll": "Brak zarejestrowanych szczepień.",
+      "emptyRange": "Brak szczepień w tym zakresie.",
+      "dateRangePlaceholder": "Filtruj według zakresu dat",
+      "noDiseaseData": "Żadne szczepienia nie są powiązane z biblioteką. Przełącz na widok „Według daty”, aby zobaczyć wszystkie wpisy, lub edytuj wpis i ponownie wybierz szczepionkę z autouzupełniania, aby ją powiązać.",
+      "unmatchedTitle": "Niektóre wpisy nie są powiązane z biblioteką szczepionek",
+      "unmatchedBanner": "Liczba niepowiązanych wpisów: {{count}}. Edytuj wpis i wybierz go ponownie z autouzupełniania, aby go powiązać."
     }
   },
   "injuries": {

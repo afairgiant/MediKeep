@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "По дате",
+        "byDisease": "По заболеванию"
       },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "recordCount": "Прививок: {{count}}",
+      "recordCountSingular": "1 прививка",
+      "dosesCount": "Доз: {{count}}",
+      "dosesCountSingular": "1 доза",
+      "doseLabel": "Доза {{n}}",
+      "lotLabel": "Партия {{lot}}",
+      "unlinkedTag": "Не связано",
+      "emptyAll": "Прививки ещё не зарегистрированы.",
+      "emptyRange": "Нет прививок в этом диапазоне.",
+      "dateRangePlaceholder": "Фильтр по диапазону дат",
+      "noDiseaseData": "Ни одна прививка не связана с библиотекой. Переключитесь на режим «По дате», чтобы увидеть все записи, или отредактируйте запись и заново выберите вакцину из автозаполнения, чтобы её связать.",
+      "unmatchedTitle": "Некоторые записи не связаны с библиотекой вакцин",
+      "unmatchedBanner": "Не связано записей: {{count}}. Отредактируйте запись и выберите её снова в автозаполнении, чтобы связать."
     }
   },
   "injuries": {

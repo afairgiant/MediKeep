@@ -359,11 +359,11 @@
       "vaccineInfo": "疫苗信息"
     },
     "tabs": {
-      "records": "Records",
-      "history": "History"
+      "records": "记录",
+      "history": "历史"
     },
     "history": {
-      "noPatient": "Select a patient to view history."
+      "noPatient": "请选择患者以查看历史。"
     }
   },
   "insurance": {

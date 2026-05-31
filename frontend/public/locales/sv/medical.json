@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "Efter datum",
+        "byDisease": "Efter sjukdom"
       },
-      "recordCount": "{{count}} vaccinations",
+      "recordCount": "{{count}} vaccinationer",
       "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "dosesCount": "{{count}} doser",
+      "dosesCountSingular": "1 dos",
+      "doseLabel": "Dos {{n}}",
+      "lotLabel": "Sats {{lot}}",
+      "unlinkedTag": "Inte länkad",
+      "emptyAll": "Inga vaccinationer registrerade ännu.",
+      "emptyRange": "Inga vaccinationer i detta intervall.",
+      "dateRangePlaceholder": "Filtrera efter datumintervall",
+      "noDiseaseData": "Inga vaccinationer är länkade till biblioteket. Växla till vyn \"Efter datum\" för att se alla poster, eller redigera en post och välj ett vaccin igen från autoifyllningen för att länka det.",
+      "unmatchedTitle": "Vissa poster är inte länkade till vaccinbiblioteket",
+      "unmatchedBanner": "{{count}} poster är inte länkade. Redigera en post och välj den igen från autoifyllningen för att länka den."
     }
   },
   "injuries": {

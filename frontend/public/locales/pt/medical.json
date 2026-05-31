@@ -397,22 +397,22 @@
     },
     "history": {
       "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
+        "byDate": "Por data",
+        "byDisease": "Por doença"
       },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
+      "recordCount": "{{count}} vacinações",
+      "recordCountSingular": "1 vacinação",
       "dosesCount": "{{count}} doses",
       "dosesCountSingular": "1 dose",
       "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "lotLabel": "Lote {{lot}}",
+      "unlinkedTag": "Não vinculado",
+      "emptyAll": "Nenhuma vacinação registrada ainda.",
+      "emptyRange": "Nenhuma vacinação neste intervalo.",
+      "dateRangePlaceholder": "Filtrar por intervalo de datas",
+      "noDiseaseData": "Nenhuma vacinação está vinculada à biblioteca. Mude para a visualização \"Por data\" para ver todos os registros, ou edite um registro e selecione novamente uma vacina no autocompletar para vinculá-lo.",
+      "unmatchedTitle": "Alguns registros não estão vinculados à biblioteca de vacinas",
+      "unmatchedBanner": "{{count}} registros não estão vinculados. Edite um registro e selecione-o novamente no autocompletar para vinculá-lo."
     }
   },
   "injuries": {
