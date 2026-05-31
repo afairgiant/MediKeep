@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import render from '../../../../../test-utils/render';
 import HistoryByDateView from '../HistoryByDateView';
@@ -58,5 +59,21 @@ describe('HistoryByDateView', () => {
   it('does not render disease badges for unmatched records', () => {
     render(<HistoryByDateView items={[unmatched]} />);
     expect(screen.queryByText('Diphtheria')).not.toBeInTheDocument();
+  });
+
+  it('calls onItemClick when a card is clicked', async () => {
+    const handleClick = vi.fn();
+    const user = userEvent.setup();
+    render(<HistoryByDateView items={[baseItem]} onItemClick={handleClick} />);
+
+    await user.click(screen.getByRole('button', { name: /DTaP/ }));
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
+    expect(handleClick).toHaveBeenCalledWith(baseItem);
+  });
+
+  it('does not assign button role when onItemClick is omitted', () => {
+    render(<HistoryByDateView items={[baseItem]} />);
+    expect(screen.queryByRole('button', { name: /DTaP/ })).toBeNull();
   });
 });

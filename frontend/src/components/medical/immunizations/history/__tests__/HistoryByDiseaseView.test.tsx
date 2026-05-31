@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -102,5 +102,26 @@ describe('HistoryByDiseaseView', () => {
     expect(
       screen.getByText(/no vaccinations are linked to the library/i)
     ).toBeInTheDocument();
+  });
+
+  it('calls onItemClick when a row is clicked', async () => {
+    const handleClick = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <HistoryByDiseaseView
+        items={[dtap]}
+        diseasesIndex={{ Diphtheria: [1] }}
+        onItemClick={handleClick}
+      />
+    );
+    // Open the Diphtheria section first
+    await user.click(
+      screen.getByRole('button', { name: /diphtheria/i })
+    );
+    // Then click the DTaP row inside the panel (also rendered as a button)
+    await user.click(screen.getByRole('button', { name: /DTaP/ }));
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
+    expect(handleClick).toHaveBeenCalledWith(dtap);
   });
 });

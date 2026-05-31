@@ -607,7 +607,10 @@ const Immunization = () => {
 
           <Tabs.Panel value="history" pt="md">
             {currentPatient?.id ? (
-              <ImmunizationHistoryTab patientId={currentPatient.id} />
+              <ImmunizationHistoryTab
+                patientId={currentPatient.id}
+                onItemClick={handleViewImmunization}
+              />
             ) : (
               <Text c="dimmed">
                 {t(

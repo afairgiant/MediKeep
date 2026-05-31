@@ -17,11 +17,13 @@ import HistoryByDateView from './HistoryByDateView';
 import HistoryByDiseaseView from './HistoryByDiseaseView';
 import type {
   HistoryViewMode,
+  ImmunizationHistoryItem,
   ImmunizationHistoryResponse,
 } from './types';
 
 interface Props {
   patientId: number;
+  onItemClick?: (_item: ImmunizationHistoryItem) => void;
 }
 
 // Mantine v8 DatePickerInput emits ISO-formatted date strings (YYYY-MM-DD) by
@@ -29,7 +31,7 @@ interface Props {
 // the API without further conversion.
 type DateRange = [string | null, string | null];
 
-const ImmunizationHistoryTab = ({ patientId }: Props) => {
+const ImmunizationHistoryTab = ({ patientId, onItemClick }: Props) => {
   const { t } = useTranslation(['medical', 'common']);
   const [viewMode, setViewMode] = useState<HistoryViewMode>('byDate');
   const [dateRange, setDateRange] = useState<DateRange>([null, null]);
@@ -207,11 +209,12 @@ const ImmunizationHistoryTab = ({ patientId }: Props) => {
       )}
 
       {viewMode === 'byDate' ? (
-        <HistoryByDateView items={data.items} />
+        <HistoryByDateView items={data.items} onItemClick={onItemClick} />
       ) : (
         <HistoryByDiseaseView
           items={data.items}
           diseasesIndex={data.diseases_index}
+          onItemClick={onItemClick}
         />
       )}
     </Stack>

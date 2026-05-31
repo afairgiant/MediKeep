@@ -7,9 +7,10 @@ import { getDoseNumber } from './utils';
 
 interface Props {
   items: ImmunizationHistoryItem[];
+  onItemClick?: (_item: ImmunizationHistoryItem) => void;
 }
 
-const HistoryByDateView = ({ items }: Props) => {
+const HistoryByDateView = ({ items, onItemClick }: Props) => {
   const { t } = useTranslation(['medical']);
   const { formatDate } = useDateFormat();
 
@@ -34,8 +35,28 @@ const HistoryByDateView = ({ items }: Props) => {
           ? `${item.vaccine_name} (${item.vaccine_trade_name})`
           : item.vaccine_name;
 
+        const clickable = Boolean(onItemClick);
         return (
-          <Card key={item.id} withBorder padding="sm" radius="md">
+          <Card
+            key={item.id}
+            withBorder
+            padding="sm"
+            radius="md"
+            style={clickable ? { cursor: 'pointer' } : undefined}
+            onClick={clickable ? () => onItemClick?.(item) : undefined}
+            role={clickable ? 'button' : undefined}
+            tabIndex={clickable ? 0 : undefined}
+            onKeyDown={
+              clickable
+                ? e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onItemClick?.(item);
+                    }
+                  }
+                : undefined
+            }
+          >
             <Group justify="space-between" align="flex-start" wrap="nowrap">
               <Stack gap={4} style={{ flex: 1 }}>
                 <Group gap="xs" align="baseline">

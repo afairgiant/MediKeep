@@ -9,9 +9,14 @@ import { getDoseNumber, groupItemsByDisease } from './utils';
 interface Props {
   items: ImmunizationHistoryItem[];
   diseasesIndex: Record<string, number[]>;
+  onItemClick?: (_item: ImmunizationHistoryItem) => void;
 }
 
-const HistoryByDiseaseView = ({ items, diseasesIndex }: Props) => {
+const HistoryByDiseaseView = ({
+  items,
+  diseasesIndex,
+  onItemClick,
+}: Props) => {
   const { t } = useTranslation(['medical']);
   const { formatDate } = useDateFormat();
 
@@ -59,8 +64,27 @@ const HistoryByDiseaseView = ({ items, diseasesIndex }: Props) => {
                 const doseLabel = dose !== null
                   ? t('medical:immunizations.history.doseLabel', 'Dose {{n}}', { n: dose })
                   : null;
+                const clickable = Boolean(onItemClick);
                 return (
-                  <Group key={item.id} justify="space-between" wrap="nowrap">
+                  <Group
+                    key={item.id}
+                    justify="space-between"
+                    wrap="nowrap"
+                    style={clickable ? { cursor: 'pointer' } : undefined}
+                    onClick={clickable ? () => onItemClick?.(item) : undefined}
+                    role={clickable ? 'button' : undefined}
+                    tabIndex={clickable ? 0 : undefined}
+                    onKeyDown={
+                      clickable
+                        ? e => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              onItemClick?.(item);
+                            }
+                          }
+                        : undefined
+                    }
+                  >
                     <Group gap="md" wrap="nowrap">
                       <Text size="sm" c="dimmed" style={{ minWidth: 100 }}>
                         {formatDate(item.date_administered)}
