@@ -241,6 +241,18 @@ const Immunization = () => {
       return;
     }
 
+    // Decide whether to send standardized_vaccine_who_code. The backend treats
+    // an explicit null as "clear the FK link". We only want that when the
+    // user actually changed the vaccine identity (typed a new name or picked
+    // a new library entry). On a pure-other-field edit, omit the key so the
+    // backend's exclude_unset preserves the existing FK link.
+    const hasPickedFromLibrary = formData.standardized_vaccine_who_code != null;
+    const nameChanged =
+      editingImmunization &&
+      formData.vaccine_name !== editingImmunization.vaccine_name;
+    const includeWhoCode =
+      !editingImmunization || hasPickedFromLibrary || nameChanged;
+
     const immunizationData = {
       vaccine_name: formData.vaccine_name,
       vaccine_trade_name: formData.vaccine_trade_name || null,
@@ -260,8 +272,10 @@ const Immunization = () => {
       practitioner_id: formData.practitioner_id
         ? parseInt(formData.practitioner_id, 10)
         : null,
-      standardized_vaccine_who_code:
-        formData.standardized_vaccine_who_code || null,
+      ...(includeWhoCode && {
+        standardized_vaccine_who_code:
+          formData.standardized_vaccine_who_code || null,
+      }),
       tags: formData.tags || [],
     };
 

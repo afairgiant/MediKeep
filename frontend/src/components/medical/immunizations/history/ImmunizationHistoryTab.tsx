@@ -45,6 +45,9 @@ const ImmunizationHistoryTab = ({ patientId, onItemClick }: Props) => {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
+    // Show the unmatched banner again whenever query inputs change — the new
+    // result set may have different unmatched records than the dismissed one.
+    setUnmatchedDismissed(false);
     apiService
       .getImmunizationHistory(
         patientId,

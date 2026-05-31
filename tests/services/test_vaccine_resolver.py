@@ -132,7 +132,7 @@ def test_resolve_returns_matched_vaccine_object():
     index = {"by_id": {10: dtap}, "by_name": {"dtap": dtap}}
     imm = make_immunization("anything", standardized_vaccine_id=10)
 
-    components, matched, vaccine = resolve_components(imm, index)
+    _components, _matched, vaccine = resolve_components(imm, index)
     assert vaccine is dtap
     assert vaccine.is_combined is True
 

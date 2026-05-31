@@ -103,8 +103,10 @@ class ImmunizationCreate(ImmunizationBase):
         max_length=100,
         description=(
             "WHO PCMT code of the standardized vaccine the user picked from the "
-            "autocomplete. Backend resolves this to standardized_vaccine_id; "
-            "ignored if not found in the library."
+            "autocomplete. The backend attempts to resolve it to "
+            "standardized_vaccine_id; if no matching library entry exists, the "
+            "record is saved with standardized_vaccine_id=NULL (the free-text "
+            "vaccine_name remains the source of truth)."
         ),
     )
 
