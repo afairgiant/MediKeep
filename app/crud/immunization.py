@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
+from app.crud.standardized_vaccine import get_vaccine_by_who_code
 from app.models.models import Immunization
 from app.schemas.immunization import ImmunizationCreate, ImmunizationUpdate
 
@@ -18,15 +19,20 @@ class CRUDImmunization(
     """
 
     def create(self, db: Session, *, obj_in: ImmunizationCreate) -> Immunization:
-        """
-        Create a new immunization record.
+        """Create a new immunization record.
 
-        Override base create method to properly handle date fields without jsonable_encoder.
+        If the payload includes a who_code, resolve it to the standardized
+        vaccine FK before insert. Unknown codes are silently dropped - the
+        record still saves with NULL FK, and the user is the source of truth
+        for whether the vaccine_name is real.
         """
-        # Convert Pydantic model to dict while preserving date objects
         obj_data = obj_in.model_dump()
+        who_code = obj_data.pop("standardized_vaccine_who_code", None)
+        if who_code:
+            vaccine = get_vaccine_by_who_code(db, who_code)
+            if vaccine:
+                obj_data["standardized_vaccine_id"] = vaccine.id
 
-        # Create the database object directly from the dict
         db_obj = self.model(**obj_data)
         db.add(db_obj)
         db.commit()
@@ -36,15 +42,24 @@ class CRUDImmunization(
     def update(
         self, db: Session, *, db_obj: Immunization, obj_in: ImmunizationUpdate
     ) -> Immunization:
-        """
-        Update an immunization record.
+        """Update an immunization record.
 
-        Override base update method to properly handle date fields without jsonable_encoder.
+        ``standardized_vaccine_who_code`` works as a virtual field: present and
+        resolvable -> set FK; present but unknown -> clear FK; explicit ``None``
+        -> clear FK; absent from payload -> preserve existing FK.
         """
-        # Get the data as dict, excluding None values
         update_data = obj_in.model_dump(exclude_unset=True)
 
-        # Update the database object
+        if "standardized_vaccine_who_code" in update_data:
+            who_code = update_data.pop("standardized_vaccine_who_code")
+            if who_code is None:
+                update_data["standardized_vaccine_id"] = None
+            else:
+                vaccine = get_vaccine_by_who_code(db, who_code)
+                update_data["standardized_vaccine_id"] = (
+                    vaccine.id if vaccine else None
+                )
+
         for field, value in update_data.items():
             setattr(db_obj, field, value)
 

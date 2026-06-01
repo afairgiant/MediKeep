@@ -394,6 +394,25 @@
       "searchPlaceholder": "Typ om vaccins te zoeken...",
       "combinedHint": "Gecombineerd vaccin — componenten: {{components}}",
       "matchedCommonName": "gevonden: {{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "Op datum",
+        "byDisease": "Op ziekte"
+      },
+      "recordCount": "{{count}} vaccinaties",
+      "recordCountSingular": "1 vaccinatie",
+      "dosesCount": "{{count}} doses",
+      "dosesCountSingular": "1 dosis",
+      "doseLabel": "Dosis {{n}}",
+      "lotLabel": "Charge {{lot}}",
+      "unlinkedTag": "Niet gekoppeld",
+      "emptyAll": "Nog geen vaccinaties geregistreerd.",
+      "emptyRange": "Geen vaccinaties in deze periode.",
+      "dateRangePlaceholder": "Filter op periode",
+      "noDiseaseData": "Er zijn geen vaccinaties gekoppeld aan de bibliotheek. Schakel over naar de weergave 'Op datum' om alle records te zien, of bewerk een record en selecteer opnieuw een vaccin uit de autocomplete om het te koppelen.",
+      "unmatchedTitle": "Sommige records zijn niet gekoppeld aan de vaccinbibliotheek",
+      "unmatchedBanner": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw uit de autocomplete om het te koppelen."
     }
   },
   "injuries": {

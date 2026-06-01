@@ -9,10 +9,147 @@ from sqlalchemy.orm import Session
 from app.crud.immunization import immunization as immunization_crud
 from app.crud.patient import patient as patient_crud
 from app.crud.practitioner import practitioner as practitioner_crud
+from app.models.clinical import StandardizedVaccine
 from app.models.models import Immunization
 from app.schemas.immunization import ImmunizationCreate, ImmunizationUpdate
 from app.schemas.patient import PatientCreate
 from app.schemas.practitioner import PractitionerCreate
+from tests.utils.user import create_random_user
+
+
+@pytest.fixture
+def user_with_patient(db_session: Session):
+    """Create a user with patient record for CRUD tests that need a real patient FK."""
+    user_data = create_random_user(db_session)
+    patient_data = PatientCreate(
+        first_name="John",
+        last_name="Doe",
+        birth_date=date(1990, 1, 1),
+        gender="M",
+        address="123 Main St",
+    )
+    patient = patient_crud.create_for_user(
+        db_session, user_id=user_data["user"].id, patient_data=patient_data
+    )
+    user_data["user"].active_patient_id = patient.id
+    db_session.commit()
+    db_session.refresh(user_data["user"])
+    return {**user_data, "patient": patient}
+
+
+def _make_library_vaccine(db_session, who_code="TEST-001", name="Test Vaccine"):
+    sv = StandardizedVaccine(
+        who_code=who_code,
+        vaccine_name=name,
+        is_combined=False,
+        is_common=False,
+    )
+    db_session.add(sv)
+    db_session.commit()
+    db_session.refresh(sv)
+    return sv
+
+
+def test_create_resolves_who_code_to_fk(db_session, user_with_patient):
+    sv = _make_library_vaccine(db_session)
+    payload = ImmunizationCreate(
+        vaccine_name="Test Vaccine",
+        date_administered=date(2024, 1, 1),
+        patient_id=user_with_patient["patient"].id,
+        standardized_vaccine_who_code=sv.who_code,
+    )
+    created = immunization_crud.create(db_session, obj_in=payload)
+    assert created.standardized_vaccine_id == sv.id
+
+
+def test_create_with_unknown_who_code_sets_fk_null(db_session, user_with_patient):
+    payload = ImmunizationCreate(
+        vaccine_name="Custom Brew",
+        date_administered=date(2024, 1, 1),
+        patient_id=user_with_patient["patient"].id,
+        standardized_vaccine_who_code="DOES-NOT-EXIST",
+    )
+    created = immunization_crud.create(db_session, obj_in=payload)
+    assert created.standardized_vaccine_id is None
+
+
+def test_update_resolves_who_code_to_fk(db_session, user_with_patient):
+    create_payload = ImmunizationCreate(
+        vaccine_name="MMR",
+        date_administered=date(2024, 1, 1),
+        patient_id=user_with_patient["patient"].id,
+    )
+    existing = immunization_crud.create(db_session, obj_in=create_payload)
+    assert existing.standardized_vaccine_id is None
+
+    sv = _make_library_vaccine(db_session, who_code="MMR-001", name="MMR")
+    update_payload = ImmunizationUpdate(standardized_vaccine_who_code=sv.who_code)
+    updated = immunization_crud.update(
+        db_session, db_obj=existing, obj_in=update_payload
+    )
+    assert updated.standardized_vaccine_id == sv.id
+
+
+def test_update_with_unknown_who_code_clears_fk(db_session, user_with_patient):
+    """If the picked WHO code isn't in the library, treat it like a clear - better
+    to silently drop the link than to keep a stale FK that doesn't match the typed name."""
+    sv = _make_library_vaccine(db_session, who_code="EXISTING-001", name="Existing")
+    create_payload = ImmunizationCreate(
+        vaccine_name="Existing",
+        date_administered=date(2024, 1, 1),
+        patient_id=user_with_patient["patient"].id,
+        standardized_vaccine_who_code=sv.who_code,
+    )
+    existing = immunization_crud.create(db_session, obj_in=create_payload)
+    assert existing.standardized_vaccine_id == sv.id
+
+    update_payload = ImmunizationUpdate(
+        standardized_vaccine_who_code="UNKNOWN-CODE"
+    )
+    updated = immunization_crud.update(
+        db_session, db_obj=existing, obj_in=update_payload
+    )
+    assert updated.standardized_vaccine_id is None
+
+
+def test_update_explicit_null_clears_fk(db_session, user_with_patient):
+    """Carried over from Task 3 review: pass explicit null to clear the link."""
+    sv = _make_library_vaccine(db_session, who_code="LINK-001", name="LinkedVax")
+    create_payload = ImmunizationCreate(
+        vaccine_name="LinkedVax",
+        date_administered=date(2024, 1, 1),
+        patient_id=user_with_patient["patient"].id,
+        standardized_vaccine_who_code=sv.who_code,
+    )
+    existing = immunization_crud.create(db_session, obj_in=create_payload)
+    assert existing.standardized_vaccine_id == sv.id
+
+    update_payload = ImmunizationUpdate(standardized_vaccine_who_code=None)
+    updated = immunization_crud.update(
+        db_session, db_obj=existing, obj_in=update_payload
+    )
+    assert updated.standardized_vaccine_id is None
+
+
+def test_update_without_who_code_field_preserves_fk(db_session, user_with_patient):
+    """If the payload doesn't include who_code at all, the existing FK is preserved."""
+    sv = _make_library_vaccine(db_session, who_code="KEEP-001", name="KeepVax")
+    create_payload = ImmunizationCreate(
+        vaccine_name="KeepVax",
+        date_administered=date(2024, 1, 1),
+        patient_id=user_with_patient["patient"].id,
+        standardized_vaccine_who_code=sv.who_code,
+    )
+    existing = immunization_crud.create(db_session, obj_in=create_payload)
+    assert existing.standardized_vaccine_id == sv.id
+
+    # Update vaccine_name only - don't touch who_code
+    update_payload = ImmunizationUpdate(vaccine_name="Updated Name")
+    updated = immunization_crud.update(
+        db_session, db_obj=existing, obj_in=update_payload
+    )
+    assert updated.standardized_vaccine_id == sv.id, "FK should be preserved"
+    assert updated.vaccine_name == "Updated Name"
 
 
 class TestImmunizationCRUD:

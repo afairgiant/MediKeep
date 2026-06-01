@@ -357,6 +357,13 @@
       "title": "疫苗详情",
       "tradeName": "商品名",
       "vaccineInfo": "疫苗信息"
+    },
+    "tabs": {
+      "records": "记录",
+      "history": "历史"
+    },
+    "history": {
+      "noPatient": "请选择患者以查看历史。"
     }
   },
   "insurance": {

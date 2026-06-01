@@ -357,6 +357,13 @@
       "title": "Impfungsdetails",
       "tradeName": "Handelsname",
       "vaccineInfo": "Impfstoffinformationen"
+    },
+    "tabs": {
+      "records": "Einträge",
+      "history": "Verlauf"
+    },
+    "history": {
+      "noPatient": "Wählen Sie einen Patienten aus, um den Verlauf anzuzeigen."
     }
   },
   "insurance": {

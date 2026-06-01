@@ -394,6 +394,25 @@
       "searchPlaceholder": "Zum Suchen von Impfstoffen eingeben...",
       "combinedHint": "Kombinierter Impfstoff — Bestandteile: {{components}}",
       "matchedCommonName": "Treffer: {{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "Nach Datum",
+        "byDisease": "Nach Krankheit"
+      },
+      "recordCount": "{{count}} Impfungen",
+      "recordCountSingular": "1 Impfung",
+      "dosesCount": "{{count}} Dosen",
+      "dosesCountSingular": "1 Dosis",
+      "doseLabel": "Dosis {{n}}",
+      "lotLabel": "Charge {{lot}}",
+      "unlinkedTag": "Nicht verknüpft",
+      "emptyAll": "Noch keine Impfungen erfasst.",
+      "emptyRange": "Keine Impfungen in diesem Zeitraum.",
+      "dateRangePlaceholder": "Nach Zeitraum filtern",
+      "noDiseaseData": "Es sind keine Impfungen mit der Bibliothek verknüpft. Wechseln Sie zur Ansicht „Nach Datum“, um alle Einträge zu sehen, oder bearbeiten Sie einen Eintrag und wählen Sie erneut einen Impfstoff aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
+      "unmatchedTitle": "Einige Einträge sind nicht mit der Impfstoffbibliothek verknüpft",
+      "unmatchedBanner": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der automatischen Vervollständigung, um ihn zu verknüpfen."
     }
   },
   "injuries": {

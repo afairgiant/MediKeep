@@ -394,6 +394,25 @@
       "searchPlaceholder": "Skriv för att söka vacciner...",
       "combinedHint": "Kombinerat vaccin — komponenter: {{components}}",
       "matchedCommonName": "matchning: {{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "Efter datum",
+        "byDisease": "Efter sjukdom"
+      },
+      "recordCount": "{{count}} vaccinationer",
+      "recordCountSingular": "1 vaccination",
+      "dosesCount": "{{count}} doser",
+      "dosesCountSingular": "1 dos",
+      "doseLabel": "Dos {{n}}",
+      "lotLabel": "Sats {{lot}}",
+      "unlinkedTag": "Inte länkad",
+      "emptyAll": "Inga vaccinationer registrerade ännu.",
+      "emptyRange": "Inga vaccinationer i detta intervall.",
+      "dateRangePlaceholder": "Filtrera efter datumintervall",
+      "noDiseaseData": "Inga vaccinationer är länkade till biblioteket. Växla till vyn \"Efter datum\" för att se alla poster, eller redigera en post och välj ett vaccin igen från autoifyllningen för att länka det.",
+      "unmatchedTitle": "Vissa poster är inte länkade till vaccinbiblioteket",
+      "unmatchedBanner": "{{count}} poster är inte länkade. Redigera en post och välj den igen från autoifyllningen för att länka den."
     }
   },
   "injuries": {

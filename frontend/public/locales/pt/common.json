@@ -357,6 +357,13 @@
       "title": "Detalhes da Imunização",
       "tradeName": "Nome Comercial",
       "vaccineInfo": "Informações da Vacina"
+    },
+    "tabs": {
+      "records": "Registros",
+      "history": "Histórico"
+    },
+    "history": {
+      "noPatient": "Selecione um paciente para ver o histórico."
     }
   },
   "insurance": {

@@ -394,6 +394,25 @@
       "searchPlaceholder": "输入以搜索疫苗...",
       "combinedHint": "联合疫苗 — 成分：{{components}}",
       "matchedCommonName": "匹配：{{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "按日期",
+        "byDisease": "按疾病"
+      },
+      "recordCount": "{{count}} 次接种",
+      "recordCountSingular": "1 次接种",
+      "dosesCount": "{{count}} 剂",
+      "dosesCountSingular": "1 剂",
+      "doseLabel": "第 {{n}} 剂",
+      "lotLabel": "批号 {{lot}}",
+      "unlinkedTag": "未关联",
+      "emptyAll": "暂无接种记录。",
+      "emptyRange": "此范围内无接种记录。",
+      "dateRangePlaceholder": "按日期范围筛选",
+      "noDiseaseData": "暂无接种记录关联到疫苗库。切换到「按日期」视图以查看所有记录，或编辑记录并从自动完成中重新选择疫苗以建立关联。",
+      "unmatchedTitle": "部分记录未关联到疫苗库",
+      "unmatchedBanner": "{{count}} 条记录未关联。编辑记录并从自动完成中重新选择以建立关联。"
     }
   },
   "injuries": {

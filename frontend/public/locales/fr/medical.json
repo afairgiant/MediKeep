@@ -394,6 +394,25 @@
       "searchPlaceholder": "Tapez pour rechercher des vaccins...",
       "combinedHint": "Vaccin combiné — composants : {{components}}",
       "matchedCommonName": "correspondance : {{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "Par date",
+        "byDisease": "Par maladie"
+      },
+      "recordCount": "{{count}} vaccinations",
+      "recordCountSingular": "1 vaccination",
+      "dosesCount": "{{count}} doses",
+      "dosesCountSingular": "1 dose",
+      "doseLabel": "Dose {{n}}",
+      "lotLabel": "Lot {{lot}}",
+      "unlinkedTag": "Non lié",
+      "emptyAll": "Aucune vaccination enregistrée.",
+      "emptyRange": "Aucune vaccination dans cette plage.",
+      "dateRangePlaceholder": "Filtrer par plage de dates",
+      "noDiseaseData": "Aucune vaccination n'est liée à la bibliothèque. Passez à la vue « Par date » pour voir tous les enregistrements, ou modifiez un enregistrement et resélectionnez un vaccin dans l'autocomplétion pour le lier.",
+      "unmatchedTitle": "Certains enregistrements ne sont pas liés à la bibliothèque de vaccins",
+      "unmatchedBanner": "{{count}} enregistrements ne sont pas liés. Modifiez un enregistrement et resélectionnez-le dans l'autocomplétion pour le lier."
     }
   },
   "injuries": {

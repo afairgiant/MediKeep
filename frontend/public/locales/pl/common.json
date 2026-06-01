@@ -357,6 +357,13 @@
       "title": "Szczegóły szczepienia",
       "tradeName": "Nazwa handlowa",
       "vaccineInfo": "Informacje o szczepionce"
+    },
+    "tabs": {
+      "records": "Wpisy",
+      "history": "Historia"
+    },
+    "history": {
+      "noPatient": "Wybierz pacjenta, aby zobaczyć historię."
     }
   },
   "insurance": {

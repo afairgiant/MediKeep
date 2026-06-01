@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Autocomplete,
   Modal,
@@ -100,6 +100,11 @@ const ImmunizationFormWrapper = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Tracks whether the next onChange is from a picker selection (where Mantine
+  // re-fires onChange with the option label after onOptionSubmit). We must not
+  // null the who_code in that case — handleVaccineOptionSubmit just set it.
+  const pickerJustFiredRef = useRef(false);
+
   // Form handlers
   const { handleTextInputChange } = useFormHandlers(onInputChange);
 
@@ -123,12 +128,14 @@ const ImmunizationFormWrapper = ({
 
   const handleVaccineOptionSubmit = useCallback(
     selectedValue => {
+      pickerJustFiredRef.current = true;
       const canonicalName = extractVaccineName(selectedValue);
       const libraryEntry = getVaccineByName(canonicalName);
 
       if (!libraryEntry) {
         // Free-text fallback — keep whatever the user picked verbatim.
         setField('vaccine_name', canonicalName);
+        setField('standardized_vaccine_who_code', null);
         return;
       }
 
@@ -139,6 +146,7 @@ const ImmunizationFormWrapper = ({
       // duplicates data. Users can fill in a specific brand manually.
       const commonName = libraryEntry.short_name || libraryEntry.vaccine_name;
       setField('vaccine_name', commonName);
+      setField('standardized_vaccine_who_code', libraryEntry.who_code || null);
 
       if (libraryEntry.default_manufacturer) {
         setField('manufacturer', libraryEntry.default_manufacturer);
@@ -252,7 +260,18 @@ const ImmunizationFormWrapper = ({
                     <Autocomplete
                       label={t('shared:fields.vaccineName', 'Vaccine Name')}
                       value={formData.vaccine_name || ''}
-                      onChange={value => setField('vaccine_name', value)}
+                      onChange={value => {
+                        setField('vaccine_name', value);
+                        // Mantine fires onChange synchronously after
+                        // onOptionSubmit with the picked option's label — skip
+                        // the clear in that case so the who_code that the
+                        // picker just set isn't immediately nulled out.
+                        if (pickerJustFiredRef.current) {
+                          pickerJustFiredRef.current = false;
+                          return;
+                        }
+                        setField('standardized_vaccine_who_code', null);
+                      }}
                       onOptionSubmit={handleVaccineOptionSubmit}
                       data={vaccineOptions}
                       limit={50}

@@ -1584,6 +1584,16 @@ class ApiService {
     );
   }
 
+  getImmunizationHistory(patientId, params = {}, signal) {
+    const queryParams = {};
+    if (params.startDate != null) queryParams.start_date = params.startDate;
+    if (params.endDate != null) queryParams.end_date = params.endDate;
+    return this.get(`/immunizations/patient/${patientId}/history`, {
+      params: queryParams,
+      signal,
+    });
+  }
+
   createImmunization(immunizationData, signal) {
     return this.createEntity(
       ENTITY_TYPES.IMMUNIZATION,

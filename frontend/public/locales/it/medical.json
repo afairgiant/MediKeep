@@ -394,6 +394,25 @@
       "searchPlaceholder": "Digita per cercare vaccini...",
       "combinedHint": "Vaccino combinato — componenti: {{components}}",
       "matchedCommonName": "corrisponde: {{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "Per data",
+        "byDisease": "Per malattia"
+      },
+      "recordCount": "{{count}} vaccinazioni",
+      "recordCountSingular": "1 vaccinazione",
+      "dosesCount": "{{count}} dosi",
+      "dosesCountSingular": "1 dose",
+      "doseLabel": "Dose {{n}}",
+      "lotLabel": "Lotto {{lot}}",
+      "unlinkedTag": "Non collegato",
+      "emptyAll": "Nessuna vaccinazione registrata.",
+      "emptyRange": "Nessuna vaccinazione in questo intervallo.",
+      "dateRangePlaceholder": "Filtra per intervallo di date",
+      "noDiseaseData": "Nessuna vaccinazione è collegata alla libreria. Passa alla vista «Per data» per vedere tutti i record, oppure modifica un record e riseleziona un vaccino dal completamento automatico per collegarlo.",
+      "unmatchedTitle": "Alcuni record non sono collegati alla libreria dei vaccini",
+      "unmatchedBanner": "{{count}} record non sono collegati. Modifica un record e riselezionalo dal completamento automatico per collegarlo."
     }
   },
   "injuries": {

@@ -394,6 +394,25 @@
       "searchPlaceholder": "Escribe para buscar vacunas...",
       "combinedHint": "Vacuna combinada — componentes: {{components}}",
       "matchedCommonName": "coincidencia: {{name}}"
+    },
+    "history": {
+      "viewMode": {
+        "byDate": "Por fecha",
+        "byDisease": "Por enfermedad"
+      },
+      "recordCount": "{{count}} vacunaciones",
+      "recordCountSingular": "1 vacunación",
+      "dosesCount": "{{count}} dosis",
+      "dosesCountSingular": "1 dosis",
+      "doseLabel": "Dosis {{n}}",
+      "lotLabel": "Lote {{lot}}",
+      "unlinkedTag": "Sin vincular",
+      "emptyAll": "No hay vacunaciones registradas todavía.",
+      "emptyRange": "No hay vacunaciones en este rango.",
+      "dateRangePlaceholder": "Filtrar por rango de fechas",
+      "noDiseaseData": "No hay vacunaciones vinculadas a la biblioteca. Cambie a la vista «Por fecha» para ver todos los registros, o edite un registro y vuelva a seleccionar una vacuna del autocompletado para vincularlo.",
+      "unmatchedTitle": "Algunos registros no están vinculados a la biblioteca de vacunas",
+      "unmatchedBanner": "{{count}} registros no están vinculados. Edite un registro y vuelva a seleccionarlo en el autocompletado para vincularlo."
     }
   },
   "injuries": {

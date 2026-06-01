@@ -357,6 +357,13 @@
       "title": "Vaccinatiedetails",
       "tradeName": "Handelsnaam",
       "vaccineInfo": "Vaccininformatie"
+    },
+    "tabs": {
+      "records": "Records",
+      "history": "Geschiedenis"
+    },
+    "history": {
+      "noPatient": "Selecteer een patiënt om de geschiedenis te bekijken."
     }
   },
   "insurance": {

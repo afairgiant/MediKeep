@@ -357,6 +357,13 @@
       "title": "Vaccinationsdetaljer",
       "tradeName": "Handelsnamn",
       "vaccineInfo": "Vaccininformation"
+    },
+    "tabs": {
+      "records": "Poster",
+      "history": "Historik"
+    },
+    "history": {
+      "noPatient": "Välj en patient för att visa historik."
     }
   },
   "insurance": {
