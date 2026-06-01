@@ -1541,20 +1541,23 @@ Base path: `/api/v1/lab-results`
   "patient_id": 1,
   "test_name": "Complete Blood Count",
   "test_code": "CBC",
-  "test_category": "Hematology",
+  "test_category": "hematology",
   "test_type": "routine",
   "facility": "LabCorp",
   "ordered_date": "2025-10-01",
   "completed_date": "2025-10-02",
   "practitioner_id": 5,
-  "status": "final",
-  "labs_result": "All values within normal range",
+  "status": "completed",
+  "labs_result": "normal",
   "notes": "Routine checkup",
   "tags": ["annual", "routine"]
 }
 ```
 
-- **Status values**: `pending`, `preliminary`, `final`, `corrected`
+- **Status values**: `ordered`, `in-progress`, `completed`, `cancelled`
+- **Labs result values**: `normal`, `abnormal`, `critical`, `high`, `low`, `borderline`, `inconclusive`
+- **Test category values**: `blood work`, `imaging`, `pathology`, `microbiology`, `chemistry`, `hematology`, `hepatology`, `immunology`, `genetics`, `cardiology`, `pulmonology`, `hearing`, `stomatology`, `other`
+- **Test type values**: `routine`, `urgent`, `stat`, `emergency`, `follow-up`, `screening`
 - **Success Response** (201): Lab result object
 
 #### List Lab Results
@@ -1647,50 +1650,51 @@ Base path: `/api/v1/lab-results`
 
 #### Lab Result File Management
 
-##### Get Lab Result Files
+Current builds use the shared Entity Files subsystem for lab result attachments. See [Section 9 — Files & Attachments](#9-files--attachments) for the full reference; the lab-result-specific paths are listed here for convenience.
 
-`GET /lab-results/{lab_result_id}/files`
+Base path: `/api/v1/entity-files`
+
+##### List Lab Result Files
+
+`GET /entity-files/lab-result/{lab_result_id}/files`
 
 - **Purpose**: Get all files attached to a lab result
 - **Authentication**: Yes
-- **Success Response** (200):
-
-```json
-[
-  {
-    "id": 1,
-    "lab_result_id": 1,
-    "file_name": "cbc_results.pdf",
-    "file_path": "/uploads/lab_result_files/abc123.pdf",
-    "file_type": "application/pdf",
-    "file_size": 245678,
-    "description": "Original lab report",
-    "uploaded_at": "2025-10-04T10:30:00Z"
-  }
-]
-```
+- **Success Response** (200): Array of entity file objects
 
 ##### Upload Lab Result File
 
-`POST /lab-results/{lab_result_id}/files`
+`POST /entity-files/lab-result/{lab_result_id}/files`
 
 - **Purpose**: Upload a file to a lab result
 - **Authentication**: Yes
 - **Content-Type**: `multipart/form-data`
 - **Request Body**:
-  - `file`: File to upload
+  - `file` (required): File to upload
   - `description` (optional): File description
+  - `category` (optional): Category label
+  - `storage_backend` (optional): Storage backend (`local`, `paperless`, `papra`)
 - **Max Size**: 1GB
 - **Allowed Extensions**: PDF, images, documents, medical imaging (DICOM, NIfTI), video, audio, archives
-- **Success Response** (201): Created file object
+- **Success Response** (200): Created entity file object
+
+##### View Lab Result File (Inline)
+
+`GET /entity-files/files/{file_id}/view`
+
+##### Download Lab Result File
+
+`GET /entity-files/files/{file_id}/download`
 
 ##### Delete Lab Result File
 
-`DELETE /lab-results/{lab_result_id}/files/{file_id}`
+`DELETE /entity-files/files/{file_id}`
 
 - **Purpose**: Delete a specific file from a lab result
 - **Authentication**: Yes
-- **Success Response** (200): `{"message": "File deleted successfully"}`
+- **Success Response** (200): File operation result
+
+> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above.
 
 #### Lab Result Statistics
 
@@ -1839,24 +1843,88 @@ Base path: `/api/v1/lab-results`
 
 Base path: `/api/v1/lab-test-components`
 
-#### Create Test Component
+#### List Components For Lab Result
 
-`POST /lab-test-components/`
+`GET /lab-test-components/lab-result/{lab_result_id}/components`
 
+- **Purpose**: List all test components for a lab result
+- **Authentication**: Yes
+- **Query Parameters**:
+  - `skip` (integer, default: 0): Pagination offset
+  - `limit` (integer, default: 100, max: 1000): Items per page
+  - `category` (string, optional): Filter by category
+  - `status` (string, optional): Filter by status
+- **Success Response** (200): Array of component objects
+
+#### Create Test Component For Lab Result
+
+`POST /lab-test-components/lab-result/{lab_result_id}/components`
+
+- **Purpose**: Add a single test component to a lab result
+- **Authentication**: Yes
 - **Request Body**:
 
 ```json
 {
   "lab_result_id": 1,
-  "component_name": "White Blood Cell Count",
-  "value": "7.5",
-  "unit": "K/uL",
-  "reference_range": "4.5-11.0",
-  "status": "normal"
+  "test_name": "White Blood Cell Count",
+  "abbreviation": "WBC",
+  "canonical_test_name": "White Blood Cell Count",
+  "value": 7.5,
+  "unit": "x10*9/L",
+  "ref_range_text": "4.5 - 11.0",
+  "status": "normal",
+  "category": "hematology",
+  "result_type": "quantitative",
+  "display_order": 1,
+  "notes": "Optional notes"
 }
 ```
 
-- **Status values**: `normal`, `abnormal`, `critical`
+- **Result type values**: `quantitative`, `qualitative`
+- **Status values**: `normal`, `abnormal`, `critical`, `high`, `low`, `borderline`, `inconclusive`
+- **Note**: For quantitative components, `value` and `unit` are required. For qualitative components, use `qualitative_value` instead.
+- **Success Response** (201): Created component object
+
+#### Bulk Create Test Components
+
+`POST /lab-test-components/lab-result/{lab_result_id}/components/bulk`
+
+- **Purpose**: Create multiple test components for a lab result in one request
+- **Authentication**: Yes
+- **Request Body**: `{"lab_result_id": <id>, "components": [<component>, ...]}`
+- **Success Response** (201): `{"created_count": N, "components": [...], "errors": [...]}`
+
+#### Get Test Component
+
+`GET /lab-test-components/components/{component_id}`
+
+- **Authentication**: Yes
+- **Success Response** (200): Component object with associated lab result summary
+
+#### Update Test Component
+
+`PUT /lab-test-components/components/{component_id}`
+
+- **Purpose**: Update an existing test component (canonical mapping, ranges, status, etc.)
+- **Authentication**: Yes
+- **Request Body**: Same shape as create (all fields optional)
+- **Success Response** (200): Updated component object
+
+#### Delete Test Component
+
+`DELETE /lab-test-components/components/{component_id}`
+
+- **Authentication**: Yes
+- **Success Response** (204): No content
+
+#### Lab Result Component Statistics
+
+`GET /lab-test-components/lab-result/{lab_result_id}/statistics`
+
+- **Purpose**: Summary counts (normal/abnormal/critical, categories, etc.)
+- **Authentication**: Yes
+- **Success Response** (200): Statistics object
 
 ### 6.7 Encounters
 
@@ -3630,30 +3698,74 @@ Base path: `/api/v1/notifications`
 
 Base path: `/api/v1/entity-files`
 
-### Upload File
-
-`POST /entity-files/`
-
-- **Content-Type**: `multipart/form-data`
-- **Request Body**:
-  - `file`: File to upload
-  - `entity_type`: Type (medication, condition, etc.)
-  - `entity_id`: ID of related record
-  - `description`: File description
-- **Max Size**: 15MB
-- **Allowed Types**: PDF, JPEG, PNG, GIF
+The shared Entity Files subsystem handles attachments across most medical entity types (lab results, medications, conditions, procedures, encounters, treatments, immunizations, vitals, allergies, injuries, etc.). Files can be stored locally or linked to external document backends (Paperless-ngx, Papra).
 
 ### List Files for Entity
 
-`GET /entity-files/{entity_type}/{entity_id}`
+`GET /entity-files/{entity_type}/{entity_id}/files`
+
+- **Purpose**: List files attached to an entity
+- **Authentication**: Yes
+- **Success Response** (200): Array of entity file objects
+
+### Upload File to Entity
+
+`POST /entity-files/{entity_type}/{entity_id}/files`
+
+- **Content-Type**: `multipart/form-data`
+- **Request Body**:
+  - `file` (required): File to upload
+  - `description` (optional): File description
+  - `category` (optional): Category label
+  - `storage_backend` (optional): Storage backend (`local`, `paperless`, `papra`)
+- **Max Size**: 1GB
+- **Allowed Extensions**: PDF, images, documents, medical imaging (DICOM, NIfTI), video, audio, archives
+- **Success Response** (200): Created entity file object
+
+### Get File Metadata
+
+`GET /entity-files/files/{file_id}`
+
+- **Authentication**: Yes
+- **Success Response** (200): Entity file object
+
+### View File (Inline)
+
+`GET /entity-files/files/{file_id}/view`
+
+- **Purpose**: Stream file inline (e.g., PDF preview, image display)
+- **Authentication**: Yes
 
 ### Download File
 
-`GET /entity-files/{file_id}/download`
+`GET /entity-files/files/{file_id}/download`
+
+- **Purpose**: Download file with `Content-Disposition: attachment`
+- **Authentication**: Yes
+
+### Update File Metadata
+
+`PUT /entity-files/files/{file_id}/metadata`
+
+- **Authentication**: Yes
+- **Request Body**: Updatable metadata fields (e.g., `description`, `category`)
+- **Success Response** (200): Updated entity file object
 
 ### Delete File
 
-`DELETE /entity-files/{file_id}`
+`DELETE /entity-files/files/{file_id}`
+
+- **Authentication**: Yes
+- **Success Response** (200): File operation result
+
+### Batch File Counts
+
+`POST /entity-files/files/batch-counts`
+
+- **Purpose**: Fetch attachment counts for many entities in one call (used by list views)
+- **Authentication**: Yes
+- **Request Body**: Array of `{entity_type, entity_id}` pairs
+- **Success Response** (200): Array of `{entity_type, entity_id, file_count}` objects
 
 ---
 
