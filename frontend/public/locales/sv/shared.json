@@ -317,6 +317,7 @@
     "episodesCount_one": "Episoder ({{count}})",
     "episodesCount_other": "Episoder ({{count}})",
     "notes": "Anteckningar",
+    "labResults": "Laboratorieresultat",
     "overview": "Översikt",
     "visits": "Besök"
   }

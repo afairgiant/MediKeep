@@ -438,8 +438,10 @@
   "key": "Standard {{var}}",
   "labels": {
     "addCustom": "+ Lägg till \"{{value}}\"",
+    "linkedLabResults": "Länkade labbresultat",
     "linkedMedications": "Länkade läkemedel",
     "loading": "Laddar...",
+    "loadingLabResults": "Laddar labbresultat...",
     "loadingOption": "Laddar {{option}}...",
     "loadingRelatedConditions": "Laddar relaterade tillstånd...",
     "new": "Ny",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "Inga besök länkade till denna behandling",
     "noEquipmentLinked": "Ingen utrustning länkad till denna behandling",
     "noLabResultsLinked": "Inga labbresultat länkade till detta besök",
+    "noLabResultsLinkedToCondition": "Inga labbresultat länkade till detta tillstånd",
     "noMedicationsLinked": "Inga läkemedel länkade till detta tillstånd",
     "none": "Ingen",
     "noRating": "Inget betyg",

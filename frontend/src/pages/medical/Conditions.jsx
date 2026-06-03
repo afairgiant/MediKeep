@@ -62,8 +62,9 @@ const Conditions = () => {
     PAGE_SIZE_OPTIONS,
   } = usePagination();
 
-  // Load medications and practitioners for linking dropdowns
+  // Load medications, lab results, and practitioners for linking dropdowns
   const [medications, setMedications] = useState([]);
+  const [labResults, setLabResults] = useState([]);
   const [practitioners, setPractitioners] = useState([]);
 
   // Condition-medication relationships (for the junction table)
@@ -241,6 +242,17 @@ const Conditions = () => {
         .catch(error => {
           logger.error('Failed to fetch practitioners:', error);
           setPractitioners([]);
+        });
+
+      // Load lab results
+      apiService
+        .getPatientLabResults(currentPatient.id)
+        .then(response => {
+          setLabResults(response || []);
+        })
+        .catch(error => {
+          logger.error('Failed to fetch lab results:', error);
+          setLabResults([]);
         });
     }
   }, [currentPatient?.id]);
@@ -534,6 +546,7 @@ const Conditions = () => {
           medications={medications}
           conditionMedications={conditionMedications}
           fetchConditionMedications={fetchConditionMedications}
+          labResults={labResults}
           navigate={navigate}
         />
 

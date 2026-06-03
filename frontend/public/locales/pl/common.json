@@ -438,8 +438,10 @@
   "key": "Domyślny {{var}}",
   "labels": {
     "addCustom": "+ Dodaj \"{{value}}\"",
+    "linkedLabResults": "Powiązane wyniki badań",
     "linkedMedications": "Powiązane leki",
     "loading": "Ładowanie...",
+    "loadingLabResults": "Ładowanie wyników badań...",
     "loadingOption": "Ładowanie {{option}}...",
     "loadingRelatedConditions": "Ładowanie powiązanych schorzeń...",
     "new": "Nowy",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "Brak wizyt połączonych z tym leczeniem",
     "noEquipmentLinked": "Brak sprzętu połączonego z tym leczeniem",
     "noLabResultsLinked": "Brak wyników badań połączonych z tą wizytą",
+    "noLabResultsLinkedToCondition": "Brak wyników badań powiązanych z tym schorzeniem",
     "noMedicationsLinked": "Brak leków powiązanych z tym schorzeniem",
     "none": "Brak",
     "noRating": "Brak oceny",

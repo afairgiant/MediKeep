@@ -317,6 +317,7 @@
     "episodesCount_one": "Crise ({{count}})",
     "episodesCount_other": "Crises ({{count}})",
     "notes": "Notes",
+    "labResults": "Résultats de laboratoire",
     "overview": "Aperçu",
     "visits": "Visites"
   }
