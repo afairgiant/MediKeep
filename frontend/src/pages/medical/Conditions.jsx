@@ -244,17 +244,32 @@ const Conditions = () => {
           setPractitioners([]);
         });
 
-      // Load lab results
-      apiService
-        .getPatientLabResults(currentPatient.id)
-        .then(response => {
-          setLabResults(response || []);
-        })
-        .catch(error => {
-          logger.error('Failed to fetch lab results:', error);
-          setLabResults([]);
-        });
     }
+  }, [currentPatient?.id]);
+
+  useEffect(() => {
+    if (!currentPatient?.id) {
+      setLabResults([]);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    apiService
+      .getPatientLabResults(currentPatient.id, controller.signal)
+      .then(response => {
+        setLabResults(response || []);
+      })
+      .catch(error => {
+        if (error.name === 'AbortError' || error.name === 'CanceledError') return;
+        logger.error('Failed to fetch lab results:', error);
+        setLabResults([]);
+      });
+
+    return () => {
+      controller.abort();
+      setLabResults([]);
+    };
   }, [currentPatient?.id]);
 
   // Function to fetch condition-medication relationships
