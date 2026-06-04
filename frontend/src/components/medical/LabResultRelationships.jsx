@@ -88,6 +88,9 @@ const LabResultRelationships = ({
   useEffect(() => {
     if (!conditionId) return;
     const controller = new AbortController();
+    setRelationships([]);
+    setEditingRelationship(null);
+    setError(null);
     setLoading(true);
 
     apiService
