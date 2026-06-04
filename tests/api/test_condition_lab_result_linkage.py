@@ -311,4 +311,4 @@ class TestConditionLabResultsAPI:
             headers=other_headers,
         )
 
-        assert response.status_code in (403, 404), response.text
+        assert response.status_code == 403, response.text

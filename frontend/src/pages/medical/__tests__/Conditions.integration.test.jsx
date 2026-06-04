@@ -75,6 +75,7 @@ vi.mock('../../../hooks/useResponsive', () => ({
 vi.mock('../../../services/api', () => ({
   apiService: {
     getPatientMedications: vi.fn(() => Promise.resolve([])),
+    getPatientLabResults: vi.fn(() => Promise.resolve([])),
     getPractitioners: vi.fn(() => Promise.resolve([])),
     getConditionMedications: vi.fn(() => Promise.resolve([])),
     createConditionMedicationsBulk: vi.fn(() => Promise.resolve([])),

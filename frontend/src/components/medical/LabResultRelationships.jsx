@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
+  Anchor,
   Badge,
   Button,
   Group,
@@ -258,14 +259,10 @@ const LabResultRelationships = ({
                 <Group justify="space-between" align="flex-start">
                   <Stack gap="xs" style={{ flex: 1 }}>
                     <Group gap="sm">
-                      <Text
+                      <Anchor
                         size="sm"
                         fw={500}
-                        c="blue"
-                        style={{
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                        }}
+                        component="button"
                         onClick={() =>
                           navigateToEntity(
                             'lab_result',
@@ -279,7 +276,7 @@ const LabResultRelationships = ({
                           {lab?.test_name ||
                             `Lab Result ID: ${relationship.lab_result_id}`}
                         </Group>
-                      </Text>
+                      </Anchor>
                       {lab?.labs_result && (
                         <Badge
                           variant="light"
@@ -346,6 +343,7 @@ const LabResultRelationships = ({
                             variant="light"
                             color="green"
                             size="sm"
+                            aria-label={t('labels.saveRelationship', 'Save relationship')}
                             onClick={() =>
                               handleEditRelationship(relationship, {
                                 relevance_note:
@@ -360,6 +358,7 @@ const LabResultRelationships = ({
                             variant="light"
                             color="gray"
                             size="sm"
+                            aria-label={t('labels.cancelEdit', 'Cancel edit')}
                             onClick={() => setEditingRelationship(null)}
                           >
                             <IconX size={14} />
@@ -371,6 +370,7 @@ const LabResultRelationships = ({
                             variant="light"
                             color="blue"
                             size="sm"
+                            aria-label={t('labels.editRelationship', 'Edit relationship')}
                             onClick={() =>
                               setEditingRelationship({
                                 id: relationship.id,
@@ -385,6 +385,7 @@ const LabResultRelationships = ({
                             variant="light"
                             color="red"
                             size="sm"
+                            aria-label={t('labels.deleteRelationship', 'Delete relationship')}
                             onClick={() =>
                               handleDeleteRelationship(relationship)
                             }

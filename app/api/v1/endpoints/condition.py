@@ -955,7 +955,7 @@ def get_condition_lab_results(
         for rel in relationships:
             lab = rel.lab_result
             if lab and lab.patient_id != db_condition.patient_id:
-                lab = None
+                continue
 
             enhanced_relationships.append(
                 {
