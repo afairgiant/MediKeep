@@ -988,7 +988,7 @@ def get_condition_lab_results(
             "ConditionLabResult",
             patient_id=patient_record.id,
             condition_id=condition_id,
-            count=len(relationships),
+            count=len(enhanced_relationships),
         )
 
         return enhanced_relationships
