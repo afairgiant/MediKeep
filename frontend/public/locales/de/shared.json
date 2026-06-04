@@ -317,6 +317,7 @@
     "episodesCount_one": "Episoden ({{count}})",
     "episodesCount_other": "Episoden ({{count}})",
     "notes": "Notizen",
+    "labResults": "Laborergebnisse",
     "overview": "Übersicht",
     "visits": "Besuche"
   }

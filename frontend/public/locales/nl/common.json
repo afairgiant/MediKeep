@@ -438,8 +438,10 @@
   "key": "Standaard {{var}}",
   "labels": {
     "addCustom": "+ \"{{value}}\" toevoegen",
+    "linkedLabResults": "Gekoppelde labresultaten",
     "linkedMedications": "Gekoppelde medicatie",
     "loading": "Laden...",
+    "loadingLabResults": "Labresultaten laden...",
     "loadingOption": "{{option}} laden...",
     "loadingRelatedConditions": "Gerelateerde aandoeningen laden...",
     "new": "Nieuw",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "Geen bezoeken gekoppeld aan deze behandeling",
     "noEquipmentLinked": "Geen apparatuur gekoppeld aan deze behandeling",
     "noLabResultsLinked": "Geen labresultaten gekoppeld aan dit bezoek",
+    "noLabResultsLinkedToCondition": "Geen labresultaten gekoppeld aan deze aandoening",
     "noMedicationsLinked": "Geen medicatie gekoppeld aan deze aandoening",
     "none": "Geen",
     "noRating": "Geen beoordeling",

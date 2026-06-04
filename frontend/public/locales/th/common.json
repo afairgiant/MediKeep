@@ -438,8 +438,10 @@
   "key": "ค่าเริ่มต้น {{var}}",
   "labels": {
     "addCustom": "+ เพิ่ม \"{{value}}\"",
+    "linkedLabResults": "ผลแลปที่เชื่อมโยง",
     "linkedMedications": "ยาที่เชื่อมโยง",
     "loading": "กำลังโหลด...",
+    "loadingLabResults": "กำลังโหลดผลแลป...",
     "loadingOption": "กำลังโหลด {{option}}...",
     "loadingRelatedConditions": "กำลังโหลดโรคที่เกี่ยวข้อง...",
     "new": "ใหม่",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "ไม่มีการเยี่ยมที่เชื่อมโยงกับการรักษานี้",
     "noEquipmentLinked": "ไม่มีอุปกรณ์ที่เชื่อมโยงกับการรักษานี้",
     "noLabResultsLinked": "ไม่มีผลแลปที่เชื่อมโยงกับการเยี่ยมนี้",
+    "noLabResultsLinkedToCondition": "ไม่มีผลแลปที่เชื่อมโยงกับโรคนี้",
     "noMedicationsLinked": "ไม่มียาที่เชื่อมโยงกับโรคนี้",
     "none": "ไม่มี",
     "noRating": "ไม่มีคะแนน",

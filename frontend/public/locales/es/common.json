@@ -438,8 +438,10 @@
   "key": "Predeterminado {{var}}",
   "labels": {
     "addCustom": "+ Añadir \"{{value}}\"",
+    "linkedLabResults": "Resultados de laboratorio vinculados",
     "linkedMedications": "Medicamentos vinculados",
     "loading": "Cargando...",
+    "loadingLabResults": "Cargando resultados de laboratorio...",
     "loadingOption": "Cargando {{option}}...",
     "loadingRelatedConditions": "Cargando condiciones relacionadas...",
     "new": "Nuevo",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "No hay visitas vinculadas a este tratamiento",
     "noEquipmentLinked": "No hay equipo vinculado a este tratamiento",
     "noLabResultsLinked": "No hay resultados de laboratorio vinculados a esta visita",
+    "noLabResultsLinkedToCondition": "No hay resultados de laboratorio vinculados a esta condición",
     "noMedicationsLinked": "No hay medicamentos vinculados a esta condición",
     "none": "Ninguno",
     "noRating": "Sin valoración",

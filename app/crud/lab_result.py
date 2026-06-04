@@ -94,9 +94,17 @@ class CRUDLabResultCondition(
     def get_by_condition(
         self, db: Session, *, condition_id: int
     ) -> List[LabResultCondition]:
-        """Get all lab result relationships for a specific condition"""
+        """Get all lab result relationships for a specific condition, with lab result eagerly loaded."""
+        from app.models.labs import LabResult
+        from sqlalchemy.orm import contains_eager
+
         return (
-            db.query(self.model).filter(self.model.condition_id == condition_id).all()
+            db.query(self.model)
+            .join(LabResult, self.model.lab_result_id == LabResult.id)
+            .options(contains_eager(self.model.lab_result))
+            .filter(self.model.condition_id == condition_id)
+            .order_by(LabResult.completed_date.desc().nulls_last())
+            .all()
         )
 
     def get_by_lab_result_and_condition(

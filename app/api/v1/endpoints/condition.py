@@ -19,6 +19,7 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.crud.condition import condition, condition_medication
+from app.crud.lab_result import lab_result_condition
 from app.crud.medication import medication as medication_crud
 from app.models.activity_log import EntityType
 from app.models.models import User
@@ -900,6 +901,94 @@ def get_medication_conditions(
             patient_id=patient_record.id,
             medication_id=medication_id,
             count=len(relationships),
+        )
+
+        return enhanced_relationships
+
+
+# Lab result-focused endpoints (for showing lab results on condition view)
+
+
+@router.get(
+    "/{condition_id}/lab-results",
+    response_model=List[dict],
+)
+def get_condition_lab_results(
+    *,
+    condition_id: int,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Get all lab result relationships for a specific condition."""
+    with handle_database_errors(request=request):
+        db_condition = condition.get(db, id=condition_id)
+        if not db_condition:
+            raise NotFoundException(
+                resource="Condition",
+                message=f"Condition with ID {condition_id} not found",
+                request=request,
+            )
+
+        from app.models.models import Patient
+        from app.services.patient_access import PatientAccessService
+
+        patient_record = (
+            db.query(Patient).filter(Patient.id == db_condition.patient_id).first()
+        )
+        if not patient_record:
+            raise NotFoundException(
+                resource="Patient", message="Patient not found", request=request
+            )
+
+        access_service = PatientAccessService(db)
+        if not access_service.can_access_patient(current_user, patient_record, "view"):
+            raise ForbiddenException(
+                message="Access denied to this condition", request=request
+            )
+
+        relationships = lab_result_condition.get_by_condition(
+            db, condition_id=condition_id
+        )
+
+        enhanced_relationships = []
+        for rel in relationships:
+            lab = rel.lab_result
+            if lab and lab.patient_id != db_condition.patient_id:
+                continue
+
+            enhanced_relationships.append(
+                {
+                    "id": rel.id,
+                    "lab_result_id": rel.lab_result_id,
+                    "condition_id": rel.condition_id,
+                    "relevance_note": rel.relevance_note,
+                    "created_at": rel.created_at,
+                    "updated_at": rel.updated_at,
+                    "lab_result": (
+                        {
+                            "id": lab.id,
+                            "test_name": lab.test_name,
+                            "test_category": lab.test_category,
+                            "status": lab.status,
+                            "labs_result": lab.labs_result,
+                            "completed_date": lab.completed_date,
+                        }
+                        if lab
+                        else None
+                    ),
+                }
+            )
+
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "read",
+            "ConditionLabResult",
+            patient_id=patient_record.id,
+            condition_id=condition_id,
+            count=len(enhanced_relationships),
         )
 
         return enhanced_relationships

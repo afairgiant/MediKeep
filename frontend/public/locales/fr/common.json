@@ -438,8 +438,10 @@
   "key": "Par défaut {{var}}",
   "labels": {
     "addCustom": "+ Ajouter \"{{value}}\"",
+    "linkedLabResults": "Résultats de laboratoire connectés",
     "linkedMedications": "Médicaments connectés",
     "loading": "Chargement...",
+    "loadingLabResults": "Chargement des résultats de laboratoire...",
     "loadingOption": "Chargement : {{option}}...",
     "loadingRelatedConditions": "Chargement des conditions connectées...",
     "new": "Nouveau",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "Aucune visite connectée à ce traitement",
     "noEquipmentLinked": "Aucun équipement connecté à ce traitement",
     "noLabResultsLinked": "Aucun résultat d'analyse connecté à cette visite",
+    "noLabResultsLinkedToCondition": "Aucun résultat d'analyse connecté à cette condition",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
     "none": "Aucun",
     "noRating": "Aucun avis",

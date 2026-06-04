@@ -317,6 +317,7 @@
     "episodesCount_one": "病程（{{count}}）",
     "episodesCount_other": "病程（{{count}}）",
     "notes": "记录",
+    "labResults": "化验结果",
     "overview": "概览",
     "visits": "就诊"
   }

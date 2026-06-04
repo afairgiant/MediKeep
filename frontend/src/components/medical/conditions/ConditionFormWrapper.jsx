@@ -20,6 +20,7 @@ import {
   IconInfoCircle,
   IconStethoscope,
   IconFileText,
+  IconFlask,
   IconNotes,
   IconPill,
 } from '@tabler/icons-react';
@@ -29,6 +30,7 @@ import { useFormHandlers } from '../../../hooks/useFormHandlers';
 import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
+import LabResultRelationships from '../LabResultRelationships';
 import MedicationRelationships from '../MedicationRelationships';
 import logger from '../../../services/logger';
 
@@ -50,6 +52,8 @@ const ConditionFormWrapper = ({
   medications = [],
   conditionMedications = {},
   fetchConditionMedications,
+  // Lab result relationship props (only used when editing)
+  labResults = [],
   navigate,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
@@ -179,6 +183,12 @@ const ConditionFormWrapper = ({
                 leftSection={<IconPill size={16} />}
               >
                 {t('shared:categories.medications', 'Medications')}
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="labResults"
+                leftSection={<IconFlask size={16} />}
+              >
+                {t('shared:tabs.labResults', 'Lab Results')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes', 'Notes')}
@@ -476,6 +486,33 @@ const ConditionFormWrapper = ({
                     clearable
                     comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                   />
+                )}
+              </Box>
+            </Tabs.Panel>
+
+            {/* Lab Results Tab */}
+            <Tabs.Panel value="labResults">
+              <Box mt="md">
+                <Text size="sm" c="dimmed" mb="md">
+                  {t(
+                    'conditions.form.labResultsDescription',
+                    'Link lab results that relate to or monitor this condition.'
+                  )}
+                </Text>
+                {editingCondition ? (
+                  <LabResultRelationships
+                    conditionId={editingCondition.id}
+                    labResults={labResults}
+                    navigate={navigate}
+                    isViewMode={false}
+                  />
+                ) : (
+                  <Text size="sm" c="dimmed">
+                    {t(
+                      'conditions.form.saveFirstToLinkLabResults',
+                      'Save the condition first, then return to edit mode to link lab results.'
+                    )}
+                  </Text>
                 )}
               </Box>
             </Tabs.Panel>

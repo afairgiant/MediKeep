@@ -20,12 +20,14 @@ import {
   IconNotes,
   IconFileText,
   IconEdit,
+  IconFlask,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTagColors } from '../../../hooks/useTagColors';
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import LabResultRelationships from '../LabResultRelationships';
 import MedicationRelationships from '../MedicationRelationships';
 
 const ConditionViewModal = ({
@@ -176,6 +178,12 @@ const ConditionViewModal = ({
               leftSection={<IconStethoscope size={16} />}
             >
               {t('shared:tabs.clinicalDetails', 'Clinical Details')}
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="labResults"
+              leftSection={<IconFlask size={16} />}
+            >
+              {t('shared:tabs.labResults', 'Lab Results')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
               {t('shared:tabs.notes', 'Notes')}
@@ -438,6 +446,23 @@ const ConditionViewModal = ({
                         'No clinical notes available'
                       )}
                   </Text>
+                </div>
+              </Stack>
+            </Box>
+          </Tabs.Panel>
+
+          {/* Lab Results Tab */}
+          <Tabs.Panel value="labResults">
+            <Box mt="md">
+              <Stack gap="lg">
+                <div>
+                  <Title order={4} mb="sm">
+                    {t('labels.linkedLabResults', 'Linked Lab Results')}
+                  </Title>
+                  <LabResultRelationships
+                    conditionId={condition.id}
+                    navigate={navigate}
+                  />
                 </div>
               </Stack>
             </Box>

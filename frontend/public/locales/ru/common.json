@@ -438,8 +438,10 @@
   "key": "По умолчанию {{var}}",
   "labels": {
     "addCustom": "+ Добавить \"{{value}}\"",
+    "linkedLabResults": "Связанные результаты анализов",
     "linkedMedications": "Связанные лекарства",
     "loading": "Загрузка...",
+    "loadingLabResults": "Загрузка результатов анализов...",
     "loadingOption": "Загрузка {{option}}...",
     "loadingRelatedConditions": "Загрузка связанных заболеваний...",
     "new": "Новый",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "Визиты не связаны с этим лечением",
     "noEquipmentLinked": "Оборудование не связано с этим лечением",
     "noLabResultsLinked": "Результаты анализов не связаны с этим визитом",
+    "noLabResultsLinkedToCondition": "Результаты анализов не связаны с данным заболеванием",
     "noMedicationsLinked": "Нет лекарств, связанных с этим заболеванием",
     "none": "Нет",
     "noRating": "Нет оценки",

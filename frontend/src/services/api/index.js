@@ -2195,6 +2195,9 @@ class ApiService {
       signal,
     });
   }
+  getConditionLabResults(conditionId, signal) {
+    return this.get(`/conditions/${conditionId}/lab-results`, { signal });
+  }
   createConditionMedication(conditionId, medicationData, signal) {
     return this.post(`/conditions/${conditionId}/medications`, medicationData, {
       signal,

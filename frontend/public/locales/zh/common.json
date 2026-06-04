@@ -438,8 +438,10 @@
   "key": "默认 {{var}}",
   "labels": {
     "addCustom": "+ 添加\"{{value}}\"",
+    "linkedLabResults": "关联化验结果",
     "linkedMedications": "关联药物",
     "loading": "正在加载...",
+    "loadingLabResults": "正在加载化验结果...",
     "loadingOption": "正在加载{{option}}...",
     "loadingRelatedConditions": "正在加载相关疾病...",
     "new": "新建",
@@ -448,6 +450,7 @@
     "noEncountersLinked": "此治疗未关联就诊记录",
     "noEquipmentLinked": "此治疗未关联设备",
     "noLabResultsLinked": "此就诊记录未关联化验结果",
+    "noLabResultsLinkedToCondition": "此疾病未关联化验结果",
     "noMedicationsLinked": "此疾病未关联药物",
     "none": "无",
     "noRating": "无评级",

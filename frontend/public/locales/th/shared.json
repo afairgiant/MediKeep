@@ -317,6 +317,7 @@
     "episodesCount_one": "ตอน ({{count}})",
     "episodesCount_other": "ตอน ({{count}})",
     "notes": "หมายเหตุ",
+    "labResults": "ผลการตรวจทางห้องปฏิบัติการ",
     "overview": "ภาพรวม",
     "visits": "การมาพบแพทย์"
   }
