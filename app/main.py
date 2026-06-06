@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,11 +24,28 @@ configure_uvicorn_logging()
 # Initialize logger
 logger = get_logger(__name__, "app")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await startup_event()
+    try:
+        yield
+    finally:
+        try:
+            from app.services.backup_scheduler_service import BackupSchedulerService
+
+            scheduler = BackupSchedulerService.get_instance()
+            await scheduler.shutdown()
+        except Exception as e:
+            logger.warning(f"Error shutting down backup scheduler: {e}")
+
+
 # Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
     openapi_url="/api/v1/openapi.json" if settings.ENABLE_API_DOCS else None,
+    lifespan=lifespan,
 )
 
 # Add middleware stack (execution order is reverse of registration)
@@ -52,23 +71,6 @@ app.include_router(api_router, prefix="/api/v1")
 
 # Setup static files and get directory paths
 static_dir, html_dir = setup_static_files(app)
-
-# Setup startup event
-app.add_event_handler("startup", startup_event)
-
-
-async def shutdown_event():
-    """Clean up resources on shutdown."""
-    try:
-        from app.services.backup_scheduler_service import BackupSchedulerService
-
-        scheduler = BackupSchedulerService.get_instance()
-        await scheduler.shutdown()
-    except Exception as e:
-        logger.warning(f"Error shutting down backup scheduler: {e}")
-
-
-app.add_event_handler("shutdown", shutdown_event)
 
 
 @app.get("/health")
