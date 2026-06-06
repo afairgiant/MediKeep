@@ -142,15 +142,42 @@ class TestStandardizedVaccineLookups:
         assert v is not None
         assert v.vaccine_name == "Covid-19"
 
-    def test_get_by_who_code_missing_returns_none(
-        self, db_session: Session, vaccines
-    ):
+    def test_get_by_who_code_missing_returns_none(self, db_session: Session, vaccines):
         assert crud.get_vaccine_by_who_code(db_session, "NotARealCode") is None
 
     def test_get_by_name_case_insensitive(self, db_session: Session, vaccines):
         v = crud.get_vaccine_by_name(db_session, "covid-19")
         assert v is not None
         assert v.short_name == "COVID-19"
+
+    def test_resolve_by_any_name_canonical(self, db_session: Session, vaccines):
+        v = crud.resolve_vaccine_by_any_name(db_session, "Covid-19")
+        assert v is not None and v.who_code == "Covid19"
+
+    def test_resolve_by_any_name_short_name(self, db_session: Session, vaccines):
+        """Regression for the Tdap link-on-save bug: short_name picks must
+        resolve even though the entry has who_code=null. MMRV stands in for
+        Tdap here — same shape (curated entry, no WHO code) and mirrors what
+        the picker writes when the user selects from autocomplete."""
+        v = crud.resolve_vaccine_by_any_name(db_session, "MMRV")
+        assert v is not None
+        assert v.short_name == "MMRV"
+        assert v.who_code is None  # confirms the curated, no-WHO case
+
+    def test_resolve_by_any_name_common_alias(self, db_session: Session, vaccines):
+        v = crud.resolve_vaccine_by_any_name(db_session, "Shingrix")
+        assert v is not None
+        assert v.short_name == "RZV"
+
+    def test_resolve_by_any_name_unknown_returns_none(
+        self, db_session: Session, vaccines
+    ):
+        assert crud.resolve_vaccine_by_any_name(db_session, "Bigfoot Vaccine") is None
+
+    def test_resolve_by_any_name_empty_returns_none(
+        self, db_session: Session, vaccines
+    ):
+        assert crud.resolve_vaccine_by_any_name(db_session, "   ") is None
 
 
 class TestStandardizedVaccineSearch:
@@ -162,9 +189,7 @@ class TestStandardizedVaccineSearch:
         names = [v.short_name for v in common]
         assert names == ["COVID-19", "MMR", "RZV", "MMRV", "BCG"]
 
-    def test_exact_short_name_match_ranks_first(
-        self, db_session: Session, vaccines
-    ):
+    def test_exact_short_name_match_ranks_first(self, db_session: Session, vaccines):
         results = crud.search_vaccines(db_session, "MMR")
         assert results[0].short_name == "MMR"
 
@@ -207,9 +232,7 @@ class TestStandardizedVaccineSearch:
 
 
 class TestStandardizedVaccineRanking:
-    def test_exact_match_outranks_contains_match(
-        self, db_session: Session, vaccines
-    ):
+    def test_exact_match_outranks_contains_match(self, db_session: Session, vaccines):
         """
         Both MMR (exact short_name match) and MMRV (contains 'mmr') should
         appear, but MMR must come first.
@@ -218,9 +241,7 @@ class TestStandardizedVaccineRanking:
         names = [v.short_name for v in results]
         assert names.index("MMR") < names.index("MMRV")
 
-    def test_is_common_boost_breaks_relevance_ties(
-        self, db_session: Session, vaccines
-    ):
+    def test_is_common_boost_breaks_relevance_ties(self, db_session: Session, vaccines):
         """
         When entries match at the same relevance tier (here: all via a
         common_names 'contains' on the word "vaccine"), is_common rows must
@@ -251,9 +272,7 @@ class TestAutocompleteOutputShape:
         assert mmr_opt is not None, "MMR option missing from autocomplete results"
         assert mmr_opt["value"] == "Measles, Mumps and Rubella (MMR)"
 
-    def test_value_omits_short_name_when_identical(
-        self, db_session: Session, vaccines
-    ):
+    def test_value_omits_short_name_when_identical(self, db_session: Session, vaccines):
         opts = crud.get_autocomplete_options(db_session, "BCG", limit=5)
         bcg = next((o for o in opts if o["label"] == "BCG"), None)
         assert bcg is not None, "BCG option missing from autocomplete results"
@@ -280,12 +299,12 @@ class TestAutocompleteOutputShape:
 
 
 class TestCommonAndCategory:
-    def test_get_common_vaccines_excludes_uncommon(
-        self, db_session: Session, vaccines
-    ):
+    def test_get_common_vaccines_excludes_uncommon(self, db_session: Session, vaccines):
         common = crud.get_common_vaccines(db_session)
         assert all(v.is_common for v in common)
-        assert all(v.vaccine_name != "Human Papillomavirus (Quadrivalent)" for v in common)
+        assert all(
+            v.vaccine_name != "Human Papillomavirus (Quadrivalent)" for v in common
+        )
 
     def test_get_common_vaccines_sorted_by_display_order(
         self, db_session: Session, vaccines
@@ -322,9 +341,7 @@ class TestBulkAndClear:
         assert count == 2
         assert crud.count_vaccines(db_session) == 2
 
-    def test_clear_all_returns_prior_count(
-        self, db_session: Session, vaccines
-    ):
+    def test_clear_all_returns_prior_count(self, db_session: Session, vaccines):
         before = crud.count_vaccines(db_session)
         removed = crud.clear_all_vaccines(db_session)
         assert removed == before

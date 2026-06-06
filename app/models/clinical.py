@@ -318,6 +318,11 @@ class StandardizedVaccine(Base):
     common_names = Column(JSON, nullable=True)
     is_combined = Column(Boolean, default=False, nullable=False)
     components = Column(JSON, nullable=True)
+    # Canonical disease names this vaccine covers (e.g. ["Polio"], ["Diphtheria",
+    # "Tetanus", "Pertussis"]). Used by the immunization-history "By Disease"
+    # view as the grouping key. Distinct from `components`, which carries raw
+    # antigen labels for display ("Diphtheria toxoid", "Polio (Inactivated)").
+    disease_keys = Column(JSON, nullable=True)
     default_manufacturer = Column(String(100), nullable=True)
     is_common = Column(Boolean, default=False, nullable=False)
     display_order = Column(Integer, nullable=True)

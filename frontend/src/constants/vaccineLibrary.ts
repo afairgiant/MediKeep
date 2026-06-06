@@ -36,9 +36,16 @@ const EMPTY_QUERY_RESULT: VaccineLibraryItem[] = [
 
 // O(1) lookups; getVaccineByName et al. are called per-option during dropdown
 // renders, so the linear Array.find we used originally added up fast.
+// Precedence: canonical > common_names > short_name > who_code. Mirrors the
+// backend resolver's four-pass build_library_index so the form's link-status
+// hint can't disagree with what the backend will actually link on save.
 const VACCINES_BY_LOWER_NAME = new Map<string, VaccineLibraryItem>();
+const VACCINES_BY_LOWER_COMMON = new Map<string, VaccineLibraryItem>();
 const VACCINES_BY_LOWER_SHORT = new Map<string, VaccineLibraryItem>();
 const VACCINES_BY_LOWER_WHO_CODE = new Map<string, VaccineLibraryItem>();
+// Bloated display strings ("<canonical> (<short>)") saved by v0.67.0's form
+// bug — indexed so handleEditImmunization can still auto-link those records.
+const VACCINES_BY_LOWER_DISPLAY = new Map<string, VaccineLibraryItem>();
 for (const v of VACCINE_LIBRARY) {
   VACCINES_BY_LOWER_NAME.set(v.vaccine_name.toLowerCase(), v);
   if (v.short_name) {
@@ -46,6 +53,22 @@ for (const v of VACCINE_LIBRARY) {
   }
   if (v.who_code) {
     VACCINES_BY_LOWER_WHO_CODE.set(v.who_code.toLowerCase(), v);
+  }
+  for (const alt of v.common_names ?? []) {
+    if (alt) {
+      // setdefault — a common_name must never displace another vaccine's
+      // canonical name.
+      const key = alt.toLowerCase();
+      if (!VACCINES_BY_LOWER_COMMON.has(key)) {
+        VACCINES_BY_LOWER_COMMON.set(key, v);
+      }
+    }
+  }
+  if (v.short_name && v.short_name !== v.vaccine_name) {
+    VACCINES_BY_LOWER_DISPLAY.set(
+      `${v.vaccine_name} (${v.short_name})`.toLowerCase(),
+      v
+    );
   }
 }
 
@@ -116,11 +139,17 @@ export function getCommonVaccines(): VaccineLibraryItem[] {
 export function getVaccineByName(
   vaccineName: string
 ): VaccineLibraryItem | undefined {
-  const needle = vaccineName.toLowerCase();
+  // Trim before lowercasing so callers that pass raw user input (e.g. the
+  // form's link-status hint) don't silently miss a match because of trailing
+  // whitespace from copy-paste or accidental keystrokes.
+  const needle = vaccineName.trim().toLowerCase();
+  if (!needle) return undefined;
   return (
     VACCINES_BY_LOWER_NAME.get(needle) ??
+    VACCINES_BY_LOWER_COMMON.get(needle) ??
     VACCINES_BY_LOWER_SHORT.get(needle) ??
-    VACCINES_BY_LOWER_WHO_CODE.get(needle)
+    VACCINES_BY_LOWER_WHO_CODE.get(needle) ??
+    VACCINES_BY_LOWER_DISPLAY.get(needle)
   );
 }
 
@@ -169,17 +198,28 @@ export function getAutocompleteOptions(
 
 /**
  * Round-trips an autocomplete display string back to the canonical
- * vaccine_name. Strips a trailing parenthetical ONLY when it matches a known
- * short_name — vaccine names like "Hepatitis A (Human Diploid Cell), Inactivated
- * (Adult)" must pass through unmodified.
+ * vaccine_name. Strips a trailing " (short_name)" suffix ONLY when ``short_name``
+ * matches a known library entry — vaccine names like "Hepatitis A (Human
+ * Diploid Cell), Inactivated (Adult)" pass through unmodified when shown
+ * without a short_name suffix.
+ *
+ * We iterate short_names rather than regex-matching ``(...)`` because many
+ * short_names contain nested parens ("Ebola (Ad26)", "HepA (Adult)", "JE
+ * (Inactivated, Pediatric)") that a balanced-paren regex can't capture. The
+ * longest matching suffix wins so partial overlaps can't strip too little.
  */
 export function extractVaccineName(selection: string): string {
   const trimmed = selection.trim();
-  const trailingParen = trimmed.match(/^(.+?)\s*\(([^()]+)\)$/);
-  if (!trailingParen) return trimmed;
-  const [, name, candidate] = trailingParen;
-  return VACCINES_BY_LOWER_SHORT.has(candidate.toLowerCase())
-    ? name.trim()
+  const lowered = trimmed.toLowerCase();
+  let bestSuffix = '';
+  for (const shortName of VACCINES_BY_LOWER_SHORT.keys()) {
+    const suffix = ` (${shortName})`;
+    if (suffix.length > bestSuffix.length && lowered.endsWith(suffix)) {
+      bestSuffix = suffix;
+    }
+  }
+  return bestSuffix
+    ? trimmed.slice(0, trimmed.length - bestSuffix.length).trim()
     : trimmed;
 }
 

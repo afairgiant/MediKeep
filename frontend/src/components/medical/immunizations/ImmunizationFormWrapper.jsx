@@ -139,13 +139,13 @@ const ImmunizationFormWrapper = ({
         return;
       }
 
-      // vaccine_name holds the casual/common name (e.g. "MMR"); the formal
-      // descriptor lives only in our library for now. vaccine_trade_name is
-      // left untouched — for many single-organism vaccines (BCG, Rabies) the
-      // formal name is identical to the common name, so auto-filling it just
-      // duplicates data. Users can fill in a specific brand manually.
-      const commonName = libraryEntry.short_name || libraryEntry.vaccine_name;
-      setField('vaccine_name', commonName);
+      // Store the library entry's canonical vaccine_name verbatim — it's
+      // what the user just clicked in the dropdown, so seeing anything else
+      // (short_name, bloated display string) is jarring. vaccine_trade_name
+      // is left untouched: for many single-organism vaccines (BCG, Rabies)
+      // the canonical name already IS the common name, so auto-filling the
+      // trade name just duplicates data. Users fill specific brands manually.
+      setField('vaccine_name', libraryEntry.vaccine_name);
       setField('standardized_vaccine_who_code', libraryEntry.who_code || null);
 
       if (libraryEntry.default_manufacturer) {
@@ -261,15 +261,21 @@ const ImmunizationFormWrapper = ({
                       label={t('shared:fields.vaccineName', 'Vaccine Name')}
                       value={formData.vaccine_name || ''}
                       onChange={value => {
-                        setField('vaccine_name', value);
                         // Mantine fires onChange synchronously after
-                        // onOptionSubmit with the picked option's label — skip
-                        // the clear in that case so the who_code that the
-                        // picker just set isn't immediately nulled out.
+                        // onOptionSubmit with the option's display string
+                        // (e.g. "Tetanus-Diphtheria-Pertussis (Adult, acellular)
+                        // (Tdap)"). If we let it through, it overwrites the
+                        // canonical short_name onOptionSubmit just stored AND
+                        // clears the who_code, so library picks save with the
+                        // bloated display string and never link to the FK.
+                        // Issue #864: this was silently breaking ~22 curated
+                        // entries whose display values differ from their
+                        // vaccine_name.
                         if (pickerJustFiredRef.current) {
                           pickerJustFiredRef.current = false;
                           return;
                         }
+                        setField('vaccine_name', value);
                         setField('standardized_vaccine_who_code', null);
                       }}
                       onOptionSubmit={handleVaccineOptionSubmit}
@@ -319,6 +325,35 @@ const ImmunizationFormWrapper = ({
                       maxDropdownHeight={300}
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
+                    {(() => {
+                      // Link-status hint: tells the user whether saving this
+                      // record will link it to the vaccine library, so the
+                      // "Link to library" affordance from the History tab has
+                      // an obvious endpoint. Resolution mirrors the backend
+                      // resolver: canonical name, common_names, or short_name.
+                      const trimmed = (formData.vaccine_name || '').trim();
+                      if (!trimmed) return null;
+                      const matchedEntry = getVaccineByName(trimmed);
+                      if (matchedEntry) {
+                        return (
+                          <Text size="xs" c="green" mt={4}>
+                            {t(
+                              'medical:immunizations.form.linkStatusLinked',
+                              '✓ Linked to library: {{name}}',
+                              { name: matchedEntry.vaccine_name }
+                            )}
+                          </Text>
+                        );
+                      }
+                      return (
+                        <Text size="xs" c="orange" mt={4}>
+                          {t(
+                            'medical:immunizations.form.linkStatusUnlinked',
+                            '⚠ Not linked to library. Pick a vaccine from the dropdown to link.'
+                          )}
+                        </Text>
+                      );
+                    })()}
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput

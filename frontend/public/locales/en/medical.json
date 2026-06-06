@@ -322,6 +322,10 @@
       "label": "Date Administered",
       "placeholder": "Select administration date"
     },
+    "form": {
+      "linkStatusLinked": "✓ Linked to library: {{name}}",
+      "linkStatusUnlinked": "⚠ Not linked to library. Pick a vaccine from the dropdown to link."
+    },
     "doseNumber": {
       "description": "Which dose in series",
       "label": "Dose Number",
@@ -407,6 +411,9 @@
       "doseLabel": "Dose {{n}}",
       "lotLabel": "Lot {{lot}}",
       "unlinkedTag": "Unlinked",
+      "linkActionLabel": "Link to library",
+      "miscGroup": "Miscellaneous / Unlinked",
+      "miscGroupHint": "These records aren't linked to the vaccine library yet. Click one to edit and pick a library entry.",
       "emptyAll": "No vaccinations recorded yet.",
       "emptyRange": "No vaccinations in this range.",
       "dateRangePlaceholder": "Filter by date range",

@@ -1,4 +1,5 @@
-import { Badge, Card, Group, Stack, Text } from '@mantine/core';
+import { Badge, Card, Group, Stack, Text, UnstyledButton } from '@mantine/core';
+import { IconLink } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
 import { useDateFormat } from '../../../../hooks/useDateFormat';
@@ -8,9 +9,10 @@ import { getDoseNumber } from './utils';
 interface Props {
   items: ImmunizationHistoryItem[];
   onItemClick?: (_item: ImmunizationHistoryItem) => void;
+  onLinkClick?: (_item: ImmunizationHistoryItem) => void;
 }
 
-const HistoryByDateView = ({ items, onItemClick }: Props) => {
+const HistoryByDateView = ({ items, onItemClick, onLinkClick }: Props) => {
   const { t } = useTranslation(['medical']);
   const { formatDate } = useDateFormat();
 
@@ -81,14 +83,52 @@ const HistoryByDateView = ({ items, onItemClick }: Props) => {
                     ))}
                   </Group>
                 )}
-                {!item.is_library_matched && (
-                  <Badge variant="outline" color="gray" size="sm">
-                    {t(
-                      'medical:immunizations.history.unlinkedTag',
-                      'Unlinked'
-                    )}
-                  </Badge>
-                )}
+                {!item.is_library_matched &&
+                  (onLinkClick ? (
+                    <UnstyledButton
+                      onClick={e => {
+                        // Don't let the card's onClick (View modal) also fire.
+                        e.stopPropagation();
+                        onLinkClick(item);
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onLinkClick(item);
+                        }
+                      }}
+                      aria-label={t(
+                        'medical:immunizations.history.linkActionLabel',
+                        'Link to library'
+                      )}
+                    >
+                      <Badge
+                        variant="outline"
+                        color="gray"
+                        size="sm"
+                        leftSection={<IconLink size={12} />}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {t(
+                          'medical:immunizations.history.unlinkedTag',
+                          'Unlinked'
+                        )}
+                        {' — '}
+                        {t(
+                          'medical:immunizations.history.linkActionLabel',
+                          'Link to library'
+                        )}
+                      </Badge>
+                    </UnstyledButton>
+                  ) : (
+                    <Badge variant="outline" color="gray" size="sm">
+                      {t(
+                        'medical:immunizations.history.unlinkedTag',
+                        'Unlinked'
+                      )}
+                    </Badge>
+                  ))}
                 {subline && (
                   <Text size="xs" c="dimmed">
                     {subline}

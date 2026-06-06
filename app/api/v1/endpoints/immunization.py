@@ -336,10 +336,7 @@ def get_immunization_history(
     re-derive it on each render.
     """
     with handle_database_errors(request=request):
-        query = (
-            db.query(Immunization)
-            .filter(Immunization.patient_id == patient_id)
-        )
+        query = db.query(Immunization).filter(Immunization.patient_id == patient_id)
         if start_date is not None:
             query = query.filter(Immunization.date_administered >= start_date)
         if end_date is not None:
@@ -351,10 +348,40 @@ def get_immunization_history(
         items: list[ImmunizationHistoryItem] = []
         diseases_index: dict[str, list[int]] = defaultdict(list)
         unmatched_count = 0
+        backfilled = 0
 
         for record in records:
-            components, matched, matched_vaccine = resolve_components(record, library_index)
+            components, matched, matched_vaccine = resolve_components(
+                record, library_index
+            )
             is_combined = bool(matched_vaccine and matched_vaccine.is_combined)
+
+            # Opportunistic FK backfill — intentional write inside a GET.
+            #
+            # Why this is safe to do at read time:
+            #   * Idempotent: once ``record.standardized_vaccine_id`` is set,
+            #     this branch is skipped on every subsequent read.
+            #   * Self-healing: v0.67.0's form bug saved bloated display strings
+            #     as ``vaccine_name`` and never set the FK. The four-pass
+            #     ``build_library_index`` now recognises those bloated strings;
+            #     pairing it with this backfill heals affected records on
+            #     first read without a data migration. Issue #864.
+            #   * Scope-limited: only the internal ``standardized_vaccine_id``
+            #     column is touched. ``vaccine_name``, dates, dose numbers, and
+            #     every user-authored field are untouched.
+            #   * Auditable: ``backfilled`` is reported in the data-access log
+            #     line below, so an operator can correlate links to a read.
+            #
+            # If you ever need read-only history endpoints (read replicas,
+            # SELECT-only DB roles), move this assignment into a dedicated
+            # admin action and gate it behind an explicit request flag.
+            if (
+                matched
+                and matched_vaccine is not None
+                and record.standardized_vaccine_id is None
+            ):
+                record.standardized_vaccine_id = matched_vaccine.id
+                backfilled += 1
 
             base = ImmunizationResponse.model_validate(record).model_dump()
             items.append(
@@ -372,6 +399,9 @@ def get_immunization_history(
             else:
                 unmatched_count += 1
 
+        if backfilled:
+            db.commit()
+
         log_data_access(
             logger,
             request,
@@ -381,6 +411,7 @@ def get_immunization_history(
             patient_id=patient_id,
             count=len(items),
             unmatched_count=unmatched_count,
+            backfilled_count=backfilled,
             event="immunization_history_read",
         )
 

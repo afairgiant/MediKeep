@@ -42,6 +42,7 @@ import {
 } from '../../components/medical/immunizations';
 import { ImmunizationHistoryTab } from '../../components/medical/immunizations/history';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import { getVaccineByName } from '../../constants/vaccineLibrary';
 
 const Immunization = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -206,6 +207,17 @@ const Immunization = () => {
 
   const handleEditImmunization = immunization => {
     resetSubmission();
+    // Auto-link on open: if the stored vaccine_name already matches a library
+    // entry, pre-populate who_code so a plain Save persists the FK without the
+    // user having to re-pick from the dropdown. The user can still re-pick to
+    // change vaccines. This is what makes the "Link to library" affordance on
+    // the History tab work in one click for records the resolver matched by
+    // name. Records whose vaccine_name doesn't match anything (typos, free
+    // text, the broken-display-string case) fall through to who_code=null and
+    // need a manual re-pick.
+    const libraryMatch = immunization.vaccine_name
+      ? getVaccineByName(immunization.vaccine_name)
+      : undefined;
     setFormData({
       vaccine_name: immunization.vaccine_name || '',
       vaccine_trade_name: immunization.vaccine_trade_name || '',
@@ -220,7 +232,7 @@ const Immunization = () => {
       location: immunization.location || '',
       notes: immunization.notes || '',
       practitioner_id: immunization.practitioner_id || null,
-      standardized_vaccine_who_code: null,
+      standardized_vaccine_who_code: libraryMatch?.who_code ?? null,
       tags: immunization.tags || [],
     });
     setEditingImmunization(immunization);
@@ -624,6 +636,7 @@ const Immunization = () => {
               <ImmunizationHistoryTab
                 patientId={currentPatient.id}
                 onItemClick={handleViewImmunization}
+                onLinkClick={handleEditImmunization}
               />
             ) : (
               <Text c="dimmed">

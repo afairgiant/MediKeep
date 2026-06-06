@@ -212,7 +212,12 @@ class ImmunizationSummary(BaseModel):
 class ImmunizationHistoryItem(ImmunizationResponse):
     components: List[str] = Field(
         default_factory=list,
-        description="Disease components this immunization covers",
+        description=(
+            "Canonical disease keys this immunization covers (e.g. "
+            '["Polio"], ["Diphtheria", "Tetanus", "Pertussis"]). '
+            "Sourced from the library's disease_keys, not raw antigen labels, "
+            "so combination and single-disease vaccines bucket consistently."
+        ),
     )
     is_combined: bool = Field(
         False, description="True if the linked vaccine is a combination vaccine"
@@ -227,8 +232,14 @@ class ImmunizationHistoryResponse(BaseModel):
     items: List[ImmunizationHistoryItem]
     diseases_index: Dict[str, List[int]] = Field(
         default_factory=dict,
-        description="Mapping of disease name to immunization IDs covering that disease",
+        description=(
+            'Mapping of canonical disease key (e.g. "Polio", "Hepatitis B") '
+            "to the immunization record IDs that confer protection against it. "
+            "Pre-aggregated server-side so the client doesn't re-derive groups."
+        ),
     )
     unmatched_count: int = Field(
-        0, ge=0, description="Number of records that could not be matched to the library"
+        0,
+        ge=0,
+        description="Number of records that could not be matched to the library",
     )
