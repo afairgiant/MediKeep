@@ -653,6 +653,50 @@ const LabResultFormWrapper = ({
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label={t('shared:labels.orderedDate')}
+                      value={parseDateInput(formData.ordered_date)}
+                      onChange={date => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({
+                          target: {
+                            name: 'ordered_date',
+                            value: formattedDate,
+                          },
+                        });
+                      }}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
+                      dateParser={dateParser}
+                      description={t('labresults:orderedDate.description')}
+                      clearable
+                      firstDayOfWeek={0}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, sm: 6 }}>
+                    <DateInput
+                      label={t('shared:labels.completedDate')}
+                      value={parseDateInput(formData.completed_date)}
+                      onChange={date => {
+                        const formattedDate = formatDateInputChange(date);
+                        onInputChange({
+                          target: {
+                            name: 'completed_date',
+                            value: formattedDate,
+                          },
+                        });
+                      }}
+                      placeholder={dateInputFormat}
+                      valueFormat={dateInputFormat}
+                      dateParser={dateParser}
+                      description={t('labresults:completedDate.description')}
+                      clearable
+                      firstDayOfWeek={0}
+                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
+                    />
+                  </Grid.Col>
                   <Grid.Col span={12}>
                     <Box>
                       <Text size="sm" fw={500} mb="xs">
@@ -709,50 +753,6 @@ const LabResultFormWrapper = ({
                       description={t('labresults:labResult.description')}
                       clearable
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <DateInput
-                      label={t('shared:labels.orderedDate')}
-                      value={parseDateInput(formData.ordered_date)}
-                      onChange={date => {
-                        const formattedDate = formatDateInputChange(date);
-                        onInputChange({
-                          target: {
-                            name: 'ordered_date',
-                            value: formattedDate,
-                          },
-                        });
-                      }}
-                      placeholder={dateInputFormat}
-                      valueFormat={dateInputFormat}
-                      dateParser={dateParser}
-                      description={t('labresults:orderedDate.description')}
-                      clearable
-                      firstDayOfWeek={0}
-                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <DateInput
-                      label={t('shared:labels.completedDate')}
-                      value={parseDateInput(formData.completed_date)}
-                      onChange={date => {
-                        const formattedDate = formatDateInputChange(date);
-                        onInputChange({
-                          target: {
-                            name: 'completed_date',
-                            value: formattedDate,
-                          },
-                        });
-                      }}
-                      placeholder={dateInputFormat}
-                      valueFormat={dateInputFormat}
-                      dateParser={dateParser}
-                      description={t('labresults:completedDate.description')}
-                      clearable
-                      firstDayOfWeek={0}
-                      popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   {formData.status && (
