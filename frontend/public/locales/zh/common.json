@@ -769,6 +769,13 @@
       "addTitle": "添加新医生",
       "editTitle": "编辑医生"
     },
+    "createInline": {
+      "buttonTooltip": "New practitioner",
+      "nameRequired": "Name is required",
+      "specialtyRequired": "Medical specialty is required",
+      "createError": "Failed to create practitioner. Please try again.",
+      "successMessage": "Practitioner created and selected"
+    },
     "groupByPractice": "按诊所分组",
     "loading": "正在加载医生...",
     "practices": {

@@ -769,6 +769,13 @@
       "addTitle": "Nieuwe zorgverlener toevoegen",
       "editTitle": "Zorgverlener bewerken"
     },
+    "createInline": {
+      "buttonTooltip": "New practitioner",
+      "nameRequired": "Name is required",
+      "specialtyRequired": "Medical specialty is required",
+      "createError": "Failed to create practitioner. Please try again.",
+      "successMessage": "Practitioner created and selected"
+    },
     "groupByPractice": "Groeperen op praktijk",
     "loading": "Zorgverleners laden...",
     "practices": {

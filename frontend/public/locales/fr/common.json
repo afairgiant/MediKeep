@@ -769,6 +769,13 @@
       "addTitle": "Ajouter un médecin",
       "editTitle": "Editer le médecin"
     },
+    "createInline": {
+      "buttonTooltip": "New practitioner",
+      "nameRequired": "Name is required",
+      "specialtyRequired": "Medical specialty is required",
+      "createError": "Failed to create practitioner. Please try again.",
+      "successMessage": "Practitioner created and selected"
+    },
     "groupByPractice": "Regrouper par établissement",
     "loading": "Chargement des médecins...",
     "practices": {

@@ -769,6 +769,13 @@
       "addTitle": "Neue medizinische Fachkraft hinzufügen",
       "editTitle": "Medizinische Fachkraft bearbeiten"
     },
+    "createInline": {
+      "buttonTooltip": "New practitioner",
+      "nameRequired": "Name is required",
+      "specialtyRequired": "Medical specialty is required",
+      "createError": "Failed to create practitioner. Please try again.",
+      "successMessage": "Practitioner created and selected"
+    },
     "groupByPractice": "Nach Praxis gruppieren",
     "loading": "Medizinische Fachkräfte werden geladen...",
     "practices": {

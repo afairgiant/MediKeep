@@ -769,6 +769,13 @@
       "addTitle": "เพิ่มแพทย์ใหม่",
       "editTitle": "แก้ไขแพทย์"
     },
+    "createInline": {
+      "buttonTooltip": "New practitioner",
+      "nameRequired": "Name is required",
+      "specialtyRequired": "Medical specialty is required",
+      "createError": "Failed to create practitioner. Please try again.",
+      "successMessage": "Practitioner created and selected"
+    },
     "groupByPractice": "จัดกลุ่มตามคลินิก",
     "loading": "กำลังโหลดข้อมูลแพทย์...",
     "practices": {

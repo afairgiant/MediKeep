@@ -122,6 +122,7 @@ const SpecialtySelect = ({
         error={error || hasError || null}
         searchable
         clearable
+        comboboxProps={{ withinPortal: true, zIndex: 3000 }}
       />
 
       <Modal

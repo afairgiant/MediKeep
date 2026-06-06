@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { ActionIcon, Group, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconEdit } from '@tabler/icons-react';
@@ -20,6 +21,7 @@ const PractitionerFormWrapper = ({
   editingItem,
   isLoading,
   statusMessage: _statusMessage,
+  zIndex,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
 
@@ -258,6 +260,7 @@ const PractitionerFormWrapper = ({
         fieldErrors={fieldErrors}
         fieldExtras={{ practice_id: practiceFieldExtra }}
         isLoading={isLoading || isLoadingPractices}
+        zIndex={zIndex}
       >
         {customContent}
       </BaseMedicalForm>
@@ -273,6 +276,19 @@ const PractitionerFormWrapper = ({
       />
     </>
   );
+};
+
+PractitionerFormWrapper.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  formData: PropTypes.object.isRequired,
+  onInputChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  editingItem: PropTypes.object,
+  isLoading: PropTypes.bool,
+  statusMessage: PropTypes.string,
+  zIndex: PropTypes.number,
 };
 
 export default PractitionerFormWrapper;
