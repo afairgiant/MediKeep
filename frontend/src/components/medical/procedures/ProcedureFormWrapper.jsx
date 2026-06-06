@@ -32,6 +32,7 @@ import {
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
+import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 
 const ProcedureFormWrapper = ({
   isOpen,
@@ -364,21 +365,22 @@ const ProcedureFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
-                      label={t('shared:fields.practitioner', 'Practitioner')}
-                      value={formData.practitioner_id || null}
-                      data={practitioners.map(prac => ({
-                        value: prac.id.toString(),
-                        label: `${prac.name}${prac.specialty ? ` - ${prac.specialty}` : ''}`,
-                      }))}
-                      onChange={value => {
+                    <PractitionerSelectWithCreate
+                      value={
+                        formData.practitioner_id
+                          ? String(formData.practitioner_id)
+                          : null
+                      }
+                      onChange={value =>
                         onInputChange({
-                          target: {
-                            name: 'practitioner_id',
-                            value: value || '',
-                          },
-                        });
-                      }}
+                          target: { name: 'practitioner_id', value: value || '' },
+                        })
+                      }
+                      practitioners={practitioners}
+                      label={t(
+                        'shared:fields.performingPractitioner',
+                        'Performing Practitioner'
+                      )}
                       placeholder={t(
                         'shared:fields.selectPractitioner',
                         'Select practitioner'
@@ -387,9 +389,6 @@ const ProcedureFormWrapper = ({
                         'procedures.form.practitionerDesc',
                         'Healthcare provider performing procedure'
                       )}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

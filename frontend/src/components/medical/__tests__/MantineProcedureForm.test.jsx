@@ -8,6 +8,28 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import MantineProcedureForm from '../MantineProcedureForm';
 
+vi.mock('../practitioners/PractitionerSelectWithCreate', () => ({
+  default: ({
+    value,
+    onChange,
+    label,
+    placeholder,
+  }) => (
+    <div data-testid="practitioner-select-with-create">
+      <label htmlFor="mock-practitioner-select">{label}</label>
+      <select
+        id="mock-practitioner-select"
+        value={value ?? ''}
+        onChange={e => onChange(e.target.value || null)}
+        placeholder={placeholder}
+      >
+        <option value="">--</option>
+        <option value="1">Dr. Smith - Surgery</option>
+      </select>
+    </div>
+  ),
+}));
+
 // Mock Date Input component since it has complex dependencies
 vi.mock('@mantine/dates', () => ({
   DateInput: ({ label, value, onChange, required, description, ...props }) => (
@@ -134,6 +156,13 @@ describe('MantineProcedureForm', () => {
       expect(
         screen.getAllByLabelText(/shared:fields\.status/).length
       ).toBeGreaterThan(0);
+    });
+
+    test('renders PractitionerSelectWithCreate for the practitioner field', () => {
+      render(<MantineProcedureForm {...defaultProps} />);
+      expect(
+        screen.getByTestId('practitioner-select-with-create')
+      ).toBeInTheDocument();
     });
 
     test('renders practitioner options correctly', () => {
@@ -469,10 +498,9 @@ describe('MantineProcedureForm', () => {
 
       render(<MantineProcedureForm {...propsWithNoPractitioners} />);
 
-      const practitionerInputs = screen.getAllByLabelText(
-        /shared:fields\.performingPractitioner/
-      );
-      expect(practitionerInputs.length).toBeGreaterThan(0);
+      expect(
+        screen.getByTestId('practitioner-select-with-create')
+      ).toBeInTheDocument();
     });
 
     test('handles null/undefined form data gracefully', () => {
