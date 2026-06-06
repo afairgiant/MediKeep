@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@mantine/core';
 import BaseMedicalForm from './BaseMedicalForm';
 import { treatmentFormFields } from '../../utils/medicalFormFields';
+import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 
 const MantineTreatmentForm = ({
   isOpen,
@@ -24,21 +26,31 @@ const MantineTreatmentForm = ({
     label: `${condition.diagnosis}${condition.severity ? ` (${condition.severity})` : ''}${condition.status ? ` - ${condition.status}` : ''}`,
   }));
 
-  // Convert practitioners to dynamic options format
-  const practitionerOptions = practitionersOptions.map(practitioner => ({
-    value: String(practitioner.id),
-    label: `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}${practitioner.practice ? ` (${practitioner.practice})` : ''}`,
-  }));
-
   const dynamicOptions = {
     conditions: conditionOptions,
-    practitioners: practitionerOptions,
   };
 
   const loadingStates = {
     conditions: conditionsLoading,
-    practitioners: practitionersLoading,
   };
+
+  const customFieldRenderers = useMemo(
+    () => ({
+      practitioner_id: (_fieldConfig, baseProps) => (
+        <PractitionerSelectWithCreate
+          value={baseProps.value ? String(baseProps.value) : null}
+          onChange={value =>
+            onInputChange({ target: { name: 'practitioner_id', value: value || '' } })
+          }
+          practitioners={practitionersOptions}
+          label={baseProps.label}
+          placeholder={baseProps.placeholder}
+          description={baseProps.description}
+        />
+      ),
+    }),
+    [onInputChange, practitionersOptions]
+  );
 
   // Get status color for visual feedback
   const getStatusColor = status => {
@@ -88,6 +100,7 @@ const MantineTreatmentForm = ({
       fields={treatmentFormFields}
       dynamicOptions={dynamicOptions}
       loadingStates={loadingStates}
+      customFieldRenderers={customFieldRenderers}
       modalSize="lg"
     >
       {/* Status Badge Visual Indicator */}
