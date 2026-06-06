@@ -22,6 +22,7 @@ interface Props {
   label: string;
   placeholder?: string;
   description?: string;
+  onPractitionerCreated?: (_practitioner: Practitioner) => void;
 }
 
 interface FormData {
@@ -51,6 +52,7 @@ const PractitionerSelectWithCreate = ({
   label,
   placeholder,
   description,
+  onPractitionerCreated,
 }: Props) => {
   const { t } = useTranslation(['common', 'shared', 'medical']);
   const { refresh } = usePractitioners(false);
@@ -125,6 +127,7 @@ const PractitionerSelectWithCreate = ({
       };
       setLocalOptions(prev => [...prev, newOption]);
       onChange(String(result.id));
+      onPractitionerCreated?.(result);
 
       notifications.show({
         title: t('shared:labels.success', 'Success'),

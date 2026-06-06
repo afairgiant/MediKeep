@@ -33,6 +33,7 @@ import { TagInput } from '../../common/TagInput';
 import LabResultRelationships from '../LabResultRelationships';
 import MedicationRelationships from '../MedicationRelationships';
 import logger from '../../../services/logger';
+import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 
 const ConditionFormWrapper = ({
   isOpen,
@@ -55,6 +56,7 @@ const ConditionFormWrapper = ({
   // Lab result relationship props (only used when editing)
   labResults = [],
   navigate,
+  onPractitionerCreated = undefined,
 }) => {
   const { t } = useTranslation(['common', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -116,15 +118,6 @@ const ConditionFormWrapper = ({
       setIsSubmitting(false);
     }
   }, [isOpen]);
-
-  // Convert practitioners to options
-  const practitionerOptions = practitioners.map(prac => ({
-    value: prac.id.toString(),
-    label:
-      prac.name ||
-      `Dr. ${prac.first_name || ''} ${prac.last_name || ''}`.trim() ||
-      `Practitioner #${prac.id}`,
-  }));
 
   // Handle form submission
   const handleSubmit = async e => {
@@ -344,11 +337,19 @@ const ConditionFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
+                    <PractitionerSelectWithCreate
+                      value={
+                        formData.practitioner_id
+                          ? String(formData.practitioner_id)
+                          : null
+                      }
+                      onChange={value =>
+                        onInputChange({
+                          target: { name: 'practitioner_id', value: value || '' },
+                        })
+                      }
+                      practitioners={practitioners}
                       label={t('shared:fields.practitioner', 'Practitioner')}
-                      value={formData.practitioner_id || null}
-                      data={practitionerOptions}
-                      onChange={handleSelectChange('practitioner_id')}
                       placeholder={t(
                         'shared:fields.selectPractitioner',
                         'Select practitioner'
@@ -357,9 +358,7 @@ const ConditionFormWrapper = ({
                         'conditions.form.descriptions.practitioner',
                         'Associated healthcare provider'
                       )}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                      onPractitionerCreated={onPractitionerCreated}
                     />
                   </Grid.Col>
                   <Grid.Col span={12}>

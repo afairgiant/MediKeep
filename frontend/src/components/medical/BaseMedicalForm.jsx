@@ -169,6 +169,7 @@ const BaseMedicalForm = ({
   const handleSubmit = useCallback(
     e => {
       e.preventDefault();
+      e.stopPropagation();
       onSubmit(e);
     },
     [onSubmit]
