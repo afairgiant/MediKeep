@@ -139,7 +139,11 @@ export function getCommonVaccines(): VaccineLibraryItem[] {
 export function getVaccineByName(
   vaccineName: string
 ): VaccineLibraryItem | undefined {
-  const needle = vaccineName.toLowerCase();
+  // Trim before lowercasing so callers that pass raw user input (e.g. the
+  // form's link-status hint) don't silently miss a match because of trailing
+  // whitespace from copy-paste or accidental keystrokes.
+  const needle = vaccineName.trim().toLowerCase();
+  if (!needle) return undefined;
   return (
     VACCINES_BY_LOWER_NAME.get(needle) ??
     VACCINES_BY_LOWER_COMMON.get(needle) ??

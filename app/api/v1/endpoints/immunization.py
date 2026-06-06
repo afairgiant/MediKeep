@@ -356,9 +356,25 @@ def get_immunization_history(
             )
             is_combined = bool(matched_vaccine and matched_vaccine.is_combined)
 
-            # Opportunistic FK backfill: if the resolver matched by name (FK was
-            # NULL) and we have a definite library row, persist the link so the
-            # record stops reporting as "Unlinked" on future reads. Issue #864.
+            # Opportunistic FK backfill — intentional write inside a GET.
+            #
+            # Why this is safe to do at read time:
+            #   * Idempotent: once ``record.standardized_vaccine_id`` is set,
+            #     this branch is skipped on every subsequent read.
+            #   * Self-healing: v0.67.0's form bug saved bloated display strings
+            #     as ``vaccine_name`` and never set the FK. The four-pass
+            #     ``build_library_index`` now recognises those bloated strings;
+            #     pairing it with this backfill heals affected records on
+            #     first read without a data migration. Issue #864.
+            #   * Scope-limited: only the internal ``standardized_vaccine_id``
+            #     column is touched. ``vaccine_name``, dates, dose numbers, and
+            #     every user-authored field are untouched.
+            #   * Auditable: ``backfilled`` is reported in the data-access log
+            #     line below, so an operator can correlate links to a read.
+            #
+            # If you ever need read-only history endpoints (read replicas,
+            # SELECT-only DB roles), move this assignment into a dedicated
+            # admin action and gate it behind an explicit request flag.
             if (
                 matched
                 and matched_vaccine is not None
