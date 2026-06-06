@@ -336,10 +336,7 @@ def get_immunization_history(
     re-derive it on each render.
     """
     with handle_database_errors(request=request):
-        query = (
-            db.query(Immunization)
-            .filter(Immunization.patient_id == patient_id)
-        )
+        query = db.query(Immunization).filter(Immunization.patient_id == patient_id)
         if start_date is not None:
             query = query.filter(Immunization.date_administered >= start_date)
         if end_date is not None:
@@ -351,10 +348,24 @@ def get_immunization_history(
         items: list[ImmunizationHistoryItem] = []
         diseases_index: dict[str, list[int]] = defaultdict(list)
         unmatched_count = 0
+        backfilled = 0
 
         for record in records:
-            components, matched, matched_vaccine = resolve_components(record, library_index)
+            components, matched, matched_vaccine = resolve_components(
+                record, library_index
+            )
             is_combined = bool(matched_vaccine and matched_vaccine.is_combined)
+
+            # Opportunistic FK backfill: if the resolver matched by name (FK was
+            # NULL) and we have a definite library row, persist the link so the
+            # record stops reporting as "Unlinked" on future reads. Issue #864.
+            if (
+                matched
+                and matched_vaccine is not None
+                and record.standardized_vaccine_id is None
+            ):
+                record.standardized_vaccine_id = matched_vaccine.id
+                backfilled += 1
 
             base = ImmunizationResponse.model_validate(record).model_dump()
             items.append(
@@ -372,6 +383,9 @@ def get_immunization_history(
             else:
                 unmatched_count += 1
 
+        if backfilled:
+            db.commit()
+
         log_data_access(
             logger,
             request,
@@ -381,6 +395,7 @@ def get_immunization_history(
             patient_id=patient_id,
             count=len(items),
             unmatched_count=unmatched_count,
+            backfilled_count=backfilled,
             event="immunization_history_read",
         )
 

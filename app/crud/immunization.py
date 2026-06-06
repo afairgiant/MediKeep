@@ -4,9 +4,36 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.crud.base_tags import TagFilterMixin
-from app.crud.standardized_vaccine import get_vaccine_by_who_code
+from app.crud.standardized_vaccine import (
+    get_vaccine_by_who_code,
+    resolve_vaccine_by_any_name,
+)
 from app.models.models import Immunization
 from app.schemas.immunization import ImmunizationCreate, ImmunizationUpdate
+
+
+def _resolve_library_fk(
+    db: Session,
+    *,
+    who_code: Optional[str],
+    vaccine_name: Optional[str],
+) -> Optional[int]:
+    """Pick the right ``standardized_vaccine_id`` for a write.
+
+    WHO code wins when present and resolvable (single-query, unambiguous).
+    Otherwise we fall back to name resolution so curated entries without WHO
+    codes still link automatically when the user picks them from autocomplete.
+    Returns ``None`` if neither path finds a library row.
+    """
+    if who_code:
+        vaccine = get_vaccine_by_who_code(db, who_code)
+        if vaccine:
+            return vaccine.id
+    if vaccine_name:
+        vaccine = resolve_vaccine_by_any_name(db, vaccine_name)
+        if vaccine:
+            return vaccine.id
+    return None
 
 
 class CRUDImmunization(
@@ -21,17 +48,20 @@ class CRUDImmunization(
     def create(self, db: Session, *, obj_in: ImmunizationCreate) -> Immunization:
         """Create a new immunization record.
 
-        If the payload includes a who_code, resolve it to the standardized
-        vaccine FK before insert. Unknown codes are silently dropped - the
-        record still saves with NULL FK, and the user is the source of truth
-        for whether the vaccine_name is real.
+        Resolves the library FK with a two-step fallback so the user only ever
+        has to pick a vaccine from the autocomplete — never deal with WHO
+        codes. Order:
+          1. ``standardized_vaccine_who_code`` if explicit and resolvable.
+          2. ``vaccine_name`` matched against canonical name, short_name, or
+             any common_names alias — handles curated entries (Tdap, MMRV,
+             Twinrix, DTaP-Hib, …) that have no WHO code.
+          3. None — record saves with NULL FK and shows as Unlinked.
         """
         obj_data = obj_in.model_dump()
         who_code = obj_data.pop("standardized_vaccine_who_code", None)
-        if who_code:
-            vaccine = get_vaccine_by_who_code(db, who_code)
-            if vaccine:
-                obj_data["standardized_vaccine_id"] = vaccine.id
+        obj_data["standardized_vaccine_id"] = _resolve_library_fk(
+            db, who_code=who_code, vaccine_name=obj_data.get("vaccine_name")
+        )
 
         db_obj = self.model(**obj_data)
         db.add(db_obj)
@@ -44,21 +74,32 @@ class CRUDImmunization(
     ) -> Immunization:
         """Update an immunization record.
 
-        ``standardized_vaccine_who_code`` works as a virtual field: present and
-        resolvable -> set FK; present but unknown -> clear FK; explicit ``None``
-        -> clear FK; absent from payload -> preserve existing FK.
+        FK linking mirrors create's resolution order. ``standardized_vaccine_who_code``
+        is an optional hint, not a requirement: a save with ``vaccine_name``
+        matching any library alias links the record even when the field is
+        absent or null. To explicitly unlink, edit to a vaccine_name that
+        doesn't match any library entry.
         """
         update_data = obj_in.model_dump(exclude_unset=True)
 
-        if "standardized_vaccine_who_code" in update_data:
-            who_code = update_data.pop("standardized_vaccine_who_code")
-            if who_code is None:
-                update_data["standardized_vaccine_id"] = None
-            else:
-                vaccine = get_vaccine_by_who_code(db, who_code)
-                update_data["standardized_vaccine_id"] = (
-                    vaccine.id if vaccine else None
-                )
+        # FK touched only when the user changed the vaccine identity (new
+        # name, or explicit who_code in the payload). Touching only other
+        # fields (e.g., lot number) leaves the existing FK untouched.
+        touches_vaccine = (
+            "standardized_vaccine_who_code" in update_data
+            or "vaccine_name" in update_data
+        )
+        if touches_vaccine:
+            who_code = update_data.pop("standardized_vaccine_who_code", None)
+            # Prefer the new name if explicitly provided (even if empty —
+            # honor what the caller sent), otherwise fall back to the stored
+            # name so updating ONLY who_code can still link via the stored name.
+            # Using ``get(..., default)`` instead of ``or`` so an explicit ""
+            # isn't silently swapped for ``db_obj.vaccine_name``.
+            effective_name = update_data.get("vaccine_name", db_obj.vaccine_name)
+            update_data["standardized_vaccine_id"] = _resolve_library_fk(
+                db, who_code=who_code, vaccine_name=effective_name
+            )
 
         for field, value in update_data.items():
             setattr(db_obj, field, value)

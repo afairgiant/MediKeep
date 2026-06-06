@@ -21,6 +21,7 @@ export interface VaccineLibraryItem {
   common_names: string[] | null;
   is_combined: boolean;
   components: string[] | null;
+  disease_keys: string[] | null;
   default_manufacturer: string | null;
   is_common: boolean;
   display_order: number | null;

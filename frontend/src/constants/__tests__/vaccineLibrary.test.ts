@@ -129,6 +129,34 @@ describe('extractVaccineName', () => {
       'Regional Custom Vaccine'
     );
   });
+
+  test('strips short_names that contain nested parens (regression for Ebola/JE/HepA/Flu/MenA/TBE)', () => {
+    // Before the suffix-iteration fix, the regex \([^()]+\)$ couldn't match
+    // short_names like "Ebola (Ad26)" because of the inner parens — so the
+    // full display string ended up saved as vaccine_name and the WHO code
+    // never resolved. New records came back as "Unlinked" in the history view.
+    expect(
+      extractVaccineName(
+        'Ebola vaccine (Ad26.ZEBOV-GP [recombinant]) (Ebola (Ad26))'
+      )
+    ).toBe('Ebola vaccine (Ad26.ZEBOV-GP [recombinant])');
+
+    expect(
+      extractVaccineName(
+        'Japanese Encephalitis Vaccine (Inactivated) (3 mcg Pediatric) (JE (Inactivated, Pediatric))'
+      )
+    ).toBe('Japanese Encephalitis Vaccine (Inactivated) (3 mcg Pediatric)');
+
+    expect(
+      extractVaccineName(
+        'Hepatitis A (Human Diploid Cell), Inactivated (Adult) (HepA (Adult))'
+      )
+    ).toBe('Hepatitis A (Human Diploid Cell), Inactivated (Adult)');
+
+    expect(
+      extractVaccineName('Influenza, seasonal (Quadrivalent) (Flu (Quad))')
+    ).toBe('Influenza, seasonal (Quadrivalent)');
+  });
 });
 
 describe('getMatchedCommonName', () => {

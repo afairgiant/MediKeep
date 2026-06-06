@@ -50,6 +50,36 @@ def get_vaccine_by_name(
     )
 
 
+def resolve_vaccine_by_any_name(
+    db: Session, name: str
+) -> Optional[StandardizedVaccine]:
+    """Resolve a library entry from any user-typed/picked name string.
+
+    Matches canonical ``vaccine_name``, ``short_name``, or any of the
+    ``common_names`` aliases — mirrors what ``vaccine_resolver.build_library_index``
+    does at read time, but with a single targeted query so create/update writes
+    don't pay the cost of building the full index.
+
+    Used by the immunization CRUD to set ``standardized_vaccine_id`` when the
+    user picked from autocomplete but no WHO code was available (Tdap, MMRV,
+    Twinrix, etc. — ~16 curated entries with ``who_code: null``).
+    """
+    if not name or not name.strip():
+        return None
+    needle = name.strip().lower()
+    return (
+        db.query(StandardizedVaccine)
+        .filter(
+            or_(
+                func.lower(StandardizedVaccine.vaccine_name) == needle,
+                func.lower(StandardizedVaccine.short_name) == needle,
+                json_array_text_contains(StandardizedVaccine.common_names, needle),
+            )
+        )
+        .first()
+    )
+
+
 def search_vaccines(
     db: Session, query: str, category: Optional[str] = None, limit: int = 200
 ) -> List[StandardizedVaccine]:
@@ -77,9 +107,7 @@ def search_vaccines(
         func.lower(StandardizedVaccine.vaccine_name) == search_term,
         func.lower(StandardizedVaccine.short_name) == search_term,
         func.lower(StandardizedVaccine.who_code) == search_term,
-        json_array_text_contains(
-            StandardizedVaccine.common_names, search_term
-        ),
+        json_array_text_contains(StandardizedVaccine.common_names, search_term),
         func.lower(StandardizedVaccine.vaccine_name).startswith(
             search_term, autoescape=True
         ),
@@ -118,9 +146,7 @@ def search_vaccines(
         (func.lower(StandardizedVaccine.short_name) == search_term, 1),
         (func.lower(StandardizedVaccine.who_code) == search_term, 1),
         (
-            json_array_text_contains(
-                StandardizedVaccine.common_names, search_term
-            ),
+            json_array_text_contains(StandardizedVaccine.common_names, search_term),
             2,
         ),
         (
@@ -181,9 +207,7 @@ def get_common_vaccines(
     return q.order_by(StandardizedVaccine.display_order).limit(limit).all()
 
 
-def get_vaccines_by_category(
-    db: Session, category: str
-) -> List[StandardizedVaccine]:
+def get_vaccines_by_category(db: Session, category: str) -> List[StandardizedVaccine]:
     """All vaccines in a category (Viral, Bacterial, Combined, Toxoid, Parasitic)."""
     return (
         db.query(StandardizedVaccine)
