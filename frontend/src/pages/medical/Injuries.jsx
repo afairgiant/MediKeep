@@ -438,6 +438,7 @@ const Injuries = () => {
           editingInjury={editingInjury}
           practitionersOptions={practitioners}
           practitionersLoading={practitionersLoading}
+          onPractitionerCreated={p => setPractitioners(prev => [...prev, p])}
           injuryTypes={injuryTypes}
           injuryTypesLoading={injuryTypesLoading}
           isLoading={isBlocking}
