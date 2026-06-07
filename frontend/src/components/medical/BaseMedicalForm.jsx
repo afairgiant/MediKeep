@@ -951,6 +951,7 @@ const MemoizedBaseMedicalForm = memo(
       'modalSize',
       'submitButtonText',
       'submitButtonColor',
+      'zIndex',
     ];
     for (const prop of primitiveProps) {
       if (prevProps[prop] !== nextProps[prop]) {

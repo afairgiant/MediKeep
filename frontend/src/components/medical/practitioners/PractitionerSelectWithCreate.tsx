@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { IconUserPlus } from '@tabler/icons-react';
@@ -63,6 +63,18 @@ const PractitionerSelectWithCreate = ({
       label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
     }))
   );
+
+  // Keep localOptions in sync when the practitioners prop updates (e.g. after
+  // the global store refreshes or a parent appends a newly-created practitioner).
+  useEffect(() => {
+    setLocalOptions(
+      practitioners.map(p => ({
+        value: String(p.id),
+        label: `${p.name}${p.specialty ? ` - ${p.specialty}` : ''}`,
+      }))
+    );
+  }, [practitioners]);
+
   const [subModalOpen, setSubModalOpen] = useState(false);
   // Incremented each time the sub-modal opens to guarantee a fresh mount of
   // PractitionerFormWrapper (and therefore SpecialtySelect) every open cycle.

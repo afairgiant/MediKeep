@@ -770,11 +770,11 @@
       "editTitle": "Editar Profissional"
     },
     "createInline": {
-      "buttonTooltip": "New practitioner",
-      "nameRequired": "Name is required",
-      "specialtyRequired": "Medical specialty is required",
-      "createError": "Failed to create practitioner. Please try again.",
-      "successMessage": "Practitioner created and selected"
+      "buttonTooltip": "Novo profissional",
+      "nameRequired": "O nome é obrigatório",
+      "specialtyRequired": "A especialidade médica é obrigatória",
+      "createError": "Falha ao criar profissional. Tente novamente.",
+      "successMessage": "Profissional criado e selecionado"
     },
     "groupByPractice": "Agrupar por Consultório",
     "loading": "Carregando profissionais...",

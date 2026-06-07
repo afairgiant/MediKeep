@@ -770,11 +770,11 @@
       "editTitle": "Редактировать врача"
     },
     "createInline": {
-      "buttonTooltip": "New practitioner",
-      "nameRequired": "Name is required",
-      "specialtyRequired": "Medical specialty is required",
-      "createError": "Failed to create practitioner. Please try again.",
-      "successMessage": "Practitioner created and selected"
+      "buttonTooltip": "Новый врач",
+      "nameRequired": "Имя обязательно",
+      "specialtyRequired": "Медицинская специальность обязательна",
+      "createError": "Не удалось создать врача. Попробуйте ещё раз.",
+      "successMessage": "Врач создан и выбран"
     },
     "groupByPractice": "Группировать по клинике",
     "loading": "Загрузка врачей...",

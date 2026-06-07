@@ -770,11 +770,11 @@
       "editTitle": "Edytuj lekarza"
     },
     "createInline": {
-      "buttonTooltip": "New practitioner",
-      "nameRequired": "Name is required",
-      "specialtyRequired": "Medical specialty is required",
-      "createError": "Failed to create practitioner. Please try again.",
-      "successMessage": "Practitioner created and selected"
+      "buttonTooltip": "Nowy lekarz",
+      "nameRequired": "Imię i nazwisko jest wymagane",
+      "specialtyRequired": "Specjalność medyczna jest wymagana",
+      "createError": "Nie udało się utworzyć lekarza. Spróbuj ponownie.",
+      "successMessage": "Lekarz utworzony i wybrany"
     },
     "groupByPractice": "Grupuj według praktyki",
     "loading": "Ładowanie pracowników ochrony zdrowia...",

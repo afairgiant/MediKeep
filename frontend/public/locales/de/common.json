@@ -770,11 +770,11 @@
       "editTitle": "Medizinische Fachkraft bearbeiten"
     },
     "createInline": {
-      "buttonTooltip": "New practitioner",
-      "nameRequired": "Name is required",
-      "specialtyRequired": "Medical specialty is required",
-      "createError": "Failed to create practitioner. Please try again.",
-      "successMessage": "Practitioner created and selected"
+      "buttonTooltip": "Neuer Behandler",
+      "nameRequired": "Name ist erforderlich",
+      "specialtyRequired": "Fachrichtung ist erforderlich",
+      "createError": "Behandler konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "successMessage": "Behandler erstellt und ausgewählt"
     },
     "groupByPractice": "Nach Praxis gruppieren",
     "loading": "Medizinische Fachkräfte werden geladen...",

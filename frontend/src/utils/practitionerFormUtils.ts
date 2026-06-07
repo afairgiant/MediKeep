@@ -39,6 +39,11 @@ export function cleanPractitionerFormData(formData: {
     email:
       formData.email?.trim() ? formData.email.trim().toLowerCase() : null,
     website: formData.website?.trim() || null,
-    rating: formData.rating ? parseFloat(String(formData.rating)) : null,
+    rating: (() => {
+      const r = formData.rating;
+      if (r == null || r === '') return null;
+      const parsed = parseFloat(String(r));
+      return Number.isFinite(parsed) ? parsed : null;
+    })(),
   };
 }

@@ -770,11 +770,11 @@
       "editTitle": "Zorgverlener bewerken"
     },
     "createInline": {
-      "buttonTooltip": "New practitioner",
-      "nameRequired": "Name is required",
-      "specialtyRequired": "Medical specialty is required",
-      "createError": "Failed to create practitioner. Please try again.",
-      "successMessage": "Practitioner created and selected"
+      "buttonTooltip": "Nieuwe behandelaar",
+      "nameRequired": "Naam is vereist",
+      "specialtyRequired": "Medische specialisatie is vereist",
+      "createError": "Aanmaken van behandelaar mislukt. Probeer het opnieuw.",
+      "successMessage": "Behandelaar aangemaakt en geselecteerd"
     },
     "groupByPractice": "Groeperen op praktijk",
     "loading": "Zorgverleners laden...",
