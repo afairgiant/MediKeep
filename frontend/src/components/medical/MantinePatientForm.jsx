@@ -378,7 +378,7 @@ const MantinePatientForm = ({
           </Grid>
 
           <PractitionerSelectWithCreate
-            value={formData.physician_id ? String(formData.physician_id) : null}
+            value={formData.physician_id == null ? null : String(formData.physician_id)}
             onChange={handleSelectChange('physician_id')}
             practitioners={practitioners}
             label={t('patients.form.physician.label')}

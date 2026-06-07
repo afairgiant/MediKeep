@@ -29,6 +29,7 @@ vi.mock('../practitioners/PractitionerSelectWithCreate', () => ({
         onChange={e => onChange(e.target.value || null)}
         placeholder={placeholder}
         data-practitioner-count={practitioners.length}
+        data-value={value ?? 'null'}
       >
         <option value="">--</option>
         {practitioners.map(p => (
@@ -165,6 +166,18 @@ describe('MantinePatientForm — Add Practitioner', () => {
       const container = screen.getByTestId('practitioner-select-with-create');
       const select = container.querySelector('select') as HTMLSelectElement;
       expect(select.value).toBe('');
+    });
+
+    test('preserves physician_id of 0 as string rather than treating it as unset', () => {
+      render(
+        <MantinePatientForm
+          {...defaultProps}
+          formData={{ ...defaultFormData, physician_id: 0 }}
+        />
+      );
+      const container = screen.getByTestId('practitioner-select-with-create');
+      const select = container.querySelector('select') as HTMLSelectElement;
+      expect(select.dataset.value).toBe('0');
     });
   });
 });
