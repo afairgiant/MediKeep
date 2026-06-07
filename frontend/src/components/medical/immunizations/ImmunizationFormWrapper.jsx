@@ -34,6 +34,7 @@ import {
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import logger from '../../../services/logger';
+import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import {
   getAutocompleteEntries,
   getVaccineByName,
@@ -195,11 +196,6 @@ const ImmunizationFormWrapper = ({
   };
 
   if (!isOpen) return null;
-
-  const practitionerOptions = practitioners.map(p => ({
-    value: p.id.toString(),
-    label: p.name,
-  }));
 
   return (
     <Modal
@@ -651,22 +647,22 @@ const ImmunizationFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
-                      label={t('shared:fields.practitioner', 'Practitioner')}
+                    <PractitionerSelectWithCreate
                       value={
                         formData.practitioner_id
                           ? formData.practitioner_id.toString()
                           : null
                       }
-                      data={practitionerOptions}
-                      onChange={value => {
+                      onChange={value =>
                         onInputChange({
                           target: {
                             name: 'practitioner_id',
                             value: value || '',
                           },
-                        });
-                      }}
+                        })
+                      }
+                      practitioners={practitioners}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       placeholder={t(
                         'immunizations.form.practitionerPlaceholder',
                         'Select administering practitioner'
@@ -675,9 +671,6 @@ const ImmunizationFormWrapper = ({
                         'immunizations.form.practitionerDesc',
                         'Healthcare provider who administered vaccine'
                       )}
-                      clearable
-                      searchable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                 </Grid>
