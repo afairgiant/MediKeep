@@ -63,7 +63,6 @@ const TreatmentFormWrapper = ({
   conditionsOptions = [],
   conditionsLoading = false,
   practitionersOptions = [],
-  practitionersLoading = false,
   isLoading = false,
   statusMessage,
   onDocumentManagerRef,

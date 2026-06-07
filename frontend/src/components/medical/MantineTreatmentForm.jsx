@@ -16,7 +16,6 @@ const MantineTreatmentForm = ({
   conditionsOptions = [],
   conditionsLoading = false,
   practitionersOptions = [],
-  practitionersLoading = false,
 }) => {
   const { t } = useTranslation('medical');
 

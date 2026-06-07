@@ -282,6 +282,42 @@ describe('PractitionerSelectWithCreate', () => {
         );
       });
     });
+
+    test('onPractitionerCreated callback is called with the new practitioner object', async () => {
+      const newPractitioner = { id: 99, name: 'Dr. New', specialty: 'Neurology' };
+      mockCreatePractitioner.mockResolvedValue(newPractitioner);
+
+      const mockOnPractitionerCreated = vi.fn();
+      render(
+        <PractitionerSelectWithCreate
+          {...defaultProps}
+          onPractitionerCreated={mockOnPractitionerCreated}
+        />
+      );
+
+      await userEvent.click(screen.getByText(BUTTON_TEXT));
+      fillRequiredFields();
+      fireEvent.click(screen.getByTestId('mock-submit'));
+
+      await waitFor(() => {
+        expect(mockOnPractitionerCreated).toHaveBeenCalledWith(newPractitioner);
+      });
+    });
+
+    test('omitting onPractitionerCreated does not throw', async () => {
+      mockCreatePractitioner.mockResolvedValue({ id: 99, name: 'Dr. New', specialty: null });
+
+      render(<PractitionerSelectWithCreate {...defaultProps} />);
+      await userEvent.click(screen.getByText(BUTTON_TEXT));
+      fillRequiredFields();
+      fireEvent.click(screen.getByTestId('mock-submit'));
+
+      await waitFor(() => {
+        expect(mockNotificationsShow).toHaveBeenCalledWith(
+          expect.objectContaining({ color: 'green' })
+        );
+      });
+    });
   });
 
   describe('Error handling', () => {
