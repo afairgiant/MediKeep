@@ -33,6 +33,7 @@ import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import EncounterLabResultRelationships from './visits/EncounterLabResultRelationships';
 import { TagInput } from '../common/TagInput';
 import logger from '../../services/logger';
+import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 
 const MantineVisitForm = ({
   isOpen,
@@ -77,12 +78,6 @@ const MantineVisitForm = ({
     }
   }, [isOpen]);
 
-  // Convert practitioners to options
-  const practitionerOptions = practitioners.map(practitioner => ({
-    value: String(practitioner.id),
-    label: `${practitioner.name}${practitioner.specialty ? ` - ${practitioner.specialty}` : ''}`,
-  }));
-
   // Convert conditions to options
   const conditionOptions = conditionsOptions.map(cond => ({
     value: cond.id.toString(),
@@ -125,11 +120,26 @@ const MantineVisitForm = ({
       error: null,
     };
 
+    if (translatedField.name === 'practitioner_id') {
+      return (
+        <PractitionerSelectWithCreate
+          value={formData.practitioner_id ? String(formData.practitioner_id) : null}
+          onChange={value =>
+            onInputChange({
+              target: { name: 'practitioner_id', value: value || '' },
+            })
+          }
+          practitioners={practitioners}
+          label={translatedField.label}
+          placeholder={translatedField.placeholder}
+          description={translatedField.description}
+        />
+      );
+    }
+
     // Get dynamic options
     let options = translatedField.options;
-    if (translatedField.dynamicOptions === 'practitioners') {
-      options = practitionerOptions;
-    } else if (translatedField.dynamicOptions === 'conditions') {
+    if (translatedField.dynamicOptions === 'conditions') {
       options = conditionOptions;
     }
 
