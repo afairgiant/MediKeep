@@ -769,6 +769,13 @@
       "addTitle": "Añadir nuevo profesional",
       "editTitle": "Editar profesional"
     },
+    "createInline": {
+      "buttonTooltip": "Nuevo profesional",
+      "nameRequired": "El nombre es obligatorio",
+      "specialtyRequired": "La especialidad médica es obligatoria",
+      "createError": "Error al crear el profesional. Por favor, inténtelo de nuevo.",
+      "successMessage": "Profesional creado y seleccionado"
+    },
     "groupByPractice": "Agrupar por consultorio",
     "loading": "Cargando profesionales...",
     "practices": {

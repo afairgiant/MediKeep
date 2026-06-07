@@ -769,6 +769,13 @@
       "addTitle": "Neue medizinische Fachkraft hinzufügen",
       "editTitle": "Medizinische Fachkraft bearbeiten"
     },
+    "createInline": {
+      "buttonTooltip": "Neuer Behandler",
+      "nameRequired": "Name ist erforderlich",
+      "specialtyRequired": "Fachrichtung ist erforderlich",
+      "createError": "Behandler konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "successMessage": "Behandler erstellt und ausgewählt"
+    },
     "groupByPractice": "Nach Praxis gruppieren",
     "loading": "Medizinische Fachkräfte werden geladen...",
     "practices": {

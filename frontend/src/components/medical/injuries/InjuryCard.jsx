@@ -184,7 +184,7 @@ const InjuryCard = ({
 
     // Custom content for practitioner linking
     const customContent = practitioner ? (
-      <Group justify="space-between" mb="xs">
+      <Group mb="xs">
         <Text size="sm" c="dimmed">
           {t('injuries.practitioner.label', 'Treating Practitioner')}:
         </Text>

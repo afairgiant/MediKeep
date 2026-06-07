@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import BaseMedicalForm from './BaseMedicalForm';
 import FormLoadingOverlay from '../shared/FormLoadingOverlay';
 import UploadProgressErrorBoundary from '../shared/UploadProgressErrorBoundary';
 import { procedureFormFields } from '../../utils/medicalFormFields';
+import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 
 const MantineProcedureForm = ({
   isOpen,
@@ -16,12 +18,6 @@ const MantineProcedureForm = ({
   isLoading = false,
   statusMessage = null,
 }) => {
-  // Convert practitioners to Mantine format
-  const practitionerOptions = practitioners.map(practitioner => ({
-    value: String(practitioner.id),
-    label: `${practitioner.name} - ${practitioner.specialty}`,
-  }));
-
   // Status options for procedures
   const statusOptions = [
     {
@@ -47,9 +43,26 @@ const MantineProcedureForm = ({
   ];
 
   const dynamicOptions = {
-    practitioners: practitionerOptions,
     statuses: statusOptions,
   };
+
+  const customFieldRenderers = useMemo(
+    () => ({
+      practitioner_id: (_fieldConfig, baseProps) => (
+        <PractitionerSelectWithCreate
+          value={baseProps.value ? String(baseProps.value) : null}
+          onChange={value =>
+            onInputChange({ target: { name: 'practitioner_id', value: value || '' } })
+          }
+          practitioners={practitioners}
+          label={baseProps.label}
+          placeholder={baseProps.placeholder}
+          description={baseProps.description}
+        />
+      ),
+    }),
+    [onInputChange, practitioners]
+  );
 
   return (
     <BaseMedicalForm
@@ -62,6 +75,7 @@ const MantineProcedureForm = ({
       editingItem={editingProcedure}
       fields={procedureFormFields}
       dynamicOptions={dynamicOptions}
+      customFieldRenderers={customFieldRenderers}
       modalSize="xl"
       isLoading={isLoading}
     >

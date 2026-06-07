@@ -769,6 +769,13 @@
       "addTitle": "Nieuwe zorgverlener toevoegen",
       "editTitle": "Zorgverlener bewerken"
     },
+    "createInline": {
+      "buttonTooltip": "Nieuwe behandelaar",
+      "nameRequired": "Naam is vereist",
+      "specialtyRequired": "Medische specialisatie is vereist",
+      "createError": "Aanmaken van behandelaar mislukt. Probeer het opnieuw.",
+      "successMessage": "Behandelaar aangemaakt en geselecteerd"
+    },
     "groupByPractice": "Groeperen op praktijk",
     "loading": "Zorgverleners laden...",
     "practices": {

@@ -769,6 +769,13 @@
       "addTitle": "Ajouter un médecin",
       "editTitle": "Editer le médecin"
     },
+    "createInline": {
+      "buttonTooltip": "Nouveau praticien",
+      "nameRequired": "Le nom est requis",
+      "specialtyRequired": "La spécialité médicale est requise",
+      "createError": "Échec de la création du praticien. Veuillez réessayer.",
+      "successMessage": "Praticien créé et sélectionné"
+    },
     "groupByPractice": "Regrouper par établissement",
     "loading": "Chargement des médecins...",
     "practices": {

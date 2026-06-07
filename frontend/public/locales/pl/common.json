@@ -769,6 +769,13 @@
       "addTitle": "Dodaj nowego lekarza",
       "editTitle": "Edytuj lekarza"
     },
+    "createInline": {
+      "buttonTooltip": "Nowy lekarz",
+      "nameRequired": "Imię i nazwisko jest wymagane",
+      "specialtyRequired": "Specjalność medyczna jest wymagana",
+      "createError": "Nie udało się utworzyć lekarza. Spróbuj ponownie.",
+      "successMessage": "Lekarz utworzony i wybrany"
+    },
     "groupByPractice": "Grupuj według praktyki",
     "loading": "Ładowanie pracowników ochrony zdrowia...",
     "practices": {

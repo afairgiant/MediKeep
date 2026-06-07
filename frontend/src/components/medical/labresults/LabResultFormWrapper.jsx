@@ -35,6 +35,7 @@ import {
   formatDateInputChange,
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
+import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import { TagInput } from '../../common/TagInput';
 import InlineTestComponentEntry from './InlineTestComponentEntry';
 import ConditionRelationships from '../ConditionRelationships';
@@ -379,10 +380,6 @@ const LabResultFormWrapper = ({
     },
   ];
 
-  const practitionerOptions = practitioners.map(p => ({
-    value: String(p.id),
-    label: `${p.name} - ${p.specialty}`,
-  }));
 
   const getStatusColor = status => {
     switch (status) {
@@ -628,14 +625,12 @@ const LabResultFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
-                      label={t('shared:labels.orderingPractitioner')}
+                    <PractitionerSelectWithCreate
                       value={
                         formData.practitioner_id
                           ? String(formData.practitioner_id)
                           : null
                       }
-                      data={practitionerOptions}
                       onChange={value => {
                         onInputChange({
                           target: {
@@ -644,13 +639,12 @@ const LabResultFormWrapper = ({
                           },
                         });
                       }}
+                      practitioners={practitioners}
+                      label={t('shared:labels.orderingPractitioner')}
                       placeholder={t('shared:fields.selectPractitioner')}
                       description={t(
                         'labresults:orderingPractitioner.description'
                       )}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

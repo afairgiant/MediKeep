@@ -32,6 +32,7 @@ import {
 } from '../../utils/unitConversion';
 import { RELATIONSHIP_OPTIONS } from '../../constants/relationshipOptions';
 import PatientPhotoUpload from './PatientPhotoUpload';
+import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 import patientApi from '../../services/api/patientApi';
 import logger from '../../services/logger';
 
@@ -128,12 +129,6 @@ const MantinePatientForm = ({
   // Get unit labels and validation ranges for current system
   const labels = unitLabels[unitSystem];
   const ranges = validationRanges[unitSystem];
-
-  // Convert practitioners to Mantine format
-  const practitionerOptions = practitioners.map(practitioner => ({
-    value: String(practitioner.id),
-    label: `${practitioner.name} - ${practitioner.specialty}`,
-  }));
 
   const { t } = useTranslation(['common', 'shared']);
 
@@ -382,16 +377,12 @@ const MantinePatientForm = ({
             </Grid.Col>
           </Grid>
 
-          <Select
+          <PractitionerSelectWithCreate
+            value={formData.physician_id == null ? null : String(formData.physician_id)}
+            onChange={handleSelectChange('physician_id')}
+            practitioners={practitioners}
             label={t('patients.form.physician.label')}
             placeholder={t('patients.form.physician.placeholder')}
-            value={formData.physician_id ? String(formData.physician_id) : ''}
-            onChange={handleSelectChange('physician_id')}
-            disabled={saving}
-            data={practitionerOptions}
-            clearable
-            searchable
-            radius="md"
           />
         </Stack>
       </Box>

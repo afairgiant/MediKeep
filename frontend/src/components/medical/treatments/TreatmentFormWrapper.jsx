@@ -43,6 +43,7 @@ import TreatmentRelationshipsManager from './TreatmentRelationshipsManager';
 import TreatmentPlanSetup from './TreatmentPlanSetup';
 import { apiService } from '../../../services/api';
 import logger from '../../../services/logger';
+import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 
 const EMPTY_PENDING_RELATIONSHIPS = {
   medications: [],
@@ -62,7 +63,6 @@ const TreatmentFormWrapper = ({
   conditionsOptions = [],
   conditionsLoading = false,
   practitionersOptions = [],
-  practitionersLoading = false,
   isLoading = false,
   statusMessage,
   onDocumentManagerRef,
@@ -665,21 +665,19 @@ const TreatmentFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
-                      label={t('shared:fields.practitioner', 'Practitioner')}
-                      value={formData.practitioner_id || null}
-                      data={practitionersOptions.map(prac => ({
-                        value: prac.id.toString(),
-                        label: `${prac.name}${prac.specialty ? ` - ${prac.specialty}` : ''}`,
-                      }))}
-                      onChange={value => {
+                    <PractitionerSelectWithCreate
+                      value={
+                        formData.practitioner_id
+                          ? String(formData.practitioner_id)
+                          : null
+                      }
+                      onChange={value =>
                         onInputChange({
-                          target: {
-                            name: 'practitioner_id',
-                            value: value || '',
-                          },
-                        });
-                      }}
+                          target: { name: 'practitioner_id', value: value || '' },
+                        })
+                      }
+                      practitioners={practitionersOptions}
+                      label={t('shared:fields.practitioner', 'Practitioner')}
                       placeholder={t(
                         'shared:fields.selectPractitioner',
                         'Select practitioner'
@@ -688,10 +686,6 @@ const TreatmentFormWrapper = ({
                         'treatments.form.practitionerDesc',
                         'Healthcare provider administering treatment'
                       )}
-                      searchable
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                      disabled={practitionersLoading}
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>

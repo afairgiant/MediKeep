@@ -769,6 +769,13 @@
       "addTitle": "เพิ่มแพทย์ใหม่",
       "editTitle": "แก้ไขแพทย์"
     },
+    "createInline": {
+      "buttonTooltip": "ผู้ให้บริการใหม่",
+      "nameRequired": "ต้องระบุชื่อ",
+      "specialtyRequired": "ต้องระบุความเชี่ยวชาญทางการแพทย์",
+      "createError": "ไม่สามารถสร้างผู้ให้บริการได้ กรุณาลองใหม่อีกครั้ง",
+      "successMessage": "สร้างและเลือกผู้ให้บริการแล้ว"
+    },
     "groupByPractice": "จัดกลุ่มตามคลินิก",
     "loading": "กำลังโหลดข้อมูลแพทย์...",
     "practices": {

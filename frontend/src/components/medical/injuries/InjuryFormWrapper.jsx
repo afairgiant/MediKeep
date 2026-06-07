@@ -27,6 +27,7 @@ import { parseDateInput, getTodayEndOfDay } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import { TagInput } from '../../common/TagInput';
 import InjuryTypeSelect from './InjuryTypeSelect';
+import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import logger from '../../../services/logger';
 
 const InjuryFormWrapper = ({
@@ -46,6 +47,7 @@ const InjuryFormWrapper = ({
   onDocumentManagerRef,
   onFileUploadComplete,
   onError,
+  onPractitionerCreated = undefined,
 }) => {
   // Translation hooks
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -130,12 +132,6 @@ const InjuryFormWrapper = ({
   };
 
   if (!isOpen) return null;
-
-  // Prepare practitioners options
-  const practitionerSelectData = practitionersOptions.map(prac => ({
-    value: String(prac.id),
-    label: prac.name,
-  }));
 
   return (
     <Modal
@@ -392,40 +388,34 @@ const InjuryFormWrapper = ({
                     />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
-                      label={t(
-                        'injuries.practitioner.label',
-                        'Treating Practitioner'
-                      )}
+                    <PractitionerSelectWithCreate
                       value={
                         formData.practitioner_id
                           ? String(formData.practitioner_id)
                           : null
                       }
-                      data={practitionerSelectData}
-                      onChange={value => {
+                      onChange={value =>
                         onInputChange({
                           target: {
                             name: 'practitioner_id',
                             value: value ? parseInt(value, 10) : null,
                           },
-                        });
-                      }}
+                        })
+                      }
+                      practitioners={practitionersOptions}
+                      label={t(
+                        'injuries.practitioner.label',
+                        'Treating Practitioner'
+                      )}
                       placeholder={t(
                         'shared:fields.selectPractitioner',
                         'Select practitioner'
-                      )}
-                      clearable
-                      searchable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                      nothingFoundMessage={t(
-                        'common:noResults',
-                        'No practitioners found'
                       )}
                       description={t(
                         'injuries.practitioner.description',
                         'The healthcare provider treating this injury'
                       )}
+                      onPractitionerCreated={onPractitionerCreated}
                     />
                   </Grid.Col>
                 </Grid>

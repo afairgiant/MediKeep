@@ -769,6 +769,13 @@
       "addTitle": "Aggiungi nuovo professionista",
       "editTitle": "Modifica professionista"
     },
+    "createInline": {
+      "buttonTooltip": "Nuovo medico",
+      "nameRequired": "Il nome è obbligatorio",
+      "specialtyRequired": "La specialità medica è obbligatoria",
+      "createError": "Impossibile creare il medico. Riprovare.",
+      "successMessage": "Medico creato e selezionato"
+    },
     "groupByPractice": "Raggruppa per studio",
     "loading": "Caricamento professionisti sanitari...",
     "practices": {

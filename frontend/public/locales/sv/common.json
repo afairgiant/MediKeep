@@ -769,6 +769,13 @@
       "addTitle": "Lägg till ny vårdgivare",
       "editTitle": "Redigera vårdgivare"
     },
+    "createInline": {
+      "buttonTooltip": "Ny behandlare",
+      "nameRequired": "Namn är obligatoriskt",
+      "specialtyRequired": "Medicinsk specialitet är obligatorisk",
+      "createError": "Det gick inte att skapa behandlaren. Försök igen.",
+      "successMessage": "Behandlare skapad och vald"
+    },
     "groupByPractice": "Gruppera efter mottagning",
     "loading": "Laddar vårdgivare...",
     "practices": {

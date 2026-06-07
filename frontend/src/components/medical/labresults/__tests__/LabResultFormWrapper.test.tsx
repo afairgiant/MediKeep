@@ -10,6 +10,33 @@ import LabResultFormWrapper from '../LabResultFormWrapper';
 
 // Paths are relative to this test file (src/components/medical/labresults/__tests__/)
 
+vi.mock('../../practitioners/PractitionerSelectWithCreate', () => ({
+  default: ({
+    value,
+    onChange,
+    label,
+    placeholder,
+  }: {
+    value: string | null;
+    onChange: (_v: string | null) => void;
+    label: string;
+    placeholder?: string;
+  }) => (
+    <div data-testid="practitioner-select-with-create">
+      <label htmlFor="mock-practitioner-select">{label}</label>
+      <select
+        id="mock-practitioner-select"
+        value={value ?? ''}
+        onChange={e => onChange(e.target.value || null)}
+        placeholder={placeholder}
+      >
+        <option value="">--</option>
+        <option value="1">Dr. Smith - Internal Medicine</option>
+      </select>
+    </div>
+  ),
+}));
+
 vi.mock('../InlineTestComponentEntry', () => ({
   default: ({ onRef }) => {
     if (onRef) onRef({ getComponents: () => [] });
@@ -88,6 +115,11 @@ describe('LabResultFormWrapper', () => {
       expect(
         screen.getByText('shared:labels.completedDate')
       ).toBeInTheDocument();
+    });
+
+    test('renders PractitionerSelectWithCreate for the practitioner field', () => {
+      render(<LabResultFormWrapper {...defaultProps} />);
+      expect(screen.getByTestId('practitioner-select-with-create')).toBeInTheDocument();
     });
 
     test('shows Tags field on the Basic Info tab', () => {

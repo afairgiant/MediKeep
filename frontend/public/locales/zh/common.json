@@ -769,6 +769,13 @@
       "addTitle": "添加新医生",
       "editTitle": "编辑医生"
     },
+    "createInline": {
+      "buttonTooltip": "新建医生",
+      "nameRequired": "姓名为必填项",
+      "specialtyRequired": "医疗专科为必填项",
+      "createError": "创建医生失败，请重试。",
+      "successMessage": "医生已创建并选中"
+    },
     "groupByPractice": "按诊所分组",
     "loading": "正在加载医生...",
     "practices": {

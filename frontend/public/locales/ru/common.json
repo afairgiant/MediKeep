@@ -769,6 +769,13 @@
       "addTitle": "Добавить врача",
       "editTitle": "Редактировать врача"
     },
+    "createInline": {
+      "buttonTooltip": "Новый врач",
+      "nameRequired": "Имя обязательно",
+      "specialtyRequired": "Медицинская специальность обязательна",
+      "createError": "Не удалось создать врача. Попробуйте ещё раз.",
+      "successMessage": "Врач создан и выбран"
+    },
     "groupByPractice": "Группировать по клинике",
     "loading": "Загрузка врачей...",
     "practices": {

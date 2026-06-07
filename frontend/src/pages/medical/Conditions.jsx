@@ -550,6 +550,7 @@ const Conditions = () => {
           onSubmit={handleSubmit}
           editingCondition={editingCondition}
           practitioners={practitioners}
+          onPractitionerCreated={p => setPractitioners(prev => [...prev, p])}
           isLoading={isBlocking}
           statusMessage={statusMessage}
           onDocumentManagerRef={setDocumentManagerMethods}

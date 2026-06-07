@@ -87,6 +87,7 @@ const BaseMedicalForm = ({
 
   // Modal customization
   modalSize = 'lg',
+  zIndex,
 
   // Extra content to render after specific fields (keyed by field name)
   fieldExtras = {},
@@ -168,6 +169,7 @@ const BaseMedicalForm = ({
   const handleSubmit = useCallback(
     e => {
       e.preventDefault();
+      e.stopPropagation();
       onSubmit(e);
     },
     [onSubmit]
@@ -837,16 +839,29 @@ const BaseMedicalForm = ({
       centered
       styles={useMemo(
         () => ({
-          body: {
-            padding: layoutConfig.container.padding || '1.5rem',
-            paddingBottom: '2rem',
+          // Make the dialog a flex column so the header stays pinned and the
+          // body scrolls independently. Overflow hidden prevents the body from
+          // visually overflowing the dialog's painted background at high zoom.
+          content: {
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           },
           header: {
             paddingBottom: '1rem',
+            flexShrink: 0,
+          },
+          body: {
+            padding: layoutConfig.container.padding || '1.5rem',
+            paddingBottom: '2rem',
+            flex: 1,
+            overflowY: 'auto',
+            minHeight: 0,
           },
         }),
         [layoutConfig.container.padding]
       )}
+      withScrollArea={false}
       lockScroll
       closeOnClickOutside
       trapFocus
@@ -854,6 +869,7 @@ const BaseMedicalForm = ({
       keepMounted={false}
       breakpoint={responsiveState.breakpoint}
       deviceType={responsiveState.deviceType}
+      zIndex={zIndex}
     >
       <form onSubmit={handleSubmit}>
         <Stack spacing={layoutConfig.spacing}>
@@ -935,6 +951,7 @@ const MemoizedBaseMedicalForm = memo(
       'modalSize',
       'submitButtonText',
       'submitButtonColor',
+      'zIndex',
     ];
     for (const prop of primitiveProps) {
       if (prevProps[prop] !== nextProps[prop]) {

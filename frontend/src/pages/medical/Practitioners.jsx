@@ -19,6 +19,7 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { apiService } from '../../services/api';
+import { cleanPractitionerFormData } from '../../utils/practitionerFormUtils';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
@@ -192,31 +193,7 @@ const Practitioners = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      // Clean the data before sending to API
-      const dataToSubmit = {
-        ...formData,
-        practice_id:
-          formData.practice_id && formData.practice_id !== ''
-            ? Number.isNaN(parseInt(formData.practice_id, 10))
-              ? null
-              : parseInt(formData.practice_id, 10)
-            : null,
-        phone_number: formData.phone_number?.trim() || null,
-        email:
-          formData.email && formData.email.trim() !== ''
-            ? formData.email.trim().toLowerCase()
-            : null,
-        website:
-          formData.website && formData.website.trim() !== ''
-            ? formData.website.trim()
-            : null,
-        rating:
-          formData.rating && formData.rating !== 0
-            ? parseFloat(formData.rating)
-            : null,
-      };
-      // Remove legacy practice field if present
-      delete dataToSubmit.practice;
+      const dataToSubmit = cleanPractitionerFormData(formData);
 
       if (editingPractitioner) {
         await apiService.updatePractitioner(
