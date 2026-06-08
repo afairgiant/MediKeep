@@ -461,5 +461,29 @@
   "unsavedDataInstructions": "在关闭前，请在预览标签页中点击\"添加组件\"以保存您解析的数据。",
   "unsavedDataMessage_one": "您有 {{count}} 个已解析的检验组件尚未添加。如果现在关闭，您将丢失这些解析数据。",
   "unsavedDataMessage_other": "您有 {{count}} 个已解析的检验组件尚未添加。如果现在关闭，您将丢失这些解析数据。",
-  "unsavedDataWarning": "未保存的解析数据"
+  "unsavedDataWarning": "未保存的解析数据",
+  "stackedView": {
+    "results": "{{count}} 个结果",
+    "results_one": "{{count}} 个结果",
+    "results_other": "{{count}} 个结果",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "最新",
+    "trendChart": "随时间变化的值",
+    "noResults": "该组中没有结果"
+  },
+  "numericResult": {
+    "sectionLabel": "数值结果（可选）",
+    "sectionDescription": "输入测量值和参考范围以启用堆叠结果的趋势图。",
+    "valueLabel": "值",
+    "valuePlaceholder": "例如 6.2",
+    "unitLabel": "单位",
+    "unitPlaceholder": "例如 mg/dL, mmol/L",
+    "refMinLabel": "范围最小值",
+    "refMinPlaceholder": "例如 4.0",
+    "refMaxLabel": "范围最大值",
+    "refMaxPlaceholder": "例如 5.6",
+    "refTextLabel": "范围文本",
+    "refTextPlaceholder": "例如 4.0-5.6 或 <200",
+    "refTextDescription": "在显示中覆盖最小值/最大值"
+  }
 }

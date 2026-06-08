@@ -1246,7 +1246,8 @@
     "cards": "卡片",
     "components": "组件",
     "label": "查看模式",
-    "table": "表格"
+    "table": "表格",
+    "stacked": "堆叠"
   },
   "visits": {
     "addNewVisit": "添加新就诊",

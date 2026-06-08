@@ -461,5 +461,29 @@
   "unsavedDataInstructions": "Klicken Sie auf \"Komponenten hinzufügen\" im Vorschau-Tab, um Ihre analysierten Daten vor dem Schließen zu speichern.",
   "unsavedDataMessage_one": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurde(n). Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
   "unsavedDataMessage_other": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurden. Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
-  "unsavedDataWarning": "Nicht gespeicherte analysierte Daten"
+  "unsavedDataWarning": "Nicht gespeicherte analysierte Daten",
+  "stackedView": {
+    "results": "{{count}} Ergebnis",
+    "results_one": "{{count}} Ergebnis",
+    "results_other": "{{count}} Ergebnisse",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Aktuell",
+    "trendChart": "Wert im Zeitverlauf",
+    "noResults": "Keine Ergebnisse in dieser Gruppe"
+  },
+  "numericResult": {
+    "sectionLabel": "Numerisches Ergebnis (optional)",
+    "sectionDescription": "Geben Sie einen Messwert und einen Referenzbereich ein, um Trenddiagramme zu aktivieren.",
+    "valueLabel": "Wert",
+    "valuePlaceholder": "z.B. 6,2",
+    "unitLabel": "Einheit",
+    "unitPlaceholder": "z.B. mg/dL, mmol/L",
+    "refMinLabel": "Bereich Min",
+    "refMinPlaceholder": "z.B. 4,0",
+    "refMaxLabel": "Bereich Max",
+    "refMaxPlaceholder": "z.B. 5,6",
+    "refTextLabel": "Bereichstext",
+    "refTextPlaceholder": "z.B. 4,0-5,6 oder <200",
+    "refTextDescription": "Überschreibt Min/Max in der Anzeige"
+  }
 }

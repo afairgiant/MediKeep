@@ -461,5 +461,29 @@
   "unsavedDataInstructions": "Klicka på \"Lägg till komponenter\" i fliken Förhandsgranskning för att spara dina tolkade data innan du stänger.",
   "unsavedDataMessage_one": "Du har {{count}} tolkad testkomponent som inte har lagts till ännu. Om du stänger nu kommer du att förlora denna tolkade data.",
   "unsavedDataMessage_other": "Du har {{count}} tolkade testkomponenter som inte har lagts till ännu. Om du stänger nu kommer du att förlora denna tolkade data.",
-  "unsavedDataWarning": "Osparade tolkade data"
+  "unsavedDataWarning": "Osparade tolkade data",
+  "stackedView": {
+    "results": "{{count}} resultat",
+    "results_one": "{{count}} resultat",
+    "results_other": "{{count}} resultat",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Senaste",
+    "trendChart": "Värde över tid",
+    "noResults": "Inga resultat i den här gruppen"
+  },
+  "numericResult": {
+    "sectionLabel": "Numeriskt resultat (valfritt)",
+    "sectionDescription": "Ange ett uppmätt värde och referensintervall för att aktivera trenddiagram.",
+    "valueLabel": "Värde",
+    "valuePlaceholder": "t.ex. 6,2",
+    "unitLabel": "Enhet",
+    "unitPlaceholder": "t.ex. mg/dL, mmol/L",
+    "refMinLabel": "Intervall min",
+    "refMinPlaceholder": "t.ex. 4,0",
+    "refMaxLabel": "Intervall max",
+    "refMaxPlaceholder": "t.ex. 5,6",
+    "refTextLabel": "Intervalltext",
+    "refTextPlaceholder": "t.ex. 4,0-5,6 eller <200",
+    "refTextDescription": "Åsidosätter min/max i visningen"
+  }
 }

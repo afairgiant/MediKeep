@@ -22,6 +22,13 @@ class LabResultBase(TaggedEntityMixin):
     patient_id: int
     practitioner_id: Optional[int] = None
 
+    # Numeric result fields (optional — for quantitative tests and trending)
+    value: Optional[float] = None
+    unit: Optional[str] = None
+    ref_range_min: Optional[float] = None
+    ref_range_max: Optional[float] = None
+    ref_range_text: Optional[str] = None
+
     @field_validator("test_name")
     @classmethod
     def validate_test_name(cls, v):
@@ -176,12 +183,71 @@ class LabResultBase(TaggedEntityMixin):
 
         raise ValueError("completed_date must be a date string or date object")
 
+    @field_validator("value")
+    @classmethod
+    def validate_value(cls, v):
+        if v is not None:
+            import math
+            if not math.isfinite(v):
+                raise ValueError("Value must be a finite number")
+            if abs(v) > 1_000_000:
+                raise ValueError("Value is out of reasonable range")
+        return v
+
+    @field_validator("ref_range_min")
+    @classmethod
+    def validate_ref_range_min(cls, v):
+        if v is not None:
+            import math
+            if not math.isfinite(v):
+                raise ValueError("Reference range minimum must be a finite number")
+        return v
+
+    @field_validator("ref_range_max")
+    @classmethod
+    def validate_ref_range_max(cls, v):
+        if v is not None:
+            import math
+            if not math.isfinite(v):
+                raise ValueError("Reference range maximum must be a finite number")
+        return v
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit(cls, v):
+        if v is not None:
+            v = v.strip()
+            if len(v) > 50:
+                raise ValueError("Unit must be 50 characters or fewer")
+            return v if v else None
+        return v
+
+    @field_validator("ref_range_text")
+    @classmethod
+    def validate_ref_range_text(cls, v):
+        if v is not None:
+            v = v.strip()
+            if len(v) > 100:
+                raise ValueError("Reference range text must be 100 characters or fewer")
+            return v if v else None
+        return v
+
     @model_validator(mode="after")
     def validate_date_order(self):
         """Validate that completed date is not before ordered date"""
         if self.completed_date and self.ordered_date:
             if self.completed_date < self.ordered_date:
                 raise ValueError("Completed date cannot be before ordered date")
+        return self
+
+    @model_validator(mode="after")
+    def validate_ref_range_order(self):
+        """Validate that ref_range_max is greater than ref_range_min"""
+        if self.ref_range_min is not None and self.ref_range_max is not None:
+            if self.ref_range_max <= self.ref_range_min:
+                raise ValueError(
+                    "Reference range maximum must be greater than minimum"
+                )
         return self
 
 
@@ -223,6 +289,11 @@ class LabResultUpdate(BaseModel):
     notes: Optional[str] = None
     practitioner_id: Optional[int] = None
     tags: Optional[List[str]] = None
+    value: Optional[float] = None
+    unit: Optional[str] = None
+    ref_range_min: Optional[float] = None
+    ref_range_max: Optional[float] = None
+    ref_range_text: Optional[str] = None
 
     @field_validator("test_name")
     @classmethod
@@ -344,12 +415,71 @@ class LabResultUpdate(BaseModel):
 
         raise ValueError("completed_date must be a date string or date object")
 
+    @field_validator("value")
+    @classmethod
+    def validate_value(cls, v):
+        if v is not None:
+            import math
+            if not math.isfinite(v):
+                raise ValueError("Value must be a finite number")
+            if abs(v) > 1_000_000:
+                raise ValueError("Value is out of reasonable range")
+        return v
+
+    @field_validator("ref_range_min")
+    @classmethod
+    def validate_ref_range_min(cls, v):
+        if v is not None:
+            import math
+            if not math.isfinite(v):
+                raise ValueError("Reference range minimum must be a finite number")
+        return v
+
+    @field_validator("ref_range_max")
+    @classmethod
+    def validate_ref_range_max(cls, v):
+        if v is not None:
+            import math
+            if not math.isfinite(v):
+                raise ValueError("Reference range maximum must be a finite number")
+        return v
+
+    @field_validator("unit")
+    @classmethod
+    def validate_unit(cls, v):
+        if v is not None:
+            v = v.strip()
+            if len(v) > 50:
+                raise ValueError("Unit must be 50 characters or fewer")
+            return v if v else None
+        return v
+
+    @field_validator("ref_range_text")
+    @classmethod
+    def validate_ref_range_text(cls, v):
+        if v is not None:
+            v = v.strip()
+            if len(v) > 100:
+                raise ValueError("Reference range text must be 100 characters or fewer")
+            return v if v else None
+        return v
+
     @model_validator(mode="after")
     def validate_date_order(self):
         """Validate that completed date is not before ordered date"""
         if self.completed_date and self.ordered_date:
             if self.completed_date < self.ordered_date:
                 raise ValueError("Completed date cannot be before ordered date")
+        return self
+
+    @model_validator(mode="after")
+    def validate_ref_range_order(self):
+        """Validate that ref_range_max is greater than ref_range_min"""
+        if self.ref_range_min is not None and self.ref_range_max is not None:
+            if self.ref_range_max <= self.ref_range_min:
+                raise ValueError(
+                    "Reference range maximum must be greater than minimum"
+                )
         return self
 
 

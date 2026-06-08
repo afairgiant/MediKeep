@@ -461,5 +461,29 @@
   "unsavedDataInstructions": "Kliknij \"Dodaj Składniki\" w zakładce Podgląd aby zapisać sparsowane dane przed zamknięciem.",
   "unsavedDataMessage_one": "Masz {{count}} sparsowany składnik badania który nie został jeszcze dodany. Jeśli zamkniesz teraz, stracisz te sparsowane dane.",
   "unsavedDataMessage_other": "Masz {{count}} sparsowanych składników badania które nie zostały jeszcze dodane. Jeśli zamkniesz teraz, stracisz te sparsowane dane.",
-  "unsavedDataWarning": "Niezapisane Sparsowane Dane"
+  "unsavedDataWarning": "Niezapisane Sparsowane Dane",
+  "stackedView": {
+    "results": "{{count}} wynik",
+    "results_one": "{{count}} wynik",
+    "results_other": "{{count}} wyniki",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Ostatni",
+    "trendChart": "Wartość w czasie",
+    "noResults": "Brak wyników w tej grupie"
+  },
+  "numericResult": {
+    "sectionLabel": "Wynik numeryczny (opcjonalnie)",
+    "sectionDescription": "Wprowadź zmierzoną wartość i zakres referencyjny, aby włączyć wykresy trendów.",
+    "valueLabel": "Wartość",
+    "valuePlaceholder": "np. 6,2",
+    "unitLabel": "Jednostka",
+    "unitPlaceholder": "np. mg/dL, mmol/L",
+    "refMinLabel": "Zakres min",
+    "refMinPlaceholder": "np. 4,0",
+    "refMaxLabel": "Zakres maks",
+    "refMaxPlaceholder": "np. 5,6",
+    "refTextLabel": "Tekst zakresu",
+    "refTextPlaceholder": "np. 4,0-5,6 lub <200",
+    "refTextDescription": "Zastępuje min/maks w wyświetlaniu"
+  }
 }

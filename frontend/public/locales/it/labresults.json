@@ -461,5 +461,29 @@
   "unsavedDataInstructions": "Fai clic su \"Aggiungi componenti\" nella scheda Anteprima per salvare i dati analizzati prima di chiudere.",
   "unsavedDataMessage_one": "Hai {{count}} componenti dell'esame analizzati che non sono ancora stati aggiunti. Se chiudi ora, perderai questi dati analizzati.",
   "unsavedDataMessage_other": "Hai {{count}} componenti dell'esame analizzati che non sono ancora stati aggiunti. Se chiudi ora, perderai questi dati analizzati.",
-  "unsavedDataWarning": "Dati analizzati non salvati"
+  "unsavedDataWarning": "Dati analizzati non salvati",
+  "stackedView": {
+    "results": "{{count}} risultato",
+    "results_one": "{{count}} risultato",
+    "results_other": "{{count}} risultati",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Più recente",
+    "trendChart": "Valore nel tempo",
+    "noResults": "Nessun risultato in questo gruppo"
+  },
+  "numericResult": {
+    "sectionLabel": "Risultato numerico (opzionale)",
+    "sectionDescription": "Inserire un valore misurato e un intervallo di riferimento per abilitare i grafici di tendenza.",
+    "valueLabel": "Valore",
+    "valuePlaceholder": "es. 6,2",
+    "unitLabel": "Unità",
+    "unitPlaceholder": "es. mg/dL, mmol/L",
+    "refMinLabel": "Intervallo min",
+    "refMinPlaceholder": "es. 4,0",
+    "refMaxLabel": "Intervallo max",
+    "refMaxPlaceholder": "es. 5,6",
+    "refTextLabel": "Testo dell'intervallo",
+    "refTextPlaceholder": "es. 4,0-5,6 o <200",
+    "refTextDescription": "Sostituisce min/max nella visualizzazione"
+  }
 }

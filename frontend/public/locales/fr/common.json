@@ -1246,7 +1246,8 @@
     "cards": "Cartes",
     "components": "Composants",
     "label": "Mode d'affichage",
-    "table": "Tableau"
+    "table": "Tableau",
+    "stacked": "Empilé"
   },
   "visits": {
     "addNewVisit": "Ajouter une nouvelle visite",

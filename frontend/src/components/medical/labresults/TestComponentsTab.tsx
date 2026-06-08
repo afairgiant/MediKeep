@@ -51,6 +51,7 @@ interface TestComponentsTabProps {
   isViewMode?: boolean;
   onError?: (_error: Error) => void;
   onLabResultUpdated?: () => void;
+  onHasComponents?: (_has: boolean) => void;
 }
 
 const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
@@ -58,6 +59,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   isViewMode = false,
   onError,
   onLabResultUpdated,
+  onHasComponents,
 }) => {
   const { t } = useTranslation(['labresults', 'common', 'shared']);
   const [activeTab, setActiveTab] = useState<string>('display');
@@ -119,7 +121,11 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           currentPatient?.id
         );
 
-        setComponents(response.data || []);
+        const data = response.data || [];
+        setComponents(data);
+        if (showLoading) {
+          onHasComponents?.(data.length > 0);
+        }
       } catch (error) {
         handleError(error as Error, 'load_components');
       } finally {
@@ -129,7 +135,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- filters is read inside but excluded intentionally; including it would refetch on every filter object identity change rather than via the explicit reload trigger
-    [labResultId, currentPatient?.id, handleError]
+    [labResultId, currentPatient?.id, handleError, onHasComponents]
   );
 
   const handleComponentsAdded = useCallback(

@@ -461,5 +461,29 @@
   "unsavedDataInstructions": "Haga clic en \"Agregar componentes\" en la pestaña de vista previa para guardar los datos analizados antes de cerrar.",
   "unsavedDataMessage_one": "Tiene {{count}} componente(s) de prueba analizado(s) que aún no se han agregado. Si cierra ahora, perderá estos datos analizados.",
   "unsavedDataMessage_other": "Tiene {{count}} componente(s) de prueba analizado(s) que aún no se han agregado. Si cierra ahora, perderá estos datos analizados.",
-  "unsavedDataWarning": "Datos analizados sin guardar"
+  "unsavedDataWarning": "Datos analizados sin guardar",
+  "stackedView": {
+    "results": "{{count}} resultado",
+    "results_one": "{{count}} resultado",
+    "results_other": "{{count}} resultados",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Más reciente",
+    "trendChart": "Valor a lo largo del tiempo",
+    "noResults": "No hay resultados en este grupo"
+  },
+  "numericResult": {
+    "sectionLabel": "Resultado numérico (opcional)",
+    "sectionDescription": "Introduzca un valor medido y un rango de referencia para habilitar los gráficos de tendencia.",
+    "valueLabel": "Valor",
+    "valuePlaceholder": "ej. 6,2",
+    "unitLabel": "Unidad",
+    "unitPlaceholder": "ej. mg/dL, mmol/L",
+    "refMinLabel": "Rango mín",
+    "refMinPlaceholder": "ej. 4,0",
+    "refMaxLabel": "Rango máx",
+    "refMaxPlaceholder": "ej. 5,6",
+    "refTextLabel": "Texto de rango",
+    "refTextPlaceholder": "ej. 4,0-5,6 o <200",
+    "refTextDescription": "Anula min/máx en la visualización"
+  }
 }

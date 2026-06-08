@@ -163,3 +163,98 @@ class TestLabResultBaseHasNoNotesValidator:
             notes=notes,
         )
         assert len(base.notes) == 10000
+
+
+class TestLabResultNumericFieldsCreate:
+    """Tests for numeric result field validation on LabResultCreate/LabResultBase."""
+
+    def test_valid_value_and_unit(self):
+        result = make_create(value=5.4, unit="mmol/L")
+        assert result.value == 5.4
+        assert result.unit == "mmol/L"
+
+    def test_value_none_accepted(self):
+        result = make_create(value=None)
+        assert result.value is None
+
+    def test_value_infinite_rejected(self):
+        import math
+        with pytest.raises(ValidationError, match="finite"):
+            make_create(value=math.inf)
+
+    def test_value_out_of_range_rejected(self):
+        with pytest.raises(ValidationError, match="reasonable"):
+            make_create(value=2_000_000)
+
+    def test_unit_stripped(self):
+        result = make_create(unit="  mg/dL  ")
+        assert result.unit == "mg/dL"
+
+    def test_unit_empty_string_normalizes_to_none(self):
+        result = make_create(unit="   ")
+        assert result.unit is None
+
+    def test_unit_too_long_rejected(self):
+        with pytest.raises(ValidationError, match="50"):
+            make_create(unit="x" * 51)
+
+    def test_ref_range_valid(self):
+        result = make_create(ref_range_min=4.0, ref_range_max=5.6)
+        assert result.ref_range_min == 4.0
+        assert result.ref_range_max == 5.6
+
+    def test_ref_range_inverted_rejected(self):
+        with pytest.raises(ValidationError, match="maximum must be greater"):
+            make_create(ref_range_min=5.6, ref_range_max=4.0)
+
+    def test_ref_range_equal_rejected(self):
+        with pytest.raises(ValidationError, match="maximum must be greater"):
+            make_create(ref_range_min=5.0, ref_range_max=5.0)
+
+    def test_ref_range_only_min(self):
+        result = make_create(ref_range_min=4.0)
+        assert result.ref_range_min == 4.0
+        assert result.ref_range_max is None
+
+    def test_ref_range_text_stripped(self):
+        result = make_create(ref_range_text="  4.0-5.6  ")
+        assert result.ref_range_text == "4.0-5.6"
+
+    def test_ref_range_text_empty_normalizes_to_none(self):
+        result = make_create(ref_range_text="   ")
+        assert result.ref_range_text is None
+
+    def test_ref_range_text_too_long_rejected(self):
+        with pytest.raises(ValidationError, match="100"):
+            make_create(ref_range_text="x" * 101)
+
+    def test_all_numeric_fields_none(self):
+        """All fields optional — omitting them should be fine."""
+        result = make_create()
+        assert result.value is None
+        assert result.unit is None
+        assert result.ref_range_min is None
+        assert result.ref_range_max is None
+        assert result.ref_range_text is None
+
+
+class TestLabResultNumericFieldsUpdate:
+    """Tests for numeric result field validation on LabResultUpdate."""
+
+    def test_update_valid_value(self):
+        result = make_update(value=6.1, unit="%")
+        assert result.value == 6.1
+        assert result.unit == "%"
+
+    def test_update_value_infinite_rejected(self):
+        import math
+        with pytest.raises(ValidationError, match="finite"):
+            make_update(value=math.inf)
+
+    def test_update_ref_range_inverted_rejected(self):
+        with pytest.raises(ValidationError, match="maximum must be greater"):
+            make_update(ref_range_min=10.0, ref_range_max=5.0)
+
+    def test_update_all_none(self):
+        result = make_update(value=None, unit=None, ref_range_min=None, ref_range_max=None)
+        assert result.value is None

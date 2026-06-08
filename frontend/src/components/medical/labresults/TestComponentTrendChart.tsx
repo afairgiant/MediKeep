@@ -107,7 +107,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
           <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="var(--color-border-light)"
+              stroke="#dee2e6"
             />
             <XAxis
               dataKey="timestamp"
@@ -117,11 +117,12 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
                 (dataMin: number) => dataMin - 86400000,
                 (dataMax: number) => dataMax + 86400000,
               ]}
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 12, fill: '#495057' }}
               angle={-45}
               textAnchor="end"
               height={80}
-              stroke="#adb5bd"
+              stroke="#6c757d"
+              tickLine={{ stroke: '#6c757d' }}
               tickFormatter={(ts: number) =>
                 new Date(ts).toLocaleDateString(undefined, {
                   month: 'short',
@@ -138,17 +139,17 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
               tickFormatter={(val: number) =>
                 val === 1 ? 'Positive / Detected' : 'Negative / Undetected'
               }
-              tick={{ fontSize: 12 }}
-              stroke="#adb5bd"
+              tick={{ fontSize: 12, fill: '#495057' }}
+              stroke="#6c757d"
+              tickLine={{ stroke: '#6c757d' }}
               width={80}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Scatter name={trendData.test_name} data={chartData} fill="#228be6">
+            <Scatter name={trendData.test_name} data={chartData} r={8} fill="#228be6">
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.value === 1 ? '#fa5252' : '#40c057'}
-                  r={6}
+                  fill={entry.value === 1 ? '#e03131' : '#2f9e44'}
                 />
               ))}
             </Scatter>
@@ -156,10 +157,10 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
         </ResponsiveContainer>
       </Paper>
       <Group gap="sm" justify="center">
-        <Badge size="sm" variant="light" color="red">
+        <Badge size="sm" variant="filled" color="red">
           {t('labresults:trendChart.positiveDetected')}
         </Badge>
-        <Badge size="sm" variant="light" color="green">
+        <Badge size="sm" variant="filled" color="green">
           {t('labresults:trendChart.negativeUndetected')}
         </Badge>
       </Group>
@@ -223,28 +224,28 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
   const CustomDot = (props: any) => {
     const { cx, cy, payload } = props;
 
-    let fill = '#228be6'; // Default blue
+    let fill = '#1971c2'; // Default blue (darker for contrast)
 
     if (payload.status) {
       switch (payload.status.toLowerCase()) {
         case 'normal':
-          fill = '#40c057'; // Green
+          fill = '#2f9e44'; // Green
           break;
         case 'high':
         case 'low':
-          fill = '#fd7e14'; // Orange
+          fill = '#e8590c'; // Orange
           break;
         case 'critical':
-          fill = '#fa5252'; // Red
+          fill = '#e03131'; // Red
           break;
         case 'abnormal':
-          fill = '#fab005'; // Yellow
+          fill = '#e67700'; // Amber
           break;
       }
     }
 
     return (
-      <Dot cx={cx} cy={cy} r={4} fill={fill} stroke="#fff" strokeWidth={2} />
+      <Dot cx={cx} cy={cy} r={6} fill={fill} stroke="#fff" strokeWidth={2} />
     );
   };
 
@@ -343,7 +344,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="var(--color-border-light)"
+              stroke="#dee2e6"
             />
 
             <XAxis
@@ -354,9 +355,9 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
                 (dataMin: number) => dataMin - 86400000,
                 (dataMax: number) => dataMax + 86400000,
               ]}
-              tick={{ fontSize: 12 }}
-              tickLine={{ stroke: '#adb5bd' }}
-              stroke="#adb5bd"
+              tick={{ fontSize: 12, fill: '#495057' }}
+              tickLine={{ stroke: '#6c757d' }}
+              stroke="#6c757d"
               angle={-45}
               textAnchor="end"
               height={80}
@@ -372,14 +373,14 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
             <YAxis
               domain={yAxisConfig.domain}
               ticks={yAxisConfig.ticks}
-              tick={{ fontSize: 12 }}
-              tickLine={{ stroke: '#adb5bd' }}
-              stroke="#adb5bd"
+              tick={{ fontSize: 12, fill: '#495057' }}
+              tickLine={{ stroke: '#6c757d' }}
+              stroke="#6c757d"
               label={{
                 value: trendData.unit,
                 angle: -90,
                 position: 'insideLeft',
-                style: { fontSize: 12 },
+                style: { fontSize: 12, fill: '#495057' },
               }}
               allowDataOverflow={false}
             />
@@ -398,8 +399,8 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
                 <ReferenceArea
                   y1={referenceRange.min}
                   y2={referenceRange.max}
-                  fill="#40c057"
-                  fillOpacity={0.1}
+                  fill="#2f9e44"
+                  fillOpacity={0.12}
                   label=""
                 />
               )}
@@ -408,13 +409,15 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
             {referenceRange && referenceRange.min !== null && (
               <ReferenceLine
                 y={referenceRange.min}
-                stroke="#40c057"
-                strokeDasharray="3 3"
+                stroke="#2f9e44"
+                strokeWidth={2}
+                strokeDasharray="5 3"
                 label={{
                   value: 'Min',
                   position: 'right',
-                  fontSize: 10,
-                  fill: '#40c057',
+                  fontSize: 11,
+                  fill: '#2f9e44',
+                  fontWeight: 600,
                 }}
               />
             )}
@@ -422,13 +425,15 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
             {referenceRange && referenceRange.max !== null && (
               <ReferenceLine
                 y={referenceRange.max}
-                stroke="#40c057"
-                strokeDasharray="3 3"
+                stroke="#2f9e44"
+                strokeWidth={2}
+                strokeDasharray="5 3"
                 label={{
                   value: 'Max',
                   position: 'right',
-                  fontSize: 10,
-                  fill: '#40c057',
+                  fontSize: 11,
+                  fill: '#2f9e44',
+                  fontWeight: 600,
                 }}
               />
             )}
@@ -437,8 +442,8 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
             <Line
               type="monotone"
               dataKey="value"
-              stroke="#228be6"
-              strokeWidth={2}
+              stroke="#1971c2"
+              strokeWidth={3}
               dot={<CustomDot />}
               name={trendData.test_name}
               connectNulls
@@ -449,16 +454,16 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
 
       {/* Status Legend */}
       <Group gap="sm" justify="center">
-        <Badge size="sm" variant="light" color="green">
+        <Badge size="sm" variant="filled" color="green">
           {t('labresults:stats.normal')}
         </Badge>
-        <Badge size="sm" variant="light" color="orange">
+        <Badge size="sm" variant="filled" color="orange">
           {t('labresults:trendChart.highLow')}
         </Badge>
-        <Badge size="sm" variant="light" color="red">
+        <Badge size="sm" variant="filled" color="red">
           {t('labresults:stats.critical')}
         </Badge>
-        <Badge size="sm" variant="light" color="yellow">
+        <Badge size="sm" variant="filled" color="yellow">
           {t('labresults:stats.abnormal')}
         </Badge>
       </Group>

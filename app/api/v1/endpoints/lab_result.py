@@ -135,6 +135,11 @@ def get_lab_results(
             "completed_date": result.completed_date,
             "notes": result.notes,
             "tags": result.tags or [],
+            "value": result.value,
+            "unit": result.unit,
+            "ref_range_min": result.ref_range_min,
+            "ref_range_max": result.ref_range_max,
+            "ref_range_text": result.ref_range_text,
             "created_at": result.created_at,
             "updated_at": result.updated_at,
             "practitioner_name": (
@@ -203,6 +208,11 @@ def get_lab_result(
         "completed_date": db_lab_result.completed_date,
         "notes": db_lab_result.notes,
         "tags": db_lab_result.tags or [],
+        "value": db_lab_result.value,
+        "unit": db_lab_result.unit,
+        "ref_range_min": db_lab_result.ref_range_min,
+        "ref_range_max": db_lab_result.ref_range_max,
+        "ref_range_text": db_lab_result.ref_range_text,
         "created_at": db_lab_result.created_at,
         "updated_at": db_lab_result.updated_at,
         "practitioner_name": (

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -34,6 +34,8 @@ import LabResultViewModal from '../../components/medical/labresults/LabResultVie
 import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
 import LabResultQuickImportModal from '../../components/medical/labresults/LabResultQuickImportModal';
 import TestComponentCatalog from '../../components/medical/labresults/TestComponentCatalog';
+import LabResultStackCard from '../../components/medical/labresults/LabResultStackCard';
+import LabResultStackPanel from '../../components/medical/labresults/LabResultStackPanel';
 import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { sanitizeComponentForApi } from '../../utils/labTestComponentUtils';
@@ -128,7 +130,18 @@ const LabResults = () => {
         completed_date: '',
         notes: '',
         practitioner_id: '',
+        value: null,
+        unit: null,
+        ref_range_min: null,
+        ref_range_max: null,
+        ref_range_text: null,
       });
+
+      // Re-open the stack panel if the edit was triggered from within it
+      if (returningToStackRef.current) {
+        returningToStackRef.current = false;
+        setStackPanelOpen(true);
+      }
 
       // Only refresh if we created a new lab result during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
@@ -250,12 +263,75 @@ const LabResults = () => {
   const filteredLabResults = dataManagement.data;
   const paginatedLabResults = paginateData(filteredLabResults);
 
+  // Stack view state
+  const [stackPanelOpen, setStackPanelOpen] = useState(false);
+  const [selectedGroupKey, setSelectedGroupKey] = useState(null);
+  // Set to true before triggering view/edit from the stack panel so close handlers re-open it
+  const returningToStackRef = useRef(false);
+
+  const groupedLabResults = useMemo(() => {
+    const getGroupKey = r => {
+      const code = (r.test_code || '').trim().toUpperCase();
+      return code ? `code:${code}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
+    };
+    const map = new Map();
+    for (const r of filteredLabResults) {
+      const key = getGroupKey(r);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(r);
+    }
+    return [...map.values()].map(results => {
+      const sorted = [...results].sort((a, b) => {
+        const da = a.completed_date || a.ordered_date || a.created_at || '';
+        const db = b.completed_date || b.ordered_date || b.created_at || '';
+        return db.localeCompare(da);
+      });
+      return {
+        key: getGroupKey(sorted[0]),
+        test_name: sorted[0].test_name,
+        results: sorted,
+        count: sorted.length,
+        latest_date: sorted[0]?.completed_date || sorted[0]?.ordered_date || null,
+        earliest_date:
+          sorted[sorted.length - 1]?.completed_date ||
+          sorted[sorted.length - 1]?.ordered_date ||
+          null,
+        latest_status: sorted[0]?.labs_result || null,
+      };
+    }).sort((a, b) => {
+      if (!a.latest_date && !b.latest_date) return 0;
+      if (!a.latest_date) return 1;
+      if (!b.latest_date) return -1;
+      return b.latest_date.localeCompare(a.latest_date);
+    });
+  }, [filteredLabResults]);
+
+  const currentSelectedGroup = useMemo(
+    () =>
+      selectedGroupKey
+        ? (groupedLabResults.find(g => g.key === selectedGroupKey) ?? null)
+        : null,
+    [groupedLabResults, selectedGroupKey]
+  );
+
+  // Auto-close the stack panel when the selected group no longer exists (e.g. all items deleted)
+  useEffect(() => {
+    if (stackPanelOpen && selectedGroupKey && !currentSelectedGroup) {
+      setStackPanelOpen(false);
+      setSelectedGroupKey(null);
+    }
+  }, [stackPanelOpen, selectedGroupKey, currentSelectedGroup]);
+
+  const paginatedGroups = paginateData(groupedLabResults);
+
   useEffect(() => {
     resetPage();
   }, [dataManagement.hasActiveFilters, resetPage]);
   useEffect(() => {
-    clampPage(filteredLabResults.length);
-  }, [filteredLabResults.length, clampPage]);
+    const count =
+      viewMode === 'stacked' ? groupedLabResults.length : filteredLabResults.length;
+    clampPage(count);
+  }, [filteredLabResults.length, groupedLabResults.length, viewMode, clampPage]);
 
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
@@ -285,6 +361,10 @@ const LabResults = () => {
       if (labResult) {
         refreshFileCount(labResult.id);
       }
+      if (returningToStackRef.current) {
+        returningToStackRef.current = false;
+        setStackPanelOpen(true);
+      }
     },
   });
 
@@ -305,6 +385,11 @@ const LabResults = () => {
     completed_date: '',
     notes: '',
     practitioner_id: '',
+    value: null,
+    unit: null,
+    ref_range_min: null,
+    ref_range_max: null,
+    ref_range_text: null,
   });
 
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
@@ -327,6 +412,11 @@ const LabResults = () => {
       notes: '',
       practitioner_id: '',
       tags: [],
+      value: null,
+      unit: null,
+      ref_range_min: null,
+      ref_range_max: null,
+      ref_range_text: null,
     });
     setShowModal(true);
   }, [resetSubmission]);
@@ -350,6 +440,11 @@ const LabResults = () => {
           ? String(labResult.practitioner_id)
           : '',
         tags: labResult.tags || [],
+        value: labResult.value ?? null,
+        unit: labResult.unit || null,
+        ref_range_min: labResult.ref_range_min ?? null,
+        ref_range_max: labResult.ref_range_max ?? null,
+        ref_range_text: labResult.ref_range_text || null,
       });
 
       setShowModal(true);
@@ -673,6 +768,52 @@ const LabResults = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
+  // Auto-populate unit and reference range from the most recent matching result.
+  // Only fires in create mode; only fills fields that are still empty.
+  useEffect(() => {
+    if (editingLabResult || !showModal) return;
+
+    const code = (formData.test_code || '').trim().toUpperCase();
+    const name = (formData.test_name || '').toLowerCase().trim();
+    if (!code && !name) return;
+
+    const getKey = r => {
+      const c = (r.test_code || '').trim().toUpperCase();
+      return c ? `code:${c}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
+    };
+    const formKey = code ? `code:${code}` : `name:${name}`;
+
+    const match = [...labResults]
+      .filter(r =>
+        getKey(r) === formKey &&
+        (r.unit || r.ref_range_min != null || r.ref_range_max != null ||
+          r.ref_range_text || r.test_category || r.practitioner_id)
+      )
+      .sort((a, b) => {
+        const da = a.completed_date || a.ordered_date || '';
+        const db = b.completed_date || b.ordered_date || '';
+        return db.localeCompare(da);
+      })[0];
+
+    if (!match) return;
+
+    setFormData(prev => {
+      const updates = {};
+      if (!prev.unit && match.unit) updates.unit = match.unit;
+      if (prev.ref_range_min == null && match.ref_range_min != null)
+        updates.ref_range_min = match.ref_range_min;
+      if (prev.ref_range_max == null && match.ref_range_max != null)
+        updates.ref_range_max = match.ref_range_max;
+      if (!prev.ref_range_text && match.ref_range_text)
+        updates.ref_range_text = match.ref_range_text;
+      if (!prev.test_category && match.test_category)
+        updates.test_category = match.test_category;
+      if (!prev.practitioner_id && match.practitioner_id)
+        updates.practitioner_id = String(match.practitioner_id);
+      return Object.keys(updates).length ? { ...prev, ...updates } : prev;
+    });
+  }, [formData.test_name, formData.test_code, editingLabResult, showModal, labResults]);
+
   const handleCloseModal = useCallback(() => {
     // Prevent closing during upload
     if (isBlocking) {
@@ -682,6 +823,10 @@ const LabResults = () => {
     resetSubmission(); // Reset submission state
     setShowModal(false);
     setEditingLabResult(null);
+    if (returningToStackRef.current) {
+      returningToStackRef.current = false;
+      setStackPanelOpen(true);
+    }
     setDocumentManagerMethods(null); // Reset document manager methods
     setTestComponentMethods(null); // Reset test component methods
     setPendingRelationshipsMethods(null); // Reset pending relationships
@@ -697,6 +842,11 @@ const LabResults = () => {
       completed_date: '',
       notes: '',
       practitioner_id: '',
+      value: null,
+      unit: null,
+      ref_range_min: null,
+      ref_range_max: null,
+      ref_range_text: null,
     });
   }, [isBlocking, resetSubmission]);
 
@@ -726,6 +876,24 @@ const LabResults = () => {
               {t('labresults:addFirst', 'Add Your First Lab Result')}
             </Button>
           }
+        />
+      );
+    }
+
+    if (viewMode === 'stacked') {
+      return (
+        <AnimatedCardGrid
+          items={paginatedGroups}
+          columns={{ base: 12, sm: 6, lg: 4 }}
+          renderCard={group => (
+            <LabResultStackCard
+              group={group}
+              onDrillDown={g => {
+                setSelectedGroupKey(g.key);
+                setStackPanelOpen(true);
+              }}
+            />
+          )}
         />
       );
     }
@@ -892,7 +1060,7 @@ const LabResults = () => {
             ]}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
-            viewModes={['cards', 'table', 'components']}
+            viewModes={['cards', 'table', 'stacked', 'components']}
             viewToggleSize="sm"
             mb={0}
           />
@@ -906,12 +1074,23 @@ const LabResults = () => {
           )}
 
           {renderViewContent()}
-          {filteredLabResults.length > 0 && viewMode !== 'components' && (
+          {viewMode !== 'components' &&
+            (viewMode === 'stacked'
+              ? groupedLabResults.length > 0
+              : filteredLabResults.length > 0) && (
             <PaginationControls
               page={page}
-              totalPages={totalPages(filteredLabResults.length)}
+              totalPages={totalPages(
+                viewMode === 'stacked'
+                  ? groupedLabResults.length
+                  : filteredLabResults.length
+              )}
               pageSize={pageSize}
-              totalRecords={filteredLabResults.length}
+              totalRecords={
+                viewMode === 'stacked'
+                  ? groupedLabResults.length
+                  : filteredLabResults.length
+              }
               onPageChange={setPage}
               onPageSizeChange={handlePageSizeChange}
               pageSizeOptions={PAGE_SIZE_OPTIONS}
@@ -919,6 +1098,26 @@ const LabResults = () => {
           )}
         </Stack>
       </Container>
+
+      {/* Stack drill-down panel */}
+      {currentPatient?.id && (
+        <LabResultStackPanel
+          opened={stackPanelOpen}
+          onClose={() => setStackPanelOpen(false)}
+          group={currentSelectedGroup}
+          patientId={currentPatient.id}
+          onViewResult={result => {
+            returningToStackRef.current = true;
+            handleViewLabResult(result);
+          }}
+          onEditResult={result => {
+            returningToStackRef.current = true;
+            handleEditLabResult(result);
+          }}
+          onDeleteResult={result => handleDeleteLabResult(result.id)}
+          disableActions={isViewOnly}
+        />
+      )}
 
       {/* Create/Edit Form Modal */}
       {showModal && (

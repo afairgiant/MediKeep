@@ -17,6 +17,11 @@ const MODE_CONFIG = {
     labelKey: 'viewToggle.components',
     fallback: 'Components',
   },
+  stacked: {
+    icon: '\uD83D\uDDC2\uFE0F',
+    labelKey: 'viewToggle.stacked',
+    fallback: 'Stacked',
+  },
 };
 
 const ViewToggle = ({
