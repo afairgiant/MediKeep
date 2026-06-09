@@ -11,6 +11,7 @@ from app.crud.lab_test_component import lab_test_component as lab_test_component
 from app.crud.lab_result import lab_result as lab_result_crud
 from app.crud.patient import patient as patient_crud
 from app.models.models import LabTestComponent
+from tests.utils.user import create_random_user
 from app.schemas.lab_test_component import (
     LabTestComponentCreate,
     LabTestComponentUpdate,
@@ -920,9 +921,6 @@ class TestGetAllForPatient:
     @pytest.fixture
     def two_patients(self, db_session: Session, test_user):
         """Create two patients (under separate users), each with a lab result and a component."""
-        from app.crud.patient import patient as patient_crud
-        from tests.utils.user import create_random_user
-
         # test_user owns p1; a fresh random user owns p2 to satisfy one-patient-per-user constraint
         other_user_data = create_random_user(db_session)
 
@@ -994,9 +992,7 @@ class TestGetAllForPatient:
         )
         assert len(results) >= 1
         component = next(r for r in results if r.id == two_patients["c1"].id)
-        # Assert the relationship is already in the instance dict (joinedload populates it);
-        # checking __dict__ directly avoids triggering a lazy load.
-        assert "lab_result" in sa_inspect(component).dict, (
+        assert "lab_result" not in sa_inspect(component).unloaded, (
             "lab_result relationship was not eagerly loaded"
         )
         assert component.lab_result is not None
