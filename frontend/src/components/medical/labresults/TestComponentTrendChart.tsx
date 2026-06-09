@@ -41,7 +41,8 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
   const chartData = useMemo(() => {
     return trendData.data_points
       .map(point => {
-        const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const dateStr = point.recorded_date || (point.created_at ? point.created_at.split('T')[0] : null);
+        if (!dateStr) return null;
         const dateOnly = dateStr.split('T')[0];
         const qv = point.qualitative_value || 'unknown';
         // Map to binary: positive/detected = 1, negative/undetected = 0
@@ -57,6 +58,7 @@ const QualitativeChart: React.FC<{ trendData: TrendResponse }> = ({
           id: point.id,
         };
       })
+      .filter((p): p is NonNullable<typeof p> => p !== null)
       .reverse();
   }, [trendData.data_points]);
 
@@ -175,8 +177,8 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
   const chartData = useMemo(() => {
     return trendData.data_points
       .map(point => {
-        // Use recorded_date if available, otherwise use created_at date
-        const dateStr = point.recorded_date || point.created_at.split('T')[0];
+        const dateStr = point.recorded_date || (point.created_at ? point.created_at.split('T')[0] : null);
+        if (!dateStr) return null;
         const dateOnly = dateStr.split('T')[0];
 
         return {
@@ -190,6 +192,7 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
           id: point.id,
         };
       })
+      .filter((p): p is NonNullable<typeof p> => p !== null)
       .reverse(); // Reverse to show oldest first (left to right)
   }, [trendData.data_points]);
 

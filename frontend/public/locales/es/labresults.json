@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Editar resultado de laboratorio",
     "labels": {
-      "testType": "Tipo de prueba"
+      "testType": "Tipo de prueba",
+        "referenceRange": "Rango de referencia"
     },
     "sections": {
       "associatedFiles": "Documentos asociados",

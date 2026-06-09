@@ -55,7 +55,7 @@ function buildTrendResponse(group: LabResultGroup): TrendResponse | null {
         ? r.completed_date + 'T00:00:00'
         : r.ordered_date
           ? r.ordered_date + 'T00:00:00'
-          : new Date().toISOString(),
+          : null,
       lab_result: {
         id: r.id,
         test_name: r.test_name,

@@ -287,7 +287,9 @@ class CRUDLabTestComponent(
             .join(self.model.lab_result)
             .filter(LabResult.patient_id == patient_id)
             .options(joinedload(self.model.lab_result))
-            .order_by(self.model.created_at.desc())
+            .order_by(
+                func.coalesce(LabResult.completed_date, func.date(self.model.created_at)).desc()
+            )
             .limit(limit)
             .all()
         )

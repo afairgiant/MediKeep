@@ -123,9 +123,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
 
         const data = response.data || [];
         setComponents(data);
-        if (showLoading) {
-          onHasComponents?.(data.length > 0);
-        }
+        onHasComponents?.(data.length > 0);
       } catch (error) {
         handleError(error as Error, 'load_components');
       } finally {

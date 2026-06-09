@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Labresultaat bewerken",
     "labels": {
-      "testType": "Testtype"
+      "testType": "Testtype",
+        "referenceRange": "Referentiebereik"
     },
     "sections": {
       "associatedFiles": "Gekoppelde documenten",

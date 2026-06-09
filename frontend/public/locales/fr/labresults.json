@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Editer le résultat d'analyse",
     "labels": {
-      "testType": "Type d'analyse"
+      "testType": "Type d'analyse",
+        "referenceRange": "Plage de référence"
     },
     "sections": {
       "associatedFiles": "Documents associés",

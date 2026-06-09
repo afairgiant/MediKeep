@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Редактировать результат исследования",
     "labels": {
-      "testType": "Тип исследования"
+      "testType": "Тип исследования",
+        "referenceRange": "Референсный диапазон"
     },
     "sections": {
       "associatedFiles": "Связанные документы",

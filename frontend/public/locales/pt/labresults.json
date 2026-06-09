@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Editar Resultado Laboratorial",
     "labels": {
-      "testType": "Tipo de Exame"
+      "testType": "Tipo de Exame",
+        "referenceRange": "Intervalo de Referência"
     },
     "sections": {
       "associatedFiles": "Documentos Associados",

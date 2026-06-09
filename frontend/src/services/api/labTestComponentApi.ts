@@ -100,7 +100,7 @@ export interface TrendDataPoint {
   ref_range_max?: number | null;
   ref_range_text?: string | null;
   recorded_date?: string | null;
-  created_at: string;
+  created_at: string | null;
   lab_result: {
     id: number;
     test_name: string;

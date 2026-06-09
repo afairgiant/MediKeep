@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Edytuj Wynik Laboratoryjny",
     "labels": {
-      "testType": "Typ Badania"
+      "testType": "Typ Badania",
+        "referenceRange": "Zakres Referencyjny"
     },
     "sections": {
       "associatedFiles": "Powiązane Dokumenty",

@@ -89,6 +89,12 @@ const LabResultStackCard: React.FC<LabResultStackCardProps> = ({
       padding="md"
       style={{ cursor: 'pointer' }}
       onClick={() => onDrillDown(group)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') { onDrillDown(group); }
+        if (e.key === ' ') { e.preventDefault(); onDrillDown(group); }
+      }}
       data-testid="stack-card"
     >
       <Stack gap="xs">

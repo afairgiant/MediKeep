@@ -272,16 +272,21 @@ const LabResults = () => {
   const [patientComponents, setPatientComponents] = useState([]);
   const [patientComponentsLoading, setPatientComponentsLoading] = useState(false);
 
-  useEffect(() => {
+  const refreshPatientComponents = useCallback((signal) => {
     if (!currentPatient?.id) return;
-    const controller = new AbortController();
     setPatientComponentsLoading(true);
-    labTestComponentApi.getAllForPatient(currentPatient.id, controller.signal)
+    labTestComponentApi.getAllForPatient(currentPatient.id, signal)
       .then(components => { setPatientComponents(components); })
       .catch(err => { if (err?.name !== 'AbortError') setPatientComponents([]); })
       .finally(() => { setPatientComponentsLoading(false); });
-    return () => { controller.abort(); };
   }, [currentPatient?.id]);
+
+  useEffect(() => {
+    if (!currentPatient?.id) return;
+    const controller = new AbortController();
+    refreshPatientComponents(controller.signal);
+    return () => { controller.abort(); };
+  }, [currentPatient?.id, refreshPatientComponents]);
 
   // IDs of lab results that are "PDF masters" (have at least one test component)
   const parentIdsWithComponents = useMemo(
@@ -435,6 +440,13 @@ const LabResults = () => {
       setSelectedGroupKey(null);
     }
   }, [stackPanelOpen, selectedGroupKey, currentSelectedGroup]);
+
+  // Close the stack panel whenever the user leaves stacked view
+  useEffect(() => {
+    if (viewMode !== 'stacked') {
+      setStackPanelOpen(false);
+    }
+  }, [viewMode]);
 
   // Combined list for stacked view: stack groups + individual PDF-master results (sorted newest-first).
   const stackedViewItems = useMemo(() => {
@@ -641,8 +653,9 @@ const LabResults = () => {
     async labResultId => {
       setShowQuickImportModal(false);
 
-      // Refresh lab results list
+      // Refresh lab results list and patient components (new PDF import creates components)
       await refreshData();
+      refreshPatientComponents();
 
       // Fetch the specific lab result directly to avoid race condition with stale state
       try {
@@ -678,6 +691,7 @@ const LabResults = () => {
     },
     [
       refreshData,
+      refreshPatientComponents,
       navigate,
       location.pathname,
       location.search,

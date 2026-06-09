@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "编辑检验结果",
     "labels": {
-      "testType": "检验类型"
+      "testType": "检验类型",
+        "referenceRange": "参考范围"
     },
     "sections": {
       "associatedFiles": "关联文档",

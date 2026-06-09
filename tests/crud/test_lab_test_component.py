@@ -4,6 +4,7 @@ Tests for LabTestComponent CRUD operations.
 
 import pytest
 from datetime import date
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.orm import Session
 
 from app.crud.lab_test_component import lab_test_component as lab_test_component_crud
@@ -987,14 +988,16 @@ class TestGetAllForPatient:
         assert len(limited) == 3
 
     def test_parent_lab_result_is_eagerly_loaded(self, db_session: Session, two_patients):
-        """Each component must have its parent lab_result accessible without a new query."""
+        """Each component must have its parent lab_result populated by the query (joinedload)."""
         results = lab_test_component_crud.get_all_for_patient(
             db_session, patient_id=two_patients["p1"].id
         )
         assert len(results) >= 1
-        # Expire all objects to force lazy-load detection; then access parent — should not raise
-        db_session.expire_all()
         component = next(r for r in results if r.id == two_patients["c1"].id)
-        parent = component.lab_result
-        assert parent is not None
-        assert parent.id == two_patients["lr1"].id
+        # Assert the relationship is already in the instance dict (joinedload populates it);
+        # checking __dict__ directly avoids triggering a lazy load.
+        assert "lab_result" in sa_inspect(component).dict, (
+            "lab_result relationship was not eagerly loaded"
+        )
+        assert component.lab_result is not None
+        assert component.lab_result.id == two_patients["lr1"].id

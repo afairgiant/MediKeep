@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "แก้ไขผลแลป",
     "labels": {
-      "testType": "ประเภทการตรวจ"
+      "testType": "ประเภทการตรวจ",
+        "referenceRange": "ช่วงค่าปกติ"
     },
     "sections": {
       "associatedFiles": "เอกสารที่เกี่ยวข้อง",

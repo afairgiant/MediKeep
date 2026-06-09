@@ -190,8 +190,8 @@ class LabResultBase(TaggedEntityMixin):
         if v is not None:
             if not math.isfinite(v):
                 raise ValueError("Value must be a finite number")
-            if abs(v) > 1_000_000:
-                raise ValueError("Value is out of reasonable range")
+            if abs(v) > 1e15:
+                raise ValueError("Value is out of reasonable range (must be ≤ 1e15)")
         return v
 
     @field_validator("ref_range_min")
@@ -419,8 +419,8 @@ class LabResultUpdate(BaseModel):
         if v is not None:
             if not math.isfinite(v):
                 raise ValueError("Value must be a finite number")
-            if abs(v) > 1_000_000:
-                raise ValueError("Value is out of reasonable range")
+            if abs(v) > 1e15:
+                raise ValueError("Value is out of reasonable range (must be ≤ 1e15)")
         return v
 
     @field_validator("ref_range_min")
