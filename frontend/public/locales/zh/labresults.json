@@ -470,7 +470,8 @@
     "latestResult": "最新",
     "trendChart": "随时间变化的值",
     "noResults": "该组中没有结果",
-    "fromPanel": "来自面板"
+    "fromPanel": "来自面板",
+    "panel": "面板"
   },
   "numericResult": {
     "sectionLabel": "数值结果（可选）",

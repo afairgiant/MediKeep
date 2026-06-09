@@ -1,3 +1,4 @@
+import math
 from datetime import date, datetime
 from typing import List, Optional
 
@@ -187,7 +188,6 @@ class LabResultBase(TaggedEntityMixin):
     @classmethod
     def validate_value(cls, v):
         if v is not None:
-            import math
             if not math.isfinite(v):
                 raise ValueError("Value must be a finite number")
             if abs(v) > 1_000_000:
@@ -198,7 +198,6 @@ class LabResultBase(TaggedEntityMixin):
     @classmethod
     def validate_ref_range_min(cls, v):
         if v is not None:
-            import math
             if not math.isfinite(v):
                 raise ValueError("Reference range minimum must be a finite number")
         return v
@@ -207,7 +206,6 @@ class LabResultBase(TaggedEntityMixin):
     @classmethod
     def validate_ref_range_max(cls, v):
         if v is not None:
-            import math
             if not math.isfinite(v):
                 raise ValueError("Reference range maximum must be a finite number")
         return v
@@ -419,7 +417,6 @@ class LabResultUpdate(BaseModel):
     @classmethod
     def validate_value(cls, v):
         if v is not None:
-            import math
             if not math.isfinite(v):
                 raise ValueError("Value must be a finite number")
             if abs(v) > 1_000_000:
@@ -430,7 +427,6 @@ class LabResultUpdate(BaseModel):
     @classmethod
     def validate_ref_range_min(cls, v):
         if v is not None:
-            import math
             if not math.isfinite(v):
                 raise ValueError("Reference range minimum must be a finite number")
         return v
@@ -439,7 +435,6 @@ class LabResultUpdate(BaseModel):
     @classmethod
     def validate_ref_range_max(cls, v):
         if v is not None:
-            import math
             if not math.isfinite(v):
                 raise ValueError("Reference range maximum must be a finite number")
         return v

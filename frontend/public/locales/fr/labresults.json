@@ -470,7 +470,8 @@
     "latestResult": "Dernier",
     "trendChart": "Évolution dans le temps",
     "noResults": "Aucun résultat dans ce groupe",
-    "fromPanel": "Du panneau"
+    "fromPanel": "Du panneau",
+    "panel": "Panneau"
   },
   "numericResult": {
     "sectionLabel": "Résultat numérique (optionnel)",

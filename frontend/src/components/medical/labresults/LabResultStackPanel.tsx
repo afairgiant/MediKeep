@@ -32,7 +32,6 @@ interface LabResultStackPanelProps {
   opened: boolean;
   onClose: () => void;
   group: LabResultGroup | null;
-  patientId: number;
   onViewResult: (_result: LabResultSummary) => void;
   onEditResult?: (_result: LabResultSummary) => void;
   onDeleteResult?: (_result: LabResultSummary) => void;
@@ -110,7 +109,6 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
   opened,
   onClose,
   group,
-  patientId,
   onViewResult,
   onEditResult,
   onDeleteResult,
@@ -256,48 +254,46 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                             </Text>
                           )}
                         </Stack>
-                        {!disableActions && (
-                          <Group gap={4} wrap="nowrap">
-                            <Tooltip label={t('common:actions.view', 'View')} withArrow>
-                              <ActionIcon
-                                variant="subtle"
-                                size="sm"
-                                onClick={() => handleViewClick(result)}
-                                data-testid={`view-result-${result.source === 'component' ? `comp-${result.id}` : result.id}`}
-                                aria-label={t('common:actions.view', 'View')}
-                              >
-                                <IconEye size={14} />
-                              </ActionIcon>
-                            </Tooltip>
-                            {result.source !== 'component' && (
-                              <>
-                                <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
-                                  <ActionIcon
-                                    variant="subtle"
-                                    size="sm"
-                                    onClick={() => handleEditClick(result)}
-                                    data-testid={`edit-result-${result.id}`}
-                                    aria-label={t('shared:labels.edit', 'Edit')}
-                                  >
-                                    <IconPencil size={14} />
-                                  </ActionIcon>
-                                </Tooltip>
-                                <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
-                                  <ActionIcon
-                                    variant="subtle"
-                                    color="red"
-                                    size="sm"
-                                    onClick={() => handleDeleteClick(result)}
-                                    data-testid={`delete-result-${result.id}`}
-                                    aria-label={t('common:actions.delete', 'Delete')}
-                                  >
-                                    <IconTrash size={14} />
-                                  </ActionIcon>
-                                </Tooltip>
-                              </>
-                            )}
-                          </Group>
-                        )}
+                        <Group gap={4} wrap="nowrap">
+                          <Tooltip label={t('common:actions.view', 'View')} withArrow>
+                            <ActionIcon
+                              variant="subtle"
+                              size="sm"
+                              onClick={() => handleViewClick(result)}
+                              data-testid={`view-result-${result.source === 'component' ? `comp-${result.id}` : result.id}`}
+                              aria-label={t('common:actions.view', 'View')}
+                            >
+                              <IconEye size={14} />
+                            </ActionIcon>
+                          </Tooltip>
+                          {!disableActions && result.source !== 'component' && (
+                            <>
+                              <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
+                                <ActionIcon
+                                  variant="subtle"
+                                  size="sm"
+                                  onClick={() => handleEditClick(result)}
+                                  data-testid={`edit-result-${result.id}`}
+                                  aria-label={t('shared:labels.edit', 'Edit')}
+                                >
+                                  <IconPencil size={14} />
+                                </ActionIcon>
+                              </Tooltip>
+                              <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
+                                <ActionIcon
+                                  variant="subtle"
+                                  color="red"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(result)}
+                                  data-testid={`delete-result-${result.id}`}
+                                  aria-label={t('common:actions.delete', 'Delete')}
+                                >
+                                  <IconTrash size={14} />
+                                </ActionIcon>
+                              </Tooltip>
+                            </>
+                          )}
+                        </Group>
                       </Group>
                     </Paper>
                     {index < group.results.length - 1 && <Divider />}

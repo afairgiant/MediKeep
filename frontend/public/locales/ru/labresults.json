@@ -470,7 +470,8 @@
     "latestResult": "Последний",
     "trendChart": "Значение с течением времени",
     "noResults": "Нет результатов в этой группе",
-    "fromPanel": "Из панели"
+    "fromPanel": "Из панели",
+    "panel": "Панель"
   },
   "numericResult": {
     "sectionLabel": "Числовой результат (необязательно)",

@@ -38,7 +38,6 @@ import LabResultStackCard from '../../components/medical/labresults/LabResultSta
 import LabResultStackPanel from '../../components/medical/labresults/LabResultStackPanel';
 import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
-import { sanitizeComponentForApi } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
 import { IconFileUpload } from '@tabler/icons-react';
@@ -271,16 +270,17 @@ const LabResults = () => {
 
   // All test components for the current patient, loaded when entering stacked view
   const [patientComponents, setPatientComponents] = useState([]);
+  const [patientComponentsLoading, setPatientComponentsLoading] = useState(false);
 
   useEffect(() => {
     if (!currentPatient?.id) return;
-    let cancelled = false;
-    labTestComponentApi.getAllForPatient(currentPatient.id).then(components => {
-      if (!cancelled) setPatientComponents(components);
-    }).catch(() => {
-      if (!cancelled) setPatientComponents([]);
-    });
-    return () => { cancelled = true; };
+    const controller = new AbortController();
+    setPatientComponentsLoading(true);
+    labTestComponentApi.getAllForPatient(currentPatient.id, controller.signal)
+      .then(components => { setPatientComponents(components); })
+      .catch(err => { if (err?.name !== 'AbortError') setPatientComponents([]); })
+      .finally(() => { setPatientComponentsLoading(false); });
+    return () => { controller.abort(); };
   }, [currentPatient?.id]);
 
   // IDs of lab results that are "PDF masters" (have at least one test component)
@@ -293,6 +293,7 @@ const LabResults = () => {
     const code = (r.test_code || '').trim().toUpperCase();
     return code ? `code:${code}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
   };
+
 
   const groupedLabResults = useMemo(() => {
     const map = new Map();
@@ -340,25 +341,28 @@ const LabResults = () => {
   // Enrich the selected group with matching test components from PDF masters
   const enrichedSelectedGroup = useMemo(() => {
     if (!currentSelectedGroup) return null;
-    // Match independently on name and code so asymmetric presence of test_code doesn't block matches
+    const groupKey = currentSelectedGroup.key;
     const groupName = currentSelectedGroup.test_name.toLowerCase().trim();
-    const groupCode = (currentSelectedGroup.results[0]?.test_code || '').trim().toUpperCase();
+    const existingGroupKeys = new Set(groupedLabResults.map(g => g.key));
     const matchingComponents = patientComponents.filter(comp => {
       const compCode = (comp.test_code || '').trim().toUpperCase();
-      // Check both canonical_test_name and test_name independently — canonical may differ from test_name
+      // If the component has a code, first try an exact code-group match.
+      // If a different code-keyed group exists for this code, don't steal it (avoids double-counting).
+      // If no code-keyed group exists at all, fall through to name matching.
+      if (compCode) {
+        const compCodeKey = `code:${compCode}`;
+        if (compCodeKey === groupKey) return true;
+        if (existingGroupKeys.has(compCodeKey)) return false;
+      }
       const compCanonical = (comp.canonical_test_name || '').toLowerCase().trim();
       const compTestName = (comp.test_name || '').toLowerCase().trim();
-      const nameMatch = (!!compCanonical && compCanonical === groupName) || compTestName === groupName;
-      const codeMatch = !!groupCode && !!compCode && compCode === groupCode;
-      return nameMatch || codeMatch;
+      return (!!compCanonical && compCanonical === groupName) || compTestName === groupName;
     });
-    // PDF masters whose test_name matches the group are excluded from group building but should
+    // PDF masters whose key matches the group are excluded from group building but should
     // still appear as regular results in the drill-down (they represent real measurements)
     const matchingPDFMasters = filteredLabResults.filter(r => {
       if (!parentIdsWithComponents.has(r.id)) return false;
-      const rCode = (r.test_code || '').trim().toUpperCase();
-      const rName = (r.test_name || '').toLowerCase().trim();
-      return rName === groupName || (!!groupCode && !!rCode && rCode === groupCode);
+      return getGroupKey(r) === groupKey;
     });
     if (matchingComponents.length === 0 && matchingPDFMasters.length === 0) return currentSelectedGroup;
     const componentResults = matchingComponents.map(comp => ({
@@ -391,32 +395,35 @@ const LabResults = () => {
       return db.localeCompare(da);
     });
     return { ...currentSelectedGroup, results: allResults, count: allResults.length };
-  }, [currentSelectedGroup, patientComponents, filteredLabResults, parentIdsWithComponents]);
+  }, [currentSelectedGroup, patientComponents, filteredLabResults, parentIdsWithComponents, groupedLabResults]);
 
   // Total display count per group key: base results + matching components + matching PDF masters.
-  // Used so the count badge on each stack card reflects enriched totals, not just standalone counts.
+  // Uses the same predicate as enrichedSelectedGroup so badge counts always match drill-down counts.
   const displayCountByGroupKey = useMemo(() => {
     if (patientComponents.length === 0 && parentIdsWithComponents.size === 0) return {};
+    const existingGroupKeys = new Set(groupedLabResults.map(g => g.key));
     const map = {};
     for (const group of groupedLabResults) {
+      const groupKey = group.key;
       const groupName = group.test_name.toLowerCase().trim();
-      const groupCode = (group.results[0]?.test_code || '').trim().toUpperCase();
       let extra = 0;
       for (const comp of patientComponents) {
         const compCode = (comp.test_code || '').trim().toUpperCase();
+        if (compCode) {
+          if (`code:${compCode}` === groupKey) { extra++; continue; }
+          if (existingGroupKeys.has(`code:${compCode}`)) continue;
+        }
         const compCanonical = (comp.canonical_test_name || '').toLowerCase().trim();
         const compTestName = (comp.test_name || '').toLowerCase().trim();
-        const nameMatch = (!!compCanonical && compCanonical === groupName) || compTestName === groupName;
-        const codeMatch = !!groupCode && !!compCode && compCode === groupCode;
-        if (nameMatch || codeMatch) extra++;
+        if ((!!compCanonical && compCanonical === groupName) || compTestName === groupName) {
+          extra++;
+        }
       }
       for (const r of filteredLabResults) {
         if (!parentIdsWithComponents.has(r.id)) continue;
-        const rCode = (r.test_code || '').trim().toUpperCase();
-        const rName = (r.test_name || '').toLowerCase().trim();
-        if (rName === groupName || (!!groupCode && !!rCode && rCode === groupCode)) extra++;
+        if (getGroupKey(r) === groupKey) extra++;
       }
-      if (extra > 0) map[group.key] = group.count + extra;
+      if (extra > 0) map[groupKey] = group.count + extra;
     }
     return map;
   }, [groupedLabResults, patientComponents, filteredLabResults, parentIdsWithComponents]);
@@ -460,14 +467,11 @@ const LabResults = () => {
     clampPage(count);
   }, [filteredLabResults.length, stackedViewItems.length, viewMode, clampPage]);
 
-  // Combined loading state
-  const loading = labResultsLoading || practitionersLoading;
+  // Combined loading state — include component fetch when in stacked view to avoid flash of ungrouped results
+  const loading = labResultsLoading || practitionersLoading || (viewMode === 'stacked' && patientComponentsLoading);
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-
-  // Test component inline entry state (create mode only)
-  const [testComponentMethods, setTestComponentMethods] = useState(null);
 
   // Pending relationships state (create mode only)
   const [pendingRelationshipsMethods, setPendingRelationshipsMethods] =
@@ -492,6 +496,7 @@ const LabResults = () => {
         returningToStackRef.current = false;
         setStackPanelOpen(true);
       }
+      setInitialViewTab('overview');
     },
   });
 
@@ -524,7 +529,6 @@ const LabResults = () => {
     resetSubmission(); // Reset submission state
     setEditingLabResult(null);
     setDocumentManagerMethods(null); // Reset document manager methods
-    setTestComponentMethods(null); // Reset test component methods
     setPendingRelationshipsMethods(null); // Reset pending relationships
     setFormData({
       test_name: '',
@@ -748,47 +752,6 @@ const LabResults = () => {
         completeFormSubmission(success, resultId);
 
         if (success && resultId) {
-          // Submit inline test components (create mode only)
-          if (
-            !editingLabResult &&
-            testComponentMethods?.hasPendingComponents?.()
-          ) {
-            try {
-              const pendingComponents =
-                testComponentMethods.getPendingComponents();
-              const componentsToCreate = pendingComponents.map(c =>
-                sanitizeComponentForApi(c, resultId)
-              );
-              await labTestComponentApi.createBulkForLabResult(
-                resultId,
-                componentsToCreate
-              );
-              logger.info('inline_test_components_created', {
-                message: 'Inline test components created with lab result',
-                labResultId: resultId,
-                componentCount: componentsToCreate.length,
-                component: 'LabResults',
-              });
-            } catch (componentError) {
-              logger.error('inline_test_components_error', {
-                message: 'Failed to create inline test components',
-                labResultId: resultId,
-                error: componentError?.message || String(componentError),
-                stack: componentError?.stack,
-                component: 'LabResults',
-              });
-              notifications.show({
-                title: t('common:warning', 'Warning'),
-                message: t(
-                  'medical:labResults.form.componentCreationWarning',
-                  'Lab result saved but test components could not be added. You can add them from the view page.'
-                ),
-                color: 'yellow',
-                autoClose: 8000,
-              });
-            }
-          }
-
           // Submit pending relationships (create mode only)
           if (
             !editingLabResult &&
@@ -901,7 +864,6 @@ const LabResults = () => {
       updateItem,
       createItem,
       documentManagerMethods,
-      testComponentMethods,
       pendingRelationshipsMethods,
       startSubmission,
       setError,
@@ -977,7 +939,6 @@ const LabResults = () => {
       setStackPanelOpen(true);
     }
     setDocumentManagerMethods(null); // Reset document manager methods
-    setTestComponentMethods(null); // Reset test component methods
     setPendingRelationshipsMethods(null); // Reset pending relationships
     setFormData({
       test_name: '',
@@ -1251,19 +1212,19 @@ const LabResults = () => {
           {renderViewContent()}
           {viewMode !== 'components' &&
             (viewMode === 'stacked'
-              ? groupedLabResults.length > 0
+              ? stackedViewItems.length > 0
               : filteredLabResults.length > 0) && (
             <PaginationControls
               page={page}
               totalPages={totalPages(
                 viewMode === 'stacked'
-                  ? groupedLabResults.length
+                  ? stackedViewItems.length
                   : filteredLabResults.length
               )}
               pageSize={pageSize}
               totalRecords={
                 viewMode === 'stacked'
-                  ? groupedLabResults.length
+                  ? stackedViewItems.length
                   : filteredLabResults.length
               }
               onPageChange={setPage}
@@ -1280,7 +1241,6 @@ const LabResults = () => {
           opened={stackPanelOpen}
           onClose={() => setStackPanelOpen(false)}
           group={enrichedSelectedGroup}
-          patientId={currentPatient.id}
           onViewResult={result => {
             returningToStackRef.current = true;
             setInitialViewTab('overview');
@@ -1319,7 +1279,6 @@ const LabResults = () => {
           fetchLabResultEncounters={fetchLabResultEncounters}
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onTestComponentRef={setTestComponentMethods}
           onPendingRelationshipsRef={setPendingRelationshipsMethods}
           isGroupedResult={!!(editingLabResult && parentIdsWithComponents.has(editingLabResult.id))}
           onFileUploadComplete={success => {

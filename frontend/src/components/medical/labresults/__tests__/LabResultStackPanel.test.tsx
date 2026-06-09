@@ -151,7 +151,6 @@ describe('LabResultStackPanel', () => {
         opened={false}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -164,7 +163,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -177,7 +175,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -191,7 +188,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -205,7 +201,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -218,7 +213,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -233,7 +227,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={onClose}
         group={group}
-        patientId={1}
         onViewResult={onViewResult}
       />
     );
@@ -250,7 +243,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={onClose}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
         onEditResult={onEditResult}
       />
@@ -268,7 +260,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={onClose}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
         onDeleteResult={onDeleteResult}
       />
@@ -278,18 +269,17 @@ describe('LabResultStackPanel', () => {
     expect(onDeleteResult).toHaveBeenCalledWith(group.results[0]);
   });
 
-  it('hides all action buttons when disableActions is true', () => {
+  it('shows View but hides Edit and Delete when disableActions is true', () => {
     render(
       <LabResultStackPanel
         opened={true}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
         disableActions={true}
       />
     );
-    expect(screen.queryByTestId('view-result-10')).not.toBeInTheDocument();
+    expect(screen.getByTestId('view-result-10')).toBeInTheDocument();
     expect(screen.queryByTestId('edit-result-10')).not.toBeInTheDocument();
     expect(screen.queryByTestId('delete-result-10')).not.toBeInTheDocument();
   });
@@ -300,7 +290,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={null}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -313,7 +302,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={group}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -326,7 +314,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={numericGroup}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -342,7 +329,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={numericGroup}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -356,7 +342,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={numericGroup}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -382,7 +367,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={textRangeGroup}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );
@@ -415,7 +399,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={mixedGroup}
-        patientId={1}
         onViewResult={vi.fn()}
         onEditResult={vi.fn()}
         onDeleteResult={vi.fn()}
@@ -460,7 +443,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={onClose}
         group={mixedGroup}
-        patientId={1}
         onViewResult={onViewResult}
         onViewComponent={onViewComponent}
       />
@@ -498,7 +480,6 @@ describe('LabResultStackPanel', () => {
         opened={true}
         onClose={vi.fn()}
         group={qualGroup}
-        patientId={1}
         onViewResult={vi.fn()}
       />
     );

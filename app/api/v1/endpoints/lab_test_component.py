@@ -509,6 +509,7 @@ def get_all_components_for_patient(
 ):
     """Get all test components for a patient with parent dates for stack view enrichment."""
 
+    results = []
     with handle_database_errors(request=request):
         deps.verify_patient_access(patient_id, db, current_user)
 
@@ -516,45 +517,44 @@ def get_all_components_for_patient(
             db, patient_id=patient_id, limit=limit
         )
 
-    log_data_access(
-        logger,
-        request,
-        current_user.id,
-        "read",
-        "LabTestComponent",
-        patient_id=patient_id,
-        count=len(components),
-    )
-
-    results = []
-    for comp in components:
-        parent = comp.lab_result
-        results.append(
-            LabTestComponentForStack(
-                id=comp.id,
-                lab_result_id=comp.lab_result_id,
-                test_name=comp.test_name,
-                abbreviation=comp.abbreviation,
-                test_code=comp.test_code,
-                value=comp.value,
-                unit=comp.unit,
-                ref_range_min=comp.ref_range_min,
-                ref_range_max=comp.ref_range_max,
-                ref_range_text=comp.ref_range_text,
-                status=comp.status,
-                category=comp.category,
-                display_order=comp.display_order,
-                canonical_test_name=comp.canonical_test_name,
-                notes=comp.notes,
-                result_type=comp.result_type,
-                qualitative_value=comp.qualitative_value,
-                created_at=comp.created_at,
-                updated_at=comp.updated_at,
-                completed_date=parent.completed_date if parent else None,
-                ordered_date=parent.ordered_date if parent else None,
-                facility=parent.facility if parent else None,
-            )
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "read",
+            "LabTestComponent",
+            patient_id=patient_id,
+            count=len(components),
         )
+
+        for comp in components:
+            parent = comp.lab_result
+            results.append(
+                LabTestComponentForStack(
+                    id=comp.id,
+                    lab_result_id=comp.lab_result_id,
+                    test_name=comp.test_name,
+                    abbreviation=comp.abbreviation,
+                    test_code=comp.test_code,
+                    value=comp.value,
+                    unit=comp.unit,
+                    ref_range_min=comp.ref_range_min,
+                    ref_range_max=comp.ref_range_max,
+                    ref_range_text=comp.ref_range_text,
+                    status=comp.status,
+                    category=comp.category,
+                    display_order=comp.display_order,
+                    canonical_test_name=comp.canonical_test_name,
+                    notes=comp.notes,
+                    result_type=comp.result_type,
+                    qualitative_value=comp.qualitative_value,
+                    created_at=comp.created_at,
+                    updated_at=comp.updated_at,
+                    completed_date=parent.completed_date if parent else None,
+                    ordered_date=parent.ordered_date if parent else None,
+                    facility=parent.facility if parent else None,
+                )
+            )
 
     return results
 

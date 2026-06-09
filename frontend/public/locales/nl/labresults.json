@@ -470,7 +470,8 @@
     "latestResult": "Laatste",
     "trendChart": "Waarde in de loop van de tijd",
     "noResults": "Geen resultaten in deze groep",
-    "fromPanel": "Uit het paneel"
+    "fromPanel": "Uit het paneel",
+    "panel": "Paneel"
   },
   "numericResult": {
     "sectionLabel": "Numeriek resultaat (optioneel)",

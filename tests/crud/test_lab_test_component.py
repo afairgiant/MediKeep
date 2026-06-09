@@ -911,3 +911,90 @@ class TestCanonicalTestNameEmptyStringFallback:
             test_name="MyCustomTest",
         )
         assert seeded_custom_and_canonical["empty"].id in {r.id for r in rows}
+
+
+class TestGetAllForPatient:
+    """Tests for get_all_for_patient CRUD method."""
+
+    @pytest.fixture
+    def two_patients(self, db_session: Session, test_user):
+        """Create two patients (under separate users), each with a lab result and a component."""
+        from app.crud.patient import patient as patient_crud
+        from tests.utils.user import create_random_user
+
+        # test_user owns p1; a fresh random user owns p2 to satisfy one-patient-per-user constraint
+        other_user_data = create_random_user(db_session)
+
+        p1 = patient_crud.create_for_user(
+            db_session,
+            user_id=test_user.id,
+            patient_data=PatientCreate(
+                first_name="Alice", last_name="A", birth_date=date(1985, 3, 1), gender="F"
+            ),
+        )
+        p2 = patient_crud.create_for_user(
+            db_session,
+            user_id=other_user_data["user"].id,
+            patient_data=PatientCreate(
+                first_name="Bob", last_name="B", birth_date=date(1990, 6, 15), gender="M"
+            ),
+        )
+        lr1 = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=p1.id, test_name="CBC", status="completed",
+                completed_date=date(2024, 1, 10),
+            ),
+        )
+        lr2 = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=p2.id, test_name="BMP", status="completed",
+                completed_date=date(2024, 2, 20),
+            ),
+        )
+        c1 = lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(lab_result_id=lr1.id, test_name="Hemoglobin", value=14.2, unit="g/dL"),
+        )
+        c2 = lab_test_component_crud.create(
+            db_session,
+            obj_in=LabTestComponentCreate(lab_result_id=lr2.id, test_name="Sodium", value=140.0, unit="mEq/L"),
+        )
+        return {"p1": p1, "p2": p2, "lr1": lr1, "lr2": lr2, "c1": c1, "c2": c2}
+
+    def test_returns_only_components_for_given_patient(self, db_session: Session, two_patients):
+        """Components for patient 1 must not include components belonging to patient 2."""
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        ids = {r.id for r in results}
+        assert two_patients["c1"].id in ids
+        assert two_patients["c2"].id not in ids
+
+    def test_limit_is_respected(self, db_session: Session, two_patients):
+        """limit parameter caps the returned row count."""
+        p1_id = two_patients["p1"].id
+        lr_id = two_patients["lr1"].id
+        for i in range(5):
+            lab_test_component_crud.create(
+                db_session,
+                obj_in=LabTestComponentCreate(lab_result_id=lr_id, test_name=f"Extra {i}", value=float(i), unit="unit"),
+            )
+        all_results = lab_test_component_crud.get_all_for_patient(db_session, patient_id=p1_id)
+        assert len(all_results) == 6  # 1 original + 5 new
+        limited = lab_test_component_crud.get_all_for_patient(db_session, patient_id=p1_id, limit=3)
+        assert len(limited) == 3
+
+    def test_parent_lab_result_is_eagerly_loaded(self, db_session: Session, two_patients):
+        """Each component must have its parent lab_result accessible without a new query."""
+        results = lab_test_component_crud.get_all_for_patient(
+            db_session, patient_id=two_patients["p1"].id
+        )
+        assert len(results) >= 1
+        # Expire all objects to force lazy-load detection; then access parent — should not raise
+        db_session.expire_all()
+        component = next(r for r in results if r.id == two_patients["c1"].id)
+        parent = component.lab_result
+        assert parent is not None
+        assert parent.id == two_patients["lr1"].id

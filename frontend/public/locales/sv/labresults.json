@@ -470,7 +470,8 @@
     "latestResult": "Senaste",
     "trendChart": "Värde över tid",
     "noResults": "Inga resultat i den här gruppen",
-    "fromPanel": "Från panelen"
+    "fromPanel": "Från panelen",
+    "panel": "Panel"
   },
   "numericResult": {
     "sectionLabel": "Numeriskt resultat (valfritt)",
