@@ -212,6 +212,21 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
     }
   };
 
+  const ariaSortAttr = (field: SortField): 'ascending' | 'descending' | 'none' =>
+    sortField === field ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none';
+
+  const sortButtonStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    padding: 0,
+    font: 'inherit',
+    color: 'inherit',
+  };
+
   const handleViewClick = (result: LabResultSummary) => {
     onClose();
     if (result.source === 'component') {
@@ -255,46 +270,34 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
           <Table striped highlightOnHover>
                       <Table.Thead>
                         <Table.Tr>
-                          <Table.Th>
-                            <Group
-                              gap="xs"
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => handleSort('date')}
-                            >
-                              <Text size="xs" fw={600}>
+                          <Table.Th aria-sort={ariaSortAttr('date')}>
+                            <button type="button" onClick={() => handleSort('date')} style={sortButtonStyle}>
+                              <Text span size="xs" fw={600}>
                                 {t('shared:labels.date', 'Date')}
                               </Text>
                               <SortIcon field="date" sortField={sortField} sortOrder={sortOrder} />
-                            </Group>
+                            </button>
                           </Table.Th>
-                          <Table.Th>
-                            <Group
-                              gap="xs"
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => handleSort('value')}
-                            >
-                              <Text size="xs" fw={600}>
+                          <Table.Th aria-sort={ariaSortAttr('value')}>
+                            <button type="button" onClick={() => handleSort('value')} style={sortButtonStyle}>
+                              <Text span size="xs" fw={600}>
                                 {t('shared:labels.value', 'Value')}
                               </Text>
                               <SortIcon field="value" sortField={sortField} sortOrder={sortOrder} />
-                            </Group>
+                            </button>
                           </Table.Th>
                           <Table.Th>
                             <Text size="xs" fw={600}>
                               {t('labresults:testComponents.editModal.fields.unit', 'Unit')}
                             </Text>
                           </Table.Th>
-                          <Table.Th>
-                            <Group
-                              gap="xs"
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => handleSort('status')}
-                            >
-                              <Text size="xs" fw={600}>
+                          <Table.Th aria-sort={ariaSortAttr('status')}>
+                            <button type="button" onClick={() => handleSort('status')} style={sortButtonStyle}>
+                              <Text span size="xs" fw={600}>
                                 {t('shared:fields.status', 'Status')}
                               </Text>
                               <SortIcon field="status" sortField={sortField} sortOrder={sortOrder} />
-                            </Group>
+                            </button>
                           </Table.Th>
                           <Table.Th>
                             <Text size="xs" fw={600}>
