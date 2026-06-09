@@ -21,7 +21,31 @@ vi.mock('@mantine/core', () => ({
   Tooltip: ({ children }: any) => <>{children}</>,
   ScrollArea: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Paper: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Divider: () => <hr />,
+  Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+  Table: Object.assign(
+    ({ children, ...props }: any) => <table {...props}>{children}</table>,
+    {
+      Thead: ({ children, ...props }: any) => <thead {...props}>{children}</thead>,
+      Tbody: ({ children, ...props }: any) => <tbody {...props}>{children}</tbody>,
+      Tr: ({ children, ...props }: any) => <tr {...props}>{children}</tr>,
+      Th: ({ children, ...props }: any) => <th {...props}>{children}</th>,
+      Td: ({ children, ...props }: any) => <td {...props}>{children}</td>,
+    }
+  ),
+  Tabs: Object.assign(
+    ({ children, value, onChange, ...props }: any) => (
+      <div data-testid="tabs" data-active-tab={value} {...props}>{children}</div>
+    ),
+    {
+      List: ({ children, ...props }: any) => <div role="tablist" {...props}>{children}</div>,
+      Tab: ({ children, value, leftSection, ...props }: any) => (
+        <button role="tab" data-tab-value={value} {...props}>{children}</button>
+      ),
+      Panel: ({ children, value, ...props }: any) => (
+        <div role="tabpanel" data-panel-value={value} {...props}>{children}</div>
+      ),
+    }
+  ),
 }));
 
 vi.mock('@tabler/icons-react', () => ({
@@ -30,6 +54,16 @@ vi.mock('@tabler/icons-react', () => ({
   IconPencil: () => <span data-testid="icon-pencil" />,
   IconTrash: () => <span data-testid="icon-trash" />,
   IconFlask: () => <span data-testid="icon-flask" />,
+  IconArrowUp: () => <span data-testid="icon-arrow-up" />,
+  IconArrowDown: () => <span data-testid="icon-arrow-down" />,
+  IconArrowsSort: () => <span data-testid="icon-arrows-sort" />,
+  IconChartLine: () => <span data-testid="icon-chart-line" />,
+  IconTable: () => <span data-testid="icon-table" />,
+}));
+
+vi.mock('../../../../constants/labCategories', () => ({
+  getQualitativeDisplayName: (v: string) => v,
+  getQualitativeColor: (_v: string) => 'blue',
 }));
 
 vi.mock('react-i18next', () => ({
@@ -50,12 +84,6 @@ vi.mock('../../../../hooks/useDateFormat', () => ({
     formatDate: (d: string | null | undefined) => d || '',
     formatLongDate: (d: string | null | undefined) => d || '',
   }),
-}));
-
-vi.mock('../../StatusBadge', () => ({
-  default: ({ status, ...props }: any) => (
-    <span data-testid="status-badge" data-status={status} {...props}>{status}</span>
-  ),
 }));
 
 vi.mock('../TestComponentTrendChart', () => ({
@@ -195,7 +223,7 @@ describe('LabResultStackPanel', () => {
     expect(screen.getByText('2024-06-05')).toBeInTheDocument();
   });
 
-  it('shows facility when present', () => {
+  it('renders a table with header columns', () => {
     render(
       <LabResultStackPanel
         opened={true}
@@ -204,19 +232,9 @@ describe('LabResultStackPanel', () => {
         onViewResult={vi.fn()}
       />
     );
-    expect(screen.getByText('Quest')).toBeInTheDocument();
-  });
-
-  it('shows notes when present', () => {
-    render(
-      <LabResultStackPanel
-        opened={true}
-        onClose={vi.fn()}
-        group={group}
-        onViewResult={vi.fn()}
-      />
-    );
-    expect(screen.getByText('Follow-up test')).toBeInTheDocument();
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    // Column headers are rendered
+    expect(screen.getAllByRole('columnheader').length).toBeGreaterThan(0);
   });
 
   it('calls onViewResult and onClose when View button is clicked', () => {
@@ -323,6 +341,35 @@ describe('LabResultStackPanel', () => {
     expect(chart.getAttribute('data-point-count')).toBe('2');
   });
 
+  it('shows Chart and Data Table tabs when numeric values are present', () => {
+    render(
+      <LabResultStackPanel
+        opened={true}
+        onClose={vi.fn()}
+        group={numericGroup}
+        onViewResult={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId('tabs')).toBeInTheDocument();
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.length).toBe(2);
+  });
+
+  it('shows results table directly without tabs when no numeric values', () => {
+    render(
+      <LabResultStackPanel
+        opened={true}
+        onClose={vi.fn()}
+        group={group}
+        onViewResult={vi.fn()}
+      />
+    );
+    expect(screen.queryByTestId('tabs')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.getByRole('table')).toBeInTheDocument();
+  });
+
   it('shows numeric value and unit in result row', () => {
     render(
       <LabResultStackPanel
@@ -336,7 +383,7 @@ describe('LabResultStackPanel', () => {
     expect(screen.getByTestId('numeric-value-21')).toBeInTheDocument();
   });
 
-  it('shows reference range inline with value when min and max are present', () => {
+  it('shows reference range in its own column when min and max are present', () => {
     render(
       <LabResultStackPanel
         opened={true}
@@ -345,10 +392,10 @@ describe('LabResultStackPanel', () => {
         onViewResult={vi.fn()}
       />
     );
-    expect(screen.getByTestId('value-range-20')).toHaveTextContent('(4–5.6)');
+    expect(screen.getByTestId('value-range-20')).toHaveTextContent('4–5.6');
   });
 
-  it('shows ref_range_text inline with value when provided', () => {
+  it('shows ref_range_text in its own column when provided', () => {
     const textRangeGroup: LabResultGroup = {
       ...numericGroup,
       results: [
@@ -370,7 +417,7 @@ describe('LabResultStackPanel', () => {
         onViewResult={vi.fn()}
       />
     );
-    expect(screen.getByTestId('value-range-30')).toHaveTextContent('(<200)');
+    expect(screen.getByTestId('value-range-30')).toHaveTextContent('<200');
   });
 
   it('component rows show only View button, not Edit or Delete', () => {

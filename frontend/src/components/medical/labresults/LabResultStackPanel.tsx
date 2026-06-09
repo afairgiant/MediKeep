@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Drawer,
@@ -7,14 +7,26 @@ import {
   Text,
   ScrollArea,
   Paper,
-  Divider,
   Title,
   ActionIcon,
   Tooltip,
+  Badge,
+  Table,
+  Tabs,
 } from '@mantine/core';
-import { IconStack2, IconEye, IconPencil, IconTrash, IconFlask } from '@tabler/icons-react';
+import {
+  IconStack2,
+  IconEye,
+  IconPencil,
+  IconTrash,
+  IconFlask,
+  IconArrowUp,
+  IconArrowDown,
+  IconArrowsSort,
+  IconChartLine,
+  IconTable,
+} from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import StatusBadge from '../StatusBadge';
 import TestComponentTrendChart from './TestComponentTrendChart';
 import {
   TrendResponse,
@@ -22,6 +34,10 @@ import {
   TrendStatistics,
 } from '../../../services/api/labTestComponentApi';
 import { LabResultGroup, LabResultSummary } from './LabResultStackCard';
+import {
+  getQualitativeDisplayName,
+  getQualitativeColor,
+} from '../../../constants/labCategories';
 
 interface DateFormatHook {
   formatDate: (_dateValue: string | null | undefined) => string;
@@ -38,6 +54,37 @@ interface LabResultStackPanelProps {
   onViewComponent?: (_result: LabResultSummary) => void;
   disableActions?: boolean;
 }
+
+type SortField = 'date' | 'value' | 'status';
+type SortOrder = 'asc' | 'desc';
+
+const getStatusColor = (status: string | null | undefined): string => {
+  if (!status) return 'gray';
+  switch (status.toLowerCase()) {
+    case 'normal': return 'green';
+    case 'high':
+    case 'low': return 'orange';
+    case 'critical': return 'red';
+    case 'abnormal':
+    case 'borderline': return 'yellow';
+    default: return 'gray';
+  }
+};
+
+const SortIcon: React.FC<{
+  field: SortField;
+  sortField: SortField;
+  sortOrder: SortOrder;
+}> = ({ field, sortField, sortOrder }) => {
+  if (sortField !== field) {
+    return <IconArrowsSort size={14} style={{ opacity: 0.5 }} />;
+  }
+  return sortOrder === 'asc' ? (
+    <IconArrowUp size={14} />
+  ) : (
+    <IconArrowDown size={14} />
+  );
+};
 
 function buildTrendResponse(group: LabResultGroup): TrendResponse | null {
   const dataPoints: TrendDataPoint[] = group.results
@@ -116,14 +163,54 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
   disableActions = false,
 }) => {
   const { t } = useTranslation(['labresults', 'shared', 'common']);
-  const { formatLongDate } = useDateFormat() as DateFormatHook;
+  const { formatDate } = useDateFormat() as DateFormatHook;
+  const [activeTab, setActiveTab] = useState<string>('chart');
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const trendData = useMemo(
     () => (group ? buildTrendResponse(group) : null),
     [group]
   );
 
+  const sortedResults = useMemo(() => {
+    if (!group) return [];
+    const data = [...group.results];
+    data.sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'date': {
+          const dateA = a.completed_date ?? a.ordered_date ?? '';
+          const dateB = b.completed_date ?? b.ordered_date ?? '';
+          comparison = dateA.localeCompare(dateB);
+          break;
+        }
+        case 'value':
+          if (a.result_type === 'qualitative' || b.result_type === 'qualitative') {
+            comparison = (a.qualitative_value ?? '').localeCompare(b.qualitative_value ?? '');
+          } else {
+            comparison = (a.value ?? 0) - (b.value ?? 0);
+          }
+          break;
+        case 'status':
+          comparison = (a.labs_result ?? '').localeCompare(b.labs_result ?? '');
+          break;
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+    return data;
+  }, [group, sortField, sortOrder]);
+
   if (!group) return null;
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
 
   const handleViewClick = (result: LabResultSummary) => {
     onClose();
@@ -152,6 +239,192 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
     return null;
   };
 
+  const resultsTable = group.results.length === 0 ? (
+    <Text c="dimmed" size="sm" ta="center" py="xl">
+      {t('labresults:stackedView.noResults', 'No results in this group')}
+    </Text>
+  ) : (
+    <Stack gap="xs">
+      {group.results.length > 1 && (
+        <Text size="xs" c="dimmed" ta="right">
+          {t('labresults:trendTable.clickToSort', 'Click column headers to sort')}
+        </Text>
+      )}
+      <Paper withBorder radius="md">
+        <ScrollArea>
+          <Table striped highlightOnHover>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>
+                            <Group
+                              gap="xs"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => handleSort('date')}
+                            >
+                              <Text size="xs" fw={600}>
+                                {t('shared:labels.date', 'Date')}
+                              </Text>
+                              <SortIcon field="date" sortField={sortField} sortOrder={sortOrder} />
+                            </Group>
+                          </Table.Th>
+                          <Table.Th>
+                            <Group
+                              gap="xs"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => handleSort('value')}
+                            >
+                              <Text size="xs" fw={600}>
+                                {t('shared:labels.value', 'Value')}
+                              </Text>
+                              <SortIcon field="value" sortField={sortField} sortOrder={sortOrder} />
+                            </Group>
+                          </Table.Th>
+                          <Table.Th>
+                            <Text size="xs" fw={600}>
+                              {t('labresults:testComponents.editModal.fields.unit', 'Unit')}
+                            </Text>
+                          </Table.Th>
+                          <Table.Th>
+                            <Group
+                              gap="xs"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => handleSort('status')}
+                            >
+                              <Text size="xs" fw={600}>
+                                {t('shared:fields.status', 'Status')}
+                              </Text>
+                              <SortIcon field="status" sortField={sortField} sortOrder={sortOrder} />
+                            </Group>
+                          </Table.Th>
+                          <Table.Th>
+                            <Text size="xs" fw={600}>
+                              {t('labresults:testComponents.editModal.fields.referenceRange', 'Reference Range')}
+                            </Text>
+                          </Table.Th>
+                          <Table.Th>
+                            <Text size="xs" fw={600}>
+                              {t('shared:labels.actions', 'Actions')}
+                            </Text>
+                          </Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        {sortedResults.map(result => {
+                          const resultKey = `${result.source ?? 'i'}-${result.id}`;
+                          const dateStr = result.completed_date ?? result.ordered_date ?? null;
+                          const isOrdered = !result.completed_date && !!result.ordered_date;
+                          const range = formatRangeValue(result);
+                          return (
+                            <Table.Tr key={resultKey}>
+                              <Table.Td>
+                                <Stack gap={2}>
+                                  {result.source === 'component' && (
+                                    <Group gap={4}>
+                                      <IconFlask size={10} color="var(--mantine-color-violet-6)" />
+                                      <Text size="xs" c="violet" fw={500}>
+                                        {t('labresults:stackedView.fromPanel', 'From panel')}
+                                      </Text>
+                                    </Group>
+                                  )}
+                                  <Text size="sm">
+                                    {dateStr ? formatDate(dateStr) : t('common:labels.noDate', 'No date')}
+                                  </Text>
+                                  {isOrdered && (
+                                    <Text size="xs" c="dimmed">
+                                      {t('shared:labels.orderedDate', 'Ordered')}
+                                    </Text>
+                                  )}
+                                </Stack>
+                              </Table.Td>
+                              <Table.Td>
+                                {result.result_type === 'qualitative' && result.qualitative_value ? (
+                                  <Badge
+                                    size="sm"
+                                    variant="filled"
+                                    color={getQualitativeColor(result.qualitative_value)}
+                                    data-testid={`qualitative-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}
+                                  >
+                                    {getQualitativeDisplayName(result.qualitative_value)}
+                                  </Badge>
+                                ) : result.value != null ? (
+                                  <Text size="sm" fw={600} data-testid={`numeric-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
+                                    {result.value}
+                                  </Text>
+                                ) : (
+                                  <Text size="xs" c="dimmed">—</Text>
+                                )}
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm" c="dimmed">
+                                  {result.result_type === 'qualitative' ? '—' : (result.unit ?? '—')}
+                                </Text>
+                              </Table.Td>
+                              <Table.Td>
+                                {result.labs_result ? (
+                                  <Badge size="sm" variant="light" color={getStatusColor(result.labs_result)}>
+                                    {result.labs_result}
+                                  </Badge>
+                                ) : (
+                                  <Text size="xs" c="dimmed">—</Text>
+                                )}
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="xs" c="dimmed" data-testid={`value-range-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
+                                  {result.result_type === 'qualitative' ? '—' : (range ?? t('labresults:trendTable.notSpecified', 'Not specified'))}
+                                </Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <Group gap={4} wrap="nowrap">
+                                  <Tooltip label={t('common:actions.view', 'View')} withArrow>
+                                    <ActionIcon
+                                      variant="subtle"
+                                      size="sm"
+                                      onClick={() => handleViewClick(result)}
+                                      data-testid={`view-result-${result.source === 'component' ? `comp-${result.id}` : result.id}`}
+                                      aria-label={t('common:actions.view', 'View')}
+                                    >
+                                      <IconEye size={14} />
+                                    </ActionIcon>
+                                  </Tooltip>
+                                  {!disableActions && result.source !== 'component' && (
+                                    <>
+                                      <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
+                                        <ActionIcon
+                                          variant="subtle"
+                                          size="sm"
+                                          onClick={() => handleEditClick(result)}
+                                          data-testid={`edit-result-${result.id}`}
+                                          aria-label={t('shared:labels.edit', 'Edit')}
+                                        >
+                                          <IconPencil size={14} />
+                                        </ActionIcon>
+                                      </Tooltip>
+                                      <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
+                                        <ActionIcon
+                                          variant="subtle"
+                                          color="red"
+                                          size="sm"
+                                          onClick={() => handleDeleteClick(result)}
+                                          data-testid={`delete-result-${result.id}`}
+                                          aria-label={t('common:actions.delete', 'Delete')}
+                                        >
+                                          <IconTrash size={14} />
+                                        </ActionIcon>
+                                      </Tooltip>
+                                    </>
+                                  )}
+                                </Group>
+                              </Table.Td>
+                            </Table.Tr>
+                          );
+                        })}
+                      </Table.Tbody>
+          </Table>
+        </ScrollArea>
+      </Paper>
+    </Stack>
+  );
+
   return (
     <>
       <Drawer
@@ -178,131 +451,40 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
         zIndex={2000}
       >
         <ScrollArea>
-          <Stack gap="md">
-            {trendData && (
-              <Stack gap="xs">
-                <Title order={6} c="dimmed">
-                  {t('labresults:stackedView.trendChart', 'Value over time')}
-                </Title>
+          {trendData ? (
+            <Tabs value={activeTab} onChange={v => setActiveTab(v || 'chart')}>
+              <Tabs.List>
+                <Tabs.Tab value="chart" leftSection={<IconChartLine size={16} />}>
+                  {t('labresults:trends.chart', 'Chart')}
+                </Tabs.Tab>
+                <Tabs.Tab value="table" leftSection={<IconTable size={16} />}>
+                  {t('labresults:trends.dataTable', 'Data Table')}
+                </Tabs.Tab>
+              </Tabs.List>
+              <Tabs.Panel value="chart" pt="md">
                 <TestComponentTrendChart trendData={trendData} />
-              </Stack>
-            )}
-
-            <Stack gap="sm">
-              {group.results.length === 0 ? (
-                <Text c="dimmed" size="sm" ta="center" py="xl">
-                  {t('labresults:stackedView.noResults', 'No results in this group')}
-                </Text>
-              ) : (
-                group.results.map((result, index) => (
-                  <React.Fragment key={`${result.source ?? 'i'}-${result.id}`}>
-                    <Paper withBorder p="sm" radius="md">
-                      <Group justify="space-between" wrap="nowrap">
-                        <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
-                          {result.source === 'component' && (
-                            <Group gap={4}>
-                              <IconFlask size={12} color="var(--mantine-color-violet-6)" />
-                              <Text size="xs" c="violet" fw={500}>
-                                {t('labresults:stackedView.fromPanel', 'From panel')}
-                              </Text>
-                            </Group>
-                          )}
-                          <Text size="sm" fw={500}>
-                            {result.completed_date
-                              ? formatLongDate(result.completed_date)
-                              : result.ordered_date
-                                ? `${t('shared:labels.orderedDate', 'Ordered')}: ${formatLongDate(result.ordered_date)}`
-                                : t('common:labels.noDate', 'No date')}
-                          </Text>
-                          {result.labs_result && (
-                            <StatusBadge
-                              status={result.labs_result}
-                              size="sm"
-                            />
-                          )}
-                          {result.result_type === 'qualitative' && result.qualitative_value && (
-                            <Text size="sm" fw={500} data-testid={`qualitative-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
-                              {result.qualitative_value}
-                            </Text>
-                          )}
-                          {result.value != null && (
-                            <Text size="sm" fw={600} data-testid={`numeric-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
-                              {result.value}
-                              {result.unit && (
-                                <Text span size="xs" c="dimmed" ml={4}>
-                                  {result.unit}
-                                </Text>
-                              )}
-                              {(() => {
-                                const range = formatRangeValue(result);
-                                return range ? (
-                                  <Text span size="xs" c="dimmed" ml={4} data-testid={`value-range-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
-                                    ({range})
-                                  </Text>
-                                ) : null;
-                              })()}
-                            </Text>
-                          )}
-                          {result.facility && (
-                            <Text size="xs" c="dimmed" lineClamp={1}>
-                              {result.facility}
-                            </Text>
-                          )}
-                          {result.notes && (
-                            <Text size="xs" c="dimmed" lineClamp={2}>
-                              {result.notes}
-                            </Text>
-                          )}
-                        </Stack>
-                        <Group gap={4} wrap="nowrap">
-                          <Tooltip label={t('common:actions.view', 'View')} withArrow>
-                            <ActionIcon
-                              variant="subtle"
-                              size="sm"
-                              onClick={() => handleViewClick(result)}
-                              data-testid={`view-result-${result.source === 'component' ? `comp-${result.id}` : result.id}`}
-                              aria-label={t('common:actions.view', 'View')}
-                            >
-                              <IconEye size={14} />
-                            </ActionIcon>
-                          </Tooltip>
-                          {!disableActions && result.source !== 'component' && (
-                            <>
-                              <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
-                                <ActionIcon
-                                  variant="subtle"
-                                  size="sm"
-                                  onClick={() => handleEditClick(result)}
-                                  data-testid={`edit-result-${result.id}`}
-                                  aria-label={t('shared:labels.edit', 'Edit')}
-                                >
-                                  <IconPencil size={14} />
-                                </ActionIcon>
-                              </Tooltip>
-                              <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
-                                <ActionIcon
-                                  variant="subtle"
-                                  color="red"
-                                  size="sm"
-                                  onClick={() => handleDeleteClick(result)}
-                                  data-testid={`delete-result-${result.id}`}
-                                  aria-label={t('common:actions.delete', 'Delete')}
-                                >
-                                  <IconTrash size={14} />
-                                </ActionIcon>
-                              </Tooltip>
-                            </>
-                          )}
-                        </Group>
-                      </Group>
-                    </Paper>
-                    {index < group.results.length - 1 && <Divider />}
-                  </React.Fragment>
-                ))
-              )}
+              </Tabs.Panel>
+              <Tabs.Panel value="table" pt="md">
+                <Stack gap="xs">
+                  <Title order={6} c="dimmed">
+                    {t('labresults:trendTable.historicalData', 'Historical Data ({{count}} points)', {
+                      count: group.results.length,
+                    })}
+                  </Title>
+                  {resultsTable}
+                </Stack>
+              </Tabs.Panel>
+            </Tabs>
+          ) : (
+            <Stack gap="xs">
+              <Title order={6} c="dimmed">
+                {t('labresults:trendTable.historicalData', 'Historical Data ({{count}} points)', {
+                  count: group.results.length,
+                })}
+              </Title>
+              {resultsTable}
             </Stack>
-
-          </Stack>
+          )}
         </ScrollArea>
       </Drawer>
     </>
