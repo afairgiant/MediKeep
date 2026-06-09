@@ -469,7 +469,8 @@
     "dateRange": "{{from}} – {{to}}",
     "latestResult": "Mais recente",
     "trendChart": "Valor ao longo do tempo",
-    "noResults": "Nenhum resultado neste grupo"
+    "noResults": "Nenhum resultado neste grupo",
+    "fromPanel": "Do painel"
   },
   "numericResult": {
     "sectionLabel": "Resultado numérico (opcional)",

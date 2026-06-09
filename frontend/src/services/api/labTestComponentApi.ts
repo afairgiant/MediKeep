@@ -203,6 +203,12 @@ export interface ComponentCatalogResponse {
   total: number;
 }
 
+export interface LabTestComponentForStack extends LabTestComponent {
+  completed_date?: string | null;
+  ordered_date?: string | null;
+  facility?: string | null;
+}
+
 class LabTestComponentApi {
   /**
    * Get all test components for a specific lab result
@@ -1178,6 +1184,33 @@ class LabTestComponentApi {
         ],
       },
     });
+  }
+
+  async getAllForPatient(
+    patientId: number,
+    signal?: AbortSignal
+  ): Promise<LabTestComponentForStack[]> {
+    try {
+      const response = await apiService.get(
+        `/lab-test-components/patient/${patientId}/all`,
+        { signal }
+      );
+
+      logger.debug('all_patient_components_fetched', {
+        patientId,
+        count: response?.length || 0,
+        component: 'LabTestComponentApi',
+      });
+
+      return response || [];
+    } catch (error: any) {
+      logger.error('all_patient_components_fetch_error', {
+        patientId,
+        error: error.message,
+        component: 'LabTestComponentApi',
+      });
+      throw error;
+    }
   }
 }
 

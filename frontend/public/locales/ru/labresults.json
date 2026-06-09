@@ -469,7 +469,8 @@
     "dateRange": "{{from}} – {{to}}",
     "latestResult": "Последний",
     "trendChart": "Значение с течением времени",
-    "noResults": "Нет результатов в этой группе"
+    "noResults": "Нет результатов в этой группе",
+    "fromPanel": "Из панели"
   },
   "numericResult": {
     "sectionLabel": "Числовой результат (необязательно)",

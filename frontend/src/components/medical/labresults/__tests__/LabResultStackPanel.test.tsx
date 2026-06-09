@@ -29,6 +29,7 @@ vi.mock('@tabler/icons-react', () => ({
   IconEye: () => <span data-testid="icon-eye" />,
   IconPencil: () => <span data-testid="icon-pencil" />,
   IconTrash: () => <span data-testid="icon-trash" />,
+  IconFlask: () => <span data-testid="icon-flask" />,
 }));
 
 vi.mock('react-i18next', () => ({
@@ -386,5 +387,121 @@ describe('LabResultStackPanel', () => {
       />
     );
     expect(screen.getByTestId('value-range-30')).toHaveTextContent('(<200)');
+  });
+
+  it('component rows show only View button, not Edit or Delete', () => {
+    const mixedGroup: LabResultGroup = {
+      ...group,
+      results: [
+        group.results[0],
+        {
+          id: 99,
+          test_name: 'Hemoglobin A1C',
+          labs_result: 'normal',
+          ordered_date: null,
+          completed_date: '2024-01-15',
+          notes: null,
+          status: null,
+          facility: 'Lab Corp',
+          test_category: null,
+          source: 'component',
+          parent_lab_result_id: 5,
+        },
+      ],
+      count: 2,
+    };
+    render(
+      <LabResultStackPanel
+        opened={true}
+        onClose={vi.fn()}
+        group={mixedGroup}
+        patientId={1}
+        onViewResult={vi.fn()}
+        onEditResult={vi.fn()}
+        onDeleteResult={vi.fn()}
+        onViewComponent={vi.fn()}
+      />
+    );
+    // Component row has View
+    expect(screen.getByTestId('view-result-comp-99')).toBeInTheDocument();
+    // Component row does NOT have Edit or Delete
+    expect(screen.queryByTestId('edit-result-comp-99')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('delete-result-comp-99')).not.toBeInTheDocument();
+    // Individual row still has all three
+    expect(screen.getByTestId('view-result-10')).toBeInTheDocument();
+    expect(screen.getByTestId('edit-result-10')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-result-10')).toBeInTheDocument();
+  });
+
+  it('clicking View on a component row calls onViewComponent', () => {
+    const onViewResult = vi.fn();
+    const onViewComponent = vi.fn();
+    const onClose = vi.fn();
+    const componentResult = {
+      id: 99,
+      test_name: 'Hemoglobin A1C',
+      labs_result: 'normal',
+      ordered_date: null,
+      completed_date: '2024-01-15',
+      notes: null,
+      status: null,
+      facility: null,
+      test_category: null,
+      source: 'component' as const,
+      parent_lab_result_id: 5,
+    };
+    const mixedGroup: LabResultGroup = {
+      ...group,
+      results: [componentResult],
+      count: 1,
+    };
+    render(
+      <LabResultStackPanel
+        opened={true}
+        onClose={onClose}
+        group={mixedGroup}
+        patientId={1}
+        onViewResult={onViewResult}
+        onViewComponent={onViewComponent}
+      />
+    );
+    fireEvent.click(screen.getByTestId('view-result-comp-99'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onViewComponent).toHaveBeenCalledWith(componentResult);
+    expect(onViewResult).not.toHaveBeenCalled();
+  });
+
+  it('shows qualitative value for component rows with result_type qualitative', () => {
+    const qualGroup: LabResultGroup = {
+      ...group,
+      results: [
+        {
+          id: 77,
+          test_name: 'COVID-19 Test',
+          labs_result: 'normal',
+          ordered_date: null,
+          completed_date: '2024-03-01',
+          notes: null,
+          status: null,
+          facility: null,
+          test_category: null,
+          source: 'component',
+          parent_lab_result_id: 5,
+          result_type: 'qualitative',
+          qualitative_value: 'negative',
+        },
+      ],
+      count: 1,
+    };
+    render(
+      <LabResultStackPanel
+        opened={true}
+        onClose={vi.fn()}
+        group={qualGroup}
+        patientId={1}
+        onViewResult={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId('qualitative-value-comp-77')).toHaveTextContent('negative');
   });
 });

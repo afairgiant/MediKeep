@@ -317,6 +317,7 @@ const LabResultFormWrapper = ({
   labResultEncounters = {},
   fetchLabResultEncounters,
   navigate,
+  isGroupedResult = false,
   children,
 }) => {
   const { t } = useTranslation(['medical', 'common']);
@@ -776,8 +777,8 @@ const LabResultFormWrapper = ({
                       </Box>
                     </Grid.Col>
                   )}
-                  {/* Numeric result section */}
-                  <Grid.Col span={12}>
+                  {/* Numeric result section — not applicable for grouped (PDF-master) results */}
+                  {!isGroupedResult && <Grid.Col span={12}>
                     <Paper withBorder p="sm" radius="md">
                       <Text size="sm" fw={500} mb="sm">
                         {t('labresults:numericResult.sectionLabel', 'Numeric Result (optional)')}
@@ -872,7 +873,7 @@ const LabResultFormWrapper = ({
                         </Grid.Col>
                       </Grid>
                     </Paper>
-                  </Grid.Col>
+                  </Grid.Col>}
                 </Grid>
               </Box>
             </Tabs.Panel>

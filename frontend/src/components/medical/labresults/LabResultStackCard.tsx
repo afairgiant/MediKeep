@@ -36,6 +36,10 @@ export interface LabResultSummary {
   ref_range_min?: number | null;
   ref_range_max?: number | null;
   ref_range_text?: string | null;
+  source?: 'individual' | 'component';
+  parent_lab_result_id?: number | null;
+  result_type?: string | null;
+  qualitative_value?: string | null;
 }
 
 interface LabResultStackCardProps {

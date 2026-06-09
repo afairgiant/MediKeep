@@ -276,6 +276,22 @@ class CRUDLabTestComponent(
 
         return query.options(joinedload(self.model.lab_result)).all()
 
+    def get_all_for_patient(
+        self, db: Session, *, patient_id: int, limit: int = 2000
+    ) -> List[LabTestComponent]:
+        """Get all test components for a patient with parent lab result loaded."""
+        from app.models.labs import LabResult
+
+        return (
+            db.query(self.model)
+            .join(self.model.lab_result)
+            .filter(LabResult.patient_id == patient_id)
+            .options(joinedload(self.model.lab_result))
+            .order_by(self.model.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+
     def bulk_create(
         self, db: Session, *, obj_in: LabTestComponentBulkCreate
     ) -> List[LabTestComponent]:

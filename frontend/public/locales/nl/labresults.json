@@ -469,7 +469,8 @@
     "dateRange": "{{from}} – {{to}}",
     "latestResult": "Laatste",
     "trendChart": "Waarde in de loop van de tijd",
-    "noResults": "Geen resultaten in deze groep"
+    "noResults": "Geen resultaten in deze groep",
+    "fromPanel": "Uit het paneel"
   },
   "numericResult": {
     "sectionLabel": "Numeriek resultaat (optioneel)",

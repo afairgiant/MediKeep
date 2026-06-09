@@ -41,6 +41,7 @@ from app.schemas.lab_test_component import (
     LabTestComponentBulkCreate,
     LabTestComponentBulkResponse,
     LabTestComponentCreate,
+    LabTestComponentForStack,
     LabTestComponentResponse,
     LabTestComponentTrendDataPoint,
     LabTestComponentTrendResponse,
@@ -492,6 +493,70 @@ def get_abbreviation_suggestions(
         abbreviations = lab_test_component.get_unique_abbreviations(db, limit=limit)
 
     return abbreviations
+
+
+@router.get(
+    "/patient/{patient_id}/all",
+    response_model=List[LabTestComponentForStack],
+)
+def get_all_components_for_patient(
+    *,
+    request: Request,
+    patient_id: int,
+    limit: int = Query(2000, ge=1, le=5000, description="Maximum components to return"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Get all test components for a patient with parent dates for stack view enrichment."""
+
+    with handle_database_errors(request=request):
+        deps.verify_patient_access(patient_id, db, current_user)
+
+        components = lab_test_component.get_all_for_patient(
+            db, patient_id=patient_id, limit=limit
+        )
+
+    log_data_access(
+        logger,
+        request,
+        current_user.id,
+        "read",
+        "LabTestComponent",
+        patient_id=patient_id,
+        count=len(components),
+    )
+
+    results = []
+    for comp in components:
+        parent = comp.lab_result
+        results.append(
+            LabTestComponentForStack(
+                id=comp.id,
+                lab_result_id=comp.lab_result_id,
+                test_name=comp.test_name,
+                abbreviation=comp.abbreviation,
+                test_code=comp.test_code,
+                value=comp.value,
+                unit=comp.unit,
+                ref_range_min=comp.ref_range_min,
+                ref_range_max=comp.ref_range_max,
+                ref_range_text=comp.ref_range_text,
+                status=comp.status,
+                category=comp.category,
+                display_order=comp.display_order,
+                canonical_test_name=comp.canonical_test_name,
+                notes=comp.notes,
+                result_type=comp.result_type,
+                qualitative_value=comp.qualitative_value,
+                created_at=comp.created_at,
+                updated_at=comp.updated_at,
+                completed_date=parent.completed_date if parent else None,
+                ordered_date=parent.ordered_date if parent else None,
+                facility=parent.facility if parent else None,
+            )
+        )
+
+    return results
 
 
 # Component Catalog Endpoint

@@ -469,7 +469,8 @@
     "dateRange": "{{from}} – {{to}}",
     "latestResult": "Senaste",
     "trendChart": "Värde över tid",
-    "noResults": "Inga resultat i den här gruppen"
+    "noResults": "Inga resultat i den här gruppen",
+    "fromPanel": "Från panelen"
   },
   "numericResult": {
     "sectionLabel": "Numeriskt resultat (valfritt)",

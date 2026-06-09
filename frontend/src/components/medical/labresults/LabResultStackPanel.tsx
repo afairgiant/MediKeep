@@ -12,7 +12,7 @@ import {
   ActionIcon,
   Tooltip,
 } from '@mantine/core';
-import { IconStack2, IconEye, IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconStack2, IconEye, IconPencil, IconTrash, IconFlask } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import StatusBadge from '../StatusBadge';
 import TestComponentTrendChart from './TestComponentTrendChart';
@@ -36,6 +36,7 @@ interface LabResultStackPanelProps {
   onViewResult: (_result: LabResultSummary) => void;
   onEditResult?: (_result: LabResultSummary) => void;
   onDeleteResult?: (_result: LabResultSummary) => void;
+  onViewComponent?: (_result: LabResultSummary) => void;
   disableActions?: boolean;
 }
 
@@ -113,6 +114,7 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
   onViewResult,
   onEditResult,
   onDeleteResult,
+  onViewComponent,
   disableActions = false,
 }) => {
   const { t } = useTranslation(['labresults', 'shared', 'common']);
@@ -127,7 +129,11 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
 
   const handleViewClick = (result: LabResultSummary) => {
     onClose();
-    onViewResult(result);
+    if (result.source === 'component') {
+      onViewComponent?.(result);
+    } else {
+      onViewResult(result);
+    }
   };
 
   const handleEditClick = (result: LabResultSummary) => {
@@ -191,10 +197,18 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                 </Text>
               ) : (
                 group.results.map((result, index) => (
-                  <React.Fragment key={result.id}>
+                  <React.Fragment key={`${result.source ?? 'i'}-${result.id}`}>
                     <Paper withBorder p="sm" radius="md">
                       <Group justify="space-between" wrap="nowrap">
                         <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+                          {result.source === 'component' && (
+                            <Group gap={4}>
+                              <IconFlask size={12} color="var(--mantine-color-violet-6)" />
+                              <Text size="xs" c="violet" fw={500}>
+                                {t('labresults:stackedView.fromPanel', 'From panel')}
+                              </Text>
+                            </Group>
+                          )}
                           <Text size="sm" fw={500}>
                             {result.completed_date
                               ? formatLongDate(result.completed_date)
@@ -208,8 +222,13 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                               size="sm"
                             />
                           )}
+                          {result.result_type === 'qualitative' && result.qualitative_value && (
+                            <Text size="sm" fw={500} data-testid={`qualitative-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
+                              {result.qualitative_value}
+                            </Text>
+                          )}
                           {result.value != null && (
-                            <Text size="sm" fw={600} data-testid={`numeric-value-${result.id}`}>
+                            <Text size="sm" fw={600} data-testid={`numeric-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
                               {result.value}
                               {result.unit && (
                                 <Text span size="xs" c="dimmed" ml={4}>
@@ -219,7 +238,7 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                               {(() => {
                                 const range = formatRangeValue(result);
                                 return range ? (
-                                  <Text span size="xs" c="dimmed" ml={4} data-testid={`value-range-${result.id}`}>
+                                  <Text span size="xs" c="dimmed" ml={4} data-testid={`value-range-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
                                     ({range})
                                   </Text>
                                 ) : null;
@@ -244,35 +263,39 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                                 variant="subtle"
                                 size="sm"
                                 onClick={() => handleViewClick(result)}
-                                data-testid={`view-result-${result.id}`}
+                                data-testid={`view-result-${result.source === 'component' ? `comp-${result.id}` : result.id}`}
                                 aria-label={t('common:actions.view', 'View')}
                               >
                                 <IconEye size={14} />
                               </ActionIcon>
                             </Tooltip>
-                            <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
-                              <ActionIcon
-                                variant="subtle"
-                                size="sm"
-                                onClick={() => handleEditClick(result)}
-                                data-testid={`edit-result-${result.id}`}
-                                aria-label={t('shared:labels.edit', 'Edit')}
-                              >
-                                <IconPencil size={14} />
-                              </ActionIcon>
-                            </Tooltip>
-                            <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
-                              <ActionIcon
-                                variant="subtle"
-                                color="red"
-                                size="sm"
-                                onClick={() => handleDeleteClick(result)}
-                                data-testid={`delete-result-${result.id}`}
-                                aria-label={t('common:actions.delete', 'Delete')}
-                              >
-                                <IconTrash size={14} />
-                              </ActionIcon>
-                            </Tooltip>
+                            {result.source !== 'component' && (
+                              <>
+                                <Tooltip label={t('shared:labels.edit', 'Edit')} withArrow>
+                                  <ActionIcon
+                                    variant="subtle"
+                                    size="sm"
+                                    onClick={() => handleEditClick(result)}
+                                    data-testid={`edit-result-${result.id}`}
+                                    aria-label={t('shared:labels.edit', 'Edit')}
+                                  >
+                                    <IconPencil size={14} />
+                                  </ActionIcon>
+                                </Tooltip>
+                                <Tooltip label={t('common:actions.delete', 'Delete')} withArrow>
+                                  <ActionIcon
+                                    variant="subtle"
+                                    color="red"
+                                    size="sm"
+                                    onClick={() => handleDeleteClick(result)}
+                                    data-testid={`delete-result-${result.id}`}
+                                    aria-label={t('common:actions.delete', 'Delete')}
+                                  >
+                                    <IconTrash size={14} />
+                                  </ActionIcon>
+                                </Tooltip>
+                              </>
+                            )}
                           </Group>
                         )}
                       </Group>

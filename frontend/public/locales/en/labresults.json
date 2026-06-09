@@ -470,7 +470,9 @@
     "dateRange": "{{from}} – {{to}}",
     "latestResult": "Latest",
     "noResults": "No results in this group",
-    "trendChart": "Value over time"
+    "trendChart": "Value over time",
+    "fromPanel": "From panel",
+    "panel": "Panel"
   },
   "numericResult": {
     "sectionLabel": "Numeric Result (optional)",

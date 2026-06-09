@@ -269,13 +269,36 @@ const LabResults = () => {
   // Set to true before triggering view/edit from the stack panel so close handlers re-open it
   const returningToStackRef = useRef(false);
 
+  // All test components for the current patient, loaded when entering stacked view
+  const [patientComponents, setPatientComponents] = useState([]);
+
+  useEffect(() => {
+    if (!currentPatient?.id) return;
+    let cancelled = false;
+    labTestComponentApi.getAllForPatient(currentPatient.id).then(components => {
+      if (!cancelled) setPatientComponents(components);
+    }).catch(() => {
+      if (!cancelled) setPatientComponents([]);
+    });
+    return () => { cancelled = true; };
+  }, [currentPatient?.id]);
+
+  // IDs of lab results that are "PDF masters" (have at least one test component)
+  const parentIdsWithComponents = useMemo(
+    () => new Set(patientComponents.map(c => c.lab_result_id)),
+    [patientComponents]
+  );
+
+  const getGroupKey = r => {
+    const code = (r.test_code || '').trim().toUpperCase();
+    return code ? `code:${code}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
+  };
+
   const groupedLabResults = useMemo(() => {
-    const getGroupKey = r => {
-      const code = (r.test_code || '').trim().toUpperCase();
-      return code ? `code:${code}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
-    };
     const map = new Map();
     for (const r of filteredLabResults) {
+      // Exclude PDF masters (lab results that have test components)
+      if (parentIdsWithComponents.has(r.id)) continue;
       const key = getGroupKey(r);
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(r);
@@ -304,7 +327,7 @@ const LabResults = () => {
       if (!b.latest_date) return -1;
       return b.latest_date.localeCompare(a.latest_date);
     });
-  }, [filteredLabResults]);
+  }, [filteredLabResults, parentIdsWithComponents]);
 
   const currentSelectedGroup = useMemo(
     () =>
@@ -314,6 +337,90 @@ const LabResults = () => {
     [groupedLabResults, selectedGroupKey]
   );
 
+  // Enrich the selected group with matching test components from PDF masters
+  const enrichedSelectedGroup = useMemo(() => {
+    if (!currentSelectedGroup) return null;
+    // Match independently on name and code so asymmetric presence of test_code doesn't block matches
+    const groupName = currentSelectedGroup.test_name.toLowerCase().trim();
+    const groupCode = (currentSelectedGroup.results[0]?.test_code || '').trim().toUpperCase();
+    const matchingComponents = patientComponents.filter(comp => {
+      const compCode = (comp.test_code || '').trim().toUpperCase();
+      // Check both canonical_test_name and test_name independently — canonical may differ from test_name
+      const compCanonical = (comp.canonical_test_name || '').toLowerCase().trim();
+      const compTestName = (comp.test_name || '').toLowerCase().trim();
+      const nameMatch = (!!compCanonical && compCanonical === groupName) || compTestName === groupName;
+      const codeMatch = !!groupCode && !!compCode && compCode === groupCode;
+      return nameMatch || codeMatch;
+    });
+    // PDF masters whose test_name matches the group are excluded from group building but should
+    // still appear as regular results in the drill-down (they represent real measurements)
+    const matchingPDFMasters = filteredLabResults.filter(r => {
+      if (!parentIdsWithComponents.has(r.id)) return false;
+      const rCode = (r.test_code || '').trim().toUpperCase();
+      const rName = (r.test_name || '').toLowerCase().trim();
+      return rName === groupName || (!!groupCode && !!rCode && rCode === groupCode);
+    });
+    if (matchingComponents.length === 0 && matchingPDFMasters.length === 0) return currentSelectedGroup;
+    const componentResults = matchingComponents.map(comp => ({
+      id: comp.id,
+      test_name: comp.test_name,
+      labs_result: comp.status ?? null,
+      ordered_date: comp.ordered_date ?? null,
+      completed_date: comp.completed_date ?? null,
+      notes: comp.notes ?? null,
+      status: null,
+      facility: comp.facility ?? null,
+      test_category: comp.category ?? null,
+      value: comp.value ?? null,
+      unit: comp.unit ?? null,
+      ref_range_min: comp.ref_range_min ?? null,
+      ref_range_max: comp.ref_range_max ?? null,
+      ref_range_text: comp.ref_range_text ?? null,
+      source: 'component',
+      parent_lab_result_id: comp.lab_result_id,
+      result_type: comp.result_type ?? null,
+      qualitative_value: comp.qualitative_value ?? null,
+    }));
+    const allResults = [
+      ...currentSelectedGroup.results,
+      ...matchingPDFMasters,
+      ...componentResults,
+    ].sort((a, b) => {
+      const da = a.completed_date || a.ordered_date || a.created_at || '';
+      const db = b.completed_date || b.ordered_date || b.created_at || '';
+      return db.localeCompare(da);
+    });
+    return { ...currentSelectedGroup, results: allResults, count: allResults.length };
+  }, [currentSelectedGroup, patientComponents, filteredLabResults, parentIdsWithComponents]);
+
+  // Total display count per group key: base results + matching components + matching PDF masters.
+  // Used so the count badge on each stack card reflects enriched totals, not just standalone counts.
+  const displayCountByGroupKey = useMemo(() => {
+    if (patientComponents.length === 0 && parentIdsWithComponents.size === 0) return {};
+    const map = {};
+    for (const group of groupedLabResults) {
+      const groupName = group.test_name.toLowerCase().trim();
+      const groupCode = (group.results[0]?.test_code || '').trim().toUpperCase();
+      let extra = 0;
+      for (const comp of patientComponents) {
+        const compCode = (comp.test_code || '').trim().toUpperCase();
+        const compCanonical = (comp.canonical_test_name || '').toLowerCase().trim();
+        const compTestName = (comp.test_name || '').toLowerCase().trim();
+        const nameMatch = (!!compCanonical && compCanonical === groupName) || compTestName === groupName;
+        const codeMatch = !!groupCode && !!compCode && compCode === groupCode;
+        if (nameMatch || codeMatch) extra++;
+      }
+      for (const r of filteredLabResults) {
+        if (!parentIdsWithComponents.has(r.id)) continue;
+        const rCode = (r.test_code || '').trim().toUpperCase();
+        const rName = (r.test_name || '').toLowerCase().trim();
+        if (rName === groupName || (!!groupCode && !!rCode && rCode === groupCode)) extra++;
+      }
+      if (extra > 0) map[group.key] = group.count + extra;
+    }
+    return map;
+  }, [groupedLabResults, patientComponents, filteredLabResults, parentIdsWithComponents]);
+
   // Auto-close the stack panel when the selected group no longer exists (e.g. all items deleted)
   useEffect(() => {
     if (stackPanelOpen && selectedGroupKey && !currentSelectedGroup) {
@@ -322,16 +429,36 @@ const LabResults = () => {
     }
   }, [stackPanelOpen, selectedGroupKey, currentSelectedGroup]);
 
-  const paginatedGroups = paginateData(groupedLabResults);
+  // Combined list for stacked view: stack groups + individual PDF-master results (sorted newest-first).
+  const stackedViewItems = useMemo(() => {
+    if (viewMode !== 'stacked') return [];
+    const stackItems = groupedLabResults.map(g => ({
+      type: 'stack',
+      key: g.key,
+      sortDate: g.latest_date || '',
+      data: g,
+    }));
+    const pdfItems = filteredLabResults
+      .filter(r => parentIdsWithComponents.has(r.id))
+      .map(r => ({
+        type: 'pdf',
+        key: `pdf:${r.id}`,
+        sortDate: r.completed_date || r.ordered_date || '',
+        data: r,
+      }));
+    return [...stackItems, ...pdfItems].sort((a, b) => b.sortDate.localeCompare(a.sortDate));
+  }, [viewMode, groupedLabResults, filteredLabResults, parentIdsWithComponents]);
+
+  const paginatedStackedItems = paginateData(stackedViewItems);
 
   useEffect(() => {
     resetPage();
   }, [dataManagement.hasActiveFilters, resetPage]);
   useEffect(() => {
     const count =
-      viewMode === 'stacked' ? groupedLabResults.length : filteredLabResults.length;
+      viewMode === 'stacked' ? stackedViewItems.length : filteredLabResults.length;
     clampPage(count);
-  }, [filteredLabResults.length, groupedLabResults.length, viewMode, clampPage]);
+  }, [filteredLabResults.length, stackedViewItems.length, viewMode, clampPage]);
 
   // Combined loading state
   const loading = labResultsLoading || practitionersLoading;
@@ -481,6 +608,30 @@ const LabResults = () => {
     // Refresh the lab results list
     await refreshData();
   }, [viewingLabResult, refreshData, setViewingLabResult]);
+
+  const handleViewComponent = useCallback(
+    async result => {
+      returningToStackRef.current = true;
+      const parentId = result.parent_lab_result_id;
+      const parent = labResults?.find(r => r.id === parentId);
+      const openParent = lr => {
+        setInitialViewTab('test-components');
+        setViewingLabResult(lr);
+        setShowViewModal(true);
+      };
+      if (parent) {
+        openParent(parent);
+      } else {
+        try {
+          const fetched = await apiService.getLabResult(parentId);
+          if (fetched) openParent(fetched);
+        } catch {
+          returningToStackRef.current = false;
+        }
+      }
+    },
+    [labResults, setViewingLabResult, setShowViewModal]
+  );
 
   const handleQuickImportSuccess = useCallback(
     async labResultId => {
@@ -777,18 +928,16 @@ const LabResults = () => {
     const name = (formData.test_name || '').toLowerCase().trim();
     if (!code && !name) return;
 
-    const getKey = r => {
-      const c = (r.test_code || '').trim().toUpperCase();
-      return c ? `code:${c}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
-    };
-    const formKey = code ? `code:${code}` : `name:${name}`;
-
     const match = [...labResults]
-      .filter(r =>
-        getKey(r) === formKey &&
-        (r.unit || r.ref_range_min != null || r.ref_range_max != null ||
-          r.ref_range_text || r.test_category || r.practitioner_id)
-      )
+      .filter(r => {
+        const rCode = (r.test_code || '').trim().toUpperCase();
+        const rName = (r.test_name || '').toLowerCase().trim();
+        const codeMatch = !!code && !!rCode && rCode === code;
+        const nameMatch = !!name && rName === name;
+        return (codeMatch || nameMatch) &&
+          (r.unit || r.ref_range_min != null || r.ref_range_max != null ||
+            r.ref_range_text || r.test_category || r.practitioner_id);
+      })
       .sort((a, b) => {
         const da = a.completed_date || a.ordered_date || '';
         const db = b.completed_date || b.ordered_date || '';
@@ -883,17 +1032,42 @@ const LabResults = () => {
     if (viewMode === 'stacked') {
       return (
         <AnimatedCardGrid
-          items={paginatedGroups}
+          items={paginatedStackedItems}
+          keyExtractor={item => item.key}
           columns={{ base: 12, sm: 6, lg: 4 }}
-          renderCard={group => (
-            <LabResultStackCard
-              group={group}
-              onDrillDown={g => {
-                setSelectedGroupKey(g.key);
-                setStackPanelOpen(true);
-              }}
-            />
-          )}
+          renderCard={item => {
+            if (item.type === 'stack') {
+              const group = item.data;
+              return (
+                <LabResultStackCard
+                  group={
+                    displayCountByGroupKey[group.key]
+                      ? { ...group, count: displayCountByGroupKey[group.key] }
+                      : group
+                  }
+                  onDrillDown={g => {
+                    setSelectedGroupKey(g.key);
+                    setStackPanelOpen(true);
+                  }}
+                />
+              );
+            }
+            return (
+              <LabResultCard
+                labResult={item.data}
+                onEdit={handleEditLabResult}
+                onDelete={() => handleDeleteLabResult(item.data.id)}
+                onView={handleViewLabResult}
+                practitioners={practitioners}
+                fileCount={fileCounts[item.data.id] || 0}
+                fileCountLoading={fileCountsLoading[item.data.id] || false}
+                navigate={navigate}
+                disableActions={isViewOnly}
+                disableActionsTooltip={viewOnlyTooltip}
+                isGroupedResult={true}
+              />
+            );
+          }}
         />
       );
     }
@@ -915,6 +1089,7 @@ const LabResults = () => {
               navigate={navigate}
               disableActions={isViewOnly}
               disableActionsTooltip={viewOnlyTooltip}
+              isGroupedResult={parentIdsWithComponents.has(result.id)}
             />
           )}
         />
@@ -1104,10 +1279,11 @@ const LabResults = () => {
         <LabResultStackPanel
           opened={stackPanelOpen}
           onClose={() => setStackPanelOpen(false)}
-          group={currentSelectedGroup}
+          group={enrichedSelectedGroup}
           patientId={currentPatient.id}
           onViewResult={result => {
             returningToStackRef.current = true;
+            setInitialViewTab('overview');
             handleViewLabResult(result);
           }}
           onEditResult={result => {
@@ -1115,6 +1291,7 @@ const LabResults = () => {
             handleEditLabResult(result);
           }}
           onDeleteResult={result => handleDeleteLabResult(result.id)}
+          onViewComponent={handleViewComponent}
           disableActions={isViewOnly}
         />
       )}
@@ -1144,6 +1321,7 @@ const LabResults = () => {
           onDocumentManagerRef={setDocumentManagerMethods}
           onTestComponentRef={setTestComponentMethods}
           onPendingRelationshipsRef={setPendingRelationshipsMethods}
+          isGroupedResult={!!(editingLabResult && parentIdsWithComponents.has(editingLabResult.id))}
           onFileUploadComplete={success => {
             if (success && editingLabResult) {
               refreshFileCount(editingLabResult.id);
