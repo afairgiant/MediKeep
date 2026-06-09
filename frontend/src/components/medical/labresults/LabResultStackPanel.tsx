@@ -13,6 +13,8 @@ import {
   Badge,
   Table,
   Tabs,
+  Box,
+  Divider,
 } from '@mantine/core';
 import {
   IconStack2,
@@ -25,6 +27,9 @@ import {
   IconArrowsSort,
   IconChartLine,
   IconTable,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconMinus,
 } from '@tabler/icons-react';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import TestComponentTrendChart from './TestComponentTrendChart';
@@ -225,6 +230,30 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
     padding: 0,
     font: 'inherit',
     color: 'inherit',
+  };
+
+  const getTrendIcon = () => {
+    switch (trendData?.statistics.trend_direction) {
+      case 'increasing': return <IconTrendingUp size={18} />;
+      case 'decreasing': return <IconTrendingDown size={18} />;
+      default: return <IconMinus size={18} />;
+    }
+  };
+
+  const getTrendColor = () => {
+    switch (trendData?.statistics.trend_direction) {
+      case 'increasing': return 'blue';
+      case 'decreasing': return 'orange';
+      default: return 'gray';
+    }
+  };
+
+  const getTrendLabel = () => {
+    switch (trendData?.statistics.trend_direction) {
+      case 'increasing': return t('labresults:trends.increasing', 'Increasing');
+      case 'decreasing': return t('labresults:trends.decreasing', 'Decreasing');
+      default: return t('labresults:trends.stable', 'Stable');
+    }
   };
 
   const handleViewClick = (result: LabResultSummary) => {
@@ -454,6 +483,67 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
         zIndex={2000}
       >
         <ScrollArea>
+          <Stack gap="md">
+          {trendData && (
+            <Paper withBorder p="md" radius="md">
+              <Stack gap="md">
+                <Text fw={600} size="sm">
+                  {t('labresults:trends.summaryStatistics', 'Summary Statistics')}
+                </Text>
+                <Divider />
+                <Group gap="xl">
+                  <Box>
+                    <Text size="xs" c="dimmed">{t('labresults:trends.latest', 'Latest')}</Text>
+                    <Group gap="xs" align="baseline">
+                      <Text fw={700} size="xl">
+                        {trendData.statistics.latest?.toFixed(2) ?? 'N/A'}
+                      </Text>
+                      <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                    </Group>
+                  </Box>
+                  <Box>
+                    <Text size="xs" c="dimmed">{t('labresults:trends.average', 'Average')}</Text>
+                    <Group gap="xs" align="baseline">
+                      <Text fw={600} size="lg">
+                        {trendData.statistics.average?.toFixed(2) ?? 'N/A'}
+                      </Text>
+                      <Text size="sm" c="dimmed">{trendData.unit}</Text>
+                    </Group>
+                  </Box>
+                  <Box>
+                    <Text size="xs" c="dimmed">{t('labresults:trends.range', 'Range')}</Text>
+                    <Group gap="xs" align="baseline">
+                      <Text fw={600} size="sm">
+                        {trendData.statistics.min?.toFixed(2)} – {trendData.statistics.max?.toFixed(2)}
+                      </Text>
+                      <Text size="xs" c="dimmed">{trendData.unit}</Text>
+                    </Group>
+                  </Box>
+                </Group>
+                <Group gap="md">
+                  <Badge leftSection={getTrendIcon()} color={getTrendColor()} variant="light" size="lg">
+                    {getTrendLabel()}
+                  </Badge>
+                  <Badge variant="light" color="blue" size="lg">
+                    {t('labresults:trends.dataPoints', '{{count}} data points', {
+                      count: trendData.statistics.count,
+                    })}
+                  </Badge>
+                </Group>
+                <Group gap="sm">
+                  <Text size="xs" c="dimmed">
+                    {t('labresults:trends.normalLabel', 'Normal:')}{' '}
+                    <Text span fw={600}>{trendData.statistics.normal_count}</Text>
+                  </Text>
+                  <Text size="xs" c="dimmed">•</Text>
+                  <Text size="xs" c="dimmed">
+                    {t('labresults:trends.abnormalLabel', 'Abnormal:')}{' '}
+                    <Text span fw={600}>{trendData.statistics.abnormal_count}</Text>
+                  </Text>
+                </Group>
+              </Stack>
+            </Paper>
+          )}
           {trendData ? (
             <Tabs value={activeTab} onChange={v => setActiveTab(v || 'chart')}>
               <Tabs.List>
@@ -488,6 +578,7 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
               {resultsTable}
             </Stack>
           )}
+          </Stack>
         </ScrollArea>
       </Drawer>
     </>

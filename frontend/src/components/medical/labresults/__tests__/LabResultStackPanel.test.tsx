@@ -22,6 +22,8 @@ vi.mock('@mantine/core', () => ({
   ScrollArea: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Paper: ({ children, ...props }: any) => <div {...props}>{children}</div>,
   Badge: ({ children, ...props }: any) => <span {...props}>{children}</span>,
+  Box: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  Divider: () => <hr />,
   Table: Object.assign(
     ({ children, ...props }: any) => <table {...props}>{children}</table>,
     {
@@ -59,6 +61,9 @@ vi.mock('@tabler/icons-react', () => ({
   IconArrowsSort: () => <span data-testid="icon-arrows-sort" />,
   IconChartLine: () => <span data-testid="icon-chart-line" />,
   IconTable: () => <span data-testid="icon-table" />,
+  IconTrendingUp: () => <span data-testid="icon-trending-up" />,
+  IconTrendingDown: () => <span data-testid="icon-trending-down" />,
+  IconMinus: () => <span data-testid="icon-minus" />,
 }));
 
 vi.mock('../../../../constants/labCategories', () => ({
