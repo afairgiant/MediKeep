@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Edit Lab Result",
     "labels": {
-      "testType": "Test Type"
+      "testType": "Test Type",
+      "referenceRange": "Reference Range"
     },
     "sections": {
       "associatedFiles": "Associated Documents",
@@ -461,5 +462,31 @@
   "unsavedDataInstructions": "Click \"Add Components\" in the Preview tab to save your parsed data before closing.",
   "unsavedDataMessage_one": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
   "unsavedDataMessage_other": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
-  "unsavedDataWarning": "Unsaved Parsed Data"
+  "unsavedDataWarning": "Unsaved Parsed Data",
+  "stackedView": {
+    "results": "{{count}} result",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Latest",
+    "noResults": "No results in this group",
+    "trendChart": "Value over time",
+    "fromPanel": "From panel",
+    "panel": "Panel"
+  },
+  "numericResult": {
+    "sectionLabel": "Numeric Result (optional)",
+    "sectionDescription": "Enter a measured value and reference range to enable trend charting for stacked results.",
+    "valueLabel": "Value",
+    "valuePlaceholder": "e.g. 6.2",
+    "unitLabel": "Unit",
+    "unitPlaceholder": "e.g. mg/dL, mmol/L",
+    "refMinLabel": "Range min",
+    "refMinPlaceholder": "e.g. 4.0",
+    "refMaxLabel": "Range max",
+    "refMaxPlaceholder": "e.g. 5.6",
+    "refTextLabel": "Range text",
+    "refTextPlaceholder": "e.g. 4.0-5.6 or <200",
+    "refTextDescription": "Overrides min/max in display"
+  }
 }

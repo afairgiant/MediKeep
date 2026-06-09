@@ -46,6 +46,13 @@ class LabResult(Base):
     # Optional notes
     notes = Column(Text, nullable=True)  # Any additional notes about the test
 
+    # Numeric result (optional — for quantitative tests and trending)
+    value = Column(Float, nullable=True)
+    unit = Column(String, nullable=True)
+    ref_range_min = Column(Float, nullable=True)
+    ref_range_max = Column(Float, nullable=True)
+    ref_range_text = Column(String, nullable=True)
+
     # Audit fields
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)

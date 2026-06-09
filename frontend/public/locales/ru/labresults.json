@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Редактировать результат исследования",
     "labels": {
-      "testType": "Тип исследования"
+      "testType": "Тип исследования",
+        "referenceRange": "Референсный диапазон"
     },
     "sections": {
       "associatedFiles": "Связанные документы",
@@ -461,5 +462,31 @@
   "unsavedDataInstructions": "Нажмите \"Добавить компоненты\" на вкладке Просмотр, чтобы сохранить разобранные данные перед закрытием.",
   "unsavedDataMessage_one": "У вас есть {{count}} разобранный компонент теста, который еще не добавлен. Если вы закроете сейчас, эти разобранные данные будут потеряны.",
   "unsavedDataMessage_other": "У вас есть {{count}} разобранных компонентов тестов, которые еще не добавлены. Если вы закроете сейчас, эти разобранные данные будут потеряны.",
-  "unsavedDataWarning": "Несохраненные разобранные данные"
+  "unsavedDataWarning": "Несохраненные разобранные данные",
+  "stackedView": {
+    "results": "{{count}} результат",
+    "results_one": "{{count}} результат",
+    "results_other": "{{count}} результатов",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Последний",
+    "trendChart": "Значение с течением времени",
+    "noResults": "Нет результатов в этой группе",
+    "fromPanel": "Из панели",
+    "panel": "Панель"
+  },
+  "numericResult": {
+    "sectionLabel": "Числовой результат (необязательно)",
+    "sectionDescription": "Введите измеренное значение и референсный диапазон для построения графиков тенденций.",
+    "valueLabel": "Значение",
+    "valuePlaceholder": "напр. 6,2",
+    "unitLabel": "Единица",
+    "unitPlaceholder": "напр. мг/дл, ммоль/л",
+    "refMinLabel": "Диапазон мин",
+    "refMinPlaceholder": "напр. 4,0",
+    "refMaxLabel": "Диапазон макс",
+    "refMaxPlaceholder": "напр. 5,6",
+    "refTextLabel": "Текст диапазона",
+    "refTextPlaceholder": "напр. 4,0-5,6 или <200",
+    "refTextDescription": "Заменяет мин/макс в отображении"
+  }
 }

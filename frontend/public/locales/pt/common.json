@@ -1246,7 +1246,8 @@
     "cards": "Cartões",
     "components": "Componentes",
     "label": "Modo de visualização",
-    "table": "Tabela"
+    "table": "Tabela",
+    "stacked": "Empilhado"
   },
   "visits": {
     "addNewVisit": "Adicionar Nova Consulta",

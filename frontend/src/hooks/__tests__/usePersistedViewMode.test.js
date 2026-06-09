@@ -58,6 +58,32 @@ describe('usePersistedViewMode', () => {
     );
   });
 
+  test('persists and restores "stacked" view mode', () => {
+    localStorage.getItem.mockImplementation(key => {
+      if (key === storageKey('lab-results')) return 'stacked';
+      return null;
+    });
+
+    const { result } = renderHook(() => usePersistedViewMode('lab-results'));
+    expect(result.current[0]).toBe('stacked');
+  });
+
+  test('writes "stacked" to localStorage when set', () => {
+    localStorage.getItem.mockReturnValue(null);
+
+    const { result } = renderHook(() => usePersistedViewMode('lab-results'));
+
+    act(() => {
+      result.current[1]('stacked');
+    });
+
+    expect(result.current[0]).toBe('stacked');
+    expect(localStorage.setItem).toHaveBeenCalledWith(
+      storageKey('lab-results'),
+      'stacked'
+    );
+  });
+
   test('ignores invalid stored values and falls back to default', () => {
     localStorage.getItem.mockReturnValue('grid');
 

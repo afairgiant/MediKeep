@@ -1246,7 +1246,8 @@
     "cards": "Schede",
     "components": "Componenti",
     "label": "Modalità di visualizzazione",
-    "table": "Tabella"
+    "table": "Tabella",
+    "stacked": "In pila"
   },
   "visits": {
     "addNewVisit": "Aggiungi nuova visita",

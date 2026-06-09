@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Editar Resultado Laboratorial",
     "labels": {
-      "testType": "Tipo de Exame"
+      "testType": "Tipo de Exame",
+        "referenceRange": "Intervalo de Referência"
     },
     "sections": {
       "associatedFiles": "Documentos Associados",
@@ -461,5 +462,31 @@
   "unsavedDataInstructions": "Clique em \"Adicionar Componentes\" na aba Visualizar para salvar seus dados analisados antes de fechar.",
   "unsavedDataMessage_one": "Você possui {{count}} componente(s) de exame analisado(s) que ainda não foram adicionados. Se fechar agora, você perderá estes dados analisados.",
   "unsavedDataMessage_other": "Você possui {{count}} componente(s) de exame analisado(s) que ainda não foram adicionados. Se fechar agora, você perderá estes dados analisados.",
-  "unsavedDataWarning": "Dados Analisados Não Salvos"
+  "unsavedDataWarning": "Dados Analisados Não Salvos",
+  "stackedView": {
+    "results": "{{count}} resultado",
+    "results_one": "{{count}} resultado",
+    "results_other": "{{count}} resultados",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Mais recente",
+    "trendChart": "Valor ao longo do tempo",
+    "noResults": "Nenhum resultado neste grupo",
+    "fromPanel": "Do painel",
+    "panel": "Painel"
+  },
+  "numericResult": {
+    "sectionLabel": "Resultado numérico (opcional)",
+    "sectionDescription": "Insira um valor medido e um intervalo de referência para ativar gráficos de tendência.",
+    "valueLabel": "Valor",
+    "valuePlaceholder": "ex. 6,2",
+    "unitLabel": "Unidade",
+    "unitPlaceholder": "ex. mg/dL, mmol/L",
+    "refMinLabel": "Intervalo mín",
+    "refMinPlaceholder": "ex. 4,0",
+    "refMaxLabel": "Intervalo máx",
+    "refMaxPlaceholder": "ex. 5,6",
+    "refTextLabel": "Texto do intervalo",
+    "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
+    "refTextDescription": "Substitui min/máx na exibição"
+  }
 }

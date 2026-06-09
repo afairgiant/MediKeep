@@ -100,7 +100,7 @@ export interface TrendDataPoint {
   ref_range_max?: number | null;
   ref_range_text?: string | null;
   recorded_date?: string | null;
-  created_at: string;
+  created_at: string | null;
   lab_result: {
     id: number;
     test_name: string;
@@ -201,6 +201,12 @@ export interface ComponentCatalogEntry {
 export interface ComponentCatalogResponse {
   items: ComponentCatalogEntry[];
   total: number;
+}
+
+export interface LabTestComponentForStack extends LabTestComponent {
+  completed_date?: string | null;
+  ordered_date?: string | null;
+  facility?: string | null;
 }
 
 class LabTestComponentApi {
@@ -1178,6 +1184,33 @@ class LabTestComponentApi {
         ],
       },
     });
+  }
+
+  async getAllForPatient(
+    patientId: number,
+    signal?: AbortSignal
+  ): Promise<LabTestComponentForStack[]> {
+    try {
+      const response = await apiService.get(
+        `/lab-test-components/patient/${patientId}/all`,
+        { signal }
+      );
+
+      logger.debug('all_patient_components_fetched', {
+        patientId,
+        count: response?.length || 0,
+        component: 'LabTestComponentApi',
+      });
+
+      return response || [];
+    } catch (error: any) {
+      logger.error('all_patient_components_fetch_error', {
+        patientId,
+        error: error.message,
+        component: 'LabTestComponentApi',
+      });
+      throw error;
+    }
   }
 }
 

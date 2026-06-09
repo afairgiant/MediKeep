@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge, Text } from '@mantine/core';
+import { IconFlask } from '@tabler/icons-react';
 import BaseMedicalCard from '../base/BaseMedicalCard';
 import StatusBadge from '../StatusBadge';
 import { navigateToEntity } from '../../../utils/linkNavigation';
@@ -19,9 +20,10 @@ const LabResultCard = React.memo(
     navigate,
     disableActions = false,
     disableActionsTooltip,
+    isGroupedResult = false,
     onError,
   }) => {
-    const { t } = useTranslation(['medical', 'common', 'shared']);
+    const { t } = useTranslation(['medical', 'common', 'shared', 'labresults']);
     const { formatLongDate } = useDateFormat();
 
     const handleError = error => {
@@ -45,6 +47,17 @@ const LabResultCard = React.memo(
 
       // Generate badges
       const badges = [];
+      if (isGroupedResult) {
+        badges.push({
+          label: (
+            <>
+              <IconFlask size={10} style={{ marginRight: 3, verticalAlign: 'middle' }} />
+              {t('labresults:stackedView.panel', 'Panel')}
+            </>
+          ),
+          color: 'violet',
+        });
+      }
       if (labResult.test_category) {
         badges.push({ label: labResult.test_category, color: 'blue' });
       }
@@ -167,7 +180,8 @@ const LabResultCard = React.memo(
       prevProps.disableActionsTooltip === nextProps.disableActionsTooltip &&
       prevProps.onEdit === nextProps.onEdit &&
       prevProps.onDelete === nextProps.onDelete &&
-      prevProps.onView === nextProps.onView
+      prevProps.onView === nextProps.onView &&
+      prevProps.isGroupedResult === nextProps.isGroupedResult
     );
   }
 );

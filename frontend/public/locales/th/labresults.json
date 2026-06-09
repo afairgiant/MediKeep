@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "แก้ไขผลแลป",
     "labels": {
-      "testType": "ประเภทการตรวจ"
+      "testType": "ประเภทการตรวจ",
+        "referenceRange": "ช่วงค่าปกติ"
     },
     "sections": {
       "associatedFiles": "เอกสารที่เกี่ยวข้อง",
@@ -461,5 +462,31 @@
   "unsavedDataInstructions": "คลิก \"เพิ่มรายการ\" ในแท็บตัวอย่างเพื่อบันทึกข้อมูลที่แปลงแล้วก่อนปิด",
   "unsavedDataMessage_one": "คุณมี {{count}} รายการตรวจที่แปลงแล้วแต่ยังไม่ได้เพิ่ม หากปิดตอนนี้คุณจะสูญเสียข้อมูลที่แปลงแล้วนี้",
   "unsavedDataMessage_other": "คุณมี {{count}} รายการตรวจที่แปลงแล้วแต่ยังไม่ได้เพิ่ม หากปิดตอนนี้คุณจะสูญเสียข้อมูลที่แปลงแล้วนี้",
-  "unsavedDataWarning": "ข้อมูลที่แปลงแล้วยังไม่ได้บันทึก"
+  "unsavedDataWarning": "ข้อมูลที่แปลงแล้วยังไม่ได้บันทึก",
+  "stackedView": {
+    "results": "{{count}} ผลลัพธ์",
+    "results_one": "{{count}} ผลลัพธ์",
+    "results_other": "{{count}} ผลลัพธ์",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "ล่าสุด",
+    "trendChart": "ค่าตามเวลา",
+    "noResults": "ไม่มีผลลัพธ์ในกลุ่มนี้",
+    "fromPanel": "จากแผง",
+    "panel": "แผง"
+  },
+  "numericResult": {
+    "sectionLabel": "ผลลัพธ์เชิงตัวเลข (ไม่บังคับ)",
+    "sectionDescription": "ป้อนค่าที่วัดได้และช่วงอ้างอิงเพื่อเปิดใช้งานแผนภูมิแนวโน้ม",
+    "valueLabel": "ค่า",
+    "valuePlaceholder": "เช่น 6.2",
+    "unitLabel": "หน่วย",
+    "unitPlaceholder": "เช่น mg/dL, mmol/L",
+    "refMinLabel": "ช่วงต่ำสุด",
+    "refMinPlaceholder": "เช่น 4.0",
+    "refMaxLabel": "ช่วงสูงสุด",
+    "refMaxPlaceholder": "เช่น 5.6",
+    "refTextLabel": "ข้อความช่วง",
+    "refTextPlaceholder": "เช่น 4.0-5.6 หรือ <200",
+    "refTextDescription": "แทนที่ค่าต่ำสุด/สูงสุดในการแสดงผล"
+  }
 }

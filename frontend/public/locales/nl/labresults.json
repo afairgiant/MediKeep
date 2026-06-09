@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Labresultaat bewerken",
     "labels": {
-      "testType": "Testtype"
+      "testType": "Testtype",
+        "referenceRange": "Referentiebereik"
     },
     "sections": {
       "associatedFiles": "Gekoppelde documenten",
@@ -461,5 +462,31 @@
   "unsavedDataInstructions": "Klik op \"Componenten toevoegen\" in het tabblad Voorbeeld om uw verwerkte gegevens op te slaan voordat u sluit.",
   "unsavedDataMessage_one": "U heeft {{count}} verwerkt testcomponent dat nog niet is toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
   "unsavedDataMessage_other": "U heeft {{count}} verwerkte testcomponenten die nog niet zijn toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
-  "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens"
+  "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens",
+  "stackedView": {
+    "results": "{{count}} resultaat",
+    "results_one": "{{count}} resultaat",
+    "results_other": "{{count}} resultaten",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Laatste",
+    "trendChart": "Waarde in de loop van de tijd",
+    "noResults": "Geen resultaten in deze groep",
+    "fromPanel": "Uit het paneel",
+    "panel": "Paneel"
+  },
+  "numericResult": {
+    "sectionLabel": "Numeriek resultaat (optioneel)",
+    "sectionDescription": "Voer een gemeten waarde en referentiebereik in om trendgrafieken in te schakelen.",
+    "valueLabel": "Waarde",
+    "valuePlaceholder": "bijv. 6,2",
+    "unitLabel": "Eenheid",
+    "unitPlaceholder": "bijv. mg/dL, mmol/L",
+    "refMinLabel": "Bereik min",
+    "refMinPlaceholder": "bijv. 4,0",
+    "refMaxLabel": "Bereik max",
+    "refMaxPlaceholder": "bijv. 5,6",
+    "refTextLabel": "Bereiktekst",
+    "refTextPlaceholder": "bijv. 4,0-5,6 of <200",
+    "refTextDescription": "Vervangt min/max in weergave"
+  }
 }

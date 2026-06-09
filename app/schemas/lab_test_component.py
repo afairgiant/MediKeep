@@ -487,6 +487,16 @@ class LabTestComponentWithLabResult(LabTestComponentResponse):
     model_config = {"from_attributes": True}
 
 
+class LabTestComponentForStack(LabTestComponentResponse):
+    """Schema for lab test component enriched with parent dates for stack drill-down."""
+
+    completed_date: Optional[date] = None
+    ordered_date: Optional[date] = None
+    facility: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
 # Bulk operations schemas
 
 

@@ -61,11 +61,14 @@ const LabResultViewModal = ({
 
   // Reset activeTab when modal opens with new labResult
   const [activeTab, setActiveTab] = useState(initialTab);
+  // null = not yet determined, true = has components, false = confirmed empty
+  const [hasTestComponents, setHasTestComponents] = useState(null);
 
-  // Reset tab when labResult changes or initialTab changes
+  // Reset tab and component state when labResult changes or initialTab changes
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialTab);
+      setHasTestComponents(null);
     }
   }, [isOpen, labResult?.id, initialTab]);
 
@@ -77,6 +80,7 @@ const LabResultViewModal = ({
       tags: labResult?.tags?.length > 0,
       conditions: !!fetchLabResultConditions,
       encounters: !!fetchLabResultEncounters,
+      'test-components': hasTestComponents !== false,
     };
     if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
       setActiveTab('overview');
@@ -88,6 +92,7 @@ const LabResultViewModal = ({
     labResult?.tags?.length,
     fetchLabResultConditions,
     fetchLabResultEncounters,
+    hasTestComponents,
   ]);
 
   const handleError = (error, context) => {
@@ -171,12 +176,14 @@ const LabResultViewModal = ({
               >
                 {t('shared:tabs.overview', 'Overview')}
               </Tabs.Tab>
-              <Tabs.Tab
-                value="test-components"
-                leftSection={<IconFlask size={16} />}
-              >
-                {t('labresults:modal.tabs.testComponents', 'Test Components')}
-              </Tabs.Tab>
+              {hasTestComponents !== false && (
+                <Tabs.Tab
+                  value="test-components"
+                  leftSection={<IconFlask size={16} />}
+                >
+                  {t('labresults:modal.tabs.testComponents', 'Test Components')}
+                </Tabs.Tab>
+              )}
               {fetchLabResultConditions && (
                 <Tabs.Tab
                   value="conditions"
@@ -308,6 +315,39 @@ const LabResultViewModal = ({
                             : t('labels.notCompleted', 'Not completed')}
                         </Text>
                       </Stack>
+                      {labResult.value != null && (
+                        <Stack gap="xs">
+                          <Text fw={600} size="sm" c="dimmed">
+                            {t('labresults:numericResult.valueLabel', 'Value')}
+                          </Text>
+                          <Text>
+                            {labResult.value}
+                            {labResult.unit && (
+                              <Text span size="sm" c="dimmed" ml={4}>
+                                {labResult.unit}
+                              </Text>
+                            )}
+                          </Text>
+                        </Stack>
+                      )}
+                      {(labResult.ref_range_text ||
+                        labResult.ref_range_min != null ||
+                        labResult.ref_range_max != null) && (
+                        <Stack gap="xs">
+                          <Text fw={600} size="sm" c="dimmed">
+                            {t('labresults:modal.labels.referenceRange', 'Reference Range')}
+                          </Text>
+                          <Text>
+                            {labResult.ref_range_text ||
+                              (labResult.ref_range_min != null &&
+                              labResult.ref_range_max != null
+                                ? `${labResult.ref_range_min} – ${labResult.ref_range_max}${labResult.unit ? ` ${labResult.unit}` : ''}`
+                                : labResult.ref_range_min != null
+                                  ? `≥ ${labResult.ref_range_min}`
+                                  : `≤ ${labResult.ref_range_max}`)}
+                          </Text>
+                        </Stack>
+                      )}
                     </SimpleGrid>
                   </div>
 
@@ -356,6 +396,7 @@ const LabResultViewModal = ({
                   isViewMode={disableEdit}
                   onError={handleTestComponentsError}
                   onLabResultUpdated={onLabResultUpdated}
+                  onHasComponents={setHasTestComponents}
                 />
               </Box>
             </Tabs.Panel>

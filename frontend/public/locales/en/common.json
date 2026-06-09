@@ -1246,6 +1246,7 @@
     "cards": "Cards",
     "components": "Components",
     "label": "View mode",
+    "stacked": "Stacked",
     "table": "Table"
   },
   "visits": {

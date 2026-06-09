@@ -165,7 +165,8 @@
   "modal": {
     "editLabResult": "Editer le résultat d'analyse",
     "labels": {
-      "testType": "Type d'analyse"
+      "testType": "Type d'analyse",
+        "referenceRange": "Plage de référence"
     },
     "sections": {
       "associatedFiles": "Documents associés",
@@ -461,5 +462,31 @@
   "unsavedDataInstructions": "Cliquez sur \"Ajouter des composants\" dans l'onglet d'aperçu pour sauvegarder vos données analysées avant de fermer la fenêtre.",
   "unsavedDataMessage_one": "Vous avez {{count}} composant d'analyse analysé qui n'a pas encore été ajouté. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
   "unsavedDataMessage_other": "Vous avez {{count}} composants d'analyse analysés qui n'ont pas encore été ajoutés. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
-  "unsavedDataWarning": "Données analysées non sauvegardées"
+  "unsavedDataWarning": "Données analysées non sauvegardées",
+  "stackedView": {
+    "results": "{{count}} résultat",
+    "results_one": "{{count}} résultat",
+    "results_other": "{{count}} résultats",
+    "dateRange": "{{from}} – {{to}}",
+    "latestResult": "Dernier",
+    "trendChart": "Évolution dans le temps",
+    "noResults": "Aucun résultat dans ce groupe",
+    "fromPanel": "Du panneau",
+    "panel": "Panneau"
+  },
+  "numericResult": {
+    "sectionLabel": "Résultat numérique (optionnel)",
+    "sectionDescription": "Saisissez une valeur mesurée et une plage de référence pour activer les graphiques de tendance.",
+    "valueLabel": "Valeur",
+    "valuePlaceholder": "ex. 6,2",
+    "unitLabel": "Unité",
+    "unitPlaceholder": "ex. mg/dL, mmol/L",
+    "refMinLabel": "Min de plage",
+    "refMinPlaceholder": "ex. 4,0",
+    "refMaxLabel": "Max de plage",
+    "refMaxPlaceholder": "ex. 5,6",
+    "refTextLabel": "Texte de plage",
+    "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
+    "refTextDescription": "Remplace min/max dans l'affichage"
+  }
 }
