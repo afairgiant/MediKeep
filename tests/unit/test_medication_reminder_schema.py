@@ -99,5 +99,5 @@ class TestMedicationReminderTemplate:
         assert "test" in body.lower()
 
     def test_missing_fields_fall_back_to_placeholders(self):
-        title, body = medication_reminder_due_template({})
+        _, body = medication_reminder_due_template({})
         assert "your medication" in body

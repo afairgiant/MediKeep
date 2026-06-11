@@ -3445,7 +3445,7 @@ Base path: `/api/v1/notifications`
 {
   "event_types": [
     {
-      "value": "medication_reminder",
+      "value": "medication_reminder_due",
       "label": "Medication Reminder",
       "description": "Reminders for taking medications",
       "category": "reminders",
@@ -3619,7 +3619,7 @@ Base path: `/api/v1/notifications`
     "id": 1,
     "channel_id": 1,
     "channel_name": "My Email",
-    "event_type": "medication_reminder",
+    "event_type": "medication_reminder_due",
     "is_enabled": true,
     "remind_before_minutes": 30,
     "created_at": "2025-09-01T00:00:00Z",
@@ -3642,9 +3642,9 @@ Base path: `/api/v1/notifications`
     {"id": 1, "name": "My Email", "channel_type": "email", ...},
     {"id": 2, "name": "My Telegram", "channel_type": "telegram", ...}
   ],
-  "events": ["medication_reminder", "lab_result_available", "appointment_reminder"],
+  "events": ["medication_reminder_due", "lab_result_available", "appointment_reminder"],
   "preferences": {
-    "medication_reminder": {"1": true, "2": false},
+    "medication_reminder_due": {"1": true, "2": false},
     "lab_result_available": {"1": true, "2": true},
     "appointment_reminder": {"1": false, "2": true}
   }
@@ -3662,7 +3662,7 @@ Base path: `/api/v1/notifications`
 ```json
 {
   "channel_id": 1,
-  "event_type": "medication_reminder",
+  "event_type": "medication_reminder_due",
   "is_enabled": true,
   "remind_before_minutes": 30
 }
@@ -3690,7 +3690,7 @@ Base path: `/api/v1/notifications`
   "items": [
     {
       "id": 1,
-      "event_type": "medication_reminder",
+      "event_type": "medication_reminder_due",
       "title": "Medication Reminder",
       "message_preview": "Time to take your Aspirin...",
       "channel_name": "My Email",

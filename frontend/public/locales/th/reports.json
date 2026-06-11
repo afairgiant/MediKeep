@@ -6,7 +6,7 @@
       "generateReport": "สร้างรายงาน ({{count}} บันทึก)",
       "generateReport_one": "สร้างรายงาน ({{count}} บันทึก)",
       "generateReport_other": "สร้างรายงาน ({{count}} บันทึก)",
-      "generateReportChartsOnly": "สร้างรายงาน ({{chartCount}} กราф)",
+      "generateReportChartsOnly": "สร้างรายงาน ({{chartCount}} กราฟ)",
       "generateReportWithCharts": "สร้างรายงาน ({{recordCount}} บันทึก, {{chartCount}} กราف)",
       "selectAll": "เลือกบันทึกทั้งหมด"
     },

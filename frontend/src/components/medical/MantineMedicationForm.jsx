@@ -403,6 +403,10 @@ const MantineMedicationForm = ({
                         );
                       }}
                       error={error}
+                      aria-label={`${t(
+                        'medications.reminders.times.label',
+                        'Reminder times'
+                      )} ${index + 1}`}
                       style={{ flex: 1 }}
                     />
                     <ActionIcon

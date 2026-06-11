@@ -151,7 +151,10 @@ class MedicationReminderSchedulerService:
     ) -> tuple:
         """Run discovery + publish loop. Returns (seen, due, skipped, published)."""
         # DB queries are synchronous; run them off-loop so a slow query
-        # doesn't stall in-flight HTTP requests every minute.
+        # doesn't stall in-flight HTTP requests every minute. Sharing the
+        # Session across to_thread calls is safe because access is strictly
+        # serialized — each call is awaited before the next; the Session is
+        # never touched from two threads concurrently.
         candidates = await asyncio.to_thread(self._discover_candidates, db, today_local)
         due_rows = [
             row

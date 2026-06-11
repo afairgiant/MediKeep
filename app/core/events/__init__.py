@@ -24,7 +24,7 @@ def register_all_events() -> None:
     """
     Register all notification event types with the event registry.
 
-    This function registers all 6 notification triggers with their metadata
+    This function registers all 7 notification triggers with their metadata
     and template functions. Should be called once during application startup.
     """
     registry = get_event_registry()

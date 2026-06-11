@@ -168,7 +168,7 @@ class TestEffectivePeriod:
             effective_period_end=date(2026, 6, 9),
         )
 
-        _, due, _, published = await _run_tick(db_session, "08:00")
+        _, _, _, published = await _run_tick(db_session, "08:00")
 
         assert published == 1
 
@@ -182,7 +182,7 @@ class TestEffectivePeriod:
             effective_period_end=date(2026, 6, 8),
         )
 
-        _, due, _, published = await _run_tick(db_session, "08:00")
+        _, _, _, published = await _run_tick(db_session, "08:00")
 
         assert published == 0
 
@@ -196,7 +196,7 @@ class TestEffectivePeriod:
             effective_period_start=date(2026, 6, 10),
         )
 
-        _, due, _, published = await _run_tick(db_session, "08:00")
+        _, _, _, published = await _run_tick(db_session, "08:00")
 
         assert published == 0
 
@@ -236,7 +236,7 @@ class TestIdempotency:
             scheduled_time_local="08:00",
         )
 
-        _, due, skipped, published = await _run_tick(db_session, "20:00")
+        _, _, skipped, published = await _run_tick(db_session, "20:00")
 
         assert published == 1
         assert skipped == 0

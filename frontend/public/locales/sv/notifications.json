@@ -145,7 +145,7 @@
     "testError": "Det gick inte att skicka testaviseringen",
     "testFailed": "Testaviseringen misslyckades",
     "testing": "Testar...",
-    "testSuccess": "Testаvisering skickad!",
+    "testSuccess": "Testavisering skickad!",
     "title": "Aviseringskanaler",
     "types": {
       "discord": "Discord",
