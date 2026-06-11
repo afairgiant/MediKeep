@@ -19,8 +19,11 @@ import {
   IconPill,
   IconNotes,
   IconFileText,
+  IconBell,
 } from '@tabler/icons-react';
 import { navigateToEntity } from '../../../utils/linkNavigation';
+import { formatTimeToAmPm } from '../../../utils/dateUtils';
+import { getReminderBlockerDescriptors } from '../../../utils/medicationReminders';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTagColors } from '../../../hooks/useTagColors';
 import StatusBadge from '../StatusBadge';
@@ -43,7 +46,7 @@ const MedicationViewModal = ({
   disableEdit = false,
   disableEditTooltip,
 }) => {
-  const { t } = useTranslation(['common', 'shared']);
+  const { t } = useTranslation(['common', 'shared', 'medical']);
   const { formatDate } = useDateFormat();
   const { getTagColor } = useTagColors();
 
@@ -88,6 +91,10 @@ const MedicationViewModal = ({
 
     return null;
   };
+
+  const reminderBlockerDescriptors = medication
+    ? getReminderBlockerDescriptors(medication)
+    : [];
 
   if (!medication) return null;
 
@@ -424,6 +431,70 @@ const MedicationViewModal = ({
                       </Text>
                     </Stack>
                   </SimpleGrid>
+                </div>
+
+                <div>
+                  <Group gap="xs" mb="sm" align="center">
+                    <IconBell size={18} />
+                    <Title order={4}>
+                      {t('medical:medications.reminders.tabLabel', 'Reminders')}
+                    </Title>
+                  </Group>
+                  {medication.reminder_enabled &&
+                  Array.isArray(medication.reminder_times) &&
+                  medication.reminder_times.length > 0 ? (
+                    <Stack gap="xs">
+                      <Group gap="xs">
+                        {reminderBlockerDescriptors.length > 0 ? (
+                          <Badge color="orange" variant="light">
+                            {t(
+                              'medical:medications.reminders.notFiring.badge',
+                              "Won't fire"
+                            )}
+                          </Badge>
+                        ) : (
+                          <Badge color="green" variant="light">
+                            {t(
+                              'medical:medications.reminders.enabledBadge',
+                              'Reminders enabled'
+                            )}
+                          </Badge>
+                        )}
+                      </Group>
+                      {reminderBlockerDescriptors.length > 0 && (
+                        <Stack gap={2}>
+                          {reminderBlockerDescriptors.map(d => (
+                            <Text size="sm" c="dimmed" key={d.blocker}>
+                              {t(`medical:${d.key}`, {
+                                ...d.params,
+                                defaultValue: d.defaultValue,
+                              })}
+                            </Text>
+                          ))}
+                        </Stack>
+                      )}
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t(
+                          'medical:medications.reminders.times.label',
+                          'Reminder times'
+                        )}
+                      </Text>
+                      <Group gap="xs">
+                        {medication.reminder_times.map(time => (
+                          <Badge key={time} variant="outline" color="blue">
+                            {formatTimeToAmPm(time)}
+                          </Badge>
+                        ))}
+                      </Group>
+                    </Stack>
+                  ) : (
+                    <Text size="sm" c="dimmed">
+                      {t(
+                        'medical:medications.reminders.viewNone',
+                        'No reminders configured'
+                      )}
+                    </Text>
+                  )}
                 </div>
 
                 {/* Refill Information - TODO: Enable when refill functionality is implemented */}

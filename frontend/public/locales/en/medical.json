@@ -874,6 +874,39 @@
       "label": "Prescribing Provider",
       "placeholder": "Select Provider"
     },
+    "reminders": {
+      "tabLabel": "Reminders",
+      "enabled": {
+        "label": "Enable reminders",
+        "description": "Send notifications when it is time to take this medication"
+      },
+      "times": {
+        "label": "Reminder times",
+        "description": "24-hour times when the reminder will fire",
+        "addButton": "Add time",
+        "removeAriaLabel": "Remove time",
+        "max": "Maximum of {{count}} times",
+        "duplicate": "This time is already in the list",
+        "invalid": "Time must be HH:MM (24-hour)",
+        "empty": "No reminder times configured."
+      },
+      "noChannelsTitle": "No notification channel enabled",
+      "noChannelsWarning": "No notification channel is configured for medication reminders. Open Notification Settings to enable a channel.",
+      "openSettings": "Open Notification Settings",
+      "testButton": "Send test reminder now",
+      "testSuccess": "Test reminder sent",
+      "testError": "Failed to send test reminder",
+      "saveBeforeTest": "Save the medication first to send a test reminder.",
+      "viewNone": "No reminders configured",
+      "notFiring": {
+        "title": "Reminders won't fire",
+        "badge": "Won't fire",
+        "periodEnded": "The effective period ended on {{date}}.",
+        "notStarted": "The effective period doesn't start until {{date}}.",
+        "statusNotActive": "The medication status is \"{{status}}\", not active."
+      },
+      "enabledBadge": "Reminders enabled"
+    },
     "route": {
       "description": "How the medication is administered",
       "label": "Route",

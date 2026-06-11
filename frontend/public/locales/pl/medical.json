@@ -412,7 +412,14 @@
       "dateRangePlaceholder": "Filtruj według zakresu dat",
       "noDiseaseData": "Żadne szczepienia nie są powiązane z biblioteką. Przełącz na widok „Według daty”, aby zobaczyć wszystkie wpisy, lub edytuj wpis i ponownie wybierz szczepionkę z autouzupełniania, aby ją powiązać.",
       "unmatchedTitle": "Niektóre wpisy nie są powiązane z biblioteką szczepionek",
-      "unmatchedBanner": "Liczba niepowiązanych wpisów: {{count}}. Edytuj wpis i wybierz go ponownie z autouzupełniania, aby go powiązać."
+      "unmatchedBanner": "Liczba niepowiązanych wpisów: {{count}}. Edytuj wpis i wybierz go ponownie z autouzupełniania, aby go powiązać.",
+      "linkActionLabel": "Połącz z biblioteką",
+      "miscGroup": "Różne / Niepołączone",
+      "miscGroupHint": "Te wpisy nie są jeszcze połączone z biblioteką szczepionek. Kliknij wpis, aby go edytować i wybrać pozycję z biblioteki."
+    },
+    "form": {
+      "linkStatusLinked": "✓ Połączono z biblioteką: {{name}}",
+      "linkStatusUnlinked": "⚠ Nie połączono z biblioteką. Wybierz szczepionkę z listy, aby połączyć."
     }
   },
   "injuries": {
@@ -888,6 +895,39 @@
       "description": "Znane lub doświadczane skutki uboczne tego leku",
       "label": "Działania niepożądane",
       "placeholder": "Wymień znane lub doświadczane działania niepożądane..."
+    },
+    "reminders": {
+      "tabLabel": "Przypomnienia",
+      "enabled": {
+        "label": "Włącz przypomnienia",
+        "description": "Wysyłaj powiadomienia, gdy nadejdzie pora przyjęcia tego leku"
+      },
+      "times": {
+        "label": "Godziny przypomnień",
+        "description": "Godziny (format 24-godzinny), o których przypomnienie zostanie wysłane",
+        "addButton": "Dodaj godzinę",
+        "removeAriaLabel": "Usuń godzinę",
+        "max": "Maksymalnie {{count}} godzin",
+        "duplicate": "Ta godzina jest już na liście",
+        "invalid": "Godzina musi być w formacie GG:MM (24-godzinnym)",
+        "empty": "Nie skonfigurowano godzin przypomnień."
+      },
+      "noChannelsTitle": "Brak włączonego kanału powiadomień",
+      "noChannelsWarning": "Nie skonfigurowano kanału powiadomień dla przypomnień o lekach. Otwórz ustawienia powiadomień, aby włączyć kanał.",
+      "openSettings": "Otwórz ustawienia powiadomień",
+      "testButton": "Wyślij teraz testowe przypomnienie",
+      "testSuccess": "Wysłano testowe przypomnienie",
+      "testError": "Nie udało się wysłać testowego przypomnienia",
+      "saveBeforeTest": "Najpierw zapisz lek, aby wysłać testowe przypomnienie.",
+      "viewNone": "Brak skonfigurowanych przypomnień",
+      "notFiring": {
+        "title": "Przypomnienia nie będą uruchamiane",
+        "badge": "Nie zostanie uruchomione",
+        "periodEnded": "Okres obowiązywania zakończył się {{date}}.",
+        "notStarted": "Okres obowiązywania zaczyna się dopiero {{date}}.",
+        "statusNotActive": "Status leku to „{{status}}”, a nie aktywny."
+      },
+      "enabledBadge": "Przypomnienia włączone"
     }
   },
   "pharmacies": {

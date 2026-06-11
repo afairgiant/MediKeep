@@ -9,6 +9,7 @@ Event Categories:
     - Backup Events: Backup completion and failure events
     - Collaboration Events: Invitation and sharing events
     - Security Events: Password changes and security-related events
+    - Medical Events: Medication reminders and other clinical triggers
 
 All events inherit from DomainEvent and include:
     - event_id: Unique identifier for the event
@@ -22,6 +23,7 @@ from app.events.collaboration_events import (
     InvitationReceivedEvent,
     ShareRevokedEvent,
 )
+from app.events.medication_events import MedicationReminderDueEvent
 from app.events.security_events import PasswordChangedEvent
 
 __all__ = [
@@ -34,4 +36,6 @@ __all__ = [
     "ShareRevokedEvent",
     # Security Events
     "PasswordChangedEvent",
+    # Medical Events
+    "MedicationReminderDueEvent",
 ]

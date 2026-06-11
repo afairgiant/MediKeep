@@ -144,9 +144,7 @@ class TestMedicationAPI:
         )
         db_session.commit()
 
-        response = client.get(
-            "/api/v1/medications/", headers=authenticated_headers
-        )
+        response = client.get("/api/v1/medications/", headers=authenticated_headers)
 
         assert response.status_code == 200
         data = response.json()
@@ -707,3 +705,122 @@ class TestMedicationAPI:
         )
 
         assert response.status_code == 422
+
+
+class TestMedicationReminderTestEndpoint:
+    """POST /medications/{id}/reminders/test fires an immediate test reminder.
+
+    Uses the shared user_with_patient / authenticated_headers fixtures from
+    tests/api/conftest.py.
+    """
+
+    def _create_medication(
+        self,
+        client,
+        headers,
+        patient_id,
+        *,
+        reminder_enabled=True,
+        reminder_times=None,
+    ):
+        payload = {
+            "patient_id": patient_id,
+            "medication_name": "Aspirin",
+            "status": "active",
+            "reminder_enabled": reminder_enabled,
+            "reminder_times": reminder_times or ["08:00"],
+        }
+        response = client.post("/api/v1/medications/", json=payload, headers=headers)
+        assert response.status_code == 200, response.text
+        return response.json()["id"]
+
+    def _add_channel_and_preference(self, db_session, user_id):
+        """Insert a notification channel + an enabled preference for the event."""
+        from app.models.notifications import (
+            NotificationChannel,
+            NotificationPreference,
+        )
+
+        channel = NotificationChannel(
+            user_id=user_id,
+            name="test-ntfy",
+            channel_type="ntfy",
+            config_encrypted="not-really-encrypted",
+            is_enabled=True,
+        )
+        db_session.add(channel)
+        db_session.commit()
+        db_session.refresh(channel)
+
+        pref = NotificationPreference(
+            user_id=user_id,
+            channel_id=channel.id,
+            event_type="medication_reminder_due",
+            is_enabled=True,
+        )
+        db_session.add(pref)
+        db_session.commit()
+        return channel, pref
+
+    def test_returns_204_when_preference_enabled(
+        self,
+        client: TestClient,
+        db_session: Session,
+        user_with_patient,
+        authenticated_headers,
+    ):
+        med_id = self._create_medication(
+            client, authenticated_headers, user_with_patient["patient"].id
+        )
+        self._add_channel_and_preference(db_session, user_with_patient["user"].id)
+
+        response = client.post(
+            f"/api/v1/medications/{med_id}/reminders/test",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 204
+
+    def test_returns_400_when_reminders_disabled(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        med_id = self._create_medication(
+            client,
+            authenticated_headers,
+            user_with_patient["patient"].id,
+            reminder_enabled=False,
+        )
+
+        response = client.post(
+            f"/api/v1/medications/{med_id}/reminders/test",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 400
+
+    def test_returns_422_when_no_channel_enabled(
+        self, client: TestClient, user_with_patient, authenticated_headers
+    ):
+        med_id = self._create_medication(
+            client, authenticated_headers, user_with_patient["patient"].id
+        )
+
+        response = client.post(
+            f"/api/v1/medications/{med_id}/reminders/test",
+            headers=authenticated_headers,
+        )
+
+        assert response.status_code == 422
+
+    def test_returns_404_for_unknown_medication(
+        self, client: TestClient, authenticated_headers
+    ):
+        response = client.post(
+            "/api/v1/medications/999999/reminders/test",
+            headers=authenticated_headers,
+        )
+        assert response.status_code == 404
+
+    def test_requires_authentication(self, client: TestClient):
+        response = client.post("/api/v1/medications/1/reminders/test")
+        assert response.status_code == 401

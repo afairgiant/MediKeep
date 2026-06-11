@@ -6,7 +6,6 @@ Configuration is persisted in the SystemSetting table as a JSON blob.
 """
 
 import json
-import re
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
@@ -16,6 +15,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
+from app.core.utils.datetime_utils import HHMM_24H_RE
 
 logger = get_logger(__name__, "app")
 
@@ -35,7 +35,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "last_run_error": None,
 }
 
-TIME_FORMAT_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
+TIME_FORMAT_RE = HHMM_24H_RE
 
 
 class BackupSchedulerService:

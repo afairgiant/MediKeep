@@ -211,6 +211,8 @@ const Medication = () => {
     notes: '',
     side_effects: '',
     condition_ids: [],
+    reminder_enabled: false,
+    reminder_times: [],
   });
 
   const {
@@ -280,6 +282,8 @@ const Medication = () => {
       side_effects: '',
       tags: [],
       condition_ids: [],
+      reminder_enabled: false,
+      reminder_times: [],
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -320,6 +324,10 @@ const Medication = () => {
       notes: medication.notes || '',
       side_effects: medication.side_effects || '',
       tags: medication.tags || [],
+      reminder_enabled: Boolean(medication.reminder_enabled),
+      reminder_times: Array.isArray(medication.reminder_times)
+        ? medication.reminder_times
+        : [],
     });
     setEditingMedication(medication);
     setShowAddForm(true);
@@ -378,6 +386,10 @@ const Medication = () => {
         notes: formData.notes?.trim() || null,
         side_effects: formData.side_effects?.trim() || null,
         tags: formData.tags || [],
+        reminder_enabled: Boolean(formData.reminder_enabled),
+        reminder_times: Array.isArray(formData.reminder_times)
+          ? formData.reminder_times.filter(Boolean)
+          : [],
       };
 
       if (formData.effective_period_start) {

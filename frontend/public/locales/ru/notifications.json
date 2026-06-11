@@ -25,7 +25,7 @@
       },
       "webhookUrl": {
         "description": "Создайте webhook в настройках вашего сервера Discord",
-        "label": "URL Webhook",
+        "label": "URL webhook",
         "placeholder": "https://discord.com/api/webhooks/..."
       }
     },
@@ -67,7 +67,7 @@
       }
     },
     "empty": "Каналы уведомлений не настроены.",
-    "emptyHint": "Добавьте канал, чтобы начать получать уведомления через Discord, электронную почту, Gotify, ntfy или вебхук.",
+    "emptyHint": "Добавьте канал, чтобы начать получать уведомления через Discord, электронную почту, Gotify, ntfy или webhook.",
     "errors": {
       "fieldRequired": "Поле «{{field}}» обязательно для заполнения",
       "nameRequired": "Название канала обязательно"
@@ -87,7 +87,7 @@
       "name": {
         "description": "Понятное название для идентификации канала",
         "label": "Название канала",
-        "placeholder": "например, Мой сервер Discord"
+        "placeholder": "напр., Мой сервер Discord"
       },
       "title": "Данные канала",
       "type": {
@@ -103,7 +103,7 @@
         "placeholder": "Токен приложения из Gotify"
       },
       "priority": {
-        "description": "Приоритет сообщения (1-10, по умолчанию 5)",
+        "description": "Приоритет сообщения (1–10, по умолчанию 5)",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -124,7 +124,7 @@
         "placeholder": "tk_..."
       },
       "priority": {
-        "description": "Приоритет сообщения (1=мин, 3=по умолчанию, 5=макс)",
+        "description": "Приоритет сообщения (1=мин., 3=по умолчанию, 5=макс.)",
         "label": "Приоритет",
         "placeholder": "3"
       },
@@ -134,7 +134,7 @@
         "placeholder": "https://ntfy.sh"
       },
       "topic": {
-        "description": "Уникальное имя темы. Подпишитесь на ту же тему на ntfy.sh или в приложении ntfy.",
+        "description": "Уникальное название темы. Подпишитесь на ту же тему на ntfy.sh или в приложении ntfy.",
         "label": "Тема",
         "placeholder": "my-alerts"
       }
@@ -174,17 +174,24 @@
       },
       "url": {
         "description": "URL для получения уведомлений",
-        "label": "URL Webhook",
+        "label": "URL webhook",
         "placeholder": "https://api.example.com/webhook"
       }
     }
   },
   "description": "Настройте способы получения уведомлений о важных событиях",
   "error": "Не удалось загрузить настройки уведомлений",
+  "categories": {
+    "medical": "Медицина"
+  },
   "events": {
     "backup_completed": {
       "description": "Когда резервное копирование завершено успешно",
       "name": "Резервная копия создана"
+    },
+    "medication_reminder_due": {
+      "description": "Когда наступает время приёма запланированного лекарства",
+      "name": "Напоминание о приёме лекарства"
     },
     "backup_failed": {
       "description": "Когда резервное копирование завершилось с ошибкой",
@@ -298,15 +305,15 @@
       "revokeFailed": "Не удалось отозвать доступ"
     },
     "files": {
-      "downloadFailed": "Ошибка загрузки файла"
+      "downloadFailed": "Ошибка скачивания файла"
     },
     "generic": {
-      "allOperationsFailed": "Все операции ({{operation}}) завершились с ошибками. Попробуйте снова.",
-      "allOperationsSuccess": "Все {{total}} операций ({{operation}}) выполнены успешно!",
-      "downloadFailed": "Ошибка загрузки",
+      "allOperationsFailed": "Все операции «{{operation}}» завершились с ошибками. Попробуйте снова.",
+      "allOperationsSuccess": "Все {{total}} операций «{{operation}}» выполнены успешно!",
+      "downloadFailed": "Ошибка скачивания",
       "operationFailed": "Ошибка операции",
       "operationFailedTitle": "Ошибка: {{operation}}",
-      "operationPartial": "{{success}}/{{total}} операций ({{operation}}) выполнены успешно. {{failed}} с ошибками.",
+      "operationPartial": "{{success}}/{{total}} операций «{{operation}}» выполнены успешно. {{failed}} завершились с ошибками.",
       "operationPartialTitle": "{{operation}} завершена с ошибками",
       "operationSuccess": "{{operation}} выполнена успешно!",
       "saveFailed": "Ошибка сохранения",
@@ -402,7 +409,7 @@
       "fileUploadedSuccess": "«{{fileName}}» успешно загружен в Paperless!",
       "fileUploadFailed": "Ошибка загрузки файла",
       "paperlessUploadFailed": "Ошибка загрузки в Paperless",
-      "partialSuccess": "{{completed}}/{{total}} файлов загружено успешно. {{failed}} с ошибками."
+      "partialSuccess": "{{completed}}/{{total}} файлов загружено успешно. {{failed}} завершились с ошибками."
     },
     "vitals": {
       "deleteFailed": "Не удалось удалить запись жизненных показателей",
@@ -430,8 +437,8 @@
     "toEmailRequired": "Email получателя обязателен",
     "typeRequired": "Тип канала обязателен",
     "urlInvalid": "Неверный формат URL",
-    "urlRequired": "URL Webhook обязателен",
-    "webhookUrlInvalid": "Неверный формат URL Webhook",
-    "webhookUrlRequired": "URL Webhook обязателен"
+    "urlRequired": "URL webhook обязателен",
+    "webhookUrlInvalid": "Неверный формат URL webhook",
+    "webhookUrlRequired": "URL webhook обязателен"
   }
 }

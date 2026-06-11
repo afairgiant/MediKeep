@@ -59,6 +59,10 @@ class Medication(Base):
     notes = Column(String, nullable=True)
     side_effects = Column(String, nullable=True)
 
+    # Reminder configuration — list of "HH:MM" strings in facility-local time
+    reminder_enabled = Column(Boolean, nullable=False, default=False)
+    reminder_times = Column(JSON, nullable=True, default=list)
+
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="medications")
     practitioner = orm_relationship("Practitioner", back_populates="medications")
@@ -90,6 +94,11 @@ class Medication(Base):
         Index("idx_medications_patient_id", "patient_id"),
         Index("idx_medications_patient_status", "patient_id", "status"),
         Index("idx_medications_patient_type", "patient_id", "medication_type"),
+        Index(
+            "idx_medications_reminder_enabled_status",
+            "reminder_enabled",
+            "status",
+        ),
     )
 
 

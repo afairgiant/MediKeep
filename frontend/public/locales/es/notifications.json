@@ -87,7 +87,7 @@
       "name": {
         "description": "Un nombre descriptivo para identificar este canal",
         "label": "Nombre del canal",
-        "placeholder": "por ejemplo, Mi servidor de Discord"
+        "placeholder": "p. ej., Mi servidor de Discord"
       },
       "title": "Detalles del canal",
       "type": {
@@ -181,10 +181,17 @@
   },
   "description": "Configure cómo recibir notificaciones de eventos importantes",
   "error": "Error al cargar la configuración de notificaciones",
+  "categories": {
+    "medical": "Médico"
+  },
   "events": {
     "backup_completed": {
       "description": "Cuando una copia de seguridad se completa con éxito",
       "name": "Copia de seguridad completada"
+    },
+    "medication_reminder_due": {
+      "description": "Cuando es hora de tomar un medicamento programado",
+      "name": "Recordatorio de medicamento"
     },
     "backup_failed": {
       "description": "Cuando una copia de seguridad falla",
@@ -192,7 +199,7 @@
     },
     "immunization_due": {
       "description": "Cuando una vacunación está próxima",
-      "name": "Vacunación pendiente"
+      "name": "Vacunación próxima"
     },
     "immunization_overdue": {
       "description": "Cuando una vacunación está vencida",

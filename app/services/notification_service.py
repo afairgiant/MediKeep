@@ -386,6 +386,36 @@ class NotificationService:
     # Notification Sending
     # =========================================================================
 
+    def has_enabled_route(self, user_id: int, event_type: str) -> bool:
+        """
+        Check whether a notification for (user_id, event_type) sent now would
+        have at least one deliverable route.
+
+        Mirrors the gating applied by send_notification/_send_to_preferences:
+        notifications globally enabled, an enabled preference for the event
+        type, and that preference's channel enabled.
+        """
+        if not settings.NOTIFICATIONS_ENABLED:
+            return False
+
+        return (
+            self.db.query(NotificationPreference.id)
+            .join(
+                NotificationChannel,
+                NotificationChannel.id == NotificationPreference.channel_id,
+            )
+            .filter(
+                and_(
+                    NotificationPreference.user_id == user_id,
+                    NotificationPreference.event_type == event_type,
+                    NotificationPreference.is_enabled.is_(True),
+                    NotificationChannel.is_enabled.is_(True),
+                )
+            )
+            .first()
+            is not None
+        )
+
     async def send_notification(
         self,
         user_id: int,

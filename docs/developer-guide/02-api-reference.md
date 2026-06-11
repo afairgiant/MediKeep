@@ -858,12 +858,15 @@ Base path: `/api/v1/medications`
   "effective_period_end": "2025-12-31",
   "status": "active",
   "practitioner_id": 5,
-  "pharmacy_id": 3
+  "pharmacy_id": 3,
+  "reminder_enabled": true,
+  "reminder_times": ["08:00", "20:00"]
 }
 ```
 
 - **Route values**: `oral`, `injection`, `topical`, `intravenous`, `intramuscular`, `subcutaneous`, `inhalation`, `nasal`, `rectal`, `sublingual`
 - **Status values**: `active`, `stopped`, `on-hold`, `completed`, `cancelled`
+- **Reminder fields**: `reminder_enabled` defaults to `false`. `reminder_times` are facility-local `"HH:MM"` strings (max 12, no duplicates, sorted on save). Reminders fire only while the medication is `active` and the current date falls within `effective_period_start`/`effective_period_end` (inclusive on both ends). Delivery uses the patient owner's enabled notification channels for the `medication_reminder_due` event.
 - **Success Response** (201): Medication object with relations
 
 #### List Medications
@@ -906,6 +909,19 @@ Base path: `/api/v1/medications`
 
 - **Query Parameters**:
   - `active_only` (boolean): Filter only active medications
+
+#### Send Test Reminder
+
+`POST /medications/{medication_id}/reminders/test`
+
+- **Authentication**: Yes
+- **Purpose**: Fire a one-shot test reminder for this medication to verify the patient owner's notification channel setup. Test events are flagged `is_test` and carry no scheduled time, so they are excluded from the scheduler's idempotency dedup.
+- **Authorization**: Caller must have access to the medication (same check as `GET /medications/{id}`). The notification is delivered to the **patient owner's** enabled channels, not the caller's.
+- **Success Response** (204): No content
+- **Error Responses**:
+  - `400` — Reminders are not enabled for this medication
+  - `404` — Medication not found or not accessible to the caller
+  - `422` — No notification channel is enabled for the `medication_reminder_due` event type for the patient owner
 
 #### Get Medication Treatments
 

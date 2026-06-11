@@ -181,10 +181,17 @@
   },
   "description": "Configure how you receive notifications for important events",
   "error": "Failed to load notification settings",
+  "categories": {
+    "medical": "Medical"
+  },
   "events": {
     "backup_completed": {
       "description": "When a backup completes successfully",
       "name": "Backup Completed"
+    },
+    "medication_reminder_due": {
+      "description": "When it is time to take a scheduled medication",
+      "name": "Medication Reminder"
     },
     "backup_failed": {
       "description": "When a backup fails",

@@ -18,6 +18,10 @@ logger = get_logger(__name__, "app")
 # Module-level configuration (simple and effective)
 FACILITY_TIMEZONE = None
 
+# Shared HH:MM 24-hour validator used by the backup schedule, the medication
+# reminder schedule, and any future time-of-day field.
+HHMM_24H_RE = re.compile(r"^([01]\d|2[0-3]):([0-5]\d)$")
+
 
 def get_facility_timezone() -> ZoneInfo:
     """Get facility timezone, initialized once on first call."""

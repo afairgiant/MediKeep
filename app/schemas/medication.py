@@ -9,12 +9,38 @@ from pydantic import (
     model_validator,
 )
 
+from app.core.utils.datetime_utils import HHMM_24H_RE
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
 from app.schemas.base_tags import TaggedEntityMixin
 
 if TYPE_CHECKING:
     from app.schemas.pharmacy import Pharmacy
     from app.schemas.practitioner import Practitioner
+
+
+MAX_REMINDER_TIMES = 12
+
+
+def _normalize_reminder_times(value):
+    """Shared validator body for reminder_times — sorts, dedups, enforces HH:MM."""
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise ValueError("reminder_times must be a list of HH:MM strings")
+    if len(value) > MAX_REMINDER_TIMES:
+        raise ValueError(
+            f"At most {MAX_REMINDER_TIMES} reminder times allowed"
+        )
+    seen = set()
+    for entry in value:
+        if not isinstance(entry, str) or not HHMM_24H_RE.match(entry):
+            raise ValueError(
+                f"Reminder time '{entry}' must be in HH:MM 24-hour format"
+            )
+        if entry in seen:
+            raise ValueError(f"Duplicate reminder time: {entry}")
+        seen.add(entry)
+    return sorted(seen)
 
 
 class MedicationBase(TaggedEntityMixin):
@@ -34,6 +60,8 @@ class MedicationBase(TaggedEntityMixin):
     pharmacy_id: Optional[int] = None
     notes: Optional[str] = None
     side_effects: Optional[str] = None
+    reminder_enabled: bool = False
+    reminder_times: Optional[List[str]] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -58,6 +86,11 @@ class MedicationBase(TaggedEntityMixin):
                 if field in values and values[field] == "":
                     values[field] = None
         return values
+
+    @field_validator("reminder_times")
+    @classmethod
+    def validate_reminder_times(cls, v):
+        return _normalize_reminder_times(v)
 
     @field_validator("medication_name")
     @classmethod
@@ -210,6 +243,13 @@ class MedicationUpdate(BaseModel):
     notes: Optional[str] = None
     side_effects: Optional[str] = None
     tags: Optional[List[str]] = None
+    reminder_enabled: Optional[bool] = None
+    reminder_times: Optional[List[str]] = None
+
+    @field_validator("reminder_times")
+    @classmethod
+    def validate_reminder_times(cls, v):
+        return _normalize_reminder_times(v)
 
     @model_validator(mode="before")
     @classmethod

@@ -81,8 +81,11 @@ LANG_NAMES = {
     "id": "Indonesian",
 }
 
-MODEL = "claude-sonnet-4-20250514"
-MAX_TOKENS = 32768
+MODEL = "claude-sonnet-4-6"
+# 64K is Sonnet 4.6's streaming output ceiling. Token-heavy scripts (th, ru)
+# need the headroom: a full medical.json re-emission overflowed the old 32K
+# cap, truncating the JSON mid-file and burning 3 billed retries per language.
+MAX_TOKENS = 64000
 STATE_FILE = ".translation_batch_state.json"
 LOCALES_DIR = Path("frontend/public/locales")
 
@@ -517,11 +520,14 @@ def cmd_live(args: argparse.Namespace) -> None:
 
             for attempt in range(1, 4):
                 try:
-                    resp = client.messages.create(
+                    # Streaming is required by the SDK for large max_tokens
+                    # (long non-streaming requests would hit HTTP timeouts).
+                    with client.messages.stream(
                         model=MODEL,
                         max_tokens=MAX_TOKENS,
                         messages=[{"role": "user", "content": prompt}],
-                    )
+                    ) as stream:
+                        resp = stream.get_final_message()
                     translated = parse_response_json(resp.content[0].text)
                     final = rebuild_with_structure(en_data, translated, existing)
 

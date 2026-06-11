@@ -91,7 +91,7 @@
       },
       "title": "Kanaalgegevens",
       "type": {
-        "description": "De service om meldingen door te sturen",
+        "description": "De service waarmee meldingen worden verzonden",
         "label": "Kanaaltype",
         "placeholder": "Selecteer kanaaltype"
       }
@@ -107,7 +107,7 @@
         "placeholder": "5"
       },
       "serverUrl": {
-        "description": "Uw Gotify-server-URL",
+        "description": "De URL van uw Gotify-server",
         "label": "Server-URL",
         "placeholder": "https://gotify.voorbeeld.nl"
       }
@@ -160,7 +160,7 @@
     "webhook": {
       "authToken": {
         "description": "Autorisatietoken voor de webhook",
-        "label": "Authenticatietoken (optioneel)",
+        "label": "Auth-token (optioneel)",
         "placeholder": "Bearer-token of API-sleutel"
       },
       "headers": {
@@ -173,7 +173,7 @@
         "label": "HTTP-methode"
       },
       "url": {
-        "description": "URL om meldingsgegevens te ontvangen",
+        "description": "URL voor het ontvangen van meldingsgegevens",
         "label": "Webhook-URL",
         "placeholder": "https://api.voorbeeld.nl/webhook"
       }
@@ -181,10 +181,17 @@
   },
   "description": "Configureer hoe u meldingen ontvangt voor belangrijke gebeurtenissen",
   "error": "Meldingsinstellingen laden mislukt",
+  "categories": {
+    "medical": "Medisch"
+  },
   "events": {
     "backup_completed": {
       "description": "Wanneer een back-up succesvol is voltooid",
       "name": "Back-up voltooid"
+    },
+    "medication_reminder_due": {
+      "description": "Wanneer het tijd is om een geplande medicatie in te nemen",
+      "name": "Medicatieherinnering"
     },
     "backup_failed": {
       "description": "Wanneer een back-up mislukt",
@@ -280,7 +287,7 @@
       "logoutSuccess": "Succesvol uitgelogd",
       "sessionExpired": "Sessie verlopen door inactiviteit",
       "sessionExpiredLogin": "Sessie verlopen. Log opnieuw in.",
-      "ssoFailed": "SSO-login starten mislukt",
+      "ssoFailed": "SSO-aanmelding starten mislukt",
       "userCreatedSuccess": "Gebruikersaccount succesvol aangemaakt!",
       "userCreatedWithLinkSuccess": "Gebruiker aangemaakt en succesvol gekoppeld aan bestaande patiënt!"
     },
@@ -332,7 +339,7 @@
       "deletedSuccess": "Component verwijderd",
       "noTextMessage": "Plak laboratoriumuitslagen in het invoerveld.",
       "noTextToParse": "Geen tekst om te verwerken",
-      "parsedCount": "{{count}} testcomponenten gevonden. Bekijk ze in het Voorbeeldtabblad.",
+      "parsedCount": "{{count}} testcomponenten gevonden. Bekijk ze op het tabblad Voorbeeld.",
       "parseWarning": "Sommige regels konden niet worden verwerkt",
       "templateApplied": "Sjabloon toegepast",
       "templateAppliedMessage": "{{count}} componenten toegevoegd vanuit sjabloon \"{{name}}\".",
@@ -380,7 +387,7 @@
     "sharing": {
       "accessRevoked": "Toegang ingetrokken voor gebruiker {{userId}}",
       "cancelFailed": "Uitnodiging annuleren mislukt: {{message}}",
-      "invalidJson": "Ongeldig JSON-formaat in {{fieldName}}. Controleer uw syntax.",
+      "invalidJson": "Ongeldig JSON-formaat in {{fieldName}}. Controleer uw syntaxis.",
       "invitationCancelled": "Uitnodiging succesvol geannuleerd",
       "invitationFailed": "Uitnodiging mislukt: {{message}}",
       "invitationSent": "Uitnodiging succesvol verzonden naar {{recipient}}",
@@ -405,11 +412,11 @@
       "partialSuccess": "{{completed}}/{{total}} bestanden succesvol geüpload. {{failed}} mislukt."
     },
     "vitals": {
-      "deleteFailed": "Vitale functies record verwijderen mislukt",
-      "deleteSuccess": "Vitale functies record succesvol verwijderd",
+      "deleteFailed": "Meting verwijderen mislukt",
+      "deleteSuccess": "Meting succesvol verwijderd",
       "formErrors": "Corrigeer de formulierfouten",
-      "savedSuccess": "Vitale functies succesvol {{action}}!",
-      "saveFailed": "Vitale functies {{action}} mislukt"
+      "savedSuccess": "Meting succesvol {{action}}!",
+      "saveFailed": "Meting {{action}} mislukt"
     }
   },
   "validation": {

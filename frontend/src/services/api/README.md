@@ -73,6 +73,7 @@ The comprehensive API service that provides all medical record management functi
 - `createMedication(medicationData, signal)` - Create medication (with validation)
 - `updateMedication(medicationId, medicationData, signal)` - Update medication
 - `deleteMedication(medicationId, signal)` - Delete medication
+- `sendMedicationTestReminder(medicationId, signal)` - Fire a one-shot test reminder notification
 
 #### Immunizations
 

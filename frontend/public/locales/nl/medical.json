@@ -412,7 +412,14 @@
       "dateRangePlaceholder": "Filter op periode",
       "noDiseaseData": "Er zijn geen vaccinaties gekoppeld aan de bibliotheek. Schakel over naar de weergave 'Op datum' om alle records te zien, of bewerk een record en selecteer opnieuw een vaccin uit de autocomplete om het te koppelen.",
       "unmatchedTitle": "Sommige records zijn niet gekoppeld aan de vaccinbibliotheek",
-      "unmatchedBanner": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw uit de autocomplete om het te koppelen."
+      "unmatchedBanner": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw uit de autocomplete om het te koppelen.",
+      "linkActionLabel": "Koppelen aan bibliotheek",
+      "miscGroup": "Overig / Niet gekoppeld",
+      "miscGroupHint": "Deze records zijn nog niet gekoppeld aan de vaccinbibliotheek. Klik op een record om te bewerken en een bibliotheekitem te kiezen."
+    },
+    "form": {
+      "linkStatusLinked": "✓ Gekoppeld aan bibliotheek: {{name}}",
+      "linkStatusUnlinked": "⚠ Niet gekoppeld aan bibliotheek. Kies een vaccin uit de lijst om te koppelen."
     }
   },
   "injuries": {
@@ -888,6 +895,39 @@
       "description": "Bekende of ondervonden bijwerkingen van deze medicatie",
       "label": "Bijwerkingen",
       "placeholder": "Vermeld bekende of ondervonden bijwerkingen..."
+    },
+    "reminders": {
+      "tabLabel": "Herinneringen",
+      "enabled": {
+        "label": "Herinneringen inschakelen",
+        "description": "Meldingen versturen wanneer het tijd is om dit medicijn in te nemen"
+      },
+      "times": {
+        "label": "Herinneringstijden",
+        "description": "Tijdstippen (24-uursnotatie) waarop de herinnering wordt verzonden",
+        "addButton": "Tijd toevoegen",
+        "removeAriaLabel": "Tijd verwijderen",
+        "max": "Maximaal {{count}} tijden",
+        "duplicate": "Deze tijd staat al in de lijst",
+        "invalid": "Tijd moet in HH:MM-notatie zijn (24 uur)",
+        "empty": "Geen herinneringstijden geconfigureerd."
+      },
+      "noChannelsTitle": "Geen meldingskanaal ingeschakeld",
+      "noChannelsWarning": "Er is geen meldingskanaal geconfigureerd voor medicatieherinneringen. Open de meldingsinstellingen om een kanaal in te schakelen.",
+      "openSettings": "Meldingsinstellingen openen",
+      "testButton": "Nu een testherinnering versturen",
+      "testSuccess": "Testherinnering verzonden",
+      "testError": "Versturen van testherinnering mislukt",
+      "saveBeforeTest": "Sla het medicijn eerst op om een testherinnering te versturen.",
+      "viewNone": "Geen herinneringen geconfigureerd",
+      "notFiring": {
+        "title": "Herinneringen worden niet geactiveerd",
+        "badge": "Wordt niet geactiveerd",
+        "periodEnded": "De geldigheidsperiode eindigde op {{date}}.",
+        "notStarted": "De geldigheidsperiode begint pas op {{date}}.",
+        "statusNotActive": "De medicatiestatus is \"{{status}}\", niet actief."
+      },
+      "enabledBadge": "Herinneringen ingeschakeld"
     }
   },
   "pharmacies": {

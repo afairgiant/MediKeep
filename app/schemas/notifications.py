@@ -46,6 +46,9 @@ class EventType(str, Enum):
     # Security events
     PASSWORD_CHANGED = "password_changed"
 
+    # Medical events
+    MEDICATION_REMINDER_DUE = "medication_reminder_due"
+
 
 class NotificationStatus(str, Enum):
     """Notification delivery status"""
