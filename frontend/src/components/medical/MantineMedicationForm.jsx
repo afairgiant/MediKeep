@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   Tabs,
@@ -13,7 +13,12 @@ import {
   MultiSelect,
   Text,
   Title,
+  Switch,
+  Alert,
+  ActionIcon,
+  Anchor,
 } from '@mantine/core';
+import { TimeInput } from '@mantine/dates';
 import { DateInput } from '../adapters/DateInput';
 import {
   IconInfoCircle,
@@ -21,9 +26,15 @@ import {
   IconFileText,
   IconNotes,
   IconStethoscope,
+  IconBell,
+  IconAlertCircle,
+  IconTrash,
+  IconPlus,
+  IconSend,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { medicationFormFields } from '../../utils/medicalFormFields';
+import { getReminderBlockerDescriptors } from '../../utils/medicationReminders';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -32,6 +43,13 @@ import DocumentManagerWithProgress from '../shared/DocumentManagerWithProgress';
 import { TagInput } from '../common/TagInput';
 import MedicationRelationships from './MedicationRelationships';
 import logger from '../../services/logger';
+import { apiService } from '../../services/api';
+import notificationApi from '../../services/api/notificationApi';
+import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
+
+const REMINDER_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
+// Mirrors MAX_REMINDER_TIMES in app/schemas/medication.py
+const MAX_REMINDER_TIMES = 12;
 
 const MantineMedicationForm = ({
   isOpen,
@@ -60,14 +78,91 @@ const MantineMedicationForm = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form handlers
-  const { handleTextInputChange } = useFormHandlers(onInputChange);
+  // Reminder-related state
+  const [hasReminderChannel, setHasReminderChannel] = useState(true);
+  const [isSendingTestReminder, setIsSendingTestReminder] = useState(false);
 
-  const handleDocumentManagerRef = methods => {
-    if (onDocumentManagerRef) {
-      onDocumentManagerRef(methods);
+  // Form handlers
+  const { handleTextInputChange, handleCheckboxChange } =
+    useFormHandlers(onInputChange);
+
+  // Check whether any notification channel is enabled for medication reminders.
+  // Used to surface a warning when the user enables reminders without a route
+  // for the notification to leave through. Fetched only when the Reminders tab
+  // is active (the warning lives there), and re-checked when switching between
+  // medications in the same modal so the warning reflects the channel state
+  // at the moment of editing, not the state at the first open.
+  useEffect(() => {
+    if (!isOpen || activeTab !== 'reminders') return;
+    let cancelled = false;
+    notificationApi
+      .getPreferenceMatrix()
+      .then(matrix => {
+        if (cancelled) return;
+        const channelStates =
+          matrix?.preferences?.medication_reminder_due || {};
+        const anyEnabled = Object.values(channelStates).some(Boolean);
+        setHasReminderChannel(anyEnabled);
+      })
+      .catch(() => {
+        // If the check fails we err on the side of NOT showing a warning —
+        // a transient API failure shouldn't block the form's primary purpose.
+        if (!cancelled) setHasReminderChannel(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, activeTab, editingMedication?.id]);
+
+  const handleSendTestReminder = async () => {
+    if (!editingMedication?.id) return;
+    setIsSendingTestReminder(true);
+    try {
+      await apiService.sendMedicationTestReminder(editingMedication.id);
+      notifySuccess(
+        t('medications.reminders.testSuccess', 'Test reminder sent')
+      );
+    } catch (error) {
+      const status = error?.status;
+      if (status === 422) {
+        notifyError(
+          t(
+            'medications.reminders.noChannelsWarning',
+            'No notification channel is configured for medication reminders.'
+          )
+        );
+        setHasReminderChannel(false);
+      } else {
+        notifyError(
+          t(
+            'medications.reminders.testError',
+            'Failed to send test reminder'
+          )
+        );
+      }
+      logger.error('medication_reminder_test_failed', {
+        message: 'Test reminder failed',
+        medicationId: editingMedication?.id,
+        error,
+        component: 'MantineMedicationForm',
+      });
+    } finally {
+      setIsSendingTestReminder(false);
     }
   };
+
+  // Stable identity is load-bearing: this lands in DocumentManager's effect
+  // deps (via DocumentManagerWithProgress.updateHandlersRef). A new function
+  // per render re-fires that effect, which calls back into page state
+  // (setDocumentManagerMethods) on a 50ms timeout — an infinite render loop.
+  const handleDocumentManagerRef = useCallback(
+    methods => {
+      if (onDocumentManagerRef) {
+        onDocumentManagerRef(methods);
+      }
+    },
+    [onDocumentManagerRef]
+  );
 
   const handleDocumentError = error => {
     logger.error('document_manager_error', {
@@ -241,6 +336,123 @@ const MantineMedicationForm = ({
           />
         );
 
+      case 'switch':
+        return (
+          <Switch
+            key={field.name}
+            label={field.labelKey ? t(field.labelKey) : field.label}
+            description={
+              field.descriptionKey
+                ? t(field.descriptionKey)
+                : field.description
+            }
+            checked={Boolean(formData[field.name])}
+            onChange={event =>
+              handleCheckboxChange(field.name)(event.currentTarget.checked)
+            }
+          />
+        );
+
+      case 'timeList': {
+        const times = Array.isArray(formData[field.name])
+          ? formData[field.name]
+          : [];
+        const setTimes = value =>
+          onInputChange({ target: { name: field.name, value } });
+        const tooMany = times.length >= MAX_REMINDER_TIMES;
+        return (
+          <Box key={field.name}>
+            <Text size="sm" fw={500}>
+              {field.labelKey ? t(field.labelKey) : field.label}
+            </Text>
+            {field.descriptionKey && (
+              <Text size="xs" c="dimmed" mb="xs">
+                {t(field.descriptionKey)}
+              </Text>
+            )}
+            <Stack gap="xs" mt="xs">
+              {times.length === 0 && (
+                <Text size="sm" c="dimmed">
+                  {t(
+                    'medications.reminders.times.empty',
+                    'No reminder times configured.'
+                  )}
+                </Text>
+              )}
+              {times.map((entry, index) => {
+                const isInvalid =
+                  entry !== '' && !REMINDER_TIME_RE.test(entry);
+                const isDuplicate =
+                  entry !== '' &&
+                  times.findIndex(other => other === entry) !== index;
+                let error = null;
+                if (isInvalid) {
+                  error = t(
+                    'medications.reminders.times.invalid',
+                    'Time must be HH:MM (24-hour)'
+                  );
+                } else if (isDuplicate) {
+                  error = t(
+                    'medications.reminders.times.duplicate',
+                    'This time is already in the list'
+                  );
+                }
+                return (
+                  <Group key={index} gap="xs" align="flex-end" wrap="nowrap">
+                    <TimeInput
+                      value={entry}
+                      onChange={event => {
+                        const newValue = event.currentTarget.value;
+                        setTimes(
+                          times.map((other, i) =>
+                            i === index ? newValue : other
+                          )
+                        );
+                      }}
+                      error={error}
+                      aria-label={`${t(
+                        'medications.reminders.times.label',
+                        'Reminder times'
+                      )} ${index + 1}`}
+                      style={{ flex: 1 }}
+                    />
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      onClick={() => setTimes(times.filter((_, i) => i !== index))}
+                      aria-label={t(
+                        'medications.reminders.times.removeAriaLabel',
+                        'Remove time'
+                      )}
+                    >
+                      <IconTrash size={16} />
+                    </ActionIcon>
+                  </Group>
+                );
+              })}
+            </Stack>
+            <Button
+              variant="light"
+              size="xs"
+              leftSection={<IconPlus size={14} />}
+              mt="xs"
+              disabled={tooMany}
+              onClick={() => setTimes([...times, ''])}
+            >
+              {t('medications.reminders.times.addButton', 'Add time')}
+            </Button>
+            {tooMany && (
+              <Text size="xs" c="dimmed" mt="xs">
+                {t('medications.reminders.times.max', {
+                  count: MAX_REMINDER_TIMES,
+                  defaultValue: 'Maximum of {{count}} times',
+                })}
+              </Text>
+            )}
+          </Box>
+        );
+      }
+
       case 'custom':
         if (field.component === 'TagInput') {
           return (
@@ -277,7 +489,16 @@ const MantineMedicationForm = ({
   const detailsFields = medicationFormFields.filter(
     f => f.section === 'details'
   );
+  const remindersFields = medicationFormFields.filter(
+    f => f.section === 'reminders'
+  );
   const notesFields = medicationFormFields.filter(f => f.section === 'notes');
+
+  const remindersEnabled = Boolean(formData.reminder_enabled);
+  const showNoChannelWarning = remindersEnabled && !hasReminderChannel;
+  const reminderBlockerDescriptors = remindersEnabled
+    ? getReminderBlockerDescriptors(formData)
+    : [];
 
   return (
     <Modal
@@ -322,6 +543,25 @@ const MantineMedicationForm = ({
                 leftSection={<IconStethoscope size={16} />}
               >
                 {t('shared:categories.conditions')}
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="reminders"
+                leftSection={<IconBell size={16} />}
+                rightSection={
+                  reminderBlockerDescriptors.length > 0 ? (
+                    <IconAlertCircle
+                      size={14}
+                      role="img"
+                      aria-label={t(
+                        'medications.reminders.notFiring.title',
+                        "Reminders won't fire"
+                      )}
+                      color="var(--mantine-color-red-6)"
+                    />
+                  ) : undefined
+                }
+              >
+                {t('medications.reminders.tabLabel', 'Reminders')}
               </Tabs.Tab>
               <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                 {t('shared:tabs.notes')}
@@ -401,6 +641,91 @@ const MantineMedicationForm = ({
                     )}
                   />
                 )}
+              </Box>
+            </Tabs.Panel>
+
+            {/* Reminders Tab */}
+            <Tabs.Panel value="reminders">
+              <Box mt="md">
+                <Stack gap="md">
+                  {showNoChannelWarning && (
+                    <Alert
+                      color="yellow"
+                      icon={<IconAlertCircle size={16} />}
+                      title={t(
+                        'medications.reminders.noChannelsTitle',
+                        'No notification channel enabled'
+                      )}
+                    >
+                      <Text size="sm">
+                        {t(
+                          'medications.reminders.noChannelsWarning',
+                          'No notification channel is configured for medication reminders. Open Notification Settings to enable a channel.'
+                        )}
+                      </Text>
+                      <Anchor href="/settings/notifications" size="sm">
+                        {t(
+                          'medications.reminders.openSettings',
+                          'Open Notification Settings'
+                        )}
+                      </Anchor>
+                    </Alert>
+                  )}
+                  {reminderBlockerDescriptors.length > 0 && (
+                    <Alert
+                      color="yellow"
+                      icon={<IconAlertCircle size={16} />}
+                      title={t(
+                        'medications.reminders.notFiring.title',
+                        "Reminders won't fire"
+                      )}
+                    >
+                      <Stack gap={4}>
+                        {reminderBlockerDescriptors.map(d => (
+                          <Text size="sm" key={d.blocker}>
+                            {t(d.key, { ...d.params, defaultValue: d.defaultValue })}
+                          </Text>
+                        ))}
+                      </Stack>
+                    </Alert>
+                  )}
+                  <Grid>
+                    {remindersFields.map(field => (
+                      <Grid.Col
+                        span={{ base: 12, sm: field.gridColumn || 12 }}
+                        key={field.name}
+                      >
+                        {renderField(field)}
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                  <Group justify="flex-start">
+                    <Button
+                      variant="default"
+                      leftSection={<IconSend size={14} />}
+                      onClick={handleSendTestReminder}
+                      disabled={
+                        !editingMedication ||
+                        !remindersEnabled ||
+                        isSendingTestReminder
+                      }
+                      loading={isSendingTestReminder}
+                    >
+                      {t(
+                        'medications.reminders.testButton',
+                        'Send test reminder now'
+                      )}
+                    </Button>
+                  </Group>
+                  {!editingMedication && (
+                    <Text size="xs" c="dimmed">
+                      {t(
+                        'medications.reminders.saveBeforeTest',
+                        'Save the medication first to send a test reminder.'
+                      )}
+                    </Text>
+                  )}
+                </Stack>
               </Box>
             </Tabs.Panel>
 

@@ -412,7 +412,14 @@
       "dateRangePlaceholder": "Filtrera efter datumintervall",
       "noDiseaseData": "Inga vaccinationer är länkade till biblioteket. Växla till vyn \"Efter datum\" för att se alla poster, eller redigera en post och välj ett vaccin igen från autoifyllningen för att länka det.",
       "unmatchedTitle": "Vissa poster är inte länkade till vaccinbiblioteket",
-      "unmatchedBanner": "{{count}} poster är inte länkade. Redigera en post och välj den igen från autoifyllningen för att länka den."
+      "unmatchedBanner": "{{count}} poster är inte länkade. Redigera en post och välj den igen från autoifyllningen för att länka den.",
+      "linkActionLabel": "Länka till biblioteket",
+      "miscGroup": "Övrigt / Olänkade",
+      "miscGroupHint": "Dessa poster är ännu inte länkade till vaccinbiblioteket. Klicka på en för att redigera och välja en bibliotekspost."
+    },
+    "form": {
+      "linkStatusLinked": "✓ Länkad till biblioteket: {{name}}",
+      "linkStatusUnlinked": "⚠ Inte länkad till biblioteket. Välj ett vaccin i listan för att länka."
     }
   },
   "injuries": {
@@ -888,6 +895,39 @@
       "description": "Kända eller upplevda biverkningar av detta läkemedel",
       "label": "Biverkningar",
       "placeholder": "Lista kända eller upplevda biverkningar..."
+    },
+    "reminders": {
+      "tabLabel": "Påminnelser",
+      "enabled": {
+        "label": "Aktivera påminnelser",
+        "description": "Skicka aviseringar när det är dags att ta detta läkemedel"
+      },
+      "times": {
+        "label": "Påminnelsetider",
+        "description": "Klockslag (24-timmarsformat) då påminnelsen skickas",
+        "addButton": "Lägg till tid",
+        "removeAriaLabel": "Ta bort tid",
+        "max": "Högst {{count}} tider",
+        "duplicate": "Den här tiden finns redan i listan",
+        "invalid": "Tiden måste anges som HH:MM (24 timmar)",
+        "empty": "Inga påminnelsetider konfigurerade."
+      },
+      "noChannelsTitle": "Ingen aviseringskanal aktiverad",
+      "noChannelsWarning": "Ingen aviseringskanal är konfigurerad för läkemedelspåminnelser. Öppna aviseringsinställningarna för att aktivera en kanal.",
+      "openSettings": "Öppna aviseringsinställningar",
+      "testButton": "Skicka testpåminnelse nu",
+      "testSuccess": "Testpåminnelse skickad",
+      "testError": "Det gick inte att skicka testpåminnelsen",
+      "saveBeforeTest": "Spara läkemedlet först för att skicka en testpåminnelse.",
+      "viewNone": "Inga påminnelser konfigurerade",
+      "notFiring": {
+        "title": "Påminnelser kommer inte att utlösas",
+        "badge": "Utlöses inte",
+        "periodEnded": "Det här läkemedlet är markerat som inte längre taget sedan {{date}}.",
+        "notStarted": "Intaget av det här läkemedlet börjar först {{date}}.",
+        "statusNotActive": "Läkemedlets status är \"{{status}}\" – påminnelser skickas endast för aktiva läkemedel."
+      },
+      "enabledBadge": "Påminnelser aktiverade"
     }
   },
   "pharmacies": {

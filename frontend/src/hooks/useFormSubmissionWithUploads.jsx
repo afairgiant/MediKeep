@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconCheck, IconX, IconExclamationMark } from '@tabler/icons-react';
 import logger from '../services/logger';
@@ -30,22 +30,27 @@ export const useFormSubmissionWithUploads = ({
 
   const [overallSuccess, setOverallSuccess] = useState(false);
 
-  // Handle success callback when submission is complete and successful
+  // Latest-ref for the success callback. Callers pass inline closures that
+  // get a new identity every render; if onSuccess were a dependency of the
+  // effect below, the effect would re-fire on every parent render while the
+  // completed flags are still true (onSuccess -> parent setState -> render ->
+  // new onSuccess -> effect again), which looped the Medication page forever.
+  const onSuccessRef = useRef(onSuccess);
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  });
+
+  // Handle success callback when submission is complete and successful.
+  // Fires once per flag transition, never on callback identity changes.
   useEffect(() => {
     if (
       submissionState.isCompleted &&
       submissionState.canClose &&
-      overallSuccess &&
-      onSuccess
+      overallSuccess
     ) {
-      onSuccess();
+      onSuccessRef.current?.();
     }
-  }, [
-    submissionState.isCompleted,
-    submissionState.canClose,
-    overallSuccess,
-    onSuccess,
-  ]);
+  }, [submissionState.isCompleted, submissionState.canClose, overallSuccess]);
 
   // Start form submission process
   const startSubmission = useCallback(() => {
@@ -285,6 +290,11 @@ export const useFormSubmissionWithUploads = ({
     return null;
   }, [submissionState]);
 
+  // Memoized so the object identity is stable across re-renders — consumers
+  // (e.g. MedicationFormWrapper's memo comparator) rely on identity equality,
+  // and a fresh object per render fed an infinite re-render loop.
+  const statusMessage = useMemo(() => getStatusMessage(), [getStatusMessage]);
+
   return {
     // State
     submissionState,
@@ -300,7 +310,7 @@ export const useFormSubmissionWithUploads = ({
     // Derived state
     isBlocking: submissionState.isSubmitting || submissionState.isUploading,
     canSubmit: !submissionState.isSubmitting && !submissionState.isUploading,
-    statusMessage: getStatusMessage(),
+    statusMessage,
 
     // State booleans for convenience
     isSubmitting: submissionState.isSubmitting,

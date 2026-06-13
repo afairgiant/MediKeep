@@ -33,6 +33,7 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getWontFireWarning } from '../../utils/medicationReminders';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
@@ -211,6 +212,8 @@ const Medication = () => {
     notes: '',
     side_effects: '',
     condition_ids: [],
+    reminder_enabled: false,
+    reminder_times: [],
   });
 
   const {
@@ -280,6 +283,8 @@ const Medication = () => {
       side_effects: '',
       tags: [],
       condition_ids: [],
+      reminder_enabled: false,
+      reminder_times: [],
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -320,6 +325,10 @@ const Medication = () => {
       notes: medication.notes || '',
       side_effects: medication.side_effects || '',
       tags: medication.tags || [],
+      reminder_enabled: Boolean(medication.reminder_enabled),
+      reminder_times: Array.isArray(medication.reminder_times)
+        ? medication.reminder_times
+        : [],
     });
     setEditingMedication(medication);
     setShowAddForm(true);
@@ -378,6 +387,10 @@ const Medication = () => {
         notes: formData.notes?.trim() || null,
         side_effects: formData.side_effects?.trim() || null,
         tags: formData.tags || [],
+        reminder_enabled: Boolean(formData.reminder_enabled),
+        reminder_times: Array.isArray(formData.reminder_times)
+          ? formData.reminder_times.filter(Boolean)
+          : [],
       };
 
       if (formData.effective_period_start) {
@@ -432,6 +445,19 @@ const Medication = () => {
                 color: 'yellow',
               });
             }
+          }
+
+          // Reminders that can never fire are easy to save by accident
+          // (lapsed effective period, non-active status). Surface it at the
+          // moment of saving, not just inside the Reminders tab.
+          const wontFireWarning = getWontFireWarning(medicationData, t);
+          if (wontFireWarning) {
+            notifications.show({
+              title: wontFireWarning.title,
+              message: wontFireWarning.message,
+              color: 'yellow',
+              autoClose: 10000,
+            });
           }
 
           const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();

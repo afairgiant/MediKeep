@@ -156,7 +156,7 @@
         "label": "Contacto Activo"
       },
       "isPrimary": {
-        "description": "Esta persona será contactada primero en emergencias",
+        "description": "Esta persona será contactada primero en caso de emergencia",
         "label": "Contacto de Emergencia Principal"
       },
       "name": {
@@ -211,7 +211,7 @@
           "placeholder": "Seleccione el tipo de condición"
         },
         "diagnosisAge": {
-          "description": "Edad en el diagnóstico",
+          "description": "Edad en el momento del diagnóstico",
           "label": "Edad en el Diagnóstico",
           "placeholder": "p. ej., 45"
         },
@@ -314,7 +314,7 @@
   },
   "form": {
     "invalidPhoneDigits": "El número de teléfono solo puede contener dígitos, espacios, guiones, paréntesis, puntos y +",
-    "invalidWebsiteUrl": "Por favor introduzca una URL de sitio web válida"
+    "invalidWebsiteUrl": "Introduzca una URL de sitio web válida"
   },
   "immunizations": {
     "dateAdministered": {
@@ -322,8 +322,12 @@
       "label": "Fecha de Administración",
       "placeholder": "Seleccione la fecha de administración"
     },
+    "form": {
+      "linkStatusLinked": "✓ Vinculada a la biblioteca: {{name}}",
+      "linkStatusUnlinked": "⚠ No vinculada a la biblioteca. Seleccione una vacuna del menú desplegable para vincularla."
+    },
     "doseNumber": {
-      "description": "Qué dosis en la serie",
+      "description": "Número de dosis en la serie",
       "label": "Número de Dosis",
       "placeholder": "1, 2, 3..."
     },
@@ -375,7 +379,7 @@
       "subcutaneous": "Subcutánea (SC)"
     },
     "site": {
-      "description": "Ubicación donde se administró la vacuna",
+      "description": "Lugar donde se administró la vacuna",
       "label": "Sitio de Inyección",
       "placeholder": "Seleccione el sitio de inyección"
     },
@@ -391,14 +395,14 @@
       "description": "Nombre de la vacuna administrada",
       "label": "Nombre de la Vacuna",
       "placeholder": "p. ej., COVID-19 ARNm, Influenza, SRP",
-      "searchPlaceholder": "Escribe para buscar vacunas...",
+      "searchPlaceholder": "Escriba para buscar vacunas...",
       "combinedHint": "Vacuna combinada — componentes: {{components}}",
       "matchedCommonName": "coincidencia: {{name}}"
     },
     "history": {
       "viewMode": {
-        "byDate": "Por fecha",
-        "byDisease": "Por enfermedad"
+        "byDate": "Por Fecha",
+        "byDisease": "Por Enfermedad"
       },
       "recordCount": "{{count}} vacunaciones",
       "recordCountSingular": "1 vacunación",
@@ -407,10 +411,13 @@
       "doseLabel": "Dosis {{n}}",
       "lotLabel": "Lote {{lot}}",
       "unlinkedTag": "Sin vincular",
+      "linkActionLabel": "Vincular a la biblioteca",
+      "miscGroup": "Misceláneos / Sin vincular",
+      "miscGroupHint": "Estos registros aún no están vinculados a la biblioteca de vacunas. Haga clic en uno para editarlo y seleccionar una entrada de la biblioteca.",
       "emptyAll": "No hay vacunaciones registradas todavía.",
       "emptyRange": "No hay vacunaciones en este rango.",
       "dateRangePlaceholder": "Filtrar por rango de fechas",
-      "noDiseaseData": "No hay vacunaciones vinculadas a la biblioteca. Cambie a la vista «Por fecha» para ver todos los registros, o edite un registro y vuelva a seleccionar una vacuna del autocompletado para vincularlo.",
+      "noDiseaseData": "No hay vacunaciones vinculadas a la biblioteca. Cambie a la vista «Por Fecha» para ver todos los registros, o edite un registro y vuelva a seleccionar una vacuna del autocompletado para vincularlo.",
       "unmatchedTitle": "Algunos registros no están vinculados a la biblioteca de vacunas",
       "unmatchedBanner": "{{count}} registros no están vinculados. Edite un registro y vuelva a seleccionarlo en el autocompletado para vincularlo."
     }
@@ -430,7 +437,7 @@
     },
     "cardSubtitle": "Lesión Física",
     "cause": {
-      "description": "Cómo ocurrió la lesión (caída, deportes, accidente, etc.)",
+      "description": "Cómo ocurrió la lesión (caída, deporte, accidente, etc.)",
       "label": "Causa / Mecanismo",
       "placeholder": "Describa cómo ocurrió la lesión..."
     },
@@ -473,7 +480,7 @@
     "mechanism": {
       "description": "Describa cómo ocurrió la lesión",
       "label": "Cómo Ocurrió",
-      "placeholder": "p. ej., Se cayó mientras hacía senderismo"
+      "placeholder": "p. ej., Caída durante una caminata"
     },
     "messages": {
       "loading": "Cargando lesiones...",
@@ -496,7 +503,7 @@
     "severity": {
       "description": "Qué tan grave es esta lesión",
       "options": {
-        "lifeThreatening": "Amenaza para la vida - Se necesita atención de emergencia",
+        "lifeThreatening": "Amenaza para la vida - Se requiere atención de emergencia",
         "mild": "Leve - Molestia menor",
         "moderate": "Moderada - Impacto notable",
         "severe": "Grave - Impacto significativo"
@@ -508,7 +515,7 @@
       "options": {
         "active": "Activa - Actualmente en tratamiento",
         "chronic": "Crónica - Efectos a largo plazo",
-        "healing": "Sanando - En recuperación",
+        "healing": "En recuperación",
         "resolved": "Resuelta - Completamente curada"
       }
     },
@@ -530,7 +537,7 @@
     "form": {
       "addInsurance": "Añadir Seguro",
       "annualMaximum": {
-        "description": "Cantidad máxima del beneficio anual",
+        "description": "Importe máximo del beneficio anual",
         "label": "Beneficio Máximo Anual",
         "placeholder": "p. ej., 1500"
       },
@@ -560,37 +567,37 @@
         "placeholder": "p. ej., 150"
       },
       "copayBrand": {
-        "description": "Cantidad del copago para medicamentos de marca",
+        "description": "Importe del copago para medicamentos de marca",
         "label": "Copago de Marca",
         "placeholder": "p. ej., 30"
       },
       "copayEmergencyRoom": {
-        "description": "Cantidad del copago para visitas a urgencias",
+        "description": "Importe del copago para visitas a urgencias",
         "label": "Copago de Urgencias",
         "placeholder": "p. ej., 200"
       },
       "copayGeneric": {
-        "description": "Cantidad del copago para medicamentos genéricos",
+        "description": "Importe del copago para medicamentos genéricos",
         "label": "Copago Genérico",
         "placeholder": "p. ej., 10"
       },
       "copayPrimaryCare": {
-        "description": "Cantidad del copago para visitas de atención primaria",
+        "description": "Importe del copago para visitas de atención primaria",
         "label": "Copago de Atención Primaria",
         "placeholder": "p. ej., 25"
       },
       "copaySpecialist": {
-        "description": "Cantidad del copago para visitas a especialistas",
+        "description": "Importe del copago para visitas a especialistas",
         "label": "Copago de Especialista",
         "placeholder": "p. ej., 50"
       },
       "copaySpecialty": {
-        "description": "Cantidad del copago para medicamentos especializados",
+        "description": "Importe del copago para medicamentos especializados",
         "label": "Copago de Especialidad",
         "placeholder": "p. ej., 50"
       },
       "copayUrgentCare": {
-        "description": "Cantidad del copago para visitas de atención urgente",
+        "description": "Importe del copago para visitas de atención urgente",
         "label": "Copago de Atención Urgente",
         "placeholder": "p. ej., 75"
       },
@@ -601,12 +608,12 @@
         "placeholder": "p. ej., 1-800-123-4567"
       },
       "deductibleFamily": {
-        "description": "Cantidad del deducible anual para familia",
+        "description": "Importe del deducible anual para familia",
         "label": "Deducible Familiar",
         "placeholder": "p. ej., 2000"
       },
       "deductibleIndividual": {
-        "description": "Cantidad del deducible anual individual",
+        "description": "Importe del deducible anual individual",
         "label": "Deducible Individual",
         "placeholder": "p. ej., 1000"
       },
@@ -639,7 +646,7 @@
         "placeholder": "p. ej., Corporación ABC, Autónomo"
       },
       "examCopay": {
-        "description": "Cantidad del copago para exámenes oculares",
+        "description": "Importe del copago para exámenes oculares",
         "label": "Copago de Examen",
         "placeholder": "p. ej., 10"
       },
@@ -728,7 +735,7 @@
       "policyHolderName": {
         "description": "Nombre del titular de la póliza (si es diferente del miembro)",
         "label": "Nombre del Titular de la Póliza",
-        "placeholder": "p. ej., María Pérez (dejar en blanco si es igual al miembro)"
+        "placeholder": "p. ej., María Pérez (dejar en blanco si coincide con el miembro)"
       },
       "preauthPhone": {
         "description": "Número de teléfono para preautorizaciones",
@@ -779,7 +786,7 @@
       "status": {
         "description": "Estado actual del seguro",
         "options": {
-          "expired": "Expirado"
+          "expired": "Vencido"
         },
         "placeholder": "Seleccione el estado"
       },
@@ -811,8 +818,8 @@
   },
   "labResults": {
     "form": {
-      "componentCreationWarning": "El resultado de laboratorio se guardó pero no se pudieron añadir los componentes de prueba. Puede añadirlos desde la página de visualización.",
-      "relationshipCreationWarning": "El resultado de laboratorio se guardó pero no se pudieron crear algunas relaciones. Puede añadirlas desde la página de edición."
+      "componentCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron añadir los componentes de prueba. Puede añadirlos desde la página de visualización.",
+      "relationshipCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron crear algunas relaciones. Puede añadirlas desde la página de edición."
     }
   },
   "medications": {
@@ -824,7 +831,7 @@
     "dosage": {
       "description": "Concentración y cantidad por dosis",
       "label": "Dosis",
-      "placeholder": "p. ej., 10mg, 1 comprimido"
+      "placeholder": "p. ej., 10 mg, 1 comprimido"
     },
     "form": {
       "addMedication": "Añadir Medicamento",
@@ -843,9 +850,9 @@
       "placeholder": "p. ej., Una vez al día, Dos veces al día"
     },
     "indication": {
-      "description": "¿Para qué es este medicamento? Describa la razón o condición que se está tratando",
+      "description": "¿Para qué es este medicamento? Describa el motivo o la condición que se está tratando",
       "label": "Indicación",
-      "placeholder": "p. ej., Presión arterial alta, Según sea necesario para el dolor, Manejo de diabetes"
+      "placeholder": "p. ej., Presión arterial alta, Según sea necesario para el dolor, Control de diabetes"
     },
     "medicationName": {
       "description": "Nombre genérico o de marca del medicamento (mín. 2 caracteres)",
@@ -864,8 +871,41 @@
     },
     "prescribingProvider": {
       "description": "Médico que recetó este medicamento",
-      "label": "Proveedor Prescriptor",
+      "label": "Médico Prescriptor",
       "placeholder": "Seleccione Proveedor"
+    },
+    "reminders": {
+      "tabLabel": "Recordatorios",
+      "enabled": {
+        "label": "Activar recordatorios",
+        "description": "Enviar notificaciones cuando sea hora de tomar este medicamento"
+      },
+      "times": {
+        "label": "Horarios de recordatorio",
+        "description": "Horarios en formato de 24 horas en que se activará el recordatorio",
+        "addButton": "Añadir horario",
+        "removeAriaLabel": "Eliminar horario",
+        "max": "Máximo de {{count}} horarios",
+        "duplicate": "Este horario ya está en la lista",
+        "invalid": "El horario debe tener el formato HH:MM (24 horas)",
+        "empty": "No hay horarios de recordatorio configurados."
+      },
+      "noChannelsTitle": "No hay canal de notificaciones activo",
+      "noChannelsWarning": "No hay ningún canal de notificaciones configurado para los recordatorios de medicamentos. Abra la Configuración de Notificaciones para activar un canal.",
+      "openSettings": "Abrir Configuración de Notificaciones",
+      "testButton": "Enviar recordatorio de prueba ahora",
+      "testSuccess": "Recordatorio de prueba enviado",
+      "testError": "Error al enviar el recordatorio de prueba",
+      "saveBeforeTest": "Guarde el medicamento primero para enviar un recordatorio de prueba.",
+      "viewNone": "No hay recordatorios configurados",
+      "notFiring": {
+        "title": "Los recordatorios no se activarán",
+        "badge": "No se activará",
+        "periodEnded": "Este medicamento está marcado como que ya no se toma desde el {{date}}.",
+        "notStarted": "La toma de este medicamento no comienza hasta el {{date}}.",
+        "statusNotActive": "El estado del medicamento es «{{status}}»: los recordatorios solo se envían para medicamentos activos."
+      },
+      "enabledBadge": "Recordatorios activados"
     },
     "route": {
       "description": "Cómo se administra el medicamento",
@@ -1010,7 +1050,7 @@
       "name": {
         "description": "Nombre completo del médico incluyendo título",
         "label": "Nombre Completo",
-        "placeholder": "Dr. María Pérez"
+        "placeholder": "Dra. María Pérez"
       },
       "phone": {
         "description": "Número de contacto principal",
@@ -1029,7 +1069,7 @@
       "specialty": {
         "description": "Seleccione de la lista o escriba una especialidad personalizada",
         "label": "Especialidad Médica",
-        "placeholder": "Busque especialidades o escriba personalizada..."
+        "placeholder": "Busque especialidades o escriba una personalizada..."
       },
       "website": {
         "description": "Sitio web profesional o página de la consulta",
@@ -1048,9 +1088,9 @@
       "label": "Tipo de Anestesia",
       "options": {
         "general": "General - Inconsciencia completa",
-        "local": "Local - Adormecimiento de área específica",
+        "local": "Local - Anestesia de área específica",
         "none": "Ninguna - No se requirió anestesia",
-        "regional": "Regional - Adormecimiento de área más grande",
+        "regional": "Regional - Anestesia de área más extensa",
         "sedation": "Sedación - Relajado pero consciente"
       },
       "placeholder": "Seleccione el tipo de anestesia"
@@ -1066,7 +1106,7 @@
     },
     "facility": {
       "description": "Dónde se realizó o se realizará el procedimiento",
-      "label": "Instalación",
+      "label": "Establecimiento",
       "placeholder": "p. ej., Hospital General, Centro Ambulatorio"
     },
     "notes": {
@@ -1155,8 +1195,8 @@
         "debilitating": "Debilitante - Incapaz de funcionar",
         "mild": "Leve - Ligera dificultad con actividades",
         "moderate": "Moderado - Algunas actividades limitadas",
-        "noImpact": "Sin Impacto - Capaz de funcionar normalmente",
-        "severe": "Grave - La mayoría de actividades difíciles"
+        "noImpact": "Sin Impacto - Capaz de funcionar con normalidad",
+        "severe": "Grave - La mayoría de las actividades son difíciles"
       },
       "location": {
         "description": "Dónde en su cuerpo sintió esto",
@@ -1189,16 +1229,16 @@
         "placeholder": "Cuándo se resolvió este episodio"
       },
       "resolvedTime": {
-        "description": "La hora cuando se resolvió este episodio",
+        "description": "La hora en que se resolvió este episodio",
         "label": "Hora de Resolución",
-        "placeholder": "Hora cuando se resolvió el episodio"
+        "placeholder": "Hora en que se resolvió el episodio"
       },
       "severity": {
         "description": "Qué tan grave es el síntoma durante esta ocurrencia",
         "placeholder": "Seleccione el nivel de gravedad"
       },
       "timeOfDay": {
-        "description": "Cuándo durante el día ocurrió esto",
+        "description": "En qué momento del día ocurrió esto",
         "label": "Hora del Día",
         "placeholder": "Seleccione la hora del día"
       },
@@ -1229,7 +1269,7 @@
         "label": "Condición Crónica"
       },
       "resolvedDate": {
-        "description": "La fecha cuando este síntoma se resolvió completamente",
+        "description": "La fecha en que este síntoma se resolvió completamente",
         "label": "Fecha de Resolución",
         "placeholder": "Cuándo se resolvió este síntoma"
       },
@@ -1239,17 +1279,17 @@
         "placeholder": "Seleccione el estado"
       },
       "statusOptions": {
-        "active": "Activo - Actualmente experimentando",
+        "active": "Activo - Actualmente en curso",
         "recurring": "Recurrente - Va y viene",
         "resolved": "Resuelto - Ya no se experimenta"
       },
       "symptomName": {
-        "description": "Nombre del síntoma que desea rastrear",
+        "description": "Nombre del síntoma que desea registrar",
         "label": "Nombre del Síntoma",
         "placeholder": "p. ej., Dolor de Cabeza por Migraña, Dolor Crónico de Espalda"
       },
       "typicalTriggers": {
-        "description": "Lo que típicamente desencadena este síntoma",
+        "description": "Lo que habitualmente desencadena este síntoma",
         "label": "Desencadenantes Comunes",
         "placeholder": "Añada desencadenantes comunes (estrés, clima, alimentos, etc.)"
       }
@@ -1270,7 +1310,7 @@
     "amount": {
       "description": "Cantidad o intensidad por sesión",
       "label": "Cantidad",
-      "placeholder": "p. ej., 500mg, 2 comprimidos, 30 minutos"
+      "placeholder": "p. ej., 500 mg, 2 comprimidos, 30 minutos"
     },
     "endDate": {
       "description": "Fecha de finalización esperada o real",
@@ -1299,7 +1339,7 @@
     },
     "mode": {
       "advancedOption": "Plan de Tratamiento",
-      "description": "Elija cómo rastrear este tratamiento",
+      "description": "Elija cómo registrar este tratamiento",
       "label": "Modo de Tratamiento",
       "simpleOption": "Simple"
     },
@@ -1309,7 +1349,7 @@
       "placeholder": "Notas de progreso, efectos secundarios, ajustes, resultados..."
     },
     "practitioner": {
-      "description": "Asignar un profesional a este tratamiento",
+      "description": "Asigne un profesional a este tratamiento",
       "placeholder": "Seleccione profesional (opcional)"
     },
     "relatedCondition": {
@@ -1335,9 +1375,9 @@
       "description": "Etapa actual en el flujo de trabajo del tratamiento",
       "label": "Estado del Tratamiento",
       "options": {
-        "active": "Activo - Actualmente recibiendo tratamiento",
-        "cancelled": "Cancelado - Tratamiento descontinuado",
-        "completed": "Completado - Tratamiento terminado exitosamente",
+        "active": "Activo - Actualmente en tratamiento",
+        "cancelled": "Cancelado - Tratamiento interrumpido",
+        "completed": "Completado - Tratamiento finalizado con éxito",
         "onHold": "En Pausa - Temporalmente pausado",
         "planned": "Planificado - Tratamiento programado para el futuro"
       },
@@ -1353,10 +1393,10 @@
         "immunotherapy": "Inmunoterapia - Tratamiento del sistema inmunológico",
         "medication": "Medicación - Terapia con medicamentos",
         "occupationalTherapy": "Terapia Ocupacional - Mejora funcional",
-        "other": "Otro - Especificar en descripción",
+        "other": "Otro - Especificar en la descripción",
         "physicalTherapy": "Fisioterapia - Rehabilitación",
-        "radiation": "Radiación - Radioterapia",
-        "speechTherapy": "Terapia del Habla - Mejora de la comunicación",
+        "radiation": "Radioterapia - Tratamiento con radiación",
+        "speechTherapy": "Logopedia - Mejora de la comunicación",
         "surgery": "Cirugía - Procedimiento quirúrgico"
       },
       "placeholder": "Seleccione el tipo"
@@ -1387,8 +1427,8 @@
           "placeholder": "Seleccione profesional (opcional)"
         },
         "chiefComplaint": {
-          "description": "Principal preocupación de salud o síntoma que motivó la consulta",
-          "placeholder": "Preocupación o síntoma principal reportado"
+          "description": "Principal motivo de salud o síntoma que originó la consulta",
+          "placeholder": "Motivo o síntoma principal referido"
         },
         "diagnosisAssessment": {
           "description": "Diagnóstico médico o evaluación clínica",
@@ -1401,7 +1441,7 @@
           "placeholder": "Duración de la consulta"
         },
         "followUpInstructions": {
-          "description": "Instrucciones para atención continua y citas de seguimiento",
+          "description": "Instrucciones para la atención continua y las citas de seguimiento",
           "placeholder": "Instrucciones de atención de seguimiento..."
         },
         "location": {
@@ -1418,7 +1458,7 @@
           "placeholder": "p. ej., Chequeo Anual, Seguimiento, Revisión de Síntomas"
         },
         "relatedCondition": {
-          "description": "Vincule esta consulta a una condición específica si aplica",
+          "description": "Vincule esta consulta a una condición específica si corresponde",
           "label": "Condición Relacionada (Opcional)",
           "placeholder": "Seleccione una condición con la que esta consulta esté relacionada"
         },
@@ -1446,7 +1486,7 @@
         "urgentCare": "Atención Urgente"
       },
       "priorityOptions": {
-        "routine": "Rutina",
+        "routine": "Rutinaria",
         "urgent": "Urgente"
       },
       "visitTypeOptions": {
@@ -1456,7 +1496,7 @@
         "followUp": "Seguimiento",
         "preventiveCare": "Atención Preventiva",
         "routineVisit": "Consulta de Rutina",
-        "specialistReferral": "Referencia a Especialista"
+        "specialistReferral": "Derivación a Especialista"
       }
     },
     "relatedCondition": {

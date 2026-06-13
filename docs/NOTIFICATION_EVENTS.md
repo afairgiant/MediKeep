@@ -184,6 +184,7 @@ title, message = registry.get_template("event_type", data)
 | `invitation_accepted` | collaboration | Someone accepted your invitation |
 | `share_revoked` | collaboration | Access to shared records revoked |
 | `password_changed` | security | Password was changed |
+| `medication_reminder_due` | medical | A scheduled medication reminder time has arrived (fired by the per-minute `MedicationReminderSchedulerService`; idempotent via `NotificationHistory` dedup) |
 
 ---
 

@@ -2,7 +2,7 @@
   "channels": {
     "add": "Aggiungi canale",
     "configTitle": "Configurazione {{type}}",
-    "confirmDelete": "Conferma l'eliminazione di questo canale?",
+    "confirmDelete": "Sei sicuro di voler eliminare questo canale?",
     "createError": "Creazione del canale non riuscita",
     "createFailed": "Impossibile creare il canale",
     "createSuccess": "Canale creato con successo",
@@ -87,7 +87,7 @@
       "name": {
         "description": "Un nome descrittivo per identificare questo canale",
         "label": "Nome del canale",
-        "placeholder": "ad es., Il mio server Discord"
+        "placeholder": "es. Il mio server Discord"
       },
       "title": "Dettagli del canale",
       "type": {
@@ -181,10 +181,17 @@
   },
   "description": "Configura come ricevere le notifiche per eventi importanti",
   "error": "Impossibile caricare le impostazioni delle notifiche",
+  "categories": {
+    "medical": "Medico"
+  },
   "events": {
     "backup_completed": {
       "description": "Quando un backup viene completato con successo",
       "name": "Backup completato"
+    },
+    "medication_reminder_due": {
+      "description": "Quando è il momento di assumere un farmaco pianificato",
+      "name": "Promemoria farmaco"
     },
     "backup_failed": {
       "description": "Quando un backup non riesce",
@@ -199,11 +206,11 @@
       "name": "Vaccinazione scaduta"
     },
     "invitation_accepted": {
-      "description": "Quando il Suo invito di condivisione viene accettato",
+      "description": "Quando il tuo invito di condivisione viene accettato",
       "name": "Invito accettato"
     },
     "invitation_received": {
-      "description": "Quando qualcuno condivide cartelle cliniche con Lei",
+      "description": "Quando qualcuno condivide cartelle cliniche con te",
       "name": "Invito ricevuto"
     },
     "lab_result_abnormal": {
@@ -215,11 +222,11 @@
       "name": "Risultati di laboratorio disponibili"
     },
     "login_from_new_device": {
-      "description": "Quando si accede al Suo account da un nuovo dispositivo",
+      "description": "Quando si accede al tuo account da un nuovo dispositivo",
       "name": "Accesso da nuovo dispositivo"
     },
     "password_changed": {
-      "description": "Quando la Sua password viene modificata",
+      "description": "Quando la tua password viene modificata",
       "name": "Password modificata"
     },
     "share_revoked": {
@@ -232,7 +239,7 @@
     }
   },
   "history": {
-    "description": "Notifiche recenti inviate attraverso i Suoi canali",
+    "description": "Notifiche recenti inviate attraverso i tuoi canali",
     "fields": {
       "channel": "Canale"
     },
@@ -275,11 +282,11 @@
       "accessDeniedRoles": "Accesso negato: uno di questi ruoli è richiesto: {{roles}}",
       "accountCreatedSuccess": "Account creato con successo! Accesso in corso...",
       "loginFailed": "Accesso non riuscito",
-      "loginRequired": "Effettui l'accesso per visualizzare questa pagina",
+      "loginRequired": "Effettua l'accesso per visualizzare questa pagina",
       "loginSuccess": "Accesso effettuato con successo!",
       "logoutSuccess": "Disconnessione avvenuta con successo",
       "sessionExpired": "Sessione scaduta per inattività",
-      "sessionExpiredLogin": "Sessione scaduta. Effettui nuovamente l'accesso.",
+      "sessionExpiredLogin": "Sessione scaduta. Effettua nuovamente l'accesso.",
       "ssoFailed": "Impossibile avviare l'accesso SSO",
       "userCreatedSuccess": "Account utente creato con successo!",
       "userCreatedWithLinkSuccess": "Account utente creato e collegato con successo al paziente esistente!"
@@ -332,7 +339,7 @@
       "deletedSuccess": "Componente eliminato",
       "noTextMessage": "Incolla il testo dei risultati di laboratorio nell'area di inserimento.",
       "noTextToParse": "Nessun testo da analizzare",
-      "parsedCount": "Trovati {{count}} componenti del test. Li revisioni nella scheda Anteprima.",
+      "parsedCount": "Trovati {{count}} componenti del test. Revisiona nella scheda Anteprima.",
       "parseWarning": "Alcune righe non sono state analizzate",
       "templateApplied": "Modello applicato",
       "templateAppliedMessage": "Aggiunti {{count}} componenti dal modello \"{{name}}\".",
@@ -356,12 +363,12 @@
       "updatedSuccess": "{{name}} aggiornato con successo"
     },
     "photo": {
-      "photoBeingUploaded": "Una foto è attualmente in fase di caricamento. Attenda il completamento.",
+      "photoBeingUploaded": "Una foto è attualmente in fase di caricamento. Attendere il completamento.",
       "pleaseWait": "Attendere",
       "uploadSuccess": "Foto caricata con successo"
     },
     "reports": {
-      "noRecordsMessage": "Selezioni almeno una registrazione dalle categorie sottostanti per generare un report.",
+      "noRecordsMessage": "Seleziona almeno una registrazione dalle categorie sottostanti per generare un report.",
       "noRecordsSelected": "Nessuna registrazione selezionata",
       "templateDeleted": "Modello eliminato con successo",
       "templateDeleteFailed": "Impossibile eliminare il modello",
@@ -373,14 +380,14 @@
     },
     "settings": {
       "cleanupComplete": "Pulizia completata: {{cleaned}} file ripuliti, {{deleted}} file eliminati",
-      "cleanupFailed": "Impossibile ripulire i file. Riprovi più tardi.",
+      "cleanupFailed": "Impossibile ripulire i file. Riprova più tardi.",
       "noOutOfSync": "Nessun file non sincronizzato trovato da ripulire",
       "sessionTimeoutUpdated": "Timeout sessione aggiornato a {{minutes}} minuti. La sessione è stata aggiornata."
     },
     "sharing": {
       "accessRevoked": "Accesso revocato per l'utente {{userId}}",
       "cancelFailed": "Impossibile annullare l'invito: {{message}}",
-      "invalidJson": "Formato JSON non valido in {{fieldName}}. Verifichi la sintassi.",
+      "invalidJson": "Formato JSON non valido in {{fieldName}}. Verifica la sintassi.",
       "invitationCancelled": "Invito annullato con successo",
       "invitationFailed": "Invito non riuscito: {{message}}",
       "invitationSent": "Invito inviato con successo a {{recipient}}",
@@ -390,12 +397,12 @@
     },
     "tagSearch": {
       "loadFailed": "Impossibile caricare i tag popolari",
-      "noTagsSelected": "Selezioni almeno un tag per la ricerca",
+      "noTagsSelected": "Seleziona almeno un tag per la ricerca",
       "noTagsSelectedTitle": "Nessun tag selezionato",
       "searchFailed": "Impossibile cercare le registrazioni per tag"
     },
     "upload": {
-      "backgroundProcessing": "\"{{fileName}}\" è in fase di elaborazione in background. Riceverà una notifica al completamento.",
+      "backgroundProcessing": "\"{{fileName}}\" è in fase di elaborazione in background. Riceverai una notifica al completamento.",
       "completedWithErrors": "Caricamento completato con errori",
       "documentAdded": "Documento aggiunto a Paperless",
       "duplicateDocument": "Documento duplicato",
@@ -407,7 +414,7 @@
     "vitals": {
       "deleteFailed": "Impossibile eliminare la registrazione dei parametri vitali",
       "deleteSuccess": "Registrazione parametri vitali eliminata con successo",
-      "formErrors": "Corregga gli errori nel modulo",
+      "formErrors": "Correggi gli errori nel modulo",
       "savedSuccess": "Parametri vitali {{action}} con successo!",
       "saveFailed": "Impossibile {{action}} i parametri vitali"
     }

@@ -103,7 +103,7 @@
         "placeholder": "Applikationstoken från Gotify"
       },
       "priority": {
-        "description": "Meddelandeprioritet (1-10, standard 5)",
+        "description": "Meddelandeprioritet (1–10, standard 5)",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -142,8 +142,8 @@
     "sentCount_one": "{{count}} skickad",
     "sentCount_other": "{{count}} skickade",
     "test": "Testa",
-    "testError": "Det gick inte att skicka testnotifiering",
-    "testFailed": "Testavisering misslyckades",
+    "testError": "Det gick inte att skicka testaviseringen",
+    "testFailed": "Testaviseringen misslyckades",
     "testing": "Testar...",
     "testSuccess": "Testavisering skickad!",
     "title": "Aviseringskanaler",
@@ -164,8 +164,8 @@
         "placeholder": "Bearer-token eller API-nyckel"
       },
       "headers": {
-        "description": "JSON-objekt med anpassade rubriker",
-        "label": "Anpassade rubriker (valfritt)",
+        "description": "JSON-objekt med anpassade huvuden",
+        "label": "Anpassade huvuden (valfritt)",
         "placeholder": "{\"Authorization\": \"Bearer token\"}"
       },
       "method": {
@@ -181,10 +181,17 @@
   },
   "description": "Konfigurera hur du tar emot aviseringar för viktiga händelser",
   "error": "Kunde inte ladda aviseringsinställningar",
+  "categories": {
+    "medical": "Medicinskt"
+  },
   "events": {
     "backup_completed": {
-      "description": "När en säkerhetskopiering slutförs framgångsrikt",
+      "description": "När en säkerhetskopiering slutförs utan fel",
       "name": "Säkerhetskopiering slutförd"
+    },
+    "medication_reminder_due": {
+      "description": "När det är dags att ta ett planerat läkemedel",
+      "name": "Läkemedelspåminnelse"
     },
     "backup_failed": {
       "description": "När en säkerhetskopiering misslyckas",
@@ -416,7 +423,7 @@
     "appTokenRequired": "Apptoken krävs",
     "fromEmailInvalid": "Ogiltigt e-postformat",
     "fromEmailRequired": "Avsändaradress krävs",
-    "headersInvalid": "Rubriker måste vara giltig JSON",
+    "headersInvalid": "Huvuden måste vara giltig JSON",
     "nameRequired": "Kanalnamn krävs",
     "nameTooLong": "Namnet får inte överstiga 100 tecken",
     "serverUrlInvalid": "Ogiltigt URL-format",

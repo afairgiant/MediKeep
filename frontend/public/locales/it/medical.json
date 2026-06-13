@@ -412,7 +412,14 @@
       "dateRangePlaceholder": "Filtra per intervallo di date",
       "noDiseaseData": "Nessuna vaccinazione è collegata alla libreria. Passa alla vista «Per data» per vedere tutti i record, oppure modifica un record e riseleziona un vaccino dal completamento automatico per collegarlo.",
       "unmatchedTitle": "Alcuni record non sono collegati alla libreria dei vaccini",
-      "unmatchedBanner": "{{count}} record non sono collegati. Modifica un record e riselezionalo dal completamento automatico per collegarlo."
+      "unmatchedBanner": "{{count}} record non sono collegati. Modifica un record e riselezionalo dal completamento automatico per collegarlo.",
+      "linkActionLabel": "Collega alla libreria",
+      "miscGroup": "Varie / Non collegati",
+      "miscGroupHint": "Questi record non sono ancora collegati alla libreria dei vaccini. Fai clic su uno per modificarlo e scegliere una voce della libreria."
+    },
+    "form": {
+      "linkStatusLinked": "✓ Collegato alla libreria: {{name}}",
+      "linkStatusUnlinked": "⚠ Non collegato alla libreria. Seleziona un vaccino dal menu a tendina per collegarlo."
     }
   },
   "injuries": {
@@ -888,6 +895,39 @@
       "description": "Effetti collaterali noti o sperimentati di questo farmaco",
       "label": "Effetti collaterali",
       "placeholder": "Elenchi gli effetti collaterali noti o sperimentati..."
+    },
+    "reminders": {
+      "tabLabel": "Promemoria",
+      "enabled": {
+        "label": "Attiva promemoria",
+        "description": "Invia notifiche quando è ora di assumere questo farmaco"
+      },
+      "times": {
+        "label": "Orari dei promemoria",
+        "description": "Orari (formato 24 ore) in cui verrà attivato il promemoria",
+        "addButton": "Aggiungi orario",
+        "removeAriaLabel": "Rimuovi orario",
+        "max": "Massimo {{count}} orari",
+        "duplicate": "Questo orario è già nell'elenco",
+        "invalid": "L'orario deve essere nel formato HH:MM (24 ore)",
+        "empty": "Nessun orario di promemoria configurato."
+      },
+      "noChannelsTitle": "Nessun canale di notifica attivato",
+      "noChannelsWarning": "Nessun canale di notifica è configurato per i promemoria dei farmaci. Apri le impostazioni di notifica per attivare un canale.",
+      "openSettings": "Apri impostazioni di notifica",
+      "testButton": "Invia ora un promemoria di prova",
+      "testSuccess": "Promemoria di prova inviato",
+      "testError": "Invio del promemoria di prova non riuscito",
+      "saveBeforeTest": "Salva prima il farmaco per inviare un promemoria di prova.",
+      "viewNone": "Nessun promemoria configurato",
+      "notFiring": {
+        "title": "I promemoria non verranno attivati",
+        "badge": "Non si attiverà",
+        "periodEnded": "Questo farmaco risulta non più assunto dal {{date}}.",
+        "notStarted": "L'assunzione di questo farmaco inizia solo il {{date}}.",
+        "statusNotActive": "Lo stato del farmaco è «{{status}}»: i promemoria vengono inviati solo per i farmaci attivi."
+      },
+      "enabledBadge": "Promemoria attivati"
     }
   },
   "pharmacies": {

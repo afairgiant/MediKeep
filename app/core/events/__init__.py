@@ -14,6 +14,7 @@ from app.services.notification_templates import (
     backup_failed_template,
     invitation_accepted_template,
     invitation_received_template,
+    medication_reminder_due_template,
     password_changed_template,
     share_revoked_template,
 )
@@ -23,7 +24,7 @@ def register_all_events() -> None:
     """
     Register all notification event types with the event registry.
 
-    This function registers all 6 notification triggers with their metadata
+    This function registers all 7 notification triggers with their metadata
     and template functions. Should be called once during application startup.
     """
     registry = get_event_registry()
@@ -82,6 +83,16 @@ def register_all_events() -> None:
         description="Confirmation when your password is changed",
         category="security",
         template_fn=password_changed_template,
+        is_implemented=True,
+    )
+
+    # Medical events
+    registry.register(
+        event_type="medication_reminder_due",
+        label="Medication Reminder",
+        description="Notification when it is time to take a scheduled medication",
+        category="medical",
+        template_fn=medication_reminder_due_template,
         is_implemented=True,
     )
 

@@ -120,7 +120,7 @@
     "ntfy": {
       "authToken": {
         "description": "Token Bearer para tópicos protegidos (deixe em branco para tópicos públicos)",
-        "label": "Token de autenticação (opcional)",
+        "label": "Token de Autenticação (Opcional)",
         "placeholder": "tk_..."
       },
       "priority": {
@@ -130,7 +130,7 @@
       },
       "serverUrl": {
         "description": "URL do servidor ntfy (padrão: https://ntfy.sh)",
-        "label": "URL do servidor",
+        "label": "URL do Servidor",
         "placeholder": "https://ntfy.sh"
       },
       "topic": {
@@ -181,10 +181,17 @@
   },
   "description": "Configure como você recebe notificações para eventos importantes",
   "error": "Falha ao carregar configurações de notificação",
+  "categories": {
+    "medical": "Médico"
+  },
   "events": {
     "backup_completed": {
       "description": "Quando um backup é concluído com sucesso",
       "name": "Backup Concluído"
+    },
+    "medication_reminder_due": {
+      "description": "Quando é hora de tomar um medicamento agendado",
+      "name": "Lembrete de Medicamento"
     },
     "backup_failed": {
       "description": "Quando um backup falha",
@@ -334,8 +341,8 @@
       "noTextToParse": "Nenhum Texto para Analisar",
       "parsedCount": "Encontrados {{count}} componentes de teste. Revise-os na aba de Visualização.",
       "parseWarning": "Algumas Linhas Não Puderam Ser Analisadas",
-      "templateApplied": "Template Aplicado",
-      "templateAppliedMessage": "{{count}} componentes adicionados do template \"{{name}}\".",
+      "templateApplied": "Modelo Aplicado",
+      "templateAppliedMessage": "{{count}} componentes adicionados do modelo \"{{name}}\".",
       "textParsed": "Texto Analisado",
       "trendExportFailed": "Falha ao exportar gráfico",
       "trendExportSuccess": "Gráfico exportado com sucesso",
@@ -363,12 +370,12 @@
     "reports": {
       "noRecordsMessage": "Por favor, selecione pelo menos um registro das categorias abaixo para gerar um relatório.",
       "noRecordsSelected": "Nenhum Registro Selecionado",
-      "templateDeleted": "Template excluído com sucesso",
-      "templateDeleteFailed": "Falha ao excluir template",
-      "templateLoaded": "Template \"{{name}}\" carregado",
-      "templateNameRequired": "O nome do template é obrigatório",
-      "templateSaved": "Template salvo com sucesso",
-      "templateSaveFailed": "Falha ao salvar template",
+      "templateDeleted": "Modelo excluído com sucesso",
+      "templateDeleteFailed": "Falha ao excluir modelo",
+      "templateLoaded": "Modelo \"{{name}}\" carregado",
+      "templateNameRequired": "O nome do modelo é obrigatório",
+      "templateSaved": "Modelo salvo com sucesso",
+      "templateSaveFailed": "Falha ao salvar modelo",
       "validationError": "Erro de Validação"
     },
     "settings": {

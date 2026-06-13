@@ -115,6 +115,7 @@ After adding channels, you can configure which events trigger notifications:
 |-------|-------------|----------|
 | Backup Completed | When a backup completes successfully | System |
 | Backup Failed | When a backup fails | System |
+| Medication Reminder | When it is time to take a scheduled medication | Medical |
 | Lab Results Available | When new lab results are added | Medical |
 | Abnormal Lab Results | When lab results are outside normal range | Medical |
 | Immunization Due | When an immunization is coming due | Medical |
@@ -124,6 +125,26 @@ After adding channels, you can configure which events trigger notifications:
 | Share Revoked | When access to shared records is revoked | Sharing |
 | New Device Login | When your account is accessed from a new device | Security |
 | Password Changed | When your password is changed | Security |
+
+### Medication Reminders
+
+Each medication can be configured to send reminders at user-defined times of day:
+
+1. Open or create a medication
+2. Switch to the **Reminders** tab
+3. Toggle **Enable reminders** on
+4. Use **Add time** to add one or more `HH:MM` times (24-hour format, facility-local time). You can have up to 12 times per medication.
+5. Save the medication
+
+Reminders fire only while the medication's status is **active** and the current date falls within its effective period (start/end dates inclusive). The notification is delivered to the **patient owner's** enabled channels for the **Medication Reminder** event, so make sure at least one channel is enabled in the events matrix above.
+
+If reminders are enabled but cannot currently fire — the medication is not
+active, or today is outside its effective period — the Reminders tab and the
+medication view show a warning explaining why, the Reminders tab is marked
+with a red alert icon, and saving the medication shows a warning notification
+with the reasons. The warnings are informational; they do not block saving.
+
+Use the **Send test reminder now** button on the Reminders tab to verify the notification path without waiting for the schedule. The test bypasses the normal idempotency check and never blocks a real scheduled reminder.
 
 ## Testing Channels
 

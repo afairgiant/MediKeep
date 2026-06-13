@@ -412,7 +412,14 @@
       "dateRangePlaceholder": "Nach Zeitraum filtern",
       "noDiseaseData": "Es sind keine Impfungen mit der Bibliothek verknüpft. Wechseln Sie zur Ansicht „Nach Datum“, um alle Einträge zu sehen, oder bearbeiten Sie einen Eintrag und wählen Sie erneut einen Impfstoff aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
       "unmatchedTitle": "Einige Einträge sind nicht mit der Impfstoffbibliothek verknüpft",
-      "unmatchedBanner": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der automatischen Vervollständigung, um ihn zu verknüpfen."
+      "unmatchedBanner": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
+      "linkActionLabel": "Mit Bibliothek verknüpfen",
+      "miscGroup": "Sonstiges / Nicht verknüpft",
+      "miscGroupHint": "Diese Einträge sind noch nicht mit der Impfstoffbibliothek verknüpft. Klicken Sie auf einen Eintrag, um ihn zu bearbeiten und einen Bibliothekseintrag auszuwählen."
+    },
+    "form": {
+      "linkStatusLinked": "✓ Mit der Bibliothek verknüpft: {{name}}",
+      "linkStatusUnlinked": "⚠ Nicht mit der Bibliothek verknüpft. Wählen Sie einen Impfstoff aus der Liste, um ihn zu verknüpfen."
     }
   },
   "injuries": {
@@ -888,6 +895,39 @@
       "description": "Bekannte oder erfahrene Nebenwirkungen dieses Medikaments",
       "label": "Nebenwirkungen",
       "placeholder": "Bekannte oder erfahrene Nebenwirkungen auflisten..."
+    },
+    "reminders": {
+      "tabLabel": "Erinnerungen",
+      "enabled": {
+        "label": "Erinnerungen aktivieren",
+        "description": "Benachrichtigungen senden, wenn es Zeit ist, dieses Medikament einzunehmen"
+      },
+      "times": {
+        "label": "Erinnerungszeiten",
+        "description": "Uhrzeiten (24-Stunden-Format), zu denen die Erinnerung ausgelöst wird",
+        "addButton": "Zeit hinzufügen",
+        "removeAriaLabel": "Zeit entfernen",
+        "max": "Maximal {{count}} Zeiten",
+        "duplicate": "Diese Zeit ist bereits in der Liste",
+        "invalid": "Zeit muss im Format HH:MM (24 Stunden) sein",
+        "empty": "Keine Erinnerungszeiten konfiguriert."
+      },
+      "noChannelsTitle": "Kein Benachrichtigungskanal aktiviert",
+      "noChannelsWarning": "Für Medikamentenerinnerungen ist kein Benachrichtigungskanal konfiguriert. Öffnen Sie die Benachrichtigungseinstellungen, um einen Kanal zu aktivieren.",
+      "openSettings": "Benachrichtigungseinstellungen öffnen",
+      "testButton": "Testerinnerung jetzt senden",
+      "testSuccess": "Testerinnerung gesendet",
+      "testError": "Testerinnerung konnte nicht gesendet werden",
+      "saveBeforeTest": "Speichern Sie das Medikament zuerst, um eine Testerinnerung zu senden.",
+      "viewNone": "Keine Erinnerungen konfiguriert",
+      "notFiring": {
+        "title": "Erinnerungen werden nicht ausgelöst",
+        "badge": "Wird nicht ausgelöst",
+        "periodEnded": "Dieses Medikament ist seit dem {{date}} als nicht mehr eingenommen markiert.",
+        "notStarted": "Die Einnahme dieses Medikaments beginnt erst am {{date}}.",
+        "statusNotActive": "Der Medikamentenstatus ist „{{status}}“ – Erinnerungen werden nur für aktive Medikamente gesendet."
+      },
+      "enabledBadge": "Erinnerungen aktiviert"
     }
   },
   "pharmacies": {

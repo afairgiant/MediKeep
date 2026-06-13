@@ -93,7 +93,9 @@ class ApiService {
       }
 
       logger.apiError('API Error', method, url, response.status, errorMessage);
-      throw new Error(errorMessage);
+      const err = new Error(errorMessage);
+      err.status = response.status;
+      throw err;
     }
 
     // logger.debug('API request successful', {
@@ -1499,6 +1501,14 @@ class ApiService {
 
   deleteMedication(medicationId, signal) {
     return this.deleteEntity(ENTITY_TYPES.MEDICATION, medicationId, signal);
+  }
+
+  sendMedicationTestReminder(medicationId, signal) {
+    return this.post(
+      `/medications/${medicationId}/reminders/test`,
+      null,
+      { signal }
+    );
   }
 
   // Insurance methods

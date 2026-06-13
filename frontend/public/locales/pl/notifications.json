@@ -37,7 +37,7 @@
         "placeholder": "notifications@example.com"
       },
       "smtpHost": {
-        "description": "Serwer SMTP Twojego dostawcy e-mail",
+        "description": "Serwer SMTP Twojego dostawcy poczty e-mail",
         "label": "Serwer SMTP",
         "placeholder": "smtp.gmail.com"
       },
@@ -47,7 +47,7 @@
         "placeholder": "Hasło aplikacji lub hasło e-mail"
       },
       "smtpPort": {
-        "description": "Zwykle 587 (TLS) lub 465 (SSL)",
+        "description": "Zazwyczaj 587 (TLS) lub 465 (SSL)",
         "label": "Port SMTP",
         "placeholder": "587"
       },
@@ -57,7 +57,7 @@
         "placeholder": "twoj-email@gmail.com"
       },
       "toEmail": {
-        "description": "Gdzie wysyłać powiadomienia",
+        "description": "Adres, na który będą wysyłane powiadomienia",
         "label": "Na adres e-mail",
         "placeholder": "twoj-email@example.com"
       },
@@ -85,7 +85,7 @@
         "label": "Włącz kanał"
       },
       "name": {
-        "description": "Przyjazna nazwa do identyfikacji tego kanału",
+        "description": "Przyjazna nazwa umożliwiająca identyfikację tego kanału",
         "label": "Nazwa kanału",
         "placeholder": "np. Mój serwer Discord"
       },
@@ -103,7 +103,7 @@
         "placeholder": "Token aplikacji z Gotify"
       },
       "priority": {
-        "description": "Priorytet wiadomości (1-10, domyślnie 5)",
+        "description": "Priorytet wiadomości (1–10, domyślnie 5)",
         "placeholder": "5"
       },
       "serverUrl": {
@@ -129,8 +129,8 @@
         "placeholder": "3"
       },
       "serverUrl": {
-        "description": "URL serwera ntfy (domyślnie: https://ntfy.sh)",
-        "label": "URL serwera",
+        "description": "Adres URL serwera ntfy (domyślnie: https://ntfy.sh)",
+        "label": "Adres URL serwera",
         "placeholder": "https://ntfy.sh"
       },
       "topic": {
@@ -173,7 +173,7 @@
         "label": "Metoda HTTP"
       },
       "url": {
-        "description": "Adres URL do odbierania ładunków powiadomień",
+        "description": "Adres URL do odbierania danych powiadomień",
         "label": "Adres URL webhooka",
         "placeholder": "https://api.example.com/webhook"
       }
@@ -181,22 +181,29 @@
   },
   "description": "Skonfiguruj sposób otrzymywania powiadomień o ważnych zdarzeniach",
   "error": "Nie udało się załadować ustawień powiadomień",
+  "categories": {
+    "medical": "Medyczne"
+  },
   "events": {
     "backup_completed": {
       "description": "Gdy kopia zapasowa zakończy się pomyślnie",
       "name": "Kopia zapasowa ukończona"
+    },
+    "medication_reminder_due": {
+      "description": "Gdy nadejdzie czas przyjęcia zaplanowanego leku",
+      "name": "Przypomnienie o leku"
     },
     "backup_failed": {
       "description": "Gdy kopia zapasowa się nie powiedzie",
       "name": "Kopia zapasowa nieudana"
     },
     "immunization_due": {
-      "description": "Gdy szczepienie się zbliża",
-      "name": "Szczepienie należne"
+      "description": "Gdy zbliża się termin szczepienia",
+      "name": "Zbliżający się termin szczepienia"
     },
     "immunization_overdue": {
-      "description": "Gdy szczepienie jest po terminie",
-      "name": "Szczepienie zaległe"
+      "description": "Gdy termin szczepienia minął",
+      "name": "Szczepienie przeterminowane"
     },
     "invitation_accepted": {
       "description": "Gdy Twoje zaproszenie do udostępniania zostanie zaakceptowane",
@@ -207,12 +214,12 @@
       "name": "Otrzymano zaproszenie"
     },
     "lab_result_abnormal": {
-      "description": "Gdy wyniki badań są poza zakresem normy",
-      "name": "Nieprawidłowe wyniki badań"
+      "description": "Gdy wyniki badań laboratoryjnych są poza zakresem normy",
+      "name": "Nieprawidłowe wyniki badań laboratoryjnych"
     },
     "lab_result_available": {
-      "description": "Gdy dodane zostaną nowe wyniki badań",
-      "name": "Wyniki badań dostępne"
+      "description": "Gdy zostaną dodane nowe wyniki badań laboratoryjnych",
+      "name": "Wyniki badań laboratoryjnych dostępne"
     },
     "login_from_new_device": {
       "description": "Gdy Twoje konto zostanie użyte z nowego urządzenia",
@@ -224,7 +231,7 @@
     },
     "share_revoked": {
       "description": "Gdy dostęp do udostępnionych rekordów zostanie odwołany",
-      "name": "Udostępnianie odwołane"
+      "name": "Dostęp do udostępniania odwołany"
     },
     "test_notification": {
       "description": "Ręczne powiadomienie testowe",
@@ -270,13 +277,13 @@
   "title": "Ustawienia powiadomień",
   "toasts": {
     "auth": {
-      "accessDeniedAdmin": "Dostęp odmówiony: wymagane uprawnienia administratora",
-      "accessDeniedRole": "Dostęp odmówiony: wymagana rola {{role}}",
-      "accessDeniedRoles": "Dostęp odmówiony: wymagana jedna z następujących ról: {{roles}}",
+      "accessDeniedAdmin": "Odmowa dostępu: wymagane uprawnienia administratora",
+      "accessDeniedRole": "Odmowa dostępu: wymagana rola {{role}}",
+      "accessDeniedRoles": "Odmowa dostępu: wymagana jedna z następujących ról: {{roles}}",
       "accountCreatedSuccess": "Konto utworzone pomyślnie! Logowanie...",
-      "loginFailed": "Logowanie nieudane",
+      "loginFailed": "Logowanie nie powiodło się",
       "loginRequired": "Zaloguj się, aby uzyskać dostęp do tej strony",
-      "loginSuccess": "Zalogowanie pomyślne!",
+      "loginSuccess": "Logowanie pomyślne!",
       "logoutSuccess": "Wylogowanie pomyślne",
       "sessionExpired": "Sesja wygasła z powodu braku aktywności",
       "sessionExpiredLogin": "Sesja wygasła. Zaloguj się ponownie.",
@@ -298,18 +305,18 @@
       "revokeFailed": "Nie udało się odwołać dostępu"
     },
     "files": {
-      "downloadFailed": "Pobieranie pliku nieudane"
+      "downloadFailed": "Pobieranie pliku nie powiodło się"
     },
     "generic": {
       "allOperationsFailed": "Wszystkie operacje {{operation}} się nie powiodły. Spróbuj ponownie.",
       "allOperationsSuccess": "Wszystkie {{total}} operacje {{operation}} ukończone pomyślnie!",
-      "downloadFailed": "Pobieranie nieudane",
-      "operationFailed": "Operacja nieudana",
-      "operationFailedTitle": "{{operation}} nieudane",
+      "downloadFailed": "Pobieranie nie powiodło się",
+      "operationFailed": "Operacja nie powiodła się",
+      "operationFailedTitle": "{{operation}} nie powiodło się",
       "operationPartial": "{{success}}/{{total}} operacje {{operation}} ukończone pomyślnie. {{failed}} nieudanych.",
       "operationPartialTitle": "{{operation}} ukończone z błędami",
       "operationSuccess": "{{operation}} ukończone pomyślnie!",
-      "saveFailed": "Zapisanie nieudane",
+      "saveFailed": "Zapisanie nie powiodło się",
       "success": "Sukces!",
       "warning": "Ostrzeżenie"
     },
@@ -325,39 +332,39 @@
       "revokeFailed": "Nie udało się odwołać dostępu"
     },
     "labResults": {
-      "addedMessage": "Dodano {{count}} komponentów badania do wyniku laboratoryjnego.",
+      "addedMessage": "Dodano {{count}} składników badania do wyniku laboratoryjnego.",
       "addedSuccess": "Sukces!",
-      "addFailed": "Nie udało się dodać komponentów badania",
+      "addFailed": "Nie udało się dodać składników badania",
       "deletedMessage": "{{name}} został usunięty",
-      "deletedSuccess": "Komponent usunięty",
+      "deletedSuccess": "Składnik usunięty",
       "noTextMessage": "Wklej tekst wyników badań w polu wprowadzania.",
       "noTextToParse": "Brak tekstu do analizy",
-      "parsedCount": "Znaleziono {{count}} komponentów badania. Przejrzyj je w zakładce Podgląd.",
+      "parsedCount": "Znaleziono {{count}} składników badania. Przejrzyj je w zakładce Podgląd.",
       "parseWarning": "Niektórych wierszy nie udało się przeanalizować",
       "templateApplied": "Szablon zastosowany",
-      "templateAppliedMessage": "Dodano {{count}} komponentów z szablonu \"{{name}}\".",
+      "templateAppliedMessage": "Dodano {{count}} składników z szablonu \"{{name}}\".",
       "textParsed": "Tekst przeanalizowany",
       "trendExportFailed": "Nie udało się wyeksportować wykresu",
       "trendExportSuccess": "Wykres wyeksportowany pomyślnie",
-      "updateFailed": "Nie udało się zaktualizować komponentu"
+      "updateFailed": "Nie udało się zaktualizować składnika"
     },
     "patient": {
-      "createdSuccess": "Utworzono pacjenta {{name}} pomyślnie",
-      "deletedNoOthers": "Usunięto pacjenta {{name}} pomyślnie. Brak innych dostępnych pacjentów.",
-      "deletedSuccess": "Usunięto pacjenta {{name}} pomyślnie",
-      "deletedSwitched": "Usunięto pacjenta {{name}} pomyślnie. Przełączono na {{fallbackName}}.",
-      "deleteFailed": "Usuwanie nieudane: {{message}}",
+      "createdSuccess": "Pomyślnie utworzono pacjenta {{name}}",
+      "deletedNoOthers": "Pomyślnie usunięto pacjenta {{name}}. Brak innych dostępnych pacjentów.",
+      "deletedSuccess": "Pomyślnie usunięto pacjenta {{name}}",
+      "deletedSwitched": "Pomyślnie usunięto pacjenta {{name}}. Przełączono na {{fallbackName}}.",
+      "deleteFailed": "Usuwanie nie powiodło się: {{message}}",
       "deleteOwnOnly": "Możesz usuwać tylko pacjentów, których jesteś właścicielem",
-      "nowViewing": "Teraz przeglądasz {{name}}",
-      "removeAccessFailed": "Usuwanie dostępu nieudane: {{message}}",
+      "nowViewing": "Teraz przeglądasz: {{name}}",
+      "removeAccessFailed": "Usuwanie dostępu nie powiodło się: {{message}}",
       "removedAccess": "Usunięto dostęp do {{name}}",
       "removeOwnOnly": "Nie możesz usuwać dostępu do pacjentów, których jesteś właścicielem",
-      "switchFailed": "Przełączenie nieudane: {{message}}",
-      "updatedSuccess": "Zaktualizowano pacjenta {{name}} pomyślnie"
+      "switchFailed": "Przełączenie nie powiodło się: {{message}}",
+      "updatedSuccess": "Pomyślnie zaktualizowano pacjenta {{name}}"
     },
     "photo": {
-      "photoBeingUploaded": "Zdjęcie jest obecnie przesyłane. Poczekaj na ukończenie.",
-      "pleaseWait": "Prosimy czekać",
+      "photoBeingUploaded": "Zdjęcie jest obecnie przesyłane. Poczekaj na ukończenie operacji.",
+      "pleaseWait": "Proszę czekać",
       "uploadSuccess": "Zdjęcie przesłane pomyślnie"
     },
     "reports": {
@@ -375,18 +382,18 @@
       "cleanupComplete": "Czyszczenie ukończone: wyczyszczono {{cleaned}} plików, usunięto {{deleted}} plików",
       "cleanupFailed": "Nie udało się wyczyścić plików. Spróbuj ponownie później.",
       "noOutOfSync": "Nie znaleziono niezsynchronizowanych plików do wyczyszczenia",
-      "sessionTimeoutUpdated": "Limit czasu sesji zaktualizowany na {{minutes}} minut. Twoja sesja została odświeżona."
+      "sessionTimeoutUpdated": "Limit czasu sesji zaktualizowany do {{minutes}} minut. Twoja sesja została odświeżona."
     },
     "sharing": {
       "accessRevoked": "Odwołano dostęp dla użytkownika {{userId}}",
       "cancelFailed": "Nie udało się anulować zaproszenia: {{message}}",
       "invalidJson": "Nieprawidłowy format JSON w polu {{fieldName}}. Sprawdź składnię.",
       "invitationCancelled": "Zaproszenie anulowane pomyślnie",
-      "invitationFailed": "Zaproszenie nieudane: {{message}}",
+      "invitationFailed": "Wysłanie zaproszenia nie powiodło się: {{message}}",
       "invitationSent": "Zaproszenie wysłane pomyślnie do {{recipient}}",
-      "revokeFailed": "Odwoływanie nieudane: {{message}}",
-      "shareUpdated": "Udostępnianie pacjenta zaktualizowane pomyślnie",
-      "updateFailed": "Aktualizacja nieudana: {{message}}"
+      "revokeFailed": "Odwoływanie nie powiodło się: {{message}}",
+      "shareUpdated": "Udostępnianie danych pacjenta zaktualizowane pomyślnie",
+      "updateFailed": "Aktualizacja nie powiodła się: {{message}}"
     },
     "tagSearch": {
       "loadFailed": "Nie udało się załadować popularnych tagów",
@@ -400,14 +407,14 @@
       "documentAdded": "Dokument dodany do Paperless",
       "duplicateDocument": "Zduplikowany dokument",
       "fileUploadedSuccess": "Plik \"{{fileName}}\" przesłany do Paperless pomyślnie!",
-      "fileUploadFailed": "Przesyłanie pliku nieudane",
-      "paperlessUploadFailed": "Przesyłanie do Paperless nieudane",
+      "fileUploadFailed": "Przesyłanie pliku nie powiodło się",
+      "paperlessUploadFailed": "Przesyłanie do Paperless nie powiodło się",
       "partialSuccess": "{{completed}}/{{total}} plików przesłano pomyślnie. {{failed}} nieudanych."
     },
     "vitals": {
       "deleteFailed": "Nie udało się usunąć rekordu parametrów życiowych",
       "deleteSuccess": "Rekord parametrów życiowych usunięty pomyślnie",
-      "formErrors": "Popraw błędy formularza",
+      "formErrors": "Popraw błędy w formularzu",
       "savedSuccess": "Parametry życiowe {{action}} pomyślnie!",
       "saveFailed": "Nie udało się {{action}} parametrów życiowych"
     }
@@ -416,14 +423,14 @@
     "appTokenRequired": "Token aplikacji jest wymagany",
     "fromEmailInvalid": "Nieprawidłowy format adresu e-mail",
     "fromEmailRequired": "Adres e-mail nadawcy jest wymagany",
-    "headersInvalid": "Nagłówki muszą być prawidłowym formatem JSON",
+    "headersInvalid": "Nagłówki muszą być prawidłowym obiektem JSON",
     "nameRequired": "Nazwa kanału jest wymagana",
     "nameTooLong": "Nazwa nie może przekraczać 100 znaków",
     "serverUrlInvalid": "Nieprawidłowy format adresu URL",
     "serverUrlRequired": "Adres URL serwera jest wymagany",
     "smtpHostRequired": "Serwer SMTP jest wymagany",
     "smtpPasswordRequired": "Hasło SMTP jest wymagane",
-    "smtpPortInvalid": "Port musi być w zakresie od 1 do 65535",
+    "smtpPortInvalid": "Port musi być wartością z zakresu od 1 do 65535",
     "smtpPortRequired": "Port SMTP jest wymagany",
     "smtpUserRequired": "Nazwa użytkownika SMTP jest wymagana",
     "toEmailInvalid": "Nieprawidłowy format adresu e-mail",

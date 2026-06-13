@@ -167,4 +167,16 @@ async def startup_event():
         logger.warning(f"Could not initialize auto-backup scheduler: {e}")
         # Non-fatal - app can still function without auto-backups
 
+    # Initialize medication reminder scheduler
+    try:
+        from app.services.medication_reminder_scheduler import (
+            MedicationReminderSchedulerService,
+        )
+
+        med_scheduler = MedicationReminderSchedulerService.get_instance()
+        await med_scheduler.start()
+    except Exception as e:
+        logger.warning(f"Could not initialize medication reminder scheduler: {e}")
+        # Non-fatal - app still functions without reminders
+
     logger.info("Application startup completed")

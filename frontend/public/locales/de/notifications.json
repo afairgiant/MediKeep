@@ -16,7 +16,7 @@
       "avatarUrl": {
         "description": "Benutzerdefinierter Avatar für den Benachrichtigungs-Bot",
         "label": "Avatar-URL (optional)",
-        "placeholder": "https://beispiel.de/avatar.png"
+        "placeholder": "https://example.com/avatar.png"
       },
       "username": {
         "description": "Benutzerdefinierter Name für den Benachrichtigungs-Bot",
@@ -34,7 +34,7 @@
       "fromEmail": {
         "description": "Die Absender-E-Mail-Adresse",
         "label": "Absender-E-Mail",
-        "placeholder": "benachrichtigungen@beispiel.de"
+        "placeholder": "notifications@example.com"
       },
       "smtpHost": {
         "description": "SMTP-Server Ihres E-Mail-Anbieters",
@@ -52,14 +52,14 @@
         "placeholder": "587"
       },
       "smtpUser": {
-        "description": "Ihre E-Mail-Adresse oder Benutzername",
+        "description": "Ihre E-Mail-Adresse oder Ihr Benutzername",
         "label": "SMTP-Benutzername",
         "placeholder": "ihre-email@gmail.com"
       },
       "toEmail": {
         "description": "Wohin Benachrichtigungen gesendet werden",
         "label": "Empfänger-E-Mail",
-        "placeholder": "ihre-email@beispiel.de"
+        "placeholder": "ihre-email@example.com"
       },
       "useTls": {
         "description": "TLS-Verschlüsselung aktivieren (empfohlen)",
@@ -103,13 +103,13 @@
         "placeholder": "Anwendungstoken aus Gotify"
       },
       "priority": {
-        "description": "Nachrichtenpriorität (1-10, Standard 5)",
+        "description": "Nachrichtenpriorität (1–10, Standard 5)",
         "placeholder": "5"
       },
       "serverUrl": {
         "description": "URL Ihres Gotify-Servers",
         "label": "Server-URL",
-        "placeholder": "https://gotify.beispiel.de"
+        "placeholder": "https://gotify.example.com"
       }
     },
     "lastUsed": "Zuletzt verwendet",
@@ -120,7 +120,7 @@
     "ntfy": {
       "authToken": {
         "description": "Bearer-Token für geschützte Themen (leer lassen für öffentliche Themen)",
-        "label": "Auth-Token (Optional)",
+        "label": "Auth-Token (optional)",
         "placeholder": "tk_..."
       },
       "priority": {
@@ -175,16 +175,23 @@
       "url": {
         "description": "URL zum Empfang der Benachrichtigungs-Payloads",
         "label": "Webhook-URL",
-        "placeholder": "https://api.beispiel.de/webhook"
+        "placeholder": "https://api.example.com/webhook"
       }
     }
   },
   "description": "Konfigurieren Sie, wie Sie Benachrichtigungen für wichtige Ereignisse erhalten",
   "error": "Benachrichtigungseinstellungen konnten nicht geladen werden",
+  "categories": {
+    "medical": "Medizinisch"
+  },
   "events": {
     "backup_completed": {
       "description": "Wenn eine Sicherung erfolgreich abgeschlossen wurde",
       "name": "Sicherung abgeschlossen"
+    },
+    "medication_reminder_due": {
+      "description": "Wenn es Zeit ist, ein geplantes Medikament einzunehmen",
+      "name": "Medikamentenerinnerung"
     },
     "backup_failed": {
       "description": "Wenn eine Sicherung fehlgeschlagen ist",

@@ -293,6 +293,10 @@ JUNCTION TABLES (Many-to-Many)
 | effective_period_end | Date | | End date |
 | status | String | | MedicationStatus enum value |
 | tags | JSONB | DEFAULT [] | User tags for organization |
+| notes | String | | General notes (≤1000 chars) |
+| side_effects | String | | Reported side effects (≤1000 chars) |
+| reminder_enabled | Boolean | NOT NULL, DEFAULT false | Whether reminder notifications are active |
+| reminder_times | JSON | | List of facility-local "HH:MM" times (sorted, deduped, max 12) |
 | created_at | DateTime | NOT NULL | Record creation timestamp |
 | updated_at | DateTime | NOT NULL | Last modification timestamp |
 
@@ -322,6 +326,7 @@ JUNCTION TABLES (Many-to-Many)
 - `idx_medications_patient_id` on patient_id
 - `idx_medications_patient_status` on (patient_id, status)
 - `idx_medications_patient_type` on (patient_id, medication_type)
+- `idx_medications_reminder_enabled_status` on (reminder_enabled, status) — supports the per-minute reminder scheduler tick
 
 **Business Rules**:
 - Patient is required, practitioner is optional (OTC medications)

@@ -229,6 +229,10 @@
     "test_notification": {
       "description": "Notification de test manuelle",
       "name": "Notification de test"
+    },
+    "medication_reminder_due": {
+      "description": "Quand il est temps de prendre un médicament programmé",
+      "name": "Rappel de médicament"
     }
   },
   "history": {
@@ -433,5 +437,8 @@
     "urlRequired": "L'URL du webhook est requise",
     "webhookUrlInvalid": "Format d'URL du webhook invalide",
     "webhookUrlRequired": "L'URL du webhook est requise"
+  },
+  "categories": {
+    "medical": "Médical"
   }
 }

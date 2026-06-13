@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -11,14 +11,19 @@ from app.api.v1.endpoints.utils import (
     handle_update_with_logging,
     verify_patient_ownership,
 )
+from app.core.events.bus import get_event_bus
 from app.core.http.error_handling import (
+    BusinessLogicException,
     NotFoundException,
+    ValidationException,
     handle_database_errors,
 )
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.logging.helpers import log_data_access
 from app.crud.medication import medication
 from app.crud.treatment import treatment_medication
+from app.events.medication_events import MedicationReminderDueEvent
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.medication import (
@@ -27,6 +32,7 @@ from app.schemas.medication import (
     MedicationUpdate,
 )
 from app.schemas.treatment import MedicationTreatmentResponse
+from app.services.notification_service import NotificationService
 
 router = APIRouter()
 
@@ -294,6 +300,73 @@ def read_patient_medications(
         )
 
         return medications
+
+
+@router.post("/{medication_id}/reminders/test", status_code=status.HTTP_204_NO_CONTENT)
+async def send_test_reminder(
+    *,
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    medication_id: int,
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
+) -> None:
+    """Fire a one-shot test reminder for this medication.
+
+    The notification is delivered to the patient owner's enabled channels for
+    the medication_reminder_due event type. Test events carry is_test=True and
+    no scheduled time, so they cannot collide with the scheduler's idempotency
+    dedup key.
+    """
+    with handle_database_errors(request=request):
+        medication_obj = medication.get(db, id=medication_id)
+        handle_not_found(medication_obj, "Medication", request)
+        verify_patient_ownership(
+            medication_obj,
+            current_user_patient_id,
+            "medication",
+            db=db,
+            current_user=current_user,
+        )
+
+        if not medication_obj.reminder_enabled:
+            raise BusinessLogicException(
+                message="Reminders are not enabled for this medication."
+            )
+
+        owner_user_id = medication_obj.patient.owner_user_id
+
+        if not NotificationService(db).has_enabled_route(
+            owner_user_id, "medication_reminder_due"
+        ):
+            raise ValidationException(
+                message=(
+                    "No notification channel is enabled for medication "
+                    "reminders. Open Notification Settings to enable a "
+                    "channel."
+                ),
+            )
+
+        event = MedicationReminderDueEvent(
+            user_id=owner_user_id,
+            patient_id=medication_obj.patient_id,
+            medication_id=medication_obj.id,
+            medication_name=medication_obj.medication_name,
+            dosage=medication_obj.dosage,
+            is_test=True,
+        )
+        await get_event_bus().publish(event)
+
+        logger.info(
+            "Medication reminder test triggered",
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "medication_reminder_test_triggered",
+                "medication_id": medication_obj.id,
+                LogFields.USER_ID: current_user_id,
+            },
+        )
 
 
 @router.get(

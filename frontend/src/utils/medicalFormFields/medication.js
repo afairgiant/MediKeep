@@ -2,9 +2,10 @@
  * Medication form field configuration
  *
  * Each field declares a `section` that maps to a form tab:
- *   'basic'   - Basic Info tab
- *   'details' - Details tab
- *   'notes'   - Notes tab
+ *   'basic'     - Basic Info tab
+ *   'details'   - Details tab
+ *   'reminders' - Reminders tab
+ *   'notes'     - Notes tab
  */
 
 import {
@@ -180,6 +181,22 @@ export const medicationFormFields = [
     clearable: true,
     maxDropdownHeight: 200,
     dynamicOptions: 'pharmacies',
+  },
+  {
+    name: 'reminder_enabled',
+    section: 'reminders',
+    type: 'switch',
+    labelKey: 'medical:medications.reminders.enabled.label',
+    descriptionKey: 'medical:medications.reminders.enabled.description',
+    gridColumn: 12,
+  },
+  {
+    name: 'reminder_times',
+    section: 'reminders',
+    type: 'timeList',
+    labelKey: 'medical:medications.reminders.times.label',
+    descriptionKey: 'medical:medications.reminders.times.description',
+    gridColumn: 12,
   },
   {
     name: 'notes',

@@ -125,6 +125,38 @@ def share_revoked_template(data: Dict) -> Tuple[str, str]:
     )
 
 
+def medication_reminder_due_template(data: Dict) -> Tuple[str, str]:
+    """
+    Template for medication reminder notifications.
+
+    Args:
+        data: Event data containing:
+            - medication_name: Name of the medication
+            - dosage: Optional dosage string
+            - scheduled_time_local: HH:MM string (empty for test reminders)
+            - is_test: True for one-shot test reminders
+
+    Returns:
+        Tuple of (title, message) for the notification
+    """
+    name = data.get("medication_name", "your medication")
+    dosage = data.get("dosage")
+    scheduled = data.get("scheduled_time_local", "")
+    dosage_part = f" ({dosage})" if dosage else ""
+
+    if data.get("is_test"):
+        return (
+            f"Test Reminder: {name}",
+            f"This is a test reminder for {name}{dosage_part}.\n\n"
+            "If you received this, your notification channel is working.",
+        )
+
+    return (
+        f"Medication Reminder: {name}",
+        f"Time to take {name}{dosage_part}.\n\nScheduled time: {scheduled}",
+    )
+
+
 def password_changed_template(data: Dict) -> Tuple[str, str]:
     """
     Template for password change notification.
@@ -152,6 +184,7 @@ NOTIFICATION_TEMPLATES = {
     "invitation_accepted": invitation_accepted_template,
     "share_revoked": share_revoked_template,
     "password_changed": password_changed_template,
+    "medication_reminder_due": medication_reminder_due_template,
 }
 
 
