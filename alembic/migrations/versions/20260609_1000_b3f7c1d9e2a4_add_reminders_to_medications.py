@@ -1,7 +1,7 @@
 """Add reminder_enabled and reminder_times columns to medications
 
-Revision ID: e8f9a0b1c2d3
-Revises: d7e8f9a0b1c2
+Revision ID: b3f7c1d9e2a4
+Revises: becc1fa4e5ab
 Create Date: 2026-06-09 10:00:00.000000
 
 Adds storage for per-medication reminder configuration so users can be notified
@@ -19,8 +19,8 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "e8f9a0b1c2d3"
-down_revision = "d7e8f9a0b1c2"
+revision = "b3f7c1d9e2a4"
+down_revision = "becc1fa4e5ab"
 branch_labels = None
 depends_on = None
 
