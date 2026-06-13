@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, field_validator, model_validator
 
+from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.schemas.base_tags import TaggedEntityMixin
 
 
@@ -268,8 +269,11 @@ class LabResultCreate(LabResultBase):
         if v is None:
             return None
         stripped = v.strip()
-        if len(stripped) > 500:
-            raise ValueError("Reference range text must be 500 characters or fewer")
+        max_len = LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+        if len(stripped) > max_len:
+            raise ValueError(
+                f"Reference range text must be {max_len} characters or fewer"
+            )
         return stripped if stripped else None
 
     @field_validator("patient_id")
@@ -463,8 +467,11 @@ class LabResultUpdate(BaseModel):
     def validate_ref_range_text(cls, v):
         if v is not None:
             v = v.strip()
-            if len(v) > 500:
-                raise ValueError("Reference range text must be 500 characters or fewer")
+            max_len = LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+            if len(v) > max_len:
+                raise ValueError(
+                    f"Reference range text must be {max_len} characters or fewer"
+                )
             return v if v else None
         return v
 
