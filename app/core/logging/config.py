@@ -353,6 +353,12 @@ class LoggingConfig:
         logging.getLogger("pdfminer").setLevel(logging.WARNING)
         logging.getLogger("PIL").setLevel(logging.WARNING)
         logging.getLogger("pytesseract").setLevel(logging.WARNING)
+        # APScheduler narrates every job execution ("Running job...",
+        # "Job ... executed successfully") at INFO and the scheduler loop at
+        # DEBUG. With the medication reminder tick firing every minute that is
+        # ~2,880 INFO lines/day of noise. WARNING still surfaces real problems
+        # (missed jobs, executor errors). Covers all apscheduler.* children.
+        logging.getLogger("apscheduler").setLevel(logging.WARNING)
 
         # Enhanced console formatter with request ID support for docker logs
         console_formatter = ConsoleFormatterWithRequestID(CONSOLE_LOG_FORMAT)
