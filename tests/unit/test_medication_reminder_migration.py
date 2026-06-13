@@ -31,7 +31,7 @@ MIGRATION_FILE = (
     / "alembic"
     / "migrations"
     / "versions"
-    / "20260609_1000_e8f9a0b1c2d3_add_reminders_to_medications.py"
+    / "20260609_1000_b3f7c1d9e2a4_add_reminders_to_medications.py"
 )
 
 
