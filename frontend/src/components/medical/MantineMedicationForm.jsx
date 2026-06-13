@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   Tabs,
@@ -151,11 +151,18 @@ const MantineMedicationForm = ({
     }
   };
 
-  const handleDocumentManagerRef = methods => {
-    if (onDocumentManagerRef) {
-      onDocumentManagerRef(methods);
-    }
-  };
+  // Stable identity is load-bearing: this lands in DocumentManager's effect
+  // deps (via DocumentManagerWithProgress.updateHandlersRef). A new function
+  // per render re-fires that effect, which calls back into page state
+  // (setDocumentManagerMethods) on a 50ms timeout — an infinite render loop.
+  const handleDocumentManagerRef = useCallback(
+    methods => {
+      if (onDocumentManagerRef) {
+        onDocumentManagerRef(methods);
+      }
+    },
+    [onDocumentManagerRef]
+  );
 
   const handleDocumentError = error => {
     logger.error('document_manager_error', {

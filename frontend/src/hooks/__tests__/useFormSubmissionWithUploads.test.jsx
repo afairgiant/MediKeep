@@ -274,6 +274,70 @@ describe('useFormSubmissionWithUploads Hook', () => {
       });
     });
 
+    test('fires onSuccess once per completed submission, not on callback identity change (regression: render loop)', () => {
+      const firstOnSuccess = vi.fn();
+      const { result, rerender } = renderHook(
+        props => useFormSubmissionWithUploads(props),
+        {
+          wrapper,
+          initialProps: {
+            entityType: 'test-entity',
+            onSuccess: firstOnSuccess,
+            onError: mockOnError,
+            component: 'TestComponent',
+          },
+        }
+      );
+
+      act(() => {
+        result.current.startSubmission();
+        result.current.completeFormSubmission(true);
+        result.current.startFileUpload();
+        result.current.completeFileUpload(true, 2, 0);
+      });
+
+      expect(firstOnSuccess).toHaveBeenCalledTimes(1);
+
+      // Parents recreate the onSuccess closure on every render while the
+      // completed flags are still true. Re-firing on the new identity
+      // (onSuccess -> resetForm -> setFormData -> render -> new onSuccess)
+      // was an infinite render loop on the Medication page.
+      const nextOnSuccess = vi.fn();
+      rerender({
+        entityType: 'test-entity',
+        onSuccess: nextOnSuccess,
+        onError: mockOnError,
+        component: 'TestComponent',
+      });
+
+      expect(nextOnSuccess).not.toHaveBeenCalled();
+      expect(firstOnSuccess).toHaveBeenCalledTimes(1);
+    });
+
+    test('keeps statusMessage identity stable across re-renders (regression: medication form render loop)', () => {
+      const { result, rerender } = renderHook(
+        () => useFormSubmissionWithUploads(defaultProps),
+        { wrapper }
+      );
+
+      act(() => {
+        result.current.startSubmission();
+        result.current.completeFormSubmission(true);
+        result.current.startFileUpload();
+        result.current.completeFileUpload(true, 2, 0);
+      });
+
+      const first = result.current.statusMessage;
+      expect(first).not.toBeNull();
+
+      rerender();
+
+      // A new object identity on every render defeats memo comparators
+      // downstream (MedicationFormWrapper) and fed an infinite re-render
+      // loop through the DocumentManager methods callback chain.
+      expect(result.current.statusMessage).toBe(first);
+    });
+
     test('should return correct status message for partial success', () => {
       const { result } = renderHook(
         () => useFormSubmissionWithUploads(defaultProps),
