@@ -923,9 +923,9 @@
       "notFiring": {
         "title": "Erinnerungen werden nicht ausgelöst",
         "badge": "Wird nicht ausgelöst",
-        "periodEnded": "Der Gültigkeitszeitraum endete am {{date}}.",
-        "notStarted": "Der Gültigkeitszeitraum beginnt erst am {{date}}.",
-        "statusNotActive": "Der Medikamentenstatus ist „{{status}}“, nicht aktiv."
+        "periodEnded": "Dieses Medikament ist seit dem {{date}} als nicht mehr eingenommen markiert.",
+        "notStarted": "Die Einnahme dieses Medikaments beginnt erst am {{date}}.",
+        "statusNotActive": "Der Medikamentenstatus ist „{{status}}“ – Erinnerungen werden nur für aktive Medikamente gesendet."
       },
       "enabledBadge": "Erinnerungen aktiviert"
     }

@@ -901,9 +901,9 @@
       "notFiring": {
         "title": "Los recordatorios no se activarán",
         "badge": "No se activará",
-        "periodEnded": "El período de vigencia terminó el {{date}}.",
-        "notStarted": "El período de vigencia no comienza hasta el {{date}}.",
-        "statusNotActive": "El estado del medicamento es «{{status}}», no activo."
+        "periodEnded": "Este medicamento está marcado como que ya no se toma desde el {{date}}.",
+        "notStarted": "La toma de este medicamento no comienza hasta el {{date}}.",
+        "statusNotActive": "El estado del medicamento es «{{status}}»: los recordatorios solo se envían para medicamentos activos."
       },
       "enabledBadge": "Recordatorios activados"
     },

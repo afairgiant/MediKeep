@@ -901,9 +901,9 @@
       "notFiring": {
         "title": "Os lembretes não serão acionados",
         "badge": "Não será acionado",
-        "periodEnded": "O período de vigência terminou em {{date}}.",
-        "notStarted": "O período de vigência só começa em {{date}}.",
-        "statusNotActive": "O status do medicamento é \"{{status}}\", não ativo."
+        "periodEnded": "Este medicamento está marcado como não sendo mais tomado desde {{date}}.",
+        "notStarted": "A toma deste medicamento só começa em {{date}}.",
+        "statusNotActive": "O status do medicamento é \"{{status}}\" — os lembretes só são enviados para medicamentos ativos."
       },
       "enabledBadge": "Lembretes ativados"
     },

@@ -923,9 +923,9 @@
       "notFiring": {
         "title": "Påminnelser kommer inte att utlösas",
         "badge": "Utlöses inte",
-        "periodEnded": "Giltighetsperioden slutade {{date}}.",
-        "notStarted": "Giltighetsperioden börjar först {{date}}.",
-        "statusNotActive": "Läkemedlets status är \"{{status}}\", inte aktiv."
+        "periodEnded": "Det här läkemedlet är markerat som inte längre taget sedan {{date}}.",
+        "notStarted": "Intaget av det här läkemedlet börjar först {{date}}.",
+        "statusNotActive": "Läkemedlets status är \"{{status}}\" – påminnelser skickas endast för aktiva läkemedel."
       },
       "enabledBadge": "Påminnelser aktiverade"
     }

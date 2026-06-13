@@ -140,8 +140,9 @@ Reminders fire only while the medication's status is **active** and the current 
 
 If reminders are enabled but cannot currently fire — the medication is not
 active, or today is outside its effective period — the Reminders tab and the
-medication view show a warning explaining why. The warning is informational;
-it does not block saving.
+medication view show a warning explaining why, the Reminders tab is marked
+with a red alert icon, and saving the medication shows a warning notification
+with the reasons. The warnings are informational; they do not block saving.
 
 Use the **Send test reminder now** button on the Reminders tab to verify the notification path without waiting for the schedule. The test bypasses the normal idempotency check and never blocks a real scheduled reminder.
 

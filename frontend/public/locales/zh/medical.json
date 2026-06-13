@@ -923,9 +923,9 @@
       "notFiring": {
         "title": "提醒将不会触发",
         "badge": "不会触发",
-        "periodEnded": "有效期已于 {{date}} 结束。",
-        "notStarted": "有效期要到 {{date}} 才开始。",
-        "statusNotActive": "药物状态为“{{status}}”，并非活动状态。"
+        "periodEnded": "该药物已标记为自 {{date}} 起不再服用。",
+        "notStarted": "该药物要到 {{date}} 才开始服用。",
+        "statusNotActive": "药物状态为“{{status}}”，仅活动状态的药物会发送提醒。"
       },
       "enabledBadge": "已启用提醒"
     }

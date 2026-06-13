@@ -923,9 +923,9 @@
       "notFiring": {
         "title": "Herinneringen worden niet geactiveerd",
         "badge": "Wordt niet geactiveerd",
-        "periodEnded": "De geldigheidsperiode eindigde op {{date}}.",
-        "notStarted": "De geldigheidsperiode begint pas op {{date}}.",
-        "statusNotActive": "De medicatiestatus is \"{{status}}\", niet actief."
+        "periodEnded": "Dit medicijn staat gemarkeerd als niet meer ingenomen sinds {{date}}.",
+        "notStarted": "De inname van dit medicijn begint pas op {{date}}.",
+        "statusNotActive": "De medicatiestatus is \"{{status}}\" — herinneringen worden alleen verzonden voor actieve medicijnen."
       },
       "enabledBadge": "Herinneringen ingeschakeld"
     }

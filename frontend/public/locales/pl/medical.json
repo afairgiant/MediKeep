@@ -923,9 +923,9 @@
       "notFiring": {
         "title": "Przypomnienia nie będą uruchamiane",
         "badge": "Nie zostanie uruchomione",
-        "periodEnded": "Okres obowiązywania zakończył się {{date}}.",
-        "notStarted": "Okres obowiązywania zaczyna się dopiero {{date}}.",
-        "statusNotActive": "Status leku to „{{status}}”, a nie aktywny."
+        "periodEnded": "Ten lek jest oznaczony jako już nieprzyjmowany od {{date}}.",
+        "notStarted": "Przyjmowanie tego leku zaczyna się dopiero {{date}}.",
+        "statusNotActive": "Status leku to „{{status}}” — przypomnienia są wysyłane tylko dla aktywnych leków."
       },
       "enabledBadge": "Przypomnienia włączone"
     }

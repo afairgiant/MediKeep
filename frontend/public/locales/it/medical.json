@@ -923,9 +923,9 @@
       "notFiring": {
         "title": "I promemoria non verranno attivati",
         "badge": "Non si attiverà",
-        "periodEnded": "Il periodo di validità è terminato il {{date}}.",
-        "notStarted": "Il periodo di validità non inizia fino al {{date}}.",
-        "statusNotActive": "Lo stato del farmaco è «{{status}}», non attivo."
+        "periodEnded": "Questo farmaco risulta non più assunto dal {{date}}.",
+        "notStarted": "L'assunzione di questo farmaco inizia solo il {{date}}.",
+        "statusNotActive": "Lo stato del farmaco è «{{status}}»: i promemoria vengono inviati solo per i farmaci attivi."
       },
       "enabledBadge": "Promemoria attivati"
     }

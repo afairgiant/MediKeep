@@ -2,8 +2,21 @@ import { describe, it, expect } from 'vitest';
 import {
   getReminderBlockers,
   getReminderBlockerDescriptors,
+  getWontFireWarning,
   REMINDER_BLOCKERS,
 } from './medicationReminders';
+
+// Minimal t() stand-in: returns the defaultValue with {{params}} interpolated.
+const fakeT = (key, options = {}) => {
+  if (typeof options === 'string') return options;
+  let text = options.defaultValue ?? key;
+  for (const [name, value] of Object.entries(options)) {
+    if (name !== 'defaultValue') {
+      text = text.replace(`{{${name}}}`, String(value));
+    }
+  }
+  return text;
+};
 
 // Arbitrary fixed date for deterministic boundary tests
 const TODAY = '2026-06-10';
@@ -119,18 +132,62 @@ describe('getReminderBlockerDescriptors', () => {
         blocker: REMINDER_BLOCKERS.PERIOD_ENDED,
         key: 'medications.reminders.notFiring.periodEnded',
         params: { date: '2025-10-30' },
-        defaultValue: 'The effective period ended on {{date}}.',
+        defaultValue:
+          'This medication is marked as no longer taken as of {{date}}.',
       },
       {
         blocker: REMINDER_BLOCKERS.STATUS_NOT_ACTIVE,
         key: 'medications.reminders.notFiring.statusNotActive',
         params: { status: 'stopped' },
-        defaultValue: 'The medication status is "{{status}}", not active.',
+        defaultValue:
+          'The medication status is "{{status}}" — reminders only fire for active medications.',
       },
     ]);
   });
 
   it('returns an empty array when nothing blocks', () => {
     expect(getReminderBlockerDescriptors({ status: 'active' }, TODAY)).toEqual([]);
+  });
+});
+
+describe('getWontFireWarning', () => {
+  it('returns null when reminders are disabled, even with blockers', () => {
+    expect(
+      getWontFireWarning(
+        { reminder_enabled: false, status: 'stopped' },
+        fakeT,
+        TODAY
+      )
+    ).toBeNull();
+  });
+
+  it('returns null when reminders are enabled and nothing blocks', () => {
+    expect(
+      getWontFireWarning(
+        { reminder_enabled: true, status: 'active' },
+        fakeT,
+        TODAY
+      )
+    ).toBeNull();
+  });
+
+  it('returns a title and all blocker reasons joined when blocked', () => {
+    const warning = getWontFireWarning(
+      {
+        reminder_enabled: true,
+        status: 'stopped',
+        effective_period_end: '2025-10-30',
+      },
+      fakeT,
+      TODAY
+    );
+
+    expect(warning.title).toBe("Reminders won't fire");
+    expect(warning.message).toContain(
+      'This medication is marked as no longer taken as of 2025-10-30.'
+    );
+    expect(warning.message).toContain(
+      'The medication status is "stopped" — reminders only fire for active medications.'
+    );
   });
 });

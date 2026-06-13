@@ -345,7 +345,7 @@ describe('MantineMedicationForm — Reminders tab', () => {
     expect(
       await screen.findByText(/reminders won't fire/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/effective period ended/i)).toBeInTheDocument();
+    expect(screen.getByText(/no longer taken/i)).toBeInTheDocument();
   });
 
   it("shows the won't-fire warning when the status is not active", async () => {
@@ -367,7 +367,9 @@ describe('MantineMedicationForm — Reminders tab', () => {
     expect(
       await screen.findByText(/reminders won't fire/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/not active/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/only fire for active medications/i)
+    ).toBeInTheDocument();
   });
 
   it("shows the won't-fire warning when the start date is in the future", async () => {
@@ -390,7 +392,9 @@ describe('MantineMedicationForm — Reminders tab', () => {
     expect(
       await screen.findByText(/reminders won't fire/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/doesn't start until/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/scheduled to start until/i)
+    ).toBeInTheDocument();
   });
 
   it("hides the won't-fire warning for an active in-period medication", async () => {
@@ -430,6 +434,46 @@ describe('MantineMedicationForm — Reminders tab', () => {
 
     expect(
       screen.queryByText(/reminders won't fire/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it("marks the Reminders tab with a warning icon when reminders won't fire", async () => {
+    getPreferenceMatrix.mockResolvedValue({
+      preferences: { medication_reminder_due: { 1: true } },
+    });
+    setupForm({
+      formData: {
+        medication_name: 'Aspirin',
+        status: 'active',
+        reminder_enabled: true,
+        reminder_times: ['08:00'],
+        effective_period_end: '2020-01-01',
+      },
+    });
+
+    // The icon's aria-label joins the tab's accessible name, so the marker
+    // is visible (and queryable) without opening the Reminders tab.
+    expect(
+      await screen.findByRole('tab', { name: /won't fire/i })
+    ).toBeInTheDocument();
+  });
+
+  it('does not mark the Reminders tab when reminders will fire', async () => {
+    getPreferenceMatrix.mockResolvedValue({
+      preferences: { medication_reminder_due: { 1: true } },
+    });
+    setupForm({
+      formData: {
+        medication_name: 'Aspirin',
+        status: 'active',
+        reminder_enabled: true,
+        reminder_times: ['08:00'],
+      },
+    });
+
+    await screen.findByRole('tab', { name: /reminders/i });
+    expect(
+      screen.queryByRole('tab', { name: /won't fire/i })
     ).not.toBeInTheDocument();
   });
 });

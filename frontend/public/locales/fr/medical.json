@@ -901,9 +901,9 @@
       "notFiring": {
         "title": "Les rappels ne se déclencheront pas",
         "badge": "Ne se déclenchera pas",
-        "periodEnded": "La période d'efficacité s'est terminée le {{date}}.",
-        "notStarted": "La période d'efficacité ne commence que le {{date}}.",
-        "statusNotActive": "Le statut du médicament est « {{status}} », et non actif."
+        "periodEnded": "Ce médicament est indiqué comme n'étant plus pris depuis le {{date}}.",
+        "notStarted": "La prise de ce médicament ne commence que le {{date}}.",
+        "statusNotActive": "Le statut du médicament est « {{status}} » — les rappels ne sont envoyés que pour les médicaments actifs."
       },
       "enabledBadge": "Rappels activés"
     },

@@ -60,6 +60,32 @@ export function getReminderBlockers(medication, today = todayLocalIso()) {
 }
 
 /**
+ * Builds a save-time warning for a medication whose enabled reminders cannot
+ * fire. Returns null when reminders are disabled or nothing blocks them,
+ * otherwise { title, message } with all blocker reasons joined, resolved
+ * through the provided t(). Keys are explicitly "medical:"-prefixed so this
+ * works regardless of the caller's default namespace.
+ */
+export function getWontFireWarning(medication, t, today = todayLocalIso()) {
+  if (!medication?.reminder_enabled) return null;
+
+  const descriptors = getReminderBlockerDescriptors(medication, today);
+  if (descriptors.length === 0) return null;
+
+  return {
+    title: t(
+      'medical:medications.reminders.notFiring.title',
+      "Reminders won't fire"
+    ),
+    message: descriptors
+      .map(d =>
+        t(`medical:${d.key}`, { ...d.params, defaultValue: d.defaultValue })
+      )
+      .join(' '),
+  };
+}
+
+/**
  * Maps each blocker to its i18n key (medical namespace, unprefixed),
  * interpolation params, and English defaultValue. Callers render with
  * t(key, { ...params, defaultValue }) — prefix "medical:" when the
@@ -76,21 +102,24 @@ export function getReminderBlockerDescriptors(
           blocker,
           key: 'medications.reminders.notFiring.periodEnded',
           params: { date: toIsoDateString(medication?.effective_period_end) },
-          defaultValue: 'The effective period ended on {{date}}.',
+          defaultValue:
+            'This medication is marked as no longer taken as of {{date}}.',
         };
       case REMINDER_BLOCKERS.NOT_STARTED:
         return {
           blocker,
           key: 'medications.reminders.notFiring.notStarted',
           params: { date: toIsoDateString(medication?.effective_period_start) },
-          defaultValue: "The effective period doesn't start until {{date}}.",
+          defaultValue:
+            "This medication isn't scheduled to start until {{date}}.",
         };
       default:
         return {
           blocker,
           key: 'medications.reminders.notFiring.statusNotActive',
           params: { status: medication?.status || '' },
-          defaultValue: 'The medication status is "{{status}}", not active.',
+          defaultValue:
+            'The medication status is "{{status}}" — reminders only fire for active medications.',
         };
     }
   });

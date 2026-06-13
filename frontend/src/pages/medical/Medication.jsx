@@ -33,6 +33,7 @@ import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { apiService } from '../../services/api';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { getMedicalPageConfig } from '../../utils/medicalPageConfigs';
+import { getWontFireWarning } from '../../utils/medicationReminders';
 import { usePatientWithStaticData } from '../../hooks/useGlobalData';
 import { getEntityFormatters } from '../../utils/tableFormatters';
 import { PageHeader } from '../../components';
@@ -444,6 +445,19 @@ const Medication = () => {
                 color: 'yellow',
               });
             }
+          }
+
+          // Reminders that can never fire are easy to save by accident
+          // (lapsed effective period, non-active status). Surface it at the
+          // moment of saving, not just inside the Reminders tab.
+          const wontFireWarning = getWontFireWarning(medicationData, t);
+          if (wontFireWarning) {
+            notifications.show({
+              title: wontFireWarning.title,
+              message: wontFireWarning.message,
+              color: 'yellow',
+              autoClose: 10000,
+            });
           }
 
           const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();

@@ -901,9 +901,9 @@
       "notFiring": {
         "title": "Reminders won't fire",
         "badge": "Won't fire",
-        "periodEnded": "The effective period ended on {{date}}.",
-        "notStarted": "The effective period doesn't start until {{date}}.",
-        "statusNotActive": "The medication status is \"{{status}}\", not active."
+        "periodEnded": "This medication is marked as no longer taken as of {{date}}.",
+        "notStarted": "This medication isn't scheduled to start until {{date}}.",
+        "statusNotActive": "The medication status is \"{{status}}\" — reminders only fire for active medications."
       },
       "enabledBadge": "Reminders enabled"
     },

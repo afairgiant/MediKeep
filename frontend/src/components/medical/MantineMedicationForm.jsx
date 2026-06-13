@@ -547,6 +547,19 @@ const MantineMedicationForm = ({
               <Tabs.Tab
                 value="reminders"
                 leftSection={<IconBell size={16} />}
+                rightSection={
+                  reminderBlockerDescriptors.length > 0 ? (
+                    <IconAlertCircle
+                      size={14}
+                      role="img"
+                      aria-label={t(
+                        'medications.reminders.notFiring.title',
+                        "Reminders won't fire"
+                      )}
+                      color="var(--mantine-color-red-6)"
+                    />
+                  ) : undefined
+                }
               >
                 {t('medications.reminders.tabLabel', 'Reminders')}
               </Tabs.Tab>
