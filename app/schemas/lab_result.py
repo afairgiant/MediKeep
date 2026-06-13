@@ -223,12 +223,12 @@ class LabResultBase(TaggedEntityMixin):
     @field_validator("ref_range_text")
     @classmethod
     def validate_ref_range_text(cls, v):
-        if v is not None:
-            v = v.strip()
-            if len(v) > 100:
-                raise ValueError("Reference range text must be 100 characters or fewer")
-            return v if v else None
-        return v
+        """Normalize only — length is enforced on the input schemas (Create/Update)
+        so the response can serialize any stored value without crashing (#894)."""
+        if v is None:
+            return None
+        stripped = v.strip()
+        return stripped if stripped else None
 
     @model_validator(mode="after")
     def validate_date_order(self):
@@ -243,9 +243,7 @@ class LabResultBase(TaggedEntityMixin):
         """Validate that ref_range_max is greater than ref_range_min"""
         if self.ref_range_min is not None and self.ref_range_max is not None:
             if self.ref_range_max <= self.ref_range_min:
-                raise ValueError(
-                    "Reference range maximum must be greater than minimum"
-                )
+                raise ValueError("Reference range maximum must be greater than minimum")
         return self
 
 
@@ -262,6 +260,17 @@ class LabResultCreate(LabResultBase):
         if v and len(v.strip()) > 5000:
             raise ValueError("Notes must be 5000 characters or fewer")
         return v.strip() if v else None
+
+    @field_validator("ref_range_text")
+    @classmethod
+    def validate_ref_range_text(cls, v):
+        """Validate reference range text length on creation (#894)."""
+        if v is None:
+            return None
+        stripped = v.strip()
+        if len(stripped) > 500:
+            raise ValueError("Reference range text must be 500 characters or fewer")
+        return stripped if stripped else None
 
     @field_validator("patient_id")
     @classmethod
@@ -454,8 +463,8 @@ class LabResultUpdate(BaseModel):
     def validate_ref_range_text(cls, v):
         if v is not None:
             v = v.strip()
-            if len(v) > 100:
-                raise ValueError("Reference range text must be 100 characters or fewer")
+            if len(v) > 500:
+                raise ValueError("Reference range text must be 500 characters or fewer")
             return v if v else None
         return v
 
@@ -472,9 +481,7 @@ class LabResultUpdate(BaseModel):
         """Validate that ref_range_max is greater than ref_range_min"""
         if self.ref_range_min is not None and self.ref_range_max is not None:
             if self.ref_range_max <= self.ref_range_min:
-                raise ValueError(
-                    "Reference range maximum must be greater than minimum"
-                )
+                raise ValueError("Reference range maximum must be greater than minimum")
         return self
 
 
