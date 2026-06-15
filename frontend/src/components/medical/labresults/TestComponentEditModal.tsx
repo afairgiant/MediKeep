@@ -24,6 +24,7 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
 import { TEST_LIBRARY } from '../../../constants/testLibrary';
 import { QUALITATIVE_SELECT_OPTIONS } from '../../../constants/labCategories';
+import { MAX_REF_RANGE_TEXT_LENGTH } from '../../../utils/labTestComponentUtils';
 
 interface TestComponentEditModalProps {
   component: LabTestComponent | null;
@@ -482,6 +483,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
                     "e.g., 'Negative' or 'Male: 13.5-17.5, Female: 12.0-15.5'"
                   )}
                   value={formData.ref_range_text || ''}
+                  maxLength={MAX_REF_RANGE_TEXT_LENGTH}
                   onChange={e =>
                     setFormData(prev => ({
                       ...prev,

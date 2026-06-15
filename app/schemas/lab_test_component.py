@@ -409,6 +409,23 @@ class LabTestComponentUpdate(BaseModel):
             )
         return stripped
 
+    @field_validator("ref_range_text")
+    @classmethod
+    def validate_ref_range_text(cls, v):
+        """Validate reference range text length on update.
+
+        Mirrors LabTestComponentBase so the update path cannot persist an
+        over-limit value that would later crash response serialization (#894).
+        """
+        if v is None:
+            return None
+        if len(v.strip()) > LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]:
+            raise ValueError(
+                f"Reference range text must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_REF_RANGE_TEXT_LENGTH']} characters"
+            )
+        stripped = v.strip()
+        return stripped if stripped else None
+
     @model_validator(mode="after")
     def validate_ref_range(self):
         """Validate that ref_range_max is greater than ref_range_min"""
@@ -477,6 +494,18 @@ class LabTestComponentResponse(LabTestComponentBase):
     updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+    @field_validator("ref_range_text")
+    @classmethod
+    def validate_ref_range_text(cls, v):
+        """Tolerate any stored length on read (#894).
+
+        Overrides the length-enforcing validator in LabTestComponentBase: the
+        response model must serialize whatever is in the database so legacy or
+        over-limit records stay viewable and editable instead of raising
+        ResponseValidationError. Length is enforced on the input schemas.
+        """
+        return v.strip() if v else None
 
 
 class LabTestComponentWithLabResult(LabTestComponentResponse):
