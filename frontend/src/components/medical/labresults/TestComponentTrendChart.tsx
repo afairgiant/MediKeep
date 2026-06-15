@@ -307,6 +307,16 @@ const TestComponentTrendChart: React.FC<TestComponentTrendChartProps> = ({
     return <QualitativeChart trendData={trendData} />;
   }
 
+  if (trendData.result_type === 'textual') {
+    return (
+      <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">
+        <Text size="sm" c="dimmed" ta="center">
+          {t('labresults:trendChart.notAvailableForTextual', 'Trend charts are not available for textual results.')}
+        </Text>
+      </Paper>
+    );
+  }
+
   if (chartData.length === 0) {
     return (
       <Paper withBorder p="xl" radius="md" bg="var(--color-bg-secondary)">

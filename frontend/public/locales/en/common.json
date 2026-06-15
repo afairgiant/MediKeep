@@ -1244,10 +1244,11 @@
   },
   "viewToggle": {
     "cards": "Cards",
-    "components": "Components",
+    "components": "Results",
     "label": "View mode",
     "stacked": "Stacked",
-    "table": "Table"
+    "table": "Table",
+    "panels": "Lab Panels"
   },
   "visits": {
     "addNewVisit": "Add New Visit",

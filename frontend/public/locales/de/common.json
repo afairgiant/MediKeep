@@ -1244,10 +1244,11 @@
   },
   "viewToggle": {
     "cards": "Karten",
-    "components": "Komponenten",
+    "components": "Ergebnisse",
     "label": "Ansichtsmodus",
     "table": "Tabelle",
-    "stacked": "Gestapelt"
+    "stacked": "Gestapelt",
+    "panels": "Labor-Panels"
   },
   "visits": {
     "addNewVisit": "Neuen Termin hinzufügen",

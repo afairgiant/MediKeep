@@ -142,7 +142,6 @@
     "statusIndicator": "Statusindikator:",
     "testCodePlaceholder": "t.ex. 718-7",
     "testComponents": "Testkomponenter (valfritt)",
-    "testComponentsDescription": "Lägg gärna till individuella testvärden. Du kan också lägga till fler senare.",
     "testDetails": "Testdetaljer",
     "unit": "Enhet",
     "matchedCommonName": "matchning: {{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "Redigera laboratorieresultat",
     "labels": {
       "testType": "Testtyp",
-        "referenceRange": "Referensintervall"
+      "referenceRange": "Referensintervall"
     },
     "sections": {
       "associatedFiles": "Associerade dokument",
+      "panelDetails": "Panelinformation",
       "testInfo": "Testinformation",
       "testResults": "Testresultat"
     },
     "tabs": {
-      "testComponents": "Testkomponenter"
+      "testComponents": "Testresultat"
     },
     "title": "Detaljer för laboratorieresultat"
   },
@@ -317,7 +317,7 @@
     "placeholder": "t.ex. CBC, 85025"
   },
   "testComponents": {
-    "addTestComponents": "Lägg till testkomponenter",
+    "addTestComponents": "Lägg till tester",
     "addTests": "Lägg till test",
     "categories": {
       "cardiology": "Kardiologi - Hjärt- & hjärtmarkörer",
@@ -332,7 +332,8 @@
       "molecular": "Molekylärdiagnostik - DNA-test",
       "other": "Andra test",
       "pathology": "Patologi - Vävnads- & biopsianalys",
-      "toxicology": "Toxikologi - Läkemedels- & giftscreening"
+      "toxicology": "Toxikologi - Läkemedels- & giftscreening",
+      "imaging": "Bilddiagnostik - Radiologi & Skanningar"
     },
     "editModal": {
       "descriptions": {
@@ -365,16 +366,16 @@
         "unit": "t.ex. g/dL",
         "value": "Ange testvärde"
       },
-      "title": "Redigera testkomponent",
+      "title": "Redigera test",
       "trendLinking": "Trendlänkning",
-      "updating": "Uppdaterar testkomponent..."
+      "updating": "Uppdaterar test..."
     },
     "emptyState": {
       "description": "Mallar tillhandahåller vanliga labbpaneler (blodstatus, CMP, osv.) där du kan ange värden och intervall. Bulkimport låter dig kopiera/klistra in resultat från labbrapporter för automatisk tolkning."
     },
-    "errorLoading": "Fel vid laddning av testkomponenter",
-    "noComponents": "Inga testkomponenter",
-    "noComponentsDescription": "Detta laboratorieresultat har inga individuella testkomponenter ännu.",
+    "errorLoading": "Fel vid laddning av tester",
+    "noComponents": "Inga tester",
+    "noComponentsDescription": "Detta laboratorieresultat har inga tester ännu.",
     "notifications": {
       "componentDeleted": "Komponent borttagen",
       "hasBeenDeleted": "{{name}} har tagits bort"
@@ -384,7 +385,12 @@
       "statistics": "Statistik",
       "testResults": "Testresultat"
     },
-    "title": "Testkomponenter"
+    "title": "Tester",
+    "resultType": {
+      "qualitative": "Kvalitativ (Pos/Neg)",
+      "quantitative": "Kvantitativ (Numerisk)",
+      "textual": "Textuell (Rapport)"
+    }
   },
   "testingFacility": {
     "description": "Var testet utförs/utfördes",
@@ -428,7 +434,8 @@
     "noDataPoints": "Inga datapunkter att visa",
     "positiveDetected": "Positiv/upptäckt",
     "referenceRange": "Referensintervall:",
-    "referenceValue": "Referens: {{min}} - {{max}}"
+    "referenceValue": "Referens: {{min}} - {{max}}",
+    "notAvailableForTextual": "Trenddiagram är inte tillgängliga för textuella resultat."
   },
   "trends": {
     "abnormalLabel": "Avvikande:",
@@ -449,7 +456,11 @@
     "summaryStatistics": "Sammanfattande statistik",
     "timeRange": "Tidsintervall",
     "title": "Trendanalys",
-    "total": "Totalt"
+    "total": "Totalt",
+    "decreasing": "Minskande",
+    "increasing": "Ökande",
+    "stable": "Stabil",
+    "textualNoStats": "Numerisk statistik är inte tillgänglig för textuella resultat."
   },
   "trendTable": {
     "clickToSort": "Klicka på kolumnrubriker för att sortera",
@@ -457,7 +468,8 @@
     "historicalData_one": "Historisk data ({{count}} punkt)",
     "historicalData_other": "Historisk data ({{count}} punkter)",
     "labResult": "Laboratorieresultat",
-    "noDataPoints": "Inga datapunkter att visa"
+    "noDataPoints": "Inga datapunkter att visa",
+    "notSpecified": "Ej angivet"
   },
   "unsavedDataInstructions": "Klicka på \"Lägg till komponenter\" i fliken Förhandsgranskning för att spara dina tolkade data innan du stänger.",
   "unsavedDataMessage_one": "Du har {{count}} tolkad testkomponent som inte har lagts till ännu. Om du stänger nu kommer du att förlora denna tolkade data.",
@@ -488,5 +500,24 @@
     "refTextLabel": "Intervalltext",
     "refTextPlaceholder": "t.ex. 4,0-5,6 eller <200",
     "refTextDescription": "Åsidosätter min/max i visningen"
+  },
+  "resultsTable": {
+    "expandAll": "Expandera alla",
+    "collapseAll": "Dölj alla",
+    "results": "{{count}} resultat",
+    "results_other": "{{count}} resultat",
+    "noResults": "Inga testresultat matchar de aktuella filtren",
+    "dateFrom": "Datum från",
+    "dateTo": "Datum till",
+    "source": "Källa",
+    "viewTrends": "Visa trender"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
+  },
+  "textualResult": {
+    "label": "Resultattext",
+    "noText": "—",
+    "placeholder": "Ange resultattext (t.ex. Inga akuta fynd)"
   }
 }

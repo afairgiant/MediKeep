@@ -14,9 +14,11 @@ import {
   Text,
   Button,
   Grid,
+  Box,
   TextInput,
   NumberInput,
   Select,
+  Textarea,
   ActionIcon,
   Collapse,
   Autocomplete,
@@ -52,20 +54,24 @@ import {
 export interface InlineTestComponentMethods {
   hasPendingComponents: () => boolean;
   getPendingComponents: () => ComponentRowData[];
+  getComponents: () => ComponentRowData[];
   clearComponents: () => void;
+  setComponents: (_rows: ComponentRowData[]) => void;
 }
 
 interface InlineTestComponentEntryProps {
   onRef?: (_methods: InlineTestComponentMethods | null) => void;
   disabled?: boolean;
+  defaultExpanded?: boolean;
 }
 
 function InlineTestComponentEntry({
   onRef,
   disabled = false,
+  defaultExpanded = false,
 }: InlineTestComponentEntryProps): React.ReactElement {
-  const { t } = useTranslation(['medical', 'shared']);
-  const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation(['medical', 'shared', 'labresults']);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const [components, setComponents] = useState<ComponentRowData[]>([
     createEmptyRow(1),
   ]);
@@ -79,15 +85,24 @@ function InlineTestComponentEntry({
     return components.some(isSubmittableComponent);
   }, [components]);
 
+  const getComponents = useCallback((): ComponentRowData[] => {
+    return components;
+  }, [components]);
+
   const clearComponents = useCallback(() => {
     setComponents([createEmptyRow(1)]);
     setExpanded(false);
   }, []);
 
+  const applyTemplateRows = useCallback((rows: ComponentRowData[]) => {
+    setComponents(rows.length > 0 ? rows : [createEmptyRow(1)]);
+    if (rows.length > 0) setExpanded(true);
+  }, []);
+
   useEffect(() => {
-    onRef?.({ hasPendingComponents, getPendingComponents, clearComponents });
+    onRef?.({ hasPendingComponents, getPendingComponents, getComponents, clearComponents, setComponents: applyTemplateRows });
     return () => onRef?.(null);
-  }, [onRef, hasPendingComponents, getPendingComponents, clearComponents]);
+  }, [onRef, hasPendingComponents, getPendingComponents, getComponents, clearComponents, applyTemplateRows]);
 
   const updateComponent = useCallback(
     (index: number, field: string, value: unknown) => {
@@ -156,7 +171,7 @@ function InlineTestComponentEntry({
         <Group gap="xs">
           <IconFlask size={20} />
           <Text fw={500}>
-            {t('labresults:form.testComponents', 'Test Components (Optional)')}
+            {t('labresults:form.testComponents', 'Add Tests')}
           </Text>
           {pendingCount > 0 && (
             <Badge size="sm" variant="filled" color="blue">
@@ -169,19 +184,12 @@ function InlineTestComponentEntry({
 
       <Collapse in={expanded}>
         <Stack gap="md" mt="md">
-          <Text size="sm" c="dimmed">
-            {t(
-              'labresults:form.testComponentsDescription',
-              'Optionally add individual test values. You can also add more later.'
-            )}
-          </Text>
-
           {components.map((component, index) => (
             <Paper key={component._rowId} withBorder p="sm" radius="sm">
               <Stack gap="xs">
                 <Group justify="space-between" align="center">
                   <Text size="xs" fw={600} c="dimmed">
-                    {`#${index + 1}`}
+                    {t('labresults:testEntry.label', 'Test #{{number}}', { number: index + 1 })}
                   </Text>
                   <ActionIcon
                     color="red"
@@ -235,6 +243,7 @@ function InlineTestComponentEntry({
                         const autoFillFields: Partial<ComponentRowData> = {
                           test_name: cleanTestName,
                           ...(libraryTest && {
+                            canonical_test_name: libraryTest.test_name,
                             unit: libraryTest.default_unit,
                             category: libraryTest.category,
                             ...(libraryTest.abbreviation && {
@@ -318,66 +327,88 @@ function InlineTestComponentEntry({
                     />
                   </Grid.Col>
 
-                  <Grid.Col
-                    span={component.result_type === 'qualitative' ? 6 : 4}
-                  >
-                    <TextInput
-                      label={t('labresults:form.unit', 'Unit')}
-                      placeholder={t('labresults:form.unit', 'Unit')}
-                      size="xs"
-                      value={component.unit}
-                      onChange={event =>
-                        updateComponent(index, 'unit', event.target.value)
-                      }
-                      disabled={disabled}
-                    />
-                  </Grid.Col>
-
-                  <Grid.Col
-                    span={component.result_type === 'qualitative' ? 6 : 4}
-                  >
-                    {component.result_type === 'qualitative' ? (
-                      <Select
-                        label={t('labresults:form.result', 'Result')}
+                  {component.result_type === 'textual' ? (
+                    <Grid.Col span={12}>
+                      <Textarea
+                        label={t('labresults:textualResult.label', 'Result Text')}
                         placeholder={t(
-                          'labresults:form.selectResult',
-                          'Select result'
+                          'labresults:textualResult.placeholder',
+                          'Enter result text (e.g. No acute findings)'
                         )}
                         size="xs"
-                        data={QUALITATIVE_SELECT_OPTIONS}
-                        value={component.qualitative_value || null}
-                        onChange={value => {
-                          updateComponent(
-                            index,
-                            'qualitative_value',
-                            value || ''
-                          );
-                          if (value === 'positive' || value === 'detected') {
-                            updateComponent(index, 'status', 'abnormal');
-                          } else if (
-                            value === 'negative' ||
-                            value === 'undetected'
-                          ) {
-                            updateComponent(index, 'status', 'normal');
-                          }
-                        }}
-                        comboboxProps={{ zIndex: 3003 }}
-                        disabled={disabled}
-                      />
-                    ) : (
-                      <NumberInput
-                        label={t('shared:labels.value', 'Value')}
-                        placeholder={t('shared:labels.value', 'Value')}
-                        size="xs"
-                        value={component.value}
-                        onChange={value =>
-                          updateComponent(index, 'value', value)
+                        value={component.textual_value || ''}
+                        onChange={event =>
+                          updateComponent(index, 'textual_value', event.target.value)
                         }
-                        hideControls
+                        minRows={2}
+                        autosize
+                        maxRows={5}
+                        maxLength={5000}
                         disabled={disabled}
                       />
-                    )}
-                  </Grid.Col>
+                    </Grid.Col>
+                  ) : (
+                    <>
+                      <Grid.Col span={component.result_type === 'qualitative' ? 6 : 4}>
+                        {component.result_type === 'qualitative' ? (
+                          <Select
+                            label={t('labresults:form.result', 'Result')}
+                            placeholder={t(
+                              'labresults:form.selectResult',
+                              'Select result'
+                            )}
+                            size="xs"
+                            data={QUALITATIVE_SELECT_OPTIONS}
+                            value={component.qualitative_value || null}
+                            onChange={value => {
+                              updateComponent(
+                                index,
+                                'qualitative_value',
+                                value || ''
+                              );
+                              if (value === 'positive' || value === 'detected') {
+                                updateComponent(index, 'status', 'abnormal');
+                              } else if (
+                                value === 'negative' ||
+                                value === 'undetected'
+                              ) {
+                                updateComponent(index, 'status', 'normal');
+                              }
+                            }}
+                            comboboxProps={{ zIndex: 3003 }}
+                            disabled={disabled}
+                          />
+                        ) : (
+                          <NumberInput
+                            label={t('shared:labels.value', 'Value')}
+                            placeholder={t('shared:labels.value', 'Value')}
+                            size="xs"
+                            value={component.value}
+                            onChange={value =>
+                              updateComponent(index, 'value', value)
+                            }
+                            hideControls
+                            disabled={disabled}
+                          />
+                        )}
+                      </Grid.Col>
+
+                      {component.result_type === 'quantitative' && (
+                        <Grid.Col span={4}>
+                          <TextInput
+                            label={t('labresults:form.unit', 'Unit')}
+                            placeholder={t('labresults:form.unit', 'Unit')}
+                            size="xs"
+                            value={component.unit}
+                            onChange={event =>
+                              updateComponent(index, 'unit', event.target.value)
+                            }
+                            disabled={disabled}
+                          />
+                        </Grid.Col>
+                      )}
+                    </>
+                  )}
 
                   <Grid.Col span={4}>
                     <TextInput
@@ -400,35 +431,67 @@ function InlineTestComponentEntry({
                     />
                   </Grid.Col>
 
-                  {component.result_type !== 'qualitative' && (
-                    <>
-                      <Grid.Col span={6}>
-                        <NumberInput
-                          label={t('labresults:form.refMin', 'Ref Min')}
-                          placeholder={t('shared:labels.min', 'Min')}
-                          size="xs"
-                          value={component.ref_range_min}
-                          onChange={value =>
-                            updateComponent(index, 'ref_range_min', value)
-                          }
-                          hideControls
-                          disabled={disabled}
-                        />
-                      </Grid.Col>
-                      <Grid.Col span={6}>
-                        <NumberInput
-                          label={t('labresults:form.refMax', 'Ref Max')}
-                          placeholder={t('shared:labels.max', 'Max')}
-                          size="xs"
-                          value={component.ref_range_max}
-                          onChange={value =>
-                            updateComponent(index, 'ref_range_max', value)
-                          }
-                          hideControls
-                          disabled={disabled}
-                        />
-                      </Grid.Col>
-                    </>
+                  {component.result_type === 'quantitative' && (
+                    <Grid.Col span={12}>
+                      <Box>
+                        <Text size="xs" c="dimmed" fw={500} mb={4}>
+                          {t(
+                            'labresults:modal.labels.referenceRange',
+                            'Reference Range'
+                          )}
+                        </Text>
+                        <Grid gutter="xs">
+                          <Grid.Col span={4}>
+                            <NumberInput
+                              label={t('labresults:form.refMin', 'Ref Min')}
+                              placeholder={t('shared:labels.min', 'Min')}
+                              size="xs"
+                              value={component.ref_range_min}
+                              onChange={value =>
+                                updateComponent(index, 'ref_range_min', value)
+                              }
+                              hideControls
+                              disabled={disabled}
+                            />
+                          </Grid.Col>
+                          <Grid.Col span={4}>
+                            <NumberInput
+                              label={t('labresults:form.refMax', 'Ref Max')}
+                              placeholder={t('shared:labels.max', 'Max')}
+                              size="xs"
+                              value={component.ref_range_max}
+                              onChange={value =>
+                                updateComponent(index, 'ref_range_max', value)
+                              }
+                              hideControls
+                              disabled={disabled}
+                            />
+                          </Grid.Col>
+                          <Grid.Col span={4}>
+                            <TextInput
+                              label={t(
+                                'labresults:numericResult.refTextLabel',
+                                'Ref Text'
+                              )}
+                              placeholder={t(
+                                'labresults:numericResult.refTextPlaceholder',
+                                'e.g. 4.0-5.6 or <200'
+                              )}
+                              size="xs"
+                              value={component.ref_range_text || ''}
+                              onChange={event =>
+                                updateComponent(
+                                  index,
+                                  'ref_range_text',
+                                  event.target.value
+                                )
+                              }
+                              disabled={disabled}
+                            />
+                          </Grid.Col>
+                        </Grid>
+                      </Box>
+                    </Grid.Col>
                   )}
 
                   <Grid.Col span={6}>

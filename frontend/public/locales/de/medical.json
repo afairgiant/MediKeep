@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Testkatalog konnte nicht geladen werden",
-    "noData": "Fügen Sie Laborergebnisse mit Testkomponenten hinzu, um sie hier zu sehen.",
-    "noResults": "Keine Testkomponenten gefunden",
+    "noData": "Fügen Sie Laborergebnisse hinzu, um sie hier zu sehen.",
+    "noResults": "Keine Laborergebnisse gefunden",
     "readingCount_one": "{{count}} Messung",
     "refRange": "Ref.",
     "searchPlaceholder": "Tests suchen...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "Laborergebnis gespeichert, aber Testkomponenten konnten nicht hinzugefügt werden. Sie können diese von der Detailseite aus hinzufügen.",
       "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Verknüpfungen konnten nicht erstellt werden. Sie können diese auf der Bearbeitungsseite hinzufügen."
+    },
+    "addPanel": {
+      "title": "Neues Testpanel hinzufügen",
+      "panelName": "Panelname",
+      "panelNamePlaceholder": "z. B. Blutbild, Jährliches Blutbild",
+      "panelNameDescription": "Ein Name für diese Gruppe von Tests",
+      "createButton": "Erstellen",
+      "creating": "Panel wird erstellt...",
+      "createError": "Testpanel konnte nicht erstellt werden",
+      "testResultRequired": "Mindestens ein Testergebnis ist erforderlich",
+      "tagsPlaceholder": "Tags hinzufügen, um diesen Eintrag später zu organisieren und zu finden"
+    },
+    "buttons": {
+      "addLabResults": "Laborergebnisse hinzufügen"
     }
   },
   "medications": {

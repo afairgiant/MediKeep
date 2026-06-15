@@ -140,6 +140,7 @@ def get_lab_results(
             "ref_range_min": result.ref_range_min,
             "ref_range_max": result.ref_range_max,
             "ref_range_text": result.ref_range_text,
+            "is_panel": result.is_panel,
             "created_at": result.created_at,
             "updated_at": result.updated_at,
             "practitioner_name": (
@@ -213,6 +214,7 @@ def get_lab_result(
         "ref_range_min": db_lab_result.ref_range_min,
         "ref_range_max": db_lab_result.ref_range_max,
         "ref_range_text": db_lab_result.ref_range_text,
+        "is_panel": db_lab_result.is_panel,
         "created_at": db_lab_result.created_at,
         "updated_at": db_lab_result.updated_at,
         "practitioner_name": (

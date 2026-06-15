@@ -2,13 +2,14 @@
  * TestComponentCatalog - Main catalog view showing one card per unique test name
  * across all lab results for a patient. Includes search, filters, category grouping,
  * sort toggle, and trend panel.
+ *
+ * Filters and aggregates the same patientComponents data used by the Results Table,
+ * so no separate API call is needed.
  */
 
 import React, {
   useState,
-  useEffect,
   useCallback,
-  useRef,
   useMemo,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,38 +20,56 @@ import {
   Select,
   Text,
   Skeleton,
-  Alert,
   SimpleGrid,
   SegmentedControl,
   Collapse,
   UnstyledButton,
   Badge,
+  Card,
+  ActionIcon,
 } from '@mantine/core';
 import {
   IconSearch,
-  IconAlertCircle,
   IconSortAscending,
   IconAlertTriangle,
   IconChevronDown,
   IconChevronRight,
+  IconChevronUp,
+  IconFilter,
+  IconX,
 } from '@tabler/icons-react';
 import {
-  labTestComponentApi,
   ComponentCatalogEntry,
+  LabTestComponentForStack,
 } from '../../../services/api/labTestComponentApi';
 import {
   CATEGORY_SELECT_OPTIONS,
   getCategoryDisplayName,
   getCategoryColor,
 } from '../../../constants/labCategories';
+import { DateInput } from '../../adapters/DateInput';
 import AnimatedCardGrid from '../../shared/AnimatedCardGrid';
 import EmptyState from '../../shared/EmptyState';
 import TestComponentCatalogCard from './TestComponentCatalogCard';
 import TestComponentTrendsPanel from './TestComponentTrendsPanel';
-import logger from '../../../services/logger';
 import { labChartKey } from '../../../utils/labChartKey';
 
+interface LabResultRef {
+  id: number;
+  test_name: string;
+  practitioner_id: number | null;
+}
+
+interface PractitionerRef {
+  id: number;
+  name: string;
+}
+
 interface TestComponentCatalogProps {
+  components: LabTestComponentForStack[];
+  labResults: LabResultRef[];
+  practitioners: PractitionerRef[];
+  loading?: boolean;
   patientId: number;
 }
 
@@ -79,117 +98,210 @@ function getStatusOptions(t: (_key: string, _fallback: string) => string) {
 
 type SortMode = 'priority' | 'alphabetical';
 
+const STATUS_PRIORITY = ['critical', 'abnormal', 'high', 'low', 'borderline', 'normal'];
+
+function toDateStr(d: Date | null): string | null {
+  if (!d || !(d instanceof Date) || isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+function getComponentDate(c: LabTestComponentForStack): string | null {
+  return c.completed_date || c.ordered_date || null;
+}
+
+function computeTrendDirection(
+  sorted: LabTestComponentForStack[]
+): ComponentCatalogEntry['trend_direction'] {
+  if (sorted.length < 2) return 'stable';
+  const latest = sorted[0];
+  const prev = sorted[1];
+  if (latest.value == null || prev.value == null) return 'stable';
+  const latestVal = Number(latest.value);
+  const prevVal = Number(prev.value);
+  if (latestVal === prevVal) return 'stable';
+  const increasing = latestVal > prevVal;
+  const status = latest.status?.toLowerCase();
+  if (status === 'high' || status === 'critical') {
+    return increasing ? 'worsening' : 'improving';
+  }
+  if (status === 'low') {
+    return increasing ? 'improving' : 'worsening';
+  }
+  return increasing ? 'increasing' : 'decreasing';
+}
+
 const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
+  components,
+  labResults,
+  practitioners,
+  loading = false,
   patientId,
 }) => {
-  const { t } = useTranslation(['medical', 'common', 'shared']);
-  const [items, setItems] = useState<ComponentCatalogEntry[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation(['medical', 'common', 'shared', 'labresults']);
 
-  // Filters
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [dateFrom, setDateFrom] = useState<Date | null>(null);
+  const [dateTo, setDateTo] = useState<Date | null>(null);
+  const [practitionerId, setPractitionerId] = useState<number | null>(null);
+  const [facility, setFacility] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('priority');
 
-  // Collapsed category groups (all expanded by default)
-  const [collapsedGroups, setCollapsedGroups] = useState<
-    Record<string, boolean>
-  >({});
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   const [trendTestName, setTrendTestName] = useState<string | null>(null);
   const [trendUnit, setTrendUnit] = useState<string | null>(null);
   const [trendOpen, setTrendOpen] = useState(false);
 
-  // Debounce ref
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const labResultById = useMemo(() => {
+    const map = new Map<number, LabResultRef>();
+    for (const lr of labResults) map.set(lr.id, lr);
+    return map;
+  }, [labResults]);
 
-  const fetchCatalog = useCallback(
-    async (
-      searchVal: string,
-      categoryVal: string | null,
-      statusVal: string | null
-    ) => {
-      // Cancel previous request
-      if (abortRef.current) {
-        abortRef.current.abort();
+  const facilityOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const opts: { value: string; label: string }[] = [];
+    for (const c of components) {
+      if (c.facility && !seen.has(c.facility)) {
+        seen.add(c.facility);
+        opts.push({ value: c.facility, label: c.facility });
       }
-      const controller = new AbortController();
-      abortRef.current = controller;
+    }
+    return opts.sort((a, b) => a.label.localeCompare(b.label));
+  }, [components]);
 
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await labTestComponentApi.getComponentCatalog(
-          patientId,
-          {
-            search: searchVal || undefined,
-            category: categoryVal || undefined,
-            status: statusVal || undefined,
-            limit: 500,
-          },
-          controller.signal
-        );
-        setItems(response.items);
-        setTotal(response.total);
-      } catch (err: any) {
-        if (err.name === 'AbortError' || err.name === 'CanceledError') return;
-        const message =
-          err?.message ||
-          t(
-            'medical:componentCatalog.fetchError',
-            'Failed to load test catalog'
-          );
-        setError(message);
-        logger.error('component_catalog_load_error', {
-          patientId,
-          error: message,
-          component: 'TestComponentCatalog',
-        });
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    },
-    [patientId, t]
+  const practitionerOptions = useMemo(
+    () => practitioners.map(p => ({ value: String(p.id), label: p.name })),
+    [practitioners]
   );
 
-  // Initial fetch and refetch on filter changes
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    debounceRef.current = setTimeout(
-      () => {
-        fetchCatalog(search, category, status);
-      },
-      search ? 300 : 0
+  const totalCatalogCount = useMemo(() => {
+    const keys = new Set(
+      components.map(c => labChartKey(c.canonical_test_name || c.test_name || '', c.unit ?? null))
     );
+    return keys.size;
+  }, [components]);
 
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [search, category, status, fetchCatalog]);
+  const catalogItems = useMemo<ComponentCatalogEntry[]>(() => {
+    const fromStr = toDateStr(dateFrom);
+    const toStr = toDateStr(dateTo);
+    const searchLower = search.toLowerCase();
 
-  // Cleanup abort on unmount
-  useEffect(() => {
-    return () => {
-      if (abortRef.current) abortRef.current.abort();
-    };
+    const filtered = components.filter(c => {
+      if (searchLower) {
+        const name = (c.canonical_test_name || c.test_name || '').toLowerCase();
+        const panelName = (labResultById.get(c.lab_result_id)?.test_name || '').toLowerCase();
+        if (!name.includes(searchLower) && !panelName.includes(searchLower)) return false;
+      }
+      if (category != null && c.category !== category) return false;
+      if (status != null && c.status !== status) return false;
+      if (practitionerId != null) {
+        const pid = labResultById.get(c.lab_result_id)?.practitioner_id ?? null;
+        if (pid !== practitionerId) return false;
+      }
+      if (facility != null && c.facility !== facility) return false;
+      const dateStr = getComponentDate(c);
+      if (fromStr && dateStr && dateStr.slice(0, 10) < fromStr) return false;
+      if (toStr && dateStr && dateStr.slice(0, 10) > toStr) return false;
+      return true;
+    });
+
+    const groupMap = new Map<string, LabTestComponentForStack[]>();
+    for (const c of filtered) {
+      const key = labChartKey(c.canonical_test_name || c.test_name || '', c.unit ?? null);
+      if (!groupMap.has(key)) groupMap.set(key, []);
+      groupMap.get(key)!.push(c);
+    }
+
+    const entries: ComponentCatalogEntry[] = [];
+    for (const comps of groupMap.values()) {
+      const sorted = [...comps].sort((a, b) => {
+        const da = getComponentDate(a) || '';
+        const db = getComponentDate(b) || '';
+        return db.localeCompare(da);
+      });
+      const latest = sorted[0];
+      const displayName = latest.canonical_test_name || latest.test_name || '';
+      entries.push({
+        test_name: displayName,
+        trend_test_name: displayName,
+        abbreviation: latest.abbreviation ?? null,
+        latest_value: latest.value ?? null,
+        latest_qualitative_value: latest.qualitative_value ?? null,
+        unit: latest.unit ?? null,
+        status: latest.status ?? null,
+        category: latest.category ?? null,
+        result_type: latest.result_type ?? null,
+        reading_count: sorted.length,
+        trend_direction: computeTrendDirection(sorted),
+        latest_date: getComponentDate(latest),
+        ref_range_min: latest.ref_range_min ?? null,
+        ref_range_max: latest.ref_range_max ?? null,
+        ref_range_text: latest.ref_range_text ?? null,
+      });
+    }
+
+    if (sortMode === 'alphabetical') {
+      entries.sort((a, b) => a.test_name.localeCompare(b.test_name));
+    } else {
+      entries.sort((a, b) => {
+        const ai = STATUS_PRIORITY.indexOf(a.status || 'normal');
+        const bi = STATUS_PRIORITY.indexOf(b.status || 'normal');
+        if (ai !== bi) return ai - bi;
+        return a.test_name.localeCompare(b.test_name);
+      });
+    }
+
+    return entries;
+  }, [components, labResultById, search, category, status, dateFrom, dateTo, practitionerId, facility, sortMode]);
+
+  const groupedByCategory = useMemo(() => {
+    const groups: Record<string, ComponentCatalogEntry[]> = {};
+    for (const item of catalogItems) {
+      const cat = item.category || 'other';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    }
+    const keys = Object.keys(groups).sort((a, b) => {
+      const aHasAbnormal = groups[a].some(i => i.status && i.status !== 'normal');
+      const bHasAbnormal = groups[b].some(i => i.status && i.status !== 'normal');
+      if (aHasAbnormal !== bHasAbnormal) return aHasAbnormal ? -1 : 1;
+      return getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b));
+    });
+    return keys.map(key => ({ category: key, items: groups[key] }));
+  }, [catalogItems]);
+
+  const hasActiveFilters = !!(
+    search || category || status || dateFrom || dateTo || practitionerId != null || facility
+  );
+
+  const activeNonSearchFilterCount = [
+    category != null,
+    status != null,
+    dateFrom != null,
+    dateTo != null,
+    practitionerId != null,
+    facility != null,
+  ].filter(Boolean).length;
+
+  const handleClearFilters = useCallback(() => {
+    setSearch('');
+    setCategory(null);
+    setStatus(null);
+    setDateFrom(null);
+    setDateTo(null);
+    setPractitionerId(null);
+    setFacility(null);
   }, []);
 
-  const handleCardClick = useCallback(
-    (testName: string, unit: string | null) => {
-      setTrendTestName(testName);
-      setTrendUnit(unit);
-      setTrendOpen(true);
-    },
-    []
-  );
+  const handleCardClick = useCallback((testName: string, unit: string | null) => {
+    setTrendTestName(testName);
+    setTrendUnit(unit);
+    setTrendOpen(true);
+  }, []);
 
   const handleCloseTrend = useCallback(() => {
     setTrendOpen(false);
@@ -201,80 +313,146 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
     setCollapsedGroups(prev => ({ ...prev, [cat]: !prev[cat] }));
   }, []);
 
-  // Sort items and group by category
-  const sortedItems = useMemo(() => {
-    if (sortMode === 'alphabetical') {
-      return [...items].sort((a, b) => a.test_name.localeCompare(b.test_name));
-    }
-    // Default: priority sort (from backend - abnormal first)
-    return items;
-  }, [items, sortMode]);
-
-  // Group items by category for display
-  const groupedByCategory = useMemo(() => {
-    const groups: Record<string, ComponentCatalogEntry[]> = {};
-    for (const item of sortedItems) {
-      const cat = item.category || 'other';
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(item);
-    }
-    // Sort category keys: put categories with abnormal items first, then alphabetical
-    const keys = Object.keys(groups).sort((a, b) => {
-      const aHasAbnormal = groups[a].some(
-        i => i.status && i.status !== 'normal'
-      );
-      const bHasAbnormal = groups[b].some(
-        i => i.status && i.status !== 'normal'
-      );
-      if (aHasAbnormal !== bHasAbnormal) return aHasAbnormal ? -1 : 1;
-      return getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b));
-    });
-    return keys.map(key => ({ category: key, items: groups[key] }));
-  }, [sortedItems]);
-
-  const hasActiveFilters = !!(search || category || status);
-
   return (
     <>
       <Stack gap="md">
-        {/* Filter bar */}
-        <Group gap="sm" grow preventGrowOverflow>
-          <TextInput
-            placeholder={t(
-              'medical:componentCatalog.searchPlaceholder',
-              'Search tests...'
-            )}
-            leftSection={<IconSearch size={16} />}
-            value={search}
-            onChange={e => setSearch(e.currentTarget.value)}
-            style={{ flex: 2, minWidth: 200 }}
-          />
-          <Select
-            placeholder={t('shared:labels.category', 'Category')}
-            data={CATEGORY_SELECT_OPTIONS}
-            value={category}
-            onChange={setCategory}
-            clearable
-            style={{ flex: 1, minWidth: 160 }}
-          />
-          <Select
-            placeholder={t('shared:fields.status', 'Status')}
-            data={getStatusOptions(t)}
-            value={status}
-            onChange={setStatus}
-            clearable
-            style={{ flex: 1, minWidth: 140 }}
-          />
-        </Group>
+        {/* Collapsible filter bar */}
+        <Card withBorder shadow="sm" p="sm" radius="md">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 50%', minWidth: 0 }}>
+              <ActionIcon
+                variant={filtersExpanded ? 'filled' : 'light'}
+                color={hasActiveFilters ? 'blue' : 'gray'}
+                size="lg"
+                onClick={() => setFiltersExpanded(prev => !prev)}
+              >
+                <IconFilter size={18} />
+              </ActionIcon>
+              <div style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden' }}>
+                <Group gap="xs" align="center" style={{ flexWrap: 'nowrap' }}>
+                  <Text size="md" fw={500} style={{ whiteSpace: 'nowrap' }}>
+                    {t('common:filters.title', 'Filters & Search')}
+                  </Text>
+                  {hasActiveFilters && (
+                    <Badge color="blue" variant="light" size="sm">
+                      {t('shared:labels.active', 'Active')}
+                    </Badge>
+                  )}
+                </Group>
+                <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {t('common:filters.itemCount', '{{filtered}} of {{total}} items', {
+                    filtered: catalogItems.length,
+                    total: totalCatalogCount,
+                  })}
+                  {activeNonSearchFilterCount > 0
+                    ? ` • ${t('shared:labels.countMoreFilters', '{{count}} more filters', { count: activeNonSearchFilterCount })}`
+                    : ''}
+                </Text>
+              </div>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                onClick={() => setFiltersExpanded(prev => !prev)}
+                style={{ flexShrink: 0 }}
+              >
+                {filtersExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+              </ActionIcon>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flex: '0 1 auto', minWidth: 0 }}>
+              <TextInput
+                placeholder={t('common:buttons.search', 'Search')}
+                leftSection={<IconSearch size={14} />}
+                value={search}
+                onChange={e => setSearch(e.currentTarget.value)}
+                size="sm"
+                style={{ width: '180px', minWidth: '100px', maxWidth: '180px' }}
+              />
+              {hasActiveFilters && (
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  onClick={handleClearFilters}
+                  aria-label={t('shared:labels.clearFilters', 'Clear filters')}
+                >
+                  <IconX size={14} />
+                </ActionIcon>
+              )}
+            </div>
+          </div>
+
+          <Collapse in={filtersExpanded}>
+            <Card withBorder p="sm" bg="gray.0" mt="sm" style={{ borderStyle: 'dashed' }}>
+              <Group gap="sm" wrap="wrap" align="flex-end">
+                <DateInput
+                  placeholder={t('labresults:resultsTable.dateFrom', 'Date from')}
+                  value={dateFrom}
+                  onChange={(val: Date | null) => setDateFrom(val)}
+                  size="sm"
+                  clearable
+                  style={{ flex: '1 1 140px', minWidth: 120 }}
+                />
+                <DateInput
+                  placeholder={t('labresults:resultsTable.dateTo', 'Date to')}
+                  value={dateTo}
+                  onChange={(val: Date | null) => setDateTo(val)}
+                  size="sm"
+                  clearable
+                  style={{ flex: '1 1 140px', minWidth: 120 }}
+                />
+                <Select
+                  placeholder={t('shared:labels.category', 'Category')}
+                  data={CATEGORY_SELECT_OPTIONS}
+                  value={category}
+                  onChange={setCategory}
+                  size="sm"
+                  clearable
+                  style={{ flex: '1 1 160px', minWidth: 140 }}
+                />
+                <Select
+                  placeholder={t('shared:fields.status', 'Status')}
+                  data={getStatusOptions(t)}
+                  value={status}
+                  onChange={setStatus}
+                  size="sm"
+                  clearable
+                  style={{ flex: '1 1 140px', minWidth: 120 }}
+                />
+                {practitionerOptions.length > 0 && (
+                  <Select
+                    placeholder={t('shared:fields.practitioner', 'Practitioner')}
+                    data={practitionerOptions}
+                    value={practitionerId != null ? String(practitionerId) : null}
+                    onChange={val => setPractitionerId(val ? Number(val) : null)}
+                    size="sm"
+                    clearable
+                    style={{ flex: '1 1 160px', minWidth: 140 }}
+                  />
+                )}
+                {facilityOptions.length > 0 && (
+                  <Select
+                    placeholder={t('shared:labels.facility', 'Facility')}
+                    data={facilityOptions}
+                    value={facility}
+                    onChange={setFacility}
+                    size="sm"
+                    clearable
+                    style={{ flex: '1 1 160px', minWidth: 140 }}
+                  />
+                )}
+              </Group>
+            </Card>
+          </Collapse>
+        </Card>
 
         {/* Sort toggle + count */}
-        {!loading && !error && items.length > 0 && (
+        {!loading && catalogItems.length > 0 && (
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
               {t(
                 'shared:labels.showingCountUniqueTests',
                 'Showing {{count}} unique tests',
-                { count: total }
+                { count: catalogItems.length }
               )}
             </Text>
             <SegmentedControl
@@ -316,24 +494,13 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
           </SimpleGrid>
         )}
 
-        {/* Error state */}
-        {!loading && error && (
-          <Alert
-            icon={<IconAlertCircle size={16} />}
-            title={t('common:errors.loadFailed', 'Load Failed')}
-            color="red"
-          >
-            {error}
-          </Alert>
-        )}
-
         {/* Empty state */}
-        {!loading && !error && items.length === 0 && (
+        {!loading && catalogItems.length === 0 && (
           <EmptyState
-            emoji="\uD83E\uDDEA"
+            emoji={"\uD83E\uDDEA"}
             title={t(
               'medical:componentCatalog.noResults',
-              'No Test Components Found'
+              'No Test Results Found'
             )}
             hasActiveFilters={hasActiveFilters}
             filteredMessage={t(
@@ -342,15 +509,14 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
             )}
             noDataMessage={t(
               'medical:componentCatalog.noData',
-              'Add lab results with test components to see them here.'
+              'Add Lab Results to see them here.'
             )}
           />
         )}
 
         {/* Card grid grouped by category (collapsible) */}
         {!loading &&
-          !error &&
-          items.length > 0 &&
+          catalogItems.length > 0 &&
           groupedByCategory.map(({ category: cat, items: catItems }) => {
             const isCollapsed = !!collapsedGroups[cat];
             return (
@@ -388,7 +554,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
                     items={catItems}
                     columns={{ base: 12, md: 6, lg: 4 }}
                     keyExtractor={(entry: ComponentCatalogEntry) =>
-                      labChartKey(entry.trend_test_name, entry.unit)
+                      labChartKey(entry.trend_test_name, entry.unit ?? null)
                     }
                     renderCard={(entry: ComponentCatalogEntry) => (
                       <TestComponentCatalogCard

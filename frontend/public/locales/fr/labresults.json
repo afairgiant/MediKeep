@@ -142,7 +142,6 @@
     "statusIndicator": "Indicateur de statut :",
     "testCodePlaceholder": "ex : 718-7",
     "testComponents": "Composants d'analyse (optionnel)",
-    "testComponentsDescription": "Optionnellement, ajoutez les valeurs d'analyse individuelles. Vous pouvez aussi en ajouter plus ultérieurement.",
     "testDetails": "Détails de l'analyse",
     "unit": "Unité",
     "matchedCommonName": "correspondance : {{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "Editer le résultat d'analyse",
     "labels": {
       "testType": "Type d'analyse",
-        "referenceRange": "Plage de référence"
+      "referenceRange": "Plage de référence"
     },
     "sections": {
       "associatedFiles": "Documents associés",
+      "panelDetails": "Détails du panneau",
       "testInfo": "Informations de l'analyse",
       "testResults": "Résultats d'analyse"
     },
     "tabs": {
-      "testComponents": "Composants d'analyse"
+      "testComponents": "Résultats d'analyse"
     },
     "title": "Détails du résultat d'analyse"
   },
@@ -317,7 +317,7 @@
     "placeholder": "ex : 85025"
   },
   "testComponents": {
-    "addTestComponents": "Ajouter des composants d'analyse",
+    "addTestComponents": "Ajouter des analyses",
     "addTests": "Ajouter des analyses",
     "categories": {
       "cardiology": "Cardiologie - Coeur et marqueurs cardiaques",
@@ -332,7 +332,8 @@
       "molecular": "Moléculaire - Analyses d'ADN",
       "other": "Autres analyses",
       "pathology": "Pathologie - Analyses de tissus et de biopsies",
-      "toxicology": "Toxicologie - Dépistage de drogues et toxines"
+      "toxicology": "Toxicologie - Dépistage de drogues et toxines",
+      "imaging": "Imagerie - Radiologie & Scans"
     },
     "editModal": {
       "descriptions": {
@@ -365,16 +366,16 @@
         "unit": "ex : g/dL",
         "value": "Saisissez la valeur de l'analyse"
       },
-      "title": "Editer le composant d'analyse",
+      "title": "Modifier l'analyse",
       "trendLinking": "Connexion aux tendances",
-      "updating": "Mise à jour du composant d'analyse..."
+      "updating": "Mise à jour de l'analyse..."
     },
     "emptyState": {
       "description": "Les modèles fournissent des batteries d'analyse communes (hémogramme, panel métabolique complet, etc.) où vous pouvez saisir des valeurs et des plages. L'importation de masse vous permet de copier/coller des résultats de rapports d'analyse pour les analyser automatiquement."
     },
-    "errorLoading": "Erreur lors du chargement des composants d'analyse",
-    "noComponents": "Aucun composant d'analyse",
-    "noComponentsDescription": "Ce résultat d'analyse ne possède pas encore de composants d'analyse individuels.",
+    "errorLoading": "Erreur lors du chargement des analyses",
+    "noComponents": "Aucune analyse",
+    "noComponentsDescription": "Ce résultat ne possède pas encore d'analyses.",
     "notifications": {
       "componentDeleted": "Composant supprimé",
       "hasBeenDeleted": "{{name}} a été supprimé"
@@ -384,7 +385,12 @@
       "statistics": "Statistiques",
       "testResults": "Résultats d'analyse"
     },
-    "title": "Composants d'analyse"
+    "title": "Analyses",
+    "resultType": {
+      "qualitative": "Qualitatif (Pos/Nég)",
+      "quantitative": "Quantitatif (Numérique)",
+      "textual": "Textuel (Rapport)"
+    }
   },
   "testingFacility": {
     "description": "Où l'analyse est / a été réalisée",
@@ -428,7 +434,8 @@
     "noDataPoints": "Aucun point de donnée à afficher",
     "positiveDetected": "Positif/Détecté",
     "referenceRange": "Plage de référence :",
-    "referenceValue": "Référence : {{min}} - {{max}}"
+    "referenceValue": "Référence : {{min}} - {{max}}",
+    "notAvailableForTextual": "Les graphiques de tendance ne sont pas disponibles pour les résultats textuels."
   },
   "trends": {
     "abnormalLabel": "Anormal :",
@@ -449,7 +456,11 @@
     "summaryStatistics": "Résumé des statistiques",
     "timeRange": "Plage temporelle",
     "title": "Analyse des tendances",
-    "total": "Total"
+    "total": "Total",
+    "decreasing": "Décroissant",
+    "increasing": "Croissant",
+    "stable": "Stable",
+    "textualNoStats": "Les statistiques numériques ne sont pas disponibles pour les résultats textuels."
   },
   "trendTable": {
     "clickToSort": "Cliquez sur les en-têtes de colonnes pour trier les données",
@@ -457,7 +468,8 @@
     "historicalData_one": "Données historiques ({{count}} point)",
     "historicalData_other": "Données historiques ({{count}} points)",
     "labResult": "Résultats d'analyse",
-    "noDataPoints": "Aucun point de donnée à afficher"
+    "noDataPoints": "Aucun point de donnée à afficher",
+    "notSpecified": "Non spécifié"
   },
   "unsavedDataInstructions": "Cliquez sur \"Ajouter des composants\" dans l'onglet d'aperçu pour sauvegarder vos données analysées avant de fermer la fenêtre.",
   "unsavedDataMessage_one": "Vous avez {{count}} composant d'analyse analysé qui n'a pas encore été ajouté. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
@@ -488,5 +500,24 @@
     "refTextLabel": "Texte de plage",
     "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
     "refTextDescription": "Remplace min/max dans l'affichage"
+  },
+  "resultsTable": {
+    "expandAll": "Tout développer",
+    "collapseAll": "Tout réduire",
+    "results": "{{count}} résultat",
+    "results_other": "{{count}} résultats",
+    "noResults": "Aucun résultat de test ne correspond aux filtres actuels",
+    "dateFrom": "Date de début",
+    "dateTo": "Date de fin",
+    "source": "Source",
+    "viewTrends": "Voir les tendances"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
+  },
+  "textualResult": {
+    "label": "Texte du résultat",
+    "noText": "—",
+    "placeholder": "Saisir le texte du résultat (p. ex. Aucune anomalie aiguë)"
   }
 }

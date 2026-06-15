@@ -34,6 +34,7 @@ class LabTestComponentBase(BaseModel):
     lab_result_id: int
     result_type: Optional[str] = "quantitative"
     qualitative_value: Optional[str] = None
+    textual_value: Optional[str] = None
 
     @field_validator("test_name")
     @classmethod
@@ -217,9 +218,22 @@ class LabTestComponentBase(BaseModel):
             )
         return normalized
 
+    @field_validator("textual_value")
+    @classmethod
+    def validate_textual_value(cls, v):
+        """Validate textual result value"""
+        if v is None:
+            return None
+        stripped = v.strip()
+        if not stripped:
+            return None
+        if len(stripped) > 5000:
+            raise ValueError("Textual result must be less than 5000 characters")
+        return stripped
+
 
 # Fields that participate in result-type validity checks (used by Update validator)
-_RESULT_TYPE_FIELDS = frozenset({"result_type", "value", "unit", "qualitative_value"})
+_RESULT_TYPE_FIELDS = frozenset({"result_type", "value", "unit", "qualitative_value", "textual_value"})
 
 
 class LabTestComponentCreate(LabTestComponentBase):
@@ -235,25 +249,21 @@ class LabTestComponentCreate(LabTestComponentBase):
 
     @model_validator(mode="after")
     def validate_result_type_fields(self):
-        """Cross-field validation for quantitative vs qualitative tests"""
+        """Cross-field validation for quantitative vs qualitative vs textual tests"""
         rt = self.result_type or "quantitative"
 
-        if rt == "quantitative":
-            if self.value is None:
-                raise ValueError("Value is required for quantitative tests")
-            if not self.unit:
-                raise ValueError("Unit is required for quantitative tests")
-        elif rt == "qualitative":
-            if not self.qualitative_value:
-                raise ValueError("Qualitative value is required for qualitative tests")
+        if rt in ("qualitative", "textual"):
             if self.value is not None:
-                raise ValueError("Numeric value must be empty for qualitative tests")
+                raise ValueError(f"Numeric value must be empty for {rt} tests")
             if self.ref_range_min is not None or self.ref_range_max is not None:
                 raise ValueError(
-                    "Reference ranges are not applicable for qualitative tests"
+                    f"Reference ranges are not applicable for {rt} tests"
                 )
-            # Note: ref_range_text is intentionally allowed for qualitative tests
-            # to store expected result context (e.g., "Expected: Negative")
+            if rt == "qualitative":
+                # ref_range_text is allowed for qualitative to store expected result context
+                pass
+            if rt == "textual" and self.qualitative_value is not None:
+                raise ValueError("Qualitative value must be empty for textual tests")
         return self
 
     @model_validator(mode="after")
@@ -263,6 +273,9 @@ class LabTestComponentCreate(LabTestComponentBase):
             return self
 
         rt = self.result_type or "quantitative"
+
+        if rt == "textual":
+            return self
 
         if rt == "qualitative" and self.qualitative_value:
             # Qualitative: positive/detected -> abnormal, negative/undetected -> normal
@@ -312,6 +325,7 @@ class LabTestComponentUpdate(BaseModel):
     notes: Optional[str] = None
     result_type: Optional[str] = None
     qualitative_value: Optional[str] = None
+    textual_value: Optional[str] = None
 
     @field_validator("test_name")
     @classmethod
@@ -417,54 +431,35 @@ class LabTestComponentUpdate(BaseModel):
                 raise ValueError("Reference range maximum must be greater than minimum")
         return self
 
+    @field_validator("textual_value")
+    @classmethod
+    def validate_textual_value(cls, v):
+        if v is not None:
+            stripped = v.strip()
+            if not stripped:
+                return None
+            if len(stripped) > 5000:
+                raise ValueError("Textual result must be less than 5000 characters")
+            return stripped
+        return v
+
     @model_validator(mode="after")
     def validate_result_type_fields(self):
-        """Prevent updates that would leave a component in an invalid state."""
-        # Only validate if result_type-related fields are being updated
+        """Prevent updates that would leave a component in a logically inconsistent state."""
         if not _RESULT_TYPE_FIELDS.intersection(self.model_fields_set):
             return self
 
-        is_clearing_value = "value" in self.model_fields_set and self.value is None
-        is_clearing_unit = "unit" in self.model_fields_set and not self.unit
-        is_clearing_qual = (
-            "qualitative_value" in self.model_fields_set and not self.qualitative_value
-        )
+        rt = self.result_type
 
-        rt = self.result_type  # None if not being updated
-
-        # Clearing required fields without specifying result_type is ambiguous —
-        # we can't know whether the existing component is quantitative or qualitative
-        if rt is None and (is_clearing_value or is_clearing_unit or is_clearing_qual):
-            raise ValueError(
-                "result_type must be provided when clearing value, unit, or qualitative_value"
-            )
-
-        # Switching result_type requires the dependent fields for the new type
-        if "result_type" in self.model_fields_set:
-            if rt == "quantitative":
-                if (
-                    "value" not in self.model_fields_set
-                    or "unit" not in self.model_fields_set
-                ):
-                    raise ValueError(
-                        "value and unit must be provided when setting result_type to quantitative"
-                    )
-            elif rt == "qualitative":
-                if "qualitative_value" not in self.model_fields_set:
-                    raise ValueError(
-                        "qualitative_value must be provided when setting result_type to qualitative"
-                    )
-
-        if rt == "quantitative":
-            if is_clearing_value:
-                raise ValueError("Value cannot be cleared for quantitative tests")
-            if is_clearing_unit:
-                raise ValueError("Unit cannot be cleared for quantitative tests")
-        elif rt == "qualitative":
-            if is_clearing_qual:
+        if rt in ("qualitative", "textual"):
+            if self.value is not None:
+                raise ValueError(f"Numeric value must be empty for {rt} tests")
+            if self.ref_range_min is not None or self.ref_range_max is not None:
                 raise ValueError(
-                    "Qualitative value cannot be cleared for qualitative tests"
+                    f"Reference ranges are not applicable for {rt} tests"
                 )
+            if rt == "textual" and self.qualitative_value is not None:
+                raise ValueError("Qualitative value must be empty for textual tests")
         return self
 
 
@@ -565,6 +560,7 @@ class LabTestComponentTrendDataPoint(BaseModel):
     lab_result: LabResultBasicForTrend
     result_type: Optional[str] = "quantitative"
     qualitative_value: Optional[str] = None
+    textual_value: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -616,6 +612,7 @@ class ComponentCatalogEntry(BaseModel):
     abbreviation: Optional[str] = None
     latest_value: Optional[float] = None
     latest_qualitative_value: Optional[str] = None
+    latest_textual_value: Optional[str] = None
     unit: Optional[str] = None
     status: Optional[str] = None
     category: Optional[str] = None
@@ -633,3 +630,14 @@ class ComponentCatalogResponse(BaseModel):
 
     items: List[ComponentCatalogEntry]
     total: int
+
+
+class TestComponentDefaults(BaseModel):
+    """Default values for a new test component, sourced from the most recent prior entry."""
+
+    unit: Optional[str] = None
+    ref_range_min: Optional[float] = None
+    ref_range_max: Optional[float] = None
+    ref_range_text: Optional[str] = None
+    category: Optional[str] = None
+    abbreviation: Optional[str] = None

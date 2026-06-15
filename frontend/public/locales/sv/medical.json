@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Kunde inte ladda testkatalog",
-    "noData": "Lägg till labbresultat med testkomponenter för att se dem här.",
-    "noResults": "Inga testkomponenter hittades",
+    "noData": "Lägg till labbresultat för att se dem här.",
+    "noResults": "Inga labbresultat hittades",
     "readingCount_one": "{{count}} värde",
     "refRange": "Ref",
     "searchPlaceholder": "Sök prover...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "Labbresultatet sparades men testkomponenter kunde inte läggas till. Du kan lägga till dem från visningssidan.",
       "relationshipCreationWarning": "Labbresultatet sparades men vissa relationer kunde inte skapas. Du kan lägga till dem från redigeringssidan."
+    },
+    "addPanel": {
+      "title": "Lägg till nytt testpanel",
+      "panelName": "Panelnamn",
+      "panelNamePlaceholder": "t.ex. Blodstatus, Årsanalys",
+      "panelNameDescription": "Ett namn för denna grupp av tester",
+      "createButton": "Skapa",
+      "creating": "Skapar panel...",
+      "createError": "Det gick inte att skapa testpanel",
+      "testResultRequired": "Minst ett testresultat krävs",
+      "tagsPlaceholder": "Lägg till taggar för att organisera och söka efter denna post senare"
+    },
+    "buttons": {
+      "addLabResults": "Lägg till labbresultat"
     }
   },
   "medications": {

@@ -1244,10 +1244,11 @@
   },
   "viewToggle": {
     "cards": "Kort",
-    "components": "Komponenter",
+    "components": "Resultat",
     "label": "Visningsläge",
     "table": "Tabell",
-    "stacked": "Staplade"
+    "stacked": "Staplade",
+    "panels": "Paneler"
   },
   "visits": {
     "addNewVisit": "Lägg till nytt besök",

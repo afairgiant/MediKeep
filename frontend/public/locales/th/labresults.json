@@ -142,7 +142,6 @@
     "statusIndicator": "ตัวบ่งชี้สถานะ:",
     "testCodePlaceholder": "เช่น 718-7",
     "testComponents": "รายการตรวจ (ไม่บังคับ)",
-    "testComponentsDescription": "สามารถเพิ่มค่าการตรวจแต่ละรายการได้ หรือเพิ่มภายหลังก็ได้",
     "testDetails": "รายละเอียดการตรวจ",
     "unit": "หน่วย",
     "matchedCommonName": "ตรงกับ: {{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "แก้ไขผลแลป",
     "labels": {
       "testType": "ประเภทการตรวจ",
-        "referenceRange": "ช่วงค่าปกติ"
+      "referenceRange": "ช่วงค่าปกติ"
     },
     "sections": {
       "associatedFiles": "เอกสารที่เกี่ยวข้อง",
+      "panelDetails": "รายละเอียดแผงการตรวจ",
       "testInfo": "ข้อมูลการตรวจ",
       "testResults": "ผลการตรวจ"
     },
     "tabs": {
-      "testComponents": "รายการตรวจ"
+      "testComponents": "ผลการตรวจ"
     },
     "title": "รายละเอียดผลแลป"
   },
@@ -332,7 +332,8 @@
       "molecular": "โมเลกุล - การตรวจ DNA",
       "other": "การตรวจอื่น ๆ",
       "pathology": "พยาธิวิทยา - การวิเคราะห์เนื้อเยื่อและชิ้นเนื้อ",
-      "toxicology": "พิษวิทยา - การตรวจหายาและสารพิษ"
+      "toxicology": "พิษวิทยา - การตรวจหายาและสารพิษ",
+      "imaging": "การถ่ายภาพ - รังสีวิทยา & การสแกน"
     },
     "editModal": {
       "descriptions": {
@@ -384,7 +385,12 @@
       "statistics": "สถิติ",
       "testResults": "ผลการตรวจ"
     },
-    "title": "รายการตรวจ"
+    "title": "รายการตรวจ",
+    "resultType": {
+      "qualitative": "เชิงคุณภาพ (บวก/ลบ)",
+      "quantitative": "เชิงปริมาณ (ตัวเลข)",
+      "textual": "ข้อความ (รายงาน)"
+    }
   },
   "testingFacility": {
     "description": "สถานที่ที่ทำการตรวจ",
@@ -428,7 +434,8 @@
     "noDataPoints": "ไม่มีจุดข้อมูลแสดง",
     "positiveDetected": "บวก/พบ",
     "referenceRange": "ช่วงค่าปกติ:",
-    "referenceValue": "ค่าปกติ: {{min}} - {{max}}"
+    "referenceValue": "ค่าปกติ: {{min}} - {{max}}",
+    "notAvailableForTextual": "ไม่มีกราฟแนวโน้มสำหรับผลลัพธ์ประเภทข้อความ"
   },
   "trends": {
     "abnormalLabel": "ผิดปกติ:",
@@ -449,7 +456,11 @@
     "summaryStatistics": "สถิติสรุป",
     "timeRange": "ช่วงเวลา",
     "title": "การวิเคราะห์แนวโน้ม",
-    "total": "รวม"
+    "total": "รวม",
+    "decreasing": "ลดลง",
+    "increasing": "เพิ่มขึ้น",
+    "stable": "คงที่",
+    "textualNoStats": "ไม่มีสถิติตัวเลขสำหรับผลลัพธ์ประเภทข้อความ"
   },
   "trendTable": {
     "clickToSort": "คลิกหัวคอลัมน์เพื่อเรียง",
@@ -457,7 +468,8 @@
     "historicalData_one": "ข้อมูลในประวัติ ({{count}} จุด)",
     "historicalData_other": "ข้อมูลในประวัติ ({{count}} จุด)",
     "labResult": "ผลแลป",
-    "noDataPoints": "ไม่มีจุดข้อมูลแสดง"
+    "noDataPoints": "ไม่มีจุดข้อมูลแสดง",
+    "notSpecified": "ไม่ระบุ"
   },
   "unsavedDataInstructions": "คลิก \"เพิ่มรายการ\" ในแท็บตัวอย่างเพื่อบันทึกข้อมูลที่แปลงแล้วก่อนปิด",
   "unsavedDataMessage_one": "คุณมี {{count}} รายการตรวจที่แปลงแล้วแต่ยังไม่ได้เพิ่ม หากปิดตอนนี้คุณจะสูญเสียข้อมูลที่แปลงแล้วนี้",
@@ -488,5 +500,24 @@
     "refTextLabel": "ข้อความช่วง",
     "refTextPlaceholder": "เช่น 4.0-5.6 หรือ <200",
     "refTextDescription": "แทนที่ค่าต่ำสุด/สูงสุดในการแสดงผล"
+  },
+  "resultsTable": {
+    "expandAll": "ขยายทั้งหมด",
+    "collapseAll": "ยุบทั้งหมด",
+    "results": "{{count}} ผลลัพธ์",
+    "results_other": "{{count}} ผลลัพธ์",
+    "noResults": "ไม่มีผลการทดสอบที่ตรงกับตัวกรองปัจจุบัน",
+    "dateFrom": "วันที่จาก",
+    "dateTo": "วันที่ถึง",
+    "source": "แหล่งที่มา",
+    "viewTrends": "ดูแนวโน้ม"
+  },
+  "testEntry": {
+    "label": "ทดสอบ #{{number}}"
+  },
+  "textualResult": {
+    "label": "ข้อความผลลัพธ์",
+    "noText": "—",
+    "placeholder": "ป้อนข้อความผลลัพธ์ (เช่น ไม่พบความผิดปกติเฉียบพลัน)"
   }
 }

@@ -39,6 +39,7 @@ const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
   lipids: 'Lipids - Cholesterol & Triglycerides',
   hearing: 'Hearing - Audiometry & Vestibular Tests',
   stomatology: 'Stomatology - Salivary & Oral Diagnostics',
+  imaging: 'Imaging - Radiology & Scans',
   other: 'Other Tests',
 };
 
@@ -58,6 +59,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   lipids: 'indigo',
   hearing: 'violet',
   stomatology: 'dark',
+  imaging: 'blue',
   other: 'gray',
 };
 
@@ -136,5 +138,6 @@ export const CATEGORY_SELECT_OPTIONS: Array<{ value: string; label: string }> =
     { value: 'pathology', label: 'Tissue & Biopsy Analysis' },
     { value: 'hearing', label: 'Hearing & Vestibular Tests' },
     { value: 'stomatology', label: 'Salivary & Oral Diagnostics' },
+    { value: 'imaging', label: 'Imaging & Radiology' },
     { value: 'other', label: 'Other Tests' },
   ];

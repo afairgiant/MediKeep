@@ -218,9 +218,9 @@ class TestCrossFieldValidation:
         with pytest.raises(ValidationError, match="Value is required for quantitative"):
             make_component(value=None, unit="mg/dL")
 
-    def test_quantitative_requires_unit(self):
-        with pytest.raises(ValidationError, match="Unit is required for quantitative"):
-            make_component(value=5.0, unit=None)
+    def test_quantitative_unit_is_optional(self):
+        comp = make_component(value=5.0, unit=None)
+        assert comp.unit is None
 
     def test_qualitative_rejects_numeric_value(self):
         with pytest.raises(ValidationError, match="Numeric value must be empty"):
@@ -405,13 +405,13 @@ class TestUpdateCrossFieldValidation:
                 unit="mg/dL",
             )
 
-    def test_clearing_unit_on_quantitative_rejected(self):
-        with pytest.raises(ValidationError, match="Unit cannot be cleared"):
-            LabTestComponentUpdate(
-                result_type="quantitative",
-                value=5.0,
-                unit="",
-            )
+    def test_clearing_unit_on_quantitative_accepted(self):
+        update = LabTestComponentUpdate(
+            result_type="quantitative",
+            value=5.0,
+            unit="",
+        )
+        assert update.unit is None
 
     def test_clearing_qualitative_value_on_qualitative_rejected(self):
         with pytest.raises(
@@ -445,15 +445,22 @@ class TestUpdateCrossFieldValidation:
         with pytest.raises(ValidationError, match="result_type must be provided"):
             LabTestComponentUpdate(value=None)
 
-    def test_clearing_unit_without_result_type_rejected(self):
-        """Clearing unit without specifying result_type is ambiguous."""
-        with pytest.raises(ValidationError, match="result_type must be provided"):
-            LabTestComponentUpdate(unit="")
+    def test_clearing_unit_without_result_type_accepted(self):
+        """Clearing unit is allowed since unit is optional for quantitative tests."""
+        update = LabTestComponentUpdate(unit="")
+        assert update.unit is None
 
-    def test_switching_to_quantitative_requires_value_and_unit(self):
-        """Changing result_type to quantitative must include value and unit."""
-        with pytest.raises(ValidationError, match="value and unit must be provided"):
-            LabTestComponentUpdate(result_type="quantitative", value=42.0)
+    def test_switching_to_quantitative_requires_value(self):
+        """Changing result_type to quantitative must include value; unit is optional."""
+        with pytest.raises(ValidationError, match="value must be provided"):
+            LabTestComponentUpdate(result_type="quantitative")
+
+    def test_switching_to_quantitative_without_unit_accepted(self):
+        """Changing result_type to quantitative with value but no unit is valid."""
+        update = LabTestComponentUpdate(result_type="quantitative", value=42.0)
+        assert update.result_type == "quantitative"
+        assert update.value == 42.0
+        assert update.unit is None
 
     def test_switching_to_qualitative_requires_qualitative_value(self):
         """Changing result_type to qualitative must include qualitative_value."""

@@ -142,7 +142,6 @@
     "statusIndicator": "Indicatore di stato:",
     "testCodePlaceholder": "ad es. 718-7",
     "testComponents": "Componenti dell'esame (facoltativo)",
-    "testComponentsDescription": "Aggiungi facoltativamente i singoli valori dell'esame. Potrai aggiungerne altri in seguito.",
     "testDetails": "Dettagli dell'esame",
     "unit": "Unità",
     "matchedCommonName": "corrispondenza: {{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "Modifica risultato di laboratorio",
     "labels": {
       "testType": "Tipo di esame",
-        "referenceRange": "Intervallo di riferimento"
+      "referenceRange": "Intervallo di riferimento"
     },
     "sections": {
       "associatedFiles": "Documenti associati",
+      "panelDetails": "Dettagli del pannello",
       "testInfo": "Informazioni sull'esame",
       "testResults": "Risultati dell'esame"
     },
     "tabs": {
-      "testComponents": "Componenti dell'esame"
+      "testComponents": "Risultati dell'esame"
     },
     "title": "Dettagli del risultato di laboratorio"
   },
@@ -317,7 +317,7 @@
     "placeholder": "ad es. CBC, 85025"
   },
   "testComponents": {
-    "addTestComponents": "Aggiungi componenti dell'esame",
+    "addTestComponents": "Aggiungi esami",
     "addTests": "Aggiungi esami",
     "categories": {
       "cardiology": "Cardiologia - Cuore e marcatori cardiaci",
@@ -332,7 +332,8 @@
       "molecular": "Molecolare - Test del DNA",
       "other": "Altri esami",
       "pathology": "Patologia - Analisi tissutale e biopsia",
-      "toxicology": "Tossicologia - Screening di farmaci e tossine"
+      "toxicology": "Tossicologia - Screening di farmaci e tossine",
+      "imaging": "Imaging - Radiologia & Scans"
     },
     "editModal": {
       "descriptions": {
@@ -365,16 +366,16 @@
         "unit": "ad es. g/dL",
         "value": "Inserisci il valore dell'esame"
       },
-      "title": "Modifica componente dell'esame",
+      "title": "Modifica esame",
       "trendLinking": "Collegamento delle tendenze",
-      "updating": "Aggiornamento del componente dell'esame in corso..."
+      "updating": "Aggiornamento dell'esame in corso..."
     },
     "emptyState": {
       "description": "I modelli forniscono pannelli di laboratorio comuni (CBC, CMP, ecc.) dove è possibile inserire valori e intervalli. L'importazione massiva consente di copiare e incollare risultati dai referti di laboratorio per l'analisi automatica."
     },
-    "errorLoading": "Errore nel caricamento dei componenti dell'esame",
-    "noComponents": "Nessun componente dell'esame",
-    "noComponentsDescription": "Questo risultato di laboratorio non ha ancora alcun componente dell'esame individuale.",
+    "errorLoading": "Errore nel caricamento degli esami",
+    "noComponents": "Nessun esame",
+    "noComponentsDescription": "Questo risultato di laboratorio non ha ancora esami.",
     "notifications": {
       "componentDeleted": "Componente eliminato",
       "hasBeenDeleted": "{{name}} è stato eliminato"
@@ -384,7 +385,12 @@
       "statistics": "Statistiche",
       "testResults": "Risultati degli esami"
     },
-    "title": "Componenti dell'esame"
+    "title": "Esami",
+    "resultType": {
+      "qualitative": "Qualitativo (Pos/Neg)",
+      "quantitative": "Quantitativo (Numerico)",
+      "textual": "Testuale (Rapporto)"
+    }
   },
   "testingFacility": {
     "description": "Dove l'esame viene/è stato eseguito",
@@ -428,7 +434,8 @@
     "noDataPoints": "Nessun dato da visualizzare",
     "positiveDetected": "Positivo/Rilevato",
     "referenceRange": "Intervallo di riferimento:",
-    "referenceValue": "Riferimento: {{min}} - {{max}}"
+    "referenceValue": "Riferimento: {{min}} - {{max}}",
+    "notAvailableForTextual": "I grafici di tendenza non sono disponibili per i risultati testuali."
   },
   "trends": {
     "abnormalLabel": "Anomali:",
@@ -449,7 +456,11 @@
     "summaryStatistics": "Statistiche riassuntive",
     "timeRange": "Intervallo temporale",
     "title": "Analisi delle tendenze",
-    "total": "Totale"
+    "total": "Totale",
+    "decreasing": "Decrescente",
+    "increasing": "Crescente",
+    "stable": "Stabile",
+    "textualNoStats": "Le statistiche numeriche non sono disponibili per i risultati testuali."
   },
   "trendTable": {
     "clickToSort": "Fai clic sulle intestazioni delle colonne per ordinare",
@@ -457,7 +468,8 @@
     "historicalData_one": "Dati storici ({{count}} punto)",
     "historicalData_other": "Dati storici ({{count}} punti)",
     "labResult": "Risultato di laboratorio",
-    "noDataPoints": "Nessun dato da visualizzare"
+    "noDataPoints": "Nessun dato da visualizzare",
+    "notSpecified": "Non specificato"
   },
   "unsavedDataInstructions": "Fai clic su \"Aggiungi componenti\" nella scheda Anteprima per salvare i dati analizzati prima di chiudere.",
   "unsavedDataMessage_one": "Hai {{count}} componenti dell'esame analizzati che non sono ancora stati aggiunti. Se chiudi ora, perderai questi dati analizzati.",
@@ -488,5 +500,24 @@
     "refTextLabel": "Testo dell'intervallo",
     "refTextPlaceholder": "es. 4,0-5,6 o <200",
     "refTextDescription": "Sostituisce min/max nella visualizzazione"
+  },
+  "resultsTable": {
+    "expandAll": "Espandi tutto",
+    "collapseAll": "Comprimi tutto",
+    "results": "{{count}} risultato",
+    "results_other": "{{count}} risultati",
+    "noResults": "Nessun risultato di test corrisponde ai filtri attuali",
+    "dateFrom": "Data da",
+    "dateTo": "Data a",
+    "source": "Fonte",
+    "viewTrends": "Visualizza tendenze"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
+  },
+  "textualResult": {
+    "label": "Testo del risultato",
+    "noText": "—",
+    "placeholder": "Inserire il testo del risultato (es. Nessun reperto acuto)"
   }
 }

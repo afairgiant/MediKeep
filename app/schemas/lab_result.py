@@ -22,6 +22,7 @@ class LabResultBase(TaggedEntityMixin):
     notes: Optional[str] = None
     patient_id: int
     practitioner_id: Optional[int] = None
+    is_panel: bool = False
 
     # Numeric result fields (optional — for quantitative tests and trending)
     value: Optional[float] = None

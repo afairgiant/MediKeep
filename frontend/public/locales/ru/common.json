@@ -1244,10 +1244,11 @@
   },
   "viewToggle": {
     "cards": "Карточки",
-    "components": "Компоненты",
+    "components": "Результаты",
     "label": "Режим просмотра",
     "table": "Таблица",
-    "stacked": "Сложенные"
+    "stacked": "Сложенные",
+    "panels": "Панели"
   },
   "visits": {
     "addNewVisit": "Добавить визит",

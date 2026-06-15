@@ -24,8 +24,8 @@ LAB_TEST_COMPONENT_STATUSES = [
     "borderline",
 ]
 
-# Lab Test Component result types (quantitative = numeric, qualitative = positive/negative)
-LAB_TEST_COMPONENT_RESULT_TYPES = ["quantitative", "qualitative"]
+# Lab Test Component result types (quantitative = numeric, qualitative = positive/negative, textual = free text)
+LAB_TEST_COMPONENT_RESULT_TYPES = ["quantitative", "qualitative", "textual"]
 
 # Valid qualitative result values
 LAB_TEST_COMPONENT_QUALITATIVE_VALUES = [
@@ -51,6 +51,7 @@ LAB_TEST_COMPONENT_CATEGORIES = [
     "lipids",
     "hearing",
     "stomatology",
+    "imaging",
     "other",
 ]
 

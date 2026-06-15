@@ -193,6 +193,8 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
         case 'value':
           if (a.result_type === 'qualitative' || b.result_type === 'qualitative') {
             comparison = (a.qualitative_value ?? '').localeCompare(b.qualitative_value ?? '');
+          } else if (a.result_type === 'textual' || b.result_type === 'textual') {
+            comparison = (a.textual_value ?? '').localeCompare(b.textual_value ?? '');
           } else {
             comparison = (a.value ?? 0) - (b.value ?? 0);
           }
@@ -378,6 +380,10 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                                   >
                                     {getQualitativeDisplayName(result.qualitative_value)}
                                   </Badge>
+                                ) : result.result_type === 'textual' ? (
+                                  <Text size="sm" lineClamp={2} data-testid={`textual-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
+                                    {result.textual_value || '—'}
+                                  </Text>
                                 ) : result.value != null ? (
                                   <Text size="sm" fw={600} data-testid={`numeric-value-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
                                     {result.value}
@@ -388,7 +394,7 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                               </Table.Td>
                               <Table.Td>
                                 <Text size="sm" c="dimmed">
-                                  {result.result_type === 'qualitative' ? '—' : (result.unit ?? '—')}
+                                  {result.result_type === 'qualitative' || result.result_type === 'textual' ? '—' : (result.unit ?? '—')}
                                 </Text>
                               </Table.Td>
                               <Table.Td>
@@ -402,7 +408,7 @@ const LabResultStackPanel: React.FC<LabResultStackPanelProps> = ({
                               </Table.Td>
                               <Table.Td>
                                 <Text size="xs" c="dimmed" data-testid={`value-range-${result.source === 'component' ? `comp-${result.id}` : result.id}`}>
-                                  {result.result_type === 'qualitative' ? '—' : (range ?? t('labresults:trendTable.notSpecified', 'Not specified'))}
+                                  {result.result_type === 'qualitative' || result.result_type === 'textual' ? '—' : (range ?? t('labresults:trendTable.notSpecified', 'Not specified'))}
                                 </Text>
                               </Table.Td>
                               <Table.Td>

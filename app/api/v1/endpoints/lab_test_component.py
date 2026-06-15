@@ -48,6 +48,7 @@ from app.schemas.lab_test_component import (
     LabTestComponentTrendStatistics,
     LabTestComponentUpdate,
     LabTestComponentWithLabResult,
+    TestComponentDefaults,
 )
 
 router = APIRouter()
@@ -612,6 +613,83 @@ def get_component_catalog(
         )
 
         return result
+
+
+# Component Defaults Endpoint
+@router.get(
+    "/patient/{patient_id}/component-defaults",
+    response_model=TestComponentDefaults,
+)
+def get_component_defaults(
+    *,
+    request: Request,
+    patient_id: int,
+    test_name: Optional[str] = Query(None, description="Test name to look up defaults for"),
+    test_code: Optional[str] = Query(None, description="Test code to look up defaults for"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """
+    Return unit and reference ranges from the most recent prior entry of a test
+    for a patient. Used to auto-populate fields when adding a new test to a panel.
+    Returns 404 if no prior entry exists.
+    """
+    from fastapi import HTTPException
+
+    if not test_name and not test_code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one of test_name or test_code is required",
+        )
+
+    with handle_database_errors(request=request):
+        deps.verify_patient_access(patient_id, db, current_user)
+
+        component = None
+
+        if test_name:
+            results = lab_test_component.get_by_patient_and_test_name(
+                db, patient_id=patient_id, test_name=test_name.strip(), limit=1
+            )
+            if results:
+                component = results[0]
+
+        if component is None and test_code:
+            from sqlalchemy import func as sqlfunc
+            from app.models.models import LabTestComponent as LTCModel
+            from app.models.labs import LabResult as LRModel
+
+            component = (
+                db.query(LTCModel)
+                .join(LTCModel.lab_result)
+                .filter(
+                    LRModel.patient_id == patient_id,
+                    sqlfunc.upper(sqlfunc.trim(LTCModel.test_code))
+                    == test_code.strip().upper(),
+                )
+                .order_by(
+                    sqlfunc.coalesce(
+                        LRModel.completed_date,
+                        sqlfunc.date(LTCModel.created_at),
+                    ).desc()
+                )
+                .first()
+            )
+
+        if component is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No prior entry found for this test",
+            )
+
+        return TestComponentDefaults(
+            unit=component.unit,
+            ref_range_min=component.ref_range_min,
+            ref_range_max=component.ref_range_max,
+            ref_range_text=component.ref_range_text,
+            category=component.category,
+            abbreviation=component.abbreviation,
+        )
 
 
 # Helper function for trend statistics

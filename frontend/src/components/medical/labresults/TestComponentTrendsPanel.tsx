@@ -249,9 +249,12 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
     try {
       // Create CSV content
       const isQualitative = trendData.result_type === 'qualitative';
+      const isTextual = trendData.result_type === 'textual';
       const headers = isQualitative
         ? ['Date', 'Result', 'Status', 'Lab Result']
-        : ['Date', 'Value', 'Unit', 'Status', 'Reference Range', 'Lab Result'];
+        : isTextual
+          ? ['Date', 'Result Text', 'Status', 'Lab Result']
+          : ['Date', 'Value', 'Unit', 'Status', 'Reference Range', 'Lab Result'];
       const rows = trendData.data_points.map(point => {
         const date = point.recorded_date || point.created_at.split('T')[0];
 
@@ -259,6 +262,15 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           return [
             date,
             point.qualitative_value || '',
+            point.status || '',
+            point.lab_result.test_name,
+          ];
+        }
+
+        if (isTextual) {
+          return [
+            date,
+            point.textual_value || '',
             point.status || '',
             point.lab_result.test_name,
           ];
@@ -489,7 +501,21 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
 
               <Divider />
 
-              {trendData.result_type === 'qualitative' &&
+              {trendData.result_type === 'textual' ? (
+                <Group gap="xl">
+                  <Box>
+                    <Text size="xs" c="dimmed">
+                      {t('labresults:trends.total')}
+                    </Text>
+                    <Text fw={700} size="xl">
+                      {trendData.statistics.count}
+                    </Text>
+                  </Box>
+                  <Text size="sm" c="dimmed">
+                    {t('labresults:trends.textualNoStats', 'Numeric statistics are not available for textual results.')}
+                  </Text>
+                </Group>
+              ) : trendData.result_type === 'qualitative' &&
               trendData.statistics.qualitative_summary ? (
                 <Group gap="xl">
                   {Object.entries(trendData.statistics.qualitative_summary).map(
