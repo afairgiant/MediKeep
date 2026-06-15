@@ -341,6 +341,7 @@ const LabResultFormWrapper = ({
 
   const categoryOptions = [
     { value: 'blood work', label: t('labresults:category.bloodWork') },
+    { value: 'hematology', label: t('labresults:category.hematology') },
     { value: 'imaging', label: t('labresults:category.imaging') },
     { value: 'pathology', label: t('labresults:category.pathology') },
     { value: 'microbiology', label: t('labresults:category.microbiology') },

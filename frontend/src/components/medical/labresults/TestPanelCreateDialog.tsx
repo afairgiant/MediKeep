@@ -142,7 +142,10 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
       );
       return;
     }
-    if (!currentPatient?.id) return;
+    if (!currentPatient?.id) {
+      setError(t('common:validation.noPatientSelected', 'No patient selected. Please select a patient first.'));
+      return;
+    }
 
     const pendingComponents =
       inlineTestRef.current?.getPendingComponents() ?? [];
@@ -182,16 +185,26 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         const apiComponents = pendingComponents.map(row =>
           sanitizeComponentForApi(row, labResult.id)
         );
-        const bulkResult = await labTestComponentApi.createBulkForLabResult(
-          labResult.id,
-          apiComponents,
-          currentPatient.id
-        );
-        if (bulkResult.errors?.length > 0) {
-          logger.error('test_panel_component_partial_failure', {
-            message: 'Some test components failed to save',
+        try {
+          const bulkResult = await labTestComponentApi.createBulkForLabResult(
+            labResult.id,
+            apiComponents,
+            currentPatient.id
+          );
+          if (bulkResult.errors?.length > 0) {
+            logger.error('test_panel_component_partial_failure', {
+              message: 'Some test components failed to save',
+              labResultId: labResult.id,
+              errors: bulkResult.errors,
+              component: 'TestPanelCreateDialog',
+            });
+          }
+        } catch (bulkErr: unknown) {
+          const bulkMessage = bulkErr instanceof Error ? bulkErr.message : String(bulkErr);
+          logger.error('test_panel_component_bulk_failure', {
+            message: 'Bulk component creation failed after panel was created',
             labResultId: labResult.id,
-            errors: bulkResult.errors,
+            error: bulkMessage,
             component: 'TestPanelCreateDialog',
           });
         }

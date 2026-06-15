@@ -411,6 +411,7 @@ const LabResults = () => {
       parent_lab_result_id: comp.lab_result_id,
       result_type: comp.result_type ?? null,
       qualitative_value: comp.qualitative_value ?? null,
+      textual_value: comp.textual_value ?? null,
     }));
     const allResults = [
       ...currentSelectedGroup.results,
@@ -1055,7 +1056,7 @@ const LabResults = () => {
             components={patientComponents}
             labResults={labResults}
             practitioners={practitioners}
-            patientId={currentPatient.id}
+            patientId={currentPatient?.id}
             onView={handleViewComponentFromTable}
             onEdit={handleEditComponentFromTable}
             onDelete={handleDeleteComponent}

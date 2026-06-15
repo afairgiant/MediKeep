@@ -308,13 +308,15 @@ const TestComponentTrendsPanel: React.FC<TestComponentTrendsPanelProps> = ({
           ? Object.entries(trendData.statistics.qualitative_summary).map(
               ([val, cnt]) => [val, String(cnt)]
             )
-          : [
-              ['Latest', trendData.statistics.latest?.toFixed(2) || 'N/A'],
-              ['Average', trendData.statistics.average?.toFixed(2) || 'N/A'],
-              ['Min', trendData.statistics.min?.toFixed(2) || 'N/A'],
-              ['Max', trendData.statistics.max?.toFixed(2) || 'N/A'],
-              ['Std Dev', trendData.statistics.std_dev?.toFixed(2) || 'N/A'],
-            ]),
+          : isTextual
+            ? []
+            : [
+                ['Latest', trendData.statistics.latest?.toFixed(2) || 'N/A'],
+                ['Average', trendData.statistics.average?.toFixed(2) || 'N/A'],
+                ['Min', trendData.statistics.min?.toFixed(2) || 'N/A'],
+                ['Max', trendData.statistics.max?.toFixed(2) || 'N/A'],
+                ['Std Dev', trendData.statistics.std_dev?.toFixed(2) || 'N/A'],
+              ]),
         ['Trend Direction', trendData.statistics.trend_direction],
         ['Normal Count', trendData.statistics.normal_count.toString()],
         ['Abnormal Count', trendData.statistics.abnormal_count.toString()],

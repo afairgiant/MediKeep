@@ -274,7 +274,7 @@ const LabResultViewModal = ({
                             <Text c={labResult.completed_date ? 'inherit' : 'dimmed'}>
                               {labResult.completed_date
                                 ? formatDate(labResult.completed_date)
-                                : t('labels.notCompleted', 'Not completed')}
+                                : t('common:labels.notCompleted', 'Not completed')}
                             </Text>
                           </Stack>
                         </SimpleGrid>
@@ -418,7 +418,7 @@ const LabResultViewModal = ({
                             >
                               {labResult.completed_date
                                 ? formatDate(labResult.completed_date)
-                                : t('labels.notCompleted', 'Not completed')}
+                                : t('common:labels.notCompleted', 'Not completed')}
                             </Text>
                           </Stack>
                           {labResult.value != null && (

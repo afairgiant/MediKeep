@@ -139,6 +139,7 @@ def get_lab_test_component(
         "notes": db_component.notes,
         "result_type": db_component.result_type,
         "qualitative_value": db_component.qualitative_value,
+        "textual_value": db_component.textual_value,
         "created_at": db_component.created_at,
         "updated_at": db_component.updated_at,
         "lab_result": (
@@ -549,6 +550,7 @@ def get_all_components_for_patient(
                     notes=comp.notes,
                     result_type=comp.result_type,
                     qualitative_value=comp.qualitative_value,
+                    textual_value=comp.textual_value,
                     created_at=comp.created_at,
                     updated_at=comp.updated_at,
                     completed_date=parent.completed_date if parent else None,
@@ -647,14 +649,7 @@ def get_component_defaults(
 
         component = None
 
-        if test_name:
-            results = lab_test_component.get_by_patient_and_test_name(
-                db, patient_id=patient_id, test_name=test_name.strip(), limit=1
-            )
-            if results:
-                component = results[0]
-
-        if component is None and test_code:
+        if test_code:
             from sqlalchemy import func as sqlfunc
             from app.models.models import LabTestComponent as LTCModel
             from app.models.labs import LabResult as LRModel
@@ -676,11 +671,28 @@ def get_component_defaults(
                 .first()
             )
 
+        if component is None and test_name:
+            results = lab_test_component.get_by_patient_and_test_name(
+                db, patient_id=patient_id, test_name=test_name.strip(), limit=1
+            )
+            if results:
+                component = results[0]
+
         if component is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No prior entry found for this test",
             )
+
+        log_data_access(
+            logger,
+            request,
+            current_user.id,
+            "read",
+            "LabTestComponent",
+            patient_id=patient_id,
+            record_id=component.id,
+        )
 
         return TestComponentDefaults(
             unit=component.unit,
@@ -721,7 +733,7 @@ def calculate_trend_statistics(
 
     result_type = result_types.pop()
 
-    if result_type == "qualitative":
+    if result_type in ("qualitative", "textual"):
         return _calculate_qualitative_statistics(components, count)
 
     return _calculate_quantitative_statistics(components, count)
@@ -949,6 +961,7 @@ def get_lab_test_component_trends(
                 created_at=component.created_at,
                 result_type=component.result_type or "quantitative",
                 qualitative_value=component.qualitative_value,
+                textual_value=component.textual_value,
                 lab_result=LabResultBasicForTrend(
                     id=component.lab_result.id,
                     test_name=component.lab_result.test_name,

@@ -295,7 +295,10 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
   };
 
   const isSubmitDisabled =
-    isSubmitting || !formData.test_name?.trim();
+    isSubmitting ||
+    !formData.test_name?.trim() ||
+    (formData.result_type === 'qualitative' && !formData.qualitative_value?.trim()) ||
+    (formData.result_type === 'textual' && !formData.textual_value?.trim());
 
   if (!component) return null;
 

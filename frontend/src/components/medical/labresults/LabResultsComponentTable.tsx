@@ -87,7 +87,10 @@ function getComponentDate(c: LabTestComponentForStack): string | null {
 
 function toDateStr(d: Date | null): string | null {
   if (!d || !(d instanceof Date) || isNaN(d.getTime())) return null;
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function formatValue(c: LabTestComponentForStack): string {
@@ -190,8 +193,8 @@ const LabResultsComponentTable: React.FC<Props> = ({
         if (c.facility !== filters.facility) return false;
       }
       const dateStr = getComponentDate(c);
-      if (fromStr && dateStr && dateStr.slice(0, 10) < fromStr) return false;
-      if (toStr && dateStr && dateStr.slice(0, 10) > toStr) return false;
+      if (fromStr && (!dateStr || dateStr.slice(0, 10) < fromStr)) return false;
+      if (toStr && (!dateStr || dateStr.slice(0, 10) > toStr)) return false;
       return true;
     });
 
@@ -331,6 +334,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
               color={hasActiveFilters ? 'blue' : 'gray'}
               size="lg"
               onClick={() => setFiltersExpanded(prev => !prev)}
+              aria-label={t('common:filters.toggle', 'Toggle filters')}
             >
               <IconFilter size={18} />
             </ActionIcon>
@@ -360,6 +364,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
               color="gray"
               onClick={() => setFiltersExpanded(prev => !prev)}
               style={{ flexShrink: 0 }}
+              aria-label={t('common:filters.toggle', 'Toggle filters')}
             >
               {filtersExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
             </ActionIcon>

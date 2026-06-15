@@ -314,8 +314,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
               )}
             </Group>
 
-            {/* Reference Range — only for quantitative results */}
-            {component.result_type === 'quantitative' && (
+            {/* Reference Range — only for quantitative results (null result_type = legacy quantitative) */}
+            {(!component.result_type || component.result_type === 'quantitative') && (
               <Group gap="xs" align="center">
                 <Text size="xs" c="dimmed" fw={500}>
                   {t('labresults:display.referenceLabel')}

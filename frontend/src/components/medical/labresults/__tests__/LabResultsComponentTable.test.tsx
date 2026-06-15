@@ -19,14 +19,14 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-vi.mock('../../../hooks/useDateFormat', () => ({
+vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
     formatDate: (d: string | null | undefined) => d ?? '—',
     dateInputFormat: 'MM/DD/YYYY',
   }),
 }));
 
-vi.mock('../../adapters/DateInput', () => ({
+vi.mock('../../../adapters/DateInput', () => ({
   DateInput: ({ placeholder, onChange }: { placeholder?: string; onChange?: (_val: Date | null) => void }) => (
     <input
       placeholder={placeholder}
@@ -48,7 +48,7 @@ vi.mock('../StatusBadge', () => ({
     status ? <span data-testid="status-badge">{status}</span> : null,
 }));
 
-vi.mock('../../../services/logger', () => ({
+vi.mock('../../../../services/logger', () => ({
   default: { info: vi.fn(), debug: vi.fn(), error: vi.fn(), warn: vi.fn() },
 }));
 
@@ -340,7 +340,7 @@ describe('LabResultsComponentTable', () => {
     expect(screen.queryByTestId('summary-row-hemoglobin')).not.toBeInTheDocument();
   });
 
-  it('filters by facility', () => {
+  it('filters by facility — initial state shows all, filter inputs are rendered', () => {
     const components = [
       makeComponent({ id: 1, canonical_test_name: 'Glucose', completed_date: '2024-01-15', facility: 'Lab A' }),
       makeComponent({ id: 2, canonical_test_name: 'Hemoglobin', lab_result_id: 2, completed_date: '2024-01-10', facility: 'Lab B' }),
@@ -358,6 +358,36 @@ describe('LabResultsComponentTable', () => {
     // Both visible initially
     expect(screen.getByTestId('summary-row-glucose')).toBeInTheDocument();
     expect(screen.getByTestId('summary-row-hemoglobin')).toBeInTheDocument();
+
+    // Date filter inputs are in the DOM (inside Mantine Collapse, rendered even when collapsed)
+    expect(screen.getByTestId('date-input-Date from')).toBeInTheDocument();
+    expect(screen.getByTestId('date-input-Date to')).toBeInTheDocument();
+  });
+
+  it('date filter excludes components without a date when from-date is set', () => {
+    const components = [
+      makeComponent({ id: 1, canonical_test_name: 'Glucose', completed_date: '2024-01-15' }),
+      makeComponent({ id: 2, canonical_test_name: 'Hemoglobin', lab_result_id: 2, completed_date: null, ordered_date: null }),
+    ];
+
+    render(
+      <LabResultsComponentTable
+        components={components}
+        labResults={defaultLabResults}
+        practitioners={defaultPractitioners}
+      />,
+      { skipRouter: true }
+    );
+
+    // Both visible initially
+    expect(screen.getByTestId('summary-row-glucose')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-row-hemoglobin')).toBeInTheDocument();
+
+    // Set a from-date — the dateless Hemoglobin should be excluded
+    fireEvent.change(screen.getByTestId('date-input-Date from'), { target: { value: '2024-01-01' } });
+
+    expect(screen.getByTestId('summary-row-glucose')).toBeInTheDocument();
+    expect(screen.queryByTestId('summary-row-hemoglobin')).not.toBeInTheDocument();
   });
 
   it('shows result count', () => {

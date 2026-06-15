@@ -814,8 +814,15 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
             component.category = standardizedTest.category;
           }
 
-          // Set result_type from standardized test if not already set
-          if (standardizedTest.result_type && !component.result_type) {
+          // Set result_type from standardized test if not already set.
+          // Don't override to 'textual' when a numeric value was parsed — the
+          // bulk parser doesn't produce textual_value, so the component would
+          // be silently dropped by the validation filter.
+          if (
+            standardizedTest.result_type &&
+            !component.result_type &&
+            !(standardizedTest.result_type === 'textual' && component.value !== null)
+          ) {
             component.result_type = standardizedTest.result_type as
               | 'quantitative'
               | 'qualitative'

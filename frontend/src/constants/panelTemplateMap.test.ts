@@ -58,7 +58,7 @@ describe('getTemplateRowsForPanel', () => {
     const panelNames = [
       'Complete Blood Count', 'Basic Metabolic Panel', 'Comprehensive Metabolic Panel',
       'Lipid Panel', 'Thyroid Function Panel', 'Hepatic Function Panel',
-      'Renal Function Panel', 'Autoimmune Panel',
+      'Renal Function Panel', 'Autoimmune Panel', 'PSA Panel',
     ];
     panelNames.forEach(name => {
       const rows = getTemplateRowsForPanel(name);
@@ -79,6 +79,16 @@ describe('getTemplateRowsForPanel', () => {
         expect(VALID_BACKEND_CATEGORIES.has(r.category), `category "${r.category}" in ${name}`).toBe(true)
       );
     });
+  });
+
+  it('returns PSA Panel row with Prostate Specific Antigen', () => {
+    const rows = getTemplateRowsForPanel('PSA Panel');
+    expect(rows).not.toBeNull();
+    expect(rows!.length).toBe(1);
+    expect(rows![0].test_name).toBe('Prostate Specific Antigen');
+    expect(rows![0].abbreviation).toBe('PSA');
+    expect(rows![0].unit).toBe('ng/mL');
+    expect(rows![0].category).toBe('other');
   });
 
   it('returns imaging rows for MRI, CT Scan, X-Ray', () => {

@@ -150,6 +150,13 @@ export const PANEL_TEMPLATES: TestTemplate[] = [
     ],
   },
   {
+    id: 'psa_panel',
+    category: 'other',
+    tests: [
+      { test_name: 'Prostate Specific Antigen', abbreviation: 'PSA', test_code: '2857-1', unit: 'ng/mL', default_display_order: 1 },
+    ],
+  },
+  {
     id: 'mri',
     category: 'imaging',
     tests: [
@@ -182,6 +189,7 @@ const PANEL_NAME_TO_TEMPLATE_ID: Readonly<Record<string, string>> = {
   'Hepatic Function Panel': 'liver_function',
   'Renal Function Panel': 'kidney_function',
   'Autoimmune Panel': 'autoimmune_panel',
+  'PSA Panel': 'psa_panel',
   'MRI': 'mri',
   'CT Scan': 'ct_scan',
   'X-Ray': 'x_ray',

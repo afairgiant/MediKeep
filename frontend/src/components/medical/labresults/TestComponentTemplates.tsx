@@ -259,9 +259,8 @@ function TestComponentTemplates({
           return component.test_name.trim() !== '';
         }
         if (selectedTemplate?.id === 'custom_entry') {
-          return (
-            component.test_name.trim() !== '' && component.unit.trim() !== ''
-          );
+          const needsUnit = !component.result_type || component.result_type === 'quantitative';
+          return component.test_name.trim() !== '' && (!needsUnit || component.unit.trim() !== '');
         }
         return true;
       });

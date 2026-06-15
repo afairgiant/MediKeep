@@ -78,7 +78,8 @@ function MedicalPageActions({
     !primaryVisible &&
     visibleSecondaryActions.length === 0 &&
     !shouldShowViewToggle &&
-    !children
+    !children &&
+    !rightChildren
   ) {
     return null;
   }

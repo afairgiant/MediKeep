@@ -822,18 +822,18 @@
       "relationshipCreationWarning": "บันทึกผลแล็บแล้ว แต่ไม่สามารถสร้างความสัมพันธ์บางอย่างได้ คุณสามารถเพิ่มได้จากหน้าแก้ไข"
     },
     "addPanel": {
-      "title": "Add New Test Panel",
-      "panelName": "Panel Name",
-      "panelNamePlaceholder": "e.g. CBC Panel, Annual Bloodwork",
-      "panelNameDescription": "A name for this group of tests",
-      "createButton": "Create",
-      "creating": "Creating panel...",
-      "createError": "Failed to create test panel",
-      "testResultRequired": "At least one test result is required",
+      "title": "เพิ่มแผงการตรวจใหม่",
+      "panelName": "ชื่อแผงการตรวจ",
+      "panelNamePlaceholder": "เช่น CBC, การตรวจเลือดประจำปี",
+      "panelNameDescription": "ชื่อสำหรับกลุ่มการตรวจนี้",
+      "createButton": "สร้างแผงการตรวจ",
+      "creating": "กำลังสร้าง...",
+      "createError": "ไม่สามารถสร้างแผงการตรวจได้",
+      "testResultRequired": "ต้องมีผลการตรวจอย่างน้อยหนึ่งรายการ",
       "tagsPlaceholder": "เพิ่มแท็กเพื่อช่วยจัดระเบียบและค้นหาบันทึกนี้ในภายหลัง"
     },
     "buttons": {
-      "addLabResults": "Add Lab Results"
+      "addLabResults": "เพิ่มผลการตรวจ"
     }
   },
   "medications": {

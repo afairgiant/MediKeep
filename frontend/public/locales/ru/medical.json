@@ -822,18 +822,18 @@
       "relationshipCreationWarning": "Результат анализа сохранён, но некоторые связи не удалось создать. Вы можете добавить их на странице редактирования."
     },
     "addPanel": {
-      "title": "Add New Test Panel",
-      "panelName": "Panel Name",
-      "panelNamePlaceholder": "e.g. CBC Panel, Annual Bloodwork",
-      "panelNameDescription": "A name for this group of tests",
-      "createButton": "Create",
-      "creating": "Creating panel...",
-      "createError": "Failed to create test panel",
-      "testResultRequired": "At least one test result is required",
+      "title": "Добавить новую панель анализов",
+      "panelName": "Название панели",
+      "panelNamePlaceholder": "напр. ОАК, биохимия крови",
+      "panelNameDescription": "Название для этой группы анализов",
+      "createButton": "Создать панель",
+      "creating": "Создание...",
+      "createError": "Не удалось создать панель анализов",
+      "testResultRequired": "Требуется хотя бы один результат анализа",
       "tagsPlaceholder": "Добавьте теги для удобной организации и поиска этой записи позже"
     },
     "buttons": {
-      "addLabResults": "Add Lab Results"
+      "addLabResults": "Добавить результаты анализов"
     }
   },
   "medications": {

@@ -822,18 +822,18 @@
       "relationshipCreationWarning": "Wynik laboratoryjny zapisany, ale niektóre relacje nie mogły być utworzone. Możesz je dodać ze strony edycji."
     },
     "addPanel": {
-      "title": "Add New Test Panel",
-      "panelName": "Panel Name",
-      "panelNamePlaceholder": "e.g. CBC Panel, Annual Bloodwork",
-      "panelNameDescription": "A name for this group of tests",
-      "createButton": "Create",
-      "creating": "Creating panel...",
-      "createError": "Failed to create test panel",
-      "testResultRequired": "At least one test result is required",
+      "title": "Dodaj nowy panel badań",
+      "panelName": "Nazwa panelu",
+      "panelNamePlaceholder": "np. CBC, morfologia krwi",
+      "panelNameDescription": "Nazwa dla tej grupy badań",
+      "createButton": "Utwórz panel",
+      "creating": "Tworzenie...",
+      "createError": "Nie udało się utworzyć panelu badań",
+      "testResultRequired": "Wymagany jest co najmniej jeden wynik badania",
       "tagsPlaceholder": "Dodaj tagi, aby później organizować i wyszukiwać ten rekord"
     },
     "buttons": {
-      "addLabResults": "Add Lab Results"
+      "addLabResults": "Dodaj wyniki badań"
     }
   },
   "medications": {
