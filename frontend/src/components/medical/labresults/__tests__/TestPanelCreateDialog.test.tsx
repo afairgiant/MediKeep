@@ -100,6 +100,10 @@ vi.mock('@mantine/core', () => ({
       </select>
     </div>
   ),
+  Input: Object.assign(
+    ({ children }: any) => <div>{children}</div>,
+    { Label: ({ children }: any) => <label>{children}</label> }
+  ),
 }));
 
 const translations: Record<string, string> = {
