@@ -425,6 +425,23 @@ class LabTestComponentUpdate(BaseModel):
             )
         return stripped
 
+    @field_validator("ref_range_text")
+    @classmethod
+    def validate_ref_range_text(cls, v):
+        """Validate reference range text length on update.
+
+        Mirrors LabTestComponentBase so the update path cannot persist an
+        over-limit value that would later crash response serialization (#894).
+        """
+        if v is None:
+            return None
+        if len(v.strip()) > LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]:
+            raise ValueError(
+                f"Reference range text must be less than {LAB_TEST_COMPONENT_LIMITS['MAX_REF_RANGE_TEXT_LENGTH']} characters"
+            )
+        stripped = v.strip()
+        return stripped if stripped else None
+
     @model_validator(mode="after")
     def validate_ref_range(self):
         """Validate that ref_range_max is greater than ref_range_min"""

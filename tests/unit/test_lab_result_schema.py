@@ -165,6 +165,36 @@ class TestLabResultBaseHasNoNotesValidator:
         assert len(base.notes) == 10000
 
 
+class TestLabResultResponseRefRangeTextRegression:
+    """Regression (#894 twin): Response must NOT reject over-limit ref_range_text.
+
+    Length is enforced on the input schemas, but data already in the DB (or
+    inserted by non-API paths such as OCR import) must always serialize so the
+    record stays viewable and editable instead of raising ResponseValidationError.
+    """
+
+    def test_response_with_over_limit_ref_range_text(self):
+        text = "x" * 600
+        response = LabResultResponse(
+            id=1,
+            test_name="Lipid Panel",
+            patient_id=1,
+            ref_range_text=text,
+            created_at=datetime(2024, 1, 1),
+            updated_at=datetime(2024, 1, 1),
+        )
+        assert len(response.ref_range_text) == 600
+
+    def test_base_accepts_long_ref_range_text(self):
+        """LabResultBase normalizes but does not enforce length."""
+        base = LabResultBase(
+            test_name="Test",
+            patient_id=1,
+            ref_range_text="x" * 10000,
+        )
+        assert len(base.ref_range_text) == 10000
+
+
 class TestLabResultNumericFieldsCreate:
     """Tests for numeric result field validation on LabResultCreate/LabResultBase."""
 
@@ -179,6 +209,7 @@ class TestLabResultNumericFieldsCreate:
 
     def test_value_infinite_rejected(self):
         import math
+
         with pytest.raises(ValidationError, match="finite"):
             make_create(value=math.inf)
 
@@ -224,9 +255,14 @@ class TestLabResultNumericFieldsCreate:
         result = make_create(ref_range_text="   ")
         assert result.ref_range_text is None
 
+    def test_ref_range_text_at_limit_accepted(self):
+        text = "x" * 500
+        result = make_create(ref_range_text=text)
+        assert result.ref_range_text == text
+
     def test_ref_range_text_too_long_rejected(self):
-        with pytest.raises(ValidationError, match="100"):
-            make_create(ref_range_text="x" * 101)
+        with pytest.raises(ValidationError, match="500"):
+            make_create(ref_range_text="x" * 501)
 
     def test_all_numeric_fields_none(self):
         """All fields optional — omitting them should be fine."""
@@ -248,6 +284,7 @@ class TestLabResultNumericFieldsUpdate:
 
     def test_update_value_infinite_rejected(self):
         import math
+
         with pytest.raises(ValidationError, match="finite"):
             make_update(value=math.inf)
 
@@ -255,6 +292,21 @@ class TestLabResultNumericFieldsUpdate:
         with pytest.raises(ValidationError, match="maximum must be greater"):
             make_update(ref_range_min=10.0, ref_range_max=5.0)
 
+    def test_update_ref_range_text_at_limit_accepted(self):
+        text = "x" * 500
+        result = make_update(ref_range_text=text)
+        assert result.ref_range_text == text
+
+    def test_update_ref_range_text_too_long_rejected(self):
+        with pytest.raises(ValidationError, match="500"):
+            make_update(ref_range_text="x" * 501)
+
+    def test_update_ref_range_text_stripped(self):
+        result = make_update(ref_range_text="  Negative  ")
+        assert result.ref_range_text == "Negative"
+
     def test_update_all_none(self):
-        result = make_update(value=None, unit=None, ref_range_min=None, ref_range_max=None)
+        result = make_update(
+            value=None, unit=None, ref_range_min=None, ref_range_max=None
+        )
         assert result.value is None
