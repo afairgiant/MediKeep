@@ -10,6 +10,12 @@ import {
 } from '../services/api/labTestComponentApi';
 import { ComponentCategory, ComponentStatus } from '../constants/labCategories';
 
+/**
+ * Maximum length for the alternative reference range text.
+ * Must match MAX_REF_RANGE_TEXT_LENGTH in app/core/constants.py (#894).
+ */
+export const MAX_REF_RANGE_TEXT_LENGTH = 500;
+
 let nextRowId = 1;
 
 /** Shape of a component row used in both TestComponentTemplates and InlineTestComponentEntry. */

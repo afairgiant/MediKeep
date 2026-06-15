@@ -18,6 +18,7 @@ Tests cover:
 import pytest
 from pydantic import ValidationError
 
+from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.schemas.lab_test_component import (
     LabTestComponentCreate,
     LabTestComponentResponse,
@@ -393,11 +394,27 @@ class TestResponseSerializationRegression:
         assert resp.ref_range_min == 200.0
         assert resp.ref_range_max == 100.0
 
+    def test_response_tolerates_over_limit_ref_range_text(self):
+        """Regression #894: Response must serialize ref_range_text longer than the
+        input limit. Otherwise legacy/over-limit records crash the response with
+        ResponseValidationError and become unviewable and unfixable in-app."""
+        long_text = "x" * (LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"] + 50)
+        resp = LabTestComponentResponse(
+            id=7,
+            test_name="Glucose",
+            lab_result_id=1,
+            result_type="quantitative",
+            value=100.0,
+            unit="mg/dL",
+            ref_range_text=long_text,
+        )
+        assert resp.ref_range_text == long_text
+
     def test_response_tolerates_textual_value_over_5000_chars(self):
         """Response must not raise on textual_value longer than 5000 chars (DB-sourced rows)."""
         long_text = "x" * 6000
         resp = LabTestComponentResponse(
-            id=7,
+            id=8,
             test_name="Radiology Report",
             lab_result_id=1,
             result_type="textual",
@@ -410,7 +427,7 @@ class TestResponseSerializationRegression:
     def test_response_still_strips_textual_value(self):
         """The lenient override should still strip surrounding whitespace."""
         resp = LabTestComponentResponse(
-            id=8,
+            id=9,
             test_name="Radiology Report",
             lab_result_id=1,
             result_type="textual",
@@ -419,6 +436,49 @@ class TestResponseSerializationRegression:
             unit=None,
         )
         assert resp.textual_value == "findings"
+
+
+class TestRefRangeTextLength:
+    """Length validation for ref_range_text on the input paths (#894).
+
+    The write paths must reject over-limit text symmetrically so it can never be
+    persisted and then crash reads, while the limit is generous enough for
+    multi-line alternative ranges.
+    """
+
+    def test_create_accepts_text_at_limit(self):
+        text = "N" * LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+        comp = make_component(ref_range_text=text)
+        assert comp.ref_range_text == text
+
+    def test_create_rejects_text_over_limit(self):
+        text = "N" * (LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"] + 1)
+        with pytest.raises(
+            ValidationError, match="Reference range text must be less than"
+        ):
+            make_component(ref_range_text=text)
+
+    def test_update_accepts_text_at_limit(self):
+        text = "N" * LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"]
+        update = LabTestComponentUpdate(ref_range_text=text)
+        assert update.ref_range_text == text
+
+    def test_update_rejects_text_over_limit(self):
+        """Regression #894: the unguarded Update path is how over-limit text got
+        persisted in the first place."""
+        text = "N" * (LAB_TEST_COMPONENT_LIMITS["MAX_REF_RANGE_TEXT_LENGTH"] + 1)
+        with pytest.raises(
+            ValidationError, match="Reference range text must be less than"
+        ):
+            LabTestComponentUpdate(ref_range_text=text)
+
+    def test_update_strips_ref_range_text(self):
+        update = LabTestComponentUpdate(ref_range_text="  Negative  ")
+        assert update.ref_range_text == "Negative"
+
+    def test_update_empty_ref_range_text_normalized_to_none(self):
+        update = LabTestComponentUpdate(ref_range_text="   ")
+        assert update.ref_range_text is None
 
 
 class TestUpdateCrossFieldValidation:

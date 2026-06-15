@@ -59,6 +59,7 @@ import {
   getQualitativeColor,
 } from '../../../constants/labCategories';
 import logger from '../../../services/logger';
+import { MAX_REF_RANGE_TEXT_LENGTH } from '../../../utils/labTestComponentUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 
 /**
@@ -345,6 +346,7 @@ const TableRow = React.memo<{
               value={localRefRangeText}
               onChange={handleRefRangeTextChange}
               onBlur={handleRefRangeTextBlur}
+              maxLength={MAX_REF_RANGE_TEXT_LENGTH}
               size="xs"
               styles={{ input: { width: 100 } }}
             />
@@ -354,6 +356,7 @@ const TableRow = React.memo<{
               value={localRefRangeText}
               onChange={handleRefRangeTextChange}
               onBlur={handleRefRangeTextBlur}
+              maxLength={MAX_REF_RANGE_TEXT_LENGTH}
               size="xs"
               styles={{ input: { width: 100 } }}
             />
