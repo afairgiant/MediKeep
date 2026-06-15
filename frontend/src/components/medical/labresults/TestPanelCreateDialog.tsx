@@ -35,6 +35,7 @@ import InlineTestComponentEntry, {
 import { apiService } from '../../../services/api';
 import { labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { sanitizeComponentForApi, hasFilledValue, createEmptyRow, ComponentRowData } from '../../../utils/labTestComponentUtils';
+import { notifications } from '@mantine/notifications';
 import logger from '../../../services/logger';
 
 interface Practitioner {
@@ -181,6 +182,8 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
 
       const labResult = await apiService.createLabResult(payload);
 
+      let componentSaveError: 'partial' | 'total' | null = null;
+
       if (pendingComponents.length > 0) {
         const apiComponents = pendingComponents.map(row =>
           sanitizeComponentForApi(row, labResult.id)
@@ -192,6 +195,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
             currentPatient.id
           );
           if (bulkResult.errors?.length > 0) {
+            componentSaveError = 'partial';
             logger.error('test_panel_component_partial_failure', {
               message: 'Some test components failed to save',
               labResultId: labResult.id,
@@ -200,6 +204,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
             });
           }
         } catch (bulkErr: unknown) {
+          componentSaveError = 'total';
           const bulkMessage = bulkErr instanceof Error ? bulkErr.message : String(bulkErr);
           logger.error('test_panel_component_bulk_failure', {
             message: 'Bulk component creation failed after panel was created',
@@ -216,6 +221,28 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         componentCount: pendingComponents.length,
         component: 'TestPanelCreateDialog',
       });
+
+      if (componentSaveError === 'total') {
+        notifications.show({
+          title: t('medical:labResults.addPanel.componentSaveFailedTitle', 'Test components not saved'),
+          message: t(
+            'medical:labResults.addPanel.componentSaveFailedMessage',
+            'The panel was created but test components could not be saved. Edit the panel to add them.'
+          ),
+          color: 'red',
+          autoClose: 8000,
+        });
+      } else if (componentSaveError === 'partial') {
+        notifications.show({
+          title: t('medical:labResults.addPanel.componentPartialSaveTitle', 'Some components not saved'),
+          message: t(
+            'medical:labResults.addPanel.componentPartialSaveMessage',
+            'The panel was created but some test components failed to save. Edit the panel to review.'
+          ),
+          color: 'yellow',
+          autoClose: 8000,
+        });
+      }
 
       setFormData(EMPTY_FORM);
       setError(null);

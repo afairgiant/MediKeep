@@ -252,16 +252,18 @@ class LabTestComponentCreate(LabTestComponentBase):
         """Cross-field validation for quantitative vs qualitative vs textual tests"""
         rt = self.result_type or "quantitative"
 
-        if rt in ("qualitative", "textual"):
+        if rt == "quantitative":
+            if self.value is None:
+                raise ValueError("Value is required for quantitative tests")
+        elif rt in ("qualitative", "textual"):
             if self.value is not None:
                 raise ValueError(f"Numeric value must be empty for {rt} tests")
             if self.ref_range_min is not None or self.ref_range_max is not None:
                 raise ValueError(
                     f"Reference ranges are not applicable for {rt} tests"
                 )
-            if rt == "qualitative":
-                # ref_range_text is allowed for qualitative to store expected result context
-                pass
+            if rt == "qualitative" and self.qualitative_value is None:
+                raise ValueError("Qualitative value is required for qualitative tests")
             if rt == "textual" and self.qualitative_value is not None:
                 raise ValueError("Qualitative value must be empty for textual tests")
         return self
@@ -451,7 +453,20 @@ class LabTestComponentUpdate(BaseModel):
 
         rt = self.result_type
 
-        if rt in ("qualitative", "textual"):
+        # Clearing value without specifying result_type is ambiguous
+        if "value" in self.model_fields_set and self.value is None and rt is None:
+            raise ValueError(
+                "When clearing value, result_type must be provided to avoid ambiguity"
+            )
+
+        if rt == "quantitative":
+            if "value" in self.model_fields_set and self.value is None:
+                raise ValueError("Value cannot be cleared for quantitative tests")
+            if "result_type" in self.model_fields_set and "value" not in self.model_fields_set:
+                raise ValueError(
+                    "When switching to quantitative, value must be provided in the same update"
+                )
+        elif rt in ("qualitative", "textual"):
             if self.value is not None:
                 raise ValueError(f"Numeric value must be empty for {rt} tests")
             if self.ref_range_min is not None or self.ref_range_max is not None:
@@ -460,6 +475,15 @@ class LabTestComponentUpdate(BaseModel):
                 )
             if rt == "textual" and self.qualitative_value is not None:
                 raise ValueError("Qualitative value must be empty for textual tests")
+            if rt == "qualitative":
+                if "qualitative_value" in self.model_fields_set and self.qualitative_value is None:
+                    raise ValueError(
+                        "Qualitative value cannot be cleared for qualitative tests"
+                    )
+                if "result_type" in self.model_fields_set and "qualitative_value" not in self.model_fields_set:
+                    raise ValueError(
+                        "When switching to qualitative, qualitative_value must be provided in the same update"
+                    )
         return self
 
 
@@ -472,6 +496,15 @@ class LabTestComponentResponse(LabTestComponentBase):
     updated_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+    @field_validator("textual_value")
+    @classmethod
+    def validate_textual_value(cls, v):
+        """Tolerate any stored length on read — normalize only."""
+        if v is None:
+            return None
+        stripped = v.strip()
+        return stripped if stripped else None
 
 
 class LabTestComponentWithLabResult(LabTestComponentResponse):

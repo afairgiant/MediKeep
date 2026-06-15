@@ -393,6 +393,33 @@ class TestResponseSerializationRegression:
         assert resp.ref_range_min == 200.0
         assert resp.ref_range_max == 100.0
 
+    def test_response_tolerates_textual_value_over_5000_chars(self):
+        """Response must not raise on textual_value longer than 5000 chars (DB-sourced rows)."""
+        long_text = "x" * 6000
+        resp = LabTestComponentResponse(
+            id=7,
+            test_name="Radiology Report",
+            lab_result_id=1,
+            result_type="textual",
+            textual_value=long_text,
+            value=None,
+            unit=None,
+        )
+        assert len(resp.textual_value) == 6000
+
+    def test_response_still_strips_textual_value(self):
+        """The lenient override should still strip surrounding whitespace."""
+        resp = LabTestComponentResponse(
+            id=8,
+            test_name="Radiology Report",
+            lab_result_id=1,
+            result_type="textual",
+            textual_value="  findings  ",
+            value=None,
+            unit=None,
+        )
+        assert resp.textual_value == "findings"
+
 
 class TestUpdateCrossFieldValidation:
     """Tests for LabTestComponentUpdate cross-field validation (#667)."""
