@@ -8,7 +8,7 @@
     "@mantine/dropzone": "^8.3.18",
     "@mantine/form": "^8.3.18",
     "@mantine/hooks": "^8.3.18",
-    "@mantine/notifications": "^8.3.18",
+    "@mantine/notifications": "^9.0.0",
     "@tabler/icons-react": "^3.41.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
