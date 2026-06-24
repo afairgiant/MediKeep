@@ -142,7 +142,6 @@
     "statusIndicator": "Statusindikator:",
     "testCodePlaceholder": "z. B. 718-7",
     "testComponents": "Testkomponenten (Optional)",
-    "testComponentsDescription": "Optional einzelne Testwerte hinzufügen. Sie können später weitere hinzufügen.",
     "testDetails": "Testdetails",
     "unit": "Einheit",
     "matchedCommonName": "Treffer: {{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "Laborergebnis bearbeiten",
     "labels": {
       "testType": "Testtyp",
-        "referenceRange": "Referenzbereich"
+      "referenceRange": "Referenzbereich"
     },
     "sections": {
       "associatedFiles": "Zugehörige Dokumente",
+      "panelDetails": "Panel-Details",
       "testInfo": "Testinformationen",
       "testResults": "Testergebnisse"
     },
     "tabs": {
-      "testComponents": "Testkomponenten"
+      "testComponents": "Testergebnisse"
     },
     "title": "Laborergebnis-Details"
   },
@@ -317,7 +317,7 @@
     "placeholder": "z. B. CBC, 85025"
   },
   "testComponents": {
-    "addTestComponents": "Testkomponenten hinzufügen",
+    "addTestComponents": "Tests hinzufügen",
     "addTests": "Tests hinzufügen",
     "categories": {
       "cardiology": "Kardiologie - Herz- & Herzmarker",
@@ -332,7 +332,8 @@
       "molecular": "Molekularbiologie - DNA-Tests",
       "other": "Sonstige Tests",
       "pathology": "Pathologie - Gewebe- & Biopsieanalyse",
-      "toxicology": "Toxikologie - Drogen- & Toxin-Screening"
+      "toxicology": "Toxikologie - Drogen- & Toxin-Screening",
+      "imaging": "Bildgebung - Radiologie & Scans"
     },
     "editModal": {
       "descriptions": {
@@ -365,16 +366,16 @@
         "unit": "z. B. g/dl",
         "value": "Testwert eingeben"
       },
-      "title": "Testkomponente bearbeiten",
+      "title": "Test bearbeiten",
       "trendLinking": "Trendverknüpfung",
-      "updating": "Testkomponente wird aktualisiert..."
+      "updating": "Test wird aktualisiert..."
     },
     "emptyState": {
       "description": "Vorlagen bieten gängige Laborprofile (Blutbild, CMP usw.), bei denen Sie Werte und Bereiche eingeben können. Der Massenimport ermöglicht das Kopieren/Einfügen von Ergebnissen aus Laborberichten zur automatischen Analyse."
     },
-    "errorLoading": "Fehler beim Laden der Testkomponenten",
-    "noComponents": "Keine Testkomponenten",
-    "noComponentsDescription": "Dieses Laborergebnis hat noch keine einzelnen Testkomponenten.",
+    "errorLoading": "Fehler beim Laden der Tests",
+    "noComponents": "Keine Tests",
+    "noComponentsDescription": "Dieses Laborergebnis hat noch keine Tests.",
     "notifications": {
       "componentDeleted": "Komponente gelöscht",
       "hasBeenDeleted": "{{name}} wurde gelöscht"
@@ -384,7 +385,12 @@
       "statistics": "Statistiken",
       "testResults": "Testergebnisse"
     },
-    "title": "Testkomponenten"
+    "title": "Tests",
+    "resultType": {
+      "qualitative": "Qualitativ (Pos/Neg)",
+      "quantitative": "Quantitativ (Numerisch)",
+      "textual": "Textuell (Bericht)"
+    }
   },
   "testingFacility": {
     "description": "Wo der Test durchgeführt wird/wurde",
@@ -428,7 +434,8 @@
     "noDataPoints": "Keine Datenpunkte zum Anzeigen",
     "positiveDetected": "Positiv/Nachgewiesen",
     "referenceRange": "Referenzbereich:",
-    "referenceValue": "Referenz: {{min}} - {{max}}"
+    "referenceValue": "Referenz: {{min}} - {{max}}",
+    "notAvailableForTextual": "Trenddiagramme sind für Textergebnisse nicht verfügbar."
   },
   "trends": {
     "abnormalLabel": "Abnormal:",
@@ -449,7 +456,11 @@
     "summaryStatistics": "Zusammenfassende Statistiken",
     "timeRange": "Zeitraum",
     "title": "Trendanalyse",
-    "total": "Gesamt"
+    "total": "Gesamt",
+    "decreasing": "Abnehmend",
+    "increasing": "Zunehmend",
+    "stable": "Stabil",
+    "textualNoStats": "Numerische Statistiken sind für Textergebnisse nicht verfügbar."
   },
   "trendTable": {
     "clickToSort": "Klicken Sie auf Spaltenüberschriften zum Sortieren",
@@ -457,7 +468,8 @@
     "historicalData_one": "Historische Daten ({{count}} Punkt)",
     "historicalData_other": "Historische Daten ({{count}} Punkte)",
     "labResult": "Laborergebnis",
-    "noDataPoints": "Keine Datenpunkte zum Anzeigen"
+    "noDataPoints": "Keine Datenpunkte zum Anzeigen",
+    "notSpecified": "Nicht angegeben"
   },
   "unsavedDataInstructions": "Klicken Sie auf \"Komponenten hinzufügen\" im Vorschau-Tab, um Ihre analysierten Daten vor dem Schließen zu speichern.",
   "unsavedDataMessage_one": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurde(n). Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
@@ -488,5 +500,24 @@
     "refTextLabel": "Bereichstext",
     "refTextPlaceholder": "z.B. 4,0-5,6 oder <200",
     "refTextDescription": "Überschreibt Min/Max in der Anzeige"
+  },
+  "resultsTable": {
+    "expandAll": "Alle erweitern",
+    "collapseAll": "Alle einklappen",
+    "results": "{{count}} Ergebnis",
+    "results_other": "{{count}} Ergebnisse",
+    "noResults": "Keine Testergebnisse entsprechen den aktuellen Filtern",
+    "dateFrom": "Datum von",
+    "dateTo": "Datum bis",
+    "source": "Quelle",
+    "viewTrends": "Trends anzeigen"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
+  },
+  "textualResult": {
+    "label": "Ergebnistext",
+    "noText": "—",
+    "placeholder": "Ergebnistext eingeben (z. B. Keine akuten Befunde)"
   }
 }

@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "加载检测目录失败",
-    "noData": "添加包含检测项目的检验结果后，可在此查看。",
-    "noResults": "未找到检测项目",
+    "noData": "添加检验结果后，可在此查看。",
+    "noResults": "未找到检验结果",
     "readingCount_one": "{{count}} 次检测",
     "refRange": "参考值",
     "searchPlaceholder": "搜索检测项目...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "检验结果已保存，但无法添加检测项目。您可以在查看页面添加。",
       "relationshipCreationWarning": "检验结果已保存，但某些关联无法创建。您可以在编辑页面添加。"
+    },
+    "addPanel": {
+      "title": "添加新检验套餐",
+      "panelName": "套餐名称",
+      "panelNamePlaceholder": "例如：血常规、年度体检",
+      "panelNameDescription": "此组检验的名称",
+      "createButton": "创建",
+      "creating": "正在创建套餐...",
+      "createError": "创建检验套餐失败",
+      "testResultRequired": "至少需要一个检验结果",
+      "tagsPlaceholder": "添加标签以便日后整理和搜索此记录"
+    },
+    "buttons": {
+      "addLabResults": "添加检验结果"
     }
   },
   "medications": {

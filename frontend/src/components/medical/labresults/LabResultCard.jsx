@@ -21,6 +21,7 @@ const LabResultCard = React.memo(
     disableActions = false,
     disableActionsTooltip,
     isGroupedResult = false,
+    worstComponentStatus = null,
     onError,
   }) => {
     const { t } = useTranslation(['medical', 'common', 'shared', 'labresults']);
@@ -62,24 +63,33 @@ const LabResultCard = React.memo(
         badges.push({ label: labResult.test_category, color: 'blue' });
       }
 
+      // For panels the rolled-up status comes from child components; for singletons use the record's own fields
+      const panelFallbackStatus = isGroupedResult && labResult.completed_date ? 'completed' : labResult.status;
+      const effectiveStatus = isGroupedResult && worstComponentStatus ? worstComponentStatus : panelFallbackStatus;
+      const effectiveLabResult = isGroupedResult
+        ? (worstComponentStatus || labResult.labs_result || null)
+        : labResult.labs_result;
+
       // Generate dynamic fields
       const fields = [
-        {
-          label: t('shared:fields.testCode'),
-          value: labResult.test_code,
-        },
-        {
-          label: t('labresults:testTypeField.label'),
-          value: labResult.test_type,
-          render: value =>
-            value ? (
-              <Badge variant="light" color="cyan" size="sm">
-                {value}
-              </Badge>
-            ) : (
-              t('shared:labels.notSpecified')
-            ),
-        },
+        ...(!isGroupedResult ? [
+          {
+            label: t('shared:fields.testCode'),
+            value: labResult.test_code,
+          },
+          {
+            label: t('labresults:testTypeField.label'),
+            value: labResult.test_type,
+            render: value =>
+              value ? (
+                <Badge variant="light" color="cyan" size="sm">
+                  {value}
+                </Badge>
+              ) : (
+                t('shared:labels.notSpecified')
+              ),
+          },
+        ] : []),
         {
           label: t('labresults:testingFacility.label'),
           value: labResult.facility,
@@ -100,10 +110,12 @@ const LabResultCard = React.memo(
         },
         {
           label: t('shared:labels.labResult'),
-          value: labResult.labs_result,
+          value: effectiveLabResult,
           render: value =>
             value ? (
               <StatusBadge status={value} />
+            ) : isGroupedResult ? (
+              '—'
             ) : (
               t('shared:fields.pending', 'Pending')
             ),
@@ -142,7 +154,7 @@ const LabResultCard = React.memo(
       return (
         <BaseMedicalCard
           title={labResult.test_name}
-          status={labResult.status}
+          status={effectiveStatus}
           badges={badges}
           tags={labResult.tags || []}
           fields={fields}
@@ -181,7 +193,8 @@ const LabResultCard = React.memo(
       prevProps.onEdit === nextProps.onEdit &&
       prevProps.onDelete === nextProps.onDelete &&
       prevProps.onView === nextProps.onView &&
-      prevProps.isGroupedResult === nextProps.isGroupedResult
+      prevProps.isGroupedResult === nextProps.isGroupedResult &&
+      prevProps.worstComponentStatus === nextProps.worstComponentStatus
     );
   }
 );

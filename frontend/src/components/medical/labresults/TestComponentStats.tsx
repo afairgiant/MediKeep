@@ -238,7 +238,7 @@ const TestComponentStats: React.FC<TestComponentStatsProps> = ({
   const overallHealthScore = useMemo(() => {
     // Only count quantitative components for the health score
     const quantitativeComponents = components.filter(
-      c => c.result_type !== 'qualitative'
+      c => c.result_type === 'quantitative' || !c.result_type
     );
     const quantTotal = quantitativeComponents.length;
     if (quantTotal === 0) return 0;

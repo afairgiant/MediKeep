@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "ไม่สามารถโหลดรายการผลตรวจได้",
-    "noData": "เพิ่มผลตรวจแล็บพร้อมค่าการตรวจเพื่อดูที่นี่",
-    "noResults": "ไม่พบรายการตรวจ",
+    "noData": "เพิ่มผลตรวจแล็บเพื่อดูที่นี่",
+    "noResults": "ไม่พบผลตรวจแล็บ",
     "readingCount_one": "{{count}} reading",
     "refRange": "ค่าอ้างอิง",
     "searchPlaceholder": "ค้นหาการตรวจ...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "บันทึกผลแล็บแล้ว แต่ไม่สามารถเพิ่มรายการตรวจได้ คุณสามารถเพิ่มได้จากหน้าดู",
       "relationshipCreationWarning": "บันทึกผลแล็บแล้ว แต่ไม่สามารถสร้างความสัมพันธ์บางอย่างได้ คุณสามารถเพิ่มได้จากหน้าแก้ไข"
+    },
+    "addPanel": {
+      "title": "เพิ่มแผงการตรวจใหม่",
+      "panelName": "ชื่อแผงการตรวจ",
+      "panelNamePlaceholder": "เช่น CBC, การตรวจเลือดประจำปี",
+      "panelNameDescription": "ชื่อสำหรับกลุ่มการตรวจนี้",
+      "createButton": "สร้างแผงการตรวจ",
+      "creating": "กำลังสร้าง...",
+      "createError": "ไม่สามารถสร้างแผงการตรวจได้",
+      "testResultRequired": "ต้องมีผลการตรวจอย่างน้อยหนึ่งรายการ",
+      "tagsPlaceholder": "เพิ่มแท็กเพื่อช่วยจัดระเบียบและค้นหาบันทึกนี้ในภายหลัง"
+    },
+    "buttons": {
+      "addLabResults": "เพิ่มผลการตรวจ"
     }
   },
   "medications": {

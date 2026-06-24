@@ -1,0 +1,310 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-06-14",
+  "panels": [
+    {
+      "panel_name": "Complete Blood Count",
+      "abbreviation": "CBC",
+      "category": "hematology",
+      "common_names": ["CBC", "Full Blood Count", "FBC", "Blood Count"],
+      "is_common": true,
+      "display_order": 1
+    },
+    {
+      "panel_name": "CBC with Differential",
+      "abbreviation": "CBC w/ Diff",
+      "category": "hematology",
+      "common_names": ["CBC with Diff", "CBC with Differential", "Diff", "Blood Count with Differential"],
+      "is_common": true,
+      "display_order": 2
+    },
+    {
+      "panel_name": "Basic Metabolic Panel",
+      "abbreviation": "BMP",
+      "category": "chemistry",
+      "common_names": ["BMP", "Basic Metabolic", "Chem 7", "SMA-7"],
+      "is_common": true,
+      "display_order": 3
+    },
+    {
+      "panel_name": "Comprehensive Metabolic Panel",
+      "abbreviation": "CMP",
+      "category": "chemistry",
+      "common_names": ["CMP", "Comprehensive Metabolic", "Chem 14", "SMA-14", "Metabolic Panel"],
+      "is_common": true,
+      "display_order": 4
+    },
+    {
+      "panel_name": "Lipid Panel",
+      "abbreviation": "LIPID",
+      "category": "lipids",
+      "common_names": ["Lipid Panel", "Cholesterol Panel", "Lipid Profile", "Fasting Lipids"],
+      "is_common": true,
+      "display_order": 5
+    },
+    {
+      "panel_name": "Thyroid Function Panel",
+      "abbreviation": "TFT",
+      "category": "endocrinology",
+      "common_names": ["TFT", "Thyroid Panel", "Thyroid Function Tests", "Thyroid Screen"],
+      "is_common": true,
+      "display_order": 6
+    },
+    {
+      "panel_name": "Hepatic Function Panel",
+      "abbreviation": "LFT",
+      "category": "hepatology",
+      "common_names": ["LFT", "Liver Function Tests", "Liver Panel", "Hepatic Panel", "Liver Function Panel"],
+      "is_common": true,
+      "display_order": 7
+    },
+    {
+      "panel_name": "Renal Function Panel",
+      "abbreviation": "RFP",
+      "category": "nephrology",
+      "common_names": ["RFP", "Kidney Function Panel", "Renal Panel", "BUN/Creatinine"],
+      "is_common": true,
+      "display_order": 8
+    },
+    {
+      "panel_name": "Urinalysis",
+      "abbreviation": "UA",
+      "category": "nephrology",
+      "common_names": ["UA", "Urine Analysis", "Urine Test", "Urinalysis with Microscopy"],
+      "is_common": true,
+      "display_order": 9
+    },
+    {
+      "panel_name": "Coagulation Panel",
+      "abbreviation": "COAG",
+      "category": "hematology",
+      "common_names": ["COAG", "Coagulation Studies", "PT/PTT/INR", "Clotting Studies"],
+      "is_common": true,
+      "display_order": 10
+    },
+    {
+      "panel_name": "Iron Studies Panel",
+      "abbreviation": "IRON",
+      "category": "hematology",
+      "common_names": ["Iron Panel", "Iron Studies", "Iron Binding Capacity", "TIBC Panel"],
+      "is_common": true,
+      "display_order": 11
+    },
+    {
+      "panel_name": "Electrolytes Panel",
+      "abbreviation": "LYTES",
+      "category": "chemistry",
+      "common_names": ["Electrolytes", "Lytes", "Sodium/Potassium Panel"],
+      "is_common": true,
+      "display_order": 12
+    },
+    {
+      "panel_name": "Diabetes Monitoring Panel",
+      "abbreviation": "DM Panel",
+      "category": "endocrinology",
+      "common_names": ["Diabetes Panel", "Diabetic Panel", "HbA1c Panel", "Glucose Panel"],
+      "is_common": true,
+      "display_order": 13
+    },
+    {
+      "panel_name": "Cardiac Enzyme Panel",
+      "abbreviation": "CARDIAC",
+      "category": "cardiology",
+      "common_names": ["Cardiac Enzymes", "Troponin Panel", "Heart Enzymes", "ACS Panel"],
+      "is_common": true,
+      "display_order": 14
+    },
+    {
+      "panel_name": "Hepatitis Panel",
+      "abbreviation": "HEP",
+      "category": "infectious",
+      "common_names": ["Hepatitis Screen", "Viral Hepatitis Panel", "Hepatitis A/B/C Panel"],
+      "is_common": true,
+      "display_order": 15
+    },
+    {
+      "panel_name": "Inflammatory Markers Panel",
+      "abbreviation": "INFLAM",
+      "category": "immunology",
+      "common_names": ["Inflammatory Markers", "Inflammation Panel", "ESR/CRP Panel"],
+      "is_common": false,
+      "display_order": 16
+    },
+    {
+      "panel_name": "Sex Hormone Panel",
+      "abbreviation": "SEX HRT",
+      "category": "endocrinology",
+      "common_names": ["Hormone Panel", "Sex Hormones", "FSH/LH/Estradiol", "Reproductive Hormones"],
+      "is_common": false,
+      "display_order": 17
+    },
+    {
+      "panel_name": "Prenatal Panel",
+      "abbreviation": "OB Panel",
+      "category": "obstetrics",
+      "common_names": ["Obstetric Panel", "Pregnancy Panel", "Antenatal Panel", "OB Labs"],
+      "is_common": false,
+      "display_order": 18
+    },
+    {
+      "panel_name": "Autoimmune Panel",
+      "abbreviation": "ANA",
+      "category": "immunology",
+      "common_names": ["ANA Panel", "Rheumatology Panel", "Antinuclear Antibody Panel", "Lupus Panel"],
+      "is_common": false,
+      "display_order": 19
+    },
+    {
+      "panel_name": "Vitamin Panel",
+      "abbreviation": "VIT",
+      "category": "nutrition",
+      "common_names": ["Vitamin Screen", "Vitamins", "Nutritional Vitamins", "Micronutrient Panel"],
+      "is_common": false,
+      "display_order": 20
+    },
+    {
+      "panel_name": "Vitamin D Panel",
+      "abbreviation": "VIT D",
+      "category": "nutrition",
+      "common_names": ["Vitamin D", "25-OH Vitamin D", "Vitamin D Level"],
+      "is_common": true,
+      "display_order": 21
+    },
+    {
+      "panel_name": "B12 and Folate Panel",
+      "abbreviation": "B12/FOL",
+      "category": "nutrition",
+      "common_names": ["B12 Folate", "Vitamin B12 Panel", "Cobalamin/Folate"],
+      "is_common": false,
+      "display_order": 22
+    },
+    {
+      "panel_name": "HIV Panel",
+      "abbreviation": "HIV",
+      "category": "infectious",
+      "common_names": ["HIV Screen", "HIV Test", "HIV-1/2 Antibody", "HIV Testing"],
+      "is_common": false,
+      "display_order": 23
+    },
+    {
+      "panel_name": "STI Panel",
+      "abbreviation": "STI",
+      "category": "infectious",
+      "common_names": ["STD Panel", "Sexually Transmitted Infection Panel", "STI Screen"],
+      "is_common": false,
+      "display_order": 24
+    },
+    {
+      "panel_name": "Respiratory Viral Panel",
+      "abbreviation": "RESP",
+      "category": "infectious",
+      "common_names": ["Respiratory Panel", "Flu Panel", "Viral Respiratory Panel", "COVID/Flu Panel"],
+      "is_common": false,
+      "display_order": 25
+    },
+    {
+      "panel_name": "BNP Panel",
+      "abbreviation": "BNP",
+      "category": "cardiology",
+      "common_names": ["BNP", "NT-proBNP", "Brain Natriuretic Peptide", "Heart Failure Panel"],
+      "is_common": false,
+      "display_order": 26
+    },
+    {
+      "panel_name": "Adrenal Function Panel",
+      "abbreviation": "ADRENAL",
+      "category": "endocrinology",
+      "common_names": ["Adrenal Panel", "Cortisol Panel", "ACTH Panel", "Adrenal Screen"],
+      "is_common": false,
+      "display_order": 27
+    },
+    {
+      "panel_name": "Glucose Tolerance Test",
+      "abbreviation": "GTT",
+      "category": "endocrinology",
+      "common_names": ["GTT", "OGTT", "Oral Glucose Tolerance Test", "Glucose Challenge"],
+      "is_common": false,
+      "display_order": 28
+    },
+    {
+      "panel_name": "Tumor Markers Panel",
+      "abbreviation": "TUMOR",
+      "category": "oncology",
+      "common_names": ["Tumor Markers", "Cancer Markers", "Oncology Panel"],
+      "is_common": false,
+      "display_order": 29
+    },
+    {
+      "panel_name": "PSA Panel",
+      "abbreviation": "PSA",
+      "category": "oncology",
+      "common_names": ["PSA", "Prostate Specific Antigen", "Prostate Panel"],
+      "is_common": false,
+      "display_order": 30
+    },
+    {
+      "panel_name": "Reticulocyte Count Panel",
+      "abbreviation": "RETIC",
+      "category": "hematology",
+      "common_names": ["Reticulocyte", "Retic Count", "Reticulocyte Panel"],
+      "is_common": false,
+      "display_order": 31
+    },
+    {
+      "panel_name": "Blood Culture Panel",
+      "abbreviation": "BC",
+      "category": "microbiology",
+      "common_names": ["Blood Culture", "Bacteremia Panel", "Sepsis Panel"],
+      "is_common": false,
+      "display_order": 32
+    },
+    {
+      "panel_name": "Urine Culture and Sensitivity",
+      "abbreviation": "UC&S",
+      "category": "microbiology",
+      "common_names": ["Urine Culture", "UC&S", "Urine MCS", "UTI Culture"],
+      "is_common": false,
+      "display_order": 33
+    },
+    {
+      "panel_name": "Allergy Testing Panel",
+      "abbreviation": "ALLERGY",
+      "category": "immunology",
+      "common_names": ["Allergy Panel", "Allergen Panel", "IgE Panel"],
+      "is_common": false,
+      "display_order": 34
+    },
+    {
+      "panel_name": "Drug Levels Panel",
+      "abbreviation": "DRUG LVL",
+      "category": "toxicology",
+      "common_names": ["Drug Levels", "Therapeutic Drug Monitoring", "TDM Panel"],
+      "is_common": false,
+      "display_order": 35
+    },
+    {
+      "panel_name": "MRI",
+      "abbreviation": "",
+      "category": "imaging",
+      "common_names": ["Magnetic Resonance Imaging", "MR Scan", "MR Imaging"],
+      "is_common": true,
+      "display_order": 36
+    },
+    {
+      "panel_name": "CT Scan",
+      "abbreviation": "CT",
+      "category": "imaging",
+      "common_names": ["Computed Tomography", "CAT Scan", "CT", "Computerized Tomography"],
+      "is_common": true,
+      "display_order": 37
+    },
+    {
+      "panel_name": "X-Ray",
+      "abbreviation": "",
+      "category": "imaging",
+      "common_names": ["Radiograph", "Radiography", "Plain Film", "Plain X-Ray"],
+      "is_common": true,
+      "display_order": 38
+    }
+  ]
+}

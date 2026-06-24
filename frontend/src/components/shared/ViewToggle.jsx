@@ -2,23 +2,28 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
 const MODE_CONFIG = {
+  panels: {
+    icon: '📋',
+    labelKey: 'viewToggle.panels',
+    fallback: 'Lab Panels',
+  },
   cards: {
-    icon: '\uD83D\uDCCB',
+    icon: '📋',
     labelKey: 'viewToggle.cards',
     fallback: 'Cards',
   },
   table: {
-    icon: '\uD83D\uDCCA',
+    icon: '📊',
     labelKey: 'viewToggle.table',
     fallback: 'Table',
   },
   components: {
-    icon: '\uD83E\uDDEA',
+    icon: '🧪',
     labelKey: 'viewToggle.components',
-    fallback: 'Components',
+    fallback: 'Results',
   },
   stacked: {
-    icon: '\uD83D\uDDC2\uFE0F',
+    icon: '🗂️',
     labelKey: 'viewToggle.stacked',
     fallback: 'Stacked',
   },

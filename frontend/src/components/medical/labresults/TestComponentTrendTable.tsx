@@ -105,13 +105,19 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
           break;
         }
         case 'value':
-          // Handle qualitative: sort alphabetically by qualitative_value
           if (
             a.result_type === 'qualitative' ||
             b.result_type === 'qualitative'
           ) {
             const valA = a.qualitative_value || '';
             const valB = b.qualitative_value || '';
+            comparison = valA.localeCompare(valB);
+          } else if (
+            a.result_type === 'textual' ||
+            b.result_type === 'textual'
+          ) {
+            const valA = a.textual_value || '';
+            const valB = b.textual_value || '';
             comparison = valA.localeCompare(valB);
           } else {
             comparison = (a.value ?? 0) - (b.value ?? 0);
@@ -253,6 +259,10 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                       >
                         {getQualitativeDisplayName(point.qualitative_value)}
                       </Badge>
+                    ) : point.result_type === 'textual' ? (
+                      <Text size="sm" lineClamp={2}>
+                        {point.textual_value || '—'}
+                      </Text>
                     ) : (
                       <Text size="sm" fw={600}>
                         {point.value}
@@ -261,7 +271,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" c="dimmed">
-                      {point.result_type === 'qualitative' ? '-' : point.unit}
+                      {point.result_type === 'qualitative' || point.result_type === 'textual' ? '-' : point.unit}
                     </Text>
                   </Table.Td>
                   <Table.Td>
@@ -281,7 +291,7 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                   </Table.Td>
                   <Table.Td>
                     <Text size="xs" c="dimmed">
-                      {point.result_type === 'qualitative'
+                      {point.result_type === 'qualitative' || point.result_type === 'textual'
                         ? '-'
                         : formatReferenceRange(point)}
                     </Text>

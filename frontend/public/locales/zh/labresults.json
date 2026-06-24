@@ -142,7 +142,6 @@
     "statusIndicator": "状态指示符：",
     "testCodePlaceholder": "例如：718-7",
     "testComponents": "检验组件（可选）",
-    "testComponentsDescription": "可选择添加单个检验值。您也可以稍后添加更多。",
     "testDetails": "检验详情",
     "unit": "单位",
     "matchedCommonName": "匹配：{{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "编辑检验结果",
     "labels": {
       "testType": "检验类型",
-        "referenceRange": "参考范围"
+      "referenceRange": "参考范围"
     },
     "sections": {
       "associatedFiles": "关联文档",
+      "panelDetails": "面板详情",
       "testInfo": "检验信息",
       "testResults": "检验结果"
     },
     "tabs": {
-      "testComponents": "检验组件"
+      "testComponents": "检验结果"
     },
     "title": "检验结果详情"
   },
@@ -317,7 +317,7 @@
     "placeholder": "例如：CBC、85025"
   },
   "testComponents": {
-    "addTestComponents": "添加检验组件",
+    "addTestComponents": "添加检验项目",
     "addTests": "添加检验",
     "categories": {
       "cardiology": "心脏病学 - 心脏和心肌标志物",
@@ -332,7 +332,8 @@
       "molecular": "分子检测 - DNA检测",
       "other": "其他检验",
       "pathology": "病理学 - 组织和活检分析",
-      "toxicology": "毒理学 - 药物和毒素筛查"
+      "toxicology": "毒理学 - 药物和毒素筛查",
+      "imaging": "影像 - 放射学与扫描"
     },
     "editModal": {
       "descriptions": {
@@ -365,16 +366,16 @@
         "unit": "例如：g/dL",
         "value": "输入检验值"
       },
-      "title": "编辑检验组件",
+      "title": "编辑检验项目",
       "trendLinking": "趋势关联",
-      "updating": "正在更新检验组件..."
+      "updating": "正在更新检验项目..."
     },
     "emptyState": {
       "description": "模板提供常见的检验组合（CBC、CMP等），您可以在其中输入数值和范围。批量导入允许您从检验报告中复制/粘贴结果进行自动解析。"
     },
-    "errorLoading": "加载检验组件时出错",
-    "noComponents": "无检验组件",
-    "noComponentsDescription": "此检验结果尚未添加任何单独的检验组件。",
+    "errorLoading": "加载检验项目时出错",
+    "noComponents": "无检验项目",
+    "noComponentsDescription": "此检验结果尚未添加任何检验项目。",
     "notifications": {
       "componentDeleted": "组件已删除",
       "hasBeenDeleted": "{{name}} 已被删除"
@@ -384,7 +385,12 @@
       "statistics": "统计",
       "testResults": "检验结果"
     },
-    "title": "检验组件"
+    "title": "检验项目",
+    "resultType": {
+      "qualitative": "定性（阳性/阴性）",
+      "quantitative": "定量（数值）",
+      "textual": "文本（报告）"
+    }
   },
   "testingFacility": {
     "description": "检验执行/将要执行的地点",
@@ -428,7 +434,8 @@
     "noDataPoints": "无数据点可显示",
     "positiveDetected": "阳性/检出",
     "referenceRange": "参考范围：",
-    "referenceValue": "参考值：{{min}} - {{max}}"
+    "referenceValue": "参考值：{{min}} - {{max}}",
+    "notAvailableForTextual": "文本结果不支持趋势图。"
   },
   "trends": {
     "abnormalLabel": "异常：",
@@ -449,7 +456,11 @@
     "summaryStatistics": "摘要统计",
     "timeRange": "时间范围",
     "title": "趋势分析",
-    "total": "总计"
+    "total": "总计",
+    "decreasing": "递减",
+    "increasing": "递增",
+    "stable": "稳定",
+    "textualNoStats": "文本结果不支持数字统计。"
   },
   "trendTable": {
     "clickToSort": "点击列标题进行排序",
@@ -457,7 +468,8 @@
     "historicalData_one": "历史数据（{{count}} 个点）",
     "historicalData_other": "历史数据（{{count}} 个点）",
     "labResult": "检验结果",
-    "noDataPoints": "无数据点可显示"
+    "noDataPoints": "无数据点可显示",
+    "notSpecified": "未指定"
   },
   "unsavedDataInstructions": "在关闭前，请在预览标签页中点击\"添加组件\"以保存您解析的数据。",
   "unsavedDataMessage_one": "您有 {{count}} 个已解析的检验组件尚未添加。如果现在关闭，您将丢失这些解析数据。",
@@ -488,5 +500,24 @@
     "refTextLabel": "范围文本",
     "refTextPlaceholder": "例如 4.0-5.6 或 <200",
     "refTextDescription": "在显示中覆盖最小值/最大值"
+  },
+  "resultsTable": {
+    "expandAll": "展开全部",
+    "collapseAll": "收起全部",
+    "results": "{{count}} 条结果",
+    "results_other": "{{count}} 条结果",
+    "noResults": "没有测试结果符合当前筛选条件",
+    "dateFrom": "起始日期",
+    "dateTo": "结束日期",
+    "source": "来源",
+    "viewTrends": "查看趋势"
+  },
+  "testEntry": {
+    "label": "测试 #{{number}}"
+  },
+  "textualResult": {
+    "label": "结果文本",
+    "noText": "—",
+    "placeholder": "输入结果文本（例如：未见急性异常）"
   }
 }

@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Error al cargar el catálogo de pruebas",
-    "noData": "Agregue resultados de laboratorio con componentes de prueba para verlos aquí.",
-    "noResults": "No se Encontraron Componentes de Prueba",
+    "noData": "Agregue resultados de laboratorio para verlos aquí.",
+    "noResults": "No se Encontraron Resultados de Laboratorio",
     "readingCount_one": "{{count}} lectura",
     "refRange": "Ref",
     "searchPlaceholder": "Buscar pruebas...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron añadir los componentes de prueba. Puede añadirlos desde la página de visualización.",
       "relationshipCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron crear algunas relaciones. Puede añadirlas desde la página de edición."
+    },
+    "addPanel": {
+      "title": "Agregar nuevo panel de pruebas",
+      "panelName": "Nombre del panel",
+      "panelNamePlaceholder": "ej. Hemograma, Análisis anual",
+      "panelNameDescription": "Un nombre para este grupo de pruebas",
+      "createButton": "Crear",
+      "creating": "Creando panel...",
+      "createError": "No se pudo crear el panel de pruebas",
+      "testResultRequired": "Se requiere al menos un resultado de prueba",
+      "tagsPlaceholder": "Añadir etiquetas para organizar y buscar este registro más tarde"
+    },
+    "buttons": {
+      "addLabResults": "Agregar resultados de laboratorio"
     }
   },
   "medications": {

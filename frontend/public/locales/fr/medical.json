@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Échec du chargement du catalogue d'analyses",
-    "noData": "Ajoutez des résultats d'analyse avec des composants d'analyse pour les voir ici.",
-    "noResults": "Aucun composant d'analyse trouvé",
+    "noData": "Ajoutez des résultats d'analyse pour les voir ici.",
+    "noResults": "Aucun résultat d'analyse trouvé",
     "readingCount_one": "{{count}} relevé",
     "refRange": "Réf",
     "searchPlaceholder": "Rechercher des analyses...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "Résultat d'analyse enregistré, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page de consultation.",
       "relationshipCreationWarning": "Résultat d'analyse enregistré, mais certaines associations n'ont pas pu être créées. Vous pouvez les ajouter depuis la page de modification."
+    },
+    "addPanel": {
+      "title": "Ajouter un nouveau panneau de tests",
+      "panelName": "Nom du panneau",
+      "panelNamePlaceholder": "ex. : NFS, Bilan annuel",
+      "panelNameDescription": "Un nom pour ce groupe de tests",
+      "createButton": "Créer",
+      "creating": "Création du panneau...",
+      "createError": "Échec de la création du panneau de tests",
+      "testResultRequired": "Au moins un résultat de test est requis",
+      "tagsPlaceholder": "Ajouter des étiquettes pour organiser et retrouver cet enregistrement plus tard"
+    },
+    "buttons": {
+      "addLabResults": "Ajouter des résultats de laboratoire"
     }
   },
   "medications": {

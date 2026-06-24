@@ -142,7 +142,6 @@
     "statusIndicator": "Statusindicator:",
     "testCodePlaceholder": "bijv. 718-7",
     "testComponents": "Testcomponenten (optioneel)",
-    "testComponentsDescription": "Voeg optioneel individuele testwaarden toe. U kunt later ook meer toevoegen.",
     "testDetails": "Testdetails",
     "unit": "Eenheid",
     "matchedCommonName": "overeenkomst: {{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "Labresultaat bewerken",
     "labels": {
       "testType": "Testtype",
-        "referenceRange": "Referentiebereik"
+      "referenceRange": "Referentiebereik"
     },
     "sections": {
       "associatedFiles": "Gekoppelde documenten",
+      "panelDetails": "Paneeldetails",
       "testInfo": "Testinformatie",
       "testResults": "Testresultaten"
     },
     "tabs": {
-      "testComponents": "Testcomponenten"
+      "testComponents": "Testresultaten"
     },
     "title": "Labresultaatdetails"
   },
@@ -317,7 +317,7 @@
     "placeholder": "bijv. CBC, 85025"
   },
   "testComponents": {
-    "addTestComponents": "Testcomponenten toevoegen",
+    "addTestComponents": "Tests toevoegen",
     "addTests": "Tests toevoegen",
     "categories": {
       "cardiology": "Cardiologie - Hart- en cardiale markers",
@@ -332,7 +332,8 @@
       "molecular": "Moleculair - DNA-tests",
       "other": "Overige tests",
       "pathology": "Pathologie - Weefsel- en biopsieanalyse",
-      "toxicology": "Toxicologie - Drugs- en toxinescreening"
+      "toxicology": "Toxicologie - Drugs- en toxinescreening",
+      "imaging": "Beeldvorming - Radiologie & Scans"
     },
     "editModal": {
       "descriptions": {
@@ -365,16 +366,16 @@
         "unit": "bijv. g/dL",
         "value": "Testwaarde invoeren"
       },
-      "title": "Testcomponent bewerken",
+      "title": "Test bewerken",
       "trendLinking": "Trendkoppeling",
-      "updating": "Testcomponent wordt bijgewerkt..."
+      "updating": "Test wordt bijgewerkt..."
     },
     "emptyState": {
       "description": "Sjablonen bieden gangbare labpanelen (CBC, CMP, enz.) waar u waarden en bereiken kunt invoeren. Bulkimport stelt u in staat resultaten uit labrapporten te kopiëren/plakken voor automatische verwerking."
     },
-    "errorLoading": "Fout bij laden van testcomponenten",
-    "noComponents": "Geen testcomponenten",
-    "noComponentsDescription": "Dit labresultaat heeft nog geen individuele testcomponenten.",
+    "errorLoading": "Fout bij laden van tests",
+    "noComponents": "Geen tests",
+    "noComponentsDescription": "Dit labresultaat heeft nog geen tests.",
     "notifications": {
       "componentDeleted": "Component verwijderd",
       "hasBeenDeleted": "{{name}} is verwijderd"
@@ -384,7 +385,12 @@
       "statistics": "Statistieken",
       "testResults": "Testresultaten"
     },
-    "title": "Testcomponenten"
+    "title": "Tests",
+    "resultType": {
+      "qualitative": "Kwalitatief (Pos/Neg)",
+      "quantitative": "Kwantitatief (Numeriek)",
+      "textual": "Tekstueel (Rapport)"
+    }
   },
   "testingFacility": {
     "description": "Waar de test wordt/werd uitgevoerd",
@@ -428,7 +434,8 @@
     "noDataPoints": "Geen datapunten om weer te geven",
     "positiveDetected": "Positief/gedetecteerd",
     "referenceRange": "Referentiebereik:",
-    "referenceValue": "Referentie: {{min}} - {{max}}"
+    "referenceValue": "Referentie: {{min}} - {{max}}",
+    "notAvailableForTextual": "Trendgrafieken zijn niet beschikbaar voor tekstresultaten."
   },
   "trends": {
     "abnormalLabel": "Afwijkend:",
@@ -449,7 +456,11 @@
     "summaryStatistics": "Samenvattende statistieken",
     "timeRange": "Tijdsbereik",
     "title": "Trendanalyse",
-    "total": "Totaal"
+    "total": "Totaal",
+    "decreasing": "Afnemend",
+    "increasing": "Toenemend",
+    "stable": "Stabiel",
+    "textualNoStats": "Numerieke statistieken zijn niet beschikbaar voor tekstresultaten."
   },
   "trendTable": {
     "clickToSort": "Klik op kolomkoppen om te sorteren",
@@ -457,7 +468,8 @@
     "historicalData_one": "Historische gegevens ({{count}} punt)",
     "historicalData_other": "Historische gegevens ({{count}} punten)",
     "labResult": "Labresultaat",
-    "noDataPoints": "Geen datapunten om weer te geven"
+    "noDataPoints": "Geen datapunten om weer te geven",
+    "notSpecified": "Niet opgegeven"
   },
   "unsavedDataInstructions": "Klik op \"Componenten toevoegen\" in het tabblad Voorbeeld om uw verwerkte gegevens op te slaan voordat u sluit.",
   "unsavedDataMessage_one": "U heeft {{count}} verwerkt testcomponent dat nog niet is toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
@@ -488,5 +500,24 @@
     "refTextLabel": "Bereiktekst",
     "refTextPlaceholder": "bijv. 4,0-5,6 of <200",
     "refTextDescription": "Vervangt min/max in weergave"
+  },
+  "resultsTable": {
+    "expandAll": "Alles uitvouwen",
+    "collapseAll": "Alles samenvouwen",
+    "results": "{{count}} resultaat",
+    "results_other": "{{count}} resultaten",
+    "noResults": "Geen testresultaten voldoen aan de huidige filters",
+    "dateFrom": "Datum van",
+    "dateTo": "Datum tot",
+    "source": "Bron",
+    "viewTrends": "Trends bekijken"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
+  },
+  "textualResult": {
+    "label": "Resultaattekst",
+    "noText": "—",
+    "placeholder": "Voer resultaattekst in (bijv. Geen acute bevindingen)"
   }
 }

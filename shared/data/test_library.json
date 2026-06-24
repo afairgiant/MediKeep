@@ -8,9 +8,14 @@
       "test_code": "1742-6",
       "default_unit": "U/L",
       "category": "hepatology",
-      "common_names": ["ALT", "SGPT", "Alanine Transaminase"],
+      "common_names": [
+        "ALT",
+        "SGPT",
+        "Alanine Transaminase"
+      ],
       "is_common": true,
-      "display_order": 1
+      "display_order": 1,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Albumin",
@@ -18,18 +23,27 @@
       "test_code": "1751-7",
       "default_unit": "g/dL",
       "category": "hepatology",
-      "common_names": ["Albumin", "Alb"],
+      "common_names": [
+        "Albumin",
+        "Alb"
+      ],
       "is_common": true,
-      "display_order": 2
+      "display_order": 2,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Albumin/Globulin Ratio",
       "abbreviation": "A/G",
       "default_unit": "ratio",
       "category": "hepatology",
-      "common_names": ["A/G Ratio", "Albumin/Globulin Ratio", "A/G"],
+      "common_names": [
+        "A/G Ratio",
+        "Albumin/Globulin Ratio",
+        "A/G"
+      ],
       "is_common": false,
-      "display_order": 3
+      "display_order": 3,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Alkaline Phosphatase",
@@ -37,9 +51,14 @@
       "test_code": "6768-6",
       "default_unit": "U/L",
       "category": "hepatology",
-      "common_names": ["ALP", "Alk Phos", "Alkaline Phosphatase"],
+      "common_names": [
+        "ALP",
+        "Alk Phos",
+        "Alkaline Phosphatase"
+      ],
       "is_common": true,
-      "display_order": 4
+      "display_order": 4,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Amylase",
@@ -47,9 +66,15 @@
       "test_code": "1798-8",
       "default_unit": "U/L",
       "category": "hepatology",
-      "common_names": ["Amylase", "Amylase, Serum", "Serum Amylase", "Amy"],
+      "common_names": [
+        "Amylase",
+        "Amylase, Serum",
+        "Serum Amylase",
+        "Amy"
+      ],
       "is_common": true,
-      "display_order": 5
+      "display_order": 5,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Aspartate Aminotransferase",
@@ -57,18 +82,27 @@
       "test_code": "1920-8",
       "default_unit": "U/L",
       "category": "hepatology",
-      "common_names": ["AST", "SGOT", "Aspartate Transaminase"],
+      "common_names": [
+        "AST",
+        "SGOT",
+        "Aspartate Transaminase"
+      ],
       "is_common": true,
-      "display_order": 6
+      "display_order": 6,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Basophils",
       "abbreviation": "BASO",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["Basophils", "Basos"],
+      "common_names": [
+        "Basophils",
+        "Basos"
+      ],
       "is_common": true,
-      "display_order": 7
+      "display_order": 7,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Basophils (Absolute)",
@@ -82,7 +116,8 @@
         "Baso(Absolute)"
       ],
       "is_common": true,
-      "display_order": 8
+      "display_order": 8,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Blood Urea Nitrogen",
@@ -90,9 +125,13 @@
       "test_code": "3094-0",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["BUN", "Urea Nitrogen"],
+      "common_names": [
+        "BUN",
+        "Urea Nitrogen"
+      ],
       "is_common": true,
-      "display_order": 9
+      "display_order": 9,
+      "result_type": "quantitative"
     },
     {
       "test_name": "BNP",
@@ -107,25 +146,35 @@
         "B-Natriuretic Peptide"
       ],
       "is_common": true,
-      "display_order": 10
+      "display_order": 10,
+      "result_type": "quantitative"
     },
     {
       "test_name": "BUN/Creatinine Ratio",
       "abbreviation": "BUN/CREA",
       "default_unit": "ratio",
       "category": "chemistry",
-      "common_names": ["BUN/Creatinine Ratio", "BUN/Cr"],
+      "common_names": [
+        "BUN/Creatinine Ratio",
+        "BUN/Cr"
+      ],
       "is_common": false,
-      "display_order": 11
+      "display_order": 11,
+      "result_type": "quantitative"
     },
     {
       "test_name": "C-Peptide",
       "abbreviation": "C-PEP",
       "default_unit": "ng/mL",
       "category": "endocrinology",
-      "common_names": ["C-Peptide", "C-Peptide, Serum", "Serum C-Peptide"],
+      "common_names": [
+        "C-Peptide",
+        "C-Peptide, Serum",
+        "Serum C-Peptide"
+      ],
       "is_common": false,
-      "display_order": 12
+      "display_order": 12,
+      "result_type": "quantitative"
     },
     {
       "test_name": "C-Reactive Protein",
@@ -133,9 +182,13 @@
       "test_code": "1988-5",
       "default_unit": "mg/L",
       "category": "immunology",
-      "common_names": ["CRP", "C-Reactive Protein"],
+      "common_names": [
+        "CRP",
+        "C-Reactive Protein"
+      ],
       "is_common": false,
-      "display_order": 13
+      "display_order": 13,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Calcium",
@@ -143,9 +196,13 @@
       "test_code": "17861-6",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["Ca", "Calcium"],
+      "common_names": [
+        "Ca",
+        "Calcium"
+      ],
       "is_common": true,
-      "display_order": 14
+      "display_order": 14,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Carbon Dioxide",
@@ -153,9 +210,15 @@
       "test_code": "2028-9",
       "default_unit": "mmol/L",
       "category": "chemistry",
-      "common_names": ["CO2", "Bicarbonate", "HCO3", "Carbon Dioxide, Total"],
+      "common_names": [
+        "CO2",
+        "Bicarbonate",
+        "HCO3",
+        "Carbon Dioxide, Total"
+      ],
       "is_common": true,
-      "display_order": 15
+      "display_order": 15,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Carbon Dioxide Partial Pressure",
@@ -172,7 +235,8 @@
         "PaCO2"
       ],
       "is_common": false,
-      "display_order": 16
+      "display_order": 16,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Chloride",
@@ -180,18 +244,25 @@
       "test_code": "2075-0",
       "default_unit": "mmol/L",
       "category": "chemistry",
-      "common_names": ["Cl", "Chloride"],
+      "common_names": [
+        "Cl",
+        "Chloride"
+      ],
       "is_common": true,
-      "display_order": 17
+      "display_order": 17,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Cortisol",
       "abbreviation": "CORT",
       "default_unit": "ug/dL",
       "category": "endocrinology",
-      "common_names": ["Cortisol"],
+      "common_names": [
+        "Cortisol"
+      ],
       "is_common": false,
-      "display_order": 18
+      "display_order": 18,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Creatine Kinase",
@@ -199,9 +270,14 @@
       "test_code": "2157-6",
       "default_unit": "U/L",
       "category": "cardiology",
-      "common_names": ["CK", "CPK", "Creatine Kinase"],
+      "common_names": [
+        "CK",
+        "CPK",
+        "Creatine Kinase"
+      ],
       "is_common": false,
-      "display_order": 19
+      "display_order": 19,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Creatinine",
@@ -209,9 +285,14 @@
       "test_code": "2160-0",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["Creatinine", "Cr", "Crea"],
+      "common_names": [
+        "Creatinine",
+        "Cr",
+        "Crea"
+      ],
       "is_common": true,
-      "display_order": 20
+      "display_order": 20,
+      "result_type": "quantitative"
     },
     {
       "test_name": "D-Dimer",
@@ -227,7 +308,8 @@
         "FDP"
       ],
       "is_common": true,
-      "display_order": 21
+      "display_order": 21,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Direct Bilirubin",
@@ -235,18 +317,27 @@
       "test_code": "1968-7",
       "default_unit": "mg/dL",
       "category": "hepatology",
-      "common_names": ["Direct Bilirubin", "D Bili", "Conjugated Bilirubin"],
+      "common_names": [
+        "Direct Bilirubin",
+        "D Bili",
+        "Conjugated Bilirubin"
+      ],
       "is_common": false,
-      "display_order": 22
+      "display_order": 22,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Eosinophils",
       "abbreviation": "EOS",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["Eosinophils", "Eos"],
+      "common_names": [
+        "Eosinophils",
+        "Eos"
+      ],
       "is_common": true,
-      "display_order": 23
+      "display_order": 23,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Eosinophils (Absolute)",
@@ -260,7 +351,8 @@
         "Eos(Absolute)"
       ],
       "is_common": true,
-      "display_order": 24
+      "display_order": 24,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Erythrocyte Sedimentation Rate",
@@ -268,27 +360,39 @@
       "test_code": "4537-7",
       "default_unit": "mm/hr",
       "category": "immunology",
-      "common_names": ["ESR", "Sed Rate"],
+      "common_names": [
+        "ESR",
+        "Sed Rate"
+      ],
       "is_common": false,
-      "display_order": 25
+      "display_order": 25,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Estimated Average Glucose",
       "abbreviation": "eAG",
       "default_unit": "mg/dL",
       "category": "endocrinology",
-      "common_names": ["eAG", "Average Glucose"],
+      "common_names": [
+        "eAG",
+        "Average Glucose"
+      ],
       "is_common": false,
-      "display_order": 26
+      "display_order": 26,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Estimated GFR",
       "abbreviation": "eGFR",
       "default_unit": "mL/min/1.73m2",
       "category": "chemistry",
-      "common_names": ["eGFR", "GFR"],
+      "common_names": [
+        "eGFR",
+        "GFR"
+      ],
       "is_common": true,
-      "display_order": 27
+      "display_order": 27,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Estradiol (Sensitive)",
@@ -302,7 +406,8 @@
         "Estradiol, Sensitive A,"
       ],
       "is_common": false,
-      "display_order": 28
+      "display_order": 28,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Ferritin",
@@ -310,9 +415,12 @@
       "test_code": "2276-4",
       "default_unit": "ng/mL",
       "category": "hematology",
-      "common_names": ["Ferritin"],
+      "common_names": [
+        "Ferritin"
+      ],
       "is_common": false,
-      "display_order": 29
+      "display_order": 29,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Fibrinogen",
@@ -327,7 +435,8 @@
         "Fibrinogen Level"
       ],
       "is_common": false,
-      "display_order": 30
+      "display_order": 30,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Folate (Folic Acid)",
@@ -342,16 +451,21 @@
         "Folate, Serum"
       ],
       "is_common": false,
-      "display_order": 31
+      "display_order": 31,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Follicle Stimulating Hormone",
       "abbreviation": "FSH",
       "default_unit": "mIU/mL",
       "category": "endocrinology",
-      "common_names": ["FSH", "Follicle Stimulating Hormone"],
+      "common_names": [
+        "FSH",
+        "Follicle Stimulating Hormone"
+      ],
       "is_common": false,
-      "display_order": 32
+      "display_order": 32,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Free T3",
@@ -359,9 +473,14 @@
       "test_code": "3051-0",
       "default_unit": "pg/mL",
       "category": "endocrinology",
-      "common_names": ["Free T3", "FT3", "Free Triiodothyronine"],
+      "common_names": [
+        "Free T3",
+        "FT3",
+        "Free Triiodothyronine"
+      ],
       "is_common": false,
-      "display_order": 33
+      "display_order": 33,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Free T4",
@@ -369,9 +488,14 @@
       "test_code": "3024-7",
       "default_unit": "ng/dL",
       "category": "endocrinology",
-      "common_names": ["Free T4", "FT4", "Free Thyroxine"],
+      "common_names": [
+        "Free T4",
+        "FT4",
+        "Free Thyroxine"
+      ],
       "is_common": true,
-      "display_order": 34
+      "display_order": 34,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Gamma-glutamyl Transferase",
@@ -386,16 +510,22 @@
         "Gamma-glutamyl Transpeptidase"
       ],
       "is_common": true,
-      "display_order": 35
+      "display_order": 35,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Globulin Total",
       "abbreviation": "GLOB",
       "default_unit": "g/dL",
       "category": "hepatology",
-      "common_names": ["Globulin", "Total Globulin", "Globulin, Total"],
+      "common_names": [
+        "Globulin",
+        "Total Globulin",
+        "Globulin, Total"
+      ],
       "is_common": false,
-      "display_order": 36
+      "display_order": 36,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Glucose",
@@ -403,9 +533,14 @@
       "test_code": "2345-7",
       "default_unit": "mg/dL",
       "category": "endocrinology",
-      "common_names": ["Blood Glucose", "Blood Sugar", "Glu"],
+      "common_names": [
+        "Blood Glucose",
+        "Blood Sugar",
+        "Glu"
+      ],
       "is_common": true,
-      "display_order": 37
+      "display_order": 37,
+      "result_type": "quantitative"
     },
     {
       "test_name": "HDL Cholesterol",
@@ -413,9 +548,15 @@
       "test_code": "2085-9",
       "default_unit": "mg/dL",
       "category": "lipids",
-      "common_names": ["HDL", "HDL-C", "Good Cholesterol", "HDL CHOLESTEROL"],
+      "common_names": [
+        "HDL",
+        "HDL-C",
+        "Good Cholesterol",
+        "HDL CHOLESTEROL"
+      ],
       "is_common": true,
-      "display_order": 38
+      "display_order": 38,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Hematocrit",
@@ -423,9 +564,14 @@
       "test_code": "4544-3",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["HCT", "Hct", "Packed Cell Volume"],
+      "common_names": [
+        "HCT",
+        "Hct",
+        "Packed Cell Volume"
+      ],
       "is_common": true,
-      "display_order": 39
+      "display_order": 39,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Hemoglobin",
@@ -433,9 +579,14 @@
       "test_code": "718-7",
       "default_unit": "g/dL",
       "category": "hematology",
-      "common_names": ["HGB", "Hb", "Hemoglobin"],
+      "common_names": [
+        "HGB",
+        "Hb",
+        "Hemoglobin"
+      ],
       "is_common": true,
-      "display_order": 40
+      "display_order": 40,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Hemoglobin A1c",
@@ -443,9 +594,14 @@
       "test_code": "4548-4",
       "default_unit": "%",
       "category": "endocrinology",
-      "common_names": ["HbA1c", "A1c", "Glycated Hemoglobin"],
+      "common_names": [
+        "HbA1c",
+        "A1c",
+        "Glycated Hemoglobin"
+      ],
       "is_common": true,
-      "display_order": 41
+      "display_order": 41,
+      "result_type": "quantitative"
     },
     {
       "test_name": "HOMA-Beta",
@@ -460,7 +616,8 @@
         "HOMA Beta Cell Function"
       ],
       "is_common": false,
-      "display_order": 97
+      "display_order": 97,
+      "result_type": "quantitative"
     },
     {
       "test_name": "HOMA-IR",
@@ -474,16 +631,21 @@
         "HOMA Insulin Resistance"
       ],
       "is_common": false,
-      "display_order": 98
+      "display_order": 98,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Immature Granulocytes",
       "abbreviation": "IG",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["Immature Grans", "IG"],
+      "common_names": [
+        "Immature Grans",
+        "IG"
+      ],
       "is_common": false,
-      "display_order": 42
+      "display_order": 42,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Immature Granulocytes (Absolute)",
@@ -497,7 +659,8 @@
         "Immature Grans( Abs)"
       ],
       "is_common": false,
-      "display_order": 43
+      "display_order": 43,
+      "result_type": "quantitative"
     },
     {
       "test_name": "INR",
@@ -505,9 +668,13 @@
       "test_code": "6301-6",
       "default_unit": "ratio",
       "category": "hematology",
-      "common_names": ["INR", "International Normalized Ratio"],
+      "common_names": [
+        "INR",
+        "International Normalized Ratio"
+      ],
       "is_common": false,
-      "display_order": 44
+      "display_order": 44,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Insulin",
@@ -523,7 +690,8 @@
         "Insulin Level"
       ],
       "is_common": false,
-      "display_order": 99
+      "display_order": 99,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Iron",
@@ -531,9 +699,14 @@
       "test_code": "2498-4",
       "default_unit": "ug/dL",
       "category": "hematology",
-      "common_names": ["Iron", "Fe", "Serum Iron"],
+      "common_names": [
+        "Iron",
+        "Fe",
+        "Serum Iron"
+      ],
       "is_common": false,
-      "display_order": 45
+      "display_order": 45,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Lactate Dehydrogenase",
@@ -541,9 +714,13 @@
       "test_code": "2532-0",
       "default_unit": "U/L",
       "category": "hepatology",
-      "common_names": ["LDH", "Lactate Dehydrogenase"],
+      "common_names": [
+        "LDH",
+        "Lactate Dehydrogenase"
+      ],
       "is_common": false,
-      "display_order": 46
+      "display_order": 46,
+      "result_type": "quantitative"
     },
     {
       "test_name": "LDL Cholesterol",
@@ -560,7 +737,8 @@
         "LDL Chol Calc"
       ],
       "is_common": true,
-      "display_order": 47
+      "display_order": 47,
+      "result_type": "quantitative"
     },
     {
       "test_name": "LDL/HDL Ratio",
@@ -574,7 +752,8 @@
         "Total Cholesterol/HDL Ratio"
       ],
       "is_common": false,
-      "display_order": 48
+      "display_order": 48,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Lipase",
@@ -582,27 +761,40 @@
       "test_code": "3040-3",
       "default_unit": "U/L",
       "category": "hepatology",
-      "common_names": ["Lipase", "Lipase, Serum", "Serum Lipase"],
+      "common_names": [
+        "Lipase",
+        "Lipase, Serum",
+        "Serum Lipase"
+      ],
       "is_common": true,
-      "display_order": 49
+      "display_order": 49,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Luteinizing Hormone",
       "abbreviation": "LH",
       "default_unit": "mIU/mL",
       "category": "endocrinology",
-      "common_names": ["LH", "Luteinizing Hormone"],
+      "common_names": [
+        "LH",
+        "Luteinizing Hormone"
+      ],
       "is_common": false,
-      "display_order": 50
+      "display_order": 50,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Lymphocytes",
       "abbreviation": "LYMPH",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["Lymphs", "Lymphocytes"],
+      "common_names": [
+        "Lymphs",
+        "Lymphocytes"
+      ],
       "is_common": true,
-      "display_order": 51
+      "display_order": 51,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Lymphocytes (Absolute)",
@@ -617,7 +809,8 @@
         "Lymphs( Absolute)"
       ],
       "is_common": true,
-      "display_order": 52
+      "display_order": 52,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Magnesium",
@@ -625,9 +818,13 @@
       "test_code": "2601-3",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["Mg", "Magnesium"],
+      "common_names": [
+        "Mg",
+        "Magnesium"
+      ],
       "is_common": false,
-      "display_order": 53
+      "display_order": 53,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Mean Corpuscular Hemoglobin",
@@ -635,9 +832,12 @@
       "test_code": "785-6",
       "default_unit": "pg",
       "category": "hematology",
-      "common_names": ["MCH"],
+      "common_names": [
+        "MCH"
+      ],
       "is_common": true,
-      "display_order": 54
+      "display_order": 54,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Mean Corpuscular Hemoglobin Concentration",
@@ -645,9 +845,12 @@
       "test_code": "786-4",
       "default_unit": "g/dL",
       "category": "hematology",
-      "common_names": ["MCHC"],
+      "common_names": [
+        "MCHC"
+      ],
       "is_common": true,
-      "display_order": 55
+      "display_order": 55,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Mean Corpuscular Volume",
@@ -655,9 +858,12 @@
       "test_code": "787-2",
       "default_unit": "fL",
       "category": "hematology",
-      "common_names": ["MCV"],
+      "common_names": [
+        "MCV"
+      ],
       "is_common": true,
-      "display_order": 56
+      "display_order": 56,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Mean Platelet Volume",
@@ -665,45 +871,68 @@
       "test_code": "32623-1",
       "default_unit": "fL",
       "category": "hematology",
-      "common_names": ["MPV", "Mean Platelet Volume", "Mean Platelet Vol"],
+      "common_names": [
+        "MPV",
+        "Mean Platelet Volume",
+        "Mean Platelet Vol"
+      ],
       "is_common": true,
-      "display_order": 100
+      "display_order": 100,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Monocytes",
       "abbreviation": "MONO",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["Monocytes", "Monos"],
+      "common_names": [
+        "Monocytes",
+        "Monos"
+      ],
       "is_common": true,
-      "display_order": 57
+      "display_order": 57,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Monocytes (Absolute)",
       "abbreviation": "MONO#",
       "default_unit": "K/uL",
       "category": "hematology",
-      "common_names": ["Absolute Monocytes", "AMC", "Monocytes(Absolute)"],
+      "common_names": [
+        "Absolute Monocytes",
+        "AMC",
+        "Monocytes(Absolute)"
+      ],
       "is_common": true,
-      "display_order": 58
+      "display_order": 58,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Neutrophils",
       "abbreviation": "NEUT",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["Neutrophils", "Segs", "Polys"],
+      "common_names": [
+        "Neutrophils",
+        "Segs",
+        "Polys"
+      ],
       "is_common": true,
-      "display_order": 59
+      "display_order": 59,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Neutrophils (Absolute)",
       "abbreviation": "NEUT#",
       "default_unit": "K/uL",
       "category": "hematology",
-      "common_names": ["Absolute Neutrophils", "ANC"],
+      "common_names": [
+        "Absolute Neutrophils",
+        "ANC"
+      ],
       "is_common": true,
-      "display_order": 60
+      "display_order": 60,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Non-HDL Cholesterol",
@@ -717,7 +946,8 @@
         "Non HDL-C"
       ],
       "is_common": false,
-      "display_order": 61
+      "display_order": 61,
+      "result_type": "quantitative"
     },
     {
       "test_name": "NT-proBNP",
@@ -733,7 +963,8 @@
         "Pro-BNP"
       ],
       "is_common": true,
-      "display_order": 62
+      "display_order": 62,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Oxygen Partial Pressure",
@@ -750,7 +981,8 @@
         "PaO2"
       ],
       "is_common": false,
-      "display_order": 63
+      "display_order": 63,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Oxygen Saturation",
@@ -768,7 +1000,8 @@
         "Arterial Oxygen Saturation"
       ],
       "is_common": false,
-      "display_order": 64
+      "display_order": 64,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Partial Thromboplastin Time",
@@ -776,9 +1009,14 @@
       "test_code": "5894-1",
       "default_unit": "seconds",
       "category": "hematology",
-      "common_names": ["PTT", "aPTT", "Activated PTT"],
+      "common_names": [
+        "PTT",
+        "aPTT",
+        "Activated PTT"
+      ],
       "is_common": false,
-      "display_order": 65
+      "display_order": 65,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Parathyroid Hormone",
@@ -795,7 +1033,8 @@
         "PTH Intact"
       ],
       "is_common": false,
-      "display_order": 101
+      "display_order": 101,
+      "result_type": "quantitative"
     },
     {
       "test_name": "pH Arterial",
@@ -803,9 +1042,15 @@
       "test_code": "2744-1",
       "default_unit": "pH",
       "category": "chemistry",
-      "common_names": ["pH", "Blood pH", "Arterial pH", "pH Blood"],
+      "common_names": [
+        "pH",
+        "Blood pH",
+        "Arterial pH",
+        "pH Blood"
+      ],
       "is_common": false,
-      "display_order": 66
+      "display_order": 66,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Phosphorus",
@@ -813,9 +1058,14 @@
       "test_code": "2777-1",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["Phosphorus", "Phos", "Phosphate"],
+      "common_names": [
+        "Phosphorus",
+        "Phos",
+        "Phosphate"
+      ],
       "is_common": false,
-      "display_order": 67
+      "display_order": 67,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Platelet Count",
@@ -823,9 +1073,14 @@
       "test_code": "777-3",
       "default_unit": "K/uL",
       "category": "hematology",
-      "common_names": ["PLT", "Platelets", "Thrombocytes"],
+      "common_names": [
+        "PLT",
+        "Platelets",
+        "Thrombocytes"
+      ],
       "is_common": true,
-      "display_order": 68
+      "display_order": 68,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Potassium",
@@ -833,9 +1088,13 @@
       "test_code": "2823-3",
       "default_unit": "mmol/L",
       "category": "chemistry",
-      "common_names": ["K", "Potassium"],
+      "common_names": [
+        "K",
+        "Potassium"
+      ],
       "is_common": true,
-      "display_order": 69
+      "display_order": 69,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Prostate Specific Antigen",
@@ -850,7 +1109,8 @@
         "PSA, Total"
       ],
       "is_common": false,
-      "display_order": 70
+      "display_order": 70,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Prothrombin Time",
@@ -858,9 +1118,14 @@
       "test_code": "5902-2",
       "default_unit": "seconds",
       "category": "hematology",
-      "common_names": ["PT", "Prothrombin Time", "ProTime"],
+      "common_names": [
+        "PT",
+        "Prothrombin Time",
+        "ProTime"
+      ],
       "is_common": false,
-      "display_order": 71
+      "display_order": 71,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Red Blood Cell Count",
@@ -868,9 +1133,14 @@
       "test_code": "789-8",
       "default_unit": "M/uL",
       "category": "hematology",
-      "common_names": ["RBC", "Red Blood Cells", "Erythrocytes"],
+      "common_names": [
+        "RBC",
+        "Red Blood Cells",
+        "Erythrocytes"
+      ],
       "is_common": true,
-      "display_order": 72
+      "display_order": 72,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Red Cell Distribution Width",
@@ -878,9 +1148,13 @@
       "test_code": "788-0",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["RDW", "RDW-CV"],
+      "common_names": [
+        "RDW",
+        "RDW-CV"
+      ],
       "is_common": true,
-      "display_order": 73
+      "display_order": 73,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Sodium",
@@ -888,9 +1162,13 @@
       "test_code": "2951-2",
       "default_unit": "mmol/L",
       "category": "chemistry",
-      "common_names": ["Na", "Sodium"],
+      "common_names": [
+        "Na",
+        "Sodium"
+      ],
       "is_common": true,
-      "display_order": 74
+      "display_order": 74,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Somatomedin C",
@@ -908,7 +1186,8 @@
         "IGF-I"
       ],
       "is_common": false,
-      "display_order": 102
+      "display_order": 102,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Specific Gravity Urine",
@@ -925,7 +1204,8 @@
         "SG"
       ],
       "is_common": false,
-      "display_order": 75
+      "display_order": 75,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Testosterone",
@@ -948,7 +1228,8 @@
         "Serum Testosterone"
       ],
       "is_common": true,
-      "display_order": 76
+      "display_order": 76,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Testosterone Free",
@@ -974,7 +1255,8 @@
         "Serum Free Testosterone"
       ],
       "is_common": true,
-      "display_order": 77
+      "display_order": 77,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Testosterone Free Percent",
@@ -991,7 +1273,8 @@
         "Percent Free Testosterone"
       ],
       "is_common": false,
-      "display_order": 78
+      "display_order": 78,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Thyroid Stimulating Hormone",
@@ -999,9 +1282,13 @@
       "test_code": "3016-3",
       "default_unit": "mIU/L",
       "category": "endocrinology",
-      "common_names": ["TSH", "Thyrotropin"],
+      "common_names": [
+        "TSH",
+        "Thyrotropin"
+      ],
       "is_common": true,
-      "display_order": 79
+      "display_order": 79,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Total Bilirubin",
@@ -1009,9 +1296,14 @@
       "test_code": "1975-2",
       "default_unit": "mg/dL",
       "category": "hepatology",
-      "common_names": ["Total Bilirubin", "T Bili", "Bilirubin, Total"],
+      "common_names": [
+        "Total Bilirubin",
+        "T Bili",
+        "Bilirubin, Total"
+      ],
       "is_common": true,
-      "display_order": 80
+      "display_order": 80,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Total Cholesterol",
@@ -1026,7 +1318,8 @@
         "Cholesterol Total"
       ],
       "is_common": true,
-      "display_order": 81
+      "display_order": 81,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Total Iron Binding Capacity",
@@ -1034,9 +1327,13 @@
       "test_code": "2500-7",
       "default_unit": "ug/dL",
       "category": "hematology",
-      "common_names": ["TIBC", "Iron Binding Capacity"],
+      "common_names": [
+        "TIBC",
+        "Iron Binding Capacity"
+      ],
       "is_common": false,
-      "display_order": 82
+      "display_order": 82,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Total Protein",
@@ -1044,9 +1341,14 @@
       "test_code": "2885-2",
       "default_unit": "g/dL",
       "category": "hepatology",
-      "common_names": ["Total Protein", "TP", "Protein, Total"],
+      "common_names": [
+        "Total Protein",
+        "TP",
+        "Protein, Total"
+      ],
       "is_common": true,
-      "display_order": 83
+      "display_order": 83,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Total T3",
@@ -1054,9 +1356,14 @@
       "test_code": "3053-6",
       "default_unit": "ng/dL",
       "category": "endocrinology",
-      "common_names": ["Total T3", "T3", "Triiodothyronine"],
+      "common_names": [
+        "Total T3",
+        "T3",
+        "Triiodothyronine"
+      ],
       "is_common": false,
-      "display_order": 84
+      "display_order": 84,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Total T4",
@@ -1064,9 +1371,14 @@
       "test_code": "3026-2",
       "default_unit": "ug/dL",
       "category": "endocrinology",
-      "common_names": ["Total T4", "T4", "Thyroxine"],
+      "common_names": [
+        "Total T4",
+        "T4",
+        "Thyroxine"
+      ],
       "is_common": false,
-      "display_order": 85
+      "display_order": 85,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Transferrin",
@@ -1074,9 +1386,15 @@
       "test_code": "3034-6",
       "default_unit": "mg/dL",
       "category": "hepatology",
-      "common_names": ["Transferrin", "Transferrin Protein", "TRF", "Serum Transferrin"],
+      "common_names": [
+        "Transferrin",
+        "Transferrin Protein",
+        "TRF",
+        "Serum Transferrin"
+      ],
       "is_common": false,
-      "display_order": 105
+      "display_order": 105,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Transferrin Saturation",
@@ -1084,9 +1402,13 @@
       "test_code": "2502-3",
       "default_unit": "%",
       "category": "hematology",
-      "common_names": ["Transferrin Saturation", "TSAT"],
+      "common_names": [
+        "Transferrin Saturation",
+        "TSAT"
+      ],
       "is_common": false,
-      "display_order": 86
+      "display_order": 86,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Triglycerides",
@@ -1094,9 +1416,15 @@
       "test_code": "2571-8",
       "default_unit": "mg/dL",
       "category": "lipids",
-      "common_names": ["Triglycerides", "TG", "Trig", "TRIGLYCERIDES"],
+      "common_names": [
+        "Triglycerides",
+        "TG",
+        "Trig",
+        "TRIGLYCERIDES"
+      ],
       "is_common": true,
-      "display_order": 87
+      "display_order": 87,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Troponin I",
@@ -1113,7 +1441,8 @@
         "Cardiac Troponin I"
       ],
       "is_common": true,
-      "display_order": 88
+      "display_order": 88,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Troponin T",
@@ -1132,7 +1461,8 @@
         "hs-TnT"
       ],
       "is_common": true,
-      "display_order": 89
+      "display_order": 89,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Urea",
@@ -1140,9 +1470,14 @@
       "test_code": "3091-6",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["Urea", "Serum Urea", "Blood Urea"],
+      "common_names": [
+        "Urea",
+        "Serum Urea",
+        "Blood Urea"
+      ],
       "is_common": true,
-      "display_order": 90
+      "display_order": 90,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Uric Acid",
@@ -1150,9 +1485,13 @@
       "test_code": "3084-1",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["Uric Acid", "UA"],
+      "common_names": [
+        "Uric Acid",
+        "UA"
+      ],
       "is_common": false,
-      "display_order": 91
+      "display_order": 91,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Urobilinogen",
@@ -1160,9 +1499,14 @@
       "test_code": "3107-0",
       "default_unit": "mg/dL",
       "category": "chemistry",
-      "common_names": ["Urobilinogen", "Urobilinogen Urine", "UBG"],
+      "common_names": [
+        "Urobilinogen",
+        "Urobilinogen Urine",
+        "UBG"
+      ],
       "is_common": false,
-      "display_order": 92
+      "display_order": 92,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Urine pH",
@@ -1170,9 +1514,15 @@
       "test_code": "2756-5",
       "default_unit": "pH",
       "category": "chemistry",
-      "common_names": ["Urine pH", "pH Urine", "pH, Urine", "Urine Acidity"],
+      "common_names": [
+        "Urine pH",
+        "pH Urine",
+        "pH, Urine",
+        "Urine Acidity"
+      ],
       "is_common": false,
-      "display_order": 103
+      "display_order": 103,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Vitamin B12",
@@ -1180,9 +1530,14 @@
       "test_code": "2132-9",
       "default_unit": "pg/mL",
       "category": "hematology",
-      "common_names": ["Vitamin B12", "B12", "Cobalamin"],
+      "common_names": [
+        "Vitamin B12",
+        "B12",
+        "Cobalamin"
+      ],
       "is_common": false,
-      "display_order": 93
+      "display_order": 93,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Vitamin D",
@@ -1198,16 +1553,22 @@
         "Vitamin D, 25-Hydroxy"
       ],
       "is_common": true,
-      "display_order": 94
+      "display_order": 94,
+      "result_type": "quantitative"
     },
     {
       "test_name": "VLDL Cholesterol",
       "abbreviation": "VLDL",
       "default_unit": "mg/dL",
       "category": "lipids",
-      "common_names": ["VLDL", "VLDL-C", "VLDL Cholesterol Cal"],
+      "common_names": [
+        "VLDL",
+        "VLDL-C",
+        "VLDL Cholesterol Cal"
+      ],
       "is_common": false,
-      "display_order": 95
+      "display_order": 95,
+      "result_type": "quantitative"
     },
     {
       "test_name": "White Blood Cell Count",
@@ -1215,9 +1576,14 @@
       "test_code": "6690-2",
       "default_unit": "K/uL",
       "category": "hematology",
-      "common_names": ["WBC", "White Blood Cells", "Leukocytes"],
+      "common_names": [
+        "WBC",
+        "White Blood Cells",
+        "Leukocytes"
+      ],
       "is_common": true,
-      "display_order": 96
+      "display_order": 96,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Pure Tone Audiometry",
@@ -1225,9 +1591,15 @@
       "test_code": "89024-4",
       "default_unit": "dB HL",
       "category": "hearing",
-      "common_names": ["PTA", "Audiogram", "Hearing Test", "Pure Tone Average"],
+      "common_names": [
+        "PTA",
+        "Audiogram",
+        "Hearing Test",
+        "Pure Tone Average"
+      ],
       "is_common": true,
-      "display_order": 106
+      "display_order": 106,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Tympanometry",
@@ -1235,9 +1607,14 @@
       "test_code": "89016-0",
       "default_unit": "mL",
       "category": "hearing",
-      "common_names": ["Tympanometry", "Tympanogram", "Middle Ear Test"],
+      "common_names": [
+        "Tympanometry",
+        "Tympanogram",
+        "Middle Ear Test"
+      ],
       "is_common": true,
-      "display_order": 107
+      "display_order": 107,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Speech Reception Threshold",
@@ -1245,9 +1622,14 @@
       "test_code": "89023-6",
       "default_unit": "dB HL",
       "category": "hearing",
-      "common_names": ["SRT", "Speech Threshold", "Speech Reception"],
+      "common_names": [
+        "SRT",
+        "Speech Threshold",
+        "Speech Reception"
+      ],
       "is_common": true,
-      "display_order": 108
+      "display_order": 108,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Word Recognition Score",
@@ -1255,9 +1637,15 @@
       "test_code": "89022-8",
       "default_unit": "%",
       "category": "hearing",
-      "common_names": ["WRS", "Word Recognition", "Speech Discrimination", "Word Discrimination"],
+      "common_names": [
+        "WRS",
+        "Word Recognition",
+        "Speech Discrimination",
+        "Word Discrimination"
+      ],
       "is_common": true,
-      "display_order": 109
+      "display_order": 109,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Otoacoustic Emissions",
@@ -1265,9 +1653,15 @@
       "test_code": "89015-2",
       "default_unit": "dB SPL",
       "category": "hearing",
-      "common_names": ["OAE", "Otoacoustic Emissions", "DPOAE", "TEOAE"],
+      "common_names": [
+        "OAE",
+        "Otoacoustic Emissions",
+        "DPOAE",
+        "TEOAE"
+      ],
       "is_common": false,
-      "display_order": 110
+      "display_order": 110,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Auditory Brainstem Response",
@@ -1275,33 +1669,54 @@
       "test_code": "89014-5",
       "default_unit": "ms",
       "category": "hearing",
-      "common_names": ["ABR", "Brainstem Audiometry", "BERA", "Auditory Brainstem Response"],
+      "common_names": [
+        "ABR",
+        "Brainstem Audiometry",
+        "BERA",
+        "Auditory Brainstem Response"
+      ],
       "is_common": false,
-      "display_order": 111
+      "display_order": 111,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Salivary Flow Rate",
       "abbreviation": "SFR",
       "default_unit": "mL/min",
       "category": "stomatology",
-      "common_names": ["SFR", "Sialometry", "Salivary Flow", "Unstimulated Salivary Flow"],
+      "common_names": [
+        "SFR",
+        "Sialometry",
+        "Salivary Flow",
+        "Unstimulated Salivary Flow"
+      ],
       "is_common": true,
-      "display_order": 112
+      "display_order": 112,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Salivary pH",
       "default_unit": "pH",
       "category": "stomatology",
-      "common_names": ["Salivary pH", "Oral pH", "Saliva pH"],
+      "common_names": [
+        "Salivary pH",
+        "Oral pH",
+        "Saliva pH"
+      ],
       "is_common": true,
-      "display_order": 113
+      "display_order": 113,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Hepatitis B Surface Antibody",
       "abbreviation": "Anti-HBs",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Anti-HBs", "HBsAb", "Hepatitis B Antibody"],
+      "common_names": [
+        "Anti-HBs",
+        "HBsAb",
+        "Hepatitis B Antibody"
+      ],
       "is_common": true,
       "result_type": "qualitative",
       "display_order": 114
@@ -1311,7 +1726,11 @@
       "abbreviation": "Anti-HCV",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Anti-HCV", "HCV Ab", "Hep C Antibody"],
+      "common_names": [
+        "Anti-HCV",
+        "HCV Ab",
+        "Hep C Antibody"
+      ],
       "is_common": true,
       "result_type": "qualitative",
       "display_order": 115
@@ -1321,7 +1740,11 @@
       "abbreviation": "Anti-HIV 1",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["HIV-1 Ab", "HIV 1/2 Antibody", "Anti-HIV"],
+      "common_names": [
+        "HIV-1 Ab",
+        "HIV 1/2 Antibody",
+        "Anti-HIV"
+      ],
       "is_common": true,
       "result_type": "qualitative",
       "display_order": 116
@@ -1331,7 +1754,9 @@
       "abbreviation": "Anti-HIV 2",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["HIV-2 Ab"],
+      "common_names": [
+        "HIV-2 Ab"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 117
@@ -1341,7 +1766,12 @@
       "abbreviation": "EBV VCA IgM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["EBV IgM", "EBV VCA IgM Antibody", "Anti-VCA IgM", "Epstein-Barr Virus IgM"],
+      "common_names": [
+        "EBV IgM",
+        "EBV VCA IgM Antibody",
+        "Anti-VCA IgM",
+        "Epstein-Barr Virus IgM"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 118
@@ -1351,7 +1781,12 @@
       "abbreviation": "EBV VCA IgG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["EBV IgG", "EBV VCA IgG Antibody", "Anti-VCA IgG", "Epstein-Barr Virus IgG"],
+      "common_names": [
+        "EBV IgG",
+        "EBV VCA IgG Antibody",
+        "Anti-VCA IgG",
+        "Epstein-Barr Virus IgG"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 119
@@ -1361,7 +1796,11 @@
       "abbreviation": "CMV IgM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["CMV IgM Antibody", "Anti-CMV IgM", "Cytomegalovirus IgM Antibody"],
+      "common_names": [
+        "CMV IgM Antibody",
+        "Anti-CMV IgM",
+        "Cytomegalovirus IgM Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 120
@@ -1371,7 +1810,11 @@
       "abbreviation": "CMV IgG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["CMV IgG Antibody", "Anti-CMV IgG", "Cytomegalovirus IgG Antibody"],
+      "common_names": [
+        "CMV IgG Antibody",
+        "Anti-CMV IgG",
+        "Cytomegalovirus IgG Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 121
@@ -1381,7 +1824,11 @@
       "abbreviation": "HSV-1 IgM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["HSV Type 1 IgM", "Anti-HSV-1 IgM", "HSV-1 IgM Antibody"],
+      "common_names": [
+        "HSV Type 1 IgM",
+        "Anti-HSV-1 IgM",
+        "HSV-1 IgM Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 122
@@ -1391,7 +1838,11 @@
       "abbreviation": "HSV-1 IgG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["HSV Type 1 IgG", "Anti-HSV-1 IgG", "HSV-1 IgG Antibody"],
+      "common_names": [
+        "HSV Type 1 IgG",
+        "Anti-HSV-1 IgG",
+        "HSV-1 IgG Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 123
@@ -1401,7 +1852,11 @@
       "abbreviation": "HSV-2 IgM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["HSV Type 2 IgM", "Anti-HSV-2 IgM", "HSV-2 IgM Antibody"],
+      "common_names": [
+        "HSV Type 2 IgM",
+        "Anti-HSV-2 IgM",
+        "HSV-2 IgM Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 124
@@ -1411,7 +1866,11 @@
       "abbreviation": "HSV-2 IgG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["HSV Type 2 IgG", "Anti-HSV-2 IgG", "HSV-2 IgG Antibody"],
+      "common_names": [
+        "HSV Type 2 IgG",
+        "Anti-HSV-2 IgG",
+        "HSV-2 IgG Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 125
@@ -1421,7 +1880,12 @@
       "abbreviation": "VDRL",
       "default_unit": "",
       "category": "microbiology",
-      "common_names": ["VDRL Test", "Syphilis Screen", "RPR", "Syphilis Test"],
+      "common_names": [
+        "VDRL Test",
+        "Syphilis Screen",
+        "RPR",
+        "Syphilis Test"
+      ],
       "is_common": true,
       "result_type": "qualitative",
       "display_order": 126
@@ -1431,7 +1895,13 @@
       "abbreviation": "SARS-CoV-2",
       "default_unit": "",
       "category": "microbiology",
-      "common_names": ["COVID-19 Test", "SARS-CoV-2 PCR", "COVID PCR", "Coronavirus Test", "COVID Test"],
+      "common_names": [
+        "COVID-19 Test",
+        "SARS-CoV-2 PCR",
+        "COVID PCR",
+        "Coronavirus Test",
+        "COVID Test"
+      ],
       "is_common": true,
       "result_type": "qualitative",
       "display_order": 127
@@ -1440,7 +1910,10 @@
       "test_name": "Mycoplasma hominis",
       "default_unit": "",
       "category": "microbiology",
-      "common_names": ["M. hominis", "Mycoplasma Culture"],
+      "common_names": [
+        "M. hominis",
+        "Mycoplasma Culture"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 128
@@ -1449,7 +1922,10 @@
       "test_name": "Ureaplasma spp",
       "default_unit": "",
       "category": "microbiology",
-      "common_names": ["Ureaplasma urealyticum", "Ureaplasma Culture"],
+      "common_names": [
+        "Ureaplasma urealyticum",
+        "Ureaplasma Culture"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 129
@@ -1459,7 +1935,11 @@
       "abbreviation": "ANA",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["ANA Screen", "ANA Test", "Antinuclear Ab"],
+      "common_names": [
+        "ANA Screen",
+        "ANA Test",
+        "Antinuclear Ab"
+      ],
       "is_common": true,
       "result_type": "qualitative",
       "display_order": 130
@@ -1469,7 +1949,11 @@
       "abbreviation": "Anti-dsDNA",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["dsDNA Antibody", "Anti-dsDNA Antibody", "Double Stranded DNA"],
+      "common_names": [
+        "dsDNA Antibody",
+        "Anti-dsDNA Antibody",
+        "Double Stranded DNA"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 131
@@ -1479,7 +1963,11 @@
       "abbreviation": "Anti-Sm",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Smith Antibody", "Anti-Sm Antibody", "Sm Antibody"],
+      "common_names": [
+        "Smith Antibody",
+        "Anti-Sm Antibody",
+        "Sm Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 132
@@ -1489,7 +1977,11 @@
       "abbreviation": "Anti-RNP",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["RNP Antibody", "Anti-U1 RNP", "Anti-RNP Antibody"],
+      "common_names": [
+        "RNP Antibody",
+        "Anti-U1 RNP",
+        "Anti-RNP Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 133
@@ -1499,7 +1991,12 @@
       "abbreviation": "Anti-SSA",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Anti-Ro", "SSA Antibody", "Ro Antibody", "Anti-Ro Antibody"],
+      "common_names": [
+        "Anti-Ro",
+        "SSA Antibody",
+        "Ro Antibody",
+        "Anti-Ro Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 134
@@ -1509,7 +2006,12 @@
       "abbreviation": "Anti-SSB",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Anti-La", "SSB Antibody", "La Antibody", "Anti-La Antibody"],
+      "common_names": [
+        "Anti-La",
+        "SSB Antibody",
+        "La Antibody",
+        "Anti-La Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 135
@@ -1519,7 +2021,11 @@
       "abbreviation": "Anti-Jo-1",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Jo-1 Antibody", "Anti-Histidyl tRNA Synthetase", "Histidyl tRNA Synthetase Antibody"],
+      "common_names": [
+        "Jo-1 Antibody",
+        "Anti-Histidyl tRNA Synthetase",
+        "Histidyl tRNA Synthetase Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 136
@@ -1529,7 +2035,12 @@
       "abbreviation": "Anti-SLA/LP",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Anti-Soluble Liver Antigen", "Anti-Liver Pancreas", "SLA/LP Antibody", "Anti-SLA"],
+      "common_names": [
+        "Anti-Soluble Liver Antigen",
+        "Anti-Liver Pancreas",
+        "SLA/LP Antibody",
+        "Anti-SLA"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 137
@@ -1540,9 +2051,12 @@
       "test_code": "8099-4",
       "default_unit": "U/mL",
       "category": "immunology",
-      "common_names": ["TPO Antibody"],
+      "common_names": [
+        "TPO Antibody"
+      ],
       "is_common": false,
-      "display_order": 138
+      "display_order": 138,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Rheumatoid Factor",
@@ -1550,9 +2064,12 @@
       "test_code": "15205-8",
       "default_unit": "IU/mL",
       "category": "immunology",
-      "common_names": ["Rheumatoid Factor (quant.)"],
+      "common_names": [
+        "Rheumatoid Factor (quant.)"
+      ],
       "is_common": false,
-      "display_order": 139
+      "display_order": 139,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Cyclic Citrullinated Peptide Antibody",
@@ -1560,9 +2077,13 @@
       "test_code": "57093-7",
       "default_unit": "U/mL",
       "category": "immunology",
-      "common_names": ["CCP Antibody", "Anti-CCP"],
+      "common_names": [
+        "CCP Antibody",
+        "Anti-CCP"
+      ],
       "is_common": false,
-      "display_order": 140
+      "display_order": 140,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Zika Virus IgG Antibody",
@@ -1570,7 +2091,9 @@
       "test_code": "91080-2",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Zika IgG"],
+      "common_names": [
+        "Zika IgG"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 141
@@ -1581,7 +2104,9 @@
       "test_code": "80824-6",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Zika IgM"],
+      "common_names": [
+        "Zika IgM"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 142
@@ -1591,7 +2116,10 @@
       "abbreviation": "BGVLSEBA",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["VlsE-Ba", "Borrelia VlsE Ba"],
+      "common_names": [
+        "VlsE-Ba",
+        "Borrelia VlsE Ba"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 143
@@ -1601,7 +2129,10 @@
       "abbreviation": "BGVLSEBG",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["VlsE-Bg", "Borrelia VlsE Bg"],
+      "common_names": [
+        "VlsE-Bg",
+        "Borrelia VlsE Bg"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 144
@@ -1611,7 +2142,10 @@
       "abbreviation": "BGVLSEBB",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["VlsE-Bb", "Borrelia VlsE Bb"],
+      "common_names": [
+        "VlsE-Bb",
+        "Borrelia VlsE Bb"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 145
@@ -1621,16 +2155,23 @@
       "abbreviation": "BORREG",
       "default_unit": "E/mL",
       "category": "immunology",
-      "common_names": ["Borrelia IgG", "Borrelia IgG ELISA"],
+      "common_names": [
+        "Borrelia IgG",
+        "Borrelia IgG ELISA"
+      ],
       "is_common": false,
-      "display_order": 146
+      "display_order": 146,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Borrelia IgM Antibody (ELISA)",
       "abbreviation": "BORREM",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Borrelia IgM", "Borrelia IgM ELISA"],
+      "common_names": [
+        "Borrelia IgM",
+        "Borrelia IgM ELISA"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 147
@@ -1640,7 +2181,9 @@
       "abbreviation": "BORGB",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Borrelia IgG (Blot)"],
+      "common_names": [
+        "Borrelia IgG (Blot)"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 148
@@ -1650,7 +2193,9 @@
       "abbreviation": "BORMB",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Borrelia IgM (Blot)"],
+      "common_names": [
+        "Borrelia IgM (Blot)"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 149
@@ -1660,7 +2205,10 @@
       "abbreviation": "BGDBPA",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["DbpA", "Borrelia DbpA"],
+      "common_names": [
+        "DbpA",
+        "Borrelia DbpA"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 150
@@ -1670,7 +2218,10 @@
       "abbreviation": "BGOSPC",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["OspC", "Borrelia OspC"],
+      "common_names": [
+        "OspC",
+        "Borrelia OspC"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 151
@@ -1680,7 +2231,10 @@
       "abbreviation": "BGP39",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["p39", "Borrelia p39"],
+      "common_names": [
+        "p39",
+        "Borrelia p39"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 152
@@ -1691,7 +2245,10 @@
       "test_code": "12891-8",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["p41", "Borrelia p41"],
+      "common_names": [
+        "p41",
+        "Borrelia p41"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 153
@@ -1701,7 +2258,10 @@
       "abbreviation": "BGP83",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["p83", "Borrelia p83"],
+      "common_names": [
+        "p83",
+        "Borrelia p83"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 154
@@ -1712,7 +2272,9 @@
       "test_code": "24312-1",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Syphilis Antibody"],
+      "common_names": [
+        "Syphilis Antibody"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 155
@@ -1723,9 +2285,16 @@
       "test_code": "43583-4",
       "default_unit": "nmol/L",
       "category": "lipids",
-      "common_names": ["AK38", "APOA", "LP", "LPA", "Lp(a)"],
+      "common_names": [
+        "AK38",
+        "APOA",
+        "LP",
+        "LPA",
+        "Lp(a)"
+      ],
       "is_common": false,
-      "display_order": 156
+      "display_order": 156,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Creatine Kinase-MB",
@@ -1733,9 +2302,14 @@
       "test_code": "32673-6",
       "default_unit": "U/L",
       "category": "cardiology",
-      "common_names": ["MB", "CPK-MB", "Creatine Phosphokinase-MB"],
+      "common_names": [
+        "MB",
+        "CPK-MB",
+        "Creatine Phosphokinase-MB"
+      ],
       "is_common": false,
-      "display_order": 157
+      "display_order": 157,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Angiotensin Converting Enzyme",
@@ -1743,9 +2317,13 @@
       "test_code": "2742-5",
       "default_unit": "U/L",
       "category": "other",
-      "common_names": ["Angiotensin-1 Converting Enzyme", "SACE"],
+      "common_names": [
+        "Angiotensin-1 Converting Enzyme",
+        "SACE"
+      ],
       "is_common": false,
-      "display_order": 158
+      "display_order": 158,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Alpha-1 Globulin",
@@ -1753,9 +2331,13 @@
       "test_code": "2865-4",
       "default_unit": "g/L",
       "category": "hepatology",
-      "common_names": ["α1-Globulin", "Alpha 1 globulin"],
+      "common_names": [
+        "\u03b11-Globulin",
+        "Alpha 1 globulin"
+      ],
       "is_common": false,
-      "display_order": 159
+      "display_order": 159,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Alpha-2 Globulin",
@@ -1763,9 +2345,13 @@
       "test_code": "2868-8",
       "default_unit": "g/L",
       "category": "hepatology",
-      "common_names": ["α2-Globulin", "Alpha 2 globulin"],
+      "common_names": [
+        "\u03b12-Globulin",
+        "Alpha 2 globulin"
+      ],
       "is_common": false,
-      "display_order": 160
+      "display_order": 160,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Beta Globulin",
@@ -1773,9 +2359,13 @@
       "test_code": "2871-2",
       "default_unit": "g/L",
       "category": "hepatology",
-      "common_names": ["β-Globulin", "Beta globulin"],
+      "common_names": [
+        "\u03b2-Globulin",
+        "Beta globulin"
+      ],
       "is_common": false,
-      "display_order": 161
+      "display_order": 161,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Gamma Globulin",
@@ -1783,16 +2373,22 @@
       "test_code": "2874-6",
       "default_unit": "g/L",
       "category": "hepatology",
-      "common_names": ["γ-Globulin", "Gamma globulin"],
+      "common_names": [
+        "\u03b3-Globulin",
+        "Gamma globulin"
+      ],
       "is_common": false,
-      "display_order": 162
+      "display_order": 162,
+      "result_type": "quantitative"
     },
     {
       "test_name": "Tuberculin Skin Test",
       "abbreviation": "TST",
       "default_unit": "",
       "category": "immunology",
-      "common_names": ["Tuberculosis antigen"],
+      "common_names": [
+        "Tuberculosis antigen"
+      ],
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 163

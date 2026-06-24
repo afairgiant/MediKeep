@@ -142,7 +142,6 @@
     "statusIndicator": "Wskaźnik Statusu:",
     "testCodePlaceholder": "np. 718-7",
     "testComponents": "Składniki Badania (Opcjonalne)",
-    "testComponentsDescription": "Opcjonalnie dodaj poszczególne wartości badań. Możesz też dodać więcej później.",
     "testDetails": "Szczegóły Badania",
     "unit": "Jednostka",
     "matchedCommonName": "dopasowanie: {{name}}"
@@ -166,15 +165,16 @@
     "editLabResult": "Edytuj Wynik Laboratoryjny",
     "labels": {
       "testType": "Typ Badania",
-        "referenceRange": "Zakres Referencyjny"
+      "referenceRange": "Zakres Referencyjny"
     },
     "sections": {
       "associatedFiles": "Powiązane Dokumenty",
+      "panelDetails": "Szczegóły Panelu",
       "testInfo": "Informacje o Badaniu",
       "testResults": "Wyniki Badania"
     },
     "tabs": {
-      "testComponents": "Składniki Badania"
+      "testComponents": "Wyniki Badania"
     },
     "title": "Szczegóły Wyniku Laboratoryjnego"
   },
@@ -317,7 +317,7 @@
     "placeholder": "np. CBC, 85025"
   },
   "testComponents": {
-    "addTestComponents": "Dodaj Składniki Badania",
+    "addTestComponents": "Dodaj badania",
     "addTests": "Dodaj Badania",
     "categories": {
       "cardiology": "Kardiologia - Serce i Markery Sercowe",
@@ -332,7 +332,8 @@
       "molecular": "Molekularne - Badania DNA",
       "other": "Inne Badania",
       "pathology": "Patologia - Analiza Tkanek i Biopsji",
-      "toxicology": "Toksykologia - Badania Leków i Toksyn"
+      "toxicology": "Toksykologia - Badania Leków i Toksyn",
+      "imaging": "Obrazowanie - Radiologia & Skany"
     },
     "editModal": {
       "descriptions": {
@@ -365,16 +366,16 @@
         "unit": "np. g/dL",
         "value": "Wprowadź wartość badania"
       },
-      "title": "Edytuj Składnik Badania",
+      "title": "Edytuj badanie",
       "trendLinking": "Łączenie Trendów",
-      "updating": "Aktualizowanie składnika badania..."
+      "updating": "Aktualizowanie badania..."
     },
     "emptyState": {
       "description": "Szablony dostarczają typowe panele laboratoryjne (morfologia, panel metaboliczny itp.) gdzie możesz wprowadzić wartości i zakresy. Import grupowy pozwala na kopiowanie/wklejanie wyników z raportów laboratoryjnych do automatycznego parsowania."
     },
-    "errorLoading": "Błąd ładowania składników badania",
-    "noComponents": "Brak składników badania",
-    "noComponentsDescription": "Ten wynik laboratoryjny nie ma jeszcze żadnych poszczególnych składników badania.",
+    "errorLoading": "Błąd ładowania badań",
+    "noComponents": "Brak badań",
+    "noComponentsDescription": "Ten wynik laboratoryjny nie ma jeszcze żadnych badań.",
     "notifications": {
       "componentDeleted": "Składnik usunięty",
       "hasBeenDeleted": "{{name}} zostało usunięte"
@@ -384,7 +385,12 @@
       "statistics": "Statystyki",
       "testResults": "Wyniki Badań"
     },
-    "title": "Składniki Badania"
+    "title": "Badania",
+    "resultType": {
+      "qualitative": "Jakościowy (Poz/Neg)",
+      "quantitative": "Ilościowy (Numeryczny)",
+      "textual": "Tekstowy (Raport)"
+    }
   },
   "testingFacility": {
     "description": "Miejsce wykonywania badania",
@@ -428,7 +434,8 @@
     "noDataPoints": "Brak punktów danych do wyświetlenia",
     "positiveDetected": "Dodatni/Wykryty",
     "referenceRange": "Zakres Referencyjny:",
-    "referenceValue": "Referencja: {{min}} - {{max}}"
+    "referenceValue": "Referencja: {{min}} - {{max}}",
+    "notAvailableForTextual": "Wykresy trendów nie są dostępne dla wyników tekstowych."
   },
   "trends": {
     "abnormalLabel": "Nieprawidłowy:",
@@ -449,7 +456,11 @@
     "summaryStatistics": "Statystyki Podsumowujące",
     "timeRange": "Zakres Czasowy",
     "title": "Analiza Trendów",
-    "total": "Wszystkie"
+    "total": "Wszystkie",
+    "decreasing": "Malejący",
+    "increasing": "Rosnący",
+    "stable": "Stabilny",
+    "textualNoStats": "Statystyki numeryczne nie są dostępne dla wyników tekstowych."
   },
   "trendTable": {
     "clickToSort": "Kliknij nagłówki kolumn aby sortować",
@@ -457,7 +468,8 @@
     "historicalData_one": "Dane Historyczne ({{count}} punkt)",
     "historicalData_other": "Dane Historyczne ({{count}} punktów)",
     "labResult": "Wynik Laboratoryjny",
-    "noDataPoints": "Brak punktów danych do wyświetlenia"
+    "noDataPoints": "Brak punktów danych do wyświetlenia",
+    "notSpecified": "Nieokreślony"
   },
   "unsavedDataInstructions": "Kliknij \"Dodaj Składniki\" w zakładce Podgląd aby zapisać sparsowane dane przed zamknięciem.",
   "unsavedDataMessage_one": "Masz {{count}} sparsowany składnik badania który nie został jeszcze dodany. Jeśli zamkniesz teraz, stracisz te sparsowane dane.",
@@ -488,5 +500,24 @@
     "refTextLabel": "Tekst zakresu",
     "refTextPlaceholder": "np. 4,0-5,6 lub <200",
     "refTextDescription": "Zastępuje min/maks w wyświetlaniu"
+  },
+  "resultsTable": {
+    "expandAll": "Rozwiń wszystko",
+    "collapseAll": "Zwiń wszystko",
+    "results": "{{count}} wynik",
+    "results_other": "{{count}} wyniki",
+    "noResults": "Żadne wyniki testów nie pasują do bieżących filtrów",
+    "dateFrom": "Data od",
+    "dateTo": "Data do",
+    "source": "Źródło",
+    "viewTrends": "Wyświetl trendy"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
+  },
+  "textualResult": {
+    "label": "Tekst wyniku",
+    "noText": "—",
+    "placeholder": "Wprowadź tekst wyniku (np. Brak ostrych zmian)"
   }
 }

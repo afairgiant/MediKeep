@@ -72,6 +72,8 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
   const [addModalTab, setAddModalTab] = useState<string>('templates');
 
   const { patient: currentPatient } = useCurrentPatient() as any;
+
+  const hasQuantitativeComponents = components.some(c => c.result_type === 'quantitative' || !c.result_type);
   const loadingRef = useRef(false);
 
   const handleError = useCallback(
@@ -298,6 +300,13 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [labResultId]);
 
+  // Reset to display tab if stats tab is active but hidden (no quantitative components)
+  useEffect(() => {
+    if (!hasQuantitativeComponents && activeTab === 'stats') {
+      setActiveTab('display');
+    }
+  }, [hasQuantitativeComponents, activeTab]);
+
   // Note: Removed auto-refresh on tab switch to prevent unnecessary API calls
   // Users can manually refresh using the refresh button if needed
 
@@ -360,7 +369,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
         <Group gap="xs">
           <IconFlask size={20} />
           <Title order={4}>
-            {t('labresults:testComponents.title', 'Test Components')}
+            {t('labresults:testComponents.title', 'Tests')}
           </Title>
           {components.length > 0 && (
             <Badge variant="light" color="blue">
@@ -401,7 +410,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
           icon={<IconAlertCircle size={16} />}
           title={t(
             'labresults:testComponents.errorLoading',
-            'Error loading test components'
+            'Error loading tests'
           )}
           color="red"
           onClose={() => setError(null)}
@@ -424,9 +433,11 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             {t('labresults:testComponents.tabs.testResults', 'Test Results')}
           </Tabs.Tab>
 
-          <Tabs.Tab value="stats" leftSection={getTabIcon('stats')}>
-            {t('labresults:testComponents.tabs.statistics', 'Statistics')}
-          </Tabs.Tab>
+          {hasQuantitativeComponents && (
+            <Tabs.Tab value="stats" leftSection={getTabIcon('stats')}>
+              {t('labresults:testComponents.tabs.statistics', 'Statistics')}
+            </Tabs.Tab>
+          )}
         </Tabs.List>
 
         {/* Display Tab */}
@@ -485,7 +496,7 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
               >
                 {t(
                   'labresults:testComponents.addTestComponents',
-                  'Add Test Components'
+                  'Add Tests'
                 )}
               </Button>
             </Group>
@@ -508,13 +519,13 @@ const TestComponentsTab: React.FC<TestComponentsTabProps> = ({
             <Title order={3} c="dimmed">
               {t(
                 'labresults:testComponents.noComponents',
-                'No test components'
+                'No tests'
               )}
             </Title>
             <Text size="sm" c="dimmed" ta="center">
               {t(
                 'labresults:testComponents.noComponentsDescription',
-                "This lab result doesn't have any individual test components added yet."
+                "This lab result doesn't have any tests yet."
               )}
             </Text>
           </Stack>

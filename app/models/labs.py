@@ -57,6 +57,9 @@ class LabResult(Base):
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
 
+    # Panel flag — true for lab results created as containers for test components
+    is_panel = Column(Boolean, nullable=False, default=False)
+
     # Tagging system
     tags = Column(JSON, nullable=True, default=list)
 
@@ -147,6 +150,9 @@ class LabTestComponent(Base):
     qualitative_value = Column(
         String, nullable=True
     )  # "positive", "negative", "detected", "undetected"
+
+    # Textual result value (for imaging/radiology reports)
+    textual_value = Column(String, nullable=True)
 
     # Reference ranges
     ref_range_min = Column(Float, nullable=True)

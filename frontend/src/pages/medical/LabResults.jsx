@@ -32,6 +32,7 @@ import PaginationControls from '../../components/shared/PaginationControls';
 import LabResultCard from '../../components/medical/labresults/LabResultCard';
 import LabResultViewModal from '../../components/medical/labresults/LabResultViewModal';
 import LabResultFormWrapper from '../../components/medical/labresults/LabResultFormWrapper';
+import TestPanelCreateDialog from '../../components/medical/labresults/TestPanelCreateDialog';
 import LabResultQuickImportModal from '../../components/medical/labresults/LabResultQuickImportModal';
 import TestComponentCatalog from '../../components/medical/labresults/TestComponentCatalog';
 import LabResultStackCard from '../../components/medical/labresults/LabResultStackCard';
@@ -40,8 +41,12 @@ import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
-import { IconFileUpload } from '@tabler/icons-react';
+import { IconFileUpload, IconTable, IconLayoutGrid } from '@tabler/icons-react';
+import LabResultsComponentTable from '../../components/medical/labresults/LabResultsComponentTable';
+import TestComponentEditModal from '../../components/medical/labresults/TestComponentEditModal';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+
+const COMPONENT_STATUS_PRIORITY = ['critical', 'abnormal', 'high', 'low', 'borderline', 'normal'];
 
 const LabResults = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -51,6 +56,7 @@ const LabResults = () => {
   const location = useLocation();
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
+  const [tableLayout, setTableLayout] = useState(() => viewMode === 'table');
   const {
     page,
     setPage,
@@ -141,6 +147,9 @@ const LabResults = () => {
         returningToStackRef.current = false;
         setStackPanelOpen(true);
       }
+
+      // Sync the components table — tests may have been added via TestComponentsTab
+      refreshPatientComponents();
 
       // Only refresh if we created a new lab result during form submission
       // Don't refresh after uploads complete to prevent resource exhaustion
@@ -294,6 +303,19 @@ const LabResults = () => {
     [patientComponents]
   );
 
+  // Worst component status per panel, used to roll up individual test statuses on the panel card
+  const worstStatusByPanelId = useMemo(() => {
+    const map = new Map();
+    for (const id of parentIdsWithComponents) {
+      const statuses = patientComponents
+        .filter(c => c.lab_result_id === id)
+        .map(c => c.status)
+        .filter(Boolean);
+      map.set(id, COMPONENT_STATUS_PRIORITY.find(p => statuses.includes(p)) ?? null);
+    }
+    return map;
+  }, [patientComponents, parentIdsWithComponents]);
+
   const getGroupKey = r => {
     const code = (r.test_code || '').trim().toUpperCase();
     return code ? `code:${code}` : `name:${(r.test_name || '').toLowerCase().trim()}`;
@@ -303,8 +325,8 @@ const LabResults = () => {
   const groupedLabResults = useMemo(() => {
     const map = new Map();
     for (const r of filteredLabResults) {
-      // Exclude PDF masters (lab results that have test components)
-      if (parentIdsWithComponents.has(r.id)) continue;
+      // Exclude panels (is_panel flag) and PDF masters (have test components)
+      if (r.is_panel || parentIdsWithComponents.has(r.id)) continue;
       const key = getGroupKey(r);
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(r);
@@ -366,7 +388,7 @@ const LabResults = () => {
     // PDF masters whose key matches the group are excluded from group building but should
     // still appear as regular results in the drill-down (they represent real measurements)
     const matchingPDFMasters = filteredLabResults.filter(r => {
-      if (!parentIdsWithComponents.has(r.id)) return false;
+      if (!(r.is_panel || parentIdsWithComponents.has(r.id))) return false;
       return getGroupKey(r) === groupKey;
     });
     if (matchingComponents.length === 0 && matchingPDFMasters.length === 0) return currentSelectedGroup;
@@ -389,6 +411,7 @@ const LabResults = () => {
       parent_lab_result_id: comp.lab_result_id,
       result_type: comp.result_type ?? null,
       qualitative_value: comp.qualitative_value ?? null,
+      textual_value: comp.textual_value ?? null,
     }));
     const allResults = [
       ...currentSelectedGroup.results,
@@ -425,7 +448,7 @@ const LabResults = () => {
         }
       }
       for (const r of filteredLabResults) {
-        if (!parentIdsWithComponents.has(r.id)) continue;
+        if (!(r.is_panel || parentIdsWithComponents.has(r.id))) continue;
         if (getGroupKey(r) === groupKey) extra++;
       }
       if (extra > 0) map[groupKey] = group.count + extra;
@@ -448,6 +471,11 @@ const LabResults = () => {
     }
   }, [viewMode]);
 
+  // Coerce legacy persisted 'table' or 'cards' viewMode to 'panels'
+  useEffect(() => {
+    if (viewMode === 'table' || viewMode === 'cards') setViewMode('panels');
+  }, [viewMode, setViewMode]);
+
   // Combined list for stacked view: stack groups + individual PDF-master results (sorted newest-first).
   const stackedViewItems = useMemo(() => {
     if (viewMode !== 'stacked') return [];
@@ -458,7 +486,7 @@ const LabResults = () => {
       data: g,
     }));
     const pdfItems = filteredLabResults
-      .filter(r => parentIdsWithComponents.has(r.id))
+      .filter(r => r.is_panel || parentIdsWithComponents.has(r.id))
       .map(r => ({
         type: 'pdf',
         key: `pdf:${r.id}`,
@@ -479,8 +507,10 @@ const LabResults = () => {
     clampPage(count);
   }, [filteredLabResults.length, stackedViewItems.length, viewMode, clampPage]);
 
-  // Combined loading state — include component fetch when in stacked view to avoid flash of ungrouped results
-  const loading = labResultsLoading || practitionersLoading || (viewMode === 'stacked' && patientComponentsLoading);
+  // Combined loading state — include component fetch when in stacked or results-table view to avoid content flash.
+  // For the components table specifically, only block on initial load (empty array); subsequent refreshes must not
+  // unmount the table or the expanded-row state (local useState) is destroyed.
+  const loading = labResultsLoading || practitionersLoading || (viewMode === 'stacked' && patientComponentsLoading) || (viewMode === 'components' && tableLayout && patientComponentsLoading && patientComponents.length === 0);
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -515,7 +545,11 @@ const LabResults = () => {
   // Form and modal state
   const [showModal, setShowModal] = useState(false);
   const [showQuickImportModal, setShowQuickImportModal] = useState(false);
+
+  const [showPanelCreateDialog, setShowPanelCreateDialog] = useState(false);
   const [initialViewTab, setInitialViewTab] = useState('overview');
+  const [editingComponent, setEditingComponent] = useState(null);
+  const [editComponentModalOpen, setEditComponentModalOpen] = useState(false);
   const [editingLabResult, setEditingLabResult] = useState(null);
   const [formData, setFormData] = useState({
     test_name: '',
@@ -536,33 +570,22 @@ const LabResults = () => {
     ref_range_text: null,
   });
 
+  const handleViewModeChange = useCallback((mode) => {
+    setViewMode(mode);
+    if (mode === 'stacked') setTableLayout(false);
+  }, [setViewMode]);
+
+  const handlePanelCreateSuccess = useCallback(() => {
+    setShowPanelCreateDialog(false);
+    needsRefreshAfterSubmissionRef.current = true;
+    refreshData();
+    refreshPatientComponents();
+  }, [refreshData, refreshPatientComponents]);
+
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
   const handleAddLabResult = useCallback(() => {
-    resetSubmission(); // Reset submission state
-    setEditingLabResult(null);
-    setDocumentManagerMethods(null); // Reset document manager methods
-    setPendingRelationshipsMethods(null); // Reset pending relationships
-    setFormData({
-      test_name: '',
-      test_code: '',
-      test_category: '',
-      test_type: '',
-      facility: '',
-      status: 'ordered',
-      labs_result: '',
-      ordered_date: '',
-      completed_date: '',
-      notes: '',
-      practitioner_id: '',
-      tags: [],
-      value: null,
-      unit: null,
-      ref_range_min: null,
-      ref_range_max: null,
-      ref_range_text: null,
-    });
-    setShowModal(true);
-  }, [resetSubmission]);
+    setShowPanelCreateDialog(true);
+  }, []);
 
   const handleEditLabResult = useCallback(
     async labResult => {
@@ -647,6 +670,55 @@ const LabResults = () => {
       }
     },
     [labResults, setViewingLabResult, setShowViewModal]
+  );
+
+  const handleViewComponentFromTable = useCallback(
+    comp => {
+      setInitialViewTab('test-components');
+      const lr = labResults.find(r => r.id === comp.lab_result_id);
+      if (lr) {
+        setViewingLabResult(lr);
+        setShowViewModal(true);
+      }
+    },
+    [labResults, setViewingLabResult, setShowViewModal]
+  );
+
+  const handleEditComponentFromTable = useCallback(comp => {
+    setEditingComponent(comp);
+    setEditComponentModalOpen(true);
+  }, []);
+
+  const handleSaveComponent = useCallback(
+    async updatedData => {
+      if (!editingComponent) return;
+      await labTestComponentApi.update(editingComponent.id, updatedData, currentPatient?.id);
+      refreshPatientComponents();
+      setEditComponentModalOpen(false);
+      setEditingComponent(null);
+    },
+    [editingComponent, currentPatient?.id, refreshPatientComponents]
+  );
+
+  const handleDeleteComponent = useCallback(
+    async compId => {
+      try {
+        await labTestComponentApi.delete(compId, currentPatient?.id);
+        refreshPatientComponents();
+        notifications.show({
+          title: t('shared:labels.success', 'Success'),
+          message: t('labresults:testComponents.notifications.componentDeleted', 'Component deleted'),
+          color: 'green',
+        });
+      } catch {
+        notifications.show({
+          title: t('shared:labels.error', 'Error'),
+          message: t('shared:labels.deleteFailed', 'Delete Failed'),
+          color: 'red',
+        });
+      }
+    },
+    [currentPatient?.id, refreshPatientComponents, t]
   );
 
   const handleQuickImportSuccess = useCallback(
@@ -954,6 +1026,8 @@ const LabResults = () => {
     }
     setDocumentManagerMethods(null); // Reset document manager methods
     setPendingRelationshipsMethods(null); // Reset pending relationships
+    // Sync the components table — tests may have been added via TestComponentsTab
+    refreshPatientComponents();
     setFormData({
       test_name: '',
       test_code: '',
@@ -972,12 +1046,32 @@ const LabResults = () => {
       ref_range_max: null,
       ref_range_text: null,
     });
-  }, [isBlocking, resetSubmission]);
+  }, [isBlocking, resetSubmission, refreshPatientComponents]);
 
   const renderViewContent = () => {
     if (viewMode === 'components') {
+      if (tableLayout) {
+        return (
+          <LabResultsComponentTable
+            components={patientComponents}
+            labResults={labResults}
+            practitioners={practitioners}
+            patientId={currentPatient?.id}
+            onView={handleViewComponentFromTable}
+            onEdit={handleEditComponentFromTable}
+            onDelete={handleDeleteComponent}
+            disableActions={isViewOnly}
+          />
+        );
+      }
       return currentPatient?.id ? (
-        <TestComponentCatalog patientId={currentPatient.id} />
+        <TestComponentCatalog
+          components={patientComponents}
+          labResults={labResults || []}
+          practitioners={practitioners || []}
+          loading={patientComponentsLoading}
+          patientId={currentPatient.id}
+        />
       ) : null;
     }
 
@@ -997,7 +1091,7 @@ const LabResults = () => {
           )}
           actionButton={
             <Button variant="filled" onClick={handleAddLabResult}>
-              {t('labresults:addFirst', 'Add Your First Lab Result')}
+              {t('medical:labResults.buttons.addLabResults', 'Add Lab Results')}
             </Button>
           }
         />
@@ -1040,6 +1134,7 @@ const LabResults = () => {
                 disableActions={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}
                 isGroupedResult={true}
+                worstComponentStatus={worstStatusByPanelId.get(item.data.id) ?? null}
               />
             );
           }}
@@ -1047,7 +1142,7 @@ const LabResults = () => {
       );
     }
 
-    if (viewMode === 'cards') {
+    if (viewMode === 'panels' && !tableLayout) {
       return (
         <AnimatedCardGrid
           items={paginatedLabResults}
@@ -1064,7 +1159,8 @@ const LabResults = () => {
               navigate={navigate}
               disableActions={isViewOnly}
               disableActionsTooltip={viewOnlyTooltip}
-              isGroupedResult={parentIdsWithComponents.has(result.id)}
+              isGroupedResult={!!(result.is_panel || parentIdsWithComponents.has(result.id))}
+              worstComponentStatus={worstStatusByPanelId.get(result.id) ?? null}
             />
           )}
         />
@@ -1082,43 +1178,23 @@ const LabResults = () => {
           disableActionsTooltip={viewOnlyTooltip}
           columns={[
             {
-              header: t('shared:fields.testName', 'Test Name'),
+              header: t('medical:labResults.addPanel.panelName', 'Panel Name'),
               accessor: 'test_name',
               priority: 'high',
               width: 200,
-            },
-            {
-              header: t('shared:labels.category', 'Category'),
-              accessor: 'test_category',
-              priority: 'low',
-              width: 150,
-            },
-            {
-              header: t('shared:labels.type', 'Type'),
-              accessor: 'test_type',
-              priority: 'low',
-              width: 120,
-            },
-            {
-              header: t('shared:labels.facility', 'Facility'),
-              accessor: 'facility',
-              priority: 'low',
-              width: 150,
             },
             {
               header: t('shared:fields.status', 'Status'),
               accessor: 'status',
               priority: 'high',
               width: 120,
-            },
-            {
-              header: t(
-                'shared:labels.orderingPractitioner',
-                'Ordering Practitioner'
-              ),
-              accessor: 'practitioner_id',
-              priority: 'low',
-              width: 150,
+              render: (value, row) => {
+                const isGrouped = row.is_panel || parentIdsWithComponents.has(row.id);
+                const worstStatus = worstStatusByPanelId.get(row.id) ?? null;
+                if (isGrouped && worstStatus) return worstStatus;
+                if (isGrouped && row.completed_date) return 'completed';
+                return value || '—';
+              },
             },
             {
               header: t('shared:labels.orderedDate', 'Ordered Date'),
@@ -1131,6 +1207,21 @@ const LabResults = () => {
               accessor: 'completed_date',
               priority: 'low',
               width: 120,
+            },
+            {
+              header: t(
+                'shared:labels.orderingPractitioner',
+                'Ordering Practitioner'
+              ),
+              accessor: 'practitioner_id',
+              priority: 'low',
+              width: 150,
+            },
+            {
+              header: t('shared:labels.facility', 'Facility'),
+              accessor: 'facility',
+              priority: 'low',
+              width: 150,
             },
             {
               header: t('shared:tabs.documents', 'Files'),
@@ -1146,6 +1237,13 @@ const LabResults = () => {
           onDelete={handleDeleteLabResult}
           formatters={{
             ...formatters,
+            status: (value, row) => {
+              const isGrouped = row.is_panel || parentIdsWithComponents.has(row.id);
+              const worstStatus = worstStatusByPanelId.get(row.id) ?? null;
+              if (isGrouped && worstStatus) return worstStatus.charAt(0).toUpperCase() + worstStatus.slice(1);
+              if (isGrouped && row.completed_date) return 'Completed';
+              return value ? value.charAt(0).toUpperCase() + value.slice(1) : '-';
+            },
             practitioner_id: value => {
               if (!value) return '-';
               const practitioner = practitioners.find(p => p.id === value);
@@ -1194,7 +1292,7 @@ const LabResults = () => {
 
           <MedicalPageActions
             primaryAction={{
-              label: t('labresults:addNew', '+ Add New Lab Result'),
+              label: t('medical:labResults.buttons.addLabResults', 'Add Lab Results'),
               onClick: handleAddLabResult,
               size: 'sm',
               disabled: isViewOnly,
@@ -1209,10 +1307,32 @@ const LabResults = () => {
               },
             ]}
             viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            viewModes={['cards', 'table', 'stacked', 'components']}
+            onViewModeChange={handleViewModeChange}
+            viewModes={['panels', 'components', 'stacked']}
             viewToggleSize="sm"
             mb={0}
+            rightChildren={
+              (viewMode === 'panels' || viewMode === 'components') ? (
+                <Button.Group>
+                  <Button
+                    size="sm"
+                    variant={!tableLayout ? 'filled' : 'default'}
+                    leftSection={<IconLayoutGrid size={14} />}
+                    onClick={() => setTableLayout(false)}
+                  >
+                    {t('common:viewToggle.cards', 'Cards')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={tableLayout ? 'filled' : 'default'}
+                    leftSection={<IconTable size={14} />}
+                    onClick={() => setTableLayout(true)}
+                  >
+                    {t('common:viewToggle.table', 'Table')}
+                  </Button>
+                </Button.Group>
+              ) : null
+            }
           />
 
           {/* Mantine Filter Controls - hidden in components view (it has its own) */}
@@ -1258,7 +1378,8 @@ const LabResults = () => {
           onViewResult={result => {
             returningToStackRef.current = true;
             setInitialViewTab('overview');
-            handleViewLabResult(result);
+            const fullResult = labResults?.find(r => r.id === result.id) || result;
+            handleViewLabResult(fullResult);
           }}
           onEditResult={result => {
             returningToStackRef.current = true;
@@ -1269,6 +1390,15 @@ const LabResults = () => {
           disableActions={isViewOnly}
         />
       )}
+
+      {/* Test Panel Create Dialog */}
+      <TestPanelCreateDialog
+        opened={showPanelCreateDialog}
+        onClose={() => setShowPanelCreateDialog(false)}
+        onCreateSuccess={handlePanelCreateSuccess}
+        practitioners={practitioners}
+        currentPatient={currentPatient}
+      />
 
       {/* Create/Edit Form Modal */}
       {showModal && (
@@ -1294,7 +1424,7 @@ const LabResults = () => {
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
           onPendingRelationshipsRef={setPendingRelationshipsMethods}
-          isGroupedResult={!!(editingLabResult && parentIdsWithComponents.has(editingLabResult.id))}
+          isGroupedResult={!!(editingLabResult && (editingLabResult.is_panel || parentIdsWithComponents.has(editingLabResult.id)))}
           onFileUploadComplete={success => {
             if (success && editingLabResult) {
               refreshFileCount(editingLabResult.id);
@@ -1326,6 +1456,7 @@ const LabResults = () => {
         navigate={navigate}
         isBlocking={isBlocking}
         initialTab={initialViewTab}
+        isGroupedResult={!!(viewingLabResult && (viewingLabResult.is_panel || parentIdsWithComponents.has(viewingLabResult.id)))}
         onFileUploadComplete={success => {
           if (success && viewingLabResult) {
             refreshFileCount(viewingLabResult.id);
@@ -1335,6 +1466,17 @@ const LabResults = () => {
         encounters={patientEncounters}
         labResultEncounters={labResultEncounters}
         fetchLabResultEncounters={fetchLabResultEncounters}
+      />
+
+      {/* Edit Individual Test Component Modal */}
+      <TestComponentEditModal
+        component={editingComponent}
+        opened={editComponentModalOpen}
+        onClose={() => {
+          setEditComponentModalOpen(false);
+          setEditingComponent(null);
+        }}
+        onSubmit={handleSaveComponent}
       />
 
       {/* Quick PDF Import Modal */}
