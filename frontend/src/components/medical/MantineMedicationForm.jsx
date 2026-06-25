@@ -35,7 +35,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { medicationFormFields } from '../../utils/medicalFormFields';
-import { getReminderBlockerDescriptors } from '../../utils/medicationReminders';
+import { getReminderBlockerDescriptors, REMINDER_BLOCKERS } from '../../utils/medicationReminders';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -538,7 +538,7 @@ const MantineMedicationForm = ({
   const remindersEnabled = Boolean(formData.reminder_enabled);
   const showNoChannelWarning = remindersEnabled && !hasReminderChannel;
   const reminderBlockerDescriptors = remindersEnabled
-    ? getReminderBlockerDescriptors(formData)
+    ? getReminderBlockerDescriptors(formData).filter(d => d.blocker !== REMINDER_BLOCKERS.DAY_NOT_ACTIVE)
     : [];
 
   return (

@@ -85,7 +85,9 @@ export function getReminderBlockers(medication, today = todayLocalIso()) {
 export function getWontFireWarning(medication, t, today = todayLocalIso()) {
   if (!medication?.reminder_enabled) return null;
 
-  const descriptors = getReminderBlockerDescriptors(medication, today);
+  const descriptors = getReminderBlockerDescriptors(medication, today).filter(
+    d => d.blocker !== REMINDER_BLOCKERS.DAY_NOT_ACTIVE
+  );
   if (descriptors.length === 0) return null;
 
   return {

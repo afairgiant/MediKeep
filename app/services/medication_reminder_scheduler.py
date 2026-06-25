@@ -204,7 +204,8 @@ class MedicationReminderSchedulerService:
 
     def _discover_candidates(self, db: Session, today_local: date) -> list:
         """Return rows of (id, patient_id, medication_name, dosage,
-        reminder_times, owner_user_id) for enabled+active+in-period meds.
+        reminder_times, reminder_message, reminder_days, owner_user_id)
+        for enabled+active+in-period meds.
 
         Selects only the columns the tick needs rather than hydrating full
         Medication entities — this query runs every minute.

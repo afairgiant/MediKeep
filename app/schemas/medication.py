@@ -51,11 +51,11 @@ def _normalize_reminder_days(value):
     if value is None:
         return None
     if not isinstance(value, list):
-        raise ValueError("reminder_days must be a list of integers (0=Mon … 6=Sun)")
-    invalid = [d for d in value if not isinstance(d, int) or d not in VALID_REMINDER_DAYS]
+        raise ValueError("reminder_days must be a list of integers (0=Mon - 6=Sun)")
+    invalid = [d for d in value if isinstance(d, bool) or not isinstance(d, int) or d not in VALID_REMINDER_DAYS]
     if invalid:
         raise ValueError(
-            f"reminder_days values must be integers 0–6 (Mon=0, Sun=6); invalid: {invalid}"
+            f"reminder_days values must be integers 0-6 (Mon=0, Sun=6); invalid: {invalid}"
         )
     return sorted(set(value))
 

@@ -133,6 +133,7 @@ def medication_reminder_due_template(data: Dict) -> Tuple[str, str]:
         data: Event data containing:
             - medication_name: Name of the medication
             - dosage: Optional dosage string
+            - reminder_message: Optional custom note appended to the notification body
             - scheduled_time_local: HH:MM string (empty for test reminders)
             - is_test: True for one-shot test reminders
 

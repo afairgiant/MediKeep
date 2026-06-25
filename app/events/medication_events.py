@@ -30,6 +30,7 @@ class MedicationReminderDueEvent(DomainEvent):
         medication_id: ID of the medication that is due
         medication_name: Display name for the notification body
         dosage: Optional dosage string for the notification body
+        reminder_message: Optional custom note shown in the notification body
         scheduled_time_local: HH:MM string in facility local time (empty for tests)
         scheduled_local_date: YYYY-MM-DD string in facility local time (empty for tests)
         is_test: True for one-shot test reminders fired from the UI
