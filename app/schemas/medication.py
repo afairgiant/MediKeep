@@ -12,6 +12,7 @@ from pydantic import (
 from app.core.utils.datetime_utils import HHMM_24H_RE
 from app.models.enums import get_all_medication_statuses, get_all_medication_types
 from app.schemas.base_tags import TaggedEntityMixin
+from app.schemas.validators import validate_text_field
 
 if TYPE_CHECKING:
     from app.schemas.pharmacy import Pharmacy
@@ -19,6 +20,8 @@ if TYPE_CHECKING:
 
 
 MAX_REMINDER_TIMES = 12
+MAX_REMINDER_MESSAGE_LENGTH = 200
+VALID_REMINDER_DAYS = frozenset(range(7))  # 0 = Monday … 6 = Sunday
 
 
 def _normalize_reminder_times(value):
@@ -43,6 +46,20 @@ def _normalize_reminder_times(value):
     return sorted(seen)
 
 
+def _normalize_reminder_days(value):
+    """Shared validator body for reminder_days — deduplicates, sorts, validates 0-6."""
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        raise ValueError("reminder_days must be a list of integers (0=Mon … 6=Sun)")
+    invalid = [d for d in value if not isinstance(d, int) or d not in VALID_REMINDER_DAYS]
+    if invalid:
+        raise ValueError(
+            f"reminder_days values must be integers 0–6 (Mon=0, Sun=6); invalid: {invalid}"
+        )
+    return sorted(set(value))
+
+
 class MedicationBase(TaggedEntityMixin):
     """Base schema for Medication"""
 
@@ -62,6 +79,8 @@ class MedicationBase(TaggedEntityMixin):
     side_effects: Optional[str] = None
     reminder_enabled: bool = False
     reminder_times: Optional[List[str]] = None
+    reminder_message: Optional[str] = None
+    reminder_days: Optional[List[int]] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -82,6 +101,7 @@ class MedicationBase(TaggedEntityMixin):
                 "pharmacy_id",
                 "notes",
                 "side_effects",
+                "reminder_message",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -91,6 +111,16 @@ class MedicationBase(TaggedEntityMixin):
     @classmethod
     def validate_reminder_times(cls, v):
         return _normalize_reminder_times(v)
+
+    @field_validator("reminder_message")
+    @classmethod
+    def validate_reminder_message(cls, v):
+        return validate_text_field(v, max_length=MAX_REMINDER_MESSAGE_LENGTH, field_name="Reminder message")
+
+    @field_validator("reminder_days")
+    @classmethod
+    def validate_reminder_days(cls, v):
+        return _normalize_reminder_days(v)
 
     @field_validator("medication_name")
     @classmethod
@@ -245,11 +275,23 @@ class MedicationUpdate(BaseModel):
     tags: Optional[List[str]] = None
     reminder_enabled: Optional[bool] = None
     reminder_times: Optional[List[str]] = None
+    reminder_message: Optional[str] = None
+    reminder_days: Optional[List[int]] = None
 
     @field_validator("reminder_times")
     @classmethod
     def validate_reminder_times(cls, v):
         return _normalize_reminder_times(v)
+
+    @field_validator("reminder_message")
+    @classmethod
+    def validate_reminder_message(cls, v):
+        return validate_text_field(v, max_length=MAX_REMINDER_MESSAGE_LENGTH, field_name="Reminder message")
+
+    @field_validator("reminder_days")
+    @classmethod
+    def validate_reminder_days(cls, v):
+        return _normalize_reminder_days(v)
 
     @model_validator(mode="before")
     @classmethod
@@ -271,6 +313,7 @@ class MedicationUpdate(BaseModel):
                 "pharmacy_id",
                 "notes",
                 "side_effects",
+                "reminder_message",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None

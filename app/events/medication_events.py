@@ -39,6 +39,7 @@ class MedicationReminderDueEvent(DomainEvent):
     medication_id: int = 0
     medication_name: str = ""
     dosage: Optional[str] = None
+    reminder_message: Optional[str] = None
     scheduled_time_local: str = ""
     scheduled_local_date: str = ""
     is_test: bool = False
