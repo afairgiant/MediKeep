@@ -925,26 +925,9 @@
         "badge": "Wordt niet geactiveerd",
         "periodEnded": "Dit medicijn staat gemarkeerd als niet meer ingenomen sinds {{date}}.",
         "notStarted": "De inname van dit medicijn begint pas op {{date}}.",
-        "statusNotActive": "De medicatiestatus is \"{{status}}\" — herinneringen worden alleen verzonden voor actieve medicijnen.",
-        "dayNotActive": "Herinneringen zijn vandaag niet gepland."
+        "statusNotActive": "De medicatiestatus is \"{{status}}\" — herinneringen worden alleen verzonden voor actieve medicijnen."
       },
-      "enabledBadge": "Herinneringen ingeschakeld",
-      "message": {
-        "label": "Aangepast herinneringsbericht",
-        "placeholder": "bijv. Innemen met voedsel, Bloeddruk eerst meten",
-        "description": "Optionele notitie in de herinneringsmelding (max. 200 tekens)"
-      },
-      "days": {
-        "label": "Herinneringsdagen",
-        "description": "Laat leeg om elke dag herinneringen te ontvangen",
-        "mon": "Ma",
-        "tue": "Di",
-        "wed": "Wo",
-        "thu": "Do",
-        "fri": "Vr",
-        "sat": "Za",
-        "sun": "Zo"
-      }
+      "enabledBadge": "Herinneringen ingeschakeld"
     }
   },
   "pharmacies": {

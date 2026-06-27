@@ -925,26 +925,9 @@
         "badge": "Nie zostanie uruchomione",
         "periodEnded": "Ten lek jest oznaczony jako już nieprzyjmowany od {{date}}.",
         "notStarted": "Przyjmowanie tego leku zaczyna się dopiero {{date}}.",
-        "statusNotActive": "Status leku to „{{status}}” — przypomnienia są wysyłane tylko dla aktywnych leków.",
-        "dayNotActive": "Przypomnienia nie są zaplanowane na dzisiaj."
+        "statusNotActive": "Status leku to „{{status}}” — przypomnienia są wysyłane tylko dla aktywnych leków."
       },
-      "enabledBadge": "Przypomnienia włączone",
-      "message": {
-        "label": "Niestandardowa wiadomość przypomnienia",
-        "placeholder": "np. Przyjmować z jedzeniem, Najpierw zmierzyć ciśnienie",
-        "description": "Opcjonalna notatka w powiadomieniu o przypomnieniu (maks. 200 znaków)"
-      },
-      "days": {
-        "label": "Dni przypomnień",
-        "description": "Zostaw puste, aby otrzymywać przypomnienia każdego dnia",
-        "mon": "Pon",
-        "tue": "Wt",
-        "wed": "Śr",
-        "thu": "Czw",
-        "fri": "Pt",
-        "sat": "Sob",
-        "sun": "Nd"
-      }
+      "enabledBadge": "Przypomnienia włączone"
     }
   },
   "pharmacies": {

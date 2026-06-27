@@ -214,8 +214,6 @@ const Medication = () => {
     condition_ids: [],
     reminder_enabled: false,
     reminder_times: [],
-    reminder_days: null,
-    reminder_message: '',
   });
 
   const {
@@ -287,8 +285,6 @@ const Medication = () => {
       condition_ids: [],
       reminder_enabled: false,
       reminder_times: [],
-      reminder_days: null,
-      reminder_message: '',
     });
     setEditingMedication(null);
     setShowAddForm(false);
@@ -333,10 +329,6 @@ const Medication = () => {
       reminder_times: Array.isArray(medication.reminder_times)
         ? medication.reminder_times
         : [],
-      reminder_days: Array.isArray(medication.reminder_days)
-        ? medication.reminder_days
-        : null,
-      reminder_message: medication.reminder_message || '',
     });
     setEditingMedication(medication);
     setShowAddForm(true);
@@ -399,10 +391,6 @@ const Medication = () => {
         reminder_times: Array.isArray(formData.reminder_times)
           ? formData.reminder_times.filter(Boolean)
           : [],
-        reminder_days: Array.isArray(formData.reminder_days) && formData.reminder_days.length
-          ? formData.reminder_days
-          : null,
-        reminder_message: formData.reminder_message?.trim() || null,
       };
 
       if (formData.effective_period_start) {

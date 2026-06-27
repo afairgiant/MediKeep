@@ -23,7 +23,7 @@ import {
 } from '@tabler/icons-react';
 import { navigateToEntity } from '../../../utils/linkNavigation';
 import { formatTimeToAmPm } from '../../../utils/dateUtils';
-import { getReminderBlockerDescriptors, REMINDER_BLOCKERS } from '../../../utils/medicationReminders';
+import { getReminderBlockerDescriptors } from '../../../utils/medicationReminders';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useTagColors } from '../../../hooks/useTagColors';
 import StatusBadge from '../StatusBadge';
@@ -93,9 +93,7 @@ const MedicationViewModal = ({
   };
 
   const reminderBlockerDescriptors = medication
-    ? getReminderBlockerDescriptors(medication).filter(
-        d => d.blocker !== REMINDER_BLOCKERS.DAY_NOT_ACTIVE
-      )
+    ? getReminderBlockerDescriptors(medication)
     : [];
 
   if (!medication) return null;
@@ -157,9 +155,6 @@ const MedicationViewModal = ({
             </Tabs.Tab>
             <Tabs.Tab value="details" leftSection={<IconPill size={16} />}>
               {t('medications.modal.tabs.dosageRefills', 'Dosage & Refills')}
-            </Tabs.Tab>
-            <Tabs.Tab value="reminders" leftSection={<IconBell size={16} />}>
-              {t('medical:medications.reminders.tabLabel', 'Reminders')}
             </Tabs.Tab>
             <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
               {t('shared:tabs.notes', 'Notes')}
@@ -438,6 +433,70 @@ const MedicationViewModal = ({
                   </SimpleGrid>
                 </div>
 
+                <div>
+                  <Group gap="xs" mb="sm" align="center">
+                    <IconBell size={18} />
+                    <Title order={4}>
+                      {t('medical:medications.reminders.tabLabel', 'Reminders')}
+                    </Title>
+                  </Group>
+                  {medication.reminder_enabled &&
+                  Array.isArray(medication.reminder_times) &&
+                  medication.reminder_times.length > 0 ? (
+                    <Stack gap="xs">
+                      <Group gap="xs">
+                        {reminderBlockerDescriptors.length > 0 ? (
+                          <Badge color="orange" variant="light">
+                            {t(
+                              'medical:medications.reminders.notFiring.badge',
+                              "Won't fire"
+                            )}
+                          </Badge>
+                        ) : (
+                          <Badge color="green" variant="light">
+                            {t(
+                              'medical:medications.reminders.enabledBadge',
+                              'Reminders enabled'
+                            )}
+                          </Badge>
+                        )}
+                      </Group>
+                      {reminderBlockerDescriptors.length > 0 && (
+                        <Stack gap={2}>
+                          {reminderBlockerDescriptors.map(d => (
+                            <Text size="sm" c="dimmed" key={d.blocker}>
+                              {t(`medical:${d.key}`, {
+                                ...d.params,
+                                defaultValue: d.defaultValue,
+                              })}
+                            </Text>
+                          ))}
+                        </Stack>
+                      )}
+                      <Text fw={500} size="sm" c="dimmed">
+                        {t(
+                          'medical:medications.reminders.times.label',
+                          'Reminder times'
+                        )}
+                      </Text>
+                      <Group gap="xs">
+                        {medication.reminder_times.map(time => (
+                          <Badge key={time} variant="outline" color="blue">
+                            {formatTimeToAmPm(time)}
+                          </Badge>
+                        ))}
+                      </Group>
+                    </Stack>
+                  ) : (
+                    <Text size="sm" c="dimmed">
+                      {t(
+                        'medical:medications.reminders.viewNone',
+                        'No reminders configured'
+                      )}
+                    </Text>
+                  )}
+                </div>
+
                 {/* Refill Information - TODO: Enable when refill functionality is implemented */}
                 {/* <div>
                   <Title order={4} mb="sm">Refill Information</Title>
@@ -463,101 +522,6 @@ const MedicationViewModal = ({
                   </SimpleGrid>
                 </div> */}
               </Stack>
-            </Box>
-          </Tabs.Panel>
-
-          {/* Reminders Tab */}
-          <Tabs.Panel value="reminders">
-            <Box mt="md">
-              {medication.reminder_enabled &&
-              Array.isArray(medication.reminder_times) &&
-              medication.reminder_times.length > 0 ? (
-                <Stack gap="md">
-                  <Group gap="xs">
-                    {reminderBlockerDescriptors.length > 0 ? (
-                      <Badge color="orange" variant="light">
-                        {t(
-                          'medical:medications.reminders.notFiring.badge',
-                          "Won't fire"
-                        )}
-                      </Badge>
-                    ) : (
-                      <Badge color="green" variant="light">
-                        {t(
-                          'medical:medications.reminders.enabledBadge',
-                          'Reminders enabled'
-                        )}
-                      </Badge>
-                    )}
-                  </Group>
-                  {reminderBlockerDescriptors.length > 0 && (
-                    <Stack gap={2}>
-                      {reminderBlockerDescriptors.map(d => (
-                        <Text size="sm" c="dimmed" key={d.blocker}>
-                          {t(`medical:${d.key}`, {
-                            ...d.params,
-                            defaultValue: d.defaultValue,
-                          })}
-                        </Text>
-                      ))}
-                    </Stack>
-                  )}
-                  <div>
-                    <Text fw={500} size="sm" c="dimmed" mb="xs">
-                      {t(
-                        'medical:medications.reminders.times.label',
-                        'Reminder times'
-                      )}
-                    </Text>
-                    <Group gap="xs">
-                      {medication.reminder_times.map(time => (
-                        <Badge key={time} variant="outline" color="blue">
-                          {formatTimeToAmPm(time)}
-                        </Badge>
-                      ))}
-                    </Group>
-                  </div>
-                  {Array.isArray(medication.reminder_days) &&
-                    medication.reminder_days.length > 0 && (
-                      <div>
-                        <Text fw={500} size="sm" c="dimmed" mb="xs">
-                          {t(
-                            'medical:medications.reminders.days.label',
-                            'Reminder days'
-                          )}
-                        </Text>
-                        <Group gap="xs">
-                          {medication.reminder_days.map(day => (
-                            <Badge key={day} variant="outline" color="blue">
-                              {t(
-                                `medical:medications.reminders.days.${['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'][day]}`,
-                                ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][day]
-                              )}
-                            </Badge>
-                          ))}
-                        </Group>
-                      </div>
-                    )}
-                  {medication.reminder_message && (
-                    <div>
-                      <Text fw={500} size="sm" c="dimmed" mb="xs">
-                        {t(
-                          'medical:medications.reminders.message.label',
-                          'Custom reminder message'
-                        )}
-                      </Text>
-                      <Text size="sm">{medication.reminder_message}</Text>
-                    </div>
-                  )}
-                </Stack>
-              ) : (
-                <Text size="sm" c="dimmed">
-                  {t(
-                    'medical:medications.reminders.viewNone',
-                    'No reminders configured'
-                  )}
-                </Text>
-              )}
             </Box>
           </Tabs.Panel>
 

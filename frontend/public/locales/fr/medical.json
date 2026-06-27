@@ -903,26 +903,9 @@
         "badge": "Ne se déclenchera pas",
         "periodEnded": "Ce médicament est indiqué comme n'étant plus pris depuis le {{date}}.",
         "notStarted": "La prise de ce médicament ne commence que le {{date}}.",
-        "statusNotActive": "Le statut du médicament est « {{status}} » — les rappels ne sont envoyés que pour les médicaments actifs.",
-        "dayNotActive": "Les rappels ne sont pas programmés pour aujourd'hui."
+        "statusNotActive": "Le statut du médicament est « {{status}} » — les rappels ne sont envoyés que pour les médicaments actifs."
       },
-      "enabledBadge": "Rappels activés",
-      "message": {
-        "label": "Message de rappel personnalisé",
-        "placeholder": "ex. Prendre avec de la nourriture, Mesurer la tension avant",
-        "description": "Note optionnelle affichée dans la notification de rappel (max 200 caractères)"
-      },
-      "days": {
-        "label": "Jours de rappel",
-        "description": "Laissez vide pour recevoir des rappels tous les jours",
-        "mon": "Lun",
-        "tue": "Mar",
-        "wed": "Mer",
-        "thu": "Jeu",
-        "fri": "Ven",
-        "sat": "Sam",
-        "sun": "Dim"
-      }
+      "enabledBadge": "Rappels activés"
     },
     "route": {
       "description": "Mode d'administration du médicament",

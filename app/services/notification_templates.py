@@ -133,7 +133,6 @@ def medication_reminder_due_template(data: Dict) -> Tuple[str, str]:
         data: Event data containing:
             - medication_name: Name of the medication
             - dosage: Optional dosage string
-            - reminder_message: Optional custom note appended to the notification body
             - scheduled_time_local: HH:MM string (empty for test reminders)
             - is_test: True for one-shot test reminders
 
@@ -143,22 +142,19 @@ def medication_reminder_due_template(data: Dict) -> Tuple[str, str]:
     name = data.get("medication_name", "your medication")
     dosage = data.get("dosage")
     scheduled = data.get("scheduled_time_local", "")
-    custom_msg = data.get("reminder_message")
     dosage_part = f" ({dosage})" if dosage else ""
 
     if data.get("is_test"):
-        title = f"Test Reminder: {name}"
-        body = (
+        return (
+            f"Test Reminder: {name}",
             f"This is a test reminder for {name}{dosage_part}.\n\n"
-            "If you received this, your notification channel is working."
+            "If you received this, your notification channel is working.",
         )
-    else:
-        title = f"Medication Reminder: {name}"
-        body = f"Time to take {name}{dosage_part}.\n\nScheduled time: {scheduled}"
 
-    if custom_msg:
-        body += f"\n\n{custom_msg}"
-    return (title, body)
+    return (
+        f"Medication Reminder: {name}",
+        f"Time to take {name}{dosage_part}.\n\nScheduled time: {scheduled}",
+    )
 
 
 def password_changed_template(data: Dict) -> Tuple[str, str]:

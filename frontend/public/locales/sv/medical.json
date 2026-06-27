@@ -925,26 +925,9 @@
         "badge": "Utlöses inte",
         "periodEnded": "Det här läkemedlet är markerat som inte längre taget sedan {{date}}.",
         "notStarted": "Intaget av det här läkemedlet börjar först {{date}}.",
-        "statusNotActive": "Läkemedlets status är \"{{status}}\" – påminnelser skickas endast för aktiva läkemedel.",
-        "dayNotActive": "Påminnelser är inte schemalagda för idag."
+        "statusNotActive": "Läkemedlets status är \"{{status}}\" – påminnelser skickas endast för aktiva läkemedel."
       },
-      "enabledBadge": "Påminnelser aktiverade",
-      "message": {
-        "label": "Anpassat påminnelsemeddelande",
-        "placeholder": "t.ex. Ta med mat, Mät blodtrycket först",
-        "description": "Valfri anteckning i påminnelsemeddelandet (max 200 tecken)"
-      },
-      "days": {
-        "label": "Påminnelsedagar",
-        "description": "Lämna tomt för att få påminnelser varje dag",
-        "mon": "Mån",
-        "tue": "Tis",
-        "wed": "Ons",
-        "thu": "Tor",
-        "fri": "Fre",
-        "sat": "Lör",
-        "sun": "Sön"
-      }
+      "enabledBadge": "Påminnelser aktiverade"
     }
   },
   "pharmacies": {

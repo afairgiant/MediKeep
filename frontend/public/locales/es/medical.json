@@ -903,26 +903,9 @@
         "badge": "No se activará",
         "periodEnded": "Este medicamento está marcado como que ya no se toma desde el {{date}}.",
         "notStarted": "La toma de este medicamento no comienza hasta el {{date}}.",
-        "statusNotActive": "El estado del medicamento es «{{status}}»: los recordatorios solo se envían para medicamentos activos.",
-        "dayNotActive": "Los recordatorios no están programados para hoy."
+        "statusNotActive": "El estado del medicamento es «{{status}}»: los recordatorios solo se envían para medicamentos activos."
       },
-      "enabledBadge": "Recordatorios activados",
-      "message": {
-        "label": "Mensaje de recordatorio personalizado",
-        "placeholder": "p. ej. Tomar con comida, Medir la tensión primero",
-        "description": "Nota opcional en la notificación de recordatorio (máx. 200 caracteres)"
-      },
-      "days": {
-        "label": "Días de recordatorio",
-        "description": "Déjelo vacío para recibir recordatorios todos los días",
-        "mon": "Lun",
-        "tue": "Mar",
-        "wed": "Mié",
-        "thu": "Jue",
-        "fri": "Vie",
-        "sat": "Sáb",
-        "sun": "Dom"
-      }
+      "enabledBadge": "Recordatorios activados"
     },
     "route": {
       "description": "Cómo se administra el medicamento",

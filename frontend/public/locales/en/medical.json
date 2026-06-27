@@ -903,26 +903,9 @@
         "badge": "Won't fire",
         "periodEnded": "This medication is marked as no longer taken as of {{date}}.",
         "notStarted": "This medication isn't scheduled to start until {{date}}.",
-        "statusNotActive": "The medication status is \"{{status}}\" — reminders only fire for active medications.",
-        "dayNotActive": "Reminders are not scheduled to fire today."
+        "statusNotActive": "The medication status is \"{{status}}\" — reminders only fire for active medications."
       },
-      "enabledBadge": "Reminders enabled",
-      "message": {
-        "label": "Custom reminder message",
-        "placeholder": "e.g. Take with food, Check blood pressure first",
-        "description": "Optional note shown in the reminder notification (max 200 characters)"
-      },
-      "days": {
-        "label": "Reminder days",
-        "description": "Leave empty to receive reminders every day",
-        "mon": "Mon",
-        "tue": "Tue",
-        "wed": "Wed",
-        "thu": "Thu",
-        "fri": "Fri",
-        "sat": "Sat",
-        "sun": "Sun"
-      }
+      "enabledBadge": "Reminders enabled"
     },
     "route": {
       "description": "How the medication is administered",

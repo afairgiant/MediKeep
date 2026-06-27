@@ -16,7 +16,6 @@ export const REMINDER_BLOCKERS = {
   PERIOD_ENDED: 'period_ended',
   NOT_STARTED: 'not_started',
   STATUS_NOT_ACTIVE: 'status_not_active',
-  DAY_NOT_ACTIVE: 'day_not_active',
 };
 
 function toIsoDateString(value) {
@@ -32,13 +31,6 @@ function toIsoDateString(value) {
 
 function todayLocalIso() {
   return toIsoDateString(new Date());
-}
-
-// Convert a YYYY-MM-DD string to Python weekday (Mon=0, Sun=6).
-// Uses local noon to avoid date-shifting across midnight boundaries.
-function toPythonWeekday(dateStr) {
-  const jsDay = new Date(`${dateStr}T12:00:00`).getDay(); // 0=Sun … 6=Sat
-  return (jsDay + 6) % 7; // Mon=0, Sun=6
 }
 
 /**
@@ -64,14 +56,6 @@ export function getReminderBlockers(medication, today = todayLocalIso()) {
     blockers.push(REMINDER_BLOCKERS.STATUS_NOT_ACTIVE);
   }
 
-  const days = medication?.reminder_days;
-  if (Array.isArray(days) && days.length > 0) {
-    const weekday = toPythonWeekday(today);
-    if (!days.includes(weekday)) {
-      blockers.push(REMINDER_BLOCKERS.DAY_NOT_ACTIVE);
-    }
-  }
-
   return blockers;
 }
 
@@ -85,9 +69,7 @@ export function getReminderBlockers(medication, today = todayLocalIso()) {
 export function getWontFireWarning(medication, t, today = todayLocalIso()) {
   if (!medication?.reminder_enabled) return null;
 
-  const descriptors = getReminderBlockerDescriptors(medication, today).filter(
-    d => d.blocker !== REMINDER_BLOCKERS.DAY_NOT_ACTIVE
-  );
+  const descriptors = getReminderBlockerDescriptors(medication, today);
   if (descriptors.length === 0) return null;
 
   return {
@@ -130,13 +112,6 @@ export function getReminderBlockerDescriptors(
           params: { date: toIsoDateString(medication?.effective_period_start) },
           defaultValue:
             "This medication isn't scheduled to start until {{date}}.",
-        };
-      case REMINDER_BLOCKERS.DAY_NOT_ACTIVE:
-        return {
-          blocker,
-          key: 'medications.reminders.notFiring.dayNotActive',
-          params: {},
-          defaultValue: 'Reminders are not scheduled to fire today.',
         };
       default:
         return {

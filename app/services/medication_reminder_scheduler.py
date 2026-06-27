@@ -156,13 +156,11 @@ class MedicationReminderSchedulerService:
         # serialized — each call is awaited before the next; the Session is
         # never touched from two threads concurrently.
         candidates = await asyncio.to_thread(self._discover_candidates, db, today_local)
-        current_weekday = today_local.weekday()  # Mon=0, Sun=6; derived from same instant as today_local
         due_rows = [
             row
             for row in candidates
             if isinstance(row.reminder_times, list)
             and current_hhmm in row.reminder_times
-            and (not row.reminder_days or current_weekday in row.reminder_days)
         ]
 
         if not due_rows:
@@ -204,8 +202,7 @@ class MedicationReminderSchedulerService:
 
     def _discover_candidates(self, db: Session, today_local: date) -> list:
         """Return rows of (id, patient_id, medication_name, dosage,
-        reminder_times, reminder_message, reminder_days, owner_user_id)
-        for enabled+active+in-period meds.
+        reminder_times, owner_user_id) for enabled+active+in-period meds.
 
         Selects only the columns the tick needs rather than hydrating full
         Medication entities — this query runs every minute.
@@ -221,8 +218,6 @@ class MedicationReminderSchedulerService:
                 Medication.medication_name,
                 Medication.dosage,
                 Medication.reminder_times,
-                Medication.reminder_message,
-                Medication.reminder_days,
                 Patient.owner_user_id,
             )
             .join(Patient, Patient.id == Medication.patient_id)
@@ -294,7 +289,6 @@ class MedicationReminderSchedulerService:
             medication_id=row.id,
             medication_name=row.medication_name,
             dosage=row.dosage,
-            reminder_message=row.reminder_message,
             scheduled_time_local=scheduled_time_local,
             scheduled_local_date=scheduled_local_date,
         )

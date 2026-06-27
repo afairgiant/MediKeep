@@ -925,26 +925,9 @@
         "badge": "不会触发",
         "periodEnded": "该药物已标记为自 {{date}} 起不再服用。",
         "notStarted": "该药物要到 {{date}} 才开始服用。",
-        "statusNotActive": "药物状态为“{{status}}”，仅活动状态的药物会发送提醒。",
-        "dayNotActive": "今天没有安排提醒。"
+        "statusNotActive": "药物状态为“{{status}}”，仅活动状态的药物会发送提醒。"
       },
-      "enabledBadge": "已启用提醒",
-      "message": {
-        "label": "自定义提醒消息",
-        "placeholder": "例如：随餐服用，先量血压",
-        "description": "在提醒通知中显示的可选备注（最多 200 个字符）"
-      },
-      "days": {
-        "label": "提醒日期",
-        "description": "留空以每天接收提醒",
-        "mon": "周一",
-        "tue": "周二",
-        "wed": "周三",
-        "thu": "周四",
-        "fri": "周五",
-        "sat": "周六",
-        "sun": "周日"
-      }
+      "enabledBadge": "已启用提醒"
     }
   },
   "pharmacies": {
