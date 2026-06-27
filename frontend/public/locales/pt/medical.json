@@ -903,9 +903,26 @@
         "badge": "Não será acionado",
         "periodEnded": "Este medicamento está marcado como não sendo mais tomado desde {{date}}.",
         "notStarted": "A toma deste medicamento só começa em {{date}}.",
-        "statusNotActive": "O status do medicamento é \"{{status}}\" — os lembretes só são enviados para medicamentos ativos."
+        "statusNotActive": "O status do medicamento é \"{{status}}\" — os lembretes só são enviados para medicamentos ativos.",
+        "dayNotActive": "Os lembretes não estão programados para hoje."
       },
-      "enabledBadge": "Lembretes ativados"
+      "enabledBadge": "Lembretes ativados",
+      "message": {
+        "label": "Mensagem de lembrete personalizada",
+        "placeholder": "ex. Tomar com comida, Verificar a pressão antes",
+        "description": "Nota opcional na notificação de lembrete (máx. 200 caracteres)"
+      },
+      "days": {
+        "label": "Dias de lembrete",
+        "description": "Deixe vazio para receber lembretes todos os dias",
+        "mon": "Seg",
+        "tue": "Ter",
+        "wed": "Qua",
+        "thu": "Qui",
+        "fri": "Sex",
+        "sat": "Sáb",
+        "sun": "Dom"
+      }
     },
     "route": {
       "description": "Como o medicamento é administrado",

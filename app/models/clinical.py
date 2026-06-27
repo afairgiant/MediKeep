@@ -62,6 +62,10 @@ class Medication(Base):
     # Reminder configuration — list of "HH:MM" strings in facility-local time
     reminder_enabled = Column(Boolean, nullable=False, default=False)
     reminder_times = Column(JSON, nullable=True, default=list)
+    # Optional note shown in the notification body (e.g. "Take with food")
+    reminder_message = Column(Text, nullable=True)
+    # Weekday filter: list of 0-6 (Mon=0, Sun=6); null/empty = every day
+    reminder_days = Column(JSON, nullable=True)
 
     # Table Relationships
     patient = orm_relationship("Patient", back_populates="medications")

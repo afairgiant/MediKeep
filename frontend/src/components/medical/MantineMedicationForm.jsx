@@ -17,6 +17,7 @@ import {
   Alert,
   ActionIcon,
   Anchor,
+  Chip,
 } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
 import { DateInput } from '../adapters/DateInput';
@@ -34,7 +35,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { medicationFormFields } from '../../utils/medicalFormFields';
-import { getReminderBlockerDescriptors } from '../../utils/medicationReminders';
+import { getReminderBlockerDescriptors, REMINDER_BLOCKERS } from '../../utils/medicationReminders';
 import { useFormHandlers } from '../../hooks/useFormHandlers';
 import { formatDateInputChange, parseDateInput } from '../../utils/dateUtils';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -50,6 +51,8 @@ import { notifySuccess, notifyError } from '../../utils/notifyTranslated';
 const REMINDER_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 // Mirrors MAX_REMINDER_TIMES in app/schemas/medication.py
 const MAX_REMINDER_TIMES = 12;
+// Mon–Sun order matching Python weekday() (Mon=0, Sun=6)
+const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 const MantineMedicationForm = ({
   isOpen,
@@ -453,6 +456,44 @@ const MantineMedicationForm = ({
         );
       }
 
+      case 'dayPicker': {
+        const selectedDays = Array.isArray(formData[field.name])
+          ? formData[field.name].map(String)
+          : [];
+        return (
+          <Box key={field.name}>
+            <Text size="sm" fw={500}>
+              {field.labelKey ? t(field.labelKey) : field.label}
+            </Text>
+            {field.descriptionKey && (
+              <Text size="xs" c="dimmed" mb="xs">
+                {t(field.descriptionKey)}
+              </Text>
+            )}
+            <Chip.Group
+              multiple
+              value={selectedDays}
+              onChange={values => {
+                onInputChange({
+                  target: {
+                    name: field.name,
+                    value: values.length ? values.map(Number) : null,
+                  },
+                });
+              }}
+            >
+              <Group gap="xs" mt="xs">
+                {DAY_KEYS.map((key, index) => (
+                  <Chip key={key} value={String(index)} size="sm">
+                    {t(`medical:medications.reminders.days.${key}`, key)}
+                  </Chip>
+                ))}
+              </Group>
+            </Chip.Group>
+          </Box>
+        );
+      }
+
       case 'custom':
         if (field.component === 'TagInput') {
           return (
@@ -497,7 +538,7 @@ const MantineMedicationForm = ({
   const remindersEnabled = Boolean(formData.reminder_enabled);
   const showNoChannelWarning = remindersEnabled && !hasReminderChannel;
   const reminderBlockerDescriptors = remindersEnabled
-    ? getReminderBlockerDescriptors(formData)
+    ? getReminderBlockerDescriptors(formData).filter(d => d.blocker !== REMINDER_BLOCKERS.DAY_NOT_ACTIVE)
     : [];
 
   return (

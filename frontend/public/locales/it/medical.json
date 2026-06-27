@@ -925,9 +925,26 @@
         "badge": "Non si attiverà",
         "periodEnded": "Questo farmaco risulta non più assunto dal {{date}}.",
         "notStarted": "L'assunzione di questo farmaco inizia solo il {{date}}.",
-        "statusNotActive": "Lo stato del farmaco è «{{status}}»: i promemoria vengono inviati solo per i farmaci attivi."
+        "statusNotActive": "Lo stato del farmaco è «{{status}}»: i promemoria vengono inviati solo per i farmaci attivi.",
+        "dayNotActive": "I promemoria non sono programmati per oggi."
       },
-      "enabledBadge": "Promemoria attivati"
+      "enabledBadge": "Promemoria attivati",
+      "message": {
+        "label": "Messaggio di promemoria personalizzato",
+        "placeholder": "es. Prendere con il cibo, Misurare la pressione prima",
+        "description": "Nota opzionale nella notifica di promemoria (max 200 caratteri)"
+      },
+      "days": {
+        "label": "Giorni di promemoria",
+        "description": "Lascia vuoto per ricevere promemoria ogni giorno",
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mer",
+        "thu": "Gio",
+        "fri": "Ven",
+        "sat": "Sab",
+        "sun": "Dom"
+      }
     }
   },
   "pharmacies": {
