@@ -149,15 +149,15 @@ def medication_reminder_due_template(data: Dict) -> Tuple[str, str]:
     if data.get("is_test"):
         title = f"Test Reminder: {name}"
         body = (
-            f"This is a test reminder for {name}{dosage_part}.\n\n"
+            f"This is a test reminder for {name}{dosage_part}.\n"
             "If you received this, your notification channel is working."
         )
     else:
         title = f"Medication Reminder: {name}"
-        body = f"Time to take {name}{dosage_part}.\n\nScheduled time: {scheduled}"
+        body = f"Time to take {name}{dosage_part} at {scheduled}."
 
     if custom_msg:
-        body += f"\n\n{custom_msg}"
+        body += f"\n{custom_msg}"
     return (title, body)
 
 
