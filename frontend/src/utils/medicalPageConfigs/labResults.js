@@ -65,11 +65,6 @@ export const labresultsPageConfig = {
         description: 'Metabolic panels, enzymes',
       },
       {
-        value: 'hematology',
-        label: 'Hematology',
-        description: 'Blood cell counts and coagulation',
-      },
-      {
         value: 'immunology',
         label: 'Immunology',
         description: 'Immune system and antibody tests',

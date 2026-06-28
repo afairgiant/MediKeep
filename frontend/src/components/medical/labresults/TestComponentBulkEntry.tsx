@@ -47,6 +47,7 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import {
   LabTestComponentCreate,
   LabTestComponent,
+  QualitativeValue,
   labTestComponentApi,
 } from '../../../services/api/labTestComponentApi';
 import { apiService } from '../../../services/api';
@@ -170,8 +171,9 @@ interface ParsedTestComponent {
   status?: string;
   category?: string;
   loinc_code?: string;
-  result_type?: 'quantitative' | 'qualitative';
+  result_type?: 'quantitative' | 'qualitative' | 'textual';
   qualitative_value?: string;
+  textual_value?: string;
   original_line: string;
   confidence: number; // 0-1 score for parsing confidence
   issues: string[];
@@ -815,11 +817,19 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
             component.category = standardizedTest.category;
           }
 
-          // Set result_type from standardized test if not already set
-          if (standardizedTest.result_type && !component.result_type) {
+          // Set result_type from standardized test if not already set.
+          // Don't override to 'textual' when a numeric value was parsed — the
+          // bulk parser doesn't produce textual_value, so the component would
+          // be silently dropped by the validation filter.
+          if (
+            standardizedTest.result_type &&
+            !component.result_type &&
+            !(standardizedTest.result_type === 'textual' && component.value !== null)
+          ) {
             component.result_type = standardizedTest.result_type as
               | 'quantitative'
-              | 'qualitative';
+              | 'qualitative'
+              | 'textual';
           }
 
           // Store LOINC code for reference
@@ -964,33 +974,37 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
           comp =>
             (comp.result_type === 'qualitative'
               ? !!comp.qualitative_value
-              : comp.value !== null) && comp.test_name.trim()
+              : comp.result_type === 'textual'
+                ? !!comp.textual_value
+                : comp.value !== null) && comp.test_name.trim()
         )
-        .map((comp, index) => ({
-          lab_result_id: labResultId,
-          test_name: comp.test_name,
-          abbreviation: comp.abbreviation || null,
-          canonical_test_name: comp.canonical_test_name || null,
-          test_code: null,
-          value:
-            comp.result_type === 'qualitative' ? null : (comp.value as number),
-          unit:
-            comp.result_type === 'qualitative'
-              ? null
-              : (comp.unit || '').trim() || 'ratio',
-          ref_range_min: comp.ref_range_min,
-          ref_range_max: comp.ref_range_max,
-          ref_range_text: comp.ref_range_text || null,
-          status: (comp.status as ComponentStatus | null) || null,
-          category: (comp.category as ComponentCategory | null) || null,
-          display_order: index + 1,
-          notes:
-            comp.issues.length > 0
-              ? `Parsing notes: ${comp.issues.join(', ')}`
-              : null,
-          result_type: comp.result_type || 'quantitative',
-          qualitative_value: comp.qualitative_value || null,
-        }));
+        .map((comp, index) => {
+          const rt = comp.result_type || 'quantitative';
+          const isQual = rt === 'qualitative';
+          const isText = rt === 'textual';
+          return {
+            lab_result_id: labResultId,
+            test_name: comp.test_name,
+            abbreviation: comp.abbreviation || null,
+            canonical_test_name: comp.canonical_test_name || null,
+            test_code: null,
+            value: (isQual || isText) ? null : (comp.value as number),
+            unit: (isQual || isText) ? null : (comp.unit || '').trim() || 'ratio',
+            ref_range_min: isQual || isText ? null : comp.ref_range_min,
+            ref_range_max: isQual || isText ? null : comp.ref_range_max,
+            ref_range_text: isQual || isText ? null : (comp.ref_range_text || null),
+            status: (comp.status as ComponentStatus | null) || null,
+            category: (comp.category as ComponentCategory | null) || null,
+            display_order: index + 1,
+            notes:
+              comp.issues.length > 0
+                ? `Parsing notes: ${comp.issues.join(', ')}`
+                : null,
+            result_type: rt,
+            qualitative_value: isQual ? (comp.qualitative_value as QualitativeValue | null) || null : null,
+            textual_value: isText ? comp.textual_value || null : null,
+          };
+        });
 
       // Call the API to create components in bulk
       const response = await labTestComponentApi.createBulkForLabResult(
@@ -1143,7 +1157,9 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
       comp =>
         (comp.result_type === 'qualitative'
           ? !!comp.qualitative_value
-          : comp.value !== null) && comp.test_name.trim()
+          : comp.result_type === 'textual'
+            ? !!comp.textual_value
+            : comp.value !== null) && comp.test_name.trim()
     );
   }, [parsedComponents]);
 

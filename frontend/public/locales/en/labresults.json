@@ -141,8 +141,7 @@
     "selectResult": "Select result",
     "statusIndicator": "Status Indicator:",
     "testCodePlaceholder": "e.g., 718-7",
-    "testComponents": "Test Components (Optional)",
-    "testComponentsDescription": "Optionally add individual test values. You can also add more later.",
+    "testComponents": "Add Tests",
     "testDetails": "Test Details",
     "unit": "Unit",
     "matchedCommonName": "matched: {{name}}"
@@ -170,11 +169,12 @@
     },
     "sections": {
       "associatedFiles": "Associated Documents",
+      "panelDetails": "Panel Details",
       "testInfo": "Test Information",
       "testResults": "Test Results"
     },
     "tabs": {
-      "testComponents": "Test Components"
+      "testComponents": "Test Results"
     },
     "title": "Lab Result Details"
   },
@@ -317,7 +317,7 @@
     "placeholder": "e.g., CBC, 85025"
   },
   "testComponents": {
-    "addTestComponents": "Add Test Components",
+    "addTestComponents": "Add Tests",
     "addTests": "Add Tests",
     "categories": {
       "cardiology": "Cardiology - Heart & Cardiac Markers",
@@ -332,7 +332,8 @@
       "molecular": "Molecular - DNA Tests",
       "other": "Other Tests",
       "pathology": "Pathology - Tissue & Biopsy Analysis",
-      "toxicology": "Toxicology - Drug & Toxin Screening"
+      "toxicology": "Toxicology - Drug & Toxin Screening",
+      "imaging": "Imaging - Radiology & Scans"
     },
     "editModal": {
       "descriptions": {
@@ -365,26 +366,36 @@
         "unit": "e.g., g/dL",
         "value": "Enter test value"
       },
-      "title": "Edit Test Component",
+      "title": "Edit Test",
       "trendLinking": "Trend Linking",
-      "updating": "Updating test component..."
+      "updating": "Updating test..."
     },
     "emptyState": {
       "description": "Templates provide common lab panels (CBC, CMP, etc.) where you can enter values and ranges. Bulk import allows you to copy/paste results from lab reports for automatic parsing."
     },
-    "errorLoading": "Error loading test components",
-    "noComponents": "No test components",
-    "noComponentsDescription": "This lab result doesn't have any individual test components yet.",
+    "errorLoading": "Error loading tests",
+    "noComponents": "No tests",
+    "noComponentsDescription": "This lab result doesn't have any tests yet.",
     "notifications": {
       "componentDeleted": "Component deleted",
       "hasBeenDeleted": "{{name}} has been deleted"
     },
     "refreshComponents": "Refresh components",
+    "resultType": {
+      "qualitative": "Qualitative (Pos/Neg)",
+      "quantitative": "Quantitative (Numeric)",
+      "textual": "Textual (Report)"
+    },
     "tabs": {
       "statistics": "Statistics",
       "testResults": "Test Results"
     },
-    "title": "Test Components"
+    "title": "Tests"
+  },
+  "textualResult": {
+    "label": "Result Text",
+    "noText": "—",
+    "placeholder": "Enter result text (e.g. No acute findings)"
   },
   "testingFacility": {
     "description": "Where the test is/was performed",
@@ -426,6 +437,7 @@
     "labLabel": "Lab: {{name}}",
     "negativeUndetected": "Negative/Undetected",
     "noDataPoints": "No data points to display",
+    "notAvailableForTextual": "Trend charts are not available for textual results.",
     "positiveDetected": "Positive/Detected",
     "referenceRange": "Reference Range:",
     "referenceValue": "Reference: {{min}} - {{max}}"
@@ -438,15 +450,19 @@
     "dataPoints_one": "{{count}} data points",
     "dataPoints_other": "{{count}} data points",
     "dataTable": "Data Table",
+    "decreasing": "Decreasing",
     "inRange": "{{percent}}% in range",
+    "increasing": "Increasing",
     "latest": "Latest",
     "noData": "No trend data available",
     "noDataDescription": "There are no historical data points for this test component.",
     "normalLabel": "Normal:",
     "range": "Range",
     "showing": "Showing:",
+    "stable": "Stable",
     "stdDevLabel": "Std Dev:",
     "summaryStatistics": "Summary Statistics",
+    "textualNoStats": "Numeric statistics are not available for textual results.",
     "timeRange": "Time Range",
     "title": "Trend Analysis",
     "total": "Total"
@@ -457,7 +473,8 @@
     "historicalData_one": "Historical Data ({{count}} point)",
     "historicalData_other": "Historical Data ({{count}} points)",
     "labResult": "Lab Result",
-    "noDataPoints": "No data points to display"
+    "noDataPoints": "No data points to display",
+    "notSpecified": "Not specified"
   },
   "unsavedDataInstructions": "Click \"Add Components\" in the Preview tab to save your parsed data before closing.",
   "unsavedDataMessage_one": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
@@ -488,5 +505,19 @@
     "refTextLabel": "Range text",
     "refTextPlaceholder": "e.g. 4.0-5.6 or <200",
     "refTextDescription": "Overrides min/max in display"
+  },
+  "resultsTable": {
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "results": "{{count}} result",
+    "results_other": "{{count}} results",
+    "noResults": "No test results match the current filters",
+    "dateFrom": "Date from",
+    "dateTo": "Date to",
+    "source": "Source",
+    "viewTrends": "View trends"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
   }
 }

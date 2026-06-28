@@ -40,6 +40,7 @@ export interface LabResultSummary {
   parent_lab_result_id?: number | null;
   result_type?: string | null;
   qualitative_value?: string | null;
+  textual_value?: string | null;
 }
 
 interface LabResultStackCardProps {

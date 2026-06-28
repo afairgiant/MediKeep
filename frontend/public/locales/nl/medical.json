@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Laden van testcatalogus mislukt",
-    "noData": "Voeg laboratoriumuitslagen met testonderdelen toe om ze hier te zien.",
-    "noResults": "Geen testonderdelen gevonden",
+    "noData": "Voeg laboratoriumuitslagen toe om ze hier te zien.",
+    "noResults": "Geen laboratoriumuitslagen gevonden",
     "readingCount_one": "{{count}} meting",
     "refRange": "Ref.",
     "searchPlaceholder": "Tests zoeken...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "Laboratoriumuitslag opgeslagen, maar testonderdelen konden niet worden toegevoegd. U kunt ze toevoegen vanaf de weergavepagina.",
       "relationshipCreationWarning": "Laboratoriumuitslag opgeslagen, maar sommige relaties konden niet worden aangemaakt. U kunt ze toevoegen vanaf de bewerkingspagina."
+    },
+    "addPanel": {
+      "title": "Nieuw testpaneel toevoegen",
+      "panelName": "Paneelnaam",
+      "panelNamePlaceholder": "bijv. Bloedbeeld, Jaarlijkse analyse",
+      "panelNameDescription": "Een naam voor deze groep tests",
+      "createButton": "Aanmaken",
+      "creating": "Paneel aanmaken...",
+      "createError": "Aanmaken van testpaneel mislukt",
+      "testResultRequired": "Minimaal één testresultaat is vereist",
+      "tagsPlaceholder": "Voeg tags toe om dit record later te organiseren en terug te vinden"
+    },
+    "buttons": {
+      "addLabResults": "Laboratoriumresultaten toevoegen"
     }
   },
   "medications": {

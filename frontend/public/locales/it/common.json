@@ -1244,10 +1244,11 @@
   },
   "viewToggle": {
     "cards": "Schede",
-    "components": "Componenti",
+    "components": "Risultati",
     "label": "Modalità di visualizzazione",
     "table": "Tabella",
-    "stacked": "In pila"
+    "stacked": "In pila",
+    "panels": "Pannelli"
   },
   "visits": {
     "addNewVisit": "Aggiungi nuova visita",

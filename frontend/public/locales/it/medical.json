@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Impossibile caricare il catalogo dei test",
-    "noData": "Aggiungi risultati di laboratorio con componenti di test per vederli qui.",
-    "noResults": "Nessun componente di test trovato",
+    "noData": "Aggiungi risultati di laboratorio per vederli qui.",
+    "noResults": "Nessun risultato di laboratorio trovato",
     "readingCount_one": "{{count}} misurazione",
     "refRange": "Rif",
     "searchPlaceholder": "Cerca test...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "Risultato di laboratorio salvato ma i componenti del test non sono stati aggiunti. Può aggiungerli dalla pagina di visualizzazione.",
       "relationshipCreationWarning": "Risultato di laboratorio salvato ma alcune relazioni non sono state create. Può aggiungerle dalla pagina di modifica."
+    },
+    "addPanel": {
+      "title": "Aggiungi nuovo pannello di test",
+      "panelName": "Nome del pannello",
+      "panelNamePlaceholder": "es. Emocromo, Analisi annuale",
+      "panelNameDescription": "Un nome per questo gruppo di test",
+      "createButton": "Crea",
+      "creating": "Creazione pannello...",
+      "createError": "Impossibile creare il pannello di test",
+      "testResultRequired": "È richiesto almeno un risultato del test",
+      "tagsPlaceholder": "Aggiungi tag per organizzare e cercare questo record in seguito"
+    },
+    "buttons": {
+      "addLabResults": "Aggiungi risultati di laboratorio"
     }
   },
   "medications": {

@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Falha ao carregar o catálogo de exames",
-    "noData": "Adicione resultados laboratoriais com componentes de exame para vê-los aqui.",
-    "noResults": "Nenhum componente de exame encontrado",
+    "noData": "Adicione resultados laboratoriais para vê-los aqui.",
+    "noResults": "Nenhum resultado laboratorial encontrado",
     "readingCount_one": "{{count}} leitura",
     "refRange": "Ref",
     "searchPlaceholder": "Pesquisar exames...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "O resultado laboratorial foi salvo, mas os componentes do exame não puderam ser adicionados. Você pode adicioná-los na página de visualização.",
       "relationshipCreationWarning": "O resultado laboratorial foi salvo, mas alguns vínculos não puderam ser criados. Você pode adicioná-los na página de edição."
+    },
+    "addPanel": {
+      "title": "Adicionar novo painel de exames",
+      "panelName": "Nome do painel",
+      "panelNamePlaceholder": "ex. Hemograma, Exames anuais",
+      "panelNameDescription": "Um nome para este grupo de exames",
+      "createButton": "Criar",
+      "creating": "Criando painel...",
+      "createError": "Falha ao criar painel de exames",
+      "testResultRequired": "É necessário pelo menos um resultado de exame",
+      "tagsPlaceholder": "Adicione tags para organizar e pesquisar este registo mais tarde"
+    },
+    "buttons": {
+      "addLabResults": "Adicionar resultados laboratoriais"
     }
   },
   "medications": {

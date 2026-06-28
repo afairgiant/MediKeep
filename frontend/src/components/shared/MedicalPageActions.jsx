@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Group, Button, Tooltip } from '@mantine/core';
+import { Group, Button, Tooltip, Divider } from '@mantine/core';
 import ViewToggle from './ViewToggle';
 
 /**
@@ -62,6 +62,7 @@ function MedicalPageActions({
   align = 'center',
   buttonGap = 'sm',
   children,
+  rightChildren,
 }) {
   // Filter out actions with visible: false
   const visibleSecondaryActions = secondaryActions.filter(
@@ -77,7 +78,8 @@ function MedicalPageActions({
     !primaryVisible &&
     visibleSecondaryActions.length === 0 &&
     !shouldShowViewToggle &&
-    !children
+    !children &&
+    !rightChildren
   ) {
     return null;
   }
@@ -129,14 +131,22 @@ function MedicalPageActions({
         {children}
       </Group>
 
-      {shouldShowViewToggle && (
-        <ViewToggle
-          viewMode={viewMode}
-          onViewModeChange={onViewModeChange}
-          showPrint={showPrint}
-          size={viewToggleSize}
-          {...(viewModes ? { modes: viewModes } : {})}
-        />
+      {(rightChildren || shouldShowViewToggle) && (
+        <Group gap="md" align="center" wrap="nowrap">
+          {rightChildren}
+          {rightChildren && shouldShowViewToggle && (
+            <Divider orientation="vertical" />
+          )}
+          {shouldShowViewToggle && (
+            <ViewToggle
+              viewMode={viewMode}
+              onViewModeChange={onViewModeChange}
+              showPrint={showPrint}
+              size={viewToggleSize}
+              {...(viewModes ? { modes: viewModes } : {})}
+            />
+          )}
+        </Group>
       )}
     </Group>
   );
@@ -190,6 +200,8 @@ MedicalPageActions.propTypes = {
   buttonGap: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   /** Custom content to render in the left section */
   children: PropTypes.node,
+  /** Custom content to render on the right, immediately before the ViewToggle (separated by a Divider) */
+  rightChildren: PropTypes.node,
 };
 
 export default MedicalPageActions;

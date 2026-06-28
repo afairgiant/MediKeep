@@ -1244,10 +1244,11 @@
   },
   "viewToggle": {
     "cards": "Cartes",
-    "components": "Composants",
+    "components": "Résultats",
     "label": "Mode d'affichage",
     "table": "Tableau",
-    "stacked": "Empilé"
+    "stacked": "Empilé",
+    "panels": "Bilans"
   },
   "visits": {
     "addNewVisit": "Ajouter une nouvelle visite",

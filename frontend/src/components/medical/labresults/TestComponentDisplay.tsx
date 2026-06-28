@@ -188,9 +188,11 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
       const trendTestName =
         component.canonical_test_name || component.test_name;
       const trendUnit = component.unit ?? null;
+      const isTextual = component.result_type === 'textual';
 
       const handleCardClick = React.useCallback(
         (e: React.MouseEvent) => {
+          if (isTextual) return;
           // Don't trigger if clicking on action buttons
           const target = e.target as HTMLElement;
           if (target.closest('button')) {
@@ -198,18 +200,19 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
           }
           onTrendClick?.(trendTestName, trendUnit);
         },
-        [trendTestName, trendUnit]
+        [isTextual, trendTestName, trendUnit]
       );
 
       const handleKeyDown = React.useCallback(
         (e: React.KeyboardEvent) => {
+          if (isTextual) return;
           // Support Enter and Space keys for accessibility
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             onTrendClick?.(trendTestName, trendUnit);
           }
         },
-        [trendTestName, trendUnit]
+        [isTextual, trendTestName, trendUnit]
       );
 
       return (
@@ -218,12 +221,12 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
           shadow="sm"
           radius="md"
           p="md"
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: isTextual ? 'default' : 'pointer' }}
           onClick={handleCardClick}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          role="button"
-          aria-label={`View trends for ${trendTestName}${trendUnit ? ` (${trendUnit})` : ''}`}
+          onKeyDown={isTextual ? undefined : handleKeyDown}
+          tabIndex={isTextual ? undefined : 0}
+          role={isTextual ? undefined : 'button'}
+          aria-label={isTextual ? undefined : `View trends for ${trendTestName}${trendUnit ? ` (${trendUnit})` : ''}`}
         >
           <Stack gap="sm">
             {/* Header */}
@@ -238,17 +241,19 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                       {component.abbreviation}
                     </Badge>
                   )}
-                  {/* Trend indicator badge */}
-                  <Tooltip label={t('shared:labels.trendCharts')}>
-                    <Badge
-                      variant="light"
-                      color="blue"
-                      size="xs"
-                      leftSection={<IconChartLine size={10} />}
-                    >
-                      {t('shared:labels.trendCharts')}
-                    </Badge>
-                  </Tooltip>
+                  {/* Trend indicator badge — not shown for textual results */}
+                  {!isTextual && (
+                    <Tooltip label={t('shared:labels.trendCharts')}>
+                      <Badge
+                        variant="light"
+                        color="blue"
+                        size="xs"
+                        leftSection={<IconChartLine size={10} />}
+                      >
+                        {t('shared:labels.trendCharts')}
+                      </Badge>
+                    </Tooltip>
+                  )}
                 </Group>
                 {component.test_code && (
                   <Text size="xs" c="dimmed">
@@ -279,6 +284,10 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
                   >
                     {getQualitativeDisplayName(component.qualitative_value)}
                   </Badge>
+                ) : component.result_type === 'textual' ? (
+                  <Text size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                    {component.textual_value || t('labresults:textualResult.noText', '—')}
+                  </Text>
                 ) : (
                   <Group gap="xs" align="baseline">
                     <Text fw={700} size="lg" c={statusColor}>
@@ -305,8 +314,8 @@ const TestComponentDisplay: React.FC<TestComponentDisplayProps> = ({
               )}
             </Group>
 
-            {/* Reference Range */}
-            {component.result_type !== 'qualitative' && (
+            {/* Reference Range — only for quantitative results (null result_type = legacy quantitative) */}
+            {(!component.result_type || component.result_type === 'quantitative') && (
               <Group gap="xs" align="center">
                 <Text size="xs" c="dimmed" fw={500}>
                   {t('labresults:display.referenceLabel')}

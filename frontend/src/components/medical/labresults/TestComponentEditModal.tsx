@@ -166,6 +166,20 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
       return 'microbiology';
     }
 
+    // Imaging & Radiology
+    if (
+      nameLower.includes('mri') ||
+      nameLower.includes('ct scan') ||
+      nameLower.includes('x-ray') ||
+      nameLower.includes('xray') ||
+      nameLower.includes('ultrasound') ||
+      nameLower.includes('radiolog') ||
+      nameLower.includes('scan') ||
+      nameLower.includes('imaging')
+    ) {
+      return 'imaging';
+    }
+
     return undefined;
   };
 
@@ -209,6 +223,7 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
         notes: component.notes || '',
         result_type: component.result_type || 'quantitative',
         qualitative_value: component.qualitative_value || undefined,
+        textual_value: component.textual_value || undefined,
       });
     }
   }, [component]);
@@ -280,12 +295,11 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
     }
   };
 
-  const isSubmitDisabled = (() => {
-    if (isSubmitting || !formData.test_name) return true;
-    if (formData.result_type === 'qualitative')
-      return !formData.qualitative_value;
-    return !formData.unit || formData.value === undefined;
-  })();
+  const isSubmitDisabled =
+    isSubmitting ||
+    !formData.test_name?.trim() ||
+    (formData.result_type === 'qualitative' && !formData.qualitative_value?.trim()) ||
+    (formData.result_type === 'textual' && !formData.textual_value?.trim());
 
   if (!component) return null;
 
@@ -372,26 +386,39 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
             onChange={value => {
               setFormData(prev => ({
                 ...prev,
-                result_type: value as 'quantitative' | 'qualitative',
-                // Clear incompatible fields when switching
+                result_type: value as 'quantitative' | 'qualitative' | 'textual',
+                // Clear incompatible fields when switching result type
                 ...(value === 'qualitative'
                   ? {
                       value: undefined,
                       unit: '',
                       ref_range_min: undefined,
                       ref_range_max: undefined,
+                      textual_value: undefined,
                     }
-                  : { qualitative_value: undefined }),
+                  : value === 'textual'
+                    ? {
+                        value: undefined,
+                        unit: '',
+                        ref_range_min: undefined,
+                        ref_range_max: undefined,
+                        qualitative_value: undefined,
+                      }
+                    : {
+                        qualitative_value: undefined,
+                        textual_value: undefined,
+                      }),
               }));
             }}
             data={[
-              { label: 'Quantitative (Numeric)', value: 'quantitative' },
-              { label: 'Qualitative (Pos/Neg)', value: 'qualitative' },
+              { label: t('labresults:testComponents.resultType.quantitative', 'Quantitative (Numeric)'), value: 'quantitative' },
+              { label: t('labresults:testComponents.resultType.qualitative', 'Qualitative (Pos/Neg)'), value: 'qualitative' },
+              { label: t('labresults:testComponents.resultType.textual', 'Textual (Report)'), value: 'textual' },
             ]}
             fullWidth
           />
 
-          {formData.result_type !== 'qualitative' && (
+          {formData.result_type === 'quantitative' && (
             <>
               {/* Value and Unit */}
               <Group grow>
@@ -401,7 +428,6 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
                     'labresults:testComponents.editModal.placeholders.value',
                     'Enter test value'
                   )}
-                  required
                   value={formData.value}
                   onChange={value =>
                     setFormData(prev => ({ ...prev, value: value as number }))
@@ -417,7 +443,6 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
                     'labresults:testComponents.editModal.placeholders.unit',
                     'e.g., g/dL'
                   )}
-                  required
                   value={formData.unit || ''}
                   onChange={e =>
                     setFormData(prev => ({ ...prev, unit: e.target.value }))
@@ -522,6 +547,24 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
                 }));
               }}
               comboboxProps={{ zIndex: 3001 }}
+            />
+          )}
+
+          {formData.result_type === 'textual' && (
+            <Textarea
+              label={t('labresults:textualResult.label', 'Result Text')}
+              placeholder={t(
+                'labresults:textualResult.placeholder',
+                'Enter the full result text (e.g. No acute findings)'
+              )}
+              value={formData.textual_value || ''}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, textual_value: e.target.value }))
+              }
+              minRows={3}
+              autosize
+              maxRows={10}
+              maxLength={5000}
             />
           )}
 
@@ -639,6 +682,13 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
                   label: t(
                     'labresults:testComponents.categories.pathology',
                     'Pathology - Tissue & Biopsy Analysis'
+                  ),
+                },
+                {
+                  value: 'imaging',
+                  label: t(
+                    'labresults:testComponents.categories.imaging',
+                    'Imaging - Radiology & Scans'
                   ),
                 },
                 {

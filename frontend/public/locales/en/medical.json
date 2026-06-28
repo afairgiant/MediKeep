@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Failed to load test catalog",
-    "noData": "Add lab results with test components to see them here.",
-    "noResults": "No Test Components Found",
+    "noData": "Add Lab Results to see them here.",
+    "noResults": "No Test Results Found",
     "readingCount_one": "{{count}} reading",
     "refRange": "Ref",
     "searchPlaceholder": "Search tests...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "Lab result saved but test components could not be added. You can add them from the view page.",
       "relationshipCreationWarning": "Lab result saved but some relationships could not be created. You can add them from the edit page."
+    },
+    "addPanel": {
+      "title": "Add New Lab Panel",
+      "panelName": "Panel Name",
+      "panelNamePlaceholder": "e.g. CBC Panel, Annual Bloodwork",
+      "panelNameDescription": "A name for this group of tests",
+      "createButton": "Create Panel",
+      "creating": "Creating...",
+      "createError": "Failed to create test panel",
+      "testResultRequired": "At least one test result is required",
+      "tagsPlaceholder": "Add tags to help organize and search for this record later"
+    },
+    "buttons": {
+      "addLabResults": "Add Lab Results"
     }
   },
   "medications": {

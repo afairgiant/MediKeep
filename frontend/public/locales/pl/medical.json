@@ -70,8 +70,8 @@
   },
   "componentCatalog": {
     "fetchError": "Nie udało się załadować katalogu badań",
-    "noData": "Dodaj wyniki laboratoryjne z komponentami badań, aby je tutaj zobaczyć.",
-    "noResults": "Nie znaleziono komponentów badań",
+    "noData": "Dodaj wyniki laboratoryjne, aby je tutaj zobaczyć.",
+    "noResults": "Nie znaleziono wyników laboratoryjnych",
     "readingCount_one": "{{count}} odczyt",
     "refRange": "Zakres ref.",
     "searchPlaceholder": "Szukaj badań...",
@@ -820,6 +820,20 @@
     "form": {
       "componentCreationWarning": "Wynik laboratoryjny zapisany, ale nie można było dodać komponentów badania. Możesz je dodać ze strony widoku.",
       "relationshipCreationWarning": "Wynik laboratoryjny zapisany, ale niektóre relacje nie mogły być utworzone. Możesz je dodać ze strony edycji."
+    },
+    "addPanel": {
+      "title": "Dodaj nowy panel badań",
+      "panelName": "Nazwa panelu",
+      "panelNamePlaceholder": "np. CBC, morfologia krwi",
+      "panelNameDescription": "Nazwa dla tej grupy badań",
+      "createButton": "Utwórz panel",
+      "creating": "Tworzenie...",
+      "createError": "Nie udało się utworzyć panelu badań",
+      "testResultRequired": "Wymagany jest co najmniej jeden wynik badania",
+      "tagsPlaceholder": "Dodaj tagi, aby później organizować i wyszukiwać ten rekord"
+    },
+    "buttons": {
+      "addLabResults": "Dodaj wyniki badań"
     }
   },
   "medications": {

@@ -173,16 +173,22 @@ vi.mock('../../../components/shared/MedicalPageActions', () => ({
       {onViewModeChange && (
         <>
           <button
-            onClick={() => onViewModeChange('cards')}
-            data-testid="cards-btn"
+            onClick={() => onViewModeChange('panels')}
+            data-testid="panels-btn"
           >
-            Cards
+            Lab Panels
           </button>
           <button
-            onClick={() => onViewModeChange('table')}
-            data-testid="table-btn"
+            onClick={() => onViewModeChange('stacked')}
+            data-testid="stacked-btn"
           >
-            Table
+            Stacked
+          </button>
+          <button
+            onClick={() => onViewModeChange('components')}
+            data-testid="components-btn"
+          >
+            Results
           </button>
         </>
       )}
@@ -369,6 +375,19 @@ vi.mock(
     default: () => null,
   })
 );
+vi.mock(
+  '../../../components/medical/labresults/TestPanelCreateDialog',
+  () => ({
+    default: ({ opened, onClose }) => {
+      if (!opened) return null;
+      return (
+        <div data-testid="panel-create-dialog" role="dialog">
+          <button onClick={onClose}>Cancel</button>
+        </div>
+      );
+    },
+  })
+);
 
 // --- Framer motion mock ---
 vi.mock('framer-motion', () => ({
@@ -476,7 +495,7 @@ describe('Lab Results Page Integration Tests', () => {
   beforeEach(() => {
     useMedicalData.mockReturnValue({ ...defaultMedicalData });
     useDataManagement.mockReturnValue({ ...mockDataManagement });
-    usePersistedViewMode.mockReturnValue(['cards', vi.fn()]);
+    usePersistedViewMode.mockReturnValue(['panels', vi.fn()]);
     useViewModalNavigation.mockReturnValue({
       isOpen: false,
       viewingItem: null,
@@ -553,22 +572,23 @@ describe('Lab Results Page Integration Tests', () => {
   });
 
   describe('Lab Result CRUD Operations', () => {
-    test('creates a new lab result through complete workflow', async () => {
-      const mockCreateItem = vi.fn().mockResolvedValue({});
+    test('edits a lab result through complete workflow', async () => {
+      const mockUpdateItem = vi.fn().mockResolvedValue(true);
       useMedicalData.mockReturnValue({
         ...defaultMedicalData,
-        createItem: mockCreateItem,
+        updateItem: mockUpdateItem,
       });
 
       renderWithPatient(<LabResults />);
 
-      const addButton = screen.getByTestId('add-button');
-      await userEvent.click(addButton);
+      await waitFor(() => {
+        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+      });
+
+      const cbcWrapper = screen.getByTestId('card-wrapper-1');
+      await userEvent.click(within(cbcWrapper).getByText('Edit'));
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), {
-        target: { value: 'Glucose Tolerance Test', name: 'test_name' },
-      });
       fireEvent.change(within(form).getByLabelText('Test Code'), {
         target: { value: 'GTT', name: 'test_code' },
       });
@@ -582,9 +602,9 @@ describe('Lab Results Page Integration Tests', () => {
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
-        expect(mockCreateItem).toHaveBeenCalledWith(
+        expect(mockUpdateItem).toHaveBeenCalledWith(
+          1,
           expect.objectContaining({
-            test_name: 'Glucose Tolerance Test',
             test_code: 'GTT',
             facility: 'Diabetes Center Lab',
             notes: 'Pre-diabetes screening',
@@ -669,26 +689,30 @@ describe('Lab Results Page Integration Tests', () => {
   });
 
   describe('File Management Integration', () => {
-    test('uploads files with lab result creation', async () => {
-      const mockCreateItem = vi.fn().mockResolvedValue({ id: 4 });
+    test('submits lab result edit with form data', async () => {
+      const mockUpdateItem = vi.fn().mockResolvedValue(true);
       useMedicalData.mockReturnValue({
         ...defaultMedicalData,
-        createItem: mockCreateItem,
+        updateItem: mockUpdateItem,
       });
 
       renderWithPatient(<LabResults />);
 
-      const addButton = screen.getByTestId('add-button');
-      await userEvent.click(addButton);
+      await waitFor(() => {
+        expect(screen.getByText('Lipid Panel')).toBeInTheDocument();
+      });
+
+      const lipidWrapper = screen.getByTestId('card-wrapper-2');
+      await userEvent.click(within(lipidWrapper).getByText('Edit'));
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), {
-        target: { value: 'X-Ray Chest', name: 'test_name' },
+      fireEvent.change(within(form).getByLabelText('Notes'), {
+        target: { value: 'Updated notes', name: 'notes' },
       });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
-        expect(mockCreateItem).toHaveBeenCalled();
+        expect(mockUpdateItem).toHaveBeenCalled();
       });
     });
 
@@ -792,9 +816,9 @@ describe('Lab Results Page Integration Tests', () => {
   });
 
   describe('View Mode Toggle', () => {
-    test('switches between cards and table view', async () => {
+    test('switches between panels and stacked view', async () => {
       const mockSetViewMode = vi.fn();
-      usePersistedViewMode.mockReturnValue(['cards', mockSetViewMode]);
+      usePersistedViewMode.mockReturnValue(['panels', mockSetViewMode]);
 
       renderWithPatient(<LabResults />);
 
@@ -804,10 +828,10 @@ describe('Lab Results Page Integration Tests', () => {
         ).toBeInTheDocument();
       });
 
-      const tableButton = screen.getByTestId('table-btn');
-      await userEvent.click(tableButton);
+      const stackedButton = screen.getByTestId('stacked-btn');
+      await userEvent.click(stackedButton);
 
-      expect(mockSetViewMode).toHaveBeenCalledWith('table');
+      expect(mockSetViewMode).toHaveBeenCalledWith('stacked');
     });
   });
 
@@ -843,31 +867,32 @@ describe('Lab Results Page Integration Tests', () => {
       ).toBeInTheDocument();
     });
 
-    test('manages follow-up recommendations', async () => {
-      const mockCreateItem = vi.fn().mockResolvedValue({});
+    test('manages follow-up recommendations by editing notes', async () => {
+      const mockUpdateItem = vi.fn().mockResolvedValue(true);
       useMedicalData.mockReturnValue({
         ...defaultMedicalData,
-        createItem: mockCreateItem,
+        updateItem: mockUpdateItem,
       });
 
       renderWithPatient(<LabResults />);
 
-      const addButton = screen.getByTestId('add-button');
-      await userEvent.click(addButton);
+      await waitFor(() => {
+        expect(screen.getByText('Thyroid Function Tests')).toBeInTheDocument();
+      });
+
+      const thyroidWrapper = screen.getByTestId('card-wrapper-3');
+      await userEvent.click(within(thyroidWrapper).getByText('Edit'));
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), {
-        target: { value: 'HbA1c Follow-up', name: 'test_name' },
-      });
       fireEvent.change(within(form).getByLabelText('Notes'), {
         target: { value: 'Follow-up in 3 months.', name: 'notes' },
       });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
-        expect(mockCreateItem).toHaveBeenCalledWith(
+        expect(mockUpdateItem).toHaveBeenCalledWith(
+          3,
           expect.objectContaining({
-            test_name: 'HbA1c Follow-up',
             notes: 'Follow-up in 3 months.',
           })
         );
@@ -877,25 +902,26 @@ describe('Lab Results Page Integration Tests', () => {
 
   describe('Error Handling and Edge Cases', () => {
     test('handles API errors gracefully', async () => {
-      const mockCreateItem = vi.fn().mockResolvedValue(false);
+      const mockUpdateItem = vi.fn().mockResolvedValue(false);
       useMedicalData.mockReturnValue({
         ...defaultMedicalData,
-        createItem: mockCreateItem,
+        updateItem: mockUpdateItem,
       });
 
       renderWithPatient(<LabResults />);
 
-      const addButton = screen.getByTestId('add-button');
-      await userEvent.click(addButton);
+      await waitFor(() => {
+        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+      });
+
+      const cbcWrapper = screen.getByTestId('card-wrapper-1');
+      await userEvent.click(within(cbcWrapper).getByText('Edit'));
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), {
-        target: { value: 'Test Lab', name: 'test_name' },
-      });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
-        expect(mockCreateItem).toHaveBeenCalled();
+        expect(mockUpdateItem).toHaveBeenCalled();
       });
     });
 
@@ -927,47 +953,45 @@ describe('Lab Results Page Integration Tests', () => {
   });
 
   describe('Form Validation and Data Integrity', () => {
-    test('validates required test name field', async () => {
-      const mockCreateItem = vi.fn().mockResolvedValue({});
-      useMedicalData.mockReturnValue({
-        ...defaultMedicalData,
-        createItem: mockCreateItem,
-      });
-
+    test('edit form modal opens and has submit button', async () => {
       renderWithPatient(<LabResults />);
 
-      const addButton = screen.getByTestId('add-button');
-      await userEvent.click(addButton);
+      await waitFor(() => {
+        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+      });
 
-      // Form modal should open
+      const cbcWrapper = screen.getByTestId('card-wrapper-1');
+      await userEvent.click(within(cbcWrapper).getByText('Edit'));
+
       const form = screen.getByTestId('form-modal');
       expect(form).toBeInTheDocument();
-
-      // Submit empty form - verify form is rendered and submit button exists
-      const submitBtn = within(form).getByText('Submit');
-      expect(submitBtn).toBeInTheDocument();
+      expect(within(form).getByText('Submit')).toBeInTheDocument();
     });
 
-    test('validates date consistency', async () => {
-      const mockCreateItem = vi.fn().mockResolvedValue({});
+    test('validates and submits date and field changes', async () => {
+      const mockUpdateItem = vi.fn().mockResolvedValue(true);
       useMedicalData.mockReturnValue({
         ...defaultMedicalData,
-        createItem: mockCreateItem,
+        updateItem: mockUpdateItem,
       });
 
       renderWithPatient(<LabResults />);
 
-      const addButton = screen.getByTestId('add-button');
-      await userEvent.click(addButton);
+      await waitFor(() => {
+        expect(screen.getByText('Complete Blood Count (CBC)')).toBeInTheDocument();
+      });
+
+      const cbcWrapper = screen.getByTestId('card-wrapper-1');
+      await userEvent.click(within(cbcWrapper).getByText('Edit'));
 
       const form = screen.getByTestId('form-modal');
-      fireEvent.change(within(form).getByLabelText('Test Name *'), {
-        target: { value: 'Test', name: 'test_name' },
+      fireEvent.change(within(form).getByLabelText('Notes'), {
+        target: { value: 'Updated note', name: 'notes' },
       });
       fireEvent.click(within(form).getByText('Submit'));
 
       await waitFor(() => {
-        expect(mockCreateItem).toHaveBeenCalled();
+        expect(mockUpdateItem).toHaveBeenCalled();
       });
     });
   });

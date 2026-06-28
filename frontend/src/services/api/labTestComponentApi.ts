@@ -2,7 +2,7 @@ import { apiService } from './index';
 import logger from '../logger';
 
 // Types for Lab Test Components
-export type ResultType = 'quantitative' | 'qualitative';
+export type ResultType = 'quantitative' | 'qualitative' | 'textual';
 export type QualitativeValue =
   | 'positive'
   | 'negative'
@@ -43,6 +43,7 @@ export interface LabTestComponent {
     | 'lipids'
     | 'hearing'
     | 'stomatology'
+    | 'imaging'
     | 'other'
     | null;
   display_order?: number | null;
@@ -52,6 +53,7 @@ export interface LabTestComponent {
   updated_at?: string;
   result_type?: ResultType | null;
   qualitative_value?: QualitativeValue | null;
+  textual_value?: string | null;
 }
 
 export interface LabTestComponentCreate extends Omit<
@@ -108,6 +110,7 @@ export interface TrendDataPoint {
   };
   result_type?: ResultType | null;
   qualitative_value?: QualitativeValue | null;
+  textual_value?: string | null;
 }
 
 export interface TrendStatistics {
@@ -174,6 +177,7 @@ export interface ComponentCatalogEntry {
   abbreviation?: string | null;
   latest_value?: number | null;
   latest_qualitative_value?: string | null;
+  latest_textual_value?: string | null;
   unit?: string | null;
   status?:
     | 'normal'

@@ -22,6 +22,7 @@ let nextRowId = 1;
 export interface ComponentRowData {
   _rowId: number;
   test_name: string;
+  canonical_test_name?: string | null;
   abbreviation?: string;
   test_code?: string;
   value: number | '';
@@ -33,8 +34,9 @@ export interface ComponentRowData {
   category?: string;
   display_order?: number;
   notes?: string;
-  result_type?: 'quantitative' | 'qualitative';
+  result_type?: 'quantitative' | 'qualitative' | 'textual';
   qualitative_value?: string;
+  textual_value?: string;
 }
 
 /** Create an empty component row with default values. */
@@ -54,6 +56,7 @@ export function createEmptyRow(displayOrder: number): ComponentRowData {
     notes: '',
     result_type: 'quantitative',
     qualitative_value: '',
+    textual_value: '',
   };
 }
 
@@ -61,25 +64,20 @@ function isValidNumber(value: unknown): value is number {
   return typeof value === 'number' && !isNaN(value);
 }
 
-/** Check whether a component row has a valid filled value (quantitative or qualitative). */
+/** Check whether a component row has a valid filled value (quantitative, qualitative, or textual). */
 export function hasFilledValue(component: ComponentRowData): boolean {
   if (component.result_type === 'qualitative') {
     return !!component.qualitative_value;
   }
+  if (component.result_type === 'textual') {
+    return !!component.textual_value;
+  }
   return isValidNumber(component.value);
 }
 
-/** Check whether a component row is complete enough to submit (has value, test name, and unit for quantitative). */
+/** Check whether a component row is complete enough to submit (has a test name). */
 export function isSubmittableComponent(component: ComponentRowData): boolean {
-  if (component.result_type === 'qualitative') {
-    return hasFilledValue(component) && component.test_name.trim() !== '';
-  }
-
-  return (
-    hasFilledValue(component) &&
-    component.test_name.trim() !== '' &&
-    component.unit.trim() !== ''
-  );
+  return component.test_name.trim() !== '';
 }
 
 /**
@@ -142,33 +140,41 @@ export function sanitizeComponentForApi(
   component: ComponentRowData,
   labResultId: number
 ): LabTestComponentCreate {
-  const isQualitative = component.result_type === 'qualitative';
+  const rt = component.result_type || 'quantitative';
+  const isQualitative = rt === 'qualitative';
+  const isTextual = rt === 'textual';
+  const isNumeric = !isQualitative && !isTextual;
   return {
     lab_result_id: labResultId,
     test_name: sanitizeInput(component.test_name) || '',
+    canonical_test_name: sanitizeInput(component.canonical_test_name ?? undefined) || null,
     abbreviation: sanitizeInput(component.abbreviation),
     test_code: sanitizeInput(component.test_code),
-    value: isQualitative
-      ? null
-      : isValidNumber(component.value)
+    value: isNumeric
+      ? isValidNumber(component.value)
         ? component.value
-        : null,
-    unit: isQualitative ? null : sanitizeInput(component.unit) || '',
-    ref_range_min:
-      component.ref_range_min === ''
+        : null
+      : null,
+    unit: isNumeric ? sanitizeInput(component.unit) || '' : null,
+    ref_range_min: isNumeric
+      ? component.ref_range_min === ''
         ? null
-        : (component.ref_range_min as number),
-    ref_range_max:
-      component.ref_range_max === ''
+        : (component.ref_range_min as number)
+      : null,
+    ref_range_max: isNumeric
+      ? component.ref_range_max === ''
         ? null
-        : (component.ref_range_max as number),
-    ref_range_text: sanitizeInput(component.ref_range_text),
+        : (component.ref_range_max as number)
+      : null,
+    ref_range_text: isNumeric ? sanitizeInput(component.ref_range_text) : null,
     status: (component.status as ComponentStatus | null) || null,
     category: (component.category as ComponentCategory | null) || null,
     display_order: component.display_order ?? null,
     notes: sanitizeInput(component.notes),
-    result_type: component.result_type || 'quantitative',
-    qualitative_value:
-      (component.qualitative_value as QualitativeValue) || null,
+    result_type: rt,
+    qualitative_value: isQualitative
+      ? (component.qualitative_value as QualitativeValue) || null
+      : null,
+    textual_value: isTextual ? sanitizeInput(component.textual_value) : null,
   };
 }

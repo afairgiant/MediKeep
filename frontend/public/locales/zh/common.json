@@ -1244,10 +1244,11 @@
   },
   "viewToggle": {
     "cards": "卡片",
-    "components": "组件",
+    "components": "结果",
     "label": "查看模式",
     "table": "表格",
-    "stacked": "堆叠"
+    "stacked": "堆叠",
+    "panels": "检验面板"
   },
   "visits": {
     "addNewVisit": "添加新就诊",

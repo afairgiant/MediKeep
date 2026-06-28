@@ -22,6 +22,7 @@ import {
   IconInfoCircle,
   IconChartBar,
   IconFileText,
+  IconFlask,
   IconLink,
   IconNotes,
   IconPlus,
@@ -40,6 +41,7 @@ import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWit
 import { TagInput } from '../../common/TagInput';
 import ConditionRelationships from '../ConditionRelationships';
 import LabResultEncounterRelationships from './LabResultEncounterRelationships';
+import TestComponentsTab from './TestComponentsTab';
 import { PURPOSE_OPTIONS } from '../../../constants/encounterLabResultConstants';
 import logger from '../../../services/logger';
 
@@ -339,11 +341,11 @@ const LabResultFormWrapper = ({
 
   const categoryOptions = [
     { value: 'blood work', label: t('labresults:category.bloodWork') },
+    { value: 'hematology', label: t('labresults:category.hematology') },
     { value: 'imaging', label: t('labresults:category.imaging') },
     { value: 'pathology', label: t('labresults:category.pathology') },
     { value: 'microbiology', label: t('labresults:category.microbiology') },
     { value: 'chemistry', label: t('labresults:category.chemistry') },
-    { value: 'hematology', label: t('labresults:category.hematology') },
     { value: 'hepatology', label: t('labresults:category.hepatology') },
     { value: 'immunology', label: t('labresults:category.immunology') },
     { value: 'genetics', label: t('labresults:category.genetics') },
@@ -534,12 +536,22 @@ const LabResultFormWrapper = ({
               >
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
-              <Tabs.Tab
-                value="results"
-                leftSection={<IconChartBar size={16} />}
-              >
-                {t('labresults:tabs.resultsStatus')}
-              </Tabs.Tab>
+              {isGroupedResult && editingItem && (
+                <Tabs.Tab
+                  value="test-results"
+                  leftSection={<IconFlask size={16} />}
+                >
+                  {t('labresults:modal.tabs.testComponents', 'Test Results')}
+                </Tabs.Tab>
+              )}
+              {!isGroupedResult && (
+                <Tabs.Tab
+                  value="results"
+                  leftSection={<IconChartBar size={16} />}
+                >
+                  {t('labresults:tabs.resultsStatus')}
+                </Tabs.Tab>
+              )}
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -563,7 +575,7 @@ const LabResultFormWrapper = ({
             <Tabs.Panel value="basic">
               <Box mt="md">
                 <Grid>
-                  <Grid.Col span={{ base: 12, sm: 8 }}>
+                  <Grid.Col span={{ base: 12, sm: isGroupedResult ? 12 : 8 }}>
                     <TextInput
                       label={t('shared:fields.testName')}
                       value={formData.test_name || ''}
@@ -573,15 +585,17 @@ const LabResultFormWrapper = ({
                       required
                     />
                   </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 4 }}>
-                    <TextInput
-                      label={t('shared:fields.testCode')}
-                      value={formData.test_code || ''}
-                      onChange={handleTextInputChange('test_code')}
-                      placeholder={t('labresults:testCode.placeholder')}
-                      description={t('labresults:testCode.description')}
-                    />
-                  </Grid.Col>
+                  {!isGroupedResult && (
+                    <Grid.Col span={{ base: 12, sm: 4 }}>
+                      <TextInput
+                        label={t('shared:fields.testCode')}
+                        value={formData.test_code || ''}
+                        onChange={handleTextInputChange('test_code')}
+                        placeholder={t('labresults:testCode.placeholder')}
+                        description={t('labresults:testCode.description')}
+                      />
+                    </Grid.Col>
+                  )}
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <Select
                       label={t('labresults:testCategory.label')}
@@ -599,22 +613,24 @@ const LabResultFormWrapper = ({
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
-                      label={t('labresults:testTypeField.label')}
-                      value={formData.test_type || null}
-                      data={testTypeOptions}
-                      onChange={value => {
-                        onInputChange({
-                          target: { name: 'test_type', value: value || '' },
-                        });
-                      }}
-                      placeholder={t('labresults:testTypeField.placeholder')}
-                      description={t('labresults:testTypeField.description')}
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </Grid.Col>
+                  {!isGroupedResult && (
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <Select
+                        label={t('labresults:testTypeField.label')}
+                        value={formData.test_type || null}
+                        data={testTypeOptions}
+                        onChange={value => {
+                          onInputChange({
+                            target: { name: 'test_type', value: value || '' },
+                          });
+                        }}
+                        placeholder={t('labresults:testTypeField.placeholder')}
+                        description={t('labresults:testTypeField.description')}
+                        clearable
+                        comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                      />
+                    </Grid.Col>
+                  )}
                   <Grid.Col span={{ base: 12, sm: 6 }}>
                     <TextInput
                       label={t('labresults:testingFacility.label')}
@@ -696,9 +712,6 @@ const LabResultFormWrapper = ({
                       <Text size="sm" fw={500} mb="xs">
                         {t('shared:labels.tags')}
                       </Text>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        {t('common:fields.tags.description')}
-                      </Text>
                       <TagInput
                         value={formData.tags || []}
                         onChange={tags => {
@@ -706,7 +719,7 @@ const LabResultFormWrapper = ({
                             target: { name: 'tags', value: tags },
                           });
                         }}
-                        placeholder={t('common:fields.tags.placeholder')}
+                        placeholder={t('medical:labResults.addPanel.tagsPlaceholder', 'Add tags to help organize and search for this record later')}
                       />
                     </Box>
                   </Grid.Col>
@@ -714,8 +727,22 @@ const LabResultFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Results & Status Tab (includes Test Components) */}
-            <Tabs.Panel value="results">
+            {/* Test Results Tab — panels only, edit mode only */}
+            {isGroupedResult && editingItem && (
+              <Tabs.Panel value="test-results">
+                <Box mt="md">
+                  <TestComponentsTab
+                    key={`test-components-${editingItem.id}`}
+                    labResultId={editingItem.id}
+                    isViewMode={false}
+                    onError={onError}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Results & Status Tab — not shown for panels */}
+            {!isGroupedResult && <Tabs.Panel value="results">
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -733,22 +760,24 @@ const LabResultFormWrapper = ({
                       comboboxProps={{ withinPortal: true, zIndex: 3000 }}
                     />
                   </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <Select
-                      label={t('shared:labels.labResult')}
-                      value={formData.labs_result || null}
-                      data={labResultOptions}
-                      onChange={value => {
-                        onInputChange({
-                          target: { name: 'labs_result', value: value || '' },
-                        });
-                      }}
-                      placeholder={t('labresults:labResult.placeholder')}
-                      description={t('labresults:labResult.description')}
-                      clearable
-                      comboboxProps={{ withinPortal: true, zIndex: 3000 }}
-                    />
-                  </Grid.Col>
+                  {!isGroupedResult && (
+                    <Grid.Col span={{ base: 12, sm: 6 }}>
+                      <Select
+                        label={t('shared:labels.labResult')}
+                        value={formData.labs_result || null}
+                        data={labResultOptions}
+                        onChange={value => {
+                          onInputChange({
+                            target: { name: 'labs_result', value: value || '' },
+                          });
+                        }}
+                        placeholder={t('labresults:labResult.placeholder')}
+                        description={t('labresults:labResult.description')}
+                        clearable
+                        comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                      />
+                    </Grid.Col>
+                  )}
                   {formData.status && (
                     <Grid.Col span={12}>
                       <Box>
@@ -767,7 +796,7 @@ const LabResultFormWrapper = ({
                       </Box>
                     </Grid.Col>
                   )}
-                  {formData.labs_result && (
+                  {!isGroupedResult && formData.labs_result && (
                     <Grid.Col span={12}>
                       <Box>
                         <Text size="sm" fw={500} mb="xs">
@@ -876,7 +905,7 @@ const LabResultFormWrapper = ({
                   </Grid.Col>}
                 </Grid>
               </Box>
-            </Tabs.Panel>
+            </Tabs.Panel>}
 
             {/* Documents Tab */}
             <Tabs.Panel value="documents">
