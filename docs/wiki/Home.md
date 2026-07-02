@@ -38,7 +38,7 @@ MediKeep is a comprehensive medical records management system designed for indiv
 - **Frontend**: React 18.3 with Mantine UI 8.x
 - **Backend**: FastAPI (Python 3.12+)
 - **Database**: PostgreSQL 15+
-- **Deployment**: Docker
+- **Deployment**: Docker, with a community-maintained Helm chart available for Kubernetes
 
 ---
 

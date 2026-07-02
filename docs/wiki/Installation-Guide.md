@@ -117,6 +117,43 @@ Default credentials: `admin` / `admin123`
 
 ---
 
+## Kubernetes with Helm (Community)
+
+For Kubernetes users, [HelmForge](https://helmforge.dev) publishes a community-maintained MediKeep Helm chart. This is not the primary deployment path maintained by the MediKeep project, but it provides a Kubernetes-native option with PostgreSQL, persistent uploads and backups, service exposure, probes, security contexts, and other production-oriented defaults.
+
+Before installing, make sure you have a working Kubernetes cluster, `kubectl` configured for that cluster, and Helm 3 installed.
+
+### 1. Add the HelmForge repository
+
+```bash
+helm repo add helmforge https://repo.helmforge.dev
+helm repo update
+```
+
+### 2. Install MediKeep
+
+```bash
+helm install medikeep helmforge/medikeep \
+  --namespace medikeep \
+  --create-namespace
+```
+
+### 3. Access MediKeep locally
+
+```bash
+kubectl -n medikeep port-forward svc/medikeep 8000:8000
+```
+
+Open **http://localhost:8000** in your browser.
+
+On fresh installations, MediKeep creates the default `admin` user. Set a secure initial admin password through Helm values or change the default password immediately after first login.
+
+For production values, existing Secrets, external PostgreSQL, Ingress, Gateway API, and persistence examples, see the [HelmForge MediKeep chart documentation](https://helmforge.dev/docs/charts/medikeep) and [chart source](https://github.com/helmforgedev/charts/tree/main/charts/medikeep).
+
+If you run into chart-specific Kubernetes or Helm issues, please report them to the [HelmForge charts repository](https://github.com/helmforgedev/charts/issues).
+
+---
+
 ## System Requirements
 
 ### Minimum
