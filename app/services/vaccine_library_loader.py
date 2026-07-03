@@ -32,7 +32,7 @@ _vaccine_library_cache: Optional[Dict[str, Any]] = None
 def _validate_path(path: Path) -> None:
     """Validate the vaccine library path is within project root."""
     resolved_path = path.resolve()
-    if not str(resolved_path).startswith(str(_PROJECT_ROOT)):
+    if not resolved_path.is_relative_to(_PROJECT_ROOT):
         raise ValueError(f"Vaccine library path outside project root: {resolved_path}")
     if not resolved_path.exists():
         raise FileNotFoundError(f"Vaccine library not found: {resolved_path}")

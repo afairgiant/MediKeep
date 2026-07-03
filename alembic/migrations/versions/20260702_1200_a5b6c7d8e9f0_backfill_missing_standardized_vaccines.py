@@ -133,10 +133,13 @@ def upgrade() -> None:
                 {"keys": disease_keys_json, "who_code": who_code},
             )
         else:
+            # Case-insensitive to match the dedup check above (existing_names
+            # is lower-cased) — otherwise a row whose vaccine_name differs
+            # only in case from the JSON never gets its disease_keys healed.
             result = bind.execute(
                 sa.text(
                     "UPDATE standardized_vaccines SET disease_keys = :keys "
-                    "WHERE who_code IS NULL AND vaccine_name = :name "
+                    "WHERE who_code IS NULL AND LOWER(vaccine_name) = LOWER(:name) "
                     "AND disease_keys IS NULL"
                 ),
                 {"keys": disease_keys_json, "name": entry["vaccine_name"]},

@@ -19,9 +19,12 @@ logger = get_logger(__name__, "app")
 __all__ = ["sync_vaccine_library", "VaccineLibrarySyncResult"]
 
 # Fields mirrored from the library JSON onto an existing row when they drift.
-# `who_code` is intentionally excluded — it's the match key, not a mirrored
-# field, and `id`/`created_at`/`updated_at` are managed by the ORM/DB.
+# `who_code` is included: a row first matched by name (no code yet) can gain
+# one in a later JSON edit, and this heals it onto the row instead of leaving
+# it permanently NULL. `id`/`created_at`/`updated_at` are managed by the
+# ORM/DB and never mirrored.
 _MIRRORED_FIELDS = (
+    "who_code",
     "vaccine_name",
     "short_name",
     "category",
@@ -43,7 +46,10 @@ class VaccineLibrarySyncResult(TypedDict):
 
 def _entry_field_values(entry: Dict[str, Any]) -> Dict[str, Any]:
     return {
-        "who_code": entry.get("who_code"),
+        # Normalize "" to None: an empty-string who_code must never be
+        # treated differently from an absent one (the DB's unique index on
+        # who_code treats repeated "" values as duplicates, unlike NULL).
+        "who_code": entry.get("who_code") or None,
         "vaccine_name": entry["vaccine_name"],
         "short_name": entry.get("short_name"),
         "category": entry.get("category"),
@@ -83,9 +89,13 @@ def sync_vaccine_library(db: Session) -> VaccineLibrarySyncResult:
     same class of drift going forward.
 
     Matching precedence mirrors ``vaccine_resolver.build_library_index`` and
-    that historical migration: ``who_code`` when present, otherwise a
-    case-insensitive ``vaccine_name`` match. Existing rows are fully
-    overwritten on drift — safe because standardized_vaccines has no
+    that historical migration: ``who_code`` when present, falling back to a
+    case-insensitive ``vaccine_name`` match if no row has that code yet (e.g.
+    a row first synced with no code later gains one in a JSON edit — the
+    fallback finds it by name instead of inserting a duplicate, and
+    ``who_code`` itself heals onto the row via ``_apply_if_changed``).
+    Existing rows are fully overwritten on drift — safe because
+    standardized_vaccines has no
     user-writable API (``app/api/v1/endpoints/standardized_vaccine.py`` is
     GET-only), so there is no user data to clobber. Rows whose entry has
     been removed from the JSON are left in place rather than deleted, since
@@ -115,13 +125,32 @@ def sync_vaccine_library(db: Session) -> VaccineLibrarySyncResult:
     result: VaccineLibrarySyncResult = {"inserted": 0, "updated": 0, "unchanged": 0}
 
     for entry in entries:
-        who_code = entry.get("who_code")
+        if not entry.get("vaccine_name"):
+            logger.warning(
+                "Vaccine library entry missing vaccine_name, skipping",
+                extra={
+                    LogFields.CATEGORY: "app",
+                    LogFields.EVENT: "vaccine_library_sync_entry_skipped",
+                    "who_code": entry.get("who_code"),
+                },
+            )
+            continue
+
+        who_code = entry.get("who_code") or None
         name_lower = entry["vaccine_name"].lower()
         values = _entry_field_values(entry)
-        row = by_who_code.get(who_code) if who_code else by_name_lower.get(name_lower)
+
+        # who_code takes precedence, but falls back to a name match if no
+        # row has that code yet — otherwise a row first synced without a
+        # code (matched by name) looks "not found" the moment its JSON entry
+        # gains a code, and gets inserted again as a duplicate.
+        row = by_who_code.get(who_code) if who_code else None
+        if row is None:
+            row = by_name_lower.get(name_lower)
 
         if row is None:
-            db.add(StandardizedVaccine(**values))
+            row = StandardizedVaccine(**values)
+            db.add(row)
             result["inserted"] += 1
         else:
             matched_ids.add(row.id)
@@ -129,6 +158,14 @@ def sync_vaccine_library(db: Session) -> VaccineLibrarySyncResult:
                 result["updated"] += 1
             else:
                 result["unchanged"] += 1
+
+        # Make this entry's row visible to later entries in the same pass —
+        # otherwise a duplicate who_code/name later in the JSON would look
+        # "not found" against the pre-loop snapshot and get inserted again,
+        # tripping the DB's unique constraint on who_code.
+        if who_code:
+            by_who_code[who_code] = row
+        by_name_lower[name_lower] = row
 
     try:
         db.commit()

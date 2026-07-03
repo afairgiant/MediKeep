@@ -139,6 +139,58 @@ class TestUpdateDrift:
         assert result["inserted"] == 0
         assert db_session.query(StandardizedVaccine).count() == 1
 
+    def test_name_matched_row_gains_who_code_without_duplicating(
+        self, db_session, monkeypatch
+    ):
+        entries = [
+            _entry(
+                "Tick-borne Encephalitis",
+                who_code=None,
+                disease_keys=["Tick-borne Encephalitis"],
+            )
+        ]
+        _patch_entries(monkeypatch, entries)
+        sync_vaccine_library(db_session)
+
+        original = (
+            db_session.query(StandardizedVaccine)
+            .filter(StandardizedVaccine.vaccine_name == "Tick-borne Encephalitis")
+            .one()
+        )
+        original_id = original.id
+        assert original.who_code is None
+
+        # Simulate a JSON edit: the entry gains a who_code it didn't have
+        # before. Without the name-match fallback, the who_code lookup
+        # misses and this would insert a duplicate row instead of updating.
+        entries[0]["who_code"] = "TickBorneEncephalitis"
+        result = sync_vaccine_library(db_session)
+
+        assert result == {"inserted": 0, "updated": 1, "unchanged": 0}
+        assert db_session.query(StandardizedVaccine).count() == 1
+        updated = db_session.get(StandardizedVaccine, original_id)
+        assert updated.id == original_id
+        assert updated.who_code == "TickBorneEncephalitis"
+
+
+class TestDuplicateEntriesWithinOnePass:
+    def test_two_entries_sharing_a_who_code_do_not_both_insert(
+        self, db_session, monkeypatch
+    ):
+        # A malformed library (copy-paste mistake) with the same who_code
+        # twice in one payload. The second must match the first's
+        # newly-created row rather than tripping the who_code unique index.
+        entries = [
+            _entry("Typhoid Ps", who_code="TyphoidDup", disease_keys=["Typhoid"]),
+            _entry("Typhoid Ps", who_code="TyphoidDup", disease_keys=["Typhoid"]),
+        ]
+        _patch_entries(monkeypatch, entries)
+
+        result = sync_vaccine_library(db_session)
+
+        assert result["inserted"] == 1
+        assert db_session.query(StandardizedVaccine).count() == 1
+
 
 class TestNoOp:
     def test_second_run_with_unchanged_library_is_a_pure_no_op(
