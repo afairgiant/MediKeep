@@ -162,10 +162,15 @@ def sync_vaccine_library(db: Session) -> VaccineLibrarySyncResult:
         # Make this entry's row visible to later entries in the same pass —
         # otherwise a duplicate who_code/name later in the JSON would look
         # "not found" against the pre-loop snapshot and get inserted again,
-        # tripping the DB's unique constraint on who_code.
+        # tripping the DB's unique constraint on who_code. by_name_lower
+        # stays uncoded-only: registering a coded row there too would let a
+        # later entry with a *different* who_code but the same display name
+        # match it via the name fallback and overwrite its who_code, merging
+        # two distinct vaccines into one row.
         if who_code:
             by_who_code[who_code] = row
-        by_name_lower[name_lower] = row
+        else:
+            by_name_lower[name_lower] = row
 
     try:
         db.commit()

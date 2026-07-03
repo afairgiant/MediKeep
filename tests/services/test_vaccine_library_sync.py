@@ -191,6 +191,25 @@ class TestDuplicateEntriesWithinOnePass:
         assert result["inserted"] == 1
         assert db_session.query(StandardizedVaccine).count() == 1
 
+    def test_two_entries_sharing_a_name_but_different_who_codes_stay_distinct(
+        self, db_session, monkeypatch
+    ):
+        # Two genuinely different vaccines that happen to share a display
+        # name. by_name_lower must stay uncoded-only, or the second entry's
+        # name-fallback lookup would find the first's row and overwrite its
+        # who_code, silently merging two distinct vaccines into one.
+        entries = [
+            _entry("Meningococcal Vaccine", who_code="MenX1", disease_keys=["Meningococcal"]),
+            _entry("Meningococcal Vaccine", who_code="MenX2", disease_keys=["Meningococcal"]),
+        ]
+        _patch_entries(monkeypatch, entries)
+
+        result = sync_vaccine_library(db_session)
+
+        assert result["inserted"] == 2
+        rows = db_session.query(StandardizedVaccine).all()
+        assert {v.who_code for v in rows} == {"MenX1", "MenX2"}
+
 
 class TestNoOp:
     def test_second_run_with_unchanged_library_is_a_pure_no_op(
