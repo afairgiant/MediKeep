@@ -210,6 +210,27 @@ def run_startup_data_migrations():
             logger.error(f"Canonical test migration encountered an error: {str(e)}")
             # Non-fatal - continue with startup
 
+        # Ongoing sync (not one-time, unlike Migrations 1-2 above): keeps
+        # standardized_vaccines in step with shared/data/vaccine_library.json
+        # on every startup. sync_vaccine_library() logs its own structured
+        # completion event, so nothing further to log here on success.
+        try:
+            from app.services.vaccine_library_sync import sync_vaccine_library
+
+            db = next(get_db())
+            try:
+                sync_vaccine_library(db)
+            finally:
+                db.close()
+
+        except ImportError:
+            logger.debug(
+                "Vaccine library sync service not yet available - skipping vaccine sync"
+            )
+        except Exception as e:
+            logger.error(f"Vaccine library sync encountered an error: {str(e)}")
+            # Non-fatal - reference/autocomplete data, must never block startup
+
         logger.debug("All startup data migrations completed successfully")
 
     except Exception as e:

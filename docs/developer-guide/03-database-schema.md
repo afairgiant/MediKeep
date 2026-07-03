@@ -1762,6 +1762,7 @@ JUNCTION TABLES (Many-to-Many)
 | common_names | JSON | | Brand and alternative names for fuzzy search |
 | is_combined | Boolean | NOT NULL, DEFAULT FALSE | Multi-component formulation flag |
 | components | JSON | | Component list when is_combined (e.g., ["Measles","Mumps","Rubella"]) |
+| disease_keys | JSON | | Canonical disease names this vaccine covers (e.g., ["Diphtheria","Tetanus","Pertussis"]); grouping key for the immunization-history "By Disease" view |
 | default_manufacturer | String(100) | | Optional manufacturer hint |
 | is_common | Boolean | NOT NULL, DEFAULT FALSE | Boost in search ranking; surfaces in default suggestions |
 | display_order | Integer | | Sort order for the common subset |
@@ -1780,8 +1781,9 @@ JUNCTION TABLES (Many-to-Many)
 - `idx_standardized_vaccines_is_combined` on is_combined
 
 **Business Rules**:
-- Seed data is sourced from `shared/data/vaccine_library.json` (WHO PCMT + curated additions). Seeding runs once during the initial `alembic upgrade`; alembic's revision tracking prevents a second seed from duplicating rows on subsequent upgrades.
-- Migration downgrade is destructive: it drops the table entirely (along with any post-seed edits or custom rows). The next `alembic upgrade` recreates and re-seeds from the current JSON.
+- `shared/data/vaccine_library.json` is the live source of truth, not a one-time seed. `sync_vaccine_library()` (`app/services/vaccine_library_sync.py`) upserts every row from the JSON into this table on every application startup (see `run_startup_data_migrations()` in `app/core/database/migrations.py`), matched by `who_code` when present, otherwise a case-insensitive `vaccine_name` match. Adding or editing a vaccine only requires editing the JSON — no Alembic migration needed, and already-deployed databases pick up the change on next boot. Rows are never deleted by the sync, even if removed from the JSON (a warning is logged instead), since `immunizations.standardized_vaccine_id` may reference them. There is no user-writable API for this table (`app/api/v1/endpoints/standardized_vaccine.py` is GET-only), so the sync safely overwrites drifted fields on existing rows.
+- Historical exception: rows added to the JSON between the initial table migration (`c1d2e3f4a5b6`) and the introduction of `sync_vaccine_library()` never reached already-migrated databases, since only that one migration ever inserted rows. A one-time catch-up migration (`a5b6c7d8e9f0`) backfilled that gap; it is not re-run and should not be used as a model for future vaccine additions — edit the JSON only.
+- Migration downgrade of the table-creation migration is destructive: it drops the table entirely (along with any post-seed edits or custom rows). The next `alembic upgrade` recreates the table, and `sync_vaccine_library()` repopulates it from the current JSON on the next app startup.
 - `is_common` flag prioritizes frequently administered vaccines in autocomplete defaults.
 - `is_combined` + `components` powers the "combined vaccine" hint on the form selector.
 - WHO codes are unique but nullable to allow curated entries (e.g., Tdap Adult Booster) not yet in the WHO catalog.
