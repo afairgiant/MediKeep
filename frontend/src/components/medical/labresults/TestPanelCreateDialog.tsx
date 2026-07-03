@@ -137,7 +137,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
     if (!formData.test_name.trim()) {
       setError(
         t('common:validation.fieldRequired', {
-          field: t('medical:labResults.addPanel.panelName', 'Panel Name'),
+          field: t('medical:labResults.addPanel.panelName', 'Lab Results Panel or Type'),
           defaultValue: '{{field}} is required',
         })
       );
@@ -435,28 +435,6 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
               disabled={isSubmitting}
             />
           </Grid.Col>
-          <Grid.Col span={12}>
-            <Input.Label>{t('shared:labels.tags')}</Input.Label>
-            <TagInput
-              placeholder={t('medical:labResults.addPanel.tagsPlaceholder', 'Add tags to help organize and search for this record later')}
-              value={formData.tags}
-              onChange={tags => setFormData(prev => ({ ...prev, tags }))}
-              disabled={isSubmitting}
-            />
-          </Grid.Col>
-          <Grid.Col span={12}>
-            <Textarea
-              label={t('shared:tabs.notes', 'Notes')}
-              value={formData.notes}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, notes: e.target.value }))
-              }
-              minRows={2}
-              autosize
-              maxLength={5000}
-              disabled={isSubmitting}
-            />
-          </Grid.Col>
         </Grid>
 
         <InlineTestComponentEntry
@@ -464,6 +442,28 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
             inlineTestRef.current = methods;
           }}
           defaultExpanded
+          disabled={isSubmitting}
+        />
+
+        <div>
+          <Input.Label>{t('shared:labels.tags')}</Input.Label>
+          <TagInput
+            placeholder={t('medical:labResults.addPanel.tagsPlaceholder', 'Add tags to help organize and search for this record later')}
+            value={formData.tags}
+            onChange={tags => setFormData(prev => ({ ...prev, tags }))}
+            disabled={isSubmitting}
+          />
+        </div>
+
+        <Textarea
+          label={t('shared:tabs.notes', 'Notes')}
+          value={formData.notes}
+          onChange={e =>
+            setFormData(prev => ({ ...prev, notes: e.target.value }))
+          }
+          minRows={2}
+          autosize
+          maxLength={5000}
           disabled={isSubmitting}
         />
 

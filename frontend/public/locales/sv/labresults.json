@@ -157,6 +157,7 @@
   "loading": "Laddar laboratorieresultat...",
   "loadingHint": "Om detta tar för lång tid, uppdatera sidan",
   "messages": {
+    "noRelationshipsAvailable": "Inga medicinska tillstånd eller besök registrerade. Lägg till dem först för att länka dem här.",
     "relationshipsCreateInfo": "Relationer kan läggas till efter att laboratorieresultatet sparats.",
     "relationshipsSaveFirst": "Spara laboratorieresultatet först för att skapa relationslänkar.",
     "testComponentsEditInfo": "Testkomponenter kan hanteras från visningssidan efter sparande."

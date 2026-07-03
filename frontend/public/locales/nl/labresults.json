@@ -157,6 +157,7 @@
   "loading": "Labresultaten worden geladen...",
   "loadingHint": "Als dit te lang duurt, vernieuw dan de pagina",
   "messages": {
+    "noRelationshipsAvailable": "Geen medische aandoeningen of bezoeken geregistreerd. Voeg deze eerst toe om ze hier te koppelen.",
     "relationshipsCreateInfo": "Koppelingen kunnen worden toegevoegd na het opslaan van het labresultaat.",
     "relationshipsSaveFirst": "Sla het labresultaat eerst op om koppelingen aan te maken.",
     "testComponentsEditInfo": "Testcomponenten kunnen na het opslaan worden beheerd via de weergavepagina."

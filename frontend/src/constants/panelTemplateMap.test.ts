@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getTemplateRowsForPanel, PANEL_TEMPLATES } from './panelTemplateMap';
+import { getTestByName } from './testLibrary';
 
 const VALID_BACKEND_CATEGORIES = new Set([
   'chemistry', 'hematology', 'hepatology', 'immunology', 'microbiology',
@@ -115,6 +116,51 @@ describe('getTemplateRowsForPanel', () => {
   it('display_order matches position in template', () => {
     const rows = getTemplateRowsForPanel('Complete Blood Count')!;
     rows.forEach((r, i) => expect(r.display_order).toBe(i + 1));
+  });
+});
+
+describe('canonical_test_name linking', () => {
+  it('CBC rows have canonical_test_name set to the library test_name', () => {
+    const rows = getTemplateRowsForPanel('Complete Blood Count')!;
+    rows.forEach(r => {
+      const libraryTest = getTestByName(r.test_name);
+      if (libraryTest) {
+        expect(r.canonical_test_name).toBe(libraryTest.test_name);
+      }
+    });
+  });
+
+  it('BMP rows all have canonical_test_name populated (none null)', () => {
+    const rows = getTemplateRowsForPanel('Basic Metabolic Panel')!;
+    rows.forEach(r =>
+      expect(r.canonical_test_name, `${r.test_name} should have canonical_test_name`).not.toBeNull()
+    );
+  });
+
+  it('canonical_test_name matches test library exactly (same bucket as PDF imports)', () => {
+    const panelNames = [
+      'Complete Blood Count', 'Basic Metabolic Panel', 'Comprehensive Metabolic Panel',
+      'Lipid Panel', 'Thyroid Function Panel', 'Hepatic Function Panel', 'Renal Function Panel',
+    ];
+    panelNames.forEach(name => {
+      const rows = getTemplateRowsForPanel(name)!;
+      rows.forEach(r => {
+        const libraryTest = getTestByName(r.test_name);
+        if (libraryTest) {
+          expect(r.canonical_test_name).toBe(libraryTest.test_name);
+        }
+      });
+    });
+  });
+
+  it('imaging rows without a library match have canonical_test_name null', () => {
+    ['MRI', 'CT Scan', 'X-Ray'].forEach(name => {
+      const rows = getTemplateRowsForPanel(name)!;
+      const libraryTest = getTestByName(rows[0].test_name);
+      if (!libraryTest) {
+        expect(rows[0].canonical_test_name).toBeNull();
+      }
+    });
   });
 });
 

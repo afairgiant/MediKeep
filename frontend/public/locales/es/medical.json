@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron crear algunas relaciones. Puede añadirlas desde la página de edición."
     },
     "addPanel": {
-      "title": "Agregar nuevo panel de pruebas",
-      "panelName": "Nombre del panel",
+      "title": "Agregar resultados de laboratorio",
+      "panelName": "Panel o tipo de resultado de laboratorio",
       "panelNamePlaceholder": "ej. Hemograma, Análisis anual",
       "panelNameDescription": "Un nombre para este grupo de pruebas",
-      "createButton": "Crear",
+      "createButton": "Guardar resultados",
       "creating": "Creando panel...",
       "createError": "No se pudo crear el panel de pruebas",
       "testResultRequired": "Se requiere al menos un resultado de prueba",

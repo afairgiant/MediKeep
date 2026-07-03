@@ -157,6 +157,7 @@
   "loading": "Carregando resultados laboratoriais...",
   "loadingHint": "Se isso demorar muito, atualize a página",
   "messages": {
+    "noRelationshipsAvailable": "Nenhuma condição médica ou visita registrada. Adicione-as primeiro para vinculá-las aqui.",
     "relationshipsCreateInfo": "Relacionamentos podem ser adicionados após salvar o resultado laboratorial.",
     "relationshipsSaveFirst": "Salve o resultado laboratorial primeiro para criar vínculos de relacionamento.",
     "testComponentsEditInfo": "Componentes do exame podem ser gerenciados na página de visualização após salvar."

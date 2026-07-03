@@ -157,6 +157,7 @@
   "loading": "Chargement des résultats d'analyse...",
   "loadingHint": "Si cela prend trop longtemps, veuillez rafraîchir la page",
   "messages": {
+    "noRelationshipsAvailable": "Aucune condition médicale ni visite enregistrée. Ajoutez-les d'abord pour les lier ici.",
     "relationshipsCreateInfo": "Les connexions peuvent être ajoutées après avoir sauvegardé le résultat d'analyse.",
     "relationshipsSaveFirst": "Sauvegardez d'abord le résultat d'analyse pour pouvoir le connecter.",
     "testComponentsEditInfo": "Les composants d'analyse peuvent être gérés depuis la page d'aperçu après sauvegarde."

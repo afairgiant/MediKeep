@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "Wynik laboratoryjny zapisany, ale niektóre relacje nie mogły być utworzone. Możesz je dodać ze strony edycji."
     },
     "addPanel": {
-      "title": "Dodaj nowy panel badań",
-      "panelName": "Nazwa panelu",
+      "title": "Dodaj wyniki laboratoryjne",
+      "panelName": "Panel lub typ wyników laboratoryjnych",
       "panelNamePlaceholder": "np. CBC, morfologia krwi",
       "panelNameDescription": "Nazwa dla tej grupy badań",
-      "createButton": "Utwórz panel",
+      "createButton": "Zapisz wyniki",
       "creating": "Tworzenie...",
       "createError": "Nie udało się utworzyć panelu badań",
       "testResultRequired": "Wymagany jest co najmniej jeden wynik badania",

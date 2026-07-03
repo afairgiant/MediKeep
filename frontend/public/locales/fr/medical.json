@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "Résultat d'analyse enregistré, mais certaines associations n'ont pas pu être créées. Vous pouvez les ajouter depuis la page de modification."
     },
     "addPanel": {
-      "title": "Ajouter un nouveau panneau de tests",
-      "panelName": "Nom du panneau",
+      "title": "Ajouter des résultats de laboratoire",
+      "panelName": "Panneau ou type de résultats de laboratoire",
       "panelNamePlaceholder": "ex. : NFS, Bilan annuel",
       "panelNameDescription": "Un nom pour ce groupe de tests",
-      "createButton": "Créer",
+      "createButton": "Enregistrer les résultats",
       "creating": "Création du panneau...",
       "createError": "Échec de la création du panneau de tests",
       "testResultRequired": "Au moins un résultat de test est requis",

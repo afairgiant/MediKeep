@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "Laboratoriumuitslag opgeslagen, maar sommige relaties konden niet worden aangemaakt. U kunt ze toevoegen vanaf de bewerkingspagina."
     },
     "addPanel": {
-      "title": "Nieuw testpaneel toevoegen",
-      "panelName": "Paneelnaam",
+      "title": "Laboratoriumresultaten toevoegen",
+      "panelName": "Laboratoriumresultaten panel of type",
       "panelNamePlaceholder": "bijv. Bloedbeeld, Jaarlijkse analyse",
       "panelNameDescription": "Een naam voor deze groep tests",
-      "createButton": "Aanmaken",
+      "createButton": "Resultaten opslaan",
       "creating": "Paneel aanmaken...",
       "createError": "Aanmaken van testpaneel mislukt",
       "testResultRequired": "Minimaal één testresultaat is vereist",

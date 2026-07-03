@@ -30,10 +30,7 @@ export function getPanelAutocompleteOptions(query: string, limit = 50): string[]
 
   return PANEL_LIBRARY
     .filter(matches)
-    .sort((a, b) => {
-      if (a.is_common !== b.is_common) return a.is_common ? -1 : 1;
-      return a.display_order - b.display_order;
-    })
+    .sort((a, b) => a.panel_name.localeCompare(b.panel_name))
     .slice(0, limit)
     .map(toOption);
 }

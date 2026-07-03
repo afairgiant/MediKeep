@@ -157,6 +157,7 @@
   "loading": "Ładowanie wyników laboratoryjnych...",
   "loadingHint": "Jeśli to trwa zbyt długo, odśwież stronę",
   "messages": {
+    "noRelationshipsAvailable": "Brak zarejestrowanych schorzeń ani wizyt. Dodaj je najpierw, aby połączyć je tutaj.",
     "relationshipsCreateInfo": "Powiązania można dodać po zapisaniu wyniku laboratoryjnego.",
     "relationshipsSaveFirst": "Najpierw zapisz wynik laboratoryjny aby utworzyć linki powiązań.",
     "testComponentsEditInfo": "Składniki badania można zarządzać ze strony podglądu po zapisaniu."

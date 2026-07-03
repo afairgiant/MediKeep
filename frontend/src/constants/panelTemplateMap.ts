@@ -1,4 +1,5 @@
 import { ComponentRowData, createEmptyRow } from '../utils/labTestComponentUtils';
+import { getTestByName } from './testLibrary';
 
 export interface TestTemplate {
   id: string;
@@ -203,15 +204,19 @@ export function getTemplateRowsForPanel(panelName: string): ComponentRowData[] |
   const template = PANEL_TEMPLATES.find(t => t.id === templateId);
   if (!template) return null;
 
-  return template.tests.map((test, idx) => ({
-    ...createEmptyRow(test.default_display_order ?? idx + 1),
-    test_name: test.test_name,
-    abbreviation: test.abbreviation || '',
-    test_code: test.test_code || '',
-    unit: test.unit,
-    category: template.category,
-    display_order: test.default_display_order ?? idx + 1,
-    notes: test.notes || '',
-    result_type: test.result_type || ('quantitative' as 'quantitative' | 'qualitative' | 'textual'),
-  }));
+  return template.tests.map((test, idx) => {
+    const libraryMatch = getTestByName(test.test_name);
+    return {
+      ...createEmptyRow(test.default_display_order ?? idx + 1),
+      test_name: test.test_name,
+      canonical_test_name: libraryMatch?.test_name ?? null,
+      abbreviation: test.abbreviation || '',
+      test_code: test.test_code || '',
+      unit: test.unit,
+      category: template.category,
+      display_order: test.default_display_order ?? idx + 1,
+      notes: test.notes || '',
+      result_type: test.result_type || ('quantitative' as 'quantitative' | 'qualitative' | 'textual'),
+    };
+  });
 }

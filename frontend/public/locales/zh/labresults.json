@@ -157,6 +157,7 @@
   "loading": "正在加载检验结果...",
   "loadingHint": "如果加载时间过长，请刷新页面",
   "messages": {
+    "noRelationshipsAvailable": "没有记录的医疗状况或就诊记录。请先添加它们，然后再在此处链接。",
     "relationshipsCreateInfo": "保存检验结果后可以添加关系。",
     "relationshipsSaveFirst": "请先保存检验结果以创建关系链接。",
     "testComponentsEditInfo": "保存后可以从查看页面管理检验组件。"

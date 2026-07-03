@@ -157,6 +157,7 @@
   "loading": "Caricamento risultati di laboratorio...",
   "loadingHint": "Se l'operazione richiede troppo tempo, aggiorna la pagina",
   "messages": {
+    "noRelationshipsAvailable": "Nessuna condizione medica o visita registrata. Aggiungile prima per collegarle qui.",
     "relationshipsCreateInfo": "Le relazioni possono essere aggiunte dopo aver salvato il risultato di laboratorio.",
     "relationshipsSaveFirst": "Salva prima il risultato di laboratorio per creare i collegamenti alle relazioni.",
     "testComponentsEditInfo": "I componenti dell'esame possono essere gestiti dalla pagina di visualizzazione dopo il salvataggio."

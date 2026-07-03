@@ -157,6 +157,7 @@
   "loading": "Cargando resultados de laboratorio...",
   "loadingHint": "Si esto tarda demasiado, por favor actualice la página",
   "messages": {
+    "noRelationshipsAvailable": "No hay condiciones médicas ni visitas registradas. Agréguelas primero para vincularlas aquí.",
     "relationshipsCreateInfo": "Las relaciones se pueden agregar después de guardar el resultado de laboratorio.",
     "relationshipsSaveFirst": "Guarde el resultado de laboratorio primero para crear vínculos de relación.",
     "testComponentsEditInfo": "Los componentes de prueba se pueden gestionar desde la página de visualización después de guardar."

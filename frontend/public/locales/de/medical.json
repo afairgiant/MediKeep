@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Verknüpfungen konnten nicht erstellt werden. Sie können diese auf der Bearbeitungsseite hinzufügen."
     },
     "addPanel": {
-      "title": "Neues Testpanel hinzufügen",
-      "panelName": "Panelname",
+      "title": "Laborbefunde hinzufügen",
+      "panelName": "Labor-Ergebnis-Panel oder -Typ",
       "panelNamePlaceholder": "z. B. Blutbild, Jährliches Blutbild",
       "panelNameDescription": "Ein Name für diese Gruppe von Tests",
-      "createButton": "Erstellen",
+      "createButton": "Ergebnisse speichern",
       "creating": "Panel wird erstellt...",
       "createError": "Testpanel konnte nicht erstellt werden",
       "testResultRequired": "Mindestens ein Testergebnis ist erforderlich",

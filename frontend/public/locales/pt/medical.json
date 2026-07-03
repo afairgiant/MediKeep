@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "O resultado laboratorial foi salvo, mas alguns vínculos não puderam ser criados. Você pode adicioná-los na página de edição."
     },
     "addPanel": {
-      "title": "Adicionar novo painel de exames",
-      "panelName": "Nome do painel",
+      "title": "Adicionar resultados de laboratório",
+      "panelName": "Painel ou tipo de resultado de laboratório",
       "panelNamePlaceholder": "ex. Hemograma, Exames anuais",
       "panelNameDescription": "Um nome para este grupo de exames",
-      "createButton": "Criar",
+      "createButton": "Guardar resultados",
       "creating": "Criando painel...",
       "createError": "Falha ao criar painel de exames",
       "testResultRequired": "É necessário pelo menos um resultado de exame",

@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 const MODE_CONFIG = {
   panels: {
     icon: '📋',
-    labelKey: 'viewToggle.panels',
-    fallback: 'Lab Panels',
+    labelKey: 'viewToggle.labwork',
+    fallback: 'Labs',
   },
   cards: {
     icon: '📋',

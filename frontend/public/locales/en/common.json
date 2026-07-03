@@ -1248,7 +1248,7 @@
     "label": "View mode",
     "stacked": "Stacked",
     "table": "Table",
-    "panels": "Lab Panels"
+    "labwork": "Labs"
   },
   "visits": {
     "addNewVisit": "Add New Visit",

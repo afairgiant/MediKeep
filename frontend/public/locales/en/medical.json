@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "Lab result saved but some relationships could not be created. You can add them from the edit page."
     },
     "addPanel": {
-      "title": "Add New Lab Panel",
-      "panelName": "Panel Name",
+      "title": "Add Lab Results",
+      "panelName": "Lab Results Panel or Type",
       "panelNamePlaceholder": "e.g. CBC Panel, Annual Bloodwork",
-      "panelNameDescription": "A name for this group of tests",
-      "createButton": "Create Panel",
+      "panelNameDescription": "Select from the list or type a custom name",
+      "createButton": "Save Results",
       "creating": "Creating...",
       "createError": "Failed to create test panel",
       "testResultRequired": "At least one test result is required",

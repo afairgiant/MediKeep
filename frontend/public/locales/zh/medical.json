@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "检验结果已保存，但某些关联无法创建。您可以在编辑页面添加。"
     },
     "addPanel": {
-      "title": "添加新检验套餐",
-      "panelName": "套餐名称",
+      "title": "添加检验结果",
+      "panelName": "检验结果面板或类型",
       "panelNamePlaceholder": "例如：血常规、年度体检",
       "panelNameDescription": "此组检验的名称",
-      "createButton": "创建",
+      "createButton": "保存结果",
       "creating": "正在创建套餐...",
       "createError": "创建检验套餐失败",
       "testResultRequired": "至少需要一个检验结果",

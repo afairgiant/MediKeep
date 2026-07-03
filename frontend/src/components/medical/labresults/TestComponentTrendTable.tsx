@@ -34,7 +34,7 @@ interface TestComponentTrendTableProps {
   trendData: TrendResponse;
 }
 
-type SortField = 'date' | 'value' | 'status';
+type SortField = 'date' | 'value' | 'status' | 'lab_result';
 type SortOrder = 'asc' | 'desc';
 
 const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
@@ -127,6 +127,12 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
           const statusA = a.status || '';
           const statusB = b.status || '';
           comparison = statusA.localeCompare(statusB);
+          break;
+        }
+        case 'lab_result': {
+          const nameA = a.lab_result.test_name || '';
+          const nameB = b.lab_result.test_name || '';
+          comparison = nameA.localeCompare(nameB);
           break;
         }
       }
@@ -237,9 +243,16 @@ const TestComponentTrendTable: React.FC<TestComponentTrendTableProps> = ({
                   </Text>
                 </Table.Th>
                 <Table.Th>
-                  <Text size="xs" fw={600}>
-                    {t('trendTable.labResult')}
-                  </Text>
+                  <Group
+                    gap="xs"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleSort('lab_result')}
+                  >
+                    <Text size="xs" fw={600}>
+                      {t('trendTable.labResult')}
+                    </Text>
+                    <SortIcon field="lab_result" />
+                  </Group>
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>

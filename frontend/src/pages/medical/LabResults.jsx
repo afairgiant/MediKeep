@@ -357,6 +357,17 @@ const LabResults = () => {
     });
   }, [filteredLabResults, parentIdsWithComponents]);
 
+  const hasStackableResults = useMemo(() => {
+    if (!labResults?.length) return false;
+    const counts = new Map();
+    for (const r of labResults) {
+      if (r.is_panel || parentIdsWithComponents.has(r.id)) continue;
+      const key = getGroupKey(r);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return [...counts.values()].some(n => n > 1);
+  }, [labResults, parentIdsWithComponents]);
+
   const currentSelectedGroup = useMemo(
     () =>
       selectedGroupKey
@@ -476,6 +487,11 @@ const LabResults = () => {
     if (viewMode === 'table' || viewMode === 'cards') setViewMode('panels');
   }, [viewMode, setViewMode]);
 
+  // Fall back from stacked view if there are no longer any stackable results
+  useEffect(() => {
+    if (viewMode === 'stacked' && !hasStackableResults) setViewMode('panels');
+  }, [hasStackableResults, viewMode, setViewMode]);
+
   // Combined list for stacked view: stack groups + individual PDF-master results (sorted newest-first).
   const stackedViewItems = useMemo(() => {
     if (viewMode !== 'stacked') return [];
@@ -514,10 +530,6 @@ const LabResults = () => {
 
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
-
-  // Pending relationships state (create mode only)
-  const [pendingRelationshipsMethods, setPendingRelationshipsMethods] =
-    useState(null);
 
   // View modal navigation with URL deep linking
   const {
@@ -838,59 +850,6 @@ const LabResults = () => {
         completeFormSubmission(success, resultId);
 
         if (success && resultId) {
-          // Submit pending relationships (create mode only)
-          if (
-            !editingLabResult &&
-            pendingRelationshipsMethods?.hasPendingRelationships?.()
-          ) {
-            try {
-              const pending =
-                pendingRelationshipsMethods.getPendingRelationships();
-
-              const conditionPromises = pending.conditions.map(condRel =>
-                apiService.createLabResultCondition(resultId, {
-                  lab_result_id: resultId,
-                  condition_id: condRel.condition_id,
-                  relevance_note: condRel.relevance_note,
-                })
-              );
-
-              const encounterPromises = pending.encounters.map(encRel =>
-                apiService.createLabResultEncounter(resultId, {
-                  encounter_id: encRel.encounter_id,
-                  purpose: encRel.purpose,
-                  relevance_note: encRel.relevance_note,
-                })
-              );
-
-              await Promise.all([...conditionPromises, ...encounterPromises]);
-
-              logger.info('pending_relationships_created', {
-                message: 'Pending relationships created with lab result',
-                labResultId: resultId,
-                conditionCount: pending.conditions.length,
-                encounterCount: pending.encounters.length,
-                component: 'LabResults',
-              });
-            } catch (relError) {
-              logger.error('pending_relationships_error', {
-                message: 'Failed to create pending relationships',
-                labResultId: resultId,
-                error: relError?.message || String(relError),
-                component: 'LabResults',
-              });
-              notifications.show({
-                title: t('common:warning', 'Warning'),
-                message: t(
-                  'medical:labResults.form.relationshipCreationWarning',
-                  'Lab result saved but some relationships could not be created. You can add them from the edit page.'
-                ),
-                color: 'yellow',
-                autoClose: 8000,
-              });
-            }
-          }
-
           // Check if we have files to upload
           const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
 
@@ -950,7 +909,6 @@ const LabResults = () => {
       updateItem,
       createItem,
       documentManagerMethods,
-      pendingRelationshipsMethods,
       startSubmission,
       setError,
       completeFormSubmission,
@@ -1025,7 +983,6 @@ const LabResults = () => {
       setStackPanelOpen(true);
     }
     setDocumentManagerMethods(null); // Reset document manager methods
-    setPendingRelationshipsMethods(null); // Reset pending relationships
     // Sync the components table — tests may have been added via TestComponentsTab
     refreshPatientComponents();
     setFormData({
@@ -1178,7 +1135,7 @@ const LabResults = () => {
           disableActionsTooltip={viewOnlyTooltip}
           columns={[
             {
-              header: t('medical:labResults.addPanel.panelName', 'Panel Name'),
+              header: t('medical:labResults.addPanel.panelName', 'Lab Results Panel or Type'),
               accessor: 'test_name',
               priority: 'high',
               width: 200,
@@ -1308,7 +1265,7 @@ const LabResults = () => {
             ]}
             viewMode={viewMode}
             onViewModeChange={handleViewModeChange}
-            viewModes={['panels', 'components', 'stacked']}
+            viewModes={hasStackableResults ? ['panels', 'components', 'stacked'] : ['panels', 'components']}
             viewToggleSize="sm"
             mb={0}
             rightChildren={
@@ -1423,7 +1380,6 @@ const LabResults = () => {
           fetchLabResultEncounters={fetchLabResultEncounters}
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
-          onPendingRelationshipsRef={setPendingRelationshipsMethods}
           isGroupedResult={!!(editingLabResult && (editingLabResult.is_panel || parentIdsWithComponents.has(editingLabResult.id)))}
           onFileUploadComplete={success => {
             if (success && editingLabResult) {

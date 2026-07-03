@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "Risultato di laboratorio salvato ma alcune relazioni non sono state create. Può aggiungerle dalla pagina di modifica."
     },
     "addPanel": {
-      "title": "Aggiungi nuovo pannello di test",
-      "panelName": "Nome del pannello",
+      "title": "Aggiungi risultati di laboratorio",
+      "panelName": "Pannello o tipo di risultati di laboratorio",
       "panelNamePlaceholder": "es. Emocromo, Analisi annuale",
       "panelNameDescription": "Un nome per questo gruppo di test",
-      "createButton": "Crea",
+      "createButton": "Salva risultati",
       "creating": "Creazione pannello...",
       "createError": "Impossibile creare il pannello di test",
       "testResultRequired": "È richiesto almeno un risultato del test",

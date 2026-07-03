@@ -822,11 +822,11 @@
       "relationshipCreationWarning": "Labbresultatet sparades men vissa relationer kunde inte skapas. Du kan lägga till dem från redigeringssidan."
     },
     "addPanel": {
-      "title": "Lägg till nytt testpanel",
-      "panelName": "Panelnamn",
+      "title": "Lägg till laboratorieresultat",
+      "panelName": "Laboratorieresultatpanel eller typ",
       "panelNamePlaceholder": "t.ex. Blodstatus, Årsanalys",
       "panelNameDescription": "Ett namn för denna grupp av tester",
-      "createButton": "Skapa",
+      "createButton": "Spara resultat",
       "creating": "Skapar panel...",
       "createError": "Det gick inte att skapa testpanel",
       "testResultRequired": "Minst ett testresultat krävs",

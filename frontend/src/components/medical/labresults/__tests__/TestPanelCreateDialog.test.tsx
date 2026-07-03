@@ -107,11 +107,11 @@ vi.mock('@mantine/core', () => ({
 }));
 
 const translations: Record<string, string> = {
-  'medical:labResults.addPanel.title': 'Add New Lab Panel',
-  'medical:labResults.addPanel.panelName': 'Panel Name',
+  'medical:labResults.addPanel.title': 'Add Lab Results',
+  'medical:labResults.addPanel.panelName': 'Lab Results Panel or Type',
   'medical:labResults.addPanel.panelNamePlaceholder': 'e.g. CBC Panel, Annual Bloodwork',
   'medical:labResults.addPanel.panelNameDescription': 'A name for this group of tests',
-  'medical:labResults.addPanel.createButton': 'Create Panel',
+  'medical:labResults.addPanel.createButton': 'Save Results',
   'medical:labResults.addPanel.creating': 'Creating...',
   'medical:labResults.addPanel.createError': 'Failed to create test panel',
 };
@@ -226,21 +226,21 @@ describe('TestPanelCreateDialog', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the dialog with Panel Name field and test component section', () => {
+  it('renders the dialog with Lab Results Panel or Type field and test component section', () => {
     render(<TestPanelCreateDialog {...defaultProps} />);
-    expect(screen.getByText('Add New Lab Panel')).toBeTruthy();
-    expect(screen.getByText(/Panel Name/)).toBeTruthy();
-    expect(screen.getByText('Create Panel')).toBeTruthy();
+    expect(screen.getByText('Add Lab Results')).toBeTruthy();
+    expect(screen.getByText(/Lab Results Panel or Type/)).toBeTruthy();
+    expect(screen.getByText('Save Results')).toBeTruthy();
     expect(screen.getByText('Cancel')).toBeTruthy();
     expect(screen.getByText(/Add Tests/i)).toBeTruthy();
   });
 
-  it('shows validation error with field name when Panel Name is empty', async () => {
+  it('shows validation error with field name when Lab Results Panel or Type is empty', async () => {
     render(<TestPanelCreateDialog {...defaultProps} />);
-    await userEvent.click(screen.getByText('Create Panel'));
+    await userEvent.click(screen.getByText('Save Results'));
     await waitFor(() => {
       const alert = screen.getByRole('alert');
-      expect(alert.textContent).toContain('Panel Name is required');
+      expect(alert.textContent).toContain('Lab Results Panel or Type is required');
     });
     expect(mockCreateLabResult).not.toHaveBeenCalled();
   });
@@ -252,7 +252,7 @@ describe('TestPanelCreateDialog', () => {
       screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
       'CBC Panel'
     );
-    await userEvent.click(screen.getByText('Create Panel'));
+    await userEvent.click(screen.getByText('Save Results'));
 
     await waitFor(() => {
       const alert = screen.getByRole('alert');
@@ -283,7 +283,7 @@ describe('TestPanelCreateDialog', () => {
     await userEvent.type(screen.getByRole('spinbutton', { name: 'Value' }), '95');
     await userEvent.type(screen.getByPlaceholderText('Unit'), 'mg/dL');
 
-    await userEvent.click(screen.getByText('Create Panel'));
+    await userEvent.click(screen.getByText('Save Results'));
 
     await waitFor(() => {
       expect(mockCreateBulkForLabResult).toHaveBeenCalledWith(
@@ -321,7 +321,7 @@ describe('TestPanelCreateDialog', () => {
     // Only fill test name; leave value blank
     await userEvent.type(screen.getByPlaceholderText('Type to search tests...'), 'Blood Glucose');
 
-    await userEvent.click(screen.getByText('Create Panel'));
+    await userEvent.click(screen.getByText('Save Results'));
 
     await waitFor(() => {
       expect(mockCreateBulkForLabResult).toHaveBeenCalledWith(
@@ -359,7 +359,7 @@ describe('TestPanelCreateDialog', () => {
     await userEvent.type(screen.getByRole('spinbutton', { name: 'Value' }), '180');
     // Intentionally omit unit — should still be submitted
 
-    await userEvent.click(screen.getByText('Create Panel'));
+    await userEvent.click(screen.getByText('Save Results'));
 
     await waitFor(() => {
       expect(mockCreateBulkForLabResult).toHaveBeenCalledWith(
@@ -387,7 +387,7 @@ describe('TestPanelCreateDialog', () => {
       screen.getByPlaceholderText('e.g. CBC Panel, Annual Bloodwork'),
       'Lipid Panel'
     );
-    await userEvent.click(screen.getByText('Create Panel'));
+    await userEvent.click(screen.getByText('Save Results'));
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeTruthy();

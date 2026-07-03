@@ -176,7 +176,7 @@ vi.mock('../../../components/shared/MedicalPageActions', () => ({
             onClick={() => onViewModeChange('panels')}
             data-testid="panels-btn"
           >
-            Lab Panels
+            Labs
           </button>
           <button
             onClick={() => onViewModeChange('stacked')}
