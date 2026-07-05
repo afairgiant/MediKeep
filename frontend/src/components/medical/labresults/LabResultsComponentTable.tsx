@@ -42,6 +42,7 @@ interface LabResultRef {
   id: number;
   test_name: string;
   practitioner_id: number | null;
+  facility?: string | null;
 }
 
 interface PractitionerRef {
@@ -159,19 +160,28 @@ const LabResultsComponentTable: React.FC<Props> = ({
   }, [labResults]);
 
   const facilityOptions = useMemo(() => {
-    const facilities = new Set<string>();
+    const seen = new Set<string>();
+    const opts: { value: string; label: string }[] = [];
     for (const c of components) {
-      if (c.facility) facilities.add(c.facility);
+      const f = labResultById.get(c.lab_result_id)?.facility;
+      if (f && !seen.has(f)) {
+        seen.add(f);
+        opts.push({ value: f, label: f });
+      }
     }
-    return Array.from(facilities)
-      .sort()
-      .map(f => ({ value: f, label: f }));
-  }, [components]);
+    return opts.sort((a, b) => a.label.localeCompare(b.label));
+  }, [components, labResultById]);
 
-  const practitionerOptions = useMemo(
-    () => practitioners.map(p => ({ value: String(p.id), label: p.name })),
-    [practitioners]
-  );
+  const practitionerOptions = useMemo(() => {
+    const seenIds = new Set<number>();
+    for (const c of components) {
+      const pid = labResultById.get(c.lab_result_id)?.practitioner_id;
+      if (pid != null) seenIds.add(pid);
+    }
+    return practitioners
+      .filter(p => seenIds.has(p.id))
+      .map(p => ({ value: String(p.id), label: p.name }));
+  }, [components, labResultById, practitioners]);
 
   const groupedTests = useMemo<GroupedTest[]>(() => {
     const fromStr = toDateStr(filters.dateFrom);
@@ -189,9 +199,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
         const pid = labResultById.get(c.lab_result_id)?.practitioner_id ?? null;
         if (pid !== filters.practitionerId) return false;
       }
-      if (filters.facility != null) {
-        if (c.facility !== filters.facility) return false;
-      }
+      if (filters.facility != null && (labResultById.get(c.lab_result_id)?.facility ?? null) !== filters.facility) return false;
       const dateStr = getComponentDate(c);
       if (fromStr && (!dateStr || dateStr.slice(0, 10) < fromStr)) return false;
       if (toStr && (!dateStr || dateStr.slice(0, 10) > toStr)) return false;

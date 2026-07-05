@@ -20,7 +20,7 @@ const MODE_CONFIG = {
   components: {
     icon: '🧪',
     labelKey: 'viewToggle.components',
-    fallback: 'Results',
+    fallback: 'Test Results',
   },
   stacked: {
     icon: '🗂️',

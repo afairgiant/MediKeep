@@ -1244,7 +1244,7 @@
   },
   "viewToggle": {
     "cards": "Kaarten",
-    "components": "Resultaten",
+    "components": "Testresultaten",
     "label": "Weergavemodus",
     "table": "Tabel",
     "stacked": "Gestapeld",

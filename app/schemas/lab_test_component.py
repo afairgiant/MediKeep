@@ -249,21 +249,20 @@ class LabTestComponentCreate(LabTestComponentBase):
 
     @model_validator(mode="after")
     def validate_result_type_fields(self):
-        """Cross-field validation for quantitative vs qualitative vs textual tests"""
+        """Cross-field validation for quantitative vs qualitative vs textual tests.
+
+        Values are intentionally optional on create so panel templates can be saved
+        without pre-filled results and filled in later via edit.
+        """
         rt = self.result_type or "quantitative"
 
-        if rt == "quantitative":
-            if self.value is None:
-                raise ValueError("Value is required for quantitative tests")
-        elif rt in ("qualitative", "textual"):
+        if rt in ("qualitative", "textual"):
             if self.value is not None:
                 raise ValueError(f"Numeric value must be empty for {rt} tests")
             if self.ref_range_min is not None or self.ref_range_max is not None:
                 raise ValueError(
                     f"Reference ranges are not applicable for {rt} tests"
                 )
-            if rt == "qualitative" and self.qualitative_value is None:
-                raise ValueError("Qualitative value is required for qualitative tests")
             if rt == "textual" and self.qualitative_value is not None:
                 raise ValueError("Qualitative value must be empty for textual tests")
         return self

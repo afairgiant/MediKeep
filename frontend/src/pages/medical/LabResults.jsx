@@ -41,12 +41,54 @@ import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
-import { IconFileUpload, IconTable, IconLayoutGrid } from '@tabler/icons-react';
+import { IconFileUpload, IconTable, IconLayoutGrid, IconStack2 } from '@tabler/icons-react';
 import LabResultsComponentTable from '../../components/medical/labresults/LabResultsComponentTable';
 import TestComponentEditModal from '../../components/medical/labresults/TestComponentEditModal';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
 const COMPONENT_STATUS_PRIORITY = ['critical', 'abnormal', 'high', 'low', 'borderline', 'normal'];
+
+function labResultToFormData(labResult) {
+  return {
+    test_name: labResult.test_name || '',
+    test_code: labResult.test_code || '',
+    test_category: labResult.test_category || '',
+    test_type: labResult.test_type || '',
+    facility: labResult.facility || '',
+    status: labResult.status || 'ordered',
+    labs_result: labResult.labs_result || '',
+    ordered_date: labResult.ordered_date || '',
+    completed_date: labResult.completed_date || '',
+    notes: labResult.notes || '',
+    practitioner_id: labResult.practitioner_id ? String(labResult.practitioner_id) : '',
+    tags: labResult.tags || [],
+    value: labResult.value ?? null,
+    unit: labResult.unit || null,
+    ref_range_min: labResult.ref_range_min ?? null,
+    ref_range_max: labResult.ref_range_max ?? null,
+    ref_range_text: labResult.ref_range_text || null,
+  };
+}
+
+const EMPTY_FORM_DATA = {
+  test_name: '',
+  test_code: '',
+  test_category: '',
+  test_type: '',
+  facility: '',
+  status: 'ordered',
+  labs_result: '',
+  ordered_date: '',
+  completed_date: '',
+  notes: '',
+  practitioner_id: '',
+  tags: [],
+  value: null,
+  unit: null,
+  ref_range_min: null,
+  ref_range_max: null,
+  ref_range_text: null,
+};
 
 const LabResults = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -105,6 +147,9 @@ const LabResults = () => {
 
   // Track if we need to refresh after form submission (but not after uploads)
   const needsRefreshAfterSubmissionRef = useRef(false);
+  // Holds the newly created lab result while transitioning to post-create edit mode
+  const newlyCreatedResultRef = useRef(null);
+  const [postCreateMode, setPostCreateMode] = useState(false);
 
   // Form submission with uploads hook
   const {
@@ -120,27 +165,30 @@ const LabResults = () => {
   } = useFormSubmissionWithUploads({
     entityType: 'lab-result',
     onSuccess: () => {
-      // Reset form and close modal on complete success
+      const newResult = newlyCreatedResultRef.current;
+      newlyCreatedResultRef.current = null;
+
+      if (newResult) {
+        // A new lab result was just created — transition to post-create edit mode
+        // so the user can add components and relationships before fully dismissing.
+        resetSubmission();
+        setEditingLabResult(newResult);
+        setFormData(labResultToFormData(newResult));
+        setPostCreateMode(true);
+        // Sync fresh data in the background so the list is up to date
+        refreshPatientComponents();
+        if (needsRefreshAfterSubmissionRef.current) {
+          needsRefreshAfterSubmissionRef.current = false;
+          refreshData();
+        }
+        return;
+      }
+
+      // Normal path: close modal after a successful edit (or post-create save)
       setShowModal(false);
       setEditingLabResult(null);
-      setFormData({
-        test_name: '',
-        test_code: '',
-        test_category: '',
-        test_type: '',
-        facility: '',
-        status: 'ordered',
-        labs_result: '',
-        ordered_date: '',
-        completed_date: '',
-        notes: '',
-        practitioner_id: '',
-        value: null,
-        unit: null,
-        ref_range_min: null,
-        ref_range_max: null,
-        ref_range_text: null,
-      });
+      setPostCreateMode(false);
+      setFormData(EMPTY_FORM_DATA);
 
       // Re-open the stack panel if the edit was triggered from within it
       if (returningToStackRef.current) {
@@ -563,36 +611,30 @@ const LabResults = () => {
   const [editingComponent, setEditingComponent] = useState(null);
   const [editComponentModalOpen, setEditComponentModalOpen] = useState(false);
   const [editingLabResult, setEditingLabResult] = useState(null);
-  const [formData, setFormData] = useState({
-    test_name: '',
-    test_code: '',
-    test_category: '',
-    test_type: '',
-    facility: '',
-    status: 'ordered',
-    labs_result: '',
-    ordered_date: '',
-    completed_date: '',
-    notes: '',
-    practitioner_id: '',
-    value: null,
-    unit: null,
-    ref_range_min: null,
-    ref_range_max: null,
-    ref_range_text: null,
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM_DATA);
 
   const handleViewModeChange = useCallback((mode) => {
     setViewMode(mode);
     if (mode === 'stacked') setTableLayout(false);
   }, [setViewMode]);
 
-  const handlePanelCreateSuccess = useCallback(() => {
-    setShowPanelCreateDialog(false);
-    needsRefreshAfterSubmissionRef.current = true;
-    refreshData();
-    refreshPatientComponents();
-  }, [refreshData, refreshPatientComponents]);
+  const handlePanelCreateSuccess = useCallback(
+    labResult => {
+      setShowPanelCreateDialog(false);
+      needsRefreshAfterSubmissionRef.current = true;
+      refreshData();
+      refreshPatientComponents();
+
+      if (labResult) {
+        resetSubmission();
+        setEditingLabResult(labResult);
+        setFormData(labResultToFormData(labResult));
+        setPostCreateMode(true);
+        setShowModal(true);
+      }
+    },
+    [refreshData, refreshPatientComponents, resetSubmission]
+  );
 
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
   const handleAddLabResult = useCallback(() => {
@@ -603,28 +645,7 @@ const LabResults = () => {
     async labResult => {
       resetSubmission(); // Reset submission state to prevent modal flash
       setEditingLabResult(labResult);
-      setFormData({
-        test_name: labResult.test_name || '',
-        test_code: labResult.test_code || '',
-        test_category: labResult.test_category || '',
-        test_type: labResult.test_type || '',
-        facility: labResult.facility || '',
-        status: labResult.status || 'ordered',
-        labs_result: labResult.labs_result || '',
-        ordered_date: labResult.ordered_date || '',
-        completed_date: labResult.completed_date || '',
-        notes: labResult.notes || '',
-        practitioner_id: labResult.practitioner_id
-          ? String(labResult.practitioner_id)
-          : '',
-        tags: labResult.tags || [],
-        value: labResult.value ?? null,
-        unit: labResult.unit || null,
-        ref_range_min: labResult.ref_range_min ?? null,
-        ref_range_max: labResult.ref_range_max ?? null,
-        ref_range_text: labResult.ref_range_text || null,
-      });
-
+      setFormData(labResultToFormData(labResult));
       setShowModal(true);
     },
     [resetSubmission]
@@ -840,6 +861,9 @@ const LabResults = () => {
           const result = await createItem(labResultData);
           success = !!result;
           resultId = result?.id;
+          if (success) {
+            newlyCreatedResultRef.current = result;
+          }
           // Set flag to refresh after new lab result creation (but only after form submission, not uploads)
           if (success) {
             needsRefreshAfterSubmissionRef.current = true;
@@ -916,7 +940,6 @@ const LabResults = () => {
       completeFileUpload,
       handleSubmissionFailure,
       refreshFileCount,
-      t,
     ]
   );
 
@@ -978,6 +1001,7 @@ const LabResults = () => {
     resetSubmission(); // Reset submission state
     setShowModal(false);
     setEditingLabResult(null);
+    setPostCreateMode(false);
     if (returningToStackRef.current) {
       returningToStackRef.current = false;
       setStackPanelOpen(true);
@@ -985,24 +1009,7 @@ const LabResults = () => {
     setDocumentManagerMethods(null); // Reset document manager methods
     // Sync the components table — tests may have been added via TestComponentsTab
     refreshPatientComponents();
-    setFormData({
-      test_name: '',
-      test_code: '',
-      test_category: '',
-      test_type: '',
-      facility: '',
-      status: 'ordered',
-      labs_result: '',
-      ordered_date: '',
-      completed_date: '',
-      notes: '',
-      practitioner_id: '',
-      value: null,
-      unit: null,
-      ref_range_min: null,
-      ref_range_max: null,
-      ref_range_text: null,
-    });
+    setFormData(EMPTY_FORM_DATA);
   }, [isBlocking, resetSubmission, refreshPatientComponents]);
 
   const renderViewContent = () => {
@@ -1265,30 +1272,38 @@ const LabResults = () => {
             ]}
             viewMode={viewMode}
             onViewModeChange={handleViewModeChange}
-            viewModes={hasStackableResults ? ['panels', 'components', 'stacked'] : ['panels', 'components']}
+            viewModes={['panels', 'components']}
             viewToggleSize="sm"
             mb={0}
             rightChildren={
-              (viewMode === 'panels' || viewMode === 'components') ? (
-                <Button.Group>
+              <Button.Group>
+                <Button
+                  size="sm"
+                  variant={viewMode !== 'stacked' && !tableLayout ? 'filled' : 'default'}
+                  leftSection={<IconLayoutGrid size={14} />}
+                  onClick={() => { setTableLayout(false); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
+                >
+                  {t('common:viewToggle.cards', 'Cards')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={viewMode !== 'stacked' && tableLayout ? 'filled' : 'default'}
+                  leftSection={<IconTable size={14} />}
+                  onClick={() => { setTableLayout(true); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
+                >
+                  {t('common:viewToggle.table', 'Table')}
+                </Button>
+                {hasStackableResults && (
                   <Button
                     size="sm"
-                    variant={!tableLayout ? 'filled' : 'default'}
-                    leftSection={<IconLayoutGrid size={14} />}
-                    onClick={() => setTableLayout(false)}
+                    variant={viewMode === 'stacked' ? 'filled' : 'default'}
+                    leftSection={<IconStack2 size={14} />}
+                    onClick={() => handleViewModeChange('stacked')}
                   >
-                    {t('common:viewToggle.cards', 'Cards')}
+                    {t('common:viewToggle.stacked', 'Stacked')}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant={tableLayout ? 'filled' : 'default'}
-                    leftSection={<IconTable size={14} />}
-                    onClick={() => setTableLayout(true)}
-                  >
-                    {t('common:viewToggle.table', 'Table')}
-                  </Button>
-                </Button.Group>
-              ) : null
+                )}
+              </Button.Group>
             }
           />
 
@@ -1363,9 +1378,11 @@ const LabResults = () => {
           isOpen={showModal}
           onClose={() => !isBlocking && handleCloseModal()}
           title={
-            editingLabResult
-              ? t('labresults:editTitle', 'Edit Lab Result')
-              : t('labresults:addTitle', 'Add New Lab Result')
+            postCreateMode
+              ? t('labresults:addDetailsTitle', 'Add Lab Result Details')
+              : editingLabResult
+                ? t('labresults:editTitle', 'Edit Lab Result')
+                : t('labresults:addTitle', 'Add New Lab Result')
           }
           formData={formData}
           onInputChange={handleInputChange}
@@ -1380,6 +1397,7 @@ const LabResults = () => {
           fetchLabResultEncounters={fetchLabResultEncounters}
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
+          postCreate={postCreateMode}
           isGroupedResult={!!(editingLabResult && (editingLabResult.is_panel || parentIdsWithComponents.has(editingLabResult.id)))}
           onFileUploadComplete={success => {
             if (success && editingLabResult) {

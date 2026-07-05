@@ -72,7 +72,7 @@ describe('getTemplateRowsForPanel', () => {
     const panelNames = [
       'Complete Blood Count', 'Basic Metabolic Panel', 'Comprehensive Metabolic Panel',
       'Lipid Panel', 'Thyroid Function Panel', 'Hepatic Function Panel',
-      'Renal Function Panel', 'Autoimmune Panel', 'MRI', 'CT Scan', 'X-Ray',
+      'Renal Function Panel', 'Autoimmune Panel', 'MRI', 'CT Scan', 'X-Ray', 'Ultrasound',
     ];
     panelNames.forEach(name => {
       const rows = getTemplateRowsForPanel(name);
@@ -92,7 +92,7 @@ describe('getTemplateRowsForPanel', () => {
     expect(rows![0].category).toBe('other');
   });
 
-  it('returns imaging rows for MRI, CT Scan, X-Ray', () => {
+  it('returns imaging rows for MRI, CT Scan, X-Ray, Ultrasound', () => {
     const mri = getTemplateRowsForPanel('MRI');
     expect(mri).not.toBeNull();
     expect(mri!.length).toBe(1);
@@ -105,6 +105,14 @@ describe('getTemplateRowsForPanel', () => {
 
     const xray = getTemplateRowsForPanel('X-Ray');
     expect(xray![0].test_name).toBe('X-Ray');
+
+    const us = getTemplateRowsForPanel('Ultrasound');
+    expect(us).not.toBeNull();
+    expect(us!.length).toBe(1);
+    expect(us![0].test_name).toBe('Ultrasound');
+    expect(us![0].abbreviation).toBe('US');
+    expect(us![0].category).toBe('imaging');
+    expect(us![0].result_type).toBe('textual');
   });
 
   it('every returned row has a unique _rowId', () => {
@@ -154,7 +162,7 @@ describe('canonical_test_name linking', () => {
   });
 
   it('imaging rows without a library match have canonical_test_name null', () => {
-    ['MRI', 'CT Scan', 'X-Ray'].forEach(name => {
+    ['MRI', 'CT Scan', 'X-Ray', 'Ultrasound'].forEach(name => {
       const rows = getTemplateRowsForPanel(name)!;
       const libraryTest = getTestByName(rows[0].test_name);
       if (!libraryTest) {

@@ -215,9 +215,10 @@ class TestQualitativeAutoStatus:
 class TestCrossFieldValidation:
     """Tests for cross-field validation between quantitative and qualitative."""
 
-    def test_quantitative_requires_value(self):
-        with pytest.raises(ValidationError, match="Value is required for quantitative"):
-            make_component(value=None, unit="mg/dL")
+    def test_quantitative_allows_null_value(self):
+        # Values are optional on create so panel templates can be saved without pre-filled results
+        comp = make_component(value=None, unit="mg/dL")
+        assert comp.value is None
 
     def test_quantitative_unit_is_optional(self):
         comp = make_component(value=5.0, unit=None)
@@ -227,16 +228,17 @@ class TestCrossFieldValidation:
         with pytest.raises(ValidationError, match="Numeric value must be empty"):
             make_qualitative_component(value=5.0)
 
-    def test_qualitative_requires_qualitative_value(self):
-        with pytest.raises(ValidationError, match="Qualitative value is required"):
-            LabTestComponentCreate(
-                test_name="HIV",
-                lab_result_id=1,
-                result_type="qualitative",
-                qualitative_value=None,
-                value=None,
-                unit=None,
-            )
+    def test_qualitative_allows_null_qualitative_value(self):
+        # qualitative_value is optional on create for the same reason as quantitative value
+        comp = LabTestComponentCreate(
+            test_name="HIV",
+            lab_result_id=1,
+            result_type="qualitative",
+            qualitative_value=None,
+            value=None,
+            unit=None,
+        )
+        assert comp.qualitative_value is None
 
     def test_qualitative_rejects_ref_range_min(self):
         with pytest.raises(

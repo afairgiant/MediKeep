@@ -9,7 +9,6 @@ import {
   Grid,
   TextInput,
   NumberInput,
-  Textarea,
   Select,
   Text,
   Paper,
@@ -23,7 +22,6 @@ import {
   IconFileText,
   IconFlask,
   IconLink,
-  IconNotes,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -35,7 +33,6 @@ import {
 } from '../../../utils/dateUtils';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
-import { TagInput } from '../../common/TagInput';
 import ConditionRelationships from '../ConditionRelationships';
 import LabResultEncounterRelationships from './LabResultEncounterRelationships';
 import TestComponentsTab from './TestComponentsTab';
@@ -64,9 +61,10 @@ const LabResultFormWrapper = ({
   fetchLabResultEncounters,
   navigate,
   isGroupedResult = false,
+  postCreate = false,
   children,
 }) => {
-  const { t } = useTranslation(['medical', 'common']);
+  const { t } = useTranslation(['medical', 'common', 'shared']);
   const { dateInputFormat, dateParser } = useDateFormat();
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -256,9 +254,6 @@ const LabResultFormWrapper = ({
                   {t('labresults:tabs.relationships')}
                 </Tabs.Tab>
               )}
-              <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
-                {t('shared:tabs.notes')}
-              </Tabs.Tab>
             </Tabs.List>
 
             {/* Basic Info Tab */}
@@ -396,22 +391,6 @@ const LabResultFormWrapper = ({
                       firstDayOfWeek={0}
                       popoverProps={{ withinPortal: true, zIndex: 3000 }}
                     />
-                  </Grid.Col>
-                  <Grid.Col span={12}>
-                    <Box>
-                      <Text size="sm" fw={500} mb="xs">
-                        {t('shared:labels.tags')}
-                      </Text>
-                      <TagInput
-                        value={formData.tags || []}
-                        onChange={tags => {
-                          onInputChange({
-                            target: { name: 'tags', value: tags },
-                          });
-                        }}
-                        placeholder={t('medical:labResults.addPanel.tagsPlaceholder', 'Add tags to help organize and search for this record later')}
-                      />
-                    </Box>
                   </Grid.Col>
                 </Grid>
               </Box>
@@ -676,22 +655,6 @@ const LabResultFormWrapper = ({
               </Tabs.Panel>
             )}
 
-            {/* Notes Tab */}
-            <Tabs.Panel value="notes">
-              <Box mt="md">
-                <Textarea
-                  label={t('shared:fields.additionalNotes')}
-                  value={formData.notes || ''}
-                  onChange={handleTextInputChange('notes')}
-                  placeholder={t('labresults:additionalNotes.placeholder')}
-                  description={t('labresults:additionalNotes.description')}
-                  rows={5}
-                  minRows={3}
-                  autosize
-                  maxLength={5000}
-                />
-              </Box>
-            </Tabs.Panel>
           </Tabs>
 
           {/* Form Actions */}
@@ -701,16 +664,17 @@ const LabResultFormWrapper = ({
               onClick={onClose}
               disabled={isLoading || isSubmitting}
             >
-              {t('shared:fields.cancel')}
+              {postCreate
+                ? t('shared:labels.close')
+                : t('shared:fields.cancel')}
             </Button>
             <SubmitButton
               loading={isLoading || isSubmitting}
               disabled={!formData.test_name?.trim()}
             >
-              {editingItem
-                ? t('common:buttons.update')
-                : t('common:buttons.create')}{' '}
-              {t('shared:categories.lab_results')}
+              {postCreate
+                ? t('common:buttons.save')
+                : `${editingItem ? t('common:buttons.update') : t('common:buttons.create')} ${t('shared:categories.lab_results')}`}
             </SubmitButton>
           </Group>
         </Stack>

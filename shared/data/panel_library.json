@@ -305,6 +305,14 @@
       "common_names": ["Radiograph", "Radiography", "Plain Film", "Plain X-Ray"],
       "is_common": true,
       "display_order": 38
+    },
+    {
+      "panel_name": "Ultrasound",
+      "abbreviation": "US",
+      "category": "imaging",
+      "common_names": ["Sonogram", "Sonography", "Ultrasonography", "Echography"],
+      "is_common": true,
+      "display_order": 39
     }
   ]
 }

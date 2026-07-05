@@ -1244,7 +1244,7 @@
   },
   "viewToggle": {
     "cards": "Karten",
-    "components": "Ergebnisse",
+    "components": "Testergebnisse",
     "label": "Ansichtsmodus",
     "table": "Tabelle",
     "stacked": "Gestapelt",

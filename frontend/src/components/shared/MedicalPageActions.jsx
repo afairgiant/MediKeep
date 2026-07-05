@@ -133,10 +133,6 @@ function MedicalPageActions({
 
       {(rightChildren || shouldShowViewToggle) && (
         <Group gap="md" align="center" wrap="nowrap">
-          {rightChildren}
-          {rightChildren && shouldShowViewToggle && (
-            <Divider orientation="vertical" />
-          )}
           {shouldShowViewToggle && (
             <ViewToggle
               viewMode={viewMode}
@@ -146,6 +142,10 @@ function MedicalPageActions({
               {...(viewModes ? { modes: viewModes } : {})}
             />
           )}
+          {rightChildren && shouldShowViewToggle && (
+            <Divider orientation="vertical" />
+          )}
+          {rightChildren}
         </Group>
       )}
     </Group>

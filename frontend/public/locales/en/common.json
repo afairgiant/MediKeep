@@ -1244,7 +1244,7 @@
   },
   "viewToggle": {
     "cards": "Cards",
-    "components": "Results",
+    "components": "Test Results",
     "label": "View mode",
     "stacked": "Stacked",
     "table": "Table",

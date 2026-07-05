@@ -306,8 +306,8 @@ export const labresultsPageConfig = {
       },
       {
         value: 'test_name',
-        label: 'Test Name',
-        description: 'Sort alphabetically by test name',
+        label: 'Lab Name',
+        description: 'Sort alphabetically by lab name',
       },
       {
         value: 'status',

@@ -6,13 +6,11 @@ import {
   Grid,
   Autocomplete,
   TextInput,
-  Textarea,
   Select,
   Button,
   Group,
   Alert,
   Text,
-  Input,
   ActionIcon,
 } from '@mantine/core';
 import {
@@ -27,7 +25,6 @@ import { DateInput } from '../../adapters/DateInput';
 import { parseDateInput, formatDateInputChange } from '../../../utils/dateUtils';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
-import { TagInput } from '../../common/TagInput';
 import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import InlineTestComponentEntry, {
   InlineTestComponentMethods,
@@ -69,8 +66,6 @@ interface FormData {
   completed_date: string;
   practitioner_id: string;
   facility: string;
-  tags: string[];
-  notes: string;
 }
 
 const EMPTY_FORM: FormData = {
@@ -80,8 +75,6 @@ const EMPTY_FORM: FormData = {
   completed_date: '',
   practitioner_id: '',
   facility: '',
-  tags: [],
-  notes: '',
 };
 
 const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
@@ -173,8 +166,6 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
           : null,
         test_category: formData.test_category || null,
         facility: formData.facility.trim() || null,
-        tags: formData.tags,
-        notes: formData.notes.trim() || null,
         patient_id: currentPatient.id,
         status: 'ordered',
         is_panel: true,
@@ -257,7 +248,7 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
         error: message,
         component: 'TestPanelCreateDialog',
       });
-      setError(t('medical:labResults.addPanel.createError'));
+      setError(message || t('medical:labResults.addPanel.createError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -442,28 +433,6 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
             inlineTestRef.current = methods;
           }}
           defaultExpanded
-          disabled={isSubmitting}
-        />
-
-        <div>
-          <Input.Label>{t('shared:labels.tags')}</Input.Label>
-          <TagInput
-            placeholder={t('medical:labResults.addPanel.tagsPlaceholder', 'Add tags to help organize and search for this record later')}
-            value={formData.tags}
-            onChange={tags => setFormData(prev => ({ ...prev, tags }))}
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <Textarea
-          label={t('shared:tabs.notes', 'Notes')}
-          value={formData.notes}
-          onChange={e =>
-            setFormData(prev => ({ ...prev, notes: e.target.value }))
-          }
-          minRows={2}
-          autosize
-          maxLength={5000}
           disabled={isSubmitting}
         />
 

@@ -1244,7 +1244,7 @@
   },
   "viewToggle": {
     "cards": "Schede",
-    "components": "Risultati",
+    "components": "Risultati dei test",
     "label": "Modalità di visualizzazione",
     "table": "Tabella",
     "stacked": "In pila",

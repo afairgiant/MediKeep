@@ -1244,7 +1244,7 @@
   },
   "viewToggle": {
     "cards": "Kort",
-    "components": "Resultat",
+    "components": "Testresultat",
     "label": "Visningsläge",
     "table": "Tabell",
     "stacked": "Staplade",

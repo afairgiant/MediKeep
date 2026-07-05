@@ -1244,7 +1244,7 @@
   },
   "viewToggle": {
     "cards": "การ์ด",
-    "components": "ผลลัพธ์",
+    "components": "ผลการทดสอบ",
     "label": "โหมดการแสดง",
     "table": "ตาราง",
     "stacked": "แบบซ้อน",

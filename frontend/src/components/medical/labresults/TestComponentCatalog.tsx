@@ -21,7 +21,6 @@ import {
   Text,
   Skeleton,
   SimpleGrid,
-  SegmentedControl,
   Collapse,
   UnstyledButton,
   Badge,
@@ -30,8 +29,6 @@ import {
 } from '@mantine/core';
 import {
   IconSearch,
-  IconSortAscending,
-  IconAlertTriangle,
   IconChevronDown,
   IconChevronRight,
   IconChevronUp,
@@ -58,6 +55,7 @@ interface LabResultRef {
   id: number;
   test_name: string;
   practitioner_id: number | null;
+  facility?: string | null;
 }
 
 interface PractitionerRef {
@@ -96,7 +94,7 @@ function getStatusOptions(t: (_key: string, _fallback: string) => string) {
   ];
 }
 
-type SortMode = 'priority' | 'alphabetical';
+type SortMode = 'priority' | 'alphabetical' | 'category' | 'status';
 
 const STATUS_PRIORITY = ['critical', 'abnormal', 'high', 'low', 'borderline', 'normal'];
 
@@ -168,18 +166,25 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
     const seen = new Set<string>();
     const opts: { value: string; label: string }[] = [];
     for (const c of components) {
-      if (c.facility && !seen.has(c.facility)) {
-        seen.add(c.facility);
-        opts.push({ value: c.facility, label: c.facility });
+      const f = labResultById.get(c.lab_result_id)?.facility;
+      if (f && !seen.has(f)) {
+        seen.add(f);
+        opts.push({ value: f, label: f });
       }
     }
     return opts.sort((a, b) => a.label.localeCompare(b.label));
-  }, [components]);
+  }, [components, labResultById]);
 
-  const practitionerOptions = useMemo(
-    () => practitioners.map(p => ({ value: String(p.id), label: p.name })),
-    [practitioners]
-  );
+  const practitionerOptions = useMemo(() => {
+    const seenIds = new Set<number>();
+    for (const c of components) {
+      const pid = labResultById.get(c.lab_result_id)?.practitioner_id;
+      if (pid != null) seenIds.add(pid);
+    }
+    return practitioners
+      .filter(p => seenIds.has(p.id))
+      .map(p => ({ value: String(p.id), label: p.name }));
+  }, [components, labResultById, practitioners]);
 
   const totalCatalogCount = useMemo(() => {
     const keys = new Set(
@@ -205,7 +210,7 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
         const pid = labResultById.get(c.lab_result_id)?.practitioner_id ?? null;
         if (pid !== practitionerId) return false;
       }
-      if (facility != null && c.facility !== facility) return false;
+      if (facility != null && (labResultById.get(c.lab_result_id)?.facility ?? null) !== facility) return false;
       const dateStr = getComponentDate(c);
       if (fromStr && (!dateStr || dateStr.slice(0, 10) < fromStr)) return false;
       if (toStr && (!dateStr || dateStr.slice(0, 10) > toStr)) return false;
@@ -249,6 +254,22 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
 
     if (sortMode === 'alphabetical') {
       entries.sort((a, b) => a.test_name.localeCompare(b.test_name));
+    } else if (sortMode === 'category') {
+      entries.sort((a, b) => {
+        const ca = getCategoryDisplayName(a.category || 'other');
+        const cb = getCategoryDisplayName(b.category || 'other');
+        const c = ca.localeCompare(cb);
+        if (c !== 0) return c;
+        return a.test_name.localeCompare(b.test_name);
+      });
+    } else if (sortMode === 'status') {
+      entries.sort((a, b) => {
+        const ai = STATUS_PRIORITY.indexOf(a.status || 'normal');
+        const bi = STATUS_PRIORITY.indexOf(b.status || 'normal');
+        const s = (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+        if (s !== 0) return s;
+        return a.test_name.localeCompare(b.test_name);
+      });
     } else {
       entries.sort((a, b) => {
         const ai = STATUS_PRIORITY.indexOf(a.status || 'normal');
@@ -269,13 +290,16 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
       groups[cat].push(item);
     }
     const keys = Object.keys(groups).sort((a, b) => {
+      if (sortMode === 'category') {
+        return getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b));
+      }
       const aHasAbnormal = groups[a].some(i => i.status && i.status !== 'normal');
       const bHasAbnormal = groups[b].some(i => i.status && i.status !== 'normal');
       if (aHasAbnormal !== bHasAbnormal) return aHasAbnormal ? -1 : 1;
       return getCategoryDisplayName(a).localeCompare(getCategoryDisplayName(b));
     });
     return keys.map(key => ({ category: key, items: groups[key] }));
-  }, [catalogItems]);
+  }, [catalogItems, sortMode]);
 
   const hasActiveFilters = !!(
     search || category || status || dateFrom || dateTo || practitionerId != null || facility
@@ -389,6 +413,15 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
           <Collapse in={filtersExpanded}>
             <Card withBorder p="sm" bg="gray.0" mt="sm" style={{ borderStyle: 'dashed' }}>
               <Group gap="sm" wrap="wrap" align="flex-end">
+                <Select
+                  placeholder={t('shared:labels.category', 'Category')}
+                  data={CATEGORY_SELECT_OPTIONS}
+                  value={category}
+                  onChange={setCategory}
+                  size="sm"
+                  clearable
+                  style={{ flex: '1 1 160px', minWidth: 140 }}
+                />
                 <DateInput
                   placeholder={t('labresults:resultsTable.dateFrom', 'Date from')}
                   value={dateFrom}
@@ -404,15 +437,6 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
                   size="sm"
                   clearable
                   style={{ flex: '1 1 140px', minWidth: 120 }}
-                />
-                <Select
-                  placeholder={t('shared:labels.category', 'Category')}
-                  data={CATEGORY_SELECT_OPTIONS}
-                  value={category}
-                  onChange={setCategory}
-                  size="sm"
-                  clearable
-                  style={{ flex: '1 1 160px', minWidth: 140 }}
                 />
                 <Select
                   placeholder={t('shared:fields.status', 'Status')}
@@ -445,50 +469,23 @@ const TestComponentCatalog: React.FC<TestComponentCatalogProps> = ({
                     style={{ flex: '1 1 160px', minWidth: 140 }}
                   />
                 )}
+                <Select
+                  label={t('shared:labels.sortBy', 'Sort by')}
+                  data={[
+                    { value: 'priority', label: t('shared:labels.priority', 'Priority') },
+                    { value: 'alphabetical', label: t('medical:componentCatalog.sort.alphabetical', 'Test Name') },
+                    { value: 'category', label: t('shared:labels.category', 'Category') },
+                    { value: 'status', label: t('shared:fields.status', 'Status') },
+                  ]}
+                  value={sortMode}
+                  onChange={val => setSortMode((val as SortMode) ?? 'priority')}
+                  size="sm"
+                  style={{ flex: '1 1 140px', minWidth: 120 }}
+                />
               </Group>
             </Card>
           </Collapse>
         </Card>
-
-        {/* Sort toggle + count */}
-        {!loading && catalogItems.length > 0 && (
-          <Group justify="space-between">
-            <Text size="sm" c="dimmed">
-              {t(
-                'shared:labels.showingCountUniqueTests',
-                'Showing {{count}} unique tests',
-                { count: catalogItems.length }
-              )}
-            </Text>
-            <SegmentedControl
-              size="xs"
-              value={sortMode}
-              onChange={val => setSortMode(val as SortMode)}
-              data={[
-                {
-                  value: 'priority',
-                  label: (
-                    <Group gap={4}>
-                      <IconAlertTriangle size={14} />
-                      <span>{t('shared:labels.priority', 'Priority')}</span>
-                    </Group>
-                  ),
-                },
-                {
-                  value: 'alphabetical',
-                  label: (
-                    <Group gap={4}>
-                      <IconSortAscending size={14} />
-                      <span>
-                        {t('medical:componentCatalog.sort.alphabetical', 'A-Z')}
-                      </span>
-                    </Group>
-                  ),
-                },
-              ]}
-            />
-          </Group>
-        )}
 
         {/* Loading state */}
         {loading && (

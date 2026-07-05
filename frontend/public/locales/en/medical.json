@@ -76,7 +76,7 @@
     "refRange": "Ref",
     "searchPlaceholder": "Search tests...",
     "sort": {
-      "alphabetical": "A-Z"
+      "alphabetical": "Test Name"
     },
     "status": {
       "abnormal": "Abnormal",
