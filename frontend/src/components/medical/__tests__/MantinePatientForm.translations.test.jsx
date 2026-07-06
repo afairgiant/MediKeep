@@ -146,6 +146,9 @@ describe('MantinePatientForm - Translations', () => {
         expect(screen.getByText('shared:fields.male')).toBeInTheDocument();
         expect(screen.getByText('shared:fields.female')).toBeInTheDocument();
         expect(screen.getByText('shared:fields.other')).toBeInTheDocument();
+        expect(
+          screen.getByText('patients.form.gender.options.preferNotToSay')
+        ).toBeInTheDocument();
       });
     });
 
@@ -217,6 +220,22 @@ describe('MantinePatientForm - Translations', () => {
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
         target: { name: 'gender', value: 'M' },
+      });
+    });
+
+    it('should handle gender select changes to prefer-not-to-say (U)', async () => {
+      render(<MantinePatientForm {...defaultProps} />);
+
+      const genderInput = getSelectInput(/shared:fields\.gender/);
+      await userEvent.click(genderInput);
+
+      const preferNotToSayOption = await screen.findByText(
+        'patients.form.gender.options.preferNotToSay'
+      );
+      await userEvent.click(preferNotToSayOption);
+
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        target: { name: 'gender', value: 'U' },
       });
     });
 

@@ -40,6 +40,7 @@ import {
   convertForDisplay,
   convertForStorage,
 } from '../../utils/unitConversion';
+import { getGenderOptions } from '../../constants/genderOptions';
 
 /**
  * Parse a YYYY-MM-DD string as a local Date to avoid UTC timezone shift.
@@ -243,16 +244,7 @@ const PatientForm = ({
     { value: 'O-', label: 'O-' },
   ];
 
-  const genderOptions = [
-    { value: '', label: t('shared:fields.selectGender') },
-    { value: 'Male', label: t('shared:fields.male') },
-    { value: 'Female', label: t('shared:fields.female') },
-    { value: 'Other', label: t('shared:fields.other') },
-    {
-      value: 'Prefer not to say',
-      label: t('patients.form.gender.options.preferNotToSay'),
-    },
-  ];
+  const genderOptions = getGenderOptions(t);
 
   const relationshipOptions = [
     { value: '', label: t('patients.form.relationship.options.select') },

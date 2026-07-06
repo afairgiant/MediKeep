@@ -197,6 +197,7 @@ class PatientManagementService:
             "weight",
             "address",
             "physician_id",
+            "relationship_to_self",
         ]
 
         for field, value in patient_data.items():

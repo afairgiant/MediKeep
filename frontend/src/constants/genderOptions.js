@@ -1,0 +1,25 @@
+/**
+ * Gender Options
+ *
+ * Canonical gender option values, matching the backend's normalized storage
+ * format (see app/schemas/validators.py validate_gender / GENDER_NORMALIZATION).
+ * Both patient forms must use these same values so a value saved by one form
+ * is correctly re-selected when read back by either form's Select.
+ */
+
+export const GENDER_OPTIONS = [
+  { value: '', labelKey: 'shared:fields.selectGender' },
+  { value: 'M', labelKey: 'shared:fields.male' },
+  { value: 'F', labelKey: 'shared:fields.female' },
+  { value: 'OTHER', labelKey: 'shared:fields.other' },
+  { value: 'U', labelKey: 'patients.form.gender.options.preferNotToSay' },
+];
+
+/**
+ * Build translated gender Select options.
+ *
+ * @param {Function} t - i18next translation function
+ * @returns {Array<{value: string, label: string}>}
+ */
+export const getGenderOptions = t =>
+  GENDER_OPTIONS.map(({ value, labelKey }) => ({ value, label: t(labelKey) }));

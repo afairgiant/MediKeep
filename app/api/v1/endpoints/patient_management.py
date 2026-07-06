@@ -20,6 +20,7 @@ from app.core.http.error_handling import (
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import log_data_access, log_endpoint_access
 from app.models.models import Patient, User
+from app.schemas.validators import validate_gender as _validate_gender
 from app.services.patient_access import PatientAccessService
 from app.services.patient_management import PatientManagementService
 
@@ -46,6 +47,17 @@ class PatientCreateRequest(BaseModel):
     is_self_record: bool = Field(
         False, description="Whether this is the user's own medical record"
     )
+    relationship_to_self: Optional[str] = Field(
+        None,
+        max_length=30,
+        description="Relationship of this record to the account owner (e.g. self, spouse, child)",
+    )
+
+    @field_validator("gender")
+    @classmethod
+    def validate_gender(cls, v):
+        """Validate and normalize gender, consistent with PatientUpdateRequest."""
+        return _validate_gender(v, allow_empty_string=True)
 
 
 class PatientUpdateRequest(BaseModel):
@@ -66,6 +78,7 @@ class PatientUpdateRequest(BaseModel):
     physician_id: Optional[int] = Field(
         None, gt=0, description="Primary care physician ID"
     )
+    relationship_to_self: Optional[str] = Field(None, max_length=30)
 
     @model_validator(mode="before")
     @classmethod
@@ -82,6 +95,7 @@ class PatientUpdateRequest(BaseModel):
                 "weight",
                 "address",
                 "physician_id",
+                "relationship_to_self",
             ]:
                 if field in values and values[field] == "":
                     values[field] = None
@@ -122,16 +136,8 @@ class PatientUpdateRequest(BaseModel):
     @field_validator("gender")
     @classmethod
     def validate_gender(cls, v):
-        """Validate gender"""
-        if v is not None and v.strip():
-            allowed = ["M", "F", "MALE", "FEMALE", "OTHER", "U", "UNKNOWN"]
-            gender_upper = v.upper()
-            if gender_upper not in allowed:
-                raise ValueError(f"Gender must be one of: {', '.join(allowed)}")
-            # Normalize common values
-            gender_map = {"MALE": "M", "FEMALE": "F", "UNKNOWN": "U"}
-            return gender_map.get(gender_upper, gender_upper)
-        return v
+        """Validate and normalize gender"""
+        return _validate_gender(v)
 
 
 class PatientResponse(BaseModel):

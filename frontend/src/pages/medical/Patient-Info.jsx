@@ -352,6 +352,11 @@ const PatientInfo = () => {
         return t('shared:fields.female', 'Female');
       case 'OTHER':
         return t('shared:fields.other', 'Other');
+      case 'U':
+        return t(
+          'patients.form.gender.options.preferNotToSay',
+          'Prefer not to say'
+        );
       default:
         return t('shared:labels.notSpecified', 'Not specified');
     }

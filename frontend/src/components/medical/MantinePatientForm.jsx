@@ -31,6 +31,7 @@ import {
   convertForStorage,
 } from '../../utils/unitConversion';
 import { RELATIONSHIP_OPTIONS } from '../../constants/relationshipOptions';
+import { getGenderOptions } from '../../constants/genderOptions';
 import PatientPhotoUpload from './PatientPhotoUpload';
 import PractitionerSelectWithCreate from './practitioners/PractitionerSelectWithCreate';
 import patientApi from '../../services/api/patientApi';
@@ -248,11 +249,7 @@ const MantinePatientForm = ({
                 value={formData.gender}
                 onChange={handleSelectChange('gender')}
                 disabled={saving}
-                data={[
-                  { value: 'M', label: t('shared:fields.male') },
-                  { value: 'F', label: t('shared:fields.female') },
-                  { value: 'OTHER', label: t('shared:fields.other') },
-                ]}
+                data={getGenderOptions(t)}
                 clearable
                 radius="md"
               />

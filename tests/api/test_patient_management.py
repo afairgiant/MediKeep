@@ -292,3 +292,120 @@ class TestPatientManagementAPI:
         assert patients_data["height"] == mgmt_data["height"] == 69.75
         assert patients_data["weight"] == mgmt_data["weight"] == 185.5
         assert patients_data["first_name"] == mgmt_data["first_name"] == "Consistency"
+
+    def test_create_patient_persists_relationship_to_self(
+        self, authenticated_client: TestClient
+    ):
+        """Regression test for #913: relationship_to_self must persist on create."""
+        patient_data = {
+            "first_name": "Relationship",
+            "last_name": "Test",
+            "birth_date": "1990-01-01",
+            "relationship_to_self": "spouse",
+            "is_self_record": False,
+        }
+
+        response = authenticated_client.post(
+            "/api/v1/patient-management/", json=patient_data
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["relationship_to_self"] == "spouse"
+
+    def test_update_patient_persists_relationship_to_self(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
+        """Regression test for #913: relationship_to_self must persist on update."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={"relationship_to_self": "child"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["relationship_to_self"] == "child"
+
+        # Confirm it actually persisted, not just echoed back in the response
+        get_response = authenticated_client.get(
+            f"/api/v1/patient-management/{test_patient.id}"
+        )
+        assert get_response.status_code == 200
+        assert get_response.json()["relationship_to_self"] == "child"
+
+    @pytest.mark.parametrize(
+        "submitted_gender,expected_stored",
+        [
+            ("Male", "M"),
+            ("male", "M"),
+            ("MALE", "M"),
+            ("Female", "F"),
+            ("OTHER", "OTHER"),
+            ("Unknown", "U"),
+        ],
+    )
+    def test_create_patient_normalizes_gender(
+        self,
+        authenticated_client: TestClient,
+        submitted_gender,
+        expected_stored,
+    ):
+        """Regression test for #913: create must normalize gender the same way update does."""
+        patient_data = {
+            "first_name": "Gender",
+            "last_name": "Create",
+            "birth_date": "1990-01-01",
+            "gender": submitted_gender,
+            "is_self_record": False,
+        }
+
+        response = authenticated_client.post(
+            "/api/v1/patient-management/", json=patient_data
+        )
+
+        assert response.status_code == 200
+        assert response.json()["gender"] == expected_stored
+
+    @pytest.mark.parametrize(
+        "submitted_gender,expected_stored",
+        [
+            ("Male", "M"),
+            ("male", "M"),
+            ("MALE", "M"),
+            ("Female", "F"),
+            ("OTHER", "OTHER"),
+            ("Unknown", "U"),
+        ],
+    )
+    def test_update_patient_normalizes_gender(
+        self,
+        authenticated_client: TestClient,
+        test_patient: Patient,
+        submitted_gender,
+        expected_stored,
+    ):
+        """Regression test for #913: create and update must agree on normalized gender."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={"gender": submitted_gender},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["gender"] == expected_stored
+
+    def test_create_patient_invalid_gender_rejected(
+        self, authenticated_client: TestClient
+    ):
+        """Invalid gender values must be rejected with a 422, not silently stored."""
+        patient_data = {
+            "first_name": "Invalid",
+            "last_name": "Gender",
+            "birth_date": "1990-01-01",
+            "gender": "not_a_real_gender",
+            "is_self_record": False,
+        }
+
+        response = authenticated_client.post(
+            "/api/v1/patient-management/", json=patient_data
+        )
+
+        assert response.status_code == 422
