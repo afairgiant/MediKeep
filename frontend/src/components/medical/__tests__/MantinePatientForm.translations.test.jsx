@@ -3,7 +3,12 @@ import { vi } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import render, { screen, fireEvent, waitFor } from '../../../test-utils/render';
+import render, {
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '../../../test-utils/render';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import MantinePatientForm from '../MantinePatientForm';
@@ -94,9 +99,23 @@ describe('MantinePatientForm - Translations', () => {
     vi.clearAllMocks();
   });
 
-  // Helper for Select inputs (Mantine renders both input + listbox)
+  // Mantine's Select associates the same label with both the visible <input>
+  // and its (always-mounted, CSS-hidden-when-closed) options listbox <div>, and
+  // their relative order in getAllByLabelText's results is not guaranteed, so
+  // filter for the actual <input> rather than assuming index [0].
   function getSelectInput(labelRegex) {
-    return screen.getAllByLabelText(labelRegex)[0];
+    return screen
+      .getAllByLabelText(labelRegex)
+      .find(el => el.tagName === 'INPUT');
+  }
+
+  // Scope option queries to the specific Select's listbox: gender's "Other"
+  // option and RELATIONSHIP_OPTIONS' "Other" label both render the same text,
+  // and Mantine mounts all listboxes in the DOM regardless of open state.
+  function getListboxFor(input) {
+    return document.querySelector(
+      `[role="listbox"][aria-labelledby="${input.id}-label"]`
+    );
   }
 
   describe('English Translations', () => {
@@ -143,12 +162,15 @@ describe('MantinePatientForm - Translations', () => {
       await userEvent.click(genderInput);
 
       await waitFor(() => {
-        expect(screen.getByText('shared:fields.male')).toBeInTheDocument();
-        expect(screen.getByText('shared:fields.female')).toBeInTheDocument();
-        expect(screen.getByText('shared:fields.other')).toBeInTheDocument();
-        expect(
-          screen.getByText('patients.form.gender.options.preferNotToSay')
-        ).toBeInTheDocument();
+        // Gender options now pass a fallback default to t(), so the global
+        // test mock renders the fallback text rather than the raw i18n key.
+        // Scoped to the gender listbox since "Other" also appears as a plain
+        // RELATIONSHIP_OPTIONS label, and Mantine mounts all listboxes at once.
+        const listbox = within(getListboxFor(genderInput));
+        expect(listbox.getByText('Male')).toBeInTheDocument();
+        expect(listbox.getByText('Female')).toBeInTheDocument();
+        expect(listbox.getByText('Other')).toBeInTheDocument();
+        expect(listbox.getByText('Prefer not to say')).toBeInTheDocument();
       });
     });
 
@@ -215,7 +237,8 @@ describe('MantinePatientForm - Translations', () => {
       const genderInput = getSelectInput(/shared:fields\.gender/);
       await userEvent.click(genderInput);
 
-      const maleOption = await screen.findByText('shared:fields.male');
+      const genderListbox = within(getListboxFor(genderInput));
+      const maleOption = await genderListbox.findByText('Male');
       await userEvent.click(maleOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
@@ -229,9 +252,9 @@ describe('MantinePatientForm - Translations', () => {
       const genderInput = getSelectInput(/shared:fields\.gender/);
       await userEvent.click(genderInput);
 
-      const preferNotToSayOption = await screen.findByText(
-        'patients.form.gender.options.preferNotToSay'
-      );
+      const genderListbox = within(getListboxFor(genderInput));
+      const preferNotToSayOption =
+        await genderListbox.findByText('Prefer not to say');
       await userEvent.click(preferNotToSayOption);
 
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({

@@ -59,6 +59,12 @@ class PatientCreateRequest(BaseModel):
         """Validate and normalize gender, consistent with PatientUpdateRequest."""
         return _validate_gender(v, allow_empty_string=True)
 
+    @field_validator("relationship_to_self")
+    @classmethod
+    def validate_relationship_to_self(cls, v):
+        """Convert empty string to None, consistent with PatientUpdateRequest."""
+        return None if v == "" else v
+
 
 class PatientUpdateRequest(BaseModel):
     """Request model for updating a patient"""

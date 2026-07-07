@@ -313,6 +313,26 @@ class TestPatientManagementAPI:
         data = response.json()
         assert data["relationship_to_self"] == "spouse"
 
+    def test_create_patient_normalizes_empty_relationship_to_self(
+        self, authenticated_client: TestClient
+    ):
+        """Empty-string relationship_to_self must normalize to None on create,
+        consistent with the update path's convert_empty_strings_to_none."""
+        patient_data = {
+            "first_name": "Empty",
+            "last_name": "Relationship",
+            "birth_date": "1990-01-01",
+            "relationship_to_self": "",
+            "is_self_record": False,
+        }
+
+        response = authenticated_client.post(
+            "/api/v1/patient-management/", json=patient_data
+        )
+
+        assert response.status_code == 200
+        assert response.json()["relationship_to_self"] is None
+
     def test_update_patient_persists_relationship_to_self(
         self, authenticated_client: TestClient, test_patient: Patient
     ):
@@ -406,6 +426,17 @@ class TestPatientManagementAPI:
 
         response = authenticated_client.post(
             "/api/v1/patient-management/", json=patient_data
+        )
+
+        assert response.status_code == 422
+
+    def test_update_patient_invalid_gender_rejected(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
+        """Invalid gender values must be rejected with a 422 on update too."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={"gender": "not_a_real_gender"},
         )
 
         assert response.status_code == 422

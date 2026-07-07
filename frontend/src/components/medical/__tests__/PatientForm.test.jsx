@@ -122,12 +122,12 @@ describe('PatientForm', () => {
     const genderInput = getSelectInput(/shared:fields\.gender/);
     const listbox = within(getListboxFor(genderInput));
 
-    expect(listbox.getByText('shared:fields.male')).toBeInTheDocument();
-    expect(listbox.getByText('shared:fields.female')).toBeInTheDocument();
-    expect(listbox.getByText('shared:fields.other')).toBeInTheDocument();
-    expect(
-      listbox.getByText('patients.form.gender.options.preferNotToSay')
-    ).toBeInTheDocument();
+    // Gender options pass a fallback default to t(), so the global test mock
+    // renders the fallback text rather than the raw i18n key.
+    expect(listbox.getByText('Male')).toBeInTheDocument();
+    expect(listbox.getByText('Female')).toBeInTheDocument();
+    expect(listbox.getByText('Other')).toBeInTheDocument();
+    expect(listbox.getByText('Prefer not to say')).toBeInTheDocument();
   });
 
   it('re-selects the correct gender option when editing a patient with gender "M"', () => {
@@ -136,7 +136,7 @@ describe('PatientForm', () => {
     );
 
     // Mantine Select displays the label of the option matching the current value
-    expect(screen.getByDisplayValue('shared:fields.male')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Male')).toBeInTheDocument();
   });
 
   it('sends the canonical gender value on submit, not the label', async () => {
@@ -151,7 +151,7 @@ describe('PatientForm', () => {
     const genderInput = getSelectInput(/shared:fields\.gender/);
     await userEvent.click(genderInput);
     const genderListbox = within(getListboxFor(genderInput));
-    await userEvent.click(genderListbox.getByText('shared:fields.female'));
+    await userEvent.click(genderListbox.getByText('Female'));
 
     const submitButton = screen.getByText(
       'patients.form.buttons.createPatient'

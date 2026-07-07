@@ -8,11 +8,19 @@
  */
 
 export const GENDER_OPTIONS = [
-  { value: '', labelKey: 'shared:fields.selectGender' },
-  { value: 'M', labelKey: 'shared:fields.male' },
-  { value: 'F', labelKey: 'shared:fields.female' },
-  { value: 'OTHER', labelKey: 'shared:fields.other' },
-  { value: 'U', labelKey: 'patients.form.gender.options.preferNotToSay' },
+  {
+    value: '',
+    labelKey: 'shared:fields.selectGender',
+    fallback: 'Select gender',
+  },
+  { value: 'M', labelKey: 'shared:fields.male', fallback: 'Male' },
+  { value: 'F', labelKey: 'shared:fields.female', fallback: 'Female' },
+  { value: 'OTHER', labelKey: 'shared:fields.other', fallback: 'Other' },
+  {
+    value: 'U',
+    labelKey: 'patients.form.gender.options.preferNotToSay',
+    fallback: 'Prefer not to say',
+  },
 ];
 
 /**
@@ -22,4 +30,7 @@ export const GENDER_OPTIONS = [
  * @returns {Array<{value: string, label: string}>}
  */
 export const getGenderOptions = t =>
-  GENDER_OPTIONS.map(({ value, labelKey }) => ({ value, label: t(labelKey) }));
+  GENDER_OPTIONS.map(({ value, labelKey, fallback }) => ({
+    value,
+    label: t(labelKey, fallback),
+  }));

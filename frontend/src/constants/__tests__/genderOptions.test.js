@@ -17,4 +17,16 @@ describe('genderOptions', () => {
       expect(option.label).toBe(`translated:${GENDER_OPTIONS[index].labelKey}`);
     });
   });
+
+  it('passes each entry fallback string as the t() default value', () => {
+    const t = vi.fn((key, fallback) => fallback);
+    const options = getGenderOptions(t);
+
+    GENDER_OPTIONS.forEach(({ labelKey, fallback }) => {
+      expect(t).toHaveBeenCalledWith(labelKey, fallback);
+    });
+    options.forEach((option, index) => {
+      expect(option.label).toBe(GENDER_OPTIONS[index].fallback);
+    });
+  });
 });
