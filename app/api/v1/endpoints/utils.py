@@ -609,14 +609,18 @@ def validate_search_input(query: str, max_length: int = None) -> str:
             detail="Search query must be at least 1 character long",
         )
 
-    # Remove or replace potentially problematic characters
-    # Allow alphanumeric, spaces, hyphens, underscores, periods, commas, parentheses, forward slashes, percent signs
+    # Reject control characters and characters with no legitimate use in a search
+    # term (quotes, semicolons, angle brackets, backslashes, backticks). We rely on
+    # parameterized queries for SQL injection protection, so this is just a sanity
+    # filter - it deliberately does NOT restrict to ASCII, since test/component
+    # names are user-defined and may be in any of the app's supported languages
+    # (e.g. Chinese, Thai, Cyrillic, accented Latin characters).
     import re
 
-    if not re.match(r"^[a-zA-Z0-9\s\-_.,()\/\%]+$", query):
+    if re.search(r"[\x00-\x1f\x7f'\"`;<>\\]", query):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Search query contains invalid characters. Only letters, numbers, spaces, hyphens, underscores, periods, commas, parentheses, forward slashes, and percent signs are allowed.",
+            detail="Search query contains invalid characters.",
         )
 
     # Note: We allow % in test names (e.g., "% Free Testosterone") since we use parameterized queries
