@@ -500,7 +500,7 @@ const PatientForm = ({
           >
             {t(
               isEditing
-                ? 'patients.form.buttons.updatePatient'
+                ? 'patients.form.buttons.saveChanges'
                 : 'patients.form.buttons.createPatient'
             )}
           </Button>
