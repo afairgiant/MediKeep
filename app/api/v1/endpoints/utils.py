@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Any, Optional
 
@@ -615,8 +616,6 @@ def validate_search_input(query: str, max_length: int = None) -> str:
     # filter - it deliberately does NOT restrict to ASCII, since test/component
     # names are user-defined and may be in any of the app's supported languages
     # (e.g. Chinese, Thai, Cyrillic, accented Latin characters).
-    import re
-
     if re.search(r"[\x00-\x1f\x7f'\"`;<>\\]", query):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
