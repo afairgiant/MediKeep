@@ -80,7 +80,7 @@ export const unitLabels = {
   imperial: {
     weight: 'lbs',
     weightLong: 'pounds',
-    height: 'inches',
+    height: 'in',
     heightLong: 'inches',
     temperature: '°F',
     temperatureLong: 'Fahrenheit',

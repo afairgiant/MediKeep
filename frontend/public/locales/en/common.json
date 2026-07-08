@@ -638,6 +638,12 @@
       "lastName": {
         "placeholder": "Enter last name"
       },
+      "height": {
+        "placeholder": "Enter height"
+      },
+      "weight": {
+        "placeholder": "Enter weight"
+      },
       "messages": {
         "createSuccess": "Created {{firstName}} {{lastName}} successfully",
         "updateSuccess": "Updated {{firstName}} {{lastName}} successfully"
