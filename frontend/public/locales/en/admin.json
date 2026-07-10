@@ -76,7 +76,9 @@
         "filename": "Filename"
       },
       "title": "Existing Backups",
-      "verify": "Verify"
+      "verify": "Verify",
+      "count": "{{count}} backups",
+      "unknown": "Unknown"
     },
     "loading": "Loading backup management...",
     "modals": {
@@ -154,7 +156,8 @@
       "retentionLogic": "Retention Logic",
       "saveRetention": "Save Retention Settings",
       "timeBasedCleanup": "<strong>Time-based Cleanup:</strong> Delete backups older than {{days}} days (beyond minimum count)",
-      "title": "Backup Retention Settings"
+      "title": "Backup Retention Settings",
+      "currentStatus": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})"
     },
     "schedule": {
       "completedSuccessfully": "Completed successfully",
@@ -640,7 +643,10 @@
     },
     "title": "Trash Management",
     "totalSize": "{{size}} total",
-    "trashPurged": "Trash purged"
+    "trashPurged": "Trash purged",
+    "purgedMessage": "{{count}} expired files permanently deleted",
+    "purgedDirectories": "across {{count}} directories",
+    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>."
   },
   "users": {
     "actionsFor": "Actions for {{username}}",

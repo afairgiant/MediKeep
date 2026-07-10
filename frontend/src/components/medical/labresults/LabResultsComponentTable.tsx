@@ -619,7 +619,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
                                         color="blue"
                                         disabled={disableActions}
                                         onClick={() => onView(comp)}
-                                        aria-label={t('shared:buttons.view', 'View')}
+                                        aria-label={t('common:buttons.view', 'View')}
                                       >
                                         <IconEye size={13} />
                                       </ActionIcon>
@@ -630,7 +630,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
                                         variant="subtle"
                                         disabled={disableActions}
                                         onClick={() => onEdit(comp)}
-                                        aria-label={t('shared:buttons.edit', 'Edit')}
+                                        aria-label={t('common:buttons.edit', 'Edit')}
                                       >
                                         <IconEdit size={13} />
                                       </ActionIcon>
@@ -642,7 +642,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
                                         color="red"
                                         disabled={disableActions}
                                         onClick={() => onDelete(comp.id)}
-                                        aria-label={t('shared:buttons.delete', 'Delete')}
+                                        aria-label={t('common:buttons.delete', 'Delete')}
                                       >
                                         <IconTrash size={13} />
                                       </ActionIcon>

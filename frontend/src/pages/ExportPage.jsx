@@ -264,7 +264,7 @@ const ExportPage = () => {
   // Translate scope labels from backend
   const translateScopeLabel = scopeValue => {
     // Try to get translation, fallback to original label if translation doesn't exist
-    const translationKey = `exportPage.scopes.${scopeValue}`;
+    const translationKey = `export.scopes.${scopeValue}`;
     return t(translationKey);
   };
 

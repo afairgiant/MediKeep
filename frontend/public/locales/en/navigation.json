@@ -2,6 +2,7 @@
   "activity": {
     "actions": {
       "added": "Added",
+      "created": "Created",
       "deleted": "Deleted",
       "modified": "Modified",
       "removed": "Removed",
