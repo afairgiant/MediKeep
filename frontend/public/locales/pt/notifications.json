@@ -177,7 +177,8 @@
         "label": "URL do Webhook",
         "placeholder": "https://api.exemplo.com/webhook"
       }
-    }
+    },
+    "sentCount": "{{count}} sent"
   },
   "description": "Configure como você recebe notificações para eventos importantes",
   "error": "Falha ao carregar configurações de notificação",
@@ -318,7 +319,8 @@
       "operationSuccess": "{{operation}} concluída com sucesso!",
       "saveFailed": "Falha ao Salvar",
       "success": "Sucesso!",
-      "warning": "Aviso"
+      "warning": "Aviso",
+      "deleteFailed": "Delete Failed"
     },
     "invitations": {
       "accessRevoked": "Acesso Revogado",
@@ -382,7 +384,9 @@
       "cleanupComplete": "Limpeza concluída: {{cleaned}} arquivos limpos, {{deleted}} arquivos excluídos",
       "cleanupFailed": "Falha ao limpar arquivos. Por favor, tente novamente mais tarde.",
       "noOutOfSync": "Nenhum arquivo dessincronizado encontrado para limpar",
-      "sessionTimeoutUpdated": "Tempo limite da sessão atualizado para {{minutes}} minutos. Sua sessão foi renovada."
+      "sessionTimeoutUpdated": "Tempo limite da sessão atualizado para {{minutes}} minutos. Sua sessão foi renovada.",
+      "saveFailed": "Failed to save settings",
+      "saved": "Settings saved successfully"
     },
     "sharing": {
       "accessRevoked": "Acesso revogado para o usuário {{userId}}",
@@ -409,7 +413,8 @@
       "fileUploadedSuccess": "\"{{fileName}}\" enviado ao Paperless com sucesso!",
       "fileUploadFailed": "Falha no Envio do Arquivo",
       "paperlessUploadFailed": "Falha no Envio ao Paperless",
-      "partialSuccess": "{{completed}}/{{total}} arquivos enviados com sucesso. {{failed}} falharam."
+      "partialSuccess": "{{completed}}/{{total}} arquivos enviados com sucesso. {{failed}} falharam.",
+      "failed": "File Upload Failed"
     },
     "vitals": {
       "deleteFailed": "Falha ao excluir registro de sinais vitais",

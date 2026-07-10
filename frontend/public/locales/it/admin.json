@@ -76,7 +76,9 @@
         "filename": "Nome file"
       },
       "title": "Backup esistenti",
-      "verify": "Verifica"
+      "verify": "Verifica",
+      "count": "{{count}} backups",
+      "unknown": "Unknown"
     },
     "loading": "Caricamento gestione backup...",
     "modals": {
@@ -154,7 +156,8 @@
       "retentionLogic": "Logica di conservazione",
       "saveRetention": "Salva impostazioni di conservazione",
       "timeBasedCleanup": "<strong>Pulizia temporale:</strong> Elimina i backup più vecchi di {{days}} giorni (oltre il conteggio minimo)",
-      "title": "Impostazioni conservazione backup"
+      "title": "Impostazioni conservazione backup",
+      "currentStatus": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})"
     },
     "schedule": {
       "completedSuccessfully": "Completato con successo",
@@ -319,13 +322,19 @@
       "symptom_occurrence": "Registrazioni dei singoli episodi sintomatici",
       "treatment": "Piani terapeutici e trattamenti",
       "user": "Utenti e amministratori di sistema",
-      "vitals": "Pressione sanguigna, frequenza cardiaca, temperatura"
+      "vitals": "Pressione sanguigna, frequenza cardiaca, temperatura",
+      "medical_specialty": "Medical specialties (e.g. Cardiology) assigned to practitioners",
+      "practice": "Medical practices — contact details and multiple locations"
     },
     "fallbackWarning": "Impossibile caricare i modelli dal server. Viene mostrato l'elenco dei modelli predefinito.",
     "filterAriaLabel": "Filtra modelli dati",
     "filterPlaceholder": "Filtra modelli...",
     "noMatchFilter": "Nessun modello corrisponde a \"{{query}}\"",
-    "subtitle": "Gestisci e visualizza tutte le tabelle e i record del database"
+    "subtitle": "Gestisci e visualizza tutte le tabelle e i record del database",
+    "displayNames": {
+      "medical_specialty": "Medical Specialties",
+      "practice": "Practices"
+    }
   },
   "directoryCard": {
     "files": "file",
@@ -347,7 +356,8 @@
     "primaryKeyReadOnly": "Chiave primaria (sola lettura)",
     "selectDefault": "-- Seleziona --",
     "selectField": "-- Seleziona {{field}} --",
-    "systemTimestamp": "Timestamp di sistema (generato automaticamente)"
+    "systemTimestamp": "Timestamp di sistema (generato automaticamente)",
+    "computedField": "Computed from related record (read-only)"
   },
   "header": {
     "administrator": "Amministratore",
@@ -610,7 +620,10 @@
     },
     "title": "Gestione cestino",
     "totalSize": "{{size}} totale",
-    "trashPurged": "Cestino svuotato"
+    "trashPurged": "Cestino svuotato",
+    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgedDirectories": "across {{count}} directories",
+    "purgedMessage": "{{count}} expired files permanently deleted"
   },
   "users": {
     "actionsFor": "Azioni per {{username}}",
@@ -690,5 +703,28 @@
     "userCount": "{{count}} utenti",
     "userCount_one": "{{count}} utente",
     "userCount_other": "{{count}} utenti"
+  },
+  "medicalSpecialty": {
+    "description": "Description",
+    "name": "Name"
+  },
+  "practices": {
+    "locations": {
+      "add": "Add location",
+      "empty": "No locations yet.",
+      "labelField": "Label",
+      "labelPlaceholder": "Main office",
+      "locationNumber": "Location {{num}}",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
+      "title": "Locations"
+    },
+    "subtitle": "Manage medical practices — contact details, locations, and more.",
+    "title": "Practices"
+  },
+  "practitioner": {
+    "quickAddSpecialty": "+ Add new specialty…",
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   }
 }

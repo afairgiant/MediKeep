@@ -85,7 +85,10 @@
     "treatmentName": "Behandlingsnamn",
     "treatmentReceived": "Mottagen behandling",
     "treatmentType": "Behandlingstyp",
-    "vaccineName": "Vaccinnamn"
+    "vaccineName": "Vaccinnamn",
+    "description": "Description",
+    "name": "Name",
+    "reset": "Reset"
   },
   "labels": {
     "acrossCountFiles": "fördelat på {{count}} filer",
@@ -301,7 +304,13 @@
     "warnings": "Varningar",
     "website": "Webbplats",
     "weekly": "Veckovis",
-    "weight": "Vikt"
+    "weight": "Vikt",
+    "remove": "Remove",
+    "save": "Save",
+    "sortBy": "Sort by",
+    "state": "State",
+    "unknownError": "Unknown error",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Skrivskyddad åtkomst"

@@ -76,7 +76,9 @@
         "filename": "Filnamn"
       },
       "title": "Befintliga säkerhetskopior",
-      "verify": "Verifiera"
+      "verify": "Verifiera",
+      "count": "{{count}} backups",
+      "unknown": "Unknown"
     },
     "loading": "Laddar säkerhetskopieringshantering...",
     "modals": {
@@ -154,7 +156,8 @@
       "retentionLogic": "Lagringslogik",
       "saveRetention": "Spara lagringsinställningar",
       "timeBasedCleanup": "<strong>Tidsbaserad rensning:</strong> Radera säkerhetskopior äldre än {{days}} dagar (utöver minsta antal)",
-      "title": "Inställningar för lagringstid"
+      "title": "Inställningar för lagringstid",
+      "currentStatus": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})"
     },
     "schedule": {
       "completedSuccessfully": "Slutfördes framgångsrikt",
@@ -319,13 +322,19 @@
       "symptom_occurrence": "Enskilda symptomhändelseposter",
       "treatment": "Behandlingsplaner och terapier",
       "user": "Systemanvändare och administratörer",
-      "vitals": "Blodtryck, hjärtfrekvens, temperatur"
+      "vitals": "Blodtryck, hjärtfrekvens, temperatur",
+      "medical_specialty": "Medical specialties (e.g. Cardiology) assigned to practitioners",
+      "practice": "Medical practices — contact details and multiple locations"
     },
     "fallbackWarning": "Kunde inte ladda modeller från servern. Visar inbyggd modellista.",
     "filterAriaLabel": "Filtrera datamodeller",
     "filterPlaceholder": "Filtrera modeller...",
     "noMatchFilter": "Inga modeller matchar \"{{query}}\"",
-    "subtitle": "Hantera och visa alla databastabeller och poster"
+    "subtitle": "Hantera och visa alla databastabeller och poster",
+    "displayNames": {
+      "medical_specialty": "Medical Specialties",
+      "practice": "Practices"
+    }
   },
   "directoryCard": {
     "files": "filer",
@@ -347,7 +356,8 @@
     "primaryKeyReadOnly": "Primärnyckel (skrivskyddad)",
     "selectDefault": "-- Välj --",
     "selectField": "-- Välj {{field}} --",
-    "systemTimestamp": "Systemtidsstämpel (autogenererad)"
+    "systemTimestamp": "Systemtidsstämpel (autogenererad)",
+    "computedField": "Computed from related record (read-only)"
   },
   "header": {
     "administrator": "Administratör",
@@ -610,7 +620,10 @@
     },
     "title": "Papperskorgshantering",
     "totalSize": "{{size}} totalt",
-    "trashPurged": "Papperskorg rensad"
+    "trashPurged": "Papperskorg rensad",
+    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgedDirectories": "across {{count}} directories",
+    "purgedMessage": "{{count}} expired files permanently deleted"
   },
   "users": {
     "actionsFor": "Åtgärder för {{username}}",
@@ -690,5 +703,28 @@
     "userCount": "{{count}} användare",
     "userCount_one": "{{count}} användare",
     "userCount_other": "{{count}} användare"
+  },
+  "medicalSpecialty": {
+    "description": "Description",
+    "name": "Name"
+  },
+  "practices": {
+    "locations": {
+      "add": "Add location",
+      "empty": "No locations yet.",
+      "labelField": "Label",
+      "labelPlaceholder": "Main office",
+      "locationNumber": "Location {{num}}",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
+      "title": "Locations"
+    },
+    "subtitle": "Manage medical practices — contact details, locations, and more.",
+    "title": "Practices"
+  },
+  "practitioner": {
+    "quickAddSpecialty": "+ Add new specialty…",
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   }
 }

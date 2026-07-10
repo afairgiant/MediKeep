@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Pokrewieństwo z pacjentem",
         "label": "Pokrewieństwo",
-        "placeholder": "Wybierz pokrewieństwo"
+        "placeholder": "Wybierz pokrewieństwo",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Opcjonalny dodatkowy numer telefonu",
@@ -830,7 +857,11 @@
       "creating": "Tworzenie...",
       "createError": "Nie udało się utworzyć panelu badań",
       "testResultRequired": "Wymagany jest co najmniej jeden wynik badania",
-      "tagsPlaceholder": "Dodaj tagi, aby później organizować i wyszukiwać ten rekord"
+      "tagsPlaceholder": "Dodaj tagi, aby później organizować i wyszukiwać ten rekord",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Dodaj wyniki badań"

@@ -177,7 +177,8 @@
         "label": "Webhook-URL",
         "placeholder": "https://api.example.com/webhook"
       }
-    }
+    },
+    "sentCount": "{{count}} sent"
   },
   "description": "Konfigurera hur du tar emot aviseringar för viktiga händelser",
   "error": "Kunde inte ladda aviseringsinställningar",
@@ -318,7 +319,8 @@
       "operationSuccess": "{{operation}} har slutförts!",
       "saveFailed": "Sparning misslyckades",
       "success": "Klart!",
-      "warning": "Varning"
+      "warning": "Varning",
+      "deleteFailed": "Delete Failed"
     },
     "invitations": {
       "accessRevoked": "Åtkomst återkallad",
@@ -382,7 +384,9 @@
       "cleanupComplete": "Rensning slutförd: {{cleaned}} filer rensade, {{deleted}} filer borttagna",
       "cleanupFailed": "Kunde inte rensa filer. Vänligen försök igen senare.",
       "noOutOfSync": "Inga osynkroniserade filer hittades att rensa",
-      "sessionTimeoutUpdated": "Sessionstimeout uppdaterad till {{minutes}} minuter. Din session har uppdaterats."
+      "sessionTimeoutUpdated": "Sessionstimeout uppdaterad till {{minutes}} minuter. Din session har uppdaterats.",
+      "saveFailed": "Failed to save settings",
+      "saved": "Settings saved successfully"
     },
     "sharing": {
       "accessRevoked": "Åtkomst återkallad för användare {{userId}}",
@@ -409,7 +413,8 @@
       "fileUploadedSuccess": "\"{{fileName}}\" har laddats upp till Paperless!",
       "fileUploadFailed": "Filuppladdning misslyckades",
       "paperlessUploadFailed": "Paperless-uppladdning misslyckades",
-      "partialSuccess": "{{completed}}/{{total}} filer uppladdade. {{failed}} misslyckades."
+      "partialSuccess": "{{completed}}/{{total}} filer uppladdade. {{failed}} misslyckades.",
+      "failed": "File Upload Failed"
     },
     "vitals": {
       "deleteFailed": "Kunde inte ta bort vitalparametrar",

@@ -39,7 +39,8 @@
     "mustBeValidNumber": "Le chiffre doit être valide",
     "patientNotSelected": "Veuillez sélectionner un patient.",
     "requiredFieldMissing": "Veuillez remplir tous les champs requis.",
-    "submissionFailed": "Echec de la sauvegarde du formulaire. Veuillez vérifier votre saisie et réessayer."
+    "submissionFailed": "Echec de la sauvegarde du formulaire. Veuillez vérifier votre saisie et réessayer.",
+    "labResultNotSelected": "Please select at least one lab result"
   },
   "general": {
     "maintenanceMode": "Le système est actuellement en cours de maintenance. Veuillez réessayer plus tard.",

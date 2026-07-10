@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Relazione con il paziente",
         "label": "Relazione",
-        "placeholder": "Seleziona la relazione"
+        "placeholder": "Seleziona la relazione",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Numero di telefono secondario opzionale",
@@ -830,7 +857,11 @@
       "creating": "Creazione pannello...",
       "createError": "Impossibile creare il pannello di test",
       "testResultRequired": "È richiesto almeno un risultato del test",
-      "tagsPlaceholder": "Aggiungi tag per organizzare e cercare questo record in seguito"
+      "tagsPlaceholder": "Aggiungi tag per organizzare e cercare questo record in seguito",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Aggiungi risultati di laboratorio"

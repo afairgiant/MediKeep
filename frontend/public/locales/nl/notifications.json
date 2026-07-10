@@ -177,7 +177,8 @@
         "label": "Webhook-URL",
         "placeholder": "https://api.voorbeeld.nl/webhook"
       }
-    }
+    },
+    "sentCount": "{{count}} sent"
   },
   "description": "Configureer hoe u meldingen ontvangt voor belangrijke gebeurtenissen",
   "error": "Meldingsinstellingen laden mislukt",
@@ -318,7 +319,8 @@
       "operationSuccess": "{{operation}} succesvol voltooid!",
       "saveFailed": "Opslaan mislukt",
       "success": "Gelukt!",
-      "warning": "Waarschuwing"
+      "warning": "Waarschuwing",
+      "deleteFailed": "Delete Failed"
     },
     "invitations": {
       "accessRevoked": "Toegang ingetrokken",
@@ -382,7 +384,9 @@
       "cleanupComplete": "Opschoning voltooid: {{cleaned}} bestanden opgeschoond, {{deleted}} bestanden verwijderd",
       "cleanupFailed": "Bestanden opschonen mislukt. Probeer het later opnieuw.",
       "noOutOfSync": "Geen niet-gesynchroniseerde bestanden gevonden om op te schonen",
-      "sessionTimeoutUpdated": "Sessietime-out bijgewerkt naar {{minutes}} minuten. Uw sessie is vernieuwd."
+      "sessionTimeoutUpdated": "Sessietime-out bijgewerkt naar {{minutes}} minuten. Uw sessie is vernieuwd.",
+      "saveFailed": "Failed to save settings",
+      "saved": "Settings saved successfully"
     },
     "sharing": {
       "accessRevoked": "Toegang ingetrokken voor gebruiker {{userId}}",
@@ -409,7 +413,8 @@
       "fileUploadedSuccess": "\"{{fileName}}\" succesvol geüpload naar Paperless!",
       "fileUploadFailed": "Bestandsupload mislukt",
       "paperlessUploadFailed": "Paperless-upload mislukt",
-      "partialSuccess": "{{completed}}/{{total}} bestanden succesvol geüpload. {{failed}} mislukt."
+      "partialSuccess": "{{completed}}/{{total}} bestanden succesvol geüpload. {{failed}} mislukt.",
+      "failed": "File Upload Failed"
     },
     "vitals": {
       "deleteFailed": "Meting verwijderen mislukt",

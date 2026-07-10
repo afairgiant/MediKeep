@@ -39,7 +39,8 @@
     "mustBeValidNumber": "Muss eine gültige Zahl sein",
     "patientNotSelected": "Bitte wählen Sie einen Patienten aus.",
     "requiredFieldMissing": "Bitte füllen Sie alle erforderlichen Felder aus.",
-    "submissionFailed": "Formular konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut."
+    "submissionFailed": "Formular konnte nicht gespeichert werden. Bitte überprüfen Sie Ihre Eingaben und versuchen Sie es erneut.",
+    "labResultNotSelected": "Please select at least one lab result"
   },
   "general": {
     "maintenanceMode": "Das System befindet sich derzeit in Wartung. Bitte versuchen Sie es später erneut.",

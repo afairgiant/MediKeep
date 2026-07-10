@@ -85,7 +85,10 @@
     "treatmentName": "Nazwa leczenia",
     "treatmentReceived": "Otrzymane leczenie",
     "treatmentType": "Typ leczenia",
-    "vaccineName": "Nazwa szczepionki"
+    "vaccineName": "Nazwa szczepionki",
+    "description": "Description",
+    "name": "Name",
+    "reset": "Reset"
   },
   "labels": {
     "acrossCountFiles": "w {{count}} plikach",
@@ -301,7 +304,13 @@
     "warnings": "Ostrzeżenia",
     "website": "Strona internetowa",
     "weekly": "Co tydzień",
-    "weight": "Waga"
+    "weight": "Waga",
+    "remove": "Remove",
+    "save": "Save",
+    "sortBy": "Sort by",
+    "state": "State",
+    "unknownError": "Unknown error",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Dostęp tylko do odczytu"

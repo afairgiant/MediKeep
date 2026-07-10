@@ -177,7 +177,8 @@
         "label": "URL webhook",
         "placeholder": "https://api.example.com/webhook"
       }
-    }
+    },
+    "sentCount": "{{count}} sent"
   },
   "description": "Настройте способы получения уведомлений о важных событиях",
   "error": "Не удалось загрузить настройки уведомлений",
@@ -318,7 +319,8 @@
       "operationSuccess": "{{operation}} выполнена успешно!",
       "saveFailed": "Ошибка сохранения",
       "success": "Успешно!",
-      "warning": "Предупреждение"
+      "warning": "Предупреждение",
+      "deleteFailed": "Delete Failed"
     },
     "invitations": {
       "accessRevoked": "Доступ отозван",
@@ -382,7 +384,9 @@
       "cleanupComplete": "Очистка завершена: {{cleaned}} файлов очищено, {{deleted}} файлов удалено",
       "cleanupFailed": "Не удалось очистить файлы. Пожалуйста, попробуйте позже.",
       "noOutOfSync": "Рассинхронизированные файлы не найдены",
-      "sessionTimeoutUpdated": "Время ожидания сеанса обновлено до {{minutes}} минут. Ваш сеанс обновлён."
+      "sessionTimeoutUpdated": "Время ожидания сеанса обновлено до {{minutes}} минут. Ваш сеанс обновлён.",
+      "saveFailed": "Failed to save settings",
+      "saved": "Settings saved successfully"
     },
     "sharing": {
       "accessRevoked": "Доступ отозван для пользователя {{userId}}",
@@ -409,7 +413,8 @@
       "fileUploadedSuccess": "«{{fileName}}» успешно загружен в Paperless!",
       "fileUploadFailed": "Ошибка загрузки файла",
       "paperlessUploadFailed": "Ошибка загрузки в Paperless",
-      "partialSuccess": "{{completed}}/{{total}} файлов загружено успешно. {{failed}} завершились с ошибками."
+      "partialSuccess": "{{completed}}/{{total}} файлов загружено успешно. {{failed}} завершились с ошибками.",
+      "failed": "File Upload Failed"
     },
     "vitals": {
       "deleteFailed": "Не удалось удалить запись жизненных показателей",

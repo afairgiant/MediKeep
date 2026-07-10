@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Relatie tot de patiënt",
         "label": "Relatie",
-        "placeholder": "Selecteer relatie"
+        "placeholder": "Selecteer relatie",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Optioneel secundair telefoonnummer",
@@ -830,7 +857,11 @@
       "creating": "Paneel aanmaken...",
       "createError": "Aanmaken van testpaneel mislukt",
       "testResultRequired": "Minimaal één testresultaat is vereist",
-      "tagsPlaceholder": "Voeg tags toe om dit record later te organiseren en terug te vinden"
+      "tagsPlaceholder": "Voeg tags toe om dit record later te organiseren en terug te vinden",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Laboratoriumresultaten toevoegen"

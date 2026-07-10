@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Relación con el paciente",
         "label": "Relación",
-        "placeholder": "Seleccione la relación"
+        "placeholder": "Seleccione la relación",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Número de teléfono secundario opcional",
@@ -830,7 +857,11 @@
       "creating": "Creando panel...",
       "createError": "No se pudo crear el panel de pruebas",
       "testResultRequired": "Se requiere al menos un resultado de prueba",
-      "tagsPlaceholder": "Añadir etiquetas para organizar y buscar este registro más tarde"
+      "tagsPlaceholder": "Añadir etiquetas para organizar y buscar este registro más tarde",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Agregar resultados de laboratorio"

@@ -177,7 +177,8 @@
         "label": "Webhook-URL",
         "placeholder": "https://api.example.com/webhook"
       }
-    }
+    },
+    "sentCount": "{{count}} sent"
   },
   "description": "Konfigurieren Sie, wie Sie Benachrichtigungen für wichtige Ereignisse erhalten",
   "error": "Benachrichtigungseinstellungen konnten nicht geladen werden",
@@ -318,7 +319,8 @@
       "operationSuccess": "{{operation}} erfolgreich abgeschlossen!",
       "saveFailed": "Speichern fehlgeschlagen",
       "success": "Erfolgreich!",
-      "warning": "Warnung"
+      "warning": "Warnung",
+      "deleteFailed": "Delete Failed"
     },
     "invitations": {
       "accessRevoked": "Zugriff widerrufen",
@@ -382,7 +384,9 @@
       "cleanupComplete": "Bereinigung abgeschlossen: {{cleaned}} Dateien bereinigt, {{deleted}} Dateien gelöscht",
       "cleanupFailed": "Dateibereinigung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
       "noOutOfSync": "Keine nicht synchronisierten Dateien zur Bereinigung gefunden",
-      "sessionTimeoutUpdated": "Sitzungs-Timeout auf {{minutes}} Minuten aktualisiert. Ihre Sitzung wurde erneuert."
+      "sessionTimeoutUpdated": "Sitzungs-Timeout auf {{minutes}} Minuten aktualisiert. Ihre Sitzung wurde erneuert.",
+      "saveFailed": "Failed to save settings",
+      "saved": "Settings saved successfully"
     },
     "sharing": {
       "accessRevoked": "Zugriff für Benutzer {{userId}} widerrufen",
@@ -409,7 +413,8 @@
       "fileUploadedSuccess": "\"{{fileName}}\" erfolgreich nach Paperless hochgeladen!",
       "fileUploadFailed": "Datei-Upload fehlgeschlagen",
       "paperlessUploadFailed": "Paperless-Upload fehlgeschlagen",
-      "partialSuccess": "{{completed}}/{{total}} Dateien erfolgreich hochgeladen. {{failed}} fehlgeschlagen."
+      "partialSuccess": "{{completed}}/{{total}} Dateien erfolgreich hochgeladen. {{failed}} fehlgeschlagen.",
+      "failed": "File Upload Failed"
     },
     "vitals": {
       "deleteFailed": "Vitalwerte-Eintrag konnte nicht gelöscht werden",

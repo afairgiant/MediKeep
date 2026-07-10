@@ -177,7 +177,8 @@
         "label": "URL du webhook",
         "placeholder": "https://api.exemple.com/webhook"
       }
-    }
+    },
+    "sentCount": "{{count}} sent"
   },
   "description": "Configurez comment vous recevez des notifications pour les événements importants",
   "error": "Echec du chargement des paramètres de notification",
@@ -315,7 +316,8 @@
       "operationSuccess": "{{operation}} complété(e) avec succès !",
       "saveFailed": "Echec de la sauvegarde",
       "success": "Succès !",
-      "warning": "Avertissement"
+      "warning": "Avertissement",
+      "deleteFailed": "Delete Failed"
     },
     "invitations": {
       "accessRevoked": "Accès révoqué",
@@ -379,7 +381,9 @@
       "cleanupComplete": "Nettoyage complété : {{cleaned}} fichiers nettoyés, {{deleted}} fichiers supprimés",
       "cleanupFailed": "Echec du nettoyage des fichiers. Veuillez réessayer ultérieurement.",
       "noOutOfSync": "Aucun fichier désynchronisé à nettoyer",
-      "sessionTimeoutUpdated": "Expiration de session mise à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie."
+      "sessionTimeoutUpdated": "Expiration de session mise à jour pour durer désormais {{minutes}} minutes. Votre session a été rafraîchie.",
+      "saveFailed": "Failed to save settings",
+      "saved": "Settings saved successfully"
     },
     "sharing": {
       "accessRevoked": "Accès révoqué pour l'utilisateur {{userId}}",
@@ -406,7 +410,8 @@
       "fileUploadedSuccess": "\"{{fileName}}\" téléversé vers Paperless avec succès !",
       "fileUploadFailed": "Echec du téléversement du fichier",
       "paperlessUploadFailed": "Echec du téléversement vers Paperless",
-      "partialSuccess": "{{completed}}/{{total}} fichiers téléversés avec succès. {{failed}} fichiers en échec."
+      "partialSuccess": "{{completed}}/{{total}} fichiers téléversés avec succès. {{failed}} fichiers en échec.",
+      "failed": "File Upload Failed"
     },
     "vitals": {
       "deleteFailed": "Echec de la suppression des signes vitaux",

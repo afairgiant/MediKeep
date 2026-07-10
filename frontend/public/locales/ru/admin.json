@@ -76,7 +76,9 @@
         "filename": "Имя файла"
       },
       "title": "Существующие резервные копии",
-      "verify": "Проверить"
+      "verify": "Проверить",
+      "count": "{{count}} backups",
+      "unknown": "Unknown"
     },
     "loading": "Загрузка управления резервными копиями...",
     "modals": {
@@ -154,7 +156,8 @@
       "retentionLogic": "Логика хранения",
       "saveRetention": "Сохранить настройки хранения",
       "timeBasedCleanup": "<strong>Очистка по времени:</strong> Удалять копии старше {{days}} дней (за пределами минимального количества)",
-      "title": "Настройки хранения резервных копий"
+      "title": "Настройки хранения резервных копий",
+      "currentStatus": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})"
     },
     "schedule": {
       "completedSuccessfully": "Завершено успешно",
@@ -319,13 +322,19 @@
       "symptom_occurrence": "Записи отдельных эпизодов симптомов",
       "treatment": "Планы лечения и терапия",
       "user": "Системные пользователи и администраторы",
-      "vitals": "Артериальное давление, частота пульса, температура"
+      "vitals": "Артериальное давление, частота пульса, температура",
+      "medical_specialty": "Medical specialties (e.g. Cardiology) assigned to practitioners",
+      "practice": "Medical practices — contact details and multiple locations"
     },
     "fallbackWarning": "Не удалось загрузить модели с сервера. Показан встроенный список моделей.",
     "filterAriaLabel": "Фильтр моделей данных",
     "filterPlaceholder": "Фильтр моделей...",
     "noMatchFilter": "Нет моделей, соответствующих «{{query}}»",
-    "subtitle": "Управление и просмотр всех таблиц и записей базы данных"
+    "subtitle": "Управление и просмотр всех таблиц и записей базы данных",
+    "displayNames": {
+      "medical_specialty": "Medical Specialties",
+      "practice": "Practices"
+    }
   },
   "directoryCard": {
     "files": "файлов",
@@ -347,7 +356,8 @@
     "primaryKeyReadOnly": "Первичный ключ (только чтение)",
     "selectDefault": "-- Выбрать --",
     "selectField": "-- Выбрать {{field}} --",
-    "systemTimestamp": "Системная метка времени (автогенерируемая)"
+    "systemTimestamp": "Системная метка времени (автогенерируемая)",
+    "computedField": "Computed from related record (read-only)"
   },
   "header": {
     "administrator": "Администратор",
@@ -610,7 +620,10 @@
     },
     "title": "Управление корзиной",
     "totalSize": "{{size}} всего",
-    "trashPurged": "Корзина очищена"
+    "trashPurged": "Корзина очищена",
+    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgedDirectories": "across {{count}} directories",
+    "purgedMessage": "{{count}} expired files permanently deleted"
   },
   "users": {
     "actionsFor": "Действия для {{username}}",
@@ -690,5 +703,28 @@
     "userCount": "{{count}} пользователей",
     "userCount_one": "{{count}} пользователь",
     "userCount_other": "{{count}} пользователей"
+  },
+  "medicalSpecialty": {
+    "description": "Description",
+    "name": "Name"
+  },
+  "practices": {
+    "locations": {
+      "add": "Add location",
+      "empty": "No locations yet.",
+      "labelField": "Label",
+      "labelPlaceholder": "Main office",
+      "locationNumber": "Location {{num}}",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
+      "title": "Locations"
+    },
+    "subtitle": "Manage medical practices — contact details, locations, and more.",
+    "title": "Practices"
+  },
+  "practitioner": {
+    "quickAddSpecialty": "+ Add new specialty…",
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   }
 }

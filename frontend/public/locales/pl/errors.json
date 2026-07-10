@@ -39,7 +39,8 @@
     "mustBeValidNumber": "Musi być prawidłową liczbą",
     "patientNotSelected": "Proszę wybrać pacjenta.",
     "requiredFieldMissing": "Proszę wypełnić wszystkie wymagane pola.",
-    "submissionFailed": "Nie udało się zapisać formularza. Proszę sprawdzić wprowadzone dane i spróbować ponownie."
+    "submissionFailed": "Nie udało się zapisać formularza. Proszę sprawdzić wprowadzone dane i spróbować ponownie.",
+    "labResultNotSelected": "Please select at least one lab result"
   },
   "general": {
     "maintenanceMode": "System jest obecnie w trakcie konserwacji. Proszę spróbować ponownie później.",

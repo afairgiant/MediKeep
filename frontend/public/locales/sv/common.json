@@ -30,7 +30,10 @@
     "tryAgain": "Försök igen",
     "update": "Uppdatera",
     "view": "Visa",
-    "linkMedications": "Länka läkemedel"
+    "linkMedications": "Länka läkemedel",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "edit": "Edit"
   },
   "conditions": {
     "addNew": "Lägg till nytt tillstånd",
@@ -74,7 +77,9 @@
       "status": {
         "chronic": "Kronisk"
       },
-      "updateCondition": "Uppdatera tillstånd"
+      "updateCondition": "Uppdatera tillstånd",
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results."
     },
     "getStarted": "Klicka på \"Lägg till nytt tillstånd\" för att komma igång.",
     "loading": "Laddar tillstånd...",
@@ -292,7 +297,8 @@
   "filters": {
     "clear": "Rensa",
     "itemCount": "{{filtered}} av {{total}} objekt",
-    "title": "Filter och sök"
+    "title": "Filter och sök",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Lägg till ny vaccination",
@@ -470,7 +476,14 @@
     "yes": "Ja",
     "noConditionsLinkedToMedication": "Inga tillstånd länkade till detta läkemedel",
     "conditionsAvailableToLink": "{{count}} tillstånd tillgängliga att länka",
-    "medicationsAvailableToLink": "{{count}} läkemedel tillgängliga att länka"
+    "medicationsAvailableToLink": "{{count}} läkemedel tillgängliga att länka",
+    "cancelEdit": "Cancel edit",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "labResultsAvailableToLink": "{{count}} lab results available to link",
+    "noDate": "No date",
+    "pleaseTryAgain": "Please try again.",
+    "saveRelationship": "Save relationship"
   },
   "labResults": {
     "emptyLabResultMessage": "Du skapade ett labbresultat men lade inte till några testkomponenter. Vill du ta bort detta labbresultat?",
@@ -489,7 +502,8 @@
     "unsavedDataInstructions": "Klicka på \"Lägg till komponenter\" i förhandsgranskningsfliken för att spara dina tolkade data innan du stänger.",
     "unsavedDataMessage_one": "Du har {{count}} tolkad testkomponent som inte har lagts till än. Om du stänger nu förlorar du dessa tolkade data.",
     "unsavedDataMessage_other": "Du har {{count}} tolkade testkomponenter som inte har lagts till än. Om du stänger nu förlorar du dessa tolkade data.",
-    "unsavedDataWarning": "Osparade tolkade data"
+    "unsavedDataWarning": "Osparade tolkade data",
+    "unsavedDataMessage": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data."
   },
   "medications": {
     "addNew": "Lägg till nytt läkemedel",
@@ -551,7 +565,8 @@
     "selectVisit": "Välj ett besök",
     "underDevelopment": "Denna sektion är för närvarande under utveckling.",
     "updateSuccess": "Uppdaterades framgångsrikt",
-    "confirmRemoveMedicationRelationship": "Är du säker på att du vill ta bort denna läkemedelsrelation?"
+    "confirmRemoveMedicationRelationship": "Är du säker på att du vill ta bort denna läkemedelsrelation?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?"
   },
   "modals": {
     "chooseConditionsToLink": "Välj tillstånd att länka",
@@ -578,7 +593,10 @@
     "linkMedicationsToCondition": "Länka läkemedel till tillstånd",
     "selectConditions": "Välj tillstånd",
     "describeConditionRelevanceMedication": "Beskriv hur detta tillstånd relaterar till läkemedlet",
-    "describeMedicationRelevance": "Beskriv hur detta läkemedel relaterar till tillståndet"
+    "describeMedicationRelevance": "Beskriv hur detta läkemedel relaterar till tillståndet",
+    "chooseLabResultsToLink": "Choose lab results to link",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
+    "selectLabResults": "Select Lab Results"
   },
   "noResults": "Inga vårdgivare hittades",
   "pagination": {
@@ -673,6 +691,12 @@
       "selfRecord": {
         "description": "Markera detta om du skapar en journal för dig själv",
         "label": "Detta är min egen medicinska journal"
+      },
+      "height": {
+        "placeholder": "Enter height"
+      },
+      "weight": {
+        "placeholder": "Enter weight"
       }
     },
     "photoFormat": "JPEG, PNG, GIF eller BMP -- Max 15MB",
@@ -1265,7 +1289,10 @@
         "clinical": "Kliniskt",
         "visitInfo": "Besöksinformation"
       },
-      "updateVisit": "Uppdatera besök"
+      "updateVisit": "Uppdatera besök",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
+      "selectLabResults": "Select Lab Results"
     },
     "loadingVisits": "Laddar besök...",
     "noVisitsFound": "Inga medicinska besök hittades",
@@ -1289,6 +1316,10 @@
       "title": "Besök - {{date}}",
       "treatmentPlan": "Behandlingsplan",
       "visitInformation": "Besöksinformation"
+    },
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
     }
   },
   "vitals": {
@@ -1330,5 +1361,13 @@
       }
     }
   },
-  "warning": "Varning"
+  "warning": "Varning",
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  }
 }

@@ -30,7 +30,10 @@
     "tryAgain": "Повторить попытку",
     "update": "Обновить",
     "view": "Просмотр",
-    "linkMedications": "Связать лекарства"
+    "linkMedications": "Связать лекарства",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "edit": "Edit"
   },
   "conditions": {
     "addNew": "Добавить заболевание",
@@ -74,7 +77,9 @@
       "status": {
         "chronic": "Хроническое"
       },
-      "updateCondition": "Обновить заболевание"
+      "updateCondition": "Обновить заболевание",
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results."
     },
     "getStarted": "Нажмите \"Добавить заболевание\", чтобы начать.",
     "loading": "Загрузка заболеваний...",
@@ -292,7 +297,8 @@
   "filters": {
     "clear": "Очистить",
     "itemCount": "{{filtered}} из {{total}} записей",
-    "title": "Фильтры и поиск"
+    "title": "Фильтры и поиск",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Добавить прививку",
@@ -470,7 +476,14 @@
     "yes": "Да",
     "noConditionsLinkedToMedication": "Нет заболеваний, связанных с этим лекарством",
     "conditionsAvailableToLink": "Доступно для связывания: {{count}} заболеваний",
-    "medicationsAvailableToLink": "Доступно для связывания: {{count}} лекарств"
+    "medicationsAvailableToLink": "Доступно для связывания: {{count}} лекарств",
+    "cancelEdit": "Cancel edit",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "labResultsAvailableToLink": "{{count}} lab results available to link",
+    "noDate": "No date",
+    "pleaseTryAgain": "Please try again.",
+    "saveRelationship": "Save relationship"
   },
   "labResults": {
     "emptyLabResultMessage": "Вы создали результат анализа, но не добавили компоненты теста. Хотите удалить этот результат анализа?",
@@ -489,7 +502,8 @@
     "unsavedDataInstructions": "Нажмите \"Добавить компоненты\" на вкладке Предпросмотр, чтобы сохранить разобранные данные перед закрытием.",
     "unsavedDataMessage_one": "У вас есть {{count}} разобранный компонент теста, который ещё не был добавлен. Если закрыть сейчас, эти данные будут потеряны.",
     "unsavedDataMessage_other": "У вас есть {{count}} разобранных компонентов теста, которые ещё не были добавлены. Если закрыть сейчас, эти данные будут потеряны.",
-    "unsavedDataWarning": "Несохранённые разобранные данные"
+    "unsavedDataWarning": "Несохранённые разобранные данные",
+    "unsavedDataMessage": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data."
   },
   "medications": {
     "addNew": "Добавить лекарство",
@@ -551,7 +565,8 @@
     "selectVisit": "Пожалуйста, выберите визит",
     "underDevelopment": "Данный раздел в настоящее время разрабатывается.",
     "updateSuccess": "Успешно обновлено",
-    "confirmRemoveMedicationRelationship": "Вы уверены, что хотите убрать эту связь с лекарством?"
+    "confirmRemoveMedicationRelationship": "Вы уверены, что хотите убрать эту связь с лекарством?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?"
   },
   "modals": {
     "chooseConditionsToLink": "Выберите заболевания для связывания",
@@ -578,7 +593,10 @@
     "linkMedicationsToCondition": "Связать лекарства с заболеванием",
     "selectConditions": "Выберите заболевания",
     "describeConditionRelevanceMedication": "Опишите, как это заболевание связано с лекарством",
-    "describeMedicationRelevance": "Опишите, как это лекарство связано с заболеванием"
+    "describeMedicationRelevance": "Опишите, как это лекарство связано с заболеванием",
+    "chooseLabResultsToLink": "Choose lab results to link",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
+    "selectLabResults": "Select Lab Results"
   },
   "noResults": "Врачи не найдены",
   "pagination": {
@@ -673,6 +691,12 @@
       "selfRecord": {
         "description": "Отметьте, если вы создаёте запись для себя",
         "label": "Это моя собственная медицинская запись"
+      },
+      "height": {
+        "placeholder": "Enter height"
+      },
+      "weight": {
+        "placeholder": "Enter weight"
       }
     },
     "photoFormat": "JPEG, PNG, GIF или BMP -- Максимум 15МБ",
@@ -1265,7 +1289,10 @@
         "clinical": "Клиника",
         "visitInfo": "Информация о визите"
       },
-      "updateVisit": "Обновить визит"
+      "updateVisit": "Обновить визит",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
+      "selectLabResults": "Select Lab Results"
     },
     "loadingVisits": "Загрузка визитов...",
     "noVisitsFound": "Медицинские визиты не найдены",
@@ -1289,6 +1316,10 @@
       "title": "Визит - {{date}}",
       "treatmentPlan": "План лечения",
       "visitInformation": "Информация о визите"
+    },
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
     }
   },
   "vitals": {
@@ -1330,5 +1361,13 @@
       }
     }
   },
-  "warning": "Предупреждение"
+  "warning": "Предупреждение",
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  }
 }

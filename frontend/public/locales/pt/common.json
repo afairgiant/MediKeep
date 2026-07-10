@@ -30,7 +30,10 @@
     "tryAgain": "Tentar Novamente",
     "update": "Atualizar",
     "view": "Visualizar",
-    "linkMedications": "Vincular Medicamentos"
+    "linkMedications": "Vincular Medicamentos",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "edit": "Edit"
   },
   "conditions": {
     "addNew": "Adicionar Nova Condição",
@@ -74,7 +77,9 @@
       "status": {
         "chronic": "Crônica"
       },
-      "updateCondition": "Atualizar Condição"
+      "updateCondition": "Atualizar Condição",
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results."
     },
     "getStarted": "Clique em \"Adicionar Nova Condição\" para começar.",
     "loading": "Carregando condições...",
@@ -292,7 +297,8 @@
   "filters": {
     "clear": "Limpar",
     "itemCount": "{{filtered}} de {{total}} itens",
-    "title": "Filtros e Pesquisa"
+    "title": "Filtros e Pesquisa",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Adicionar Nova Imunização",
@@ -470,7 +476,14 @@
     "yes": "Sim",
     "noConditionsLinkedToMedication": "Nenhuma condição vinculada a este medicamento",
     "conditionsAvailableToLink": "{{count}} condições disponíveis para vincular",
-    "medicationsAvailableToLink": "{{count}} medicamentos disponíveis para vincular"
+    "medicationsAvailableToLink": "{{count}} medicamentos disponíveis para vincular",
+    "cancelEdit": "Cancel edit",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "labResultsAvailableToLink": "{{count}} lab results available to link",
+    "noDate": "No date",
+    "pleaseTryAgain": "Please try again.",
+    "saveRelationship": "Save relationship"
   },
   "labResults": {
     "emptyLabResultMessage": "Você criou um resultado de laboratório mas não adicionou nenhum componente de teste. Gostaria de excluir este resultado de laboratório?",
@@ -489,7 +502,8 @@
     "unsavedDataInstructions": "Clique em \"Adicionar Componentes\" na aba Prévia para salvar seus dados analisados antes de fechar.",
     "unsavedDataMessage_one": "Você tem {{count}} componente de teste analisado que ainda não foi adicionado. Se fechar agora, perderá esses dados analisados.",
     "unsavedDataMessage_other": "Você tem {{count}} componentes de teste analisados que ainda não foram adicionados. Se fechar agora, perderá esses dados analisados.",
-    "unsavedDataWarning": "Dados Analisados Não Salvos"
+    "unsavedDataWarning": "Dados Analisados Não Salvos",
+    "unsavedDataMessage": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data."
   },
   "medications": {
     "addNew": "Adicionar Novo Medicamento",
@@ -551,7 +565,8 @@
     "selectVisit": "Por favor, selecione uma consulta",
     "underDevelopment": "Esta seção está atualmente em desenvolvimento.",
     "updateSuccess": "Atualizado com sucesso",
-    "confirmRemoveMedicationRelationship": "Tem certeza de que deseja remover esta relação de medicamento?"
+    "confirmRemoveMedicationRelationship": "Tem certeza de que deseja remover esta relação de medicamento?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?"
   },
   "modals": {
     "chooseConditionsToLink": "Escolha condições para vincular",
@@ -578,7 +593,10 @@
     "linkMedicationsToCondition": "Vincular medicamentos à condição",
     "selectConditions": "Selecionar condições",
     "describeConditionRelevanceMedication": "Descreva como esta condição se relaciona com o medicamento",
-    "describeMedicationRelevance": "Descreva como este medicamento se relaciona com a condição"
+    "describeMedicationRelevance": "Descreva como este medicamento se relaciona com a condição",
+    "chooseLabResultsToLink": "Choose lab results to link",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
+    "selectLabResults": "Select Lab Results"
   },
   "noResults": "Nenhum profissional encontrado",
   "pagination": {
@@ -673,6 +691,12 @@
       "selfRecord": {
         "description": "Marque esta opção se estiver criando um registro para você mesmo",
         "label": "Este é meu próprio prontuário médico"
+      },
+      "height": {
+        "placeholder": "Enter height"
+      },
+      "weight": {
+        "placeholder": "Enter weight"
       }
     },
     "photoFormat": "JPEG, PNG, GIF ou BMP -- Máx. 15MB",
@@ -1265,7 +1289,10 @@
         "clinical": "Clínico",
         "visitInfo": "Informações da Consulta"
       },
-      "updateVisit": "Atualizar Consulta"
+      "updateVisit": "Atualizar Consulta",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
+      "selectLabResults": "Select Lab Results"
     },
     "loadingVisits": "Carregando consultas...",
     "noVisitsFound": "Nenhuma consulta médica encontrada",
@@ -1289,6 +1316,10 @@
       "title": "Consulta - {{date}}",
       "treatmentPlan": "Plano de Tratamento",
       "visitInformation": "Informações da Consulta"
+    },
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
     }
   },
   "vitals": {
@@ -1330,5 +1361,13 @@
       }
     }
   },
-  "warning": "Aviso"
+  "warning": "Aviso",
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  }
 }

@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Relation till patienten",
         "label": "Relation",
-        "placeholder": "Välj relation"
+        "placeholder": "Välj relation",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Valfritt sekundärt telefonnummer",
@@ -830,7 +857,11 @@
       "creating": "Skapar panel...",
       "createError": "Det gick inte att skapa testpanel",
       "testResultRequired": "Minst ett testresultat krävs",
-      "tagsPlaceholder": "Lägg till taggar för att organisera och söka efter denna post senare"
+      "tagsPlaceholder": "Lägg till taggar för att organisera och söka efter denna post senare",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Lägg till labbresultat"

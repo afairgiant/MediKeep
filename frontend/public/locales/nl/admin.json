@@ -76,7 +76,9 @@
         "filename": "Bestandsnaam"
       },
       "title": "Bestaande back-ups",
-      "verify": "Verifiëren"
+      "verify": "Verifiëren",
+      "count": "{{count}} backups",
+      "unknown": "Unknown"
     },
     "loading": "Back-upbeheer laden...",
     "modals": {
@@ -154,7 +156,8 @@
       "retentionLogic": "Bewaarlogica",
       "saveRetention": "Bewaarinstellingen opslaan",
       "timeBasedCleanup": "<strong>Tijdgebaseerde opschoning:</strong> Verwijder back-ups ouder dan {{days}} dagen (boven minimum aantal)",
-      "title": "Back-up bewaarinstellingen"
+      "title": "Back-up bewaarinstellingen",
+      "currentStatus": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})"
     },
     "schedule": {
       "completedSuccessfully": "Succesvol voltooid",
@@ -319,13 +322,19 @@
       "symptom_occurrence": "Individuele symptoomregistraties",
       "treatment": "Behandelplannen en therapieën",
       "user": "Systeemgebruikers en beheerders",
-      "vitals": "Bloeddruk, hartslag, temperatuur"
+      "vitals": "Bloeddruk, hartslag, temperatuur",
+      "medical_specialty": "Medical specialties (e.g. Cardiology) assigned to practitioners",
+      "practice": "Medical practices — contact details and multiple locations"
     },
     "fallbackWarning": "Kon modellen niet laden van server. Ingebouwde modellenlijst wordt getoond.",
     "filterAriaLabel": "Datamodellen filteren",
     "filterPlaceholder": "Modellen filteren...",
     "noMatchFilter": "Geen modellen gevonden voor \"{{query}}\"",
-    "subtitle": "Beheer en bekijk alle databasetabellen en dossiers"
+    "subtitle": "Beheer en bekijk alle databasetabellen en dossiers",
+    "displayNames": {
+      "medical_specialty": "Medical Specialties",
+      "practice": "Practices"
+    }
   },
   "directoryCard": {
     "files": "bestanden",
@@ -347,7 +356,8 @@
     "primaryKeyReadOnly": "Primaire sleutel (alleen-lezen)",
     "selectDefault": "-- Selecteer --",
     "selectField": "-- Selecteer {{field}} --",
-    "systemTimestamp": "Systeemtijdstempel (automatisch gegenereerd)"
+    "systemTimestamp": "Systeemtijdstempel (automatisch gegenereerd)",
+    "computedField": "Computed from related record (read-only)"
   },
   "header": {
     "administrator": "Beheerder",
@@ -610,7 +620,10 @@
     },
     "title": "Prullenbakbeheer",
     "totalSize": "{{size}} totaal",
-    "trashPurged": "Prullenbak opgeschoond"
+    "trashPurged": "Prullenbak opgeschoond",
+    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgedDirectories": "across {{count}} directories",
+    "purgedMessage": "{{count}} expired files permanently deleted"
   },
   "users": {
     "actionsFor": "Acties voor {{username}}",
@@ -690,5 +703,28 @@
     "userCount": "{{count}} gebruikers",
     "userCount_one": "{{count}} gebruiker",
     "userCount_other": "{{count}} gebruikers"
+  },
+  "medicalSpecialty": {
+    "description": "Description",
+    "name": "Name"
+  },
+  "practices": {
+    "locations": {
+      "add": "Add location",
+      "empty": "No locations yet.",
+      "labelField": "Label",
+      "labelPlaceholder": "Main office",
+      "locationNumber": "Location {{num}}",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
+      "title": "Locations"
+    },
+    "subtitle": "Manage medical practices — contact details, locations, and more.",
+    "title": "Practices"
+  },
+  "practitioner": {
+    "quickAddSpecialty": "+ Add new specialty…",
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   }
 }

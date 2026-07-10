@@ -85,7 +85,10 @@
     "treatmentName": "Название лечения",
     "treatmentReceived": "Полученное лечение",
     "treatmentType": "Тип лечения",
-    "vaccineName": "Название вакцины"
+    "vaccineName": "Название вакцины",
+    "description": "Description",
+    "name": "Name",
+    "reset": "Reset"
   },
   "labels": {
     "acrossCountFiles": "в {{count}} файлах",
@@ -301,7 +304,13 @@
     "warnings": "Предупреждения",
     "website": "Веб-сайт",
     "weekly": "Еженедельно",
-    "weight": "Вес"
+    "weight": "Вес",
+    "remove": "Remove",
+    "save": "Save",
+    "sortBy": "Sort by",
+    "state": "State",
+    "unknownError": "Unknown error",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Доступ только для чтения"
