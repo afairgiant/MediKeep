@@ -39,7 +39,8 @@
     "mustBeValidNumber": "Måste vara ett giltigt nummer",
     "patientNotSelected": "Välj en patient.",
     "requiredFieldMissing": "Fyll i alla obligatoriska fält.",
-    "submissionFailed": "Det gick inte att spara formuläret. Kontrollera dina uppgifter och försök igen."
+    "submissionFailed": "Det gick inte att spara formuläret. Kontrollera dina uppgifter och försök igen.",
+    "labResultNotSelected": "Please select at least one lab result"
   },
   "general": {
     "maintenanceMode": "Systemet är för närvarande under underhåll. Försök igen senare.",

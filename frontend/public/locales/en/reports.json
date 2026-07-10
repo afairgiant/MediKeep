@@ -187,7 +187,22 @@
     "loading": "Loading export options...",
     "scopes": {
       "all": "All Records",
-      "encounters": "Encounters"
+      "allergies": "Allergies",
+      "conditions": "Conditions",
+      "emergency_contacts": "Emergency Contacts",
+      "encounters": "Encounters",
+      "family_history": "Family History",
+      "immunizations": "Immunizations",
+      "injuries": "Injuries",
+      "insurance": "Insurance",
+      "lab_results": "Lab Results",
+      "medications": "Medications",
+      "pharmacies": "Pharmacies",
+      "practitioners": "Practitioners",
+      "procedures": "Procedures",
+      "symptoms": "Symptoms",
+      "treatments": "Treatments",
+      "vitals": "Vitals"
     },
     "success": {
       "bulkExportComplete": "Bulk export completed successfully! Your ZIP file containing {{count}} data types has been downloaded.",

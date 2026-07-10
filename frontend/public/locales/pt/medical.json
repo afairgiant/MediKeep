@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Relação com o paciente",
         "label": "Parentesco",
-        "placeholder": "Selecione o parentesco"
+        "placeholder": "Selecione o parentesco",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Número de telefone secundário opcional",
@@ -830,7 +857,11 @@
       "creating": "Criando painel...",
       "createError": "Falha ao criar painel de exames",
       "testResultRequired": "É necessário pelo menos um resultado de exame",
-      "tagsPlaceholder": "Adicione tags para organizar e pesquisar este registo mais tarde"
+      "tagsPlaceholder": "Adicione tags para organizar e pesquisar este registo mais tarde",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Adicionar resultados laboratoriais"

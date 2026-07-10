@@ -85,7 +85,10 @@
     "treatmentName": "Behandelingsnaam",
     "treatmentReceived": "Ontvangen behandeling",
     "treatmentType": "Behandelingstype",
-    "vaccineName": "Vaccinnaam"
+    "vaccineName": "Vaccinnaam",
+    "description": "Description",
+    "name": "Name",
+    "reset": "Reset"
   },
   "labels": {
     "acrossCountFiles": "verdeeld over {{count}} bestanden",
@@ -301,7 +304,13 @@
     "warnings": "Waarschuwingen",
     "website": "Website",
     "weekly": "Wekelijks",
-    "weight": "Gewicht"
+    "weight": "Gewicht",
+    "remove": "Remove",
+    "save": "Save",
+    "sortBy": "Sort by",
+    "state": "State",
+    "unknownError": "Unknown error",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Alleen-lezen toegang"

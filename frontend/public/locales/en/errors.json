@@ -39,7 +39,8 @@
     "mustBeValidNumber": "Must be a valid number",
     "patientNotSelected": "Please select a patient.",
     "requiredFieldMissing": "Please fill in all required fields.",
-    "submissionFailed": "Failed to save form. Please check your input and try again."
+    "submissionFailed": "Failed to save form. Please check your input and try again.",
+    "labResultNotSelected": "Please select at least one lab result"
   },
   "general": {
     "maintenanceMode": "The system is currently under maintenance. Please try again later.",

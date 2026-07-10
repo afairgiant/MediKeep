@@ -420,18 +420,14 @@ const PatientForm = ({
               onChange={value =>
                 setFormData({ ...formData, blood_type: value })
               }
-              disabled={loading}
+              disabled={loading}  
               clearable
             />
 
             <Group grow>
               <NumberInput
                 label={`${t('shared:labels.height')} (${labels.heightLong})`}
-                placeholder={t(
-                  unitSystem === 'imperial'
-                    ? 'patients.form.height.placeholder.imperial'
-                    : 'patients.form.height.placeholder.metric'
-                )}
+                placeholder={`${t('patients.form.height.placeholder')} (${labels.height})`}
                 min={ranges.height.min}
                 max={ranges.height.max}
                 value={formData.height}
@@ -441,11 +437,7 @@ const PatientForm = ({
               />
               <NumberInput
                 label={`${t('shared:labels.weight')} (${labels.weightLong})`}
-                placeholder={t(
-                  unitSystem === 'imperial'
-                    ? 'patients.form.weight.placeholder.imperial'
-                    : 'patients.form.weight.placeholder.metric'
-                )}
+                placeholder={`${t('patients.form.weight.placeholder')} (${labels.weight})`}
                 min={ranges.weight.min}
                 max={ranges.weight.max}
                 value={formData.weight}
@@ -500,7 +492,7 @@ const PatientForm = ({
           >
             {t(
               isEditing
-                ? 'patients.form.buttons.updatePatient'
+                ? 'patients.form.buttons.saveChanges'
                 : 'patients.form.buttons.createPatient'
             )}
           </Button>

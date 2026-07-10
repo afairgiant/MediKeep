@@ -85,7 +85,10 @@
     "treatmentName": "Treatment Name",
     "treatmentReceived": "Treatment Received",
     "treatmentType": "Treatment Type",
-    "vaccineName": "Vaccine Name"
+    "vaccineName": "Vaccine Name",
+    "name": "Name",
+    "description": "Description",
+    "reset": "Reset"
   },
   "labels": {
     "acrossCountFiles": "across {{count}} files",
@@ -266,6 +269,7 @@
     "size": "Size",
     "specialties": "Specialties",
     "specialty": "Specialty",
+    "state": "State",
     "startDate": "Start Date",
     "stateProvince": "State / Province",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
@@ -301,7 +305,12 @@
     "warnings": "Warnings",
     "website": "Website",
     "weekly": "Weekly",
-    "weight": "Weight"
+    "weight": "Weight",
+    "remove": "Remove",
+    "zip": "ZIP",
+    "unknownError": "Unknown error",
+    "save": "Save",
+    "sortBy": "Sort by"
   },
   "permissions": {
     "viewOnly": "View-only access"

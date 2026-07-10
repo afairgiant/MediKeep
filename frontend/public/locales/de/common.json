@@ -30,7 +30,10 @@
     "tryAgain": "Erneut versuchen",
     "update": "Aktualisieren",
     "view": "Ansehen",
-    "linkMedications": "Medikamente verknüpfen"
+    "linkMedications": "Medikamente verknüpfen",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "edit": "Edit"
   },
   "conditions": {
     "addNew": "Neue Erkrankung hinzufügen",
@@ -74,7 +77,9 @@
       "status": {
         "chronic": "Chronisch"
       },
-      "updateCondition": "Erkrankung aktualisieren"
+      "updateCondition": "Erkrankung aktualisieren",
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results."
     },
     "getStarted": "Klicken Sie auf \"Neue Erkrankung hinzufügen\", um zu beginnen.",
     "loading": "Erkrankungen werden geladen...",
@@ -292,7 +297,8 @@
   "filters": {
     "clear": "Löschen",
     "itemCount": "{{filtered}} von {{total}} Einträgen",
-    "title": "Filter & Suche"
+    "title": "Filter & Suche",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Neue Impfung hinzufügen",
@@ -470,7 +476,14 @@
     "yes": "Ja",
     "noConditionsLinkedToMedication": "Keine Erkrankungen mit diesem Medikament verknüpft",
     "conditionsAvailableToLink": "{{count}} Erkrankungen zum Verknüpfen verfügbar",
-    "medicationsAvailableToLink": "{{count}} Medikamente zum Verknüpfen verfügbar"
+    "medicationsAvailableToLink": "{{count}} Medikamente zum Verknüpfen verfügbar",
+    "cancelEdit": "Cancel edit",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "labResultsAvailableToLink": "{{count}} lab results available to link",
+    "noDate": "No date",
+    "pleaseTryAgain": "Please try again.",
+    "saveRelationship": "Save relationship"
   },
   "labResults": {
     "emptyLabResultMessage": "Sie haben ein Laborergebnis erstellt, aber keine Testkomponenten hinzugefügt. Möchten Sie dieses Laborergebnis löschen?",
@@ -489,7 +502,8 @@
     "unsavedDataInstructions": "Klicken Sie auf \"Komponenten hinzufügen\" im Vorschau-Tab, um Ihre analysierten Daten vor dem Schließen zu speichern.",
     "unsavedDataMessage_one": "Sie haben {{count}} analysierte Testkomponente, die noch nicht hinzugefügt wurde. Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
     "unsavedDataMessage_other": "Sie haben {{count}} analysierte Testkomponenten, die noch nicht hinzugefügt wurden. Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
-    "unsavedDataWarning": "Nicht gespeicherte analysierte Daten"
+    "unsavedDataWarning": "Nicht gespeicherte analysierte Daten",
+    "unsavedDataMessage": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data."
   },
   "medications": {
     "addNew": "Neues Medikament hinzufügen",
@@ -551,7 +565,8 @@
     "selectVisit": "Bitte wählen Sie einen Termin aus",
     "underDevelopment": "Dieser Bereich befindet sich derzeit in Entwicklung.",
     "updateSuccess": "Erfolgreich aktualisiert",
-    "confirmRemoveMedicationRelationship": "Möchten Sie diese Medikamentenverknüpfung wirklich entfernen?"
+    "confirmRemoveMedicationRelationship": "Möchten Sie diese Medikamentenverknüpfung wirklich entfernen?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?"
   },
   "modals": {
     "chooseConditionsToLink": "Wählen Sie Erkrankungen zum Verknüpfen",
@@ -578,7 +593,10 @@
     "linkMedicationsToCondition": "Medikamente mit Erkrankung verknüpfen",
     "selectConditions": "Erkrankungen auswählen",
     "describeConditionRelevanceMedication": "Beschreiben Sie, wie diese Erkrankung mit dem Medikament zusammenhängt",
-    "describeMedicationRelevance": "Beschreiben Sie, wie dieses Medikament mit der Erkrankung zusammenhängt"
+    "describeMedicationRelevance": "Beschreiben Sie, wie dieses Medikament mit der Erkrankung zusammenhängt",
+    "chooseLabResultsToLink": "Choose lab results to link",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
+    "selectLabResults": "Select Lab Results"
   },
   "noResults": "Keine Ärzte gefunden",
   "pagination": {
@@ -673,6 +691,12 @@
       "selfRecord": {
         "description": "Aktivieren Sie dies, wenn Sie eine Akte für sich selbst erstellen",
         "label": "Dies ist meine eigene Krankenakte"
+      },
+      "height": {
+        "placeholder": "Enter height"
+      },
+      "weight": {
+        "placeholder": "Enter weight"
       }
     },
     "photoFormat": "JPEG, PNG, GIF oder BMP – Max. 15 MB",
@@ -1265,7 +1289,10 @@
         "clinical": "Klinisch",
         "visitInfo": "Termininfo"
       },
-      "updateVisit": "Termin aktualisieren"
+      "updateVisit": "Termin aktualisieren",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
+      "selectLabResults": "Select Lab Results"
     },
     "loadingVisits": "Arzttermine werden geladen...",
     "noVisitsFound": "Keine Arzttermine gefunden",
@@ -1289,6 +1316,10 @@
       "title": "Termin - {{date}}",
       "treatmentPlan": "Behandlungsplan",
       "visitInformation": "Termininformationen"
+    },
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
     }
   },
   "vitals": {
@@ -1330,5 +1361,13 @@
       }
     }
   },
-  "warning": "Warnung"
+  "warning": "Warnung",
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  }
 }

@@ -76,7 +76,9 @@
         "filename": "Dateiname"
       },
       "title": "Vorhandene Sicherungen",
-      "verify": "Überprüfen"
+      "verify": "Überprüfen",
+      "count": "{{count}} backups",
+      "unknown": "Unknown"
     },
     "loading": "Sicherungsverwaltung wird geladen...",
     "modals": {
@@ -154,7 +156,8 @@
       "retentionLogic": "Aufbewahrungslogik",
       "saveRetention": "Aufbewahrungseinstellungen speichern",
       "timeBasedCleanup": "<strong>Zeitbasierte Bereinigung:</strong> Sicherungen löschen, die älter als {{days}} Tage sind (über die Mindestanzahl hinaus)",
-      "title": "Sicherungsaufbewahrungseinstellungen"
+      "title": "Sicherungsaufbewahrungseinstellungen",
+      "currentStatus": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})"
     },
     "schedule": {
       "completedSuccessfully": "Erfolgreich abgeschlossen",
@@ -319,13 +322,19 @@
       "symptom_occurrence": "Einzelne Symptomepisoden-Datensätze",
       "treatment": "Behandlungspläne und Therapien",
       "user": "Systembenutzer und Administratoren",
-      "vitals": "Blutdruck, Herzfrequenz, Temperatur"
+      "vitals": "Blutdruck, Herzfrequenz, Temperatur",
+      "medical_specialty": "Medical specialties (e.g. Cardiology) assigned to practitioners",
+      "practice": "Medical practices — contact details and multiple locations"
     },
     "fallbackWarning": "Modelle konnten nicht vom Server geladen werden. Integrierte Modellliste wird angezeigt.",
     "filterAriaLabel": "Datenmodelle filtern",
     "filterPlaceholder": "Modelle filtern...",
     "noMatchFilter": "Keine Modelle stimmen mit \"{{query}}\" überein",
-    "subtitle": "Alle Datenbanktabellen und Datensätze verwalten und anzeigen"
+    "subtitle": "Alle Datenbanktabellen und Datensätze verwalten und anzeigen",
+    "displayNames": {
+      "medical_specialty": "Medical Specialties",
+      "practice": "Practices"
+    }
   },
   "directoryCard": {
     "files": "Dateien",
@@ -347,7 +356,8 @@
     "primaryKeyReadOnly": "Primärschlüssel (schreibgeschützt)",
     "selectDefault": "-- Auswählen --",
     "selectField": "-- {{field}} auswählen --",
-    "systemTimestamp": "Systemzeitstempel (automatisch generiert)"
+    "systemTimestamp": "Systemzeitstempel (automatisch generiert)",
+    "computedField": "Computed from related record (read-only)"
   },
   "header": {
     "administrator": "Administrator",
@@ -610,7 +620,10 @@
     },
     "title": "Papierkorbverwaltung",
     "totalSize": "{{size}} gesamt",
-    "trashPurged": "Papierkorb bereinigt"
+    "trashPurged": "Papierkorb bereinigt",
+    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgedDirectories": "across {{count}} directories",
+    "purgedMessage": "{{count}} expired files permanently deleted"
   },
   "users": {
     "actionsFor": "Aktionen für {{username}}",
@@ -690,5 +703,28 @@
     "userCount": "{{count}} Benutzer",
     "userCount_one": "{{count}} Benutzer",
     "userCount_other": "{{count}} Benutzer"
+  },
+  "medicalSpecialty": {
+    "description": "Description",
+    "name": "Name"
+  },
+  "practices": {
+    "locations": {
+      "add": "Add location",
+      "empty": "No locations yet.",
+      "labelField": "Label",
+      "labelPlaceholder": "Main office",
+      "locationNumber": "Location {{num}}",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
+      "title": "Locations"
+    },
+    "subtitle": "Manage medical practices — contact details, locations, and more.",
+    "title": "Practices"
+  },
+  "practitioner": {
+    "quickAddSpecialty": "+ Add new specialty…",
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   }
 }

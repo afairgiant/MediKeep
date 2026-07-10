@@ -48,14 +48,14 @@ const resolve = (keyOrLiteral, interpolation) => {
  * Show a translated success notification.
  * @param {string} messageKey - Translation key or literal string for the message
  * @param {Object} [options] - Additional options
- * @param {string} [options.title] - Translation key or literal for title (default: common:messages.saveSuccess)
+ * @param {string} [options.title] - Translation key or literal for title (default: notifications:toasts.generic.success)
  * @param {Object} [options.interpolation] - Values for {{placeholder}} interpolation
  * @param {number} [options.autoClose] - Auto close time in ms (default: 5000)
  */
 export const notifySuccess = (messageKey, options = {}) => {
   const { title, interpolation, autoClose = 5000, ...rest } = options;
   notifications.show({
-    title: resolve(title || 'common:messages.saveSuccess', interpolation),
+    title: resolve(title || 'notifications:toasts.generic.success', interpolation),
     message: resolve(messageKey, interpolation),
     color: 'green',
     icon: <IconCheck size={16} />,

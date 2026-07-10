@@ -222,7 +222,7 @@ const BaseMedicalCard = ({
                   onClick={safeOnEdit}
                   disabled={disableActions}
                 >
-                  {t('shared:labels.edit')}
+                  {t('buttons.edit')}
                 </Button>
               </span>
             </Tooltip>

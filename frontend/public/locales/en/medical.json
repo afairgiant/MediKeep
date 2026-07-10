@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Relationship to patient",
         "label": "Relationship",
-        "placeholder": "Select relationship"
+        "placeholder": "Select relationship",
+        "options": {
+          "spouse": "Spouse",
+          "partner": "Partner",
+          "parent": "Parent",
+          "mother": "Mother",
+          "father": "Father",
+          "child": "Child",
+          "son": "Son",
+          "daughter": "Daughter",
+          "sibling": "Sibling",
+          "brother": "Brother",
+          "sister": "Sister",
+          "grandparent": "Grandparent",
+          "grandmother": "Grandmother",
+          "grandfather": "Grandfather",
+          "grandchild": "Grandchild",
+          "grandson": "Grandson",
+          "granddaughter": "Granddaughter",
+          "aunt": "Aunt",
+          "uncle": "Uncle",
+          "cousin": "Cousin",
+          "friend": "Friend",
+          "neighbor": "Neighbor",
+          "caregiver": "Caregiver",
+          "guardian": "Guardian",
+          "other": "Other"
+        }
       },
       "secondaryPhone": {
         "description": "Optional secondary phone number",
@@ -830,7 +857,11 @@
       "creating": "Creating...",
       "createError": "Failed to create test panel",
       "testResultRequired": "At least one test result is required",
-      "tagsPlaceholder": "Add tags to help organize and search for this record later"
+      "tagsPlaceholder": "Add tags to help organize and search for this record later",
+      "componentSaveFailedTitle": "Test components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them."
     },
     "buttons": {
       "addLabResults": "Add Lab Results"

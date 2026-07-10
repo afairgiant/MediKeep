@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Lien avec le patient",
         "label": "Lien",
-        "placeholder": "Sélectionnez le lien"
+        "placeholder": "Sélectionnez le lien",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Numéro de téléphone secondaire (optionnel)",
@@ -830,7 +857,11 @@
       "creating": "Création du panneau...",
       "createError": "Échec de la création du panneau de tests",
       "testResultRequired": "Au moins un résultat de test est requis",
-      "tagsPlaceholder": "Ajouter des étiquettes pour organiser et retrouver cet enregistrement plus tard"
+      "tagsPlaceholder": "Ajouter des étiquettes pour organiser et retrouver cet enregistrement plus tard",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Ajouter des résultats de laboratoire"

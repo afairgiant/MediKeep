@@ -76,7 +76,9 @@
         "filename": "Nom de fichier"
       },
       "title": "Backups existants",
-      "verify": "Vérifier"
+      "verify": "Vérifier",
+      "count": "{{count}} backups",
+      "unknown": "Unknown"
     },
     "loading": "Chargement de la gestion des backups...",
     "modals": {
@@ -154,7 +156,8 @@
       "retentionLogic": "Logique de rétention",
       "saveRetention": "Sauvegarder les paramètres de rétention",
       "timeBasedCleanup": "<strong>Nettoyage par ancienneté :</strong> Supprimer les backups vieux de plus de {{days}} jours (au-delà du décompte minimum)",
-      "title": "Paramètres de rétention des backups"
+      "title": "Paramètres de rétention des backups",
+      "currentStatus": "<strong>Current Status:</strong> {{count}} backups stored (max: {{max}})"
     },
     "schedule": {
       "completedSuccessfully": "Complété avec succès",
@@ -319,13 +322,19 @@
       "symptom_occurrence": "Entrées de crises symptômatiques individuelles",
       "treatment": "Plans de traitement et thérapies",
       "user": "Utilisateurs et administrateurs système",
-      "vitals": "Tension artérielle, fréquence cardiaque, température"
+      "vitals": "Tension artérielle, fréquence cardiaque, température",
+      "medical_specialty": "Medical specialties (e.g. Cardiology) assigned to practitioners",
+      "practice": "Medical practices — contact details and multiple locations"
     },
     "fallbackWarning": "Impossible de charger les modèles depuis le serveur. Affichage de la liste de modèle intégrée.",
     "filterAriaLabel": "Filtrer les modèles de données",
     "filterPlaceholder": "Filtrer les modèles...",
     "noMatchFilter": "Aucun modèle ne correspond à \"{{query}}\"",
-    "subtitle": "Gérez et visualisez toutes les tables et entrées de la base de données"
+    "subtitle": "Gérez et visualisez toutes les tables et entrées de la base de données",
+    "displayNames": {
+      "medical_specialty": "Medical Specialties",
+      "practice": "Practices"
+    }
   },
   "directoryCard": {
     "files": "fichiers",
@@ -347,7 +356,8 @@
     "primaryKeyReadOnly": "Clé primaire (lecture seule)",
     "selectDefault": "-- Sélectionnez --",
     "selectField": "-- Sélectionnez {{field}} --",
-    "systemTimestamp": "Horodatage système (auto-généré)"
+    "systemTimestamp": "Horodatage système (auto-généré)",
+    "computedField": "Computed from related record (read-only)"
   },
   "header": {
     "administrator": "Administrateur",
@@ -610,7 +620,10 @@
     },
     "title": "Gestion de la corbeille",
     "totalSize": "{{size}} total",
-    "trashPurged": "Corbeille purgée"
+    "trashPurged": "Corbeille purgée",
+    "purgeDescription": "Files that have exceeded the retention period will be removed. Currently there {{verb}} <strong>{{count}} {{files}}</strong> in the trash totalling <strong>{{size}}</strong>.",
+    "purgedDirectories": "across {{count}} directories",
+    "purgedMessage": "{{count}} expired files permanently deleted"
   },
   "users": {
     "actionsFor": "Actions pour {{username}}",
@@ -690,5 +703,28 @@
     "userCount": "{{count}} utilisateurs",
     "userCount_one": "{{count}} utilisateur",
     "userCount_other": "{{count}} utilisateurs"
+  },
+  "medicalSpecialty": {
+    "description": "Description",
+    "name": "Name"
+  },
+  "practices": {
+    "locations": {
+      "add": "Add location",
+      "empty": "No locations yet.",
+      "labelField": "Label",
+      "labelPlaceholder": "Main office",
+      "locationNumber": "Location {{num}}",
+      "moveDown": "Move down",
+      "moveUp": "Move up",
+      "title": "Locations"
+    },
+    "subtitle": "Manage medical practices — contact details, locations, and more.",
+    "title": "Practices"
+  },
+  "practitioner": {
+    "quickAddSpecialty": "+ Add new specialty…",
+    "specialtyPlaceholder": "Select a specialty",
+    "specialtySaved": "Specialty ready to use"
   }
 }

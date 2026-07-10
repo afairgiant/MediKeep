@@ -39,7 +39,8 @@
     "mustBeValidNumber": "Moet een geldig getal zijn",
     "patientNotSelected": "Selecteer een patiënt.",
     "requiredFieldMissing": "Vul alle verplichte velden in.",
-    "submissionFailed": "Formulier opslaan mislukt. Controleer uw invoer en probeer het opnieuw."
+    "submissionFailed": "Formulier opslaan mislukt. Controleer uw invoer en probeer het opnieuw.",
+    "labResultNotSelected": "Please select at least one lab result"
   },
   "general": {
     "maintenanceMode": "Het systeem is momenteel in onderhoud. Probeer het later opnieuw.",

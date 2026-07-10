@@ -176,7 +176,34 @@
       "relationship": {
         "description": "Родство с пациентом",
         "label": "Родство",
-        "placeholder": "Выберите родство"
+        "placeholder": "Выберите родство",
+        "options": {
+          "aunt": "Aunt",
+          "brother": "Brother",
+          "caregiver": "Caregiver",
+          "child": "Child",
+          "cousin": "Cousin",
+          "daughter": "Daughter",
+          "father": "Father",
+          "friend": "Friend",
+          "grandchild": "Grandchild",
+          "granddaughter": "Granddaughter",
+          "grandfather": "Grandfather",
+          "grandmother": "Grandmother",
+          "grandparent": "Grandparent",
+          "grandson": "Grandson",
+          "guardian": "Guardian",
+          "mother": "Mother",
+          "neighbor": "Neighbor",
+          "other": "Other",
+          "parent": "Parent",
+          "partner": "Partner",
+          "sibling": "Sibling",
+          "sister": "Sister",
+          "son": "Son",
+          "spouse": "Spouse",
+          "uncle": "Uncle"
+        }
       },
       "secondaryPhone": {
         "description": "Необязательный дополнительный номер телефона",
@@ -830,7 +857,11 @@
       "creating": "Создание...",
       "createError": "Не удалось создать панель анализов",
       "testResultRequired": "Требуется хотя бы один результат анализа",
-      "tagsPlaceholder": "Добавьте теги для удобной организации и поиска этой записи позже"
+      "tagsPlaceholder": "Добавьте теги для удобной организации и поиска этой записи позже",
+      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved"
     },
     "buttons": {
       "addLabResults": "Добавить результаты анализов"

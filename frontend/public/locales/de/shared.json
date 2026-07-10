@@ -85,7 +85,10 @@
     "treatmentName": "Behandlung",
     "treatmentReceived": "Erhaltene Behandlung",
     "treatmentType": "Behandlungsart",
-    "vaccineName": "Impfstoff"
+    "vaccineName": "Impfstoff",
+    "description": "Description",
+    "name": "Name",
+    "reset": "Reset"
   },
   "labels": {
     "acrossCountFiles": "über {{count}} Dateien verteilt",
@@ -301,7 +304,13 @@
     "warnings": "Warnungen",
     "website": "Website",
     "weekly": "Wöchentlich",
-    "weight": "Körpergewicht"
+    "weight": "Körpergewicht",
+    "remove": "Remove",
+    "save": "Save",
+    "sortBy": "Sort by",
+    "state": "State",
+    "unknownError": "Unknown error",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Nur-Lese-Zugriff"

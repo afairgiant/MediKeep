@@ -141,6 +141,7 @@
     },
     "sentCount_one": "{{count}} sent",
     "sentCount_other": "{{count}} sent",
+    "sentCount": "{{count}} sent",
     "test": "Test",
     "testError": "Failed to send test notification",
     "testFailed": "Test notification failed",
@@ -318,7 +319,8 @@
       "operationSuccess": "{{operation}} completed successfully!",
       "saveFailed": "Save Failed",
       "success": "Success!",
-      "warning": "Warning"
+      "warning": "Warning",
+      "deleteFailed": "Delete Failed"
     },
     "invitations": {
       "accessRevoked": "Access Revoked",
@@ -382,7 +384,9 @@
       "cleanupComplete": "Cleanup completed: {{cleaned}} files cleaned, {{deleted}} files deleted",
       "cleanupFailed": "Failed to cleanup files. Please try again later.",
       "noOutOfSync": "No out-of-sync files found to clean up",
-      "sessionTimeoutUpdated": "Session timeout updated to {{minutes}} minutes. Your session has been refreshed."
+      "sessionTimeoutUpdated": "Session timeout updated to {{minutes}} minutes. Your session has been refreshed.",
+      "saved": "Settings saved successfully",
+      "saveFailed": "Failed to save settings"
     },
     "sharing": {
       "accessRevoked": "Access revoked for user {{userId}}",
@@ -409,7 +413,8 @@
       "fileUploadedSuccess": "\"{{fileName}}\" uploaded to Paperless successfully!",
       "fileUploadFailed": "File Upload Failed",
       "paperlessUploadFailed": "Paperless Upload Failed",
-      "partialSuccess": "{{completed}}/{{total}} files uploaded successfully. {{failed}} failed."
+      "partialSuccess": "{{completed}}/{{total}} files uploaded successfully. {{failed}} failed.",
+      "failed": "File Upload Failed"
     },
     "vitals": {
       "deleteFailed": "Failed to delete vitals record",
