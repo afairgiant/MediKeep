@@ -7,6 +7,8 @@
   },
   "addNew": "+ เพิ่มผลแลปใหม่",
   "addTitle": "เพิ่มผลแลปใหม่",
+  "advancedMode": "โหมดขั้นสูง",
+  "advancedModeDescription": "แสดงแท็บทั้งหมด (ความสัมพันธ์ หมายเหตุ ไฟล์) เมื่อสร้างผลแลปใหม่",
   "bulkEntry": {
     "addComponents": "เพิ่ม {{count}} รายการ",
     "addComponents_one": "เพิ่ม {{count}} รายการ",

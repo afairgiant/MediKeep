@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Laborbefund-Details hinzufügen",
   "addFirst": "Erstes Laborergebnis hinzufügen",
   "additionalNotes": {
     "description": "Klinische Notizen oder besondere Anweisungen",
@@ -7,6 +8,8 @@
   },
   "addNew": "+ Neues Laborergebnis hinzufügen",
   "addTitle": "Neues Laborergebnis hinzufügen",
+  "advancedMode": "Erweiterter Modus",
+  "advancedModeDescription": "Alle Tabs anzeigen (Verknüpfungen, Notizen, Dateien) beim Erstellen eines neuen Laborergebnisses",
   "bulkEntry": {
     "addComponents": "{{count}} Komponente hinzufügen",
     "addComponents_one": "{{count}} Komponente hinzufügen",
@@ -115,7 +118,6 @@
     "trendAvailable": "Trenddaten verfügbar"
   },
   "editTitle": "Laborergebnis bearbeiten",
-  "addDetailsTitle": "Laborbefund-Details hinzufügen",
   "emptyLabResultMessage": "Sie haben ein Laborergebnis erstellt, aber keine Testkomponenten hinzugefügt. Möchten Sie dieses Laborergebnis löschen?",
   "emptyLabResultWarning": "Laborergebnis erstellt, aber leer",
   "errorOccurred": "Ein Fehler ist aufgetreten",
@@ -131,6 +133,7 @@
     "linkedVisits": "Verknüpfte Besuche",
     "linkVisitsDescription": "Verknüpfen Sie dieses Laborergebnis mit Besuchen, bei denen es angeordnet oder überprüft wurde.",
     "linkVisitsTitle": "Mit Besuchen verknüpfen",
+    "matchedCommonName": "Treffer: {{name}}",
     "notesOptional": "Notizen (optional)",
     "refMax": "Ref Max",
     "refMin": "Ref Min",
@@ -144,8 +147,7 @@
     "testCodePlaceholder": "z. B. 718-7",
     "testComponents": "Testkomponenten (Optional)",
     "testDetails": "Testdetails",
-    "unit": "Einheit",
-    "matchedCommonName": "Treffer: {{name}}"
+    "unit": "Einheit"
   },
   "keepEmptyLabResult": "Laborergebnis behalten",
   "labResult": {
@@ -166,8 +168,8 @@
   "modal": {
     "editLabResult": "Laborergebnis bearbeiten",
     "labels": {
-      "testType": "Testtyp",
-      "referenceRange": "Referenzbereich"
+      "referenceRange": "Referenzbereich",
+      "testType": "Testtyp"
     },
     "sections": {
       "associatedFiles": "Zugehörige Dokumente",
@@ -182,6 +184,21 @@
   },
   "networkError": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
   "noResults": "Keine Laborergebnisse gefunden",
+  "numericResult": {
+    "refMaxLabel": "Bereich Max",
+    "refMaxPlaceholder": "z.B. 5,6",
+    "refMinLabel": "Bereich Min",
+    "refMinPlaceholder": "z.B. 4,0",
+    "refTextDescription": "Überschreibt Min/Max in der Anzeige",
+    "refTextLabel": "Bereichstext",
+    "refTextPlaceholder": "z.B. 4,0-5,6 oder <200",
+    "sectionDescription": "Geben Sie einen Messwert und einen Referenzbereich ein, um Trenddiagramme zu aktivieren.",
+    "sectionLabel": "Numerisches Ergebnis (optional)",
+    "unitLabel": "Einheit",
+    "unitPlaceholder": "z.B. mg/dL, mmol/L",
+    "valueLabel": "Wert",
+    "valuePlaceholder": "z.B. 6,2"
+  },
   "orderedDate": {
     "description": "Datum, an dem der Test angefordert wurde",
     "label": "Auftragsdatum",
@@ -205,6 +222,29 @@
     "inconclusive": "Nicht eindeutig - Wiederholung erforderlich",
     "low": "Erniedrigt - Unter dem Normalbereich",
     "normal": "Normal - Innerhalb des Referenzbereichs"
+  },
+  "resultsTable": {
+    "collapseAll": "Alle einklappen",
+    "dateFrom": "Datum von",
+    "dateTo": "Datum bis",
+    "expandAll": "Alle erweitern",
+    "noResults": "Keine Testergebnisse entsprechen den aktuellen Filtern",
+    "results": "{{count}} Ergebnis",
+    "results_one": "{{count}} results",
+    "results_other": "{{count}} Ergebnisse",
+    "source": "Quelle",
+    "viewTrends": "Trends anzeigen"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "Aus dem Panel",
+    "latestResult": "Aktuell",
+    "noResults": "Keine Ergebnisse in dieser Gruppe",
+    "panel": "Panel",
+    "results": "{{count}} Ergebnis",
+    "results_one": "{{count}} Ergebnis",
+    "results_other": "{{count}} Ergebnisse",
+    "trendChart": "Wert im Zeitverlauf"
   },
   "startAdding": "Beginnen Sie mit dem Hinzufügen Ihres ersten Laborergebnisses.",
   "stats": {
@@ -328,14 +368,14 @@
       "genetics": "Genetik - Gentests",
       "hematology": "Hämatologie - Blutbild & Eisen",
       "hepatology": "Hepatologie - Leberenzyme & -funktion",
+      "imaging": "Bildgebung - Radiologie & Scans",
       "immunology": "Immunologie - Immunsystem & Antikörper",
       "lipids": "Lipide - Cholesterin & Triglyzeride",
       "microbiology": "Mikrobiologie - Infektionen & Kulturen",
       "molecular": "Molekularbiologie - DNA-Tests",
       "other": "Sonstige Tests",
       "pathology": "Pathologie - Gewebe- & Biopsieanalyse",
-      "toxicology": "Toxikologie - Drogen- & Toxin-Screening",
-      "imaging": "Bildgebung - Radiologie & Scans"
+      "toxicology": "Toxikologie - Drogen- & Toxin-Screening"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +423,19 @@
       "hasBeenDeleted": "{{name}} wurde gelöscht"
     },
     "refreshComponents": "Komponenten aktualisieren",
-    "tabs": {
-      "statistics": "Statistiken",
-      "testResults": "Testergebnisse"
-    },
-    "title": "Tests",
     "resultType": {
       "qualitative": "Qualitativ (Pos/Neg)",
       "quantitative": "Quantitativ (Numerisch)",
       "textual": "Textuell (Bericht)"
-    }
+    },
+    "tabs": {
+      "statistics": "Statistiken",
+      "testResults": "Testergebnisse"
+    },
+    "title": "Tests"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
   },
   "testingFacility": {
     "description": "Wo der Test durchgeführt wird/wurde",
@@ -427,6 +470,11 @@
     "label": "Testtyp",
     "placeholder": "Dringlichkeitsstufe auswählen"
   },
+  "textualResult": {
+    "label": "Ergebnistext",
+    "noText": "—",
+    "placeholder": "Ergebnistext eingeben (z. B. Keine akuten Befunde)"
+  },
   "timeoutError": "Zeitüberschreitung der Anfrage. Bitte versuchen Sie es erneut.",
   "title": "Laborergebnisse",
   "trendChart": {
@@ -434,10 +482,10 @@
     "labLabel": "Labor: {{name}}",
     "negativeUndetected": "Negativ/Nicht nachgewiesen",
     "noDataPoints": "Keine Datenpunkte zum Anzeigen",
+    "notAvailableForTextual": "Trenddiagramme sind für Textergebnisse nicht verfügbar.",
     "positiveDetected": "Positiv/Nachgewiesen",
     "referenceRange": "Referenzbereich:",
-    "referenceValue": "Referenz: {{min}} - {{max}}",
-    "notAvailableForTextual": "Trenddiagramme sind für Textergebnisse nicht verfügbar."
+    "referenceValue": "Referenz: {{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "Abnormal:",
@@ -447,6 +495,8 @@
     "dataPoints_one": "{{count}} Datenpunkte",
     "dataPoints_other": "{{count}} Datenpunkte",
     "dataTable": "Datentabelle",
+    "decreasing": "Abnehmend",
+    "increasing": "Zunehmend",
     "inRange": "{{percent}} % im Bereich",
     "latest": "Aktuell",
     "noData": "Keine Trenddaten verfügbar",
@@ -454,15 +504,13 @@
     "normalLabel": "Normal:",
     "range": "Bereich",
     "showing": "Anzeige:",
+    "stable": "Stabil",
     "stdDevLabel": "Std.-Abw.:",
     "summaryStatistics": "Zusammenfassende Statistiken",
+    "textualNoStats": "Numerische Statistiken sind für Textergebnisse nicht verfügbar.",
     "timeRange": "Zeitraum",
     "title": "Trendanalyse",
-    "total": "Gesamt",
-    "decreasing": "Abnehmend",
-    "increasing": "Zunehmend",
-    "stable": "Stabil",
-    "textualNoStats": "Numerische Statistiken sind für Textergebnisse nicht verfügbar."
+    "total": "Gesamt"
   },
   "trendTable": {
     "clickToSort": "Klicken Sie auf Spaltenüberschriften zum Sortieren",
@@ -476,50 +524,5 @@
   "unsavedDataInstructions": "Klicken Sie auf \"Komponenten hinzufügen\" im Vorschau-Tab, um Ihre analysierten Daten vor dem Schließen zu speichern.",
   "unsavedDataMessage_one": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurde(n). Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
   "unsavedDataMessage_other": "Sie haben {{count}} analysierte Testkomponente(n), die noch nicht hinzugefügt wurden. Wenn Sie jetzt schließen, gehen diese analysierten Daten verloren.",
-  "unsavedDataWarning": "Nicht gespeicherte analysierte Daten",
-  "stackedView": {
-    "results": "{{count}} Ergebnis",
-    "results_one": "{{count}} Ergebnis",
-    "results_other": "{{count}} Ergebnisse",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Aktuell",
-    "trendChart": "Wert im Zeitverlauf",
-    "noResults": "Keine Ergebnisse in dieser Gruppe",
-    "fromPanel": "Aus dem Panel",
-    "panel": "Panel"
-  },
-  "numericResult": {
-    "sectionLabel": "Numerisches Ergebnis (optional)",
-    "sectionDescription": "Geben Sie einen Messwert und einen Referenzbereich ein, um Trenddiagramme zu aktivieren.",
-    "valueLabel": "Wert",
-    "valuePlaceholder": "z.B. 6,2",
-    "unitLabel": "Einheit",
-    "unitPlaceholder": "z.B. mg/dL, mmol/L",
-    "refMinLabel": "Bereich Min",
-    "refMinPlaceholder": "z.B. 4,0",
-    "refMaxLabel": "Bereich Max",
-    "refMaxPlaceholder": "z.B. 5,6",
-    "refTextLabel": "Bereichstext",
-    "refTextPlaceholder": "z.B. 4,0-5,6 oder <200",
-    "refTextDescription": "Überschreibt Min/Max in der Anzeige"
-  },
-  "resultsTable": {
-    "expandAll": "Alle erweitern",
-    "collapseAll": "Alle einklappen",
-    "results": "{{count}} Ergebnis",
-    "results_other": "{{count}} Ergebnisse",
-    "noResults": "Keine Testergebnisse entsprechen den aktuellen Filtern",
-    "dateFrom": "Datum von",
-    "dateTo": "Datum bis",
-    "source": "Quelle",
-    "viewTrends": "Trends anzeigen"
-  },
-  "testEntry": {
-    "label": "Test #{{number}}"
-  },
-  "textualResult": {
-    "label": "Ergebnistext",
-    "noText": "—",
-    "placeholder": "Ergebnistext eingeben (z. B. Keine akuten Befunde)"
-  }
+  "unsavedDataWarning": "Nicht gespeicherte analysierte Daten"
 }

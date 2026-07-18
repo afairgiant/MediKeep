@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Labresultaat details toevoegen",
   "addFirst": "Voeg uw eerste labresultaat toe",
   "additionalNotes": {
     "description": "Klinische notities of speciale instructies",
@@ -7,6 +8,8 @@
   },
   "addNew": "+ Nieuw labresultaat toevoegen",
   "addTitle": "Nieuw labresultaat toevoegen",
+  "advancedMode": "Geavanceerde modus",
+  "advancedModeDescription": "Toon alle tabbladen (koppelingen, notities, bestanden) bij het aanmaken van een nieuw labresultaat",
   "bulkEntry": {
     "addComponents": "{{count}} component toevoegen",
     "addComponents_one": "{{count}} component toevoegen",
@@ -115,7 +118,6 @@
     "trendAvailable": "Trendgegevens beschikbaar"
   },
   "editTitle": "Labresultaat bewerken",
-  "addDetailsTitle": "Labresultaat details toevoegen",
   "emptyLabResultMessage": "U heeft een labresultaat aangemaakt maar geen testcomponenten toegevoegd. Wilt u dit labresultaat verwijderen?",
   "emptyLabResultWarning": "Labresultaat aangemaakt maar leeg",
   "errorOccurred": "Er is een fout opgetreden",
@@ -131,6 +133,7 @@
     "linkedVisits": "Gekoppelde consulten",
     "linkVisitsDescription": "Koppel dit labresultaat aan consulten waarbij het is aangevraagd of beoordeeld.",
     "linkVisitsTitle": "Koppelen aan consulten",
+    "matchedCommonName": "overeenkomst: {{name}}",
     "notesOptional": "Notities (optioneel)",
     "refMax": "Ref max",
     "refMin": "Ref min",
@@ -144,8 +147,7 @@
     "testCodePlaceholder": "bijv. 718-7",
     "testComponents": "Testcomponenten (optioneel)",
     "testDetails": "Testdetails",
-    "unit": "Eenheid",
-    "matchedCommonName": "overeenkomst: {{name}}"
+    "unit": "Eenheid"
   },
   "keepEmptyLabResult": "Labresultaat behouden",
   "labResult": {
@@ -166,8 +168,8 @@
   "modal": {
     "editLabResult": "Labresultaat bewerken",
     "labels": {
-      "testType": "Testtype",
-      "referenceRange": "Referentiebereik"
+      "referenceRange": "Referentiebereik",
+      "testType": "Testtype"
     },
     "sections": {
       "associatedFiles": "Gekoppelde documenten",
@@ -182,6 +184,21 @@
   },
   "networkError": "Netwerkfout. Controleer uw verbinding en probeer het opnieuw.",
   "noResults": "Geen labresultaten gevonden",
+  "numericResult": {
+    "refMaxLabel": "Bereik max",
+    "refMaxPlaceholder": "bijv. 5,6",
+    "refMinLabel": "Bereik min",
+    "refMinPlaceholder": "bijv. 4,0",
+    "refTextDescription": "Vervangt min/max in weergave",
+    "refTextLabel": "Bereiktekst",
+    "refTextPlaceholder": "bijv. 4,0-5,6 of <200",
+    "sectionDescription": "Voer een gemeten waarde en referentiebereik in om trendgrafieken in te schakelen.",
+    "sectionLabel": "Numeriek resultaat (optioneel)",
+    "unitLabel": "Eenheid",
+    "unitPlaceholder": "bijv. mg/dL, mmol/L",
+    "valueLabel": "Waarde",
+    "valuePlaceholder": "bijv. 6,2"
+  },
   "orderedDate": {
     "description": "Datum waarop de test is aangevraagd",
     "label": "Aanvraagdatum",
@@ -205,6 +222,29 @@
     "inconclusive": "Niet-conclusief - Herhaling nodig",
     "low": "Laag - Onder normaal bereik",
     "normal": "Normaal - Binnen referentiebereik"
+  },
+  "resultsTable": {
+    "collapseAll": "Alles samenvouwen",
+    "dateFrom": "Datum van",
+    "dateTo": "Datum tot",
+    "expandAll": "Alles uitvouwen",
+    "noResults": "Geen testresultaten voldoen aan de huidige filters",
+    "results": "{{count}} resultaat",
+    "results_one": "{{count}} results",
+    "results_other": "{{count}} resultaten",
+    "source": "Bron",
+    "viewTrends": "Trends bekijken"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "Uit het paneel",
+    "latestResult": "Laatste",
+    "noResults": "Geen resultaten in deze groep",
+    "panel": "Paneel",
+    "results": "{{count}} resultaat",
+    "results_one": "{{count}} resultaat",
+    "results_other": "{{count}} resultaten",
+    "trendChart": "Waarde in de loop van de tijd"
   },
   "startAdding": "Begin met het toevoegen van uw eerste labresultaat.",
   "stats": {
@@ -328,14 +368,14 @@
       "genetics": "Genetica - Genetisch onderzoek",
       "hematology": "Hematologie - Bloedtellingen en ijzer",
       "hepatology": "Hepatologie - Leverenzymen en -functie",
+      "imaging": "Beeldvorming - Radiologie & Scans",
       "immunology": "Immunologie - Immuunsysteem en antilichamen",
       "lipids": "Lipiden - Cholesterol en triglyceriden",
       "microbiology": "Microbiologie - Infecties en kweken",
       "molecular": "Moleculair - DNA-tests",
       "other": "Overige tests",
       "pathology": "Pathologie - Weefsel- en biopsieanalyse",
-      "toxicology": "Toxicologie - Drugs- en toxinescreening",
-      "imaging": "Beeldvorming - Radiologie & Scans"
+      "toxicology": "Toxicologie - Drugs- en toxinescreening"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +423,19 @@
       "hasBeenDeleted": "{{name}} is verwijderd"
     },
     "refreshComponents": "Componenten vernieuwen",
-    "tabs": {
-      "statistics": "Statistieken",
-      "testResults": "Testresultaten"
-    },
-    "title": "Tests",
     "resultType": {
       "qualitative": "Kwalitatief (Pos/Neg)",
       "quantitative": "Kwantitatief (Numeriek)",
       "textual": "Tekstueel (Rapport)"
-    }
+    },
+    "tabs": {
+      "statistics": "Statistieken",
+      "testResults": "Testresultaten"
+    },
+    "title": "Tests"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
   },
   "testingFacility": {
     "description": "Waar de test wordt/werd uitgevoerd",
@@ -427,6 +470,11 @@
     "label": "Testtype",
     "placeholder": "Selecteer urgentieniveau"
   },
+  "textualResult": {
+    "label": "Resultaattekst",
+    "noText": "—",
+    "placeholder": "Voer resultaattekst in (bijv. Geen acute bevindingen)"
+  },
   "timeoutError": "Time-out bij verzoek. Probeer het opnieuw.",
   "title": "Labresultaten",
   "trendChart": {
@@ -434,10 +482,10 @@
     "labLabel": "Lab: {{name}}",
     "negativeUndetected": "Negatief/niet gedetecteerd",
     "noDataPoints": "Geen datapunten om weer te geven",
+    "notAvailableForTextual": "Trendgrafieken zijn niet beschikbaar voor tekstresultaten.",
     "positiveDetected": "Positief/gedetecteerd",
     "referenceRange": "Referentiebereik:",
-    "referenceValue": "Referentie: {{min}} - {{max}}",
-    "notAvailableForTextual": "Trendgrafieken zijn niet beschikbaar voor tekstresultaten."
+    "referenceValue": "Referentie: {{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "Afwijkend:",
@@ -447,6 +495,8 @@
     "dataPoints_one": "{{count}} datapunt",
     "dataPoints_other": "{{count}} datapunten",
     "dataTable": "Gegevenstabel",
+    "decreasing": "Afnemend",
+    "increasing": "Toenemend",
     "inRange": "{{percent}}% binnen bereik",
     "latest": "Laatste",
     "noData": "Geen trendgegevens beschikbaar",
@@ -454,15 +504,13 @@
     "normalLabel": "Normaal:",
     "range": "Bereik",
     "showing": "Weergave:",
+    "stable": "Stabiel",
     "stdDevLabel": "Std afw:",
     "summaryStatistics": "Samenvattende statistieken",
+    "textualNoStats": "Numerieke statistieken zijn niet beschikbaar voor tekstresultaten.",
     "timeRange": "Tijdsbereik",
     "title": "Trendanalyse",
-    "total": "Totaal",
-    "decreasing": "Afnemend",
-    "increasing": "Toenemend",
-    "stable": "Stabiel",
-    "textualNoStats": "Numerieke statistieken zijn niet beschikbaar voor tekstresultaten."
+    "total": "Totaal"
   },
   "trendTable": {
     "clickToSort": "Klik op kolomkoppen om te sorteren",
@@ -476,50 +524,5 @@
   "unsavedDataInstructions": "Klik op \"Componenten toevoegen\" in het tabblad Voorbeeld om uw verwerkte gegevens op te slaan voordat u sluit.",
   "unsavedDataMessage_one": "U heeft {{count}} verwerkt testcomponent dat nog niet is toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
   "unsavedDataMessage_other": "U heeft {{count}} verwerkte testcomponenten die nog niet zijn toegevoegd. Als u nu sluit, verliest u deze verwerkte gegevens.",
-  "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens",
-  "stackedView": {
-    "results": "{{count}} resultaat",
-    "results_one": "{{count}} resultaat",
-    "results_other": "{{count}} resultaten",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Laatste",
-    "trendChart": "Waarde in de loop van de tijd",
-    "noResults": "Geen resultaten in deze groep",
-    "fromPanel": "Uit het paneel",
-    "panel": "Paneel"
-  },
-  "numericResult": {
-    "sectionLabel": "Numeriek resultaat (optioneel)",
-    "sectionDescription": "Voer een gemeten waarde en referentiebereik in om trendgrafieken in te schakelen.",
-    "valueLabel": "Waarde",
-    "valuePlaceholder": "bijv. 6,2",
-    "unitLabel": "Eenheid",
-    "unitPlaceholder": "bijv. mg/dL, mmol/L",
-    "refMinLabel": "Bereik min",
-    "refMinPlaceholder": "bijv. 4,0",
-    "refMaxLabel": "Bereik max",
-    "refMaxPlaceholder": "bijv. 5,6",
-    "refTextLabel": "Bereiktekst",
-    "refTextPlaceholder": "bijv. 4,0-5,6 of <200",
-    "refTextDescription": "Vervangt min/max in weergave"
-  },
-  "resultsTable": {
-    "expandAll": "Alles uitvouwen",
-    "collapseAll": "Alles samenvouwen",
-    "results": "{{count}} resultaat",
-    "results_other": "{{count}} resultaten",
-    "noResults": "Geen testresultaten voldoen aan de huidige filters",
-    "dateFrom": "Datum van",
-    "dateTo": "Datum tot",
-    "source": "Bron",
-    "viewTrends": "Trends bekijken"
-  },
-  "testEntry": {
-    "label": "Test #{{number}}"
-  },
-  "textualResult": {
-    "label": "Resultaattekst",
-    "noText": "—",
-    "placeholder": "Voer resultaattekst in (bijv. Geen acute bevindingen)"
-  }
+  "unsavedDataWarning": "Niet-opgeslagen verwerkte gegevens"
 }

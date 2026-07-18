@@ -29,6 +29,7 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import InlineTestComponentEntry, {
   InlineTestComponentMethods,
 } from './InlineTestComponentEntry';
+import AdvancedModeSwitch from './AdvancedModeSwitch';
 import { apiService } from '../../../services/api';
 import { labTestComponentApi } from '../../../services/api/labTestComponentApi';
 import { sanitizeComponentForApi, hasFilledValue, createEmptyRow, ComponentRowData } from '../../../utils/labTestComponentUtils';
@@ -57,6 +58,8 @@ interface TestPanelCreateDialogProps {
   onCreateSuccess: (_labResult: LabResult) => void;
   practitioners: Practitioner[];
   currentPatient: Patient | null;
+  advancedMode: boolean;
+  onAdvancedModeChange: (_checked: boolean) => void;
 }
 
 interface FormData {
@@ -83,6 +86,8 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
   onCreateSuccess,
   practitioners,
   currentPatient,
+  advancedMode,
+  onAdvancedModeChange,
 }) => {
   const { t } = useTranslation(['medical', 'shared', 'common', 'labresults']);
   const { dateInputFormat, dateParser } = useDateFormat();
@@ -436,13 +441,20 @@ const TestPanelCreateDialog: React.FC<TestPanelCreateDialogProps> = ({
           disabled={isSubmitting}
         />
 
-        <Group justify="flex-end" gap="sm" mt="sm">
-          <Button variant="default" onClick={handleClose} disabled={isSubmitting}>
-            {t('shared:fields.cancel', 'Cancel')}
-          </Button>
-          <Button onClick={handleCreate} loading={isSubmitting}>
-            {t('medical:labResults.addPanel.createButton')}
-          </Button>
+        <Group justify="space-between" gap="sm" mt="sm">
+          <AdvancedModeSwitch
+            checked={advancedMode}
+            onChange={onAdvancedModeChange}
+            disabled={isSubmitting}
+          />
+          <Group gap="sm">
+            <Button variant="default" onClick={handleClose} disabled={isSubmitting}>
+              {t('shared:fields.cancel', 'Cancel')}
+            </Button>
+            <Button onClick={handleCreate} loading={isSubmitting}>
+              {t('medical:labResults.addPanel.createButton')}
+            </Button>
+          </Group>
         </Group>
       </Stack>
     </Modal>

@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Dodaj szczegóły wyniku laboratoryjnego",
   "addFirst": "Dodaj Pierwszy Wynik Laboratoryjny",
   "additionalNotes": {
     "description": "Notatki kliniczne lub specjalne instrukcje",
@@ -7,9 +8,13 @@
   },
   "addNew": "+ Dodaj Nowy Wynik Laboratoryjny",
   "addTitle": "Dodaj Nowy Wynik Laboratoryjny",
+  "advancedMode": "Tryb zaawansowany",
+  "advancedModeDescription": "Pokaż wszystkie karty (powiązania, notatki, pliki) podczas tworzenia nowego wyniku laboratoryjnego",
   "bulkEntry": {
     "addComponents": "Dodaj {{count}} Składnik",
     "addComponents_one": "Dodaj {{count}} Składnik",
+    "addComponents_few": "",
+    "addComponents_many": "",
     "addComponents_other": "Dodaj {{count}} Składników",
     "autoParseDescription": "Automatyczne parsowanie podczas wpisywania",
     "clearAll": "Wyczyść Wszystko",
@@ -31,12 +36,16 @@
     "examples": "Przykłady",
     "extractedChars": "{{charCount}} znaków z {{pageCount}} strony",
     "extractedChars_one": "{{charCount}} znaków z {{pageCount}} strony",
+    "extractedChars_few": "",
+    "extractedChars_many": "",
     "extractedChars_other": "{{charCount}} znaków z {{pageCount}} stron",
     "fastExtraction": "Szybka Ekstrakcja",
     "firstColumnName": "Założ że pierwsza kolumna to nazwa badania",
     "firstColumnNameDesc": "Traktuj pierwszą kolumnę jako nazwę badania w danych tabelarycznych",
     "foundComponents": "Znaleziono {{count}} prawidłowy składnik gotowy do przeglądu",
     "foundComponents_one": "Znaleziono {{count}} prawidłowy składnik gotowy do przeglądu",
+    "foundComponents_few": "",
+    "foundComponents_many": "",
     "foundComponents_other": "Znaleziono {{count}} prawidłowych składników gotowych do przeglądu",
     "labResultsText": "Tekst Wyników Laboratoryjnych",
     "linked": "Połączono: {{name}}",
@@ -56,9 +65,13 @@
     "pdfUpload": "Przesyłanie PDF",
     "previewComponents": "Podgląd {{count}} Składnika",
     "previewComponents_one": "Podgląd {{count}} Składnika",
+    "previewComponents_few": "",
+    "previewComponents_many": "",
     "previewComponents_other": "Podgląd {{count}} Składników",
     "previewCount": "Podgląd ({{count}})",
     "previewCount_one": "Podgląd ({{count}})",
+    "previewCount_few": "",
+    "previewCount_many": "",
     "previewCount_other": "Podgląd ({{count}})",
     "qualitativeResults": "Wyniki jakościowe (dodatnie/ujemne)",
     "skipEmptyLines": "Pomiń puste linie",
@@ -72,9 +85,13 @@
     "useExample": "Użyj Przykładu",
     "validComponents": "{{count}} prawidłowych składników",
     "validComponents_one": "{{count}} prawidłowych składników",
+    "validComponents_few": "",
+    "validComponents_many": "",
     "validComponents_other": "{{count}} prawidłowych składników",
     "withIssues": "{{count}} z problemami",
     "withIssues_one": "{{count}} z problemami",
+    "withIssues_few": "",
+    "withIssues_many": "",
     "withIssues_other": "{{count}} z problemami"
   },
   "category": {
@@ -115,7 +132,6 @@
     "trendAvailable": "Dane trendów dostępne"
   },
   "editTitle": "Edytuj Wynik Laboratoryjny",
-  "addDetailsTitle": "Dodaj szczegóły wyniku laboratoryjnego",
   "emptyLabResultMessage": "Utworzyłeś wynik laboratoryjny ale nie dodałeś żadnych składników badania. Czy chcesz usunąć ten wynik laboratoryjny?",
   "emptyLabResultWarning": "Wynik Laboratoryjny Utworzony Ale Pusty",
   "errorOccurred": "Wystąpił błąd",
@@ -131,6 +147,7 @@
     "linkedVisits": "Powiązane Wizyty",
     "linkVisitsDescription": "Powiąż ten wynik laboratoryjny z wizytami podczas których został zlecony lub przejrzany.",
     "linkVisitsTitle": "Powiąż z Wizytami",
+    "matchedCommonName": "dopasowanie: {{name}}",
     "notesOptional": "Uwagi (opcjonalne)",
     "refMax": "Ref. Maks.",
     "refMin": "Ref. Min.",
@@ -144,8 +161,7 @@
     "testCodePlaceholder": "np. 718-7",
     "testComponents": "Składniki Badania (Opcjonalne)",
     "testDetails": "Szczegóły Badania",
-    "unit": "Jednostka",
-    "matchedCommonName": "dopasowanie: {{name}}"
+    "unit": "Jednostka"
   },
   "keepEmptyLabResult": "Zachowaj Wynik Laboratoryjny",
   "labResult": {
@@ -166,8 +182,8 @@
   "modal": {
     "editLabResult": "Edytuj Wynik Laboratoryjny",
     "labels": {
-      "testType": "Typ Badania",
-      "referenceRange": "Zakres Referencyjny"
+      "referenceRange": "Zakres Referencyjny",
+      "testType": "Typ Badania"
     },
     "sections": {
       "associatedFiles": "Powiązane Dokumenty",
@@ -182,6 +198,21 @@
   },
   "networkError": "Błąd sieci. Sprawdź połączenie i spróbuj ponownie.",
   "noResults": "Nie Znaleziono Wyników Laboratoryjnych",
+  "numericResult": {
+    "refMaxLabel": "Zakres maks",
+    "refMaxPlaceholder": "np. 5,6",
+    "refMinLabel": "Zakres min",
+    "refMinPlaceholder": "np. 4,0",
+    "refTextDescription": "Zastępuje min/maks w wyświetlaniu",
+    "refTextLabel": "Tekst zakresu",
+    "refTextPlaceholder": "np. 4,0-5,6 lub <200",
+    "sectionDescription": "Wprowadź zmierzoną wartość i zakres referencyjny, aby włączyć wykresy trendów.",
+    "sectionLabel": "Wynik numeryczny (opcjonalnie)",
+    "unitLabel": "Jednostka",
+    "unitPlaceholder": "np. mg/dL, mmol/L",
+    "valueLabel": "Wartość",
+    "valuePlaceholder": "np. 6,2"
+  },
   "orderedDate": {
     "description": "Data zlecenia badania",
     "label": "Data Zlecenia",
@@ -206,24 +237,59 @@
     "low": "Niski - Poniżej normy",
     "normal": "Normalny - W zakresie referencyjnym"
   },
+  "resultsTable": {
+    "collapseAll": "Zwiń wszystko",
+    "dateFrom": "Data od",
+    "dateTo": "Data do",
+    "expandAll": "Rozwiń wszystko",
+    "noResults": "Żadne wyniki testów nie pasują do bieżących filtrów",
+    "results": "{{count}} wynik",
+    "results_one": "{{count}} results",
+    "results_few": "{{count}} results",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} wyniki",
+    "source": "Źródło",
+    "viewTrends": "Wyświetl trendy"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "Z panelu",
+    "latestResult": "Ostatni",
+    "noResults": "Brak wyników w tej grupie",
+    "panel": "Panel",
+    "results": "{{count}} wynik",
+    "results_one": "{{count}} wynik",
+    "results_few": "{{count}} results",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} wyniki",
+    "trendChart": "Wartość w czasie"
+  },
   "startAdding": "Zacznij od dodania pierwszego wyniku laboratoryjnego.",
   "stats": {
     "abnormal": "Nieprawidłowy",
     "actionRequired": "Wymagane Działanie:",
     "basedOn": "Na podstawie {{count}} badania z zakresami referencyjnymi",
     "basedOn_one": "Na podstawie {{count}} badania z zakresami referencyjnymi",
+    "basedOn_few": "",
+    "basedOn_many": "",
     "basedOn_other": "Na podstawie {{count}} badań z zakresami referencyjnymi",
     "categories": "Kategorie Badań",
     "categoriesCount": "{{count}} kategorii",
     "categoriesCount_one": "{{count}} kategorii",
+    "categoriesCount_few": "",
+    "categoriesCount_many": "",
     "categoriesCount_other": "{{count}} kategorii",
     "coverageDetail": "{{withRanges}} z {{total}} badań ({{percent}}%) ma zakresy referencyjne dla prawidłowej oceny.",
     "critical": "Krytyczny",
     "criticalAction": "<strong>Wymagane Działanie:</strong> Wykryto {{count}} krytyczny wynik. Skonsultuj się natychmiast z pracownikiem służby zdrowia.",
     "criticalAction_one": "<strong>Wymagane Działanie:</strong> Wykryto {{count}} krytyczny wynik. Skonsultuj się natychmiast z pracownikiem służby zdrowia.",
+    "criticalAction_few": "",
+    "criticalAction_many": "",
     "criticalAction_other": "<strong>Wymagane Działanie:</strong> Wykryto {{count}} krytycznych wyników. Skonsultuj się natychmiast z pracownikiem służby zdrowia.",
     "criticalResultsWarning": "{{count}} krytyczny wynik wymaga natychmiastowej uwagi",
     "criticalResultsWarning_one": "{{count}} krytyczny wynik wymaga natychmiastowej uwagi",
+    "criticalResultsWarning_few": "",
+    "criticalResultsWarning_many": "",
     "criticalResultsWarning_other": "{{count}} krytycznych wyników wymaga natychmiastowej uwagi",
     "distribution": "Rozkład",
     "healthScore": "Ogólny Wynik Zdrowotny",
@@ -235,6 +301,8 @@
     "outOfRange": "Poza zakresem",
     "outOfRangeCount": "{{count}} z {{total}} badań jest poza zakresami referencyjnymi",
     "outOfRangeCount_one": "{{count}} z {{total}} badań jest poza zakresami referencyjnymi",
+    "outOfRangeCount_few": "",
+    "outOfRangeCount_many": "",
     "outOfRangeCount_other": "{{count}} z {{total}} badań jest poza zakresami referencyjnymi",
     "rangeAnalysis": "Analiza Zakresów Referencyjnych",
     "resultsAttention": "Kilka wyników wymaga uwagi lub obserwacji.",
@@ -264,13 +332,19 @@
     "healthyPercent": "{{score}}% Zdrowe",
     "moreCategories": "+{{count}} więcej",
     "moreCategories_one": "+{{count}} więcej",
+    "moreCategories_few": "",
+    "moreCategories_many": "",
     "moreCategories_other": "+{{count}} więcej",
     "noComponents": "Brak wyników badania",
     "testComponentsCount": "Wyniki Badania ({{count}})",
     "testComponentsCount_one": "Wyniki Badania ({{count}})",
+    "testComponentsCount_few": "",
+    "testComponentsCount_many": "",
     "testComponentsCount_other": "Wyniki Badania ({{count}})",
     "testComponentsTotal": "{{count}} wynik badania",
     "testComponentsTotal_one": "{{count}} wynik badania",
+    "testComponentsTotal_few": "",
+    "testComponentsTotal_many": "",
     "testComponentsTotal_other": "{{count}} wyników badania",
     "unavailable": "Wyniki badania niedostępne"
   },
@@ -287,9 +361,13 @@
     "addTests": "Dodaj Badania ({{filled}}/{{total}} wypełnione)",
     "addTestsAll": "Dodaj {{count}} Badanie",
     "addTestsAll_one": "Dodaj {{count}} Badanie",
+    "addTestsAll_few": "",
+    "addTestsAll_many": "",
     "addTestsAll_other": "Dodaj {{count}} Badań",
     "addTestsPartial": "Dodaj {{filled}} z {{total}} Badania",
     "addTestsPartial_one": "Dodaj {{filled}} z {{total}} Badania",
+    "addTestsPartial_few": "",
+    "addTestsPartial_many": "",
     "addTestsPartial_other": "Dodaj {{filled}} z {{total}} Badań",
     "customEntry": "Wprowadzanie Niestandardowe",
     "customEntryInstructions": "Wprowadź własne składniki badania. Wypełnij nazwę badania, jednostkę, wartość i opcjonalne zakresy referencyjne. Kliknij \"Dodaj Kolejne Badanie\" aby dodać więcej wierszy.",
@@ -299,11 +377,15 @@
     "searchPlaceholder": "Wyszukaj szablony...",
     "templateCount": "{{count}} szablon",
     "templateCount_one": "{{count}} szablon",
+    "templateCount_few": "",
+    "templateCount_many": "",
     "templateCount_other": "{{count}} szablonów",
     "templateInstructions": "Instrukcje Szablonu",
     "templateInstructionsText": "Wprowadź wartości badań i zakresy referencyjne dla każdego badania poniżej. Zakresy referencyjne powinny odpowiadać tym podawanym przez laboratorium. Pozostaw badania puste jeśli nie zostały wykonane.",
     "testCount": "{{count}} badanie",
     "testCount_one": "{{count}} badanie",
+    "testCount_few": "",
+    "testCount_many": "",
     "testCount_other": "{{count}} badań",
     "title": "Szablony Badań",
     "useTemplate": "Użyj Szablonu"
@@ -328,14 +410,14 @@
       "genetics": "Genetyka - Badania Genetyczne",
       "hematology": "Hematologia - Morfologia Krwi i Żelazo",
       "hepatology": "Hepatologia - Enzymy Wątrobowe i Funkcja",
+      "imaging": "Obrazowanie - Radiologia & Skany",
       "immunology": "Immunologia - Układ Odpornościowy i Przeciwciała",
       "lipids": "Lipidy - Cholesterol i Trójglicerydy",
       "microbiology": "Mikrobiologia - Zakażenia i Posiewy",
       "molecular": "Molekularne - Badania DNA",
       "other": "Inne Badania",
       "pathology": "Patologia - Analiza Tkanek i Biopsji",
-      "toxicology": "Toksykologia - Badania Leków i Toksyn",
-      "imaging": "Obrazowanie - Radiologia & Skany"
+      "toxicology": "Toksykologia - Badania Leków i Toksyn"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +465,19 @@
       "hasBeenDeleted": "{{name}} zostało usunięte"
     },
     "refreshComponents": "Odśwież składniki",
-    "tabs": {
-      "statistics": "Statystyki",
-      "testResults": "Wyniki Badań"
-    },
-    "title": "Badania",
     "resultType": {
       "qualitative": "Jakościowy (Poz/Neg)",
       "quantitative": "Ilościowy (Numeryczny)",
       "textual": "Tekstowy (Raport)"
-    }
+    },
+    "tabs": {
+      "statistics": "Statystyki",
+      "testResults": "Wyniki Badań"
+    },
+    "title": "Badania"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
   },
   "testingFacility": {
     "description": "Miejsce wykonywania badania",
@@ -427,6 +512,11 @@
     "label": "Typ Badania",
     "placeholder": "Wybierz poziom pilności"
   },
+  "textualResult": {
+    "label": "Tekst wyniku",
+    "noText": "—",
+    "placeholder": "Wprowadź tekst wyniku (np. Brak ostrych zmian)"
+  },
   "timeoutError": "Przekroczono limit czasu żądania. Spróbuj ponownie.",
   "title": "Wyniki Laboratoryjne",
   "trendChart": {
@@ -434,10 +524,10 @@
     "labLabel": "Lab: {{name}}",
     "negativeUndetected": "Ujemny/Niewykryty",
     "noDataPoints": "Brak punktów danych do wyświetlenia",
+    "notAvailableForTextual": "Wykresy trendów nie są dostępne dla wyników tekstowych.",
     "positiveDetected": "Dodatni/Wykryty",
     "referenceRange": "Zakres Referencyjny:",
-    "referenceValue": "Referencja: {{min}} - {{max}}",
-    "notAvailableForTextual": "Wykresy trendów nie są dostępne dla wyników tekstowych."
+    "referenceValue": "Referencja: {{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "Nieprawidłowy:",
@@ -445,8 +535,12 @@
     "chart": "Wykres",
     "dataPoints": "{{count}} punktów danych",
     "dataPoints_one": "{{count}} punktów danych",
+    "dataPoints_few": "{{count}} data points",
+    "dataPoints_many": "{{count}} data points",
     "dataPoints_other": "{{count}} punktów danych",
     "dataTable": "Tabela Danych",
+    "decreasing": "Malejący",
+    "increasing": "Rosnący",
     "inRange": "{{percent}}% w normie",
     "latest": "Najnowszy",
     "noData": "Brak danych trendów",
@@ -454,20 +548,20 @@
     "normalLabel": "Normalny:",
     "range": "Zakres",
     "showing": "Pokazano:",
+    "stable": "Stabilny",
     "stdDevLabel": "Odch. std.:",
     "summaryStatistics": "Statystyki Podsumowujące",
+    "textualNoStats": "Statystyki numeryczne nie są dostępne dla wyników tekstowych.",
     "timeRange": "Zakres Czasowy",
     "title": "Analiza Trendów",
-    "total": "Wszystkie",
-    "decreasing": "Malejący",
-    "increasing": "Rosnący",
-    "stable": "Stabilny",
-    "textualNoStats": "Statystyki numeryczne nie są dostępne dla wyników tekstowych."
+    "total": "Wszystkie"
   },
   "trendTable": {
     "clickToSort": "Kliknij nagłówki kolumn aby sortować",
     "historicalData": "Dane Historyczne ({{count}} punkt)",
     "historicalData_one": "Dane Historyczne ({{count}} punkt)",
+    "historicalData_few": "Historical Data ({{count}} points)",
+    "historicalData_many": "Historical Data ({{count}} points)",
     "historicalData_other": "Dane Historyczne ({{count}} punktów)",
     "labResult": "Wynik Laboratoryjny",
     "noDataPoints": "Brak punktów danych do wyświetlenia",
@@ -476,50 +570,5 @@
   "unsavedDataInstructions": "Kliknij \"Dodaj Składniki\" w zakładce Podgląd aby zapisać sparsowane dane przed zamknięciem.",
   "unsavedDataMessage_one": "Masz {{count}} sparsowany składnik badania który nie został jeszcze dodany. Jeśli zamkniesz teraz, stracisz te sparsowane dane.",
   "unsavedDataMessage_other": "Masz {{count}} sparsowanych składników badania które nie zostały jeszcze dodane. Jeśli zamkniesz teraz, stracisz te sparsowane dane.",
-  "unsavedDataWarning": "Niezapisane Sparsowane Dane",
-  "stackedView": {
-    "results": "{{count}} wynik",
-    "results_one": "{{count}} wynik",
-    "results_other": "{{count}} wyniki",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Ostatni",
-    "trendChart": "Wartość w czasie",
-    "noResults": "Brak wyników w tej grupie",
-    "fromPanel": "Z panelu",
-    "panel": "Panel"
-  },
-  "numericResult": {
-    "sectionLabel": "Wynik numeryczny (opcjonalnie)",
-    "sectionDescription": "Wprowadź zmierzoną wartość i zakres referencyjny, aby włączyć wykresy trendów.",
-    "valueLabel": "Wartość",
-    "valuePlaceholder": "np. 6,2",
-    "unitLabel": "Jednostka",
-    "unitPlaceholder": "np. mg/dL, mmol/L",
-    "refMinLabel": "Zakres min",
-    "refMinPlaceholder": "np. 4,0",
-    "refMaxLabel": "Zakres maks",
-    "refMaxPlaceholder": "np. 5,6",
-    "refTextLabel": "Tekst zakresu",
-    "refTextPlaceholder": "np. 4,0-5,6 lub <200",
-    "refTextDescription": "Zastępuje min/maks w wyświetlaniu"
-  },
-  "resultsTable": {
-    "expandAll": "Rozwiń wszystko",
-    "collapseAll": "Zwiń wszystko",
-    "results": "{{count}} wynik",
-    "results_other": "{{count}} wyniki",
-    "noResults": "Żadne wyniki testów nie pasują do bieżących filtrów",
-    "dateFrom": "Data od",
-    "dateTo": "Data do",
-    "source": "Źródło",
-    "viewTrends": "Wyświetl trendy"
-  },
-  "testEntry": {
-    "label": "Test #{{number}}"
-  },
-  "textualResult": {
-    "label": "Tekst wyniku",
-    "noText": "—",
-    "placeholder": "Wprowadź tekst wyniku (np. Brak ostrych zmian)"
-  }
+  "unsavedDataWarning": "Niezapisane Sparsowane Dane"
 }

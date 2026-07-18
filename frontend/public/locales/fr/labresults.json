@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Ajouter les détails du résultat de laboratoire",
   "addFirst": "Ajoutez votre premier résultat d'analyse",
   "additionalNotes": {
     "description": "Notes cliniques ou instructions spéciales",
@@ -7,9 +8,12 @@
   },
   "addNew": "+ Ajouter un résultat d'analyse",
   "addTitle": "Ajouter un résultat d'analyse",
+  "advancedMode": "Mode avancé",
+  "advancedModeDescription": "Afficher tous les onglets (connexions, notes, fichiers) lors de la création d'un nouveau résultat d'analyse",
   "bulkEntry": {
     "addComponents": "Ajouter {{count}} composant(s)",
     "addComponents_one": "Ajouter {{count}} composant",
+    "addComponents_many": "",
     "addComponents_other": "Ajouter {{count}} composants",
     "autoParseDescription": "Analyser au fil de la saisie",
     "clearAll": "Tout effacer",
@@ -31,12 +35,14 @@
     "examples": "Exemples",
     "extractedChars": "{{charCount}} caractères sur {{pageCount}} page(s)",
     "extractedChars_one": "{{charCount}} caractères sur {{pageCount}} page",
+    "extractedChars_many": "",
     "extractedChars_other": "{{charCount}} caractères sur {{pageCount}} pages",
     "fastExtraction": "Extraction rapide",
     "firstColumnName": "Présumer que la première colonne est le nom de l'analyse",
     "firstColumnNameDesc": "Traite la première colonne comme le nom de l'analyse dans les données de tableur",
     "foundComponents": "Trouvé {{count}} composant(s) valide(s) prêt(s) pour examen",
     "foundComponents_one": "Trouvé {{count}} composant valide prêt pour examen",
+    "foundComponents_many": "",
     "foundComponents_other": "Trouvé {{count}} composants valides prêts pour examen",
     "labResultsText": "Texte des résultats d'analyse",
     "linked": "Connecté : {{name}}",
@@ -56,9 +62,11 @@
     "pdfUpload": "Téléversement de PDF",
     "previewComponents": "Aperçu de {{count}} composant(s)",
     "previewComponents_one": "Aperçu de {{count}} composant",
+    "previewComponents_many": "",
     "previewComponents_other": "Aperçu de {{count}} composants",
     "previewCount": "Aperçu ({{count}})",
     "previewCount_one": "Aperçu ({{count}})",
+    "previewCount_many": "",
     "previewCount_other": "Aperçu ({{count}})",
     "qualitativeResults": "Résultats qualitatifs (positif/négatif)",
     "skipEmptyLines": "Ignorer les lignes vides",
@@ -72,9 +80,11 @@
     "useExample": "Utiliser l'exemple",
     "validComponents": "{{count}} composant(s) valide(s)",
     "validComponents_one": "{{count}} composant valide",
+    "validComponents_many": "",
     "validComponents_other": "{{count}} composants valides",
     "withIssues": "{{count}} avec problèmes",
     "withIssues_one": "{{count}} avec problèmes",
+    "withIssues_many": "",
     "withIssues_other": "{{count}} avec problèmes"
   },
   "category": {
@@ -115,7 +125,6 @@
     "trendAvailable": "Données de tendances disponibles"
   },
   "editTitle": "Editer le résultat d'analyse",
-  "addDetailsTitle": "Ajouter les détails du résultat de laboratoire",
   "emptyLabResultMessage": "Vous avez créé un résultat d'analyse, mais n'avez pas ajouté de composants d'analyse. Souhaitez-vous supprimer ce résultat d'analyse ?",
   "emptyLabResultWarning": "Résultat d'analyse créé, mais vide",
   "errorOccurred": "Une erreur est survenue",
@@ -131,6 +140,7 @@
     "linkedVisits": "Visites connectées",
     "linkVisitsDescription": "Associez ce résultat d'analyse aux visites où il a été prescrit ou traité.",
     "linkVisitsTitle": "Connecter des visites",
+    "matchedCommonName": "correspondance : {{name}}",
     "notesOptional": "Notes (optionnel)",
     "refMax": "Réf max",
     "refMin": "Réf min",
@@ -144,8 +154,7 @@
     "testCodePlaceholder": "ex : 718-7",
     "testComponents": "Composants d'analyse (optionnel)",
     "testDetails": "Détails de l'analyse",
-    "unit": "Unité",
-    "matchedCommonName": "correspondance : {{name}}"
+    "unit": "Unité"
   },
   "keepEmptyLabResult": "Conserver le résultat d'analyse",
   "labResult": {
@@ -166,8 +175,8 @@
   "modal": {
     "editLabResult": "Editer le résultat d'analyse",
     "labels": {
-      "testType": "Type d'analyse",
-      "referenceRange": "Plage de référence"
+      "referenceRange": "Plage de référence",
+      "testType": "Type d'analyse"
     },
     "sections": {
       "associatedFiles": "Documents associés",
@@ -182,6 +191,21 @@
   },
   "networkError": "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
   "noResults": "Aucun résultat d'analyse trouvé",
+  "numericResult": {
+    "refMaxLabel": "Max de plage",
+    "refMaxPlaceholder": "ex. 5,6",
+    "refMinLabel": "Min de plage",
+    "refMinPlaceholder": "ex. 4,0",
+    "refTextDescription": "Remplace min/max dans l'affichage",
+    "refTextLabel": "Texte de plage",
+    "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
+    "sectionDescription": "Saisissez une valeur mesurée et une plage de référence pour activer les graphiques de tendance.",
+    "sectionLabel": "Résultat numérique (optionnel)",
+    "unitLabel": "Unité",
+    "unitPlaceholder": "ex. mg/dL, mmol/L",
+    "valueLabel": "Valeur",
+    "valuePlaceholder": "ex. 6,2"
+  },
   "orderedDate": {
     "description": "Date à laquelle l'analyse a été prescrite",
     "label": "Date de prescription",
@@ -206,24 +230,53 @@
     "low": "Bas - En dessous des valeurs normales",
     "normal": "Normal - Dans la plage de référence"
   },
+  "resultsTable": {
+    "collapseAll": "Tout réduire",
+    "dateFrom": "Date de début",
+    "dateTo": "Date de fin",
+    "expandAll": "Tout développer",
+    "noResults": "Aucun résultat de test ne correspond aux filtres actuels",
+    "results": "{{count}} résultat",
+    "results_one": "{{count}} results",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} résultats",
+    "source": "Source",
+    "viewTrends": "Voir les tendances"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "Du panneau",
+    "latestResult": "Dernier",
+    "noResults": "Aucun résultat dans ce groupe",
+    "panel": "Panneau",
+    "results": "{{count}} résultat",
+    "results_one": "{{count}} résultat",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} résultats",
+    "trendChart": "Évolution dans le temps"
+  },
   "startAdding": "Commencez en ajoutant votre premier résultat d'analyse.",
   "stats": {
     "abnormal": "Anormal",
     "actionRequired": "Action requise :",
     "basedOn": "D'après {{count}} analyse(s) dans les plages de référence",
     "basedOn_one": "D'après {{count}} analyse dans les plages de référence",
+    "basedOn_many": "",
     "basedOn_other": "D'après {{count}} analyses dans les plages de référence",
     "categories": "Catégories d'analyse",
     "categoriesCount": "{{count}} catégorie(s)",
     "categoriesCount_one": "{{count}} catégorie",
+    "categoriesCount_many": "",
     "categoriesCount_other": "{{count}} catégories",
     "coverageDetail": "{{withRanges}} sur {{total}} analyses ({{percent}} %) ont des plages de référence pour une évaluation appropriée.",
     "critical": "Critique",
     "criticalAction": "<strong>Action requise :</strong> {{count}} résultat(s) critique(s) détecté(s). Veuillez consulter un médecin immédiatement.",
     "criticalAction_one": "<strong>Action requise :</strong> {{count}} résultat critique détecté. Veuillez consulter un médecin immédiatement.",
+    "criticalAction_many": "",
     "criticalAction_other": "<strong>Action requise :</strong> {{count}} résultats critiques détectés. Veuillez consulter un médecin immédiatement.",
     "criticalResultsWarning": "{{count}} résultat(s) critique(s) requérant une attention immédiate",
     "criticalResultsWarning_one": "{{count}} résultat critique requérant une attention immédiate",
+    "criticalResultsWarning_many": "",
     "criticalResultsWarning_other": "{{count}} résultats critiques requérant une attention immédiate",
     "distribution": "Distribution",
     "healthScore": "Score de santé global",
@@ -235,6 +288,7 @@
     "outOfRange": "Hors des plages",
     "outOfRangeCount": "{{count}} sur {{total}} analyse(s) hors des plages de référence",
     "outOfRangeCount_one": "{{count}} sur {{total}} analyse hors des plages de référence",
+    "outOfRangeCount_many": "",
     "outOfRangeCount_other": "{{count}} sur {{total}} analyses hors des plages de référence",
     "rangeAnalysis": "Analyse de plage de référence",
     "resultsAttention": "Plusieurs résultats requièrent votre attention ou un suivi.",
@@ -264,13 +318,16 @@
     "healthyPercent": "{{score}} % en bonne santé",
     "moreCategories": "+{{count}} en plus",
     "moreCategories_one": "+{{count}} en plus",
+    "moreCategories_many": "",
     "moreCategories_other": "+{{count}} en plus",
     "noComponents": "Aucun résultat d'analyse",
     "testComponentsCount": "Résultats d'analyse ({{count}})",
     "testComponentsCount_one": "Résultat d'analyse ({{count}})",
+    "testComponentsCount_many": "",
     "testComponentsCount_other": "Résultats d'analyse ({{count}})",
     "testComponentsTotal": "{{count}} résultat(s) d'analyse",
     "testComponentsTotal_one": "{{count}} résultat d'analyse",
+    "testComponentsTotal_many": "",
     "testComponentsTotal_other": "{{count}} résultats d'analyse",
     "unavailable": "Résultats d'analyse indisponibles"
   },
@@ -287,9 +344,11 @@
     "addTests": "Ajouter des analyses ({{filled}}/{{total}} remplie(s))",
     "addTestsAll": "Ajouter {{count}} analyse(s)",
     "addTestsAll_one": "Ajouter {{count}} analyse",
+    "addTestsAll_many": "",
     "addTestsAll_other": "Ajouter {{count}} analyses",
     "addTestsPartial": "Ajouter {{filled}} sur {{total}} analyse(s)",
     "addTestsPartial_one": "Ajouter {{filled}} sur {{total}} analyse",
+    "addTestsPartial_many": "",
     "addTestsPartial_other": "Ajouter {{filled}} sur {{total}} analyses",
     "customEntry": "Saisie personnalisée",
     "customEntryInstructions": "Saisissez vos propres composants d'analyse. Remplissez le nom de l'analyse, l'unité, la valeur, et les plages de référence optionnelles. Cliquez sur \"Ajouter une autre analyse\" pour ajouter plus de lignes si nécessaire.",
@@ -299,11 +358,13 @@
     "searchPlaceholder": "Rechercher dans les modèles...",
     "templateCount": "{{count}} modèle(s)",
     "templateCount_one": "{{count}} modèle",
+    "templateCount_many": "",
     "templateCount_other": "{{count}} modèles",
     "templateInstructions": "Instructions de modèle",
     "templateInstructionsText": "Saisissez les valeurs d'analyse et les plages de référence pour chaque analyse ci-dessous. Les plages de référence doivent correspondre à ce que fournit votre analyse. Laissez les analyses vides si elles n'ont pas été réalisées.",
     "testCount": "{{count}} analyse(s)",
     "testCount_one": "{{count}} analyse",
+    "testCount_many": "",
     "testCount_other": "{{count}} analyses",
     "title": "Modèles d'analyse",
     "useTemplate": "Utiliser un modèle"
@@ -328,14 +389,14 @@
       "genetics": "Génétique - Analyses génétiques",
       "hematology": "Hématologie - Décomptes sanguins et fer",
       "hepatology": "Hépatologie - Enzymes et fonctions du foie",
+      "imaging": "Imagerie - Radiologie & Scans",
       "immunology": "Immunologie - Système immunitaire et anticorps",
       "lipids": "Lipides - Cholestérol et triglycérides",
       "microbiology": "Microbiologie - Infections et cultures",
       "molecular": "Moléculaire - Analyses d'ADN",
       "other": "Autres analyses",
       "pathology": "Pathologie - Analyses de tissus et de biopsies",
-      "toxicology": "Toxicologie - Dépistage de drogues et toxines",
-      "imaging": "Imagerie - Radiologie & Scans"
+      "toxicology": "Toxicologie - Dépistage de drogues et toxines"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +444,19 @@
       "hasBeenDeleted": "{{name}} a été supprimé"
     },
     "refreshComponents": "Rafraîchir les composants",
-    "tabs": {
-      "statistics": "Statistiques",
-      "testResults": "Résultats d'analyse"
-    },
-    "title": "Analyses",
     "resultType": {
       "qualitative": "Qualitatif (Pos/Nég)",
       "quantitative": "Quantitatif (Numérique)",
       "textual": "Textuel (Rapport)"
-    }
+    },
+    "tabs": {
+      "statistics": "Statistiques",
+      "testResults": "Résultats d'analyse"
+    },
+    "title": "Analyses"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
   },
   "testingFacility": {
     "description": "Où l'analyse est / a été réalisée",
@@ -427,6 +491,11 @@
     "label": "Type d'analyse",
     "placeholder": "Sélectionnez le niveau d'urgence"
   },
+  "textualResult": {
+    "label": "Texte du résultat",
+    "noText": "—",
+    "placeholder": "Saisir le texte du résultat (p. ex. Aucune anomalie aiguë)"
+  },
   "timeoutError": "Requête expirée. Veuillez réessayer.",
   "title": "Résultats d'analyse",
   "trendChart": {
@@ -434,10 +503,10 @@
     "labLabel": "Analyse : {{name}}",
     "negativeUndetected": "Négatif/Non détecté",
     "noDataPoints": "Aucun point de donnée à afficher",
+    "notAvailableForTextual": "Les graphiques de tendance ne sont pas disponibles pour les résultats textuels.",
     "positiveDetected": "Positif/Détecté",
     "referenceRange": "Plage de référence :",
-    "referenceValue": "Référence : {{min}} - {{max}}",
-    "notAvailableForTextual": "Les graphiques de tendance ne sont pas disponibles pour les résultats textuels."
+    "referenceValue": "Référence : {{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "Anormal :",
@@ -445,8 +514,11 @@
     "chart": "Tableau",
     "dataPoints": "{{count}} point(s) de donnée",
     "dataPoints_one": "{{count}} point de donnée",
+    "dataPoints_many": "{{count}} data points",
     "dataPoints_other": "{{count}} points de donnée",
     "dataTable": "Tableau de données",
+    "decreasing": "Décroissant",
+    "increasing": "Croissant",
     "inRange": "{{percent}} % dans les plages",
     "latest": "Plus récent",
     "noData": "Aucune donnée de tendances disponible",
@@ -454,20 +526,19 @@
     "normalLabel": "Normal :",
     "range": "Plage ",
     "showing": "Affichage :",
+    "stable": "Stable",
     "stdDevLabel": "Dév std :",
     "summaryStatistics": "Résumé des statistiques",
+    "textualNoStats": "Les statistiques numériques ne sont pas disponibles pour les résultats textuels.",
     "timeRange": "Plage temporelle",
     "title": "Analyse des tendances",
-    "total": "Total",
-    "decreasing": "Décroissant",
-    "increasing": "Croissant",
-    "stable": "Stable",
-    "textualNoStats": "Les statistiques numériques ne sont pas disponibles pour les résultats textuels."
+    "total": "Total"
   },
   "trendTable": {
     "clickToSort": "Cliquez sur les en-têtes de colonnes pour trier les données",
     "historicalData": "Données historiques ({{count}} point(s))",
     "historicalData_one": "Données historiques ({{count}} point)",
+    "historicalData_many": "Historical Data ({{count}} points)",
     "historicalData_other": "Données historiques ({{count}} points)",
     "labResult": "Résultats d'analyse",
     "noDataPoints": "Aucun point de donnée à afficher",
@@ -476,50 +547,5 @@
   "unsavedDataInstructions": "Cliquez sur \"Ajouter des composants\" dans l'onglet d'aperçu pour sauvegarder vos données analysées avant de fermer la fenêtre.",
   "unsavedDataMessage_one": "Vous avez {{count}} composant d'analyse analysé qui n'a pas encore été ajouté. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
   "unsavedDataMessage_other": "Vous avez {{count}} composants d'analyse analysés qui n'ont pas encore été ajoutés. Si vous fermez la fenêtre maintenant, vous perdrez ces données analysées.",
-  "unsavedDataWarning": "Données analysées non sauvegardées",
-  "stackedView": {
-    "results": "{{count}} résultat",
-    "results_one": "{{count}} résultat",
-    "results_other": "{{count}} résultats",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Dernier",
-    "trendChart": "Évolution dans le temps",
-    "noResults": "Aucun résultat dans ce groupe",
-    "fromPanel": "Du panneau",
-    "panel": "Panneau"
-  },
-  "numericResult": {
-    "sectionLabel": "Résultat numérique (optionnel)",
-    "sectionDescription": "Saisissez une valeur mesurée et une plage de référence pour activer les graphiques de tendance.",
-    "valueLabel": "Valeur",
-    "valuePlaceholder": "ex. 6,2",
-    "unitLabel": "Unité",
-    "unitPlaceholder": "ex. mg/dL, mmol/L",
-    "refMinLabel": "Min de plage",
-    "refMinPlaceholder": "ex. 4,0",
-    "refMaxLabel": "Max de plage",
-    "refMaxPlaceholder": "ex. 5,6",
-    "refTextLabel": "Texte de plage",
-    "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
-    "refTextDescription": "Remplace min/max dans l'affichage"
-  },
-  "resultsTable": {
-    "expandAll": "Tout développer",
-    "collapseAll": "Tout réduire",
-    "results": "{{count}} résultat",
-    "results_other": "{{count}} résultats",
-    "noResults": "Aucun résultat de test ne correspond aux filtres actuels",
-    "dateFrom": "Date de début",
-    "dateTo": "Date de fin",
-    "source": "Source",
-    "viewTrends": "Voir les tendances"
-  },
-  "testEntry": {
-    "label": "Test #{{number}}"
-  },
-  "textualResult": {
-    "label": "Texte du résultat",
-    "noText": "—",
-    "placeholder": "Saisir le texte du résultat (p. ex. Aucune anomalie aiguë)"
-  }
+  "unsavedDataWarning": "Données analysées non sauvegardées"
 }

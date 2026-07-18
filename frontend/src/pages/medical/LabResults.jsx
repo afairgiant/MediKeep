@@ -14,6 +14,7 @@ import { PageHeader } from '../../components';
 import { withResponsive } from '../../hoc/withResponsive';
 import { useResponsive } from '../../hooks/useResponsive';
 import { usePersistedViewMode } from '../../hooks/usePersistedViewMode';
+import { usePersistedToggle } from '../../hooks/usePersistedToggle';
 import { usePagination } from '../../hooks/usePagination';
 import logger from '../../services/logger';
 import {
@@ -579,6 +580,17 @@ const LabResults = () => {
   // Document management state
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
 
+  // Pending relationships state (advanced create mode only)
+  const [pendingRelationshipsMethods, setPendingRelationshipsMethods] =
+    useState(null);
+
+  // Advanced create mode: bypasses the quick TestPanelCreateDialog and opens the
+  // full tabbed form (relationships, notes, files) directly. Persisted per browser.
+  const [advancedCreateMode, setAdvancedCreateMode] = usePersistedToggle(
+    'medikeep_labresults_advanced_create',
+    false
+  );
+
   // View modal navigation with URL deep linking
   const {
     isOpen: showViewModal,
@@ -636,10 +648,25 @@ const LabResults = () => {
     [refreshData, refreshPatientComponents, resetSubmission]
   );
 
+  // Opens the full tabbed form directly (relationships, notes, files) instead of
+  // the quick panel-creation dialog. Shared by the "Add" button and the in-form toggle.
+  const openAdvancedForm = useCallback(() => {
+    resetSubmission();
+    setEditingLabResult(null);
+    setDocumentManagerMethods(null);
+    setPendingRelationshipsMethods(null);
+    setFormData(EMPTY_FORM_DATA);
+    setShowModal(true);
+  }, [resetSubmission]);
+
   // Modern CRUD handlers using useMedicalData - memoized to prevent LabResultCard re-renders
   const handleAddLabResult = useCallback(() => {
+    if (advancedCreateMode) {
+      openAdvancedForm();
+      return;
+    }
     setShowPanelCreateDialog(true);
-  }, []);
+  }, [advancedCreateMode, openAdvancedForm]);
 
   const handleEditLabResult = useCallback(
     async labResult => {
@@ -874,6 +901,59 @@ const LabResults = () => {
         completeFormSubmission(success, resultId);
 
         if (success && resultId) {
+          // Submit pending relationships (advanced create mode only)
+          if (
+            !editingLabResult &&
+            pendingRelationshipsMethods?.hasPendingRelationships?.()
+          ) {
+            try {
+              const pending =
+                pendingRelationshipsMethods.getPendingRelationships();
+
+              const conditionPromises = pending.conditions.map(condRel =>
+                apiService.createLabResultCondition(resultId, {
+                  lab_result_id: resultId,
+                  condition_id: condRel.condition_id,
+                  relevance_note: condRel.relevance_note,
+                })
+              );
+
+              const encounterPromises = pending.encounters.map(encRel =>
+                apiService.createLabResultEncounter(resultId, {
+                  encounter_id: encRel.encounter_id,
+                  purpose: encRel.purpose,
+                  relevance_note: encRel.relevance_note,
+                })
+              );
+
+              await Promise.all([...conditionPromises, ...encounterPromises]);
+
+              logger.info('pending_relationships_created', {
+                message: 'Pending relationships created with lab result',
+                labResultId: resultId,
+                conditionCount: pending.conditions.length,
+                encounterCount: pending.encounters.length,
+                component: 'LabResults',
+              });
+            } catch (relError) {
+              logger.error('pending_relationships_error', {
+                message: 'Failed to create pending relationships',
+                labResultId: resultId,
+                error: relError?.message || String(relError),
+                component: 'LabResults',
+              });
+              notifications.show({
+                title: t('common:warning', 'Warning'),
+                message: t(
+                  'medical:labResults.form.relationshipCreationWarning',
+                  'Lab result saved but some relationships could not be created. You can add them from the edit page.'
+                ),
+                color: 'yellow',
+                autoClose: 8000,
+              });
+            }
+          }
+
           // Check if we have files to upload
           const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
 
@@ -933,6 +1013,7 @@ const LabResults = () => {
       updateItem,
       createItem,
       documentManagerMethods,
+      pendingRelationshipsMethods,
       startSubmission,
       setError,
       completeFormSubmission,
@@ -940,6 +1021,7 @@ const LabResults = () => {
       completeFileUpload,
       handleSubmissionFailure,
       refreshFileCount,
+      t,
     ]
   );
 
@@ -1007,10 +1089,27 @@ const LabResults = () => {
       setStackPanelOpen(true);
     }
     setDocumentManagerMethods(null); // Reset document manager methods
+    setPendingRelationshipsMethods(null); // Reset pending relationships
     // Sync the components table — tests may have been added via TestComponentsTab
     refreshPatientComponents();
     setFormData(EMPTY_FORM_DATA);
   }, [isBlocking, resetSubmission, refreshPatientComponents]);
+
+  // Lets the user swap between the quick panel-creation dialog and the full
+  // tabbed form from within whichever create modal is currently open.
+  const handleAdvancedModeToggle = useCallback(
+    checked => {
+      setAdvancedCreateMode(checked);
+      if (checked) {
+        setShowPanelCreateDialog(false);
+        openAdvancedForm();
+      } else {
+        handleCloseModal();
+        setShowPanelCreateDialog(true);
+      }
+    },
+    [openAdvancedForm, handleCloseModal, setAdvancedCreateMode]
+  );
 
   const renderViewContent = () => {
     if (viewMode === 'components') {
@@ -1370,6 +1469,8 @@ const LabResults = () => {
         onCreateSuccess={handlePanelCreateSuccess}
         practitioners={practitioners}
         currentPatient={currentPatient}
+        advancedMode={advancedCreateMode}
+        onAdvancedModeChange={handleAdvancedModeToggle}
       />
 
       {/* Create/Edit Form Modal */}
@@ -1397,7 +1498,10 @@ const LabResults = () => {
           fetchLabResultEncounters={fetchLabResultEncounters}
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
+          onPendingRelationshipsRef={setPendingRelationshipsMethods}
           postCreate={postCreateMode}
+          advancedCreate={advancedCreateMode}
+          onAdvancedModeChange={handleAdvancedModeToggle}
           isGroupedResult={!!(editingLabResult && (editingLabResult.is_panel || parentIdsWithComponents.has(editingLabResult.id)))}
           onFileUploadComplete={success => {
             if (success && editingLabResult) {

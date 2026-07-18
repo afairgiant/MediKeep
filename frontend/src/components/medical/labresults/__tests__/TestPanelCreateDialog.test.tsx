@@ -104,6 +104,20 @@ vi.mock('@mantine/core', () => ({
     ({ children }: any) => <div>{children}</div>,
     { Label: ({ children }: any) => <label>{children}</label> }
   ),
+  Switch: ({ label, checked, onChange }: any) => (
+    <div>
+      {label && <label htmlFor="mock-switch">{label}</label>}
+      <input
+        id="mock-switch"
+        type="checkbox"
+        role="switch"
+        aria-label={label}
+        checked={checked ?? false}
+        onChange={onChange ?? (() => {})}
+      />
+    </div>
+  ),
+  Tooltip: ({ children }: any) => children,
 }));
 
 const translations: Record<string, string> = {
@@ -219,6 +233,8 @@ const defaultProps = {
   onCreateSuccess: vi.fn(),
   practitioners: [],
   currentPatient: { id: 42 },
+  advancedMode: false,
+  onAdvancedModeChange: vi.fn(),
 };
 
 describe('TestPanelCreateDialog', () => {
@@ -233,6 +249,19 @@ describe('TestPanelCreateDialog', () => {
     expect(screen.getByText('Save Results')).toBeTruthy();
     expect(screen.getByText('Cancel')).toBeTruthy();
     expect(screen.getByText(/Add Tests/i)).toBeTruthy();
+  });
+
+  it('calls onAdvancedModeChange when the Advanced mode switch is toggled', async () => {
+    const onAdvancedModeChange = vi.fn();
+    render(
+      <TestPanelCreateDialog
+        {...defaultProps}
+        onAdvancedModeChange={onAdvancedModeChange}
+      />
+    );
+
+    await userEvent.click(screen.getByRole('switch'));
+    expect(onAdvancedModeChange).toHaveBeenCalledWith(true);
   });
 
   it('shows validation error with field name when Lab Results Panel or Type is empty', async () => {

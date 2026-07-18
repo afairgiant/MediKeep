@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Adicionar detalhes do resultado laboratorial",
   "addFirst": "Adicionar Seu Primeiro Resultado Laboratorial",
   "additionalNotes": {
     "description": "Notas clínicas ou instruções especiais",
@@ -7,9 +8,12 @@
   },
   "addNew": "+ Adicionar Novo Resultado Laboratorial",
   "addTitle": "Adicionar Novo Resultado Laboratorial",
+  "advancedMode": "Modo avançado",
+  "advancedModeDescription": "Mostrar todas as abas (relacionamentos, notas, arquivos) ao criar um novo resultado laboratorial",
   "bulkEntry": {
     "addComponents": "Adicionar {{count}} Componente",
     "addComponents_one": "Adicionar {{count}} Componente",
+    "addComponents_many": "",
     "addComponents_other": "Adicionar {{count}} Componentes",
     "autoParseDescription": "Análise automática conforme você digita",
     "clearAll": "Limpar Tudo",
@@ -31,12 +35,14 @@
     "examples": "Exemplos",
     "extractedChars": "{{charCount}} caracteres de {{pageCount}} página",
     "extractedChars_one": "{{charCount}} caracteres de {{pageCount}} página",
+    "extractedChars_many": "",
     "extractedChars_other": "{{charCount}} caracteres de {{pageCount}} páginas",
     "fastExtraction": "Extração Rápida",
     "firstColumnName": "Assumir primeira coluna como nome do exame",
     "firstColumnNameDesc": "Tratar primeira coluna como nome do exame em dados tabulares",
     "foundComponents": "Encontrado {{count}} componente válido pronto para revisão",
     "foundComponents_one": "Encontrado {{count}} componente válido pronto para revisão",
+    "foundComponents_many": "",
     "foundComponents_other": "Encontrados {{count}} componentes válidos prontos para revisão",
     "labResultsText": "Texto dos Resultados Laboratoriais",
     "linked": "Vinculado: {{name}}",
@@ -56,9 +62,11 @@
     "pdfUpload": "Upload de PDF",
     "previewComponents": "Visualizar {{count}} Componente",
     "previewComponents_one": "Visualizar {{count}} Componente",
+    "previewComponents_many": "",
     "previewComponents_other": "Visualizar {{count}} Componentes",
     "previewCount": "Visualizar ({{count}})",
     "previewCount_one": "Visualizar ({{count}})",
+    "previewCount_many": "",
     "previewCount_other": "Visualizar ({{count}})",
     "qualitativeResults": "Resultados qualitativos (positivo/negativo)",
     "skipEmptyLines": "Pular linhas vazias",
@@ -72,9 +80,11 @@
     "useExample": "Usar Exemplo",
     "validComponents": "{{count}} componentes válidos",
     "validComponents_one": "{{count}} componentes válidos",
+    "validComponents_many": "",
     "validComponents_other": "{{count}} componentes válidos",
     "withIssues": "{{count}} com problemas",
     "withIssues_one": "{{count}} com problemas",
+    "withIssues_many": "",
     "withIssues_other": "{{count}} com problemas"
   },
   "category": {
@@ -115,7 +125,6 @@
     "trendAvailable": "Dados de tendência disponíveis"
   },
   "editTitle": "Editar Resultado Laboratorial",
-  "addDetailsTitle": "Adicionar detalhes do resultado laboratorial",
   "emptyLabResultMessage": "Você criou um resultado laboratorial mas não adicionou nenhum componente de exame. Gostaria de excluir este resultado laboratorial?",
   "emptyLabResultWarning": "Resultado Laboratorial Criado Mas Vazio",
   "errorOccurred": "Ocorreu um erro",
@@ -131,6 +140,7 @@
     "linkedVisits": "Consultas Vinculadas",
     "linkVisitsDescription": "Associe este resultado laboratorial a consultas onde foi solicitado ou revisado.",
     "linkVisitsTitle": "Vincular a Consultas",
+    "matchedCommonName": "correspondência: {{name}}",
     "notesOptional": "Observações (opcional)",
     "refMax": "Ref Máx",
     "refMin": "Ref Mín",
@@ -144,8 +154,7 @@
     "testCodePlaceholder": "p.ex., 718-7",
     "testComponents": "Componentes do Exame (Opcional)",
     "testDetails": "Detalhes do Exame",
-    "unit": "Unidade",
-    "matchedCommonName": "correspondência: {{name}}"
+    "unit": "Unidade"
   },
   "keepEmptyLabResult": "Manter Resultado Laboratorial",
   "labResult": {
@@ -166,8 +175,8 @@
   "modal": {
     "editLabResult": "Editar Resultado Laboratorial",
     "labels": {
-      "testType": "Tipo de Exame",
-      "referenceRange": "Intervalo de Referência"
+      "referenceRange": "Intervalo de Referência",
+      "testType": "Tipo de Exame"
     },
     "sections": {
       "associatedFiles": "Documentos Associados",
@@ -182,6 +191,21 @@
   },
   "networkError": "Erro de rede. Verifique sua conexão e tente novamente.",
   "noResults": "Nenhum Resultado Laboratorial Encontrado",
+  "numericResult": {
+    "refMaxLabel": "Intervalo máx",
+    "refMaxPlaceholder": "ex. 5,6",
+    "refMinLabel": "Intervalo mín",
+    "refMinPlaceholder": "ex. 4,0",
+    "refTextDescription": "Substitui min/máx na exibição",
+    "refTextLabel": "Texto do intervalo",
+    "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
+    "sectionDescription": "Insira um valor medido e um intervalo de referência para ativar gráficos de tendência.",
+    "sectionLabel": "Resultado numérico (opcional)",
+    "unitLabel": "Unidade",
+    "unitPlaceholder": "ex. mg/dL, mmol/L",
+    "valueLabel": "Valor",
+    "valuePlaceholder": "ex. 6,2"
+  },
   "orderedDate": {
     "description": "Data em que o exame foi solicitado",
     "label": "Data da Solicitação",
@@ -206,24 +230,53 @@
     "low": "Baixo - Abaixo do intervalo normal",
     "normal": "Normal - Dentro do intervalo de referência"
   },
+  "resultsTable": {
+    "collapseAll": "Recolher tudo",
+    "dateFrom": "Data de",
+    "dateTo": "Data até",
+    "expandAll": "Expandir tudo",
+    "noResults": "Nenhum resultado de teste corresponde aos filtros atuais",
+    "results": "{{count}} resultado",
+    "results_one": "{{count}} results",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} resultados",
+    "source": "Fonte",
+    "viewTrends": "Ver tendências"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "Do painel",
+    "latestResult": "Mais recente",
+    "noResults": "Nenhum resultado neste grupo",
+    "panel": "Painel",
+    "results": "{{count}} resultado",
+    "results_one": "{{count}} resultado",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} resultados",
+    "trendChart": "Valor ao longo do tempo"
+  },
   "startAdding": "Comece adicionando seu primeiro resultado laboratorial.",
   "stats": {
     "abnormal": "Anormal",
     "actionRequired": "Ação Necessária:",
     "basedOn": "Baseado em {{count}} exame com intervalos de referência",
     "basedOn_one": "Baseado em {{count}} exame com intervalos de referência",
+    "basedOn_many": "",
     "basedOn_other": "Baseado em {{count}} exames com intervalos de referência",
     "categories": "Categorias de Exames",
     "categoriesCount": "{{count}} categorias",
     "categoriesCount_one": "{{count}} categorias",
+    "categoriesCount_many": "",
     "categoriesCount_other": "{{count}} categorias",
     "coverageDetail": "{{withRanges}} de {{total}} exames ({{percent}}%) possuem intervalos de referência para avaliação adequada.",
     "critical": "Crítico",
     "criticalAction": "<strong>Ação Necessária:</strong> {{count}} resultado crítico detectado. Consulte um profissional de saúde imediatamente.",
     "criticalAction_one": "<strong>Ação Necessária:</strong> {{count}} resultado crítico detectado. Consulte um profissional de saúde imediatamente.",
+    "criticalAction_many": "",
     "criticalAction_other": "<strong>Ação Necessária:</strong> {{count}} resultados críticos detectados. Consulte um profissional de saúde imediatamente.",
     "criticalResultsWarning": "{{count}} resultado crítico requer atenção imediata",
     "criticalResultsWarning_one": "{{count}} resultado crítico requer atenção imediata",
+    "criticalResultsWarning_many": "",
     "criticalResultsWarning_other": "{{count}} resultados críticos requerem atenção imediata",
     "distribution": "Distribuição",
     "healthScore": "Pontuação Geral de Saúde",
@@ -235,6 +288,7 @@
     "outOfRange": "Fora do intervalo",
     "outOfRangeCount": "{{count}} de {{total}} exames estão fora dos intervalos de referência",
     "outOfRangeCount_one": "{{count}} de {{total}} exames estão fora dos intervalos de referência",
+    "outOfRangeCount_many": "",
     "outOfRangeCount_other": "{{count}} de {{total}} exames estão fora dos intervalos de referência",
     "rangeAnalysis": "Análise de Intervalos de Referência",
     "resultsAttention": "Vários resultados requerem atenção ou acompanhamento.",
@@ -264,13 +318,16 @@
     "healthyPercent": "{{score}}% Saudável",
     "moreCategories": "+{{count}} mais",
     "moreCategories_one": "+{{count}} mais",
+    "moreCategories_many": "",
     "moreCategories_other": "+{{count}} mais",
     "noComponents": "Sem resultados de exame",
     "testComponentsCount": "Resultados do Exame ({{count}})",
     "testComponentsCount_one": "Resultados do Exame ({{count}})",
+    "testComponentsCount_many": "",
     "testComponentsCount_other": "Resultados do Exame ({{count}})",
     "testComponentsTotal": "{{count}} resultado de exame",
     "testComponentsTotal_one": "{{count}} resultado de exame",
+    "testComponentsTotal_many": "",
     "testComponentsTotal_other": "{{count}} resultados de exame",
     "unavailable": "Resultados de exame indisponíveis"
   },
@@ -287,9 +344,11 @@
     "addTests": "Adicionar Exames ({{filled}}/{{total}} preenchidos)",
     "addTestsAll": "Adicionar {{count}} Exame",
     "addTestsAll_one": "Adicionar {{count}} Exame",
+    "addTestsAll_many": "",
     "addTestsAll_other": "Adicionar {{count}} Exames",
     "addTestsPartial": "Adicionar {{filled}} de {{total}} Exame",
     "addTestsPartial_one": "Adicionar {{filled}} de {{total}} Exame",
+    "addTestsPartial_many": "",
     "addTestsPartial_other": "Adicionar {{filled}} de {{total}} Exames",
     "customEntry": "Entrada Personalizada",
     "customEntryInstructions": "Digite seus próprios componentes de exame. Preencha o nome do exame, unidade, valor e intervalos de referência opcionais. Clique em \"Adicionar Outro Exame\" para adicionar mais linhas conforme necessário.",
@@ -299,11 +358,13 @@
     "searchPlaceholder": "Buscar modelos...",
     "templateCount": "{{count}} modelo",
     "templateCount_one": "{{count}} modelo",
+    "templateCount_many": "",
     "templateCount_other": "{{count}} modelos",
     "templateInstructions": "Instruções do Modelo",
     "templateInstructionsText": "Digite os valores dos exames e intervalos de referência para cada exame abaixo. Os intervalos de referência devem corresponder ao que seu laboratório fornece. Deixe exames em branco se não foram realizados.",
     "testCount": "{{count}} exame",
     "testCount_one": "{{count}} exame",
+    "testCount_many": "",
     "testCount_other": "{{count}} exames",
     "title": "Modelos de Exame",
     "useTemplate": "Usar Modelo"
@@ -328,14 +389,14 @@
       "genetics": "Genética - Testes Genéticos",
       "hematology": "Hematologia - Hemograma e Ferro",
       "hepatology": "Hepatologia - Enzimas e Função Hepática",
+      "imaging": "Imagem - Radiologia & Scans",
       "immunology": "Imunologia - Sistema Imune e Anticorpos",
       "lipids": "Lipídios - Colesterol e Triglicerídeos",
       "microbiology": "Microbiologia - Infecções e Culturas",
       "molecular": "Molecular - Testes de DNA",
       "other": "Outros Exames",
       "pathology": "Patologia - Análise de Tecidos e Biópsia",
-      "toxicology": "Toxicologia - Triagem de Drogas e Toxinas",
-      "imaging": "Imagem - Radiologia & Scans"
+      "toxicology": "Toxicologia - Triagem de Drogas e Toxinas"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +444,19 @@
       "hasBeenDeleted": "{{name}} foi excluído"
     },
     "refreshComponents": "Atualizar componentes",
-    "tabs": {
-      "statistics": "Estatísticas",
-      "testResults": "Resultados dos Exames"
-    },
-    "title": "Exames",
     "resultType": {
       "qualitative": "Qualitativo (Pos/Neg)",
       "quantitative": "Quantitativo (Numérico)",
       "textual": "Textual (Relatório)"
-    }
+    },
+    "tabs": {
+      "statistics": "Estatísticas",
+      "testResults": "Resultados dos Exames"
+    },
+    "title": "Exames"
+  },
+  "testEntry": {
+    "label": "Teste #{{number}}"
   },
   "testingFacility": {
     "description": "Onde o exame é/foi realizado",
@@ -427,6 +491,11 @@
     "label": "Tipo de Exame",
     "placeholder": "Selecionar nível de urgência"
   },
+  "textualResult": {
+    "label": "Texto do resultado",
+    "noText": "—",
+    "placeholder": "Insira o texto do resultado (ex.: Sem achados agudos)"
+  },
   "timeoutError": "Tempo limite da requisição esgotado. Tente novamente.",
   "title": "Resultados Laboratoriais",
   "trendChart": {
@@ -434,10 +503,10 @@
     "labLabel": "Laboratório: {{name}}",
     "negativeUndetected": "Negativo/Não Detectado",
     "noDataPoints": "Nenhum ponto de dados para exibir",
+    "notAvailableForTextual": "Gráficos de tendência não estão disponíveis para resultados textuais.",
     "positiveDetected": "Positivo/Detectado",
     "referenceRange": "Intervalo de Referência:",
-    "referenceValue": "Referência: {{min}} - {{max}}",
-    "notAvailableForTextual": "Gráficos de tendência não estão disponíveis para resultados textuais."
+    "referenceValue": "Referência: {{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "Anormal:",
@@ -445,8 +514,11 @@
     "chart": "Gráfico",
     "dataPoints": "{{count}} pontos de dados",
     "dataPoints_one": "{{count}} pontos de dados",
+    "dataPoints_many": "{{count}} data points",
     "dataPoints_other": "{{count}} pontos de dados",
     "dataTable": "Tabela de Dados",
+    "decreasing": "Decrescente",
+    "increasing": "Crescente",
     "inRange": "{{percent}}% no intervalo",
     "latest": "Mais Recente",
     "noData": "Nenhum dado de tendência disponível",
@@ -454,20 +526,19 @@
     "normalLabel": "Normal:",
     "range": "Intervalo",
     "showing": "Exibindo:",
+    "stable": "Estável",
     "stdDevLabel": "Desvio Padrão:",
     "summaryStatistics": "Estatísticas Resumo",
+    "textualNoStats": "Estatísticas numéricas não estão disponíveis para resultados textuais.",
     "timeRange": "Período de Tempo",
     "title": "Análise de Tendências",
-    "total": "Total",
-    "decreasing": "Decrescente",
-    "increasing": "Crescente",
-    "stable": "Estável",
-    "textualNoStats": "Estatísticas numéricas não estão disponíveis para resultados textuais."
+    "total": "Total"
   },
   "trendTable": {
     "clickToSort": "Clique nos cabeçalhos das colunas para ordenar",
     "historicalData": "Dados Históricos ({{count}} ponto)",
     "historicalData_one": "Dados Históricos ({{count}} ponto)",
+    "historicalData_many": "Historical Data ({{count}} points)",
     "historicalData_other": "Dados Históricos ({{count}} pontos)",
     "labResult": "Resultado Laboratorial",
     "noDataPoints": "Nenhum ponto de dados para exibir",
@@ -476,50 +547,5 @@
   "unsavedDataInstructions": "Clique em \"Adicionar Componentes\" na aba Visualizar para salvar seus dados analisados antes de fechar.",
   "unsavedDataMessage_one": "Você possui {{count}} componente(s) de exame analisado(s) que ainda não foram adicionados. Se fechar agora, você perderá estes dados analisados.",
   "unsavedDataMessage_other": "Você possui {{count}} componente(s) de exame analisado(s) que ainda não foram adicionados. Se fechar agora, você perderá estes dados analisados.",
-  "unsavedDataWarning": "Dados Analisados Não Salvos",
-  "stackedView": {
-    "results": "{{count}} resultado",
-    "results_one": "{{count}} resultado",
-    "results_other": "{{count}} resultados",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Mais recente",
-    "trendChart": "Valor ao longo do tempo",
-    "noResults": "Nenhum resultado neste grupo",
-    "fromPanel": "Do painel",
-    "panel": "Painel"
-  },
-  "numericResult": {
-    "sectionLabel": "Resultado numérico (opcional)",
-    "sectionDescription": "Insira um valor medido e um intervalo de referência para ativar gráficos de tendência.",
-    "valueLabel": "Valor",
-    "valuePlaceholder": "ex. 6,2",
-    "unitLabel": "Unidade",
-    "unitPlaceholder": "ex. mg/dL, mmol/L",
-    "refMinLabel": "Intervalo mín",
-    "refMinPlaceholder": "ex. 4,0",
-    "refMaxLabel": "Intervalo máx",
-    "refMaxPlaceholder": "ex. 5,6",
-    "refTextLabel": "Texto do intervalo",
-    "refTextPlaceholder": "ex. 4,0-5,6 ou <200",
-    "refTextDescription": "Substitui min/máx na exibição"
-  },
-  "resultsTable": {
-    "expandAll": "Expandir tudo",
-    "collapseAll": "Recolher tudo",
-    "results": "{{count}} resultado",
-    "results_other": "{{count}} resultados",
-    "noResults": "Nenhum resultado de teste corresponde aos filtros atuais",
-    "dateFrom": "Data de",
-    "dateTo": "Data até",
-    "source": "Fonte",
-    "viewTrends": "Ver tendências"
-  },
-  "testEntry": {
-    "label": "Teste #{{number}}"
-  },
-  "textualResult": {
-    "label": "Texto do resultado",
-    "noText": "—",
-    "placeholder": "Insira o texto do resultado (ex.: Sem achados agudos)"
-  }
+  "unsavedDataWarning": "Dados Analisados Não Salvos"
 }

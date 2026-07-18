@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "添加检验结果详情",
   "addFirst": "添加您的第一个检验结果",
   "additionalNotes": {
     "description": "临床备注或特殊指示",
@@ -7,6 +8,8 @@
   },
   "addNew": "+ 添加新检验结果",
   "addTitle": "添加新检验结果",
+  "advancedMode": "高级模式",
+  "advancedModeDescription": "创建新检验结果时显示所有标签页(关系、记录、文件)",
   "bulkEntry": {
     "addComponents": "添加 {{count}} 个组件",
     "addComponents_one": "添加 {{count}} 个组件",
@@ -115,7 +118,6 @@
     "trendAvailable": "趋势数据可用"
   },
   "editTitle": "编辑检验结果",
-  "addDetailsTitle": "添加检验结果详情",
   "emptyLabResultMessage": "您创建了检验结果但没有添加任何检验组件。您想删除此检验结果吗？",
   "emptyLabResultWarning": "检验结果已创建但为空",
   "errorOccurred": "发生错误",
@@ -131,6 +133,7 @@
     "linkedVisits": "关联就诊",
     "linkVisitsDescription": "将此检验结果与开具或审查该检验的就诊记录关联。",
     "linkVisitsTitle": "关联就诊",
+    "matchedCommonName": "匹配：{{name}}",
     "notesOptional": "备注（可选）",
     "refMax": "参考最大值",
     "refMin": "参考最小值",
@@ -144,8 +147,7 @@
     "testCodePlaceholder": "例如：718-7",
     "testComponents": "检验组件（可选）",
     "testDetails": "检验详情",
-    "unit": "单位",
-    "matchedCommonName": "匹配：{{name}}"
+    "unit": "单位"
   },
   "keepEmptyLabResult": "保留检验结果",
   "labResult": {
@@ -166,8 +168,8 @@
   "modal": {
     "editLabResult": "编辑检验结果",
     "labels": {
-      "testType": "检验类型",
-      "referenceRange": "参考范围"
+      "referenceRange": "参考范围",
+      "testType": "检验类型"
     },
     "sections": {
       "associatedFiles": "关联文档",
@@ -182,6 +184,21 @@
   },
   "networkError": "网络错误。请检查您的连接并重试。",
   "noResults": "未找到检验结果",
+  "numericResult": {
+    "refMaxLabel": "范围最大值",
+    "refMaxPlaceholder": "例如 5.6",
+    "refMinLabel": "范围最小值",
+    "refMinPlaceholder": "例如 4.0",
+    "refTextDescription": "在显示中覆盖最小值/最大值",
+    "refTextLabel": "范围文本",
+    "refTextPlaceholder": "例如 4.0-5.6 或 <200",
+    "sectionDescription": "输入测量值和参考范围以启用堆叠结果的趋势图。",
+    "sectionLabel": "数值结果（可选）",
+    "unitLabel": "单位",
+    "unitPlaceholder": "例如 mg/dL, mmol/L",
+    "valueLabel": "值",
+    "valuePlaceholder": "例如 6.2"
+  },
   "orderedDate": {
     "description": "请求检验的日期",
     "label": "开具日期",
@@ -205,6 +222,28 @@
     "inconclusive": "不确定 - 需要重检",
     "low": "偏低 - 低于正常范围",
     "normal": "正常 - 在参考范围内"
+  },
+  "resultsTable": {
+    "collapseAll": "收起全部",
+    "dateFrom": "起始日期",
+    "dateTo": "结束日期",
+    "expandAll": "展开全部",
+    "noResults": "没有测试结果符合当前筛选条件",
+    "results": "{{count}} 条结果",
+    "results_other": "{{count}} 条结果",
+    "source": "来源",
+    "viewTrends": "查看趋势"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "来自面板",
+    "latestResult": "最新",
+    "noResults": "该组中没有结果",
+    "panel": "面板",
+    "results": "{{count}} 个结果",
+    "results_one": "{{count}} 个结果",
+    "results_other": "{{count}} 个结果",
+    "trendChart": "随时间变化的值"
   },
   "startAdding": "开始添加您的第一个检验结果。",
   "stats": {
@@ -328,14 +367,14 @@
       "genetics": "遗传学 - 基因检测",
       "hematology": "血液病学 - 血细胞计数和铁",
       "hepatology": "肝病学 - 肝酶和肝功能",
+      "imaging": "影像 - 放射学与扫描",
       "immunology": "免疫学 - 免疫系统和抗体",
       "lipids": "血脂 - 胆固醇和甘油三酯",
       "microbiology": "微生物学 - 感染和培养",
       "molecular": "分子检测 - DNA检测",
       "other": "其他检验",
       "pathology": "病理学 - 组织和活检分析",
-      "toxicology": "毒理学 - 药物和毒素筛查",
-      "imaging": "影像 - 放射学与扫描"
+      "toxicology": "毒理学 - 药物和毒素筛查"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +422,19 @@
       "hasBeenDeleted": "{{name}} 已被删除"
     },
     "refreshComponents": "刷新组件",
-    "tabs": {
-      "statistics": "统计",
-      "testResults": "检验结果"
-    },
-    "title": "检验项目",
     "resultType": {
       "qualitative": "定性（阳性/阴性）",
       "quantitative": "定量（数值）",
       "textual": "文本（报告）"
-    }
+    },
+    "tabs": {
+      "statistics": "统计",
+      "testResults": "检验结果"
+    },
+    "title": "检验项目"
+  },
+  "testEntry": {
+    "label": "测试 #{{number}}"
   },
   "testingFacility": {
     "description": "检验执行/将要执行的地点",
@@ -427,6 +469,11 @@
     "label": "检验类型",
     "placeholder": "选择紧急程度"
   },
+  "textualResult": {
+    "label": "结果文本",
+    "noText": "—",
+    "placeholder": "输入结果文本（例如：未见急性异常）"
+  },
   "timeoutError": "请求超时。请重试。",
   "title": "检验结果",
   "trendChart": {
@@ -434,10 +481,10 @@
     "labLabel": "实验室：{{name}}",
     "negativeUndetected": "阴性/未检出",
     "noDataPoints": "无数据点可显示",
+    "notAvailableForTextual": "文本结果不支持趋势图。",
     "positiveDetected": "阳性/检出",
     "referenceRange": "参考范围：",
-    "referenceValue": "参考值：{{min}} - {{max}}",
-    "notAvailableForTextual": "文本结果不支持趋势图。"
+    "referenceValue": "参考值：{{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "异常：",
@@ -447,6 +494,8 @@
     "dataPoints_one": "{{count}} 个数据点",
     "dataPoints_other": "{{count}} 个数据点",
     "dataTable": "数据表",
+    "decreasing": "递减",
+    "increasing": "递增",
     "inRange": "{{percent}}% 在范围内",
     "latest": "最新",
     "noData": "无趋势数据可用",
@@ -454,15 +503,13 @@
     "normalLabel": "正常：",
     "range": "范围",
     "showing": "显示：",
+    "stable": "稳定",
     "stdDevLabel": "标准差：",
     "summaryStatistics": "摘要统计",
+    "textualNoStats": "文本结果不支持数字统计。",
     "timeRange": "时间范围",
     "title": "趋势分析",
-    "total": "总计",
-    "decreasing": "递减",
-    "increasing": "递增",
-    "stable": "稳定",
-    "textualNoStats": "文本结果不支持数字统计。"
+    "total": "总计"
   },
   "trendTable": {
     "clickToSort": "点击列标题进行排序",
@@ -476,50 +523,5 @@
   "unsavedDataInstructions": "在关闭前，请在预览标签页中点击\"添加组件\"以保存您解析的数据。",
   "unsavedDataMessage_one": "您有 {{count}} 个已解析的检验组件尚未添加。如果现在关闭，您将丢失这些解析数据。",
   "unsavedDataMessage_other": "您有 {{count}} 个已解析的检验组件尚未添加。如果现在关闭，您将丢失这些解析数据。",
-  "unsavedDataWarning": "未保存的解析数据",
-  "stackedView": {
-    "results": "{{count}} 个结果",
-    "results_one": "{{count}} 个结果",
-    "results_other": "{{count}} 个结果",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "最新",
-    "trendChart": "随时间变化的值",
-    "noResults": "该组中没有结果",
-    "fromPanel": "来自面板",
-    "panel": "面板"
-  },
-  "numericResult": {
-    "sectionLabel": "数值结果（可选）",
-    "sectionDescription": "输入测量值和参考范围以启用堆叠结果的趋势图。",
-    "valueLabel": "值",
-    "valuePlaceholder": "例如 6.2",
-    "unitLabel": "单位",
-    "unitPlaceholder": "例如 mg/dL, mmol/L",
-    "refMinLabel": "范围最小值",
-    "refMinPlaceholder": "例如 4.0",
-    "refMaxLabel": "范围最大值",
-    "refMaxPlaceholder": "例如 5.6",
-    "refTextLabel": "范围文本",
-    "refTextPlaceholder": "例如 4.0-5.6 或 <200",
-    "refTextDescription": "在显示中覆盖最小值/最大值"
-  },
-  "resultsTable": {
-    "expandAll": "展开全部",
-    "collapseAll": "收起全部",
-    "results": "{{count}} 条结果",
-    "results_other": "{{count}} 条结果",
-    "noResults": "没有测试结果符合当前筛选条件",
-    "dateFrom": "起始日期",
-    "dateTo": "结束日期",
-    "source": "来源",
-    "viewTrends": "查看趋势"
-  },
-  "testEntry": {
-    "label": "测试 #{{number}}"
-  },
-  "textualResult": {
-    "label": "结果文本",
-    "noText": "—",
-    "placeholder": "输入结果文本（例如：未见急性异常）"
-  }
+  "unsavedDataWarning": "未保存的解析数据"
 }

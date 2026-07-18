@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   Modal,
   Tabs,
@@ -9,11 +9,13 @@ import {
   Grid,
   TextInput,
   NumberInput,
+  Textarea,
   Select,
   Text,
   Paper,
   Title,
   Badge,
+  ActionIcon,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
@@ -22,6 +24,9 @@ import {
   IconFileText,
   IconFlask,
   IconLink,
+  IconNotes,
+  IconPlus,
+  IconTrash,
 } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { useDateFormat } from '../../../hooks/useDateFormat';
@@ -36,7 +41,264 @@ import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWit
 import ConditionRelationships from '../ConditionRelationships';
 import LabResultEncounterRelationships from './LabResultEncounterRelationships';
 import TestComponentsTab from './TestComponentsTab';
+import AdvancedModeSwitch from './AdvancedModeSwitch';
+import { PURPOSE_OPTIONS } from '../../../constants/encounterLabResultConstants';
 import logger from '../../../services/logger';
+
+/**
+ * Inline picker for selecting conditions/encounters to link during lab result creation.
+ * Selections are stored locally and submitted after the lab result is saved.
+ */
+const PendingRelationshipsPicker = ({
+  conditions,
+  encounters,
+  pendingConditions,
+  pendingEncounters,
+  onAddCondition,
+  onRemoveCondition,
+  onAddEncounter,
+  onRemoveEncounter,
+}) => {
+  const { t } = useTranslation(['medical', 'common', 'shared']);
+  const [selectedCondition, setSelectedCondition] = useState('');
+  const [conditionNote, setConditionNote] = useState('');
+  const [selectedEncounter, setSelectedEncounter] = useState('');
+  const [encounterPurpose, setEncounterPurpose] = useState('');
+  const [encounterNote, setEncounterNote] = useState('');
+
+  const availableConditions = useMemo(() => {
+    const pendingConditionIds = pendingConditions.map(pc =>
+      pc.condition_id.toString()
+    );
+    return conditions
+      .filter(c => !pendingConditionIds.includes(c.id.toString()))
+      .map(c => ({
+        value: c.id.toString(),
+        label: `${c.diagnosis}${c.status ? ` (${c.status})` : ''}`,
+      }));
+  }, [conditions, pendingConditions]);
+
+  const availableEncounters = useMemo(() => {
+    const pendingEncounterIds = pendingEncounters.map(pe =>
+      pe.encounter_id.toString()
+    );
+    return encounters
+      .filter(e => !pendingEncounterIds.includes(e.id.toString()))
+      .map(e => ({
+        value: e.id.toString(),
+        label: `${e.reason}${e.date ? ` (${e.date})` : ''}${e.visit_type ? ` - ${e.visit_type}` : ''}`,
+      }));
+  }, [encounters, pendingEncounters]);
+
+  const handleAddCondition = () => {
+    if (!selectedCondition) return;
+    onAddCondition(selectedCondition, conditionNote);
+    setSelectedCondition('');
+    setConditionNote('');
+  };
+
+  const handleAddEncounter = () => {
+    if (!selectedEncounter) return;
+    onAddEncounter(selectedEncounter, encounterPurpose, encounterNote);
+    setSelectedEncounter('');
+    setEncounterPurpose('');
+    setEncounterNote('');
+  };
+
+  const getConditionLabel = conditionId => {
+    const c = conditions.find(cond => cond.id === conditionId);
+    return c ? c.diagnosis : `Condition #${conditionId}`;
+  };
+
+  const getEncounterLabel = encounterId => {
+    const e = encounters.find(enc => enc.id === encounterId);
+    return e
+      ? `${e.reason}${e.date ? ` (${e.date})` : ''}`
+      : `Visit #${encounterId}`;
+  };
+
+  return (
+    <Stack gap="md">
+      <Text size="sm" c="dimmed">
+        {t('labresults:messages.relationshipsSaveFirst')}
+      </Text>
+
+      {/* Conditions section */}
+      {conditions.length > 0 && (
+        <Paper withBorder p="md">
+          <Stack gap="sm">
+            <Title order={6}>{t('labresults:form.linkConditionsTitle')}</Title>
+
+            {/* Already-added pending conditions */}
+            {pendingConditions.map((pc, index) => (
+              <Paper key={index} withBorder p="xs">
+                <Group justify="space-between">
+                  <Stack gap={2}>
+                    <Badge variant="light" color="blue" size="sm">
+                      {getConditionLabel(pc.condition_id)}
+                    </Badge>
+                    {pc.relevance_note && (
+                      <Text size="xs" c="dimmed" fs="italic">
+                        {pc.relevance_note}
+                      </Text>
+                    )}
+                  </Stack>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemoveCondition(index)}
+                  >
+                    <IconTrash size={14} />
+                  </ActionIcon>
+                </Group>
+              </Paper>
+            ))}
+
+            {/* Add new condition */}
+            {availableConditions.length > 0 && (
+              <Group gap="sm" align="flex-end">
+                <Select
+                  style={{ flex: 1 }}
+                  placeholder={t('common:modals.chooseConditionToLink')}
+                  data={availableConditions}
+                  value={selectedCondition}
+                  onChange={val => setSelectedCondition(val || '')}
+                  searchable
+                  clearable
+                  size="sm"
+                  comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                />
+                <TextInput
+                  style={{ flex: 1 }}
+                  placeholder={t('common:modals.relevanceNoteOptional')}
+                  value={conditionNote}
+                  onChange={e => setConditionNote(e.target.value)}
+                  size="sm"
+                />
+                <ActionIcon
+                  variant="filled"
+                  color="blue"
+                  size="lg"
+                  onClick={handleAddCondition}
+                  disabled={!selectedCondition}
+                >
+                  <IconPlus size={16} />
+                </ActionIcon>
+              </Group>
+            )}
+          </Stack>
+        </Paper>
+      )}
+
+      {/* Encounters section */}
+      {encounters.length > 0 && (
+        <Paper withBorder p="md">
+          <Stack gap="sm">
+            <Title order={6}>
+              {t('common:labResults.form.linkVisitsTitle', 'Link to Visits')}
+            </Title>
+
+            {/* Already-added pending encounters */}
+            {pendingEncounters.map((pe, index) => (
+              <Paper key={index} withBorder p="xs">
+                <Group justify="space-between">
+                  <Stack gap={2}>
+                    <Badge variant="light" color="indigo" size="sm">
+                      {getEncounterLabel(pe.encounter_id)}
+                    </Badge>
+                    {pe.purpose && (
+                      <Badge variant="outline" size="xs">
+                        {PURPOSE_OPTIONS.find(o => o.value === pe.purpose)
+                          ?.label || pe.purpose}
+                      </Badge>
+                    )}
+                    {pe.relevance_note && (
+                      <Text size="xs" c="dimmed" fs="italic">
+                        {pe.relevance_note}
+                      </Text>
+                    )}
+                  </Stack>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemoveEncounter(index)}
+                  >
+                    <IconTrash size={14} />
+                  </ActionIcon>
+                </Group>
+              </Paper>
+            ))}
+
+            {/* Add new encounter */}
+            {availableEncounters.length > 0 && (
+              <Stack gap="xs">
+                <Group gap="sm" align="flex-end">
+                  <Select
+                    style={{ flex: 2 }}
+                    placeholder={t(
+                      'common:modals.chooseVisitToLink',
+                      'Choose a visit to link'
+                    )}
+                    data={availableEncounters}
+                    value={selectedEncounter}
+                    onChange={val => setSelectedEncounter(val || '')}
+                    searchable
+                    clearable
+                    size="sm"
+                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                  />
+                  <Select
+                    style={{ flex: 1 }}
+                    placeholder={t(
+                      'common:modals.selectPurpose',
+                      'Select purpose'
+                    )}
+                    data={PURPOSE_OPTIONS}
+                    value={encounterPurpose}
+                    onChange={val => setEncounterPurpose(val || '')}
+                    clearable
+                    size="sm"
+                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                  />
+                  <ActionIcon
+                    variant="filled"
+                    color="blue"
+                    size="lg"
+                    onClick={handleAddEncounter}
+                    disabled={!selectedEncounter}
+                  >
+                    <IconPlus size={16} />
+                  </ActionIcon>
+                </Group>
+                {selectedEncounter && (
+                  <TextInput
+                    placeholder={t(
+                      'common:modals.relevanceNoteOptional',
+                      'Relevance note (optional)'
+                    )}
+                    value={encounterNote}
+                    onChange={e => setEncounterNote(e.target.value)}
+                    size="sm"
+                  />
+                )}
+              </Stack>
+            )}
+          </Stack>
+        </Paper>
+      )}
+
+      {conditions.length === 0 && encounters.length === 0 && (
+        <Paper withBorder p="md" ta="center">
+          <Text c="dimmed">
+            {t('labresults:messages.relationshipsCreateInfo')}
+          </Text>
+        </Paper>
+      )}
+    </Stack>
+  );
+};
 
 const LabResultFormWrapper = ({
   isOpen,
@@ -49,6 +311,7 @@ const LabResultFormWrapper = ({
   practitioners = [],
   isLoading = false,
   onDocumentManagerRef,
+  onPendingRelationshipsRef,
   onFileUploadComplete,
   onError,
   // Condition relationship props
@@ -62,6 +325,8 @@ const LabResultFormWrapper = ({
   navigate,
   isGroupedResult = false,
   postCreate = false,
+  advancedCreate = false,
+  onAdvancedModeChange,
   children,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
@@ -69,6 +334,16 @@ const LabResultFormWrapper = ({
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { handleTextInputChange } = useFormHandlers(onInputChange);
+
+  // Pending relationships for create mode (stored locally until lab result is saved)
+  const [pendingConditions, setPendingConditions] = useState([]);
+  const [pendingEncounters, setPendingEncounters] = useState([]);
+
+  // Notes and create-mode relationship linking are only shown once the record exists
+  // (edit mode) or when the user has opted into the advanced create form.
+  const showAdvancedTabs = !!editingItem || advancedCreate;
+  // The mode toggle itself only makes sense during a true create (not edit/post-create).
+  const showAdvancedToggle = !editingItem && !!onAdvancedModeChange;
 
   const statusOptions = [
     { value: 'ordered', label: t('labresults:status.ordered') },
@@ -179,8 +454,67 @@ const LabResultFormWrapper = ({
 
   useEffect(() => {
     if (isOpen) setActiveTab('basic');
-    if (!isOpen) setIsSubmitting(false);
+    if (!isOpen) {
+      setIsSubmitting(false);
+      setPendingConditions([]);
+      setPendingEncounters([]);
+    }
   }, [isOpen]);
+
+  // Latest pending relationships, read live by the methods object below so that
+  // adding/removing an item doesn't re-notify the parent (which would re-render it).
+  const pendingRelationshipsRef = useRef({ pendingConditions, pendingEncounters });
+  pendingRelationshipsRef.current = { pendingConditions, pendingEncounters };
+
+  // Expose pending relationships ref to parent (same pattern as onDocumentManagerRef).
+  // Only re-registers when the callback identity changes, not on every pending edit.
+  useEffect(() => {
+    if (onPendingRelationshipsRef) {
+      onPendingRelationshipsRef({
+        hasPendingRelationships: () =>
+          pendingRelationshipsRef.current.pendingConditions.length > 0 ||
+          pendingRelationshipsRef.current.pendingEncounters.length > 0,
+        getPendingRelationships: () => ({
+          conditions: pendingRelationshipsRef.current.pendingConditions,
+          encounters: pendingRelationshipsRef.current.pendingEncounters,
+        }),
+      });
+    }
+  }, [onPendingRelationshipsRef]);
+
+  // Pending condition helpers
+  const addPendingCondition = useCallback((conditionId, relevanceNote) => {
+    setPendingConditions(prev => [
+      ...prev,
+      {
+        condition_id: parseInt(conditionId),
+        relevance_note: relevanceNote || null,
+      },
+    ]);
+  }, []);
+
+  const removePendingCondition = useCallback(index => {
+    setPendingConditions(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Pending encounter helpers
+  const addPendingEncounter = useCallback(
+    (encounterId, purpose, relevanceNote) => {
+      setPendingEncounters(prev => [
+        ...prev,
+        {
+          encounter_id: parseInt(encounterId),
+          purpose: purpose || null,
+          relevance_note: relevanceNote || null,
+        },
+      ]);
+    },
+    []
+  );
+
+  const removePendingEncounter = useCallback(index => {
+    setPendingEncounters(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -246,12 +580,17 @@ const LabResultFormWrapper = ({
                   ? t('shared:tabs.documents')
                   : t('shared:tabs.addFiles')}
               </Tabs.Tab>
-              {editingItem && (
+              {showAdvancedTabs && (
                 <Tabs.Tab
                   value="relationships"
                   leftSection={<IconLink size={16} />}
                 >
                   {t('labresults:tabs.relationships')}
+                </Tabs.Tab>
+              )}
+              {showAdvancedTabs && (
+                <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
+                  {t('shared:tabs.notes')}
                 </Tabs.Tab>
               )}
             </Tabs.List>
@@ -591,66 +930,100 @@ const LabResultFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Relationships Tab — edit mode only */}
-            {editingItem && (
+            {/* Relationships Tab — edit mode, or create mode when advanced */}
+            {showAdvancedTabs && (
               <Tabs.Panel value="relationships">
                 <Box mt="md">
-                  <Stack gap="md">
-                    {conditions.length > 0 && (
-                      <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                        <Stack gap="md">
-                          <Title order={5}>
-                            {t('labresults:form.linkConditionsTitle')}
-                          </Title>
-                          <Text size="sm" c="dimmed">
-                            {t('labresults:form.linkConditionsDescription')}
-                          </Text>
-                          <ConditionRelationships
-                            labResultId={editingItem.id}
-                            labResultConditions={labResultConditions}
-                            conditions={conditions}
-                            fetchLabResultConditions={fetchLabResultConditions}
-                            navigate={navigate}
-                          />
-                        </Stack>
-                      </Paper>
-                    )}
-                    {encounters.length > 0 && (
-                      <Paper withBorder p="md" bg="var(--color-bg-secondary)">
-                        <Stack gap="md">
-                          <Title order={5}>
+                  {editingItem ? (
+                    /* Edit mode: use full relationship components with API calls */
+                    <Stack gap="md">
+                      {conditions.length > 0 && (
+                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                          <Stack gap="md">
+                            <Title order={5}>
+                              {t('labresults:form.linkConditionsTitle')}
+                            </Title>
+                            <Text size="sm" c="dimmed">
+                              {t('labresults:form.linkConditionsDescription')}
+                            </Text>
+                            <ConditionRelationships
+                              labResultId={editingItem.id}
+                              labResultConditions={labResultConditions}
+                              conditions={conditions}
+                              fetchLabResultConditions={fetchLabResultConditions}
+                              navigate={navigate}
+                            />
+                          </Stack>
+                        </Paper>
+                      )}
+                      {encounters.length > 0 && (
+                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                          <Stack gap="md">
+                            <Title order={5}>
+                              {t(
+                                'common:labResults.form.linkVisitsTitle',
+                                'Link to Visits'
+                              )}
+                            </Title>
+                            <Text size="sm" c="dimmed">
+                              {t(
+                                'common:labResults.form.linkVisitsDescription',
+                                'Associate this lab result with visits where it was ordered or reviewed.'
+                              )}
+                            </Text>
+                            <LabResultEncounterRelationships
+                              labResultId={editingItem.id}
+                              labResultEncounters={labResultEncounters}
+                              encounters={encounters}
+                              fetchLabResultEncounters={fetchLabResultEncounters}
+                              navigate={navigate}
+                            />
+                          </Stack>
+                        </Paper>
+                      )}
+                      {conditions.length === 0 && encounters.length === 0 && (
+                        <Paper withBorder p="md" ta="center">
+                          <Text c="dimmed">
                             {t(
-                              'common:labResults.form.linkVisitsTitle',
-                              'Link to Visits'
-                            )}
-                          </Title>
-                          <Text size="sm" c="dimmed">
-                            {t(
-                              'common:labResults.form.linkVisitsDescription',
-                              'Associate this lab result with visits where it was ordered or reviewed.'
+                              'labresults:messages.noRelationshipsAvailable',
+                              'No medical conditions or visits on record. Add them first to link them here.'
                             )}
                           </Text>
-                          <LabResultEncounterRelationships
-                            labResultId={editingItem.id}
-                            labResultEncounters={labResultEncounters}
-                            encounters={encounters}
-                            fetchLabResultEncounters={fetchLabResultEncounters}
-                            navigate={navigate}
-                          />
-                        </Stack>
-                      </Paper>
-                    )}
-                    {conditions.length === 0 && encounters.length === 0 && (
-                      <Paper withBorder p="md" ta="center">
-                        <Text c="dimmed">
-                          {t(
-                            'labresults:messages.noRelationshipsAvailable',
-                            'No medical conditions or visits on record. Add them first to link them here.'
-                          )}
-                        </Text>
-                      </Paper>
-                    )}
-                  </Stack>
+                        </Paper>
+                      )}
+                    </Stack>
+                  ) : (
+                    /* Create mode (advanced): pending relationship picker, saved after the lab result is created */
+                    <PendingRelationshipsPicker
+                      conditions={conditions}
+                      encounters={encounters}
+                      pendingConditions={pendingConditions}
+                      pendingEncounters={pendingEncounters}
+                      onAddCondition={addPendingCondition}
+                      onRemoveCondition={removePendingCondition}
+                      onAddEncounter={addPendingEncounter}
+                      onRemoveEncounter={removePendingEncounter}
+                    />
+                  )}
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Notes Tab */}
+            {showAdvancedTabs && (
+              <Tabs.Panel value="notes">
+                <Box mt="md">
+                  <Textarea
+                    label={t('shared:fields.additionalNotes')}
+                    value={formData.notes || ''}
+                    onChange={handleTextInputChange('notes')}
+                    placeholder={t('labresults:additionalNotes.placeholder')}
+                    description={t('labresults:additionalNotes.description')}
+                    rows={5}
+                    minRows={3}
+                    autosize
+                    maxLength={5000}
+                  />
                 </Box>
               </Tabs.Panel>
             )}
@@ -658,24 +1031,36 @@ const LabResultFormWrapper = ({
           </Tabs>
 
           {/* Form Actions */}
-          <Group justify="flex-end" gap="sm">
-            <Button
-              variant="default"
-              onClick={onClose}
-              disabled={isLoading || isSubmitting}
-            >
-              {postCreate
-                ? t('shared:labels.close')
-                : t('shared:fields.cancel')}
-            </Button>
-            <SubmitButton
-              loading={isLoading || isSubmitting}
-              disabled={!formData.test_name?.trim()}
-            >
-              {postCreate
-                ? t('common:buttons.save')
-                : `${editingItem ? t('common:buttons.update') : t('common:buttons.create')} ${t('shared:categories.lab_results')}`}
-            </SubmitButton>
+          <Group
+            justify={showAdvancedToggle ? 'space-between' : 'flex-end'}
+            gap="sm"
+          >
+            {showAdvancedToggle && (
+              <AdvancedModeSwitch
+                checked={advancedCreate}
+                onChange={onAdvancedModeChange}
+                disabled={isLoading || isSubmitting}
+              />
+            )}
+            <Group gap="sm">
+              <Button
+                variant="default"
+                onClick={onClose}
+                disabled={isLoading || isSubmitting}
+              >
+                {postCreate
+                  ? t('shared:labels.close')
+                  : t('shared:fields.cancel')}
+              </Button>
+              <SubmitButton
+                loading={isLoading || isSubmitting}
+                disabled={!formData.test_name?.trim()}
+              >
+                {postCreate
+                  ? t('common:buttons.save')
+                  : `${editingItem ? t('common:buttons.update') : t('common:buttons.create')} ${t('shared:categories.lab_results')}`}
+              </SubmitButton>
+            </Group>
           </Group>
         </Stack>
       </form>

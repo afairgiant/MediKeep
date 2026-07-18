@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Lägg till labbresultatdetaljer",
   "addFirst": "Lägg till ditt första laboratorieresultat",
   "additionalNotes": {
     "description": "Kliniska anteckningar eller särskilda instruktioner",
@@ -7,6 +8,8 @@
   },
   "addNew": "+ Lägg till nytt laboratorieresultat",
   "addTitle": "Lägg till nytt laboratorieresultat",
+  "advancedMode": "Avancerat läge",
+  "advancedModeDescription": "Visa alla flikar (relationer, anteckningar, filer) vid skapande av ett nytt laboratorieresultat",
   "bulkEntry": {
     "addComponents": "Lägg till {{count}} komponent",
     "addComponents_one": "Lägg till {{count}} komponent",
@@ -115,7 +118,6 @@
     "trendAvailable": "Trenddata tillgänglig"
   },
   "editTitle": "Redigera laboratorieresultat",
-  "addDetailsTitle": "Lägg till labbresultatdetaljer",
   "emptyLabResultMessage": "Du skapade ett laboratorieresultat men lade inte till några testkomponenter. Vill du ta bort detta laboratorieresultat?",
   "emptyLabResultWarning": "Laboratorieresultat skapat men tomt",
   "errorOccurred": "Ett fel uppstod",
@@ -131,6 +133,7 @@
     "linkedVisits": "Länkade besök",
     "linkVisitsDescription": "Associera detta laboratorieresultat med besök där det beställdes eller granskades.",
     "linkVisitsTitle": "Länka till besök",
+    "matchedCommonName": "matchning: {{name}}",
     "notesOptional": "Anteckningar (valfritt)",
     "refMax": "Ref max",
     "refMin": "Ref min",
@@ -144,8 +147,7 @@
     "testCodePlaceholder": "t.ex. 718-7",
     "testComponents": "Testkomponenter (valfritt)",
     "testDetails": "Testdetaljer",
-    "unit": "Enhet",
-    "matchedCommonName": "matchning: {{name}}"
+    "unit": "Enhet"
   },
   "keepEmptyLabResult": "Behåll laboratorieresultat",
   "labResult": {
@@ -166,8 +168,8 @@
   "modal": {
     "editLabResult": "Redigera laboratorieresultat",
     "labels": {
-      "testType": "Testtyp",
-      "referenceRange": "Referensintervall"
+      "referenceRange": "Referensintervall",
+      "testType": "Testtyp"
     },
     "sections": {
       "associatedFiles": "Associerade dokument",
@@ -182,6 +184,21 @@
   },
   "networkError": "Nätverksfel. Kontrollera din anslutning och försök igen.",
   "noResults": "Inga laboratorieresultat funna",
+  "numericResult": {
+    "refMaxLabel": "Intervall max",
+    "refMaxPlaceholder": "t.ex. 5,6",
+    "refMinLabel": "Intervall min",
+    "refMinPlaceholder": "t.ex. 4,0",
+    "refTextDescription": "Åsidosätter min/max i visningen",
+    "refTextLabel": "Intervalltext",
+    "refTextPlaceholder": "t.ex. 4,0-5,6 eller <200",
+    "sectionDescription": "Ange ett uppmätt värde och referensintervall för att aktivera trenddiagram.",
+    "sectionLabel": "Numeriskt resultat (valfritt)",
+    "unitLabel": "Enhet",
+    "unitPlaceholder": "t.ex. mg/dL, mmol/L",
+    "valueLabel": "Värde",
+    "valuePlaceholder": "t.ex. 6,2"
+  },
   "orderedDate": {
     "description": "Datum då testet beställdes",
     "label": "Beställningsdatum",
@@ -205,6 +222,29 @@
     "inconclusive": "Oklart - Behöver upprepas",
     "low": "Lågt - Under normalintervall",
     "normal": "Normalt - Inom referensintervall"
+  },
+  "resultsTable": {
+    "collapseAll": "Dölj alla",
+    "dateFrom": "Datum från",
+    "dateTo": "Datum till",
+    "expandAll": "Expandera alla",
+    "noResults": "Inga testresultat matchar de aktuella filtren",
+    "results": "{{count}} resultat",
+    "results_one": "{{count}} results",
+    "results_other": "{{count}} resultat",
+    "source": "Källa",
+    "viewTrends": "Visa trender"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "Från panelen",
+    "latestResult": "Senaste",
+    "noResults": "Inga resultat i den här gruppen",
+    "panel": "Panel",
+    "results": "{{count}} resultat",
+    "results_one": "{{count}} resultat",
+    "results_other": "{{count}} resultat",
+    "trendChart": "Värde över tid"
   },
   "startAdding": "Börja med att lägga till ditt första laboratorieresultat.",
   "stats": {
@@ -328,14 +368,14 @@
       "genetics": "Genetik - Genetiska test",
       "hematology": "Hematologi - Blodstatus & järn",
       "hepatology": "Hepatologi - Leverenzymer & funktion",
+      "imaging": "Bilddiagnostik - Radiologi & Skanningar",
       "immunology": "Immunologi - Immunsystem & antikroppar",
       "lipids": "Lipider - Kolesterol & triglycerider",
       "microbiology": "Mikrobiologi - Infektioner & odlingar",
       "molecular": "Molekylärdiagnostik - DNA-test",
       "other": "Andra test",
       "pathology": "Patologi - Vävnads- & biopsianalys",
-      "toxicology": "Toxikologi - Läkemedels- & giftscreening",
-      "imaging": "Bilddiagnostik - Radiologi & Skanningar"
+      "toxicology": "Toxikologi - Läkemedels- & giftscreening"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +423,19 @@
       "hasBeenDeleted": "{{name}} har tagits bort"
     },
     "refreshComponents": "Uppdatera komponenter",
-    "tabs": {
-      "statistics": "Statistik",
-      "testResults": "Testresultat"
-    },
-    "title": "Tester",
     "resultType": {
       "qualitative": "Kvalitativ (Pos/Neg)",
       "quantitative": "Kvantitativ (Numerisk)",
       "textual": "Textuell (Rapport)"
-    }
+    },
+    "tabs": {
+      "statistics": "Statistik",
+      "testResults": "Testresultat"
+    },
+    "title": "Tester"
+  },
+  "testEntry": {
+    "label": "Test #{{number}}"
   },
   "testingFacility": {
     "description": "Var testet utförs/utfördes",
@@ -427,6 +470,11 @@
     "label": "Testtyp",
     "placeholder": "Välj prioritetsnivå"
   },
+  "textualResult": {
+    "label": "Resultattext",
+    "noText": "—",
+    "placeholder": "Ange resultattext (t.ex. Inga akuta fynd)"
+  },
   "timeoutError": "Begäran fick timeout. Försök igen.",
   "title": "Laboratorieresultat",
   "trendChart": {
@@ -434,10 +482,10 @@
     "labLabel": "Labb: {{name}}",
     "negativeUndetected": "Negativ/ej upptäckt",
     "noDataPoints": "Inga datapunkter att visa",
+    "notAvailableForTextual": "Trenddiagram är inte tillgängliga för textuella resultat.",
     "positiveDetected": "Positiv/upptäckt",
     "referenceRange": "Referensintervall:",
-    "referenceValue": "Referens: {{min}} - {{max}}",
-    "notAvailableForTextual": "Trenddiagram är inte tillgängliga för textuella resultat."
+    "referenceValue": "Referens: {{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "Avvikande:",
@@ -447,6 +495,8 @@
     "dataPoints_one": "{{count}} datapunkter",
     "dataPoints_other": "{{count}} datapunkter",
     "dataTable": "Datatabell",
+    "decreasing": "Minskande",
+    "increasing": "Ökande",
     "inRange": "{{percent}}% inom intervall",
     "latest": "Senaste",
     "noData": "Ingen trenddata tillgänglig",
@@ -454,15 +504,13 @@
     "normalLabel": "Normalt:",
     "range": "Intervall",
     "showing": "Visar:",
+    "stable": "Stabil",
     "stdDevLabel": "Standardavvikelse:",
     "summaryStatistics": "Sammanfattande statistik",
+    "textualNoStats": "Numerisk statistik är inte tillgänglig för textuella resultat.",
     "timeRange": "Tidsintervall",
     "title": "Trendanalys",
-    "total": "Totalt",
-    "decreasing": "Minskande",
-    "increasing": "Ökande",
-    "stable": "Stabil",
-    "textualNoStats": "Numerisk statistik är inte tillgänglig för textuella resultat."
+    "total": "Totalt"
   },
   "trendTable": {
     "clickToSort": "Klicka på kolumnrubriker för att sortera",
@@ -476,50 +524,5 @@
   "unsavedDataInstructions": "Klicka på \"Lägg till komponenter\" i fliken Förhandsgranskning för att spara dina tolkade data innan du stänger.",
   "unsavedDataMessage_one": "Du har {{count}} tolkad testkomponent som inte har lagts till ännu. Om du stänger nu kommer du att förlora denna tolkade data.",
   "unsavedDataMessage_other": "Du har {{count}} tolkade testkomponenter som inte har lagts till ännu. Om du stänger nu kommer du att förlora denna tolkade data.",
-  "unsavedDataWarning": "Osparade tolkade data",
-  "stackedView": {
-    "results": "{{count}} resultat",
-    "results_one": "{{count}} resultat",
-    "results_other": "{{count}} resultat",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Senaste",
-    "trendChart": "Värde över tid",
-    "noResults": "Inga resultat i den här gruppen",
-    "fromPanel": "Från panelen",
-    "panel": "Panel"
-  },
-  "numericResult": {
-    "sectionLabel": "Numeriskt resultat (valfritt)",
-    "sectionDescription": "Ange ett uppmätt värde och referensintervall för att aktivera trenddiagram.",
-    "valueLabel": "Värde",
-    "valuePlaceholder": "t.ex. 6,2",
-    "unitLabel": "Enhet",
-    "unitPlaceholder": "t.ex. mg/dL, mmol/L",
-    "refMinLabel": "Intervall min",
-    "refMinPlaceholder": "t.ex. 4,0",
-    "refMaxLabel": "Intervall max",
-    "refMaxPlaceholder": "t.ex. 5,6",
-    "refTextLabel": "Intervalltext",
-    "refTextPlaceholder": "t.ex. 4,0-5,6 eller <200",
-    "refTextDescription": "Åsidosätter min/max i visningen"
-  },
-  "resultsTable": {
-    "expandAll": "Expandera alla",
-    "collapseAll": "Dölj alla",
-    "results": "{{count}} resultat",
-    "results_other": "{{count}} resultat",
-    "noResults": "Inga testresultat matchar de aktuella filtren",
-    "dateFrom": "Datum från",
-    "dateTo": "Datum till",
-    "source": "Källa",
-    "viewTrends": "Visa trender"
-  },
-  "testEntry": {
-    "label": "Test #{{number}}"
-  },
-  "textualResult": {
-    "label": "Resultattext",
-    "noText": "—",
-    "placeholder": "Ange resultattext (t.ex. Inga akuta fynd)"
-  }
+  "unsavedDataWarning": "Osparade tolkade data"
 }

@@ -160,6 +160,146 @@ describe('LabResultFormWrapper', () => {
     });
   });
 
+  describe('Notes tab', () => {
+    test('is not shown when creating a lab result without advanced mode', () => {
+      render(<LabResultFormWrapper {...defaultProps} />);
+      expect(
+        screen.queryByRole('tab', { name: 'shared:tabs.notes' })
+      ).not.toBeInTheDocument();
+    });
+
+    test('is shown when creating a lab result with advancedCreate enabled', async () => {
+      render(<LabResultFormWrapper {...defaultProps} advancedCreate />);
+      const notesTab = screen.getByRole('tab', { name: 'shared:tabs.notes' });
+      expect(notesTab).toBeInTheDocument();
+
+      await userEvent.click(notesTab);
+      expect(
+        screen.getByText('shared:fields.additionalNotes')
+      ).toBeInTheDocument();
+    });
+
+    test('is shown when editing an existing lab result', async () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          editingItem={{ id: 1, test_name: 'CBC' }}
+        />
+      );
+      const notesTab = screen.getByRole('tab', { name: 'shared:tabs.notes' });
+      expect(notesTab).toBeInTheDocument();
+
+      await userEvent.click(notesTab);
+      expect(
+        screen.getByText('shared:fields.additionalNotes')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('Advanced mode switch', () => {
+    test('is not shown when editing an existing lab result', () => {
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          editingItem={{ id: 1, test_name: 'CBC' }}
+          onAdvancedModeChange={vi.fn()}
+        />
+      );
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    });
+
+    test('is not shown when onAdvancedModeChange is not provided', () => {
+      render(<LabResultFormWrapper {...defaultProps} />);
+      expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    });
+
+    test('calls onAdvancedModeChange when toggled while creating', async () => {
+      const onAdvancedModeChange = vi.fn();
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          onAdvancedModeChange={onAdvancedModeChange}
+        />
+      );
+
+      const toggle = screen.getByRole('switch');
+      await userEvent.click(toggle);
+
+      expect(onAdvancedModeChange).toHaveBeenCalledWith(true);
+    });
+  });
+
+  describe('Relationships tab', () => {
+    test('is not shown when creating a lab result without advanced mode', () => {
+      render(<LabResultFormWrapper {...defaultProps} />);
+      expect(
+        screen.queryByRole('tab', { name: 'labresults:tabs.relationships' })
+      ).not.toBeInTheDocument();
+    });
+
+    test('uses the pending relationships picker when creating with advancedCreate enabled', async () => {
+      const conditions = [{ id: 1, diagnosis: 'Diabetes', status: 'active' }];
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          advancedCreate
+          conditions={conditions}
+        />
+      );
+      const relationshipsTab = screen.getByRole('tab', {
+        name: 'labresults:tabs.relationships',
+      });
+      await userEvent.click(relationshipsTab);
+
+      // Pending picker (create mode), not the edit-mode API-backed components
+      expect(
+        screen.getByText('labresults:messages.relationshipsSaveFirst')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('condition-relationships')
+      ).not.toBeInTheDocument();
+    });
+
+    test('uses the API-backed relationship components when editing an existing lab result', async () => {
+      const conditions = [{ id: 1, diagnosis: 'Diabetes', status: 'active' }];
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          editingItem={{ id: 1, test_name: 'CBC' }}
+          conditions={conditions}
+        />
+      );
+      const relationshipsTab = screen.getByRole('tab', {
+        name: 'labresults:tabs.relationships',
+      });
+      await userEvent.click(relationshipsTab);
+
+      expect(screen.getByTestId('condition-relationships')).toBeInTheDocument();
+      expect(
+        screen.queryByText('labresults:messages.relationshipsSaveFirst')
+      ).not.toBeInTheDocument();
+    });
+
+    test('exposes pending-relationship methods to the parent via onPendingRelationshipsRef', () => {
+      const onPendingRelationshipsRef = vi.fn();
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          advancedCreate
+          onPendingRelationshipsRef={onPendingRelationshipsRef}
+        />
+      );
+
+      expect(onPendingRelationshipsRef).toHaveBeenCalled();
+      const methods = onPendingRelationshipsRef.mock.calls.at(-1)[0];
+      expect(methods.hasPendingRelationships()).toBe(false);
+      expect(methods.getPendingRelationships()).toEqual({
+        conditions: [],
+        encounters: [],
+      });
+    });
+  });
+
   describe('Form submission', () => {
     test('calls onClose when Cancel is clicked', async () => {
       const mockClose = vi.fn();

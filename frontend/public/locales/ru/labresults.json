@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Добавить детали результата лаборатории",
   "addFirst": "Добавить первый результат лабораторного исследования",
   "additionalNotes": {
     "description": "Клинические примечания или специальные инструкции",
@@ -7,9 +8,13 @@
   },
   "addNew": "+ Добавить новый результат исследования",
   "addTitle": "Добавить новый результат исследования",
+  "advancedMode": "Расширенный режим",
+  "advancedModeDescription": "Показывать все вкладки (связи, заметки, файлы) при создании нового результата исследования",
   "bulkEntry": {
     "addComponents": "Добавить {{count}} компонент",
     "addComponents_one": "Добавить {{count}} компонент",
+    "addComponents_few": "",
+    "addComponents_many": "",
     "addComponents_other": "Добавить {{count}} компонентов",
     "autoParseDescription": "Автоматический разбор при вводе",
     "clearAll": "Очистить все",
@@ -31,12 +36,16 @@
     "examples": "Примеры",
     "extractedChars": "{{charCount}} символов с {{pageCount}} страницы",
     "extractedChars_one": "{{charCount}} символов с {{pageCount}} страницы",
+    "extractedChars_few": "",
+    "extractedChars_many": "",
     "extractedChars_other": "{{charCount}} символов с {{pageCount}} страниц",
     "fastExtraction": "Быстрое извлечение",
     "firstColumnName": "Считать первый столбец названием исследования",
     "firstColumnNameDesc": "Обрабатывать первый столбец как название исследования в табличных данных",
     "foundComponents": "Найден {{count}} действительный компонент готовый к просмотру",
     "foundComponents_one": "Найден {{count}} действительный компонент готовый к просмотру",
+    "foundComponents_few": "",
+    "foundComponents_many": "",
     "foundComponents_other": "Найдено {{count}} действительных компонентов готовых к просмотру",
     "labResultsText": "Текст результатов исследований",
     "linked": "Связано: {{name}}",
@@ -56,9 +65,13 @@
     "pdfUpload": "Загрузка PDF",
     "previewComponents": "Просмотр {{count}} компонента",
     "previewComponents_one": "Просмотр {{count}} компонента",
+    "previewComponents_few": "",
+    "previewComponents_many": "",
     "previewComponents_other": "Просмотр {{count}} компонентов",
     "previewCount": "Просмотр ({{count}})",
     "previewCount_one": "Просмотр ({{count}})",
+    "previewCount_few": "",
+    "previewCount_many": "",
     "previewCount_other": "Просмотр ({{count}})",
     "qualitativeResults": "Качественные результаты (положительные/отрицательные)",
     "skipEmptyLines": "Пропускать пустые строки",
@@ -72,9 +85,13 @@
     "useExample": "Использовать пример",
     "validComponents": "{{count}} действительных компонентов",
     "validComponents_one": "{{count}} действительных компонентов",
+    "validComponents_few": "",
+    "validComponents_many": "",
     "validComponents_other": "{{count}} действительных компонентов",
     "withIssues": "{{count}} с проблемами",
     "withIssues_one": "{{count}} с проблемами",
+    "withIssues_few": "",
+    "withIssues_many": "",
     "withIssues_other": "{{count}} с проблемами"
   },
   "category": {
@@ -115,7 +132,6 @@
     "trendAvailable": "Данные динамики доступны"
   },
   "editTitle": "Редактировать результат исследования",
-  "addDetailsTitle": "Добавить детали результата лаборатории",
   "emptyLabResultMessage": "Вы создали результат исследования, но не добавили никаких компонентов. Хотите удалить этот результат исследования?",
   "emptyLabResultWarning": "Результат исследования создан, но пуст",
   "errorOccurred": "Произошла ошибка",
@@ -131,6 +147,7 @@
     "linkedVisits": "Связанные визиты",
     "linkVisitsDescription": "Свяжите этот результат исследования с визитами, во время которых он был назначен или рассмотрен.",
     "linkVisitsTitle": "Связать с визитами",
+    "matchedCommonName": "совпадение: {{name}}",
     "notesOptional": "Примечания (необязательно)",
     "refMax": "Макс. референс",
     "refMin": "Мин. референс",
@@ -144,8 +161,7 @@
     "testCodePlaceholder": "напр., 718-7",
     "testComponents": "Компоненты тестов (необязательно)",
     "testDetails": "Детали теста",
-    "unit": "Единица измерения",
-    "matchedCommonName": "совпадение: {{name}}"
+    "unit": "Единица измерения"
   },
   "keepEmptyLabResult": "Оставить результат исследования",
   "labResult": {
@@ -166,8 +182,8 @@
   "modal": {
     "editLabResult": "Редактировать результат исследования",
     "labels": {
-      "testType": "Тип исследования",
-      "referenceRange": "Референсный диапазон"
+      "referenceRange": "Референсный диапазон",
+      "testType": "Тип исследования"
     },
     "sections": {
       "associatedFiles": "Связанные документы",
@@ -182,6 +198,21 @@
   },
   "networkError": "Сетевая ошибка. Пожалуйста, проверьте соединение и попробуйте еще раз.",
   "noResults": "Результаты исследований не найдены",
+  "numericResult": {
+    "refMaxLabel": "Диапазон макс",
+    "refMaxPlaceholder": "напр. 5,6",
+    "refMinLabel": "Диапазон мин",
+    "refMinPlaceholder": "напр. 4,0",
+    "refTextDescription": "Заменяет мин/макс в отображении",
+    "refTextLabel": "Текст диапазона",
+    "refTextPlaceholder": "напр. 4,0-5,6 или <200",
+    "sectionDescription": "Введите измеренное значение и референсный диапазон для построения графиков тенденций.",
+    "sectionLabel": "Числовой результат (необязательно)",
+    "unitLabel": "Единица",
+    "unitPlaceholder": "напр. мг/дл, ммоль/л",
+    "valueLabel": "Значение",
+    "valuePlaceholder": "напр. 6,2"
+  },
   "orderedDate": {
     "description": "Дата назначения исследования",
     "label": "Дата назначения",
@@ -206,24 +237,59 @@
     "low": "Пониженное - Ниже нормального диапазона",
     "normal": "Норма - В пределах референсного диапазона"
   },
+  "resultsTable": {
+    "collapseAll": "Свернуть все",
+    "dateFrom": "Дата от",
+    "dateTo": "Дата до",
+    "expandAll": "Развернуть все",
+    "noResults": "Нет результатов тестов, соответствующих текущим фильтрам",
+    "results": "{{count}} результат",
+    "results_one": "{{count}} results",
+    "results_few": "{{count}} results",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} результатов",
+    "source": "Источник",
+    "viewTrends": "Просмотр тенденций"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "Из панели",
+    "latestResult": "Последний",
+    "noResults": "Нет результатов в этой группе",
+    "panel": "Панель",
+    "results": "{{count}} результат",
+    "results_one": "{{count}} результат",
+    "results_few": "{{count}} results",
+    "results_many": "{{count}} results",
+    "results_other": "{{count}} результатов",
+    "trendChart": "Значение с течением времени"
+  },
   "startAdding": "Начните с добавления вашего первого результата исследования.",
   "stats": {
     "abnormal": "Отклонение",
     "actionRequired": "Требуются действия:",
     "basedOn": "На основе {{count}} теста с референсными диапазонами",
     "basedOn_one": "На основе {{count}} теста с референсными диапазонами",
+    "basedOn_few": "",
+    "basedOn_many": "",
     "basedOn_other": "На основе {{count}} тестов с референсными диапазонами",
     "categories": "Категории тестов",
     "categoriesCount": "{{count}} категорий",
     "categoriesCount_one": "{{count}} категория",
+    "categoriesCount_few": "",
+    "categoriesCount_many": "",
     "categoriesCount_other": "{{count}} категорий",
     "coverageDetail": "{{withRanges}} из {{total}} тестов ({{percent}}%) имеют референсные диапазоны для правильной оценки.",
     "critical": "Критическое",
     "criticalAction": "<strong>Требуются действия:</strong> Обнаружен {{count}} критический результат. Пожалуйста, немедленно обратитесь к врачу.",
     "criticalAction_one": "<strong>Требуются действия:</strong> Обнаружен {{count}} критический результат. Пожалуйста, немедленно обратитесь к врачу.",
+    "criticalAction_few": "",
+    "criticalAction_many": "",
     "criticalAction_other": "<strong>Требуются действия:</strong> Обнаружено {{count}} критических результатов. Пожалуйста, немедленно обратитесь к врачу.",
     "criticalResultsWarning": "{{count}} критический результат требует немедленного внимания",
     "criticalResultsWarning_one": "{{count}} критический результат требует немедленного внимания",
+    "criticalResultsWarning_few": "",
+    "criticalResultsWarning_many": "",
     "criticalResultsWarning_other": "{{count}} критических результатов требуют немедленного внимания",
     "distribution": "Распределение",
     "healthScore": "Общий показатель здоровья",
@@ -235,6 +301,8 @@
     "outOfRange": "За пределами диапазона",
     "outOfRangeCount": "{{count}} из {{total}} тестов находятся вне референсных диапазонов",
     "outOfRangeCount_one": "{{count}} из {{total}} тестов находится вне референсных диапазонов",
+    "outOfRangeCount_few": "",
+    "outOfRangeCount_many": "",
     "outOfRangeCount_other": "{{count}} из {{total}} тестов находятся вне референсных диапазонов",
     "rangeAnalysis": "Анализ референсных диапазонов",
     "resultsAttention": "Несколько результатов требуют внимания или последующего наблюдения.",
@@ -264,13 +332,19 @@
     "healthyPercent": "{{score}}% в норме",
     "moreCategories": "+{{count}} еще",
     "moreCategories_one": "+{{count}} еще",
+    "moreCategories_few": "",
+    "moreCategories_many": "",
     "moreCategories_other": "+{{count}} еще",
     "noComponents": "Нет результатов тестов",
     "testComponentsCount": "Результаты тестов ({{count}})",
     "testComponentsCount_one": "Результаты тестов ({{count}})",
+    "testComponentsCount_few": "",
+    "testComponentsCount_many": "",
     "testComponentsCount_other": "Результаты тестов ({{count}})",
     "testComponentsTotal": "{{count}} результат теста",
     "testComponentsTotal_one": "{{count}} результат теста",
+    "testComponentsTotal_few": "",
+    "testComponentsTotal_many": "",
     "testComponentsTotal_other": "{{count}} результатов теста",
     "unavailable": "Результаты тестов недоступны"
   },
@@ -287,9 +361,13 @@
     "addTests": "Добавить тесты ({{filled}}/{{total}} заполнено)",
     "addTestsAll": "Добавить {{count}} тест",
     "addTestsAll_one": "Добавить {{count}} тест",
+    "addTestsAll_few": "",
+    "addTestsAll_many": "",
     "addTestsAll_other": "Добавить {{count}} тестов",
     "addTestsPartial": "Добавить {{filled}} из {{total}} теста",
     "addTestsPartial_one": "Добавить {{filled}} из {{total}} теста",
+    "addTestsPartial_few": "",
+    "addTestsPartial_many": "",
     "addTestsPartial_other": "Добавить {{filled}} из {{total}} тестов",
     "customEntry": "Пользовательский ввод",
     "customEntryInstructions": "Введите ваши собственные компоненты тестов. Заполните название теста, единицу измерения, значение и дополнительные референсные диапазоны. Нажмите «Добавить еще один тест», чтобы добавить больше строк по необходимости.",
@@ -299,11 +377,15 @@
     "searchPlaceholder": "Поиск шаблонов...",
     "templateCount": "{{count}} шаблон",
     "templateCount_one": "{{count}} шаблон",
+    "templateCount_few": "",
+    "templateCount_many": "",
     "templateCount_other": "{{count}} шаблонов",
     "templateInstructions": "Инструкции к шаблону",
     "templateInstructionsText": "Введите значения тестов и референсные диапазоны для каждого теста ниже. Референсные диапазоны должны соответствовать тем, что предоставляет ваша лаборатория. Оставьте тесты пустыми, если они не проводились.",
     "testCount": "{{count}} тест",
     "testCount_one": "{{count}} тест",
+    "testCount_few": "",
+    "testCount_many": "",
     "testCount_other": "{{count}} тестов",
     "title": "Шаблоны тестов",
     "useTemplate": "Использовать шаблон"
@@ -328,14 +410,14 @@
       "genetics": "Генетика - Генетическое тестирование",
       "hematology": "Гематология - Клеточный состав крови и железо",
       "hepatology": "Гепатология - Ферменты и функции печени",
+      "imaging": "Визуализация - Радиология & Сканирование",
       "immunology": "Иммунология - Иммунная система и антитела",
       "lipids": "Липиды - Холестерин и триглицериды",
       "microbiology": "Микробиология - Инфекции и посевы",
       "molecular": "Молекулярные - ДНК-тесты",
       "other": "Другие тесты",
       "pathology": "Патология - Ткани и биопсийный анализ",
-      "toxicology": "Токсикология - Скрининг наркотиков и токсинов",
-      "imaging": "Визуализация - Радиология & Сканирование"
+      "toxicology": "Токсикология - Скрининг наркотиков и токсинов"
     },
     "editModal": {
       "descriptions": {
@@ -383,16 +465,19 @@
       "hasBeenDeleted": "{{name}} был удален"
     },
     "refreshComponents": "Обновить компоненты",
-    "tabs": {
-      "statistics": "Статистика",
-      "testResults": "Результаты тестов"
-    },
-    "title": "Тесты",
     "resultType": {
       "qualitative": "Качественный (Пол/Отр)",
       "quantitative": "Количественный (Числовой)",
       "textual": "Текстовый (Отчёт)"
-    }
+    },
+    "tabs": {
+      "statistics": "Статистика",
+      "testResults": "Результаты тестов"
+    },
+    "title": "Тесты"
+  },
+  "testEntry": {
+    "label": "Тест #{{number}}"
   },
   "testingFacility": {
     "description": "Где выполняется/выполнялось исследование",
@@ -427,6 +512,11 @@
     "label": "Тип исследования",
     "placeholder": "Выберите уровень срочности"
   },
+  "textualResult": {
+    "label": "Текст результата",
+    "noText": "—",
+    "placeholder": "Введите текст результата (например, Острых изменений нет)"
+  },
   "timeoutError": "Время запроса истекло. Пожалуйста, попробуйте еще раз.",
   "title": "Результаты лабораторных исследований",
   "trendChart": {
@@ -434,10 +524,10 @@
     "labLabel": "Лаборатория: {{name}}",
     "negativeUndetected": "Отрицательный/Не обнаружен",
     "noDataPoints": "Нет точек данных для отображения",
+    "notAvailableForTextual": "Графики трендов недоступны для текстовых результатов.",
     "positiveDetected": "Положительный/Обнаружен",
     "referenceRange": "Референсный диапазон:",
-    "referenceValue": "Референс: {{min}} - {{max}}",
-    "notAvailableForTextual": "Графики трендов недоступны для текстовых результатов."
+    "referenceValue": "Референс: {{min}} - {{max}}"
   },
   "trends": {
     "abnormalLabel": "Отклонение:",
@@ -445,8 +535,12 @@
     "chart": "График",
     "dataPoints": "{{count}} точек данных",
     "dataPoints_one": "{{count}} точка данных",
+    "dataPoints_few": "{{count}} data points",
+    "dataPoints_many": "{{count}} data points",
     "dataPoints_other": "{{count}} точек данных",
     "dataTable": "Таблица данных",
+    "decreasing": "Убывающий",
+    "increasing": "Возрастающий",
     "inRange": "{{percent}}% в диапазоне",
     "latest": "Последний",
     "noData": "Данные о трендах недоступны",
@@ -454,20 +548,20 @@
     "normalLabel": "Норма:",
     "range": "Диапазон",
     "showing": "Показано:",
+    "stable": "Стабильный",
     "stdDevLabel": "Ст. откл.:",
     "summaryStatistics": "Сводная статистика",
+    "textualNoStats": "Числовая статистика недоступна для текстовых результатов.",
     "timeRange": "Временной диапазон",
     "title": "Анализ трендов",
-    "total": "Всего",
-    "decreasing": "Убывающий",
-    "increasing": "Возрастающий",
-    "stable": "Стабильный",
-    "textualNoStats": "Числовая статистика недоступна для текстовых результатов."
+    "total": "Всего"
   },
   "trendTable": {
     "clickToSort": "Нажмите на заголовки столбцов для сортировки",
     "historicalData": "Исторические данные ({{count}} точка)",
     "historicalData_one": "Исторические данные ({{count}} точка)",
+    "historicalData_few": "Historical Data ({{count}} points)",
+    "historicalData_many": "Historical Data ({{count}} points)",
     "historicalData_other": "Исторические данные ({{count}} точек)",
     "labResult": "Результат исследования",
     "noDataPoints": "Нет точек данных для отображения",
@@ -476,50 +570,5 @@
   "unsavedDataInstructions": "Нажмите \"Добавить компоненты\" на вкладке Просмотр, чтобы сохранить разобранные данные перед закрытием.",
   "unsavedDataMessage_one": "У вас есть {{count}} разобранный компонент теста, который еще не добавлен. Если вы закроете сейчас, эти разобранные данные будут потеряны.",
   "unsavedDataMessage_other": "У вас есть {{count}} разобранных компонентов тестов, которые еще не добавлены. Если вы закроете сейчас, эти разобранные данные будут потеряны.",
-  "unsavedDataWarning": "Несохраненные разобранные данные",
-  "stackedView": {
-    "results": "{{count}} результат",
-    "results_one": "{{count}} результат",
-    "results_other": "{{count}} результатов",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Последний",
-    "trendChart": "Значение с течением времени",
-    "noResults": "Нет результатов в этой группе",
-    "fromPanel": "Из панели",
-    "panel": "Панель"
-  },
-  "numericResult": {
-    "sectionLabel": "Числовой результат (необязательно)",
-    "sectionDescription": "Введите измеренное значение и референсный диапазон для построения графиков тенденций.",
-    "valueLabel": "Значение",
-    "valuePlaceholder": "напр. 6,2",
-    "unitLabel": "Единица",
-    "unitPlaceholder": "напр. мг/дл, ммоль/л",
-    "refMinLabel": "Диапазон мин",
-    "refMinPlaceholder": "напр. 4,0",
-    "refMaxLabel": "Диапазон макс",
-    "refMaxPlaceholder": "напр. 5,6",
-    "refTextLabel": "Текст диапазона",
-    "refTextPlaceholder": "напр. 4,0-5,6 или <200",
-    "refTextDescription": "Заменяет мин/макс в отображении"
-  },
-  "resultsTable": {
-    "expandAll": "Развернуть все",
-    "collapseAll": "Свернуть все",
-    "results": "{{count}} результат",
-    "results_other": "{{count}} результатов",
-    "noResults": "Нет результатов тестов, соответствующих текущим фильтрам",
-    "dateFrom": "Дата от",
-    "dateTo": "Дата до",
-    "source": "Источник",
-    "viewTrends": "Просмотр тенденций"
-  },
-  "testEntry": {
-    "label": "Тест #{{number}}"
-  },
-  "textualResult": {
-    "label": "Текст результата",
-    "noText": "—",
-    "placeholder": "Введите текст результата (например, Острых изменений нет)"
-  }
+  "unsavedDataWarning": "Несохраненные разобранные данные"
 }

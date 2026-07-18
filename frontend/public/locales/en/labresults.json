@@ -1,4 +1,5 @@
 {
+  "addDetailsTitle": "Add Lab Result Details",
   "addFirst": "Add Your First Lab Result",
   "additionalNotes": {
     "description": "Clinical notes or special instructions",
@@ -7,6 +8,8 @@
   },
   "addNew": "+ Add New Lab Result",
   "addTitle": "Add New Lab Result",
+  "advancedMode": "Advanced mode",
+  "advancedModeDescription": "Show all tabs (relationships, notes, files) when creating a new lab result",
   "bulkEntry": {
     "addComponents": "Add {{count}} Component",
     "addComponents_one": "Add {{count}} Component",
@@ -115,7 +118,6 @@
     "trendAvailable": "Trend data available"
   },
   "editTitle": "Edit Lab Result",
-  "addDetailsTitle": "Add Lab Result Details",
   "emptyLabResultMessage": "You created a lab result but didn't add any test components. Would you like to delete this lab result?",
   "emptyLabResultWarning": "Lab Result Created But Empty",
   "errorOccurred": "An error occurred",
@@ -131,6 +133,7 @@
     "linkedVisits": "Linked Visits",
     "linkVisitsDescription": "Associate this lab result with visits where it was ordered or reviewed.",
     "linkVisitsTitle": "Link to Visits",
+    "matchedCommonName": "matched: {{name}}",
     "notesOptional": "Notes (optional)",
     "refMax": "Ref Max",
     "refMin": "Ref Min",
@@ -144,8 +147,7 @@
     "testCodePlaceholder": "e.g., 718-7",
     "testComponents": "Add Tests",
     "testDetails": "Test Details",
-    "unit": "Unit",
-    "matchedCommonName": "matched: {{name}}"
+    "unit": "Unit"
   },
   "keepEmptyLabResult": "Keep Lab Result",
   "labResult": {
@@ -166,8 +168,8 @@
   "modal": {
     "editLabResult": "Edit Lab Result",
     "labels": {
-      "testType": "Test Type",
-      "referenceRange": "Reference Range"
+      "referenceRange": "Reference Range",
+      "testType": "Test Type"
     },
     "sections": {
       "associatedFiles": "Associated Documents",
@@ -182,6 +184,21 @@
   },
   "networkError": "Network error. Please check your connection and try again.",
   "noResults": "No Lab Results Found",
+  "numericResult": {
+    "refMaxLabel": "Range max",
+    "refMaxPlaceholder": "e.g. 5.6",
+    "refMinLabel": "Range min",
+    "refMinPlaceholder": "e.g. 4.0",
+    "refTextDescription": "Overrides min/max in display",
+    "refTextLabel": "Range text",
+    "refTextPlaceholder": "e.g. 4.0-5.6 or <200",
+    "sectionDescription": "Enter a measured value and reference range to enable trend charting for stacked results.",
+    "sectionLabel": "Numeric Result (optional)",
+    "unitLabel": "Unit",
+    "unitPlaceholder": "e.g. mg/dL, mmol/L",
+    "valueLabel": "Value",
+    "valuePlaceholder": "e.g. 6.2"
+  },
   "orderedDate": {
     "description": "Date the test was requested",
     "label": "Ordered Date",
@@ -205,6 +222,29 @@
     "inconclusive": "Inconclusive - Needs repeat",
     "low": "Low - Below normal range",
     "normal": "Normal - Within reference range"
+  },
+  "resultsTable": {
+    "collapseAll": "Collapse All",
+    "dateFrom": "Date from",
+    "dateTo": "Date to",
+    "expandAll": "Expand All",
+    "noResults": "No test results match the current filters",
+    "results": "{{count}} result",
+    "results_one": "{{count}} results",
+    "results_other": "{{count}} results",
+    "source": "Source",
+    "viewTrends": "View trends"
+  },
+  "stackedView": {
+    "dateRange": "{{from}} – {{to}}",
+    "fromPanel": "From panel",
+    "latestResult": "Latest",
+    "noResults": "No results in this group",
+    "panel": "Panel",
+    "results": "{{count}} result",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "trendChart": "Value over time"
   },
   "startAdding": "Start by adding your first lab result.",
   "stats": {
@@ -328,14 +368,14 @@
       "genetics": "Genetics - Genetic Testing",
       "hematology": "Hematology - Blood Counts & Iron",
       "hepatology": "Hepatology - Liver Enzymes & Function",
+      "imaging": "Imaging - Radiology & Scans",
       "immunology": "Immunology - Immune System & Antibodies",
       "lipids": "Lipids - Cholesterol & Triglycerides",
       "microbiology": "Microbiology - Infections & Cultures",
       "molecular": "Molecular - DNA Tests",
       "other": "Other Tests",
       "pathology": "Pathology - Tissue & Biopsy Analysis",
-      "toxicology": "Toxicology - Drug & Toxin Screening",
-      "imaging": "Imaging - Radiology & Scans"
+      "toxicology": "Toxicology - Drug & Toxin Screening"
     },
     "editModal": {
       "descriptions": {
@@ -394,10 +434,8 @@
     },
     "title": "Tests"
   },
-  "textualResult": {
-    "label": "Result Text",
-    "noText": "—",
-    "placeholder": "Enter result text (e.g. No acute findings)"
+  "testEntry": {
+    "label": "Test #{{number}}"
   },
   "testingFacility": {
     "description": "Where the test is/was performed",
@@ -432,6 +470,11 @@
     "label": "Test Type",
     "placeholder": "Select urgency level"
   },
+  "textualResult": {
+    "label": "Result Text",
+    "noText": "—",
+    "placeholder": "Enter result text (e.g. No acute findings)"
+  },
   "timeoutError": "Request timed out. Please try again.",
   "title": "Lab Results",
   "trendChart": {
@@ -453,8 +496,8 @@
     "dataPoints_other": "{{count}} data points",
     "dataTable": "Data Table",
     "decreasing": "Decreasing",
-    "inRange": "{{percent}}% in range",
     "increasing": "Increasing",
+    "inRange": "{{percent}}% in range",
     "latest": "Latest",
     "noData": "No trend data available",
     "noDataDescription": "There are no historical data points for this test component.",
@@ -481,45 +524,5 @@
   "unsavedDataInstructions": "Click \"Add Components\" in the Preview tab to save your parsed data before closing.",
   "unsavedDataMessage_one": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
   "unsavedDataMessage_other": "You have {{count}} parsed test component(s) that haven't been added yet. If you close now, you'll lose this parsed data.",
-  "unsavedDataWarning": "Unsaved Parsed Data",
-  "stackedView": {
-    "results": "{{count}} result",
-    "results_one": "{{count}} result",
-    "results_other": "{{count}} results",
-    "dateRange": "{{from}} – {{to}}",
-    "latestResult": "Latest",
-    "noResults": "No results in this group",
-    "trendChart": "Value over time",
-    "fromPanel": "From panel",
-    "panel": "Panel"
-  },
-  "numericResult": {
-    "sectionLabel": "Numeric Result (optional)",
-    "sectionDescription": "Enter a measured value and reference range to enable trend charting for stacked results.",
-    "valueLabel": "Value",
-    "valuePlaceholder": "e.g. 6.2",
-    "unitLabel": "Unit",
-    "unitPlaceholder": "e.g. mg/dL, mmol/L",
-    "refMinLabel": "Range min",
-    "refMinPlaceholder": "e.g. 4.0",
-    "refMaxLabel": "Range max",
-    "refMaxPlaceholder": "e.g. 5.6",
-    "refTextLabel": "Range text",
-    "refTextPlaceholder": "e.g. 4.0-5.6 or <200",
-    "refTextDescription": "Overrides min/max in display"
-  },
-  "resultsTable": {
-    "expandAll": "Expand All",
-    "collapseAll": "Collapse All",
-    "results": "{{count}} result",
-    "results_other": "{{count}} results",
-    "noResults": "No test results match the current filters",
-    "dateFrom": "Date from",
-    "dateTo": "Date to",
-    "source": "Source",
-    "viewTrends": "View trends"
-  },
-  "testEntry": {
-    "label": "Test #{{number}}"
-  }
+  "unsavedDataWarning": "Unsaved Parsed Data"
 }
