@@ -160,10 +160,17 @@
   "loading": "กำลังโหลดผลแลป...",
   "loadingHint": "หากใช้เวลานานเกินไป กรุณาโหลดหน้าใหม่",
   "messages": {
+    "confirmDiscardAdvancedForm": "การสลับโหมดจะทำให้ข้อมูลที่คุณกรอกไว้หายไป ต้องการดำเนินการต่อหรือไม่?",
     "noRelationshipsAvailable": "ไม่มีสภาวะทางการแพทย์หรือการเข้าพบที่บันทึกไว้ เพิ่มรายการเหล่านั้นก่อนเพื่อเชื่อมโยงที่นี่",
     "relationshipsCreateInfo": "สามารถเพิ่มความสัมพันธ์หลังจากบันทึกผลแลป",
     "relationshipsSaveFirst": "บันทึกผลแลปก่อนเพื่อสร้างลิงก์ความสัมพันธ์",
     "testComponentsEditInfo": "สามารถจัดการรายการตรวจจากหน้าดูรายละเอียดหลังจากบันทึก"
+  },
+  "pendingRelationships": {
+    "addCondition": "เพิ่มภาวะ",
+    "addVisit": "เพิ่มการเข้ารับบริการ",
+    "removeCondition": "ลบภาวะ",
+    "removeVisit": "ลบการเข้ารับบริการ"
   },
   "modal": {
     "editLabResult": "แก้ไขผลแลป",

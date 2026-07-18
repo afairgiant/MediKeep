@@ -160,10 +160,17 @@
   "loading": "Labresultaten worden geladen...",
   "loadingHint": "Als dit te lang duurt, vernieuw dan de pagina",
   "messages": {
+    "confirmDiscardAdvancedForm": "Als u van modus wisselt, gaat wat u tot nu toe hebt ingevoerd verloren. Doorgaan?",
     "noRelationshipsAvailable": "Geen medische aandoeningen of bezoeken geregistreerd. Voeg deze eerst toe om ze hier te koppelen.",
     "relationshipsCreateInfo": "Koppelingen kunnen worden toegevoegd na het opslaan van het labresultaat.",
     "relationshipsSaveFirst": "Sla het labresultaat eerst op om koppelingen aan te maken.",
     "testComponentsEditInfo": "Testcomponenten kunnen na het opslaan worden beheerd via de weergavepagina."
+  },
+  "pendingRelationships": {
+    "addCondition": "Aandoening toevoegen",
+    "addVisit": "Bezoek toevoegen",
+    "removeCondition": "Aandoening verwijderen",
+    "removeVisit": "Bezoek verwijderen"
   },
   "modal": {
     "editLabResult": "Labresultaat bewerken",
@@ -230,7 +237,7 @@
     "expandAll": "Alles uitvouwen",
     "noResults": "Geen testresultaten voldoen aan de huidige filters",
     "results": "{{count}} resultaat",
-    "results_one": "{{count}} results",
+    "results_one": "{{count}} resultaat",
     "results_other": "{{count}} resultaten",
     "source": "Bron",
     "viewTrends": "Trends bekijken"

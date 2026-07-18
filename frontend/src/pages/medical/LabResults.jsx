@@ -1097,8 +1097,24 @@ const LabResults = () => {
 
   // Lets the user swap between the quick panel-creation dialog and the full
   // tabbed form from within whichever create modal is currently open.
+  // Switching away from the advanced form unmounts it (losing formData, staged
+  // relationships, and pending files), so confirm first if there's anything to lose.
+  // The quick dialog stays mounted in the background when hidden, so no guard is
+  // needed switching in that direction.
   const handleAdvancedModeToggle = useCallback(
     checked => {
+      if (!checked) {
+        const hasEnteredData =
+          !!formData.test_name?.trim() ||
+          pendingRelationshipsMethods?.hasPendingRelationships?.() ||
+          documentManagerMethods?.hasPendingFiles?.();
+        if (
+          hasEnteredData &&
+          !window.confirm(t('labresults:messages.confirmDiscardAdvancedForm'))
+        ) {
+          return;
+        }
+      }
       setAdvancedCreateMode(checked);
       if (checked) {
         setShowPanelCreateDialog(false);
@@ -1108,7 +1124,15 @@ const LabResults = () => {
         setShowPanelCreateDialog(true);
       }
     },
-    [openAdvancedForm, handleCloseModal, setAdvancedCreateMode]
+    [
+      formData.test_name,
+      pendingRelationshipsMethods,
+      documentManagerMethods,
+      openAdvancedForm,
+      handleCloseModal,
+      setAdvancedCreateMode,
+      t,
+    ]
   );
 
   const renderViewContent = () => {

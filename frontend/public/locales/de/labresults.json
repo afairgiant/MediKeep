@@ -160,10 +160,17 @@
   "loading": "Laborergebnisse werden geladen...",
   "loadingHint": "Falls dies zu lange dauert, aktualisieren Sie bitte die Seite",
   "messages": {
+    "confirmDiscardAdvancedForm": "Beim Wechseln des Modus gehen die bisher eingegebenen Daten verloren. Fortfahren?",
     "noRelationshipsAvailable": "Keine medizinischen Erkrankungen oder Besuche vorhanden. Fügen Sie diese zuerst hinzu, um sie hier zu verknüpfen.",
     "relationshipsCreateInfo": "Verknüpfungen können nach dem Speichern des Laborergebnisses hinzugefügt werden.",
     "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Verknüpfungen zu erstellen.",
     "testComponentsEditInfo": "Testkomponenten können nach dem Speichern über die Ansichtsseite verwaltet werden."
+  },
+  "pendingRelationships": {
+    "addCondition": "Erkrankung hinzufügen",
+    "addVisit": "Besuch hinzufügen",
+    "removeCondition": "Erkrankung entfernen",
+    "removeVisit": "Besuch entfernen"
   },
   "modal": {
     "editLabResult": "Laborergebnis bearbeiten",

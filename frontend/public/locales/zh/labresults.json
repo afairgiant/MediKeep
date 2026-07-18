@@ -160,10 +160,17 @@
   "loading": "正在加载检验结果...",
   "loadingHint": "如果加载时间过长，请刷新页面",
   "messages": {
+    "confirmDiscardAdvancedForm": "切换模式将丢弃您目前输入的内容。是否继续？",
     "noRelationshipsAvailable": "没有记录的医疗状况或就诊记录。请先添加它们，然后再在此处链接。",
     "relationshipsCreateInfo": "保存检验结果后可以添加关系。",
     "relationshipsSaveFirst": "请先保存检验结果以创建关系链接。",
     "testComponentsEditInfo": "保存后可以从查看页面管理检验组件。"
+  },
+  "pendingRelationships": {
+    "addCondition": "添加病症",
+    "addVisit": "添加就诊",
+    "removeCondition": "移除病症",
+    "removeVisit": "移除就诊"
   },
   "modal": {
     "editLabResult": "编辑检验结果",

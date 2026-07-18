@@ -160,10 +160,17 @@
   "loading": "Loading lab results...",
   "loadingHint": "If this takes too long, please refresh the page",
   "messages": {
+    "confirmDiscardAdvancedForm": "Switching modes will discard what you've entered so far. Continue?",
     "noRelationshipsAvailable": "No medical conditions or visits on record. Add them first to link them here.",
     "relationshipsCreateInfo": "Relationships can be added after saving the lab result.",
     "relationshipsSaveFirst": "Save the lab result first to create relationship links.",
     "testComponentsEditInfo": "Test components can be managed from the view page after saving."
+  },
+  "pendingRelationships": {
+    "addCondition": "Add condition",
+    "addVisit": "Add visit",
+    "removeCondition": "Remove condition",
+    "removeVisit": "Remove visit"
   },
   "modal": {
     "editLabResult": "Edit Lab Result",

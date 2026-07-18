@@ -148,6 +148,7 @@ const PendingRelationshipsPicker = ({
                     color="red"
                     size="sm"
                     onClick={() => onRemoveCondition(index)}
+                    aria-label={t('labresults:pendingRelationships.removeCondition')}
                   >
                     <IconTrash size={14} />
                   </ActionIcon>
@@ -182,6 +183,7 @@ const PendingRelationshipsPicker = ({
                   size="lg"
                   onClick={handleAddCondition}
                   disabled={!selectedCondition}
+                  aria-label={t('labresults:pendingRelationships.addCondition')}
                 >
                   <IconPlus size={16} />
                 </ActionIcon>
@@ -224,6 +226,7 @@ const PendingRelationshipsPicker = ({
                     color="red"
                     size="sm"
                     onClick={() => onRemoveEncounter(index)}
+                    aria-label={t('labresults:pendingRelationships.removeVisit')}
                   >
                     <IconTrash size={14} />
                   </ActionIcon>
@@ -268,6 +271,7 @@ const PendingRelationshipsPicker = ({
                     size="lg"
                     onClick={handleAddEncounter}
                     disabled={!selectedEncounter}
+                    aria-label={t('labresults:pendingRelationships.addVisit')}
                   >
                     <IconPlus size={16} />
                   </ActionIcon>
