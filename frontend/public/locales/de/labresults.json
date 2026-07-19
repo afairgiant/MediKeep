@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Beim Wechseln des Modus gehen die bisher eingegebenen Daten verloren. Fortfahren?",
     "noRelationshipsAvailable": "Keine medizinischen Erkrankungen oder Besuche vorhanden. Fügen Sie diese zuerst hinzu, um sie hier zu verknüpfen.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Verknüpfungen können nach dem Speichern des Laborergebnisses hinzugefügt werden.",
     "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Verknüpfungen zu erstellen.",
     "testComponentsEditInfo": "Testkomponenten können nach dem Speichern über die Ansichtsseite verwaltet werden."

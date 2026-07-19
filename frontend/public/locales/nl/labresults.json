@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Als u van modus wisselt, gaat wat u tot nu toe hebt ingevoerd verloren. Doorgaan?",
     "noRelationshipsAvailable": "Geen medische aandoeningen of bezoeken geregistreerd. Voeg deze eerst toe om ze hier te koppelen.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Koppelingen kunnen worden toegevoegd na het opslaan van het labresultaat.",
     "relationshipsSaveFirst": "Sla het labresultaat eerst op om koppelingen aan te maken.",
     "testComponentsEditInfo": "Testcomponenten kunnen na het opslaan worden beheerd via de weergavepagina."

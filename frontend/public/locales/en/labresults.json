@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Switching modes will discard what you've entered so far. Continue?",
     "noRelationshipsAvailable": "No medical conditions or visits on record. Add them first to link them here.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Relationships can be added after saving the lab result.",
     "relationshipsSaveFirst": "Save the lab result first to create relationship links.",
     "testComponentsEditInfo": "Test components can be managed from the view page after saving."

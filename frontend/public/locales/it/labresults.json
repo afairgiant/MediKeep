@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Il cambio di modalità comporterà la perdita dei dati inseriti finora. Continuare?",
     "noRelationshipsAvailable": "Nessuna condizione medica o visita registrata. Aggiungile prima per collegarle qui.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Le relazioni possono essere aggiunte dopo aver salvato il risultato di laboratorio.",
     "relationshipsSaveFirst": "Salva prima il risultato di laboratorio per creare i collegamenti alle relazioni.",
     "testComponentsEditInfo": "I componenti dell'esame possono essere gestiti dalla pagina di visualizzazione dopo il salvataggio."

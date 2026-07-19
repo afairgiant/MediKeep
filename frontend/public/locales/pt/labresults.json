@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Mudar de modo descartará o que você inseriu até agora. Continuar?",
     "noRelationshipsAvailable": "Nenhuma condição médica ou visita registrada. Adicione-as primeiro para vinculá-las aqui.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Relacionamentos podem ser adicionados após salvar o resultado laboratorial.",
     "relationshipsSaveFirst": "Salve o resultado laboratorial primeiro para criar vínculos de relacionamento.",
     "testComponentsEditInfo": "Componentes do exame podem ser gerenciados na página de visualização após salvar."

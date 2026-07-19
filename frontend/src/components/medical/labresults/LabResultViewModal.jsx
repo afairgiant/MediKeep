@@ -18,14 +18,10 @@ import {
 import {
   IconInfoCircle,
   IconFlask,
-  IconUsers,
   IconTags,
   IconFileText,
   IconNotes,
-  IconStethoscope,
-  IconPill,
-  IconMedicalCross,
-  IconClipboardHeart,
+  IconLink,
 } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
@@ -94,11 +90,6 @@ const LabResultViewModal = ({
     const conditionalTabs = {
       notes: !!labResult?.notes,
       tags: labResult?.tags?.length > 0,
-      conditions: !!fetchLabResultConditions,
-      encounters: !!fetchLabResultEncounters,
-      medications: !!fetchLabResultMedications,
-      procedures: !!fetchLabResultProcedures,
-      treatments: !!fetchLabResultTreatments,
       'test-components': isGroupedResult || hasTestComponents !== false,
     };
     if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
@@ -110,11 +101,6 @@ const LabResultViewModal = ({
     isGroupedResult,
     labResult?.notes,
     labResult?.tags?.length,
-    fetchLabResultConditions,
-    fetchLabResultEncounters,
-    fetchLabResultMedications,
-    fetchLabResultProcedures,
-    fetchLabResultTreatments,
     hasTestComponents,
   ]);
 
@@ -209,46 +195,9 @@ const LabResultViewModal = ({
                   {t('labresults:modal.tabs.testComponents', 'Tests')}
                 </Tabs.Tab>
               )}
-              {fetchLabResultConditions && (
-                <Tabs.Tab
-                  value="conditions"
-                  leftSection={<IconUsers size={16} />}
-                >
-                  {t('shared:labels.relatedConditions', 'Related Conditions')}
-                </Tabs.Tab>
-              )}
-              {fetchLabResultEncounters && (
-                <Tabs.Tab
-                  value="encounters"
-                  leftSection={<IconStethoscope size={16} />}
-                >
-                  {t('shared:tabs.visits', 'Visits')}
-                </Tabs.Tab>
-              )}
-              {fetchLabResultMedications && (
-                <Tabs.Tab
-                  value="medications"
-                  leftSection={<IconPill size={16} />}
-                >
-                  {t('shared:tabs.medications', 'Medications')}
-                </Tabs.Tab>
-              )}
-              {fetchLabResultProcedures && (
-                <Tabs.Tab
-                  value="procedures"
-                  leftSection={<IconMedicalCross size={16} />}
-                >
-                  {t('shared:tabs.procedures', 'Procedures')}
-                </Tabs.Tab>
-              )}
-              {fetchLabResultTreatments && (
-                <Tabs.Tab
-                  value="treatments"
-                  leftSection={<IconClipboardHeart size={16} />}
-                >
-                  {t('shared:tabs.treatments', 'Treatments')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab value="relationships" leftSection={<IconLink size={16} />}>
+                {t('labresults:tabs.relationships', 'Relationships')}
+              </Tabs.Tab>
               {labResult.notes && (
                 <Tabs.Tab value="notes" leftSection={<IconNotes size={16} />}>
                   {t('shared:tabs.notes', 'Notes')}
@@ -554,90 +503,129 @@ const LabResultViewModal = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Related Conditions Tab */}
-            {fetchLabResultConditions && (
-              <Tabs.Panel value="conditions">
-                <Box mt="md">
-                  <ConditionRelationships
-                    key={`conditions-${labResult.id}`}
-                    labResultId={labResult.id}
-                    labResultConditions={labResultConditions}
-                    conditions={conditions}
-                    fetchLabResultConditions={fetchLabResultConditions}
-                    navigate={navigate}
-                    isViewMode={true}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
-
-            {/* Encounters/Visits Tab */}
-            {fetchLabResultEncounters && (
-              <Tabs.Panel value="encounters">
-                <Box mt="md">
-                  <LabResultEncounterRelationships
-                    key={`encounters-${labResult.id}`}
-                    labResultId={labResult.id}
-                    labResultEncounters={labResultEncounters}
-                    encounters={encounters}
-                    fetchLabResultEncounters={fetchLabResultEncounters}
-                    navigate={navigate}
-                    isViewMode={disableEdit}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
-
-            {/* Medications Tab */}
-            {fetchLabResultMedications && (
-              <Tabs.Panel value="medications">
-                <Box mt="md">
-                  <LabResultMedicationRelationships
-                    key={`medications-${labResult.id}`}
-                    labResultId={labResult.id}
-                    labResultMedications={labResultMedications}
-                    medications={medications}
-                    fetchLabResultMedications={fetchLabResultMedications}
-                    navigate={navigate}
-                    isViewMode={disableEdit}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
-
-            {/* Procedures Tab */}
-            {fetchLabResultProcedures && (
-              <Tabs.Panel value="procedures">
-                <Box mt="md">
-                  <LabResultProcedureRelationships
-                    key={`procedures-${labResult.id}`}
-                    labResultId={labResult.id}
-                    labResultProcedures={labResultProcedures}
-                    procedures={procedures}
-                    fetchLabResultProcedures={fetchLabResultProcedures}
-                    navigate={navigate}
-                    isViewMode={disableEdit}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
-
-            {/* Treatments Tab */}
-            {fetchLabResultTreatments && (
-              <Tabs.Panel value="treatments">
-                <Box mt="md">
-                  <LabResultTreatmentRelationships
-                    key={`treatments-${labResult.id}`}
-                    labResultId={labResult.id}
-                    labResultTreatments={labResultTreatments}
-                    treatments={treatments}
-                    fetchLabResultTreatments={fetchLabResultTreatments}
-                    navigate={navigate}
-                    isViewMode={disableEdit}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
+            {/* Relationships Tab */}
+            <Tabs.Panel value="relationships">
+              <Box mt="md">
+                <Stack gap="md">
+                  {conditions.length > 0 && (
+                    <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                      <Stack gap="md">
+                        <Title order={5}>
+                          {t('labresults:form.linkConditionsTitle')}
+                        </Title>
+                        <ConditionRelationships
+                          key={`conditions-${labResult.id}`}
+                          labResultId={labResult.id}
+                          labResultConditions={labResultConditions}
+                          conditions={conditions}
+                          fetchLabResultConditions={fetchLabResultConditions}
+                          navigate={navigate}
+                          isViewMode={true}
+                        />
+                      </Stack>
+                    </Paper>
+                  )}
+                  {encounters.length > 0 && (
+                    <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                      <Stack gap="md">
+                        <Title order={5}>
+                          {t(
+                            'common:labResults.form.linkVisitsTitle',
+                            'Link to Visits'
+                          )}
+                        </Title>
+                        <LabResultEncounterRelationships
+                          key={`encounters-${labResult.id}`}
+                          labResultId={labResult.id}
+                          labResultEncounters={labResultEncounters}
+                          encounters={encounters}
+                          fetchLabResultEncounters={fetchLabResultEncounters}
+                          navigate={navigate}
+                          isViewMode={true}
+                        />
+                      </Stack>
+                    </Paper>
+                  )}
+                  {medications.length > 0 && (
+                    <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                      <Stack gap="md">
+                        <Title order={5}>
+                          {t(
+                            'labresults:form.linkMedicationsTitle',
+                            'Link to Medications'
+                          )}
+                        </Title>
+                        <LabResultMedicationRelationships
+                          key={`medications-${labResult.id}`}
+                          labResultId={labResult.id}
+                          labResultMedications={labResultMedications}
+                          medications={medications}
+                          fetchLabResultMedications={fetchLabResultMedications}
+                          navigate={navigate}
+                          isViewMode={true}
+                        />
+                      </Stack>
+                    </Paper>
+                  )}
+                  {procedures.length > 0 && (
+                    <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                      <Stack gap="md">
+                        <Title order={5}>
+                          {t(
+                            'labresults:form.linkProceduresTitle',
+                            'Link to Procedures'
+                          )}
+                        </Title>
+                        <LabResultProcedureRelationships
+                          key={`procedures-${labResult.id}`}
+                          labResultId={labResult.id}
+                          labResultProcedures={labResultProcedures}
+                          procedures={procedures}
+                          fetchLabResultProcedures={fetchLabResultProcedures}
+                          navigate={navigate}
+                          isViewMode={true}
+                        />
+                      </Stack>
+                    </Paper>
+                  )}
+                  {treatments.length > 0 && (
+                    <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                      <Stack gap="md">
+                        <Title order={5}>
+                          {t(
+                            'labresults:form.linkTreatmentsTitle',
+                            'Link to Treatments'
+                          )}
+                        </Title>
+                        <LabResultTreatmentRelationships
+                          key={`treatments-${labResult.id}`}
+                          labResultId={labResult.id}
+                          labResultTreatments={labResultTreatments}
+                          treatments={treatments}
+                          fetchLabResultTreatments={fetchLabResultTreatments}
+                          navigate={navigate}
+                          isViewMode={true}
+                        />
+                      </Stack>
+                    </Paper>
+                  )}
+                  {conditions.length === 0 &&
+                    encounters.length === 0 &&
+                    medications.length === 0 &&
+                    procedures.length === 0 &&
+                    treatments.length === 0 && (
+                      <Paper withBorder p="md" ta="center">
+                        <Text c="dimmed">
+                          {t(
+                            'labresults:messages.noRelationshipsOnRecord',
+                            'No medical conditions, visits, medications, procedures, or treatments on record for this patient.'
+                          )}
+                        </Text>
+                      </Paper>
+                    )}
+                </Stack>
+              </Box>
+            </Tabs.Panel>
 
             {/* Notes Tab */}
             {labResult.notes && (

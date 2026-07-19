@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Zmiana trybu spowoduje utratę dotychczas wprowadzonych danych. Kontynuować?",
     "noRelationshipsAvailable": "Brak zarejestrowanych schorzeń ani wizyt. Dodaj je najpierw, aby połączyć je tutaj.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Powiązania można dodać po zapisaniu wyniku laboratoryjnego.",
     "relationshipsSaveFirst": "Najpierw zapisz wynik laboratoryjny aby utworzyć linki powiązań.",
     "testComponentsEditInfo": "Składniki badania można zarządzać ze strony podglądu po zapisaniu."

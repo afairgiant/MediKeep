@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Om du byter läge kommer det du har angett hittills att gå förlorat. Fortsätta?",
     "noRelationshipsAvailable": "Inga medicinska tillstånd eller besök registrerade. Lägg till dem först för att länka dem här.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Relationer kan läggas till efter att laboratorieresultatet sparats.",
     "relationshipsSaveFirst": "Spara laboratorieresultatet först för att skapa relationslänkar.",
     "testComponentsEditInfo": "Testkomponenter kan hanteras från visningssidan efter sparande."

@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "При переключении режима введённые данные будут потеряны. Продолжить?",
     "noRelationshipsAvailable": "Нет зарегистрированных заболеваний или визитов. Сначала добавьте их, чтобы создать связи здесь.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Связи можно добавить после сохранения результата исследования.",
     "relationshipsSaveFirst": "Сначала сохраните результат исследования, чтобы создать связи.",
     "testComponentsEditInfo": "Компонентами тестов можно управлять со страницы просмотра после сохранения."

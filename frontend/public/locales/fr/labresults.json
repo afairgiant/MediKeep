@@ -165,6 +165,7 @@
   "messages": {
     "confirmDiscardAdvancedForm": "Changer de mode annulera ce que vous avez saisi jusqu'à présent. Continuer ?",
     "noRelationshipsAvailable": "Aucune condition médicale ni visite enregistrée. Ajoutez-les d'abord pour les lier ici.",
+    "noRelationshipsOnRecord": "No medical conditions, visits, medications, procedures, or treatments on record for this patient.",
     "relationshipsCreateInfo": "Les connexions peuvent être ajoutées après avoir sauvegardé le résultat d'analyse.",
     "relationshipsSaveFirst": "Sauvegardez d'abord le résultat d'analyse pour pouvoir le connecter.",
     "testComponentsEditInfo": "Les composants d'analyse peuvent être gérés depuis la page d'aperçu après sauvegarde."
