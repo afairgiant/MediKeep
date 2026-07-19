@@ -45,8 +45,8 @@ const LabResultProcedureRelationships = ({
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const rels = labResultProcedures[labResultId] || [];
-    setRelationships(rels);
+    const rels = labResultProcedures[labResultId];
+    setRelationships(Array.isArray(rels) ? rels : []);
   }, [labResultId, labResultProcedures]);
 
   useEffect(() => {
