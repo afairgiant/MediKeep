@@ -1,4 +1,8 @@
 {
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
   "allergies": {
     "messages": {
       "loading": "Chargement des allergies..."
@@ -8,6 +12,7 @@
     "addNew": "Ajouter nouveau",
     "back": "Retour",
     "cancelSelection": "Annuler la sélection",
+    "clear": "Clear",
     "create": "Créer",
     "delete": "Supprimer",
     "done": "Fait",
@@ -17,6 +22,9 @@
     "linkEquipment": "Connecter équipment",
     "linkLabResult": "Connecter résultat d'analyse",
     "linkMedication": "Connecter médicament",
+    "linkMedications": "Connecter médicaments",
+    "linkProcedure": "Link Procedure",
+    "linkTreatment": "Link Treatment",
     "linkVisit": "Connecter visite",
     "print": "Imprimer",
     "refresh": "Rafraîchir",
@@ -29,8 +37,7 @@
     "showMore": "Afficher plus",
     "tryAgain": "Réessayer",
     "update": "Mettre à jour",
-    "view": "Afficher",
-    "linkMedications": "Connecter médicaments"
+    "view": "Afficher"
   },
   "conditions": {
     "addNew": "Ajouter une nouvelle condition",
@@ -54,6 +61,7 @@
         "snomedCode": "Code de terminologie clinique SNOMED",
         "tags": "Ajoutez des étiquettes pour catégoriser et organiser les conditions"
       },
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
       "medicationsDescription": "Connectez les médicaments utilisés pour traiter ou gérer cette condition.",
       "placeholders": {
         "codeDescription": "Description du code médical",
@@ -64,6 +72,7 @@
         "severity": "Sélectionnez la sévérité",
         "snomedCode": "ex : 44054006"
       },
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results.",
       "saving": "Sauvegarde de la condition...",
       "severity": {
         "lifeThreatening": "Critique",
@@ -292,7 +301,8 @@
   "filters": {
     "clear": "Effacer",
     "itemCount": "{{filtered}} sur {{total}} objets",
-    "title": "Filtres et recherche"
+    "title": "Filtres et recherche",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Ajouter une nouvelle immunisation",
@@ -345,10 +355,17 @@
       "vaccineNameDesc": "Nom commun pour le vaccin",
       "vaccineNamePlaceholder": "ex : vaccin contre la grippe, COVID-19, DTP"
     },
+    "history": {
+      "noPatient": "Sélectionnez un patient pour afficher l'historique."
+    },
     "loadingImmunizations": "Chargement des immunisations...",
     "noImmunizationsFound": "Aucune immunisation trouvée",
     "table": {
       "site": "Site"
+    },
+    "tabs": {
+      "history": "Historique",
+      "records": "Enregistrements"
     },
     "viewModal": {
       "adminDetails": "Détails d'administration",
@@ -357,13 +374,6 @@
       "title": "Détails de l'immunisation",
       "tradeName": "Nom commercial",
       "vaccineInfo": "Informations sur le vaccin"
-    },
-    "tabs": {
-      "records": "Enregistrements",
-      "history": "Historique"
-    },
-    "history": {
-      "noPatient": "Sélectionnez un patient pour afficher l'historique."
     }
   },
   "insurance": {
@@ -438,39 +448,50 @@
   "key": "Par défaut {{var}}",
   "labels": {
     "addCustom": "+ Ajouter \"{{value}}\"",
+    "cancelEdit": "Cancel edit",
+    "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "expectedFrequency": "Expected frequency",
+    "labResultsAvailableToLink_one": "{{count}} lab results available to link",
+    "labResultsAvailableToLink_other": "{{count}} lab results available to link",
     "linkedLabResults": "Résultats de laboratoire connectés",
     "linkedMedications": "Médicaments connectés",
     "loading": "Chargement...",
     "loadingLabResults": "Chargement des résultats de laboratoire...",
     "loadingOption": "Chargement : {{option}}...",
     "loadingRelatedConditions": "Chargement des conditions connectées...",
+    "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés",
     "new": "Nouveau",
     "no": "Non",
     "noConditionsLinked": "Aucune condition connectée à ce résultat d'analyse",
+    "noConditionsLinkedToMedication": "Aucune condition connectée à ce médicament",
+    "noDate": "No date",
     "noEncountersLinked": "Aucune visite connectée à ce traitement",
     "noEquipmentLinked": "Aucun équipement connecté à ce traitement",
     "noLabResultsLinked": "Aucun résultat d'analyse connecté à cette visite",
     "noLabResultsLinkedToCondition": "Aucun résultat d'analyse connecté à cette condition",
     "noMedicationsLinked": "Aucun médicament connecté à cette condition",
+    "noMedicationsLinkedToLabResult": "No medications linked to this lab result",
     "none": "Aucun",
+    "noProceduresLinked": "No procedures linked to this lab result",
     "noRating": "Aucun avis",
     "notAvailable": "N/A",
     "notCompleted": "Non complété(e)",
+    "noTreatmentsLinked": "No treatments linked to this lab result",
     "noVisitsLinked": "Aucune visite connectée à ce résultat d'analyse",
     "ordered": "Prescrit",
     "phoneNumber": "Numéro de téléphone",
     "ratingStars": "{{count}}/5 étoiles",
     "ratingStars_one": "{{count}}/5 étoile",
     "ratingStars_other": "{{count}}/5 étoiles",
+    "saveRelationship": "Save relationship",
     "selectPurpose": "Sélectionnez le but",
     "viewDetails": "Voir les détails",
     "viewPharmacyDetails": "Voir les détails de la pharmacie",
     "visitDate": "Date de visite",
     "visitWebsite": "Visiter le site web ↗",
-    "yes": "Oui",
-    "noConditionsLinkedToMedication": "Aucune condition connectée à ce médicament",
-    "conditionsAvailableToLink": "{{count}} conditions pouvant être connectées",
-    "medicationsAvailableToLink": "{{count}} médicaments pouvant être connectés"
+    "yes": "Oui"
   },
   "labResults": {
     "emptyLabResultMessage": "Vous avez créé un résultat d'analyse, mais sans y ajouter de composants d'analyse. Souhaitez-vous supprimer ce résultat d'analyse ?",
@@ -538,47 +559,76 @@
     "confirmRemoveConditionRelationship": "Voulez-vous vraiment supprimer cette connexion à une condition ?",
     "confirmRemoveEquipmentRelationship": "Voulez-vous vraiment supprimer cette connexion à un équipement ?",
     "confirmRemoveLabResultLink": "Supprimer cette connexion à un résultat d'analyse ?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?",
+    "confirmRemoveMedicationLink": "Remove this medication link?",
+    "confirmRemoveMedicationRelationship": "Voulez-vous vraiment supprimer cette connexion à un médicament ?",
+    "confirmRemoveProcedureLink": "Remove this procedure link?",
+    "confirmRemoveTreatmentLink": "Remove this treatment link?",
     "confirmRemoveVisitLink": "Supprimer cette connexion à une visite ?",
     "displayError": "Impossible d'afficher cet objet. Veuillez rafraîchir la page.",
     "doNotClose": "Veuillez ne pas fermer ni quitter cette fenêtre",
     "failedToLinkLabResult": "Echec de la connexion au résultat d'analyse",
+    "failedToLinkMedication": "Failed to link medication",
+    "failedToLinkProcedure": "Failed to link procedure",
+    "failedToLinkTreatment": "Failed to link treatment",
     "failedToLinkVisit": "Echec de la connexion à la visite",
     "failedToUnlinkLabResult": "Echec de la déconnexion du résultat d'analyse",
+    "failedToUnlinkMedication": "Failed to unlink medication",
+    "failedToUnlinkProcedure": "Failed to unlink procedure",
+    "failedToUnlinkTreatment": "Failed to unlink treatment",
     "failedToUnlinkVisit": "Echec de la déconnexion de la visite",
     "failedToUpdateRelationship": "Echec de la mise à jour de la connexion",
     "processing": "Traitement en cours...",
     "selectLabResult": "Veuillez sélectionner un résultat d'analyse",
+    "selectMedication": "Please select a medication",
+    "selectProcedure": "Please select a procedure",
+    "selectTreatment": "Please select a treatment",
     "selectVisit": "Veuillez sélectionner une visite",
     "underDevelopment": "Cette section est actuellement en cours de développement.",
-    "updateSuccess": "Mise à jour réussie",
-    "confirmRemoveMedicationRelationship": "Voulez-vous vraiment supprimer cette connexion à un médicament ?"
+    "updateSuccess": "Mise à jour réussie"
   },
   "modals": {
     "chooseConditionsToLink": "Choisissez des conditions à connecter",
     "chooseConditionToLink": "Choisissez une condition à connecter",
+    "chooseLabResultsToLink": "Choose lab results to link",
     "chooseLabResultToLink": "Choisissez un résultat d'analyse à connecter",
     "chooseMedicationToLink": "Choisissez des médicaments à connecter",
+    "chooseOneMedicationToLink": "Choose a medication to link",
+    "chooseProcedureToLink": "Choose a procedure to link",
+    "chooseTreatmentToLink": "Choose a treatment to link",
     "chooseVisitToLink": "Choisissez une visite à connecter",
     "describeConditionRelevance": "Décrivez quel rapport cette condition a avec le résultat d'analyse (optionnel)",
+    "describeConditionRelevanceMedication": "Décrivez quel rapport cette condition a avec le médicament",
     "describeLabResultRelevance": "Décrivez quel rapport ce résultat d'analyse a avec cette visite",
+    "describeMedicationLabResultRelevance": "Describe how this medication relates to this lab result",
+    "describeMedicationRelevance": "Décrivez quel rapport ce médicament a avec cette condition",
+    "describeProcedureRelevance": "Describe how this procedure relates to this lab result",
+    "describeTreatmentRelevance": "Describe how this treatment relates to this lab result",
     "describeVisitRelevance": "Décrivez quel rapport cette visite a avec ce résultat d'analyse",
+    "expectedFrequencyPlaceholder": "e.g. Monthly, Every 3 months",
+    "linkConditionsToMedication": "Connecter des conditions à un médicament",
     "linkConditionToLabResult": "Connecter une condition à un résultat d'analyse",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
     "linkLabResultToVisit": "Connecter un résultat d'analyse à une visite",
+    "linkMedicationsToCondition": "Connecter des médicaments à une condition",
+    "linkMedicationToLabResult": "Link Medication to Lab Result",
+    "linkProcedureToLabResult": "Link Procedure to Lab Result",
+    "linkTreatmentToLabResult": "Link Treatment to Lab Result",
     "linkVisitToLabResult": "Connecter une visite à un résultat d'analyse",
     "noRelevanceNoteProvided": "Aucune note de pertinence fournie",
     "purpose": "But",
     "relevanceNote": "Note de pertinence",
     "relevanceNoteOptional": "Note de pertinence (optionnelle)",
     "selectCondition": "Sélectionnez une condition",
-    "selectLabResult": "Sélectionnez un résultat d'analyse",
-    "selectMedications": "Sélectionnez des médicaments",
-    "selectPurpose": "Sélectionnez le but",
-    "selectVisit": "Sélectionnez une visite",
-    "linkConditionsToMedication": "Connecter des conditions à un médicament",
-    "linkMedicationsToCondition": "Connecter des médicaments à une condition",
     "selectConditions": "Sélectionnez des conditions",
-    "describeConditionRelevanceMedication": "Décrivez quel rapport cette condition a avec le médicament",
-    "describeMedicationRelevance": "Décrivez quel rapport ce médicament a avec cette condition"
+    "selectLabResult": "Sélectionnez un résultat d'analyse",
+    "selectLabResults": "Select Lab Results",
+    "selectMedication": "Select Medication",
+    "selectMedications": "Sélectionnez des médicaments",
+    "selectProcedure": "Select Procedure",
+    "selectPurpose": "Sélectionnez le but",
+    "selectTreatment": "Select Treatment",
+    "selectVisit": "Sélectionnez une visite"
   },
   "noResults": "Aucun médecin trouvé",
   "pagination": {
@@ -755,6 +805,13 @@
     "card": {
       "subtitle": "Médecin"
     },
+    "createInline": {
+      "buttonTooltip": "Nouveau praticien",
+      "createError": "Échec de la création du praticien. Veuillez réessayer.",
+      "nameRequired": "Le nom est requis",
+      "specialtyRequired": "La spécialité médicale est requise",
+      "successMessage": "Praticien créé et sélectionné"
+    },
     "createPracticeError": "Echec de la création de l'établissement. Veuillez réessayer.",
     "editPracticeError": "Echec du chargement de l'établissement pour l'éditer",
     "empty": {
@@ -768,13 +825,6 @@
     "form": {
       "addTitle": "Ajouter un médecin",
       "editTitle": "Editer le médecin"
-    },
-    "createInline": {
-      "buttonTooltip": "Nouveau praticien",
-      "nameRequired": "Le nom est requis",
-      "specialtyRequired": "La spécialité médicale est requise",
-      "createError": "Échec de la création du praticien. Veuillez réessayer.",
-      "successMessage": "Praticien créé et sélectionné"
     },
     "groupByPractice": "Regrouper par établissement",
     "loading": "Chargement des médecins...",
@@ -1242,13 +1292,17 @@
       "treatmentNotes": "Notes du traitement"
     }
   },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  },
   "viewToggle": {
     "cards": "Cartes",
     "components": "Résultats des tests",
     "label": "Mode d'affichage",
-    "table": "Tableau",
+    "labwork": "Analyses",
     "stacked": "Empilé",
-    "labwork": "Analyses"
+    "table": "Tableau"
   },
   "visits": {
     "addNewVisit": "Ajouter une nouvelle visite",
@@ -1260,7 +1314,10 @@
     "editVisit": "Editer la visite",
     "form": {
       "addVisit": "Ajouter une visite",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
       "savingVisit": "Sauvegarde de la visite...",
+      "selectLabResults": "Select Lab Results",
       "tabs": {
         "clinical": "Données cliniques",
         "visitInfo": "Informations sur la visite"
@@ -1268,6 +1325,10 @@
       "updateVisit": "Mettre à jour la visite"
     },
     "loadingVisits": "Chargement des visites...",
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
+    },
     "noVisitsFound": "Aucune visite médicale trouvée",
     "table": {
       "visitDate": "Date de la visite",

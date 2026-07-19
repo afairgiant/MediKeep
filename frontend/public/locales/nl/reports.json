@@ -14,7 +14,6 @@
       "description": "Selecteer medische dossiers om op te nemen in uw aangepaste rapport",
       "title": "Rapportconfiguratie"
     },
-    "icon": "",
     "loading": "Rapportbouwer laden...",
     "noData": {
       "description": "Voeg eerst medische dossiers toe om de rapportbouwer te gebruiken.",
@@ -160,7 +159,6 @@
       "singleExport": "Enkelvoudige export",
       "title": "Exportmodus"
     },
-    "icon": "",
     "information": {
       "bulk": {
         "description": "Maakt een ZIP-bestand met meerdere gegevenstypen in het door u gekozen formaat voor een uitgebreide gegevensback-up.",
@@ -221,8 +219,8 @@
     "saveAsNew": "Opslaan als nieuw sjabloon",
     "saveAsTemplate": "Opslaan als sjabloon",
     "saveDescription": "Dit sjabloon slaat uw huidige rapportinstellingen, geselecteerde dossiers en geselecteerde trendgrafieken op.",
-    "saveModalTitle": "Rapportsjabloon opslaan",
     "savedTemplates": "Opgeslagen sjablonen",
+    "saveModalTitle": "Rapportsjabloon opslaan",
     "updateCurrent": "\"{{name}}\" bijwerken",
     "updateTemplate": "Sjabloon bijwerken"
   }

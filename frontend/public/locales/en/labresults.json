@@ -131,6 +131,9 @@
     "linkConditionsDescription": "Associate this lab result with relevant medical conditions for better tracking and organization.",
     "linkConditionsTitle": "Link Medical Conditions",
     "linkedVisits": "Linked Visits",
+    "linkMedicationsTitle": "Link to Medications",
+    "linkProceduresTitle": "Link to Procedures",
+    "linkTreatmentsTitle": "Link to Treatments",
     "linkVisitsDescription": "Associate this lab result with visits where it was ordered or reviewed.",
     "linkVisitsTitle": "Link to Visits",
     "matchedCommonName": "matched: {{name}}",
@@ -165,12 +168,6 @@
     "relationshipsCreateInfo": "Relationships can be added after saving the lab result.",
     "relationshipsSaveFirst": "Save the lab result first to create relationship links.",
     "testComponentsEditInfo": "Test components can be managed from the view page after saving."
-  },
-  "pendingRelationships": {
-    "addCondition": "Add condition",
-    "addVisit": "Add visit",
-    "removeCondition": "Remove condition",
-    "removeVisit": "Remove visit"
   },
   "modal": {
     "editLabResult": "Edit Lab Result",
@@ -217,6 +214,18 @@
     "placeholder": "Select practitioner"
   },
   "patientIdRequired": "Patient ID is required. Please select a patient first.",
+  "pendingRelationships": {
+    "addCondition": "Add condition",
+    "addMedication": "Add medication",
+    "addProcedure": "Add procedure",
+    "addTreatment": "Add treatment",
+    "addVisit": "Add visit",
+    "removeCondition": "Remove condition",
+    "removeMedication": "Remove medication",
+    "removeProcedure": "Remove procedure",
+    "removeTreatment": "Remove treatment",
+    "removeVisit": "Remove visit"
+  },
   "quickFormInstructions": "Enter a name for this lab result, then you'll be able to upload and parse your PDF.",
   "quickImportModalTitle": "Quick PDF Import - Step {{step}} of 2",
   "quickImportSuccess": "Lab result and test components imported successfully",

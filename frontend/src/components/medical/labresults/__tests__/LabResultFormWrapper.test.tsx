@@ -52,6 +52,15 @@ vi.mock('../../ConditionRelationships', () => ({
 vi.mock('../LabResultEncounterRelationships', () => ({
   default: () => <div data-testid="encounter-relationships" />,
 }));
+vi.mock('../LabResultMedicationRelationships', () => ({
+  default: () => <div data-testid="medication-relationships" />,
+}));
+vi.mock('../LabResultProcedureRelationships', () => ({
+  default: () => <div data-testid="procedure-relationships" />,
+}));
+vi.mock('../LabResultTreatmentRelationships', () => ({
+  default: () => <div data-testid="treatment-relationships" />,
+}));
 
 vi.mock('../../../../hooks/useDateFormat', () => ({
   useDateFormat: () => ({
@@ -296,7 +305,62 @@ describe('LabResultFormWrapper', () => {
       expect(methods.getPendingRelationships()).toEqual({
         conditions: [],
         encounters: [],
+        medications: [],
+        procedures: [],
+        treatments: [],
       });
+    });
+
+    test('uses the pending relationships picker for medications/procedures/treatments when creating with advancedCreate enabled', async () => {
+      const medications = [{ id: 1, medication_name: 'Metformin' }];
+      const procedures = [{ id: 1, procedure_name: 'Colonoscopy' }];
+      const treatments = [{ id: 1, treatment_name: 'Physical Therapy' }];
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          advancedCreate
+          medications={medications}
+          procedures={procedures}
+          treatments={treatments}
+        />
+      );
+      const relationshipsTab = screen.getByRole('tab', {
+        name: 'labresults:tabs.relationships',
+      });
+      await userEvent.click(relationshipsTab);
+
+      expect(
+        screen.queryByTestId('medication-relationships')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('procedure-relationships')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('treatment-relationships')
+      ).not.toBeInTheDocument();
+    });
+
+    test('uses the API-backed medication/procedure/treatment components when editing an existing lab result', async () => {
+      const medications = [{ id: 1, medication_name: 'Metformin' }];
+      const procedures = [{ id: 1, procedure_name: 'Colonoscopy' }];
+      const treatments = [{ id: 1, treatment_name: 'Physical Therapy' }];
+      render(
+        <LabResultFormWrapper
+          {...defaultProps}
+          editingItem={{ id: 1, test_name: 'CBC' }}
+          medications={medications}
+          procedures={procedures}
+          treatments={treatments}
+        />
+      );
+      const relationshipsTab = screen.getByRole('tab', {
+        name: 'labresults:tabs.relationships',
+      });
+      await userEvent.click(relationshipsTab);
+
+      expect(screen.getByTestId('medication-relationships')).toBeInTheDocument();
+      expect(screen.getByTestId('procedure-relationships')).toBeInTheDocument();
+      expect(screen.getByTestId('treatment-relationships')).toBeInTheDocument();
     });
   });
 

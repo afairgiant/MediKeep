@@ -322,10 +322,6 @@
       "label": "Fecha de Administración",
       "placeholder": "Seleccione la fecha de administración"
     },
-    "form": {
-      "linkStatusLinked": "✓ Vinculada a la biblioteca: {{name}}",
-      "linkStatusUnlinked": "⚠ No vinculada a la biblioteca. Seleccione una vacuna del menú desplegable para vincularla."
-    },
     "doseNumber": {
       "description": "Número de dosis en la serie",
       "label": "Número de Dosis",
@@ -335,6 +331,38 @@
       "description": "Fecha de caducidad del vial/dosis de vacuna utilizada",
       "label": "Fecha de Caducidad de la Vacuna",
       "placeholder": "Seleccione la fecha de caducidad"
+    },
+    "form": {
+      "linkStatusLinked": "✓ Vinculada a la biblioteca: {{name}}",
+      "linkStatusUnlinked": "⚠ No vinculada a la biblioteca. Seleccione una vacuna del menú desplegable para vincularla."
+    },
+    "history": {
+      "dateRangePlaceholder": "Filtrar por rango de fechas",
+      "doseLabel": "Dosis {{n}}",
+      "dosesCount": "{{count}} dosis",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 dosis",
+      "emptyAll": "No hay vacunaciones registradas todavía.",
+      "emptyRange": "No hay vacunaciones en este rango.",
+      "linkActionLabel": "Vincular a la biblioteca",
+      "lotLabel": "Lote {{lot}}",
+      "miscGroup": "Misceláneos / Sin vincular",
+      "miscGroupHint": "Estos registros aún no están vinculados a la biblioteca de vacunas. Haga clic en uno para editarlo y seleccionar una entrada de la biblioteca.",
+      "noDiseaseData": "No hay vacunaciones vinculadas a la biblioteca. Cambie a la vista «Por Fecha» para ver todos los registros, o edite un registro y vuelva a seleccionar una vacuna del autocompletado para vincularlo.",
+      "recordCount": "{{count}} vacunaciones",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 vacunación",
+      "unlinkedTag": "Sin vincular",
+      "unmatchedBanner": "{{count}} registros no están vinculados. Edite un registro y vuelva a seleccionarlo en el autocompletado para vincularlo.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Algunos registros no están vinculados a la biblioteca de vacunas",
+      "viewMode": {
+        "byDate": "Por Fecha",
+        "byDisease": "Por Enfermedad"
+      }
     },
     "location": {
       "description": "Dónde se administró la vacuna",
@@ -392,34 +420,12 @@
       "rightThigh": "Muslo Derecho"
     },
     "vaccineName": {
+      "combinedHint": "Vacuna combinada — componentes: {{components}}",
       "description": "Nombre de la vacuna administrada",
       "label": "Nombre de la Vacuna",
+      "matchedCommonName": "coincidencia: {{name}}",
       "placeholder": "p. ej., COVID-19 ARNm, Influenza, SRP",
-      "searchPlaceholder": "Escriba para buscar vacunas...",
-      "combinedHint": "Vacuna combinada — componentes: {{components}}",
-      "matchedCommonName": "coincidencia: {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "Por Fecha",
-        "byDisease": "Por Enfermedad"
-      },
-      "recordCount": "{{count}} vacunaciones",
-      "recordCountSingular": "1 vacunación",
-      "dosesCount": "{{count}} dosis",
-      "dosesCountSingular": "1 dosis",
-      "doseLabel": "Dosis {{n}}",
-      "lotLabel": "Lote {{lot}}",
-      "unlinkedTag": "Sin vincular",
-      "linkActionLabel": "Vincular a la biblioteca",
-      "miscGroup": "Misceláneos / Sin vincular",
-      "miscGroupHint": "Estos registros aún no están vinculados a la biblioteca de vacunas. Haga clic en uno para editarlo y seleccionar una entrada de la biblioteca.",
-      "emptyAll": "No hay vacunaciones registradas todavía.",
-      "emptyRange": "No hay vacunaciones en este rango.",
-      "dateRangePlaceholder": "Filtrar por rango de fechas",
-      "noDiseaseData": "No hay vacunaciones vinculadas a la biblioteca. Cambie a la vista «Por Fecha» para ver todos los registros, o edite un registro y vuelva a seleccionar una vacuna del autocompletado para vincularlo.",
-      "unmatchedTitle": "Algunos registros no están vinculados a la biblioteca de vacunas",
-      "unmatchedBanner": "{{count}} registros no están vinculados. Edite un registro y vuelva a seleccionarlo en el autocompletado para vincularlo."
+      "searchPlaceholder": "Escriba para buscar vacunas..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron añadir los componentes de prueba. Puede añadirlos desde la página de visualización.",
-      "relationshipCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron crear algunas relaciones. Puede añadirlas desde la página de edición."
-    },
     "addPanel": {
-      "title": "Agregar resultados de laboratorio",
-      "panelName": "Panel o tipo de resultado de laboratorio",
-      "panelNamePlaceholder": "ej. Hemograma, Análisis anual",
-      "panelNameDescription": "Un nombre para este grupo de pruebas",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Guardar resultados",
-      "creating": "Creando panel...",
       "createError": "No se pudo crear el panel de pruebas",
+      "creating": "Creando panel...",
+      "panelName": "Panel o tipo de resultado de laboratorio",
+      "panelNameDescription": "Un nombre para este grupo de pruebas",
+      "panelNamePlaceholder": "ej. Hemograma, Análisis anual",
+      "tagsPlaceholder": "Añadir etiquetas para organizar y buscar este registro más tarde",
       "testResultRequired": "Se requiere al menos un resultado de prueba",
-      "tagsPlaceholder": "Añadir etiquetas para organizar y buscar este registro más tarde"
+      "title": "Agregar resultados de laboratorio"
     },
     "buttons": {
       "addLabResults": "Agregar resultados de laboratorio"
+    },
+    "form": {
+      "componentCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron añadir los componentes de prueba. Puede añadirlos desde la página de visualización.",
+      "relationshipCreationWarning": "El resultado de laboratorio se guardó, pero no se pudieron crear algunas relaciones. Puede añadirlas desde la página de edición."
     }
   },
   "medications": {
@@ -889,54 +899,56 @@
       "placeholder": "Seleccione Proveedor"
     },
     "reminders": {
-      "tabLabel": "Recordatorios",
+      "days": {
+        "description": "Déjelo vacío para recibir recordatorios todos los días",
+        "fri": "Vie",
+        "label": "Días de recordatorio",
+        "mon": "Lun",
+        "sat": "Sáb",
+        "sun": "Dom",
+        "thu": "Jue",
+        "tue": "Mar",
+        "wed": "Mié"
+      },
       "enabled": {
-        "label": "Activar recordatorios",
-        "description": "Enviar notificaciones cuando sea hora de tomar este medicamento"
-      },
-      "times": {
-        "label": "Horarios de recordatorio",
-        "description": "Horarios en formato de 24 horas en que se activará el recordatorio",
-        "addButton": "Añadir horario",
-        "removeAriaLabel": "Eliminar horario",
-        "max": "Máximo de {{count}} horarios",
-        "duplicate": "Este horario ya está en la lista",
-        "invalid": "El horario debe tener el formato HH:MM (24 horas)",
-        "empty": "No hay horarios de recordatorio configurados."
-      },
-      "noChannelsTitle": "No hay canal de notificaciones activo",
-      "noChannelsWarning": "No hay ningún canal de notificaciones configurado para los recordatorios de medicamentos. Abra la Configuración de Notificaciones para activar un canal.",
-      "openSettings": "Abrir Configuración de Notificaciones",
-      "testButton": "Enviar recordatorio de prueba ahora",
-      "testSuccess": "Recordatorio de prueba enviado",
-      "testError": "Error al enviar el recordatorio de prueba",
-      "saveBeforeTest": "Guarde el medicamento primero para enviar un recordatorio de prueba.",
-      "viewNone": "No hay recordatorios configurados",
-      "notFiring": {
-        "title": "Los recordatorios no se activarán",
-        "badge": "No se activará",
-        "periodEnded": "Este medicamento está marcado como que ya no se toma desde el {{date}}.",
-        "notStarted": "La toma de este medicamento no comienza hasta el {{date}}.",
-        "statusNotActive": "El estado del medicamento es «{{status}}»: los recordatorios solo se envían para medicamentos activos.",
-        "dayNotActive": "Los recordatorios no están programados para hoy."
+        "description": "Enviar notificaciones cuando sea hora de tomar este medicamento",
+        "label": "Activar recordatorios"
       },
       "enabledBadge": "Recordatorios activados",
       "message": {
+        "description": "Nota opcional en la notificación de recordatorio (máx. 200 caracteres)",
         "label": "Mensaje de recordatorio personalizado",
-        "placeholder": "p. ej. Tomar con comida, Medir la tensión primero",
-        "description": "Nota opcional en la notificación de recordatorio (máx. 200 caracteres)"
+        "placeholder": "p. ej. Tomar con comida, Medir la tensión primero"
       },
-      "days": {
-        "label": "Días de recordatorio",
-        "description": "Déjelo vacío para recibir recordatorios todos los días",
-        "mon": "Lun",
-        "tue": "Mar",
-        "wed": "Mié",
-        "thu": "Jue",
-        "fri": "Vie",
-        "sat": "Sáb",
-        "sun": "Dom"
-      }
+      "noChannelsTitle": "No hay canal de notificaciones activo",
+      "noChannelsWarning": "No hay ningún canal de notificaciones configurado para los recordatorios de medicamentos. Abra la Configuración de Notificaciones para activar un canal.",
+      "notFiring": {
+        "badge": "No se activará",
+        "dayNotActive": "Los recordatorios no están programados para hoy.",
+        "notStarted": "La toma de este medicamento no comienza hasta el {{date}}.",
+        "periodEnded": "Este medicamento está marcado como que ya no se toma desde el {{date}}.",
+        "statusNotActive": "El estado del medicamento es «{{status}}»: los recordatorios solo se envían para medicamentos activos.",
+        "title": "Los recordatorios no se activarán"
+      },
+      "openSettings": "Abrir Configuración de Notificaciones",
+      "saveBeforeTest": "Guarde el medicamento primero para enviar un recordatorio de prueba.",
+      "tabLabel": "Recordatorios",
+      "testButton": "Enviar recordatorio de prueba ahora",
+      "testError": "Error al enviar el recordatorio de prueba",
+      "testSuccess": "Recordatorio de prueba enviado",
+      "times": {
+        "addButton": "Añadir horario",
+        "description": "Horarios en formato de 24 horas en que se activará el recordatorio",
+        "duplicate": "Este horario ya está en la lista",
+        "empty": "No hay horarios de recordatorio configurados.",
+        "invalid": "El horario debe tener el formato HH:MM (24 horas)",
+        "label": "Horarios de recordatorio",
+        "max": "Máximo de {{count}} horarios",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Eliminar horario"
+      },
+      "viewNone": "No hay recordatorios configurados"
     },
     "route": {
       "description": "Cómo se administra el medicamento",

@@ -57,6 +57,27 @@
     "organizationPlaceholder": "选择组织",
     "urlPlaceholder": "https://your-papra-instance.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "选择在整个应用程序中如何显示日期",
+      "dmy": "DD/MM/YYYY（英国/国际）",
+      "dmy_dot": "DD.MM.YYYY（欧洲格式）",
+      "mdy": "MM/DD/YYYY（美国格式）",
+      "title": "日期格式",
+      "ymd": "YYYY-MM-DD（ISO 格式）"
+    },
+    "sessionTimeout": {
+      "description": "设置会话过期前的非活动持续时间（以分钟为单位）",
+      "range": "分钟（5-1440）",
+      "title": "会话超时"
+    },
+    "unitSystem": {
+      "description": "选择是否以英制单位（磅、英尺、°F）或公制单位（千克、厘米、°C）显示测量值",
+      "imperial": "英制（磅、英尺、°F）",
+      "metric": "公制（千克、厘米、°C）",
+      "title": "单位制"
+    }
+  },
   "profile": {
     "description": "更新您的账户身份。更改用户名将使您登出 -- 您需要使用新名称重新登录。",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "个人资料已更新",
     "usernameChangedLogoutWarning": "保存后将登出您以使新用户名生效。请使用新用户名重新登录。",
     "usernameChangedNotice": "用户名已更改。请使用您的新用户名登录。"
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "选择在整个应用程序中如何显示日期",
-      "dmy": "DD/MM/YYYY（英国/国际）",
-      "dmy_dot": "DD.MM.YYYY（欧洲格式）",
-      "mdy": "MM/DD/YYYY（美国格式）",
-      "title": "日期格式",
-      "ymd": "YYYY-MM-DD（ISO 格式）"
-    },
-    "sessionTimeout": {
-      "description": "设置会话过期前的非活动持续时间（以分钟为单位）",
-      "range": "分钟（5-1440）",
-      "title": "会话超时"
-    },
-    "unitSystem": {
-      "description": "选择是否以英制单位（磅、英尺、°F）或公制单位（千克、厘米、°C）显示测量值",
-      "imperial": "英制（磅、英尺、°F）",
-      "metric": "公制（千克、厘米、°C）",
-      "title": "单位制"
-    }
   },
   "releaseNotes": {
     "currentVersion": "当前版本",

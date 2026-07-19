@@ -57,6 +57,27 @@
     "organizationPlaceholder": "Select an organization",
     "urlPlaceholder": "https://your-papra-instance.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "Choose how dates are displayed throughout the application",
+      "dmy": "DD/MM/YYYY (UK/International)",
+      "dmy_dot": "DD.MM.YYYY (European)",
+      "mdy": "MM/DD/YYYY (US)",
+      "title": "Date Format",
+      "ymd": "YYYY-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Set the duration of inactivity before your session expires (in minutes)",
+      "range": "minutes (5-1440)",
+      "title": "Session Timeout"
+    },
+    "unitSystem": {
+      "description": "Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units",
+      "imperial": "Imperial (lbs, feet, °F)",
+      "metric": "Metric (kg, cm, °C)",
+      "title": "Unit System"
+    }
+  },
   "profile": {
     "description": "Update your account identity. Changing your username will log you out -- you will sign back in with the new name.",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "Profile updated",
     "usernameChangedLogoutWarning": "Saving will log you out so the new username takes effect. Sign back in with the new username.",
     "usernameChangedNotice": "Username changed. Please sign in with your new username."
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "Choose how dates are displayed throughout the application",
-      "dmy": "DD/MM/YYYY (UK/International)",
-      "dmy_dot": "DD.MM.YYYY (European)",
-      "mdy": "MM/DD/YYYY (US)",
-      "title": "Date Format",
-      "ymd": "YYYY-MM-DD (ISO)"
-    },
-    "sessionTimeout": {
-      "description": "Set the duration of inactivity before your session expires (in minutes)",
-      "range": "minutes (5-1440)",
-      "title": "Session Timeout"
-    },
-    "unitSystem": {
-      "description": "Choose whether to display measurements in Imperial (pounds, feet, °F) or Metric (kilograms, centimeters, °C) units",
-      "imperial": "Imperial (lbs, feet, °F)",
-      "metric": "Metric (kg, cm, °C)",
-      "title": "Unit System"
-    }
   },
   "releaseNotes": {
     "currentVersion": "Current",

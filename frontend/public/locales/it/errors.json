@@ -35,6 +35,7 @@
     "invalidPhone": "Si prega di inserire un numero di telefono valido.",
     "invalidPhoneDigits": "Si prega di inserire un numero di telefono valido",
     "invalidWebsiteUrl": "Si prega di inserire un URL del sito web valido",
+    "labResultNotSelected": "Please select at least one lab result",
     "medicationNotSelected": "Si prega di selezionare un farmaco",
     "mustBeValidNumber": "Deve essere un numero valido",
     "patientNotSelected": "Si prega di selezionare un paziente.",

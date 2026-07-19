@@ -57,6 +57,27 @@
     "organizationPlaceholder": "Selecione uma organização",
     "urlPlaceholder": "https://sua-instancia-papra.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "Escolha como as datas são exibidas em todo o aplicativo",
+      "dmy": "DD/MM/AAAA (Reino Unido/Internacional)",
+      "dmy_dot": "DD.MM.AAAA (Europeu)",
+      "mdy": "MM/DD/AAAA (EUA)",
+      "title": "Formato de Data",
+      "ymd": "AAAA-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Defina a duração de inatividade antes que sua sessão expire (em minutos)",
+      "range": "minutos (5-1440)",
+      "title": "Tempo Limite da Sessão"
+    },
+    "unitSystem": {
+      "description": "Escolha se deseja exibir medidas em unidades Imperiais (libras, pés, °F) ou Métricas (quilogramas, centímetros, °C)",
+      "imperial": "Imperial (lbs, pés, °F)",
+      "metric": "Métrico (kg, cm, °C)",
+      "title": "Sistema de Unidades"
+    }
+  },
   "profile": {
     "description": "Atualize a identidade da sua conta. Alterar seu nome de usuário fará seu logout -- você entrará novamente com o novo nome.",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "Perfil atualizado",
     "usernameChangedLogoutWarning": "Salvar fará seu logout para que o novo nome de usuário entre em vigor. Entre novamente com o novo nome de usuário.",
     "usernameChangedNotice": "Nome de usuário alterado. Por favor, entre com seu novo nome de usuário."
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "Escolha como as datas são exibidas em todo o aplicativo",
-      "dmy": "DD/MM/AAAA (Reino Unido/Internacional)",
-      "dmy_dot": "DD.MM.AAAA (Europeu)",
-      "mdy": "MM/DD/AAAA (EUA)",
-      "title": "Formato de Data",
-      "ymd": "AAAA-MM-DD (ISO)"
-    },
-    "sessionTimeout": {
-      "description": "Defina a duração de inatividade antes que sua sessão expire (em minutos)",
-      "range": "minutos (5-1440)",
-      "title": "Tempo Limite da Sessão"
-    },
-    "unitSystem": {
-      "description": "Escolha se deseja exibir medidas em unidades Imperiais (libras, pés, °F) ou Métricas (quilogramas, centímetros, °C)",
-      "imperial": "Imperial (lbs, pés, °F)",
-      "metric": "Métrico (kg, cm, °C)",
-      "title": "Sistema de Unidades"
-    }
   },
   "releaseNotes": {
     "currentVersion": "Atual",

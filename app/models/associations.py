@@ -552,3 +552,98 @@ class EncounterLabResult(Base):
             "encounter_id", "lab_result_id", name="uq_encounter_lab_result"
         ),
     )
+
+
+# =============================================================================
+# Lab Result - Medication / Procedure Relationship Tables
+# =============================================================================
+
+
+class LabResultMedication(Base):
+    """
+    Junction table for many-to-many relationship between lab results and medications.
+    Allows one lab result to be related to multiple medications with optional context.
+    """
+
+    __tablename__ = "lab_result_medications"
+
+    id = Column(Integer, primary_key=True)
+    lab_result_id = Column(
+        Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False
+    )
+    medication_id = Column(
+        Integer, ForeignKey("medications.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # Optional context about how this lab result relates to this medication
+    relevance_note = Column(
+        String, nullable=True
+    )  # e.g., "Ordered to monitor liver function on this medication"
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    lab_result = orm_relationship(
+        "LabResult", back_populates="medication_relationships"
+    )
+    medication = orm_relationship(
+        "Medication", back_populates="lab_result_relationships"
+    )
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_lab_result_medication_lab_result_id", "lab_result_id"),
+        Index("idx_lab_result_medication_medication_id", "medication_id"),
+        UniqueConstraint(
+            "lab_result_id", "medication_id", name="uq_lab_result_medication"
+        ),
+    )
+
+
+class LabResultProcedure(Base):
+    """
+    Junction table for many-to-many relationship between lab results and procedures.
+    Allows one lab result to be related to multiple procedures with optional context.
+    """
+
+    __tablename__ = "lab_result_procedures"
+
+    id = Column(Integer, primary_key=True)
+    lab_result_id = Column(
+        Integer, ForeignKey("lab_results.id", ondelete="CASCADE"), nullable=False
+    )
+    procedure_id = Column(
+        Integer, ForeignKey("procedures.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # Optional context about how this lab result relates to this procedure
+    relevance_note = Column(
+        String, nullable=True
+    )  # e.g., "Pre-operative labs for this procedure"
+
+    # Audit fields
+    created_at = Column(DateTime, default=get_utc_now, nullable=False)
+    updated_at = Column(
+        DateTime, default=get_utc_now, onupdate=get_utc_now, nullable=False
+    )
+
+    # Table Relationships
+    lab_result = orm_relationship(
+        "LabResult", back_populates="procedure_relationships"
+    )
+    procedure = orm_relationship(
+        "Procedure", back_populates="lab_result_relationships"
+    )
+
+    # Indexes and constraints
+    __table_args__ = (
+        Index("idx_lab_result_procedure_lab_result_id", "lab_result_id"),
+        Index("idx_lab_result_procedure_procedure_id", "procedure_id"),
+        UniqueConstraint(
+            "lab_result_id", "procedure_id", name="uq_lab_result_procedure"
+        ),
+    )

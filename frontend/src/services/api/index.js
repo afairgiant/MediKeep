@@ -1458,6 +1458,75 @@ class ApiService {
     );
   }
 
+  // Lab Result - Medication Relationship methods (lab result side)
+  getLabResultMedications(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/medications`, { signal });
+  }
+  createLabResultMedication(labResultId, data, signal) {
+    return this.post(`/lab-results/${labResultId}/medications`, data, {
+      signal,
+    });
+  }
+  updateLabResultMedication(labResultId, relationshipId, data, signal) {
+    return this.put(
+      `/lab-results/${labResultId}/medications/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  deleteLabResultMedication(labResultId, relationshipId, signal) {
+    return this.delete(
+      `/lab-results/${labResultId}/medications/${relationshipId}`,
+      { signal }
+    );
+  }
+
+  // Lab Result - Procedure Relationship methods (lab result side)
+  getLabResultProcedures(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/procedures`, { signal });
+  }
+  createLabResultProcedure(labResultId, data, signal) {
+    return this.post(`/lab-results/${labResultId}/procedures`, data, {
+      signal,
+    });
+  }
+  updateLabResultProcedure(labResultId, relationshipId, data, signal) {
+    return this.put(
+      `/lab-results/${labResultId}/procedures/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  deleteLabResultProcedure(labResultId, relationshipId, signal) {
+    return this.delete(
+      `/lab-results/${labResultId}/procedures/${relationshipId}`,
+      { signal }
+    );
+  }
+
+  // Lab Result - Treatment Relationship methods (lab result side)
+  getLabResultTreatments(labResultId, signal) {
+    return this.get(`/lab-results/${labResultId}/treatments`, { signal });
+  }
+  createLabResultTreatment(labResultId, data, signal) {
+    return this.post(`/lab-results/${labResultId}/treatments`, data, {
+      signal,
+    });
+  }
+  updateLabResultTreatment(labResultId, relationshipId, data, signal) {
+    return this.put(
+      `/lab-results/${labResultId}/treatments/${relationshipId}`,
+      data,
+      { signal }
+    );
+  }
+  deleteLabResultTreatment(labResultId, relationshipId, signal) {
+    return this.delete(
+      `/lab-results/${labResultId}/treatments/${relationshipId}`,
+      { signal }
+    );
+  }
+
   // Medication methods
   getMedications(signal) {
     return this.getEntities(ENTITY_TYPES.MEDICATION, signal);

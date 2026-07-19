@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Adminpanel",
     "allergies": "Allergier",
@@ -71,6 +76,7 @@
     "procedureCode": "Ingreppskod",
     "procedureName": "Ingreppets namn",
     "procedureType": "Typ av ingrepp",
+    "reset": "Reset",
     "selectGender": "Välj kön",
     "selectPractitioner": "Välj vårdpersonal",
     "selectRelationship": "Välj relation",
@@ -243,11 +249,13 @@
     "relatedCondition": "Relaterat tillstånd",
     "relatedConditions": "Relaterade tillstånd",
     "relationship": "Relation",
+    "remove": "Remove",
     "resetPassword": "Återställ lösenord",
     "resolved": "Löst",
     "retry": "Försök igen",
     "role": "Roll",
     "route": "Administreringsväg",
+    "save": "Save",
     "saving": "Sparar...",
     "selectCategory": "Välj kategori",
     "selectPractitioner": "Välj vårdpersonal",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "Visar {{count}} unika prover",
     "sideEffects": "Biverkningar",
     "size": "Storlek",
+    "sortBy": "Sort by",
     "specialties": "Specialiteter",
     "specialty": "Specialitet",
     "startDate": "Startdatum",
+    "state": "State",
     "stateProvince": "Län / Region",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Antal-skydd:</strong> Behåll alltid de {{count}} senaste säkerhetskopiorna",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Antal-skydd:</strong> Behåll alltid den {{count}} senaste säkerhetskopian",
@@ -287,6 +297,7 @@
     "trendCharts": "Trenddiagram",
     "type": "Typ",
     "unknown": "Okänd",
+    "unknownError": "Unknown error",
     "uploadFailed": "Uppladdning misslyckades",
     "user": "Användare",
     "userManagement": "Användarhantering",
@@ -301,7 +312,8 @@
     "warnings": "Varningar",
     "website": "Webbplats",
     "weekly": "Veckovis",
-    "weight": "Vikt"
+    "weight": "Vikt",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Skrivskyddad åtkomst"
@@ -316,9 +328,12 @@
     "episodesCount": "Episoder ({{count}})",
     "episodesCount_one": "Episoder ({{count}})",
     "episodesCount_other": "Episoder ({{count}})",
-    "notes": "Anteckningar",
     "labResults": "Laboratorieresultat",
+    "medications": "Medications",
+    "notes": "Anteckningar",
     "overview": "Översikt",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Besök"
   }
 }

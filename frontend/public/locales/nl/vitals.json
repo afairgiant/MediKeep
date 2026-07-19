@@ -17,7 +17,6 @@
   "diastolic": "Diastolisch",
   "editTitle": "Vitale functies bewerken",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "bijv. digitale bloeddrukmeter, thermometermodel...",
     "deviceUsed": "Gebruikt apparaat/hulpmiddel",
     "diastolicBP": "Diastolische bloeddruk",

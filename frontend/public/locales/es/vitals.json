@@ -17,7 +17,6 @@
   "diastolic": "Diastólica",
   "editTitle": "Editar signos vitales",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "ej., Monitor de presión digital, modelo de termómetro...",
     "deviceUsed": "Dispositivo/equipo utilizado",
     "diastolicBP": "Presión diastólica",

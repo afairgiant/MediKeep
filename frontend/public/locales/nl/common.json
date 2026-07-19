@@ -1,4 +1,8 @@
 {
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
   "allergies": {
     "messages": {
       "loading": "Allergieën laden..."
@@ -8,6 +12,7 @@
     "addNew": "Nieuw toevoegen",
     "back": "Terug",
     "cancelSelection": "Selectie annuleren",
+    "clear": "Clear",
     "create": "Aanmaken",
     "delete": "Verwijderen",
     "done": "Gereed",
@@ -17,6 +22,9 @@
     "linkEquipment": "Apparatuur koppelen",
     "linkLabResult": "Labresultaat koppelen",
     "linkMedication": "Medicatie koppelen",
+    "linkMedications": "Medicatie koppelen",
+    "linkProcedure": "Link Procedure",
+    "linkTreatment": "Link Treatment",
     "linkVisit": "Bezoek koppelen",
     "print": "Afdrukken",
     "refresh": "Vernieuwen",
@@ -29,8 +37,7 @@
     "showMore": "Meer weergeven",
     "tryAgain": "Opnieuw proberen",
     "update": "Bijwerken",
-    "view": "Bekijken",
-    "linkMedications": "Medicatie koppelen"
+    "view": "Bekijken"
   },
   "conditions": {
     "addNew": "Nieuwe aandoening toevoegen",
@@ -54,6 +61,7 @@
         "snomedCode": "SNOMED CT-code",
         "tags": "Voeg tags toe om aandoeningen te categoriseren en te organiseren"
       },
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
       "medicationsDescription": "Koppel medicijnen die gebruikt worden om deze aandoening te behandelen of te beheersen.",
       "placeholders": {
         "codeDescription": "Beschrijving van de medische code",
@@ -64,6 +72,7 @@
         "severity": "Selecteer ernst",
         "snomedCode": "bijv. 44054006"
       },
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results.",
       "saving": "Aandoening opslaan...",
       "severity": {
         "lifeThreatening": "Levensbedreigend",
@@ -292,7 +301,8 @@
   "filters": {
     "clear": "Wissen",
     "itemCount": "{{filtered}} van {{total}} items",
-    "title": "Filters en zoeken"
+    "title": "Filters en zoeken",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Nieuwe vaccinatie toevoegen",
@@ -345,10 +355,17 @@
       "vaccineNameDesc": "Gangbare naam van het vaccin",
       "vaccineNamePlaceholder": "bijv. griepvaccinatie, COVID-19, DTP"
     },
+    "history": {
+      "noPatient": "Selecteer een patiënt om de geschiedenis te bekijken."
+    },
     "loadingImmunizations": "Vaccinaties laden...",
     "noImmunizationsFound": "Geen vaccinaties gevonden",
     "table": {
       "site": "Locatie"
+    },
+    "tabs": {
+      "history": "Geschiedenis",
+      "records": "Records"
     },
     "viewModal": {
       "adminDetails": "Toedieningsdetails",
@@ -357,13 +374,6 @@
       "title": "Vaccinatiedetails",
       "tradeName": "Handelsnaam",
       "vaccineInfo": "Vaccininformatie"
-    },
-    "tabs": {
-      "records": "Records",
-      "history": "Geschiedenis"
-    },
-    "history": {
-      "noPatient": "Selecteer een patiënt om de geschiedenis te bekijken."
     }
   },
   "insurance": {
@@ -438,39 +448,50 @@
   "key": "Standaard {{var}}",
   "labels": {
     "addCustom": "+ \"{{value}}\" toevoegen",
+    "cancelEdit": "Cancel edit",
+    "conditionsAvailableToLink": "{{count}} aandoeningen beschikbaar om te koppelen",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "expectedFrequency": "Expected frequency",
+    "labResultsAvailableToLink_one": "{{count}} lab results available to link",
+    "labResultsAvailableToLink_other": "{{count}} lab results available to link",
     "linkedLabResults": "Gekoppelde labresultaten",
     "linkedMedications": "Gekoppelde medicatie",
     "loading": "Laden...",
     "loadingLabResults": "Labresultaten laden...",
     "loadingOption": "{{option}} laden...",
     "loadingRelatedConditions": "Gerelateerde aandoeningen laden...",
+    "medicationsAvailableToLink": "{{count}} medicatie beschikbaar om te koppelen",
     "new": "Nieuw",
     "no": "Nee",
     "noConditionsLinked": "Geen aandoeningen gekoppeld aan dit labresultaat",
+    "noConditionsLinkedToMedication": "Geen aandoeningen gekoppeld aan deze medicatie",
+    "noDate": "No date",
     "noEncountersLinked": "Geen bezoeken gekoppeld aan deze behandeling",
     "noEquipmentLinked": "Geen apparatuur gekoppeld aan deze behandeling",
     "noLabResultsLinked": "Geen labresultaten gekoppeld aan dit bezoek",
     "noLabResultsLinkedToCondition": "Geen labresultaten gekoppeld aan deze aandoening",
     "noMedicationsLinked": "Geen medicatie gekoppeld aan deze aandoening",
+    "noMedicationsLinkedToLabResult": "No medications linked to this lab result",
     "none": "Geen",
+    "noProceduresLinked": "No procedures linked to this lab result",
     "noRating": "Geen beoordeling",
     "notAvailable": "N.v.t.",
     "notCompleted": "Niet voltooid",
+    "noTreatmentsLinked": "No treatments linked to this lab result",
     "noVisitsLinked": "Geen bezoeken gekoppeld aan dit labresultaat",
     "ordered": "Aangevraagd",
     "phoneNumber": "Telefoonnummer",
     "ratingStars": "{{count}}/5 sterren",
     "ratingStars_one": "{{count}}/5 ster",
     "ratingStars_other": "{{count}}/5 sterren",
+    "saveRelationship": "Save relationship",
     "selectPurpose": "Selecteer doel",
     "viewDetails": "Details bekijken",
     "viewPharmacyDetails": "Apotheekgegevens bekijken",
     "visitDate": "Bezoekdatum",
     "visitWebsite": "Website bezoeken ↗",
-    "yes": "Ja",
-    "noConditionsLinkedToMedication": "Geen aandoeningen gekoppeld aan deze medicatie",
-    "conditionsAvailableToLink": "{{count}} aandoeningen beschikbaar om te koppelen",
-    "medicationsAvailableToLink": "{{count}} medicatie beschikbaar om te koppelen"
+    "yes": "Ja"
   },
   "labResults": {
     "emptyLabResultMessage": "U heeft een labresultaat aangemaakt maar geen testcomponenten toegevoegd. Wilt u dit labresultaat verwijderen?",
@@ -538,47 +559,76 @@
     "confirmRemoveConditionRelationship": "Weet u zeker dat u deze aandoeningsrelatie wilt verwijderen?",
     "confirmRemoveEquipmentRelationship": "Weet u zeker dat u deze apparatuurkoppeling wilt verwijderen?",
     "confirmRemoveLabResultLink": "Deze labresultaatkoppeling verwijderen?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?",
+    "confirmRemoveMedicationLink": "Remove this medication link?",
+    "confirmRemoveMedicationRelationship": "Weet u zeker dat u deze medicatierelatie wilt verwijderen?",
+    "confirmRemoveProcedureLink": "Remove this procedure link?",
+    "confirmRemoveTreatmentLink": "Remove this treatment link?",
     "confirmRemoveVisitLink": "Deze bezoekskoppeling verwijderen?",
     "displayError": "Dit item kan niet worden weergegeven. Probeer de pagina te vernieuwen.",
     "doNotClose": "Sluit dit venster niet en navigeer niet weg",
     "failedToLinkLabResult": "Koppelen van labresultaat mislukt",
+    "failedToLinkMedication": "Failed to link medication",
+    "failedToLinkProcedure": "Failed to link procedure",
+    "failedToLinkTreatment": "Failed to link treatment",
     "failedToLinkVisit": "Koppelen van bezoek mislukt",
     "failedToUnlinkLabResult": "Ontkoppelen van labresultaat mislukt",
+    "failedToUnlinkMedication": "Failed to unlink medication",
+    "failedToUnlinkProcedure": "Failed to unlink procedure",
+    "failedToUnlinkTreatment": "Failed to unlink treatment",
     "failedToUnlinkVisit": "Ontkoppelen van bezoek mislukt",
     "failedToUpdateRelationship": "Bijwerken van relatie mislukt",
     "processing": "Verwerken...",
     "selectLabResult": "Selecteer een labresultaat",
+    "selectMedication": "Please select a medication",
+    "selectProcedure": "Please select a procedure",
+    "selectTreatment": "Please select a treatment",
     "selectVisit": "Selecteer een bezoek",
     "underDevelopment": "Dit onderdeel is momenteel in ontwikkeling.",
-    "updateSuccess": "Succesvol bijgewerkt",
-    "confirmRemoveMedicationRelationship": "Weet u zeker dat u deze medicatierelatie wilt verwijderen?"
+    "updateSuccess": "Succesvol bijgewerkt"
   },
   "modals": {
     "chooseConditionsToLink": "Kies aandoeningen om te koppelen",
     "chooseConditionToLink": "Kies een aandoening om te koppelen",
+    "chooseLabResultsToLink": "Choose lab results to link",
     "chooseLabResultToLink": "Kies een labresultaat om te koppelen",
     "chooseMedicationToLink": "Kies medicatie om te koppelen",
+    "chooseOneMedicationToLink": "Choose a medication to link",
+    "chooseProcedureToLink": "Choose a procedure to link",
+    "chooseTreatmentToLink": "Choose a treatment to link",
     "chooseVisitToLink": "Kies een bezoek om te koppelen",
     "describeConditionRelevance": "Beschrijf hoe deze aandoening verband houdt met het labresultaat (optioneel)",
+    "describeConditionRelevanceMedication": "Beschrijf hoe deze aandoening verband houdt met de medicatie",
     "describeLabResultRelevance": "Beschrijf hoe dit labresultaat verband houdt met dit bezoek",
+    "describeMedicationLabResultRelevance": "Describe how this medication relates to this lab result",
+    "describeMedicationRelevance": "Beschrijf hoe deze medicatie verband houdt met de aandoening",
+    "describeProcedureRelevance": "Describe how this procedure relates to this lab result",
+    "describeTreatmentRelevance": "Describe how this treatment relates to this lab result",
     "describeVisitRelevance": "Beschrijf hoe dit bezoek verband houdt met dit labresultaat",
+    "expectedFrequencyPlaceholder": "e.g. Monthly, Every 3 months",
+    "linkConditionsToMedication": "Aandoeningen koppelen aan medicatie",
     "linkConditionToLabResult": "Aandoening koppelen aan labresultaat",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
     "linkLabResultToVisit": "Labresultaat koppelen aan bezoek",
+    "linkMedicationsToCondition": "Medicatie koppelen aan aandoening",
+    "linkMedicationToLabResult": "Link Medication to Lab Result",
+    "linkProcedureToLabResult": "Link Procedure to Lab Result",
+    "linkTreatmentToLabResult": "Link Treatment to Lab Result",
     "linkVisitToLabResult": "Bezoek koppelen aan labresultaat",
     "noRelevanceNoteProvided": "Geen relevantieopmerking opgegeven",
     "purpose": "Doel",
     "relevanceNote": "Relevantieopmerking",
     "relevanceNoteOptional": "Relevantieopmerking (optioneel)",
     "selectCondition": "Selecteer aandoening",
-    "selectLabResult": "Selecteer labresultaat",
-    "selectMedications": "Selecteer medicatie",
-    "selectPurpose": "Selecteer doel",
-    "selectVisit": "Selecteer bezoek",
-    "linkConditionsToMedication": "Aandoeningen koppelen aan medicatie",
-    "linkMedicationsToCondition": "Medicatie koppelen aan aandoening",
     "selectConditions": "Selecteer aandoeningen",
-    "describeConditionRelevanceMedication": "Beschrijf hoe deze aandoening verband houdt met de medicatie",
-    "describeMedicationRelevance": "Beschrijf hoe deze medicatie verband houdt met de aandoening"
+    "selectLabResult": "Selecteer labresultaat",
+    "selectLabResults": "Select Lab Results",
+    "selectMedication": "Select Medication",
+    "selectMedications": "Selecteer medicatie",
+    "selectProcedure": "Select Procedure",
+    "selectPurpose": "Selecteer doel",
+    "selectTreatment": "Select Treatment",
+    "selectVisit": "Selecteer bezoek"
   },
   "noResults": "Geen zorgverleners gevonden",
   "pagination": {
@@ -755,6 +805,13 @@
     "card": {
       "subtitle": "Zorgverlener"
     },
+    "createInline": {
+      "buttonTooltip": "Nieuwe behandelaar",
+      "createError": "Aanmaken van behandelaar mislukt. Probeer het opnieuw.",
+      "nameRequired": "Naam is vereist",
+      "specialtyRequired": "Medische specialisatie is vereist",
+      "successMessage": "Behandelaar aangemaakt en geselecteerd"
+    },
     "createPracticeError": "Praktijk kon niet worden aangemaakt. Probeer het opnieuw.",
     "editPracticeError": "Praktijk kon niet worden geladen voor bewerking",
     "empty": {
@@ -768,13 +825,6 @@
     "form": {
       "addTitle": "Nieuwe zorgverlener toevoegen",
       "editTitle": "Zorgverlener bewerken"
-    },
-    "createInline": {
-      "buttonTooltip": "Nieuwe behandelaar",
-      "nameRequired": "Naam is vereist",
-      "specialtyRequired": "Medische specialisatie is vereist",
-      "createError": "Aanmaken van behandelaar mislukt. Probeer het opnieuw.",
-      "successMessage": "Behandelaar aangemaakt en geselecteerd"
     },
     "groupByPractice": "Groeperen op praktijk",
     "loading": "Zorgverleners laden...",
@@ -1242,13 +1292,17 @@
       "treatmentNotes": "Behandelnotities"
     }
   },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  },
   "viewToggle": {
     "cards": "Kaarten",
     "components": "Testresultaten",
     "label": "Weergavemodus",
-    "table": "Tabel",
+    "labwork": "Labwerk",
     "stacked": "Gestapeld",
-    "labwork": "Labwerk"
+    "table": "Tabel"
   },
   "visits": {
     "addNewVisit": "Nieuw consult toevoegen",
@@ -1260,7 +1314,10 @@
     "editVisit": "Consult bewerken",
     "form": {
       "addVisit": "Consult toevoegen",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
       "savingVisit": "Consult opslaan...",
+      "selectLabResults": "Select Lab Results",
       "tabs": {
         "clinical": "Klinisch",
         "visitInfo": "Consultinfo"
@@ -1268,6 +1325,10 @@
       "updateVisit": "Consult bijwerken"
     },
     "loadingVisits": "Consulten laden...",
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
+    },
     "noVisitsFound": "Geen medische consulten gevonden",
     "table": {
       "visitDate": "Consultdatum",

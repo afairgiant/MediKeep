@@ -17,7 +17,6 @@
   "diastolic": "Rozkurczowe",
   "editTitle": "Edytuj parametry życiowe",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "np. Cyfrowy ciśnieniomierz, Model termometru...",
     "deviceUsed": "Używane urządzenie/sprzęt",
     "diastolicBP": "Ciśnienie rozkurczowe",

@@ -1,4 +1,7 @@
 {
+  "categories": {
+    "medical": "Medyczne"
+  },
   "channels": {
     "add": "Dodaj kanał",
     "configTitle": "Konfiguracja {{type}}",
@@ -181,17 +184,10 @@
   },
   "description": "Skonfiguruj sposób otrzymywania powiadomień o ważnych zdarzeniach",
   "error": "Nie udało się załadować ustawień powiadomień",
-  "categories": {
-    "medical": "Medyczne"
-  },
   "events": {
     "backup_completed": {
       "description": "Gdy kopia zapasowa zakończy się pomyślnie",
       "name": "Kopia zapasowa ukończona"
-    },
-    "medication_reminder_due": {
-      "description": "Gdy nadejdzie czas przyjęcia zaplanowanego leku",
-      "name": "Przypomnienie o leku"
     },
     "backup_failed": {
       "description": "Gdy kopia zapasowa się nie powiedzie",
@@ -224,6 +220,10 @@
     "login_from_new_device": {
       "description": "Gdy Twoje konto zostanie użyte z nowego urządzenia",
       "name": "Logowanie z nowego urządzenia"
+    },
+    "medication_reminder_due": {
+      "description": "Gdy nadejdzie czas przyjęcia zaplanowanego leku",
+      "name": "Przypomnienie o leku"
     },
     "password_changed": {
       "description": "Gdy Twoje hasło zostanie zmienione",

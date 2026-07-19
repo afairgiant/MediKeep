@@ -131,6 +131,9 @@
     "linkConditionsDescription": "Свяжите этот результат исследования с соответствующими медицинскими состояниями для лучшего отслеживания и организации.",
     "linkConditionsTitle": "Связать медицинские состояния",
     "linkedVisits": "Связанные визиты",
+    "linkMedicationsTitle": "Link to Medications",
+    "linkProceduresTitle": "Link to Procedures",
+    "linkTreatmentsTitle": "Link to Treatments",
     "linkVisitsDescription": "Свяжите этот результат исследования с визитами, во время которых он был назначен или рассмотрен.",
     "linkVisitsTitle": "Связать с визитами",
     "matchedCommonName": "совпадение: {{name}}",
@@ -165,12 +168,6 @@
     "relationshipsCreateInfo": "Связи можно добавить после сохранения результата исследования.",
     "relationshipsSaveFirst": "Сначала сохраните результат исследования, чтобы создать связи.",
     "testComponentsEditInfo": "Компонентами тестов можно управлять со страницы просмотра после сохранения."
-  },
-  "pendingRelationships": {
-    "addCondition": "Добавить заболевание",
-    "addVisit": "Добавить визит",
-    "removeCondition": "Удалить заболевание",
-    "removeVisit": "Удалить визит"
   },
   "modal": {
     "editLabResult": "Редактировать результат исследования",
@@ -217,6 +214,12 @@
     "placeholder": "Выберите врача"
   },
   "patientIdRequired": "Требуется ID пациента. Пожалуйста, сначала выберите пациента.",
+  "pendingRelationships": {
+    "addCondition": "Добавить заболевание",
+    "addVisit": "Добавить визит",
+    "removeCondition": "Удалить заболевание",
+    "removeVisit": "Удалить визит"
+  },
   "quickFormInstructions": "Введите название для этого результата исследования, затем вы сможете загрузить и обработать ваш PDF.",
   "quickImportModalTitle": "Быстрый импорт PDF - Шаг {{step}} из 2",
   "quickImportSuccess": "Результат исследования и компоненты тестов успешно импортированы",
@@ -238,8 +241,6 @@
     "noResults": "Нет результатов тестов, соответствующих текущим фильтрам",
     "results": "{{count}} результат",
     "results_one": "{{count}} результат",
-    "results_few": "{{count}} результата",
-    "results_many": "{{count}} результатов",
     "results_other": "{{count}} результатов",
     "source": "Источник",
     "viewTrends": "Просмотр тенденций"
@@ -252,8 +253,6 @@
     "panel": "Панель",
     "results": "{{count}} результат",
     "results_one": "{{count}} результат",
-    "results_few": "{{count}} results",
-    "results_many": "{{count}} results",
     "results_other": "{{count}} результатов",
     "trendChart": "Значение с течением времени"
   },
@@ -504,8 +503,6 @@
     "chart": "График",
     "dataPoints": "{{count}} точек данных",
     "dataPoints_one": "{{count}} точка данных",
-    "dataPoints_few": "{{count}} data points",
-    "dataPoints_many": "{{count}} data points",
     "dataPoints_other": "{{count}} точек данных",
     "dataTable": "Таблица данных",
     "decreasing": "Убывающий",
@@ -529,8 +526,6 @@
     "clickToSort": "Нажмите на заголовки столбцов для сортировки",
     "historicalData": "Исторические данные ({{count}} точка)",
     "historicalData_one": "Исторические данные ({{count}} точка)",
-    "historicalData_few": "Historical Data ({{count}} points)",
-    "historicalData_many": "Historical Data ({{count}} points)",
     "historicalData_other": "Исторические данные ({{count}} точек)",
     "labResult": "Результат исследования",
     "noDataPoints": "Нет точек данных для отображения",

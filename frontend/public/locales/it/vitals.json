@@ -17,7 +17,6 @@
   "diastolic": "Diastolica",
   "editTitle": "Modifica segni vitali",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "ad es., Monitor digitale PA, Modello di termometro...",
     "deviceUsed": "Dispositivo/Attrezzatura utilizzata",
     "diastolicBP": "PA diastolica",

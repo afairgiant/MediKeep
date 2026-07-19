@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Admin-Dashboard",
     "allergies": "Allergien",
@@ -71,6 +76,7 @@
     "procedureCode": "Eingriffsschlüssel",
     "procedureName": "Eingriff",
     "procedureType": "Eingriffsart",
+    "reset": "Reset",
     "selectGender": "Geschlecht auswählen",
     "selectPractitioner": "Arzt auswählen",
     "selectRelationship": "Verwandtschaftsverhältnis auswählen",
@@ -243,11 +249,13 @@
     "relatedCondition": "Verwandte Erkrankung",
     "relatedConditions": "Verwandte Erkrankungen",
     "relationship": "Verwandtschaftsverhältnis",
+    "remove": "Remove",
     "resetPassword": "Passwort zurücksetzen",
     "resolved": "Ausgeheilt",
     "retry": "Erneut versuchen",
     "role": "Rolle",
     "route": "Verabreichungsweg",
+    "save": "Save",
     "saving": "Speichern...",
     "selectCategory": "Kategorie auswählen",
     "selectPractitioner": "Arzt auswählen",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "{{count}} eindeutige Tests angezeigt",
     "sideEffects": "Nebenwirkungen",
     "size": "Größe",
+    "sortBy": "Sort by",
     "specialties": "Fachgebiete",
     "specialty": "Fachgebiet",
     "startDate": "Beginn",
+    "state": "State",
     "stateProvince": "Bundesland / Provinz",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Mindestanzahl:</strong> Immer die {{count}} neuesten Sicherungen behalten",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Mindestanzahl:</strong> Immer die {{count}} neueste Sicherung behalten",
@@ -287,6 +297,7 @@
     "trendCharts": "Verlaufsdiagramme",
     "type": "Typ",
     "unknown": "Unbekannt",
+    "unknownError": "Unknown error",
     "uploadFailed": "Hochladen fehlgeschlagen",
     "user": "Benutzer",
     "userManagement": "Benutzerverwaltung",
@@ -301,7 +312,8 @@
     "warnings": "Warnungen",
     "website": "Website",
     "weekly": "Wöchentlich",
-    "weight": "Körpergewicht"
+    "weight": "Körpergewicht",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Nur-Lese-Zugriff"
@@ -316,9 +328,12 @@
     "episodesCount": "Episoden ({{count}})",
     "episodesCount_one": "Episoden ({{count}})",
     "episodesCount_other": "Episoden ({{count}})",
-    "notes": "Notizen",
     "labResults": "Laborergebnisse",
+    "medications": "Medications",
+    "notes": "Notizen",
     "overview": "Übersicht",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Besuche"
   }
 }

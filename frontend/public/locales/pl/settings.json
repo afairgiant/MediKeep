@@ -57,6 +57,27 @@
     "organizationPlaceholder": "Wybierz organizację",
     "urlPlaceholder": "https://twoja-instancja-papra.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "Wybierz sposób wyświetlania dat w całej aplikacji",
+      "dmy": "DD/MM/YYYY (brytyjski/międzynarodowy)",
+      "dmy_dot": "DD.MM.YYYY (europejski)",
+      "mdy": "MM/DD/YYYY (amerykański)",
+      "title": "Format daty",
+      "ymd": "YYYY-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Ustaw czas bezczynności przed wygaśnięciem sesji (w minutach)",
+      "range": "minuty (5-1440)",
+      "title": "Limit czasu sesji"
+    },
+    "unitSystem": {
+      "description": "Wybierz, czy wyświetlać pomiary w jednostkach imperialnych (funty, stopy, °F) czy metrycznych (kilogramy, centymetry, °C)",
+      "imperial": "Imperialne (lbs, stopy, °F)",
+      "metric": "Metryczne (kg, cm, °C)",
+      "title": "System jednostek"
+    }
+  },
   "profile": {
     "description": "Zaktualizuj tożsamość swojego konta. Zmiana nazwy użytkownika spowoduje wylogowanie -- zalogujesz się ponownie z nową nazwą.",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "Profil zaktualizowany",
     "usernameChangedLogoutWarning": "Zapisanie spowoduje wylogowanie, aby nowa nazwa użytkownika zaczęła obowiązywać. Zaloguj się ponownie z nową nazwą użytkownika.",
     "usernameChangedNotice": "Nazwa użytkownika została zmieniona. Zaloguj się ponownie z nową nazwą użytkownika."
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "Wybierz sposób wyświetlania dat w całej aplikacji",
-      "dmy": "DD/MM/YYYY (brytyjski/międzynarodowy)",
-      "dmy_dot": "DD.MM.YYYY (europejski)",
-      "mdy": "MM/DD/YYYY (amerykański)",
-      "title": "Format daty",
-      "ymd": "YYYY-MM-DD (ISO)"
-    },
-    "sessionTimeout": {
-      "description": "Ustaw czas bezczynności przed wygaśnięciem sesji (w minutach)",
-      "range": "minuty (5-1440)",
-      "title": "Limit czasu sesji"
-    },
-    "unitSystem": {
-      "description": "Wybierz, czy wyświetlać pomiary w jednostkach imperialnych (funty, stopy, °F) czy metrycznych (kilogramy, centymetry, °C)",
-      "imperial": "Imperialne (lbs, stopy, °F)",
-      "metric": "Metryczne (kg, cm, °C)",
-      "title": "System jednostek"
-    }
   },
   "releaseNotes": {
     "currentVersion": "Bieżąca",

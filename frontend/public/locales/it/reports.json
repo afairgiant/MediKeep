@@ -14,7 +14,6 @@
       "description": "Seleziona le cartelle cliniche da includere nel tuo report personalizzato",
       "title": "Configurazione report"
     },
-    "icon": "",
     "loading": "Caricamento generatore di report...",
     "noData": {
       "description": "Aggiungi prima alcune cartelle cliniche per utilizzare il generatore di report.",
@@ -160,7 +159,6 @@
       "singleExport": "Esportazione singola",
       "title": "Modalità di esportazione"
     },
-    "icon": "",
     "information": {
       "bulk": {
         "description": "Crea un file ZIP contenente più tipi di dati nel formato scelto per un backup completo dei dati.",
@@ -221,8 +219,8 @@
     "saveAsNew": "Salva come nuovo modello",
     "saveAsTemplate": "Salva come modello",
     "saveDescription": "Questo modello salverà le tue impostazioni attuali del report, i record selezionati e i grafici di tendenza selezionati.",
-    "saveModalTitle": "Salva modello di report",
     "savedTemplates": "Modelli salvati",
+    "saveModalTitle": "Salva modello di report",
     "updateCurrent": "Aggiorna \"{{name}}\"",
     "updateTemplate": "Aggiorna modello"
   }

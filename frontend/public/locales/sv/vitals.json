@@ -17,7 +17,6 @@
   "diastolic": "Diastolisk",
   "editTitle": "Redigera vitalparametrar",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "t.ex. Digital blodtrycksmätare, Termometermodell...",
     "deviceUsed": "Använd enhet/utrustning",
     "diastolicBP": "Diastoliskt BT",

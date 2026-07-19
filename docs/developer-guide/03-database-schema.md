@@ -1811,6 +1811,64 @@ JUNCTION TABLES (Many-to-Many)
 - relevance_note provides clinical context
 - Cascade deletes with either parent
 
+### lab_result_medications
+**Purpose**: Many-to-many relationship between lab results and medications
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| lab_result_id | Integer | FK(lab_results.id), ON DELETE CASCADE, NOT NULL | Associated lab result |
+| medication_id | Integer | FK(medications.id), ON DELETE CASCADE, NOT NULL | Associated medication |
+| relevance_note | String | | How lab relates to medication |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `lab_result`: Many-to-one with LabResult
+- `medication`: Many-to-one with Medication
+
+**Indexes**:
+- `idx_lab_result_medication_lab_result_id` on lab_result_id
+- `idx_lab_result_medication_medication_id` on medication_id
+
+**Constraints**:
+- `uq_lab_result_medication` UNIQUE on (lab_result_id, medication_id)
+
+**Business Rules**:
+- Links lab results to related medications (e.g. labs ordered to monitor a medication)
+- relevance_note provides clinical context
+- Cascade deletes with either parent
+- Only one relationship per lab_result/medication pair
+
+### lab_result_procedures
+**Purpose**: Many-to-many relationship between lab results and procedures
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | Integer | PRIMARY KEY | Unique relationship ID |
+| lab_result_id | Integer | FK(lab_results.id), ON DELETE CASCADE, NOT NULL | Associated lab result |
+| procedure_id | Integer | FK(procedures.id), ON DELETE CASCADE, NOT NULL | Associated procedure |
+| relevance_note | String | | How lab relates to procedure |
+| created_at | DateTime | NOT NULL | Relationship creation timestamp |
+| updated_at | DateTime | NOT NULL | Last modification timestamp |
+
+**Relationships**:
+- `lab_result`: Many-to-one with LabResult
+- `procedure`: Many-to-one with Procedure
+
+**Indexes**:
+- `idx_lab_result_procedure_lab_result_id` on lab_result_id
+- `idx_lab_result_procedure_procedure_id` on procedure_id
+
+**Constraints**:
+- `uq_lab_result_procedure` UNIQUE on (lab_result_id, procedure_id)
+
+**Business Rules**:
+- Links lab results to related procedures (e.g. pre/post-operative labs)
+- relevance_note provides clinical context
+- Cascade deletes with either parent
+- Only one relationship per lab_result/procedure pair
+
 ### condition_medications
 **Purpose**: Many-to-many relationship between conditions and medications
 
@@ -1955,6 +2013,8 @@ JUNCTION TABLES (Many-to-Many)
 
 **Constraints**:
 - `uq_treatment_lab_result` UNIQUE on (treatment_id, lab_result_id)
+
+**Note**: Accessible via both the treatment-side (`/treatments/{treatment_id}/lab-results`) and lab-result-side (`/lab-results/{lab_result_id}/treatments`) endpoints — both operate on this same table.
 
 ### treatment_equipment
 **Purpose**: Many-to-many relationship between treatments and medical equipment

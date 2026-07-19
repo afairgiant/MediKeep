@@ -360,6 +360,19 @@ class CRUDTreatmentLabResult(
             db.query(self.model).filter(self.model.lab_result_id == lab_result_id).all()
         )
 
+    def get_by_lab_result_with_details(self, db: Session, *, lab_result_id: int) -> List:
+        """Get all treatment relationships for a lab result with joined treatment data.
+
+        Returns a list of (TreatmentLabResult, Treatment) tuples, eliminating
+        the N+1 query pattern of fetching each treatment individually.
+        """
+        return (
+            db.query(self.model, Treatment)
+            .join(Treatment, self.model.treatment_id == Treatment.id)
+            .filter(self.model.lab_result_id == lab_result_id)
+            .all()
+        )
+
     def get_by_treatment_and_lab_result(
         self, db: Session, *, treatment_id: int, lab_result_id: int
     ) -> Optional[TreatmentLabResult]:

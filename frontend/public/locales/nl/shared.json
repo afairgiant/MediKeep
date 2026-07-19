@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Beheerderspaneel",
     "allergies": "Allergieën",
@@ -71,6 +76,7 @@
     "procedureCode": "Procedurecode",
     "procedureName": "Procedurenaam",
     "procedureType": "Proceduretype",
+    "reset": "Reset",
     "selectGender": "Selecteer geslacht",
     "selectPractitioner": "Selecteer zorgverlener",
     "selectRelationship": "Selecteer relatie",
@@ -243,11 +249,13 @@
     "relatedCondition": "Gerelateerde aandoening",
     "relatedConditions": "Gerelateerde aandoeningen",
     "relationship": "Relatie",
+    "remove": "Remove",
     "resetPassword": "Wachtwoord herstellen",
     "resolved": "Opgelost",
     "retry": "Opnieuw proberen",
     "role": "Rol",
     "route": "Toedieningsweg",
+    "save": "Save",
     "saving": "Opslaan...",
     "selectCategory": "Selecteer categorie",
     "selectPractitioner": "Selecteer zorgverlener",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "{{count}} unieke tests weergegeven",
     "sideEffects": "Bijwerkingen",
     "size": "Grootte",
+    "sortBy": "Sort by",
     "specialties": "Specialismen",
     "specialty": "Specialisme",
     "startDate": "Startdatum",
+    "state": "State",
     "stateProvince": "Provincie",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Aantalbeveiliging:</strong> Bewaar altijd de {{count}} meest recente back-ups",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Aantalbeveiliging:</strong> Bewaar altijd de {{count}} meest recente back-up",
@@ -287,6 +297,7 @@
     "trendCharts": "Trendgrafieken",
     "type": "Type",
     "unknown": "Onbekend",
+    "unknownError": "Unknown error",
     "uploadFailed": "Upload mislukt",
     "user": "Gebruiker",
     "userManagement": "Gebruikersbeheer",
@@ -301,7 +312,8 @@
     "warnings": "Waarschuwingen",
     "website": "Website",
     "weekly": "Wekelijks",
-    "weight": "Gewicht"
+    "weight": "Gewicht",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Alleen-lezen toegang"
@@ -316,9 +328,12 @@
     "episodesCount": "Episoden ({{count}})",
     "episodesCount_one": "Episode ({{count}})",
     "episodesCount_other": "Episoden ({{count}})",
-    "notes": "Notities",
     "labResults": "Laboratoriumresultaten",
+    "medications": "Medications",
+    "notes": "Notities",
     "overview": "Overzicht",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Consulten"
   }
 }

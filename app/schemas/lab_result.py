@@ -8,6 +8,13 @@ from app.core.constants import LAB_TEST_COMPONENT_LIMITS
 from app.schemas.base_tags import TaggedEntityMixin
 
 
+def _validate_relevance_note(v):
+    """Validate relevance note shared by lab result relationship schemas"""
+    if v and len(v.strip()) > 500:
+        raise ValueError("Relevance note must be less than 500 characters")
+    return v.strip() if v else None
+
+
 class LabResultBase(TaggedEntityMixin):
     """Base schema for LabResult - simple test tracking"""
 
@@ -528,10 +535,7 @@ class LabResultConditionBase(BaseModel):
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
-        """Validate relevance note"""
-        if v and len(v.strip()) > 500:
-            raise ValueError("Relevance note must be less than 500 characters")
-        return v.strip() if v else None
+        return _validate_relevance_note(v)
 
 
 class LabResultConditionCreate(LabResultConditionBase):
@@ -546,10 +550,7 @@ class LabResultConditionUpdate(BaseModel):
     @field_validator("relevance_note")
     @classmethod
     def validate_relevance_note(cls, v):
-        """Validate relevance note"""
-        if v and len(v.strip()) > 500:
-            raise ValueError("Relevance note must be less than 500 characters")
-        return v.strip() if v else None
+        return _validate_relevance_note(v)
 
 
 class LabResultConditionResponse(LabResultConditionBase):
@@ -566,6 +567,108 @@ class LabResultConditionWithDetails(LabResultConditionResponse):
     """Schema for lab result condition relationship with condition details"""
 
     condition: Optional[dict] = None  # Will contain condition details
+
+    model_config = {"from_attributes": True}
+
+
+# Lab Result - Medication Relationship Schemas
+
+
+class LabResultMedicationBase(BaseModel):
+    """Base schema for lab result medication relationship"""
+
+    lab_result_id: int
+    medication_id: int
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class LabResultMedicationCreate(LabResultMedicationBase):
+    """Schema for creating a lab result medication relationship"""
+
+    lab_result_id: Optional[int] = None  # Will be set from URL path parameter
+
+
+class LabResultMedicationUpdate(BaseModel):
+    """Schema for updating a lab result medication relationship"""
+
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class LabResultMedicationResponse(LabResultMedicationBase):
+    """Schema for lab result medication relationship response"""
+
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
+
+
+class LabResultMedicationWithDetails(LabResultMedicationResponse):
+    """Schema for lab result medication relationship with medication details"""
+
+    medication: Optional[dict] = None  # Will contain medication details
+
+    model_config = {"from_attributes": True}
+
+
+# Lab Result - Procedure Relationship Schemas
+
+
+class LabResultProcedureBase(BaseModel):
+    """Base schema for lab result procedure relationship"""
+
+    lab_result_id: int
+    procedure_id: int
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class LabResultProcedureCreate(LabResultProcedureBase):
+    """Schema for creating a lab result procedure relationship"""
+
+    lab_result_id: Optional[int] = None  # Will be set from URL path parameter
+
+
+class LabResultProcedureUpdate(BaseModel):
+    """Schema for updating a lab result procedure relationship"""
+
+    relevance_note: Optional[str] = None
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class LabResultProcedureResponse(LabResultProcedureBase):
+    """Schema for lab result procedure relationship response"""
+
+    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
+
+
+class LabResultProcedureWithDetails(LabResultProcedureResponse):
+    """Schema for lab result procedure relationship with procedure details"""
+
+    procedure: Optional[dict] = None  # Will contain procedure details
 
     model_config = {"from_attributes": True}
 

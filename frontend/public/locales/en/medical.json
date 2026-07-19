@@ -322,10 +322,6 @@
       "label": "Date Administered",
       "placeholder": "Select administration date"
     },
-    "form": {
-      "linkStatusLinked": "✓ Linked to library: {{name}}",
-      "linkStatusUnlinked": "⚠ Not linked to library. Pick a vaccine from the dropdown to link."
-    },
     "doseNumber": {
       "description": "Which dose in series",
       "label": "Dose Number",
@@ -335,6 +331,38 @@
       "description": "Expiration date of the vaccine vial/dose used",
       "label": "Vaccine Expiration Date",
       "placeholder": "Select expiration date"
+    },
+    "form": {
+      "linkStatusLinked": "✓ Linked to library: {{name}}",
+      "linkStatusUnlinked": "⚠ Not linked to library. Pick a vaccine from the dropdown to link."
+    },
+    "history": {
+      "dateRangePlaceholder": "Filter by date range",
+      "doseLabel": "Dose {{n}}",
+      "dosesCount": "{{count}} doses",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 dose",
+      "emptyAll": "No vaccinations recorded yet.",
+      "emptyRange": "No vaccinations in this range.",
+      "linkActionLabel": "Link to library",
+      "lotLabel": "Lot {{lot}}",
+      "miscGroup": "Miscellaneous / Unlinked",
+      "miscGroupHint": "These records aren't linked to the vaccine library yet. Click one to edit and pick a library entry.",
+      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
+      "recordCount": "{{count}} vaccinations",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 vaccination",
+      "unlinkedTag": "Unlinked",
+      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Some records aren't linked to the vaccine library",
+      "viewMode": {
+        "byDate": "By Date",
+        "byDisease": "By Disease"
+      }
     },
     "location": {
       "description": "Where the vaccine was administered",
@@ -392,34 +420,12 @@
       "rightThigh": "Right Thigh"
     },
     "vaccineName": {
+      "combinedHint": "Combined vaccine — components: {{components}}",
       "description": "Name of the administered vaccine",
       "label": "Vaccine Name",
+      "matchedCommonName": "matched: {{name}}",
       "placeholder": "e.g., COVID-19 mRNA, Influenza, MMR",
-      "searchPlaceholder": "Type to search vaccines...",
-      "combinedHint": "Combined vaccine — components: {{components}}",
-      "matchedCommonName": "matched: {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "By Date",
-        "byDisease": "By Disease"
-      },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Unlinked",
-      "linkActionLabel": "Link to library",
-      "miscGroup": "Miscellaneous / Unlinked",
-      "miscGroupHint": "These records aren't linked to the vaccine library yet. Click one to edit and pick a library entry.",
-      "emptyAll": "No vaccinations recorded yet.",
-      "emptyRange": "No vaccinations in this range.",
-      "dateRangePlaceholder": "Filter by date range",
-      "noDiseaseData": "No vaccinations are linked to the library. Switch to the By Date view to see all records, or edit a record and re-select a vaccine from the autocomplete to link it.",
-      "unmatchedTitle": "Some records aren't linked to the vaccine library",
-      "unmatchedBanner": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it."
+      "searchPlaceholder": "Type to search vaccines..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "Lab result saved but test components could not be added. You can add them from the view page.",
-      "relationshipCreationWarning": "Lab result saved but some relationships could not be created. You can add them from the edit page."
-    },
     "addPanel": {
-      "title": "Add Lab Results",
-      "panelName": "Lab Results Panel or Type",
-      "panelNamePlaceholder": "e.g. CBC Panel, Annual Bloodwork",
-      "panelNameDescription": "Select from the list or type a custom name",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Save Results",
-      "creating": "Creating...",
       "createError": "Failed to create test panel",
+      "creating": "Creating...",
+      "panelName": "Lab Results Panel or Type",
+      "panelNameDescription": "Select from the list or type a custom name",
+      "panelNamePlaceholder": "e.g. CBC Panel, Annual Bloodwork",
+      "tagsPlaceholder": "Add tags to help organize and search for this record later",
       "testResultRequired": "At least one test result is required",
-      "tagsPlaceholder": "Add tags to help organize and search for this record later"
+      "title": "Add Lab Results"
     },
     "buttons": {
       "addLabResults": "Add Lab Results"
+    },
+    "form": {
+      "componentCreationWarning": "Lab result saved but test components could not be added. You can add them from the view page.",
+      "relationshipCreationWarning": "Lab result saved but some relationships could not be created. You can add them from the edit page."
     }
   },
   "medications": {
@@ -889,54 +899,56 @@
       "placeholder": "Select Provider"
     },
     "reminders": {
-      "tabLabel": "Reminders",
+      "days": {
+        "description": "Leave empty to receive reminders every day",
+        "fri": "Fri",
+        "label": "Reminder days",
+        "mon": "Mon",
+        "sat": "Sat",
+        "sun": "Sun",
+        "thu": "Thu",
+        "tue": "Tue",
+        "wed": "Wed"
+      },
       "enabled": {
-        "label": "Enable reminders",
-        "description": "Send notifications when it is time to take this medication"
-      },
-      "times": {
-        "label": "Reminder times",
-        "description": "24-hour times when the reminder will fire",
-        "addButton": "Add time",
-        "removeAriaLabel": "Remove time",
-        "max": "Maximum of {{count}} times",
-        "duplicate": "This time is already in the list",
-        "invalid": "Time must be HH:MM (24-hour)",
-        "empty": "No reminder times configured."
-      },
-      "noChannelsTitle": "No notification channel enabled",
-      "noChannelsWarning": "No notification channel is configured for medication reminders. Open Notification Settings to enable a channel.",
-      "openSettings": "Open Notification Settings",
-      "testButton": "Send test reminder now",
-      "testSuccess": "Test reminder sent",
-      "testError": "Failed to send test reminder",
-      "saveBeforeTest": "Save the medication first to send a test reminder.",
-      "viewNone": "No reminders configured",
-      "notFiring": {
-        "title": "Reminders won't fire",
-        "badge": "Won't fire",
-        "periodEnded": "This medication is marked as no longer taken as of {{date}}.",
-        "notStarted": "This medication isn't scheduled to start until {{date}}.",
-        "statusNotActive": "The medication status is \"{{status}}\" — reminders only fire for active medications.",
-        "dayNotActive": "Reminders are not scheduled to fire today."
+        "description": "Send notifications when it is time to take this medication",
+        "label": "Enable reminders"
       },
       "enabledBadge": "Reminders enabled",
       "message": {
+        "description": "Optional note shown in the reminder notification (max 200 characters)",
         "label": "Custom reminder message",
-        "placeholder": "e.g. Take with food, Check blood pressure first",
-        "description": "Optional note shown in the reminder notification (max 200 characters)"
+        "placeholder": "e.g. Take with food, Check blood pressure first"
       },
-      "days": {
-        "label": "Reminder days",
-        "description": "Leave empty to receive reminders every day",
-        "mon": "Mon",
-        "tue": "Tue",
-        "wed": "Wed",
-        "thu": "Thu",
-        "fri": "Fri",
-        "sat": "Sat",
-        "sun": "Sun"
-      }
+      "noChannelsTitle": "No notification channel enabled",
+      "noChannelsWarning": "No notification channel is configured for medication reminders. Open Notification Settings to enable a channel.",
+      "notFiring": {
+        "badge": "Won't fire",
+        "dayNotActive": "Reminders are not scheduled to fire today.",
+        "notStarted": "This medication isn't scheduled to start until {{date}}.",
+        "periodEnded": "This medication is marked as no longer taken as of {{date}}.",
+        "statusNotActive": "The medication status is \"{{status}}\" — reminders only fire for active medications.",
+        "title": "Reminders won't fire"
+      },
+      "openSettings": "Open Notification Settings",
+      "saveBeforeTest": "Save the medication first to send a test reminder.",
+      "tabLabel": "Reminders",
+      "testButton": "Send test reminder now",
+      "testError": "Failed to send test reminder",
+      "testSuccess": "Test reminder sent",
+      "times": {
+        "addButton": "Add time",
+        "description": "24-hour times when the reminder will fire",
+        "duplicate": "This time is already in the list",
+        "empty": "No reminder times configured.",
+        "invalid": "Time must be HH:MM (24-hour)",
+        "label": "Reminder times",
+        "max": "Maximum of {{count}} times",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Remove time"
+      },
+      "viewNone": "No reminders configured"
     },
     "route": {
       "description": "How the medication is administered",

@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Admin Dashboard",
     "allergies": "Allergies",
@@ -71,6 +76,7 @@
     "procedureCode": "Procedure Code",
     "procedureName": "Procedure Name",
     "procedureType": "Procedure Type",
+    "reset": "Reset",
     "selectGender": "Select gender",
     "selectPractitioner": "Select practitioner",
     "selectRelationship": "Select relationship",
@@ -243,11 +249,13 @@
     "relatedCondition": "Related Condition",
     "relatedConditions": "Related Conditions",
     "relationship": "Relationship",
+    "remove": "Remove",
     "resetPassword": "Reset Password",
     "resolved": "Resolved",
     "retry": "Retry",
     "role": "Role",
     "route": "Route",
+    "save": "Save",
     "saving": "Saving...",
     "selectCategory": "Select category",
     "selectPractitioner": "Select practitioner",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "Showing {{count}} unique tests",
     "sideEffects": "Side Effects",
     "size": "Size",
+    "sortBy": "Sort by",
     "specialties": "Specialties",
     "specialty": "Specialty",
     "startDate": "Start Date",
+    "state": "State",
     "stateProvince": "State / Province",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Count Protection:</strong> Always keep the {{count}} most recent backups",
@@ -287,6 +297,7 @@
     "trendCharts": "Trend Charts",
     "type": "Type",
     "unknown": "Unknown",
+    "unknownError": "Unknown error",
     "uploadFailed": "Upload Failed",
     "user": "User",
     "userManagement": "User Management",
@@ -301,7 +312,8 @@
     "warnings": "Warnings",
     "website": "Website",
     "weekly": "Weekly",
-    "weight": "Weight"
+    "weight": "Weight",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "View-only access"
@@ -316,9 +328,12 @@
     "episodesCount": "Episodes ({{count}})",
     "episodesCount_one": "Episodes ({{count}})",
     "episodesCount_other": "Episodes ({{count}})",
-    "notes": "Notes",
     "labResults": "Lab Results",
+    "medications": "Medications",
+    "notes": "Notes",
     "overview": "Overview",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Visits"
   }
 }

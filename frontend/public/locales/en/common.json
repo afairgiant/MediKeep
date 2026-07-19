@@ -1,4 +1,8 @@
 {
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
   "allergies": {
     "messages": {
       "loading": "Loading allergies..."
@@ -8,6 +12,7 @@
     "addNew": "Add New",
     "back": "Back",
     "cancelSelection": "Cancel Selection",
+    "clear": "Clear",
     "create": "Create",
     "delete": "Delete",
     "done": "Done",
@@ -17,6 +22,9 @@
     "linkEquipment": "Link Equipment",
     "linkLabResult": "Link Lab Result",
     "linkMedication": "Link Medication",
+    "linkMedications": "Link Medications",
+    "linkProcedure": "Link Procedure",
+    "linkTreatment": "Link Treatment",
     "linkVisit": "Link Visit",
     "print": "Print",
     "refresh": "Refresh",
@@ -29,8 +37,7 @@
     "showMore": "Show more",
     "tryAgain": "Try Again",
     "update": "Update",
-    "view": "View",
-    "linkMedications": "Link Medications"
+    "view": "View"
   },
   "conditions": {
     "addNew": "Add New Condition",
@@ -54,6 +61,7 @@
         "snomedCode": "SNOMED CT code",
         "tags": "Add tags to categorize and organize conditions"
       },
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
       "medicationsDescription": "Link medications used to treat or manage this condition.",
       "placeholders": {
         "codeDescription": "Description of the medical code",
@@ -64,6 +72,7 @@
         "severity": "Select severity",
         "snomedCode": "e.g., 44054006"
       },
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results.",
       "saving": "Saving condition...",
       "severity": {
         "lifeThreatening": "Life-threatening",
@@ -292,7 +301,8 @@
   "filters": {
     "clear": "Clear",
     "itemCount": "{{filtered}} of {{total}} items",
-    "title": "Filters & Search"
+    "title": "Filters & Search",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Add New Immunization",
@@ -345,10 +355,17 @@
       "vaccineNameDesc": "Common name for the vaccine",
       "vaccineNamePlaceholder": "e.g., Flu Shot, COVID-19, Tdap"
     },
+    "history": {
+      "noPatient": "Select a patient to view history."
+    },
     "loadingImmunizations": "Loading immunizations...",
     "noImmunizationsFound": "No immunizations found",
     "table": {
       "site": "Site"
+    },
+    "tabs": {
+      "history": "History",
+      "records": "Records"
     },
     "viewModal": {
       "adminDetails": "Administration Details",
@@ -357,13 +374,6 @@
       "title": "Immunization Details",
       "tradeName": "Trade Name",
       "vaccineInfo": "Vaccine Information"
-    },
-    "tabs": {
-      "records": "Records",
-      "history": "History"
-    },
-    "history": {
-      "noPatient": "Select a patient to view history."
     }
   },
   "insurance": {
@@ -438,39 +448,50 @@
   "key": "Default {{var}}",
   "labels": {
     "addCustom": "+ Add \"{{value}}\"",
+    "cancelEdit": "Cancel edit",
+    "conditionsAvailableToLink": "{{count}} conditions available to link",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "expectedFrequency": "Expected frequency",
+    "labResultsAvailableToLink_one": "{{count}} lab results available to link",
+    "labResultsAvailableToLink_other": "{{count}} lab results available to link",
     "linkedLabResults": "Linked Lab Results",
     "linkedMedications": "Linked Medications",
     "loading": "Loading...",
-    "loadingOption": "Loading {{option}}...",
     "loadingLabResults": "Loading lab results...",
+    "loadingOption": "Loading {{option}}...",
     "loadingRelatedConditions": "Loading related conditions...",
+    "medicationsAvailableToLink": "{{count}} medications available to link",
     "new": "New",
     "no": "No",
     "noConditionsLinked": "No conditions linked to this lab result",
+    "noConditionsLinkedToMedication": "No conditions linked to this medication",
+    "noDate": "No date",
     "noEncountersLinked": "No visits linked to this treatment",
     "noEquipmentLinked": "No equipment linked to this treatment",
     "noLabResultsLinked": "No lab results linked to this visit",
     "noLabResultsLinkedToCondition": "No lab results linked to this condition",
     "noMedicationsLinked": "No medications linked to this condition",
+    "noMedicationsLinkedToLabResult": "No medications linked to this lab result",
     "none": "None",
+    "noProceduresLinked": "No procedures linked to this lab result",
     "noRating": "No rating",
     "notAvailable": "N/A",
     "notCompleted": "Not completed",
+    "noTreatmentsLinked": "No treatments linked to this lab result",
     "noVisitsLinked": "No visits linked to this lab result",
     "ordered": "Ordered",
     "phoneNumber": "Phone Number",
     "ratingStars": "{{count}}/5 stars",
     "ratingStars_one": "{{count}}/5 star",
     "ratingStars_other": "{{count}}/5 stars",
+    "saveRelationship": "Save relationship",
     "selectPurpose": "Select purpose",
     "viewDetails": "View Details",
     "viewPharmacyDetails": "View pharmacy details",
     "visitDate": "Visit date",
     "visitWebsite": "Visit Website ↗",
-    "yes": "Yes",
-    "noConditionsLinkedToMedication": "No conditions linked to this medication",
-    "conditionsAvailableToLink": "{{count}} conditions available to link",
-    "medicationsAvailableToLink": "{{count}} medications available to link"
+    "yes": "Yes"
   },
   "labResults": {
     "emptyLabResultMessage": "You created a lab result but didn't add any test components. Would you like to delete this lab result?",
@@ -538,47 +559,76 @@
     "confirmRemoveConditionRelationship": "Are you sure you want to remove this condition relationship?",
     "confirmRemoveEquipmentRelationship": "Are you sure you want to remove this equipment link?",
     "confirmRemoveLabResultLink": "Remove this lab result link?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?",
+    "confirmRemoveMedicationLink": "Remove this medication link?",
+    "confirmRemoveMedicationRelationship": "Are you sure you want to remove this medication relationship?",
+    "confirmRemoveProcedureLink": "Remove this procedure link?",
+    "confirmRemoveTreatmentLink": "Remove this treatment link?",
     "confirmRemoveVisitLink": "Remove this visit link?",
     "displayError": "Unable to display this item. Please try refreshing the page.",
     "doNotClose": "Please do not close this window or navigate away",
     "failedToLinkLabResult": "Failed to link lab result",
+    "failedToLinkMedication": "Failed to link medication",
+    "failedToLinkProcedure": "Failed to link procedure",
+    "failedToLinkTreatment": "Failed to link treatment",
     "failedToLinkVisit": "Failed to link visit",
     "failedToUnlinkLabResult": "Failed to unlink lab result",
+    "failedToUnlinkMedication": "Failed to unlink medication",
+    "failedToUnlinkProcedure": "Failed to unlink procedure",
+    "failedToUnlinkTreatment": "Failed to unlink treatment",
     "failedToUnlinkVisit": "Failed to unlink visit",
     "failedToUpdateRelationship": "Failed to update relationship",
     "processing": "Processing...",
     "selectLabResult": "Please select a lab result",
+    "selectMedication": "Please select a medication",
+    "selectProcedure": "Please select a procedure",
+    "selectTreatment": "Please select a treatment",
     "selectVisit": "Please select a visit",
     "underDevelopment": "This section is currently under development.",
-    "updateSuccess": "Updated successfully",
-    "confirmRemoveMedicationRelationship": "Are you sure you want to remove this medication relationship?"
+    "updateSuccess": "Updated successfully"
   },
   "modals": {
     "chooseConditionsToLink": "Choose conditions to link",
     "chooseConditionToLink": "Choose a condition to link",
+    "chooseLabResultsToLink": "Choose lab results to link",
     "chooseLabResultToLink": "Choose a lab result to link",
     "chooseMedicationToLink": "Choose medications to link",
+    "chooseOneMedicationToLink": "Choose a medication to link",
+    "chooseProcedureToLink": "Choose a procedure to link",
+    "chooseTreatmentToLink": "Choose a treatment to link",
     "chooseVisitToLink": "Choose a visit to link",
     "describeConditionRelevance": "Describe how this condition relates to the lab result (optional)",
+    "describeConditionRelevanceMedication": "Describe how this condition is relevant to the medication",
     "describeLabResultRelevance": "Describe how this lab result relates to this visit",
+    "describeMedicationLabResultRelevance": "Describe how this medication relates to this lab result",
+    "describeMedicationRelevance": "Describe how this medication is relevant to the condition",
+    "describeProcedureRelevance": "Describe how this procedure relates to this lab result",
+    "describeTreatmentRelevance": "Describe how this treatment relates to this lab result",
     "describeVisitRelevance": "Describe how this visit relates to this lab result",
+    "expectedFrequencyPlaceholder": "e.g. Monthly, Every 3 months",
+    "linkConditionsToMedication": "Link Conditions to Medication",
     "linkConditionToLabResult": "Link Condition to Lab Result",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
     "linkLabResultToVisit": "Link Lab Result to Visit",
+    "linkMedicationsToCondition": "Link Medications to Condition",
+    "linkMedicationToLabResult": "Link Medication to Lab Result",
+    "linkProcedureToLabResult": "Link Procedure to Lab Result",
+    "linkTreatmentToLabResult": "Link Treatment to Lab Result",
     "linkVisitToLabResult": "Link Visit to Lab Result",
     "noRelevanceNoteProvided": "No relevance note provided",
     "purpose": "Purpose",
     "relevanceNote": "Relevance Note",
     "relevanceNoteOptional": "Relevance note (optional)",
     "selectCondition": "Select Condition",
-    "selectLabResult": "Select Lab Result",
-    "selectMedications": "Select Medications",
-    "selectPurpose": "Select purpose",
-    "selectVisit": "Select Visit",
-    "linkConditionsToMedication": "Link Conditions to Medication",
-    "linkMedicationsToCondition": "Link Medications to Condition",
     "selectConditions": "Select Conditions",
-    "describeConditionRelevanceMedication": "Describe how this condition is relevant to the medication",
-    "describeMedicationRelevance": "Describe how this medication is relevant to the condition"
+    "selectLabResult": "Select Lab Result",
+    "selectLabResults": "Select Lab Results",
+    "selectMedication": "Select Medication",
+    "selectMedications": "Select Medications",
+    "selectProcedure": "Select Procedure",
+    "selectPurpose": "Select purpose",
+    "selectTreatment": "Select Treatment",
+    "selectVisit": "Select Visit"
   },
   "noResults": "No practitioners found",
   "pagination": {
@@ -755,6 +805,13 @@
     "card": {
       "subtitle": "Healthcare Practitioner"
     },
+    "createInline": {
+      "buttonTooltip": "New practitioner",
+      "createError": "Failed to create practitioner. Please try again.",
+      "nameRequired": "Name is required",
+      "specialtyRequired": "Medical specialty is required",
+      "successMessage": "Practitioner created and selected"
+    },
     "createPracticeError": "Failed to create practice. Please try again.",
     "editPracticeError": "Failed to load practice for editing",
     "empty": {
@@ -768,13 +825,6 @@
     "form": {
       "addTitle": "Add New Practitioner",
       "editTitle": "Edit Practitioner"
-    },
-    "createInline": {
-      "buttonTooltip": "New practitioner",
-      "nameRequired": "Name is required",
-      "specialtyRequired": "Medical specialty is required",
-      "createError": "Failed to create practitioner. Please try again.",
-      "successMessage": "Practitioner created and selected"
     },
     "groupByPractice": "Group by Practice",
     "loading": "Loading practitioners...",
@@ -1242,13 +1292,17 @@
       "treatmentNotes": "Treatment Notes"
     }
   },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  },
   "viewToggle": {
     "cards": "Cards",
     "components": "Test Results",
     "label": "View mode",
+    "labwork": "Labs",
     "stacked": "Stacked",
-    "table": "Table",
-    "labwork": "Labs"
+    "table": "Table"
   },
   "visits": {
     "addNewVisit": "Add New Visit",
@@ -1260,7 +1314,10 @@
     "editVisit": "Edit Visit",
     "form": {
       "addVisit": "Add Visit",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
       "savingVisit": "Saving visit...",
+      "selectLabResults": "Select Lab Results",
       "tabs": {
         "clinical": "Clinical",
         "visitInfo": "Visit Info"
@@ -1268,6 +1325,10 @@
       "updateVisit": "Update Visit"
     },
     "loadingVisits": "Loading visits...",
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
+    },
     "noVisitsFound": "No medical visits found",
     "table": {
       "visitDate": "Visit Date",

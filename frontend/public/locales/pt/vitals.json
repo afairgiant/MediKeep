@@ -17,7 +17,6 @@
   "diastolic": "Diastólica",
   "editTitle": "Editar Sinais Vitais",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "p. ex.: Monitor de PA digital, Modelo do termômetro...",
     "deviceUsed": "Dispositivo/Equipamento Utilizado",
     "diastolicBP": "PA Diastólica",

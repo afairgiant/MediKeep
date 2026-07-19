@@ -1,4 +1,7 @@
 {
+  "categories": {
+    "medical": "Medizinisch"
+  },
   "channels": {
     "add": "Kanal hinzufügen",
     "configTitle": "{{type}}-Konfiguration",
@@ -181,17 +184,10 @@
   },
   "description": "Konfigurieren Sie, wie Sie Benachrichtigungen für wichtige Ereignisse erhalten",
   "error": "Benachrichtigungseinstellungen konnten nicht geladen werden",
-  "categories": {
-    "medical": "Medizinisch"
-  },
   "events": {
     "backup_completed": {
       "description": "Wenn eine Sicherung erfolgreich abgeschlossen wurde",
       "name": "Sicherung abgeschlossen"
-    },
-    "medication_reminder_due": {
-      "description": "Wenn es Zeit ist, ein geplantes Medikament einzunehmen",
-      "name": "Medikamentenerinnerung"
     },
     "backup_failed": {
       "description": "Wenn eine Sicherung fehlgeschlagen ist",
@@ -224,6 +220,10 @@
     "login_from_new_device": {
       "description": "Wenn von einem neuen Gerät auf Ihr Konto zugegriffen wird",
       "name": "Anmeldung von neuem Gerät"
+    },
+    "medication_reminder_due": {
+      "description": "Wenn es Zeit ist, ein geplantes Medikament einzunehmen",
+      "name": "Medikamentenerinnerung"
     },
     "password_changed": {
       "description": "Wenn Ihr Passwort geändert wurde",

@@ -1824,6 +1824,211 @@ Base path: `/api/v1/entity-files`
 
 - **Success Response** (200): `{"message": "Lab result condition relationship deleted successfully"}`
 
+#### Lab Result - Medication Relationships
+
+##### Get Lab Result Medications
+
+`GET /lab-results/{lab_result_id}/medications`
+
+- **Purpose**: Get all medications linked to a lab result
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+[
+  {
+    "id": 1,
+    "lab_result_id": 1,
+    "medication_id": 5,
+    "relevance_note": "Ordered to monitor kidney function",
+    "created_at": "2025-10-01T00:00:00Z",
+    "medication": {
+      "id": 5,
+      "medication_name": "Metformin",
+      "dosage": "500mg",
+      "status": "active"
+    }
+  }
+]
+```
+
+##### Link Medication to Lab Result
+
+`POST /lab-results/{lab_result_id}/medications`
+
+- **Purpose**: Create a relationship between a lab result and medication
+- **Authentication**: Yes
+- **Request Body**:
+
+```json
+{
+  "medication_id": 5,
+  "relevance_note": "Ordered to monitor kidney function"
+}
+```
+
+- **Success Response** (201): Created relationship object
+
+##### Update Lab Result-Medication Link
+
+`PUT /lab-results/{lab_result_id}/medications/{relationship_id}`
+
+- **Request Body**:
+
+```json
+{
+  "relevance_note": "Updated relevance note"
+}
+```
+
+- **Success Response** (200): Updated relationship object
+
+##### Remove Medication Link from Lab Result
+
+`DELETE /lab-results/{lab_result_id}/medications/{relationship_id}`
+
+- **Success Response** (200): `{"message": "Lab result medication relationship deleted successfully"}`
+
+#### Lab Result - Procedure Relationships
+
+##### Get Lab Result Procedures
+
+`GET /lab-results/{lab_result_id}/procedures`
+
+- **Purpose**: Get all procedures linked to a lab result
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+[
+  {
+    "id": 1,
+    "lab_result_id": 1,
+    "procedure_id": 8,
+    "relevance_note": "Pre-operative labs for this procedure",
+    "created_at": "2025-10-01T00:00:00Z",
+    "procedure": {
+      "id": 8,
+      "procedure_name": "Colonoscopy",
+      "procedure_type": "diagnostic",
+      "status": "completed",
+      "date": "2025-09-15"
+    }
+  }
+]
+```
+
+##### Link Procedure to Lab Result
+
+`POST /lab-results/{lab_result_id}/procedures`
+
+- **Purpose**: Create a relationship between a lab result and procedure
+- **Authentication**: Yes
+- **Request Body**:
+
+```json
+{
+  "procedure_id": 8,
+  "relevance_note": "Pre-operative labs for this procedure"
+}
+```
+
+- **Success Response** (201): Created relationship object
+
+##### Update Lab Result-Procedure Link
+
+`PUT /lab-results/{lab_result_id}/procedures/{relationship_id}`
+
+- **Request Body**:
+
+```json
+{
+  "relevance_note": "Updated relevance note"
+}
+```
+
+- **Success Response** (200): Updated relationship object
+
+##### Remove Procedure Link from Lab Result
+
+`DELETE /lab-results/{lab_result_id}/procedures/{relationship_id}`
+
+- **Success Response** (200): `{"message": "Lab result procedure relationship deleted successfully"}`
+
+#### Lab Result - Treatment Relationships
+
+Note: this reuses the same `treatment_lab_results` junction table as the existing Treatment-side `/treatments/{treatment_id}/lab-results` endpoints — these are lab-result-side endpoints for creating/managing the same relationship.
+
+##### Get Lab Result Treatments
+
+`GET /lab-results/{lab_result_id}/treatments`
+
+- **Purpose**: Get all treatments linked to a lab result
+- **Authentication**: Yes
+- **Success Response** (200):
+
+```json
+[
+  {
+    "id": 1,
+    "treatment_id": 12,
+    "lab_result_id": 1,
+    "purpose": "baseline",
+    "expected_frequency": "Monthly",
+    "relevance_note": "Baseline labs before starting therapy",
+    "created_at": "2025-10-01T00:00:00Z",
+    "treatment": {
+      "id": 12,
+      "treatment_name": "Insulin Therapy",
+      "treatment_type": "medication management",
+      "status": "active"
+    }
+  }
+]
+```
+
+##### Link Treatment to Lab Result
+
+`POST /lab-results/{lab_result_id}/treatments`
+
+- **Purpose**: Create a relationship between a lab result and treatment
+- **Authentication**: Yes
+- **Request Body**:
+
+```json
+{
+  "treatment_id": 12,
+  "purpose": "baseline",
+  "expected_frequency": "Monthly",
+  "relevance_note": "Baseline labs before starting therapy"
+}
+```
+
+- **Valid `purpose` values**: `baseline`, `monitoring`, `outcome`, `safety`, `other`
+- **Success Response** (201): Created relationship object
+
+##### Update Lab Result-Treatment Link
+
+`PUT /lab-results/{lab_result_id}/treatments/{relationship_id}`
+
+- **Request Body**:
+
+```json
+{
+  "purpose": "monitoring",
+  "expected_frequency": "Every 3 months",
+  "relevance_note": "Updated relevance note"
+}
+```
+
+- **Success Response** (200): Updated relationship object
+
+##### Remove Treatment Link from Lab Result
+
+`DELETE /lab-results/{lab_result_id}/treatments/{relationship_id}`
+
+- **Success Response** (200): `{"message": "Lab result treatment relationship deleted successfully"}`
+
 #### PDF OCR Extraction
 
 `POST /lab-results/{lab_result_id}/ocr-parse`

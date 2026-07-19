@@ -240,6 +240,14 @@ const LabResults = () => {
   const [patientEncounters, setPatientEncounters] = useState([]);
   const [labResultEncounters, setLabResultEncounters] = useState({});
 
+  // Medications, procedures, treatments for lab result relationship linking
+  const [patientMedications, setPatientMedications] = useState([]);
+  const [labResultMedications, setLabResultMedications] = useState({});
+  const [patientProcedures, setPatientProcedures] = useState([]);
+  const [labResultProcedures, setLabResultProcedures] = useState({});
+  const [patientTreatments, setPatientTreatments] = useState([]);
+  const [labResultTreatments, setLabResultTreatments] = useState({});
+
   useEffect(() => {
     if (currentPatient?.id) {
       apiService
@@ -270,6 +278,51 @@ const LabResults = () => {
             component: 'LabResults',
           });
           setPatientEncounters([]);
+        });
+
+      apiService
+        .getPatientMedications(currentPatient.id)
+        .then(response => {
+          setPatientMedications(response || []);
+        })
+        .catch(err => {
+          logger.error('medical_medications_fetch_error', {
+            message: 'Failed to fetch medications for lab results',
+            patientId: currentPatient.id,
+            error: err.message,
+            component: 'LabResults',
+          });
+          setPatientMedications([]);
+        });
+
+      apiService
+        .getPatientProcedures(currentPatient.id)
+        .then(response => {
+          setPatientProcedures(response || []);
+        })
+        .catch(err => {
+          logger.error('medical_procedures_fetch_error', {
+            message: 'Failed to fetch procedures for lab results',
+            patientId: currentPatient.id,
+            error: err.message,
+            component: 'LabResults',
+          });
+          setPatientProcedures([]);
+        });
+
+      apiService
+        .getPatientTreatments(currentPatient.id)
+        .then(response => {
+          setPatientTreatments(response || []);
+        })
+        .catch(err => {
+          logger.error('medical_treatments_fetch_error', {
+            message: 'Failed to fetch treatments for lab results',
+            patientId: currentPatient.id,
+            error: err.message,
+            component: 'LabResults',
+          });
+          setPatientTreatments([]);
         });
     }
   }, [currentPatient?.id]);
@@ -308,6 +361,69 @@ const LabResults = () => {
     } catch (err) {
       logger.error('medical_encounters_fetch_error', {
         message: 'Failed to fetch lab result encounters',
+        labResultId,
+        error: err.message,
+        component: 'LabResults',
+      });
+      return [];
+    }
+  };
+
+  // Helper function to fetch medication relationships for a lab result
+  const fetchLabResultMedications = async labResultId => {
+    try {
+      const relationships =
+        await apiService.getLabResultMedications(labResultId);
+      setLabResultMedications(prev => ({
+        ...prev,
+        [labResultId]: relationships || [],
+      }));
+      return relationships || [];
+    } catch (err) {
+      logger.error('medical_medications_fetch_error', {
+        message: 'Failed to fetch lab result medications',
+        labResultId,
+        error: err.message,
+        component: 'LabResults',
+      });
+      return [];
+    }
+  };
+
+  // Helper function to fetch procedure relationships for a lab result
+  const fetchLabResultProcedures = async labResultId => {
+    try {
+      const relationships =
+        await apiService.getLabResultProcedures(labResultId);
+      setLabResultProcedures(prev => ({
+        ...prev,
+        [labResultId]: relationships || [],
+      }));
+      return relationships || [];
+    } catch (err) {
+      logger.error('medical_procedures_fetch_error', {
+        message: 'Failed to fetch lab result procedures',
+        labResultId,
+        error: err.message,
+        component: 'LabResults',
+      });
+      return [];
+    }
+  };
+
+  // Helper function to fetch treatment relationships for a lab result
+  const fetchLabResultTreatments = async labResultId => {
+    try {
+      const relationships =
+        await apiService.getLabResultTreatments(labResultId);
+      setLabResultTreatments(prev => ({
+        ...prev,
+        [labResultId]: relationships || [],
+      }));
+      return relationships || [];
+    } catch (err) {
+      logger.error('medical_treatments_fetch_error', {
+        message: 'Failed to fetch lab result treatments',
         labResultId,
         error: err.message,
         component: 'LabResults',
@@ -926,13 +1042,47 @@ const LabResults = () => {
                 })
               );
 
-              await Promise.all([...conditionPromises, ...encounterPromises]);
+              const medicationPromises = pending.medications.map(medRel =>
+                apiService.createLabResultMedication(resultId, {
+                  lab_result_id: resultId,
+                  medication_id: medRel.medication_id,
+                  relevance_note: medRel.relevance_note,
+                })
+              );
+
+              const procedurePromises = pending.procedures.map(procRel =>
+                apiService.createLabResultProcedure(resultId, {
+                  lab_result_id: resultId,
+                  procedure_id: procRel.procedure_id,
+                  relevance_note: procRel.relevance_note,
+                })
+              );
+
+              const treatmentPromises = pending.treatments.map(treatRel =>
+                apiService.createLabResultTreatment(resultId, {
+                  treatment_id: treatRel.treatment_id,
+                  purpose: treatRel.purpose,
+                  expected_frequency: treatRel.expected_frequency,
+                  relevance_note: treatRel.relevance_note,
+                })
+              );
+
+              await Promise.all([
+                ...conditionPromises,
+                ...encounterPromises,
+                ...medicationPromises,
+                ...procedurePromises,
+                ...treatmentPromises,
+              ]);
 
               logger.info('pending_relationships_created', {
                 message: 'Pending relationships created with lab result',
                 labResultId: resultId,
                 conditionCount: pending.conditions.length,
                 encounterCount: pending.encounters.length,
+                medicationCount: pending.medications.length,
+                procedureCount: pending.procedures.length,
+                treatmentCount: pending.treatments.length,
                 component: 'LabResults',
               });
             } catch (relError) {
@@ -1520,6 +1670,15 @@ const LabResults = () => {
           encounters={patientEncounters}
           labResultEncounters={labResultEncounters}
           fetchLabResultEncounters={fetchLabResultEncounters}
+          medications={patientMedications}
+          labResultMedications={labResultMedications}
+          fetchLabResultMedications={fetchLabResultMedications}
+          procedures={patientProcedures}
+          labResultProcedures={labResultProcedures}
+          fetchLabResultProcedures={fetchLabResultProcedures}
+          treatments={patientTreatments}
+          labResultTreatments={labResultTreatments}
+          fetchLabResultTreatments={fetchLabResultTreatments}
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
           onPendingRelationshipsRef={setPendingRelationshipsMethods}
@@ -1568,6 +1727,15 @@ const LabResults = () => {
         encounters={patientEncounters}
         labResultEncounters={labResultEncounters}
         fetchLabResultEncounters={fetchLabResultEncounters}
+        medications={patientMedications}
+        labResultMedications={labResultMedications}
+        fetchLabResultMedications={fetchLabResultMedications}
+        procedures={patientProcedures}
+        labResultProcedures={labResultProcedures}
+        fetchLabResultProcedures={fetchLabResultProcedures}
+        treatments={patientTreatments}
+        labResultTreatments={labResultTreatments}
+        fetchLabResultTreatments={fetchLabResultTreatments}
       />
 
       {/* Edit Individual Test Component Modal */}

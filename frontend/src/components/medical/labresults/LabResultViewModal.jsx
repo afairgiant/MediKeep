@@ -23,12 +23,18 @@ import {
   IconFileText,
   IconNotes,
   IconStethoscope,
+  IconPill,
+  IconMedicalCross,
+  IconClipboardHeart,
 } from '@tabler/icons-react';
 import StatusBadge from '../StatusBadge';
 import { ClickableTagBadge } from '../../common/ClickableTagBadge';
 import { useTagColors } from '../../../hooks/useTagColors';
 import ConditionRelationships from '../ConditionRelationships';
 import LabResultEncounterRelationships from './LabResultEncounterRelationships';
+import LabResultMedicationRelationships from './LabResultMedicationRelationships';
+import LabResultProcedureRelationships from './LabResultProcedureRelationships';
+import LabResultTreatmentRelationships from './LabResultTreatmentRelationships';
 import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgress';
 import TestComponentsTab from './TestComponentsTab';
 import logger from '../../../services/logger';
@@ -52,6 +58,15 @@ const LabResultViewModal = ({
   encounters,
   labResultEncounters,
   fetchLabResultEncounters,
+  medications,
+  labResultMedications,
+  fetchLabResultMedications,
+  procedures,
+  labResultProcedures,
+  fetchLabResultProcedures,
+  treatments,
+  labResultTreatments,
+  fetchLabResultTreatments,
   disableEdit = false,
   disableEditTooltip,
   isGroupedResult = false,
@@ -81,6 +96,9 @@ const LabResultViewModal = ({
       tags: labResult?.tags?.length > 0,
       conditions: !!fetchLabResultConditions,
       encounters: !!fetchLabResultEncounters,
+      medications: !!fetchLabResultMedications,
+      procedures: !!fetchLabResultProcedures,
+      treatments: !!fetchLabResultTreatments,
       'test-components': isGroupedResult || hasTestComponents !== false,
     };
     if (activeTab in conditionalTabs && !conditionalTabs[activeTab]) {
@@ -94,6 +112,9 @@ const LabResultViewModal = ({
     labResult?.tags?.length,
     fetchLabResultConditions,
     fetchLabResultEncounters,
+    fetchLabResultMedications,
+    fetchLabResultProcedures,
+    fetchLabResultTreatments,
     hasTestComponents,
   ]);
 
@@ -202,6 +223,30 @@ const LabResultViewModal = ({
                   leftSection={<IconStethoscope size={16} />}
                 >
                   {t('shared:tabs.visits', 'Visits')}
+                </Tabs.Tab>
+              )}
+              {fetchLabResultMedications && (
+                <Tabs.Tab
+                  value="medications"
+                  leftSection={<IconPill size={16} />}
+                >
+                  {t('shared:tabs.medications', 'Medications')}
+                </Tabs.Tab>
+              )}
+              {fetchLabResultProcedures && (
+                <Tabs.Tab
+                  value="procedures"
+                  leftSection={<IconMedicalCross size={16} />}
+                >
+                  {t('shared:tabs.procedures', 'Procedures')}
+                </Tabs.Tab>
+              )}
+              {fetchLabResultTreatments && (
+                <Tabs.Tab
+                  value="treatments"
+                  leftSection={<IconClipboardHeart size={16} />}
+                >
+                  {t('shared:tabs.treatments', 'Treatments')}
                 </Tabs.Tab>
               )}
               {labResult.notes && (
@@ -536,6 +581,57 @@ const LabResultViewModal = ({
                     labResultEncounters={labResultEncounters}
                     encounters={encounters}
                     fetchLabResultEncounters={fetchLabResultEncounters}
+                    navigate={navigate}
+                    isViewMode={disableEdit}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Medications Tab */}
+            {fetchLabResultMedications && (
+              <Tabs.Panel value="medications">
+                <Box mt="md">
+                  <LabResultMedicationRelationships
+                    key={`medications-${labResult.id}`}
+                    labResultId={labResult.id}
+                    labResultMedications={labResultMedications}
+                    medications={medications}
+                    fetchLabResultMedications={fetchLabResultMedications}
+                    navigate={navigate}
+                    isViewMode={disableEdit}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Procedures Tab */}
+            {fetchLabResultProcedures && (
+              <Tabs.Panel value="procedures">
+                <Box mt="md">
+                  <LabResultProcedureRelationships
+                    key={`procedures-${labResult.id}`}
+                    labResultId={labResult.id}
+                    labResultProcedures={labResultProcedures}
+                    procedures={procedures}
+                    fetchLabResultProcedures={fetchLabResultProcedures}
+                    navigate={navigate}
+                    isViewMode={disableEdit}
+                  />
+                </Box>
+              </Tabs.Panel>
+            )}
+
+            {/* Treatments Tab */}
+            {fetchLabResultTreatments && (
+              <Tabs.Panel value="treatments">
+                <Box mt="md">
+                  <LabResultTreatmentRelationships
+                    key={`treatments-${labResult.id}`}
+                    labResultId={labResult.id}
+                    labResultTreatments={labResultTreatments}
+                    treatments={treatments}
+                    fetchLabResultTreatments={fetchLabResultTreatments}
                     navigate={navigate}
                     isViewMode={disableEdit}
                   />

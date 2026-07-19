@@ -40,9 +40,16 @@ import DocumentManagerWithProgress from '../../shared/DocumentManagerWithProgres
 import PractitionerSelectWithCreate from '../practitioners/PractitionerSelectWithCreate';
 import ConditionRelationships from '../ConditionRelationships';
 import LabResultEncounterRelationships from './LabResultEncounterRelationships';
+import LabResultMedicationRelationships from './LabResultMedicationRelationships';
+import LabResultProcedureRelationships from './LabResultProcedureRelationships';
+import LabResultTreatmentRelationships from './LabResultTreatmentRelationships';
 import TestComponentsTab from './TestComponentsTab';
 import AdvancedModeSwitch from './AdvancedModeSwitch';
 import { PURPOSE_OPTIONS } from '../../../constants/encounterLabResultConstants';
+import {
+  PURPOSE_OPTIONS as TREATMENT_PURPOSE_OPTIONS,
+  getPurposeLabel as getTreatmentPurposeLabel,
+} from '../../../constants/treatmentLabResultConstants';
 import logger from '../../../services/logger';
 
 /**
@@ -52,12 +59,24 @@ import logger from '../../../services/logger';
 const PendingRelationshipsPicker = ({
   conditions,
   encounters,
+  medications,
+  procedures,
+  treatments,
   pendingConditions,
   pendingEncounters,
+  pendingMedications,
+  pendingProcedures,
+  pendingTreatments,
   onAddCondition,
   onRemoveCondition,
   onAddEncounter,
   onRemoveEncounter,
+  onAddMedication,
+  onRemoveMedication,
+  onAddProcedure,
+  onRemoveProcedure,
+  onAddTreatment,
+  onRemoveTreatment,
 }) => {
   const { t } = useTranslation(['medical', 'common', 'shared']);
   const [selectedCondition, setSelectedCondition] = useState('');
@@ -65,6 +84,14 @@ const PendingRelationshipsPicker = ({
   const [selectedEncounter, setSelectedEncounter] = useState('');
   const [encounterPurpose, setEncounterPurpose] = useState('');
   const [encounterNote, setEncounterNote] = useState('');
+  const [selectedMedication, setSelectedMedication] = useState('');
+  const [medicationNote, setMedicationNote] = useState('');
+  const [selectedProcedure, setSelectedProcedure] = useState('');
+  const [procedureNote, setProcedureNote] = useState('');
+  const [selectedTreatment, setSelectedTreatment] = useState('');
+  const [treatmentPurpose, setTreatmentPurpose] = useState('');
+  const [treatmentFrequency, setTreatmentFrequency] = useState('');
+  const [treatmentNote, setTreatmentNote] = useState('');
 
   const availableConditions = useMemo(() => {
     const pendingConditionIds = pendingConditions.map(pc =>
@@ -90,6 +117,42 @@ const PendingRelationshipsPicker = ({
       }));
   }, [encounters, pendingEncounters]);
 
+  const availableMedications = useMemo(() => {
+    const pendingMedicationIds = pendingMedications.map(pm =>
+      pm.medication_id.toString()
+    );
+    return medications
+      .filter(m => !pendingMedicationIds.includes(m.id.toString()))
+      .map(m => ({
+        value: m.id.toString(),
+        label: `${m.medication_name}${m.dosage ? ` (${m.dosage})` : ''}`,
+      }));
+  }, [medications, pendingMedications]);
+
+  const availableProcedures = useMemo(() => {
+    const pendingProcedureIds = pendingProcedures.map(pp =>
+      pp.procedure_id.toString()
+    );
+    return procedures
+      .filter(p => !pendingProcedureIds.includes(p.id.toString()))
+      .map(p => ({
+        value: p.id.toString(),
+        label: `${p.procedure_name}${p.date ? ` (${p.date})` : ''}`,
+      }));
+  }, [procedures, pendingProcedures]);
+
+  const availableTreatments = useMemo(() => {
+    const pendingTreatmentIds = pendingTreatments.map(pt =>
+      pt.treatment_id.toString()
+    );
+    return treatments
+      .filter(tr => !pendingTreatmentIds.includes(tr.id.toString()))
+      .map(tr => ({
+        value: tr.id.toString(),
+        label: tr.treatment_name,
+      }));
+  }, [treatments, pendingTreatments]);
+
   const handleAddCondition = () => {
     if (!selectedCondition) return;
     onAddCondition(selectedCondition, conditionNote);
@@ -105,6 +168,34 @@ const PendingRelationshipsPicker = ({
     setEncounterNote('');
   };
 
+  const handleAddMedication = () => {
+    if (!selectedMedication) return;
+    onAddMedication(selectedMedication, medicationNote);
+    setSelectedMedication('');
+    setMedicationNote('');
+  };
+
+  const handleAddProcedure = () => {
+    if (!selectedProcedure) return;
+    onAddProcedure(selectedProcedure, procedureNote);
+    setSelectedProcedure('');
+    setProcedureNote('');
+  };
+
+  const handleAddTreatment = () => {
+    if (!selectedTreatment) return;
+    onAddTreatment(
+      selectedTreatment,
+      treatmentPurpose,
+      treatmentFrequency,
+      treatmentNote
+    );
+    setSelectedTreatment('');
+    setTreatmentPurpose('');
+    setTreatmentFrequency('');
+    setTreatmentNote('');
+  };
+
   const getConditionLabel = conditionId => {
     const c = conditions.find(cond => cond.id === conditionId);
     return c ? c.diagnosis : `Condition #${conditionId}`;
@@ -115,6 +206,21 @@ const PendingRelationshipsPicker = ({
     return e
       ? `${e.reason}${e.date ? ` (${e.date})` : ''}`
       : `Visit #${encounterId}`;
+  };
+
+  const getMedicationLabel = medicationId => {
+    const m = medications.find(med => med.id === medicationId);
+    return m ? m.medication_name : `Medication #${medicationId}`;
+  };
+
+  const getProcedureLabel = procedureId => {
+    const p = procedures.find(proc => proc.id === procedureId);
+    return p ? p.procedure_name : `Procedure #${procedureId}`;
+  };
+
+  const getTreatmentLabel = treatmentId => {
+    const tr = treatments.find(t2 => t2.id === treatmentId);
+    return tr ? tr.treatment_name : `Treatment #${treatmentId}`;
   };
 
   return (
@@ -293,13 +399,299 @@ const PendingRelationshipsPicker = ({
         </Paper>
       )}
 
-      {conditions.length === 0 && encounters.length === 0 && (
-        <Paper withBorder p="md" ta="center">
-          <Text c="dimmed">
-            {t('labresults:messages.relationshipsCreateInfo')}
-          </Text>
+      {/* Medications section */}
+      {medications.length > 0 && (
+        <Paper withBorder p="md">
+          <Stack gap="sm">
+            <Title order={6}>
+              {t(
+                'labresults:form.linkMedicationsTitle',
+                'Link to Medications'
+              )}
+            </Title>
+
+            {/* Already-added pending medications */}
+            {pendingMedications.map((pm, index) => (
+              <Paper key={index} withBorder p="xs">
+                <Group justify="space-between">
+                  <Stack gap={2}>
+                    <Badge variant="light" color="teal" size="sm">
+                      {getMedicationLabel(pm.medication_id)}
+                    </Badge>
+                    {pm.relevance_note && (
+                      <Text size="xs" c="dimmed" fs="italic">
+                        {pm.relevance_note}
+                      </Text>
+                    )}
+                  </Stack>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemoveMedication(index)}
+                    aria-label={t(
+                      'labresults:pendingRelationships.removeMedication'
+                    )}
+                  >
+                    <IconTrash size={14} />
+                  </ActionIcon>
+                </Group>
+              </Paper>
+            ))}
+
+            {/* Add new medication */}
+            {availableMedications.length > 0 && (
+              <Group gap="sm" align="flex-end">
+                <Select
+                  style={{ flex: 1 }}
+                  placeholder={t('common:modals.chooseOneMedicationToLink')}
+                  data={availableMedications}
+                  value={selectedMedication}
+                  onChange={val => setSelectedMedication(val || '')}
+                  searchable
+                  clearable
+                  size="sm"
+                  comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                />
+                <TextInput
+                  style={{ flex: 1 }}
+                  placeholder={t('common:modals.relevanceNoteOptional')}
+                  value={medicationNote}
+                  onChange={e => setMedicationNote(e.target.value)}
+                  size="sm"
+                />
+                <ActionIcon
+                  variant="filled"
+                  color="blue"
+                  size="lg"
+                  onClick={handleAddMedication}
+                  disabled={!selectedMedication}
+                  aria-label={t(
+                    'labresults:pendingRelationships.addMedication'
+                  )}
+                >
+                  <IconPlus size={16} />
+                </ActionIcon>
+              </Group>
+            )}
+          </Stack>
         </Paper>
       )}
+
+      {/* Procedures section */}
+      {procedures.length > 0 && (
+        <Paper withBorder p="md">
+          <Stack gap="sm">
+            <Title order={6}>
+              {t(
+                'labresults:form.linkProceduresTitle',
+                'Link to Procedures'
+              )}
+            </Title>
+
+            {/* Already-added pending procedures */}
+            {pendingProcedures.map((pp, index) => (
+              <Paper key={index} withBorder p="xs">
+                <Group justify="space-between">
+                  <Stack gap={2}>
+                    <Badge variant="light" color="grape" size="sm">
+                      {getProcedureLabel(pp.procedure_id)}
+                    </Badge>
+                    {pp.relevance_note && (
+                      <Text size="xs" c="dimmed" fs="italic">
+                        {pp.relevance_note}
+                      </Text>
+                    )}
+                  </Stack>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemoveProcedure(index)}
+                    aria-label={t(
+                      'labresults:pendingRelationships.removeProcedure'
+                    )}
+                  >
+                    <IconTrash size={14} />
+                  </ActionIcon>
+                </Group>
+              </Paper>
+            ))}
+
+            {/* Add new procedure */}
+            {availableProcedures.length > 0 && (
+              <Group gap="sm" align="flex-end">
+                <Select
+                  style={{ flex: 1 }}
+                  placeholder={t('common:modals.chooseProcedureToLink')}
+                  data={availableProcedures}
+                  value={selectedProcedure}
+                  onChange={val => setSelectedProcedure(val || '')}
+                  searchable
+                  clearable
+                  size="sm"
+                  comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                />
+                <TextInput
+                  style={{ flex: 1 }}
+                  placeholder={t('common:modals.relevanceNoteOptional')}
+                  value={procedureNote}
+                  onChange={e => setProcedureNote(e.target.value)}
+                  size="sm"
+                />
+                <ActionIcon
+                  variant="filled"
+                  color="blue"
+                  size="lg"
+                  onClick={handleAddProcedure}
+                  disabled={!selectedProcedure}
+                  aria-label={t(
+                    'labresults:pendingRelationships.addProcedure'
+                  )}
+                >
+                  <IconPlus size={16} />
+                </ActionIcon>
+              </Group>
+            )}
+          </Stack>
+        </Paper>
+      )}
+
+      {/* Treatments section */}
+      {treatments.length > 0 && (
+        <Paper withBorder p="md">
+          <Stack gap="sm">
+            <Title order={6}>
+              {t(
+                'labresults:form.linkTreatmentsTitle',
+                'Link to Treatments'
+              )}
+            </Title>
+
+            {/* Already-added pending treatments */}
+            {pendingTreatments.map((pt, index) => (
+              <Paper key={index} withBorder p="xs">
+                <Group justify="space-between">
+                  <Stack gap={2}>
+                    <Badge variant="light" color="orange" size="sm">
+                      {getTreatmentLabel(pt.treatment_id)}
+                    </Badge>
+                    {pt.purpose && (
+                      <Badge variant="outline" size="xs">
+                        {getTreatmentPurposeLabel(pt.purpose)}
+                      </Badge>
+                    )}
+                    {pt.expected_frequency && (
+                      <Text size="xs" c="dimmed">
+                        {pt.expected_frequency}
+                      </Text>
+                    )}
+                    {pt.relevance_note && (
+                      <Text size="xs" c="dimmed" fs="italic">
+                        {pt.relevance_note}
+                      </Text>
+                    )}
+                  </Stack>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    size="sm"
+                    onClick={() => onRemoveTreatment(index)}
+                    aria-label={t(
+                      'labresults:pendingRelationships.removeTreatment'
+                    )}
+                  >
+                    <IconTrash size={14} />
+                  </ActionIcon>
+                </Group>
+              </Paper>
+            ))}
+
+            {/* Add new treatment */}
+            {availableTreatments.length > 0 && (
+              <Stack gap="xs">
+                <Group gap="sm" align="flex-end">
+                  <Select
+                    style={{ flex: 2 }}
+                    placeholder={t(
+                      'common:modals.chooseTreatmentToLink',
+                      'Choose a treatment to link'
+                    )}
+                    data={availableTreatments}
+                    value={selectedTreatment}
+                    onChange={val => setSelectedTreatment(val || '')}
+                    searchable
+                    clearable
+                    size="sm"
+                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                  />
+                  <Select
+                    style={{ flex: 1 }}
+                    placeholder={t(
+                      'common:modals.selectPurpose',
+                      'Select purpose'
+                    )}
+                    data={TREATMENT_PURPOSE_OPTIONS}
+                    value={treatmentPurpose}
+                    onChange={val => setTreatmentPurpose(val || '')}
+                    clearable
+                    size="sm"
+                    comboboxProps={{ withinPortal: true, zIndex: 3000 }}
+                  />
+                  <ActionIcon
+                    variant="filled"
+                    color="blue"
+                    size="lg"
+                    onClick={handleAddTreatment}
+                    disabled={!selectedTreatment}
+                    aria-label={t(
+                      'labresults:pendingRelationships.addTreatment'
+                    )}
+                  >
+                    <IconPlus size={16} />
+                  </ActionIcon>
+                </Group>
+                {selectedTreatment && (
+                  <Group gap="sm">
+                    <TextInput
+                      style={{ flex: 1 }}
+                      placeholder={t(
+                        'common:labels.expectedFrequency',
+                        'Expected frequency'
+                      )}
+                      value={treatmentFrequency}
+                      onChange={e => setTreatmentFrequency(e.target.value)}
+                      size="sm"
+                    />
+                    <TextInput
+                      style={{ flex: 1 }}
+                      placeholder={t(
+                        'common:modals.relevanceNoteOptional',
+                        'Relevance note (optional)'
+                      )}
+                      value={treatmentNote}
+                      onChange={e => setTreatmentNote(e.target.value)}
+                      size="sm"
+                    />
+                  </Group>
+                )}
+              </Stack>
+            )}
+          </Stack>
+        </Paper>
+      )}
+
+      {conditions.length === 0 &&
+        encounters.length === 0 &&
+        medications.length === 0 &&
+        procedures.length === 0 &&
+        treatments.length === 0 && (
+          <Paper withBorder p="md" ta="center">
+            <Text c="dimmed">
+              {t('labresults:messages.relationshipsCreateInfo')}
+            </Text>
+          </Paper>
+        )}
     </Stack>
   );
 };
@@ -326,6 +718,18 @@ const LabResultFormWrapper = ({
   encounters = [],
   labResultEncounters = {},
   fetchLabResultEncounters,
+  // Medication relationship props
+  medications = [],
+  labResultMedications = {},
+  fetchLabResultMedications,
+  // Procedure relationship props
+  procedures = [],
+  labResultProcedures = {},
+  fetchLabResultProcedures,
+  // Treatment relationship props
+  treatments = [],
+  labResultTreatments = {},
+  fetchLabResultTreatments,
   navigate,
   isGroupedResult = false,
   postCreate = false,
@@ -342,6 +746,9 @@ const LabResultFormWrapper = ({
   // Pending relationships for create mode (stored locally until lab result is saved)
   const [pendingConditions, setPendingConditions] = useState([]);
   const [pendingEncounters, setPendingEncounters] = useState([]);
+  const [pendingMedications, setPendingMedications] = useState([]);
+  const [pendingProcedures, setPendingProcedures] = useState([]);
+  const [pendingTreatments, setPendingTreatments] = useState([]);
 
   // Notes and create-mode relationship linking are only shown once the record exists
   // (edit mode) or when the user has opted into the advanced create form.
@@ -462,13 +869,28 @@ const LabResultFormWrapper = ({
       setIsSubmitting(false);
       setPendingConditions([]);
       setPendingEncounters([]);
+      setPendingMedications([]);
+      setPendingProcedures([]);
+      setPendingTreatments([]);
     }
   }, [isOpen]);
 
   // Latest pending relationships, read live by the methods object below so that
   // adding/removing an item doesn't re-notify the parent (which would re-render it).
-  const pendingRelationshipsRef = useRef({ pendingConditions, pendingEncounters });
-  pendingRelationshipsRef.current = { pendingConditions, pendingEncounters };
+  const pendingRelationshipsRef = useRef({
+    pendingConditions,
+    pendingEncounters,
+    pendingMedications,
+    pendingProcedures,
+    pendingTreatments,
+  });
+  pendingRelationshipsRef.current = {
+    pendingConditions,
+    pendingEncounters,
+    pendingMedications,
+    pendingProcedures,
+    pendingTreatments,
+  };
 
   // Expose pending relationships ref to parent (same pattern as onDocumentManagerRef).
   // Only re-registers when the callback identity changes, not on every pending edit.
@@ -477,10 +899,16 @@ const LabResultFormWrapper = ({
       onPendingRelationshipsRef({
         hasPendingRelationships: () =>
           pendingRelationshipsRef.current.pendingConditions.length > 0 ||
-          pendingRelationshipsRef.current.pendingEncounters.length > 0,
+          pendingRelationshipsRef.current.pendingEncounters.length > 0 ||
+          pendingRelationshipsRef.current.pendingMedications.length > 0 ||
+          pendingRelationshipsRef.current.pendingProcedures.length > 0 ||
+          pendingRelationshipsRef.current.pendingTreatments.length > 0,
         getPendingRelationships: () => ({
           conditions: pendingRelationshipsRef.current.pendingConditions,
           encounters: pendingRelationshipsRef.current.pendingEncounters,
+          medications: pendingRelationshipsRef.current.pendingMedications,
+          procedures: pendingRelationshipsRef.current.pendingProcedures,
+          treatments: pendingRelationshipsRef.current.pendingTreatments,
         }),
       });
     }
@@ -518,6 +946,56 @@ const LabResultFormWrapper = ({
 
   const removePendingEncounter = useCallback(index => {
     setPendingEncounters(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Pending medication helpers
+  const addPendingMedication = useCallback((medicationId, relevanceNote) => {
+    setPendingMedications(prev => [
+      ...prev,
+      {
+        medication_id: parseInt(medicationId),
+        relevance_note: relevanceNote || null,
+      },
+    ]);
+  }, []);
+
+  const removePendingMedication = useCallback(index => {
+    setPendingMedications(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Pending procedure helpers
+  const addPendingProcedure = useCallback((procedureId, relevanceNote) => {
+    setPendingProcedures(prev => [
+      ...prev,
+      {
+        procedure_id: parseInt(procedureId),
+        relevance_note: relevanceNote || null,
+      },
+    ]);
+  }, []);
+
+  const removePendingProcedure = useCallback(index => {
+    setPendingProcedures(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Pending treatment helpers
+  const addPendingTreatment = useCallback(
+    (treatmentId, purpose, expectedFrequency, relevanceNote) => {
+      setPendingTreatments(prev => [
+        ...prev,
+        {
+          treatment_id: parseInt(treatmentId),
+          purpose: purpose || null,
+          expected_frequency: expectedFrequency || null,
+          relevance_note: relevanceNote || null,
+        },
+      ]);
+    },
+    []
+  );
+
+  const removePendingTreatment = useCallback(index => {
+    setPendingTreatments(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleSubmit = async e => {
@@ -985,28 +1463,107 @@ const LabResultFormWrapper = ({
                           </Stack>
                         </Paper>
                       )}
-                      {conditions.length === 0 && encounters.length === 0 && (
-                        <Paper withBorder p="md" ta="center">
-                          <Text c="dimmed">
-                            {t(
-                              'labresults:messages.noRelationshipsAvailable',
-                              'No medical conditions or visits on record. Add them first to link them here.'
-                            )}
-                          </Text>
+                      {medications.length > 0 && (
+                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                          <Stack gap="md">
+                            <Title order={5}>
+                              {t(
+                                'labresults:form.linkMedicationsTitle',
+                                'Link to Medications'
+                              )}
+                            </Title>
+                            <LabResultMedicationRelationships
+                              labResultId={editingItem.id}
+                              labResultMedications={labResultMedications}
+                              medications={medications}
+                              fetchLabResultMedications={
+                                fetchLabResultMedications
+                              }
+                              navigate={navigate}
+                            />
+                          </Stack>
                         </Paper>
                       )}
+                      {procedures.length > 0 && (
+                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                          <Stack gap="md">
+                            <Title order={5}>
+                              {t(
+                                'labresults:form.linkProceduresTitle',
+                                'Link to Procedures'
+                              )}
+                            </Title>
+                            <LabResultProcedureRelationships
+                              labResultId={editingItem.id}
+                              labResultProcedures={labResultProcedures}
+                              procedures={procedures}
+                              fetchLabResultProcedures={
+                                fetchLabResultProcedures
+                              }
+                              navigate={navigate}
+                            />
+                          </Stack>
+                        </Paper>
+                      )}
+                      {treatments.length > 0 && (
+                        <Paper withBorder p="md" bg="var(--color-bg-secondary)">
+                          <Stack gap="md">
+                            <Title order={5}>
+                              {t(
+                                'labresults:form.linkTreatmentsTitle',
+                                'Link to Treatments'
+                              )}
+                            </Title>
+                            <LabResultTreatmentRelationships
+                              labResultId={editingItem.id}
+                              labResultTreatments={labResultTreatments}
+                              treatments={treatments}
+                              fetchLabResultTreatments={
+                                fetchLabResultTreatments
+                              }
+                              navigate={navigate}
+                            />
+                          </Stack>
+                        </Paper>
+                      )}
+                      {conditions.length === 0 &&
+                        encounters.length === 0 &&
+                        medications.length === 0 &&
+                        procedures.length === 0 &&
+                        treatments.length === 0 && (
+                          <Paper withBorder p="md" ta="center">
+                            <Text c="dimmed">
+                              {t(
+                                'labresults:messages.noRelationshipsAvailable',
+                                'No medical conditions or visits on record. Add them first to link them here.'
+                              )}
+                            </Text>
+                          </Paper>
+                        )}
                     </Stack>
                   ) : (
                     /* Create mode (advanced): pending relationship picker, saved after the lab result is created */
                     <PendingRelationshipsPicker
                       conditions={conditions}
                       encounters={encounters}
+                      medications={medications}
+                      procedures={procedures}
+                      treatments={treatments}
                       pendingConditions={pendingConditions}
                       pendingEncounters={pendingEncounters}
+                      pendingMedications={pendingMedications}
+                      pendingProcedures={pendingProcedures}
+                      pendingTreatments={pendingTreatments}
                       onAddCondition={addPendingCondition}
                       onRemoveCondition={removePendingCondition}
                       onAddEncounter={addPendingEncounter}
                       onRemoveEncounter={removePendingEncounter}
+                      onAddMedication={addPendingMedication}
+                      onRemoveMedication={removePendingMedication}
+                      onAddProcedure={addPendingProcedure}
+                      onRemoveProcedure={removePendingProcedure}
+                      onAddTreatment={addPendingTreatment}
+                      onRemoveTreatment={removePendingTreatment}
                     />
                   )}
                 </Box>

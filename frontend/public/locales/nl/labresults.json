@@ -131,6 +131,9 @@
     "linkConditionsDescription": "Koppel dit labresultaat aan relevante medische aandoeningen voor betere tracking en organisatie.",
     "linkConditionsTitle": "Medische aandoeningen koppelen",
     "linkedVisits": "Gekoppelde consulten",
+    "linkMedicationsTitle": "Link to Medications",
+    "linkProceduresTitle": "Link to Procedures",
+    "linkTreatmentsTitle": "Link to Treatments",
     "linkVisitsDescription": "Koppel dit labresultaat aan consulten waarbij het is aangevraagd of beoordeeld.",
     "linkVisitsTitle": "Koppelen aan consulten",
     "matchedCommonName": "overeenkomst: {{name}}",
@@ -165,12 +168,6 @@
     "relationshipsCreateInfo": "Koppelingen kunnen worden toegevoegd na het opslaan van het labresultaat.",
     "relationshipsSaveFirst": "Sla het labresultaat eerst op om koppelingen aan te maken.",
     "testComponentsEditInfo": "Testcomponenten kunnen na het opslaan worden beheerd via de weergavepagina."
-  },
-  "pendingRelationships": {
-    "addCondition": "Aandoening toevoegen",
-    "addVisit": "Bezoek toevoegen",
-    "removeCondition": "Aandoening verwijderen",
-    "removeVisit": "Bezoek verwijderen"
   },
   "modal": {
     "editLabResult": "Labresultaat bewerken",
@@ -217,6 +214,12 @@
     "placeholder": "Selecteer arts"
   },
   "patientIdRequired": "Patiënt-ID is vereist. Selecteer eerst een patiënt.",
+  "pendingRelationships": {
+    "addCondition": "Aandoening toevoegen",
+    "addVisit": "Bezoek toevoegen",
+    "removeCondition": "Aandoening verwijderen",
+    "removeVisit": "Bezoek verwijderen"
+  },
   "quickFormInstructions": "Voer een naam in voor dit labresultaat, daarna kunt u uw PDF uploaden en verwerken.",
   "quickImportModalTitle": "Snelle PDF-import - Stap {{step}} van 2",
   "quickImportSuccess": "Labresultaat en testcomponenten succesvol geïmporteerd",

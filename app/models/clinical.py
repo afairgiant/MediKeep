@@ -93,6 +93,11 @@ class Medication(Base):
         "TreatmentMedication", back_populates="medication", cascade="all, delete-orphan"
     )
 
+    # Many-to-Many relationship with lab results through junction table
+    lab_result_relationships = orm_relationship(
+        "LabResultMedication", back_populates="medication", cascade="all, delete-orphan"
+    )
+
     # Indexes for performance
     __table_args__ = (
         Index("idx_medications_patient_id", "patient_id"),

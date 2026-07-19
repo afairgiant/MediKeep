@@ -26,6 +26,20 @@ def _validate_relevance_note(v: Optional[str]) -> Optional[str]:
     return v
 
 
+_VALID_LAB_RESULT_PURPOSES = ["baseline", "monitoring", "outcome", "safety", "other"]
+
+
+def _validate_lab_result_purpose(v: Optional[str]) -> Optional[str]:
+    """Validate purpose for a treatment-lab result relationship."""
+    if v is not None:
+        if v.lower() not in _VALID_LAB_RESULT_PURPOSES:
+            raise ValueError(
+                f"Purpose must be one of: {', '.join(_VALID_LAB_RESULT_PURPOSES)}"
+            )
+        return v.lower()
+    return v
+
+
 class TreatmentBase(TaggedEntityMixin):
     treatment_name: str = Field(
         ..., min_length=2, max_length=300, description="Name of the treatment"
@@ -646,12 +660,7 @@ class TreatmentLabResultBase(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        if v is not None:
-            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
-            if v.lower() not in valid_purposes:
-                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
-            return v.lower()
-        return v
+        return _validate_lab_result_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -671,12 +680,27 @@ class TreatmentLabResultCreate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        if v is not None:
-            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
-            if v.lower() not in valid_purposes:
-                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
-            return v.lower()
-        return v
+        return _validate_lab_result_purpose(v)
+
+    @field_validator("relevance_note")
+    @classmethod
+    def validate_relevance_note(cls, v):
+        return _validate_relevance_note(v)
+
+
+class LabResultTreatmentCreate(BaseModel):
+    """Schema for creating a lab-result-side treatment relationship (uses treatment_id)."""
+
+    treatment_id: int
+    lab_result_id: Optional[int] = None  # Will be set from URL path parameter
+    purpose: Optional[str] = Field(None, max_length=50)
+    expected_frequency: Optional[str] = Field(None, max_length=100)
+    relevance_note: Optional[str] = None
+
+    @field_validator("purpose")
+    @classmethod
+    def validate_purpose(cls, v):
+        return _validate_lab_result_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -694,12 +718,7 @@ class TreatmentLabResultUpdate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        if v is not None:
-            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
-            if v.lower() not in valid_purposes:
-                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
-            return v.lower()
-        return v
+        return _validate_lab_result_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod
@@ -721,6 +740,14 @@ class TreatmentLabResultWithDetails(TreatmentLabResultResponse):
     """Schema for treatment lab result relationship with lab result details."""
 
     lab_result: Optional[dict] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LabResultTreatmentWithDetails(TreatmentLabResultResponse):
+    """Schema for lab-result-side treatment relationship with treatment details."""
+
+    treatment: Optional[dict] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -753,12 +780,7 @@ class TreatmentLabResultBulkCreate(BaseModel):
     @field_validator("purpose")
     @classmethod
     def validate_purpose(cls, v):
-        if v is not None:
-            valid_purposes = ["baseline", "monitoring", "outcome", "safety", "other"]
-            if v.lower() not in valid_purposes:
-                raise ValueError(f"Purpose must be one of: {', '.join(valid_purposes)}")
-            return v.lower()
-        return v
+        return _validate_lab_result_purpose(v)
 
     @field_validator("relevance_note")
     @classmethod

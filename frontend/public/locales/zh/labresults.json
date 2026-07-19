@@ -131,6 +131,9 @@
     "linkConditionsDescription": "将此检验结果与相关疾病关联，以便更好地跟踪和组织。",
     "linkConditionsTitle": "关联疾病",
     "linkedVisits": "关联就诊",
+    "linkMedicationsTitle": "Link to Medications",
+    "linkProceduresTitle": "Link to Procedures",
+    "linkTreatmentsTitle": "Link to Treatments",
     "linkVisitsDescription": "将此检验结果与开具或审查该检验的就诊记录关联。",
     "linkVisitsTitle": "关联就诊",
     "matchedCommonName": "匹配：{{name}}",
@@ -165,12 +168,6 @@
     "relationshipsCreateInfo": "保存检验结果后可以添加关系。",
     "relationshipsSaveFirst": "请先保存检验结果以创建关系链接。",
     "testComponentsEditInfo": "保存后可以从查看页面管理检验组件。"
-  },
-  "pendingRelationships": {
-    "addCondition": "添加病症",
-    "addVisit": "添加就诊",
-    "removeCondition": "移除病症",
-    "removeVisit": "移除就诊"
   },
   "modal": {
     "editLabResult": "编辑检验结果",
@@ -217,6 +214,12 @@
     "placeholder": "选择医师"
   },
   "patientIdRequired": "需要患者ID。请先选择患者。",
+  "pendingRelationships": {
+    "addCondition": "添加病症",
+    "addVisit": "添加就诊",
+    "removeCondition": "移除病症",
+    "removeVisit": "移除就诊"
+  },
   "quickFormInstructions": "为此检验结果输入名称，然后您就可以上传并解析您的PDF。",
   "quickImportModalTitle": "快速PDF导入 - 第 {{step}} 步，共2步",
   "quickImportSuccess": "检验结果和检验组件导入成功",

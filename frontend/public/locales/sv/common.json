@@ -1,4 +1,8 @@
 {
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
   "allergies": {
     "messages": {
       "loading": "Laddar allergier..."
@@ -8,6 +12,7 @@
     "addNew": "Lägg till ny",
     "back": "Tillbaka",
     "cancelSelection": "Avbryt val",
+    "clear": "Clear",
     "create": "Skapa",
     "delete": "Radera",
     "done": "Klar",
@@ -17,6 +22,9 @@
     "linkEquipment": "Länka utrustning",
     "linkLabResult": "Länka labbresultat",
     "linkMedication": "Länka läkemedel",
+    "linkMedications": "Länka läkemedel",
+    "linkProcedure": "Link Procedure",
+    "linkTreatment": "Link Treatment",
     "linkVisit": "Länka besök",
     "print": "Skriv ut",
     "refresh": "Uppdatera",
@@ -29,8 +37,7 @@
     "showMore": "Visa mer",
     "tryAgain": "Försök igen",
     "update": "Uppdatera",
-    "view": "Visa",
-    "linkMedications": "Länka läkemedel"
+    "view": "Visa"
   },
   "conditions": {
     "addNew": "Lägg till nytt tillstånd",
@@ -54,6 +61,7 @@
         "snomedCode": "SNOMED CT-kod",
         "tags": "Lägg till taggar för att kategorisera och organisera tillstånd"
       },
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
       "medicationsDescription": "Länka läkemedel som används för att behandla eller hantera detta tillstånd.",
       "placeholders": {
         "codeDescription": "Beskrivning av den medicinska koden",
@@ -64,6 +72,7 @@
         "severity": "Välj allvarlighetsgrad",
         "snomedCode": "t.ex. 44054006"
       },
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results.",
       "saving": "Sparar tillstånd...",
       "severity": {
         "lifeThreatening": "Livshotande",
@@ -292,7 +301,8 @@
   "filters": {
     "clear": "Rensa",
     "itemCount": "{{filtered}} av {{total}} objekt",
-    "title": "Filter och sök"
+    "title": "Filter och sök",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Lägg till ny vaccination",
@@ -345,10 +355,17 @@
       "vaccineNameDesc": "Vanligt namn för vaccinet",
       "vaccineNamePlaceholder": "t.ex. Influensavaccin, COVID-19, Tdap"
     },
+    "history": {
+      "noPatient": "Välj en patient för att visa historik."
+    },
     "loadingImmunizations": "Laddar vaccinationer...",
     "noImmunizationsFound": "Inga vaccinationer hittades",
     "table": {
       "site": "Injektionsställe"
+    },
+    "tabs": {
+      "history": "Historik",
+      "records": "Poster"
     },
     "viewModal": {
       "adminDetails": "Administreringsdetaljer",
@@ -357,13 +374,6 @@
       "title": "Vaccinationsdetaljer",
       "tradeName": "Handelsnamn",
       "vaccineInfo": "Vaccininformation"
-    },
-    "tabs": {
-      "records": "Poster",
-      "history": "Historik"
-    },
-    "history": {
-      "noPatient": "Välj en patient för att visa historik."
     }
   },
   "insurance": {
@@ -438,39 +448,50 @@
   "key": "Standard {{var}}",
   "labels": {
     "addCustom": "+ Lägg till \"{{value}}\"",
+    "cancelEdit": "Cancel edit",
+    "conditionsAvailableToLink": "{{count}} tillstånd tillgängliga att länka",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "expectedFrequency": "Expected frequency",
+    "labResultsAvailableToLink_one": "{{count}} lab results available to link",
+    "labResultsAvailableToLink_other": "{{count}} lab results available to link",
     "linkedLabResults": "Länkade labbresultat",
     "linkedMedications": "Länkade läkemedel",
     "loading": "Laddar...",
     "loadingLabResults": "Laddar labbresultat...",
     "loadingOption": "Laddar {{option}}...",
     "loadingRelatedConditions": "Laddar relaterade tillstånd...",
+    "medicationsAvailableToLink": "{{count}} läkemedel tillgängliga att länka",
     "new": "Ny",
     "no": "Nej",
     "noConditionsLinked": "Inga tillstånd länkade till detta labbresultat",
+    "noConditionsLinkedToMedication": "Inga tillstånd länkade till detta läkemedel",
+    "noDate": "No date",
     "noEncountersLinked": "Inga besök länkade till denna behandling",
     "noEquipmentLinked": "Ingen utrustning länkad till denna behandling",
     "noLabResultsLinked": "Inga labbresultat länkade till detta besök",
     "noLabResultsLinkedToCondition": "Inga labbresultat länkade till detta tillstånd",
     "noMedicationsLinked": "Inga läkemedel länkade till detta tillstånd",
+    "noMedicationsLinkedToLabResult": "No medications linked to this lab result",
     "none": "Ingen",
+    "noProceduresLinked": "No procedures linked to this lab result",
     "noRating": "Inget betyg",
     "notAvailable": "Ej tillgänglig",
     "notCompleted": "Ej slutfört",
+    "noTreatmentsLinked": "No treatments linked to this lab result",
     "noVisitsLinked": "Inga besök länkade till detta labbresultat",
     "ordered": "Beställt",
     "phoneNumber": "Telefonnummer",
     "ratingStars": "{{count}}/5 stjärnor",
     "ratingStars_one": "{{count}}/5 stjärna",
     "ratingStars_other": "{{count}}/5 stjärnor",
+    "saveRelationship": "Save relationship",
     "selectPurpose": "Välj syfte",
     "viewDetails": "Visa detaljer",
     "viewPharmacyDetails": "Visa apoteksinformation",
     "visitDate": "Besöksdatum",
     "visitWebsite": "Besök webbplats ↗",
-    "yes": "Ja",
-    "noConditionsLinkedToMedication": "Inga tillstånd länkade till detta läkemedel",
-    "conditionsAvailableToLink": "{{count}} tillstånd tillgängliga att länka",
-    "medicationsAvailableToLink": "{{count}} läkemedel tillgängliga att länka"
+    "yes": "Ja"
   },
   "labResults": {
     "emptyLabResultMessage": "Du skapade ett labbresultat men lade inte till några testkomponenter. Vill du ta bort detta labbresultat?",
@@ -538,47 +559,76 @@
     "confirmRemoveConditionRelationship": "Är du säker på att du vill ta bort denna tillståndsrelation?",
     "confirmRemoveEquipmentRelationship": "Är du säker på att du vill ta bort denna utrustningslänk?",
     "confirmRemoveLabResultLink": "Ta bort denna labbresultatlänk?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?",
+    "confirmRemoveMedicationLink": "Remove this medication link?",
+    "confirmRemoveMedicationRelationship": "Är du säker på att du vill ta bort denna läkemedelsrelation?",
+    "confirmRemoveProcedureLink": "Remove this procedure link?",
+    "confirmRemoveTreatmentLink": "Remove this treatment link?",
     "confirmRemoveVisitLink": "Ta bort denna besökslänk?",
     "displayError": "Kan inte visa detta objekt. Försök att uppdatera sidan.",
     "doNotClose": "Vänligen stäng inte detta fönster eller navigera bort",
     "failedToLinkLabResult": "Misslyckades med att länka labbresultat",
+    "failedToLinkMedication": "Failed to link medication",
+    "failedToLinkProcedure": "Failed to link procedure",
+    "failedToLinkTreatment": "Failed to link treatment",
     "failedToLinkVisit": "Misslyckades med att länka besök",
     "failedToUnlinkLabResult": "Misslyckades med att ta bort länk till labbresultat",
+    "failedToUnlinkMedication": "Failed to unlink medication",
+    "failedToUnlinkProcedure": "Failed to unlink procedure",
+    "failedToUnlinkTreatment": "Failed to unlink treatment",
     "failedToUnlinkVisit": "Misslyckades med att ta bort länk till besök",
     "failedToUpdateRelationship": "Misslyckades med att uppdatera relationen",
     "processing": "Bearbetar...",
     "selectLabResult": "Välj ett labbresultat",
+    "selectMedication": "Please select a medication",
+    "selectProcedure": "Please select a procedure",
+    "selectTreatment": "Please select a treatment",
     "selectVisit": "Välj ett besök",
     "underDevelopment": "Denna sektion är för närvarande under utveckling.",
-    "updateSuccess": "Uppdaterades framgångsrikt",
-    "confirmRemoveMedicationRelationship": "Är du säker på att du vill ta bort denna läkemedelsrelation?"
+    "updateSuccess": "Uppdaterades framgångsrikt"
   },
   "modals": {
     "chooseConditionsToLink": "Välj tillstånd att länka",
     "chooseConditionToLink": "Välj ett tillstånd att länka",
+    "chooseLabResultsToLink": "Choose lab results to link",
     "chooseLabResultToLink": "Välj ett labbresultat att länka",
     "chooseMedicationToLink": "Välj läkemedel att länka",
+    "chooseOneMedicationToLink": "Choose a medication to link",
+    "chooseProcedureToLink": "Choose a procedure to link",
+    "chooseTreatmentToLink": "Choose a treatment to link",
     "chooseVisitToLink": "Välj ett besök att länka",
     "describeConditionRelevance": "Beskriv hur detta tillstånd relaterar till labbresultatet (valfritt)",
+    "describeConditionRelevanceMedication": "Beskriv hur detta tillstånd relaterar till läkemedlet",
     "describeLabResultRelevance": "Beskriv hur detta labbresultat är relaterat till detta besök",
+    "describeMedicationLabResultRelevance": "Describe how this medication relates to this lab result",
+    "describeMedicationRelevance": "Beskriv hur detta läkemedel relaterar till tillståndet",
+    "describeProcedureRelevance": "Describe how this procedure relates to this lab result",
+    "describeTreatmentRelevance": "Describe how this treatment relates to this lab result",
     "describeVisitRelevance": "Beskriv hur detta besök är relaterat till detta labbresultat",
+    "expectedFrequencyPlaceholder": "e.g. Monthly, Every 3 months",
+    "linkConditionsToMedication": "Länka tillstånd till läkemedel",
     "linkConditionToLabResult": "Länka tillstånd till labbresultat",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
     "linkLabResultToVisit": "Länka labbresultat till besök",
+    "linkMedicationsToCondition": "Länka läkemedel till tillstånd",
+    "linkMedicationToLabResult": "Link Medication to Lab Result",
+    "linkProcedureToLabResult": "Link Procedure to Lab Result",
+    "linkTreatmentToLabResult": "Link Treatment to Lab Result",
     "linkVisitToLabResult": "Länka besök till labbresultat",
     "noRelevanceNoteProvided": "Ingen relevansanteckning angiven",
     "purpose": "Syfte",
     "relevanceNote": "Relevansanteckning",
     "relevanceNoteOptional": "Relevansanteckning (valfritt)",
     "selectCondition": "Välj tillstånd",
-    "selectLabResult": "Välj labbresultat",
-    "selectMedications": "Välj läkemedel",
-    "selectPurpose": "Välj syfte",
-    "selectVisit": "Välj besök",
-    "linkConditionsToMedication": "Länka tillstånd till läkemedel",
-    "linkMedicationsToCondition": "Länka läkemedel till tillstånd",
     "selectConditions": "Välj tillstånd",
-    "describeConditionRelevanceMedication": "Beskriv hur detta tillstånd relaterar till läkemedlet",
-    "describeMedicationRelevance": "Beskriv hur detta läkemedel relaterar till tillståndet"
+    "selectLabResult": "Välj labbresultat",
+    "selectLabResults": "Select Lab Results",
+    "selectMedication": "Select Medication",
+    "selectMedications": "Välj läkemedel",
+    "selectProcedure": "Select Procedure",
+    "selectPurpose": "Välj syfte",
+    "selectTreatment": "Select Treatment",
+    "selectVisit": "Välj besök"
   },
   "noResults": "Inga vårdgivare hittades",
   "pagination": {
@@ -755,6 +805,13 @@
     "card": {
       "subtitle": "Vårdgivare"
     },
+    "createInline": {
+      "buttonTooltip": "Ny behandlare",
+      "createError": "Det gick inte att skapa behandlaren. Försök igen.",
+      "nameRequired": "Namn är obligatoriskt",
+      "specialtyRequired": "Medicinsk specialitet är obligatorisk",
+      "successMessage": "Behandlare skapad och vald"
+    },
     "createPracticeError": "Kunde inte skapa mottagning. Försök igen.",
     "editPracticeError": "Kunde inte ladda mottagningen för redigering",
     "empty": {
@@ -768,13 +825,6 @@
     "form": {
       "addTitle": "Lägg till ny vårdgivare",
       "editTitle": "Redigera vårdgivare"
-    },
-    "createInline": {
-      "buttonTooltip": "Ny behandlare",
-      "nameRequired": "Namn är obligatoriskt",
-      "specialtyRequired": "Medicinsk specialitet är obligatorisk",
-      "createError": "Det gick inte att skapa behandlaren. Försök igen.",
-      "successMessage": "Behandlare skapad och vald"
     },
     "groupByPractice": "Gruppera efter mottagning",
     "loading": "Laddar vårdgivare...",
@@ -1242,13 +1292,17 @@
       "treatmentNotes": "Behandlingsanteckningar"
     }
   },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  },
   "viewToggle": {
     "cards": "Kort",
     "components": "Testresultat",
     "label": "Visningsläge",
-    "table": "Tabell",
+    "labwork": "Laboratoriearbete",
     "stacked": "Staplade",
-    "labwork": "Laboratoriearbete"
+    "table": "Tabell"
   },
   "visits": {
     "addNewVisit": "Lägg till nytt besök",
@@ -1260,7 +1314,10 @@
     "editVisit": "Redigera besök",
     "form": {
       "addVisit": "Lägg till besök",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
       "savingVisit": "Sparar besök...",
+      "selectLabResults": "Select Lab Results",
       "tabs": {
         "clinical": "Kliniskt",
         "visitInfo": "Besöksinformation"
@@ -1268,6 +1325,10 @@
       "updateVisit": "Uppdatera besök"
     },
     "loadingVisits": "Laddar besök...",
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
+    },
     "noVisitsFound": "Inga medicinska besök hittades",
     "table": {
       "visitDate": "Besöksdatum",

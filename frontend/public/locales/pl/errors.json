@@ -35,6 +35,7 @@
     "invalidPhone": "Proszę podać prawidłowy numer telefonu.",
     "invalidPhoneDigits": "Proszę podać prawidłowy numer telefonu",
     "invalidWebsiteUrl": "Proszę podać prawidłowy adres URL strony internetowej",
+    "labResultNotSelected": "Please select at least one lab result",
     "medicationNotSelected": "Proszę wybrać lek",
     "mustBeValidNumber": "Musi być prawidłową liczbą",
     "patientNotSelected": "Proszę wybrać pacjenta.",

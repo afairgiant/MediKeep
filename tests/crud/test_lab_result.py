@@ -4,15 +4,29 @@ Tests for Lab Result CRUD operations.
 
 import pytest
 from datetime import date, timedelta
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.crud.lab_result import lab_result as lab_result_crud
+from app.crud.lab_result import (
+    lab_result as lab_result_crud,
+    lab_result_medication,
+    lab_result_procedure,
+)
+from app.crud.medication import medication as medication_crud
 from app.crud.patient import patient as patient_crud
 from app.crud.practitioner import practitioner as practitioner_crud
-from app.models.models import LabResult
-from app.schemas.lab_result import LabResultCreate, LabResultUpdate
+from app.crud.procedure import procedure as procedure_crud
+from app.models.models import LabResult, LabResultMedication, LabResultProcedure
+from app.schemas.lab_result import (
+    LabResultCreate,
+    LabResultMedicationCreate,
+    LabResultProcedureCreate,
+    LabResultUpdate,
+)
+from app.schemas.medication import MedicationCreate
 from app.schemas.patient import PatientCreate
 from app.schemas.practitioner import PractitionerCreate
+from app.schemas.procedure import ProcedureCreate
 
 
 class TestLabResultCRUD:
@@ -502,3 +516,424 @@ class TestLabResultCRUD:
         assert lab_result_with_files is not None
         assert lab_result_with_files.id == created_lab_result.id
         assert lab_result_with_files.test_name == "MRI Brain"
+
+
+class TestCRUDLabResultMedication:
+    """Tests for the LabResultMedication junction CRUD operations."""
+
+    @pytest.fixture
+    def patient_with_data(self, db_session: Session, test_user):
+        """Create a patient with a lab result and two medications."""
+        patient = patient_crud.create_for_user(
+            db_session,
+            user_id=test_user.id,
+            patient_data=PatientCreate(
+                first_name="Med",
+                last_name="Patient",
+                birth_date=date(1990, 1, 1),
+                gender="M",
+                address="123 Test St",
+            ),
+        )
+
+        lab_result = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=patient.id,
+                test_name="Liver Function Panel",
+                test_code="LFT",
+                test_category="chemistry",
+                ordered_date=date(2024, 1, 10),
+                status="completed",
+            ),
+        )
+
+        medication = medication_crud.create(
+            db_session,
+            obj_in=MedicationCreate(
+                patient_id=patient.id,
+                medication_name="Atorvastatin",
+                dosage="20mg",
+                status="active",
+            ),
+        )
+
+        medication2 = medication_crud.create(
+            db_session,
+            obj_in=MedicationCreate(
+                patient_id=patient.id,
+                medication_name="Metformin",
+                dosage="500mg",
+                status="active",
+            ),
+        )
+
+        return {
+            "patient": patient,
+            "lab_result": lab_result,
+            "medication": medication,
+            "medication2": medication2,
+        }
+
+    def test_create_relationship(self, db_session, patient_with_data):
+        """Test creating a lab result medication relationship."""
+        lr = patient_with_data["lab_result"]
+        med = patient_with_data["medication"]
+
+        relationship = lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(
+                lab_result_id=lr.id,
+                medication_id=med.id,
+                relevance_note="Ordered to monitor liver function on this medication",
+            ),
+        )
+
+        assert relationship.id is not None
+        assert relationship.lab_result_id == lr.id
+        assert relationship.medication_id == med.id
+        assert (
+            relationship.relevance_note
+            == "Ordered to monitor liver function on this medication"
+        )
+        assert relationship.created_at is not None
+
+    def test_get_by_lab_result(self, db_session, patient_with_data):
+        """Test querying relationships by lab result."""
+        lr = patient_with_data["lab_result"]
+        med = patient_with_data["medication"]
+        med2 = patient_with_data["medication2"]
+
+        lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(lab_result_id=lr.id, medication_id=med.id),
+        )
+        lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(lab_result_id=lr.id, medication_id=med2.id),
+        )
+
+        results = lab_result_medication.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
+        assert len(results) == 2
+        med_ids = {r.medication_id for r in results}
+        assert med.id in med_ids
+        assert med2.id in med_ids
+
+    def test_get_by_lab_result_and_medication(self, db_session, patient_with_data):
+        """Test querying a specific lab result-medication pair."""
+        lr = patient_with_data["lab_result"]
+        med = patient_with_data["medication"]
+
+        lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(lab_result_id=lr.id, medication_id=med.id),
+        )
+
+        result = lab_result_medication.get_by_lab_result_and_medication(
+            db_session, lab_result_id=lr.id, medication_id=med.id
+        )
+        assert result is not None
+        assert result.lab_result_id == lr.id
+        assert result.medication_id == med.id
+
+    def test_get_by_lab_result_and_medication_not_found(
+        self, db_session, patient_with_data
+    ):
+        """Test querying a nonexistent pair returns None."""
+        result = lab_result_medication.get_by_lab_result_and_medication(
+            db_session, lab_result_id=99999, medication_id=99999
+        )
+        assert result is None
+
+    def test_delete_by_lab_result_and_medication(self, db_session, patient_with_data):
+        """Test deleting a specific relationship by its pair."""
+        lr = patient_with_data["lab_result"]
+        med = patient_with_data["medication"]
+
+        lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(lab_result_id=lr.id, medication_id=med.id),
+        )
+
+        deleted = lab_result_medication.delete_by_lab_result_and_medication(
+            db_session, lab_result_id=lr.id, medication_id=med.id
+        )
+        assert deleted is True
+
+        result = lab_result_medication.get_by_lab_result_and_medication(
+            db_session, lab_result_id=lr.id, medication_id=med.id
+        )
+        assert result is None
+
+    def test_delete_nonexistent_returns_false(self, db_session):
+        """Test deleting a nonexistent relationship returns False."""
+        deleted = lab_result_medication.delete_by_lab_result_and_medication(
+            db_session, lab_result_id=99999, medication_id=99999
+        )
+        assert deleted is False
+
+    def test_unique_constraint_violation(self, db_session, patient_with_data):
+        """Test that creating a duplicate lab result-medication pair raises IntegrityError."""
+        lr = patient_with_data["lab_result"]
+        med = patient_with_data["medication"]
+
+        lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(lab_result_id=lr.id, medication_id=med.id),
+        )
+
+        with pytest.raises(IntegrityError):
+            lab_result_medication.create(
+                db_session,
+                obj_in=LabResultMedicationCreate(
+                    lab_result_id=lr.id, medication_id=med.id
+                ),
+            )
+
+    def test_cascade_delete_lab_result(self, db_session, patient_with_data):
+        """Test that deleting the lab result cascades to relationships."""
+        lr = patient_with_data["lab_result"]
+        med = patient_with_data["medication"]
+
+        lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(lab_result_id=lr.id, medication_id=med.id),
+        )
+
+        db_session.delete(lr)
+        db_session.commit()
+
+        results = lab_result_medication.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
+        assert len(results) == 0
+
+    def test_cascade_delete_medication(self, db_session, patient_with_data):
+        """Test that deleting the medication cascades to relationships."""
+        lr = patient_with_data["lab_result"]
+        med = patient_with_data["medication"]
+
+        lab_result_medication.create(
+            db_session,
+            obj_in=LabResultMedicationCreate(lab_result_id=lr.id, medication_id=med.id),
+        )
+
+        db_session.delete(med)
+        db_session.commit()
+
+        results = lab_result_medication.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
+        assert len(results) == 0
+
+
+class TestCRUDLabResultProcedure:
+    """Tests for the LabResultProcedure junction CRUD operations."""
+
+    @pytest.fixture
+    def patient_with_data(self, db_session: Session, test_user):
+        """Create a patient with a lab result and two procedures."""
+        patient = patient_crud.create_for_user(
+            db_session,
+            user_id=test_user.id,
+            patient_data=PatientCreate(
+                first_name="Proc",
+                last_name="Patient",
+                birth_date=date(1990, 1, 1),
+                gender="M",
+                address="123 Test St",
+            ),
+        )
+
+        lab_result = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                patient_id=patient.id,
+                test_name="Pre-op Labs",
+                test_code="PREOP",
+                test_category="chemistry",
+                ordered_date=date(2024, 1, 10),
+                status="completed",
+            ),
+        )
+
+        procedure = procedure_crud.create(
+            db_session,
+            obj_in=ProcedureCreate(
+                patient_id=patient.id,
+                procedure_name="Appendectomy",
+                date=date(2024, 1, 15),
+                status="completed",
+            ),
+        )
+
+        procedure2 = procedure_crud.create(
+            db_session,
+            obj_in=ProcedureCreate(
+                patient_id=patient.id,
+                procedure_name="Blood Draw",
+                date=date(2024, 1, 12),
+                status="completed",
+            ),
+        )
+
+        return {
+            "patient": patient,
+            "lab_result": lab_result,
+            "procedure": procedure,
+            "procedure2": procedure2,
+        }
+
+    def test_create_relationship(self, db_session, patient_with_data):
+        """Test creating a lab result procedure relationship."""
+        lr = patient_with_data["lab_result"]
+        proc = patient_with_data["procedure"]
+
+        relationship = lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(
+                lab_result_id=lr.id,
+                procedure_id=proc.id,
+                relevance_note="Pre-operative labs for this procedure",
+            ),
+        )
+
+        assert relationship.id is not None
+        assert relationship.lab_result_id == lr.id
+        assert relationship.procedure_id == proc.id
+        assert (
+            relationship.relevance_note == "Pre-operative labs for this procedure"
+        )
+        assert relationship.created_at is not None
+
+    def test_get_by_lab_result(self, db_session, patient_with_data):
+        """Test querying relationships by lab result."""
+        lr = patient_with_data["lab_result"]
+        proc = patient_with_data["procedure"]
+        proc2 = patient_with_data["procedure2"]
+
+        lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(lab_result_id=lr.id, procedure_id=proc.id),
+        )
+        lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(lab_result_id=lr.id, procedure_id=proc2.id),
+        )
+
+        results = lab_result_procedure.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
+        assert len(results) == 2
+        proc_ids = {r.procedure_id for r in results}
+        assert proc.id in proc_ids
+        assert proc2.id in proc_ids
+
+    def test_get_by_lab_result_and_procedure(self, db_session, patient_with_data):
+        """Test querying a specific lab result-procedure pair."""
+        lr = patient_with_data["lab_result"]
+        proc = patient_with_data["procedure"]
+
+        lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(lab_result_id=lr.id, procedure_id=proc.id),
+        )
+
+        result = lab_result_procedure.get_by_lab_result_and_procedure(
+            db_session, lab_result_id=lr.id, procedure_id=proc.id
+        )
+        assert result is not None
+        assert result.lab_result_id == lr.id
+        assert result.procedure_id == proc.id
+
+    def test_get_by_lab_result_and_procedure_not_found(
+        self, db_session, patient_with_data
+    ):
+        """Test querying a nonexistent pair returns None."""
+        result = lab_result_procedure.get_by_lab_result_and_procedure(
+            db_session, lab_result_id=99999, procedure_id=99999
+        )
+        assert result is None
+
+    def test_delete_by_lab_result_and_procedure(self, db_session, patient_with_data):
+        """Test deleting a specific relationship by its pair."""
+        lr = patient_with_data["lab_result"]
+        proc = patient_with_data["procedure"]
+
+        lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(lab_result_id=lr.id, procedure_id=proc.id),
+        )
+
+        deleted = lab_result_procedure.delete_by_lab_result_and_procedure(
+            db_session, lab_result_id=lr.id, procedure_id=proc.id
+        )
+        assert deleted is True
+
+        result = lab_result_procedure.get_by_lab_result_and_procedure(
+            db_session, lab_result_id=lr.id, procedure_id=proc.id
+        )
+        assert result is None
+
+    def test_delete_nonexistent_returns_false(self, db_session):
+        """Test deleting a nonexistent relationship returns False."""
+        deleted = lab_result_procedure.delete_by_lab_result_and_procedure(
+            db_session, lab_result_id=99999, procedure_id=99999
+        )
+        assert deleted is False
+
+    def test_unique_constraint_violation(self, db_session, patient_with_data):
+        """Test that creating a duplicate lab result-procedure pair raises IntegrityError."""
+        lr = patient_with_data["lab_result"]
+        proc = patient_with_data["procedure"]
+
+        lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(lab_result_id=lr.id, procedure_id=proc.id),
+        )
+
+        with pytest.raises(IntegrityError):
+            lab_result_procedure.create(
+                db_session,
+                obj_in=LabResultProcedureCreate(
+                    lab_result_id=lr.id, procedure_id=proc.id
+                ),
+            )
+
+    def test_cascade_delete_lab_result(self, db_session, patient_with_data):
+        """Test that deleting the lab result cascades to relationships."""
+        lr = patient_with_data["lab_result"]
+        proc = patient_with_data["procedure"]
+
+        lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(lab_result_id=lr.id, procedure_id=proc.id),
+        )
+
+        db_session.delete(lr)
+        db_session.commit()
+
+        results = lab_result_procedure.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
+        assert len(results) == 0
+
+    def test_cascade_delete_procedure(self, db_session, patient_with_data):
+        """Test that deleting the procedure cascades to relationships."""
+        lr = patient_with_data["lab_result"]
+        proc = patient_with_data["procedure"]
+
+        lab_result_procedure.create(
+            db_session,
+            obj_in=LabResultProcedureCreate(lab_result_id=lr.id, procedure_id=proc.id),
+        )
+
+        db_session.delete(proc)
+        db_session.commit()
+
+        results = lab_result_procedure.get_by_lab_result(
+            db_session, lab_result_id=lr.id
+        )
+        assert len(results) == 0

@@ -332,6 +332,38 @@
       "label": "Data ważności szczepionki",
       "placeholder": "Wybierz datę ważności"
     },
+    "form": {
+      "linkStatusLinked": "✓ Połączono z biblioteką: {{name}}",
+      "linkStatusUnlinked": "⚠ Nie połączono z biblioteką. Wybierz szczepionkę z listy, aby połączyć."
+    },
+    "history": {
+      "dateRangePlaceholder": "Filtruj według zakresu dat",
+      "doseLabel": "Dawka {{n}}",
+      "dosesCount": "Liczba dawek: {{count}}",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 dawka",
+      "emptyAll": "Brak zarejestrowanych szczepień.",
+      "emptyRange": "Brak szczepień w tym zakresie.",
+      "linkActionLabel": "Połącz z biblioteką",
+      "lotLabel": "Partia {{lot}}",
+      "miscGroup": "Różne / Niepołączone",
+      "miscGroupHint": "Te wpisy nie są jeszcze połączone z biblioteką szczepionek. Kliknij wpis, aby go edytować i wybrać pozycję z biblioteki.",
+      "noDiseaseData": "Żadne szczepienia nie są powiązane z biblioteką. Przełącz na widok „Według daty”, aby zobaczyć wszystkie wpisy, lub edytuj wpis i ponownie wybierz szczepionkę z autouzupełniania, aby ją powiązać.",
+      "recordCount": "Liczba szczepień: {{count}}",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 szczepienie",
+      "unlinkedTag": "Niepowiązane",
+      "unmatchedBanner": "Liczba niepowiązanych wpisów: {{count}}. Edytuj wpis i wybierz go ponownie z autouzupełniania, aby go powiązać.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Niektóre wpisy nie są powiązane z biblioteką szczepionek",
+      "viewMode": {
+        "byDate": "Według daty",
+        "byDisease": "Według choroby"
+      }
+    },
     "location": {
       "description": "Gdzie szczepionka została podana",
       "placeholder": "np. Apteka, Szpital, Klinika, Departament Zdrowia"
@@ -388,38 +420,12 @@
       "rightThigh": "Prawe udo"
     },
     "vaccineName": {
+      "combinedHint": "Szczepionka złożona — składniki: {{components}}",
       "description": "Nazwa podanej szczepionki",
       "label": "Nazwa szczepionki",
+      "matchedCommonName": "dopasowano: {{name}}",
       "placeholder": "np. COVID-19 mRNA, Grypa, MMR",
-      "searchPlaceholder": "Wpisz, aby wyszukać szczepionki...",
-      "combinedHint": "Szczepionka złożona — składniki: {{components}}",
-      "matchedCommonName": "dopasowano: {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "Według daty",
-        "byDisease": "Według choroby"
-      },
-      "recordCount": "Liczba szczepień: {{count}}",
-      "recordCountSingular": "1 szczepienie",
-      "dosesCount": "Liczba dawek: {{count}}",
-      "dosesCountSingular": "1 dawka",
-      "doseLabel": "Dawka {{n}}",
-      "lotLabel": "Partia {{lot}}",
-      "unlinkedTag": "Niepowiązane",
-      "emptyAll": "Brak zarejestrowanych szczepień.",
-      "emptyRange": "Brak szczepień w tym zakresie.",
-      "dateRangePlaceholder": "Filtruj według zakresu dat",
-      "noDiseaseData": "Żadne szczepienia nie są powiązane z biblioteką. Przełącz na widok „Według daty”, aby zobaczyć wszystkie wpisy, lub edytuj wpis i ponownie wybierz szczepionkę z autouzupełniania, aby ją powiązać.",
-      "unmatchedTitle": "Niektóre wpisy nie są powiązane z biblioteką szczepionek",
-      "unmatchedBanner": "Liczba niepowiązanych wpisów: {{count}}. Edytuj wpis i wybierz go ponownie z autouzupełniania, aby go powiązać.",
-      "linkActionLabel": "Połącz z biblioteką",
-      "miscGroup": "Różne / Niepołączone",
-      "miscGroupHint": "Te wpisy nie są jeszcze połączone z biblioteką szczepionek. Kliknij wpis, aby go edytować i wybrać pozycję z biblioteki."
-    },
-    "form": {
-      "linkStatusLinked": "✓ Połączono z biblioteką: {{name}}",
-      "linkStatusUnlinked": "⚠ Nie połączono z biblioteką. Wybierz szczepionkę z listy, aby połączyć."
+      "searchPlaceholder": "Wpisz, aby wyszukać szczepionki..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "Wynik laboratoryjny zapisany, ale nie można było dodać komponentów badania. Możesz je dodać ze strony widoku.",
-      "relationshipCreationWarning": "Wynik laboratoryjny zapisany, ale niektóre relacje nie mogły być utworzone. Możesz je dodać ze strony edycji."
-    },
     "addPanel": {
-      "title": "Dodaj wyniki laboratoryjne",
-      "panelName": "Panel lub typ wyników laboratoryjnych",
-      "panelNamePlaceholder": "np. CBC, morfologia krwi",
-      "panelNameDescription": "Nazwa dla tej grupy badań",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Zapisz wyniki",
-      "creating": "Tworzenie...",
       "createError": "Nie udało się utworzyć panelu badań",
+      "creating": "Tworzenie...",
+      "panelName": "Panel lub typ wyników laboratoryjnych",
+      "panelNameDescription": "Nazwa dla tej grupy badań",
+      "panelNamePlaceholder": "np. CBC, morfologia krwi",
+      "tagsPlaceholder": "Dodaj tagi, aby później organizować i wyszukiwać ten rekord",
       "testResultRequired": "Wymagany jest co najmniej jeden wynik badania",
-      "tagsPlaceholder": "Dodaj tagi, aby później organizować i wyszukiwać ten rekord"
+      "title": "Dodaj wyniki laboratoryjne"
     },
     "buttons": {
       "addLabResults": "Dodaj wyniki badań"
+    },
+    "form": {
+      "componentCreationWarning": "Wynik laboratoryjny zapisany, ale nie można było dodać komponentów badania. Możesz je dodać ze strony widoku.",
+      "relationshipCreationWarning": "Wynik laboratoryjny zapisany, ale niektóre relacje nie mogły być utworzone. Możesz je dodać ze strony edycji."
     }
   },
   "medications": {
@@ -888,6 +898,58 @@
       "label": "Lekarz przepisujący",
       "placeholder": "Wybierz lekarza"
     },
+    "reminders": {
+      "days": {
+        "description": "Zostaw puste, aby otrzymywać przypomnienia każdego dnia",
+        "fri": "Pt",
+        "label": "Dni przypomnień",
+        "mon": "Pon",
+        "sat": "Sob",
+        "sun": "Nd",
+        "thu": "Czw",
+        "tue": "Wt",
+        "wed": "Śr"
+      },
+      "enabled": {
+        "description": "Wysyłaj powiadomienia, gdy nadejdzie pora przyjęcia tego leku",
+        "label": "Włącz przypomnienia"
+      },
+      "enabledBadge": "Przypomnienia włączone",
+      "message": {
+        "description": "Opcjonalna notatka w powiadomieniu o przypomnieniu (maks. 200 znaków)",
+        "label": "Niestandardowa wiadomość przypomnienia",
+        "placeholder": "np. Przyjmować z jedzeniem, Najpierw zmierzyć ciśnienie"
+      },
+      "noChannelsTitle": "Brak włączonego kanału powiadomień",
+      "noChannelsWarning": "Nie skonfigurowano kanału powiadomień dla przypomnień o lekach. Otwórz ustawienia powiadomień, aby włączyć kanał.",
+      "notFiring": {
+        "badge": "Nie zostanie uruchomione",
+        "dayNotActive": "Przypomnienia nie są zaplanowane na dzisiaj.",
+        "notStarted": "Przyjmowanie tego leku zaczyna się dopiero {{date}}.",
+        "periodEnded": "Ten lek jest oznaczony jako już nieprzyjmowany od {{date}}.",
+        "statusNotActive": "Status leku to „{{status}}” — przypomnienia są wysyłane tylko dla aktywnych leków.",
+        "title": "Przypomnienia nie będą uruchamiane"
+      },
+      "openSettings": "Otwórz ustawienia powiadomień",
+      "saveBeforeTest": "Najpierw zapisz lek, aby wysłać testowe przypomnienie.",
+      "tabLabel": "Przypomnienia",
+      "testButton": "Wyślij teraz testowe przypomnienie",
+      "testError": "Nie udało się wysłać testowego przypomnienia",
+      "testSuccess": "Wysłano testowe przypomnienie",
+      "times": {
+        "addButton": "Dodaj godzinę",
+        "description": "Godziny (format 24-godzinny), o których przypomnienie zostanie wysłane",
+        "duplicate": "Ta godzina jest już na liście",
+        "empty": "Nie skonfigurowano godzin przypomnień.",
+        "invalid": "Godzina musi być w formacie GG:MM (24-godzinnym)",
+        "label": "Godziny przypomnień",
+        "max": "Maksymalnie {{count}} godzin",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Usuń godzinę"
+      },
+      "viewNone": "Brak skonfigurowanych przypomnień"
+    },
     "route": {
       "description": "Sposób podawania leku",
       "label": "Droga podania",
@@ -909,56 +971,6 @@
       "description": "Znane lub doświadczane skutki uboczne tego leku",
       "label": "Działania niepożądane",
       "placeholder": "Wymień znane lub doświadczane działania niepożądane..."
-    },
-    "reminders": {
-      "tabLabel": "Przypomnienia",
-      "enabled": {
-        "label": "Włącz przypomnienia",
-        "description": "Wysyłaj powiadomienia, gdy nadejdzie pora przyjęcia tego leku"
-      },
-      "times": {
-        "label": "Godziny przypomnień",
-        "description": "Godziny (format 24-godzinny), o których przypomnienie zostanie wysłane",
-        "addButton": "Dodaj godzinę",
-        "removeAriaLabel": "Usuń godzinę",
-        "max": "Maksymalnie {{count}} godzin",
-        "duplicate": "Ta godzina jest już na liście",
-        "invalid": "Godzina musi być w formacie GG:MM (24-godzinnym)",
-        "empty": "Nie skonfigurowano godzin przypomnień."
-      },
-      "noChannelsTitle": "Brak włączonego kanału powiadomień",
-      "noChannelsWarning": "Nie skonfigurowano kanału powiadomień dla przypomnień o lekach. Otwórz ustawienia powiadomień, aby włączyć kanał.",
-      "openSettings": "Otwórz ustawienia powiadomień",
-      "testButton": "Wyślij teraz testowe przypomnienie",
-      "testSuccess": "Wysłano testowe przypomnienie",
-      "testError": "Nie udało się wysłać testowego przypomnienia",
-      "saveBeforeTest": "Najpierw zapisz lek, aby wysłać testowe przypomnienie.",
-      "viewNone": "Brak skonfigurowanych przypomnień",
-      "notFiring": {
-        "title": "Przypomnienia nie będą uruchamiane",
-        "badge": "Nie zostanie uruchomione",
-        "periodEnded": "Ten lek jest oznaczony jako już nieprzyjmowany od {{date}}.",
-        "notStarted": "Przyjmowanie tego leku zaczyna się dopiero {{date}}.",
-        "statusNotActive": "Status leku to „{{status}}” — przypomnienia są wysyłane tylko dla aktywnych leków.",
-        "dayNotActive": "Przypomnienia nie są zaplanowane na dzisiaj."
-      },
-      "enabledBadge": "Przypomnienia włączone",
-      "message": {
-        "label": "Niestandardowa wiadomość przypomnienia",
-        "placeholder": "np. Przyjmować z jedzeniem, Najpierw zmierzyć ciśnienie",
-        "description": "Opcjonalna notatka w powiadomieniu o przypomnieniu (maks. 200 znaków)"
-      },
-      "days": {
-        "label": "Dni przypomnień",
-        "description": "Zostaw puste, aby otrzymywać przypomnienia każdego dnia",
-        "mon": "Pon",
-        "tue": "Wt",
-        "wed": "Śr",
-        "thu": "Czw",
-        "fri": "Pt",
-        "sat": "Sob",
-        "sun": "Nd"
-      }
     }
   },
   "pharmacies": {

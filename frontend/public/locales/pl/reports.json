@@ -14,7 +14,6 @@
       "description": "Wybierz dokumentację medyczną do uwzględnienia w niestandardowym raporcie",
       "title": "Konfiguracja raportu"
     },
-    "icon": "",
     "loading": "Ładowanie kreatora raportów...",
     "noData": {
       "description": "Najpierw dodaj dokumentację medyczną, aby skorzystać z kreatora raportów.",
@@ -160,7 +159,6 @@
       "singleExport": "Eksport pojedynczy",
       "title": "Tryb eksportu"
     },
-    "icon": "",
     "information": {
       "bulk": {
         "description": "Tworzy plik ZIP zawierający wiele typów danych w wybranym formacie do kompleksowej archiwizacji danych.",
@@ -221,8 +219,8 @@
     "saveAsNew": "Zapisz jako nowy szablon",
     "saveAsTemplate": "Zapisz jako szablon",
     "saveDescription": "Ten szablon zapisze Twoje bieżące ustawienia raportu, wybrane rekordy i wybrane wykresy trendów.",
-    "saveModalTitle": "Zapisz szablon raportu",
     "savedTemplates": "Zapisane szablony",
+    "saveModalTitle": "Zapisz szablon raportu",
     "updateCurrent": "Aktualizuj \"{{name}}\"",
     "updateTemplate": "Aktualizuj szablon"
   }

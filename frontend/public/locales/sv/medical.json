@@ -332,6 +332,38 @@
       "label": "Vaccinets utgångsdatum",
       "placeholder": "Välj utgångsdatum"
     },
+    "form": {
+      "linkStatusLinked": "✓ Länkad till biblioteket: {{name}}",
+      "linkStatusUnlinked": "⚠ Inte länkad till biblioteket. Välj ett vaccin i listan för att länka."
+    },
+    "history": {
+      "dateRangePlaceholder": "Filtrera efter datumintervall",
+      "doseLabel": "Dos {{n}}",
+      "dosesCount": "{{count}} doser",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 dos",
+      "emptyAll": "Inga vaccinationer registrerade ännu.",
+      "emptyRange": "Inga vaccinationer i detta intervall.",
+      "linkActionLabel": "Länka till biblioteket",
+      "lotLabel": "Sats {{lot}}",
+      "miscGroup": "Övrigt / Olänkade",
+      "miscGroupHint": "Dessa poster är ännu inte länkade till vaccinbiblioteket. Klicka på en för att redigera och välja en bibliotekspost.",
+      "noDiseaseData": "Inga vaccinationer är länkade till biblioteket. Växla till vyn \"Efter datum\" för att se alla poster, eller redigera en post och välj ett vaccin igen från autoifyllningen för att länka det.",
+      "recordCount": "{{count}} vaccinationer",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 vaccination",
+      "unlinkedTag": "Inte länkad",
+      "unmatchedBanner": "{{count}} poster är inte länkade. Redigera en post och välj den igen från autoifyllningen för att länka den.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Vissa poster är inte länkade till vaccinbiblioteket",
+      "viewMode": {
+        "byDate": "Efter datum",
+        "byDisease": "Efter sjukdom"
+      }
+    },
     "location": {
       "description": "Var vaccinet administrerades",
       "placeholder": "t.ex. Apotek, Sjukhus, Vårdcentral, Hälsocentral"
@@ -388,38 +420,12 @@
       "rightThigh": "Höger lår"
     },
     "vaccineName": {
+      "combinedHint": "Kombinerat vaccin — komponenter: {{components}}",
       "description": "Namn på det administrerade vaccinet",
       "label": "Vaccinnamn",
+      "matchedCommonName": "matchning: {{name}}",
       "placeholder": "t.ex. COVID-19 mRNA, Influensa, MPR",
-      "searchPlaceholder": "Skriv för att söka vacciner...",
-      "combinedHint": "Kombinerat vaccin — komponenter: {{components}}",
-      "matchedCommonName": "matchning: {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "Efter datum",
-        "byDisease": "Efter sjukdom"
-      },
-      "recordCount": "{{count}} vaccinationer",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doser",
-      "dosesCountSingular": "1 dos",
-      "doseLabel": "Dos {{n}}",
-      "lotLabel": "Sats {{lot}}",
-      "unlinkedTag": "Inte länkad",
-      "emptyAll": "Inga vaccinationer registrerade ännu.",
-      "emptyRange": "Inga vaccinationer i detta intervall.",
-      "dateRangePlaceholder": "Filtrera efter datumintervall",
-      "noDiseaseData": "Inga vaccinationer är länkade till biblioteket. Växla till vyn \"Efter datum\" för att se alla poster, eller redigera en post och välj ett vaccin igen från autoifyllningen för att länka det.",
-      "unmatchedTitle": "Vissa poster är inte länkade till vaccinbiblioteket",
-      "unmatchedBanner": "{{count}} poster är inte länkade. Redigera en post och välj den igen från autoifyllningen för att länka den.",
-      "linkActionLabel": "Länka till biblioteket",
-      "miscGroup": "Övrigt / Olänkade",
-      "miscGroupHint": "Dessa poster är ännu inte länkade till vaccinbiblioteket. Klicka på en för att redigera och välja en bibliotekspost."
-    },
-    "form": {
-      "linkStatusLinked": "✓ Länkad till biblioteket: {{name}}",
-      "linkStatusUnlinked": "⚠ Inte länkad till biblioteket. Välj ett vaccin i listan för att länka."
+      "searchPlaceholder": "Skriv för att söka vacciner..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "Labbresultatet sparades men testkomponenter kunde inte läggas till. Du kan lägga till dem från visningssidan.",
-      "relationshipCreationWarning": "Labbresultatet sparades men vissa relationer kunde inte skapas. Du kan lägga till dem från redigeringssidan."
-    },
     "addPanel": {
-      "title": "Lägg till laboratorieresultat",
-      "panelName": "Laboratorieresultatpanel eller typ",
-      "panelNamePlaceholder": "t.ex. Blodstatus, Årsanalys",
-      "panelNameDescription": "Ett namn för denna grupp av tester",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Spara resultat",
-      "creating": "Skapar panel...",
       "createError": "Det gick inte att skapa testpanel",
+      "creating": "Skapar panel...",
+      "panelName": "Laboratorieresultatpanel eller typ",
+      "panelNameDescription": "Ett namn för denna grupp av tester",
+      "panelNamePlaceholder": "t.ex. Blodstatus, Årsanalys",
+      "tagsPlaceholder": "Lägg till taggar för att organisera och söka efter denna post senare",
       "testResultRequired": "Minst ett testresultat krävs",
-      "tagsPlaceholder": "Lägg till taggar för att organisera och söka efter denna post senare"
+      "title": "Lägg till laboratorieresultat"
     },
     "buttons": {
       "addLabResults": "Lägg till labbresultat"
+    },
+    "form": {
+      "componentCreationWarning": "Labbresultatet sparades men testkomponenter kunde inte läggas till. Du kan lägga till dem från visningssidan.",
+      "relationshipCreationWarning": "Labbresultatet sparades men vissa relationer kunde inte skapas. Du kan lägga till dem från redigeringssidan."
     }
   },
   "medications": {
@@ -888,6 +898,58 @@
       "label": "Förskrivande läkare",
       "placeholder": "Välj läkare"
     },
+    "reminders": {
+      "days": {
+        "description": "Lämna tomt för att få påminnelser varje dag",
+        "fri": "Fre",
+        "label": "Påminnelsedagar",
+        "mon": "Mån",
+        "sat": "Lör",
+        "sun": "Sön",
+        "thu": "Tor",
+        "tue": "Tis",
+        "wed": "Ons"
+      },
+      "enabled": {
+        "description": "Skicka aviseringar när det är dags att ta detta läkemedel",
+        "label": "Aktivera påminnelser"
+      },
+      "enabledBadge": "Påminnelser aktiverade",
+      "message": {
+        "description": "Valfri anteckning i påminnelsemeddelandet (max 200 tecken)",
+        "label": "Anpassat påminnelsemeddelande",
+        "placeholder": "t.ex. Ta med mat, Mät blodtrycket först"
+      },
+      "noChannelsTitle": "Ingen aviseringskanal aktiverad",
+      "noChannelsWarning": "Ingen aviseringskanal är konfigurerad för läkemedelspåminnelser. Öppna aviseringsinställningarna för att aktivera en kanal.",
+      "notFiring": {
+        "badge": "Utlöses inte",
+        "dayNotActive": "Påminnelser är inte schemalagda för idag.",
+        "notStarted": "Intaget av det här läkemedlet börjar först {{date}}.",
+        "periodEnded": "Det här läkemedlet är markerat som inte längre taget sedan {{date}}.",
+        "statusNotActive": "Läkemedlets status är \"{{status}}\" – påminnelser skickas endast för aktiva läkemedel.",
+        "title": "Påminnelser kommer inte att utlösas"
+      },
+      "openSettings": "Öppna aviseringsinställningar",
+      "saveBeforeTest": "Spara läkemedlet först för att skicka en testpåminnelse.",
+      "tabLabel": "Påminnelser",
+      "testButton": "Skicka testpåminnelse nu",
+      "testError": "Det gick inte att skicka testpåminnelsen",
+      "testSuccess": "Testpåminnelse skickad",
+      "times": {
+        "addButton": "Lägg till tid",
+        "description": "Klockslag (24-timmarsformat) då påminnelsen skickas",
+        "duplicate": "Den här tiden finns redan i listan",
+        "empty": "Inga påminnelsetider konfigurerade.",
+        "invalid": "Tiden måste anges som HH:MM (24 timmar)",
+        "label": "Påminnelsetider",
+        "max": "Högst {{count}} tider",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Ta bort tid"
+      },
+      "viewNone": "Inga påminnelser konfigurerade"
+    },
     "route": {
       "description": "Hur läkemedlet administreras",
       "label": "Administreringsväg",
@@ -909,56 +971,6 @@
       "description": "Kända eller upplevda biverkningar av detta läkemedel",
       "label": "Biverkningar",
       "placeholder": "Lista kända eller upplevda biverkningar..."
-    },
-    "reminders": {
-      "tabLabel": "Påminnelser",
-      "enabled": {
-        "label": "Aktivera påminnelser",
-        "description": "Skicka aviseringar när det är dags att ta detta läkemedel"
-      },
-      "times": {
-        "label": "Påminnelsetider",
-        "description": "Klockslag (24-timmarsformat) då påminnelsen skickas",
-        "addButton": "Lägg till tid",
-        "removeAriaLabel": "Ta bort tid",
-        "max": "Högst {{count}} tider",
-        "duplicate": "Den här tiden finns redan i listan",
-        "invalid": "Tiden måste anges som HH:MM (24 timmar)",
-        "empty": "Inga påminnelsetider konfigurerade."
-      },
-      "noChannelsTitle": "Ingen aviseringskanal aktiverad",
-      "noChannelsWarning": "Ingen aviseringskanal är konfigurerad för läkemedelspåminnelser. Öppna aviseringsinställningarna för att aktivera en kanal.",
-      "openSettings": "Öppna aviseringsinställningar",
-      "testButton": "Skicka testpåminnelse nu",
-      "testSuccess": "Testpåminnelse skickad",
-      "testError": "Det gick inte att skicka testpåminnelsen",
-      "saveBeforeTest": "Spara läkemedlet först för att skicka en testpåminnelse.",
-      "viewNone": "Inga påminnelser konfigurerade",
-      "notFiring": {
-        "title": "Påminnelser kommer inte att utlösas",
-        "badge": "Utlöses inte",
-        "periodEnded": "Det här läkemedlet är markerat som inte längre taget sedan {{date}}.",
-        "notStarted": "Intaget av det här läkemedlet börjar först {{date}}.",
-        "statusNotActive": "Läkemedlets status är \"{{status}}\" – påminnelser skickas endast för aktiva läkemedel.",
-        "dayNotActive": "Påminnelser är inte schemalagda för idag."
-      },
-      "enabledBadge": "Påminnelser aktiverade",
-      "message": {
-        "label": "Anpassat påminnelsemeddelande",
-        "placeholder": "t.ex. Ta med mat, Mät blodtrycket först",
-        "description": "Valfri anteckning i påminnelsemeddelandet (max 200 tecken)"
-      },
-      "days": {
-        "label": "Påminnelsedagar",
-        "description": "Lämna tomt för att få påminnelser varje dag",
-        "mon": "Mån",
-        "tue": "Tis",
-        "wed": "Ons",
-        "thu": "Tor",
-        "fri": "Fre",
-        "sat": "Lör",
-        "sun": "Sön"
-      }
     }
   },
   "pharmacies": {

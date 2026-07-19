@@ -57,6 +57,27 @@
     "organizationPlaceholder": "Seleziona un'organizzazione",
     "urlPlaceholder": "https://la-tua-istanza-papra.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "Scegli come vengono visualizzate le date nell'applicazione",
+      "dmy": "DD/MM/YYYY (UK/Internazionale)",
+      "dmy_dot": "DD.MM.YYYY (Europeo)",
+      "mdy": "MM/DD/YYYY (US)",
+      "title": "Formato Data",
+      "ymd": "YYYY-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Imposta la durata dell'inattività prima della scadenza della sessione (in minuti)",
+      "range": "minuti (5-1440)",
+      "title": "Timeout Sessione"
+    },
+    "unitSystem": {
+      "description": "Scegli se visualizzare le misurazioni in unità Imperiali (libbre, piedi, °F) o Metriche (chilogrammi, centimetri, °C)",
+      "imperial": "Imperiale (lbs, piedi, °F)",
+      "metric": "Metrico (kg, cm, °C)",
+      "title": "Sistema di Unità"
+    }
+  },
   "profile": {
     "description": "Aggiorna l'identità del tuo account. Modificare il nome utente ti disconnetterà -- accederai di nuovo con il nuovo nome.",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "Profilo aggiornato",
     "usernameChangedLogoutWarning": "Il salvataggio ti disconnetterà affinché il nuovo nome utente abbia effetto. Accedi nuovamente con il nuovo nome utente.",
     "usernameChangedNotice": "Nome utente modificato. Accedi con il tuo nuovo nome utente."
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "Scegli come vengono visualizzate le date nell'applicazione",
-      "dmy": "DD/MM/YYYY (UK/Internazionale)",
-      "dmy_dot": "DD.MM.YYYY (Europeo)",
-      "mdy": "MM/DD/YYYY (US)",
-      "title": "Formato Data",
-      "ymd": "YYYY-MM-DD (ISO)"
-    },
-    "sessionTimeout": {
-      "description": "Imposta la durata dell'inattività prima della scadenza della sessione (in minuti)",
-      "range": "minuti (5-1440)",
-      "title": "Timeout Sessione"
-    },
-    "unitSystem": {
-      "description": "Scegli se visualizzare le misurazioni in unità Imperiali (libbre, piedi, °F) o Metriche (chilogrammi, centimetri, °C)",
-      "imperial": "Imperiale (lbs, piedi, °F)",
-      "metric": "Metrico (kg, cm, °C)",
-      "title": "Sistema di Unità"
-    }
   },
   "releaseNotes": {
     "currentVersion": "Attuale",

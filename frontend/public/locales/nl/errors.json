@@ -35,6 +35,7 @@
     "invalidPhone": "Voer een geldig telefoonnummer in.",
     "invalidPhoneDigits": "Voer een geldig telefoonnummer in",
     "invalidWebsiteUrl": "Voer een geldige website-URL in",
+    "labResultNotSelected": "Please select at least one lab result",
     "medicationNotSelected": "Selecteer een medicatie",
     "mustBeValidNumber": "Moet een geldig getal zijn",
     "patientNotSelected": "Selecteer een patiënt.",

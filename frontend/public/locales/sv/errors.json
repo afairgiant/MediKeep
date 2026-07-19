@@ -35,6 +35,7 @@
     "invalidPhone": "Ange ett giltigt telefonnummer.",
     "invalidPhoneDigits": "Ange ett giltigt telefonnummer",
     "invalidWebsiteUrl": "Ange en giltig webbadress",
+    "labResultNotSelected": "Please select at least one lab result",
     "medicationNotSelected": "Välj ett läkemedel",
     "mustBeValidNumber": "Måste vara ett giltigt nummer",
     "patientNotSelected": "Välj en patient.",

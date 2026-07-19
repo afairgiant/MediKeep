@@ -14,7 +14,6 @@
       "description": "Seleccione los registros médicos a incluir en su informe personalizado",
       "title": "Configuración del Informe"
     },
-    "icon": "",
     "loading": "Cargando generador de informes...",
     "noData": {
       "description": "Agregue algunos registros médicos primero para usar el generador de informes.",
@@ -160,7 +159,6 @@
       "singleExport": "Exportación Individual",
       "title": "Modo de Exportación"
     },
-    "icon": "",
     "information": {
       "bulk": {
         "description": "Crea un archivo ZIP que contiene varios tipos de datos en el formato elegido para un respaldo completo de datos.",
@@ -221,8 +219,8 @@
     "saveAsNew": "Guardar como nueva plantilla",
     "saveAsTemplate": "Guardar como Plantilla",
     "saveDescription": "Esta plantilla guardará la configuración actual del informe, los registros seleccionados y los gráficos de tendencias seleccionados.",
-    "saveModalTitle": "Guardar plantilla de informe",
     "savedTemplates": "Plantillas Guardadas",
+    "saveModalTitle": "Guardar plantilla de informe",
     "updateCurrent": "Actualizar \"{{name}}\"",
     "updateTemplate": "Actualizar Plantilla"
   }

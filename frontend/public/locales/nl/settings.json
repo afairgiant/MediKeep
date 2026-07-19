@@ -57,6 +57,27 @@
     "organizationPlaceholder": "Selecteer een organisatie",
     "urlPlaceholder": "https://uw-papra-instantie.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "Kies hoe datums in de applicatie worden weergegeven",
+      "dmy": "DD/MM/JJJJ (VK/Internationaal)",
+      "dmy_dot": "DD.MM.JJJJ (Europees)",
+      "mdy": "MM/DD/JJJJ (VS)",
+      "title": "Datumnotatie",
+      "ymd": "JJJJ-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Stel de duur van inactiviteit in voordat uw sessie verloopt (in minuten)",
+      "range": "minuten (5-1440)",
+      "title": "Sessietimeout"
+    },
+    "unitSystem": {
+      "description": "Kies of metingen worden weergegeven in imperiale (pond, voet, °F) of metrische (kilogram, centimeter, °C) eenheden",
+      "imperial": "Imperiaal (lbs, voet, °F)",
+      "metric": "Metrisch (kg, cm, °C)",
+      "title": "Eenhedensysteem"
+    }
+  },
   "profile": {
     "description": "Werk de identiteit van uw account bij. Het wijzigen van uw gebruikersnaam logt u uit -- u meldt zich opnieuw aan met de nieuwe naam.",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "Profiel bijgewerkt",
     "usernameChangedLogoutWarning": "Opslaan logt u uit zodat de nieuwe gebruikersnaam van kracht wordt. Meld u opnieuw aan met de nieuwe gebruikersnaam.",
     "usernameChangedNotice": "Gebruikersnaam gewijzigd. Meld u aan met uw nieuwe gebruikersnaam."
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "Kies hoe datums in de applicatie worden weergegeven",
-      "dmy": "DD/MM/JJJJ (VK/Internationaal)",
-      "dmy_dot": "DD.MM.JJJJ (Europees)",
-      "mdy": "MM/DD/JJJJ (VS)",
-      "title": "Datumnotatie",
-      "ymd": "JJJJ-MM-DD (ISO)"
-    },
-    "sessionTimeout": {
-      "description": "Stel de duur van inactiviteit in voordat uw sessie verloopt (in minuten)",
-      "range": "minuten (5-1440)",
-      "title": "Sessietimeout"
-    },
-    "unitSystem": {
-      "description": "Kies of metingen worden weergegeven in imperiale (pond, voet, °F) of metrische (kilogram, centimeter, °C) eenheden",
-      "imperial": "Imperiaal (lbs, voet, °F)",
-      "metric": "Metrisch (kg, cm, °C)",
-      "title": "Eenhedensysteem"
-    }
   },
   "releaseNotes": {
     "currentVersion": "Huidig",

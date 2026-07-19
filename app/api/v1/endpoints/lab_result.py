@@ -40,8 +40,17 @@ from app.core.logging.helpers import (
 from app.crud.condition import condition as condition_crud
 from app.crud.encounter import encounter as encounter_crud
 from app.crud.encounter import encounter_lab_result
-from app.crud.lab_result import lab_result, lab_result_condition
+from app.crud.lab_result import (
+    lab_result,
+    lab_result_condition,
+    lab_result_medication,
+    lab_result_procedure,
+)
 from app.crud.lab_result_file import lab_result_file
+from app.crud.medication import medication as medication_crud
+from app.crud.procedure import procedure as procedure_crud
+from app.crud.treatment import treatment as treatment_crud
+from app.crud.treatment import treatment_lab_result
 from app.models.activity_log import EntityType
 from app.models.models import User
 from app.schemas.encounter import (
@@ -57,6 +66,14 @@ from app.schemas.lab_result import (
     LabResultConditionUpdate,
     LabResultConditionWithDetails,
     LabResultCreate,
+    LabResultMedicationCreate,
+    LabResultMedicationResponse,
+    LabResultMedicationUpdate,
+    LabResultMedicationWithDetails,
+    LabResultProcedureCreate,
+    LabResultProcedureResponse,
+    LabResultProcedureUpdate,
+    LabResultProcedureWithDetails,
     LabResultResponse,
     LabResultUpdate,
     LabResultWithRelations,
@@ -64,6 +81,12 @@ from app.schemas.lab_result import (
     PDFExtractionResponse,
 )
 from app.schemas.lab_result_file import LabResultFileCreate, LabResultFileResponse
+from app.schemas.treatment import (
+    LabResultTreatmentCreate,
+    LabResultTreatmentWithDetails,
+    TreatmentLabResultResponse,
+    TreatmentLabResultUpdate,
+)
 from app.services.generic_entity_file_service import GenericEntityFileService
 
 router = APIRouter()
@@ -1298,6 +1321,558 @@ def delete_lab_result_encounter(
 
         encounter_lab_result.delete(db, id=relationship_id)
         return {"message": "Lab result encounter relationship deleted successfully"}
+
+
+# Lab Result - Medication Relationship Endpoints
+
+
+@router.get(
+    "/{lab_result_id}/medications",
+    response_model=List[LabResultMedicationWithDetails],
+)
+def get_lab_result_medications(
+    *,
+    request: Request,
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Get all medication relationships for a specific lab result."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+        )
+
+        results = lab_result_medication.get_by_lab_result_with_details(
+            db, lab_result_id=lab_result_id
+        )
+
+        enhanced_relationships = []
+        for rel, medication_obj in results:
+            rel_dict = {
+                "id": rel.id,
+                "lab_result_id": rel.lab_result_id,
+                "medication_id": rel.medication_id,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "medication": {
+                    "id": medication_obj.id,
+                    "medication_name": medication_obj.medication_name,
+                    "dosage": medication_obj.dosage,
+                    "status": medication_obj.status,
+                },
+            }
+            enhanced_relationships.append(rel_dict)
+
+        return enhanced_relationships
+
+
+@router.post(
+    "/{lab_result_id}/medications", response_model=LabResultMedicationResponse
+)
+def create_lab_result_medication(
+    *,
+    request: Request,
+    lab_result_id: int,
+    medication_in: LabResultMedicationCreate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Create a new lab result medication relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        db_medication = medication_crud.get(db, id=medication_in.medication_id)
+        handle_not_found(db_medication, "Medication", request)
+
+        if db_medication.patient_id != db_lab_result.patient_id:
+            raise BusinessLogicException(
+                message="Cannot link medication that doesn't belong to the same patient",
+                request=request,
+            )
+
+        existing = lab_result_medication.get_by_lab_result_and_medication(
+            db, lab_result_id=lab_result_id, medication_id=medication_in.medication_id
+        )
+        if existing:
+            raise BusinessLogicException(
+                message="Relationship between this lab result and medication already exists",
+                request=request,
+            )
+
+        medication_in.lab_result_id = lab_result_id
+
+        relationship = lab_result_medication.create(db, obj_in=medication_in)
+        return relationship
+
+
+@router.put(
+    "/{lab_result_id}/medications/{relationship_id}",
+    response_model=LabResultMedicationResponse,
+)
+def update_lab_result_medication(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    medication_in: LabResultMedicationUpdate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Update a lab result medication relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        relationship = lab_result_medication.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result medication relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        updated_relationship = lab_result_medication.update(
+            db, db_obj=relationship, obj_in=medication_in
+        )
+        return updated_relationship
+
+
+@router.delete("/{lab_result_id}/medications/{relationship_id}")
+def delete_lab_result_medication(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Delete a lab result medication relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        relationship = lab_result_medication.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result medication relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        lab_result_medication.delete(db, id=relationship_id)
+        return {"message": "Lab result medication relationship deleted successfully"}
+
+
+# Lab Result - Procedure Relationship Endpoints
+
+
+@router.get(
+    "/{lab_result_id}/procedures",
+    response_model=List[LabResultProcedureWithDetails],
+)
+def get_lab_result_procedures(
+    *,
+    request: Request,
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Get all procedure relationships for a specific lab result."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+        )
+
+        results = lab_result_procedure.get_by_lab_result_with_details(
+            db, lab_result_id=lab_result_id
+        )
+
+        enhanced_relationships = []
+        for rel, procedure_obj in results:
+            rel_dict = {
+                "id": rel.id,
+                "lab_result_id": rel.lab_result_id,
+                "procedure_id": rel.procedure_id,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "procedure": {
+                    "id": procedure_obj.id,
+                    "procedure_name": procedure_obj.procedure_name,
+                    "procedure_type": procedure_obj.procedure_type,
+                    "status": procedure_obj.status,
+                    "date": procedure_obj.date,
+                },
+            }
+            enhanced_relationships.append(rel_dict)
+
+        return enhanced_relationships
+
+
+@router.post(
+    "/{lab_result_id}/procedures", response_model=LabResultProcedureResponse
+)
+def create_lab_result_procedure(
+    *,
+    request: Request,
+    lab_result_id: int,
+    procedure_in: LabResultProcedureCreate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Create a new lab result procedure relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        db_procedure = procedure_crud.get(db, id=procedure_in.procedure_id)
+        handle_not_found(db_procedure, "Procedure", request)
+
+        if db_procedure.patient_id != db_lab_result.patient_id:
+            raise BusinessLogicException(
+                message="Cannot link procedure that doesn't belong to the same patient",
+                request=request,
+            )
+
+        existing = lab_result_procedure.get_by_lab_result_and_procedure(
+            db, lab_result_id=lab_result_id, procedure_id=procedure_in.procedure_id
+        )
+        if existing:
+            raise BusinessLogicException(
+                message="Relationship between this lab result and procedure already exists",
+                request=request,
+            )
+
+        procedure_in.lab_result_id = lab_result_id
+
+        relationship = lab_result_procedure.create(db, obj_in=procedure_in)
+        return relationship
+
+
+@router.put(
+    "/{lab_result_id}/procedures/{relationship_id}",
+    response_model=LabResultProcedureResponse,
+)
+def update_lab_result_procedure(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    procedure_in: LabResultProcedureUpdate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Update a lab result procedure relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        relationship = lab_result_procedure.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result procedure relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        updated_relationship = lab_result_procedure.update(
+            db, db_obj=relationship, obj_in=procedure_in
+        )
+        return updated_relationship
+
+
+@router.delete("/{lab_result_id}/procedures/{relationship_id}")
+def delete_lab_result_procedure(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Delete a lab result procedure relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        relationship = lab_result_procedure.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result procedure relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        lab_result_procedure.delete(db, id=relationship_id)
+        return {"message": "Lab result procedure relationship deleted successfully"}
+
+
+# Lab Result - Treatment Relationship Endpoints
+
+
+@router.get(
+    "/{lab_result_id}/treatments",
+    response_model=List[LabResultTreatmentWithDetails],
+)
+def get_lab_result_treatments(
+    *,
+    request: Request,
+    lab_result_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Get all treatment relationships for a specific lab result."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+        )
+
+        results = treatment_lab_result.get_by_lab_result_with_details(
+            db, lab_result_id=lab_result_id
+        )
+
+        enhanced_relationships = []
+        for rel, treatment_obj in results:
+            rel_dict = {
+                "id": rel.id,
+                "treatment_id": rel.treatment_id,
+                "lab_result_id": rel.lab_result_id,
+                "purpose": rel.purpose,
+                "expected_frequency": rel.expected_frequency,
+                "relevance_note": rel.relevance_note,
+                "created_at": rel.created_at,
+                "updated_at": rel.updated_at,
+                "treatment": {
+                    "id": treatment_obj.id,
+                    "treatment_name": treatment_obj.treatment_name,
+                    "treatment_type": treatment_obj.treatment_type,
+                    "status": treatment_obj.status,
+                },
+            }
+            enhanced_relationships.append(rel_dict)
+
+        return enhanced_relationships
+
+
+@router.post(
+    "/{lab_result_id}/treatments", response_model=TreatmentLabResultResponse
+)
+def create_lab_result_treatment(
+    *,
+    request: Request,
+    lab_result_id: int,
+    treatment_in: LabResultTreatmentCreate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Create a new lab result treatment relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        db_treatment = treatment_crud.get(db, id=treatment_in.treatment_id)
+        handle_not_found(db_treatment, "Treatment", request)
+
+        if db_treatment.patient_id != db_lab_result.patient_id:
+            raise BusinessLogicException(
+                message="Cannot link treatment that doesn't belong to the same patient",
+                request=request,
+            )
+
+        existing = treatment_lab_result.get_by_treatment_and_lab_result(
+            db, treatment_id=treatment_in.treatment_id, lab_result_id=lab_result_id
+        )
+        if existing:
+            raise BusinessLogicException(
+                message="Relationship between this lab result and treatment already exists",
+                request=request,
+            )
+
+        treatment_in.lab_result_id = lab_result_id
+
+        relationship = treatment_lab_result.create(db, obj_in=treatment_in)
+        return relationship
+
+
+@router.put(
+    "/{lab_result_id}/treatments/{relationship_id}",
+    response_model=TreatmentLabResultResponse,
+)
+def update_lab_result_treatment(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    treatment_in: TreatmentLabResultUpdate,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Update a lab result treatment relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        relationship = treatment_lab_result.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result treatment relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        updated_relationship = treatment_lab_result.update(
+            db, db_obj=relationship, obj_in=treatment_in
+        )
+        return updated_relationship
+
+
+@router.delete("/{lab_result_id}/treatments/{relationship_id}")
+def delete_lab_result_treatment(
+    *,
+    request: Request,
+    lab_result_id: int,
+    relationship_id: int,
+    db: Session = Depends(get_db),
+    current_user_patient_id: int = Depends(deps.get_current_user_patient_id),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Delete a lab result treatment relationship."""
+    with handle_database_errors(request=request):
+        db_lab_result = lab_result.get(db, id=lab_result_id)
+        handle_not_found(db_lab_result, "Lab result", request)
+
+        verify_patient_ownership(
+            db_lab_result,
+            current_user_patient_id,
+            "lab_result",
+            db=db,
+            current_user=current_user,
+            permission="edit",
+        )
+
+        relationship = treatment_lab_result.get(db, id=relationship_id)
+        handle_not_found(relationship, "Lab result treatment relationship", request)
+
+        if relationship.lab_result_id != lab_result_id:
+            raise BusinessLogicException(
+                message="Relationship does not belong to this lab result",
+                request=request,
+            )
+
+        treatment_lab_result.delete(db, id=relationship_id)
+        return {"message": "Lab result treatment relationship deleted successfully"}
 
 
 # OCR PDF Parsing Endpoint

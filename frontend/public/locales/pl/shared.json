@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Pulpit administratora",
     "allergies": "Alergie",
@@ -71,6 +76,7 @@
     "procedureCode": "Kod procedury",
     "procedureName": "Nazwa procedury",
     "procedureType": "Typ procedury",
+    "reset": "Reset",
     "selectGender": "Wybierz płeć",
     "selectPractitioner": "Wybierz lekarza",
     "selectRelationship": "Wybierz pokrewieństwo",
@@ -243,11 +249,13 @@
     "relatedCondition": "Powiązane schorzenie",
     "relatedConditions": "Powiązane schorzenia",
     "relationship": "Pokrewieństwo",
+    "remove": "Remove",
     "resetPassword": "Zresetuj hasło",
     "resolved": "Rozwiązane",
     "retry": "Spróbuj ponownie",
     "role": "Rola",
     "route": "Droga podania",
+    "save": "Save",
     "saving": "Zapisywanie...",
     "selectCategory": "Wybierz kategorię",
     "selectPractitioner": "Wybierz lekarza",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "Wyświetlanie {{count}} unikalnych badań",
     "sideEffects": "Skutki uboczne",
     "size": "Rozmiar",
+    "sortBy": "Sort by",
     "specialties": "Specjalizacje",
     "specialty": "Specjalizacja",
     "startDate": "Data rozpoczęcia",
+    "state": "State",
     "stateProvince": "Województwo/stan",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Ochrona ilościowa:</strong> Zawsze przechowuj {{count}} najnowszych kopii zapasowych",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Ochrona ilościowa:</strong> Zawsze przechowuj {{count}} najnowszą kopię zapasową",
@@ -287,6 +297,7 @@
     "trendCharts": "Wykresy trendów",
     "type": "Typ",
     "unknown": "Nieznany",
+    "unknownError": "Unknown error",
     "uploadFailed": "Przesyłanie nieudane",
     "user": "Użytkownik",
     "userManagement": "Zarządzanie użytkownikami",
@@ -301,7 +312,8 @@
     "warnings": "Ostrzeżenia",
     "website": "Strona internetowa",
     "weekly": "Co tydzień",
-    "weight": "Waga"
+    "weight": "Waga",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Dostęp tylko do odczytu"
@@ -316,9 +328,12 @@
     "episodesCount": "Epizody ({{count}})",
     "episodesCount_one": "Epizody ({{count}})",
     "episodesCount_other": "Epizody ({{count}})",
-    "notes": "Notatki",
     "labResults": "Wyniki laboratoryjne",
+    "medications": "Medications",
+    "notes": "Notatki",
     "overview": "Przegląd",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Wizyty"
   }
 }

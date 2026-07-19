@@ -57,6 +57,27 @@
     "organizationPlaceholder": "Välj en organisation",
     "urlPlaceholder": "https://din-papra-instans.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "Välj hur datum visas genom hela applikationen",
+      "dmy": "DD/MM/ÅÅÅÅ (Storbritannien/Internationell)",
+      "dmy_dot": "DD.MM.ÅÅÅÅ (Europeisk)",
+      "mdy": "MM/DD/ÅÅÅÅ (USA)",
+      "title": "Datumformat",
+      "ymd": "ÅÅÅÅ-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Ange varaktigheten för inaktivitet innan din session går ut (i minuter)",
+      "range": "minuter (5-1440)",
+      "title": "Sessionstimeout"
+    },
+    "unitSystem": {
+      "description": "Välj om mätningar ska visas i Imperial (pund, fot, °F) eller metriska (kilogram, centimeter, °C) enheter",
+      "imperial": "Imperial (lbs, fot, °F)",
+      "metric": "Metrisk (kg, cm, °C)",
+      "title": "Enhetssystem"
+    }
+  },
   "profile": {
     "description": "Uppdatera din kontoidentitet. Att ändra ditt användarnamn loggar ut dig -- du loggar in igen med det nya namnet.",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "Profilen uppdaterad",
     "usernameChangedLogoutWarning": "Att spara loggar ut dig så att det nya användarnamnet träder i kraft. Logga in igen med det nya användarnamnet.",
     "usernameChangedNotice": "Användarnamnet har ändrats. Logga in med ditt nya användarnamn."
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "Välj hur datum visas genom hela applikationen",
-      "dmy": "DD/MM/ÅÅÅÅ (Storbritannien/Internationell)",
-      "dmy_dot": "DD.MM.ÅÅÅÅ (Europeisk)",
-      "mdy": "MM/DD/ÅÅÅÅ (USA)",
-      "title": "Datumformat",
-      "ymd": "ÅÅÅÅ-MM-DD (ISO)"
-    },
-    "sessionTimeout": {
-      "description": "Ange varaktigheten för inaktivitet innan din session går ut (i minuter)",
-      "range": "minuter (5-1440)",
-      "title": "Sessionstimeout"
-    },
-    "unitSystem": {
-      "description": "Välj om mätningar ska visas i Imperial (pund, fot, °F) eller metriska (kilogram, centimeter, °C) enheter",
-      "imperial": "Imperial (lbs, fot, °F)",
-      "metric": "Metrisk (kg, cm, °C)",
-      "title": "Enhetssystem"
-    }
   },
   "releaseNotes": {
     "currentVersion": "Aktuell",

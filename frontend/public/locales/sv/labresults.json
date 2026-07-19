@@ -131,6 +131,9 @@
     "linkConditionsDescription": "Associera detta laboratorieresultat med relevanta medicinska tillstånd för bättre spårning och organisation.",
     "linkConditionsTitle": "Länka medicinska tillstånd",
     "linkedVisits": "Länkade besök",
+    "linkMedicationsTitle": "Link to Medications",
+    "linkProceduresTitle": "Link to Procedures",
+    "linkTreatmentsTitle": "Link to Treatments",
     "linkVisitsDescription": "Associera detta laboratorieresultat med besök där det beställdes eller granskades.",
     "linkVisitsTitle": "Länka till besök",
     "matchedCommonName": "matchning: {{name}}",
@@ -165,12 +168,6 @@
     "relationshipsCreateInfo": "Relationer kan läggas till efter att laboratorieresultatet sparats.",
     "relationshipsSaveFirst": "Spara laboratorieresultatet först för att skapa relationslänkar.",
     "testComponentsEditInfo": "Testkomponenter kan hanteras från visningssidan efter sparande."
-  },
-  "pendingRelationships": {
-    "addCondition": "Lägg till tillstånd",
-    "addVisit": "Lägg till besök",
-    "removeCondition": "Ta bort tillstånd",
-    "removeVisit": "Ta bort besök"
   },
   "modal": {
     "editLabResult": "Redigera laboratorieresultat",
@@ -217,6 +214,12 @@
     "placeholder": "Välj läkare"
   },
   "patientIdRequired": "Patient-ID krävs. Välj en patient först.",
+  "pendingRelationships": {
+    "addCondition": "Lägg till tillstånd",
+    "addVisit": "Lägg till besök",
+    "removeCondition": "Ta bort tillstånd",
+    "removeVisit": "Ta bort besök"
+  },
   "quickFormInstructions": "Ange ett namn för detta laboratorieresultat, sedan kan du ladda upp och tolka din PDF.",
   "quickImportModalTitle": "Snabb PDF-import - Steg {{step}} av 2",
   "quickImportSuccess": "Laboratorieresultat och testkomponenter importerade framgångsrikt",

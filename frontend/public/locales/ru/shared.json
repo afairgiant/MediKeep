@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Панель администратора",
     "allergies": "Аллергии",
@@ -71,6 +76,7 @@
     "procedureCode": "Код процедуры",
     "procedureName": "Название процедуры",
     "procedureType": "Тип процедуры",
+    "reset": "Reset",
     "selectGender": "Выберите пол",
     "selectPractitioner": "Выберите врача",
     "selectRelationship": "Выберите родство",
@@ -243,11 +249,13 @@
     "relatedCondition": "Связанное заболевание",
     "relatedConditions": "Связанные заболевания",
     "relationship": "Родство",
+    "remove": "Remove",
     "resetPassword": "Сбросить пароль",
     "resolved": "Вылечено",
     "retry": "Повторить",
     "role": "Роль",
     "route": "Способ введения",
+    "save": "Save",
     "saving": "Сохранение...",
     "selectCategory": "Выберите категорию",
     "selectPractitioner": "Выберите врача",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "Показано {{count}} уникальных анализов",
     "sideEffects": "Побочные эффекты",
     "size": "Размер",
+    "sortBy": "Sort by",
     "specialties": "Специализации",
     "specialty": "Специализация",
     "startDate": "Дата начала",
+    "state": "State",
     "stateProvince": "Область / Регион",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Защита по количеству:</strong> Всегда хранить {{count}} последних резервных копий",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Защита по количеству:</strong> Всегда хранить {{count}} последнюю резервную копию",
@@ -287,6 +297,7 @@
     "trendCharts": "Графики трендов",
     "type": "Тип",
     "unknown": "Неизвестно",
+    "unknownError": "Unknown error",
     "uploadFailed": "Ошибка загрузки",
     "user": "Пользователь",
     "userManagement": "Управление пользователями",
@@ -301,7 +312,8 @@
     "warnings": "Предупреждения",
     "website": "Веб-сайт",
     "weekly": "Еженедельно",
-    "weight": "Вес"
+    "weight": "Вес",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Доступ только для чтения"
@@ -316,9 +328,12 @@
     "episodesCount": "Эпизоды ({{count}})",
     "episodesCount_one": "Эпизоды ({{count}})",
     "episodesCount_other": "Эпизоды ({{count}})",
-    "notes": "Заметки",
     "labResults": "Результаты анализов",
+    "medications": "Medications",
+    "notes": "Заметки",
     "overview": "Обзор",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Визиты"
   }
 }

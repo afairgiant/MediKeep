@@ -1,4 +1,7 @@
 {
+  "categories": {
+    "medical": "Médical"
+  },
   "channels": {
     "add": "Ajouter un canal",
     "configTitle": "Configuration : {{type}}",
@@ -218,6 +221,10 @@
       "description": "Quand votre compte reçoit une connexion depuis un nouvel appareil",
       "name": "Connexion depuis un nouvel appareil"
     },
+    "medication_reminder_due": {
+      "description": "Quand il est temps de prendre un médicament programmé",
+      "name": "Rappel de médicament"
+    },
     "password_changed": {
       "description": "Quand votre mot de passe est modifié",
       "name": "Mot de passe modifié"
@@ -229,10 +236,6 @@
     "test_notification": {
       "description": "Notification de test manuelle",
       "name": "Notification de test"
-    },
-    "medication_reminder_due": {
-      "description": "Quand il est temps de prendre un médicament programmé",
-      "name": "Rappel de médicament"
     }
   },
   "history": {
@@ -437,8 +440,5 @@
     "urlRequired": "L'URL du webhook est requise",
     "webhookUrlInvalid": "Format d'URL du webhook invalide",
     "webhookUrlRequired": "L'URL du webhook est requise"
-  },
-  "categories": {
-    "medical": "Médical"
   }
 }

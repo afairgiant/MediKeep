@@ -1,4 +1,7 @@
 {
+  "categories": {
+    "medical": "Medico"
+  },
   "channels": {
     "add": "Aggiungi canale",
     "configTitle": "Configurazione {{type}}",
@@ -181,17 +184,10 @@
   },
   "description": "Configura come ricevere le notifiche per eventi importanti",
   "error": "Impossibile caricare le impostazioni delle notifiche",
-  "categories": {
-    "medical": "Medico"
-  },
   "events": {
     "backup_completed": {
       "description": "Quando un backup viene completato con successo",
       "name": "Backup completato"
-    },
-    "medication_reminder_due": {
-      "description": "Quando è il momento di assumere un farmaco pianificato",
-      "name": "Promemoria farmaco"
     },
     "backup_failed": {
       "description": "Quando un backup non riesce",
@@ -224,6 +220,10 @@
     "login_from_new_device": {
       "description": "Quando si accede al tuo account da un nuovo dispositivo",
       "name": "Accesso da nuovo dispositivo"
+    },
+    "medication_reminder_due": {
+      "description": "Quando è il momento di assumere un farmaco pianificato",
+      "name": "Promemoria farmaco"
     },
     "password_changed": {
       "description": "Quando la tua password viene modificata",

@@ -1,4 +1,8 @@
 {
+  "actions": {
+    "delete": "Delete",
+    "view": "View"
+  },
   "allergies": {
     "messages": {
       "loading": "Загрузка аллергий..."
@@ -8,6 +12,7 @@
     "addNew": "Добавить",
     "back": "Назад",
     "cancelSelection": "Отменить выбор",
+    "clear": "Clear",
     "create": "Создать",
     "delete": "Удалить",
     "done": "Готово",
@@ -17,6 +22,9 @@
     "linkEquipment": "Связать оборудование",
     "linkLabResult": "Связать результат анализа",
     "linkMedication": "Связать лекарство",
+    "linkMedications": "Связать лекарства",
+    "linkProcedure": "Link Procedure",
+    "linkTreatment": "Link Treatment",
     "linkVisit": "Связать визит",
     "print": "Печать",
     "refresh": "Обновить",
@@ -29,8 +37,7 @@
     "showMore": "Показать больше",
     "tryAgain": "Повторить попытку",
     "update": "Обновить",
-    "view": "Просмотр",
-    "linkMedications": "Связать лекарства"
+    "view": "Просмотр"
   },
   "conditions": {
     "addNew": "Добавить заболевание",
@@ -54,6 +61,7 @@
         "snomedCode": "Код SNOMED CT",
         "tags": "Добавьте теги для категоризации и организации заболеваний"
       },
+      "labResultsDescription": "Link lab results that relate to or monitor this condition.",
       "medicationsDescription": "Свяжите лекарства, используемые для лечения или контроля данного состояния.",
       "placeholders": {
         "codeDescription": "Описание медицинского кода",
@@ -64,6 +72,7 @@
         "severity": "Выберите тяжесть",
         "snomedCode": "напр., 44054006"
       },
+      "saveFirstToLinkLabResults": "Save the condition first, then return to edit mode to link lab results.",
       "saving": "Сохранение заболевания...",
       "severity": {
         "lifeThreatening": "Угрожающая жизни",
@@ -292,7 +301,8 @@
   "filters": {
     "clear": "Очистить",
     "itemCount": "{{filtered}} из {{total}} записей",
-    "title": "Фильтры и поиск"
+    "title": "Фильтры и поиск",
+    "toggle": "Toggle filters"
   },
   "immunizations": {
     "addImmunization": "Добавить прививку",
@@ -345,10 +355,17 @@
       "vaccineNameDesc": "Общепринятое название вакцины",
       "vaccineNamePlaceholder": "напр., Грипп, COVID-19, АКДС"
     },
+    "history": {
+      "noPatient": "Выберите пациента, чтобы просмотреть историю."
+    },
     "loadingImmunizations": "Загрузка прививок...",
     "noImmunizationsFound": "Прививки не найдены",
     "table": {
       "site": "Место введения"
+    },
+    "tabs": {
+      "history": "История",
+      "records": "Записи"
     },
     "viewModal": {
       "adminDetails": "Детали введения",
@@ -357,13 +374,6 @@
       "title": "Подробности прививки",
       "tradeName": "Торговое название",
       "vaccineInfo": "Информация о вакцине"
-    },
-    "tabs": {
-      "records": "Записи",
-      "history": "История"
-    },
-    "history": {
-      "noPatient": "Выберите пациента, чтобы просмотреть историю."
     }
   },
   "insurance": {
@@ -438,39 +448,50 @@
   "key": "По умолчанию {{var}}",
   "labels": {
     "addCustom": "+ Добавить \"{{value}}\"",
+    "cancelEdit": "Cancel edit",
+    "conditionsAvailableToLink": "Доступно для связывания: {{count}} заболеваний",
+    "deleteRelationship": "Delete relationship",
+    "editRelationship": "Edit relationship",
+    "expectedFrequency": "Expected frequency",
+    "labResultsAvailableToLink_one": "{{count}} lab results available to link",
+    "labResultsAvailableToLink_other": "{{count}} lab results available to link",
     "linkedLabResults": "Связанные результаты анализов",
     "linkedMedications": "Связанные лекарства",
     "loading": "Загрузка...",
     "loadingLabResults": "Загрузка результатов анализов...",
     "loadingOption": "Загрузка {{option}}...",
     "loadingRelatedConditions": "Загрузка связанных заболеваний...",
+    "medicationsAvailableToLink": "Доступно для связывания: {{count}} лекарств",
     "new": "Новый",
     "no": "Нет",
     "noConditionsLinked": "Нет заболеваний, связанных с этим результатом анализа",
+    "noConditionsLinkedToMedication": "Нет заболеваний, связанных с этим лекарством",
+    "noDate": "No date",
     "noEncountersLinked": "Визиты не связаны с этим лечением",
     "noEquipmentLinked": "Оборудование не связано с этим лечением",
     "noLabResultsLinked": "Результаты анализов не связаны с этим визитом",
     "noLabResultsLinkedToCondition": "Результаты анализов не связаны с данным заболеванием",
     "noMedicationsLinked": "Нет лекарств, связанных с этим заболеванием",
+    "noMedicationsLinkedToLabResult": "No medications linked to this lab result",
     "none": "Нет",
+    "noProceduresLinked": "No procedures linked to this lab result",
     "noRating": "Нет оценки",
     "notAvailable": "Н/Д",
     "notCompleted": "Не завершено",
+    "noTreatmentsLinked": "No treatments linked to this lab result",
     "noVisitsLinked": "Визиты не связаны с этим результатом анализа",
     "ordered": "Назначено",
     "phoneNumber": "Номер телефона",
     "ratingStars": "{{count}}/5 звёзд",
     "ratingStars_one": "{{count}}/5 звезда",
     "ratingStars_other": "{{count}}/5 звёзд",
+    "saveRelationship": "Save relationship",
     "selectPurpose": "Выберите цель",
     "viewDetails": "Просмотреть подробности",
     "viewPharmacyDetails": "Просмотреть данные аптеки",
     "visitDate": "Дата визита",
     "visitWebsite": "Перейти на сайт ↗",
-    "yes": "Да",
-    "noConditionsLinkedToMedication": "Нет заболеваний, связанных с этим лекарством",
-    "conditionsAvailableToLink": "Доступно для связывания: {{count}} заболеваний",
-    "medicationsAvailableToLink": "Доступно для связывания: {{count}} лекарств"
+    "yes": "Да"
   },
   "labResults": {
     "emptyLabResultMessage": "Вы создали результат анализа, но не добавили компоненты теста. Хотите удалить этот результат анализа?",
@@ -538,47 +559,76 @@
     "confirmRemoveConditionRelationship": "Вы уверены, что хотите убрать эту связь с заболеванием?",
     "confirmRemoveEquipmentRelationship": "Вы уверены, что хотите удалить эту связь с оборудованием?",
     "confirmRemoveLabResultLink": "Удалить эту связь с результатом анализа?",
+    "confirmRemoveLabResultRelationship": "Remove this lab result link?",
+    "confirmRemoveMedicationLink": "Remove this medication link?",
+    "confirmRemoveMedicationRelationship": "Вы уверены, что хотите убрать эту связь с лекарством?",
+    "confirmRemoveProcedureLink": "Remove this procedure link?",
+    "confirmRemoveTreatmentLink": "Remove this treatment link?",
     "confirmRemoveVisitLink": "Удалить эту связь с визитом?",
     "displayError": "Невозможно отобразить этот элемент. Попробуйте обновить страницу.",
     "doNotClose": "Пожалуйста, не закрывайте это окно и не переходите на другую страницу",
     "failedToLinkLabResult": "Не удалось связать результат анализа",
+    "failedToLinkMedication": "Failed to link medication",
+    "failedToLinkProcedure": "Failed to link procedure",
+    "failedToLinkTreatment": "Failed to link treatment",
     "failedToLinkVisit": "Не удалось связать визит",
     "failedToUnlinkLabResult": "Не удалось отвязать результат анализа",
+    "failedToUnlinkMedication": "Failed to unlink medication",
+    "failedToUnlinkProcedure": "Failed to unlink procedure",
+    "failedToUnlinkTreatment": "Failed to unlink treatment",
     "failedToUnlinkVisit": "Не удалось отвязать визит",
     "failedToUpdateRelationship": "Не удалось обновить связь",
     "processing": "Обработка...",
     "selectLabResult": "Пожалуйста, выберите результат анализа",
+    "selectMedication": "Please select a medication",
+    "selectProcedure": "Please select a procedure",
+    "selectTreatment": "Please select a treatment",
     "selectVisit": "Пожалуйста, выберите визит",
     "underDevelopment": "Данный раздел в настоящее время разрабатывается.",
-    "updateSuccess": "Успешно обновлено",
-    "confirmRemoveMedicationRelationship": "Вы уверены, что хотите убрать эту связь с лекарством?"
+    "updateSuccess": "Успешно обновлено"
   },
   "modals": {
     "chooseConditionsToLink": "Выберите заболевания для связывания",
     "chooseConditionToLink": "Выберите заболевание для связывания",
+    "chooseLabResultsToLink": "Choose lab results to link",
     "chooseLabResultToLink": "Выберите результат анализа для связывания",
     "chooseMedicationToLink": "Выберите лекарства для связывания",
+    "chooseOneMedicationToLink": "Choose a medication to link",
+    "chooseProcedureToLink": "Choose a procedure to link",
+    "chooseTreatmentToLink": "Choose a treatment to link",
     "chooseVisitToLink": "Выберите визит для связывания",
     "describeConditionRelevance": "Опишите, как это заболевание связано с результатом анализа (необязательно)",
+    "describeConditionRelevanceMedication": "Опишите, как это заболевание связано с лекарством",
     "describeLabResultRelevance": "Опишите, как этот результат анализа связан с данным визитом",
+    "describeMedicationLabResultRelevance": "Describe how this medication relates to this lab result",
+    "describeMedicationRelevance": "Опишите, как это лекарство связано с заболеванием",
+    "describeProcedureRelevance": "Describe how this procedure relates to this lab result",
+    "describeTreatmentRelevance": "Describe how this treatment relates to this lab result",
     "describeVisitRelevance": "Опишите, как этот визит связан с данным результатом анализа",
+    "expectedFrequencyPlaceholder": "e.g. Monthly, Every 3 months",
+    "linkConditionsToMedication": "Связать заболевания с лекарством",
     "linkConditionToLabResult": "Связать заболевание с результатом анализа",
+    "linkLabResultsToCondition": "Link Lab Results to Condition",
     "linkLabResultToVisit": "Связать результат анализа с визитом",
+    "linkMedicationsToCondition": "Связать лекарства с заболеванием",
+    "linkMedicationToLabResult": "Link Medication to Lab Result",
+    "linkProcedureToLabResult": "Link Procedure to Lab Result",
+    "linkTreatmentToLabResult": "Link Treatment to Lab Result",
     "linkVisitToLabResult": "Связать визит с результатом анализа",
     "noRelevanceNoteProvided": "Примечание о связи не указано",
     "purpose": "Цель",
     "relevanceNote": "Примечание о связи",
     "relevanceNoteOptional": "Примечание о связи (необязательно)",
     "selectCondition": "Выберите заболевание",
-    "selectLabResult": "Выберите результат анализа",
-    "selectMedications": "Выберите лекарства",
-    "selectPurpose": "Выберите цель",
-    "selectVisit": "Выберите визит",
-    "linkConditionsToMedication": "Связать заболевания с лекарством",
-    "linkMedicationsToCondition": "Связать лекарства с заболеванием",
     "selectConditions": "Выберите заболевания",
-    "describeConditionRelevanceMedication": "Опишите, как это заболевание связано с лекарством",
-    "describeMedicationRelevance": "Опишите, как это лекарство связано с заболеванием"
+    "selectLabResult": "Выберите результат анализа",
+    "selectLabResults": "Select Lab Results",
+    "selectMedication": "Select Medication",
+    "selectMedications": "Выберите лекарства",
+    "selectProcedure": "Select Procedure",
+    "selectPurpose": "Выберите цель",
+    "selectTreatment": "Select Treatment",
+    "selectVisit": "Выберите визит"
   },
   "noResults": "Врачи не найдены",
   "pagination": {
@@ -755,6 +805,13 @@
     "card": {
       "subtitle": "Медицинский специалист"
     },
+    "createInline": {
+      "buttonTooltip": "Новый врач",
+      "createError": "Не удалось создать врача. Попробуйте ещё раз.",
+      "nameRequired": "Имя обязательно",
+      "specialtyRequired": "Медицинская специальность обязательна",
+      "successMessage": "Врач создан и выбран"
+    },
     "createPracticeError": "Не удалось создать клинику. Попробуйте снова.",
     "editPracticeError": "Не удалось загрузить клинику для редактирования",
     "empty": {
@@ -768,13 +825,6 @@
     "form": {
       "addTitle": "Добавить врача",
       "editTitle": "Редактировать врача"
-    },
-    "createInline": {
-      "buttonTooltip": "Новый врач",
-      "nameRequired": "Имя обязательно",
-      "specialtyRequired": "Медицинская специальность обязательна",
-      "createError": "Не удалось создать врача. Попробуйте ещё раз.",
-      "successMessage": "Врач создан и выбран"
     },
     "groupByPractice": "Группировать по клинике",
     "loading": "Загрузка врачей...",
@@ -1242,13 +1292,17 @@
       "treatmentNotes": "Заметки о лечении"
     }
   },
+  "validation": {
+    "fieldRequired": "{{field}} is required",
+    "noPatientSelected": "No patient selected. Please select a patient first."
+  },
   "viewToggle": {
     "cards": "Карточки",
     "components": "Результаты тестов",
     "label": "Режим просмотра",
-    "table": "Таблица",
+    "labwork": "Лабораторная работа",
     "stacked": "Сложенные",
-    "labwork": "Лабораторная работа"
+    "table": "Таблица"
   },
   "visits": {
     "addNewVisit": "Добавить визит",
@@ -1260,7 +1314,10 @@
     "editVisit": "Редактировать визит",
     "form": {
       "addVisit": "Добавить визит",
+      "chooseLabResultsToLink": "Choose lab results to link",
+      "labResultsDescription": "Link lab results relevant to this visit. You can set purpose and notes after creating the visit.",
       "savingVisit": "Сохранение визита...",
+      "selectLabResults": "Select Lab Results",
       "tabs": {
         "clinical": "Клиника",
         "visitInfo": "Информация о визите"
@@ -1268,6 +1325,10 @@
       "updateVisit": "Обновить визит"
     },
     "loadingVisits": "Загрузка визитов...",
+    "notifications": {
+      "labResultLinkFailed": "Visit was created, but some lab results could not be linked. You can link them manually by editing the visit.",
+      "labResultLinkWarning": "Lab Result Linking Issue"
+    },
     "noVisitsFound": "Медицинские визиты не найдены",
     "table": {
       "visitDate": "Дата визита",

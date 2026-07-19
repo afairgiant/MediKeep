@@ -35,6 +35,7 @@
     "invalidPhone": "请输入有效的电话号码。",
     "invalidPhoneDigits": "请输入有效的电话号码",
     "invalidWebsiteUrl": "请输入有效的网站URL",
+    "labResultNotSelected": "Please select at least one lab result",
     "medicationNotSelected": "请选择药物",
     "mustBeValidNumber": "必须是有效数字",
     "patientNotSelected": "请选择患者。",

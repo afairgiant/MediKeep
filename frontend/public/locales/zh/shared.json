@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "管理员仪表板",
     "allergies": "过敏史",
@@ -71,6 +76,7 @@
     "procedureCode": "程序编码",
     "procedureName": "程序名称",
     "procedureType": "程序类型",
+    "reset": "Reset",
     "selectGender": "选择性别",
     "selectPractitioner": "选择医师",
     "selectRelationship": "选择关系",
@@ -243,11 +249,13 @@
     "relatedCondition": "相关疾病",
     "relatedConditions": "相关疾病",
     "relationship": "关系",
+    "remove": "Remove",
     "resetPassword": "重置密码",
     "resolved": "已解决",
     "retry": "重试",
     "role": "角色",
     "route": "给药途径",
+    "save": "Save",
     "saving": "保存中...",
     "selectCategory": "选择分类",
     "selectPractitioner": "选择医师",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "显示 {{count}} 项独特检测",
     "sideEffects": "副作用",
     "size": "大小",
+    "sortBy": "Sort by",
     "specialties": "专科",
     "specialty": "专科",
     "startDate": "开始日期",
+    "state": "State",
     "stateProvince": "州/省",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>数量保护：</strong>始终保留最近的 {{count}} 个备份",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>数量保护：</strong>始终保留最近的 {{count}} 个备份",
@@ -287,6 +297,7 @@
     "trendCharts": "趋势图表",
     "type": "类型",
     "unknown": "未知",
+    "unknownError": "Unknown error",
     "uploadFailed": "上传失败",
     "user": "用户",
     "userManagement": "用户管理",
@@ -301,7 +312,8 @@
     "warnings": "警告",
     "website": "网站",
     "weekly": "每周",
-    "weight": "体重"
+    "weight": "体重",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "仅查看权限"
@@ -316,9 +328,12 @@
     "episodesCount": "病程（{{count}}）",
     "episodesCount_one": "病程（{{count}}）",
     "episodesCount_other": "病程（{{count}}）",
-    "notes": "记录",
     "labResults": "化验结果",
+    "medications": "Medications",
+    "notes": "记录",
     "overview": "概览",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "就诊"
   }
 }

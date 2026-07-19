@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Panel de administración",
     "allergies": "Alergias",
@@ -71,6 +76,7 @@
     "procedureCode": "Código del procedimiento",
     "procedureName": "Nombre del procedimiento",
     "procedureType": "Tipo de procedimiento",
+    "reset": "Reset",
     "selectGender": "Seleccione el sexo",
     "selectPractitioner": "Seleccione un profesional",
     "selectRelationship": "Seleccione la relación",
@@ -243,11 +249,13 @@
     "relatedCondition": "Condición relacionada",
     "relatedConditions": "Condiciones relacionadas",
     "relationship": "Parentesco",
+    "remove": "Remove",
     "resetPassword": "Restablecer contraseña",
     "resolved": "Resuelto",
     "retry": "Reintentar",
     "role": "Rol",
     "route": "Vía de administración",
+    "save": "Save",
     "saving": "Guardando...",
     "selectCategory": "Seleccione una categoría",
     "selectPractitioner": "Seleccione un profesional",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "Mostrando {{count}} pruebas únicas",
     "sideEffects": "Efectos secundarios",
     "size": "Tamaño",
+    "sortBy": "Sort by",
     "specialties": "Especialidades",
     "specialty": "Especialidad",
     "startDate": "Fecha de inicio",
+    "state": "State",
     "stateProvince": "Estado / Provincia",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Protección por cantidad:</strong> Siempre conservar las {{count}} copias de seguridad más recientes",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Protección por cantidad:</strong> Siempre conservar la {{count}} copia de seguridad más reciente",
@@ -287,6 +297,7 @@
     "trendCharts": "Gráficos de tendencia",
     "type": "Tipo",
     "unknown": "Desconocido",
+    "unknownError": "Unknown error",
     "uploadFailed": "Error en la carga",
     "user": "Usuario",
     "userManagement": "Gestión de usuarios",
@@ -301,7 +312,8 @@
     "warnings": "Advertencias",
     "website": "Sitio web",
     "weekly": "Semanal",
-    "weight": "Peso"
+    "weight": "Peso",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Acceso de solo lectura"
@@ -316,9 +328,12 @@
     "episodesCount": "Episodios ({{count}})",
     "episodesCount_one": "Episodios ({{count}})",
     "episodesCount_other": "Episodios ({{count}})",
-    "notes": "Notas",
     "labResults": "Resultados de laboratorio",
+    "medications": "Medications",
+    "notes": "Notas",
     "overview": "Resumen",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Visitas"
   }
 }

@@ -57,6 +57,27 @@
     "organizationPlaceholder": "Seleccionar una organización",
     "urlPlaceholder": "https://su-instancia-papra.com"
   },
+  "preferences": {
+    "dateFormat": {
+      "description": "Elija cómo se muestran las fechas en toda la aplicación",
+      "dmy": "DD/MM/AAAA (R. Unido/Internacional)",
+      "dmy_dot": "DD.MM.AAAA (Europeo)",
+      "mdy": "MM/DD/AAAA (EE. UU.)",
+      "title": "Formato de fecha",
+      "ymd": "AAAA-MM-DD (ISO)"
+    },
+    "sessionTimeout": {
+      "description": "Establezca la duración de inactividad antes de que expire su sesión (en minutos)",
+      "range": "minutos (5-1440)",
+      "title": "Tiempo de espera de sesión"
+    },
+    "unitSystem": {
+      "description": "Elija si desea mostrar las mediciones en unidades imperiales (libras, pies, °F) o métricas (kilogramos, centímetros, °C)",
+      "imperial": "Imperial (lbs, pies, °F)",
+      "metric": "Métrico (kg, cm, °C)",
+      "title": "Sistema de unidades"
+    }
+  },
   "profile": {
     "description": "Actualice la identidad de su cuenta. Cambiar su nombre de usuario cerrará su sesión -- volverá a iniciar sesión con el nuevo nombre.",
     "errors": {
@@ -79,27 +100,6 @@
     "updateSuccess": "Perfil actualizado",
     "usernameChangedLogoutWarning": "Al guardar se cerrará su sesión para que el nuevo nombre de usuario tenga efecto. Inicie sesión nuevamente con el nuevo nombre de usuario.",
     "usernameChangedNotice": "Nombre de usuario cambiado. Por favor, inicie sesión con su nuevo nombre de usuario."
-  },
-  "preferences": {
-    "dateFormat": {
-      "description": "Elija cómo se muestran las fechas en toda la aplicación",
-      "dmy": "DD/MM/AAAA (R. Unido/Internacional)",
-      "dmy_dot": "DD.MM.AAAA (Europeo)",
-      "mdy": "MM/DD/AAAA (EE. UU.)",
-      "title": "Formato de fecha",
-      "ymd": "AAAA-MM-DD (ISO)"
-    },
-    "sessionTimeout": {
-      "description": "Establezca la duración de inactividad antes de que expire su sesión (en minutos)",
-      "range": "minutos (5-1440)",
-      "title": "Tiempo de espera de sesión"
-    },
-    "unitSystem": {
-      "description": "Elija si desea mostrar las mediciones en unidades imperiales (libras, pies, °F) o métricas (kilogramos, centímetros, °C)",
-      "imperial": "Imperial (lbs, pies, °F)",
-      "metric": "Métrico (kg, cm, °C)",
-      "title": "Sistema de unidades"
-    }
   },
   "releaseNotes": {
     "currentVersion": "Actual",

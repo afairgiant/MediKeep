@@ -17,7 +17,6 @@
   "diastolic": "Diastolisch",
   "editTitle": "Vitalzeichen bearbeiten",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "z. B. Digitales Blutdruckmessgerät, Thermometermodell...",
     "deviceUsed": "Verwendetes Gerät/Ausrüstung",
     "diastolicBP": "Diastolischer RR",

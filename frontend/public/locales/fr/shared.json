@@ -1,4 +1,9 @@
 {
+  "buttons": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  },
   "categories": {
     "admin_dashboard": "Tableau de bord administrateur",
     "allergies": "Allergies",
@@ -71,6 +76,7 @@
     "procedureCode": "Code de procédure",
     "procedureName": "Nom de la procédure",
     "procedureType": "Type de procédure",
+    "reset": "Reset",
     "selectGender": "Sélectionnez le genre",
     "selectPractitioner": "Sélectionnez un médecin",
     "selectRelationship": "Sélectionnez un lien de parenté",
@@ -243,11 +249,13 @@
     "relatedCondition": "Condition connectée",
     "relatedConditions": "Conditions connectées",
     "relationship": "Lien de parenté",
+    "remove": "Remove",
     "resetPassword": "Réinitialiser le mot de passe",
     "resolved": "Résolu(e)",
     "retry": "Réessayer",
     "role": "Rôle",
     "route": "Voie",
+    "save": "Save",
     "saving": "Sauvegarde en cours...",
     "selectCategory": "Sélectionnez la catégorie",
     "selectPractitioner": "Sélectionnez le médecin",
@@ -264,9 +272,11 @@
     "showingCountUniqueTests_other": "{{count}} analyses uniques affichées",
     "sideEffects": "Effets secondaires",
     "size": "Taille",
+    "sortBy": "Sort by",
     "specialties": "Spécialités",
     "specialty": "Spécialité",
     "startDate": "Date de début",
+    "state": "State",
     "stateProvince": "Etat / Province",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups": "<strong>Protection de décompte :</strong> Toujours conserver les {{count}} plus récents backups",
     "strongcountProtectionstrongAlwaysKeepTheCountMostRecentBackups_one": "<strong>Protection de décompte :</strong> Toujours conserver le plus récent backup",
@@ -287,6 +297,7 @@
     "trendCharts": "Tableaux de tendances",
     "type": "Type",
     "unknown": "Inconnu",
+    "unknownError": "Unknown error",
     "uploadFailed": "Echec du téléversement",
     "user": "Utilisateur",
     "userManagement": "Gestion des utilisateurs",
@@ -301,7 +312,8 @@
     "warnings": "Avertissements",
     "website": "Site web",
     "weekly": "Hebdomadaire",
-    "weight": "Poids"
+    "weight": "Poids",
+    "zip": "ZIP"
   },
   "permissions": {
     "viewOnly": "Accès en lecture seule"
@@ -316,9 +328,12 @@
     "episodesCount": "Crise(s) ({{count}})",
     "episodesCount_one": "Crise ({{count}})",
     "episodesCount_other": "Crises ({{count}})",
-    "notes": "Notes",
     "labResults": "Résultats de laboratoire",
+    "medications": "Medications",
+    "notes": "Notes",
     "overview": "Aperçu",
+    "procedures": "Procedures",
+    "treatments": "Treatments",
     "visits": "Visites"
   }
 }

@@ -14,7 +14,6 @@
       "description": "Selecione registos médicos para incluir no seu relatório personalizado",
       "title": "Configuração do Relatório"
     },
-    "icon": "",
     "loading": "A carregar construtor de relatórios...",
     "noData": {
       "description": "Adicione primeiro alguns registos médicos para usar o construtor de relatórios.",
@@ -160,7 +159,6 @@
       "singleExport": "Exportação Individual",
       "title": "Modo de Exportação"
     },
-    "icon": "",
     "information": {
       "bulk": {
         "description": "Cria um ficheiro ZIP contendo múltiplos tipos de dados no formato escolhido para cópia de segurança abrangente de dados.",
@@ -221,8 +219,8 @@
     "saveAsNew": "Guardar como novo modelo",
     "saveAsTemplate": "Guardar como Modelo",
     "saveDescription": "Este modelo irá guardar as suas configurações atuais do relatório, registos selecionados e gráficos de tendência selecionados.",
-    "saveModalTitle": "Guardar modelo de relatório",
     "savedTemplates": "Modelos Guardados",
+    "saveModalTitle": "Guardar modelo de relatório",
     "updateCurrent": "Atualizar \"{{name}}\"",
     "updateTemplate": "Atualizar Modelo"
   }

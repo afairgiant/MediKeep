@@ -332,6 +332,38 @@
       "label": "Vervaldatum vaccin",
       "placeholder": "Selecteer vervaldatum"
     },
+    "form": {
+      "linkStatusLinked": "✓ Gekoppeld aan bibliotheek: {{name}}",
+      "linkStatusUnlinked": "⚠ Niet gekoppeld aan bibliotheek. Kies een vaccin uit de lijst om te koppelen."
+    },
+    "history": {
+      "dateRangePlaceholder": "Filter op periode",
+      "doseLabel": "Dosis {{n}}",
+      "dosesCount": "{{count}} doses",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 dosis",
+      "emptyAll": "Nog geen vaccinaties geregistreerd.",
+      "emptyRange": "Geen vaccinaties in deze periode.",
+      "linkActionLabel": "Koppelen aan bibliotheek",
+      "lotLabel": "Charge {{lot}}",
+      "miscGroup": "Overig / Niet gekoppeld",
+      "miscGroupHint": "Deze records zijn nog niet gekoppeld aan de vaccinbibliotheek. Klik op een record om te bewerken en een bibliotheekitem te kiezen.",
+      "noDiseaseData": "Er zijn geen vaccinaties gekoppeld aan de bibliotheek. Schakel over naar de weergave 'Op datum' om alle records te zien, of bewerk een record en selecteer opnieuw een vaccin uit de autocomplete om het te koppelen.",
+      "recordCount": "{{count}} vaccinaties",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 vaccinatie",
+      "unlinkedTag": "Niet gekoppeld",
+      "unmatchedBanner": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw uit de autocomplete om het te koppelen.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Sommige records zijn niet gekoppeld aan de vaccinbibliotheek",
+      "viewMode": {
+        "byDate": "Op datum",
+        "byDisease": "Op ziekte"
+      }
+    },
     "location": {
       "description": "Waar het vaccin is toegediend",
       "placeholder": "bv. Apotheek, Ziekenhuis, Kliniek, GGD"
@@ -388,38 +420,12 @@
       "rightThigh": "Rechterdij"
     },
     "vaccineName": {
+      "combinedHint": "Gecombineerd vaccin — componenten: {{components}}",
       "description": "Naam van het toegediende vaccin",
       "label": "Vaccinnaam",
+      "matchedCommonName": "gevonden: {{name}}",
       "placeholder": "bv. COVID-19 mRNA, Influenza, BMR",
-      "searchPlaceholder": "Typ om vaccins te zoeken...",
-      "combinedHint": "Gecombineerd vaccin — componenten: {{components}}",
-      "matchedCommonName": "gevonden: {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "Op datum",
-        "byDisease": "Op ziekte"
-      },
-      "recordCount": "{{count}} vaccinaties",
-      "recordCountSingular": "1 vaccinatie",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dosis",
-      "doseLabel": "Dosis {{n}}",
-      "lotLabel": "Charge {{lot}}",
-      "unlinkedTag": "Niet gekoppeld",
-      "emptyAll": "Nog geen vaccinaties geregistreerd.",
-      "emptyRange": "Geen vaccinaties in deze periode.",
-      "dateRangePlaceholder": "Filter op periode",
-      "noDiseaseData": "Er zijn geen vaccinaties gekoppeld aan de bibliotheek. Schakel over naar de weergave 'Op datum' om alle records te zien, of bewerk een record en selecteer opnieuw een vaccin uit de autocomplete om het te koppelen.",
-      "unmatchedTitle": "Sommige records zijn niet gekoppeld aan de vaccinbibliotheek",
-      "unmatchedBanner": "{{count}} records zijn niet gekoppeld. Bewerk een record en selecteer het opnieuw uit de autocomplete om het te koppelen.",
-      "linkActionLabel": "Koppelen aan bibliotheek",
-      "miscGroup": "Overig / Niet gekoppeld",
-      "miscGroupHint": "Deze records zijn nog niet gekoppeld aan de vaccinbibliotheek. Klik op een record om te bewerken en een bibliotheekitem te kiezen."
-    },
-    "form": {
-      "linkStatusLinked": "✓ Gekoppeld aan bibliotheek: {{name}}",
-      "linkStatusUnlinked": "⚠ Niet gekoppeld aan bibliotheek. Kies een vaccin uit de lijst om te koppelen."
+      "searchPlaceholder": "Typ om vaccins te zoeken..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "Laboratoriumuitslag opgeslagen, maar testonderdelen konden niet worden toegevoegd. U kunt ze toevoegen vanaf de weergavepagina.",
-      "relationshipCreationWarning": "Laboratoriumuitslag opgeslagen, maar sommige relaties konden niet worden aangemaakt. U kunt ze toevoegen vanaf de bewerkingspagina."
-    },
     "addPanel": {
-      "title": "Laboratoriumresultaten toevoegen",
-      "panelName": "Laboratoriumresultaten panel of type",
-      "panelNamePlaceholder": "bijv. Bloedbeeld, Jaarlijkse analyse",
-      "panelNameDescription": "Een naam voor deze groep tests",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Resultaten opslaan",
-      "creating": "Paneel aanmaken...",
       "createError": "Aanmaken van testpaneel mislukt",
+      "creating": "Paneel aanmaken...",
+      "panelName": "Laboratoriumresultaten panel of type",
+      "panelNameDescription": "Een naam voor deze groep tests",
+      "panelNamePlaceholder": "bijv. Bloedbeeld, Jaarlijkse analyse",
+      "tagsPlaceholder": "Voeg tags toe om dit record later te organiseren en terug te vinden",
       "testResultRequired": "Minimaal één testresultaat is vereist",
-      "tagsPlaceholder": "Voeg tags toe om dit record later te organiseren en terug te vinden"
+      "title": "Laboratoriumresultaten toevoegen"
     },
     "buttons": {
       "addLabResults": "Laboratoriumresultaten toevoegen"
+    },
+    "form": {
+      "componentCreationWarning": "Laboratoriumuitslag opgeslagen, maar testonderdelen konden niet worden toegevoegd. U kunt ze toevoegen vanaf de weergavepagina.",
+      "relationshipCreationWarning": "Laboratoriumuitslag opgeslagen, maar sommige relaties konden niet worden aangemaakt. U kunt ze toevoegen vanaf de bewerkingspagina."
     }
   },
   "medications": {
@@ -888,6 +898,58 @@
       "label": "Voorschrijvend arts",
       "placeholder": "Selecteer arts"
     },
+    "reminders": {
+      "days": {
+        "description": "Laat leeg om elke dag herinneringen te ontvangen",
+        "fri": "Vr",
+        "label": "Herinneringsdagen",
+        "mon": "Ma",
+        "sat": "Za",
+        "sun": "Zo",
+        "thu": "Do",
+        "tue": "Di",
+        "wed": "Wo"
+      },
+      "enabled": {
+        "description": "Meldingen versturen wanneer het tijd is om dit medicijn in te nemen",
+        "label": "Herinneringen inschakelen"
+      },
+      "enabledBadge": "Herinneringen ingeschakeld",
+      "message": {
+        "description": "Optionele notitie in de herinneringsmelding (max. 200 tekens)",
+        "label": "Aangepast herinneringsbericht",
+        "placeholder": "bijv. Innemen met voedsel, Bloeddruk eerst meten"
+      },
+      "noChannelsTitle": "Geen meldingskanaal ingeschakeld",
+      "noChannelsWarning": "Er is geen meldingskanaal geconfigureerd voor medicatieherinneringen. Open de meldingsinstellingen om een kanaal in te schakelen.",
+      "notFiring": {
+        "badge": "Wordt niet geactiveerd",
+        "dayNotActive": "Herinneringen zijn vandaag niet gepland.",
+        "notStarted": "De inname van dit medicijn begint pas op {{date}}.",
+        "periodEnded": "Dit medicijn staat gemarkeerd als niet meer ingenomen sinds {{date}}.",
+        "statusNotActive": "De medicatiestatus is \"{{status}}\" — herinneringen worden alleen verzonden voor actieve medicijnen.",
+        "title": "Herinneringen worden niet geactiveerd"
+      },
+      "openSettings": "Meldingsinstellingen openen",
+      "saveBeforeTest": "Sla het medicijn eerst op om een testherinnering te versturen.",
+      "tabLabel": "Herinneringen",
+      "testButton": "Nu een testherinnering versturen",
+      "testError": "Versturen van testherinnering mislukt",
+      "testSuccess": "Testherinnering verzonden",
+      "times": {
+        "addButton": "Tijd toevoegen",
+        "description": "Tijdstippen (24-uursnotatie) waarop de herinnering wordt verzonden",
+        "duplicate": "Deze tijd staat al in de lijst",
+        "empty": "Geen herinneringstijden geconfigureerd.",
+        "invalid": "Tijd moet in HH:MM-notatie zijn (24 uur)",
+        "label": "Herinneringstijden",
+        "max": "Maximaal {{count}} tijden",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Tijd verwijderen"
+      },
+      "viewNone": "Geen herinneringen geconfigureerd"
+    },
     "route": {
       "description": "Hoe de medicatie wordt toegediend",
       "label": "Toedieningsweg",
@@ -909,56 +971,6 @@
       "description": "Bekende of ondervonden bijwerkingen van deze medicatie",
       "label": "Bijwerkingen",
       "placeholder": "Vermeld bekende of ondervonden bijwerkingen..."
-    },
-    "reminders": {
-      "tabLabel": "Herinneringen",
-      "enabled": {
-        "label": "Herinneringen inschakelen",
-        "description": "Meldingen versturen wanneer het tijd is om dit medicijn in te nemen"
-      },
-      "times": {
-        "label": "Herinneringstijden",
-        "description": "Tijdstippen (24-uursnotatie) waarop de herinnering wordt verzonden",
-        "addButton": "Tijd toevoegen",
-        "removeAriaLabel": "Tijd verwijderen",
-        "max": "Maximaal {{count}} tijden",
-        "duplicate": "Deze tijd staat al in de lijst",
-        "invalid": "Tijd moet in HH:MM-notatie zijn (24 uur)",
-        "empty": "Geen herinneringstijden geconfigureerd."
-      },
-      "noChannelsTitle": "Geen meldingskanaal ingeschakeld",
-      "noChannelsWarning": "Er is geen meldingskanaal geconfigureerd voor medicatieherinneringen. Open de meldingsinstellingen om een kanaal in te schakelen.",
-      "openSettings": "Meldingsinstellingen openen",
-      "testButton": "Nu een testherinnering versturen",
-      "testSuccess": "Testherinnering verzonden",
-      "testError": "Versturen van testherinnering mislukt",
-      "saveBeforeTest": "Sla het medicijn eerst op om een testherinnering te versturen.",
-      "viewNone": "Geen herinneringen geconfigureerd",
-      "notFiring": {
-        "title": "Herinneringen worden niet geactiveerd",
-        "badge": "Wordt niet geactiveerd",
-        "periodEnded": "Dit medicijn staat gemarkeerd als niet meer ingenomen sinds {{date}}.",
-        "notStarted": "De inname van dit medicijn begint pas op {{date}}.",
-        "statusNotActive": "De medicatiestatus is \"{{status}}\" — herinneringen worden alleen verzonden voor actieve medicijnen.",
-        "dayNotActive": "Herinneringen zijn vandaag niet gepland."
-      },
-      "enabledBadge": "Herinneringen ingeschakeld",
-      "message": {
-        "label": "Aangepast herinneringsbericht",
-        "placeholder": "bijv. Innemen met voedsel, Bloeddruk eerst meten",
-        "description": "Optionele notitie in de herinneringsmelding (max. 200 tekens)"
-      },
-      "days": {
-        "label": "Herinneringsdagen",
-        "description": "Laat leeg om elke dag herinneringen te ontvangen",
-        "mon": "Ma",
-        "tue": "Di",
-        "wed": "Wo",
-        "thu": "Do",
-        "fri": "Vr",
-        "sat": "Za",
-        "sun": "Zo"
-      }
     }
   },
   "pharmacies": {

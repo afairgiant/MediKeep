@@ -332,6 +332,35 @@
       "label": "疫苗有效期",
       "placeholder": "选择有效期"
     },
+    "form": {
+      "linkStatusLinked": "✓ 已关联至疫苗库：{{name}}",
+      "linkStatusUnlinked": "⚠ 尚未关联至疫苗库。请从下拉列表中选择疫苗以关联。"
+    },
+    "history": {
+      "dateRangePlaceholder": "按日期范围筛选",
+      "doseLabel": "第 {{n}} 剂",
+      "dosesCount": "{{count}} 剂",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 剂",
+      "emptyAll": "暂无接种记录。",
+      "emptyRange": "此范围内无接种记录。",
+      "linkActionLabel": "关联至疫苗库",
+      "lotLabel": "批号 {{lot}}",
+      "miscGroup": "其他 / 未关联",
+      "miscGroupHint": "这些记录尚未关联至疫苗库。点击记录进行编辑并选择疫苗库条目。",
+      "noDiseaseData": "暂无接种记录关联到疫苗库。切换到「按日期」视图以查看所有记录，或编辑记录并从自动完成中重新选择疫苗以建立关联。",
+      "recordCount": "{{count}} 次接种",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 次接种",
+      "unlinkedTag": "未关联",
+      "unmatchedBanner": "{{count}} 条记录未关联。编辑记录并从自动完成中重新选择以建立关联。",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "部分记录未关联到疫苗库",
+      "viewMode": {
+        "byDate": "按日期",
+        "byDisease": "按疾病"
+      }
+    },
     "location": {
       "description": "疫苗接种地点",
       "placeholder": "如：社区卫生服务中心、医院、诊所、疾控中心"
@@ -388,38 +417,12 @@
       "rightThigh": "右大腿"
     },
     "vaccineName": {
+      "combinedHint": "联合疫苗 — 成分：{{components}}",
       "description": "接种的疫苗名称",
       "label": "疫苗名称",
+      "matchedCommonName": "匹配：{{name}}",
       "placeholder": "如：新冠mRNA疫苗、流感疫苗、MMR疫苗",
-      "searchPlaceholder": "输入以搜索疫苗...",
-      "combinedHint": "联合疫苗 — 成分：{{components}}",
-      "matchedCommonName": "匹配：{{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "按日期",
-        "byDisease": "按疾病"
-      },
-      "recordCount": "{{count}} 次接种",
-      "recordCountSingular": "1 次接种",
-      "dosesCount": "{{count}} 剂",
-      "dosesCountSingular": "1 剂",
-      "doseLabel": "第 {{n}} 剂",
-      "lotLabel": "批号 {{lot}}",
-      "unlinkedTag": "未关联",
-      "emptyAll": "暂无接种记录。",
-      "emptyRange": "此范围内无接种记录。",
-      "dateRangePlaceholder": "按日期范围筛选",
-      "noDiseaseData": "暂无接种记录关联到疫苗库。切换到「按日期」视图以查看所有记录，或编辑记录并从自动完成中重新选择疫苗以建立关联。",
-      "unmatchedTitle": "部分记录未关联到疫苗库",
-      "unmatchedBanner": "{{count}} 条记录未关联。编辑记录并从自动完成中重新选择以建立关联。",
-      "linkActionLabel": "关联至疫苗库",
-      "miscGroup": "其他 / 未关联",
-      "miscGroupHint": "这些记录尚未关联至疫苗库。点击记录进行编辑并选择疫苗库条目。"
-    },
-    "form": {
-      "linkStatusLinked": "✓ 已关联至疫苗库：{{name}}",
-      "linkStatusUnlinked": "⚠ 尚未关联至疫苗库。请从下拉列表中选择疫苗以关联。"
+      "searchPlaceholder": "输入以搜索疫苗..."
     }
   },
   "injuries": {
@@ -817,23 +820,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "检验结果已保存，但无法添加检测项目。您可以在查看页面添加。",
-      "relationshipCreationWarning": "检验结果已保存，但某些关联无法创建。您可以在编辑页面添加。"
-    },
     "addPanel": {
-      "title": "添加检验结果",
-      "panelName": "检验结果面板或类型",
-      "panelNamePlaceholder": "例如：血常规、年度体检",
-      "panelNameDescription": "此组检验的名称",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "保存结果",
-      "creating": "正在创建套餐...",
       "createError": "创建检验套餐失败",
+      "creating": "正在创建套餐...",
+      "panelName": "检验结果面板或类型",
+      "panelNameDescription": "此组检验的名称",
+      "panelNamePlaceholder": "例如：血常规、年度体检",
+      "tagsPlaceholder": "添加标签以便日后整理和搜索此记录",
       "testResultRequired": "至少需要一个检验结果",
-      "tagsPlaceholder": "添加标签以便日后整理和搜索此记录"
+      "title": "添加检验结果"
     },
     "buttons": {
       "addLabResults": "添加检验结果"
+    },
+    "form": {
+      "componentCreationWarning": "检验结果已保存，但无法添加检测项目。您可以在查看页面添加。",
+      "relationshipCreationWarning": "检验结果已保存，但某些关联无法创建。您可以在编辑页面添加。"
     }
   },
   "medications": {
@@ -888,6 +895,57 @@
       "label": "开药医生",
       "placeholder": "选择医生"
     },
+    "reminders": {
+      "days": {
+        "description": "留空以每天接收提醒",
+        "fri": "周五",
+        "label": "提醒日期",
+        "mon": "周一",
+        "sat": "周六",
+        "sun": "周日",
+        "thu": "周四",
+        "tue": "周二",
+        "wed": "周三"
+      },
+      "enabled": {
+        "description": "在该服药时间发送通知",
+        "label": "启用提醒"
+      },
+      "enabledBadge": "已启用提醒",
+      "message": {
+        "description": "在提醒通知中显示的可选备注（最多 200 个字符）",
+        "label": "自定义提醒消息",
+        "placeholder": "例如：随餐服用，先量血压"
+      },
+      "noChannelsTitle": "未启用通知渠道",
+      "noChannelsWarning": "尚未为用药提醒配置通知渠道。请打开通知设置以启用渠道。",
+      "notFiring": {
+        "badge": "不会触发",
+        "dayNotActive": "今天没有安排提醒。",
+        "notStarted": "该药物要到 {{date}} 才开始服用。",
+        "periodEnded": "该药物已标记为自 {{date}} 起不再服用。",
+        "statusNotActive": "药物状态为“{{status}}”，仅活动状态的药物会发送提醒。",
+        "title": "提醒将不会触发"
+      },
+      "openSettings": "打开通知设置",
+      "saveBeforeTest": "请先保存药物，然后再发送测试提醒。",
+      "tabLabel": "提醒",
+      "testButton": "立即发送测试提醒",
+      "testError": "发送测试提醒失败",
+      "testSuccess": "测试提醒已发送",
+      "times": {
+        "addButton": "添加时间",
+        "description": "触发提醒的时间（24小时制）",
+        "duplicate": "该时间已在列表中",
+        "empty": "尚未配置提醒时间。",
+        "invalid": "时间必须为 HH:MM 格式（24小时制）",
+        "label": "提醒时间",
+        "max": "最多 {{count}} 个时间",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "移除时间"
+      },
+      "viewNone": "未配置提醒"
+    },
     "route": {
       "description": "药物给药方式",
       "label": "给药途径",
@@ -909,56 +967,6 @@
       "description": "此药物的已知或经历的副作用",
       "label": "副作用",
       "placeholder": "列出任何已知或经历的副作用..."
-    },
-    "reminders": {
-      "tabLabel": "提醒",
-      "enabled": {
-        "label": "启用提醒",
-        "description": "在该服药时间发送通知"
-      },
-      "times": {
-        "label": "提醒时间",
-        "description": "触发提醒的时间（24小时制）",
-        "addButton": "添加时间",
-        "removeAriaLabel": "移除时间",
-        "max": "最多 {{count}} 个时间",
-        "duplicate": "该时间已在列表中",
-        "invalid": "时间必须为 HH:MM 格式（24小时制）",
-        "empty": "尚未配置提醒时间。"
-      },
-      "noChannelsTitle": "未启用通知渠道",
-      "noChannelsWarning": "尚未为用药提醒配置通知渠道。请打开通知设置以启用渠道。",
-      "openSettings": "打开通知设置",
-      "testButton": "立即发送测试提醒",
-      "testSuccess": "测试提醒已发送",
-      "testError": "发送测试提醒失败",
-      "saveBeforeTest": "请先保存药物，然后再发送测试提醒。",
-      "viewNone": "未配置提醒",
-      "notFiring": {
-        "title": "提醒将不会触发",
-        "badge": "不会触发",
-        "periodEnded": "该药物已标记为自 {{date}} 起不再服用。",
-        "notStarted": "该药物要到 {{date}} 才开始服用。",
-        "statusNotActive": "药物状态为“{{status}}”，仅活动状态的药物会发送提醒。",
-        "dayNotActive": "今天没有安排提醒。"
-      },
-      "enabledBadge": "已启用提醒",
-      "message": {
-        "label": "自定义提醒消息",
-        "placeholder": "例如：随餐服用，先量血压",
-        "description": "在提醒通知中显示的可选备注（最多 200 个字符）"
-      },
-      "days": {
-        "label": "提醒日期",
-        "description": "留空以每天接收提醒",
-        "mon": "周一",
-        "tue": "周二",
-        "wed": "周三",
-        "thu": "周四",
-        "fri": "周五",
-        "sat": "周六",
-        "sun": "周日"
-      }
     }
   },
   "pharmacies": {

@@ -14,7 +14,6 @@
       "description": "Select medical records to include in your custom report",
       "title": "Report Configuration"
     },
-    "icon": "",
     "loading": "Loading report builder...",
     "noData": {
       "description": "Add some medical records first to use the report builder.",
@@ -160,7 +159,6 @@
       "singleExport": "Single Export",
       "title": "Export Mode"
     },
-    "icon": "",
     "information": {
       "bulk": {
         "description": "Creates a ZIP file containing multiple data types in your chosen format for comprehensive data backup.",
@@ -221,8 +219,8 @@
     "saveAsNew": "Save as new template",
     "saveAsTemplate": "Save as Template",
     "saveDescription": "This template will save your current report settings, selected records, and selected trend charts.",
-    "saveModalTitle": "Save Report Template",
     "savedTemplates": "Saved Templates",
+    "saveModalTitle": "Save Report Template",
     "updateCurrent": "Update \"{{name}}\"",
     "updateTemplate": "Update Template"
   }

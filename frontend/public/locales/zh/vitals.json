@@ -17,7 +17,6 @@
   "diastolic": "舒张压",
   "editTitle": "编辑生命体征",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "例如：数字血压计、体温计型号...",
     "deviceUsed": "使用的设备/仪器",
     "diastolicBP": "舒张压",

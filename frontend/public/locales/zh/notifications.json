@@ -1,4 +1,7 @@
 {
+  "categories": {
+    "medical": "医疗"
+  },
   "channels": {
     "add": "添加通道",
     "configTitle": "{{type}}配置",
@@ -218,6 +221,10 @@
       "description": "从新设备访问您的账户时",
       "name": "新设备登录"
     },
+    "medication_reminder_due": {
+      "description": "当到了服用预定药物的时间时",
+      "name": "用药提醒"
+    },
     "password_changed": {
       "description": "密码更改时",
       "name": "密码已更改"
@@ -229,10 +236,6 @@
     "test_notification": {
       "description": "手动测试通知",
       "name": "测试通知"
-    },
-    "medication_reminder_due": {
-      "description": "当到了服用预定药物的时间时",
-      "name": "用药提醒"
     }
   },
   "history": {
@@ -437,8 +440,5 @@
     "urlRequired": "Webhook URL为必填项",
     "webhookUrlInvalid": "Webhook URL格式无效",
     "webhookUrlRequired": "Webhook URL为必填项"
-  },
-  "categories": {
-    "medical": "医疗"
   }
 }

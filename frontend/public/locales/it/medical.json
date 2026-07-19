@@ -332,6 +332,38 @@
       "label": "Data di scadenza del vaccino",
       "placeholder": "Seleziona la data di scadenza"
     },
+    "form": {
+      "linkStatusLinked": "✓ Collegato alla libreria: {{name}}",
+      "linkStatusUnlinked": "⚠ Non collegato alla libreria. Seleziona un vaccino dal menu a tendina per collegarlo."
+    },
+    "history": {
+      "dateRangePlaceholder": "Filtra per intervallo di date",
+      "doseLabel": "Dose {{n}}",
+      "dosesCount": "{{count}} dosi",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 dose",
+      "emptyAll": "Nessuna vaccinazione registrata.",
+      "emptyRange": "Nessuna vaccinazione in questo intervallo.",
+      "linkActionLabel": "Collega alla libreria",
+      "lotLabel": "Lotto {{lot}}",
+      "miscGroup": "Varie / Non collegati",
+      "miscGroupHint": "Questi record non sono ancora collegati alla libreria dei vaccini. Fai clic su uno per modificarlo e scegliere una voce della libreria.",
+      "noDiseaseData": "Nessuna vaccinazione è collegata alla libreria. Passa alla vista «Per data» per vedere tutti i record, oppure modifica un record e riseleziona un vaccino dal completamento automatico per collegarlo.",
+      "recordCount": "{{count}} vaccinazioni",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 vaccinazione",
+      "unlinkedTag": "Non collegato",
+      "unmatchedBanner": "{{count}} record non sono collegati. Modifica un record e riselezionalo dal completamento automatico per collegarlo.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Alcuni record non sono collegati alla libreria dei vaccini",
+      "viewMode": {
+        "byDate": "Per data",
+        "byDisease": "Per malattia"
+      }
+    },
     "location": {
       "description": "Dove è stato somministrato il vaccino",
       "placeholder": "ad es., Farmacia CVS, Ospedale, Clinica, ASL"
@@ -388,38 +420,12 @@
       "rightThigh": "Coscia destra"
     },
     "vaccineName": {
+      "combinedHint": "Vaccino combinato — componenti: {{components}}",
       "description": "Nome del vaccino somministrato",
       "label": "Nome del vaccino",
+      "matchedCommonName": "corrisponde: {{name}}",
       "placeholder": "ad es., COVID-19 mRNA, Influenza, MMR",
-      "searchPlaceholder": "Digita per cercare vaccini...",
-      "combinedHint": "Vaccino combinato — componenti: {{components}}",
-      "matchedCommonName": "corrisponde: {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "Per data",
-        "byDisease": "Per malattia"
-      },
-      "recordCount": "{{count}} vaccinazioni",
-      "recordCountSingular": "1 vaccinazione",
-      "dosesCount": "{{count}} dosi",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lotto {{lot}}",
-      "unlinkedTag": "Non collegato",
-      "emptyAll": "Nessuna vaccinazione registrata.",
-      "emptyRange": "Nessuna vaccinazione in questo intervallo.",
-      "dateRangePlaceholder": "Filtra per intervallo di date",
-      "noDiseaseData": "Nessuna vaccinazione è collegata alla libreria. Passa alla vista «Per data» per vedere tutti i record, oppure modifica un record e riseleziona un vaccino dal completamento automatico per collegarlo.",
-      "unmatchedTitle": "Alcuni record non sono collegati alla libreria dei vaccini",
-      "unmatchedBanner": "{{count}} record non sono collegati. Modifica un record e riselezionalo dal completamento automatico per collegarlo.",
-      "linkActionLabel": "Collega alla libreria",
-      "miscGroup": "Varie / Non collegati",
-      "miscGroupHint": "Questi record non sono ancora collegati alla libreria dei vaccini. Fai clic su uno per modificarlo e scegliere una voce della libreria."
-    },
-    "form": {
-      "linkStatusLinked": "✓ Collegato alla libreria: {{name}}",
-      "linkStatusUnlinked": "⚠ Non collegato alla libreria. Seleziona un vaccino dal menu a tendina per collegarlo."
+      "searchPlaceholder": "Digita per cercare vaccini..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "Risultato di laboratorio salvato ma i componenti del test non sono stati aggiunti. Può aggiungerli dalla pagina di visualizzazione.",
-      "relationshipCreationWarning": "Risultato di laboratorio salvato ma alcune relazioni non sono state create. Può aggiungerle dalla pagina di modifica."
-    },
     "addPanel": {
-      "title": "Aggiungi risultati di laboratorio",
-      "panelName": "Pannello o tipo di risultati di laboratorio",
-      "panelNamePlaceholder": "es. Emocromo, Analisi annuale",
-      "panelNameDescription": "Un nome per questo gruppo di test",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Salva risultati",
-      "creating": "Creazione pannello...",
       "createError": "Impossibile creare il pannello di test",
+      "creating": "Creazione pannello...",
+      "panelName": "Pannello o tipo di risultati di laboratorio",
+      "panelNameDescription": "Un nome per questo gruppo di test",
+      "panelNamePlaceholder": "es. Emocromo, Analisi annuale",
+      "tagsPlaceholder": "Aggiungi tag per organizzare e cercare questo record in seguito",
       "testResultRequired": "È richiesto almeno un risultato del test",
-      "tagsPlaceholder": "Aggiungi tag per organizzare e cercare questo record in seguito"
+      "title": "Aggiungi risultati di laboratorio"
     },
     "buttons": {
       "addLabResults": "Aggiungi risultati di laboratorio"
+    },
+    "form": {
+      "componentCreationWarning": "Risultato di laboratorio salvato ma i componenti del test non sono stati aggiunti. Può aggiungerli dalla pagina di visualizzazione.",
+      "relationshipCreationWarning": "Risultato di laboratorio salvato ma alcune relazioni non sono state create. Può aggiungerle dalla pagina di modifica."
     }
   },
   "medications": {
@@ -888,6 +898,58 @@
       "label": "Medico prescrittore",
       "placeholder": "Seleziona il medico"
     },
+    "reminders": {
+      "days": {
+        "description": "Lascia vuoto per ricevere promemoria ogni giorno",
+        "fri": "Ven",
+        "label": "Giorni di promemoria",
+        "mon": "Lun",
+        "sat": "Sab",
+        "sun": "Dom",
+        "thu": "Gio",
+        "tue": "Mar",
+        "wed": "Mer"
+      },
+      "enabled": {
+        "description": "Invia notifiche quando è ora di assumere questo farmaco",
+        "label": "Attiva promemoria"
+      },
+      "enabledBadge": "Promemoria attivati",
+      "message": {
+        "description": "Nota opzionale nella notifica di promemoria (max 200 caratteri)",
+        "label": "Messaggio di promemoria personalizzato",
+        "placeholder": "es. Prendere con il cibo, Misurare la pressione prima"
+      },
+      "noChannelsTitle": "Nessun canale di notifica attivato",
+      "noChannelsWarning": "Nessun canale di notifica è configurato per i promemoria dei farmaci. Apri le impostazioni di notifica per attivare un canale.",
+      "notFiring": {
+        "badge": "Non si attiverà",
+        "dayNotActive": "I promemoria non sono programmati per oggi.",
+        "notStarted": "L'assunzione di questo farmaco inizia solo il {{date}}.",
+        "periodEnded": "Questo farmaco risulta non più assunto dal {{date}}.",
+        "statusNotActive": "Lo stato del farmaco è «{{status}}»: i promemoria vengono inviati solo per i farmaci attivi.",
+        "title": "I promemoria non verranno attivati"
+      },
+      "openSettings": "Apri impostazioni di notifica",
+      "saveBeforeTest": "Salva prima il farmaco per inviare un promemoria di prova.",
+      "tabLabel": "Promemoria",
+      "testButton": "Invia ora un promemoria di prova",
+      "testError": "Invio del promemoria di prova non riuscito",
+      "testSuccess": "Promemoria di prova inviato",
+      "times": {
+        "addButton": "Aggiungi orario",
+        "description": "Orari (formato 24 ore) in cui verrà attivato il promemoria",
+        "duplicate": "Questo orario è già nell'elenco",
+        "empty": "Nessun orario di promemoria configurato.",
+        "invalid": "L'orario deve essere nel formato HH:MM (24 ore)",
+        "label": "Orari dei promemoria",
+        "max": "Massimo {{count}} orari",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Rimuovi orario"
+      },
+      "viewNone": "Nessun promemoria configurato"
+    },
     "route": {
       "description": "Come viene somministrato il farmaco",
       "label": "Via di somministrazione",
@@ -909,56 +971,6 @@
       "description": "Effetti collaterali noti o sperimentati di questo farmaco",
       "label": "Effetti collaterali",
       "placeholder": "Elenchi gli effetti collaterali noti o sperimentati..."
-    },
-    "reminders": {
-      "tabLabel": "Promemoria",
-      "enabled": {
-        "label": "Attiva promemoria",
-        "description": "Invia notifiche quando è ora di assumere questo farmaco"
-      },
-      "times": {
-        "label": "Orari dei promemoria",
-        "description": "Orari (formato 24 ore) in cui verrà attivato il promemoria",
-        "addButton": "Aggiungi orario",
-        "removeAriaLabel": "Rimuovi orario",
-        "max": "Massimo {{count}} orari",
-        "duplicate": "Questo orario è già nell'elenco",
-        "invalid": "L'orario deve essere nel formato HH:MM (24 ore)",
-        "empty": "Nessun orario di promemoria configurato."
-      },
-      "noChannelsTitle": "Nessun canale di notifica attivato",
-      "noChannelsWarning": "Nessun canale di notifica è configurato per i promemoria dei farmaci. Apri le impostazioni di notifica per attivare un canale.",
-      "openSettings": "Apri impostazioni di notifica",
-      "testButton": "Invia ora un promemoria di prova",
-      "testSuccess": "Promemoria di prova inviato",
-      "testError": "Invio del promemoria di prova non riuscito",
-      "saveBeforeTest": "Salva prima il farmaco per inviare un promemoria di prova.",
-      "viewNone": "Nessun promemoria configurato",
-      "notFiring": {
-        "title": "I promemoria non verranno attivati",
-        "badge": "Non si attiverà",
-        "periodEnded": "Questo farmaco risulta non più assunto dal {{date}}.",
-        "notStarted": "L'assunzione di questo farmaco inizia solo il {{date}}.",
-        "statusNotActive": "Lo stato del farmaco è «{{status}}»: i promemoria vengono inviati solo per i farmaci attivi.",
-        "dayNotActive": "I promemoria non sono programmati per oggi."
-      },
-      "enabledBadge": "Promemoria attivati",
-      "message": {
-        "label": "Messaggio di promemoria personalizzato",
-        "placeholder": "es. Prendere con il cibo, Misurare la pressione prima",
-        "description": "Nota opzionale nella notifica di promemoria (max 200 caratteri)"
-      },
-      "days": {
-        "label": "Giorni di promemoria",
-        "description": "Lascia vuoto per ricevere promemoria ogni giorno",
-        "mon": "Lun",
-        "tue": "Mar",
-        "wed": "Mer",
-        "thu": "Gio",
-        "fri": "Ven",
-        "sat": "Sab",
-        "sun": "Dom"
-      }
     }
   },
   "pharmacies": {

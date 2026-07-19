@@ -322,10 +322,6 @@
       "label": "Date d'administration",
       "placeholder": "Sélectionnez la date d'administration"
     },
-    "form": {
-      "linkStatusLinked": "✓ Lié à la bibliothèque : {{name}}",
-      "linkStatusUnlinked": "⚠ Non lié à la bibliothèque. Sélectionnez un vaccin dans la liste déroulante pour l'associer."
-    },
     "doseNumber": {
       "description": "Numéro de la dose dans la série",
       "label": "Numéro de dose",
@@ -335,6 +331,38 @@
       "description": "Date de péremption de la dose de vaccin utilisée",
       "label": "Date de péremption du vaccin",
       "placeholder": "Sélectionnez la date de péremption"
+    },
+    "form": {
+      "linkStatusLinked": "✓ Lié à la bibliothèque : {{name}}",
+      "linkStatusUnlinked": "⚠ Non lié à la bibliothèque. Sélectionnez un vaccin dans la liste déroulante pour l'associer."
+    },
+    "history": {
+      "dateRangePlaceholder": "Filtrer par période",
+      "doseLabel": "Dose {{n}}",
+      "dosesCount": "{{count}} doses",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 dose",
+      "emptyAll": "Aucune vaccination enregistrée.",
+      "emptyRange": "Aucune vaccination dans cette période.",
+      "linkActionLabel": "Associer à la bibliothèque",
+      "lotLabel": "Lot {{lot}}",
+      "miscGroup": "Divers / Non liés",
+      "miscGroupHint": "Ces enregistrements ne sont pas encore associés à la bibliothèque de vaccins. Cliquez sur l'un d'eux pour le modifier et sélectionner une entrée de la bibliothèque.",
+      "noDiseaseData": "Aucune vaccination n'est associée à la bibliothèque. Passez à la vue « Par date » pour voir tous les enregistrements, ou modifiez un enregistrement et resélectionnez un vaccin dans l'autocomplétion pour l'associer.",
+      "recordCount": "{{count}} vaccinations",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 vaccination",
+      "unlinkedTag": "Non lié",
+      "unmatchedBanner": "{{count}} enregistrements ne sont pas associés. Modifiez un enregistrement et resélectionnez-le dans l'autocomplétion pour l'associer.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Certains enregistrements ne sont pas associés à la bibliothèque de vaccins",
+      "viewMode": {
+        "byDate": "Par date",
+        "byDisease": "Par maladie"
+      }
     },
     "location": {
       "description": "Lieu où le vaccin a été administré",
@@ -392,34 +420,12 @@
       "rightThigh": "Cuisse droite"
     },
     "vaccineName": {
+      "combinedHint": "Vaccin combiné — composants : {{components}}",
       "description": "Nom du vaccin administré",
       "label": "Nom du vaccin",
+      "matchedCommonName": "correspondance : {{name}}",
       "placeholder": "p. ex. : COVID-19 ARNm, Grippe, ROR",
-      "searchPlaceholder": "Tapez pour rechercher des vaccins...",
-      "combinedHint": "Vaccin combiné — composants : {{components}}",
-      "matchedCommonName": "correspondance : {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "Par date",
-        "byDisease": "Par maladie"
-      },
-      "recordCount": "{{count}} vaccinations",
-      "recordCountSingular": "1 vaccination",
-      "dosesCount": "{{count}} doses",
-      "dosesCountSingular": "1 dose",
-      "doseLabel": "Dose {{n}}",
-      "lotLabel": "Lot {{lot}}",
-      "unlinkedTag": "Non lié",
-      "linkActionLabel": "Associer à la bibliothèque",
-      "miscGroup": "Divers / Non liés",
-      "miscGroupHint": "Ces enregistrements ne sont pas encore associés à la bibliothèque de vaccins. Cliquez sur l'un d'eux pour le modifier et sélectionner une entrée de la bibliothèque.",
-      "emptyAll": "Aucune vaccination enregistrée.",
-      "emptyRange": "Aucune vaccination dans cette période.",
-      "dateRangePlaceholder": "Filtrer par période",
-      "noDiseaseData": "Aucune vaccination n'est associée à la bibliothèque. Passez à la vue « Par date » pour voir tous les enregistrements, ou modifiez un enregistrement et resélectionnez un vaccin dans l'autocomplétion pour l'associer.",
-      "unmatchedTitle": "Certains enregistrements ne sont pas associés à la bibliothèque de vaccins",
-      "unmatchedBanner": "{{count}} enregistrements ne sont pas associés. Modifiez un enregistrement et resélectionnez-le dans l'autocomplétion pour l'associer."
+      "searchPlaceholder": "Tapez pour rechercher des vaccins..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "Résultat d'analyse enregistré, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page de consultation.",
-      "relationshipCreationWarning": "Résultat d'analyse enregistré, mais certaines associations n'ont pas pu être créées. Vous pouvez les ajouter depuis la page de modification."
-    },
     "addPanel": {
-      "title": "Ajouter des résultats de laboratoire",
-      "panelName": "Panneau ou type de résultats de laboratoire",
-      "panelNamePlaceholder": "ex. : NFS, Bilan annuel",
-      "panelNameDescription": "Un nom pour ce groupe de tests",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Enregistrer les résultats",
-      "creating": "Création du panneau...",
       "createError": "Échec de la création du panneau de tests",
+      "creating": "Création du panneau...",
+      "panelName": "Panneau ou type de résultats de laboratoire",
+      "panelNameDescription": "Un nom pour ce groupe de tests",
+      "panelNamePlaceholder": "ex. : NFS, Bilan annuel",
+      "tagsPlaceholder": "Ajouter des étiquettes pour organiser et retrouver cet enregistrement plus tard",
       "testResultRequired": "Au moins un résultat de test est requis",
-      "tagsPlaceholder": "Ajouter des étiquettes pour organiser et retrouver cet enregistrement plus tard"
+      "title": "Ajouter des résultats de laboratoire"
     },
     "buttons": {
       "addLabResults": "Ajouter des résultats de laboratoire"
+    },
+    "form": {
+      "componentCreationWarning": "Résultat d'analyse enregistré, mais les composants d'analyse n'ont pas pu être ajoutés. Vous pouvez les ajouter depuis la page de consultation.",
+      "relationshipCreationWarning": "Résultat d'analyse enregistré, mais certaines associations n'ont pas pu être créées. Vous pouvez les ajouter depuis la page de modification."
     }
   },
   "medications": {
@@ -889,54 +899,56 @@
       "placeholder": "Sélectionnez un praticien"
     },
     "reminders": {
-      "tabLabel": "Rappels",
+      "days": {
+        "description": "Laissez vide pour recevoir des rappels tous les jours",
+        "fri": "Ven",
+        "label": "Jours de rappel",
+        "mon": "Lun",
+        "sat": "Sam",
+        "sun": "Dim",
+        "thu": "Jeu",
+        "tue": "Mar",
+        "wed": "Mer"
+      },
       "enabled": {
-        "label": "Activer les rappels",
-        "description": "Envoyer des notifications au moment de prendre ce médicament"
-      },
-      "times": {
-        "label": "Horaires de rappel",
-        "description": "Horaires (format 24 h) auxquels le rappel se déclenchera",
-        "addButton": "Ajouter un horaire",
-        "removeAriaLabel": "Supprimer l'horaire",
-        "max": "Maximum de {{count}} horaires",
-        "duplicate": "Cet horaire est déjà dans la liste",
-        "invalid": "L'horaire doit être au format HH:MM (24 h)",
-        "empty": "Aucun horaire de rappel configuré."
-      },
-      "noChannelsTitle": "Aucun canal de notification activé",
-      "noChannelsWarning": "Aucun canal de notification n'est configuré pour les rappels de médicaments. Ouvrez les paramètres de notification pour en activer un.",
-      "openSettings": "Ouvrir les paramètres de notification",
-      "testButton": "Envoyer un rappel de test maintenant",
-      "testSuccess": "Rappel de test envoyé",
-      "testError": "Échec de l'envoi du rappel de test",
-      "saveBeforeTest": "Enregistrez le médicament avant d'envoyer un rappel de test.",
-      "viewNone": "Aucun rappel configuré",
-      "notFiring": {
-        "title": "Les rappels ne se déclencheront pas",
-        "badge": "Ne se déclenchera pas",
-        "periodEnded": "Ce médicament est indiqué comme n'étant plus pris depuis le {{date}}.",
-        "notStarted": "La prise de ce médicament ne commence que le {{date}}.",
-        "statusNotActive": "Le statut du médicament est « {{status}} » — les rappels ne sont envoyés que pour les médicaments actifs.",
-        "dayNotActive": "Les rappels ne sont pas programmés pour aujourd'hui."
+        "description": "Envoyer des notifications au moment de prendre ce médicament",
+        "label": "Activer les rappels"
       },
       "enabledBadge": "Rappels activés",
       "message": {
+        "description": "Note optionnelle affichée dans la notification de rappel (max 200 caractères)",
         "label": "Message de rappel personnalisé",
-        "placeholder": "ex. Prendre avec de la nourriture, Mesurer la tension avant",
-        "description": "Note optionnelle affichée dans la notification de rappel (max 200 caractères)"
+        "placeholder": "ex. Prendre avec de la nourriture, Mesurer la tension avant"
       },
-      "days": {
-        "label": "Jours de rappel",
-        "description": "Laissez vide pour recevoir des rappels tous les jours",
-        "mon": "Lun",
-        "tue": "Mar",
-        "wed": "Mer",
-        "thu": "Jeu",
-        "fri": "Ven",
-        "sat": "Sam",
-        "sun": "Dim"
-      }
+      "noChannelsTitle": "Aucun canal de notification activé",
+      "noChannelsWarning": "Aucun canal de notification n'est configuré pour les rappels de médicaments. Ouvrez les paramètres de notification pour en activer un.",
+      "notFiring": {
+        "badge": "Ne se déclenchera pas",
+        "dayNotActive": "Les rappels ne sont pas programmés pour aujourd'hui.",
+        "notStarted": "La prise de ce médicament ne commence que le {{date}}.",
+        "periodEnded": "Ce médicament est indiqué comme n'étant plus pris depuis le {{date}}.",
+        "statusNotActive": "Le statut du médicament est « {{status}} » — les rappels ne sont envoyés que pour les médicaments actifs.",
+        "title": "Les rappels ne se déclencheront pas"
+      },
+      "openSettings": "Ouvrir les paramètres de notification",
+      "saveBeforeTest": "Enregistrez le médicament avant d'envoyer un rappel de test.",
+      "tabLabel": "Rappels",
+      "testButton": "Envoyer un rappel de test maintenant",
+      "testError": "Échec de l'envoi du rappel de test",
+      "testSuccess": "Rappel de test envoyé",
+      "times": {
+        "addButton": "Ajouter un horaire",
+        "description": "Horaires (format 24 h) auxquels le rappel se déclenchera",
+        "duplicate": "Cet horaire est déjà dans la liste",
+        "empty": "Aucun horaire de rappel configuré.",
+        "invalid": "L'horaire doit être au format HH:MM (24 h)",
+        "label": "Horaires de rappel",
+        "max": "Maximum de {{count}} horaires",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Supprimer l'horaire"
+      },
+      "viewNone": "Aucun rappel configuré"
     },
     "route": {
       "description": "Mode d'administration du médicament",

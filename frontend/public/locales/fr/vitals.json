@@ -17,7 +17,6 @@
   "diastolic": "Diastolique",
   "editTitle": "Editer les signes vitaux",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "ex : tensiomètre digital, modèle de thermomètre...",
     "deviceUsed": "Appareil/Equipement utilisé",
     "diastolicBP": "Pression artérielle diastolique (PAD)",

@@ -110,6 +110,15 @@ vi.mock('../../../services/api', () => ({
     getPatientConditions: vi.fn(() => Promise.resolve([])),
     getPatientEncounters: vi.fn(() => Promise.resolve([])),
     getLabResultEncounters: vi.fn(() => Promise.resolve([])),
+    getPatientMedications: vi.fn(() => Promise.resolve([])),
+    getLabResultMedications: vi.fn(() => Promise.resolve([])),
+    createLabResultMedication: vi.fn(() => Promise.resolve({})),
+    getPatientProcedures: vi.fn(() => Promise.resolve([])),
+    getLabResultProcedures: vi.fn(() => Promise.resolve([])),
+    createLabResultProcedure: vi.fn(() => Promise.resolve({})),
+    getPatientTreatments: vi.fn(() => Promise.resolve([])),
+    getLabResultTreatments: vi.fn(() => Promise.resolve([])),
+    createLabResultTreatment: vi.fn(() => Promise.resolve({})),
   },
 }));
 vi.mock('../../../services/logger', () => ({

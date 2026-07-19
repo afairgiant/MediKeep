@@ -332,6 +332,38 @@
       "label": "Ablaufdatum des Impfstoffs",
       "placeholder": "Ablaufdatum auswählen"
     },
+    "form": {
+      "linkStatusLinked": "✓ Mit der Bibliothek verknüpft: {{name}}",
+      "linkStatusUnlinked": "⚠ Nicht mit der Bibliothek verknüpft. Wählen Sie einen Impfstoff aus der Liste, um ihn zu verknüpfen."
+    },
+    "history": {
+      "dateRangePlaceholder": "Nach Zeitraum filtern",
+      "doseLabel": "Dosis {{n}}",
+      "dosesCount": "{{count}} Dosen",
+      "dosesCount_one": "{{count}} doses",
+      "dosesCount_other": "{{count}} doses",
+      "dosesCountSingular": "1 Dosis",
+      "emptyAll": "Noch keine Impfungen erfasst.",
+      "emptyRange": "Keine Impfungen in diesem Zeitraum.",
+      "linkActionLabel": "Mit Bibliothek verknüpfen",
+      "lotLabel": "Charge {{lot}}",
+      "miscGroup": "Sonstiges / Nicht verknüpft",
+      "miscGroupHint": "Diese Einträge sind noch nicht mit der Impfstoffbibliothek verknüpft. Klicken Sie auf einen Eintrag, um ihn zu bearbeiten und einen Bibliothekseintrag auszuwählen.",
+      "noDiseaseData": "Es sind keine Impfungen mit der Bibliothek verknüpft. Wechseln Sie zur Ansicht „Nach Datum“, um alle Einträge zu sehen, oder bearbeiten Sie einen Eintrag und wählen Sie erneut einen Impfstoff aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
+      "recordCount": "{{count}} Impfungen",
+      "recordCount_one": "{{count}} vaccinations",
+      "recordCount_other": "{{count}} vaccinations",
+      "recordCountSingular": "1 Impfung",
+      "unlinkedTag": "Nicht verknüpft",
+      "unmatchedBanner": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
+      "unmatchedBanner_one": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedBanner_other": "{{count}} records aren't linked. Edit a record and re-select from the autocomplete to link it.",
+      "unmatchedTitle": "Einige Einträge sind nicht mit der Impfstoffbibliothek verknüpft",
+      "viewMode": {
+        "byDate": "Nach Datum",
+        "byDisease": "Nach Krankheit"
+      }
+    },
     "location": {
       "description": "Wo die Impfung verabreicht wurde",
       "placeholder": "z.B. CVS-Apotheke, Krankenhaus, Klinik, Gesundheitsamt"
@@ -388,38 +420,12 @@
       "rightThigh": "Rechter Oberschenkel"
     },
     "vaccineName": {
+      "combinedHint": "Kombinierter Impfstoff — Bestandteile: {{components}}",
       "description": "Name des verabreichten Impfstoffs",
       "label": "Impfstoffname",
+      "matchedCommonName": "Treffer: {{name}}",
       "placeholder": "z.B. COVID-19 mRNA, Influenza, MMR",
-      "searchPlaceholder": "Zum Suchen von Impfstoffen eingeben...",
-      "combinedHint": "Kombinierter Impfstoff — Bestandteile: {{components}}",
-      "matchedCommonName": "Treffer: {{name}}"
-    },
-    "history": {
-      "viewMode": {
-        "byDate": "Nach Datum",
-        "byDisease": "Nach Krankheit"
-      },
-      "recordCount": "{{count}} Impfungen",
-      "recordCountSingular": "1 Impfung",
-      "dosesCount": "{{count}} Dosen",
-      "dosesCountSingular": "1 Dosis",
-      "doseLabel": "Dosis {{n}}",
-      "lotLabel": "Charge {{lot}}",
-      "unlinkedTag": "Nicht verknüpft",
-      "emptyAll": "Noch keine Impfungen erfasst.",
-      "emptyRange": "Keine Impfungen in diesem Zeitraum.",
-      "dateRangePlaceholder": "Nach Zeitraum filtern",
-      "noDiseaseData": "Es sind keine Impfungen mit der Bibliothek verknüpft. Wechseln Sie zur Ansicht „Nach Datum“, um alle Einträge zu sehen, oder bearbeiten Sie einen Eintrag und wählen Sie erneut einen Impfstoff aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
-      "unmatchedTitle": "Einige Einträge sind nicht mit der Impfstoffbibliothek verknüpft",
-      "unmatchedBanner": "{{count}} Einträge sind nicht verknüpft. Bearbeiten Sie einen Eintrag und wählen Sie ihn erneut aus der automatischen Vervollständigung, um ihn zu verknüpfen.",
-      "linkActionLabel": "Mit Bibliothek verknüpfen",
-      "miscGroup": "Sonstiges / Nicht verknüpft",
-      "miscGroupHint": "Diese Einträge sind noch nicht mit der Impfstoffbibliothek verknüpft. Klicken Sie auf einen Eintrag, um ihn zu bearbeiten und einen Bibliothekseintrag auszuwählen."
-    },
-    "form": {
-      "linkStatusLinked": "✓ Mit der Bibliothek verknüpft: {{name}}",
-      "linkStatusUnlinked": "⚠ Nicht mit der Bibliothek verknüpft. Wählen Sie einen Impfstoff aus der Liste, um ihn zu verknüpfen."
+      "searchPlaceholder": "Zum Suchen von Impfstoffen eingeben..."
     }
   },
   "injuries": {
@@ -817,23 +823,27 @@
     }
   },
   "labResults": {
-    "form": {
-      "componentCreationWarning": "Laborergebnis gespeichert, aber Testkomponenten konnten nicht hinzugefügt werden. Sie können diese von der Detailseite aus hinzufügen.",
-      "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Verknüpfungen konnten nicht erstellt werden. Sie können diese auf der Bearbeitungsseite hinzufügen."
-    },
     "addPanel": {
-      "title": "Laborbefunde hinzufügen",
-      "panelName": "Labor-Ergebnis-Panel oder -Typ",
-      "panelNamePlaceholder": "z. B. Blutbild, Jährliches Blutbild",
-      "panelNameDescription": "Ein Name für diese Gruppe von Tests",
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review.",
+      "componentPartialSaveTitle": "Some components not saved",
+      "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentSaveFailedTitle": "Test components not saved",
       "createButton": "Ergebnisse speichern",
-      "creating": "Panel wird erstellt...",
       "createError": "Testpanel konnte nicht erstellt werden",
+      "creating": "Panel wird erstellt...",
+      "panelName": "Labor-Ergebnis-Panel oder -Typ",
+      "panelNameDescription": "Ein Name für diese Gruppe von Tests",
+      "panelNamePlaceholder": "z. B. Blutbild, Jährliches Blutbild",
+      "tagsPlaceholder": "Tags hinzufügen, um diesen Eintrag später zu organisieren und zu finden",
       "testResultRequired": "Mindestens ein Testergebnis ist erforderlich",
-      "tagsPlaceholder": "Tags hinzufügen, um diesen Eintrag später zu organisieren und zu finden"
+      "title": "Laborbefunde hinzufügen"
     },
     "buttons": {
       "addLabResults": "Laborergebnisse hinzufügen"
+    },
+    "form": {
+      "componentCreationWarning": "Laborergebnis gespeichert, aber Testkomponenten konnten nicht hinzugefügt werden. Sie können diese von der Detailseite aus hinzufügen.",
+      "relationshipCreationWarning": "Laborergebnis gespeichert, aber einige Verknüpfungen konnten nicht erstellt werden. Sie können diese auf der Bearbeitungsseite hinzufügen."
     }
   },
   "medications": {
@@ -888,6 +898,58 @@
       "label": "Verschreibender Arzt",
       "placeholder": "Arzt auswählen"
     },
+    "reminders": {
+      "days": {
+        "description": "Leer lassen, um täglich Erinnerungen zu erhalten",
+        "fri": "Fr",
+        "label": "Erinnerungstage",
+        "mon": "Mo",
+        "sat": "Sa",
+        "sun": "So",
+        "thu": "Do",
+        "tue": "Di",
+        "wed": "Mi"
+      },
+      "enabled": {
+        "description": "Benachrichtigungen senden, wenn es Zeit ist, dieses Medikament einzunehmen",
+        "label": "Erinnerungen aktivieren"
+      },
+      "enabledBadge": "Erinnerungen aktiviert",
+      "message": {
+        "description": "Optionale Notiz in der Erinnerungsbenachrichtigung (max. 200 Zeichen)",
+        "label": "Benutzerdefinierte Erinnerungsnachricht",
+        "placeholder": "z. B. Mit Essen einnehmen, Blutdruck vorher messen"
+      },
+      "noChannelsTitle": "Kein Benachrichtigungskanal aktiviert",
+      "noChannelsWarning": "Für Medikamentenerinnerungen ist kein Benachrichtigungskanal konfiguriert. Öffnen Sie die Benachrichtigungseinstellungen, um einen Kanal zu aktivieren.",
+      "notFiring": {
+        "badge": "Wird nicht ausgelöst",
+        "dayNotActive": "Erinnerungen sind für heute nicht geplant.",
+        "notStarted": "Die Einnahme dieses Medikaments beginnt erst am {{date}}.",
+        "periodEnded": "Dieses Medikament ist seit dem {{date}} als nicht mehr eingenommen markiert.",
+        "statusNotActive": "Der Medikamentenstatus ist „{{status}}“ – Erinnerungen werden nur für aktive Medikamente gesendet.",
+        "title": "Erinnerungen werden nicht ausgelöst"
+      },
+      "openSettings": "Benachrichtigungseinstellungen öffnen",
+      "saveBeforeTest": "Speichern Sie das Medikament zuerst, um eine Testerinnerung zu senden.",
+      "tabLabel": "Erinnerungen",
+      "testButton": "Testerinnerung jetzt senden",
+      "testError": "Testerinnerung konnte nicht gesendet werden",
+      "testSuccess": "Testerinnerung gesendet",
+      "times": {
+        "addButton": "Zeit hinzufügen",
+        "description": "Uhrzeiten (24-Stunden-Format), zu denen die Erinnerung ausgelöst wird",
+        "duplicate": "Diese Zeit ist bereits in der Liste",
+        "empty": "Keine Erinnerungszeiten konfiguriert.",
+        "invalid": "Zeit muss im Format HH:MM (24 Stunden) sein",
+        "label": "Erinnerungszeiten",
+        "max": "Maximal {{count}} Zeiten",
+        "max_one": "Maximum of {{count}} times",
+        "max_other": "Maximum of {{count}} times",
+        "removeAriaLabel": "Zeit entfernen"
+      },
+      "viewNone": "Keine Erinnerungen konfiguriert"
+    },
     "route": {
       "description": "Wie das Medikament verabreicht wird",
       "label": "Applikationsweg",
@@ -909,56 +971,6 @@
       "description": "Bekannte oder erfahrene Nebenwirkungen dieses Medikaments",
       "label": "Nebenwirkungen",
       "placeholder": "Bekannte oder erfahrene Nebenwirkungen auflisten..."
-    },
-    "reminders": {
-      "tabLabel": "Erinnerungen",
-      "enabled": {
-        "label": "Erinnerungen aktivieren",
-        "description": "Benachrichtigungen senden, wenn es Zeit ist, dieses Medikament einzunehmen"
-      },
-      "times": {
-        "label": "Erinnerungszeiten",
-        "description": "Uhrzeiten (24-Stunden-Format), zu denen die Erinnerung ausgelöst wird",
-        "addButton": "Zeit hinzufügen",
-        "removeAriaLabel": "Zeit entfernen",
-        "max": "Maximal {{count}} Zeiten",
-        "duplicate": "Diese Zeit ist bereits in der Liste",
-        "invalid": "Zeit muss im Format HH:MM (24 Stunden) sein",
-        "empty": "Keine Erinnerungszeiten konfiguriert."
-      },
-      "noChannelsTitle": "Kein Benachrichtigungskanal aktiviert",
-      "noChannelsWarning": "Für Medikamentenerinnerungen ist kein Benachrichtigungskanal konfiguriert. Öffnen Sie die Benachrichtigungseinstellungen, um einen Kanal zu aktivieren.",
-      "openSettings": "Benachrichtigungseinstellungen öffnen",
-      "testButton": "Testerinnerung jetzt senden",
-      "testSuccess": "Testerinnerung gesendet",
-      "testError": "Testerinnerung konnte nicht gesendet werden",
-      "saveBeforeTest": "Speichern Sie das Medikament zuerst, um eine Testerinnerung zu senden.",
-      "viewNone": "Keine Erinnerungen konfiguriert",
-      "notFiring": {
-        "title": "Erinnerungen werden nicht ausgelöst",
-        "badge": "Wird nicht ausgelöst",
-        "periodEnded": "Dieses Medikament ist seit dem {{date}} als nicht mehr eingenommen markiert.",
-        "notStarted": "Die Einnahme dieses Medikaments beginnt erst am {{date}}.",
-        "statusNotActive": "Der Medikamentenstatus ist „{{status}}“ – Erinnerungen werden nur für aktive Medikamente gesendet.",
-        "dayNotActive": "Erinnerungen sind für heute nicht geplant."
-      },
-      "enabledBadge": "Erinnerungen aktiviert",
-      "message": {
-        "label": "Benutzerdefinierte Erinnerungsnachricht",
-        "placeholder": "z. B. Mit Essen einnehmen, Blutdruck vorher messen",
-        "description": "Optionale Notiz in der Erinnerungsbenachrichtigung (max. 200 Zeichen)"
-      },
-      "days": {
-        "label": "Erinnerungstage",
-        "description": "Leer lassen, um täglich Erinnerungen zu erhalten",
-        "mon": "Mo",
-        "tue": "Di",
-        "wed": "Mi",
-        "thu": "Do",
-        "fri": "Fr",
-        "sat": "Sa",
-        "sun": "So"
-      }
     }
   },
   "pharmacies": {

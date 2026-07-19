@@ -131,6 +131,9 @@
     "linkConditionsDescription": "Verknüpfen Sie dieses Laborergebnis mit relevanten medizinischen Bedingungen für bessere Nachverfolgung und Organisation.",
     "linkConditionsTitle": "Medizinische Bedingungen verknüpfen",
     "linkedVisits": "Verknüpfte Besuche",
+    "linkMedicationsTitle": "Link to Medications",
+    "linkProceduresTitle": "Link to Procedures",
+    "linkTreatmentsTitle": "Link to Treatments",
     "linkVisitsDescription": "Verknüpfen Sie dieses Laborergebnis mit Besuchen, bei denen es angeordnet oder überprüft wurde.",
     "linkVisitsTitle": "Mit Besuchen verknüpfen",
     "matchedCommonName": "Treffer: {{name}}",
@@ -165,12 +168,6 @@
     "relationshipsCreateInfo": "Verknüpfungen können nach dem Speichern des Laborergebnisses hinzugefügt werden.",
     "relationshipsSaveFirst": "Speichern Sie zuerst das Laborergebnis, um Verknüpfungen zu erstellen.",
     "testComponentsEditInfo": "Testkomponenten können nach dem Speichern über die Ansichtsseite verwaltet werden."
-  },
-  "pendingRelationships": {
-    "addCondition": "Erkrankung hinzufügen",
-    "addVisit": "Besuch hinzufügen",
-    "removeCondition": "Erkrankung entfernen",
-    "removeVisit": "Besuch entfernen"
   },
   "modal": {
     "editLabResult": "Laborergebnis bearbeiten",
@@ -217,6 +214,12 @@
     "placeholder": "Arzt auswählen"
   },
   "patientIdRequired": "Patienten-ID ist erforderlich. Bitte wählen Sie zuerst einen Patienten aus.",
+  "pendingRelationships": {
+    "addCondition": "Erkrankung hinzufügen",
+    "addVisit": "Besuch hinzufügen",
+    "removeCondition": "Erkrankung entfernen",
+    "removeVisit": "Besuch entfernen"
+  },
   "quickFormInstructions": "Geben Sie einen Namen für dieses Laborergebnis ein, dann können Sie Ihr PDF hochladen und analysieren.",
   "quickImportModalTitle": "Schneller PDF-Import - Schritt {{step}} von 2",
   "quickImportSuccess": "Laborergebnis und Testkomponenten erfolgreich importiert",

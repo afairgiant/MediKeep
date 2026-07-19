@@ -17,7 +17,6 @@
   "diastolic": "Diastolic",
   "editTitle": "Edit Vital Signs",
   "form": {
-    "dateTimePlaceholder": "",
     "devicePlaceholder": "e.g., Digital BP monitor, Thermometer model...",
     "deviceUsed": "Device/Equipment Used",
     "diastolicBP": "Diastolic BP",

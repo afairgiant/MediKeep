@@ -14,7 +14,6 @@
       "description": "Välj journalhandlingar att inkludera i din anpassade rapport",
       "title": "Rapportkonfiguration"
     },
-    "icon": "",
     "loading": "Laddar rapportbyggare...",
     "noData": {
       "description": "Lägg först till journalhandlingar för att använda rapportbyggaren.",
@@ -160,7 +159,6 @@
       "singleExport": "Enskild export",
       "title": "Exportläge"
     },
-    "icon": "",
     "information": {
       "bulk": {
         "description": "Skapar en ZIP-fil som innehåller flera datatyper i ditt valda format för omfattande datasäkerhetskopiering.",
@@ -221,8 +219,8 @@
     "saveAsNew": "Spara som ny mall",
     "saveAsTemplate": "Spara som mall",
     "saveDescription": "Denna mall sparar dina aktuella rapportinställningar, valda handlingar och valda trenddiagram.",
-    "saveModalTitle": "Spara rapportmall",
     "savedTemplates": "Sparade mallar",
+    "saveModalTitle": "Spara rapportmall",
     "updateCurrent": "Uppdatera \"{{name}}\"",
     "updateTemplate": "Uppdatera mall"
   }
