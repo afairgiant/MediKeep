@@ -95,7 +95,7 @@ export const familyConditionFormFields = [
         labelKey: 'medical:familyHistory.form.condition.severityOptions.severe',
       },
       {
-        value: 'critical',
+        value: 'life-threatening',
         labelKey:
           'medical:familyHistory.form.condition.severityOptions.critical',
       },
