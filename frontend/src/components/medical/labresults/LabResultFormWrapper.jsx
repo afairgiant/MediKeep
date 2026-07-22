@@ -16,11 +16,14 @@ import {
   Title,
   Badge,
   ActionIcon,
+  Collapse,
 } from '@mantine/core';
 import { DateInput } from '../../adapters/DateInput';
 import {
   IconInfoCircle,
   IconChartBar,
+  IconChevronDown,
+  IconChevronUp,
   IconFileText,
   IconFileUpload,
   IconLink,
@@ -737,6 +740,9 @@ const LabResultFormWrapper = ({
   const { dateInputFormat, dateParser } = useDateFormat();
   const [activeTab, setActiveTab] = useState('basic');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Collapsible numeric-result section (edit mode, non-panel): expanded by default
+  // since it's the leading section when there's no component data yet.
+  const [numericResultExpanded, setNumericResultExpanded] = useState(true);
   const { handleTextInputChange } = useFormHandlers(onInputChange);
 
   // Pending relationships for create mode (stored locally until lab result is saved)
@@ -1289,6 +1295,165 @@ const LabResultFormWrapper = ({
                   )}
                   {editingItem ? (
                     <>
+                      {/* Singleton results (non-panel): direct numeric value editing,
+                          collapsible. Leads when there's no component data yet; hidden
+                          entirely once the result has components (isGroupedResult) —
+                          components take over as the sole editor at that point. */}
+                      {!isGroupedResult && (
+                        <Grid.Col span={12}>
+                          <Paper withBorder p="sm" radius="md">
+                            <Group
+                              justify="space-between"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() =>
+                                setNumericResultExpanded(prev => !prev)
+                              }
+                            >
+                              <Text size="sm" fw={500}>
+                                {t(
+                                  'labresults:numericResult.sectionLabel',
+                                  'Numeric Result (optional)'
+                                )}
+                              </Text>
+                              {numericResultExpanded ? (
+                                <IconChevronUp size={18} />
+                              ) : (
+                                <IconChevronDown size={18} />
+                              )}
+                            </Group>
+                            <Collapse in={numericResultExpanded}>
+                              <Text size="xs" c="dimmed" mb="sm" mt="sm">
+                                {t(
+                                  'labresults:numericResult.sectionDescription',
+                                  'Enter a measured value and reference range to enable trend charting for stacked results.'
+                                )}
+                              </Text>
+                              <Grid>
+                                <Grid.Col span={{ base: 12, sm: 6 }}>
+                                  <NumberInput
+                                    label={t(
+                                      'labresults:numericResult.valueLabel',
+                                      'Value'
+                                    )}
+                                    value={formData.value ?? ''}
+                                    onChange={val =>
+                                      onInputChange({
+                                        target: {
+                                          name: 'value',
+                                          value: val === '' ? null : val,
+                                        },
+                                      })
+                                    }
+                                    placeholder={t(
+                                      'labresults:numericResult.valuePlaceholder',
+                                      'e.g. 6.2'
+                                    )}
+                                    decimalScale={6}
+                                    allowDecimal
+                                    clearable
+                                  />
+                                </Grid.Col>
+                                <Grid.Col span={{ base: 12, sm: 6 }}>
+                                  <TextInput
+                                    label={t(
+                                      'labresults:numericResult.unitLabel',
+                                      'Unit'
+                                    )}
+                                    value={formData.unit || ''}
+                                    onChange={e =>
+                                      onInputChange({
+                                        target: {
+                                          name: 'unit',
+                                          value: e.target.value,
+                                        },
+                                      })
+                                    }
+                                    placeholder={t(
+                                      'labresults:numericResult.unitPlaceholder',
+                                      'e.g. mg/dL, mmol/L'
+                                    )}
+                                    maxLength={50}
+                                  />
+                                </Grid.Col>
+                                <Grid.Col span={{ base: 12, sm: 4 }}>
+                                  <NumberInput
+                                    label={t(
+                                      'labresults:numericResult.refMinLabel',
+                                      'Range min'
+                                    )}
+                                    value={formData.ref_range_min ?? ''}
+                                    onChange={val =>
+                                      onInputChange({
+                                        target: {
+                                          name: 'ref_range_min',
+                                          value: val === '' ? null : val,
+                                        },
+                                      })
+                                    }
+                                    placeholder={t(
+                                      'labresults:numericResult.refMinPlaceholder',
+                                      'e.g. 4.0'
+                                    )}
+                                    decimalScale={6}
+                                    allowDecimal
+                                    clearable
+                                  />
+                                </Grid.Col>
+                                <Grid.Col span={{ base: 12, sm: 4 }}>
+                                  <NumberInput
+                                    label={t(
+                                      'labresults:numericResult.refMaxLabel',
+                                      'Range max'
+                                    )}
+                                    value={formData.ref_range_max ?? ''}
+                                    onChange={val =>
+                                      onInputChange({
+                                        target: {
+                                          name: 'ref_range_max',
+                                          value: val === '' ? null : val,
+                                        },
+                                      })
+                                    }
+                                    placeholder={t(
+                                      'labresults:numericResult.refMaxPlaceholder',
+                                      'e.g. 5.6'
+                                    )}
+                                    decimalScale={6}
+                                    allowDecimal
+                                    clearable
+                                  />
+                                </Grid.Col>
+                                <Grid.Col span={{ base: 12, sm: 4 }}>
+                                  <TextInput
+                                    label={t(
+                                      'labresults:numericResult.refTextLabel',
+                                      'Range text'
+                                    )}
+                                    value={formData.ref_range_text || ''}
+                                    onChange={e =>
+                                      onInputChange({
+                                        target: {
+                                          name: 'ref_range_text',
+                                          value: e.target.value,
+                                        },
+                                      })
+                                    }
+                                    placeholder={t(
+                                      'labresults:numericResult.refTextPlaceholder',
+                                      'e.g. 4.0-5.6 or <200'
+                                    )}
+                                    description={t(
+                                      'labresults:numericResult.refTextDescription',
+                                      'Overrides min/max in display'
+                                    )}
+                                    maxLength={100}
+                                  />
+                                </Grid.Col>
+                              </Grid>
+                            </Collapse>
+                          </Paper>
+                        </Grid.Col>
+                      )}
                       {/* API-backed components editor. Shown regardless of isGroupedResult
                           so a singleton result can have its first component added —
                           isGroupedResult only becomes true once components exist, so
@@ -1301,147 +1466,6 @@ const LabResultFormWrapper = ({
                           onError={onError}
                         />
                       </Grid.Col>
-                      {/* Singleton results (non-panel): direct numeric value editing */}
-                      {!isGroupedResult && (
-                        <Grid.Col span={12}>
-                          <Paper withBorder p="sm" radius="md">
-                            <Text size="sm" fw={500} mb="sm">
-                              {t(
-                                'labresults:numericResult.sectionLabel',
-                                'Numeric Result (optional)'
-                              )}
-                            </Text>
-                            <Text size="xs" c="dimmed" mb="sm">
-                              {t(
-                                'labresults:numericResult.sectionDescription',
-                                'Enter a measured value and reference range to enable trend charting for stacked results.'
-                              )}
-                            </Text>
-                            <Grid>
-                              <Grid.Col span={{ base: 12, sm: 6 }}>
-                                <NumberInput
-                                  label={t(
-                                    'labresults:numericResult.valueLabel',
-                                    'Value'
-                                  )}
-                                  value={formData.value ?? ''}
-                                  onChange={val =>
-                                    onInputChange({
-                                      target: {
-                                        name: 'value',
-                                        value: val === '' ? null : val,
-                                      },
-                                    })
-                                  }
-                                  placeholder={t(
-                                    'labresults:numericResult.valuePlaceholder',
-                                    'e.g. 6.2'
-                                  )}
-                                  decimalScale={6}
-                                  allowDecimal
-                                  clearable
-                                />
-                              </Grid.Col>
-                              <Grid.Col span={{ base: 12, sm: 6 }}>
-                                <TextInput
-                                  label={t(
-                                    'labresults:numericResult.unitLabel',
-                                    'Unit'
-                                  )}
-                                  value={formData.unit || ''}
-                                  onChange={e =>
-                                    onInputChange({
-                                      target: {
-                                        name: 'unit',
-                                        value: e.target.value,
-                                      },
-                                    })
-                                  }
-                                  placeholder={t(
-                                    'labresults:numericResult.unitPlaceholder',
-                                    'e.g. mg/dL, mmol/L'
-                                  )}
-                                  maxLength={50}
-                                />
-                              </Grid.Col>
-                              <Grid.Col span={{ base: 12, sm: 4 }}>
-                                <NumberInput
-                                  label={t(
-                                    'labresults:numericResult.refMinLabel',
-                                    'Range min'
-                                  )}
-                                  value={formData.ref_range_min ?? ''}
-                                  onChange={val =>
-                                    onInputChange({
-                                      target: {
-                                        name: 'ref_range_min',
-                                        value: val === '' ? null : val,
-                                      },
-                                    })
-                                  }
-                                  placeholder={t(
-                                    'labresults:numericResult.refMinPlaceholder',
-                                    'e.g. 4.0'
-                                  )}
-                                  decimalScale={6}
-                                  allowDecimal
-                                  clearable
-                                />
-                              </Grid.Col>
-                              <Grid.Col span={{ base: 12, sm: 4 }}>
-                                <NumberInput
-                                  label={t(
-                                    'labresults:numericResult.refMaxLabel',
-                                    'Range max'
-                                  )}
-                                  value={formData.ref_range_max ?? ''}
-                                  onChange={val =>
-                                    onInputChange({
-                                      target: {
-                                        name: 'ref_range_max',
-                                        value: val === '' ? null : val,
-                                      },
-                                    })
-                                  }
-                                  placeholder={t(
-                                    'labresults:numericResult.refMaxPlaceholder',
-                                    'e.g. 5.6'
-                                  )}
-                                  decimalScale={6}
-                                  allowDecimal
-                                  clearable
-                                />
-                              </Grid.Col>
-                              <Grid.Col span={{ base: 12, sm: 4 }}>
-                                <TextInput
-                                  label={t(
-                                    'labresults:numericResult.refTextLabel',
-                                    'Range text'
-                                  )}
-                                  value={formData.ref_range_text || ''}
-                                  onChange={e =>
-                                    onInputChange({
-                                      target: {
-                                        name: 'ref_range_text',
-                                        value: e.target.value,
-                                      },
-                                    })
-                                  }
-                                  placeholder={t(
-                                    'labresults:numericResult.refTextPlaceholder',
-                                    'e.g. 4.0-5.6 or <200'
-                                  )}
-                                  description={t(
-                                    'labresults:numericResult.refTextDescription',
-                                    'Overrides min/max in display'
-                                  )}
-                                  maxLength={100}
-                                />
-                              </Grid.Col>
-                            </Grid>
-                          </Paper>
-                        </Grid.Col>
-                      )}
                     </>
                   ) : (
                     /* New (create mode): stage components locally before the record exists */
