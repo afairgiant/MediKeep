@@ -80,6 +80,7 @@
     "withIssues_one": "{{count}} with issues",
     "withIssues_other": "{{count}} with issues"
   },
+  "bulkImport": "Bulk Import",
   "category": {
     "bloodWork": "Blood Work",
     "cardiology": "Cardiology",

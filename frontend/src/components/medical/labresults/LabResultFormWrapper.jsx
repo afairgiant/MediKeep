@@ -22,7 +22,7 @@ import {
   IconInfoCircle,
   IconChartBar,
   IconFileText,
-  IconFlask,
+  IconFileUpload,
   IconLink,
   IconNotes,
   IconPlus,
@@ -44,6 +44,7 @@ import LabResultMedicationRelationships from './LabResultMedicationRelationships
 import LabResultProcedureRelationships from './LabResultProcedureRelationships';
 import LabResultTreatmentRelationships from './LabResultTreatmentRelationships';
 import TestComponentsTab from './TestComponentsTab';
+import InlineTestComponentEntry from './InlineTestComponentEntry';
 import AdvancedModeSwitch from './AdvancedModeSwitch';
 import { PURPOSE_OPTIONS } from '../../../constants/encounterLabResultConstants';
 import {
@@ -254,7 +255,9 @@ const PendingRelationshipsPicker = ({
                     color="red"
                     size="sm"
                     onClick={() => onRemoveCondition(index)}
-                    aria-label={t('labresults:pendingRelationships.removeCondition')}
+                    aria-label={t(
+                      'labresults:pendingRelationships.removeCondition'
+                    )}
                   >
                     <IconTrash size={14} />
                   </ActionIcon>
@@ -332,7 +335,9 @@ const PendingRelationshipsPicker = ({
                     color="red"
                     size="sm"
                     onClick={() => onRemoveEncounter(index)}
-                    aria-label={t('labresults:pendingRelationships.removeVisit')}
+                    aria-label={t(
+                      'labresults:pendingRelationships.removeVisit'
+                    )}
                   >
                     <IconTrash size={14} />
                   </ActionIcon>
@@ -404,10 +409,7 @@ const PendingRelationshipsPicker = ({
         <Paper withBorder p="md">
           <Stack gap="sm">
             <Title order={6}>
-              {t(
-                'labresults:form.linkMedicationsTitle',
-                'Link to Medications'
-              )}
+              {t('labresults:form.linkMedicationsTitle', 'Link to Medications')}
             </Title>
 
             {/* Already-added pending medications */}
@@ -483,10 +485,7 @@ const PendingRelationshipsPicker = ({
         <Paper withBorder p="md">
           <Stack gap="sm">
             <Title order={6}>
-              {t(
-                'labresults:form.linkProceduresTitle',
-                'Link to Procedures'
-              )}
+              {t('labresults:form.linkProceduresTitle', 'Link to Procedures')}
             </Title>
 
             {/* Already-added pending procedures */}
@@ -545,9 +544,7 @@ const PendingRelationshipsPicker = ({
                   size="lg"
                   onClick={handleAddProcedure}
                   disabled={!selectedProcedure}
-                  aria-label={t(
-                    'labresults:pendingRelationships.addProcedure'
-                  )}
+                  aria-label={t('labresults:pendingRelationships.addProcedure')}
                 >
                   <IconPlus size={16} />
                 </ActionIcon>
@@ -562,10 +559,7 @@ const PendingRelationshipsPicker = ({
         <Paper withBorder p="md">
           <Stack gap="sm">
             <Title order={6}>
-              {t(
-                'labresults:form.linkTreatmentsTitle',
-                'Link to Treatments'
-              )}
+              {t('labresults:form.linkTreatmentsTitle', 'Link to Treatments')}
             </Title>
 
             {/* Already-added pending treatments */}
@@ -708,6 +702,8 @@ const LabResultFormWrapper = ({
   isLoading = false,
   onDocumentManagerRef,
   onPendingRelationshipsRef,
+  onPendingComponentsRef,
+  onSwitchToQuickImport,
   onFileUploadComplete,
   onError,
   // Condition relationship props
@@ -805,7 +801,6 @@ const LabResultFormWrapper = ({
       color: 'gray',
     },
   ];
-
 
   const getStatusColor = status => {
     switch (status) {
@@ -913,6 +908,26 @@ const LabResultFormWrapper = ({
       });
     }
   }, [onPendingRelationshipsRef]);
+
+  // InlineTestComponentEntry's onRef fires on every keystroke (its methods depend on
+  // component state), so hold the latest methods in a ref and expose a stable wrapper
+  // to the parent — same "read live, register once" approach as pendingRelationshipsRef
+  // below, avoiding a parent re-render on every pending test-row edit.
+  const inlineComponentsMethodsRef = useRef(null);
+  const handleInlineComponentsRef = useCallback(methods => {
+    inlineComponentsMethodsRef.current = methods;
+  }, []);
+
+  useEffect(() => {
+    if (onPendingComponentsRef) {
+      onPendingComponentsRef({
+        hasPendingComponents: () =>
+          inlineComponentsMethodsRef.current?.hasPendingComponents() ?? false,
+        getPendingComponents: () =>
+          inlineComponentsMethodsRef.current?.getPendingComponents() ?? [],
+      });
+    }
+  }, [onPendingComponentsRef]);
 
   // Pending condition helpers
   const addPendingCondition = useCallback((conditionId, relevanceNote) => {
@@ -1030,7 +1045,7 @@ const LabResultFormWrapper = ({
     >
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
-          <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs value={activeTab} onChange={setActiveTab} keepMounted={false}>
             <Tabs.List>
               <Tabs.Tab
                 value="basic"
@@ -1038,22 +1053,12 @@ const LabResultFormWrapper = ({
               >
                 {t('shared:tabs.basicInfo')}
               </Tabs.Tab>
-              {isGroupedResult && editingItem && (
-                <Tabs.Tab
-                  value="test-results"
-                  leftSection={<IconFlask size={16} />}
-                >
-                  {t('labresults:modal.tabs.testComponents', 'Test Results')}
-                </Tabs.Tab>
-              )}
-              {!isGroupedResult && (
-                <Tabs.Tab
-                  value="results"
-                  leftSection={<IconChartBar size={16} />}
-                >
-                  {t('labresults:tabs.resultsStatus')}
-                </Tabs.Tab>
-              )}
+              <Tabs.Tab
+                value="results"
+                leftSection={<IconChartBar size={16} />}
+              >
+                {t('labresults:tabs.resultsStatus')}
+              </Tabs.Tab>
               <Tabs.Tab
                 value="documents"
                 leftSection={<IconFileText size={16} />}
@@ -1217,22 +1222,8 @@ const LabResultFormWrapper = ({
               </Box>
             </Tabs.Panel>
 
-            {/* Test Results Tab — panels only, edit mode only */}
-            {isGroupedResult && editingItem && (
-              <Tabs.Panel value="test-results">
-                <Box mt="md">
-                  <TestComponentsTab
-                    key={`test-components-${editingItem.id}`}
-                    labResultId={editingItem.id}
-                    isViewMode={false}
-                    onError={onError}
-                  />
-                </Box>
-              </Tabs.Panel>
-            )}
-
-            {/* Results & Status Tab — not shown for panels */}
-            {!isGroupedResult && <Tabs.Panel value="results">
+            {/* Results & Status Tab */}
+            <Tabs.Panel value="results">
               <Box mt="md">
                 <Grid>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -1296,106 +1287,183 @@ const LabResultFormWrapper = ({
                       </Box>
                     </Grid.Col>
                   )}
-                  {/* Numeric result section — not applicable for grouped (PDF-master) results */}
-                  {!isGroupedResult && <Grid.Col span={12}>
-                    <Paper withBorder p="sm" radius="md">
-                      <Text size="sm" fw={500} mb="sm">
-                        {t('labresults:numericResult.sectionLabel', 'Numeric Result (optional)')}
-                      </Text>
-                      <Text size="xs" c="dimmed" mb="sm">
-                        {t(
-                          'labresults:numericResult.sectionDescription',
-                          'Enter a measured value and reference range to enable trend charting for stacked results.'
-                        )}
-                      </Text>
-                      <Grid>
-                        <Grid.Col span={{ base: 12, sm: 6 }}>
-                          <NumberInput
-                            label={t('labresults:numericResult.valueLabel', 'Value')}
-                            value={formData.value ?? ''}
-                            onChange={val =>
-                              onInputChange({
-                                target: {
-                                  name: 'value',
-                                  value: val === '' ? null : val,
-                                },
-                              })
-                            }
-                            placeholder={t('labresults:numericResult.valuePlaceholder', 'e.g. 6.2')}
-                            decimalScale={6}
-                            allowDecimal
-                            clearable
-                          />
+                  {editingItem ? (
+                    <>
+                      {/* API-backed components editor. Shown regardless of isGroupedResult
+                          so a singleton result can have its first component added —
+                          isGroupedResult only becomes true once components exist, so
+                          gating on it here would make it unreachable for singletons. */}
+                      <Grid.Col span={12}>
+                        <TestComponentsTab
+                          key={`test-components-${editingItem.id}`}
+                          labResultId={editingItem.id}
+                          isViewMode={false}
+                          onError={onError}
+                        />
+                      </Grid.Col>
+                      {/* Singleton results (non-panel): direct numeric value editing */}
+                      {!isGroupedResult && (
+                        <Grid.Col span={12}>
+                          <Paper withBorder p="sm" radius="md">
+                            <Text size="sm" fw={500} mb="sm">
+                              {t(
+                                'labresults:numericResult.sectionLabel',
+                                'Numeric Result (optional)'
+                              )}
+                            </Text>
+                            <Text size="xs" c="dimmed" mb="sm">
+                              {t(
+                                'labresults:numericResult.sectionDescription',
+                                'Enter a measured value and reference range to enable trend charting for stacked results.'
+                              )}
+                            </Text>
+                            <Grid>
+                              <Grid.Col span={{ base: 12, sm: 6 }}>
+                                <NumberInput
+                                  label={t(
+                                    'labresults:numericResult.valueLabel',
+                                    'Value'
+                                  )}
+                                  value={formData.value ?? ''}
+                                  onChange={val =>
+                                    onInputChange({
+                                      target: {
+                                        name: 'value',
+                                        value: val === '' ? null : val,
+                                      },
+                                    })
+                                  }
+                                  placeholder={t(
+                                    'labresults:numericResult.valuePlaceholder',
+                                    'e.g. 6.2'
+                                  )}
+                                  decimalScale={6}
+                                  allowDecimal
+                                  clearable
+                                />
+                              </Grid.Col>
+                              <Grid.Col span={{ base: 12, sm: 6 }}>
+                                <TextInput
+                                  label={t(
+                                    'labresults:numericResult.unitLabel',
+                                    'Unit'
+                                  )}
+                                  value={formData.unit || ''}
+                                  onChange={e =>
+                                    onInputChange({
+                                      target: {
+                                        name: 'unit',
+                                        value: e.target.value,
+                                      },
+                                    })
+                                  }
+                                  placeholder={t(
+                                    'labresults:numericResult.unitPlaceholder',
+                                    'e.g. mg/dL, mmol/L'
+                                  )}
+                                  maxLength={50}
+                                />
+                              </Grid.Col>
+                              <Grid.Col span={{ base: 12, sm: 4 }}>
+                                <NumberInput
+                                  label={t(
+                                    'labresults:numericResult.refMinLabel',
+                                    'Range min'
+                                  )}
+                                  value={formData.ref_range_min ?? ''}
+                                  onChange={val =>
+                                    onInputChange({
+                                      target: {
+                                        name: 'ref_range_min',
+                                        value: val === '' ? null : val,
+                                      },
+                                    })
+                                  }
+                                  placeholder={t(
+                                    'labresults:numericResult.refMinPlaceholder',
+                                    'e.g. 4.0'
+                                  )}
+                                  decimalScale={6}
+                                  allowDecimal
+                                  clearable
+                                />
+                              </Grid.Col>
+                              <Grid.Col span={{ base: 12, sm: 4 }}>
+                                <NumberInput
+                                  label={t(
+                                    'labresults:numericResult.refMaxLabel',
+                                    'Range max'
+                                  )}
+                                  value={formData.ref_range_max ?? ''}
+                                  onChange={val =>
+                                    onInputChange({
+                                      target: {
+                                        name: 'ref_range_max',
+                                        value: val === '' ? null : val,
+                                      },
+                                    })
+                                  }
+                                  placeholder={t(
+                                    'labresults:numericResult.refMaxPlaceholder',
+                                    'e.g. 5.6'
+                                  )}
+                                  decimalScale={6}
+                                  allowDecimal
+                                  clearable
+                                />
+                              </Grid.Col>
+                              <Grid.Col span={{ base: 12, sm: 4 }}>
+                                <TextInput
+                                  label={t(
+                                    'labresults:numericResult.refTextLabel',
+                                    'Range text'
+                                  )}
+                                  value={formData.ref_range_text || ''}
+                                  onChange={e =>
+                                    onInputChange({
+                                      target: {
+                                        name: 'ref_range_text',
+                                        value: e.target.value,
+                                      },
+                                    })
+                                  }
+                                  placeholder={t(
+                                    'labresults:numericResult.refTextPlaceholder',
+                                    'e.g. 4.0-5.6 or <200'
+                                  )}
+                                  description={t(
+                                    'labresults:numericResult.refTextDescription',
+                                    'Overrides min/max in display'
+                                  )}
+                                  maxLength={100}
+                                />
+                              </Grid.Col>
+                            </Grid>
+                          </Paper>
                         </Grid.Col>
-                        <Grid.Col span={{ base: 12, sm: 6 }}>
-                          <TextInput
-                            label={t('labresults:numericResult.unitLabel', 'Unit')}
-                            value={formData.unit || ''}
-                            onChange={e =>
-                              onInputChange({
-                                target: { name: 'unit', value: e.target.value },
-                              })
-                            }
-                            placeholder={t('labresults:numericResult.unitPlaceholder', 'e.g. mg/dL, mmol/L')}
-                            maxLength={50}
-                          />
-                        </Grid.Col>
-                        <Grid.Col span={{ base: 12, sm: 4 }}>
-                          <NumberInput
-                            label={t('labresults:numericResult.refMinLabel', 'Range min')}
-                            value={formData.ref_range_min ?? ''}
-                            onChange={val =>
-                              onInputChange({
-                                target: {
-                                  name: 'ref_range_min',
-                                  value: val === '' ? null : val,
-                                },
-                              })
-                            }
-                            placeholder={t('labresults:numericResult.refMinPlaceholder', 'e.g. 4.0')}
-                            decimalScale={6}
-                            allowDecimal
-                            clearable
-                          />
-                        </Grid.Col>
-                        <Grid.Col span={{ base: 12, sm: 4 }}>
-                          <NumberInput
-                            label={t('labresults:numericResult.refMaxLabel', 'Range max')}
-                            value={formData.ref_range_max ?? ''}
-                            onChange={val =>
-                              onInputChange({
-                                target: {
-                                  name: 'ref_range_max',
-                                  value: val === '' ? null : val,
-                                },
-                              })
-                            }
-                            placeholder={t('labresults:numericResult.refMaxPlaceholder', 'e.g. 5.6')}
-                            decimalScale={6}
-                            allowDecimal
-                            clearable
-                          />
-                        </Grid.Col>
-                        <Grid.Col span={{ base: 12, sm: 4 }}>
-                          <TextInput
-                            label={t('labresults:numericResult.refTextLabel', 'Range text')}
-                            value={formData.ref_range_text || ''}
-                            onChange={e =>
-                              onInputChange({
-                                target: { name: 'ref_range_text', value: e.target.value },
-                              })
-                            }
-                            placeholder={t('labresults:numericResult.refTextPlaceholder', 'e.g. 4.0-5.6 or <200')}
-                            description={t('labresults:numericResult.refTextDescription', 'Overrides min/max in display')}
-                            maxLength={100}
-                          />
-                        </Grid.Col>
-                      </Grid>
-                    </Paper>
-                  </Grid.Col>}
+                      )}
+                    </>
+                  ) : (
+                    /* New (create mode): stage components locally before the record exists */
+                    <Grid.Col span={12}>
+                      <InlineTestComponentEntry
+                        onRef={handleInlineComponentsRef}
+                      />
+                      {onSwitchToQuickImport && (
+                        <Button
+                          variant="subtle"
+                          mt="sm"
+                          leftSection={<IconFileUpload size={16} />}
+                          onClick={onSwitchToQuickImport}
+                        >
+                          {t('labresults:bulkImport', 'Bulk Import')}
+                        </Button>
+                      )}
+                    </Grid.Col>
+                  )}
                 </Grid>
               </Box>
-            </Tabs.Panel>}
+            </Tabs.Panel>
 
             {/* Documents Tab */}
             <Tabs.Panel value="documents">
@@ -1432,7 +1500,9 @@ const LabResultFormWrapper = ({
                               labResultId={editingItem.id}
                               labResultConditions={labResultConditions}
                               conditions={conditions}
-                              fetchLabResultConditions={fetchLabResultConditions}
+                              fetchLabResultConditions={
+                                fetchLabResultConditions
+                              }
                               navigate={navigate}
                             />
                           </Stack>
@@ -1457,7 +1527,9 @@ const LabResultFormWrapper = ({
                               labResultId={editingItem.id}
                               labResultEncounters={labResultEncounters}
                               encounters={encounters}
-                              fetchLabResultEncounters={fetchLabResultEncounters}
+                              fetchLabResultEncounters={
+                                fetchLabResultEncounters
+                              }
                               navigate={navigate}
                             />
                           </Stack>
@@ -1588,7 +1660,6 @@ const LabResultFormWrapper = ({
                 </Box>
               </Tabs.Panel>
             )}
-
           </Tabs>
 
           {/* Form Actions */}

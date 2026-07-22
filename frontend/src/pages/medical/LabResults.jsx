@@ -40,6 +40,7 @@ import LabResultStackCard from '../../components/medical/labresults/LabResultSta
 import LabResultStackPanel from '../../components/medical/labresults/LabResultStackPanel';
 import { notifications } from '@mantine/notifications';
 import { labTestComponentApi } from '../../services/api/labTestComponentApi';
+import { submitPendingTestComponents } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
 import { IconFileUpload, IconTable, IconLayoutGrid, IconStack2 } from '@tabler/icons-react';
@@ -700,6 +701,10 @@ const LabResults = () => {
   const [pendingRelationshipsMethods, setPendingRelationshipsMethods] =
     useState(null);
 
+  // Pending test components state (advanced create mode only)
+  const [pendingComponentsMethods, setPendingComponentsMethods] =
+    useState(null);
+
   // Advanced create mode: bypasses the quick TestPanelCreateDialog and opens the
   // full tabbed form (relationships, notes, files) directly. Persisted per browser.
   const [advancedCreateMode, setAdvancedCreateMode] = usePersistedToggle(
@@ -771,6 +776,7 @@ const LabResults = () => {
     setEditingLabResult(null);
     setDocumentManagerMethods(null);
     setPendingRelationshipsMethods(null);
+    setPendingComponentsMethods(null);
     setFormData(EMPTY_FORM_DATA);
     setShowModal(true);
   }, [resetSubmission]);
@@ -991,6 +997,16 @@ const LabResults = () => {
         completed_date: formData.completed_date || null,
       };
 
+      // Staged test components (advanced create mode only). Computed once and reused
+      // both to flag the record as a panel and to submit them after it's created.
+      const pendingComponents = editingLabResult
+        ? []
+        : (pendingComponentsMethods?.getPendingComponents?.() ?? []);
+
+      if (pendingComponents.length > 0) {
+        labResultData.is_panel = true;
+      }
+
       try {
         let success;
         let resultId;
@@ -1017,11 +1033,15 @@ const LabResults = () => {
         completeFormSubmission(success, resultId);
 
         if (success && resultId) {
-          // Submit pending relationships (advanced create mode only)
-          if (
-            !editingLabResult &&
-            pendingRelationshipsMethods?.hasPendingRelationships?.()
-          ) {
+          // Submit pending relationships and pending test components (advanced create
+          // mode only) concurrently — neither depends on the other, only on resultId.
+          const submitPendingRelationships = async () => {
+            if (
+              editingLabResult ||
+              !pendingRelationshipsMethods?.hasPendingRelationships?.()
+            ) {
+              return;
+            }
             try {
               const pending =
                 pendingRelationshipsMethods.getPendingRelationships();
@@ -1102,7 +1122,29 @@ const LabResults = () => {
                 autoClose: 8000,
               });
             }
-          }
+          };
+
+          const submitComponents = async () => {
+            if (pendingComponents.length === 0) return;
+            await submitPendingTestComponents(
+              resultId,
+              pendingComponents,
+              currentPatient.id,
+              'LabResults',
+              t
+            );
+            logger.info('pending_components_created', {
+              message: 'Pending test components created with lab result',
+              labResultId: resultId,
+              componentCount: pendingComponents.length,
+              component: 'LabResults',
+            });
+          };
+
+          await Promise.allSettled([
+            submitPendingRelationships(),
+            submitComponents(),
+          ]);
 
           // Check if we have files to upload
           const hasPendingFiles = documentManagerMethods?.hasPendingFiles?.();
@@ -1164,6 +1206,7 @@ const LabResults = () => {
       createItem,
       documentManagerMethods,
       pendingRelationshipsMethods,
+      pendingComponentsMethods,
       startSubmission,
       setError,
       completeFormSubmission,
@@ -1240,10 +1283,27 @@ const LabResults = () => {
     }
     setDocumentManagerMethods(null); // Reset document manager methods
     setPendingRelationshipsMethods(null); // Reset pending relationships
+    setPendingComponentsMethods(null); // Reset pending test components
     // Sync the components table — tests may have been added via TestComponentsTab
     refreshPatientComponents();
     setFormData(EMPTY_FORM_DATA);
   }, [isBlocking, resetSubmission, refreshPatientComponents]);
+
+  // Shared by handleAdvancedModeToggle and handleSwitchToQuickImport: whether the
+  // advanced create form has anything a user would lose by abandoning it.
+  const hasUnsavedAdvancedFormData = useCallback(
+    () =>
+      !!formData.test_name?.trim() ||
+      pendingRelationshipsMethods?.hasPendingRelationships?.() ||
+      pendingComponentsMethods?.hasPendingComponents?.() ||
+      documentManagerMethods?.hasPendingFiles?.(),
+    [
+      formData.test_name,
+      pendingRelationshipsMethods,
+      pendingComponentsMethods,
+      documentManagerMethods,
+    ]
+  );
 
   // Lets the user swap between the quick panel-creation dialog and the full
   // tabbed form from within whichever create modal is currently open.
@@ -1253,17 +1313,12 @@ const LabResults = () => {
   // needed switching in that direction.
   const handleAdvancedModeToggle = useCallback(
     checked => {
-      if (!checked) {
-        const hasEnteredData =
-          !!formData.test_name?.trim() ||
-          pendingRelationshipsMethods?.hasPendingRelationships?.() ||
-          documentManagerMethods?.hasPendingFiles?.();
-        if (
-          hasEnteredData &&
-          !window.confirm(t('labresults:messages.confirmDiscardAdvancedForm'))
-        ) {
-          return;
-        }
+      if (
+        !checked &&
+        hasUnsavedAdvancedFormData() &&
+        !window.confirm(t('labresults:messages.confirmDiscardAdvancedForm'))
+      ) {
+        return;
       }
       setAdvancedCreateMode(checked);
       if (checked) {
@@ -1275,15 +1330,26 @@ const LabResults = () => {
       }
     },
     [
-      formData.test_name,
-      pendingRelationshipsMethods,
-      documentManagerMethods,
+      hasUnsavedAdvancedFormData,
       openAdvancedForm,
       handleCloseModal,
       setAdvancedCreateMode,
       t,
     ]
   );
+
+  // Abandons the advanced create form (confirming first if there's anything to
+  // lose) and opens the separate Quick PDF Import flow instead.
+  const handleSwitchToQuickImport = useCallback(() => {
+    if (
+      hasUnsavedAdvancedFormData() &&
+      !window.confirm(t('labresults:messages.confirmDiscardAdvancedForm'))
+    ) {
+      return;
+    }
+    handleCloseModal();
+    setShowQuickImportModal(true);
+  }, [hasUnsavedAdvancedFormData, handleCloseModal, t]);
 
   const renderViewContent = () => {
     if (viewMode === 'components') {
@@ -1682,6 +1748,8 @@ const LabResults = () => {
           navigate={navigate}
           onDocumentManagerRef={setDocumentManagerMethods}
           onPendingRelationshipsRef={setPendingRelationshipsMethods}
+          onPendingComponentsRef={setPendingComponentsMethods}
+          onSwitchToQuickImport={handleSwitchToQuickImport}
           postCreate={postCreateMode}
           advancedCreate={advancedCreateMode}
           onAdvancedModeChange={handleAdvancedModeToggle}

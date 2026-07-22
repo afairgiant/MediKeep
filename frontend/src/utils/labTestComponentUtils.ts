@@ -4,11 +4,14 @@
  */
 
 import sanitizeHtml from 'sanitize-html';
+import { notifications } from '@mantine/notifications';
 import {
   LabTestComponentCreate,
   QualitativeValue,
+  labTestComponentApi,
 } from '../services/api/labTestComponentApi';
 import { ComponentCategory, ComponentStatus } from '../constants/labCategories';
+import logger from '../services/logger';
 
 /**
  * Maximum length for the alternative reference range text.
@@ -177,4 +180,72 @@ export function sanitizeComponentForApi(
       : null,
     textual_value: isTextual ? sanitizeInput(component.textual_value) : null,
   };
+}
+
+/**
+ * Bulk-create staged component rows against a lab result that already exists,
+ * logging and notifying on partial/total failure. Shared by every "create a lab
+ * result, then attach its pending test components" flow (advanced create form,
+ * simple-mode panel dialog) so they don't each reimplement the same error handling.
+ */
+export async function submitPendingTestComponents(
+  labResultId: number,
+  pendingComponents: ComponentRowData[],
+  patientId: number | null | undefined,
+  source: string,
+  t: (_key: string, _fallback: string) => string
+): Promise<void> {
+  if (pendingComponents.length === 0) return;
+
+  const apiComponents = pendingComponents.map(row =>
+    sanitizeComponentForApi(row, labResultId)
+  );
+
+  try {
+    const bulkResult = await labTestComponentApi.createBulkForLabResult(
+      labResultId,
+      apiComponents,
+      patientId
+    );
+
+    if (bulkResult.errors?.length > 0) {
+      logger.error('test_component_partial_save_failure', {
+        message: 'Some test components failed to save',
+        labResultId,
+        errors: bulkResult.errors,
+        component: source,
+      });
+      notifications.show({
+        title: t(
+          'medical:labResults.addPanel.componentPartialSaveTitle',
+          'Some components not saved'
+        ),
+        message: t(
+          'medical:labResults.addPanel.componentPartialSaveMessage',
+          'The panel was created but some test components failed to save. Edit the panel to review.'
+        ),
+        color: 'yellow',
+        autoClose: 8000,
+      });
+    }
+  } catch (err: unknown) {
+    logger.error('test_component_bulk_save_failure', {
+      message: 'Bulk component creation failed after lab result was created',
+      labResultId,
+      error: err instanceof Error ? err.message : String(err),
+      component: source,
+    });
+    notifications.show({
+      title: t(
+        'medical:labResults.addPanel.componentSaveFailedTitle',
+        'Test components not saved'
+      ),
+      message: t(
+        'medical:labResults.addPanel.componentSaveFailedMessage',
+        'The panel was created but test components could not be saved. Edit the panel to add them.'
+      ),
+      color: 'red',
+      autoClose: 8000,
+    });
+  }
 }
