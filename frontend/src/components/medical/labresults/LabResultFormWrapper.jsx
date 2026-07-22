@@ -1051,7 +1051,7 @@ const LabResultFormWrapper = ({
     >
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
-          <Tabs value={activeTab} onChange={setActiveTab} keepMounted={false}>
+          <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List>
               <Tabs.Tab
                 value="basic"
