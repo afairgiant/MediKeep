@@ -43,7 +43,7 @@ import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { submitPendingTestComponents } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
-import { IconFileUpload, IconTable, IconLayoutGrid, IconStack2 } from '@tabler/icons-react';
+import { IconFileUpload, IconTable, IconLayoutGrid, IconStack2, IconPrinter } from '@tabler/icons-react';
 import LabResultsComponentTable from '../../components/medical/labresults/LabResultsComponentTable';
 import TestComponentEditModal from '../../components/medical/labresults/TestComponentEditModal';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
@@ -1615,34 +1615,47 @@ const LabResults = () => {
             viewToggleSize="sm"
             mb={0}
             rightChildren={
-              <Button.Group>
-                <Button
-                  size="sm"
-                  variant={viewMode !== 'stacked' && !tableLayout ? 'filled' : 'default'}
-                  leftSection={<IconLayoutGrid size={14} />}
-                  onClick={() => { setTableLayout(false); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
-                >
-                  {t('common:viewToggle.cards', 'Cards')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant={viewMode !== 'stacked' && tableLayout ? 'filled' : 'default'}
-                  leftSection={<IconTable size={14} />}
-                  onClick={() => { setTableLayout(true); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
-                >
-                  {t('common:viewToggle.table', 'Table')}
-                </Button>
-                {hasStackableResults && (
+              <>
+                <Button.Group>
                   <Button
                     size="sm"
-                    variant={viewMode === 'stacked' ? 'filled' : 'default'}
-                    leftSection={<IconStack2 size={14} />}
-                    onClick={() => handleViewModeChange('stacked')}
+                    variant={viewMode !== 'stacked' && !tableLayout ? 'filled' : 'default'}
+                    leftSection={<IconLayoutGrid size={14} />}
+                    onClick={() => { setTableLayout(false); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
                   >
-                    {t('common:viewToggle.stacked', 'Stacked')}
+                    {t('common:viewToggle.cards', 'Cards')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={viewMode !== 'stacked' && tableLayout ? 'filled' : 'default'}
+                    leftSection={<IconTable size={14} />}
+                    onClick={() => { setTableLayout(true); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
+                  >
+                    {t('common:viewToggle.table', 'Table')}
+                  </Button>
+                  {hasStackableResults && (
+                    <Button
+                      size="sm"
+                      variant={viewMode === 'stacked' ? 'filled' : 'default'}
+                      leftSection={<IconStack2 size={14} />}
+                      onClick={() => handleViewModeChange('stacked')}
+                    >
+                      {t('common:viewToggle.stacked', 'Stacked')}
+                    </Button>
+                  )}
+                </Button.Group>
+                {viewMode !== 'stacked' && tableLayout && (
+                  <Button
+                    className="print-button"
+                    size="sm"
+                    variant="light"
+                    leftSection={<IconPrinter size={14} />}
+                    onClick={() => window.print()}
+                  >
+                    {t('common:buttons.print', 'Print')}
                   </Button>
                 )}
-              </Button.Group>
+              </>
             }
           />
 
