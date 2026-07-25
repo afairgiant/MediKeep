@@ -32,13 +32,16 @@
   .header-center,
   nav,
   header,
+  footer,
+  .app-footer,
   .back-button,
   /* Hide any elements with settings or theme in class names */
   [class*="settings"],
   [class*="theme"],
   [class*="logout"],
   [class*="header-action"],
-  [class*="nav-"] {
+  [class*="nav-"],
+  [class*="navigation-toggle"] {
     display: none !important;
   }
 
@@ -61,6 +64,19 @@
     background: white !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+
+  /* Prevent scrollable table containers from clipping printed content */
+  .lab-components-table-wrapper,
+  [class*='mantine-Paper'] {
+    overflow: visible !important;
+  }
+
+  /* Expanded history rows use a smaller font on screen for visual hierarchy;
+     bump them up for print so they stay legible on paper. */
+  .lab-history-row [class*='mantine-Text-root'],
+  .lab-history-row [class*='mantine-Badge-root'] {
+    font-size: 10px !important;
   }
 
   /* Ensure the main container takes full width */

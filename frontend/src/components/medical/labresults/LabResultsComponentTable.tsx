@@ -456,7 +456,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
       </Card>
 
       {/* Table */}
-      <Paper withBorder radius="md" style={{ overflow: 'auto' }}>
+      <Paper withBorder radius="md" className="lab-components-table-wrapper" style={{ overflow: 'auto' }}>
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
@@ -592,6 +592,7 @@ const LabResultsComponentTable: React.FC<Props> = ({
                               <Table.Tr
                                 key={comp.id}
                                 data-testid={`history-row-${comp.id}`}
+                                className="lab-history-row"
                                 style={{ backgroundColor: 'var(--mantine-color-gray-0)' }}
                               >
                                 <Table.Td />

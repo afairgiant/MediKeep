@@ -43,7 +43,7 @@ import { labTestComponentApi } from '../../services/api/labTestComponentApi';
 import { submitPendingTestComponents } from '../../utils/labTestComponentUtils';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
 import { Button, Container, Stack, Paper } from '@mantine/core';
-import { IconFileUpload, IconTable, IconLayoutGrid, IconStack2 } from '@tabler/icons-react';
+import { IconFileUpload, IconTable, IconLayoutGrid, IconStack2, IconPrinter } from '@tabler/icons-react';
 import LabResultsComponentTable from '../../components/medical/labresults/LabResultsComponentTable';
 import TestComponentEditModal from '../../components/medical/labresults/TestComponentEditModal';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
@@ -101,6 +101,7 @@ const LabResults = () => {
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
   const [tableLayout, setTableLayout] = useState(() => viewMode === 'table');
+  const [isPrintingAll, setIsPrintingAll] = useState(false);
   const {
     page,
     setPage,
@@ -688,6 +689,23 @@ const LabResults = () => {
       viewMode === 'stacked' ? stackedViewItems.length : filteredLabResults.length;
     clampPage(count);
   }, [filteredLabResults.length, stackedViewItems.length, viewMode, clampPage]);
+
+  // Restore normal pagination after the browser print dialog closes (covers
+  // both completed prints and cancellations).
+  useEffect(() => {
+    const handleAfterPrint = () => setIsPrintingAll(false);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => window.removeEventListener('afterprint', handleAfterPrint);
+  }, []);
+
+  const handlePrintTable = () => {
+    setIsPrintingAll(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
+  };
 
   // Combined loading state — include component fetch when in stacked or results-table view to avoid content flash.
   // For the components table specifically, only block on initial load (empty array); subsequent refreshes must not
@@ -1474,7 +1492,7 @@ const LabResults = () => {
       <Paper shadow="sm" radius="md" withBorder>
         <ResponsiveTable
           persistKey="lab-results"
-          data={paginatedLabResults}
+          data={isPrintingAll ? filteredLabResults : paginatedLabResults}
           pagination={false}
           disableEdit={isViewOnly}
           disableDelete={isViewOnly}
@@ -1615,34 +1633,47 @@ const LabResults = () => {
             viewToggleSize="sm"
             mb={0}
             rightChildren={
-              <Button.Group>
-                <Button
-                  size="sm"
-                  variant={viewMode !== 'stacked' && !tableLayout ? 'filled' : 'default'}
-                  leftSection={<IconLayoutGrid size={14} />}
-                  onClick={() => { setTableLayout(false); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
-                >
-                  {t('common:viewToggle.cards', 'Cards')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant={viewMode !== 'stacked' && tableLayout ? 'filled' : 'default'}
-                  leftSection={<IconTable size={14} />}
-                  onClick={() => { setTableLayout(true); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
-                >
-                  {t('common:viewToggle.table', 'Table')}
-                </Button>
-                {hasStackableResults && (
+              <>
+                <Button.Group>
                   <Button
                     size="sm"
-                    variant={viewMode === 'stacked' ? 'filled' : 'default'}
-                    leftSection={<IconStack2 size={14} />}
-                    onClick={() => handleViewModeChange('stacked')}
+                    variant={viewMode !== 'stacked' && !tableLayout ? 'filled' : 'default'}
+                    leftSection={<IconLayoutGrid size={14} />}
+                    onClick={() => { setTableLayout(false); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
                   >
-                    {t('common:viewToggle.stacked', 'Stacked')}
+                    {t('common:viewToggle.cards', 'Cards')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={viewMode !== 'stacked' && tableLayout ? 'filled' : 'default'}
+                    leftSection={<IconTable size={14} />}
+                    onClick={() => { setTableLayout(true); if (viewMode === 'stacked') handleViewModeChange('panels'); }}
+                  >
+                    {t('common:viewToggle.table', 'Table')}
+                  </Button>
+                  {hasStackableResults && (
+                    <Button
+                      size="sm"
+                      variant={viewMode === 'stacked' ? 'filled' : 'default'}
+                      leftSection={<IconStack2 size={14} />}
+                      onClick={() => handleViewModeChange('stacked')}
+                    >
+                      {t('common:viewToggle.stacked', 'Stacked')}
+                    </Button>
+                  )}
+                </Button.Group>
+                {viewMode !== 'stacked' && tableLayout && (
+                  <Button
+                    className="print-button"
+                    size="sm"
+                    variant="light"
+                    leftSection={<IconPrinter size={14} />}
+                    onClick={handlePrintTable}
+                  >
+                    {t('common:buttons.print', 'Print')}
                   </Button>
                 )}
-              </Button.Group>
+              </>
             }
           />
 
