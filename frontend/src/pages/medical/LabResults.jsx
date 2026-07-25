@@ -101,6 +101,7 @@ const LabResults = () => {
   const responsive = useResponsive();
   const [viewMode, setViewMode] = usePersistedViewMode('lab-results');
   const [tableLayout, setTableLayout] = useState(() => viewMode === 'table');
+  const [isPrintingAll, setIsPrintingAll] = useState(false);
   const {
     page,
     setPage,
@@ -688,6 +689,23 @@ const LabResults = () => {
       viewMode === 'stacked' ? stackedViewItems.length : filteredLabResults.length;
     clampPage(count);
   }, [filteredLabResults.length, stackedViewItems.length, viewMode, clampPage]);
+
+  // Restore normal pagination after the browser print dialog closes (covers
+  // both completed prints and cancellations).
+  useEffect(() => {
+    const handleAfterPrint = () => setIsPrintingAll(false);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => window.removeEventListener('afterprint', handleAfterPrint);
+  }, []);
+
+  const handlePrintTable = () => {
+    setIsPrintingAll(true);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
+  };
 
   // Combined loading state — include component fetch when in stacked or results-table view to avoid content flash.
   // For the components table specifically, only block on initial load (empty array); subsequent refreshes must not
@@ -1474,7 +1492,7 @@ const LabResults = () => {
       <Paper shadow="sm" radius="md" withBorder>
         <ResponsiveTable
           persistKey="lab-results"
-          data={paginatedLabResults}
+          data={isPrintingAll ? filteredLabResults : paginatedLabResults}
           pagination={false}
           disableEdit={isViewOnly}
           disableDelete={isViewOnly}
@@ -1650,7 +1668,7 @@ const LabResults = () => {
                     size="sm"
                     variant="light"
                     leftSection={<IconPrinter size={14} />}
-                    onClick={() => window.print()}
+                    onClick={handlePrintTable}
                   >
                     {t('common:buttons.print', 'Print')}
                   </Button>
