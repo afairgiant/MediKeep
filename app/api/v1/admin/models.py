@@ -2019,7 +2019,7 @@ def create_model_record(
         raise
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=e.errors(),
         ) from e
     except Exception as e:
