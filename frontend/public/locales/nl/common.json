@@ -1042,6 +1042,7 @@
     "mildImpact": "Licht - Geringe impact",
     "moderate": "Matig - Merkbare symptomen",
     "moderateImpact": "Matig - Merkbare impact",
+    "none": "Geen - Geen ongemak",
     "severe": "Ernstig - Significante reactie",
     "severeImpact": "Ernstig - Significante impact"
   },

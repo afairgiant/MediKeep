@@ -233,6 +233,7 @@
           "critical": "🚨 Kritisch - Lebensbedrohlich",
           "mild": "💛 Leicht - Geringe Auswirkung",
           "moderate": "⚡ Mäßig - Merkliche Auswirkung",
+          "none": "🚫 Keine - Keine Beschwerden",
           "severe": "⚠️ Schwer - Erhebliche Auswirkung"
         },
         "status": {
@@ -512,6 +513,7 @@
         "lifeThreatening": "Lebensbedrohlich - Notfallversorgung erforderlich",
         "mild": "Leicht - Geringfügige Beschwerden",
         "moderate": "Mäßig - Merkbare Auswirkung",
+        "none": "Keine - Keine Beschwerden",
         "severe": "Schwer - Erhebliche Auswirkung"
       },
       "placeholder": "Schweregrad auswählen"

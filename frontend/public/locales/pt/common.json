@@ -1042,6 +1042,7 @@
     "mildImpact": "Leve - Impacto menor",
     "moderate": "Moderada - Sintomas perceptíveis",
     "moderateImpact": "Moderada - Impacto perceptível",
+    "none": "Nenhuma - Sem desconforto",
     "severe": "Grave - Reação significativa",
     "severeImpact": "Grave - Impacto significativo"
   },

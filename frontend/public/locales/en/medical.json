@@ -233,6 +233,7 @@
           "critical": "🚨 Critical - Life-threatening",
           "mild": "💛 Mild - Minor impact",
           "moderate": "⚡ Moderate - Noticeable impact",
+          "none": "🚫 None - No discomfort",
           "severe": "⚠️ Severe - Significant impact"
         },
         "status": {
@@ -512,6 +513,7 @@
         "lifeThreatening": "Life-threatening - Emergency care needed",
         "mild": "Mild - Minor discomfort",
         "moderate": "Moderate - Noticeable impact",
+        "none": "None - No discomfort",
         "severe": "Severe - Significant impact"
       },
       "placeholder": "Select severity"

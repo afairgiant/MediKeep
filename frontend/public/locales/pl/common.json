@@ -1042,6 +1042,7 @@
     "mildImpact": "Łagodny - Niewielki wpływ",
     "moderate": "Umiarkowany - Zauważalne objawy",
     "moderateImpact": "Umiarkowany - Zauważalny wpływ",
+    "none": "Brak - Brak dyskomfortu",
     "severe": "Ciężki - Znacząca reakcja",
     "severeImpact": "Ciężki - Znaczący wpływ"
   },

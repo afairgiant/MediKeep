@@ -34,6 +34,10 @@ export const symptomOccurrenceFormFields = [
     gridColumn: 6,
     options: [
       {
+        value: 'none',
+        labelKey: 'common:severity.none',
+      },
+      {
         value: 'mild',
         labelKey: 'common:severity.mild',
       },

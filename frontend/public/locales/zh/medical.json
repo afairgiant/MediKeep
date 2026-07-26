@@ -233,6 +233,7 @@
           "critical": "🚨 危重 - 危及生命",
           "mild": "💛 轻度 - 轻微影响",
           "moderate": "⚡ 中度 - 明显影响",
+          "none": "🚫 无 - 无不适",
           "severe": "⚠️ 重度 - 显著影响"
         },
         "status": {
@@ -509,6 +510,7 @@
         "lifeThreatening": "危及生命 - 需要紧急护理",
         "mild": "轻度 - 轻微不适",
         "moderate": "中度 - 明显影响",
+        "none": "无 - 无不适",
         "severe": "重度 - 显著影响"
       },
       "placeholder": "选择严重程度"

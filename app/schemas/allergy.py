@@ -29,7 +29,7 @@ class AllergyBase(TaggedEntityMixin):
     @field_validator("severity")
     @classmethod
     def validate_severity(cls, v):
-        valid_severities = ["mild", "moderate", "severe", "life-threatening"]
+        valid_severities = ["none", "mild", "moderate", "severe", "life-threatening"]
         if v.lower() not in valid_severities:
             raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
         return v.lower()
@@ -68,7 +68,7 @@ class AllergyUpdate(BaseModel):
     @classmethod
     def validate_severity(cls, v):
         if v is not None:
-            valid_severities = ["mild", "moderate", "severe", "life-threatening"]
+            valid_severities = ["none", "mild", "moderate", "severe", "life-threatening"]
             if v.lower() not in valid_severities:
                 raise ValueError(
                     f"Severity must be one of: {', '.join(valid_severities)}"

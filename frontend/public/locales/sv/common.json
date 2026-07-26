@@ -1042,6 +1042,7 @@
     "mildImpact": "Mild - Lätt påverkan",
     "moderate": "Måttlig - Märkbara symtom",
     "moderateImpact": "Måttlig - Märkbar påverkan",
+    "none": "Ingen - Inget obehag",
     "severe": "Svår - Betydande reaktion",
     "severeImpact": "Svår - Betydande påverkan"
   },
