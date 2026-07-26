@@ -983,7 +983,7 @@ Base path: `/api/v1/allergies`
 }
 ```
 
-- **Severity values**: `mild`, `moderate`, `severe`, `life-threatening`
+- **Severity values**: `none`, `mild`, `moderate`, `severe`, `life-threatening`
 
 #### List Allergies
 
@@ -1044,7 +1044,7 @@ Base path: `/api/v1/conditions`
 ```
 
 - **Status values**: `active`, `resolved`, `chronic`
-- **Severity values**: `mild`, `moderate`, `severe`
+- **Severity values**: `none`, `mild`, `moderate`, `severe`, `life-threatening`
 
 #### List Conditions
 
@@ -2799,7 +2799,7 @@ Base path: `/api/v1/injury-types`
 ```
 
 - **Laterality values**: `left`, `right`, `bilateral`, `not_applicable`
-- **Severity values**: `mild`, `moderate`, `severe`, `life-threatening`
+- **Severity values**: `none`, `mild`, `moderate`, `severe`, `life-threatening`
 - **Status values**: `active`, `healing`, `resolved`, `chronic`
 - **Success Response** (201): Injury with relations
 
