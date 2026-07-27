@@ -3,7 +3,10 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.models.enums import get_all_severity_levels
 from app.schemas.base_tags import TaggedEntityMixin
+
+VALID_SEVERITY_LEVELS = get_all_severity_levels()
 
 
 class AllergyBase(TaggedEntityMixin):
@@ -29,9 +32,10 @@ class AllergyBase(TaggedEntityMixin):
     @field_validator("severity")
     @classmethod
     def validate_severity(cls, v):
-        valid_severities = ["mild", "moderate", "severe", "life-threatening"]
-        if v.lower() not in valid_severities:
-            raise ValueError(f"Severity must be one of: {', '.join(valid_severities)}")
+        if v.lower() not in VALID_SEVERITY_LEVELS:
+            raise ValueError(
+                f"Severity must be one of: {', '.join(VALID_SEVERITY_LEVELS)}"
+            )
         return v.lower()
 
     @field_validator("status")
@@ -68,10 +72,9 @@ class AllergyUpdate(BaseModel):
     @classmethod
     def validate_severity(cls, v):
         if v is not None:
-            valid_severities = ["mild", "moderate", "severe", "life-threatening"]
-            if v.lower() not in valid_severities:
+            if v.lower() not in VALID_SEVERITY_LEVELS:
                 raise ValueError(
-                    f"Severity must be one of: {', '.join(valid_severities)}"
+                    f"Severity must be one of: {', '.join(VALID_SEVERITY_LEVELS)}"
                 )
             return v.lower()
         return v
