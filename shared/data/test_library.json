@@ -2469,7 +2469,7 @@
       "abbreviation": "Prot Ur",
       "test_code": "2888-6",
       "default_unit": "mg/dL",
-      "category": "other",
+      "category": "chemistry",
       "common_names": [
         "Proteins in Urine"
       ],
@@ -2481,7 +2481,7 @@
       "test_name": "Glucose in Urine",
       "abbreviation": "Glucose Ur",
       "test_code": "2349-9",
-      "category": "other",
+      "category": "chemistry",
       "common_names": [
         "Glucose in Urine",
         "Glucose [Presence] in Urine"
@@ -2494,7 +2494,7 @@
       "test_name": "Ketones in Urine",
       "abbreviation": "Ketones Ur",
       "test_code": "33903-6",
-      "category": "other",
+      "category": "chemistry",
       "common_names": [
         "Ketones in Urine",
         "Ketones [Presence] in Urine"
@@ -2507,7 +2507,7 @@
       "test_name": "Bilirubin in Urine",
       "abbreviation": "Bilirubin Ur",
       "test_code": "1977-8",
-      "category": "other",
+      "category": "chemistry",
       "common_names": [
         "Bilirubin in Urine",
         "Bilirubin [Presence] in Urine"
@@ -2520,7 +2520,7 @@
       "test_name": "Erythrocytes [Presence] in Urine",
       "abbreviation": "RBC Ur",
       "test_code": "33051-4",
-      "category": "other",
+      "category": "chemistry",
       "common_names": [
         "Erythrocytes in Urine",
         "Erythrocytes [Presence] in Urine"
@@ -2533,7 +2533,7 @@
       "test_name": "Nitrite in Urine",
       "abbreviation": "Nitrite Ur",
       "test_code": "32710-6",
-      "category": "other",
+      "category": "chemistry",
       "common_names": [
         "Nitrite in Urine",
         "Nitrite [Presence] in Urine"
@@ -2547,7 +2547,7 @@
       "abbreviation": "WBC Ur",
       "test_code": "30405-5",
       "default_unit": "#/uL",
-      "category": "other",
+      "category": "chemistry",
       "common_names": [
         "Leukocytes in Urine",
         "Leukocytes [#/volume] in Urine"
