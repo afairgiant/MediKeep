@@ -164,7 +164,7 @@ class TestChannelManagement:
             },
         )
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_create_ntfy_channel_missing_topic(self, client, user_token_headers):
         """Test ntfy channel requires topic field."""
@@ -178,7 +178,7 @@ class TestChannelManagement:
             },
         )
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_create_ntfy_channel_invalid_priority(self, client, user_token_headers):
         """Test ntfy channel rejects priority outside 1-5 range."""
@@ -196,7 +196,7 @@ class TestChannelManagement:
             },
         )
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_create_ntfy_channel_topic_with_url_reserved_chars(
         self, client, user_token_headers
@@ -213,7 +213,7 @@ class TestChannelManagement:
                 },
             )
             assert (
-                response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+                response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
             ), f"Expected 422 for topic {bad_topic!r}"
 
     def test_create_ntfy_channel_topic_too_long(self, client, user_token_headers):
@@ -228,7 +228,7 @@ class TestChannelManagement:
             },
         )
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_create_channel_invalid_type(self, client, user_token_headers):
         """Test creating a channel with invalid type."""
@@ -242,7 +242,7 @@ class TestChannelManagement:
             },
         )
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_create_channel_invalid_discord_url(self, client, user_token_headers):
         """Test creating a Discord channel with invalid URL."""
@@ -256,7 +256,7 @@ class TestChannelManagement:
             },
         )
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_create_channel_duplicate_name(self, client, user_token_headers):
         """Test that duplicate channel names are rejected."""
