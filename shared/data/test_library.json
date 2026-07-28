@@ -2471,8 +2471,7 @@
       "default_unit": "mg/dL",
       "category": "other",
       "common_names": [
-        "Proteins in Urine",
-        "Proteins [Presence] in Urine"
+        "Proteins in Urine"
       ],
       "is_common": false,
       "display_order": 169,
