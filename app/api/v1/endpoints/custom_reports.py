@@ -121,7 +121,7 @@ async def generate_custom_report(
     except ValueError as e:
         log_validation_error(logger, http_request, str(e), user_id=current_user_id)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
@@ -280,7 +280,7 @@ async def save_report_template(
     except ValueError as e:
         log_validation_error(logger, request, str(e), user_id=current_user_id)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
@@ -399,7 +399,7 @@ async def update_template(
     except ValueError as e:
         log_validation_error(logger, request, str(e), user_id=current_user_id)
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e)
         )
     except Exception as e:
         log_endpoint_error(
