@@ -4,6 +4,7 @@ import { IconX } from '@tabler/icons-react';
 import { getNavigationSections } from '../../config/navigation.config';
 import { useViewport } from '../../hooks/useViewport';
 import ThemeToggle from '../ui/ThemeToggle';
+import LanguageSwitcher from '../shared/LanguageSwitcher';
 
 const MobileNavigation = ({
   isOpen,
@@ -91,6 +92,10 @@ const MobileNavigation = ({
             >
               {'\u2699\uFE0F'} {t('shared:labels.settings', 'Settings')}
             </button>
+            <div className="mobile-theme-toggle">
+              <span>{t('sidebarNav.items.language', 'Language')}</span>
+              <LanguageSwitcher size="xs" />
+            </div>
             <div className="mobile-theme-toggle">
               <span>{t('sidebarNav.items.theme', 'Theme')}</span>
               <ThemeToggle />
