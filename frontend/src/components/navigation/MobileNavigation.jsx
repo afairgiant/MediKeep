@@ -94,7 +94,7 @@ const MobileNavigation = ({
             </button>
             <div className="mobile-theme-toggle">
               <span>{t('sidebarNav.items.language', 'Language')}</span>
-              <LanguageSwitcher size="xs" />
+              <LanguageSwitcher size="xs" compact />
             </div>
             <div className="mobile-theme-toggle">
               <span>{t('sidebarNav.items.theme', 'Theme')}</span>
