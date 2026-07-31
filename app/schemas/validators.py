@@ -18,7 +18,7 @@ Usage:
 """
 
 import re
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from typing import List, Optional
 
 
@@ -141,6 +141,16 @@ def validate_date_not_future(
     """
     Validate that a date is not in the future.
 
+    The "future" bound is timezone-tolerant. The server cannot know the
+    submitting user's timezone, and local calendar dates worldwide span 26
+    hours (UTC-12 to UTC+14). A user's local date can therefore be at most one
+    day ahead of UTC, so we compare against the current date at UTC+14 (the
+    earliest timezone on Earth). This avoids rejecting a user's genuine "today"
+    when they are ahead of the server, at the cost of accepting a date up to
+    roughly one day early. That is the correct direction for a backstop guard
+    whose purpose is to catch obvious data-entry mistakes, not to be a precise
+    clock. See PR fixing symptom date auto-fill (#945/#946) for context.
+
     Args:
         value: The date to validate
         field_name: Name of the field for error messages
@@ -155,12 +165,14 @@ def validate_date_not_future(
     if value is None:
         return None
 
-    today = date.today()
+    # Latest calendar date in effect anywhere on Earth (UTC+14).
+    max_valid_date = (datetime.now(timezone.utc) + timedelta(hours=14)).date()
 
-    if value > today:
+    if value > max_valid_date:
         raise ValueError(f"{field_name} cannot be in the future")
 
     if max_years_past is not None:
+        today = date.today()
         if today.year - value.year > max_years_past:
             raise ValueError(
                 f"{field_name} cannot be more than {max_years_past} years ago"
