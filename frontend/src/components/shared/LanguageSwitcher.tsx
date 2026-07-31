@@ -164,7 +164,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           cursor: 'pointer',
         },
       }}
-      comboboxProps={{ withinPortal: true }}
+      comboboxProps={{ withinPortal: true, zIndex: 1100 }}
       allowDeselect={false}
       aria-label="Select language"
     />
