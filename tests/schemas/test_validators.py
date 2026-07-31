@@ -111,5 +111,10 @@ def test_bound_tracks_the_real_utc14_date():
     """Without pinning, the accepted upper bound is the live UTC+14 date."""
     expected = (datetime.now(timezone.utc) + timedelta(hours=14)).date()
     assert validate_date_not_future(expected) == expected
+    # Reject with +2 days rather than +1: the validator recomputes its bound on
+    # each call, so if the UTC+14 clock crosses midnight between capturing
+    # `expected` and this call, the live bound would be expected+1 and a +1
+    # assertion would flake. The exact expected+1 boundary is covered by the
+    # pinned-clock tests above.
     with pytest.raises(ValueError, match="cannot be in the future"):
-        validate_date_not_future(expected + timedelta(days=1))
+        validate_date_not_future(expected + timedelta(days=2))
