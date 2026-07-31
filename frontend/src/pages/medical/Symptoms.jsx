@@ -1,4 +1,5 @@
 import logger from '../../services/logger';
+import { getTodayString } from '../../utils/dateUtils';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
@@ -89,9 +90,7 @@ const Symptoms = () => {
   // Default occurrence form state - used for both initial state and reset
   const getDefaultOccurrenceFormData = useCallback(
     (withTodayDate = false) => ({
-      occurrence_date: withTodayDate
-        ? new Date().toISOString().split('T')[0]
-        : '',
+      occurrence_date: withTodayDate ? getTodayString() : '',
       occurrence_time: '',
       severity: 'moderate',
       pain_scale: '',
@@ -219,7 +218,7 @@ const Symptoms = () => {
     setSymptomFormData({
       symptom_name: '',
       category: '',
-      first_occurrence_date: new Date().toISOString().split('T')[0],
+      first_occurrence_date: getTodayString(),
       status: 'active',
       is_chronic: false,
       resolved_date: '',
@@ -259,7 +258,7 @@ const Symptoms = () => {
       if (name === 'status') {
         if (value === 'resolved' && !prev.resolved_date) {
           // Auto-fill resolved_date with today when status changes to resolved
-          updated.resolved_date = new Date().toISOString().split('T')[0];
+          updated.resolved_date = getTodayString();
         } else if (value !== 'resolved') {
           // Clear resolved_date when status changes away from resolved
           updated.resolved_date = '';
