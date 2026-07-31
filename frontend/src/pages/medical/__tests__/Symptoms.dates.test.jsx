@@ -260,14 +260,16 @@ describe('Symptoms page - date auto-fill uses the local date, not UTC', () => {
     vi.useRealTimers();
   });
 
-  it('confirms the pinned clock actually straddles the date line', () => {
-    // Precondition for the assertions below. Skipped only when CI runs in UTC,
-    // where no local/UTC divergence is possible.
-    if (!DIVERGES_FROM_UTC) return;
-    expect(new Date().toISOString().split('T')[0]).not.toBe(
-      EXPECTED_LOCAL_DATE
-    );
-  });
+  it.runIf(DIVERGES_FROM_UTC)(
+    'confirms the pinned clock actually straddles the date line',
+    () => {
+      // Precondition for the assertions below. Reported as skipped when CI
+      // runs in UTC, where no local/UTC divergence is possible.
+      expect(new Date().toISOString().split('T')[0]).not.toBe(
+        EXPECTED_LOCAL_DATE
+      );
+    }
+  );
 
   it('defaults a new symptom first occurrence date to the local date', async () => {
     await renderAndWait();
