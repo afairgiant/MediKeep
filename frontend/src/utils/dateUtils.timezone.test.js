@@ -46,6 +46,7 @@ const DIVERGENT_INSTANT = IS_EAST_OF_UTC
 /** What the old, buggy implementation would have produced. */
 const utcDateString = () => new Date().toISOString().split('T')[0];
 
+/** Run `fn` with the system clock pinned to `instant`, restoring real timers after. */
 function at(instant, fn) {
   vi.useFakeTimers();
   vi.setSystemTime(instant);

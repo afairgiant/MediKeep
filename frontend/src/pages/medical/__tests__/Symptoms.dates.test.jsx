@@ -236,6 +236,7 @@ const DIVERGENT_INSTANT = IS_EAST_OF_UTC
 
 const EXPECTED_LOCAL_DATE = '2026-07-30';
 
+/** Render the Symptoms page and flush the async loading effect. */
 async function renderAndWait() {
   render(
     <BrowserRouter>
