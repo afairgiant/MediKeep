@@ -1,6 +1,6 @@
 {
-  "version": "1.8.0",
-  "lastUpdated": "2026-05-23",
+  "version": "1.9.0",
+  "lastUpdated": "2026-08-01",
   "tests": [
     {
       "test_name": "Alanine Aminotransferase",
@@ -2392,6 +2392,49 @@
       "is_common": false,
       "result_type": "qualitative",
       "display_order": 163
+    },
+    {
+      "test_name": "Hemoglobin A",
+      "abbreviation": "HbA",
+      "test_code": "4546-8",
+      "default_unit": "%",
+      "category": "hematology",
+      "common_names": [
+        "HbA",
+        "Hgb A"
+      ],
+      "is_common": false,
+      "display_order": 164,
+      "result_type": "quantitative"
+    },
+    {
+      "test_name": "Hemoglobin A2",
+      "abbreviation": "HbA2",
+      "test_code": "4551-8",
+      "default_unit": "%",
+      "category": "hematology",
+      "common_names": [
+        "HbA2",
+        "Hgb A2"
+      ],
+      "is_common": false,
+      "display_order": 165,
+      "result_type": "quantitative"
+    },
+    {
+      "test_name": "Hemoglobin F",
+      "abbreviation": "HbF",
+      "test_code": "4576-5",
+      "default_unit": "%",
+      "category": "hematology",
+      "common_names": [
+        "HbF",
+        "Fetal Hemoglobin",
+        "Hgb F"
+      ],
+      "is_common": false,
+      "display_order": 166,
+      "result_type": "quantitative"
     }
   ]
 }
