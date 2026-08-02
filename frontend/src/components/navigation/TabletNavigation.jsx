@@ -99,7 +99,7 @@ const TabletNavigation = ({ user: _user, isAdmin, onLogout }) => {
             <Menu.Item onClick={() => navigate('/settings')}>
               {t('shared:labels.settings', 'Settings')}
             </Menu.Item>
-            <Menu.Item closeMenuOnClick={false}>
+            <Menu.Item component="div" closeMenuOnClick={false}>
               <div
                 style={{
                   display: 'flex',
@@ -109,7 +109,7 @@ const TabletNavigation = ({ user: _user, isAdmin, onLogout }) => {
                 }}
               >
                 <span>{t('sidebarNav.items.language', 'Language')}</span>
-                <LanguageSwitcher size="xs" />
+                <LanguageSwitcher size="xs" comboboxWithinPortal={false} />
               </div>
             </Menu.Item>
             <Menu.Item>

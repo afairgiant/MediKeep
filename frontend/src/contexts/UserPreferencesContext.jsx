@@ -61,11 +61,10 @@ export const UserPreferencesProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         const userPrefs = await getUserPreferences();
-        setPreferences(userPrefs);
 
-        // Apply the backend-stored language to i18next if it differs from the current language.
-        // Without this, the saved language preference is ignored on every page load because
-        // i18next only reads from localStorage/browser detection on startup.
+        // Apply the backend-stored language to i18next BEFORE updating React state.
+        // This ensures syncAutoDetectedLanguage never reads a stale i18n.language
+        // in the window between setPreferences and changeLanguage completing.
         if (
           userPrefs.language &&
           SUPPORTED_LANGUAGES.includes(userPrefs.language) &&
@@ -84,6 +83,8 @@ export const UserPreferencesProvider = ({ children }) => {
             );
           }
         }
+
+        setPreferences(userPrefs);
 
         frontendLogger.logInfo('User preferences loaded', {
           unitSystem: userPrefs.unit_system,

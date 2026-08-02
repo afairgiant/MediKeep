@@ -66,6 +66,9 @@
       "title": "Formato de Data",
       "ymd": "AAAA-MM-DD (ISO)"
     },
+    "language": {
+      "saveError": "Idioma aplicado mas não foi possível salvar. Pode reverter no próximo login."
+    },
     "sessionTimeout": {
       "description": "Defina a duração de inatividade antes que sua sessão expire (em minutos)",
       "range": "minutos (5-1440)",

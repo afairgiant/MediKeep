@@ -66,6 +66,9 @@
       "title": "Formato Data",
       "ymd": "YYYY-MM-DD (ISO)"
     },
+    "language": {
+      "saveError": "Lingua applicata ma non è stato possibile salvarla. Potrebbe ripristinarsi al prossimo accesso."
+    },
     "sessionTimeout": {
       "description": "Imposta la durata dell'inattività prima della scadenza della sessione (in minuti)",
       "range": "minuti (5-1440)",

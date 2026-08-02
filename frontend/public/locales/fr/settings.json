@@ -66,6 +66,9 @@
       "title": "Format des dates",
       "ymd": "AAAA-MM-JJ (ISO)"
     },
+    "language": {
+      "saveError": "Langue appliquée mais n'a pas pu être sauvegardée. Elle peut être réinitialisée à la prochaine connexion."
+    },
     "sessionTimeout": {
       "description": "Définissez la période d'inactivité devant s'écouler avant l'expiration de votre session (en minutes)",
       "range": "minutes (5-1440)",

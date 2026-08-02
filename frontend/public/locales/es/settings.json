@@ -66,6 +66,9 @@
       "title": "Formato de fecha",
       "ymd": "AAAA-MM-DD (ISO)"
     },
+    "language": {
+      "saveError": "Idioma aplicado pero no se pudo guardar. Puede revertirse al próximo inicio de sesión."
+    },
     "sessionTimeout": {
       "description": "Establezca la duración de inactividad antes de que expire su sesión (en minutos)",
       "range": "minutos (5-1440)",

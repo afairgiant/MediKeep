@@ -66,6 +66,9 @@
       "title": "Datumsformat",
       "ymd": "JJJJ-MM-TT (ISO)"
     },
+    "language": {
+      "saveError": "Sprache angewendet, konnte aber nicht gespeichert werden. Beim nächsten Login kann sie sich zurücksetzen."
+    },
     "sessionTimeout": {
       "description": "Legen Sie die Dauer der Inaktivität fest, bevor Ihre Sitzung abläuft (in Minuten)",
       "range": "Minuten (5-1440)",
