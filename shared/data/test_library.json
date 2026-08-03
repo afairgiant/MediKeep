@@ -2405,8 +2405,8 @@
         "Plateletcrit"
       ],
       "is_common": true,
-      "display_order": 164,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 164
     },
     {
       "test_name": "Platelet distribution width",
@@ -2419,8 +2419,8 @@
         "Platelet distribution width"
       ],
       "is_common": true,
-      "display_order": 165,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 165
     },
     {
       "test_name": "Band form Neutrophils (Absolute)",
@@ -2434,8 +2434,9 @@
         "Neuts Band #"
       ],
       "is_common": false,
-      "display_order": 166,
-      "result_type": "quantitative"
+
+      "result_type": "quantitative",
+      "display_order": 166
     },
      {
       "test_name": "Band form Neutrophils",
@@ -2449,8 +2450,8 @@
         "Neuts Band"
       ],
       "is_common": false,
-      "display_order": 167,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 167
     },
      {
       "test_name": "Urine Color",
@@ -2461,8 +2462,8 @@
         "Urine Color"
       ],
       "is_common": true,
-      "display_order": 168,
-      "result_type": "qualitative"
+      "result_type": "qualitative",
+      "display_order": 168
     },
     {
       "test_name": "Proteins in Urine",
@@ -2474,8 +2475,8 @@
         "Proteins in Urine"
       ],
       "is_common": false,
-      "display_order": 169,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 169
     },
     {
       "test_name": "Glucose in Urine",
@@ -2487,8 +2488,8 @@
         "Glucose [Presence] in Urine"
       ],
       "is_common": false,
-      "display_order": 170,
-      "result_type": "qualitative"
+      "result_type": "qualitative",
+      "display_order": 170
     },
     {
       "test_name": "Ketones in Urine",
@@ -2500,8 +2501,8 @@
         "Ketones [Presence] in Urine"
       ],
       "is_common": false,
-      "display_order": 171,
-      "result_type": "qualitative"
+      "result_type": "qualitative",
+      "display_order": 171
     },
     {
       "test_name": "Bilirubin in Urine",
@@ -2513,8 +2514,8 @@
         "Bilirubin [Presence] in Urine"
       ],
       "is_common": false,
-      "display_order": 172,
-      "result_type": "qualitative"
+      "result_type": "qualitative",
+      "display_order": 172
     },
     {
       "test_name": "Erythrocytes [Presence] in Urine",
@@ -2526,8 +2527,8 @@
         "Erythrocytes [Presence] in Urine"
       ],
       "is_common": false,
-      "display_order": 173,
-      "result_type": "qualitative"
+      "result_type": "qualitative",
+      "display_order": 173
     },
     {
       "test_name": "Nitrite in Urine",
@@ -2539,8 +2540,8 @@
         "Nitrite [Presence] in Urine"
       ],
       "is_common": false,
-      "display_order": 174,
-      "result_type": "qualitative"
+      "result_type": "qualitative",
+      "display_order": 174
     },
     {
       "test_name": "Leukocytes in Urine",
@@ -2553,8 +2554,8 @@
         "Leukocytes [#/volume] in Urine"
       ],
       "is_common": false,
-      "display_order": 175,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 175
     }
   ]
 }
