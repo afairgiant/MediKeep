@@ -322,6 +322,23 @@ class TestCanonicalTestMatchingService:
             result = matching_service.find_canonical_match(variation)
             assert result == "Hemoglobin A1c", f"Failed to match: {variation}"
 
+    def test_hemoglobin_fraction_matching(self, matching_service):
+        """Test exact matching for hemoglobin fraction names."""
+        expected_matches = {
+            "Hemoglobin A": "Hemoglobin A",
+            "HbA": "Hemoglobin A",
+            "Hgb A": "Hemoglobin A",
+            "Hemoglobin A2": "Hemoglobin A2",
+            "HbA2": "Hemoglobin A2",
+            "Hgb A2": "Hemoglobin A2",
+            "Hemoglobin F": "Hemoglobin F",
+            "HbF": "Hemoglobin F",
+            "Fetal Hemoglobin": "Hemoglobin F",
+        }
+
+        for variation, expected in expected_matches.items():
+            assert matching_service.find_canonical_match(variation) == expected
+
     def test_thyroid_matching(self, matching_service):
         """Test thyroid test matching."""
         result = matching_service.find_canonical_match("TSH")
