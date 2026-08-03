@@ -6,8 +6,8 @@
       "generateReport": "Δημιουργία Αναφοράς ({{count}} εγγραφές)",
       "generateReport_one": "Δημιουργία Αναφοράς ({{count}} εγγραφή)",
       "generateReport_other": "Δημιουργία Αναφοράς ({{count}} εγγραφές)",
-      "generateReportChartsOnly": "Δημιουργία Αναφοράς ({{chartCount}} γραφήματα)",
-      "generateReportWithCharts": "Δημιουργία Αναφοράς ({{recordCount}} εγγραφές, {{chartCount}} γραφήματα)",
+      "generateReportChartsOnly": "Δημιουργία Αναφοράς (Γραφήματα: {{chartCount}})",
+      "generateReportWithCharts": "Δημιουργία Αναφοράς (Εγγραφές: {{recordCount}}, Γραφήματα: {{chartCount}})",
       "selectAll": "Επιλογή Όλων των Εγγραφών"
     },
     "configuration": {

@@ -98,7 +98,7 @@
     "selectDevice": "Επιλέξτε Συσκευή",
     "selectDevicePlaceholder": "Επιλέξτε τη συσκευή σας...",
     "skipDuplicates": "Παράλειψη διπλότυπων μετρήσεων",
-    "successWithSkipped": "Εισήχθησαν {{imported}} μετρήσεις ({{skipped}} διπλότυπα παραλείφθηκαν)",
+    "successWithSkipped": "Εισαγωγή Ολοκληρώθηκε — Μετρήσεις: {{imported}}, Παραλειφθέντα Διπλότυπα: {{skipped}}",
     "title": "Εισαγωγή Ζωτικών Σημείων",
     "totalReadings": "Συνολικές Μετρήσεις",
     "uploadFile": "Μεταφόρτωση Αρχείου CSV"
