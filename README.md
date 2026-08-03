@@ -59,36 +59,39 @@ services:
   # PostgreSQL Database Service
   postgres:
     image: postgres:15.8-alpine
-    container_name: medical-records-db
+    container_name: medikeep-db
     environment:
       POSTGRES_DB: ${DB_NAME:-medical_records}
       POSTGRES_USER: ${DB_USER:-medapp}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      # For Docker secrets, use POSTGRES_PASSWORD_FILE instead (built-in to postgres image):
+      #POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data-prod:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - '5432:5432'
+      - "5432:5432"
     healthcheck:
       test:
         [
-          'CMD-SHELL',
-          'pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}',
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-medapp} -d ${DB_NAME:-medical_records}",
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
     networks:
-      - medical-records-network
+      - medikeep-network
 
   # Combined Frontend + Backend Application Service
-  medical-records-app:
+  medikeep-app:
     image: ghcr.io/afairgiant/medikeep:latest
     # build:
     #   context: ..
     #   dockerfile: docker/Dockerfile
-    container_name: medical-records-app
+    container_name: medikeep-app
     ports:
       - ${APP_PORT:-8005}:8000 # Single port serves both React app and FastAPI
     environment:
@@ -97,46 +100,65 @@ services:
       DB_NAME: ${DB_NAME:-medical_records}
       DB_USER: ${DB_USER:-medapp}
       DB_PASSWORD: ${DB_PASSWORD}
-      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env for persistent JWTs}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or Docker secrets for persistent JWTs}
       DEBUG: ${DEBUG:-false}
       ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
-      TZ: ${TZ:-America/New_York}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      TZ: ${TZ:-America/New_York}
+      # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS
+      ENABLE_SSL: ${ENABLE_SSL:-false}
+      # SSO Configuration (Optional) - SSO is disabled by default
+      SSO_ENABLED: ${SSO_ENABLED:-false}
+      SSO_PROVIDER_TYPE: ${SSO_PROVIDER_TYPE:-oidc}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-}
+      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-}
+      SSO_ISSUER_URL: ${SSO_ISSUER_URL:-}
+      SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
+      SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-[]}
+
+      # Default Admin Password Configuration (optional - defaults to admin123 in app if not set)
+      #ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-}
+
       #PUID: ${PUID} # Enable if using bind mounts
       #PGID: ${PGID} # Enable if using bind mounts
 
-      # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS - Uncomment if needed
-      #ENABLE_SSL: ${ENABLE_SSL:-false}
-      # SSO Configuration (Optional) - SSO is disabled by default
-      SSO_ENABLED: ${SSO_ENABLED:-false}
-      #SSO_PROVIDER_TYPE: ${SSO_PROVIDER_TYPE:-oidc}
-      #SSO_CLIENT_ID: ${SSO_CLIENT_ID:-}
-      #SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-}
-      #SSO_ISSUER_URL: ${SSO_ISSUER_URL:-}
-      #SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
-      #SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-[]}
-
+      # --- Docker Secrets (_FILE pattern) ---
+      # Instead of passing secrets as plain env vars, point to mounted files:
+      #DB_PASSWORD_FILE: /run/secrets/db_password
+      #SECRET_KEY_FILE: /run/secrets/secret_key
+      #SSO_CLIENT_ID_FILE: /run/secrets/sso_client_id
+      #SSO_CLIENT_SECRET_FILE: /run/secrets/sso_client_secret
+      #ADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/admin_password
+      # When using _FILE vars, remove the corresponding plain env var above.
+    # secrets:
+    #   - db_password
+    #   - secret_key
+    #   - sso_client_id
+    #   - sso_client_secret
+    #   - admin_password
     volumes:
       - app_uploads:/app/uploads
       - app_logs:/app/logs
       - app_backups:/app/backups
+
       # Uncomment the line below and create certificates if you want HTTPS
       # - ./certs:/app/certs:ro
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "curl", "-f", "-k", "http://localhost:8000/health"]
+      interval: 120s
+      timeout: 15s
+      retries: 2
+      start_period: 60s
     restart: unless-stopped
     networks:
-      - medical-records-network
+      - medikeep-network
 
 # Named volumes for data persistence
 volumes:
-  postgres_data:
+  postgres_data-prod:
     driver: local
   app_uploads:
     driver: local
@@ -145,9 +167,22 @@ volumes:
   app_backups:
     driver: local
 
+# --- Docker Secrets (uncomment to use with Docker Swarm or compose secrets) ---
+# secrets:
+#   db_password:
+#     file: ./secrets/db_password.txt
+#   secret_key:
+#     file: ./secrets/secret_key.txt
+#   sso_client_id:
+#     file: ./secrets/sso_client_id.txt
+#   sso_client_secret:
+#     file: ./secrets/sso_client_secret.txt
+#   admin_password:
+#     file: ./secrets/admin_password.txt
+
 # Network for service communication
 networks:
-  medical-records-network:
+  medikeep-network:
     driver: bridge
 ```
 
