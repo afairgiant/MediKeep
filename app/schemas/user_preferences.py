@@ -6,7 +6,20 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator
 
 # Supported languages - single source of truth
-SUPPORTED_LANGUAGES = ["en", "fr", "de", "es", "it", "pt", "ru", "sv", "nl", "pl", "zh"]
+SUPPORTED_LANGUAGES = [
+    "en",
+    "fr",
+    "de",
+    "es",
+    "it",
+    "pt",
+    "ru",
+    "sv",
+    "nl",
+    "pl",
+    "zh",
+    "el",
+]
 
 # Supported date formats - single source of truth
 # mdy = MM/DD/YYYY (US), dmy = DD/MM/YYYY (UK/International),
