@@ -2522,7 +2522,7 @@
       "display_order": 172
     },
     {
-      "test_name": "Erythrocytes [Presence] in Urine",
+      "test_name": "Erythrocytes in Urine",
       "abbreviation": "RBC Ur",
       "test_code": "33051-4",
       "default_unit": "",
