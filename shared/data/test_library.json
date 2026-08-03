@@ -2293,8 +2293,8 @@
         "Lp(a)"
       ],
       "is_common": false,
-      "display_order": 156,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 156
     },
     {
       "test_name": "Creatine Kinase-MB",
@@ -2308,8 +2308,8 @@
         "Creatine Phosphokinase-MB"
       ],
       "is_common": false,
-      "display_order": 157,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 157
     },
     {
       "test_name": "Angiotensin Converting Enzyme",
@@ -2322,8 +2322,8 @@
         "SACE"
       ],
       "is_common": false,
-      "display_order": 158,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 158
     },
     {
       "test_name": "Alpha-1 Globulin",
@@ -2336,8 +2336,8 @@
         "Alpha 1 globulin"
       ],
       "is_common": false,
-      "display_order": 159,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 160
     },
     {
       "test_name": "Alpha-2 Globulin",
@@ -2350,8 +2350,8 @@
         "Alpha 2 globulin"
       ],
       "is_common": false,
-      "display_order": 160,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 160
     },
     {
       "test_name": "Beta Globulin",
@@ -2364,8 +2364,8 @@
         "Beta globulin"
       ],
       "is_common": false,
-      "display_order": 161,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 161
     },
     {
       "test_name": "Gamma Globulin",
@@ -2378,8 +2378,8 @@
         "Gamma globulin"
       ],
       "is_common": false,
-      "display_order": 162,
-      "result_type": "quantitative"
+      "result_type": "quantitative",
+      "display_order": 162
     },
     {
       "test_name": "Tuberculin Skin Test",
