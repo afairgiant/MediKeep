@@ -2404,7 +2404,7 @@
         "PCT",
         "Plateletcrit"
       ],
-      "is_common": true,
+      "is_common": false,
       "result_type": "quantitative",
       "display_order": 164
     },
@@ -2418,7 +2418,7 @@
         "PDW",
         "Platelet distribution width"
       ],
-      "is_common": true,
+      "is_common": false,
       "result_type": "quantitative",
       "display_order": 165
     },
