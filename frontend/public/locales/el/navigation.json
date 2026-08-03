@@ -1,0 +1,122 @@
+{
+  "activity": {
+    "actions": {
+      "added": "Προστέθηκε",
+      "deleted": "Διαγράφηκε",
+      "modified": "Τροποποιήθηκε",
+      "removed": "Αφαιρέθηκε",
+      "scheduled": "Προγραμματίστηκε",
+      "updated": "Ενημερώθηκε",
+      "viewed": "Προβλήθηκε"
+    }
+  },
+  "dashboard": {
+    "activity": {
+      "lastUpdated": "Τελευταία ενημέρωση",
+      "noActivity": "Καμία πρόσφατη δραστηριότητα",
+      "noActivityDescription": "Οι δραστηριότητες του ιατρικού σας φακέλου θα εμφανίζονται εδώ"
+    },
+    "hello": "Γεια σας",
+    "loading": "Φόρτωση του ιατρικού σας πίνακα ελέγχου...",
+    "modules": {
+      "exportRecords": "Εξαγωγή Αρχείων",
+      "visitHistory": "Ιστορικό Επισκέψεων"
+    },
+    "search": {
+      "advancedSearch": "Σύνθετη Αναζήτηση",
+      "placeholder": "Αναζήτηση ιατρικών αρχείων..."
+    },
+    "sections": {
+      "additionalResources": "Πρόσθετοι Πόροι",
+      "coreMedical": "Βασικές Ιατρικές Πληροφορίες",
+      "healthMonitoring": "Παρακολούθηση Υγείας",
+      "prevention": "Πρόληψη & Ιστορικό",
+      "recentActivity": "Πρόσφατη Δραστηριότητα",
+      "treatments": "Θεραπείες και Επεμβάσεις"
+    },
+    "stats": {
+      "activeMedications": "Ενεργά Φάρμακα"
+    },
+    "subtitle": "Διαχειριστείτε τις πληροφορίες υγείας σας με ασφάλεια",
+    "title": "Πίνακας Ελέγχου MediKeep"
+  },
+  "invitations": {
+    "acceptButton": "Αποδοχή Πρόσκλησης",
+    "confirmDescription": "Με την αποδοχή, θα αποκτήσετε πρόσβαση για προβολή των κοινόχρηστων ιατρικών πληροφοριών.",
+    "confirmQuestion": "Είστε βέβαιοι ότι θέλετε να αποδεχτείτε αυτή την πρόσκληση;",
+    "confirmTitle": "Επιβεβαίωση Αποδοχής Πρόσκλησης",
+    "from": "Από",
+    "lastUpdated": "Τελευταία ενημέρωση",
+    "manageAll": "Διαχείριση Όλων των Προσκλήσεων",
+    "noPending": "Καμία εκκρεμής πρόσκληση",
+    "noPendingDescription": "Νέες προσκλήσεις κοινής χρήσης θα εμφανίζονται εδώ",
+    "sharePatient": "Κοινή Χρήση Ασθενή",
+    "title": "Προσκλήσεις",
+    "types": {
+      "patientRecord": "Αρχείο Ασθενή"
+    }
+  },
+  "menu": {
+    "account": "Λογαριασμός",
+    "backToDashboard": "Επιστροφή στον Πίνακα Ελέγχου",
+    "darkMode": "Σκοτεινή Λειτουργία",
+    "help": "Βοήθεια",
+    "lightMode": "Φωτεινή Λειτουργία",
+    "logout": "Αποσύνδεση",
+    "patients": "Ασθενείς",
+    "profile": "Προφίλ",
+    "reports": "Αναφορές",
+    "userActions": "Ενέργειες Χρήστη"
+  },
+  "pages": {
+    "help": "Βοήθεια & Υποστήριξη",
+    "medicalHistory": "Ιατρικό Ιστορικό",
+    "patientDetails": "Στοιχεία Ασθενή",
+    "patientList": "Λίστα Ασθενών",
+    "preferences": "Προτιμήσεις",
+    "reports": "Αναφορές",
+    "userProfile": "Προφίλ Χρήστη"
+  },
+  "sections": {
+    "personalInfo": "Προσωπικές Πληροφορίες",
+    "preferences": "Προτιμήσεις"
+  },
+  "sidebarNav": {
+    "items": {
+      "adminDashboard": "Πίνακας Ελέγχου Διαχειριστή",
+      "allergies": "Αλλεργίες",
+      "backupManagement": "Διαχείριση Αντιγράφων Ασφαλείας",
+      "conditions": "Παθήσεις",
+      "customReports": "Προσαρμοσμένες Αναφορές",
+      "dataModels": "Μοντέλα Δεδομένων",
+      "emergencyContacts": "Επαφές Έκτακτης Ανάγκης",
+      "exportRecords": "Εξαγωγή Αρχείων",
+      "familyHistory": "Οικογενειακό Ιστορικό",
+      "immunizations": "Εμβολιασμοί",
+      "injuries": "Τραυματισμοί",
+      "insurance": "Ασφάλιση",
+      "labResults": "Εργαστηριακά Αποτελέσματα",
+      "language": "Γλώσσα",
+      "medicalEquipment": "Ιατρικός Εξοπλισμός",
+      "medications": "Φάρμακα",
+      "patientInfo": "Στοιχεία Ασθενή",
+      "pharmacies": "Φαρμακεία",
+      "practitioners": "Επαγγελματίες Υγείας",
+      "procedures": "Επεμβάσεις",
+      "settings": "Ρυθμίσεις",
+      "symptoms": "Συμπτώματα",
+      "systemHealth": "Κατάσταση Συστήματος",
+      "tagManagement": "Διαχείριση Ετικετών",
+      "theme": "Θέμα",
+      "treatments": "Θεραπείες",
+      "visitHistory": "Ιστορικό Επισκέψεων",
+      "vitalSigns": "Ζωτικά Σημεία"
+    },
+    "sections": {
+      "administration": "Διαχείριση",
+      "careAndTreatment": "Φροντίδα & Θεραπεία",
+      "misc": "Διάφορα",
+      "tools": "Εργαλεία"
+    }
+  }
+}

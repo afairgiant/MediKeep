@@ -29,6 +29,7 @@ const SUPPORTED_LANGUAGES = [
   'nl',
   'pl',
   'zh',
+  'el',
 ];
 
 /**
