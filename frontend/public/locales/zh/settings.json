@@ -66,6 +66,9 @@
       "title": "日期格式",
       "ymd": "YYYY-MM-DD（ISO 格式）"
     },
+    "language": {
+      "saveError": "语言已应用但无法保存。下次登录时可能会恢复。"
+    },
     "sessionTimeout": {
       "description": "设置会话过期前的非活动持续时间（以分钟为单位）",
       "range": "分钟（5-1440）",

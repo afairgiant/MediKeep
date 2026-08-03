@@ -1,13 +1,29 @@
-import { describe, it, expect, vi } from 'vitest';
+import type { ReactNode } from 'react';
+import { describe, it, test, expect, vi } from 'vitest';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import render from '../../../test-utils/render';
 import LanguageSwitcher from '../LanguageSwitcher';
+
+// Mocks are hoisted above imports by vitest, so the mock functions
+// themselves must be created via vi.hoisted() to be referenceable
+// (and individually configurable) from within test bodies below.
+const { changeLanguage, notificationsShow, updatePreferences } = vi.hoisted(
+  () => ({
+    changeLanguage: vi.fn().mockResolvedValue(undefined),
+    notificationsShow: vi.fn(),
+    updatePreferences: vi.fn().mockResolvedValue({ language: 'fr' }),
+  })
+);
 
 // Mock i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     i18n: {
       language: 'en',
-      changeLanguage: vi.fn().mockResolvedValue(undefined),
+      changeLanguage,
     },
+    t: (_key: string, fallback: string) => fallback,
   }),
 }));
 
@@ -19,21 +35,26 @@ vi.mock('../../../services/logger', () => ({
   },
 }));
 
-// Mock UserPreferencesContext
+// Mock @mantine/notifications so the save-failure toast can be asserted on
+vi.mock('@mantine/notifications', () => ({
+  notifications: { show: notificationsShow },
+}));
+
+// Mock UserPreferencesContext. UserPreferencesProvider is re-exported as a
+// passthrough because the shared test-utils render() wraps every component
+// under test in it.
 vi.mock('../../../contexts/UserPreferencesContext', () => ({
-  useUserPreferences: () => ({
-    updatePreferences: vi.fn().mockResolvedValue({ language: 'fr' }),
-  }),
+  useUserPreferences: () => ({ updatePreferences }),
+  UserPreferencesProvider: ({ children }: { children: ReactNode }) =>
+    children,
 }));
 
 /**
  * LanguageSwitcher Component Tests
  *
- * Tests language selection functionality and backend sync.
- * Note: These tests verify component structure and mocking setup.
- * Full integration testing of Mantine Select interactions would require
- * more complex setup. The backend sync functionality is thoroughly tested
- * in backend API tests (test_user_preferences_language.py).
+ * Tests language selection functionality and backend sync, including a real
+ * interaction test for the save-failure notification path. Structural tests
+ * below cover the rest of the component's surface without a full render.
  */
 describe('LanguageSwitcher', () => {
   describe('Component Definition', () => {
@@ -99,6 +120,53 @@ describe('LanguageSwitcher', () => {
       // Backend validation ensures only these values are accepted
       // See tests/api/test_user_preferences_language.py for validation tests
       expect(LanguageSwitcher).toBeDefined();
+    });
+  });
+
+  describe('Backend save failure notification', () => {
+    test('shows a user-facing notification when updatePreferences rejects', async () => {
+      updatePreferences.mockRejectedValueOnce(new Error('network down'));
+      const user = userEvent.setup();
+
+      render(<LanguageSwitcher />);
+      const select = screen.getByRole('textbox', { name: 'Select language' });
+
+      await user.click(select);
+      // Mantine's dropdown stays display:none under jsdom (no real
+      // transitions/layout), so options must be queried with hidden: true.
+      const frOption = await screen.findByRole('option', {
+        name: 'Français',
+        hidden: true,
+      });
+      await user.click(frOption);
+
+      expect(changeLanguage).toHaveBeenCalledWith('fr');
+      expect(updatePreferences).toHaveBeenCalledWith({ language: 'fr' });
+      expect(notificationsShow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message:
+            'Language applied but could not be saved. It may revert on next login.',
+          color: 'orange',
+        })
+      );
+    });
+
+    test('does not show a notification when the backend save succeeds', async () => {
+      updatePreferences.mockResolvedValueOnce({ language: 'fr' });
+      const user = userEvent.setup();
+
+      render(<LanguageSwitcher />);
+      const select = screen.getByRole('textbox', { name: 'Select language' });
+
+      await user.click(select);
+      const frOption = await screen.findByRole('option', {
+        name: 'Français',
+        hidden: true,
+      });
+      await user.click(frOption);
+
+      expect(updatePreferences).toHaveBeenCalledWith({ language: 'fr' });
+      expect(notificationsShow).not.toHaveBeenCalled();
     });
   });
 });

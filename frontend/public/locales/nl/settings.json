@@ -66,6 +66,9 @@
       "title": "Datumnotatie",
       "ymd": "JJJJ-MM-DD (ISO)"
     },
+    "language": {
+      "saveError": "Taal toegepast maar kon niet worden opgeslagen. Het kan terugkeren bij de volgende aanmelding."
+    },
     "sessionTimeout": {
       "description": "Stel de duur van inactiviteit in voordat uw sessie verloopt (in minuten)",
       "range": "minuten (5-1440)",

@@ -66,6 +66,9 @@
       "title": "Datumformat",
       "ymd": "ÅÅÅÅ-MM-DD (ISO)"
     },
+    "language": {
+      "saveError": "Språket tillämpades men kunde inte sparas. Det kan återställas vid nästa inloggning."
+    },
     "sessionTimeout": {
       "description": "Ange varaktigheten för inaktivitet innan din session går ut (i minuter)",
       "range": "minuter (5-1440)",

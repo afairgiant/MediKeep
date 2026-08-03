@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import logger from '../../services/logger';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 
@@ -8,6 +9,7 @@ interface LanguageSwitcherProps {
   compact?: boolean;
   variant?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  comboboxWithinPortal?: boolean;
 }
 
 interface Language {
@@ -57,8 +59,9 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   compact = false,
   variant = 'default',
   size = 'sm',
+  comboboxWithinPortal = true,
 }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation('settings');
   const { updatePreferences } = useUserPreferences();
 
   // Track if a change is in progress to prevent race conditions
@@ -116,7 +119,6 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             }
           );
         } catch (backendError) {
-          // Log but don't fail - language is already changed locally
           logger.error(
             'language_backend_save_failed',
             'Failed to save language to backend',
@@ -129,6 +131,14 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                   : 'Unknown error',
             }
           );
+          notifications.show({
+            message: t(
+              'preferences.language.saveError',
+              'Language applied but could not be saved. It may revert on next login.'
+            ),
+            color: 'orange',
+            autoClose: 6000,
+          });
         }
       } catch (error) {
         // Revert local state on failure
@@ -143,7 +153,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         isChangingRef.current = false;
       }
     },
-    [selectedLanguage, i18n, updatePreferences]
+    [selectedLanguage, i18n, t, updatePreferences]
   );
 
   const selectData = LANGUAGES.map(lang => ({
@@ -164,7 +174,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           cursor: 'pointer',
         },
       }}
-      comboboxProps={{ withinPortal: true, zIndex: 1100 }}
+      comboboxProps={{ withinPortal: comboboxWithinPortal, zIndex: 1100 }}
       allowDeselect={false}
       aria-label="Select language"
     />

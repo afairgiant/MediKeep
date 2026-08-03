@@ -66,6 +66,9 @@
       "title": "Date Format",
       "ymd": "YYYY-MM-DD (ISO)"
     },
+    "language": {
+      "saveError": "Language applied but could not be saved. It may revert on next login."
+    },
     "sessionTimeout": {
       "description": "Set the duration of inactivity before your session expires (in minutes)",
       "range": "minutes (5-1440)",

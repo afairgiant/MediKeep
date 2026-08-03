@@ -66,6 +66,9 @@
       "title": "Format daty",
       "ymd": "YYYY-MM-DD (ISO)"
     },
+    "language": {
+      "saveError": "Język zastosowany, ale nie można go było zapisać. Może się przywrócić przy następnym logowaniu."
+    },
     "sessionTimeout": {
       "description": "Ustaw czas bezczynności przed wygaśnięciem sesji (w minutach)",
       "range": "minuty (5-1440)",

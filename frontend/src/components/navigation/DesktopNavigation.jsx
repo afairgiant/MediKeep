@@ -136,10 +136,10 @@ const DesktopNavigation = ({ user: _user, isAdmin, onLogout }) => {
               {t('shared:labels.settings', 'Settings')}
             </Menu.Item>
 
-            <Menu.Item closeMenuOnClick={false}>
+            <Menu.Item component="div" closeMenuOnClick={false}>
               <div className="theme-toggle-menu-item">
                 <span>{t('sidebarNav.items.language', 'Language')}</span>
-                <LanguageSwitcher size="xs" />
+                <LanguageSwitcher size="xs" comboboxWithinPortal={false} />
               </div>
             </Menu.Item>
 
