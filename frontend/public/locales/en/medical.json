@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "Reaction Details"
     },
-    "viewMedication": "View medication details"
+    "viewMedication": "View medication details",
+    "filters": {
+      "sort": {
+        "severity": "Severity",
+        "allergen": "Allergen",
+        "onsetDate": "Onset Date"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "Failed to load test catalog",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "Current status of this condition"
+    },
+    "filters": {
+      "status": {
+        "all": "All Statuses",
+        "active": "Active",
+        "resolved": "Resolved",
+        "chronic": "Chronic",
+        "inactive": "Inactive"
+      },
+      "sort": {
+        "onsetDate": "Onset Date",
+        "diagnosis": "Diagnosis",
+        "status": "Status"
+      }
     }
   },
   "emergencyContacts": {
@@ -971,6 +992,28 @@
       "description": "Known or experienced side effects of this medication",
       "label": "Side Effects",
       "placeholder": "List any known or experienced side effects..."
+    },
+    "filters": {
+      "status": {
+        "all": "All Statuses",
+        "active": "Active",
+        "completed": "Completed",
+        "stopped": "Stopped",
+        "onHold": "On Hold"
+      },
+      "dateRange": {
+        "all": "All Time Periods",
+        "current": "Currently Active",
+        "past": "Past Medications",
+        "future": "Future Medications"
+      },
+      "sort": {
+        "active": "Status (Active First)",
+        "medicationName": "Medication Name",
+        "startDate": "Start Date",
+        "prescriber": "Prescriber",
+        "pharmacy": "Pharmacy"
+      }
     }
   },
   "pharmacies": {
@@ -1207,6 +1250,22 @@
     },
     "status": {
       "description": "Current status of the procedure"
+    },
+    "filters": {
+      "status": {
+        "all": "All Statuses",
+        "scheduled": "Scheduled",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "postponed": "Postponed",
+        "cancelled": "Cancelled"
+      },
+      "sort": {
+        "date": "Procedure Date",
+        "procedureName": "Procedure Name",
+        "status": "Status",
+        "practitioner": "Practitioner"
+      }
     }
   },
   "symptoms": {
@@ -1443,6 +1502,22 @@
         "surgery": "Surgery - Surgical procedure"
       },
       "placeholder": "Select type"
+    },
+    "filters": {
+      "status": {
+        "all": "All Statuses",
+        "active": "Active",
+        "completed": "Completed",
+        "planned": "Planned",
+        "onHold": "On Hold",
+        "cancelled": "Cancelled"
+      },
+      "sort": {
+        "startDate": "Start Date",
+        "treatmentName": "Treatment Name",
+        "status": "Status",
+        "practitioner": "Practitioner"
+      }
     }
   },
   "visits": {

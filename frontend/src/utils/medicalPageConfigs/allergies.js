@@ -22,9 +22,12 @@ export const allergiesPageConfig = {
     defaultSortBy: 'severity',
     defaultSortOrder: 'desc',
     sortOptions: [
-      { value: 'severity', label: 'Severity' },
-      { value: 'allergen', label: 'Allergen' },
-      { value: 'onset_date', label: 'Onset Date' },
+      { value: 'severity', label: 'medical:allergies.filters.sort.severity' },
+      { value: 'allergen', label: 'medical:allergies.filters.sort.allergen' },
+      {
+        value: 'onset_date',
+        label: 'medical:allergies.filters.sort.onsetDate',
+      },
     ],
     sortTypes: {
       severity: 'severity',

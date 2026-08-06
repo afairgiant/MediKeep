@@ -52,6 +52,8 @@ function MedicalPageFilters({ dataManagement, config }) {
     resultOptions,
     typeOptions,
     filesOptions,
+    practitionerOptions,
+    pharmacyOptions,
     sortOptions,
     sortBy,
     sortOrder,
@@ -75,6 +77,8 @@ function MedicalPageFilters({ dataManagement, config }) {
       resultOptions={resultOptions}
       typeOptions={typeOptions}
       filesOptions={filesOptions}
+      practitionerOptions={practitionerOptions}
+      pharmacyOptions={pharmacyOptions}
       sortOptions={sortOptions}
       sortBy={sortBy}
       sortOrder={sortOrder}
@@ -102,6 +106,8 @@ MedicalPageFilters.propTypes = {
     resultOptions: PropTypes.array,
     typeOptions: PropTypes.array,
     filesOptions: PropTypes.array,
+    practitionerOptions: PropTypes.array,
+    pharmacyOptions: PropTypes.array,
     sortOptions: PropTypes.array,
     sortBy: PropTypes.string,
     sortOrder: PropTypes.string,

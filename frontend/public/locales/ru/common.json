@@ -302,7 +302,58 @@
     "clear": "Очистить",
     "itemCount": "{{filtered}} из {{total}} записей",
     "title": "Фильтры и поиск",
-    "toggle": "Toggle filters"
+    "toggle": "Toggle filters",
+    "defaults": {
+      "all": "Все",
+      "completedDate": {
+        "all": "Все даты завершения"
+      },
+      "dateRange": {
+        "all": "За всё время",
+        "lastYear": "Последний год",
+        "month": "В этом месяце",
+        "pastYear": "Последние 12 месяцев",
+        "today": "Сегодня",
+        "week": "На этой неделе",
+        "year": "В этом году"
+      },
+      "files": {
+        "all": "Все записи"
+      },
+      "medicationType": {
+        "all": "Все типы"
+      },
+      "orderedDate": {
+        "all": "Все даты назначения"
+      },
+      "result": {
+        "all": "Все результаты"
+      },
+      "status": {
+        "active": "Активный",
+        "all": "Все статусы",
+        "inactive": "Неактивный"
+      },
+      "type": {
+        "all": "Все типы"
+      }
+    },
+    "placeholders": {
+      "category": "Категория",
+      "completedDate": "Дата завершения",
+      "dateRange": "Диапазон дат",
+      "files": "Файлы",
+      "medicationType": "Тип препарата",
+      "orderedDate": "Дата назначения",
+      "pharmacy": "Аптека",
+      "prescriber": "Назначивший врач",
+      "priority": "Приоритет",
+      "results": "Результаты",
+      "sortBy": "Сортировать по",
+      "status": "Статус"
+    },
+    "sortAscending": "А-Я",
+    "sortDescending": "Я-А"
   },
   "immunizations": {
     "addImmunization": "Добавить прививку",

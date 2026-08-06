@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -115,8 +115,21 @@ const Procedures = () => {
   // Get standardized configuration
   const config = getMedicalPageConfig('procedures');
 
+  // Enrich with practitioner display name *before* filtering and sorting, so
+  // the Advanced Filters dropdown and Sort dropdown/table-header sort can
+  // match on that name instead of only the underlying practitioner_id.
+  const proceduresWithNames = useMemo(() => {
+    return procedures.map(procedure => ({
+      ...procedure,
+      practitioner_name:
+        procedure.practitioner?.name ||
+        practitioners.find(p => p.id === procedure.practitioner_id)?.name ||
+        '',
+    }));
+  }, [procedures, practitioners]);
+
   // Use standardized data management
-  const dataManagement = useDataManagement(procedures, config);
+  const dataManagement = useDataManagement(proceduresWithNames, config);
 
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
@@ -464,9 +477,11 @@ const Procedures = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
-                persistKey="procedures"
                 data={paginatedProcedures}
                 pagination={false}
+                sortBy={dataManagement.sortBy}
+                sortDirection={dataManagement.sortOrder}
+                onSort={dataManagement.handleSortChange}
                 disableEdit={isViewOnly}
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}

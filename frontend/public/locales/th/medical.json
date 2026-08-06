@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "รายละเอียดปฏิกิริยาแพ้"
     },
-    "viewMedication": "ดูรายละเอียดยา"
+    "viewMedication": "ดูรายละเอียดยา",
+    "filters": {
+      "sort": {
+        "severity": "ความรุนแรง",
+        "allergen": "สารก่อภูมิแพ้",
+        "onsetDate": "วันที่เริ่มต้น"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "ไม่สามารถโหลดรายการผลตรวจได้",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "สถานะปัจจุบันของโรคนี้"
+    },
+    "filters": {
+      "status": {
+        "all": "สถานะทั้งหมด",
+        "active": "ใช้งานอยู่",
+        "resolved": "หายแล้ว",
+        "chronic": "เรื้อรัง",
+        "inactive": "ไม่ใช้งาน"
+      },
+      "sort": {
+        "onsetDate": "วันที่เริ่มต้น",
+        "diagnosis": "การวินิจฉัย",
+        "status": "สถานะ"
+      }
     }
   },
   "emergencyContacts": {
@@ -959,6 +980,28 @@
         "sat": "ส",
         "sun": "อา"
       }
+    },
+    "filters": {
+      "status": {
+        "all": "สถานะทั้งหมด",
+        "active": "ใช้งานอยู่",
+        "completed": "เสร็จสิ้น",
+        "stopped": "หยุด",
+        "onHold": "พักการดำเนินการ"
+      },
+      "dateRange": {
+        "all": "ทุกช่วงเวลา",
+        "current": "ที่ใช้งานอยู่ในปัจจุบัน",
+        "past": "ยาในอดีต",
+        "future": "ยาในอนาคต"
+      },
+      "sort": {
+        "active": "สถานะ (ใช้งานอยู่ก่อน)",
+        "medicationName": "ชื่อยา",
+        "startDate": "วันที่เริ่มต้น",
+        "prescriber": "แพทย์ผู้สั่งยา",
+        "pharmacy": "ร้านขายยา"
+      }
     }
   },
   "pharmacies": {
@@ -1195,6 +1238,22 @@
     },
     "status": {
       "description": "สถานะปัจจุบันของการผ่าตัด"
+    },
+    "filters": {
+      "status": {
+        "all": "สถานะทั้งหมด",
+        "scheduled": "นัดหมายแล้ว",
+        "inProgress": "กำลังดำเนินการ",
+        "completed": "เสร็จสิ้น",
+        "postponed": "เลื่อนแล้ว",
+        "cancelled": "ยกเลิกแล้ว"
+      },
+      "sort": {
+        "date": "วันที่ผ่าตัด",
+        "procedureName": "ชื่อการผ่าตัด",
+        "status": "สถานะ",
+        "practitioner": "แพทย์/บุคลากร"
+      }
     }
   },
   "symptoms": {
@@ -1431,6 +1490,22 @@
         "surgery": "ศัลยกรรม - การผ่าตัด"
       },
       "placeholder": "เลือกประเภท"
+    },
+    "filters": {
+      "status": {
+        "all": "สถานะทั้งหมด",
+        "active": "ใช้งานอยู่",
+        "completed": "เสร็จสิ้น",
+        "planned": "วางแผนแล้ว",
+        "onHold": "พักการดำเนินการ",
+        "cancelled": "ยกเลิกแล้ว"
+      },
+      "sort": {
+        "startDate": "วันที่เริ่มต้น",
+        "treatmentName": "ชื่อการรักษา",
+        "status": "สถานะ",
+        "practitioner": "แพทย์/บุคลากร"
+      }
     }
   },
   "visits": {

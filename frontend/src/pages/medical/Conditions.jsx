@@ -606,9 +606,11 @@ const Conditions = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
-                persistKey="conditions"
                 data={paginatedConditions}
                 pagination={false}
+                sortBy={dataManagement.sortBy}
+                sortDirection={dataManagement.sortOrder}
+                onSort={dataManagement.handleSortChange}
                 disableEdit={isViewOnly}
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}

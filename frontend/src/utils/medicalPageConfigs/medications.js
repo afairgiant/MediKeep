@@ -9,14 +9,29 @@ import {
 
 export const medicationsPageConfig = {
   filtering: {
-    searchFields: ['medication_name', 'indication', 'dosage'],
+    searchFields: [
+      'medication_name',
+      'indication',
+      'dosage',
+      'practitioner_name',
+      'pharmacy_name',
+    ],
     statusField: 'status',
     statusOptions: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'active', label: 'Active' },
-      { value: 'completed', label: 'Completed' },
-      { value: 'stopped', label: 'Stopped' },
-      { value: 'on-hold', label: 'On Hold' },
+      { value: 'all', label: 'medical:medications.filters.status.all' },
+      { value: 'active', label: 'medical:medications.filters.status.active' },
+      {
+        value: 'completed',
+        label: 'medical:medications.filters.status.completed',
+      },
+      {
+        value: 'stopped',
+        label: 'medical:medications.filters.status.stopped',
+      },
+      {
+        value: 'on-hold',
+        label: 'medical:medications.filters.status.onHold',
+      },
     ],
     medicationTypeField: 'medication_type',
     medicationTypeOptions: [
@@ -28,23 +43,47 @@ export const medicationsPageConfig = {
     ],
     categoryField: 'route',
     categoryLabel: 'Routes',
+    practitionerField: 'practitioner_name',
+    practitionerLabel: 'Prescribers',
+    pharmacyField: 'pharmacy_name',
+    pharmacyLabel: 'Pharmacies',
     dateField: 'effective_period_start',
     startDateField: 'effective_period_start',
     endDateField: 'effective_period_end',
     dateRangeOptions: [
-      { value: 'all', label: 'All Time Periods' },
-      { value: 'current', label: 'Currently Active' },
-      { value: 'past', label: 'Past Medications' },
-      { value: 'future', label: 'Future Medications' },
+      { value: 'all', label: 'medical:medications.filters.dateRange.all' },
+      {
+        value: 'current',
+        label: 'medical:medications.filters.dateRange.current',
+      },
+      { value: 'past', label: 'medical:medications.filters.dateRange.past' },
+      {
+        value: 'future',
+        label: 'medical:medications.filters.dateRange.future',
+      },
     ],
   },
   sorting: {
     defaultSortBy: 'active',
     defaultSortOrder: 'desc',
     sortOptions: [
-      { value: 'active', label: 'Status (Active First)' },
-      { value: 'medication_name', label: 'Medication Name' },
-      { value: 'effective_period_start', label: 'Start Date' },
+      { value: 'active', label: 'medical:medications.filters.sort.active' },
+      {
+        value: 'medication_name',
+        label: 'medical:medications.filters.sort.medicationName',
+      },
+      {
+        value: 'effective_period_start',
+        label: 'medical:medications.filters.sort.startDate',
+      },
+      {
+        value: 'practitioner_name',
+        label: 'medical:medications.filters.sort.prescriber',
+      },
+      {
+        value: 'pharmacy_name',
+        label: 'medical:medications.filters.sort.pharmacy',
+      },
     ],
     customSortFunctions: {
       active: (a, b, sortOrder) => {
@@ -68,8 +107,13 @@ export const medicationsPageConfig = {
   filterControls: {
     searchPlaceholder: 'searchPlaceholders.medications',
     title: 'Filter & Sort Medications',
-    showMedicationType: true,
+    // Medication type already has a dedicated, always-visible Quick Filter
+    // row (with counts) above the filter bar — showing it again here would
+    // just be the same dataManagement.filters.medicationType state twice.
+    showMedicationType: false,
     showCategory: true,
+    showPractitioner: true,
+    showPharmacy: true,
     showDateRange: true,
   },
 };

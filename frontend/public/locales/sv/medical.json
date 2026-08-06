@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "Reaktionsdetaljer"
     },
-    "viewMedication": "Visa läkemedelsdetaljer"
+    "viewMedication": "Visa läkemedelsdetaljer",
+    "filters": {
+      "sort": {
+        "allergen": "Allergen",
+        "onsetDate": "Startdatum",
+        "severity": "Allvarlighetsgrad"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "Kunde inte ladda testkatalog",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "Aktuell status för detta tillstånd"
+    },
+    "filters": {
+      "sort": {
+        "diagnosis": "Diagnos",
+        "onsetDate": "Startdatum",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Aktiv",
+        "all": "Alla statusar",
+        "chronic": "Kronisk",
+        "inactive": "Inaktiv",
+        "resolved": "Löst"
+      }
     }
   },
   "emergencyContacts": {
@@ -971,6 +992,28 @@
       "description": "Kända eller upplevda biverkningar av detta läkemedel",
       "label": "Biverkningar",
       "placeholder": "Lista kända eller upplevda biverkningar..."
+    },
+    "filters": {
+      "dateRange": {
+        "all": "Alla perioder",
+        "current": "För närvarande aktiv",
+        "future": "Framtida läkemedel",
+        "past": "Tidigare läkemedel"
+      },
+      "sort": {
+        "active": "Status (Aktiva först)",
+        "medicationName": "Läkemedelsnamn",
+        "pharmacy": "Apotek",
+        "prescriber": "Förskrivare",
+        "startDate": "Startdatum"
+      },
+      "status": {
+        "active": "Aktiv",
+        "all": "Alla statusar",
+        "completed": "Slutförd",
+        "onHold": "Pausad",
+        "stopped": "Avslutad"
+      }
     }
   },
   "pharmacies": {
@@ -1207,6 +1250,22 @@
     },
     "status": {
       "description": "Aktuell status för ingreppet"
+    },
+    "filters": {
+      "sort": {
+        "date": "Ingreppsdatum",
+        "practitioner": "Vårdpersonal",
+        "procedureName": "Ingreppets namn",
+        "status": "Status"
+      },
+      "status": {
+        "all": "Alla statusar",
+        "cancelled": "Avbokad",
+        "completed": "Slutförd",
+        "inProgress": "Pågående",
+        "postponed": "Uppskjuten",
+        "scheduled": "Schemalagd"
+      }
     }
   },
   "symptoms": {
@@ -1443,6 +1502,22 @@
         "surgery": "Kirurgi - Kirurgiskt ingrepp"
       },
       "placeholder": "Välj typ"
+    },
+    "filters": {
+      "sort": {
+        "practitioner": "Vårdpersonal",
+        "startDate": "Startdatum",
+        "status": "Status",
+        "treatmentName": "Behandlingsnamn"
+      },
+      "status": {
+        "active": "Aktiv",
+        "all": "Alla statusar",
+        "cancelled": "Avbokad",
+        "completed": "Slutförd",
+        "onHold": "Pausad",
+        "planned": "Planerad"
+      }
     }
   },
   "visits": {

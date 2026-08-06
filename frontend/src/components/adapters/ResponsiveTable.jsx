@@ -141,9 +141,14 @@ export const ResponsiveTable = memo(
     // so an API returning null would otherwise crash at data.length below.
     data = data ?? [];
 
+    // When a parent supplies onSort, it owns the sort state (e.g. shares it
+    // with a filter-bar sort dropdown) — the table just reflects sortBy/
+    // sortDirection props instead of tracking its own local state.
+    const isControlled = typeof onSort === 'function';
+
     // Restore persisted sort state from localStorage when persistKey is provided
     const persistedSort = useMemo(() => {
-      if (!persistKey) return null;
+      if (isControlled || !persistKey) return null;
       try {
         const stored = localStorage.getItem(`medikeep_sort_${persistKey}`);
         if (stored) {
@@ -162,18 +167,26 @@ export const ResponsiveTable = memo(
       return null;
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Only read on mount
-    const [internalSortBy, setInternalSortBy] = useState(
+    const [uncontrolledSortBy, setUncontrolledSortBy] = useState(
       persistedSort?.sortBy ?? sortBy
     );
-    const [internalSortDirection, setInternalSortDirection] = useState(
+    const [uncontrolledSortDirection, setUncontrolledSortDirection] = useState(
       persistedSort?.sortDirection ?? sortDirection
     );
+
+    // Single source of truth for the active sort, whichever mode we're in.
+    const internalSortBy = isControlled ? sortBy : uncontrolledSortBy;
+    const internalSortDirection = isControlled
+      ? sortDirection
+      : uncontrolledSortDirection;
 
     const tableRef = useRef(null);
     const strategyRef = useRef(new TableLayoutStrategy());
 
-    // Persist sort state to localStorage when it changes
+    // Persist sort state to localStorage when it changes (uncontrolled only —
+    // a controlled parent owns persistence if it wants any)
     useEffect(() => {
+      if (isControlled) return;
       if (persistKey) {
         try {
           if (internalSortBy) {
@@ -191,7 +204,7 @@ export const ResponsiveTable = memo(
           // Storage full or unavailable - silently ignore
         }
       }
-    }, [persistKey, internalSortBy, internalSortDirection]);
+    }, [isControlled, persistKey, internalSortBy, internalSortDirection]);
 
     // Component logging context
     const componentContext = useMemo(
@@ -347,8 +360,10 @@ export const ResponsiveTable = memo(
             ? 'desc'
             : 'asc';
 
-        setInternalSortBy(columnKey);
-        setInternalSortDirection(newDirection);
+        if (!isControlled) {
+          setUncontrolledSortBy(columnKey);
+          setUncontrolledSortDirection(newDirection);
+        }
 
         // Removed frequent sort logging for performance
 
@@ -356,7 +371,7 @@ export const ResponsiveTable = memo(
           onSort(columnKey, newDirection);
         }
       },
-      [sortable, internalSortBy, internalSortDirection, onSort]
+      [sortable, internalSortBy, internalSortDirection, isControlled, onSort]
     );
 
     // Handle row selection

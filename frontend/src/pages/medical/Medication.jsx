@@ -59,6 +59,12 @@ import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithU
 import logger from '../../services/logger';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
+// The "active" sort field (sort dropdown's "Status (Active First)" option)
+// groups by status, so a click on the table's Status column should reuse it
+// rather than falling back to a plain alphabetical status sort.
+const SORT_FIELD_TO_COLUMN = { active: 'status' };
+const COLUMN_TO_SORT_FIELD = { status: 'active' };
+
 const Medication = () => {
   const { t } = useTranslation(['common', 'medical', 'shared']);
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
@@ -152,8 +158,29 @@ const Medication = () => {
   // Get standardized configuration
   const config = getMedicalPageConfig('medications');
 
+  // Enrich with practitioner/pharmacy display names *before* filtering and
+  // sorting, so the global search box and Sort dropdown/table-header sort
+  // can match on those names instead of only the underlying *_id fields.
+  const medicationsWithNames = useMemo(() => {
+    return medications.map(medication => ({
+      ...medication,
+      // Prefer the nested practitioner/pharmacy object the API already
+      // returns (MedicationResponseWithNested) before falling back to an
+      // ID lookup against the separately-fetched practitioners/pharmacies
+      // lists, so the name isn't blank while those lists are still loading.
+      practitioner_name:
+        medication.practitioner?.name ||
+        practitioners.find(p => p.id === medication.practitioner_id)?.name ||
+        '',
+      pharmacy_name:
+        medication.pharmacy?.name ||
+        pharmacies.find(p => p.id === medication.pharmacy_id)?.name ||
+        '',
+    }));
+  }, [medications, practitioners, pharmacies]);
+
   // Use standardized data management
-  const dataManagement = useDataManagement(medications, config);
+  const dataManagement = useDataManagement(medicationsWithNames, config);
 
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
@@ -532,23 +559,25 @@ const Medication = () => {
     ]
   );
 
-  // Get processed data from data management and add practitioner/pharmacy names for sorting
-  const processedMedications = useMemo(() => {
-    return dataManagement.data.map(medication => ({
-      ...medication,
-      // Add practitioner name for sorting
-      practitioner_name: medication.practitioner_id
-        ? practitioners.find(p => p.id === medication.practitioner_id)?.name ||
-          ''
-        : '',
-      // Add pharmacy name for sorting
-      pharmacy_name: medication.pharmacy_id
-        ? pharmacies.find(p => p.id === medication.pharmacy_id)?.name || ''
-        : '',
-    }));
-  }, [dataManagement.data, practitioners, pharmacies]);
+  // dataManagement.data is already filtered, sorted, and name-enriched.
+  const processedMedications = dataManagement.data;
 
   const paginatedMedications = paginateData(processedMedications);
+
+  // Share sort state between the filter bar's Sort dropdown and the table's
+  // clickable column headers instead of letting the table sort its own
+  // (page-local, disconnected) copy.
+  const tableSortBy =
+    SORT_FIELD_TO_COLUMN[dataManagement.sortBy] ?? dataManagement.sortBy;
+
+  const handleTableSort = useCallback(
+    columnKey => {
+      dataManagement.handleSortChange(
+        COLUMN_TO_SORT_FIELD[columnKey] ?? columnKey
+      );
+    },
+    [dataManagement]
+  );
 
   useEffect(() => {
     resetPage();
@@ -790,9 +819,11 @@ const Medication = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
-                persistKey="medications"
                 data={paginatedMedications}
                 pagination={false}
+                sortBy={tableSortBy}
+                sortDirection={dataManagement.sortOrder}
+                onSort={handleTableSort}
                 disableEdit={isViewOnly}
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}

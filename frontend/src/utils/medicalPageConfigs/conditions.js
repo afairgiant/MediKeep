@@ -7,11 +7,17 @@ export const conditionsPageConfig = {
     searchFields: ['diagnosis', 'notes'],
     statusField: 'status',
     statusOptions: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'active', label: 'Active' },
-      { value: 'resolved', label: 'Resolved' },
-      { value: 'chronic', label: 'Chronic' },
-      { value: 'inactive', label: 'Inactive' },
+      { value: 'all', label: 'medical:conditions.filters.status.all' },
+      { value: 'active', label: 'medical:conditions.filters.status.active' },
+      {
+        value: 'resolved',
+        label: 'medical:conditions.filters.status.resolved',
+      },
+      { value: 'chronic', label: 'medical:conditions.filters.status.chronic' },
+      {
+        value: 'inactive',
+        label: 'medical:conditions.filters.status.inactive',
+      },
     ],
     dateField: 'onset_date',
   },
@@ -19,9 +25,15 @@ export const conditionsPageConfig = {
     defaultSortBy: 'onset_date',
     defaultSortOrder: 'desc',
     sortOptions: [
-      { value: 'onset_date', label: 'Onset Date' },
-      { value: 'diagnosis', label: 'Diagnosis' },
-      { value: 'status', label: 'Status' },
+      {
+        value: 'onset_date',
+        label: 'medical:conditions.filters.sort.onsetDate',
+      },
+      {
+        value: 'diagnosis',
+        label: 'medical:conditions.filters.sort.diagnosis',
+      },
+      { value: 'status', label: 'medical:conditions.filters.sort.status' },
     ],
     sortTypes: {
       onset_date: 'date',

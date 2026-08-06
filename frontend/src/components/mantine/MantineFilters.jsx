@@ -38,6 +38,8 @@ const MantineFilters = ({
   resultOptions,
   typeOptions,
   filesOptions,
+  practitionerOptions,
+  pharmacyOptions,
   sortOptions,
   sortBy,
   sortOrder,
@@ -58,6 +60,8 @@ const MantineFilters = ({
     showResult = false,
     showType = false,
     showFiles = false,
+    showPractitioner = false,
+    showPharmacy = false,
     showSearch = true,
   } = config;
 
@@ -142,6 +146,8 @@ const MantineFilters = ({
     showResult && resultOptions?.length > 1,
     showType && typeOptions?.length > 1,
     showFiles && filesOptions?.length > 1,
+    showPractitioner && practitionerOptions?.length > 1,
+    showPharmacy && pharmacyOptions?.length > 1,
     sortOptions?.length > 1,
   ].filter(Boolean).length;
 
@@ -299,12 +305,12 @@ const MantineFilters = ({
                 {/* Status Filter */}
                 {showStatus && statusOptions && statusOptions.length > 1 && (
                   <Select
-                    placeholder="Status"
+                    placeholder={t('filters.placeholders.status', 'Status')}
                     value={filters.status}
                     onChange={value => updateFilter('status', value || 'all')}
                     data={statusOptions.map(option => ({
                       value: option.value,
-                      label: option.label,
+                      label: t(option.label, option.label),
                     }))}
                     clearable={true}
                     style={{ minWidth: '120px', flex: '0 1 150px' }}
@@ -316,14 +322,17 @@ const MantineFilters = ({
                   medicationTypeOptions &&
                   medicationTypeOptions.length > 1 && (
                     <Select
-                      placeholder="Medication Type"
+                      placeholder={t(
+                        'filters.placeholders.medicationType',
+                        'Medication Type'
+                      )}
                       value={filters.medicationType}
                       onChange={value =>
                         updateFilter('medicationType', value || 'all')
                       }
                       data={medicationTypeOptions.map(option => ({
                         value: option.value,
-                        label: option.label,
+                        label: t(option.label, option.label),
                       }))}
                       clearable={true}
                       style={{ minWidth: '140px', flex: '0 1 160px' }}
@@ -331,11 +340,17 @@ const MantineFilters = ({
                   )}
 
                 {/* Category Filter */}
+                {/* Not translated: categoryOptions is often built at runtime
+                    from real data (e.g. route names), so its labels can't be
+                    safely treated as translation keys — see TECHNICAL_DEBT.md */}
                 {showCategory &&
                   categoryOptions &&
                   categoryOptions.length > 1 && (
                     <Select
-                      placeholder="Category"
+                      placeholder={t(
+                        'filters.placeholders.category',
+                        'Category'
+                      )}
                       value={filters.category}
                       onChange={value =>
                         updateFilter('category', value || 'all')
@@ -349,19 +364,72 @@ const MantineFilters = ({
                     />
                   )}
 
+                {/* Practitioner Filter */}
+                {/* Not translated: practitionerOptions is built at runtime
+                    from real prescriber names — see TECHNICAL_DEBT.md */}
+                {showPractitioner &&
+                  practitionerOptions &&
+                  practitionerOptions.length > 1 && (
+                    <Select
+                      placeholder={t(
+                        'filters.placeholders.prescriber',
+                        'Prescriber'
+                      )}
+                      value={filters.practitioner}
+                      onChange={value =>
+                        updateFilter('practitioner', value || 'all')
+                      }
+                      data={practitionerOptions.map(option => ({
+                        value: option.value,
+                        label: option.label,
+                      }))}
+                      clearable={true}
+                      searchable
+                      style={{ minWidth: '140px', flex: '0 1 170px' }}
+                    />
+                  )}
+
+                {/* Pharmacy Filter */}
+                {/* Not translated: pharmacyOptions is built at runtime
+                    from real pharmacy names — see TECHNICAL_DEBT.md */}
+                {showPharmacy &&
+                  pharmacyOptions &&
+                  pharmacyOptions.length > 1 && (
+                    <Select
+                      placeholder={t(
+                        'filters.placeholders.pharmacy',
+                        'Pharmacy'
+                      )}
+                      value={filters.pharmacy}
+                      onChange={value =>
+                        updateFilter('pharmacy', value || 'all')
+                      }
+                      data={pharmacyOptions.map(option => ({
+                        value: option.value,
+                        label: option.label,
+                      }))}
+                      clearable={true}
+                      searchable
+                      style={{ minWidth: '140px', flex: '0 1 170px' }}
+                    />
+                  )}
+
                 {/* Date Range Filter */}
                 {showDateRange &&
                   dateRangeOptions &&
                   dateRangeOptions.length > 1 && (
                     <Select
-                      placeholder="Date Range"
+                      placeholder={t(
+                        'filters.placeholders.dateRange',
+                        'Date Range'
+                      )}
                       value={filters.dateRange}
                       onChange={value =>
                         updateFilter('dateRange', value || 'all')
                       }
                       data={dateRangeOptions.map(option => ({
                         value: option.value,
-                        label: option.label,
+                        label: t(option.label, option.label),
                       }))}
                       clearable={true}
                       style={{ minWidth: '120px', flex: '0 1 150px' }}
@@ -373,14 +441,17 @@ const MantineFilters = ({
                   orderedDateOptions &&
                   orderedDateOptions.length > 1 && (
                     <Select
-                      placeholder="Ordered Date"
+                      placeholder={t(
+                        'filters.placeholders.orderedDate',
+                        'Ordered Date'
+                      )}
                       value={filters.orderedDate}
                       onChange={value =>
                         updateFilter('orderedDate', value || 'all')
                       }
                       data={orderedDateOptions.map(option => ({
                         value: option.value,
-                        label: option.label,
+                        label: t(option.label, option.label),
                       }))}
                       clearable={true}
                       style={{ minWidth: '140px', flex: '0 1 160px' }}
@@ -392,14 +463,17 @@ const MantineFilters = ({
                   completedDateOptions &&
                   completedDateOptions.length > 1 && (
                     <Select
-                      placeholder="Completed Date"
+                      placeholder={t(
+                        'filters.placeholders.completedDate',
+                        'Completed Date'
+                      )}
                       value={filters.completedDate}
                       onChange={value =>
                         updateFilter('completedDate', value || 'all')
                       }
                       data={completedDateOptions.map(option => ({
                         value: option.value,
-                        label: option.label,
+                        label: t(option.label, option.label),
                       }))}
                       clearable={true}
                       style={{ minWidth: '140px', flex: '0 1 160px' }}
@@ -409,12 +483,12 @@ const MantineFilters = ({
                 {/* Result Filter */}
                 {showResult && resultOptions && resultOptions.length > 1 && (
                   <Select
-                    placeholder="Results"
+                    placeholder={t('filters.placeholders.results', 'Results')}
                     value={filters.result}
                     onChange={value => updateFilter('result', value || 'all')}
                     data={resultOptions.map(option => ({
                       value: option.value,
-                      label: option.label,
+                      label: t(option.label, option.label),
                     }))}
                     clearable={true}
                     style={{ minWidth: '120px', flex: '0 1 150px' }}
@@ -424,12 +498,12 @@ const MantineFilters = ({
                 {/* Type Filter */}
                 {showType && typeOptions && typeOptions.length > 1 && (
                   <Select
-                    placeholder="Priority"
+                    placeholder={t('filters.placeholders.priority', 'Priority')}
                     value={filters.type}
                     onChange={value => updateFilter('type', value || 'all')}
                     data={typeOptions.map(option => ({
                       value: option.value,
-                      label: option.label,
+                      label: t(option.label, option.label),
                     }))}
                     clearable={true}
                     style={{ minWidth: '120px', flex: '0 1 150px' }}
@@ -439,12 +513,12 @@ const MantineFilters = ({
                 {/* Files Filter */}
                 {showFiles && filesOptions && filesOptions.length > 1 && (
                   <Select
-                    placeholder="Files"
+                    placeholder={t('filters.placeholders.files', 'Files')}
                     value={filters.files}
                     onChange={value => updateFilter('files', value || 'all')}
                     data={filesOptions.map(option => ({
                       value: option.value,
-                      label: option.label,
+                      label: t(option.label, option.label),
                     }))}
                     clearable={true}
                     style={{ minWidth: '120px', flex: '0 1 150px' }}
@@ -476,12 +550,12 @@ const MantineFilters = ({
                       {t('search.sortBy')}
                     </Text>
                     <Select
-                      placeholder="Sort by"
+                      placeholder={t('filters.placeholders.sortBy', 'Sort by')}
                       value={sortBy}
                       onChange={value => handleSortChange(value)}
                       data={sortOptions.map(option => ({
                         value: option.value,
-                        label: option.label,
+                        label: t(option.label, option.label),
                       }))}
                       style={{ minWidth: '140px', flex: '0 1 160px' }}
                     />
@@ -498,7 +572,9 @@ const MantineFilters = ({
                       }
                       style={{ flex: '0 0 auto' }}
                     >
-                      {sortOrder === 'asc' ? 'A-Z' : 'Z-A'}
+                      {sortOrder === 'asc'
+                        ? t('filters.sortAscending', 'A-Z')
+                        : t('filters.sortDescending', 'Z-A')}
                     </Button>
                   </>
                 )}

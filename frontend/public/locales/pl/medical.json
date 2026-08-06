@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "Szczegóły reakcji"
     },
-    "viewMedication": "Wyświetl szczegóły leku"
+    "viewMedication": "Wyświetl szczegóły leku",
+    "filters": {
+      "sort": {
+        "allergen": "Alergen",
+        "onsetDate": "Data rozpoczęcia",
+        "severity": "Nasilenie"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "Nie udało się załadować katalogu badań",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "Aktualny status tego schorzenia"
+    },
+    "filters": {
+      "sort": {
+        "diagnosis": "Diagnoza",
+        "onsetDate": "Data rozpoczęcia",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Aktywny",
+        "all": "Wszystkie statusy",
+        "chronic": "Przewlekłe",
+        "inactive": "Nieaktywny",
+        "resolved": "Rozwiązane"
+      }
     }
   },
   "emergencyContacts": {
@@ -971,6 +992,28 @@
       "description": "Znane lub doświadczane skutki uboczne tego leku",
       "label": "Działania niepożądane",
       "placeholder": "Wymień znane lub doświadczane działania niepożądane..."
+    },
+    "filters": {
+      "dateRange": {
+        "all": "Wszystkie okresy",
+        "current": "Obecnie aktywne",
+        "future": "Przyszłe leki",
+        "past": "Poprzednie leki"
+      },
+      "sort": {
+        "active": "Status (najpierw aktywne)",
+        "medicationName": "Nazwa leku",
+        "pharmacy": "Apteka",
+        "prescriber": "Lekarz przepisujący",
+        "startDate": "Data rozpoczęcia"
+      },
+      "status": {
+        "active": "Aktywny",
+        "all": "Wszystkie statusy",
+        "completed": "Zakończone",
+        "onHold": "Wstrzymany",
+        "stopped": "Zatrzymany"
+      }
     }
   },
   "pharmacies": {
@@ -1207,6 +1250,22 @@
     },
     "status": {
       "description": "Aktualny status zabiegu"
+    },
+    "filters": {
+      "sort": {
+        "date": "Data zabiegu",
+        "practitioner": "Lekarz",
+        "procedureName": "Nazwa zabiegu",
+        "status": "Status"
+      },
+      "status": {
+        "all": "Wszystkie statusy",
+        "cancelled": "Anulowany",
+        "completed": "Zakończone",
+        "inProgress": "W trakcie",
+        "postponed": "Odroczony",
+        "scheduled": "Zaplanowany"
+      }
     }
   },
   "symptoms": {
@@ -1443,6 +1502,22 @@
         "surgery": "Chirurgia - Zabieg chirurgiczny"
       },
       "placeholder": "Wybierz typ"
+    },
+    "filters": {
+      "sort": {
+        "practitioner": "Lekarz",
+        "startDate": "Data rozpoczęcia",
+        "status": "Status",
+        "treatmentName": "Nazwa leczenia"
+      },
+      "status": {
+        "active": "Aktywny",
+        "all": "Wszystkie statusy",
+        "cancelled": "Anulowany",
+        "completed": "Zakończone",
+        "onHold": "Wstrzymany",
+        "planned": "Zaplanowany"
+      }
     }
   },
   "visits": {

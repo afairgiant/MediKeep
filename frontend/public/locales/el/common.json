@@ -302,7 +302,58 @@
     "clear": "Καθαρισμός",
     "itemCount": "{{filtered}} από {{total}} στοιχεία",
     "title": "Φίλτρα & Αναζήτηση",
-    "toggle": "Εναλλαγή φίλτρων"
+    "toggle": "Εναλλαγή φίλτρων",
+    "defaults": {
+      "all": "Όλα",
+      "completedDate": {
+        "all": "Όλες οι Ημερομηνίες Ολοκλήρωσης"
+      },
+      "dateRange": {
+        "all": "Όλες οι περίοδοι",
+        "lastYear": "Τελευταίο έτος",
+        "month": "Αυτόν τον Μήνα",
+        "pastYear": "Τελευταίοι 12 Μήνες",
+        "today": "Σήμερα",
+        "week": "Αυτή την Εβδομάδα",
+        "year": "Αυτό το Έτος"
+      },
+      "files": {
+        "all": "Όλα τα Αρχεία"
+      },
+      "medicationType": {
+        "all": "Όλοι οι Τύποι"
+      },
+      "orderedDate": {
+        "all": "Όλες οι Ημερομηνίες Παραγγελίας"
+      },
+      "result": {
+        "all": "Όλα τα Αποτελέσματα"
+      },
+      "status": {
+        "active": "Ενεργό",
+        "all": "Όλες οι Καταστάσεις",
+        "inactive": "Ανενεργό"
+      },
+      "type": {
+        "all": "Όλοι οι Τύποι"
+      }
+    },
+    "placeholders": {
+      "category": "Κατηγορία",
+      "completedDate": "Ημερομηνία Ολοκλήρωσης",
+      "dateRange": "Εύρος Ημερομηνιών",
+      "files": "Αρχεία",
+      "medicationType": "Τύπος Φαρμάκου",
+      "orderedDate": "Ημερομηνία Παραγγελίας",
+      "pharmacy": "Φαρμακείο",
+      "prescriber": "Συνταγογράφος",
+      "priority": "Προτεραιότητα",
+      "results": "Αποτελέσματα",
+      "sortBy": "Ταξινόμηση κατά",
+      "status": "Κατάσταση"
+    },
+    "sortAscending": "Α-Ω",
+    "sortDescending": "Ω-Α"
   },
   "immunizations": {
     "addImmunization": "Προσθήκη Νέου Εμβολιασμού",

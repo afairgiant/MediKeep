@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Universal filtering hook for medical data
@@ -7,6 +8,7 @@ import { useState, useMemo, useCallback } from 'react';
  * @returns {Object} - Filtered data and filter controls
  */
 export const useFiltering = (data = [], config = {}) => {
+  const { t } = useTranslation('common');
   const [filters, setFilters] = useState({
     search: '',
     status: 'all',
@@ -18,6 +20,8 @@ export const useFiltering = (data = [], config = {}) => {
     type: 'all',
     files: 'all',
     medicationType: 'all',
+    practitioner: 'all',
+    pharmacy: 'all',
     ...config.initialFilters,
   });
 
@@ -26,11 +30,16 @@ export const useFiltering = (data = [], config = {}) => {
     return config.searchFields || ['name'];
   }, [config.searchFields]);
 
-  // Status options
+  // Status options — page-specific statusOptions are supplied as translation
+  // keys already (see medicalPageConfigs/*.js); this fallback covers pages
+  // that don't override it, so it's translated directly here.
   const statusOptions = config.statusOptions || [
-    { value: 'all', label: 'All Statuses' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
+    { value: 'all', label: t('filters.defaults.status.all', 'All Statuses') },
+    { value: 'active', label: t('filters.defaults.status.active', 'Active') },
+    {
+      value: 'inactive',
+      label: t('filters.defaults.status.inactive', 'Inactive'),
+    },
   ];
 
   // Category options (dynamic from data or static config)
@@ -52,53 +61,134 @@ export const useFiltering = (data = [], config = {}) => {
       ];
     }
 
-    return [{ value: 'all', label: 'All' }];
+    return [{ value: 'all', label: t('filters.defaults.all', 'All') }];
   }, [
     data,
     config.categoryField,
     config.categoryOptions,
     config.categoryLabel,
+    t,
+  ]);
+
+  // Practitioner options (dynamic from data, mirrors categoryOptions)
+  const practitionerOptions = useMemo(() => {
+    if (config.practitionerOptions) {
+      return config.practitionerOptions;
+    }
+
+    if (config.practitionerField && Array.isArray(data) && data.length > 0) {
+      const uniquePractitioners = [
+        ...new Set(
+          data.map(item => item[config.practitionerField]).filter(Boolean)
+        ),
+      ].sort();
+
+      return [
+        {
+          value: 'all',
+          label: `All ${config.practitionerLabel || 'Prescribers'}`,
+        },
+        ...uniquePractitioners.map(name => ({ value: name, label: name })),
+      ];
+    }
+
+    return [{ value: 'all', label: t('filters.defaults.all', 'All') }];
+  }, [
+    data,
+    config.practitionerField,
+    config.practitionerOptions,
+    config.practitionerLabel,
+    t,
+  ]);
+
+  // Pharmacy options (dynamic from data, mirrors categoryOptions)
+  const pharmacyOptions = useMemo(() => {
+    if (config.pharmacyOptions) {
+      return config.pharmacyOptions;
+    }
+
+    if (config.pharmacyField && Array.isArray(data) && data.length > 0) {
+      const uniquePharmacies = [
+        ...new Set(
+          data.map(item => item[config.pharmacyField]).filter(Boolean)
+        ),
+      ].sort();
+
+      return [
+        { value: 'all', label: `All ${config.pharmacyLabel || 'Pharmacies'}` },
+        ...uniquePharmacies.map(name => ({ value: name, label: name })),
+      ];
+    }
+
+    return [{ value: 'all', label: t('filters.defaults.all', 'All') }];
+  }, [
+    data,
+    config.pharmacyField,
+    config.pharmacyOptions,
+    config.pharmacyLabel,
+    t,
   ]);
 
   // Date range options
   const dateRangeOptions = config.dateRangeOptions || [
-    { value: 'all', label: 'All Time' },
-    { value: 'today', label: 'Today' },
-    { value: 'week', label: 'This Week' },
-    { value: 'month', label: 'This Month' },
-    { value: 'year', label: 'This Year' },
-    { value: 'past_year', label: 'Past 12 Months' },
-    { value: 'last_year', label: 'Last Year' },
+    { value: 'all', label: t('filters.defaults.dateRange.all', 'All Time') },
+    { value: 'today', label: t('filters.defaults.dateRange.today', 'Today') },
+    {
+      value: 'week',
+      label: t('filters.defaults.dateRange.week', 'This Week'),
+    },
+    {
+      value: 'month',
+      label: t('filters.defaults.dateRange.month', 'This Month'),
+    },
+    { value: 'year', label: t('filters.defaults.dateRange.year', 'This Year') },
+    {
+      value: 'past_year',
+      label: t('filters.defaults.dateRange.pastYear', 'Past 12 Months'),
+    },
+    {
+      value: 'last_year',
+      label: t('filters.defaults.dateRange.lastYear', 'Last Year'),
+    },
   ];
 
   // Result options (for lab results)
   const resultOptions = config.resultOptions || [
-    { value: 'all', label: 'All Results' },
+    { value: 'all', label: t('filters.defaults.result.all', 'All Results') },
   ];
 
   // Type options (for test types/priorities)
   const typeOptions = config.typeOptions || [
-    { value: 'all', label: 'All Types' },
+    { value: 'all', label: t('filters.defaults.type.all', 'All Types') },
   ];
 
   // Files options (for file attachments)
   const filesOptions = config.filesOptions || [
-    { value: 'all', label: 'All Records' },
+    { value: 'all', label: t('filters.defaults.files.all', 'All Records') },
   ];
 
   // Medication type options
   const medicationTypeOptions = config.medicationTypeOptions || [
-    { value: 'all', label: 'All Types' },
+    {
+      value: 'all',
+      label: t('filters.defaults.medicationType.all', 'All Types'),
+    },
   ];
 
   // Ordered date options
   const orderedDateOptions = config.orderedDateOptions || [
-    { value: 'all', label: 'All Ordered Dates' },
+    {
+      value: 'all',
+      label: t('filters.defaults.orderedDate.all', 'All Ordered Dates'),
+    },
   ];
 
   // Completed date options
   const completedDateOptions = config.completedDateOptions || [
-    { value: 'all', label: 'All Completed Dates' },
+    {
+      value: 'all',
+      label: t('filters.defaults.completedDate.all', 'All Completed Dates'),
+    },
   ];
 
   // Helper function to get nested object values
@@ -391,6 +481,17 @@ export const useFiltering = (data = [], config = {}) => {
           return false;
       }
 
+      // Practitioner filter
+      if (filters.practitioner !== 'all' && config.practitionerField) {
+        if (item[config.practitionerField] !== filters.practitioner)
+          return false;
+      }
+
+      // Pharmacy filter
+      if (filters.pharmacy !== 'all' && config.pharmacyField) {
+        if (item[config.pharmacyField] !== filters.pharmacy) return false;
+      }
+
       // Date range filter
       if (filters.dateRange !== 'all' && config.dateField) {
         if (!matchesDateRange(item[config.dateField], filters.dateRange, item))
@@ -455,6 +556,8 @@ export const useFiltering = (data = [], config = {}) => {
       type: 'all',
       files: 'all',
       medicationType: 'all',
+      practitioner: 'all',
+      pharmacy: 'all',
       ...config.initialFilters,
     });
   }, [config.initialFilters]);
@@ -484,6 +587,8 @@ export const useFiltering = (data = [], config = {}) => {
     typeOptions,
     filesOptions,
     medicationTypeOptions,
+    practitionerOptions,
+    pharmacyOptions,
     totalCount: Array.isArray(data) ? data.length : 0,
     filteredCount: filteredData.length,
   };

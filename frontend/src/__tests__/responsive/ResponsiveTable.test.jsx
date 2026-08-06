@@ -344,7 +344,11 @@ describe('ResponsiveTable Component Tests', () => {
       const user = userEvent.setup();
       const mockOnSort = vi.fn();
 
-      renderResponsive(
+      // With onSort supplied, ResponsiveTable is a controlled component:
+      // it reflects the sortBy/sortDirection props rather than tracking its
+      // own state, so the parent must feed the new values back in (as a
+      // real caller wiring onSort to shared sort state would).
+      const { rerender } = renderResponsive(
         <ResponsiveTable {...sortableProps} onSort={mockOnSort} />,
         { viewport: TEST_VIEWPORTS.desktop }
       );
@@ -358,6 +362,15 @@ describe('ResponsiveTable Component Tests', () => {
       await waitFor(() => {
         expect(mockOnSort).toHaveBeenCalledWith('medication_name', 'asc');
       });
+
+      rerender(
+        <ResponsiveTable
+          {...sortableProps}
+          sortBy="medication_name"
+          sortDirection="asc"
+          onSort={mockOnSort}
+        />
+      );
 
       // Click again to reverse sort
       await user.click(medicationHeader);
