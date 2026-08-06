@@ -43,6 +43,7 @@ class TestClassifyUrl:
             "http://10.0.0.5:5432",
             "http://192.168.1.10:9000",
             "http://172.18.0.2:8080",  # docker default range
+            "http://100.64.0.1:8000",  # CGNAT shared address space (not routable)
         ],
     )
     def test_private_and_loopback_are_internal(self, url):
@@ -79,6 +80,16 @@ class TestValidateNoSsrf:
 
     def test_public_allowed(self):
         validate_no_ssrf("https://8.8.8.8", allow_private=False)
+
+    def test_shared_cgnat_blocked_when_not_allowed(self):
+        # 100.64.0.0/10 is not globally routable -> treated as internal and
+        # blocked when private addresses are not allowed
+        with pytest.raises(ValueError) as exc:
+            validate_no_ssrf("http://100.64.0.1:8000", allow_private=False)
+        assert str(exc.value) == PRIVATE_URL_ERROR
+
+    def test_shared_cgnat_allowed_when_allowed(self):
+        validate_no_ssrf("http://100.64.0.1:8000", allow_private=True)
 
     def test_unresolved_rejected_by_default(self):
         # Fail closed: an unresolvable host is indeterminate, not "allowed"

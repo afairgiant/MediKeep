@@ -65,9 +65,12 @@ def _ip_always_blocked(ip: _IpAddress) -> bool:
 
 
 def _ip_is_internal(ip: _IpAddress) -> bool:
-    """Private/loopback ranges: legitimate for self-hosted setups, blocked only
-    when private integration URLs are not allowed."""
-    return ip.is_private or ip.is_loopback
+    """Any address that is not globally routable - private and loopback ranges
+    but also shared CGNAT space (100.64.0.0/10), benchmarking, and documentation
+    ranges. Legitimate for self-hosted setups but blocked when private
+    integration URLs are not allowed. (Link-local/metadata is handled earlier by
+    _ip_always_blocked and always blocked regardless of this.)"""
+    return not ip.is_global
 
 
 def _resolve_ips(url: str) -> Optional[List[_IpAddress]]:
