@@ -508,10 +508,12 @@ async def upload_entity_file(
                 detail=f"{entity_type.title()} not found",
             )
 
-        # Verify user has access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
-            deps.verify_patient_access(entity_patient_id, db, current_user)
+            deps.verify_patient_access(
+                entity_patient_id, db, current_user, required_permission="edit"
+            )
 
         # Validate file type and size
         if not file.filename:
@@ -627,10 +629,12 @@ async def link_paperless_document(
                 detail=f"{entity_type.title()} not found",
             )
 
-        # Verify user has access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
-            deps.verify_patient_access(entity_patient_id, db, current_user)
+            deps.verify_patient_access(
+                entity_patient_id, db, current_user, required_permission="edit"
+            )
 
         # Get user's Paperless preferences
         user_prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
@@ -873,10 +877,12 @@ async def link_papra_document(
                 detail=f"{entity_type.title()} not found",
             )
 
-        # Verify user has access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
-            deps.verify_patient_access(entity_patient_id, db, current_user)
+            deps.verify_patient_access(
+                entity_patient_id, db, current_user, required_permission="edit"
+            )
 
         # Get user's Papra preferences
         user_prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
@@ -1340,10 +1346,12 @@ async def delete_file(
         )
         handle_not_found(parent_entity, file_record.entity_type)
 
-        # Verify user has access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
-            deps.verify_patient_access(entity_patient_id, db, current_user)
+            deps.verify_patient_access(
+                entity_patient_id, db, current_user, required_permission="edit"
+            )
 
         # Delete the file
         result = await file_service.delete_file(db, file_id, current_user_id)
@@ -1369,7 +1377,7 @@ async def delete_file(
 
         return result
 
-    except HTTPException:
+    except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
         raise HTTPException(
@@ -1411,10 +1419,12 @@ def update_file_metadata(
         )
         handle_not_found(parent_entity, original_file.entity_type)
 
-        # Verify user has access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity
         entity_patient_id = getattr(parent_entity, "patient_id", None)
         if entity_patient_id:
-            deps.verify_patient_access(entity_patient_id, db, current_user)
+            deps.verify_patient_access(
+                entity_patient_id, db, current_user, required_permission="edit"
+            )
 
         # Update metadata
         result = file_service.update_file_metadata(
@@ -1445,7 +1455,7 @@ def update_file_metadata(
 
         return result
 
-    except HTTPException:
+    except (HTTPException, NotFoundException, MedicalRecordsAPIException):
         raise
     except Exception as e:
         raise HTTPException(

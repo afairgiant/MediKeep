@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
 from app.crud.lab_result import lab_result as lab_result_crud
+from app.models.models import PatientShare
 from app.schemas.patient import PatientCreate
 from app.schemas.lab_result import LabResultCreate
 from tests.utils.user import create_random_user, create_user_token_headers
@@ -375,8 +376,9 @@ class TestEntityFileAPI:
         response = client.delete(
             f"/api/v1/entity-files/files/{file_id}", headers=headers2
         )
-        # API may return 404 or 500 for unauthorized file deletion
-        assert response.status_code in [404, 500]
+        # Unauthorized deletion is now rejected with 403 (404/500 tolerated for
+        # legacy error-handling paths)
+        assert response.status_code in [403, 404, 500]
 
     def test_get_files_requires_authentication(self, client: TestClient):
         """Test that getting files requires authentication."""
@@ -625,6 +627,180 @@ class TestEntityFileAPI:
                 file1_data["id"] != file2_data["id"]
                 or file1_data["file_name"] != file2_data["file_name"]
             )
+
+
+class TestEntityFileSharePermissions:
+    """Regression tests for GHSA-6r48.
+
+    A patient record shared at 'view' level must be read-only: the recipient
+    may read/download files but must NOT be able to upload, delete, or edit
+    file metadata. Previously the write endpoints called verify_patient_access
+    without required_permission, silently defaulting to 'view', which let a
+    view-only recipient mutate the owner's files.
+    """
+
+    def _setup_share(self, db_session, permission_level):
+        """Create an owner (with a lab result + uploaded file) and a recipient
+        who has the owner's patient shared at the given permission level.
+
+        Returns a dict with owner/recipient headers, the lab_result id, the
+        uploaded file id, and the PatientShare row (so tests can flip its
+        permission level).
+        """
+        # Owner with a patient and a lab result
+        owner_data = create_random_user(db_session)
+        owner_patient = patient_crud.create_for_user(
+            db_session,
+            user_id=owner_data["user"].id,
+            patient_data=PatientCreate(
+                first_name="Owner",
+                last_name="User",
+                birth_date=date(1985, 5, 5),
+                gender="M",
+            ),
+        )
+        owner_data["user"].active_patient_id = owner_patient.id
+        db_session.commit()
+        db_session.refresh(owner_data["user"])
+        owner_headers = create_user_token_headers(owner_data["user"].username)
+
+        lab_result = lab_result_crud.create(
+            db_session,
+            obj_in=LabResultCreate(
+                test_name="Shared Panel",
+                completed_date=date.today(),
+                status="completed",
+                patient_id=owner_patient.id,
+            ),
+        )
+
+        # Recipient with their own (unrelated) patient
+        recipient_data = create_random_user(db_session)
+        recipient_patient = patient_crud.create_for_user(
+            db_session,
+            user_id=recipient_data["user"].id,
+            patient_data=PatientCreate(
+                first_name="Recipient",
+                last_name="User",
+                birth_date=date(1990, 2, 2),
+                gender="F",
+            ),
+        )
+        recipient_data["user"].active_patient_id = recipient_patient.id
+        db_session.commit()
+        db_session.refresh(recipient_data["user"])
+        recipient_headers = create_user_token_headers(recipient_data["user"].username)
+
+        # Owner shares the patient with the recipient at the given level
+        share = PatientShare(
+            patient_id=owner_patient.id,
+            shared_by_user_id=owner_data["user"].id,
+            shared_with_user_id=recipient_data["user"].id,
+            permission_level=permission_level,
+            is_active=True,
+        )
+        db_session.add(share)
+        db_session.commit()
+        db_session.refresh(share)
+
+        return {
+            "db_session": db_session,
+            "owner_headers": owner_headers,
+            "recipient_headers": recipient_headers,
+            "lab_result_id": lab_result.id,
+            "share": share,
+        }
+
+    def _upload_as_owner(self, client, ctx, name="owned.txt"):
+        files = {"file": (name, io.BytesIO(b"owner file content"), "text/plain")}
+        resp = client.post(
+            f"/api/v1/entity-files/lab-result/{ctx['lab_result_id']}/files",
+            headers=ctx["owner_headers"],
+            files=files,
+        )
+        assert resp.status_code == 201
+        return resp.json()["id"]
+
+    def test_view_share_cannot_upload(self, client: TestClient, db_session: Session):
+        ctx = self._setup_share(db_session, "view")
+        files = {"file": ("evil.txt", io.BytesIO(b"evil"), "text/plain")}
+        resp = client.post(
+            f"/api/v1/entity-files/lab-result/{ctx['lab_result_id']}/files",
+            headers=ctx["recipient_headers"],
+            files=files,
+        )
+        assert resp.status_code == 403
+
+    def test_view_share_cannot_delete(self, client: TestClient, db_session: Session):
+        ctx = self._setup_share(db_session, "view")
+        file_id = self._upload_as_owner(client, ctx)
+        resp = client.delete(
+            f"/api/v1/entity-files/files/{file_id}",
+            headers=ctx["recipient_headers"],
+        )
+        assert resp.status_code == 403
+
+    def test_view_share_cannot_update_metadata(
+        self, client: TestClient, db_session: Session
+    ):
+        ctx = self._setup_share(db_session, "view")
+        file_id = self._upload_as_owner(client, ctx)
+        resp = client.put(
+            f"/api/v1/entity-files/files/{file_id}/metadata",
+            headers=ctx["recipient_headers"],
+            data={"description": "tampered by view-only user"},
+        )
+        assert resp.status_code == 403
+
+    def test_view_share_can_still_read_and_download(
+        self, client: TestClient, db_session: Session
+    ):
+        """View access must remain read/download-capable (no regression)."""
+        ctx = self._setup_share(db_session, "view")
+        file_id = self._upload_as_owner(client, ctx)
+
+        details = client.get(
+            f"/api/v1/entity-files/files/{file_id}",
+            headers=ctx["recipient_headers"],
+        )
+        assert details.status_code == 200
+
+        download = client.get(
+            f"/api/v1/entity-files/files/{file_id}/download",
+            headers=ctx["recipient_headers"],
+        )
+        assert download.status_code == 200
+
+    def test_edit_share_can_upload_update_delete(
+        self, client: TestClient, db_session: Session
+    ):
+        """An 'edit' share retains full file-management ability."""
+        ctx = self._setup_share(db_session, "edit")
+
+        # Upload
+        files = {"file": ("edited.txt", io.BytesIO(b"edit content"), "text/plain")}
+        upload = client.post(
+            f"/api/v1/entity-files/lab-result/{ctx['lab_result_id']}/files",
+            headers=ctx["recipient_headers"],
+            files=files,
+        )
+        assert upload.status_code == 201
+        file_id = upload.json()["id"]
+
+        # Update metadata
+        update = client.put(
+            f"/api/v1/entity-files/files/{file_id}/metadata",
+            headers=ctx["recipient_headers"],
+            data={"description": "legit edit"},
+        )
+        assert update.status_code == 200
+
+        # Delete
+        delete = client.delete(
+            f"/api/v1/entity-files/files/{file_id}",
+            headers=ctx["recipient_headers"],
+        )
+        assert delete.status_code == 200
 
 
 class TestEntityFileSupportedTypes:
