@@ -2337,7 +2337,7 @@
       ],
       "is_common": false,
       "result_type": "quantitative",
-      "display_order": 160
+      "display_order": 159
     },
     {
       "test_name": "Alpha-2 Globulin",
@@ -2434,7 +2434,6 @@
         "Neuts Band #"
       ],
       "is_common": false,
-
       "result_type": "quantitative",
       "display_order": 166
     },
