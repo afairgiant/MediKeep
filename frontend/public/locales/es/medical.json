@@ -994,11 +994,20 @@
       "placeholder": "Enumere cualquier efecto secundario conocido o experimentado..."
     },
     "filters": {
+      "category": {
+        "all": "Todas las Vías"
+      },
       "dateRange": {
         "all": "Todos los períodos",
         "current": "Actualmente activo",
         "future": "Medicamentos futuros",
         "past": "Medicamentos anteriores"
+      },
+      "pharmacy": {
+        "all": "Todas las Farmacias"
+      },
+      "practitioner": {
+        "all": "Todos los Prescriptores"
       },
       "sort": {
         "active": "Estado (Activos primero)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Profesional",
         "procedureName": "Nombre del Procedimiento",
         "status": "Estado"
+      },
+      "practitioner": {
+        "all": "Todos los profesionales"
       },
       "status": {
         "all": "Todos los estados",

@@ -302,7 +302,7 @@
     "clear": "Rensa",
     "itemCount": "{{filtered}} av {{total}} objekt",
     "title": "Filter och sök",
-    "toggle": "Toggle filters",
+    "toggle": "Växla filter",
     "defaults": {
       "all": "Alla",
       "completedDate": {

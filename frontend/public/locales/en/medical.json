@@ -1013,6 +1013,15 @@
         "startDate": "Start Date",
         "prescriber": "Prescriber",
         "pharmacy": "Pharmacy"
+      },
+      "category": {
+        "all": "All Routes"
+      },
+      "practitioner": {
+        "all": "All Prescribers"
+      },
+      "pharmacy": {
+        "all": "All Pharmacies"
       }
     }
   },
@@ -1265,6 +1274,9 @@
         "procedureName": "Procedure Name",
         "status": "Status",
         "practitioner": "Practitioner"
+      },
+      "practitioner": {
+        "all": "All Practitioners"
       }
     }
   },

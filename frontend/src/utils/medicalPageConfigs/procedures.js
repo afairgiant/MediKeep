@@ -38,7 +38,7 @@ export const proceduresPageConfig = {
     startDateField: 'date',
     endDateField: 'date',
     practitionerField: 'practitioner_name',
-    practitionerLabel: 'Practitioners',
+    practitionerLabel: 'medical:procedures.filters.practitioner.all',
   },
   sorting: {
     defaultSortBy: 'date',

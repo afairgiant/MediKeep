@@ -994,11 +994,20 @@
       "placeholder": "Liste os efeitos colaterais conhecidos ou relatados..."
     },
     "filters": {
+      "category": {
+        "all": "Todas as Vias de Administração"
+      },
       "dateRange": {
         "all": "Todos os Períodos",
         "current": "Atualmente ativo",
         "future": "Medicamentos Futuros",
         "past": "Medicamentos Anteriores"
+      },
+      "pharmacy": {
+        "all": "Todas as Farmácias"
+      },
+      "practitioner": {
+        "all": "Todos os Prescritores"
       },
       "sort": {
         "active": "Status (Ativos Primeiro)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Profissional",
         "procedureName": "Nome do Procedimento",
         "status": "Status"
+      },
+      "practitioner": {
+        "all": "Todos os Profissionais"
       },
       "status": {
         "all": "Todos os Status",

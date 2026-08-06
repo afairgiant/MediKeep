@@ -302,7 +302,7 @@
     "clear": "Wissen",
     "itemCount": "{{filtered}} van {{total}} items",
     "title": "Filters en zoeken",
-    "toggle": "Toggle filters",
+    "toggle": "Filters in-/uitklappen",
     "defaults": {
       "all": "Alle",
       "completedDate": {

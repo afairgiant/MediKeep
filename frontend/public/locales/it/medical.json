@@ -994,11 +994,20 @@
       "placeholder": "Elenchi gli effetti collaterali noti o sperimentati..."
     },
     "filters": {
+      "category": {
+        "all": "Tutte le vie di somministrazione"
+      },
       "dateRange": {
         "all": "Tutti i periodi",
         "current": "Attualmente attivo",
         "future": "Farmaci futuri",
         "past": "Farmaci passati"
+      },
+      "pharmacy": {
+        "all": "Tutte le Farmacie"
+      },
+      "practitioner": {
+        "all": "Tutti i Prescrittori"
       },
       "sort": {
         "active": "Stato (Attivi per primi)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Professionista",
         "procedureName": "Nome della procedura",
         "status": "Stato"
+      },
+      "practitioner": {
+        "all": "Tutti i professionisti"
       },
       "status": {
         "all": "Tutti gli stati",

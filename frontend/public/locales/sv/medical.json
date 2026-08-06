@@ -994,11 +994,20 @@
       "placeholder": "Lista kända eller upplevda biverkningar..."
     },
     "filters": {
+      "category": {
+        "all": "Alla administreringsvägar"
+      },
       "dateRange": {
         "all": "Alla perioder",
         "current": "För närvarande aktiv",
         "future": "Framtida läkemedel",
         "past": "Tidigare läkemedel"
+      },
+      "pharmacy": {
+        "all": "Alla apotek"
+      },
+      "practitioner": {
+        "all": "Alla förskrivare"
       },
       "sort": {
         "active": "Status (Aktiva först)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Vårdpersonal",
         "procedureName": "Ingreppets namn",
         "status": "Status"
+      },
+      "practitioner": {
+        "all": "All vårdpersonal"
       },
       "status": {
         "all": "Alla statusar",

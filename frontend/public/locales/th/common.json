@@ -293,6 +293,7 @@
     "clear": "ล้าง",
     "itemCount": "{{filtered}} จาก {{total}} รายการ",
     "title": "ฟิลเตอร์และค้นหา",
+    "toggle": "สลับฟิลเตอร์",
     "placeholders": {
       "status": "สถานะ",
       "medicationType": "ประเภทยา",

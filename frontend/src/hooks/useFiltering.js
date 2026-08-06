@@ -56,7 +56,12 @@ export const useFiltering = (data = [], config = {}) => {
       ].sort();
 
       return [
-        { value: 'all', label: `All ${config.categoryLabel || 'Categories'}` },
+        {
+          value: 'all',
+          label: config.categoryLabel
+            ? t(config.categoryLabel, `All ${config.categoryLabel}`)
+            : t('filters.defaults.all', 'All'),
+        },
         ...uniqueCategories.map(cat => ({ value: cat, label: cat })),
       ];
     }
@@ -86,7 +91,9 @@ export const useFiltering = (data = [], config = {}) => {
       return [
         {
           value: 'all',
-          label: `All ${config.practitionerLabel || 'Prescribers'}`,
+          label: config.practitionerLabel
+            ? t(config.practitionerLabel, `All ${config.practitionerLabel}`)
+            : t('filters.defaults.all', 'All'),
         },
         ...uniquePractitioners.map(name => ({ value: name, label: name })),
       ];
@@ -115,7 +122,12 @@ export const useFiltering = (data = [], config = {}) => {
       ].sort();
 
       return [
-        { value: 'all', label: `All ${config.pharmacyLabel || 'Pharmacies'}` },
+        {
+          value: 'all',
+          label: config.pharmacyLabel
+            ? t(config.pharmacyLabel, `All ${config.pharmacyLabel}`)
+            : t('filters.defaults.all', 'All'),
+        },
         ...uniquePharmacies.map(name => ({ value: name, label: name })),
       ];
     }

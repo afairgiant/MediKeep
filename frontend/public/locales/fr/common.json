@@ -302,7 +302,7 @@
     "clear": "Effacer",
     "itemCount": "{{filtered}} sur {{total}} objets",
     "title": "Filtres et recherche",
-    "toggle": "Toggle filters",
+    "toggle": "Basculer les filtres",
     "defaults": {
       "all": "Tous",
       "completedDate": {

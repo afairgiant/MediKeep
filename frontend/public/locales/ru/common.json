@@ -302,7 +302,7 @@
     "clear": "Очистить",
     "itemCount": "{{filtered}} из {{total}} записей",
     "title": "Фильтры и поиск",
-    "toggle": "Toggle filters",
+    "toggle": "Переключить фильтры",
     "defaults": {
       "all": "Все",
       "completedDate": {

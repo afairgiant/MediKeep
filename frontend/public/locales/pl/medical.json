@@ -994,11 +994,20 @@
       "placeholder": "Wymień znane lub doświadczane działania niepożądane..."
     },
     "filters": {
+      "category": {
+        "all": "Wszystkie drogi podania"
+      },
       "dateRange": {
         "all": "Wszystkie okresy",
         "current": "Obecnie aktywne",
         "future": "Przyszłe leki",
         "past": "Poprzednie leki"
+      },
+      "pharmacy": {
+        "all": "Wszystkie apteki"
+      },
+      "practitioner": {
+        "all": "Wszyscy lekarze przepisujący"
       },
       "sort": {
         "active": "Status (najpierw aktywne)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Lekarz",
         "procedureName": "Nazwa zabiegu",
         "status": "Status"
+      },
+      "practitioner": {
+        "all": "Wszyscy lekarze"
       },
       "status": {
         "all": "Wszystkie statusy",

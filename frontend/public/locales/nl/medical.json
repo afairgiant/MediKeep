@@ -994,11 +994,20 @@
       "placeholder": "Vermeld bekende of ondervonden bijwerkingen..."
     },
     "filters": {
+      "category": {
+        "all": "Alle toedieningswegen"
+      },
       "dateRange": {
         "all": "Alle periodes",
         "current": "Momenteel actief",
         "future": "Toekomstige medicatie",
         "past": "Eerdere medicatie"
+      },
+      "pharmacy": {
+        "all": "Alle Apotheken"
+      },
+      "practitioner": {
+        "all": "Alle Voorschrijvers"
       },
       "sort": {
         "active": "Status (Actief eerst)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Zorgverlener",
         "procedureName": "Naam ingreep",
         "status": "Status"
+      },
+      "practitioner": {
+        "all": "Alle zorgverleners"
       },
       "status": {
         "all": "Alle statussen",

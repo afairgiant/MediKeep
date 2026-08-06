@@ -994,11 +994,20 @@
       "placeholder": "Bekannte oder erfahrene Nebenwirkungen auflisten..."
     },
     "filters": {
+      "category": {
+        "all": "Alle Applikationswege"
+      },
       "dateRange": {
         "all": "Alle Zeiträume",
         "current": "Aktuell aktiv",
         "future": "Zukünftige Medikamente",
         "past": "Vergangene Medikamente"
+      },
+      "pharmacy": {
+        "all": "Alle Apotheken"
+      },
+      "practitioner": {
+        "all": "Alle Verordner"
       },
       "sort": {
         "active": "Status (Aktiv zuerst)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Arzt",
         "procedureName": "Eingriffsname",
         "status": "Status"
+      },
+      "practitioner": {
+        "all": "Alle Ärzte"
       },
       "status": {
         "all": "Alle Status",

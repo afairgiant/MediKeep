@@ -994,11 +994,20 @@
       "placeholder": "Listez tout effet indésirable connu ou observé..."
     },
     "filters": {
+      "category": {
+        "all": "Toutes les voies d'administration"
+      },
       "dateRange": {
         "all": "Toutes les périodes",
         "current": "Actuellement actif",
         "future": "Médicaments futurs",
         "past": "Médicaments passés"
+      },
+      "pharmacy": {
+        "all": "Toutes les Pharmacies"
+      },
+      "practitioner": {
+        "all": "Tous les Prescripteurs"
       },
       "sort": {
         "active": "Statut (Actifs en premier)",
@@ -1257,6 +1266,9 @@
         "practitioner": "Médecin",
         "procedureName": "Nom de la procédure",
         "status": "Statut"
+      },
+      "practitioner": {
+        "all": "Tous les médecins"
       },
       "status": {
         "all": "Tous les statuts",

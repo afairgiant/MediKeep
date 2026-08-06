@@ -1009,6 +1009,15 @@
         "startDate": "开始日期",
         "prescriber": "开方医师",
         "pharmacy": "药房"
+      },
+      "category": {
+        "all": "所有给药途径"
+      },
+      "practitioner": {
+        "all": "所有开方医师"
+      },
+      "pharmacy": {
+        "all": "所有药房"
       }
     }
   },
@@ -1261,6 +1270,9 @@
         "procedureName": "操作名称",
         "status": "状态",
         "practitioner": "医师"
+      },
+      "practitioner": {
+        "all": "所有医师"
       }
     }
   },

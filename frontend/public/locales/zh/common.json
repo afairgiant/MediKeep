@@ -302,7 +302,7 @@
     "clear": "清除",
     "itemCount": "{{total}}项中的{{filtered}}项",
     "title": "筛选和搜索",
-    "toggle": "Toggle filters",
+    "toggle": "切换筛选",
     "placeholders": {
       "status": "状态",
       "medicationType": "药物类型",
