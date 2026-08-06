@@ -210,6 +210,19 @@ class Settings:  # App Info
         os.getenv("ALLOW_USER_REGISTRATION", "True").lower() == "true"
     )  # Default: enabled to avoid lockout scenarios
 
+    # Integration URL SSRF Control
+    # Controls whether user-configured integration URLs (Paperless/Papra) may
+    # target private/loopback addresses (RFC1918 10/172.16/192.168, 127.x).
+    # Defaults to True because MediKeep is typically self-hosted with these
+    # services on a private LAN/Docker network behind a firewall. Set to False
+    # on internet-exposed / multi-user instances to lock integrations down to
+    # public addresses only.
+    # NOTE: link-local / cloud-metadata addresses (169.254.x, e.g.
+    # 169.254.169.254) are ALWAYS blocked regardless of this setting.
+    ALLOW_PRIVATE_INTEGRATION_URLS: bool = (
+        os.getenv("ALLOW_PRIVATE_INTEGRATION_URLS", "True").lower() == "true"
+    )
+
     # Default Admin Password Configuration
     ADMIN_DEFAULT_PASSWORD: str = get_secret("ADMIN_DEFAULT_PASSWORD", "admin123")
 

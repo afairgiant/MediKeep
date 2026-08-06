@@ -107,6 +107,10 @@ services:
       TZ: ${TZ:-America/New_York}
       # SSL Configuration - set ENABLE_SSL=true in .env to enable HTTPS
       ENABLE_SSL: ${ENABLE_SSL:-false}
+      # Integration URL SSRF control - Paperless/Papra on private LAN addresses
+      # is allowed by default; set false on internet-exposed instances to
+      # restrict to public URLs (169.254.x cloud-metadata is always blocked).
+      #ALLOW_PRIVATE_INTEGRATION_URLS: ${ALLOW_PRIVATE_INTEGRATION_URLS:-true}
       # SSO Configuration (Optional) - SSO is disabled by default
       SSO_ENABLED: ${SSO_ENABLED:-false}
       SSO_PROVIDER_TYPE: ${SSO_PROVIDER_TYPE:-oidc}
@@ -210,6 +214,9 @@ LOG_LEVEL=INFO #INFO or DEBUG
 DEBUG=false
 ENABLE_API_DOCS=false  # Set to true to expose Swagger docs
 ENABLE_SSL=false # false or true
+# Allow Paperless/Papra integrations on private LAN addresses (default true).
+# Set false on internet-exposed/multi-user instances to restrict to public URLs.
+# ALLOW_PRIVATE_INTEGRATION_URLS=true
 ```
 
 ### 3️⃣ Start the Containers

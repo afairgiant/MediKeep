@@ -31,6 +31,7 @@
     }
   },
   "paperlessConnection": {
+    "privateUrlNote": "Endereços privados e internos (localhost, 192.168.x.x, 10.x.x.x) são compatíveis com instalações auto-hospedadas. Endereços de metadados de nuvem e link-local (169.254.x.x) são sempre bloqueados por segurança. Se o seu administrador restringiu as integrações a endereços públicos, as URLs privadas serão rejeitadas.",
     "apiTokenHelp": "Seu token de API do paperless-ngx. Encontre-o no painel administrativo do Paperless em Configurações.",
     "apiTokenLabel": "Token de API",
     "apiTokenRecommended": "Token de API (Recomendado)",
@@ -49,6 +50,8 @@
     "usernamePassword": "Nome de Usuário e Senha"
   },
   "papra": {
+    "privateUrlNote": "Endereços privados e internos (localhost, 192.168.x.x, 10.x.x.x) são compatíveis com instalações auto-hospedadas. Endereços de metadados de nuvem e link-local (169.254.x.x) são sempre bloqueados por segurança. Se o seu administrador restringiu as integrações a endereços públicos, as URLs privadas serão rejeitadas.",
+    "urlDescription": "HTTP é permitido para endereços locais; HTTPS é obrigatório para URLs externas. Endereços de metadados de nuvem e link-local são sempre bloqueados.",
     "apiTokenPlaceholder": "Insira seu token de API do Papra",
     "connectionFailed": "Falha na conexão",
     "connectionSuccess": "Conexão bem-sucedida",

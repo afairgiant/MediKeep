@@ -324,6 +324,9 @@ const ConnectionConfigCard = ({
             <div className="paperless-form-help">
               {t('paperlessConnection.urlHelp')}
             </div>
+            <div className="paperless-form-help paperless-form-note">
+              {t('paperlessConnection.privateUrlNote')}
+            </div>
           </div>
 
           {/* Authentication Method Selector */}
