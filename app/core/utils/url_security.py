@@ -48,6 +48,13 @@ METADATA_URL_ERROR = (
     "blocked for security."
 )
 
+# Shown when a host cannot be resolved and the caller does not accept unresolved
+# (indeterminate) results. Fail closed - such a host cannot be verified as safe.
+UNRESOLVED_URL_ERROR = (
+    "This URL's host could not be resolved to an IP address, so it cannot be "
+    "verified as safe. Check the hostname and that the server is reachable."
+)
+
 
 def _ip_always_blocked(ip: _IpAddress) -> bool:
     """IPs that are never a legitimate integration target, blocked regardless of
@@ -63,16 +70,17 @@ def _ip_is_internal(ip: _IpAddress) -> bool:
     return ip.is_private or ip.is_loopback
 
 
-def _resolve_ips(url: str) -> List[_IpAddress]:
+def _resolve_ips(url: str) -> Optional[List[_IpAddress]]:
     """Return the IP address(es) a URL's host points to.
 
     Literal IPs are returned directly. Hostnames are resolved via getaddrinfo.
-    Returns an empty list if there is no host or resolution fails (in which case
-    the connection-time check remains the authoritative boundary).
+    Returns ``None`` when the host is missing or cannot be resolved - an
+    indeterminate result that callers must treat as unsafe unless they
+    explicitly accept unresolved hosts.
     """
     hostname = urlparse(url).hostname
     if not hostname:
-        return []
+        return None
 
     try:
         return [ipaddress.ip_address(hostname)]
@@ -82,7 +90,7 @@ def _resolve_ips(url: str) -> List[_IpAddress]:
     try:
         infos = socket.getaddrinfo(hostname, None)
     except socket.gaierror:
-        return []
+        return None
 
     ips: List[_IpAddress] = []
     for info in infos:
@@ -90,22 +98,27 @@ def _resolve_ips(url: str) -> List[_IpAddress]:
             ips.append(ipaddress.ip_address(info[4][0]))
         except ValueError:
             continue
-    return ips
+    return ips or None
 
 
-def classify_url(url: str) -> Optional[str]:
+def classify_url(url: str) -> str:
     """Classify a URL's target by resolved IP.
 
-    Returns:
-        "metadata" if any resolved IP is always-blocked (link-local / metadata /
-        multicast / unspecified / reserved), "internal" if any resolved IP is a
-        private/loopback address, or None for public / unresolvable hosts.
+    Returns one of:
+        "metadata"      - resolves to an always-blocked address (link-local /
+                          cloud-metadata / multicast / unspecified)
+        "internal"      - resolves to a private/loopback address
+        "public"        - resolves only to public addresses
+        "indeterminate" - host is missing or could not be resolved
 
     "metadata" takes precedence over "internal" so the always-blocked case is
     never masked by a co-resolved private address.
     """
-    reason: Optional[str] = None
-    for ip in _resolve_ips(url):
+    ips = _resolve_ips(url)
+    if not ips:
+        return "indeterminate"
+    reason = "public"
+    for ip in ips:
         if _ip_always_blocked(ip):
             return "metadata"
         if _ip_is_internal(ip):
@@ -113,14 +126,23 @@ def classify_url(url: str) -> Optional[str]:
     return reason
 
 
-def validate_no_ssrf(url: Optional[str], *, allow_private: bool) -> None:
+def validate_no_ssrf(
+    url: Optional[str], *, allow_private: bool, allow_unresolved: bool = False
+) -> None:
     """Raise ValueError if ``url`` targets a disallowed address.
 
-    Link-local / cloud-metadata addresses are always rejected. Private/loopback
-    addresses are rejected only when ``allow_private`` is False. No-op for empty
-    URLs. Callers in the service layer should catch ValueError and re-raise as
-    their own connection error type; Pydantic validators can let it surface as a
-    validation error.
+    - Link-local / cloud-metadata addresses are always rejected.
+    - Private/loopback addresses are rejected unless ``allow_private``.
+    - Hosts that cannot be resolved are rejected unless ``allow_unresolved``.
+      This fails closed by default (an unresolvable host cannot be verified and
+      cannot be connected to anyway); save-time validators may pass
+      ``allow_unresolved=True`` so a config can be stored for a host that is not
+      currently resolvable, leaving the strict check to the connection-time
+      boundary.
+
+    No-op for empty URLs. Callers in the service layer should catch ValueError
+    and re-raise as their own connection error type; Pydantic validators can let
+    it surface as a validation error.
     """
     if not url:
         return
@@ -129,3 +151,5 @@ def validate_no_ssrf(url: Optional[str], *, allow_private: bool) -> None:
         raise ValueError(METADATA_URL_ERROR)
     if classification == "internal" and not allow_private:
         raise ValueError(PRIVATE_URL_ERROR)
+    if classification == "indeterminate" and not allow_unresolved:
+        raise ValueError(UNRESOLVED_URL_ERROR)

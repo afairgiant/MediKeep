@@ -29,7 +29,7 @@ class TestPaperlessService:
 
     def setup_method(self):
         """Setup test fixtures."""
-        self.base_url = "https://paperless.example.com"
+        self.base_url = "https://1.1.1.1"
         self.api_token = "a1b2c3d4e5f6789012345678901234567890abcd"
         self.username = "testuser"
         self.password = "testpass"
@@ -476,7 +476,7 @@ class TestPaperlessMetadataEnrichment:
     """Tests for lookup helpers and enrich_documents_with_metadata."""
 
     def setup_method(self):
-        self.base_url = "https://paperless.example.com"
+        self.base_url = "https://1.1.1.1"
         self.username = "testuser"
         self.password = "testpass"
         self.user_id = 123
@@ -659,7 +659,7 @@ class TestPaperlessServiceCreation:
 
     def setup_method(self):
         """Setup test fixtures."""
-        self.paperless_url = "https://paperless.example.com"
+        self.paperless_url = "https://1.1.1.1"
         self.api_token = "a1b2c3d4e5f6789012345678901234567890abcd"
         self.user_id = 123
 
@@ -748,7 +748,7 @@ class TestPaperlessAuthentication:
 
     def setup_method(self):
         """Setup test fixtures."""
-        self.base_url = "https://paperless.example.com"
+        self.base_url = "https://1.1.1.1"
         self.api_token = "a1b2c3d4e5f6789012345678901234567890abcd"
         self.username = "testuser"
         self.password = "testpass"

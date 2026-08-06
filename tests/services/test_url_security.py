@@ -17,6 +17,7 @@ from pydantic import ValidationError
 from app.core.utils.url_security import (
     METADATA_URL_ERROR,
     PRIVATE_URL_ERROR,
+    UNRESOLVED_URL_ERROR,
     classify_url,
     validate_no_ssrf,
 )
@@ -48,11 +49,11 @@ class TestClassifyUrl:
         assert classify_url(url) == "internal"
 
     @pytest.mark.parametrize("url", ["https://8.8.8.8", "https://1.1.1.1"])
-    def test_public_is_none(self, url):
-        assert classify_url(url) is None
+    def test_public_is_public(self, url):
+        assert classify_url(url) == "public"
 
-    def test_unresolvable_is_none(self):
-        assert classify_url("https://host.invalid") is None
+    def test_unresolvable_is_indeterminate(self):
+        assert classify_url("https://host.invalid") == "indeterminate"
 
 
 class TestValidateNoSsrf:
@@ -78,6 +79,18 @@ class TestValidateNoSsrf:
 
     def test_public_allowed(self):
         validate_no_ssrf("https://8.8.8.8", allow_private=False)
+
+    def test_unresolved_rejected_by_default(self):
+        # Fail closed: an unresolvable host is indeterminate, not "allowed"
+        with pytest.raises(ValueError) as exc:
+            validate_no_ssrf("https://host.invalid", allow_private=True)
+        assert str(exc.value) == UNRESOLVED_URL_ERROR
+
+    def test_unresolved_allowed_when_opted_in(self):
+        # Save-time validators may accept indeterminate results
+        validate_no_ssrf(
+            "https://host.invalid", allow_private=True, allow_unresolved=True
+        )
 
     def test_noop_for_empty(self):
         validate_no_ssrf(None, allow_private=False)
