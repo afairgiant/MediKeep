@@ -113,7 +113,7 @@ class PaperlessServiceBase(ABC):
                 allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
             )
         except ValueError as exc:
-            raise PaperlessConnectionError(str(exc))
+            raise PaperlessConnectionError(str(exc)) from exc
 
         # Create SSL context with strict security for HTTPS connections
         self.ssl_context = None

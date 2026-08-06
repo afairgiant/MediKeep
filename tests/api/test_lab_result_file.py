@@ -52,7 +52,7 @@ class TestLabResultFileCrossUserAccess:
     @pytest.fixture
     def owner_setup(self, db_session: Session, client: TestClient):
         """Owner with a lab result and one uploaded file."""
-        owner, patient, headers = _make_user_with_patient(db_session, "Owner")
+        _owner, patient, headers = _make_user_with_patient(db_session, "Owner")
         lab_result = lab_result_crud.create(
             db_session,
             obj_in=LabResultCreate(
@@ -90,9 +90,7 @@ class TestLabResultFileCrossUserAccess:
         )
         assert resp.status_code == 200
 
-    def test_attacker_cannot_read_metadata(
-        self, client, owner_setup, attacker_headers
-    ):
+    def test_attacker_cannot_read_metadata(self, client, owner_setup, attacker_headers):
         resp = client.get(
             f"/api/v1/lab-result-files/{owner_setup['file_id']}",
             headers=attacker_headers,
@@ -136,9 +134,7 @@ class TestLabResultFileCrossUserAccess:
         self, client, owner_setup, attacker_headers
     ):
         """The unfiltered list endpoint must not leak other users' files."""
-        resp = client.get(
-            "/api/v1/lab-result-files/", headers=attacker_headers
-        )
+        resp = client.get("/api/v1/lab-result-files/", headers=attacker_headers)
         assert resp.status_code == 200
         returned_ids = {item["id"] for item in resp.json()}
         assert owner_setup["file_id"] not in returned_ids

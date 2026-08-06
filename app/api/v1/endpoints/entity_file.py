@@ -508,12 +508,17 @@ async def upload_entity_file(
                 detail=f"{entity_type.title()} not found",
             )
 
-        # Verify user has EDIT access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity.
+        # Fail closed if the parent entity has no resolvable patient owner.
         entity_patient_id = getattr(parent_entity, "patient_id", None)
-        if entity_patient_id:
-            deps.verify_patient_access(
-                entity_patient_id, db, current_user, required_permission="edit"
+        if not entity_patient_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot verify ownership of this record",
             )
+        deps.verify_patient_access(
+            entity_patient_id, db, current_user, required_permission="edit"
+        )
 
         # Validate file type and size
         if not file.filename:
@@ -629,12 +634,17 @@ async def link_paperless_document(
                 detail=f"{entity_type.title()} not found",
             )
 
-        # Verify user has EDIT access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity.
+        # Fail closed if the parent entity has no resolvable patient owner.
         entity_patient_id = getattr(parent_entity, "patient_id", None)
-        if entity_patient_id:
-            deps.verify_patient_access(
-                entity_patient_id, db, current_user, required_permission="edit"
+        if not entity_patient_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot verify ownership of this record",
             )
+        deps.verify_patient_access(
+            entity_patient_id, db, current_user, required_permission="edit"
+        )
 
         # Get user's Paperless preferences
         user_prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
@@ -877,12 +887,17 @@ async def link_papra_document(
                 detail=f"{entity_type.title()} not found",
             )
 
-        # Verify user has EDIT access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity.
+        # Fail closed if the parent entity has no resolvable patient owner.
         entity_patient_id = getattr(parent_entity, "patient_id", None)
-        if entity_patient_id:
-            deps.verify_patient_access(
-                entity_patient_id, db, current_user, required_permission="edit"
+        if not entity_patient_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot verify ownership of this record",
             )
+        deps.verify_patient_access(
+            entity_patient_id, db, current_user, required_permission="edit"
+        )
 
         # Get user's Papra preferences
         user_prefs = user_preferences.get_by_user_id(db, user_id=current_user_id)
@@ -1346,12 +1361,17 @@ async def delete_file(
         )
         handle_not_found(parent_entity, file_record.entity_type)
 
-        # Verify user has EDIT access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity.
+        # Fail closed if the parent entity has no resolvable patient owner.
         entity_patient_id = getattr(parent_entity, "patient_id", None)
-        if entity_patient_id:
-            deps.verify_patient_access(
-                entity_patient_id, db, current_user, required_permission="edit"
+        if not entity_patient_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot verify ownership of this record",
             )
+        deps.verify_patient_access(
+            entity_patient_id, db, current_user, required_permission="edit"
+        )
 
         # Delete the file
         result = await file_service.delete_file(db, file_id, current_user_id)
@@ -1419,12 +1439,17 @@ def update_file_metadata(
         )
         handle_not_found(parent_entity, original_file.entity_type)
 
-        # Verify user has EDIT access to the patient that owns this entity
+        # Verify user has EDIT access to the patient that owns this entity.
+        # Fail closed if the parent entity has no resolvable patient owner.
         entity_patient_id = getattr(parent_entity, "patient_id", None)
-        if entity_patient_id:
-            deps.verify_patient_access(
-                entity_patient_id, db, current_user, required_permission="edit"
+        if not entity_patient_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot verify ownership of this record",
             )
+        deps.verify_patient_access(
+            entity_patient_id, db, current_user, required_permission="edit"
+        )
 
         # Update metadata
         result = file_service.update_file_metadata(

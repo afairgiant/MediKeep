@@ -39,10 +39,17 @@ class PapraAuth:
             raise ValueError("Organization ID is required for Papra")
 
         # SSRF protection: reject targets that resolve to private/internal
-        # addresses unless the deployment has explicitly opted in.
-        validate_no_ssrf(
-            self.url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
-        )
+        # addresses unless the deployment has explicitly opted in. Wrap the
+        # validation error in the typed Papra connection error so endpoint
+        # handlers return a clear 4xx rather than a generic 500.
+        try:
+            validate_no_ssrf(
+                self.url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
+            )
+        except ValueError as exc:
+            from app.services.papra_client import PapraConnectionError
+
+            raise PapraConnectionError(str(exc)) from exc
 
     def get_headers(self) -> dict:
         """Get authentication headers for requests."""

@@ -376,9 +376,8 @@ class TestEntityFileAPI:
         response = client.delete(
             f"/api/v1/entity-files/files/{file_id}", headers=headers2
         )
-        # Unauthorized deletion is now rejected with 403 (404/500 tolerated for
-        # legacy error-handling paths)
-        assert response.status_code in [403, 404, 500]
+        # Unauthorized deletion must be rejected with 403
+        assert response.status_code == 403
 
     def test_get_files_requires_authentication(self, client: TestClient):
         """Test that getting files requires authentication."""

@@ -193,6 +193,21 @@ async def test_papra_connection(
         )
         return {"status": "error", "message": message}
 
+    except PapraConnectionError as exc:
+        log_endpoint_error(
+            logger,
+            request,
+            "Papra connection blocked",
+            exc,
+            user_id=current_user_id,
+            event="papra_connection_test_blocked",
+            papra_url=connection_data.papra_url,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
     except ValueError as exc:
         log_endpoint_error(
             logger,

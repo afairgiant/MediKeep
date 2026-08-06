@@ -1711,7 +1711,7 @@ Base path: `/api/v1/entity-files`
 - **Authentication**: Yes
 - **Success Response** (200): File operation result
 
-> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); reads are also scoped so list/search only return the caller's own files.
+> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them.
 
 #### Lab Result Statistics
 

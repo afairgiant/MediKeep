@@ -1,7 +1,7 @@
 # filepath: e:\Software\Projects\Medical Records-V2\app\api\v1\endpoints\lab_result_file.py
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 
@@ -16,6 +16,7 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from sqlalchemy import false
 from sqlalchemy.orm import Session
 
 from app.api import deps
@@ -134,27 +135,24 @@ def _get_file_or_404(db: Session, file_id: int) -> LabResultFile:
     return file_obj
 
 
-def _filter_files_to_accessible(db: Session, files: List, current_user: User) -> List:
-    """Filter lab result files to those whose owning patient the user can access.
+def _accessible_files_query(db: Session, current_user: User):
+    """Base query over lab result files scoped to the patients the current user
+    can access, joined to LabResult and ordered newest-first.
 
-    Resolves the owning patient for every file in a single query to avoid N+1.
-    Used to scope the unfiltered list/search/filter endpoints so they never leak
-    files across patient boundaries.
+    Callers add their own filters and pagination on top so that accessibility
+    scoping happens in the database *before* skip/limit are applied - post
+    filtering a fetched page would return fewer rows than requested and break
+    pagination.
     """
-    if not files:
-        return files
     accessible = _accessible_patient_ids(db, current_user)
-    lab_result_ids = {getattr(f, "lab_result_id", None) for f in files}
-    lab_result_ids.discard(None)
-    patient_by_lab_result = {
-        lr.id: lr.patient_id
-        for lr in db.query(LabResult).filter(LabResult.id.in_(lab_result_ids)).all()
-    }
-    return [
-        f
-        for f in files
-        if patient_by_lab_result.get(getattr(f, "lab_result_id", None)) in accessible
-    ]
+    query = (
+        db.query(LabResultFile)
+        .join(LabResult, LabResultFile.lab_result_id == LabResult.id)
+        .order_by(LabResultFile.uploaded_at.desc())
+    )
+    if not accessible:
+        return query.filter(false())
+    return query.filter(LabResult.patient_id.in_(accessible))
 
 
 @router.post(
@@ -353,8 +351,7 @@ def read_lab_result_files(
 
     Results are scoped to files whose owning patient the current user can access.
     """
-    files = lab_result_file.get_multi(db, skip=skip, limit=limit)
-    return _filter_files_to_accessible(db, files, current_user)
+    return _accessible_files_query(db, current_user).offset(skip).limit(limit).all()
 
 
 @router.get("/lab-result/{lab_result_id}", response_model=List[LabResultFileResponse])
@@ -546,10 +543,13 @@ def search_files_by_filename(
     """
     Search files by filename pattern.
     """
-    files = lab_result_file.search_by_filename_pattern(
-        db=db, filename_pattern=filename_pattern, skip=skip, limit=limit
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(LabResultFile.file_name.ilike(f"%{filename_pattern}%"))
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
-    return _filter_files_to_accessible(db, files, current_user)
 
 
 @router.get("/filter/by-type", response_model=List[LabResultFileResponse])
@@ -564,10 +564,13 @@ def get_files_by_type(
     """
     Get files by file type.
     """
-    files = lab_result_file.get_by_file_type(
-        db=db, file_type=file_type, skip=skip, limit=limit
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(LabResultFile.file_type == file_type)
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
-    return _filter_files_to_accessible(db, files, current_user)
 
 
 @router.get("/filter/recent", response_model=List[LabResultFileResponse])
@@ -582,8 +585,14 @@ def get_recent_files(
     """
     Get recently uploaded files.
     """
-    files = lab_result_file.get_recent_files(db=db, days=days, skip=skip, limit=limit)
-    return _filter_files_to_accessible(db, files, current_user)
+    start_date = datetime.utcnow() - timedelta(days=days)
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(LabResultFile.uploaded_at >= start_date)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 @router.get("/filter/date-range", response_model=List[LabResultFileResponse])
@@ -599,10 +608,16 @@ def get_files_by_date_range(
     """
     Get files uploaded within a date range.
     """
-    files = lab_result_file.get_files_by_date_range(
-        db=db, start_date=start_date, end_date=end_date, skip=skip, limit=limit
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(
+            LabResultFile.uploaded_at >= start_date,
+            LabResultFile.uploaded_at <= end_date,
+        )
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
-    return _filter_files_to_accessible(db, files, current_user)
 
 
 @router.get("/stats/count-by-lab-result/{lab_result_id}")

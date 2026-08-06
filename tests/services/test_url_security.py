@@ -87,14 +87,20 @@ class TestValidateNoSsrf:
 class TestSchemaValidation:
     """Default config allows private (ALLOW_PRIVATE_INTEGRATION_URLS=True)."""
 
-    def test_paperless_accepts_private_by_default(self):
+    def test_paperless_accepts_private_by_default(self, monkeypatch):
+        monkeypatch.setattr(
+            "app.core.config.settings.ALLOW_PRIVATE_INTEGRATION_URLS", True
+        )
         data = PaperlessConnectionData(
             paperless_url="http://127.0.0.1:8000",
             paperless_api_token="dummytoken123",
         )
         assert data.paperless_url == "http://127.0.0.1:8000"
 
-    def test_papra_accepts_private_by_default(self):
+    def test_papra_accepts_private_by_default(self, monkeypatch):
+        monkeypatch.setattr(
+            "app.core.config.settings.ALLOW_PRIVATE_INTEGRATION_URLS", True
+        )
         data = PapraConnectionData(
             papra_url="http://10.0.0.5:3000",
             papra_api_token="dummytoken123",
