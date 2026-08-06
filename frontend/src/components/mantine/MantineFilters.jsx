@@ -525,9 +525,12 @@ const MantineFilters = ({
                   />
                 )}
 
-                {/* Sort Controls - Visually separated from filters */}
+                {/* Sort Controls - Visually separated from filters.
+                    Wrapped in its own nowrap Group so the label, select, and
+                    direction button move to the next line together instead
+                    of splitting across lines when filters crowd the row. */}
                 {sortOptions && sortOptions.length > 1 && (
-                  <>
+                  <Group gap="xs" wrap="nowrap" style={{ flex: '0 0 auto' }}>
                     <Box
                       style={{
                         height: '36px',
@@ -576,7 +579,7 @@ const MantineFilters = ({
                         ? t('filters.sortAscending', 'A-Z')
                         : t('filters.sortDescending', 'Z-A')}
                     </Button>
-                  </>
+                  </Group>
                 )}
               </Group>
             </Stack>
