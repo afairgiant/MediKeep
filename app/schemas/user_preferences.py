@@ -73,6 +73,19 @@ def _validate_integration_url(v: Optional[str]) -> Optional[str]:
     if not _URL_PATTERN.match(v):
         raise ValueError("Invalid URL format")
 
+    # Reject URLs that resolve to private/internal addresses (SSRF protection),
+    # unless the deployment has explicitly opted in via config. Save-time
+    # validation permits hosts that are not currently resolvable; the strict
+    # unresolved-host check is enforced at connection time in the service layer.
+    from app.core.config import settings
+    from app.core.utils.url_security import validate_no_ssrf
+
+    validate_no_ssrf(
+        v,
+        allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
+        allow_unresolved=True,
+    )
+
     return v.rstrip("/")
 
 

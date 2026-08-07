@@ -31,6 +31,7 @@
     }
   },
   "paperlessConnection": {
+    "privateUrlNote": "Privé- en interne adressen (localhost, 192.168.x.x, 10.x.x.x) worden ondersteund voor zelf-gehoste installaties. Cloud-metadata- en link-local-adressen (169.254.x.x) worden om veiligheidsredenen altijd geblokkeerd. Als uw beheerder integraties heeft beperkt tot openbare adressen, worden privé-URL's geweigerd.",
     "apiTokenHelp": "Uw Paperless-ngx API-token. U vindt het in het Paperless-beheerdersdashboard onder Instellingen.",
     "apiTokenLabel": "API-token",
     "apiTokenRecommended": "API-token (Aanbevolen)",
@@ -49,6 +50,8 @@
     "usernamePassword": "Gebruikersnaam en wachtwoord"
   },
   "papra": {
+    "privateUrlNote": "Privé- en interne adressen (localhost, 192.168.x.x, 10.x.x.x) worden ondersteund voor zelf-gehoste installaties. Cloud-metadata- en link-local-adressen (169.254.x.x) worden om veiligheidsredenen altijd geblokkeerd. Als uw beheerder integraties heeft beperkt tot openbare adressen, worden privé-URL's geweigerd.",
+    "urlDescription": "HTTP is toegestaan voor lokale adressen; HTTPS is vereist voor externe URL's. Cloud-metadata- en link-local-adressen worden altijd geblokkeerd.",
     "apiTokenPlaceholder": "Voer uw Papra API-token in",
     "connectionFailed": "Verbinding mislukt",
     "connectionSuccess": "Verbinding geslaagd",

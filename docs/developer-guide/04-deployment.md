@@ -404,6 +404,7 @@ DB_PASSWORD=secure-password-here
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | integer | `480`                     | No       | JWT token expiration (8 hours)             |
 | `ADMIN_DEFAULT_PASSWORD`      | string  | `admin123`                | No       | Default admin password for fresh installs  |
 | `ALLOW_USER_REGISTRATION`     | boolean | `true`                    | No       | Allow new user registration                |
+| `ALLOW_PRIVATE_INTEGRATION_URLS` | boolean | `true`                 | No       | Allow Paperless/Papra integration URLs that resolve to private/internal addresses (localhost, `10.x`, `172.16-31.x`, `192.168.x`). Defaults to `true` for self-hosted setups where these services run on a private LAN/Docker network. Set to `false` on internet-exposed / multi-user instances to restrict integrations to public addresses (SSRF hardening). Link-local / cloud-metadata addresses (`169.254.x`) are **always** blocked regardless of this setting. |
 | `DEBUG`                       | boolean | `false`                   | No       | Enable debug mode                          |
 | `ENABLE_API_DOCS`             | boolean | `false`                   | No       | Expose OpenAPI/Swagger docs at `/api/v1/openapi.json` |
 | `CORS_ALLOWED_ORIGINS`        | string  | `http://localhost:3000`   | No       | Comma-separated list of allowed CORS origins |

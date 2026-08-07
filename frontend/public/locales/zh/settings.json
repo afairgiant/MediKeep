@@ -31,6 +31,7 @@
     }
   },
   "paperlessConnection": {
+    "privateUrlNote": "私有和内部地址（localhost、192.168.x.x、10.x.x.x）支持自托管部署。出于安全考虑，云元数据和链路本地地址（169.254.x.x）始终被阻止。如果管理员已将集成限制为公共地址，则私有 URL 将被拒绝。",
     "apiTokenHelp": "您的 paperless-ngx API 令牌。可在 Paperless 管理面板的设置中找到。",
     "apiTokenLabel": "API 令牌",
     "apiTokenRecommended": "API 令牌（推荐）",
@@ -49,6 +50,8 @@
     "usernamePassword": "用户名和密码"
   },
   "papra": {
+    "privateUrlNote": "私有和内部地址（localhost、192.168.x.x、10.x.x.x）支持自托管部署。出于安全考虑，云元数据和链路本地地址（169.254.x.x）始终被阻止。如果管理员已将集成限制为公共地址，则私有 URL 将被拒绝。",
+    "urlDescription": "本地地址允许使用 HTTP；外部 URL 需要使用 HTTPS。云元数据和链路本地地址始终被阻止。",
     "apiTokenPlaceholder": "输入您的 Papra API 令牌",
     "connectionFailed": "连接失败",
     "connectionSuccess": "连接成功",

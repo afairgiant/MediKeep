@@ -1,7 +1,7 @@
 # filepath: e:\Software\Projects\Medical Records-V2\app\api\v1\endpoints\lab_result_file.py
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional
 
@@ -16,11 +16,13 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse
+from sqlalchemy import false
 from sqlalchemy.orm import Session
 
 from app.api import deps
 from app.api.activity_logging import log_create, log_delete, log_update
 from app.core.config import settings
+from app.core.http.error_handling import MedicalRecordsAPIException
 from app.core.logging.config import get_logger
 from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
@@ -31,7 +33,7 @@ from app.core.logging.helpers import (
 from app.crud.lab_result import lab_result
 from app.crud.lab_result_file import lab_result_file
 from app.models.activity_log import EntityType
-from app.models.models import LabResultFile, User
+from app.models.models import LabResult, LabResultFile, User
 from app.schemas.lab_result_file import (
     FileBatchOperation,
     LabResultFileCreate,
@@ -86,6 +88,73 @@ ALLOWED_EXTENSIONS = {
 # See archive_validator.py for ZIP/ISO security validation and limits
 
 
+def _accessible_patient_ids(db: Session, current_user: User) -> set:
+    """Return the set of patient IDs the current user can view (owned or shared)."""
+    from app.services.patient_access import PatientAccessService
+
+    access_service = PatientAccessService(db)
+    return {
+        patient.id
+        for patient in access_service.get_accessible_patients(current_user, "view")
+    }
+
+
+def _verify_lab_result_access(
+    db: Session,
+    lab_result_id: int,
+    current_user: User,
+    permission: str = "view",
+) -> LabResult:
+    """Verify the current user can access the patient that owns a lab result.
+
+    Resolves the lab result's owning patient and delegates the access decision
+    to deps.verify_patient_access (which raises ForbiddenException on denial).
+
+    Raises:
+        HTTPException: 404 if the lab result does not exist.
+        ForbiddenException: if the user lacks the required permission.
+    """
+    lab_result_obj = lab_result.get(db=db, id=lab_result_id)
+    if not lab_result_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
+        )
+    deps.verify_patient_access(
+        lab_result_obj.patient_id, db, current_user, required_permission=permission
+    )
+    return lab_result_obj
+
+
+def _get_file_or_404(db: Session, file_id: int) -> LabResultFile:
+    """Fetch a lab result file by ID or raise a 404."""
+    file_obj = lab_result_file.get(db=db, id=file_id)
+    if not file_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
+        )
+    return file_obj
+
+
+def _accessible_files_query(db: Session, current_user: User):
+    """Base query over lab result files scoped to the patients the current user
+    can access, joined to LabResult and ordered newest-first.
+
+    Callers add their own filters and pagination on top so that accessibility
+    scoping happens in the database *before* skip/limit are applied - post
+    filtering a fetched page would return fewer rows than requested and break
+    pagination.
+    """
+    accessible = _accessible_patient_ids(db, current_user)
+    query = (
+        db.query(LabResultFile)
+        .join(LabResult, LabResultFile.lab_result_id == LabResult.id)
+        .order_by(LabResultFile.uploaded_at.desc())
+    )
+    if not accessible:
+        return query.filter(false())
+    return query.filter(LabResult.patient_id.in_(accessible))
+
+
 @router.post(
     "/", response_model=LabResultFileResponse, status_code=status.HTTP_201_CREATED
 )
@@ -94,19 +163,17 @@ def create_lab_result_file(
     db: Session = Depends(deps.get_db),
     file_in: LabResultFileCreate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> LabResultFile:
     """
     Create a new lab result file entry.
     """
-    # Verify lab result exists and user has access
-    lab_result_obj = lab_result.get(db=db, id=file_in.lab_result_id)
-    if not lab_result_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
-        )
+    # Verify the lab result exists and the user has EDIT access to its patient
+    _verify_lab_result_access(
+        db, file_in.lab_result_id, current_user, permission="edit"
+    )
 
-    # Check if user has access to this lab result (assuming patient ownership or admin)
-    # This would need to be implemented based on your user model and permissions    # Create the file entry
+    # Create the file entry
     file_obj = lab_result_file.create(db=db, obj_in=file_in)
 
     # Log the creation activity using centralized logging
@@ -132,6 +199,7 @@ async def upload_file(
     file: UploadFile = File(...),
     description: Optional[str] = Form(None),
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
     request: Request,
 ) -> LabResultFile:
     """
@@ -147,19 +215,8 @@ async def upload_file(
         uploaded_filename=file.filename,
     )
 
-    # Verify lab result exists
-    lab_result_obj = lab_result.get(db=db, id=lab_result_id)
-    if not lab_result_obj:
-        log_validation_error(
-            logger,
-            request,
-            f"Lab result {lab_result_id} not found",
-            user_id=current_user_id,
-            lab_result_id=lab_result_id,
-        )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
-        )
+    # Verify the lab result exists and the user has EDIT access to its patient
+    _verify_lab_result_access(db, lab_result_id, current_user, permission="edit")
 
     # Validate file
     if not file.filename:
@@ -291,9 +348,10 @@ def read_lab_result_files(
 ) -> List[LabResultFile]:
     """
     Retrieve lab result files.
+
+    Results are scoped to files whose owning patient the current user can access.
     """
-    files = lab_result_file.get_multi(db, skip=skip, limit=limit)
-    return files
+    return _accessible_files_query(db, current_user).offset(skip).limit(limit).all()
 
 
 @router.get("/lab-result/{lab_result_id}", response_model=List[LabResultFileResponse])
@@ -306,12 +364,8 @@ def read_files_by_lab_result(
     """
     Get all files for a specific lab result.
     """
-    # Verify lab result exists
-    lab_result_obj = lab_result.get(db=db, id=lab_result_id)
-    if not lab_result_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
-        )
+    # Verify the lab result exists and the user can view its patient
+    _verify_lab_result_access(db, lab_result_id, current_user, permission="view")
 
     files = lab_result_file.get_by_lab_result(db=db, lab_result_id=lab_result_id)
     return files
@@ -344,11 +398,10 @@ def read_lab_result_file(
     """
     Get a specific lab result file by ID.
     """
-    file_obj = lab_result_file.get(db=db, id=file_id)
-    if not file_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
-        )
+    file_obj = _get_file_or_404(db, file_id)
+    _verify_lab_result_access(
+        db, file_obj.lab_result_id, current_user, permission="view"
+    )
     return file_obj
 
 
@@ -359,15 +412,15 @@ def update_lab_result_file(
     file_id: int,
     file_in: LabResultFileUpdate,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
 ) -> LabResultFile:
     """
     Update a lab result file.
     """
-    file_obj = lab_result_file.get(db=db, id=file_id)
-    if not file_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
-        )
+    file_obj = _get_file_or_404(db, file_id)
+    _verify_lab_result_access(
+        db, file_obj.lab_result_id, current_user, permission="edit"
+    )
 
     file_obj = lab_result_file.update(db=db, db_obj=file_obj, obj_in=file_in)
 
@@ -388,23 +441,16 @@ def delete_lab_result_file(
     db: Session = Depends(deps.get_db),
     file_id: int,
     current_user_id: int = Depends(deps.get_current_user_id),
+    current_user: User = Depends(deps.get_current_user),
     request: Request,
 ):
     """
     Delete a lab result file.
     """
-    file_obj = lab_result_file.get(db=db, id=file_id)
-    if not file_obj:
-        log_validation_error(
-            logger,
-            request,
-            f"Lab result file {file_id} not found",
-            user_id=current_user_id,
-            file_id=file_id,
-        )
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
-        )
+    file_obj = _get_file_or_404(db, file_id)
+    _verify_lab_result_access(
+        db, file_obj.lab_result_id, current_user, permission="edit"
+    )
 
     # Log the deletion activity BEFORE deleting using centralized logging
     log_delete(
@@ -468,11 +514,10 @@ async def download_file(
     """
     Download a lab result file.
     """
-    file_obj = lab_result_file.get(db=db, id=file_id)
-    if not file_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result file not found"
-        )
+    file_obj = _get_file_or_404(db, file_id)
+    _verify_lab_result_access(
+        db, file_obj.lab_result_id, current_user, permission="view"
+    )
 
     if not os.path.exists(getattr(file_obj, "file_path", "")):
         raise HTTPException(
@@ -498,10 +543,13 @@ def search_files_by_filename(
     """
     Search files by filename pattern.
     """
-    files = lab_result_file.search_by_filename_pattern(
-        db=db, filename_pattern=filename_pattern, skip=skip, limit=limit
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(LabResultFile.file_name.ilike(f"%{filename_pattern}%"))
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
-    return files
 
 
 @router.get("/filter/by-type", response_model=List[LabResultFileResponse])
@@ -516,10 +564,13 @@ def get_files_by_type(
     """
     Get files by file type.
     """
-    files = lab_result_file.get_by_file_type(
-        db=db, file_type=file_type, skip=skip, limit=limit
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(LabResultFile.file_type == file_type)
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
-    return files
 
 
 @router.get("/filter/recent", response_model=List[LabResultFileResponse])
@@ -534,8 +585,14 @@ def get_recent_files(
     """
     Get recently uploaded files.
     """
-    files = lab_result_file.get_recent_files(db=db, days=days, skip=skip, limit=limit)
-    return files
+    start_date = datetime.utcnow() - timedelta(days=days)
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(LabResultFile.uploaded_at >= start_date)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 @router.get("/filter/date-range", response_model=List[LabResultFileResponse])
@@ -551,10 +608,16 @@ def get_files_by_date_range(
     """
     Get files uploaded within a date range.
     """
-    files = lab_result_file.get_files_by_date_range(
-        db=db, start_date=start_date, end_date=end_date, skip=skip, limit=limit
+    return (
+        _accessible_files_query(db, current_user)
+        .filter(
+            LabResultFile.uploaded_at >= start_date,
+            LabResultFile.uploaded_at <= end_date,
+        )
+        .offset(skip)
+        .limit(limit)
+        .all()
     )
-    return files
 
 
 @router.get("/stats/count-by-lab-result/{lab_result_id}")
@@ -567,12 +630,8 @@ def get_file_count_by_lab_result(
     """
     Get count of files for a specific lab result.
     """
-    # Verify lab result exists
-    lab_result_obj = lab_result.get(db=db, id=lab_result_id)
-    if not lab_result_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
-        )
+    # Verify the lab result exists and the user can view its patient
+    _verify_lab_result_access(db, lab_result_id, current_user, permission="view")
 
     count = lab_result_file.count_files_by_lab_result(
         db=db, lab_result_id=lab_result_id
@@ -603,9 +662,19 @@ def get_batch_file_counts(
             detail="Cannot request counts for more than 100 lab results at once",
         )
 
-    # Get counts for all lab results in a single query
+    # Restrict to lab results whose owning patient the current user can access
+    accessible = _accessible_patient_ids(db, current_user)
+    patient_by_lab_result = {
+        lr.id: lr.patient_id
+        for lr in db.query(LabResult).filter(LabResult.id.in_(lab_result_ids)).all()
+    }
+    authorized_ids = [
+        lid for lid in lab_result_ids if patient_by_lab_result.get(lid) in accessible
+    ]
+
+    # Get counts for authorized lab results in a single query
     counts = lab_result_file.count_files_by_lab_results_batch(
-        db=db, lab_result_ids=lab_result_ids
+        db=db, lab_result_ids=authorized_ids
     )
 
     return counts
@@ -629,6 +698,15 @@ def batch_file_operation(
             file_obj = lab_result_file.get(db=db, id=file_id)
             if not file_obj:
                 errors.append(f"File {file_id} not found")
+                continue
+
+            # Authorization: require EDIT access to the owning patient
+            try:
+                _verify_lab_result_access(
+                    db, file_obj.lab_result_id, current_user, permission="edit"
+                )
+            except (HTTPException, MedicalRecordsAPIException):
+                errors.append(f"Not authorized to modify file {file_id}")
                 continue
 
             if operation.operation == "delete":
@@ -672,12 +750,8 @@ def delete_all_files_for_lab_result(
     """
     Delete all files associated with a lab result.
     """
-    # Verify lab result exists
-    lab_result_obj = lab_result.get(db=db, id=lab_result_id)
-    if not lab_result_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lab result not found"
-        )
+    # Verify the lab result exists and the user has EDIT access to its patient
+    _verify_lab_result_access(db, lab_result_id, current_user, permission="edit")
 
     # Get all files for this lab result
     files = lab_result_file.get_by_lab_result(db=db, lab_result_id=lab_result_id)

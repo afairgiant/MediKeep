@@ -19,6 +19,7 @@ import aiohttp
 
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.utils.url_security import validate_no_ssrf
 from app.services.credential_encryption import credential_encryption
 
 logger = get_logger(__name__)
@@ -41,10 +42,8 @@ def _build_title_fallback_query(query: str, user_id: Optional[int] = None) -> st
     query matches titles across the whole Paperless instance.
     """
     terms = [t for t in query.split() if t]
-    _escape = r'\\\1'
-    clauses = [
-        f"title:*{_LUCENE_SPECIAL_CHARS.sub(_escape, term)}*" for term in terms
-    ]
+    _escape = r"\\\1"
+    clauses = [f"title:*{_LUCENE_SPECIAL_CHARS.sub(_escape, term)}*" for term in terms]
     if user_id is not None:
         clauses.append(f"custom_fields.medical_record_user_id:{user_id}")
     return " AND ".join(clauses) if clauses else "*"
@@ -104,6 +103,17 @@ class PaperlessServiceBase(ABC):
             raise PaperlessConnectionError(
                 "External paperless connections must use HTTPS for security"
             )
+
+        # SSRF protection: reject targets that resolve to private/internal
+        # addresses unless the deployment has explicitly opted in. This is the
+        # authoritative connection-time boundary (also closes DNS rebinding).
+        try:
+            validate_no_ssrf(
+                self.base_url,
+                allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS,
+            )
+        except ValueError as exc:
+            raise PaperlessConnectionError(str(exc)) from exc
 
         # Create SSL context with strict security for HTTPS connections
         self.ssl_context = None

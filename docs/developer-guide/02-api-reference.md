@@ -1692,6 +1692,7 @@ Base path: `/api/v1/entity-files`
   - `storage_backend` (optional): Storage backend (`local`, `paperless`, `papra`)
 - **Max Size**: 1GB
 - **Allowed Extensions**: PDF, images, documents, medical imaging (DICOM, NIfTI), video, audio, archives
+- **Permission**: `edit` on the owning patient
 - **Success Response** (200): Created entity file object
 
 ##### View Lab Result File (Inline)
@@ -1710,7 +1711,7 @@ Base path: `/api/v1/entity-files`
 - **Authentication**: Yes
 - **Success Response** (200): File operation result
 
-> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above.
+> **Legacy endpoints**: Earlier builds exposed `GET|POST /lab-results/{lab_result_id}/files`, `DELETE /lab-results/{lab_result_id}/files/{file_id}`, and a `/lab-result-files/...` router. These still respond for backward compatibility but new integrations should prefer the `entity-files` endpoints above. All of them — including the `/lab-result-files/...` router — enforce the same patient-scoped access control (`view` to read, `edit` to write); list and search results are scoped to files for every patient the caller is authorized to access, including patients shared with them.
 
 #### Lab Result Statistics
 
@@ -3921,6 +3922,15 @@ Base path: `/api/v1/entity-files`
 
 The shared Entity Files subsystem handles attachments across most medical entity types (lab results, medications, conditions, procedures, encounters, treatments, immunizations, vitals, allergies, injuries, etc.). Files can be stored locally or linked to external document backends (Paperless-ngx, Papra).
 
+### Access Control
+
+All file endpoints are **patient-scoped**. The server resolves the patient that owns the parent entity (or, for `/files/{file_id}` paths, the entity the file is attached to) and verifies the caller's access to that patient before returning or mutating anything:
+
+- **Read** operations (list, metadata, view, download, batch counts) require **`view`** access to the owning patient.
+- **Write** operations (upload, update metadata, delete, link Paperless/Papra document) require **`edit`** access.
+
+A caller with no access to the patient — or with only `view` access attempting a write — receives `403 Forbidden`. Access covers records the user owns and records shared with them at the required level (see [Section 10 — Sharing & Collaboration](#10-sharing--collaboration)). List/search endpoints only return files whose owning patient the caller can access.
+
 ### List Files for Entity
 
 `GET /entity-files/{entity_type}/{entity_id}/files`
@@ -3941,6 +3951,7 @@ The shared Entity Files subsystem handles attachments across most medical entity
   - `storage_backend` (optional): Storage backend (`local`, `paperless`, `papra`)
 - **Max Size**: 1GB
 - **Allowed Extensions**: PDF, images, documents, medical imaging (DICOM, NIfTI), video, audio, archives
+- **Permission**: `edit` on the owning patient
 - **Success Response** (200): Created entity file object
 
 ### Get File Metadata
@@ -3969,6 +3980,7 @@ The shared Entity Files subsystem handles attachments across most medical entity
 `PUT /entity-files/files/{file_id}/metadata`
 
 - **Authentication**: Yes
+- **Permission**: `edit` on the owning patient
 - **Request Body**: Updatable metadata fields (e.g., `description`, `category`)
 - **Success Response** (200): Updated entity file object
 
@@ -3977,6 +3989,7 @@ The shared Entity Files subsystem handles attachments across most medical entity
 `DELETE /entity-files/files/{file_id}`
 
 - **Authentication**: Yes
+- **Permission**: `edit` on the owning patient
 - **Success Response** (200): File operation result
 
 ### Batch File Counts

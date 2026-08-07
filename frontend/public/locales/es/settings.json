@@ -31,6 +31,7 @@
     }
   },
   "paperlessConnection": {
+    "privateUrlNote": "Las direcciones privadas e internas (localhost, 192.168.x.x, 10.x.x.x) son compatibles con las instalaciones autoalojadas. Las direcciones de metadatos de nube y link-local (169.254.x.x) siempre se bloquean por seguridad. Si su administrador ha restringido las integraciones a direcciones públicas, las URL privadas serán rechazadas.",
     "apiTokenHelp": "Su token de API de Paperless-ngx. Encuéntrelo en el panel de administración de Paperless en Configuración.",
     "apiTokenLabel": "Token de API",
     "apiTokenRecommended": "Token de API (Recomendado)",
@@ -49,6 +50,8 @@
     "usernamePassword": "Usuario y contraseña"
   },
   "papra": {
+    "privateUrlNote": "Las direcciones privadas e internas (localhost, 192.168.x.x, 10.x.x.x) son compatibles con las instalaciones autoalojadas. Las direcciones de metadatos de nube y link-local (169.254.x.x) siempre se bloquean por seguridad. Si su administrador ha restringido las integraciones a direcciones públicas, las URL privadas serán rechazadas.",
+    "urlDescription": "Se permite HTTP para direcciones locales; se requiere HTTPS para las URL externas. Las direcciones de metadatos de nube y link-local siempre están bloqueadas.",
     "apiTokenPlaceholder": "Ingrese su token de API de Papra",
     "connectionFailed": "Conexión fallida",
     "connectionSuccess": "Conexión exitosa",

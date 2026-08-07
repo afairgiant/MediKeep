@@ -31,6 +31,7 @@
     }
   },
   "paperlessConnection": {
+    "privateUrlNote": "Les adresses privées et internes (localhost, 192.168.x.x, 10.x.x.x) sont prises en charge pour les installations auto-hébergées. Les adresses de métadonnées cloud et link-local (169.254.x.x) sont toujours bloquées pour des raisons de sécurité. Si votre administrateur a limité les intégrations aux adresses publiques, les URL privées seront rejetées.",
     "apiTokenHelp": "Votre jeton d'API Paperless-ngx. Vous pouvez le trouver dans l'onglet d'administration de Paperless, sous Paramètres.",
     "apiTokenLabel": "Jeton d'API",
     "apiTokenRecommended": "Jeton d'API (Recommandé)",
@@ -49,6 +50,8 @@
     "usernamePassword": "Nom d'utilisateur et mot de passe"
   },
   "papra": {
+    "privateUrlNote": "Les adresses privées et internes (localhost, 192.168.x.x, 10.x.x.x) sont prises en charge pour les installations auto-hébergées. Les adresses de métadonnées cloud et link-local (169.254.x.x) sont toujours bloquées pour des raisons de sécurité. Si votre administrateur a limité les intégrations aux adresses publiques, les URL privées seront rejetées.",
+    "urlDescription": "Le HTTP est autorisé pour les adresses locales ; le HTTPS est requis pour les URL externes. Les adresses de métadonnées cloud et link-local sont toujours bloquées.",
     "apiTokenPlaceholder": "Saisissez votre jeton d'API Papra",
     "connectionFailed": "Echec de la connexion",
     "connectionSuccess": "Connexion réussie",

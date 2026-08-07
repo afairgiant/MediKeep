@@ -10,7 +10,9 @@ from urllib.parse import urlparse
 
 import aiohttp
 
+from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.utils.url_security import validate_no_ssrf
 
 logger = get_logger(__name__)
 
@@ -35,6 +37,19 @@ class PapraAuth:
             raise ValueError("API token is required for Papra authentication")
         if not self.organization_id:
             raise ValueError("Organization ID is required for Papra")
+
+        # SSRF protection: reject targets that resolve to private/internal
+        # addresses unless the deployment has explicitly opted in. Wrap the
+        # validation error in the typed Papra connection error so endpoint
+        # handlers return a clear 4xx rather than a generic 500.
+        try:
+            validate_no_ssrf(
+                self.url, allow_private=settings.ALLOW_PRIVATE_INTEGRATION_URLS
+            )
+        except ValueError as exc:
+            from app.services.papra_client import PapraConnectionError
+
+            raise PapraConnectionError(str(exc)) from exc
 
     def get_headers(self) -> dict:
         """Get authentication headers for requests."""

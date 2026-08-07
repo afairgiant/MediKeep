@@ -31,6 +31,7 @@
     }
   },
   "paperlessConnection": {
+    "privateUrlNote": "Privata och interna adresser (localhost, 192.168.x.x, 10.x.x.x) stöds för självhostade installationer. Moln-metadata- och link-local-adresser (169.254.x.x) blockeras alltid av säkerhetsskäl. Om din administratör har begränsat integrationer till offentliga adresser kommer privata URL:er att avvisas.",
     "apiTokenHelp": "Din paperless-ngx API-token. Hitta den i Paperless-adminpanelen under Inställningar.",
     "apiTokenLabel": "API-token",
     "apiTokenRecommended": "API-token (Rekommenderas)",
@@ -49,6 +50,8 @@
     "usernamePassword": "Användarnamn och lösenord"
   },
   "papra": {
+    "privateUrlNote": "Privata och interna adresser (localhost, 192.168.x.x, 10.x.x.x) stöds för självhostade installationer. Moln-metadata- och link-local-adresser (169.254.x.x) blockeras alltid av säkerhetsskäl. Om din administratör har begränsat integrationer till offentliga adresser kommer privata URL:er att avvisas.",
+    "urlDescription": "HTTP tillåts för lokala adresser; HTTPS krävs för externa URL:er. Moln-metadata- och link-local-adresser blockeras alltid.",
     "apiTokenPlaceholder": "Ange din Papra API-token",
     "connectionFailed": "Anslutning misslyckades",
     "connectionSuccess": "Anslutning lyckades",

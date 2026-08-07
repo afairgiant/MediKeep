@@ -38,6 +38,7 @@
     "connected": "Connected to Paperless-ngx",
     "connectionError": "Unable to connect. Please check your URL and credentials.",
     "methodInfo": "API tokens are the recommended authentication method for better security.",
+    "privateUrlNote": "Private and internal addresses (localhost, 192.168.x.x, 10.x.x.x) are supported for self-hosted setups. Cloud-metadata and link-local addresses (169.254.x.x) are always blocked for security. If your administrator has restricted integrations to public addresses, private URLs will be rejected.",
     "passwordHelp": "Your paperless-ngx password.",
     "passwordLabel": "Password",
     "sessionStorage": "Using session storage for token",
@@ -53,6 +54,8 @@
     "connectionFailed": "Connection failed",
     "connectionSuccess": "Connection successful",
     "description": "Connect to your Papra instance for document management",
+    "privateUrlNote": "Private and internal addresses (localhost, 192.168.x.x, 10.x.x.x) are supported for self-hosted setups. Cloud-metadata and link-local addresses (169.254.x.x) are always blocked for security. If your administrator has restricted integrations to public addresses, private URLs will be rejected.",
+    "urlDescription": "HTTP is allowed for local addresses; HTTPS is required for external URLs. Cloud-metadata and link-local addresses are always blocked.",
     "organization": "Organization",
     "organizationPlaceholder": "Select an organization",
     "urlPlaceholder": "https://your-papra-instance.com"

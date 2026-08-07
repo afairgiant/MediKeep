@@ -132,6 +132,8 @@ const PapraSettings = ({ settings, onSettingChange, loading }) => {
       url={papraUrl}
       onUrlChange={value => onSettingChange(PAPRA_SETTING_KEYS.url, value)}
       urlPlaceholder={t('papra.urlPlaceholder')}
+      urlDescription={t('papra.urlDescription')}
+      urlNote={t('papra.privateUrlNote')}
       token={papraApiToken}
       onTokenChange={value =>
         onSettingChange(PAPRA_SETTING_KEYS.apiToken, value)

@@ -31,6 +31,7 @@
     }
   },
   "paperlessConnection": {
+    "privateUrlNote": "ที่อยู่ส่วนตัวและภายใน (localhost, 192.168.x.x, 10.x.x.x) รองรับสำหรับการติดตั้งแบบโฮสต์เอง ที่อยู่ cloud-metadata และ link-local (169.254.x.x) จะถูกบล็อกเสมอเพื่อความปลอดภัย หากผู้ดูแลระบบของคุณจำกัดการเชื่อมต่อให้ใช้เฉพาะที่อยู่สาธารณะ URL ส่วนตัวจะถูกปฏิเสธ",
     "apiTokenHelp": "โทเค็น API ของ paperless-ngx ของคุณ ค้นหาได้ในแผงควบคุมผู้ดูแลระบบ Paperless ในส่วนการตั้งค่า",
     "apiTokenLabel": "โทเค็น API",
     "apiTokenRecommended": "โทเค็น API (แนะนำ)",
@@ -49,6 +50,8 @@
     "usernamePassword": "ชื่อผู้ใช้และรหัสผ่าน"
   },
   "papra": {
+    "privateUrlNote": "ที่อยู่ส่วนตัวและภายใน (localhost, 192.168.x.x, 10.x.x.x) รองรับสำหรับการติดตั้งแบบโฮสต์เอง ที่อยู่ cloud-metadata และ link-local (169.254.x.x) จะถูกบล็อกเสมอเพื่อความปลอดภัย หากผู้ดูแลระบบของคุณจำกัดการเชื่อมต่อให้ใช้เฉพาะที่อยู่สาธารณะ URL ส่วนตัวจะถูกปฏิเสธ",
+    "urlDescription": "อนุญาตให้ใช้ HTTP สำหรับที่อยู่ภายใน; ต้องใช้ HTTPS สำหรับ URL ภายนอก ที่อยู่ cloud-metadata และ link-local จะถูกบล็อกเสมอ",
     "apiTokenPlaceholder": "กรอกโทเค็น API ของ Papra",
     "connectionFailed": "การเชื่อมต่อล้มเหลว",
     "connectionSuccess": "เชื่อมต่อสำเร็จ",

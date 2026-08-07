@@ -55,6 +55,8 @@ const IntegrationSettingsCard = ({
   url,
   onUrlChange,
   urlPlaceholder,
+  urlDescription,
+  urlNote,
   token,
   onTokenChange,
   tokenPlaceholder,
@@ -143,8 +145,17 @@ const IntegrationSettingsCard = ({
         onChange={handleUrlChange}
         error={urlError}
         disabled={disabled || testingConnection}
-        description="HTTP is allowed for local addresses, HTTPS required for external URLs"
+        description={
+          urlDescription ||
+          'HTTP is allowed for local addresses, HTTPS required for external URLs'
+        }
       />
+
+      {urlNote && (
+        <Alert color="blue" variant="light">
+          {urlNote}
+        </Alert>
+      )}
 
       <PasswordInput
         label="API Token"
