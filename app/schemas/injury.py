@@ -89,7 +89,7 @@ class InjuryBase(TaggedEntityMixin):
         None, max_length=500, description="How the injury happened"
     )
     severity: Optional[str] = Field(
-        None, description="Injury severity (mild/moderate/severe/life-threatening)"
+        None, description="Injury severity (none/mild/moderate/severe/life-threatening)"
     )
     status: str = Field(
         default="active", description="Current status (active/healing/resolved/chronic)"

@@ -415,7 +415,18 @@ const Symptoms = () => {
 
   const handleOccurrenceInputChange = e => {
     const { name, value } = e.target;
-    setOccurrenceFormData(prev => ({ ...prev, [name]: value }));
+    setOccurrenceFormData(prev => {
+      const updated = { ...prev, [name]: value };
+      if (name === 'severity' && value === 'none') {
+        if (prev.pain_scale === '') {
+          updated.pain_scale = '0';
+        }
+        if (prev.impact_level === '') {
+          updated.impact_level = 'no_impact';
+        }
+      }
+      return updated;
+    });
   };
 
   const handleOccurrenceSubmit = async e => {

@@ -1093,6 +1093,7 @@
     "mildImpact": "Bénigne - Impact mineur",
     "moderate": "Modérée - Symptômes notables",
     "moderateImpact": "Modérée - Impact notable",
+    "none": "Aucune - Aucune gêne",
     "severe": "Sévère - Réaction significative",
     "severeImpact": "Sévère - Impact significatif"
   },
