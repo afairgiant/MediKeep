@@ -302,7 +302,58 @@
     "clear": "Löschen",
     "itemCount": "{{filtered}} von {{total}} Einträgen",
     "title": "Filter & Suche",
-    "toggle": "Toggle filters"
+    "toggle": "Filter umschalten",
+    "defaults": {
+      "all": "Alle",
+      "completedDate": {
+        "all": "Alle Abschlussdaten"
+      },
+      "dateRange": {
+        "all": "Gesamter Zeitraum",
+        "lastYear": "Letztes Jahr",
+        "month": "Diesen Monat",
+        "pastYear": "Letzte 12 Monate",
+        "today": "Heute",
+        "week": "Diese Woche",
+        "year": "Dieses Jahr"
+      },
+      "files": {
+        "all": "Alle Datensätze"
+      },
+      "medicationType": {
+        "all": "Alle Typen"
+      },
+      "orderedDate": {
+        "all": "Alle Anordnungsdaten"
+      },
+      "result": {
+        "all": "Alle Ergebnisse"
+      },
+      "status": {
+        "active": "Aktiv",
+        "all": "Alle Status",
+        "inactive": "Inaktiv"
+      },
+      "type": {
+        "all": "Alle Typen"
+      }
+    },
+    "placeholders": {
+      "category": "Kategorie",
+      "completedDate": "Abschlussdatum",
+      "dateRange": "Zeitraum",
+      "files": "Dateien",
+      "medicationType": "Medikamententyp",
+      "orderedDate": "Anordnungsdatum",
+      "pharmacy": "Apotheke",
+      "prescriber": "Verordner",
+      "priority": "Priorität",
+      "results": "Ergebnisse",
+      "sortBy": "Sortieren nach",
+      "status": "Status"
+    },
+    "sortAscending": "A-Z",
+    "sortDescending": "Z-A"
   },
   "immunizations": {
     "addImmunization": "Neue Impfung hinzufügen",

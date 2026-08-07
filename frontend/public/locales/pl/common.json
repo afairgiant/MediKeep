@@ -302,7 +302,58 @@
     "clear": "Wyczyść",
     "itemCount": "{{filtered}} z {{total}} elementów",
     "title": "Filtry i wyszukiwanie",
-    "toggle": "Toggle filters"
+    "toggle": "Przełącz filtry",
+    "defaults": {
+      "all": "Wszystkie",
+      "completedDate": {
+        "all": "Wszystkie daty zakończenia"
+      },
+      "dateRange": {
+        "all": "Cały czas",
+        "lastYear": "Ostatni rok",
+        "month": "W tym miesiącu",
+        "pastYear": "Ostatnie 12 miesięcy",
+        "today": "Dzisiaj",
+        "week": "W tym tygodniu",
+        "year": "W tym roku"
+      },
+      "files": {
+        "all": "Wszystkie rekordy"
+      },
+      "medicationType": {
+        "all": "Wszystkie typy"
+      },
+      "orderedDate": {
+        "all": "Wszystkie daty zlecenia"
+      },
+      "result": {
+        "all": "Wszystkie wyniki"
+      },
+      "status": {
+        "active": "Aktywny",
+        "all": "Wszystkie statusy",
+        "inactive": "Nieaktywny"
+      },
+      "type": {
+        "all": "Wszystkie typy"
+      }
+    },
+    "placeholders": {
+      "category": "Kategoria",
+      "completedDate": "Data zakończenia",
+      "dateRange": "Zakres dat",
+      "files": "Pliki",
+      "medicationType": "Typ leku",
+      "orderedDate": "Data zlecenia",
+      "pharmacy": "Apteka",
+      "prescriber": "Lekarz przepisujący",
+      "priority": "Priorytet",
+      "results": "Wyniki",
+      "sortBy": "Sortuj według",
+      "status": "Status"
+    },
+    "sortAscending": "A-Z",
+    "sortDescending": "Z-A"
   },
   "immunizations": {
     "addImmunization": "Dodaj nowe szczepienie",

@@ -444,9 +444,11 @@ const Allergies = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
-                persistKey="allergies"
                 data={paginatedAllergies}
                 pagination={false}
+                sortBy={dataManagement.sortBy}
+                sortDirection={dataManagement.sortOrder}
+                onSort={dataManagement.handleSortChange}
                 disableEdit={isViewOnly}
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}

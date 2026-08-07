@@ -302,7 +302,58 @@
     "clear": "清除",
     "itemCount": "{{total}}项中的{{filtered}}项",
     "title": "筛选和搜索",
-    "toggle": "Toggle filters"
+    "toggle": "切换筛选",
+    "placeholders": {
+      "status": "状态",
+      "medicationType": "药物类型",
+      "category": "分类",
+      "prescriber": "开方医师",
+      "pharmacy": "药房",
+      "dateRange": "日期范围",
+      "orderedDate": "开单日期",
+      "completedDate": "完成日期",
+      "results": "结果",
+      "priority": "优先级",
+      "files": "文件",
+      "sortBy": "排序方式"
+    },
+    "sortAscending": "升序",
+    "sortDescending": "降序",
+    "defaults": {
+      "all": "全部",
+      "status": {
+        "all": "所有状态",
+        "active": "活跃",
+        "inactive": "非活跃"
+      },
+      "dateRange": {
+        "all": "全部时间",
+        "today": "今天",
+        "week": "本周",
+        "month": "本月",
+        "year": "今年",
+        "pastYear": "过去12个月",
+        "lastYear": "去年"
+      },
+      "result": {
+        "all": "所有结果"
+      },
+      "type": {
+        "all": "所有类型"
+      },
+      "files": {
+        "all": "所有记录"
+      },
+      "medicationType": {
+        "all": "所有类型"
+      },
+      "orderedDate": {
+        "all": "所有开单日期"
+      },
+      "completedDate": {
+        "all": "所有完成日期"
+      }
+    }
   },
   "immunizations": {
     "addImmunization": "添加新疫苗",

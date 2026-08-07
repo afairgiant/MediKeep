@@ -302,7 +302,58 @@
     "clear": "Wissen",
     "itemCount": "{{filtered}} van {{total}} items",
     "title": "Filters en zoeken",
-    "toggle": "Toggle filters"
+    "toggle": "Filters in-/uitklappen",
+    "defaults": {
+      "all": "Alle",
+      "completedDate": {
+        "all": "Alle voltooiingsdata"
+      },
+      "dateRange": {
+        "all": "Altijd",
+        "lastYear": "Vorig jaar",
+        "month": "Deze maand",
+        "pastYear": "Afgelopen 12 maanden",
+        "today": "Vandaag",
+        "week": "Deze week",
+        "year": "Dit jaar"
+      },
+      "files": {
+        "all": "Alle records"
+      },
+      "medicationType": {
+        "all": "Alle typen"
+      },
+      "orderedDate": {
+        "all": "Alle aanvraagdata"
+      },
+      "result": {
+        "all": "Alle resultaten"
+      },
+      "status": {
+        "active": "Actief",
+        "all": "Alle statussen",
+        "inactive": "Inactief"
+      },
+      "type": {
+        "all": "Alle typen"
+      }
+    },
+    "placeholders": {
+      "category": "Categorie",
+      "completedDate": "Voltooiingsdatum",
+      "dateRange": "Datumbereik",
+      "files": "Bestanden",
+      "medicationType": "Medicatietype",
+      "orderedDate": "Aanvraagdatum",
+      "pharmacy": "Apotheek",
+      "prescriber": "Voorschrijver",
+      "priority": "Prioriteit",
+      "results": "Resultaten",
+      "sortBy": "Sorteren op",
+      "status": "Status"
+    },
+    "sortAscending": "A-Z",
+    "sortDescending": "Z-A"
   },
   "immunizations": {
     "addImmunization": "Nieuwe vaccinatie toevoegen",

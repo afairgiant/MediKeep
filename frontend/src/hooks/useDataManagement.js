@@ -33,6 +33,8 @@ export const useDataManagement = (
     typeOptions = [],
     filesOptions = [],
     medicationTypeOptions = [],
+    practitionerOptions = [],
+    pharmacyOptions = [],
     totalCount = 0,
     filteredCount = 0,
   } = useFiltering(safeData, filterConfig);
@@ -81,6 +83,8 @@ export const useDataManagement = (
     typeOptions,
     filesOptions,
     medicationTypeOptions,
+    practitionerOptions,
+    pharmacyOptions,
 
     // Sort controls
     sortBy,

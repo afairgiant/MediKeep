@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "Детали реакции"
     },
-    "viewMedication": "Просмотреть сведения о лекарстве"
+    "viewMedication": "Просмотреть сведения о лекарстве",
+    "filters": {
+      "sort": {
+        "allergen": "Аллерген",
+        "onsetDate": "Дата начала",
+        "severity": "Тяжесть"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "Не удалось загрузить каталог анализов",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "Текущий статус этого заболевания"
+    },
+    "filters": {
+      "sort": {
+        "diagnosis": "Диагноз",
+        "onsetDate": "Дата начала",
+        "status": "Статус"
+      },
+      "status": {
+        "active": "Активный",
+        "all": "Все статусы",
+        "chronic": "Хроническое",
+        "inactive": "Неактивный",
+        "resolved": "Вылечено"
+      }
     }
   },
   "emergencyContacts": {
@@ -971,6 +992,37 @@
       "description": "Известные или наблюдаемые побочные эффекты этого лекарства",
       "label": "Побочные эффекты",
       "placeholder": "Перечислите известные или наблюдаемые побочные эффекты..."
+    },
+    "filters": {
+      "category": {
+        "all": "Все пути введения"
+      },
+      "dateRange": {
+        "all": "Все периоды",
+        "current": "В настоящее время активно",
+        "future": "Будущие препараты",
+        "past": "Прошлые препараты"
+      },
+      "pharmacy": {
+        "all": "Все аптеки"
+      },
+      "practitioner": {
+        "all": "Все назначившие врачи"
+      },
+      "sort": {
+        "active": "Статус (сначала активные)",
+        "medicationName": "Название лекарства",
+        "pharmacy": "Аптека",
+        "prescriber": "Назначивший врач",
+        "startDate": "Дата начала"
+      },
+      "status": {
+        "active": "Активный",
+        "all": "Все статусы",
+        "completed": "Завершено",
+        "onHold": "Приостановлено",
+        "stopped": "Прекращено"
+      }
     }
   },
   "pharmacies": {
@@ -1207,6 +1259,25 @@
     },
     "status": {
       "description": "Текущий статус процедуры"
+    },
+    "filters": {
+      "sort": {
+        "date": "Дата процедуры",
+        "practitioner": "Лечащий врач",
+        "procedureName": "Название процедуры",
+        "status": "Статус"
+      },
+      "practitioner": {
+        "all": "Все лечащие врачи"
+      },
+      "status": {
+        "all": "Все статусы",
+        "cancelled": "Отменено",
+        "completed": "Завершено",
+        "inProgress": "В процессе",
+        "postponed": "Отложено",
+        "scheduled": "Запланировано"
+      }
     }
   },
   "symptoms": {
@@ -1443,6 +1514,22 @@
         "surgery": "Хирургия — Хирургическая процедура"
       },
       "placeholder": "Выберите тип"
+    },
+    "filters": {
+      "sort": {
+        "practitioner": "Лечащий врач",
+        "startDate": "Дата начала",
+        "status": "Статус",
+        "treatmentName": "Название лечения"
+      },
+      "status": {
+        "active": "Активный",
+        "all": "Все статусы",
+        "cancelled": "Отменено",
+        "completed": "Завершено",
+        "onHold": "Приостановлено",
+        "planned": "Запланировано"
+      }
     }
   },
   "visits": {

@@ -1045,6 +1045,65 @@ describe('Procedures Page Integration Tests', () => {
     });
   });
 
+  /* ============ Practitioner filtering/sorting enrichment ============ */
+  describe('Practitioner Name Enrichment (filtering/sorting)', () => {
+    // useDataManagement is mocked with a fixed mockReturnValue in
+    // setupDefaults(), so it never reflects what Procedures.jsx actually
+    // computed — but vi.fn() still records the call, so we can inspect the
+    // *argument* it was invoked with to verify the enrichment itself,
+    // independent of what the mock chooses to return for rendering.
+    function getEnrichedDataPassedToDataManagement() {
+      const calls = useDataManagement.mock.calls;
+      return calls[calls.length - 1][0];
+    }
+
+    it('prefers a nested practitioner object over an practitioner_id lookup', () => {
+      const proceduresWithNestedPractitioner = [
+        {
+          ...mockProcedures[0],
+          // Nested object should win even though practitioner_id also
+          // resolves (to a different practitioner) via the practitioners list.
+          practitioner: { id: 99, name: 'Dr. Nested' },
+          practitioner_id: 1,
+        },
+      ];
+      setupDefaults({ items: proceduresWithNestedPractitioner });
+
+      render(<Procedures />);
+
+      const enriched = getEnrichedDataPassedToDataManagement();
+      expect(enriched[0].practitioner_name).toBe('Dr. Nested');
+    });
+
+    it('falls back to a practitioner_id lookup when there is no nested object', () => {
+      const proceduresWithIdOnly = [
+        { ...mockProcedures[1], practitioner: undefined, practitioner_id: 2 },
+      ];
+      setupDefaults({ items: proceduresWithIdOnly });
+
+      render(<Procedures />);
+
+      const enriched = getEnrichedDataPassedToDataManagement();
+      expect(enriched[0].practitioner_name).toBe('Dr. Martinez');
+    });
+
+    it('resolves to an empty string when neither a nested object nor a matching practitioner_id is present', () => {
+      const proceduresWithNoPractitioner = [
+        {
+          ...mockProcedures[2],
+          practitioner: undefined,
+          practitioner_id: null,
+        },
+      ];
+      setupDefaults({ items: proceduresWithNoPractitioner });
+
+      render(<Procedures />);
+
+      const enriched = getEnrichedDataPassedToDataManagement();
+      expect(enriched[0].practitioner_name).toBe('');
+    });
+  });
+
   /* ============ useFormSubmissionWithUploads Integration ============ */
   describe('Form Submission With Uploads', () => {
     it('calls resetSubmission when opening add form', async () => {
@@ -1090,5 +1149,30 @@ describe('Procedures Page Integration Tests', () => {
         render(<Procedures />);
       }).not.toThrow();
     });
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  proceduresPageConfig — imported directly (not through the mocked  */
+/*  getMedicalPageConfig barrel above) so this checks the real config */
+/*  object that powers Advanced Filters/Sort in production.           */
+/* ------------------------------------------------------------------ */
+describe('proceduresPageConfig — practitioner filtering/sorting', () => {
+  it('wires up practitioner_name for filtering, search, and sorting', async () => {
+    const { proceduresPageConfig } = await import(
+      '../../../utils/medicalPageConfigs/procedures'
+    );
+
+    expect(proceduresPageConfig.filtering.practitionerField).toBe(
+      'practitioner_name'
+    );
+    expect(proceduresPageConfig.filtering.searchFields).toContain(
+      'practitioner_name'
+    );
+    expect(proceduresPageConfig.sorting.sortOptions).toContainEqual({
+      value: 'practitioner_name',
+      label: 'medical:procedures.filters.sort.practitioner',
+    });
+    expect(proceduresPageConfig.filterControls.showPractitioner).toBe(true);
   });
 });

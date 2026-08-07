@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "反应详情"
     },
-    "viewMedication": "查看药物详情"
+    "viewMedication": "查看药物详情",
+    "filters": {
+      "sort": {
+        "severity": "严重程度",
+        "allergen": "过敏原",
+        "onsetDate": "开始日期"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "加载检测目录失败",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "疾病的当前状态"
+    },
+    "filters": {
+      "status": {
+        "all": "所有状态",
+        "active": "活跃",
+        "resolved": "已解决",
+        "chronic": "慢性",
+        "inactive": "非活跃"
+      },
+      "sort": {
+        "onsetDate": "开始日期",
+        "diagnosis": "诊断",
+        "status": "状态"
+      }
     }
   },
   "emergencyContacts": {
@@ -967,6 +988,37 @@
       "description": "此药物的已知或经历的副作用",
       "label": "副作用",
       "placeholder": "列出任何已知或经历的副作用..."
+    },
+    "filters": {
+      "status": {
+        "all": "所有状态",
+        "active": "活跃",
+        "completed": "已完成",
+        "stopped": "已停止",
+        "onHold": "暂停"
+      },
+      "dateRange": {
+        "all": "所有时间段",
+        "current": "当前活跃",
+        "past": "既往用药",
+        "future": "未来用药"
+      },
+      "sort": {
+        "active": "状态（活跃优先）",
+        "medicationName": "药物名称",
+        "startDate": "开始日期",
+        "prescriber": "开方医师",
+        "pharmacy": "药房"
+      },
+      "category": {
+        "all": "所有给药途径"
+      },
+      "practitioner": {
+        "all": "所有开方医师"
+      },
+      "pharmacy": {
+        "all": "所有药房"
+      }
     }
   },
   "pharmacies": {
@@ -1203,6 +1255,25 @@
     },
     "status": {
       "description": "操作的当前状态"
+    },
+    "filters": {
+      "status": {
+        "all": "所有状态",
+        "scheduled": "已安排",
+        "inProgress": "进行中",
+        "completed": "已完成",
+        "postponed": "已推迟",
+        "cancelled": "已取消"
+      },
+      "sort": {
+        "date": "操作日期",
+        "procedureName": "操作名称",
+        "status": "状态",
+        "practitioner": "医师"
+      },
+      "practitioner": {
+        "all": "所有医师"
+      }
     }
   },
   "symptoms": {
@@ -1439,6 +1510,22 @@
         "surgery": "手术 - 外科手术"
       },
       "placeholder": "选择类型"
+    },
+    "filters": {
+      "status": {
+        "all": "所有状态",
+        "active": "活跃",
+        "completed": "已完成",
+        "planned": "计划中",
+        "onHold": "暂停",
+        "cancelled": "已取消"
+      },
+      "sort": {
+        "startDate": "开始日期",
+        "treatmentName": "治疗名称",
+        "status": "状态",
+        "practitioner": "医师"
+      }
     }
   },
   "visits": {

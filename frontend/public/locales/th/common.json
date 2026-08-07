@@ -292,7 +292,59 @@
   "filters": {
     "clear": "ล้าง",
     "itemCount": "{{filtered}} จาก {{total}} รายการ",
-    "title": "ฟิลเตอร์และค้นหา"
+    "title": "ฟิลเตอร์และค้นหา",
+    "toggle": "สลับฟิลเตอร์",
+    "placeholders": {
+      "status": "สถานะ",
+      "medicationType": "ประเภทยา",
+      "category": "หมวดหมู่",
+      "prescriber": "แพทย์ผู้สั่งยา",
+      "pharmacy": "ร้านขายยา",
+      "dateRange": "ช่วงวันที่",
+      "orderedDate": "วันที่สั่ง",
+      "completedDate": "วันที่เสร็จสิ้น",
+      "results": "ผลลัพธ์",
+      "priority": "ความสำคัญ",
+      "files": "ไฟล์",
+      "sortBy": "เรียงตาม"
+    },
+    "sortAscending": "น้อยไปมาก",
+    "sortDescending": "มากไปน้อย",
+    "defaults": {
+      "all": "ทั้งหมด",
+      "status": {
+        "all": "สถานะทั้งหมด",
+        "active": "ใช้งานอยู่",
+        "inactive": "ไม่ใช้งาน"
+      },
+      "dateRange": {
+        "all": "ทุกช่วงเวลา",
+        "today": "วันนี้",
+        "week": "สัปดาห์นี้",
+        "month": "เดือนนี้",
+        "year": "ปีนี้",
+        "pastYear": "12 เดือนที่ผ่านมา",
+        "lastYear": "ปีที่แล้ว"
+      },
+      "result": {
+        "all": "ผลลัพธ์ทั้งหมด"
+      },
+      "type": {
+        "all": "ทุกประเภท"
+      },
+      "files": {
+        "all": "บันทึกทั้งหมด"
+      },
+      "medicationType": {
+        "all": "ทุกประเภท"
+      },
+      "orderedDate": {
+        "all": "วันที่สั่งทั้งหมด"
+      },
+      "completedDate": {
+        "all": "วันที่เสร็จสิ้นทั้งหมด"
+      }
+    }
   },
   "immunizations": {
     "addImmunization": "เพิ่มการฉีดวัคซีนใหม่",

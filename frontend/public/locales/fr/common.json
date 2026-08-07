@@ -302,7 +302,58 @@
     "clear": "Effacer",
     "itemCount": "{{filtered}} sur {{total}} objets",
     "title": "Filtres et recherche",
-    "toggle": "Toggle filters"
+    "toggle": "Basculer les filtres",
+    "defaults": {
+      "all": "Tous",
+      "completedDate": {
+        "all": "Toutes les dates d'achèvement"
+      },
+      "dateRange": {
+        "all": "Toutes périodes",
+        "lastYear": "L'an passé",
+        "month": "Ce mois-ci",
+        "pastYear": "12 derniers mois",
+        "today": "Aujourd'hui",
+        "week": "Cette semaine",
+        "year": "Cette année"
+      },
+      "files": {
+        "all": "Tous les dossiers"
+      },
+      "medicationType": {
+        "all": "Tous les types"
+      },
+      "orderedDate": {
+        "all": "Toutes les dates de prescription"
+      },
+      "result": {
+        "all": "Tous les résultats"
+      },
+      "status": {
+        "active": "Actif",
+        "all": "Tous les statuts",
+        "inactive": "Inactif"
+      },
+      "type": {
+        "all": "Tous les types"
+      }
+    },
+    "placeholders": {
+      "category": "Catégorie",
+      "completedDate": "Date d'achèvement",
+      "dateRange": "Plage temporelle",
+      "files": "Fichiers",
+      "medicationType": "Type de médicament",
+      "orderedDate": "Date de prescription",
+      "pharmacy": "Pharmacie",
+      "prescriber": "Prescripteur",
+      "priority": "Priorité",
+      "results": "Résultats",
+      "sortBy": "Trier par",
+      "status": "Statut"
+    },
+    "sortAscending": "A-Z",
+    "sortDescending": "Z-A"
   },
   "immunizations": {
     "addImmunization": "Ajouter une nouvelle immunisation",

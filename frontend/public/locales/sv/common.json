@@ -302,7 +302,58 @@
     "clear": "Rensa",
     "itemCount": "{{filtered}} av {{total}} objekt",
     "title": "Filter och sök",
-    "toggle": "Toggle filters"
+    "toggle": "Växla filter",
+    "defaults": {
+      "all": "Alla",
+      "completedDate": {
+        "all": "Alla slutförandedatum"
+      },
+      "dateRange": {
+        "all": "All tid",
+        "lastYear": "Senaste året",
+        "month": "Denna månad",
+        "pastYear": "Senaste 12 månaderna",
+        "today": "Idag",
+        "week": "Denna vecka",
+        "year": "Detta år"
+      },
+      "files": {
+        "all": "Alla poster"
+      },
+      "medicationType": {
+        "all": "Alla typer"
+      },
+      "orderedDate": {
+        "all": "Alla beställningsdatum"
+      },
+      "result": {
+        "all": "Alla resultat"
+      },
+      "status": {
+        "active": "Aktiv",
+        "all": "Alla statusar",
+        "inactive": "Inaktiv"
+      },
+      "type": {
+        "all": "Alla typer"
+      }
+    },
+    "placeholders": {
+      "category": "Kategori",
+      "completedDate": "Slutförandedatum",
+      "dateRange": "Datumintervall",
+      "files": "Filer",
+      "medicationType": "Läkemedelstyp",
+      "orderedDate": "Beställningsdatum",
+      "pharmacy": "Apotek",
+      "prescriber": "Förskrivare",
+      "priority": "Prioritet",
+      "results": "Resultat",
+      "sortBy": "Sortera efter",
+      "status": "Status"
+    },
+    "sortAscending": "A-Z",
+    "sortDescending": "Z-A"
   },
   "immunizations": {
     "addImmunization": "Lägg till ny vaccination",

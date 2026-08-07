@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "Detalles de la Reacción"
     },
-    "viewMedication": "Ver detalles del medicamento"
+    "viewMedication": "Ver detalles del medicamento",
+    "filters": {
+      "sort": {
+        "allergen": "Alérgeno",
+        "onsetDate": "Fecha de inicio",
+        "severity": "Gravedad"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "Error al cargar el catálogo de pruebas",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "Estado actual de esta condición"
+    },
+    "filters": {
+      "sort": {
+        "diagnosis": "Diagnóstico",
+        "onsetDate": "Fecha de inicio",
+        "status": "Estado"
+      },
+      "status": {
+        "active": "Activo",
+        "all": "Todos los estados",
+        "chronic": "Crónica",
+        "inactive": "Inactivo",
+        "resolved": "Resuelto"
+      }
     }
   },
   "emergencyContacts": {
@@ -971,6 +992,37 @@
       "description": "Efectos secundarios conocidos o experimentados de este medicamento",
       "label": "Efectos Secundarios",
       "placeholder": "Enumere cualquier efecto secundario conocido o experimentado..."
+    },
+    "filters": {
+      "category": {
+        "all": "Todas las Vías"
+      },
+      "dateRange": {
+        "all": "Todos los períodos",
+        "current": "Actualmente activo",
+        "future": "Medicamentos futuros",
+        "past": "Medicamentos anteriores"
+      },
+      "pharmacy": {
+        "all": "Todas las Farmacias"
+      },
+      "practitioner": {
+        "all": "Todos los Prescriptores"
+      },
+      "sort": {
+        "active": "Estado (Activos primero)",
+        "medicationName": "Nombre del Medicamento",
+        "pharmacy": "Farmacia",
+        "prescriber": "Prescriptor",
+        "startDate": "Fecha de inicio"
+      },
+      "status": {
+        "active": "Activo",
+        "all": "Todos los estados",
+        "completed": "Completado",
+        "onHold": "En espera",
+        "stopped": "Detenido"
+      }
     }
   },
   "pharmacies": {
@@ -1207,6 +1259,25 @@
     },
     "status": {
       "description": "Estado actual del procedimiento"
+    },
+    "filters": {
+      "sort": {
+        "date": "Fecha del Procedimiento",
+        "practitioner": "Profesional",
+        "procedureName": "Nombre del Procedimiento",
+        "status": "Estado"
+      },
+      "practitioner": {
+        "all": "Todos los profesionales"
+      },
+      "status": {
+        "all": "Todos los estados",
+        "cancelled": "Cancelado",
+        "completed": "Completado",
+        "inProgress": "En curso",
+        "postponed": "Pospuesto",
+        "scheduled": "Programado"
+      }
     }
   },
   "symptoms": {
@@ -1443,6 +1514,22 @@
         "surgery": "Cirugía - Procedimiento quirúrgico"
       },
       "placeholder": "Seleccione el tipo"
+    },
+    "filters": {
+      "sort": {
+        "practitioner": "Profesional",
+        "startDate": "Fecha de inicio",
+        "status": "Estado",
+        "treatmentName": "Nombre del Tratamiento"
+      },
+      "status": {
+        "active": "Activo",
+        "all": "Todos los estados",
+        "cancelled": "Cancelado",
+        "completed": "Completado",
+        "onHold": "En espera",
+        "planned": "Planificado"
+      }
     }
   },
   "visits": {

@@ -302,7 +302,58 @@
     "clear": "Clear",
     "itemCount": "{{filtered}} of {{total}} items",
     "title": "Filters & Search",
-    "toggle": "Toggle filters"
+    "toggle": "Toggle filters",
+    "placeholders": {
+      "status": "Status",
+      "medicationType": "Medication Type",
+      "category": "Category",
+      "prescriber": "Prescriber",
+      "pharmacy": "Pharmacy",
+      "dateRange": "Date Range",
+      "orderedDate": "Ordered Date",
+      "completedDate": "Completed Date",
+      "results": "Results",
+      "priority": "Priority",
+      "files": "Files",
+      "sortBy": "Sort by"
+    },
+    "sortAscending": "A-Z",
+    "sortDescending": "Z-A",
+    "defaults": {
+      "all": "All",
+      "status": {
+        "all": "All Statuses",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "dateRange": {
+        "all": "All Time",
+        "today": "Today",
+        "week": "This Week",
+        "month": "This Month",
+        "year": "This Year",
+        "pastYear": "Past 12 Months",
+        "lastYear": "Last Year"
+      },
+      "result": {
+        "all": "All Results"
+      },
+      "type": {
+        "all": "All Types"
+      },
+      "files": {
+        "all": "All Records"
+      },
+      "medicationType": {
+        "all": "All Types"
+      },
+      "orderedDate": {
+        "all": "All Ordered Dates"
+      },
+      "completedDate": {
+        "all": "All Completed Dates"
+      }
+    }
   },
   "immunizations": {
     "addImmunization": "Add New Immunization",

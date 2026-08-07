@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMedicalData } from '../../hooks/useMedicalData';
@@ -39,6 +39,13 @@ import {
 import MedicalPageAlerts from '../../components/shared/MedicalPageAlerts';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
 
+// The table's Practitioner column renders a nested `practitioner` object
+// (or falls back to a practitioner_id lookup), so it has no plain string
+// field to sort on directly — route it through the enriched practitioner_name
+// field instead, same as the Sort dropdown's "Practitioner" option.
+const SORT_FIELD_TO_COLUMN = { practitioner_name: 'practitioner' };
+const COLUMN_TO_SORT_FIELD = { practitioner: 'practitioner_name' };
+
 const Treatments = () => {
   const { t } = useTranslation(['common', 'shared']);
   const { isViewOnly, viewOnlyTooltip } = usePatientPermissions();
@@ -61,7 +68,12 @@ const Treatments = () => {
   // Get practitioners data
   const { practitioners: practitionersObject } = usePatientWithStaticData();
 
-  const practitioners = practitionersObject?.practitioners || [];
+  // Memoized so treatmentsWithNames below doesn't recompute every render —
+  // the `|| []` fallback would otherwise be a new array reference each time.
+  const practitioners = useMemo(
+    () => practitionersObject?.practitioners || [],
+    [practitionersObject?.practitioners]
+  );
 
   // Get standardized formatters for treatments
   const treatmentFormatters = getEntityFormatters(
@@ -117,8 +129,21 @@ const Treatments = () => {
   // Get standardized configuration
   const config = getMedicalPageConfig('treatments');
 
+  // Enrich with practitioner display name *before* filtering and sorting, so
+  // the Advanced Filters dropdown and Sort dropdown/table-header sort can
+  // match on that name instead of only the underlying practitioner_id.
+  const treatmentsWithNames = useMemo(() => {
+    return treatments.map(treatment => ({
+      ...treatment,
+      practitioner_name:
+        treatment.practitioner?.name ||
+        practitioners.find(p => p.id === treatment.practitioner_id)?.name ||
+        '',
+    }));
+  }, [treatments, practitioners]);
+
   // Use standardized data management
-  const dataManagement = useDataManagement(treatments, config);
+  const dataManagement = useDataManagement(treatmentsWithNames, config);
 
   // File count management for cards
   const { fileCounts, fileCountsLoading, cleanupFileCount, refreshFileCount } =
@@ -410,6 +435,21 @@ const Treatments = () => {
   const filteredTreatments = dataManagement.data;
   const paginatedTreatments = paginateData(filteredTreatments);
 
+  // Share sort state between the filter bar's Sort dropdown and the table's
+  // clickable column headers instead of letting the table sort its own
+  // (page-local, disconnected) copy.
+  const tableSortBy =
+    SORT_FIELD_TO_COLUMN[dataManagement.sortBy] ?? dataManagement.sortBy;
+
+  const handleTableSort = useCallback(
+    columnKey => {
+      dataManagement.handleSortChange(
+        COLUMN_TO_SORT_FIELD[columnKey] ?? columnKey
+      );
+    },
+    [dataManagement]
+  );
+
   useEffect(() => {
     resetPage();
   }, [dataManagement.hasActiveFilters, resetPage]);
@@ -525,9 +565,11 @@ const Treatments = () => {
           ) : (
             <Paper shadow="sm" radius="md" withBorder>
               <ResponsiveTable
-                persistKey="treatments"
                 data={paginatedTreatments}
                 pagination={false}
+                sortBy={tableSortBy}
+                sortDirection={dataManagement.sortOrder}
+                onSort={handleTableSort}
                 disableEdit={isViewOnly}
                 disableDelete={isViewOnly}
                 disableActionsTooltip={viewOnlyTooltip}

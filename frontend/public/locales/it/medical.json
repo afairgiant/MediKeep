@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "Dettagli della reazione"
     },
-    "viewMedication": "Visualizza dettagli farmaco"
+    "viewMedication": "Visualizza dettagli farmaco",
+    "filters": {
+      "sort": {
+        "allergen": "Allergene",
+        "onsetDate": "Data di inizio",
+        "severity": "Gravità"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "Impossibile caricare il catalogo dei test",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "Stato attuale di questa condizione"
+    },
+    "filters": {
+      "sort": {
+        "diagnosis": "Diagnosi",
+        "onsetDate": "Data di inizio",
+        "status": "Stato"
+      },
+      "status": {
+        "active": "Attivo",
+        "all": "Tutti gli stati",
+        "chronic": "Cronico",
+        "inactive": "Inattivo",
+        "resolved": "Risolto"
+      }
     }
   },
   "emergencyContacts": {
@@ -971,6 +992,37 @@
       "description": "Effetti collaterali noti o sperimentati di questo farmaco",
       "label": "Effetti collaterali",
       "placeholder": "Elenchi gli effetti collaterali noti o sperimentati..."
+    },
+    "filters": {
+      "category": {
+        "all": "Tutte le vie di somministrazione"
+      },
+      "dateRange": {
+        "all": "Tutti i periodi",
+        "current": "Attualmente attivo",
+        "future": "Farmaci futuri",
+        "past": "Farmaci passati"
+      },
+      "pharmacy": {
+        "all": "Tutte le Farmacie"
+      },
+      "practitioner": {
+        "all": "Tutti i Prescrittori"
+      },
+      "sort": {
+        "active": "Stato (Attivi per primi)",
+        "medicationName": "Nome del farmaco",
+        "pharmacy": "Farmacia",
+        "prescriber": "Prescrittore",
+        "startDate": "Data di inizio"
+      },
+      "status": {
+        "active": "Attivo",
+        "all": "Tutti gli stati",
+        "completed": "Completato",
+        "onHold": "In attesa",
+        "stopped": "Interrotto"
+      }
     }
   },
   "pharmacies": {
@@ -1207,6 +1259,25 @@
     },
     "status": {
       "description": "Stato attuale della procedura"
+    },
+    "filters": {
+      "sort": {
+        "date": "Data della procedura",
+        "practitioner": "Professionista",
+        "procedureName": "Nome della procedura",
+        "status": "Stato"
+      },
+      "practitioner": {
+        "all": "Tutti i professionisti"
+      },
+      "status": {
+        "all": "Tutti gli stati",
+        "cancelled": "Annullato",
+        "completed": "Completato",
+        "inProgress": "In corso",
+        "postponed": "Rinviato",
+        "scheduled": "Programmato"
+      }
     }
   },
   "symptoms": {
@@ -1443,6 +1514,22 @@
         "surgery": "Chirurgia - Procedura chirurgica"
       },
       "placeholder": "Seleziona il tipo"
+    },
+    "filters": {
+      "sort": {
+        "practitioner": "Professionista",
+        "startDate": "Data di inizio",
+        "status": "Stato",
+        "treatmentName": "Nome del trattamento"
+      },
+      "status": {
+        "active": "Attivo",
+        "all": "Tutti gli stati",
+        "cancelled": "Annullato",
+        "completed": "Completato",
+        "onHold": "In attesa",
+        "planned": "Pianificato"
+      }
     }
   },
   "visits": {

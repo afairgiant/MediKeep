@@ -4,19 +4,35 @@
 
 export const treatmentsPageConfig = {
   filtering: {
-    searchFields: ['treatment_name', 'description', 'notes'],
+    searchFields: [
+      'treatment_name',
+      'description',
+      'notes',
+      'practitioner_name',
+    ],
     statusField: 'status',
     statusOptions: [
-      { value: 'all', label: 'All Statuses' },
-      { value: 'active', label: 'Active' },
-      { value: 'completed', label: 'Completed' },
-      { value: 'planned', label: 'Planned' },
-      { value: 'on-hold', label: 'On Hold' },
-      { value: 'cancelled', label: 'Cancelled' },
+      { value: 'all', label: 'medical:treatments.filters.status.all' },
+      { value: 'active', label: 'medical:treatments.filters.status.active' },
+      {
+        value: 'completed',
+        label: 'medical:treatments.filters.status.completed',
+      },
+      { value: 'planned', label: 'medical:treatments.filters.status.planned' },
+      {
+        value: 'on-hold',
+        label: 'medical:treatments.filters.status.onHold',
+      },
+      {
+        value: 'cancelled',
+        label: 'medical:treatments.filters.status.cancelled',
+      },
     ],
     dateField: 'start_date',
     startDateField: 'start_date',
     endDateField: 'end_date',
+    practitionerField: 'practitioner_name',
+    practitionerLabel: 'Practitioners',
     customFilters: {
       dateRange: (item, dateRange) => {
         if (dateRange === 'all') return true;
@@ -118,19 +134,31 @@ export const treatmentsPageConfig = {
     defaultSortBy: 'start_date',
     defaultSortOrder: 'desc',
     sortOptions: [
-      { value: 'start_date', label: 'Start Date' },
-      { value: 'treatment_name', label: 'Treatment Name' },
-      { value: 'status', label: 'Status' },
+      {
+        value: 'start_date',
+        label: 'medical:treatments.filters.sort.startDate',
+      },
+      {
+        value: 'treatment_name',
+        label: 'medical:treatments.filters.sort.treatmentName',
+      },
+      { value: 'status', label: 'medical:treatments.filters.sort.status' },
+      {
+        value: 'practitioner_name',
+        label: 'medical:treatments.filters.sort.practitioner',
+      },
     ],
     sortTypes: {
       start_date: 'date',
       treatment_name: 'string',
       status: 'status',
+      practitioner_name: 'string',
     },
   },
   filterControls: {
     searchPlaceholder: 'searchPlaceholders.treatments',
     title: 'Filter & Sort Treatments',
     showDateRange: true,
+    showPractitioner: true,
   },
 };

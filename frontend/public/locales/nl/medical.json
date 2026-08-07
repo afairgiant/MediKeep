@@ -66,7 +66,14 @@
     "tabs": {
       "reactionDetails": "Reactiedetails"
     },
-    "viewMedication": "Medicijndetails bekijken"
+    "viewMedication": "Medicijndetails bekijken",
+    "filters": {
+      "sort": {
+        "allergen": "Allergeen",
+        "onsetDate": "Startdatum",
+        "severity": "Ernst"
+      }
+    }
   },
   "componentCatalog": {
     "fetchError": "Laden van testcatalogus mislukt",
@@ -137,6 +144,20 @@
     },
     "status": {
       "description": "Huidige status van deze aandoening"
+    },
+    "filters": {
+      "sort": {
+        "diagnosis": "Diagnose",
+        "onsetDate": "Startdatum",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Actief",
+        "all": "Alle statussen",
+        "chronic": "Chronisch",
+        "inactive": "Inactief",
+        "resolved": "Opgelost"
+      }
     }
   },
   "emergencyContacts": {
@@ -971,6 +992,37 @@
       "description": "Bekende of ondervonden bijwerkingen van deze medicatie",
       "label": "Bijwerkingen",
       "placeholder": "Vermeld bekende of ondervonden bijwerkingen..."
+    },
+    "filters": {
+      "category": {
+        "all": "Alle toedieningswegen"
+      },
+      "dateRange": {
+        "all": "Alle periodes",
+        "current": "Momenteel actief",
+        "future": "Toekomstige medicatie",
+        "past": "Eerdere medicatie"
+      },
+      "pharmacy": {
+        "all": "Alle Apotheken"
+      },
+      "practitioner": {
+        "all": "Alle Voorschrijvers"
+      },
+      "sort": {
+        "active": "Status (Actief eerst)",
+        "medicationName": "Naam medicatie",
+        "pharmacy": "Apotheek",
+        "prescriber": "Voorschrijver",
+        "startDate": "Startdatum"
+      },
+      "status": {
+        "active": "Actief",
+        "all": "Alle statussen",
+        "completed": "Voltooid",
+        "onHold": "In de wacht",
+        "stopped": "Gestopt"
+      }
     }
   },
   "pharmacies": {
@@ -1207,6 +1259,25 @@
     },
     "status": {
       "description": "Huidige status van de ingreep"
+    },
+    "filters": {
+      "sort": {
+        "date": "Datum ingreep",
+        "practitioner": "Zorgverlener",
+        "procedureName": "Naam ingreep",
+        "status": "Status"
+      },
+      "practitioner": {
+        "all": "Alle zorgverleners"
+      },
+      "status": {
+        "all": "Alle statussen",
+        "cancelled": "Geannuleerd",
+        "completed": "Voltooid",
+        "inProgress": "In behandeling",
+        "postponed": "Uitgesteld",
+        "scheduled": "Gepland"
+      }
     }
   },
   "symptoms": {
@@ -1443,6 +1514,22 @@
         "surgery": "Chirurgie - Chirurgische ingreep"
       },
       "placeholder": "Selecteer type"
+    },
+    "filters": {
+      "sort": {
+        "practitioner": "Zorgverlener",
+        "startDate": "Startdatum",
+        "status": "Status",
+        "treatmentName": "Naam behandeling"
+      },
+      "status": {
+        "active": "Actief",
+        "all": "Alle statussen",
+        "cancelled": "Geannuleerd",
+        "completed": "Voltooid",
+        "onHold": "In de wacht",
+        "planned": "Gepland"
+      }
     }
   },
   "visits": {
