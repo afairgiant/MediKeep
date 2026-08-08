@@ -9,7 +9,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { REGEX_PATTERNS } from '../TestComponentBulkEntry';
+import {
+  REGEX_PATTERNS,
+  QUALITATIVE_PATTERN,
+  TEXTUAL_PATTERN,
+} from '../TestComponentBulkEntry';
 
 /**
  * Helper to parse a line using the same logic as TestComponentBulkEntry.
@@ -344,5 +348,50 @@ describe('TestComponentBulkEntry Parser', () => {
       expect(result).not.toBeNull();
       expect(result!.status).toBe('normal');
     });
+  });
+});
+
+/**
+ * Textual / semi-quantitative results (Epic MyChart urinalysis, GFR, etc.).
+ * These are emitted by the backend Epic MyChart card parser as bare
+ * "Name: token" lines and stored as free-text results.
+ */
+describe('TEXTUAL_PATTERN: semi-quantitative results', () => {
+  const cases: Array<[string, string, string]> = [
+    ['Ketones, UA: Trace', 'Ketones, UA', 'Trace'],
+    ['Squamous Epi (lpf), UA: Few', 'Squamous Epi (lpf), UA', 'Few'],
+    ['WBC, UA: None seen', 'WBC, UA', 'None seen'],
+    ['Bacteria, UA: None', 'Bacteria, UA', 'None'],
+    ['GFR Calculation: >60', 'GFR Calculation', '>60'],
+    ['Epithelial Cells (non renal): 0-10', 'Epithelial Cells (non renal)', '0-10'],
+    ['Glucose, UA: 3+', 'Glucose, UA', '3+'],
+  ];
+
+  it.each(cases)('parses "%s"', (line, expectedName, expectedValue) => {
+    const match = line.match(TEXTUAL_PATTERN);
+    expect(match).not.toBeNull();
+    expect(match![1].trim()).toBe(expectedName);
+    expect(match![2].trim()).toBe(expectedValue);
+  });
+
+  it('does not match numeric results with unit and range', () => {
+    expect('WBC: 14.2 x10E3/uL (3.4 - 10.8)'.match(TEXTUAL_PATTERN)).toBeNull();
+  });
+
+  it('does not match a bare decimal value', () => {
+    expect('Anion Gap: 10.0'.match(TEXTUAL_PATTERN)).toBeNull();
+  });
+
+  it('does not match standard qualitative values (handled elsewhere)', () => {
+    expect('Protein, UA: Negative'.match(TEXTUAL_PATTERN)).toBeNull();
+  });
+});
+
+describe('QUALITATIVE_PATTERN precedence', () => {
+  it('matches standard qualitative value', () => {
+    const match = 'Protein, UA: Negative'.match(QUALITATIVE_PATTERN);
+    expect(match).not.toBeNull();
+    expect(match![1].trim()).toBe('Protein, UA');
+    expect(match![2].toLowerCase()).toBe('negative');
   });
 });

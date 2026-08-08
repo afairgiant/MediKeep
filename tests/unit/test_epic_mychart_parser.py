@@ -6,7 +6,9 @@ flag determination, gauge artifact filtering, and edge cases.
 """
 
 import pytest
-from app.services.lab_parsers.epic_mychart_parser import EpicMyChartParser
+from app.services.lab_parsers.epic_mychart_parser import (
+    EpicMyChartSingleColumnParser as EpicMyChartParser,
+)
 from tests.fixtures.lab_text_samples import (
     EPIC_MYCHART_RENAL_PANEL,
     EPIC_MYCHART_FULL_PANEL,
@@ -424,7 +426,7 @@ class TestEpicMyChartRegistryIntegration:
 
         registry = LabParserRegistry()
         parser_types = [type(p).__name__ for p in registry.parsers]
-        assert "EpicMyChartParser" in parser_types
+        assert "EpicMyChartSingleColumnParser" in parser_types
 
     def test_registry_detects_epic_format(self):
         """Test registry auto-detects Epic MyChart format."""

@@ -1,26 +1,30 @@
 """
-Epic MyChart-specific PDF parser.
-Handles lab results downloaded from Epic MyChart patient portals.
+Epic MyChart single-column PDF parser.
+Handles lab results downloaded from Epic MyChart patient portals whose text
+extracts as a simple single-column stream.
 
-Epic MyChart uses a card-based visual layout with gauge bars.
 Each test shows: test name, "Normal range: X - Y unit", a value with a
 visual gauge, and gauge endpoint numbers. This is very different from the
 tabular formats of LabCorp/Quest.
+
+For the richer two-column "Test Details" export layout (with doubled-digit
+gauge artifacts and "Normal value:" anchors) see
+``epic_mychart_card_parser.EpicMyChartCardParser``, which is tried first.
 """
 
 import re
-from datetime import datetime
 from typing import List, Optional, Set, Tuple
 
 from app.core.logging.config import get_logger
 
-from .base_parser import BaseLabParser, LabTestResult
+from .base_parser import LabTestResult
+from .epic_mychart_base_parser import EpicMyChartBaseParser
 
 logger = get_logger(__name__, "app")
 
 
-class EpicMyChartParser(BaseLabParser):
-    """Parser for Epic MyChart lab results."""
+class EpicMyChartSingleColumnParser(EpicMyChartBaseParser):
+    """Parser for single-column Epic MyChart lab results."""
 
     LAB_NAME = "Epic MyChart"
 
@@ -160,7 +164,7 @@ class EpicMyChartParser(BaseLabParser):
             )
 
         # Deduplicate by test name (card layout can cause double parsing)
-        results = self._deduplicate(results)
+        results = self.deduplicate(results)
 
         logger.info("=" * 80)
         logger.info(f"TOTAL PARSED: {len(results)} components")
@@ -425,50 +429,3 @@ class EpicMyChartParser(BaseLabParser):
                 return True
 
         return False
-
-    @staticmethod
-    def _deduplicate(results: List[LabTestResult]) -> List[LabTestResult]:
-        """Deduplicate results by test name, keeping the first occurrence."""
-        seen: Set[str] = set()
-        unique = []
-        for result in results:
-            key = result.test_name.lower()
-            if key not in seen:
-                seen.add(key)
-                unique.append(result)
-        return unique
-
-    def extract_date_from_text(self, text: str) -> Optional[str]:
-        """
-        Extract lab test date from Epic MyChart PDF text.
-
-        Epic uses month-name date format:
-        - "Collected on Apr 10, 2025"
-        - "Collection date: Apr 10, 2025"
-        - "Collected on April 10, 2025"
-        """
-        # Epic-specific date patterns with month names
-        date_patterns = [
-            r"(?i)collected on\s+([A-Z][a-z]+)\s+(\d{1,2}),?\s+(\d{4})",
-            r"(?i)collection date:?\s+([A-Z][a-z]+)\s+(\d{1,2}),?\s+(\d{4})",
-            r"(?i)reported on\s+([A-Z][a-z]+)\s+(\d{1,2}),?\s+(\d{4})",
-        ]
-
-        for pattern in date_patterns:
-            match = re.search(pattern, text)
-            if match:
-                month_str = match.group(1)
-                day = match.group(2)
-                year = match.group(3)
-                date_str = f"{month_str} {day}, {year}"
-
-                # Try full month name first, then abbreviated
-                for fmt in ("%B %d, %Y", "%b %d, %Y"):
-                    try:
-                        date_obj = datetime.strptime(date_str, fmt)
-                        return date_obj.strftime("%Y-%m-%d")
-                    except ValueError:
-                        continue
-
-        # Fallback to base class method for numeric dates
-        return super().extract_date_from_text(text)

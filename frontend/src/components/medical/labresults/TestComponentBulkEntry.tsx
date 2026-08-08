@@ -143,6 +143,22 @@ export const REGEX_PATTERNS = {
 export const QUALITATIVE_PATTERN =
   /^(.+?)[:]\s*(positive|negative|detected|undetected|reactive|non-reactive|not detected)\s*$/i;
 
+// Pattern for textual / semi-quantitative results that are not standard
+// qualitative values. Common in urinalysis and estimated results, e.g.
+// "Ketones, UA: Trace", "Squamous Epi (lpf), UA: Few", "WBC, UA: None seen",
+// "GFR Calculation: >60", "Epithelial Cells: 0-10", "Glucose, UA: 3+".
+// The value must be exactly a recognized token at end-of-line, so numeric
+// results (which carry a unit and/or reference range) never match here.
+export const TEXTUAL_PATTERN = new RegExp(
+  String.raw`^(.+?):\s*(` +
+    String.raw`none seen|none|trace|few|rare|occasional|moderate|many|small|large|present|absent|` +
+    String.raw`[1-4]\+|` +
+    String.raw`[<>]=?\s*\d+(?:\.\d+)?|` +
+    String.raw`\d+(?:\.\d+)?\s*[-–]\s*\d+(?:\.\d+)?` +
+    String.raw`)\s*$`,
+  'i'
+);
+
 /** Normalize qualitative value strings to standard values. */
 function normalizeQualitativeValue(raw: string): string {
   const lower = raw.toLowerCase().trim();
@@ -577,6 +593,28 @@ const TestComponentBulkEntry: React.FC<TestComponentBulkEntryProps> = ({
               parsed.status = 'abnormal';
             } else {
               parsed.status = 'normal';
+            }
+          }
+        }
+
+        // Try textual / semi-quantitative results (Trace, Few, None seen, 3+,
+        // >60, 0-10) before numeric patterns. Stored as free-text results.
+        if (!parsed) {
+          const textualMatch = trimmedLine.match(TEXTUAL_PATTERN);
+          if (textualMatch) {
+            const testName = textualMatch[1].trim().replace(/[,;:]+$/, '');
+            const textualValue = textualMatch[2].trim();
+            if (testName) {
+              parsed = {
+                test_name: testName,
+                value: null,
+                unit: '',
+                original_line: trimmedLine,
+                confidence: 0.7,
+                issues: [],
+                result_type: 'textual',
+                textual_value: textualValue,
+              };
             }
           }
         }
