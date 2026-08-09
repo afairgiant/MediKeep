@@ -240,6 +240,11 @@ const BaseMedicalForm = ({
       return (
         <Select
           {...baseProps}
+          // Mantine's Select needs null, not '', to clear its displayed label.
+          // baseProps supplies '' for every field type, which leaves a stale
+          // option visible when a select is cleared programmatically. The
+          // hand-written form wrappers already pass null for this reason.
+          value={baseProps.value || null}
           data={selectOptions}
           onChange={handleSelectChange(name)}
           searchable={searchable}
