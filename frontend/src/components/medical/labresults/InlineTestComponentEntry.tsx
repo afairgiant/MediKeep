@@ -115,16 +115,16 @@ function InlineTestComponentEntry({
           if (
             field === 'value' ||
             field === 'ref_range_min' ||
-            field === 'ref_range_max'
+            field === 'ref_range_max' ||
+            field === 'ref_range_text'
           ) {
+            // updatedComp already has the changed field merged in above, so read
+            // every argument from it rather than re-selecting `value` per field.
             updatedComp.status = calculateStatus(
-              field === 'value' ? (value as number | '') : updatedComp.value,
-              field === 'ref_range_min'
-                ? (value as number | '')
-                : updatedComp.ref_range_min,
-              field === 'ref_range_max'
-                ? (value as number | '')
-                : updatedComp.ref_range_max
+              updatedComp.value,
+              updatedComp.ref_range_min,
+              updatedComp.ref_range_max,
+              updatedComp.ref_range_text
             );
           }
 

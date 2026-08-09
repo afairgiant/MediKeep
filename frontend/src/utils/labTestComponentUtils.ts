@@ -84,23 +84,80 @@ export function isSubmittableComponent(component: ComponentRowData): boolean {
 }
 
 /**
+ * Parse a free-text reference range into numeric bounds.
+ *
+ * Uses `match` (not full-string) so trailing units are tolerated
+ * (e.g. "4.0-5.6 mg/dL"). Modeled on the backend Epic parser in
+ * app/services/lab_parsers/epic_mychart_parser.py, but not identical to it:
+ * this parser also accepts "<=", ">=" and negative numbers, and treats "<N"
+ * bounds as exclusive, so the two can differ at the boundary.
+ *
+ * Supported forms:
+ *   "X - Y" / "X-Y"      -> { min: X, max: Y }
+ *   "< N" / "<= N" / "≤ N" -> { min: null, max: N }
+ *   "> N" / ">= N" / "≥ N" -> { min: N, max: null }
+ *   anything else         -> { min: null, max: null }
+ */
+export function parseRefRangeText(
+  text: string | undefined | null
+): { min: number | null; max: number | null } {
+  const empty = { min: null, max: null };
+  if (!text) return empty;
+
+  const trimmed = text.trim();
+
+  // Range "X - Y": require a separating hyphen that is not the leading sign.
+  const rangeMatch = trimmed.match(
+    /^(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)/
+  );
+  if (rangeMatch) {
+    return { min: parseFloat(rangeMatch[1]), max: parseFloat(rangeMatch[2]) };
+  }
+
+  // Upper bound only: "< N", "<= N", "≤ N"
+  const ltMatch = trimmed.match(/^(?:<=?|≤)\s*(-?\d+(?:\.\d+)?)/);
+  if (ltMatch) {
+    return { min: null, max: parseFloat(ltMatch[1]) };
+  }
+
+  // Lower bound only: "> N", ">= N", "≥ N"
+  const gtMatch = trimmed.match(/^(?:>=?|≥)\s*(-?\d+(?:\.\d+)?)/);
+  if (gtMatch) {
+    return { min: parseFloat(gtMatch[1]), max: null };
+  }
+
+  return empty;
+}
+
+/**
  * Auto-calculate status based on value and reference range.
  * Returns 'normal', 'high', 'low', or undefined.
+ *
+ * Numeric refMin/refMax take priority. When neither is a valid number, the
+ * optional free-text reference range (e.g. "70-100", "<200") is parsed and used
+ * as a fallback, so a range typed only in the Ref Text field still drives status.
  */
 export function calculateStatus(
-  value: number | '',
-  refMin: number | '',
-  refMax: number | ''
-): string | undefined {
+  value: number | '' | null | undefined,
+  refMin: number | '' | null | undefined,
+  refMax: number | '' | null | undefined,
+  refText?: string | null
+): ComponentStatus | undefined {
   if (!isValidNumber(value)) return undefined;
 
-  const hasMin = isValidNumber(refMin);
-  const hasMax = isValidNumber(refMax);
+  let min: number | null = isValidNumber(refMin) ? refMin : null;
+  let max: number | null = isValidNumber(refMax) ? refMax : null;
 
-  if (!hasMin && !hasMax) return undefined;
+  if (min === null && max === null) {
+    const parsed = parseRefRangeText(refText);
+    min = parsed.min;
+    max = parsed.max;
+  }
 
-  if (hasMin && value < refMin) return 'low';
-  if (hasMax && value > refMax) return 'high';
+  if (min === null && max === null) return undefined;
+
+  if (min !== null && value < min) return 'low';
+  if (max !== null && value > max) return 'high';
   return 'normal';
 }
 
