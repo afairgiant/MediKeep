@@ -241,6 +241,22 @@ class TestGaugeDetection:
         assert parser._is_gauge("3.4 10.8", 3.4, 10.8) is True
 
 
+class TestNameCleaning:
+    @pytest.fixture
+    def parser(self):
+        return EpicMyChartCardParser()
+
+    def test_embedded_digits_preserved(self, parser):
+        # Significant digits in a name must survive superscript stripping.
+        assert parser.clean_test_name("Vitamin B12") == "Vitamin B12"
+        assert parser.clean_test_name("Hemoglobin A1C") == "Hemoglobin A1C"
+
+    def test_whitespace_delimited_superscript_stripped(self, parser):
+        # Footnote markers (space-delimited two-digit runs) are still removed.
+        assert parser.clean_test_name("Folate 01") == "Folate"
+        assert parser.clean_test_name("WBC 02") == "WBC"
+
+
 class TestDateExtraction:
     @pytest.fixture
     def parser(self):

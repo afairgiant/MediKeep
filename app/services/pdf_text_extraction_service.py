@@ -453,22 +453,37 @@ class PDFTextExtractionService:
 
         return {"text": text, "page_count": page_count, "char_count": len(text)}
 
-    def _extract_layout_text(self, pdf_bytes: bytes) -> str:
+    def _extract_layout_text(self, pdf_bytes: bytes) -> Optional[str]:
         """Extract a layout-preserved rendering (pdfplumber ``layout=True``).
 
         This retains horizontal positions as whitespace so column-aware parsers
         (e.g. the Epic MyChart card parser) can reconstruct columns. It is
         materially more expensive than plain extraction, so it is only invoked
         lazily for the parser that needs it.
+
+        Column reconstruction derives a single document-wide gutter, so a page
+        silently rendered as empty text would corrupt that alignment and drop
+        the page's data. If any page fails layout extraction we therefore abandon
+        the layout rendering entirely and return ``None``, which makes the caller
+        fall back to the complete plain-text extraction rather than a truncated
+        or misaligned layout.
         """
         layout_parts = []
         with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-            for page in pdf.pages:
+            for page_number, page in enumerate(pdf.pages, start=1):
                 try:
                     layout_parts.append(page.extract_text(layout=True) or "")
-                except Exception:
-                    # Layout extraction is best-effort; fall back to plain text.
-                    layout_parts.append("")
+                except Exception as e:
+                    logger.warning(
+                        "Layout extraction failed for a page; falling back to "
+                        "plain-text extraction for the whole document",
+                        extra={
+                            "component": "PDFTextExtractionService",
+                            "page_number": page_number,
+                            "error": str(e),
+                        },
+                    )
+                    return None
         return "\n".join(layout_parts)
 
     def _extract_ocr_text(self, pdf_bytes: bytes) -> Dict:

@@ -164,8 +164,10 @@ class BaseLabParser(ABC):
         # First apply OCR cleanup to handle artifacts
         name = self.clean_ocr_artifacts(name)
 
-        # Remove superscript patterns (01, 02, etc.)
-        name = re.sub(r"\d{2}$", "", name)
+        # Remove superscript footnote markers (01, 02, etc.). Only strip a
+        # trailing 2-digit run that is whitespace-delimited, so significant
+        # digits embedded in a name (e.g. "Vitamin B12") are preserved.
+        name = re.sub(r"\s+\d{2}$", "", name)
         name = re.sub(r"\s+\d{2}\s+", " ", name)
 
         # Remove extra whitespace
