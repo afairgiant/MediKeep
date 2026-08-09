@@ -5,7 +5,7 @@ Each lab (LabCorp, Quest, etc.) will have its own parser implementation.
 
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import Dict, List, Set
 
 
 class LabTestResult:
@@ -20,6 +20,7 @@ class LabTestResult:
         flag: str = "",
         confidence: float = 1.0,
         test_date: str = None,  # Date in YYYY-MM-DD format
+        qualitative_value: str = "",  # Non-numeric result (e.g. "Negative", "3+")
     ):
         self.test_name = test_name
         self.value = value
@@ -28,6 +29,7 @@ class LabTestResult:
         self.flag = flag
         self.confidence = confidence
         self.test_date = test_date
+        self.qualitative_value = qualitative_value
 
     def to_dict(self) -> Dict:
         """Convert to dictionary for serialization."""
@@ -39,6 +41,7 @@ class LabTestResult:
             "flag": self.flag,
             "confidence": self.confidence,
             "test_date": self.test_date,
+            "qualitative_value": self.qualitative_value,
         }
 
 
@@ -49,6 +52,11 @@ class BaseLabParser(ABC):
     """
 
     LAB_NAME = "Generic"
+
+    # When True, the extraction pipeline feeds this parser layout-preserved
+    # text (pdfplumber ``extract_text(layout=True)``) instead of plain text,
+    # so column positions are retained for spatial reconstruction.
+    prefers_layout_text: bool = False
 
     # OCR corruption patterns and their corrections
     # These handle common OCR errors found in scanned lab reports
@@ -156,8 +164,10 @@ class BaseLabParser(ABC):
         # First apply OCR cleanup to handle artifacts
         name = self.clean_ocr_artifacts(name)
 
-        # Remove superscript patterns (01, 02, etc.)
-        name = re.sub(r"\d{2}$", "", name)
+        # Remove superscript footnote markers (01, 02, etc.). Only strip a
+        # trailing 2-digit run that is whitespace-delimited, so significant
+        # digits embedded in a name (e.g. "Vitamin B12") are preserved.
+        name = re.sub(r"\s+\d{2}$", "", name)
         name = re.sub(r"\s+\d{2}\s+", " ", name)
 
         # Remove extra whitespace
@@ -189,6 +199,18 @@ class BaseLabParser(ABC):
             r"^(Ref\.?\s*Range:?|Reference:?)\s*", "", range_str, flags=re.IGNORECASE
         )
         return range_str
+
+    @staticmethod
+    def deduplicate(results: List["LabTestResult"]) -> List["LabTestResult"]:
+        """Deduplicate results by test name, keeping the first occurrence."""
+        seen: Set[str] = set()
+        unique = []
+        for result in results:
+            key = result.test_name.lower()
+            if key not in seen:
+                seen.add(key)
+                unique.append(result)
+        return unique
 
     def extract_date_from_text(self, text: str) -> str:
         """

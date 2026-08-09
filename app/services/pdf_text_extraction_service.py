@@ -6,7 +6,7 @@ Includes lab-specific parsing for structured extraction.
 
 import io
 import re
-from typing import Dict, Optional
+from typing import Callable, Dict, Optional
 
 import pdfplumber
 import pytesseract
@@ -306,8 +306,13 @@ class PDFTextExtractionService:
             native_result = self._extract_native_text(pdf_bytes)
 
             if self._is_valid_text(native_result["text"]):
-                # Try lab-specific parsing first
-                parsed_result = self._try_lab_specific_parsing(native_result["text"])
+                # Try lab-specific parsing first. Layout-preserved text is
+                # extracted lazily (and only for parsers that need it) via the
+                # provider, so the expensive layout pass is skipped otherwise.
+                parsed_result = self._try_lab_specific_parsing(
+                    native_result["text"],
+                    layout_text_provider=lambda: self._extract_layout_text(pdf_bytes),
+                )
 
                 if parsed_result:
                     # Lab-specific parser succeeded, but check if quality is good enough
@@ -448,6 +453,39 @@ class PDFTextExtractionService:
 
         return {"text": text, "page_count": page_count, "char_count": len(text)}
 
+    def _extract_layout_text(self, pdf_bytes: bytes) -> Optional[str]:
+        """Extract a layout-preserved rendering (pdfplumber ``layout=True``).
+
+        This retains horizontal positions as whitespace so column-aware parsers
+        (e.g. the Epic MyChart card parser) can reconstruct columns. It is
+        materially more expensive than plain extraction, so it is only invoked
+        lazily for the parser that needs it.
+
+        Column reconstruction derives a single document-wide gutter, so a page
+        silently rendered as empty text would corrupt that alignment and drop
+        the page's data. If any page fails layout extraction we therefore abandon
+        the layout rendering entirely and return ``None``, which makes the caller
+        fall back to the complete plain-text extraction rather than a truncated
+        or misaligned layout.
+        """
+        layout_parts = []
+        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+            for page_number, page in enumerate(pdf.pages, start=1):
+                try:
+                    layout_parts.append(page.extract_text(layout=True) or "")
+                except Exception as e:
+                    logger.warning(
+                        "Layout extraction failed for a page; falling back to "
+                        "plain-text extraction for the whole document",
+                        extra={
+                            "component": "PDFTextExtractionService",
+                            "page_number": page_number,
+                            "error": str(e),
+                        },
+                    )
+                    return None
+        return "\n".join(layout_parts)
+
     def _extract_ocr_text(self, pdf_bytes: bytes) -> Dict:
         """
         Extract text using OCR (slower, for scanned PDFs).
@@ -585,7 +623,10 @@ class PDFTextExtractionService:
         return cleaned_text
 
     def _try_lab_specific_parsing(
-        self, text: str, extraction_method: str = "native"
+        self,
+        text: str,
+        extraction_method: str = "native",
+        layout_text_provider: Optional[Callable[[], Optional[str]]] = None,
     ) -> Optional[Dict]:
         """
         Try to parse using lab-specific parsers.
@@ -593,12 +634,16 @@ class PDFTextExtractionService:
         Args:
             text: Extracted PDF text
             extraction_method: Method used to extract text ('native' or 'ocr')
+            layout_text_provider: Callable returning layout-preserved text,
+                invoked lazily only for column-aware parsers
 
         Returns:
             Dict with formatted text if successful, None otherwise
         """
         try:
-            results, lab_name = lab_parser_registry.parse(text)
+            results, lab_name = lab_parser_registry.parse(
+                text, layout_text_provider=layout_text_provider
+            )
 
             if not results:
                 logger.info(
@@ -610,6 +655,14 @@ class PDFTextExtractionService:
             # Convert parsed results to formatted text
             formatted_lines = []
             for result in results:
+                # Qualitative result (no numeric value): "TestName: Negative".
+                # Emitted bare so the frontend qualitative matcher applies.
+                if result.value is None and result.qualitative_value:
+                    formatted_lines.append(
+                        f"{result.test_name}: {result.qualitative_value}"
+                    )
+                    continue
+
                 # Format: TestName: Value Unit (Range)
                 line_parts = [result.test_name + ":"]
 

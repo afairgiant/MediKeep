@@ -16,8 +16,16 @@ MediKeep automatically detects and parses reports from:
 
 - **LabCorp** (Laboratory Corporation of America)
 - **Quest Diagnostics**
+- **Epic MyChart** patient-portal exports, including the two-column "Test Details" layout with visual gauge bars
 
-The system identifies the lab provider by scanning for signature indicators in the PDF (e.g., company name, website, copyright notices) and applies the appropriate parser.
+The system identifies the lab provider by scanning for signature indicators in the PDF (e.g., company name, website, copyright notices) and applies the appropriate parser. Epic MyChart exports are detected even when the performing lab (LabCorp, Quest, etc.) is named in the footer.
+
+### Result types
+
+Beyond standard numeric results, MediKeep also extracts:
+
+- **Qualitative results** such as *Negative* / *Positive* / *Detected* (common in urinalysis and infectious-disease panels)
+- **Semi-quantitative results** such as *Trace*, *Few*, *None seen*, *3+*, or *&gt;60*, which are saved as free-text results
 
 ---
 
