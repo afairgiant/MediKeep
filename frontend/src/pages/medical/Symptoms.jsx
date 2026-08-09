@@ -1,4 +1,5 @@
 import logger from '../../services/logger';
+import { getTodayString } from '../../utils/dateUtils';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFormSubmissionWithUploads } from '../../hooks/useFormSubmissionWithUploads';
@@ -42,6 +43,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import { applyOccurrenceSeverityAutoFill } from '../../utils/anticipatoryAutoFill';
 
 const Symptoms = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -89,9 +91,7 @@ const Symptoms = () => {
   // Default occurrence form state - used for both initial state and reset
   const getDefaultOccurrenceFormData = useCallback(
     (withTodayDate = false) => ({
-      occurrence_date: withTodayDate
-        ? new Date().toISOString().split('T')[0]
-        : '',
+      occurrence_date: withTodayDate ? getTodayString() : '',
       occurrence_time: '',
       severity: 'moderate',
       pain_scale: '',
@@ -117,6 +117,10 @@ const Symptoms = () => {
   const [occurrenceFormData, setOccurrenceFormData] = useState(
     getDefaultOccurrenceFormData()
   );
+  // Tracks which occurrence fields currently hold a severity=none auto-fill
+  // value rather than one the user typed in, so they can be reverted if the
+  // user changes severity away from none without editing them directly.
+  const autoFilledOccurrenceFieldsRef = useRef(new Set());
 
   // Document manager methods ref for upload orchestration
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -219,7 +223,7 @@ const Symptoms = () => {
     setSymptomFormData({
       symptom_name: '',
       category: '',
-      first_occurrence_date: new Date().toISOString().split('T')[0],
+      first_occurrence_date: getTodayString(),
       status: 'active',
       is_chronic: false,
       resolved_date: '',
@@ -259,7 +263,7 @@ const Symptoms = () => {
       if (name === 'status') {
         if (value === 'resolved' && !prev.resolved_date) {
           // Auto-fill resolved_date with today when status changes to resolved
-          updated.resolved_date = new Date().toISOString().split('T')[0];
+          updated.resolved_date = getTodayString();
         } else if (value !== 'resolved') {
           // Clear resolved_date when status changes away from resolved
           updated.resolved_date = '';
@@ -383,6 +387,7 @@ const Symptoms = () => {
   const handleLogEpisode = symptom => {
     setSelectedSymptomForOccurrence(symptom);
     setEditingOccurrence(null);
+    autoFilledOccurrenceFieldsRef.current.clear();
     setOccurrenceFormData(getDefaultOccurrenceFormData(true));
     setShowOccurrenceForm(true);
   };
@@ -394,6 +399,7 @@ const Symptoms = () => {
 
     setSelectedSymptomForOccurrence(symptom);
     setEditingOccurrence(occurrence);
+    autoFilledOccurrenceFieldsRef.current.clear();
     setOccurrenceFormData({
       occurrence_date: occurrence.occurrence_date || '',
       occurrence_time: occurrence.occurrence_time || '',
@@ -416,18 +422,14 @@ const Symptoms = () => {
 
   const handleOccurrenceInputChange = e => {
     const { name, value } = e.target;
-    setOccurrenceFormData(prev => {
-      const updated = { ...prev, [name]: value };
-      if (name === 'severity' && value === 'none') {
-        if (prev.pain_scale === '') {
-          updated.pain_scale = '0';
-        }
-        if (prev.impact_level === '') {
-          updated.impact_level = 'no_impact';
-        }
-      }
-      return updated;
-    });
+    setOccurrenceFormData(prev =>
+      applyOccurrenceSeverityAutoFill(
+        prev,
+        name,
+        value,
+        autoFilledOccurrenceFieldsRef.current
+      )
+    );
   };
 
   const handleOccurrenceSubmit = async e => {
