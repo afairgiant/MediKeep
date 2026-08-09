@@ -853,6 +853,22 @@ function TestComponentTemplates({
                                   hideControls
                                 />
                               </Box>
+                              <Box
+                                style={{ width: '120px', minWidth: '120px' }}
+                              >
+                                <TextInput
+                                  placeholder="Ref Text (e.g. <200)"
+                                  size="xs"
+                                  value={component.ref_range_text || ''}
+                                  onChange={event =>
+                                    updateComponent(
+                                      index,
+                                      'ref_range_text',
+                                      event.target.value
+                                    )
+                                  }
+                                />
+                              </Box>
                             </>
                           )}
                           <Box style={{ width: '120px', minWidth: '120px' }}>
