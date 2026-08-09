@@ -25,7 +25,7 @@ from starlette.status import (
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
-    HTTP_422_UNPROCESSABLE_ENTITY,
+    HTTP_422_UNPROCESSABLE_CONTENT,
     HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_503_SERVICE_UNAVAILABLE,
 )
@@ -201,7 +201,7 @@ class ValidationException(MedicalRecordsAPIException):
     ):
         super().__init__(
             error_code=ExceptionCode.VALIDATION_ERROR,
-            http_status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            http_status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             status=ExceptionStatus.FAIL,
             message=message or "Validation failed",
             description=description or "One or more fields failed validation",
