@@ -43,6 +43,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePagination } from '../../hooks/usePagination';
 import PaginationControls from '../../components/shared/PaginationControls';
 import { usePatientPermissions } from '../../hooks/usePatientPermissions';
+import { applyOccurrenceSeverityAutoFill } from '../../utils/anticipatoryAutoFill';
 
 const Symptoms = () => {
   const { t } = useTranslation(['common', 'shared']);
@@ -116,6 +117,10 @@ const Symptoms = () => {
   const [occurrenceFormData, setOccurrenceFormData] = useState(
     getDefaultOccurrenceFormData()
   );
+  // Tracks which occurrence fields currently hold a severity=none auto-fill
+  // value rather than one the user typed in, so they can be reverted if the
+  // user changes severity away from none without editing them directly.
+  const autoFilledOccurrenceFieldsRef = useRef(new Set());
 
   // Document manager methods ref for upload orchestration
   const [documentManagerMethods, setDocumentManagerMethods] = useState(null);
@@ -382,6 +387,7 @@ const Symptoms = () => {
   const handleLogEpisode = symptom => {
     setSelectedSymptomForOccurrence(symptom);
     setEditingOccurrence(null);
+    autoFilledOccurrenceFieldsRef.current.clear();
     setOccurrenceFormData(getDefaultOccurrenceFormData(true));
     setShowOccurrenceForm(true);
   };
@@ -393,6 +399,7 @@ const Symptoms = () => {
 
     setSelectedSymptomForOccurrence(symptom);
     setEditingOccurrence(occurrence);
+    autoFilledOccurrenceFieldsRef.current.clear();
     setOccurrenceFormData({
       occurrence_date: occurrence.occurrence_date || '',
       occurrence_time: occurrence.occurrence_time || '',
@@ -415,7 +422,14 @@ const Symptoms = () => {
 
   const handleOccurrenceInputChange = e => {
     const { name, value } = e.target;
-    setOccurrenceFormData(prev => ({ ...prev, [name]: value }));
+    setOccurrenceFormData(prev =>
+      applyOccurrenceSeverityAutoFill(
+        prev,
+        name,
+        value,
+        autoFilledOccurrenceFieldsRef.current
+      )
+    );
   };
 
   const handleOccurrenceSubmit = async e => {

@@ -1092,6 +1092,7 @@
     "mildImpact": "轻度 - 轻微影响",
     "moderate": "中度 - 明显症状",
     "moderateImpact": "中度 - 明显影响",
+    "none": "无 - 无不适",
     "severe": "重度 - 严重反应",
     "severeImpact": "重度 - 严重影响"
   },

@@ -303,6 +303,13 @@ const InjuryFormWrapper = ({
                       value={formData.severity || null}
                       data={[
                         {
+                          value: 'none',
+                          label: t(
+                            'injuries.severity.options.none',
+                            'None - No discomfort'
+                          ),
+                        },
+                        {
                           value: 'mild',
                           label: t(
                             'injuries.severity.options.mild',
