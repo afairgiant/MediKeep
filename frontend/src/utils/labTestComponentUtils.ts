@@ -83,24 +83,117 @@ export function isSubmittableComponent(component: ComponentRowData): boolean {
   return component.test_name.trim() !== '';
 }
 
+/** Numeric bounds parsed from a free-text reference range. */
+export interface ParsedRefRange {
+  min: number | null;
+  max: number | null;
+  /** True when the lower bound is strict ("> N"), i.e. value === min is out of range. */
+  minExclusive: boolean;
+  /** True when the upper bound is strict ("< N"), i.e. value === max is out of range. */
+  maxExclusive: boolean;
+}
+
+/**
+ * Parse a free-text reference range into numeric bounds.
+ *
+ * Uses `match` (not full-string) so trailing units are tolerated
+ * (e.g. "4.0-5.6 mg/dL"). Modeled on the backend Epic parser in
+ * app/services/lab_parsers/epic_mychart_parser.py, though this parser accepts a
+ * few more forms the backend does not ("<=", ">=", "≥", bare ">" and negatives).
+ *
+ * The operator's strictness is preserved so "<N" (exclusive) and "<=N"
+ * (inclusive) classify a value equal to N differently.
+ *
+ * Supported forms:
+ *   "X - Y" / "X-Y"      -> { min: X, max: Y }        (both inclusive)
+ *   "< N"                -> { max: N, maxExclusive }
+ *   "<= N" / "≤ N"       -> { max: N }                (inclusive)
+ *   "> N"                -> { min: N, minExclusive }
+ *   ">= N" / "≥ N"       -> { min: N }                (inclusive)
+ *   anything else        -> { min: null, max: null }
+ */
+export function parseRefRangeText(
+  text: string | undefined | null
+): ParsedRefRange {
+  const empty: ParsedRefRange = {
+    min: null,
+    max: null,
+    minExclusive: false,
+    maxExclusive: false,
+  };
+  if (!text) return empty;
+
+  const trimmed = text.trim();
+
+  // Range "X - Y": require a separating hyphen that is not the leading sign.
+  const rangeMatch = trimmed.match(
+    /^(-?\d+(?:\.\d+)?)\s*-\s*(-?\d+(?:\.\d+)?)/
+  );
+  if (rangeMatch) {
+    return {
+      ...empty,
+      min: parseFloat(rangeMatch[1]),
+      max: parseFloat(rangeMatch[2]),
+    };
+  }
+
+  // Upper bound only: "< N", "<= N", "≤ N" ("<" is exclusive of N).
+  const ltMatch = trimmed.match(/^(<=?|≤)\s*(-?\d+(?:\.\d+)?)/);
+  if (ltMatch) {
+    return {
+      ...empty,
+      max: parseFloat(ltMatch[2]),
+      maxExclusive: ltMatch[1] === '<',
+    };
+  }
+
+  // Lower bound only: "> N", ">= N", "≥ N" (">" is exclusive of N).
+  const gtMatch = trimmed.match(/^(>=?|≥)\s*(-?\d+(?:\.\d+)?)/);
+  if (gtMatch) {
+    return {
+      ...empty,
+      min: parseFloat(gtMatch[2]),
+      minExclusive: gtMatch[1] === '>',
+    };
+  }
+
+  return empty;
+}
+
 /**
  * Auto-calculate status based on value and reference range.
  * Returns 'normal', 'high', 'low', or undefined.
+ *
+ * Numeric refMin/refMax take priority. When neither is a valid number, the
+ * optional free-text reference range (e.g. "70-100", "<200") is parsed and used
+ * as a fallback, so a range typed only in the Ref Text field still drives status.
  */
 export function calculateStatus(
-  value: number | '',
-  refMin: number | '',
-  refMax: number | ''
-): string | undefined {
+  value: number | '' | null | undefined,
+  refMin: number | '' | null | undefined,
+  refMax: number | '' | null | undefined,
+  refText?: string | null
+): ComponentStatus | undefined {
   if (!isValidNumber(value)) return undefined;
 
-  const hasMin = isValidNumber(refMin);
-  const hasMax = isValidNumber(refMax);
+  let min: number | null = isValidNumber(refMin) ? refMin : null;
+  let max: number | null = isValidNumber(refMax) ? refMax : null;
+  // Numeric bounds from the Min/Max inputs are treated as inclusive.
+  let minExclusive = false;
+  let maxExclusive = false;
 
-  if (!hasMin && !hasMax) return undefined;
+  if (min === null && max === null) {
+    const parsed = parseRefRangeText(refText);
+    min = parsed.min;
+    max = parsed.max;
+    minExclusive = parsed.minExclusive;
+    maxExclusive = parsed.maxExclusive;
+  }
 
-  if (hasMin && value < refMin) return 'low';
-  if (hasMax && value > refMax) return 'high';
+  if (min === null && max === null) return undefined;
+
+  if (min !== null && (minExclusive ? value <= min : value < min)) return 'low';
+  if (max !== null && (maxExclusive ? value >= max : value > max)) return 'high';
   return 'normal';
 }
 

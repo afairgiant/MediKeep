@@ -24,7 +24,10 @@ import FormLoadingOverlay from '../../shared/FormLoadingOverlay';
 import { LabTestComponent } from '../../../services/api/labTestComponentApi';
 import { TEST_LIBRARY } from '../../../constants/testLibrary';
 import { QUALITATIVE_SELECT_OPTIONS } from '../../../constants/labCategories';
-import { MAX_REF_RANGE_TEXT_LENGTH } from '../../../utils/labTestComponentUtils';
+import {
+  MAX_REF_RANGE_TEXT_LENGTH,
+  calculateStatus,
+} from '../../../utils/labTestComponentUtils';
 
 interface TestComponentEditModalProps {
   component: LabTestComponent | null;
@@ -42,30 +45,6 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
   const { t } = useTranslation(['common', 'shared']);
   const [formData, setFormData] = useState<Partial<LabTestComponent>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Auto-calculate status based on value and reference range
-  const calculateStatus = (
-    value: number | undefined,
-    refMin: number | undefined,
-    refMax: number | undefined
-  ): LabTestComponent['status'] => {
-    if (value === undefined || value === null) return undefined;
-    if (refMin === undefined && refMax === undefined) return undefined;
-
-    if (refMin !== undefined && refMax !== undefined) {
-      if (value < refMin) return 'low';
-      if (value > refMax) return 'high';
-      return 'normal';
-    }
-    if (refMin !== undefined) {
-      return value < refMin ? 'low' : 'normal';
-    }
-    if (refMax !== undefined) {
-      return value > refMax ? 'high' : 'normal';
-    }
-
-    return undefined;
-  };
 
   // Auto-suggest category based on test name
   const suggestCategory = (testName: string): LabTestComponent['category'] => {
@@ -201,7 +180,8 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
       const calculatedStatus = calculateStatus(
         component.value,
         component.ref_range_min ?? undefined,
-        component.ref_range_max ?? undefined
+        component.ref_range_max ?? undefined,
+        component.ref_range_text
       );
 
       // Use existing category if present, otherwise suggest one
@@ -234,7 +214,8 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
     const newStatus = calculateStatus(
       formData.value as number,
       formData.ref_range_min as number | undefined,
-      formData.ref_range_max as number | undefined
+      formData.ref_range_max as number | undefined,
+      formData.ref_range_text
     );
 
     // Only update if status actually changed to avoid infinite loops
@@ -244,7 +225,12 @@ const TestComponentEditModal: React.FC<TestComponentEditModalProps> = ({
       }
       return { ...prev, status: newStatus };
     });
-  }, [formData.value, formData.ref_range_min, formData.ref_range_max]);
+  }, [
+    formData.value,
+    formData.ref_range_min,
+    formData.ref_range_max,
+    formData.ref_range_text,
+  ]);
 
   // Separate effect for auto-suggesting category when test name changes
   useEffect(() => {
