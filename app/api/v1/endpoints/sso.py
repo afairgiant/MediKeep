@@ -72,8 +72,9 @@ def _complete_sso_login(
 ) -> dict:
     """Shared post-authentication logic for all SSO login paths.
 
-    Logs the login activity, updates last_login_at, creates a JWT token,
-    and returns the standard SSO login response dict.
+    Logs the login activity, updates last_login_at, clears an unsatisfiable forced
+    password change for SSO-only accounts, creates a JWT token, and returns the
+    standard SSO login response dict.
     """
     sso_user = result["user"]
 
@@ -103,9 +104,31 @@ def _complete_sso_login(
             )
             # Continue login without active patient - user can set it later
 
+    # A forced password change is unsatisfiable for a pure-SSO user: the account was
+    # created with a random password that was discarded immediately (crud/user.py
+    # create_from_sso), and /auth/change-password requires the current password. The
+    # flag would lock the account out permanently, so clear it on successful SSO login.
+    # Hybrid users are deliberately excluded - they have a real local password they
+    # know, so the normal forced-change flow works for them.
+    clear_forced_password_change = (
+        bool(sso_user.must_change_password) and sso_user.auth_method == "sso"
+    )
+
     try:
         sso_user.last_login_at = get_utc_now()
+        if clear_forced_password_change:
+            sso_user.must_change_password = False
         db.commit()
+        if clear_forced_password_change:
+            log_security_event(
+                logger,
+                "sso_forced_password_change_cleared",
+                req,
+                "Cleared unsatisfiable forced password change for SSO-only user",
+                user_id=sso_user.id,
+                username=sso_user.username,
+                auth_method=sso_user.auth_method,
+            )
     except Exception:
         db.rollback()
 
@@ -152,6 +175,7 @@ def _complete_sso_login(
         },
         "is_new_user": result["is_new_user"],
         "session_timeout_minutes": session_timeout_minutes,
+        "must_change_password": bool(sso_user.must_change_password),
     }
     response = JSONResponse(content=response_data)
     set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)

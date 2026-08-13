@@ -284,14 +284,15 @@ export function AuthProvider({ children }) {
   // Auth Actions - handles both username/password credentials and SSO user object.
   // The token is stored as an HttpOnly cookie by the server -- the frontend
   // only manages user state and session timeout preferences.
-  // For SSO: pass { sso: true } as second arg to distinguish from regular login.
+  // For SSO: pass { sso: true, mustChangePassword } as second arg to distinguish
+  // from regular login and carry through flags from the SSO login response.
   const login = async (credentialsOrUser, ssoFlag = null) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
       // Check if this is SSO login (user object) or regular login (credentials).
-      // SSO callers pass a truthy second arg (legacy: token string; new: { sso: true }).
+      // SSO callers pass the options object; regular logins pass nothing.
       const isSSO =
         ssoFlag !== null &&
         typeof credentialsOrUser === 'object' &&
@@ -347,9 +348,11 @@ export function AuthProvider({ children }) {
       // Get session timeout from result or use default
       const sessionTimeoutMinutes =
         (isSSO ? 120 : result?.sessionTimeoutMinutes) || 120;
-      const mustChangePassword = isSSO
-        ? false
-        : result?.mustChangePassword || false;
+      // SSO callers read the flag from the login response and pass it in the options
+      // object; regular logins get it from the login result.
+      const mustChangePassword =
+        (isSSO ? ssoFlag?.mustChangePassword : result?.mustChangePassword) ||
+        false;
 
       // Store session timeout preference in localStorage (not sensitive)
       localStorage.setItem(
