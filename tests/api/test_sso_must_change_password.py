@@ -15,6 +15,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.crud.user import user as user_crud
@@ -222,6 +223,47 @@ class TestForcedChangePreservedForOtherAuthMethods:
 
         db_session.expire_all()
         assert db_session.get(User, user_id).must_change_password is True
+
+
+class TestClearFailure:
+    """If the clear cannot be persisted, the login must not succeed."""
+
+    def test_commit_failure_fails_the_login_and_leaves_flag_set(
+        self, client: TestClient, db_session: Session
+    ):
+        user = make_sso_user(db_session, auth_method="sso", must_change_password=True)
+        user_id = user.id
+
+        # Break the commit that persists the clear. Issuing a session here would
+        # route the user to a forced-change form they cannot satisfy.
+        with patch.object(
+            Session, "commit", side_effect=SQLAlchemyError("commit failed")
+        ):
+            with patch_callback(user):
+                response = client.post(CALLBACK_URL, json=CALLBACK_BODY)
+
+        assert response.status_code != 200
+        assert "access_token" not in response.json()
+
+        db_session.rollback()
+        db_session.expire_all()
+        assert db_session.get(User, user_id).must_change_password is True
+
+    def test_last_login_failure_alone_does_not_fail_the_login(
+        self, client: TestClient, db_session: Session
+    ):
+        """No clear intended - the pre-existing tolerance for this must survive."""
+        user = make_sso_user(db_session, auth_method="sso", must_change_password=False)
+
+        with patch(
+            "app.api.v1.endpoints.sso.get_utc_now",
+            side_effect=SQLAlchemyError("clock failed"),
+        ):
+            with patch_callback(user):
+                response = client.post(CALLBACK_URL, json=CALLBACK_BODY)
+
+        assert response.status_code == 200
+        assert "access_token" in response.json()
 
 
 class TestEdgeCases:

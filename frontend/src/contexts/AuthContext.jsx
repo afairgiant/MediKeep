@@ -292,9 +292,11 @@ export function AuthProvider({ children }) {
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
       // Check if this is SSO login (user object) or regular login (credentials).
-      // SSO callers pass the options object; regular logins pass nothing.
+      // Requires sso === true, not merely a present options object: { sso: false }
+      // must fall through to a credential login rather than trusting the first
+      // argument as an already-authenticated user.
       const isSSO =
-        ssoFlag !== null &&
+        ssoFlag?.sso === true &&
         typeof credentialsOrUser === 'object' &&
         credentialsOrUser.username;
 

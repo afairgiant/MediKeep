@@ -119,18 +119,34 @@ def _complete_sso_login(
         if clear_forced_password_change:
             sso_user.must_change_password = False
         db.commit()
-        if clear_forced_password_change:
-            log_security_event(
-                logger,
-                "sso_forced_password_change_cleared",
-                req,
-                "Cleared unsatisfiable forced password change for SSO-only user",
-                user_id=sso_user.id,
-                username=sso_user.username,
-                auth_method=sso_user.auth_method,
-            )
-    except Exception:
+    except Exception as e:
         db.rollback()
+        if clear_forced_password_change:
+            # The flag is still set in the database. Issuing a session now would
+            # send the user to the forced-change form they cannot satisfy - the
+            # exact lockout this clear exists to prevent - so fail the login
+            # instead and let the next attempt retry the clear.
+            log_endpoint_error(
+                logger,
+                req,
+                "Failed to clear forced password change during SSO login",
+                e,
+                user_id=sso_user.id,
+            )
+            raise
+        # A failed last_login_at update on its own is not worth failing a login
+        # over; this tolerance predates the clear and is deliberate.
+
+    if clear_forced_password_change:
+        log_security_event(
+            logger,
+            "sso_forced_password_change_cleared",
+            req,
+            "Cleared unsatisfiable forced password change for SSO-only user",
+            user_id=sso_user.id,
+            username=sso_user.username,
+            auth_method=sso_user.auth_method,
+        )
 
     preferences = user_preferences.get_or_create_by_user_id(db, user_id=sso_user.id)
     session_timeout_minutes = (

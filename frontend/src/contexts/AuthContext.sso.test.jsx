@@ -136,6 +136,46 @@ describe('AuthContext login - SSO mustChangePassword', () => {
     expect(screen.getByTestId('must-change')).toHaveTextContent('true');
   });
 
+  test('{ sso: false } is a credential login, not a trusted user object', async () => {
+    // The options object alone must not mark a login as SSO - otherwise the first
+    // argument would be accepted as an already-authenticated user without ever
+    // calling authService.login.
+    authService.login.mockResolvedValue({
+      success: true,
+      user: { id: 1, username: 'localuser', role: 'user' },
+      sessionTimeoutMinutes: 60,
+      mustChangePassword: false,
+    });
+
+    const credentials = { username: 'localuser', password: 'password123' };
+
+    function NotSSOHarness() {
+      const { login } = useAuth();
+      return (
+        <button onClick={() => login(credentials, { sso: false })}>
+          not-sso-login
+        </button>
+      );
+    }
+
+    render(
+      <AuthProvider>
+        <NotSSOHarness />
+      </AuthProvider>
+    );
+
+    await waitFor(() =>
+      expect(authService.getCurrentUser).toHaveBeenCalledTimes(1)
+    );
+
+    const user = userEvent.setup();
+    await user.click(screen.getByText('not-sso-login'));
+
+    await waitFor(() =>
+      expect(authService.login).toHaveBeenCalledWith(credentials)
+    );
+  });
+
   test('password login still reads the flag from the login result', async () => {
     authService.login.mockResolvedValue({
       success: true,
