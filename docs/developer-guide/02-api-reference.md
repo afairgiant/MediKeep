@@ -270,9 +270,19 @@ Base path: `/api/v1/auth/sso`
     "role": "user",
     "auth_method": "google_sso"
   },
-  "is_new_user": false
+  "is_new_user": false,
+  "must_change_password": false
 }
 ```
+
+- **`must_change_password`**: when `true`, the client must route the user to the
+  forced password change flow — every other endpoint returns 403 until it completes.
+  Accounts with `auth_method: "sso"` never see `true` here: their password is a
+  discarded random token, so a forced change is unsatisfiable and the flag is cleared
+  on login (audited as `sso_forced_password_change_cleared`). `hybrid` accounts, which
+  have a real local password, do see `true`.
+  The same field is returned by `/auth/sso/resolve-conflict` and
+  `/auth/sso/resolve-github-link`.
 
 - **Conflict Response** (200):
 

@@ -7,6 +7,36 @@ import SSOConflictModal from './SSOConflictModal';
 import GitHubLinkModal from './GitHubLinkModal';
 import logger from '../../services/logger';
 
+/**
+ * Where to send a user after any successful SSO login.
+ *
+ * Shared by all three SSO entry points (callback, conflict resolution, GitHub
+ * manual linking) so they cannot drift apart - the backend already routes them
+ * through one function (_complete_sso_login).
+ *
+ * Consumes the stored return URL when it is used.
+ */
+const getPostSSORedirectPath = ({ mustChangePassword, isNewUser }) => {
+  // Every other route is blocked until the password is changed
+  if (mustChangePassword) {
+    return '/change-password';
+  }
+
+  // New SSO users go to profile completion
+  if (isNewUser) {
+    return '/patients/me?edit=true';
+  }
+
+  // Existing users go to their intended destination or dashboard
+  const returnUrl = sessionStorage.getItem('sso_return_url');
+  if (returnUrl) {
+    sessionStorage.removeItem('sso_return_url');
+    return returnUrl;
+  }
+
+  return '/dashboard';
+};
+
 const SSOCallback = () => {
   const { t } = useTranslation('auth');
   const [searchParams] = useSearchParams();
@@ -133,26 +163,16 @@ const SSOCallback = () => {
 
       // Update auth context with SSO login
       if (login) {
-        login(result.user, { sso: true });
-      }
-
-      // Determine where to redirect
-      let redirectPath = '/dashboard';
-
-      if (result.isNewUser) {
-        // New SSO users go to profile completion
-        logger.info('Redirecting new SSO user to profile', {
-          category: 'sso_callback_component',
+        login(result.user, {
+          sso: true,
+          mustChangePassword: result.mustChangePassword,
         });
-        redirectPath = '/patients/me?edit=true';
-      } else {
-        // Existing users go to their intended destination or dashboard
-        const returnUrl = sessionStorage.getItem('sso_return_url');
-        if (returnUrl) {
-          redirectPath = returnUrl;
-          sessionStorage.removeItem('sso_return_url');
-        }
       }
+
+      const redirectPath = getPostSSORedirectPath({
+        mustChangePassword: result.mustChangePassword,
+        isNewUser: result.isNewUser,
+      });
 
       logger.info('Redirecting after successful SSO', {
         redirectPath,
@@ -202,26 +222,22 @@ const SSOCallback = () => {
 
         // Update auth context with resolved login
         if (login) {
-          login(result.user, { sso: true });
+          login(result.user, {
+            sso: true,
+            mustChangePassword: result.mustChangePassword,
+          });
         }
 
         // Hide the modal and redirect
         setShowConflictModal(false);
 
-        // Determine where to redirect
-        let redirectPath = '/dashboard';
-
-        if (result.isNewUser) {
-          redirectPath = '/patients/me?edit=true';
-        } else {
-          const returnUrl = sessionStorage.getItem('sso_return_url');
-          if (returnUrl) {
-            redirectPath = returnUrl;
-            sessionStorage.removeItem('sso_return_url');
-          }
-        }
-
-        navigate(redirectPath, { replace: true });
+        navigate(
+          getPostSSORedirectPath({
+            mustChangePassword: result.mustChangePassword,
+            isNewUser: result.isNewUser,
+          }),
+          { replace: true }
+        );
       } else {
         setError(result.error || 'Failed to resolve account conflict');
         setShowConflictModal(false);
@@ -244,26 +260,24 @@ const SSOCallback = () => {
       category: 'sso_callback_component',
     });
 
+    // This path posts to the backend directly rather than going through
+    // simpleAuthService, so it receives the raw snake_case response. Normalize
+    // once here so everything below matches the other two SSO paths.
+    const mustChangePassword = result.must_change_password || false;
+    const isNewUser = result.is_new_user || false;
+
     // Update auth context with linked login
     if (login) {
-      login(result.user, result.access_token);
+      login(result.user, { sso: true, mustChangePassword });
     }
 
     // Hide the modal and redirect
     setShowGithubLinkModal(false);
 
-    // Determine where to redirect
-    let redirectPath = '/dashboard';
-
-    if (result.is_new_user) {
-      redirectPath = '/patients/me?edit=true';
-    } else {
-      const returnUrl = sessionStorage.getItem('sso_return_url');
-      if (returnUrl) {
-        redirectPath = returnUrl;
-        sessionStorage.removeItem('sso_return_url');
-      }
-    }
+    const redirectPath = getPostSSORedirectPath({
+      mustChangePassword,
+      isNewUser,
+    });
 
     navigate(redirectPath, { replace: true });
   };

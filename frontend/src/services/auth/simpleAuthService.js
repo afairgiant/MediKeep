@@ -624,6 +624,7 @@ class SimpleAuthService {
         user: enrichedUser,
         token: null,
         isNewUser: data.is_new_user,
+        mustChangePassword: data.must_change_password || false,
       };
     } catch (error) {
       logger.error('SSO callback error', {
@@ -728,6 +729,7 @@ class SimpleAuthService {
         },
         token: data.access_token,
         isNewUser: data.is_new_user,
+        mustChangePassword: data.must_change_password || false,
       };
     } catch (error) {
       logger.error('SSO conflict resolution error', {
