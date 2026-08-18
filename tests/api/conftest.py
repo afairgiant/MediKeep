@@ -2,8 +2,10 @@
 Shared fixtures for API tests.
 """
 
-import pytest
+import secrets
 from datetime import date, timedelta
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -52,6 +54,11 @@ def limiter_ceiling():
         limiter.reset()
 
 
+# The password given to local and hybrid users built by make_sso_user. Pure-SSO
+# users get a random one instead - see the factory.
+LOCAL_PASSWORD = "localpassword123"
+
+
 @pytest.fixture
 def make_sso_user(db_session: Session):
     """Create a user with the SSO fields and flags a test needs."""
@@ -64,12 +71,18 @@ def make_sso_user(db_session: Session):
         is_active: bool = True,
         link_sso_identity: bool = True,
     ) -> User:
+        # Model create_from_sso: a pure-SSO account is given a random password that
+        # is discarded immediately, so no caller can present it. Handing these users
+        # a known password would let a test "prove" an SSO-only account logs in
+        # locally, which is true only after an admin reset promotes it to hybrid.
+        password = secrets.token_urlsafe(32) if auth_method == "sso" else LOCAL_PASSWORD
+
         user = user_crud.create(
             db_session,
             obj_in=UserCreate(
                 username=username,
                 email=f"{username}@example.com",
-                password="localpassword123",
+                password=password,
                 full_name="SSO Test User",
                 role="user",
             ),

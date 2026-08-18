@@ -34,9 +34,10 @@ sso_service = SSOService()
 # Throttles the unauthenticated /initiate endpoint, which is what stops an
 # anonymous caller from minting SSO state entries without bound. Keyed per IP.
 #
-# The limits are read from settings at import time, so a test that patches
-# settings.SSO_RATE_LIMIT_* must call _initiate_limiter.reconfigure() to apply the
-# override to this instance.
+# The limits are read from settings at import time, so patching
+# settings.SSO_RATE_LIMIT_* has no effect on this instance. A test overrides
+# max_requests / window_seconds on the object directly and calls reset() to clear
+# counters - see the limiter_ceiling fixture in tests/api/conftest.py.
 _initiate_limiter = SlidingWindowRateLimiter(
     max_requests=settings.SSO_RATE_LIMIT_ATTEMPTS,
     window_seconds=settings.SSO_RATE_LIMIT_WINDOW_MINUTES * 60,

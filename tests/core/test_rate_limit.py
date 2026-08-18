@@ -4,6 +4,7 @@ The limiter backs three endpoints with different keys (IP and user id), so the
 boundary behavior is tested here once rather than at each call site.
 """
 
+import threading
 from unittest.mock import patch
 
 import pytest
@@ -184,6 +185,87 @@ class TestKeyStoreIsBounded:
             limiter.is_allowed("fresh")
 
         assert len(limiter._requests) == limiter._SWEEP_THRESHOLD + 2
+
+    def test_sweep_runs_at_most_once_per_window(self, limiter):
+        """A store held above the threshold by live keys must not be rescanned on
+        every request - that would make the defense the amplifier."""
+        with patch("app.core.utils.rate_limit.time.time", return_value=1000.0):
+            for i in range(limiter._SWEEP_THRESHOLD + 1):
+                limiter.is_allowed(f"live-{i}")
+            # The threshold is crossed by the final insert, so the next request is
+            # the first one to see an over-threshold store and sweep.
+            limiter.is_allowed("trigger")
+
+        assert limiter._last_sweep == 1000.0
+
+        # Still over the threshold, but inside the same window: no rescan.
+        with patch("app.core.utils.rate_limit.time.time", return_value=1030.0):
+            limiter.is_allowed("x")
+
+        assert limiter._last_sweep == 1000.0
+
+        # A full window later, one sweep is allowed again.
+        with patch("app.core.utils.rate_limit.time.time", return_value=1061.0):
+            limiter.is_allowed("y")
+
+        assert limiter._last_sweep == 1061.0
+
+
+class TestThreadSafety:
+    """Three of the four call sites are sync `def` endpoints, which FastAPI runs in
+    a threadpool - so these paths genuinely execute in parallel."""
+
+    def test_concurrent_requests_do_not_exceed_the_limit(self):
+        limiter = SlidingWindowRateLimiter(max_requests=10, window_seconds=60)
+        admitted = []
+        barrier = threading.Barrier(8)
+
+        def hammer():
+            barrier.wait()  # maximize overlap on the read-modify-write
+            for _ in range(20):
+                if limiter.is_allowed("shared"):
+                    admitted.append(1)
+
+        threads = [threading.Thread(target=hammer) for _ in range(8)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        assert sum(admitted) == 10
+
+    def test_concurrent_mixed_operations_complete(self):
+        """Smoke cover for the locked paths under real parallelism: reads nested
+        inside writes complete without error and without deadlocking.
+
+        The nesting matters - rate_limit_headers takes the lock and then calls
+        getters that take it again, so a plain Lock here would hang. It is a weaker
+        test than the over-admission one above: an interleaving that corrupts the
+        dict mid-sweep is possible in principle but did not reproduce on demand.
+        """
+        limiter = SlidingWindowRateLimiter(max_requests=1000, window_seconds=60)
+        for i in range(limiter._SWEEP_THRESHOLD + 1):
+            limiter.is_allowed(f"seed-{i}")
+
+        errors = []
+        barrier = threading.Barrier(4)
+
+        def hammer(worker: int):
+            barrier.wait()
+            try:
+                for i in range(200):
+                    limiter.is_allowed(f"w{worker}-{i}")
+                    limiter.rate_limit_headers(f"w{worker}-{i}")
+            except Exception as exc:  # noqa: BLE001 - the assertion is "none raised"
+                errors.append(exc)
+
+        threads = [threading.Thread(target=hammer, args=(n,)) for n in range(4)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        assert errors == []
 
     def test_reset_clears_recorded_requests(self, limiter):
         for _ in range(3):

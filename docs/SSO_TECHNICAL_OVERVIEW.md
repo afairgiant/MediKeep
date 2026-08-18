@@ -472,7 +472,18 @@ all are single-use — validated and deleted in the same operation.
 
 Because the store is in process memory, the server must run with **one worker**. A callback
 handled by a different worker than the one that minted the state fails validation.
-`docker/entrypoint.sh` pins `--workers 1` on every startup path.
+
+Every supported startup path satisfies this today:
+
+| Path | Why it is single-process |
+|---|---|
+| Docker | `docker/entrypoint.sh` passes `--workers 1` explicitly |
+| Windows EXE / tray (`run.py`) | Builds a `uvicorn.Config` and calls `uvicorn.Server(...).run()` directly; the multiprocess supervisor is only reachable through `uvicorn.run()` with `workers > 1`, so `WEB_CONCURRENCY` has no effect |
+| Dev (`run.py`, reload) | `uvicorn.run(reload=True)` takes uvicorn's reload supervisor, which is single-worker |
+
+Only the Docker path states the constraint explicitly; the other two hold by construction.
+Anyone switching `run.py` to `uvicorn.run(..., workers=N)`, or dropping `--workers 1` from
+the entrypoint, must move this store to shared storage (database or Redis) first.
 
 Expired entries are swept on every `/auth/sso/initiate` write, so an abandoned flow (a user
 who closes the tab at the IdP, a crawler, a monitoring probe) is reclaimed by the next

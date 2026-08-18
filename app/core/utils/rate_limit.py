@@ -10,6 +10,7 @@ survive a restart. That is adequate for abuse prevention, not for hard quotas.
 """
 
 import math
+import threading
 import time
 from collections import deque
 from collections.abc import Hashable
@@ -28,22 +29,35 @@ class SlidingWindowRateLimiter:
     does not accumulate an empty deque per key ever seen. Pruning is lazy, though:
     it happens when a key is looked up again, which never comes for a key seen once.
     ``_SWEEP_THRESHOLD`` bounds that residue.
+
+    Thread-safe. FastAPI runs non-``async`` endpoints in a threadpool, and three of
+    the call sites are plain ``def``, so requests genuinely execute in parallel:
+    without the lock, two threads can pass the limit check before either records its
+    request, and a sweep iterating the dict while another thread inserts raises
+    ``RuntimeError: dictionary changed size during iteration``.
     """
 
-    # Past this many tracked keys, a request sweeps every stale key rather than only
-    # its own. Amortized O(1), and it caps the residue of one-shot keys - which for
-    # an IP-keyed limiter on an unauthenticated endpoint is one entry per address a
-    # distributed source cares to use. Well above any legitimate concurrent-client
-    # count, so a real deployment never pays for the sweep.
+    # Past this many tracked keys, a request sweeps stale keys rather than only its
+    # own, which caps the residue of one-shot keys - for an IP-keyed limiter on an
+    # unauthenticated endpoint, one entry per address a distributed source cares to
+    # use. Well above any legitimate concurrent-client count, so a real deployment
+    # never pays for the sweep.
     _SWEEP_THRESHOLD = 10000
 
     def __init__(self, max_requests: int, window_seconds: int):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self._requests: Dict[Hashable, Deque[float]] = {}
+        # Re-entrant so rate_limit_headers can call the public getters, which take
+        # the lock themselves, without deadlocking.
+        self._lock = threading.RLock()
+        self._last_sweep = 0.0
 
     def _prune(self, key: Hashable, now: float) -> Optional[Deque[float]]:
-        """Drop timestamps outside the window; return the live deque or None."""
+        """Drop timestamps outside the window; return the live deque or None.
+
+        Caller must hold ``_lock``.
+        """
         window = self._requests.get(key)
         if window is None:
             return None
@@ -57,8 +71,20 @@ class SlidingWindowRateLimiter:
 
         return window
 
-    def _sweep_stale_keys(self, now: float) -> None:
-        """Drop every key whose window has fully aged out."""
+    def _maybe_sweep(self, now: float) -> None:
+        """Drop keys whose windows have fully aged out, at most once per window.
+
+        Throttled because the scan is O(tracked keys): a store held above the
+        threshold by *live* keys would otherwise be rescanned on every request, so
+        the defense against one-shot-key growth would itself become the amplifier.
+        Caller must hold ``_lock``.
+        """
+        if len(self._requests) <= self._SWEEP_THRESHOLD:
+            return
+        if now - self._last_sweep < self.window_seconds:
+            return
+
+        self._last_sweep = now
         cutoff = now - self.window_seconds
         stale = [
             key
@@ -72,33 +98,34 @@ class SlidingWindowRateLimiter:
         """Record a request and return whether it is under the limit."""
         now = time.time()
 
-        if len(self._requests) > self._SWEEP_THRESHOLD:
-            self._sweep_stale_keys(now)
+        with self._lock:
+            self._maybe_sweep(now)
+            window = self._prune(key, now)
 
-        window = self._prune(key, now)
+            if window is None:
+                window = deque()
 
-        if window is None:
-            window = deque()
+            if len(window) < self.max_requests:
+                window.append(now)
+                self._requests[key] = window
+                return True
 
-        if len(window) < self.max_requests:
-            window.append(now)
-            self._requests[key] = window
-            return True
-
-        return False
+            return False
 
     def get_remaining_requests(self, key: Hashable) -> int:
         """Requests still available to this key in the current window."""
-        window = self._prune(key, time.time())
-        used = len(window) if window else 0
-        return max(0, self.max_requests - used)
+        with self._lock:
+            window = self._prune(key, time.time())
+            used = len(window) if window else 0
+            return max(0, self.max_requests - used)
 
     def get_reset_time(self, key: Hashable) -> float:
         """Unix timestamp at which this key's oldest request leaves the window."""
-        window = self._requests.get(key)
-        if not window:
-            return time.time()
-        return window[0] + self.window_seconds
+        with self._lock:
+            window = self._requests.get(key)
+            if not window:
+                return time.time()
+            return window[0] + self.window_seconds
 
     def get_retry_after(self, key: Hashable) -> int:
         """Whole seconds a limited caller should wait, for the Retry-After header.
@@ -106,10 +133,11 @@ class SlidingWindowRateLimiter:
         Rounded up and floored at 1 - a Retry-After of 0 invites an immediate retry
         that would be rejected again.
         """
-        window = self._requests.get(key)
-        if not window:
-            return 0
-        return max(1, math.ceil(window[0] + self.window_seconds - time.time()))
+        with self._lock:
+            window = self._requests.get(key)
+            if not window:
+                return 0
+            return max(1, math.ceil(window[0] + self.window_seconds - time.time()))
 
     def rate_limit_headers(self, key: Hashable) -> Dict[str, str]:
         """Standard `429` headers for a rejected request.
@@ -118,17 +146,20 @@ class SlidingWindowRateLimiter:
         the limit in particular was previously hardcoded per endpoint and went stale
         the moment the limiter was configured differently.
         """
-        return {
-            "Retry-After": str(self.get_retry_after(key)),
-            "X-RateLimit-Limit": str(self.max_requests),
-            "X-RateLimit-Remaining": str(self.get_remaining_requests(key)),
-            "X-RateLimit-Reset": str(int(self.get_reset_time(key))),
-        }
+        with self._lock:
+            return {
+                "Retry-After": str(self.get_retry_after(key)),
+                "X-RateLimit-Limit": str(self.max_requests),
+                "X-RateLimit-Remaining": str(self.get_remaining_requests(key)),
+                "X-RateLimit-Reset": str(int(self.get_reset_time(key))),
+            }
 
     def reset(self) -> None:
         """Discard all recorded requests. For tests - module-scope limiter state
         otherwise leaks between them."""
-        self._requests.clear()
+        with self._lock:
+            self._requests.clear()
+            self._last_sweep = 0.0
 
 
 def get_client_ip(request: Request) -> str:

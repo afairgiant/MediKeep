@@ -18,6 +18,7 @@ import logging
 import pytest
 
 from app.models.models import User
+from tests.api.conftest import LOCAL_PASSWORD
 
 ADMIN_MODELS_LOGGER = "medical_records.app.api.v1.admin.models"
 
@@ -220,6 +221,20 @@ class TestResetThenForceChangeSequence:
 
 
 class TestPromotedAccountLogin:
+    def test_sso_only_account_cannot_log_in_locally_before_a_reset(
+        self, client, make_user
+    ):
+        """The state has_usable_password describes: the account's password is a
+        random token nobody holds, so no local credential can satisfy /auth/login."""
+        make_user(auth_method="sso", username="nolocalpassword")
+
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": "nolocalpassword", "password": LOCAL_PASSWORD},
+        )
+
+        assert response.status_code != 200
+
     def test_promoted_account_logs_in_locally_with_the_new_password(
         self, admin_client, client, make_user
     ):
