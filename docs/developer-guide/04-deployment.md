@@ -491,8 +491,24 @@ TRASH_RETENTION_DAYS=60
 | `SSO_ISSUER_URL`                | string     | -       | For OIDC       | OIDC issuer URL                                                           |
 | `SSO_REDIRECT_URI`              | string     | -       | If SSO enabled | OAuth redirect URI                                                        |
 | `SSO_ALLOWED_DOMAINS`           | JSON array | `[]`    | No             | Allowed email domains                                                     |
-| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `10`    | No             | Max SSO attempts per window                                               |
+| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `10`    | No             | Max `POST /auth/sso/initiate` calls per IP per window                     |
 | `SSO_RATE_LIMIT_WINDOW_MINUTES` | integer    | `10`    | No             | Rate limit window                                                         |
+
+**SSO rate limiting:** these two variables throttle `POST /api/v1/auth/sso/initiate`,
+the unauthenticated endpoint that starts the sign-in redirect. Exceeding the limit
+returns `429` with `Retry-After` and `X-RateLimit-*` headers. The limit is **per client
+IP**, and counters live in process memory - they are not shared between workers and
+reset when the container restarts.
+
+Two consequences worth knowing before tuning these:
+
+- Behind a reverse proxy that does not set `X-Forwarded-For` or `X-Real-IP`, every
+  request resolves to the proxy's address and shares a single bucket. Set those
+  headers on your proxy.
+- Each sign-in attempt is one attempt against the limit. If a future release adds
+  automatic redirect-to-IdP on unauthenticated page loads, a household or CGNAT range
+  sharing one address could plausibly reach the default 10-per-10-minutes. Raise
+  `SSO_RATE_LIMIT_ATTEMPTS` if legitimate users report being turned away.
 
 **Example (Google):**
 

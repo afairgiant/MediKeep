@@ -57,6 +57,7 @@ class GitHubProvider(SSOProvider):
         return SSOUserInfo(
             sub=str(raw_data["id"]),  # GitHub uses numeric IDs
             email=raw_data.get("email"),
+            username=raw_data.get("login"),
             name=name,
         )
 

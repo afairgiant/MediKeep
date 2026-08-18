@@ -8,8 +8,85 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.crud.patient import patient as patient_crud
+from app.crud.user import user as user_crud
+from app.models.models import User
 from app.schemas.patient import PatientCreate
+from app.schemas.user import UserCreate
+from app.services.sso_service import _state_storage
 from tests.utils.user import create_random_user, create_user_token_headers
+
+
+@pytest.fixture
+def clean_sso_state():
+    """Empty the SSO state store around a test.
+
+    ``_state_storage`` is module-level and leaks between tests otherwise. Opt in
+    with ``pytestmark = pytest.mark.usefixtures("clean_sso_state")``.
+    """
+    _state_storage.clear()
+    yield
+    _state_storage.clear()
+
+
+@pytest.fixture
+def limiter_ceiling():
+    """Temporarily lower a rate limiter's ceiling, restoring it afterwards.
+
+    Limiters are module-scope singletons built from settings at import time, so
+    patching a setting has no effect on the already-built object - a test sets the
+    attribute on the instance instead. Counters are cleared on both sides so limits
+    do not leak between tests.
+    """
+    originals = []
+
+    def apply(limiter, max_requests: int):
+        originals.append((limiter, limiter.max_requests))
+        limiter.reset()
+        limiter.max_requests = max_requests
+        return limiter
+
+    yield apply
+
+    for limiter, original in originals:
+        limiter.max_requests = original
+        limiter.reset()
+
+
+@pytest.fixture
+def make_sso_user(db_session: Session):
+    """Create a user with the SSO fields and flags a test needs."""
+
+    def factory(
+        *,
+        username: str = "ssouser",
+        auth_method: str = "sso",
+        must_change_password: bool = False,
+        is_active: bool = True,
+        link_sso_identity: bool = True,
+    ) -> User:
+        user = user_crud.create(
+            db_session,
+            obj_in=UserCreate(
+                username=username,
+                email=f"{username}@example.com",
+                password="localpassword123",
+                full_name="SSO Test User",
+                role="user",
+            ),
+            must_change_password=must_change_password,
+        )
+
+        user.auth_method = auth_method
+        user.is_active = is_active
+        if link_sso_identity:
+            user.external_id = f"external-{username}"
+            user.sso_provider = "google"
+        db_session.commit()
+        db_session.refresh(user)
+
+        return user
+
+    return factory
 
 
 @pytest.fixture

@@ -1,3 +1,4 @@
+import heapq
 import secrets
 from datetime import datetime, timedelta
 from typing import Dict, Optional
@@ -13,8 +14,122 @@ from app.crud.user import user as user_crud
 
 logger = get_logger(__name__, "sso")
 
-# In-memory state storage for temporary SSO tokens
+# Lifetime of every entry in _state_storage. Shared by the CSRF state tokens, the
+# account-conflict tokens, and the GitHub manual-link tokens so the sweep and the
+# three expiry checks cannot drift apart.
+_STATE_TTL = timedelta(minutes=10)
+
+# Defensive ceiling on the state store. Sweep-on-write bounds the store to what is
+# minted inside one TTL window, which the per-IP rate limit on /auth/sso/initiate
+# caps per source - but a distributed source can still grow it linearly. Roughly
+# 1 MB of entries: far above any legitimate self-hosted load, far below anything
+# that threatens the process.
+_STATE_STORE_MAX_ENTRIES = 10000
+
+# In-memory state storage for temporary SSO tokens.
+#
+# This dict is per-process, so it requires the server to run with a single worker:
+# a callback handled by a different worker than the one that minted the state would
+# fail validation. docker/entrypoint.sh pins --workers 1 on every startup path
+# (lines 180, 187, 191). Anyone raising the worker count must move this store to
+# shared storage (database or Redis) first, or SSO will fail intermittently.
+#
+# Three unrelated flows share this dict, keyed as:
+#   <state>                        - CSRF state for the authorization redirect
+#   sso_conflict_<token>           - pending account-conflict resolution
+#   github_manual_link_<token>     - pending GitHub manual account link
+# Write through _store_state_entry, which stamps the timestamps every entry must
+# carry and keeps the store swept and bounded on every write path.
 _state_storage = {}
+
+
+def _sweep_expired_states() -> int:
+    """Drop expired entries of every kind. Returns the number reclaimed."""
+    now = datetime.utcnow()
+    # Build the key list before deleting - mutating a dict during iteration raises.
+    expired = [
+        key for key, value in _state_storage.items() if value["expires_at"] <= now
+    ]
+    for key in expired:
+        del _state_storage[key]
+
+    if expired:
+        # debug, not info: under SSO_AUTO_REDIRECT this runs on every unauthenticated
+        # page load.
+        logger.debug(
+            f"Swept {len(expired)} expired SSO state entries",
+            extra={
+                "category": "sso",
+                "event": "sso_state_store_swept",
+                "reclaimed": len(expired),
+                "remaining": len(_state_storage),
+            },
+        )
+    return len(expired)
+
+
+def _enforce_state_store_cap() -> int:
+    """Evict oldest entries until the store fits under the cap. Returns evictions.
+
+    Only reached if a sweep left the store above the ceiling, which means either an
+    attack or a wildly misconfigured deployment. Eviction is safe: an evicted entry
+    fails its callback with the same "invalid or expired" error as a natural expiry,
+    so a legitimate caught-in-the-crossfire user just retries.
+    """
+    overflow = len(_state_storage) - _STATE_STORE_MAX_ENTRIES
+    if overflow <= 0:
+        return 0
+
+    # nsmallest, not a full sort: the cap runs on every write, so overflow is 1 in
+    # practice and sorting all 10,000 entries to find one minimum would make the
+    # defense cost more than the memory it protects.
+    oldest = heapq.nsmallest(
+        overflow, _state_storage.items(), key=lambda item: item[1]["created_at"]
+    )
+    for key, _ in oldest:
+        del _state_storage[key]
+
+    logger.warning(
+        "SSO state store exceeded capacity - evicted oldest entries",
+        extra={
+            "category": "security",
+            "event": "sso_state_store_capacity_exceeded",
+            "evicted": overflow,
+            "capacity": _STATE_STORE_MAX_ENTRIES,
+        },
+    )
+    return overflow
+
+
+def _serialize_user_info(user_info) -> Dict:
+    """Reduce a provider user-info object to a plain dict for storage."""
+    if hasattr(user_info, "model_dump"):
+        return user_info.model_dump()
+    if hasattr(user_info, "__dict__"):
+        return user_info.__dict__
+    return user_info
+
+
+def _store_state_entry(key: str, payload: Dict) -> None:
+    """Stamp and store a state entry, keeping the store swept and under its cap.
+
+    The single write path for all three token kinds. Sweeping here means conflict and
+    github-link entries are reclaimed by any subsequent SSO activity rather than by
+    an action of their own - so a wholly idle instance retains them until the next
+    sign-in attempt. The cap is enforced after the insert, so the store never exceeds
+    the ceiling; the entry just written is the newest, so oldest-first eviction never
+    discards it.
+    """
+    _sweep_expired_states()
+
+    now = datetime.utcnow()
+    _state_storage[key] = {
+        **payload,
+        "created_at": now,
+        "expires_at": now + _STATE_TTL,
+    }
+
+    _enforce_state_store_cap()
 
 
 class SSOService:
@@ -34,34 +149,34 @@ class SSOService:
         # Generate CSRF state token
         state = secrets.token_urlsafe(32)
 
-        # Store state with expiration (10 minutes)
-        _state_storage[state] = {
-            "created_at": datetime.utcnow(),
-            "return_url": return_url,
-        }
-
+        # Build the authorization URL before storing anything. A state entry has no
+        # value until the user is actually sent to the IdP, and storing it first would
+        # orphan an entry on every misconfigured-provider attempt - nothing would ever
+        # consume or delete it.
         try:
             provider = create_sso_provider()
             auth_url = provider.get_auth_url(state)
-
-            logger.info(
-                f"SSO authorization initiated for provider: {settings.SSO_PROVIDER_TYPE}",
-                extra={"category": "sso", "event": "auth_initiated"},
-            )
-
-            return {
-                "auth_url": auth_url,
-                "state": state,
-                "provider": settings.SSO_PROVIDER_TYPE,
-            }
         except Exception as e:
             logger.error(f"Failed to generate SSO auth URL: {str(e)}")
             raise SSOAuthenticationError("Failed to start SSO authentication")
 
+        _store_state_entry(state, {"return_url": return_url})
+
+        logger.info(
+            f"SSO authorization initiated for provider: {settings.SSO_PROVIDER_TYPE}",
+            extra={"category": "sso", "event": "auth_initiated"},
+        )
+
+        return {
+            "auth_url": auth_url,
+            "state": state,
+            "provider": settings.SSO_PROVIDER_TYPE,
+        }
+
     async def complete_authentication(self, code: str, state: str, db: Session) -> Dict:
         """Complete SSO authentication - no retry for OAuth codes (they're single-use)"""
         # Validate state and consume it (single-use)
-        self._validate_and_consume_state(state)
+        state_data = self._validate_and_consume_state(state)
 
         try:
             provider = create_sso_provider()
@@ -141,20 +256,29 @@ class SSOService:
                 },
             )
 
+        # Carry the deep link the flow started from back to the caller. Ships inert -
+        # no frontend reads it yet (deep links currently survive via sessionStorage,
+        # which fails in private browsing). See SSO_ONLY_MODE_SPEC.md 8.8.
+        result["return_url"] = state_data.get("return_url")
+
         return result
 
-    def _validate_and_consume_state(self, state: str):
-        """Validate and consume CSRF state token (single-use)"""
+    def _validate_and_consume_state(self, state: str) -> Dict:
+        """Validate and consume CSRF state token (single-use).
+
+        Returns the consumed entry so callers can read the ``return_url`` that
+        ``/auth/sso/initiate`` was given.
+        """
         if state not in _state_storage:
             raise SSOAuthenticationError("Invalid or expired state parameter")
 
-        # Check if state is expired (10 minutes)
         state_data = _state_storage[state]
-        if datetime.utcnow() - state_data["created_at"] > timedelta(minutes=10):
+        if datetime.utcnow() > state_data["expires_at"]:
             del _state_storage[state]
             raise SSOAuthenticationError("State parameter expired")
 
         del _state_storage[state]
+        return state_data
 
     @staticmethod
     def _extract_oauth_error(exc: Exception) -> str:
@@ -373,16 +497,13 @@ class SSOService:
 
         # Store conflict data temporarily
         conflict_key = f"sso_conflict_{temp_token}"
-        _state_storage[conflict_key] = {
-            "created_at": datetime.utcnow(),
-            "existing_user_id": existing_user.id,
-            "sso_user_info": (
-                user_info.model_dump()
-                if hasattr(user_info, "model_dump")
-                else user_info.__dict__ if hasattr(user_info, "__dict__") else user_info
-            ),
-            "expires_at": datetime.utcnow() + timedelta(minutes=10),
-        }
+        _store_state_entry(
+            conflict_key,
+            {
+                "existing_user_id": existing_user.id,
+                "sso_user_info": _serialize_user_info(user_info),
+            },
+        )
 
         return {
             "conflict": True,
@@ -412,15 +533,9 @@ class SSOService:
 
         # Store GitHub user info temporarily
         github_key = f"github_manual_link_{temp_token}"
-        _state_storage[github_key] = {
-            "created_at": datetime.utcnow(),
-            "sso_user_info": (
-                user_info.model_dump()
-                if hasattr(user_info, "model_dump")
-                else user_info.__dict__ if hasattr(user_info, "__dict__") else user_info
-            ),
-            "expires_at": datetime.utcnow() + timedelta(minutes=10),
-        }
+        _store_state_entry(
+            github_key, {"sso_user_info": _serialize_user_info(user_info)}
+        )
 
         return {
             "github_manual_link": True,
@@ -522,8 +637,9 @@ class SSOService:
         if not existing_user:
             raise SSOAuthenticationError("Invalid username or password")
 
-        # Verify password
-        if not verify_password(password, existing_user.password):
+        # Verify password. The column is password_hash - User has no `password`
+        # attribute, and reading one raised AttributeError on every manual link.
+        if not verify_password(password, str(existing_user.password_hash)):
             raise SSOAuthenticationError("Invalid username or password")
 
         # Link the GitHub account to the existing user

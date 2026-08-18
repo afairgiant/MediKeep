@@ -1835,13 +1835,38 @@ def _enforce_user_update_guards(
     current_user: User,
     request: Request,
 ) -> None:
-    """Block admin updates that would lock out admin access or self-disable.
+    """Block admin updates that would leave the account or the system unusable.
 
     Mirrors the protections on user DELETE (last admin / self) so role and
-    is_active changes cannot bypass them via the generic PUT endpoint.
+    is_active changes cannot bypass them via the generic PUT endpoint, and refuses
+    a forced password change that the target account could never satisfy.
     """
     is_self = record.id == current_user.id
     current_role = record.role
+
+    # A forced password change is meaningless for an account whose password is a
+    # discarded random token: it has no local password to change, and
+    # /auth/change-password requires the current one. Setting it would lock the
+    # account out until its next SSO login clears the flag.
+    #
+    # Ordering note: the admin UI resets the password first, which promotes the
+    # account to 'hybrid' (see admin_reset_password below), so the follow-up write
+    # that sets this flag passes this guard. It fires only on the incoherent case -
+    # forcing a change on an account that has never had a password set. Reversing
+    # those two frontend calls would break the flow.
+    if update_data.get("must_change_password") and not record.has_usable_password:
+        _block_user_update(
+            request=request,
+            current_user=current_user,
+            record=record,
+            event="forced_password_change_blocked_sso_account",
+            log_message="Attempt to force a password change on an SSO-only account",
+            detail=(
+                "Cannot require a password change for an SSO-only account - "
+                "it has no local password to change. Reset the user's password "
+                "first, which converts the account to hybrid authentication."
+            ),
+        )
 
     demoting_admin = (
         "role" in update_data
@@ -1874,9 +1899,7 @@ def _enforce_user_update_guards(
             detail="Cannot deactivate your own user account",
         )
 
-    if demoting_admin and not _has_other_admin(
-        db, record.id, active_only=False
-    ):
+    if demoting_admin and not _has_other_admin(db, record.id, active_only=False):
         _block_user_update(
             request=request,
             current_user=current_user,
@@ -2077,7 +2100,20 @@ def admin_reset_password(
         )
 
     try:
-        # Update password using the CRUD method
+        # An 'sso' account that is being given a real password is no longer SSO-only:
+        # /auth/login authenticates on password_hash alone and never reads
+        # auth_method, so local login works from the moment the password lands.
+        # Promoting the label grants no new capability - it makes the stored value
+        # match reality, which is what User.has_usable_password and the SSO login
+        # clear both key off. Mirrors _link_existing_user, which likewise only ever
+        # promotes 'local' -> 'hybrid'.
+        #
+        # Set before the password write so update_password's commit persists both
+        # columns in one transaction; if that commit fails, neither is applied.
+        promoting_to_hybrid = target_user.auth_method == "sso"
+        if promoting_to_hybrid:
+            target_user.auth_method = "hybrid"
+
         updated_user = user.update_password(
             db, user_id=user_id, new_password=password_data.new_password
         )
@@ -2085,6 +2121,16 @@ def admin_reset_password(
         if not updated_user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+
+        if promoting_to_hybrid:
+            log_security_event(
+                logger,
+                "sso_account_promoted_to_hybrid",
+                request,
+                "SSO-only account promoted to hybrid by admin password reset",
+                user_id=current_user.id,
+                target_user_id=user_id,
             )
 
         # Log admin password reset in activity log

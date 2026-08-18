@@ -456,17 +456,43 @@ CREATE INDEX ix_users_sso_provider ON users(sso_provider);
 CREATE INDEX ix_users_email_auth_method ON users(email, auth_method);
 ```
 
-### Session Management
+### State Token Storage
 
-```python
-# Store minimal data in session
-session["sso_state"] = state
-session["sso_return_url"] = return_url
+There is no server-side session. `app/services/sso_service.py` keeps an in-process dict,
+`_state_storage`, holding three kinds of short-lived token:
 
-# Clean up after use
-del session["sso_state"]
-del session["sso_return_url"]
-```
+| Key | Created by | Payload |
+|---|---|---|
+| `<state>` | `/auth/sso/initiate` | `return_url` |
+| `sso_conflict_<token>` | an email that matches an existing account | the SSO user info |
+| `github_manual_link_<token>` | a GitHub user whose email is not exposed | the SSO user info |
+
+All three share one TTL (`_STATE_TTL`, 10 minutes) and one expiry field (`expires_at`), and
+all are single-use — validated and deleted in the same operation.
+
+Because the store is in process memory, the server must run with **one worker**. A callback
+handled by a different worker than the one that minted the state fails validation.
+`docker/entrypoint.sh` pins `--workers 1` on every startup path.
+
+Expired entries are swept on every `/auth/sso/initiate` write, so an abandoned flow (a user
+who closes the tab at the IdP, a crawler, a monitoring probe) is reclaimed by the next
+sign-in rather than retained forever. A hard ceiling of 10,000 entries evicts oldest-first
+as a backstop, logging `sso_state_store_capacity_exceeded`. An evicted or expired token
+produces the ordinary "Invalid or expired state parameter" error; retrying the sign-in
+works.
+
+### Rate Limiting
+
+`POST /auth/sso/initiate` is unauthenticated and mints a state entry per call, so it is
+throttled per client IP by `SSO_RATE_LIMIT_ATTEMPTS` per `SSO_RATE_LIMIT_WINDOW_MINUTES`
+(defaults: 10 per 10 minutes). The check runs *before* the state entry is created, which is
+what bounds the store against an anonymous caller. Exceeding it returns 429 with
+`Retry-After`, `X-RateLimit-*`, and `X-Error-Code: sso_rate_limited`, and logs
+`sso_initiate_rate_limited`.
+
+The limiter is `app/core/utils/rate_limit.SlidingWindowRateLimiter`, shared with the
+system log-level and medical-specialty create endpoints. Counters are per-process and do
+not survive a restart.
 
 ## Monitoring and Logging
 

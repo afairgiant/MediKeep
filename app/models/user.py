@@ -101,6 +101,19 @@ class User(Base):
     # Indexes for performance
     __table_args__ = (Index("idx_users_email", "email"),)
 
+    @property
+    def has_usable_password(self) -> bool:
+        """False for accounts whose password_hash is a discarded random token.
+
+        SSO-created accounts (crud/user.py create_from_sso) are given a random
+        password that is never revealed to anyone, so password-based flows
+        (forced change, local login) cannot be satisfied. password_hash is
+        nullable=False, so there is no "no password" state to check directly -
+        auth_method is the only signal. Admin password reset promotes 'sso' to
+        'hybrid' precisely so this stays true.
+        """
+        return self.auth_method != "sso"
+
 
 class UserPreferences(Base):
     """Stores per-user settings including units, language, session timeout, and integrations."""

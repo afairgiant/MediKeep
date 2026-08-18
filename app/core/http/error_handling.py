@@ -581,6 +581,7 @@ _HTTP_STATUS_TO_CODE = {
     403: ExceptionCode.FORBIDDEN,
     404: ExceptionCode.NOT_FOUND,
     409: ExceptionCode.CONFLICT,
+    429: ExceptionCode.RATE_LIMITED,
 }
 
 
@@ -644,6 +645,10 @@ def setup_error_handling(app: FastAPI):
         return JSONResponse(
             status_code=api_exception.http_status_code,
             content=api_exception.to_response_model().model_dump(exclude_none=False),
+            # Carry through headers the raiser set. Dropping them silently voided
+            # every Retry-After and X-RateLimit-* this app has ever raised on a 429,
+            # and WWW-Authenticate on a 401.
+            headers=exc.headers or None,
         )
 
     logger.info(
