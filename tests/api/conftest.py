@@ -75,7 +75,13 @@ def make_sso_user(db_session: Session):
         # is discarded immediately, so no caller can present it. Handing these users
         # a known password would let a test "prove" an SSO-only account logs in
         # locally, which is true only after an admin reset promotes it to hybrid.
-        password = secrets.token_urlsafe(32) if auth_method == "sso" else LOCAL_PASSWORD
+        #
+        # The "A1" prefix is load-bearing: UserCreate requires at least one letter
+        # and one digit, and a bare token_urlsafe contains no digit about 1 time in
+        # 1500 - a flake that would surface as an unrelated ValidationError.
+        password = (
+            f"A1{secrets.token_urlsafe(32)}" if auth_method == "sso" else LOCAL_PASSWORD
+        )
 
         user = user_crud.create(
             db_session,

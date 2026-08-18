@@ -96,9 +96,13 @@ class SlidingWindowRateLimiter:
 
     def is_allowed(self, key: Hashable) -> bool:
         """Record a request and return whether it is under the limit."""
-        now = time.time()
-
         with self._lock:
+            # Read the clock under the lock, not before it. A thread that stamps its
+            # timestamp and then waits on the lock would append a value older than
+            # one already recorded, leaving the deque out of order - and _prune pops
+            # from the left only while the leftmost is expired, so it assumes order.
+            now = time.time()
+
             self._maybe_sweep(now)
             window = self._prune(key, now)
 
@@ -120,24 +124,32 @@ class SlidingWindowRateLimiter:
             return max(0, self.max_requests - used)
 
     def get_reset_time(self, key: Hashable) -> float:
-        """Unix timestamp at which this key's oldest request leaves the window."""
+        """Unix timestamp at which this key's oldest request leaves the window.
+
+        Returns now for a key with no live requests - there is nothing to wait for.
+        """
         with self._lock:
-            window = self._requests.get(key)
+            now = time.time()
+            # Prune first: reading an unpruned window would report a reset time
+            # derived from an already-expired timestamp, i.e. one in the past.
+            window = self._prune(key, now)
             if not window:
-                return time.time()
+                return now
             return window[0] + self.window_seconds
 
     def get_retry_after(self, key: Hashable) -> int:
         """Whole seconds a limited caller should wait, for the Retry-After header.
 
         Rounded up and floored at 1 - a Retry-After of 0 invites an immediate retry
-        that would be rejected again.
+        that would be rejected again. A key with no live requests returns 0, since
+        there is no limit in force to wait out.
         """
         with self._lock:
-            window = self._requests.get(key)
+            now = time.time()
+            window = self._prune(key, now)
             if not window:
                 return 0
-            return max(1, math.ceil(window[0] + self.window_seconds - time.time()))
+            return max(1, math.ceil(window[0] + self.window_seconds - now))
 
     def rate_limit_headers(self, key: Hashable) -> Dict[str, str]:
         """Standard `429` headers for a rejected request.

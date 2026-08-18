@@ -127,6 +127,37 @@ class TestHeaderHelpers:
     def test_retry_after_is_zero_for_an_unknown_key(self, limiter):
         assert limiter.get_retry_after("k") == 0
 
+    def test_retry_after_is_zero_once_the_window_has_expired(self, limiter):
+        """A fully-expired window is no limit at all - reading it unpruned would
+        floor to 1 and tell the caller to wait for a limit that has lapsed."""
+        with patch("app.core.utils.rate_limit.time.time", return_value=1000.0):
+            for _ in range(3):
+                limiter.is_allowed("k")
+
+        with patch("app.core.utils.rate_limit.time.time", return_value=1061.0):
+            assert limiter.get_retry_after("k") == 0
+
+    def test_reset_time_is_not_in_the_past_once_the_window_has_expired(self, limiter):
+        """Unpruned, this would report oldest + window - a timestamp already gone."""
+        with patch("app.core.utils.rate_limit.time.time", return_value=1000.0):
+            for _ in range(3):
+                limiter.is_allowed("k")
+
+        with patch("app.core.utils.rate_limit.time.time", return_value=1061.0):
+            assert limiter.get_reset_time("k") == 1061.0
+
+    def test_headers_are_self_consistent_after_expiry(self, limiter):
+        """Remaining prunes and the other two did not, so they could disagree."""
+        with patch("app.core.utils.rate_limit.time.time", return_value=1000.0):
+            for _ in range(3):
+                limiter.is_allowed("k")
+
+        with patch("app.core.utils.rate_limit.time.time", return_value=1061.0):
+            headers = limiter.rate_limit_headers("k")
+
+        assert headers["X-RateLimit-Remaining"] == "3"
+        assert headers["Retry-After"] == "0"
+
 
 class TestRateLimitHeaders:
     """One header set, built from the limiter's own numbers, for every call site."""
@@ -233,6 +264,12 @@ class TestThreadSafety:
             thread.join()
 
         assert sum(admitted) == 10
+
+        # Timestamps are read under the lock, so they land in lock-acquisition
+        # order. _prune pops from the left only while the leftmost is expired, so
+        # an out-of-order deque would strand expired entries.
+        recorded = list(limiter._requests["shared"])
+        assert recorded == sorted(recorded)
 
     def test_concurrent_mixed_operations_complete(self):
         """Smoke cover for the locked paths under real parallelism: reads nested
