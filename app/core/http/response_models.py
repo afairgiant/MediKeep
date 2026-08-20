@@ -99,6 +99,13 @@ class ExceptionCode:
         "A resource with the same identifier already exists",
     )
 
+    # 429 Too Many Requests
+    RATE_LIMITED = ExceptionCodeDefinition(
+        "RATE-429",
+        "Too Many Requests",
+        "The rate limit for this endpoint has been exceeded",
+    )
+
     # 500 Internal Server Error
     INTERNAL_SERVER_ERROR = ExceptionCodeDefinition(
         "ISE-500", "Internal Server Error", "An unexpected error occurred on the server"

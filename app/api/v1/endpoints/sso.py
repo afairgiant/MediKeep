@@ -18,16 +18,30 @@ from app.core.logging.helpers import (
     log_security_event,
 )
 from app.core.utils.cookie_auth import set_auth_cookie
+from app.core.utils.rate_limit import SlidingWindowRateLimiter, get_client_ip
 from app.core.utils.security import create_access_token
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActionType, EntityType
 from app.models.base import get_utc_now
+from app.models.models import User
 from app.services.patient_management import PatientManagementService
 from app.services.sso_service import SSOService
 
 logger = get_logger(__name__, "sso")
 router = APIRouter(prefix="/auth/sso", tags=["sso"])
 sso_service = SSOService()
+
+# Throttles the unauthenticated /initiate endpoint, which is what stops an
+# anonymous caller from minting SSO state entries without bound. Keyed per IP.
+#
+# The limits are read from settings at import time, so patching
+# settings.SSO_RATE_LIMIT_* has no effect on this instance. A test overrides
+# max_requests / window_seconds on the object directly and calls reset() to clear
+# counters - see the limiter_ceiling fixture in tests/api/conftest.py.
+_initiate_limiter = SlidingWindowRateLimiter(
+    max_requests=settings.SSO_RATE_LIMIT_ATTEMPTS,
+    window_seconds=settings.SSO_RATE_LIMIT_WINDOW_MINUTES * 60,
+)
 
 
 class SSOConflictRequest(BaseModel):
@@ -111,7 +125,7 @@ def _complete_sso_login(
     # Hybrid users are deliberately excluded - they have a real local password they
     # know, so the normal forced-change flow works for them.
     clear_forced_password_change = (
-        bool(sso_user.must_change_password) and sso_user.auth_method == "sso"
+        bool(sso_user.must_change_password) and not sso_user.has_usable_password
     )
 
     try:
@@ -192,6 +206,11 @@ def _complete_sso_login(
         "is_new_user": result["is_new_user"],
         "session_timeout_minutes": session_timeout_minutes,
         "must_change_password": bool(sso_user.must_change_password),
+        # The deep link /auth/sso/initiate was given, carried through the state entry.
+        # Ships inert: no frontend reads it yet (deep links currently survive via
+        # sessionStorage, which fails in private browsing). See SSO_ONLY_MODE_SPEC.md
+        # 8.8 - the consumer is a later PR.
+        "return_url": result.get("return_url"),
     }
     response = JSONResponse(content=response_data)
     set_auth_cookie(response, access_token, max_age_minutes=jwt_lifetime)
@@ -225,6 +244,36 @@ async def initiate_sso_login(
     db: Session = Depends(deps.get_db),
 ):
     """Start SSO authentication flow"""
+    # Checked before get_authorization_url so a limited request mints no state
+    # entry - throttling this endpoint is what bounds the in-memory state store.
+    client_ip = get_client_ip(request)
+    if not _initiate_limiter.is_allowed(client_ip):
+        headers = _initiate_limiter.rate_limit_headers(client_ip)
+
+        log_security_event(
+            logger,
+            "sso_initiate_rate_limited",
+            request,
+            "Rate limit exceeded for SSO initiate endpoint",
+            endpoint="/api/v1/auth/sso/initiate",
+            retry_after_seconds=headers["Retry-After"],
+        )
+
+        raise HTTPException(
+            status_code=429,
+            detail=(
+                "Too many SSO sign-in attempts. "
+                f"Please wait {headers['Retry-After']} seconds and try again."
+            ),
+            headers={
+                **headers,
+                # X-Error-Code lets a client distinguish this from the generic SSO
+                # failures without matching on the message text. Nothing reads it
+                # yet - the frontend consumer is SSO_ONLY_MODE_SPEC.md criterion 15.
+                "X-Error-Code": "sso_rate_limited",
+            },
+        )
+
     try:
         result = await sso_service.get_authorization_url(return_url)
         return result
@@ -380,8 +429,17 @@ async def resolve_github_manual_link(
 
 
 @router.post("/test-connection")
-async def test_sso_connection(request: Request):
-    """Test SSO provider connection (for admin use)"""
+async def test_sso_connection(
+    request: Request,
+    current_user: User = Depends(deps.get_current_admin_user),
+):
+    """Test SSO provider connection. Admin only.
+
+    Each call makes the server perform an outbound token exchange against the
+    configured IdP and can echo provider configuration detail, so it must not be
+    reachable anonymously - the docstring always claimed admin use, but nothing
+    enforced it.
+    """
     try:
         result = await sso_service.test_connection()
         if result["success"]:

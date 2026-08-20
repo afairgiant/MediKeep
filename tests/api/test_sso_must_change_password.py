@@ -201,6 +201,29 @@ class TestForcedChangePreservedForOtherAuthMethods:
         db_session.expire_all()
         assert db_session.get(User, user_id).must_change_password is True
 
+    def test_promoted_account_keeps_the_flag_on_the_next_sso_login(
+        self, client: TestClient, db_session: Session
+    ):
+        """An admin reset promotes 'sso' to 'hybrid', which is what makes the
+        forced change satisfiable. Before that promotion existed, this login
+        silently reverted an admin security action."""
+        user = make_sso_user(
+            db_session,
+            username="promoteduser",
+            auth_method="hybrid",
+            must_change_password=True,
+        )
+        user_id = user.id
+
+        with patch_callback(user):
+            response = client.post(CALLBACK_URL, json=CALLBACK_BODY)
+
+        assert response.status_code == 200
+        assert response.json()["must_change_password"] is True
+
+        db_session.expire_all()
+        assert db_session.get(User, user_id).must_change_password is True
+
     def test_password_login_leaves_flag_untouched(
         self, client: TestClient, db_session: Session
     ):

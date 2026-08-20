@@ -6,8 +6,6 @@ Provides system configuration and logging level information for frontend integra
 """
 
 import os
-import time
-from collections import defaultdict, deque
 from datetime import datetime
 from typing import Any, Dict
 
@@ -25,6 +23,7 @@ from app.core.logging.constants import (
     validate_log_level,
 )
 from app.core.logging.helpers import log_security_event
+from app.core.utils.rate_limit import SlidingWindowRateLimiter, get_client_ip
 from app.services.release_notes_service import get_release_notes_service
 
 # Constants
@@ -37,90 +36,9 @@ app_logger = get_logger(__name__, "app")
 security_logger = get_logger(__name__, "security")
 
 
-# Simple rate limiting implementation (10 requests per minute)
-# Using collections for efficiency and automatic cleanup
-class SimpleRateLimiter:
-    """
-    Simple in-memory rate limiter for log level endpoint.
-    Tracks requests per IP address with automatic cleanup.
-    """
-
-    def __init__(self, max_requests: int = 10, window_minutes: int = 1):
-        self.max_requests = max_requests
-        self.window_seconds = window_minutes * 60
-        self.requests: Dict[str, deque] = defaultdict(deque)
-
-    def is_allowed(self, client_ip: str) -> bool:
-        """
-        Check if client IP is allowed to make a request.
-
-        Args:
-            client_ip: IP address of the client
-
-        Returns:
-            True if allowed, False if rate limited
-        """
-        now = time.time()
-        client_requests = self.requests[client_ip]
-
-        # Remove old requests outside the window
-        while client_requests and client_requests[0] <= now - self.window_seconds:
-            client_requests.popleft()
-
-        # Check if under limit
-        if len(client_requests) < self.max_requests:
-            client_requests.append(now)
-            return True
-
-        return False
-
-    def get_remaining_requests(self, client_ip: str) -> int:
-        """Get number of remaining requests for client."""
-        now = time.time()
-        client_requests = self.requests[client_ip]
-
-        # Remove old requests
-        while client_requests and client_requests[0] <= now - self.window_seconds:
-            client_requests.popleft()
-
-        return max(0, self.max_requests - len(client_requests))
-
-    def get_reset_time(self, client_ip: str) -> float:
-        """Get timestamp when rate limit resets for client."""
-        client_requests = self.requests[client_ip]
-        if not client_requests:
-            return time.time()
-        return client_requests[0] + self.window_seconds
-
-
 # Initialize rate limiter for log level endpoint
 # 60 requests per minute = 1 per second (reasonable for frontend usage)
-rate_limiter = SimpleRateLimiter(max_requests=60, window_minutes=1)
-
-
-def get_client_ip(request: Request) -> str:
-    """
-    Safely extract client IP address from request.
-
-    Args:
-        request: FastAPI request object
-
-    Returns:
-        Sanitized client IP address
-    """
-    # Try various headers for real IP (useful behind proxies)
-    potential_ips = [
-        request.headers.get("x-forwarded-for", "").split(",")[0].strip(),
-        request.headers.get("x-real-ip", ""),
-        getattr(request.client, "host", "unknown") if request.client else "unknown",
-    ]
-
-    # Return first non-empty IP, sanitized
-    for ip in potential_ips:
-        if ip and ip != "unknown":
-            return sanitize_log_input(ip, max_length=45)  # IPv6 max length
-
-    return "unknown"
+rate_limiter = SlidingWindowRateLimiter(max_requests=60, window_seconds=60)
 
 
 @router.get("/log-level")
@@ -146,9 +64,8 @@ def get_log_level(request: Request) -> Dict[str, Any]:
     try:
         # Apply rate limiting
         if not rate_limiter.is_allowed(client_ip):
-            remaining_requests = rate_limiter.get_remaining_requests(client_ip)
-            reset_time = rate_limiter.get_reset_time(client_ip)
-            reset_datetime = datetime.fromtimestamp(reset_time)
+            headers = rate_limiter.rate_limit_headers(client_ip)
+            reset_datetime = datetime.fromtimestamp(float(headers["X-RateLimit-Reset"]))
 
             # Log rate limit violation for security monitoring
             log_security_event(
@@ -157,19 +74,17 @@ def get_log_level(request: Request) -> Dict[str, Any]:
                 request,
                 f"Rate limit exceeded for log level endpoint from {client_ip}",
                 endpoint="/api/v1/system/log-level",
-                remaining_requests=remaining_requests,
+                remaining_requests=headers["X-RateLimit-Remaining"],
                 reset_time=reset_datetime.isoformat(),
             )
 
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit exceeded. Maximum 60 requests per minute.",
-                headers={
-                    "X-RateLimit-Limit": "60",
-                    "X-RateLimit-Remaining": str(remaining_requests),
-                    "X-RateLimit-Reset": str(int(reset_time)),
-                    "Retry-After": str(int(reset_time - time.time())),
-                },
+                detail=(
+                    "Rate limit exceeded. Maximum "
+                    f"{rate_limiter.max_requests} requests per minute."
+                ),
+                headers=headers,
             )
 
         # Log successful access attempt for app monitoring
@@ -225,8 +140,8 @@ def get_log_level(request: Request) -> Dict[str, Any]:
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "rate_limit_info": {
                 "requests_remaining": remaining_requests,
-                "requests_limit": 60,
-                "window_seconds": 60,
+                "requests_limit": rate_limiter.max_requests,
+                "window_seconds": rate_limiter.window_seconds,
                 "reset_time": datetime.fromtimestamp(reset_time).isoformat() + "Z",
             },
         }
@@ -341,9 +256,6 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
     try:
         # Apply rate limiting
         if not rate_limiter.is_allowed(client_ip):
-            remaining_requests = rate_limiter.get_remaining_requests(client_ip)
-            reset_time = rate_limiter.get_reset_time(client_ip)
-
             log_security_event(
                 security_logger,
                 "rate_limit_exceeded",
@@ -354,12 +266,11 @@ def get_log_rotation_config(request: Request) -> Dict[str, Any]:
 
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit exceeded. Maximum 60 requests per minute.",
-                headers={
-                    "X-RateLimit-Limit": "60",
-                    "X-RateLimit-Remaining": str(remaining_requests),
-                    "X-RateLimit-Reset": str(int(reset_time)),
-                },
+                detail=(
+                    "Rate limit exceeded. Maximum "
+                    f"{rate_limiter.max_requests} requests per minute."
+                ),
+                headers=rate_limiter.rate_limit_headers(client_ip),
             )
 
         # Log access

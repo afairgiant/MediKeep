@@ -86,6 +86,13 @@
 - File upload endpoints: 50 requests/hour
 - Search endpoints: 30 requests/minute
 - System monitoring endpoints: 60 requests/minute per IP (`/system/log-level`, `/system/log-rotation-config`)
+- SSO sign-in: `SSO_RATE_LIMIT_ATTEMPTS` per `SSO_RATE_LIMIT_WINDOW_MINUTES` per IP,
+  default 10 per 10 minutes (`/auth/sso/initiate`)
+- Medical specialty creation: 20 requests/hour per **user** (`POST /medical-specialties/`)
+
+Every rate-limited endpoint returns `429` with `Retry-After`, `X-RateLimit-Limit`,
+`X-RateLimit-Remaining`, and `X-RateLimit-Reset`. Limits are enforced per process and
+reset on restart, so they are abuse prevention rather than hard quotas.
 
 ---
 
@@ -229,8 +236,14 @@ Base path: `/api/v1/auth/sso`
 
 - **Purpose**: Start SSO authentication flow
 - **Authentication**: No
+- **Rate Limited**: yes — `SSO_RATE_LIMIT_ATTEMPTS` per client IP per
+  `SSO_RATE_LIMIT_WINDOW_MINUTES` (defaults: 10 per 10 minutes)
 - **Query Parameters**:
   - `return_url` (string, optional): URL to redirect after authentication
+- **Error Response** (429): rate limit exceeded. Carries `Retry-After`,
+  `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and
+  `X-Error-Code: sso_rate_limited` — branch on the status or `X-Error-Code`, not on
+  the message text. A rate-limited request creates no server-side state entry.
 - **Success Response** (200):
 
 ```json
@@ -271,9 +284,15 @@ Base path: `/api/v1/auth/sso`
     "auth_method": "google_sso"
   },
   "is_new_user": false,
-  "must_change_password": false
+  "must_change_password": false,
+  "return_url": "/patients/42"
 }
 ```
+
+- **`return_url`**: the `return_url` that `/auth/sso/initiate` was given for this
+  flow, carried through the server-side state entry, or `null` if none was supplied.
+  Provided so a client can restore a deep link without relying on `sessionStorage`
+  (which is unavailable in private browsing). No client consumes it yet.
 
 - **`must_change_password`**: when `true`, the client must route the user to the
   forced password change flow — every other endpoint returns 403 until it completes.
@@ -339,8 +358,10 @@ Base path: `/api/v1/auth/sso`
 
 `POST /auth/sso/test-connection`
 
-- **Purpose**: Test SSO provider connectivity (admin)
-- **Authentication**: No (but intended for admin use)
+- **Purpose**: Test SSO provider connectivity
+- **Authentication**: Yes — admin role required. Each call makes the server perform an
+  outbound token exchange against the configured IdP and can echo provider
+  configuration detail, so it is not reachable anonymously.
 - **Success Response** (200):
 
 ```json
@@ -5270,6 +5291,12 @@ Base path: `/api/v1/admin/models`
 - **Note**: Password fields cannot be updated through this endpoint
 - **Request Body**: Fields to update
 - **Success Response** (200): Updated record object
+- **Error Response** (400): for `model_name: "user"`, setting
+  `must_change_password: true` on an account with `auth_method: "sso"` is refused —
+  such an account has no local password to change, so the flag would lock it out.
+  Reset the user's password first (which promotes the account to `hybrid`), then set
+  the flag. Clearing the flag (`false`) is always allowed. Audited as
+  `forced_password_change_blocked_sso_account`.
 
 #### Delete Model Record
 
@@ -5301,6 +5328,12 @@ Base path: `/api/v1/admin/models`
 
 - **Validation**: Min 6 chars, must contain letter and number
 - **Success Response** (200): `{"message": "Password reset successfully"}`
+- **Side effect**: an account with `auth_method: "sso"` is promoted to `"hybrid"`.
+  This grants no new capability — `/auth/login` authenticates on the password hash
+  alone and never read `auth_method`, so local login already worked the moment the
+  password was set. The promotion makes the stored label match that reality, which is
+  what the forced-password-change guard and the SSO login flow both key off. Audited
+  as `sso_account_promoted_to_hybrid`. `local` and `hybrid` accounts are untouched.
 
 ### 15.3 Backup Operations
 

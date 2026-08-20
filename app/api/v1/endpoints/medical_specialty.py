@@ -9,9 +9,8 @@ deactivate) stays behind the admin registry at ``/api/v1/admin/models/medical_sp
 Create is rate-limited per user to prevent form-abuse spam since this is the
 only write path non-admins have.
 """
-import time
-from collections import deque
-from typing import Any, Dict, List
+
+from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
@@ -20,6 +19,7 @@ from app.api import deps
 from app.api.activity_logging import safe_log_activity
 from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
+from app.core.utils.rate_limit import SlidingWindowRateLimiter
 from app.crud.medical_specialty import medical_specialty
 from app.models.activity_log import ActionType, EntityType
 from app.schemas.medical_specialty import (
@@ -33,50 +33,11 @@ router = APIRouter()
 logger = get_logger(__name__, "app")
 
 
-class _UserRateLimiter:
-    """Tiny in-memory per-user rate limiter.
-
-    Mirrors the pattern from ``app.api.v1.endpoints.system.SimpleRateLimiter``
-    but keyed on user_id instead of IP so SSO users behind a shared NAT
-    aren't limited collectively. Not durable across restarts — adequate for
-    abuse prevention, not for hard quotas.
-    """
-
-    def __init__(self, max_requests: int, window_seconds: int):
-        self.max_requests = max_requests
-        self.window_seconds = window_seconds
-        # Plain dict — entries are only created when we actually record a
-        # request, and pruned-to-empty entries are deleted so idle users
-        # don't accumulate forever.
-        self.requests: Dict[int, deque] = {}
-
-    def allow(self, user_id: int) -> bool:
-        now = time.time()
-        window = self.requests.get(user_id)
-        if window is not None:
-            while window and window[0] <= now - self.window_seconds:
-                window.popleft()
-            if not window:
-                del self.requests[user_id]
-                window = None
-        if window is None:
-            window = deque()
-        if len(window) < self.max_requests:
-            window.append(now)
-            self.requests[user_id] = window
-            return True
-        return False
-
-    def retry_after(self, user_id: int) -> int:
-        window = self.requests.get(user_id)
-        if not window:
-            return 0
-        return max(1, int(window[0] + self.window_seconds - time.time()))
-
-
 # 20 specialty creates per user per hour — tight enough to prevent abuse,
 # generous enough for a real user onboarding multiple practitioners in one session.
-_create_limiter = _UserRateLimiter(max_requests=20, window_seconds=3600)
+# Keyed on user_id rather than IP so users behind a shared NAT aren't limited
+# collectively.
+_create_limiter = SlidingWindowRateLimiter(max_requests=20, window_seconds=3600)
 
 
 @router.get("/", response_model=List[MedicalSpecialtySummary])
@@ -113,18 +74,15 @@ def create_or_get_specialty(
     row is inserted so the frontend can treat both uniformly (select the
     returned row by id).
     """
-    if not _create_limiter.allow(current_user_id):
-        retry_after = _create_limiter.retry_after(current_user_id)
+    if not _create_limiter.is_allowed(current_user_id):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many specialty create requests. Try again later.",
-            headers={"Retry-After": str(retry_after)},
+            headers=_create_limiter.rate_limit_headers(current_user_id),
         )
 
     with handle_database_errors(request=request):
-        specialty, created = medical_specialty.get_or_create(
-            db, obj_in=specialty_in
-        )
+        specialty, created = medical_specialty.get_or_create(db, obj_in=specialty_in)
 
         if not created:
             response.status_code = status.HTTP_200_OK
