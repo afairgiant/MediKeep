@@ -387,27 +387,32 @@ class SimpleAuthService {
     return { success: false, error: 'Token refresh not supported' };
   }
 
+  /**
+   * End the server-side session.
+   *
+   * Throws when the server did not clear the cookie. That matters more than it
+   * looks: makeRequest returns non-ok responses to the caller rather than
+   * throwing ("let caller handle HTTP errors"), so this method used to swallow a
+   * 500 from /auth/logout entirely. The client would clear its own state,
+   * clear_auth_cookie would never run, and the HttpOnly cookie would stay valid --
+   * the user is shown a logged-out UI while still holding a live session. Under
+   * SSO_AUTO_REDIRECT that is unrecoverable rather than merely wrong.
+   * See SSO_ONLY_MODE_SPEC.md 8.7b.
+   */
   async logout() {
-    try {
-      logger.info('Logging out user', { category: 'auth_logout' });
+    logger.info('Logging out user', { category: 'auth_logout' });
 
-      try {
-        await this.makeRequest('/auth/logout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-      } catch (error) {
-        logger.warn('Backend logout request failed', {
-          error: error.message,
-          category: 'auth_logout',
-        });
-      }
-    } catch (error) {
-      logger.error('Error during logout process', {
-        error: error.message,
-        errorType: error.constructor.name,
+    const response = await this.makeRequest('/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) {
+      logger.error('Backend logout rejected the request', {
+        status: response.status,
         category: 'auth_logout',
       });
+      throw new Error(`Logout failed with status ${response.status}`);
     }
   }
 
@@ -625,6 +630,12 @@ class SimpleAuthService {
         token: null,
         isNewUser: data.is_new_user,
         mustChangePassword: data.must_change_password || false,
+        // The deep link /auth/sso/initiate was given, carried through the state
+        // entry. Keyed to the OAuth state parameter, so it survives private
+        // browsing and disabled storage where sessionStorage does not.
+        // Untrusted - the backend stores and echoes it verbatim; validate before
+        // navigating. See SSO_ONLY_MODE_SPEC.md 8.8 and 8.11.
+        returnUrl: data.return_url || null,
       };
     } catch (error) {
       logger.error('SSO callback error', {
@@ -730,6 +741,8 @@ class SimpleAuthService {
         token: data.access_token,
         isNewUser: data.is_new_user,
         mustChangePassword: data.must_change_password || false,
+        // See completeSSOAuth - same field, same caveat.
+        returnUrl: data.return_url || null,
       };
     } catch (error) {
       logger.error('SSO conflict resolution error', {

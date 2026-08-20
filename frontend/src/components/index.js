@@ -15,7 +15,6 @@ export { default as FormInput } from './adapters/FormInput';
 export { default as FormSelect } from './adapters/FormSelect';
 
 // Layout Components
-export { default as Header } from './adapters/Header';
 export { default as Container } from './layout/Container';
 export { default as PageHeader } from './adapters/PageHeader';
 
@@ -33,6 +32,5 @@ export {
 export { default as ProtectedRoute } from './auth/ProtectedRoute';
 
 // Layout Components (future)
-// export { default as Header } from './layout/Header';
 // export { default as Sidebar } from './layout/Sidebar';
 // export { default as Footer } from './layout/Footer';

@@ -123,9 +123,12 @@ describe('ProtectedRoute', () => {
       });
     });
 
-    test('shows notification for custom redirect when not authenticated', async () => {
+    // Was 'shows notification for custom redirect' and passed redirectTo. That
+    // prop had no production caller and is gone; the notification is what this
+    // case ever asserted.
+    test('shows notification when not authenticated', async () => {
       render(
-        <ProtectedRoute redirectTo="/custom-login">
+        <ProtectedRoute>
           <TestComponent />
         </ProtectedRoute>,
         {

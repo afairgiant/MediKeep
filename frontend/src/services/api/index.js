@@ -2,6 +2,7 @@ import logger from '../logger.js';
 import { ENTITY_TYPES } from '../../utils/entityRelationships';
 import { extractErrorMessage } from '../../utils/errorUtils';
 import { getApiUrl, isDevelopment } from '../../config/env';
+import { handleUnauthorized } from '../../utils/loginRedirect';
 
 // Map entity types to their API endpoint paths
 const ENTITY_TO_API_PATH = {
@@ -90,6 +91,17 @@ class ApiService {
         errorMessage =
           errorData ||
           `HTTP error! status: ${response.status} - ${response.statusText}`;
+      }
+
+      // Outside the JSON parse, deliberately: an expired session is just as
+      // expired when the body is not JSON, and this used to be the one client
+      // that did nothing at all with a 401 beyond logging it. It carries most of
+      // the app's traffic, so an expired session surfaced as a generic error
+      // toast on whatever screen the user happened to be on, indistinguishable
+      // from a server fault. Same rule as every other client now.
+      // See SSO_ONLY_MODE_SPEC.md 8.10.
+      if (response.status === 401) {
+        handleUnauthorized(url);
       }
 
       logger.apiError('API Error', method, url, response.status, errorMessage);

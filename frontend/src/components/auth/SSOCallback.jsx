@@ -6,6 +6,9 @@ import { authService } from '../../services/auth/simpleAuthService';
 import SSOConflictModal from './SSOConflictModal';
 import GitHubLinkModal from './GitHubLinkModal';
 import logger from '../../services/logger';
+import { buildLoginPath } from '../../utils/loginRedirect';
+import { safeInternalPath } from '../../utils/safeInternalPath';
+import { takeSSOReturnUrl } from '../../utils/ssoReturnUrl';
 
 /**
  * Where to send a user after any successful SSO login.
@@ -14,9 +17,24 @@ import logger from '../../services/logger';
  * manual linking) so they cannot drift apart - the backend already routes them
  * through one function (_complete_sso_login).
  *
- * Consumes the stored return URL when it is used.
+ * The return path is preferred from the server, which keyed it to the OAuth state
+ * parameter and hands it back on the callback. That survives private browsing and
+ * disabled storage; sessionStorage, which used to be the only carrier, does not.
+ * See SSO_ONLY_MODE_SPEC.md 8.8.
+ *
+ * Both sources are untrusted input - the backend stores return_url verbatim and
+ * echoes it back - so both go through safeInternalPath before anyone navigates
+ * to them.
  */
-const getPostSSORedirectPath = ({ mustChangePassword, isNewUser }) => {
+const getPostSSORedirectPath = ({
+  mustChangePassword,
+  isNewUser,
+  returnUrl,
+}) => {
+  // Consume the stored value on every path so it cannot leak into a later login,
+  // even when the branches below do not use it.
+  const storedReturnUrl = takeSSOReturnUrl();
+
   // Every other route is blocked until the password is changed
   if (mustChangePassword) {
     return '/change-password';
@@ -28,13 +46,11 @@ const getPostSSORedirectPath = ({ mustChangePassword, isNewUser }) => {
   }
 
   // Existing users go to their intended destination or dashboard
-  const returnUrl = sessionStorage.getItem('sso_return_url');
-  if (returnUrl) {
-    sessionStorage.removeItem('sso_return_url');
-    return returnUrl;
-  }
-
-  return '/dashboard';
+  return (
+    safeInternalPath(returnUrl) ||
+    safeInternalPath(storedReturnUrl) ||
+    '/dashboard'
+  );
 };
 
 const SSOCallback = () => {
@@ -172,6 +188,7 @@ const SSOCallback = () => {
       const redirectPath = getPostSSORedirectPath({
         mustChangePassword: result.mustChangePassword,
         isNewUser: result.isNewUser,
+        returnUrl: result.returnUrl,
       });
 
       logger.info('Redirecting after successful SSO', {
@@ -235,6 +252,7 @@ const SSOCallback = () => {
           getPostSSORedirectPath({
             mustChangePassword: result.mustChangePassword,
             isNewUser: result.isNewUser,
+            returnUrl: result.returnUrl,
           }),
           { replace: true }
         );
@@ -277,6 +295,7 @@ const SSOCallback = () => {
     const redirectPath = getPostSSORedirectPath({
       mustChangePassword,
       isNewUser,
+      returnUrl: result.return_url,
     });
 
     navigate(redirectPath, { replace: true });
@@ -403,7 +422,7 @@ const SSOCallback = () => {
             }}
           >
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate(buildLoginPath({ reason: 'sso_error' }))}
               style={{
                 backgroundColor: 'var(--color-primary)',
                 color: 'white',

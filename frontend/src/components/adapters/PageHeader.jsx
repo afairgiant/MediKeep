@@ -23,6 +23,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { redirectToLogin } from '../../utils/loginRedirect';
 import LayoutPageHeader from '../layout/PageHeader';
 import LanguageSwitcher from '../shared/LanguageSwitcher';
 
@@ -168,8 +169,10 @@ const PageHeader = ({
         '🚪 PAGEHEADER_LOGOUT: Logout failed with error',
         error.message
       );
-      // Fallback navigation if logout fails
-      window.location.href = '/login';
+      // Fallback if AuthContext.logout() itself throws. On the success path it
+      // navigates nowhere -- ProtectedRoute issues the redirect once the auth
+      // state flips, and picks up the suppression endSession recorded.
+      redirectToLogin({ reason: 'logged_out' });
     }
   };
 

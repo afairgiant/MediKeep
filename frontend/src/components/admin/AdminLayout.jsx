@@ -7,13 +7,21 @@ import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import AdminBreadcrumbs from './AdminBreadcrumbs';
 import { adminApiService } from '../../services/api/adminApi';
+import { buildLoginPath } from '../../utils/loginRedirect';
+import { currentInternalPath } from '../../utils/safeInternalPath';
 import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    logout,
+    sessionEndedReason,
+  } = useAuth();
 
   // Gate admin access on AuthContext user state (populated from /users/me),
   // not client-side JWT decoding — the cookie-auth flow stores the token in
@@ -25,7 +33,21 @@ const AdminLayout = ({ children }) => {
     }
 
     if (!isAuthenticated || !user) {
-      navigate('/login');
+      // Every /admin route is already wrapped in AdminRoute -> ProtectedRoute,
+      // which makes this exact decision. Both fire on an admin logout, so this
+      // must carry sessionEndedReason too -- otherwise the two guards race to
+      // two different login URLs and the one without it bounces the user
+      // straight back to an IdP that still holds a live session.
+      //
+      // currentInternalPath() rather than the router's `location` so this effect
+      // does not have to depend on it -- adding location to the dep array would
+      // re-run the admin-access probe on every navigation inside /admin.
+      navigate(
+        buildLoginPath({
+          reason: sessionEndedReason,
+          next: currentInternalPath(),
+        })
+      );
       return;
     }
 
@@ -42,13 +64,15 @@ const AdminLayout = ({ children }) => {
       // Intentionally swallowed: context says admin, backend disagreement
       // will surface on the next admin API call.
     });
-  }, [authLoading, isAuthenticated, user, navigate]);
+  }, [authLoading, isAuthenticated, user, navigate, sessionEndedReason]);
 
   const handleLogout = async () => {
     try {
       await logout();
+      // Navigation is ProtectedRoute's job once the auth state flips; it reads
+      // the suppression endSession recorded.
     } catch (logoutError) {
-      navigate('/login');
+      navigate(buildLoginPath({ reason: 'logged_out' }));
     }
   };
 

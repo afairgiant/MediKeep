@@ -284,6 +284,7 @@
       "loginFailed": "Inloggen mislukt",
       "loginRequired": "Log in om deze pagina te openen",
       "loginSuccess": "Succesvol ingelogd!",
+      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
       "logoutSuccess": "Succesvol uitgelogd",
       "sessionExpired": "Sessie verlopen door inactiviteit",
       "sessionExpiredLogin": "Sessie verlopen. Log opnieuw in.",

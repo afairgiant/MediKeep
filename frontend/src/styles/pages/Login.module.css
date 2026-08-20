@@ -297,6 +297,19 @@
   font-size: var(--font-size-sm);
 }
 
+/* Explains why the user was sent back here - session expired, signed out, SSO
+   failed. Informational rather than an error: in most cases nothing went wrong. */
+.redirectNotice {
+  background-color: var(--color-info-light, #e7f1ff);
+  color: var(--color-info-dark, #1c4e80);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--color-info, #4a90d9);
+  text-align: center;
+  font-size: var(--font-size-sm);
+}
+
 .configWarning {
   background-color: var(--color-warning-light, #fff8e1);
   color: var(--color-warning-dark, #8a5a00);

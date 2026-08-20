@@ -284,6 +284,7 @@
       "loginFailed": "Logowanie nie powiodło się",
       "loginRequired": "Zaloguj się, aby uzyskać dostęp do tej strony",
       "loginSuccess": "Logowanie pomyślne!",
+      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
       "logoutSuccess": "Wylogowanie pomyślne",
       "sessionExpired": "Sesja wygasła z powodu braku aktywności",
       "sessionExpiredLogin": "Sesja wygasła. Zaloguj się ponownie.",

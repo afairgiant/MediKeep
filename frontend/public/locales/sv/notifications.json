@@ -284,6 +284,7 @@
       "loginFailed": "Inloggning misslyckades",
       "loginRequired": "Vänligen logga in för att komma åt denna sida",
       "loginSuccess": "Inloggning lyckades!",
+      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
       "logoutSuccess": "Utloggning lyckades",
       "sessionExpired": "Sessionen har löpt ut på grund av inaktivitet",
       "sessionExpiredLogin": "Sessionen har löpt ut. Vänligen logga in igen.",

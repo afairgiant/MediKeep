@@ -292,7 +292,21 @@ describe('ModelEdit security', () => {
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.stringContaining('/login')
+      );
     });
+
+    // Still a router navigate, not a hard window.location assignment -- that is
+    // the point of this test and the reason this site is not migrated to
+    // redirectToLogin().
+    expect(window.location.href).not.toContain('/login');
+
+    // The username changed under this user, so the login page must say so rather
+    // than looking like a random ejection, and must not bounce to the IdP.
+    const [target] = mockNavigate.mock.calls.at(-1);
+    const params = new URLSearchParams(target.split('?')[1]);
+    expect(params.get('local')).toBe('1');
+    expect(params.get('reason')).toBe('account_changed');
   });
 });

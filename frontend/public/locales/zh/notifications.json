@@ -284,6 +284,7 @@
       "loginFailed": "登录失败",
       "loginRequired": "请登录以访问此页面",
       "loginSuccess": "登录成功！",
+      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
       "logoutSuccess": "退出登录成功",
       "sessionExpired": "会话因不活跃而过期",
       "sessionExpiredLogin": "会话已过期。请重新登录。",

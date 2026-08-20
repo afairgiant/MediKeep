@@ -8,6 +8,7 @@ import logger from './logger';
 import { createRaceSafeWrapper } from '../utils/throttleUtils';
 import secureActivityLogger from '../utils/secureActivityLogger';
 import { getApiUrl } from '../config/env';
+import { handleUnauthorized } from '../utils/loginRedirect';
 
 class APIClient {
   constructor() {
@@ -70,27 +71,21 @@ class APIClient {
 
   // Error interceptor - handles auth errors
   async errorInterceptor(error, originalConfig) {
-    if (error.status === 401 && !originalConfig._retry) {
-      originalConfig._retry = true;
-
-      // Check if this is a critical endpoint that requires immediate redirect
-      const criticalEndpoints = ['/auth/', '/login', '/users/me'];
-      const isCriticalEndpoint = criticalEndpoints.some(endpoint =>
-        originalConfig.url.includes(endpoint)
-      );
-
-      if (isCriticalEndpoint) {
-        notifyError('notifications:toasts.auth.sessionExpiredLogin');
-        window.location.href = '/login';
-      } else {
-        logger.warn('Authentication failed for non-critical endpoint', {
-          category: 'api_client_warning',
-          endpoint: originalConfig.url,
-          message: 'Session expired or invalid (401)',
-        });
-      }
-
-      throw error;
+    // One shared rule across every HTTP client, rather than this client's own
+    // "critical endpoints" allowlist. That list named /auth/, /login and
+    // /users/me, which are not the requests that need protecting - none of the
+    // app's background polls goes through this client at all, so the swallow it
+    // implemented protected nothing and the redirect it skipped mattered
+    // everywhere else. See SSO_ONLY_MODE_SPEC.md 8.10.
+    //
+    // The explanation is no longer raised here as a toast: this ends in a full
+    // page load, which discarded the toast before it could render. It travels in
+    // the login URL and is shown by the login page instead.
+    //
+    // No per-request re-entry guard is needed: request() builds a fresh config
+    // per call and invokes this once, and redirectToLogin carries a global one.
+    if (error.status === 401) {
+      handleUnauthorized(originalConfig.url);
     }
 
     throw error;

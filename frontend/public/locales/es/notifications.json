@@ -284,6 +284,7 @@
       "loginFailed": "Error de inicio de sesión",
       "loginRequired": "Por favor, inicie sesión para acceder a esta página",
       "loginSuccess": "¡Inicio de sesión exitoso!",
+      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
       "logoutSuccess": "Sesión cerrada con éxito",
       "sessionExpired": "Sesión expirada por inactividad",
       "sessionExpiredLogin": "Sesión expirada. Por favor, inicie sesión de nuevo.",
