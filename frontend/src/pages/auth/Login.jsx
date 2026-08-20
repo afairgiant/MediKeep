@@ -61,10 +61,17 @@ const Login = () => {
   // would otherwise re-parse the query string and re-validate both candidates.
   const { returnPath, redirectReason } = useMemo(() => {
     const params = new URLSearchParams(location.search);
+    // `from` is the whole location object ProtectedRoute captured, so rebuild the
+    // full path from it. Reading only `.pathname` silently dropped the query and
+    // fragment, sending someone deep-linked to /lab-results?status=open back to
+    // /lab-results with their filter gone.
+    const from = location.state?.from;
     return {
       returnPath:
         safeInternalPath(params.get('next')) ||
-        safeInternalPath(location.state?.from?.pathname) ||
+        safeInternalPath(
+          from && `${from.pathname || ''}${from.search || ''}${from.hash || ''}`
+        ) ||
         '/dashboard',
       redirectReason: params.get('reason'),
     };

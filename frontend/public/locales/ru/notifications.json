@@ -284,7 +284,7 @@
       "loginFailed": "Ошибка входа",
       "loginRequired": "Пожалуйста, войдите в систему для доступа к этой странице",
       "loginSuccess": "Вход выполнен успешно!",
-      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
+      "logoutIncomplete": "Вы вышли из системы на этом устройстве, но сервер это не подтвердил. Для надёжности закройте браузер.",
       "logoutSuccess": "Выход выполнен успешно",
       "sessionExpired": "Сеанс истёк из-за неактивности",
       "sessionExpiredLogin": "Сеанс истёк. Пожалуйста, войдите снова.",

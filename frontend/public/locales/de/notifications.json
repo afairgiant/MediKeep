@@ -284,7 +284,7 @@
       "loginFailed": "Anmeldung fehlgeschlagen",
       "loginRequired": "Bitte melden Sie sich an, um auf diese Seite zuzugreifen",
       "loginSuccess": "Anmeldung erfolgreich!",
-      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
+      "logoutIncomplete": "Sie wurden auf diesem Gerät abgemeldet, aber der Server hat dies nicht bestätigt. Schließen Sie zur Sicherheit Ihren Browser.",
       "logoutSuccess": "Erfolgreich abgemeldet",
       "sessionExpired": "Sitzung aufgrund von Inaktivität abgelaufen",
       "sessionExpiredLogin": "Sitzung abgelaufen. Bitte melden Sie sich erneut an.",

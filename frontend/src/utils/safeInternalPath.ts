@@ -93,6 +93,6 @@ export function currentInternalPath(): string | null {
     return null;
   }
   return safeInternalPath(
-    `${window.location.pathname}${window.location.search}`
+    `${window.location.pathname}${window.location.search}${window.location.hash}`
   );
 }

@@ -13,7 +13,7 @@ import { vi } from 'vitest';
  *
  * @returns the `assign` spy, so a caller can assert on where it was sent.
  */
-export const stubLocation = (pathname = '/dashboard', search = '') => {
+export const stubLocation = (pathname = '/dashboard', search = '', hash = '') => {
   const assign = vi.fn();
   Object.defineProperty(window, 'location', {
     configurable: true,
@@ -21,8 +21,11 @@ export const stubLocation = (pathname = '/dashboard', search = '') => {
     value: {
       pathname,
       search,
+      // Present and empty by default. currentInternalPath() concatenates it, so
+      // leaving it undefined appends the string "undefined" to every return path.
+      hash,
       origin: 'http://localhost',
-      href: `http://localhost${pathname}${search}`,
+      href: `http://localhost${pathname}${search}${hash}`,
       assign,
     },
   });
@@ -50,6 +53,12 @@ export const withThrowingSessionStorage = fn => {
   } finally {
     if (original) {
       Object.defineProperty(window, 'sessionStorage', original);
+    } else {
+      // No own descriptor to restore: sessionStorage was inherited from the
+      // prototype, so deleting the one we injected uncovers it again. Without
+      // this the throwing getter outlives the call and every later test in the
+      // file sees storage explode.
+      delete window.sessionStorage;
     }
   }
 };

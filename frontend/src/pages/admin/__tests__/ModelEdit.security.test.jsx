@@ -297,10 +297,10 @@ describe('ModelEdit security', () => {
       );
     });
 
-    // Still a router navigate, not a hard window.location assignment -- that is
-    // the point of this test and the reason this site is not migrated to
-    // redirectToLogin().
-    expect(window.location.href).not.toContain('/login');
+    // Still a router navigate, which is why this site is not migrated to
+    // redirectToLogin(). Asserted through mockNavigate above rather than through
+    // window.location: jsdom refuses href navigation and leaves the value
+    // unchanged, so checking it would pass whatever the component did.
 
     // The username changed under this user, so the login page must say so rather
     // than looking like a random ejection, and must not bounce to the IdP.

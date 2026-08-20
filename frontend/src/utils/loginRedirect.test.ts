@@ -108,12 +108,18 @@ describe('redirectToLogin', () => {
 
   test('does not log the next value, only whether one was present', async () => {
     const logger = (await import('../services/logger')).default;
+    const info = logger.info as ReturnType<typeof vi.fn>;
+    info.mockClear();
+
     redirectToLogin({ reason: 'session_expired', next: '/patients/42' });
-    expect(logger.info).toHaveBeenCalledWith(
-      'login_redirect',
-      expect.objectContaining({ hasNext: true })
-    );
-    const [, payload] = (logger.info as ReturnType<typeof vi.fn>).mock.calls[0];
+
+    // The most recent call, and only it. Earlier tests in this block already
+    // logged their own redirects, so indexing calls[0] would assert against a
+    // different payload and pass even if the record id here were leaked.
+    expect(info).toHaveBeenCalledTimes(1);
+    const [event, payload] = info.mock.calls.at(-1);
+    expect(event).toBe('login_redirect');
+    expect(payload).toEqual(expect.objectContaining({ hasNext: true }));
     expect(JSON.stringify(payload)).not.toContain('42');
   });
 });

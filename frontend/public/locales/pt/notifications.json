@@ -284,7 +284,7 @@
       "loginFailed": "Falha no login",
       "loginRequired": "Por favor, faça login para acessar esta página",
       "loginSuccess": "Login realizado com sucesso!",
-      "logoutIncomplete": "You have been signed out on this device, but the server did not confirm it. Close your browser to be sure.",
+      "logoutIncomplete": "Você foi desconectado neste dispositivo, mas o servidor não confirmou. Feche o navegador para ter certeza.",
       "logoutSuccess": "Desconectado com sucesso",
       "sessionExpired": "Sessão expirada por inatividade",
       "sessionExpiredLogin": "Sessão expirada. Por favor, faça login novamente.",

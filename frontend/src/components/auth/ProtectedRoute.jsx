@@ -47,7 +47,7 @@ function ProtectedRoute({
       return {
         to: buildLoginPath({
           reason: sessionEndedReason,
-          next: `${location.pathname}${location.search}`,
+          next: `${location.pathname}${location.search}${location.hash}`,
         }),
         reason: 'unauthenticated',
       };

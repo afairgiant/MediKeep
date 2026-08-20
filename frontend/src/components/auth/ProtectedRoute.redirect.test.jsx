@@ -82,6 +82,17 @@ describe('ProtectedRoute login redirect', () => {
     expect(params.get('next')).toBe('/lab-results?status=open');
   });
 
+  // The whole point of `next` is landing the user back where they were. A path
+  // rebuilt from pathname alone loses the filter and the anchor, which is exactly
+  // the deep link worth preserving.
+  test('the deep link keeps its query string and fragment', () => {
+    renderAt('/lab-results?status=open&sort=date#result-117');
+
+    expect(loginParams().get('next')).toBe(
+      '/lab-results?status=open&sort=date#result-117'
+    );
+  });
+
   test('after a logout the redirect carries suppression and the reason', () => {
     mockAuth.sessionEndedReason = 'logged_out';
     renderAt('/lab-results');
