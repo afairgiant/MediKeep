@@ -984,7 +984,8 @@
         "rectal": "Rectaal",
         "subcutaneous": "Subcutaan",
         "sublingual": "Sublinguaal",
-        "topical": "Uitwendig"
+        "topical": "Uitwendig",
+        "aural": "Auditief"
       },
       "placeholder": "Selecteer toedieningsweg"
     },
