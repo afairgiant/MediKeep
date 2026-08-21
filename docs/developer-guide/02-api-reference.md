@@ -895,7 +895,7 @@ Base path: `/api/v1/medications`
 }
 ```
 
-- **Route values**: `oral`, `injection`, `topical`, `intravenous`, `intramuscular`, `subcutaneous`, `inhalation`, `nasal`, `rectal`, `sublingual`
+- **Route values**: `oral`, `injection`, `topical`, `intravenous`, `intramuscular`, `subcutaneous`, `inhalation`, `nasal`, `rectal`, `sublingual`, `aural`
 - **Status values**: `active`, `stopped`, `on-hold`, `completed`, `cancelled`
 - **Reminder fields**: `reminder_enabled` defaults to `false`. `reminder_times` are facility-local `"HH:MM"` strings (max 12, no duplicates, sorted on save). Reminders fire only while the medication is `active` and the current date falls within `effective_period_start`/`effective_period_end` (inclusive on both ends). Delivery uses the patient owner's enabled notification channels for the `medication_reminder_due` event.
 - **Success Response** (201): Medication object with relations

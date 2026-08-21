@@ -980,7 +980,8 @@
         "rectal": "直肠给药",
         "subcutaneous": "皮下注射",
         "sublingual": "舌下含服",
-        "topical": "外用"
+        "topical": "外用",
+        "aural": "听觉的"
       },
       "placeholder": "选择给药途径"
     },

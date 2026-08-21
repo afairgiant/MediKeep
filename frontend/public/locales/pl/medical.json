@@ -984,7 +984,8 @@
         "rectal": "Doodbytniczo",
         "subcutaneous": "Podskórnie",
         "sublingual": "Podjęzykowo",
-        "topical": "Miejscowo"
+        "topical": "Miejscowo",
+        "aural": "Słuchowy"
       },
       "placeholder": "Wybierz drogę"
     },

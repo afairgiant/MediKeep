@@ -984,7 +984,8 @@
         "rectal": "Rektal",
         "subcutaneous": "Subkutan",
         "sublingual": "Sublingual",
-        "topical": "Äußerlich"
+        "topical": "Äußerlich",
+        "aural": "Aural"
       },
       "placeholder": "Applikationsweg auswählen"
     },

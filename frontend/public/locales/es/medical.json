@@ -984,7 +984,8 @@
         "rectal": "Rectal",
         "subcutaneous": "Subcutánea",
         "sublingual": "Sublingual",
-        "topical": "Tópica"
+        "topical": "Tópica",
+        "aural": "Auditivo"
       },
       "placeholder": "Seleccione la Vía"
     },

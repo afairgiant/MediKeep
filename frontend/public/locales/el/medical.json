@@ -984,7 +984,8 @@
         "rectal": "Ορθικά",
         "subcutaneous": "Υποδόρια",
         "sublingual": "Υπογλώσσια",
-        "topical": "Τοπικά"
+        "topical": "Τοπικά",
+        "aural": "Ωτικός"
       },
       "placeholder": "Επιλέξτε Οδό"
     },

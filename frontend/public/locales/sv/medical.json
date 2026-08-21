@@ -984,7 +984,8 @@
         "rectal": "Rektalt",
         "subcutaneous": "Subkutant",
         "sublingual": "Sublingualt",
-        "topical": "Topikalt"
+        "topical": "Topikalt",
+        "aural": "Auditiv"
       },
       "placeholder": "Välj administreringsväg"
     },
