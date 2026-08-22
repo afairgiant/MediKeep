@@ -6,10 +6,12 @@ import render from '../../test-utils/render';
 
 // Mock react-router-dom navigate
 const mockNavigate = vi.fn();
+// Mutable so a test can put the page at a specific URL. Reset in beforeEach.
+let mockLocation = { search: '', state: null };
 vi.mock('react-router-dom', async () => ({
   ...(await vi.importActual('react-router-dom')),
   useNavigate: () => mockNavigate,
-  useLocation: () => ({ state: null }),
+  useLocation: () => mockLocation,
 }));
 
 // Mock toast notifications
@@ -33,6 +35,7 @@ describe('Login Component', () => {
   // deferred-promise test, which would hang a subsequent test forever).
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLocation = { search: '', state: null };
     authService.checkRegistrationEnabled.mockResolvedValue({
       registration_enabled: true,
     });
@@ -303,6 +306,79 @@ describe('Login Component', () => {
         window.location = originalLocation;
       }
     }, 10000);
+  });
+
+  // An already-authenticated visitor is bounced straight to their return path,
+  // which makes that effect the cheapest way to observe how the path resolved.
+  describe('Return path resolution', () => {
+    const renderAuthenticated = () =>
+      render(<Login />, {
+        authContextValue: { isAuthenticated: true, isLoading: false },
+      });
+
+    test('prefers ?next= and keeps its query string and fragment', async () => {
+      mockLocation = {
+        search: '?next=%2Flab-results%3Fstatus%3Dopen%23result-117',
+        state: null,
+      };
+      renderAuthenticated();
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith(
+          '/lab-results?status=open#result-117',
+          { replace: true }
+        );
+      });
+    });
+
+    // The fallback used to read `from.pathname` only, silently dropping the
+    // filter the user had applied before being ejected.
+    test('falls back to router state, keeping its query string and fragment', async () => {
+      mockLocation = {
+        search: '',
+        state: {
+          from: {
+            pathname: '/vitals',
+            search: '?range=90d',
+            hash: '#chart',
+          },
+        },
+      };
+      renderAuthenticated();
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/vitals?range=90d#chart', {
+          replace: true,
+        });
+      });
+    });
+
+    test('a fresh ?next= beats a stale router state', async () => {
+      mockLocation = {
+        search: '?next=%2Fmedications',
+        state: { from: { pathname: '/vitals', search: '', hash: '' } },
+      };
+      renderAuthenticated();
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/medications', {
+          replace: true,
+        });
+      });
+    });
+
+    // ?next= is attacker-supplied in a link, so an off-origin value must not
+    // survive into a post-authentication navigation.
+    test('rejects an off-origin next and uses the dashboard', async () => {
+      mockLocation = { search: '?next=https%3A%2F%2Fevil.example', state: null };
+      renderAuthenticated();
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/dashboard', {
+          replace: true,
+        });
+      });
+    });
   });
 
   describe('Component Structure', () => {

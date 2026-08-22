@@ -1,12 +1,29 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { notifyError } from '../../utils/notifyTranslated';
 import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
+import { safeInternalPath } from '../../utils/safeInternalPath';
+import { storeSSOReturnUrl } from '../../utils/ssoReturnUrl';
 import { IconUser, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
 import styles from '../../styles/pages/Login.module.css';
+
+/**
+ * Copy for each `reason` the redirect helper can attach.
+ *
+ * An unknown reason renders nothing rather than a fallback message - the value
+ * comes from the URL and anyone can put anything there, so it must not be able to
+ * put arbitrary text on the login page.
+ */
+const REDIRECT_REASON_KEYS = {
+  logged_out: 'login.redirectReason.loggedOut',
+  session_expired: 'login.redirectReason.sessionExpired',
+  sso_error: 'login.redirectReason.ssoError',
+  account_changed: 'login.redirectReason.accountChanged',
+  registered: 'login.redirectReason.registered',
+};
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -27,13 +44,45 @@ const Login = () => {
   const { login, error, clearError, isAuthenticated } = useAuth();
   const { t } = useTranslation(['auth', 'common', 'shared']);
 
+  // Where to go after signing in, and why the user is here at all.
+  //
+  // The URL wins over router state. Several callers reach this page through a
+  // full page load, which discards state entirely; `?next=` survives that, and
+  // survives private browsing and disabled storage too. `from` stays as the
+  // fallback for soft navigations, but a stale `from` must not beat a fresh
+  // `next`. Both are untrusted - `next` is attacker-supplied in a link - so both
+  // go through safeInternalPath. See SSO_ONLY_MODE_SPEC.md 8.11.
+  //
+  // The reason is rendered below so a session that expired mid-use is
+  // distinguishable from a random failure - the toast the HTTP clients used to
+  // raise was discarded by the page load that followed it.
+  //
+  // Memoized because this page re-renders on every keystroke, and each pass
+  // would otherwise re-parse the query string and re-validate both candidates.
+  const { returnPath, redirectReason } = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    // `from` is the whole location object ProtectedRoute captured, so rebuild the
+    // full path from it. Reading only `.pathname` silently dropped the query and
+    // fragment, sending someone deep-linked to /lab-results?status=open back to
+    // /lab-results with their filter gone.
+    const from = location.state?.from;
+    return {
+      returnPath:
+        safeInternalPath(params.get('next')) ||
+        safeInternalPath(
+          from && `${from.pathname || ''}${from.search || ''}${from.hash || ''}`
+        ) ||
+        '/dashboard',
+      redirectReason: params.get('reason'),
+    };
+  }, [location.search, location.state]);
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const from = location.state?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
+      navigate(returnPath, { replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, navigate, returnPath]);
 
   // One-shot environment snapshot. If a later auth fetch fails, pairing this
   // log with the failure tells us whether a stale service worker, insecure
@@ -51,8 +100,7 @@ const Login = () => {
       isSecureContext:
         typeof window !== 'undefined' ? window.isSecureContext : null,
       origin: typeof window !== 'undefined' ? window.location.origin : null,
-      protocol:
-        typeof window !== 'undefined' ? window.location.protocol : null,
+      protocol: typeof window !== 'undefined' ? window.location.protocol : null,
       cookieEnabled:
         typeof navigator !== 'undefined' ? navigator.cookieEnabled : null,
     });
@@ -177,8 +225,7 @@ const Login = () => {
         if (result.mustChangePassword) {
           navigate('/change-password', { replace: true });
         } else {
-          const from = location.state?.from?.pathname || '/dashboard';
-          navigate(from, { replace: true });
+          navigate(returnPath, { replace: true });
         }
       } else {
         notifyError('notifications:toasts.auth.loginFailed');
@@ -201,11 +248,14 @@ const Login = () => {
   const handleSSOLogin = async () => {
     setSSOLoading(true);
     try {
-      // Store current location for redirect after SSO
-      const returnUrl = location.state?.from?.pathname || '/dashboard';
-      sessionStorage.setItem('sso_return_url', returnUrl);
+      // The same resolved return path the password flow uses, so a deep link
+      // survives whichever way the user signs in. It goes to the backend, which
+      // stores it against the OAuth state parameter and hands it back on the
+      // callback; the sessionStorage copy is the fallback for flows that predate
+      // that.
+      storeSSOReturnUrl(returnPath);
 
-      const result = await authService.initiateSSOLogin(returnUrl);
+      const result = await authService.initiateSSOLogin(returnPath);
       // Redirect to SSO provider
       window.location.href = result.auth_url;
     } catch (error) {
@@ -238,6 +288,12 @@ const Login = () => {
         <div className={styles.loginDivider}>
           <span>{t('login.title')}</span>
         </div>
+
+        {redirectReason && REDIRECT_REASON_KEYS[redirectReason] && (
+          <div className={styles.redirectNotice} role="status">
+            {t(REDIRECT_REASON_KEYS[redirectReason])}
+          </div>
+        )}
 
         {error && <div className={styles.errorMessage}>{error}</div>}
 
@@ -332,10 +388,7 @@ const Login = () => {
 
         {/* SSO Login Option -- only when config loaded successfully AND backend says SSO is on */}
         {configLoaded && !configError && ssoConfig.enabled && (
-          <div
-            className={styles.ssoSection}
-            data-testid="sso-section"
-          >
+          <div className={styles.ssoSection} data-testid="sso-section">
             <div className={styles.divider}>
               <span>{t('login.or')}</span>
             </div>

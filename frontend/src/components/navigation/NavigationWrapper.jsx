@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useViewport } from '../../hooks/useViewport';
+import { redirectToLogin } from '../../utils/loginRedirect';
 import MobileNavigation from './MobileNavigation';
 import TabletNavigation from './TabletNavigation';
 import DesktopNavigation from './DesktopNavigation';
@@ -50,8 +51,10 @@ const NavigationWrapper = ({
       );
     } catch (error) {
       logger.error('🚪 NAVIGATION_LOGOUT: Error during logout:', error);
-      // Fallback: direct redirect if auth logout fails
-      window.location.href = '/login';
+      // Fallback if AuthContext.logout() itself throws. On the success path it
+      // navigates nowhere -- ProtectedRoute issues the redirect once the auth
+      // state flips, and picks up the suppression endSession recorded.
+      redirectToLogin({ reason: 'logged_out' });
     }
   }, [logout]);
 

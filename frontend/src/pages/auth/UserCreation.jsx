@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import UserRegistrationForm from '../../components/forms/UserRegistrationForm';
+import { buildLoginPath } from '../../utils/loginRedirect';
 import {
   Card,
   Text,
@@ -39,7 +40,7 @@ const UserCreation = () => {
         });
       } else {
         // If login result indicates failure, redirect to login page
-        navigate('/login', {
+        navigate(buildLoginPath({ reason: 'registered' }), {
           state: {
             message: t('userCreation.accountCreated'),
           },
@@ -47,7 +48,7 @@ const UserCreation = () => {
       }
     } catch (error) {
       // If auto-login fails, redirect to login page with success message
-      navigate('/login', {
+      navigate(buildLoginPath({ reason: 'registered' }), {
         state: {
           message: t('userCreation.accountCreated'),
         },
@@ -55,8 +56,11 @@ const UserCreation = () => {
     }
   };
 
+  // Cancel and "back to login" are ordinary navigation, not a session event.
+  // No reason: attaching one would tell a visitor who was never signed in that
+  // they had been signed out, and would suppress a redirect that should happen.
   const handleCancel = () => {
-    navigate('/login');
+    navigate(buildLoginPath());
   };
 
   return (
@@ -68,7 +72,7 @@ const UserCreation = () => {
             <Button
               variant="subtle"
               leftSection={<IconArrowLeft size={16} />}
-              onClick={() => navigate('/login')}
+              onClick={() => navigate(buildLoginPath())}
               color="gray"
             >
               {t('userCreation.backToLogin')}

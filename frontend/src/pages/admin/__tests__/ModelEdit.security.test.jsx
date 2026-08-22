@@ -292,7 +292,21 @@ describe('ModelEdit security', () => {
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.stringContaining('/login')
+      );
     });
+
+    // Still a router navigate, which is why this site is not migrated to
+    // redirectToLogin(). Asserted through mockNavigate above rather than through
+    // window.location: jsdom refuses href navigation and leaves the value
+    // unchanged, so checking it would pass whatever the component did.
+
+    // The username changed under this user, so the login page must say so rather
+    // than looking like a random ejection, and must not bounce to the IdP.
+    const [target] = mockNavigate.mock.calls.at(-1);
+    const params = new URLSearchParams(target.split('?')[1]);
+    expect(params.get('local')).toBe('1');
+    expect(params.get('reason')).toBe('account_changed');
   });
 });

@@ -284,6 +284,7 @@
       "loginFailed": "Accesso non riuscito",
       "loginRequired": "Effettua l'accesso per visualizzare questa pagina",
       "loginSuccess": "Accesso effettuato con successo!",
+      "logoutIncomplete": "Sei stato disconnesso su questo dispositivo, ma il server non lo ha confermato. Chiudi il browser per sicurezza.",
       "logoutSuccess": "Disconnessione avvenuta con successo",
       "sessionExpired": "Sessione scaduta per inattività",
       "sessionExpiredLogin": "Sessione scaduta. Effettua nuovamente l'accesso.",

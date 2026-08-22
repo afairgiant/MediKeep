@@ -2,8 +2,15 @@
 import logger from '../logger';
 import { getApiUrl } from '../../config/env';
 import { extractErrorMessage } from '../../utils/errorUtils.js';
+import {
+  handleUnauthorized,
+  isNonEjectingEndpoint,
+} from '../../utils/loginRedirect';
 
 const API_BASE_URL = getApiUrl();
+
+// Bounded retries for transient admin 401s. See handleResponse.
+const MAX_401_RETRIES = 2;
 
 class BaseApiService {
   constructor(basePath = '') {
@@ -67,29 +74,15 @@ class BaseApiService {
 
   // Handle authentication errors. Cookie is HttpOnly so we cannot inspect it;
   // a 401 means the session cookie is invalid/expired.
+  //
+  // Callers that still have a retry to spend must absorb the 401 before calling
+  // this -- see handleResponse. Once retries are exhausted the request falls
+  // through here and ejects like any other. The exemption used to be permanent
+  // for /admin/ URLs, and the retry meant to bound it never worked at all, so an
+  // expired admin session hung rather than redirecting.
   handleAuthError(response) {
     if (response.status === 401) {
-      const url = response.url;
-
-      // For admin endpoints, allow retry logic to handle transient issues
-      if (url && url.includes('/admin/')) {
-        logger.warn('api_admin_access_denied', {
-          message: 'Admin access denied (401)',
-          url,
-          activeRequests: this.activeRequests,
-          action: 'retry_will_handle',
-        });
-        return false;
-      }
-
-      // For non-admin endpoints, redirect to login
-      logger.warn('api_auth_error', {
-        message: 'Session expired or invalid (401)',
-        url: response.url,
-        action: 'redirect_to_login',
-      });
-      window.location.href = '/login';
-      return true;
+      return handleUnauthorized(response.url);
     }
 
     if (response.status === 429) {
@@ -103,40 +96,67 @@ class BaseApiService {
 
     return false;
   } // Enhanced response handling with retry logic
+  /**
+   * @param {object} [retry] - how to replay this request, when it can be
+   *   replayed at all. Omitted by every verb except GET: the replay is the
+   *   caller's own fetch, and there is no safe way to replay a POST/PUT/DELETE
+   *   from here. Omitting it means an admin 401 ejects immediately rather than
+   *   being absorbed.
+   * @param {number} retry.attempt - replays already made.
+   * @param {() => Promise<Response>} retry.replay - re-issues the original
+   *   request, with its original method and abort signal.
+   */
   async handleResponse(
     response,
     errorMessage = 'API request failed',
-    retryCount = 0
+    retry = null
   ) {
-    const maxRetries = 2;
-
     if (!response.ok) {
-      // Handle auth errors first
-      if (this.handleAuthError(response)) {
-        // If handleAuthError returns true, it means we're redirecting to login
-        // We should throw an error so the calling code knows the request failed
-        throw new Error('Authentication failed - redirecting to login');
-      }
-
-      // For 401 errors on admin endpoints with valid tokens, retry once
-      if (
+      // Absorb a transient 401 before handleAuthError can eject on it. A
+      // concurrent admin request is the only case worth replaying; background
+      // polls are excluded because handleUnauthorized is going to swallow them
+      // anyway, so retrying one spends two extra round trips and half a second
+      // of backoff to arrive at "do nothing".
+      const willRetry =
         response.status === 401 &&
+        retry &&
+        retry.attempt < MAX_401_RETRIES &&
         response.url?.includes('/admin/') &&
-        retryCount < maxRetries
-      ) {
+        !isNonEjectingEndpoint(response.url);
+
+      if (willRetry) {
         logger.info('api_retry', {
           message: 'Retrying request due to concurrent auth issue',
-          attempt: retryCount + 1,
-          maxRetries,
+          attempt: retry.attempt + 1,
+          maxRetries: MAX_401_RETRIES,
           url: response.url,
+          activeRequests: this.activeRequests,
         });
         await new Promise(resolve =>
-          setTimeout(resolve, 200 + retryCount * 100)
+          setTimeout(resolve, 200 + retry.attempt * 100)
         ); // Backoff delay
 
-        // Retry the original request
-        const url = response.url.replace(this.baseURL + this.basePath, '');
-        return this.get(url, errorMessage);
+        // Replay through the caller's own thunk rather than reconstructing a
+        // request from the Response. Reconstructing loses the abort signal and
+        // the method, and calling get() again would re-enter the request queue -
+        // which is what this retry used to do, and it deadlocked outright:
+        // processQueue holds isProcessingQueue while awaiting the request, so
+        // the nested one was queued and never dequeued and the caller's promise
+        // never settled. An admin page whose session had expired hung on its
+        // spinner forever. Verified against main before changing it.
+        return this.handleResponse(await retry.replay(), errorMessage, {
+          ...retry,
+          // Must be threaded through, or maxRetries never binds and the hang
+          // becomes an unbounded loop instead.
+          attempt: retry.attempt + 1,
+        });
+      }
+
+      // Not retryable, or retries exhausted -- now a 401 may eject.
+      if (this.handleAuthError(response)) {
+        // handleAuthError returned true, so a redirect to login is underway.
+        // Throw so the calling code knows the request failed.
+        throw new Error('Authentication failed - redirecting to login');
       }
 
       // Handle rate limiting
@@ -187,11 +207,17 @@ class BaseApiService {
         finalUrl: url,
       });
 
-      const response = await fetch(url, {
-        credentials: 'include',
-        headers: this.getAuthHeaders(),
-        signal,
-      });
+      // The replay a 401 retry uses. Defined here because this is the only place
+      // that knows the request - its URL, method and abort signal - and it runs
+      // outside queueRequest deliberately: re-entering the queue deadlocks it.
+      const sendRequest = () =>
+        fetch(url, {
+          credentials: 'include',
+          headers: this.getAuthHeaders(),
+          signal,
+        });
+
+      const response = await sendRequest();
 
       logger.debug('api_response', {
         message: 'GET response received',
@@ -200,7 +226,10 @@ class BaseApiService {
         endpoint: `${this.basePath}${endpoint}`,
         method: 'GET',
       });
-      return this.handleResponse(response, errorMessage);
+      return this.handleResponse(response, errorMessage, {
+        attempt: 0,
+        replay: sendRequest,
+      });
     });
   }
 

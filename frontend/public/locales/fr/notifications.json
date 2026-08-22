@@ -284,6 +284,7 @@
       "loginFailed": "Echec de la connexion",
       "loginRequired": "Veuillez vous connecter pour accéder à cette page",
       "loginSuccess": "Connexion réussie !",
+      "logoutIncomplete": "Vous avez été déconnecté sur cet appareil, mais le serveur ne l'a pas confirmé. Fermez votre navigateur par sécurité.",
       "logoutSuccess": "Déconnexion réussie",
       "sessionExpired": "La session a expiré pour cause d'inactivité.",
       "sessionExpiredLogin": "Session expirée. Veuillez vous reconnecter.",

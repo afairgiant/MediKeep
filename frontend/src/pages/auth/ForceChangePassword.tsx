@@ -7,6 +7,7 @@ import { apiService } from '../../services/api';
 import { Button, Alert } from '../../components/ui';
 import FormLoadingOverlay from '../../components/shared/FormLoadingOverlay';
 import logger from '../../services/logger';
+import { buildLoginPath } from '../../utils/loginRedirect';
 import styles from '../../styles/pages/Login.module.css';
 import '../../components/auth/ChangePasswordModal.css';
 
@@ -110,7 +111,7 @@ const ForceChangePassword = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login', { replace: true });
+    navigate(buildLoginPath({ reason: 'logged_out' }), { replace: true });
   };
 
   return (

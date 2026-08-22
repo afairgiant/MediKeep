@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { isUserAdmin } from '../../utils/authUtils';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { notifyError, notifyWarning } from '../../utils/notifyTranslated';
+import { buildLoginPath } from '../../utils/loginRedirect';
 
 /**
  * Enhanced Protected Route Component
@@ -14,7 +15,6 @@ function ProtectedRoute({
   requiredRole = null,
   requiredRoles = [],
   adminOnly = false,
-  redirectTo = '/login',
   fallback = null,
 }) {
   const {
@@ -24,6 +24,7 @@ function ProtectedRoute({
     hasRole,
     hasAnyRole,
     mustChangePassword,
+    sessionEndedReason,
   } = useAuth();
   const location = useLocation();
   const toastShownRef = useRef(false);
@@ -35,7 +36,21 @@ function ProtectedRoute({
     }
 
     if (!isAuthenticated) {
-      return { to: redirectTo, reason: 'unauthenticated' };
+      // This is the one redirect that is SUPPOSED to reach the identity provider
+      // when SSO_AUTO_REDIRECT is on -- someone asked for a protected page and
+      // needs to sign in. It only carries suppression when the session ended by
+      // our own action, which AuthContext records as sessionEndedReason.
+      //
+      // The return path travels in the URL, not in router state: several callers
+      // reach the login page through a full page load, which discards state. The
+      // `from` state below is kept as a fallback for the soft-navigation case.
+      return {
+        to: buildLoginPath({
+          reason: sessionEndedReason,
+          next: `${location.pathname}${location.search}${location.hash}`,
+        }),
+        reason: 'unauthenticated',
+      };
     }
 
     // Authenticated but must change password — block access to all other routes

@@ -1,6 +1,16 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useCallback,
+} from 'react';
 import { authService } from '../services/auth/simpleAuthService';
-import { notifySuccess, notifyInfo } from '../utils/notifyTranslated';
+import {
+  notifySuccess,
+  notifyInfo,
+  notifyWarning,
+} from '../utils/notifyTranslated';
 import { env } from '../config/env';
 import {
   shouldShowPatientProfileCompletionPrompt,
@@ -21,6 +31,18 @@ const initialState = {
   lastActivity: Date.now(),
   sessionTimeoutMinutes: 120, // Default timeout
   mustChangePassword: false,
+  // Why the session ended, when it ended by our own action (the user logged out,
+  // or the inactivity timeout fired) rather than because there was never one.
+  // ProtectedRoute turns this into a `local=1` on the login URL so the redirect
+  // that follows does not bounce to the IdP, which still holds a live session and
+  // would silently sign the user back in. Null for a visitor who simply is not
+  // logged in - that redirect SHOULD reach the IdP.
+  //
+  // It lives in reducer state rather than a module flag on purpose: ProtectedRoute
+  // computes its redirect during render, and React StrictMode double-invokes
+  // render in development, so a consume-on-read flag would be swallowed by the
+  // discarded first pass and suppression would vanish in dev only.
+  sessionEndedReason: null,
 };
 
 // Auth Actions
@@ -55,6 +77,7 @@ function authReducer(state, action) {
         lastActivity: Date.now(),
         sessionTimeoutMinutes: action.payload.sessionTimeoutMinutes || 120,
         mustChangePassword: action.payload.mustChangePassword || false,
+        sessionEndedReason: null,
       };
 
     case AUTH_ACTIONS.CLEAR_MUST_CHANGE_PASSWORD:
@@ -76,6 +99,9 @@ function authReducer(state, action) {
       return {
         ...initialState,
         isLoading: false,
+        // Set by endSession, null by discardSession. Never inherited from the
+        // previous state - a teardown that had no reason must clear a stale one.
+        sessionEndedReason: action.payload?.reason ?? null,
       };
 
     case AUTH_ACTIONS.UPDATE_ACTIVITY:
@@ -129,6 +155,51 @@ export function AuthProvider({ children }) {
     return state.user && isFirstLogin(state.user.username);
   };
 
+  // Helper functions
+  // Clear client-side auth data. The HttpOnly cookie is cleared server-side on logout.
+  const clearAuthData = () => {
+    localStorage.removeItem('medapp_sessionTimeoutMinutes');
+
+    const cacheKeys = Object.keys(localStorage).filter(
+      key =>
+        key.startsWith('appData_') ||
+        key.startsWith('patient_') ||
+        key.startsWith('cache_')
+    );
+    cacheKeys.forEach(key => localStorage.removeItem(key));
+  };
+
+  // Tear down a session that WE ended -- the user logged out, or the inactivity
+  // timeout fired. The reason is recorded so the redirect that follows carries
+  // suppression.
+  //
+  // This exists as one function because there is more than one way to end a
+  // session and only one of them is a button. The inactivity timeout used to
+  // clear and dispatch by hand; under SSO_AUTO_REDIRECT that meant an idle user
+  // was bounced to the IdP, silently re-authenticated, and returned to the app --
+  // the inactivity timeout disabled deployment-wide. See SSO_ONLY_MODE_SPEC.md 8.12.
+  //
+  // useCallback with no dependencies so the inactivity effect can depend on it
+  // without being torn down and recreated on every render. dispatch is stable,
+  // and clearAuthData reads nothing reactive.
+  const endSession = useCallback(reason => {
+    clearAuthData();
+    dispatch({ type: AUTH_ACTIONS.LOGOUT, payload: { reason } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- clearAuthData touches only localStorage
+  }, []);
+
+  // The other kind of teardown: there was no session to end. Startup found no
+  // valid cookie, or the lookup failed outright.
+  //
+  // It records no reason, which is the whole point - a visitor who simply is not
+  // signed in should still reach the IdP under SSO_AUTO_REDIRECT. Naming it
+  // rather than leaving the two sites to dispatch LOGOUT by hand is what keeps
+  // that distinction visible: it used to be expressed only by *not* calling
+  // endSession, which is invisible to whoever adds the next teardown.
+  // Not memoized: its only caller is the mount-once effect below, which has no
+  // dependency on it.
+  const discardSession = () => endSession(null);
+
   // Initialize auth state on app load.
   // The HttpOnly cookie is sent automatically -- we verify the session by
   // calling /users/me. If the cookie is valid the user is returned; otherwise
@@ -150,8 +221,7 @@ export function AuthProvider({ children }) {
             category: 'auth_init_no_session',
             timestamp: new Date().toISOString(),
           });
-          clearAuthData();
-          dispatch({ type: AUTH_ACTIONS.LOGOUT });
+          discardSession();
           return;
         }
 
@@ -198,13 +268,14 @@ export function AuthProvider({ children }) {
           stack: error.stack,
           timestamp: new Date().toISOString(),
         });
-        dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        discardSession();
       } finally {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     };
 
     initializeAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount; discardSession is stable
   }, []);
 
   // Refs so the interval closure reads fresh values without re-registering
@@ -243,27 +314,12 @@ export function AuthProvider({ children }) {
         } catch {
           // ignored -- expired JWT will 401, that's expected
         }
-        clearAuthData();
-        dispatch({ type: AUTH_ACTIONS.LOGOUT });
+        endSession('session_expired');
       }
     }, SESSION_CHECK_INTERVAL);
 
     return () => clearInterval(activityTimer);
-  }, [state.isAuthenticated]);
-
-  // Helper functions
-  // Clear client-side auth data. The HttpOnly cookie is cleared server-side on logout.
-  const clearAuthData = () => {
-    localStorage.removeItem('medapp_sessionTimeoutMinutes');
-
-    const cacheKeys = Object.keys(localStorage).filter(
-      key =>
-        key.startsWith('appData_') ||
-        key.startsWith('patient_') ||
-        key.startsWith('cache_')
-    );
-    cacheKeys.forEach(key => localStorage.removeItem(key));
-  };
+  }, [state.isAuthenticated, endSession]);
 
   // Update user data in context -- preserve existing session state
   const updateUser = updatedUserData => {
@@ -392,10 +448,17 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    // Tracked so the `finally` can tell a clean logout from one where the server
+    // never cleared the cookie. authService.logout() used to swallow a non-2xx
+    // response, which made this catch unreachable for anything but a total
+    // network failure -- see SSO_ONLY_MODE_SPEC.md 8.7b.
+    let serverLogoutFailed = false;
+
     try {
       // Call backend logout to clear the HttpOnly cookie
       await authService.logout();
     } catch (error) {
+      serverLogoutFailed = true;
       logger.error('auth_context_logout_error', {
         message: 'Logout API call failed',
         error: error.message,
@@ -405,13 +468,18 @@ export function AuthProvider({ children }) {
         timestamp: new Date().toISOString(),
       });
     } finally {
-      // Clear auth data first
-      clearAuthData();
+      // Tear down local state either way. Refusing to log out because the server
+      // refused would leave someone who clicked "log out" sitting in an
+      // authenticated session, which is worse on a shared workstation than a
+      // client-side-only logout. But say so: the cookie may still be live, and
+      // only closing the browser is guaranteed to end it.
+      endSession('logged_out');
 
-      // Dispatch logout action to update state
-      dispatch({ type: AUTH_ACTIONS.LOGOUT });
-
-      notifyInfo('notifications:toasts.auth.logoutSuccess');
+      if (serverLogoutFailed) {
+        notifyWarning('notifications:toasts.auth.logoutIncomplete');
+      } else {
+        notifyInfo('notifications:toasts.auth.logoutSuccess');
+      }
     }
   };
 
@@ -490,6 +558,7 @@ export function AuthProvider({ children }) {
     error: state.error,
     sessionTimeoutMinutes: state.sessionTimeoutMinutes,
     mustChangePassword: state.mustChangePassword,
+    sessionEndedReason: state.sessionEndedReason,
 
     // Actions
     login,

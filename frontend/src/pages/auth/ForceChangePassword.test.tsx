@@ -251,7 +251,7 @@ describe('ForceChangePassword', () => {
   });
 
   describe('Logout', () => {
-    test('calls logout and navigates to /login', async () => {
+    test('calls logout and navigates to a login URL that suppresses the SSO bounce', async () => {
       renderComponent();
       const buttons = Array.from(document.querySelectorAll('button'));
       const logoutBtn = buttons.find(b =>
@@ -261,8 +261,19 @@ describe('ForceChangePassword', () => {
       if (logoutBtn) fireEvent.click(logoutBtn);
       await waitFor(() => {
         expect(mockLogout).toHaveBeenCalled();
-        expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: true });
+        expect(mockNavigate).toHaveBeenCalledWith(
+          expect.stringContaining('/login'),
+          { replace: true }
+        );
       });
+
+      // local=1 is what stops SSO_AUTO_REDIRECT from bouncing the user straight
+      // back to an IdP that still holds a live session. Without it this button
+      // logs the user out and signs them back in.
+      const [target] = mockNavigate.mock.calls.at(-1) as [string];
+      const params = new URLSearchParams(target.split('?')[1]);
+      expect(params.get('local')).toBe('1');
+      expect(params.get('reason')).toBe('logged_out');
     });
   });
 });

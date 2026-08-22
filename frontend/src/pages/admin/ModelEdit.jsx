@@ -27,6 +27,7 @@ import { useFieldHandlers } from '../../hooks/useFieldHandlers';
 import { adminApiService } from '../../services/api/adminApi';
 import logger from '../../services/logger';
 import { validateForm } from '../../utils/fieldValidation';
+import { buildLoginPath } from '../../utils/loginRedirect';
 import { formatFieldLabel } from '../../utils/formatters';
 import { secureStorage } from '../../utils/secureStorage';
 import './ModelEdit.css';
@@ -161,7 +162,9 @@ const ModelEdit = () => {
               autoClose: 5000,
             });
             await logout();
-            navigate('/login');
+            // Soft navigate, deliberately -- ModelEdit.security.test.jsx asserts
+            // this path does not hard-navigate.
+            navigate(buildLoginPath({ reason: 'account_changed' }));
             return;
           }
         }
