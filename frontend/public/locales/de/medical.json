@@ -858,7 +858,7 @@
       "createError": "Testpanel konnte nicht erstellt werden",
       "testResultRequired": "Mindestens ein Testergebnis ist erforderlich",
       "tagsPlaceholder": "Tags hinzufügen, um diesen Eintrag später zu organisieren und zu finden",
-      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveMessage": "Das Panel wurde erstellt, aber einige Testkomponenten konnten nicht gespeichert werden. Bearbeiten Sie das Panel, um sie zu überprüfen.",
       "componentPartialSaveTitle": "Some components not saved",
       "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
       "componentSaveFailedTitle": "Test components not saved"
