@@ -104,7 +104,7 @@ Base path: `/api/v1/auth`
 
 `GET /auth/registration-status`
 
-- **Purpose**: Check if new user registration is enabled
+- **Purpose**: Check whether self-service (password) registration is available
 - **Authentication**: No
 - **Success Response** (200):
 
@@ -114,6 +114,13 @@ Base path: `/api/v1/auth`
   "message": null
 }
 ```
+
+- Reports the **effective** answer: `false` when `ALLOW_USER_REGISTRATION` is off
+  **or** `SSO_ONLY_MODE` is on, each with its own `message`. Under `SSO_ONLY_MODE`,
+  `POST /auth/register` returns 403 regardless of the registration setting, so this
+  endpoint must not advertise a route that refuses every caller
+- Not the same field as `registration_enabled` in `GET /auth/sso/config`, which
+  reports the raw setting because there it governs SSO account provisioning
 
 ### User Registration
 
@@ -148,7 +155,11 @@ Base path: `/api/v1/auth`
 
 - **Error Responses**:
   - `400`: Validation failed (weak password, invalid email)
-  - `403`: Registration disabled
+  - `401`: `ALLOW_USER_REGISTRATION=false`. Recorded as `registration_blocked`.
+    (401 rather than 403 is long-standing behavior, not a typo — do not branch on
+    403 alone to detect "registration unavailable")
+  - `403`: `SSO_ONLY_MODE=true`. Checked first and applies regardless of the
+    registration setting; recorded as `registration_blocked_sso_only`
   - `409`: Username or email already exists
 
 ### User Login
@@ -177,6 +188,9 @@ username=johndoe&password=SecurePass123!
 - **Note**: The response does NOT include a user object. Use `GET /users/me` to retrieve user details after login. The `session_timeout_minutes` reflects the user's session timeout preference (or system default if not set).
 - **Error Responses**:
   - `401`: Invalid credentials
+  - `403`: Password login disabled (`SSO_ONLY_MODE=true`). Returned before any
+    credential check, so valid credentials are refused too. Recorded as
+    `password_login_blocked_sso_only` in the security log
   - `429`: Too many login attempts (rate limited)
 
 ### Change Password
@@ -226,9 +240,27 @@ Base path: `/api/v1/auth/sso`
 {
   "enabled": true,
   "provider_type": "google",
-  "registration_enabled": true
+  "registration_enabled": true,
+  "sso_only": false,
+  "auto_redirect": false
 }
 ```
+
+- `sso_only` — `SSO_ONLY_MODE`. Password login and password registration are
+  refused server-side; the login form is hidden
+- `auto_redirect` — `SSO_AUTO_REDIRECT`. Unauthenticated visitors are sent to the
+  IdP without interaction
+- `registration_enabled` — the raw `ALLOW_USER_REGISTRATION` setting, which **in
+  this payload** governs whether SSO may provision new accounts. `SSO_ONLY_MODE`
+  does not disable that, so this field is unaffected by it. The different question
+  "can someone register with a password" is answered by
+  `GET /auth/registration-status`, which does fold `SSO_ONLY_MODE` in and reports
+  `false` under it
+- This endpoint does not degrade to a fallback payload on error. Reporting
+  `enabled: false, sso_only: false` would be indistinguishable from "SSO is
+  genuinely off", which under `SSO_ONLY_MODE` strands the caller — no SSO button,
+  and a password form the server refuses. A failure is a `500`, which a client can
+  tell apart and retry
 
 ### Initiate SSO Login
 
@@ -239,7 +271,16 @@ Base path: `/api/v1/auth/sso`
 - **Rate Limited**: yes — `SSO_RATE_LIMIT_ATTEMPTS` per client IP per
   `SSO_RATE_LIMIT_WINDOW_MINUTES` (defaults: 10 per 10 minutes)
 - **Query Parameters**:
-  - `return_url` (string, optional): URL to redirect after authentication
+  - `return_url` (string, optional): where to send the user after authentication.
+    Must be a **root-relative internal path** (`/patients/42`,
+    `/lab-results?status=open`). Stored against the state token and echoed back by
+    `/auth/sso/callback`
+- **Error Response** (400): `return_url` is not a root-relative internal path.
+  Absolute (`https://evil.example`), protocol-relative (`//evil.example`,
+  `/\evil.example`), and non-root-relative (`../admin`) values are all refused, and
+  no state entry is created. The value never reaches the state store, so any
+  consumer of `return_url` inherits the guarantee. Recorded as
+  `sso_return_url_rejected`. Checked after the rate limit
 - **Error Response** (429): rate limit exceeded. Carries `Retry-After`,
   `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and
   `X-Error-Code: sso_rate_limited` — branch on the status or `X-Error-Code`, not on

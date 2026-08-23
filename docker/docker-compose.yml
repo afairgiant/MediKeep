@@ -62,6 +62,10 @@ services:
       SSO_ISSUER_URL: ${SSO_ISSUER_URL:-}
       SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
       SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-[]}
+      # SSO-only front door. Both require SSO_ENABLED=true - the app refuses to
+      # start otherwise, rather than booting with no usable way to sign in.
+      SSO_ONLY_MODE: ${SSO_ONLY_MODE:-false}
+      SSO_AUTO_REDIRECT: ${SSO_AUTO_REDIRECT:-false}
 
       # Default Admin Password Configuration (optional - defaults to admin123 in app if not set)
       #ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-}

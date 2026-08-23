@@ -241,6 +241,23 @@ class Settings:  # App Info
         os.getenv("SSO_RATE_LIMIT_WINDOW_MINUTES", "10")
     )
 
+    # SSO-only mode and IdP auto-redirect.
+    #
+    # Both default off, so a deployment upgrading to this release behaves exactly
+    # as before. Neither is meaningful without SSO_ENABLED, and the combination is
+    # refused at startup rather than silently ignored - see
+    # validate_auth_mode_config().
+    #
+    # Env-driven on purpose: there is deliberately no in-app toggle, so a broken
+    # IdP or an unlinked admin account cannot lock an operator out of their own
+    # instance permanently.
+    #
+    # SSO_ONLY_MODE     - the server refuses password login and password
+    #                     registration; the frontend hides the form.
+    # SSO_AUTO_REDIRECT - unauthenticated visitors are sent straight to the IdP.
+    SSO_ONLY_MODE: bool = os.getenv("SSO_ONLY_MODE", "False").lower() == "true"
+    SSO_AUTO_REDIRECT: bool = os.getenv("SSO_AUTO_REDIRECT", "False").lower() == "true"
+
     # Paperless-ngx Integration Configuration
     PAPERLESS_REQUEST_TIMEOUT: int = int(
         os.getenv("PAPERLESS_REQUEST_TIMEOUT", "30")
@@ -414,6 +431,78 @@ class Settings:  # App Info
             and not self.SSO_ISSUER_URL
         ):
             raise ValueError("SSO_ISSUER_URL is required for OIDC providers")
+
+    # The flags that only describe how SSO is used, and are therefore meaningless
+    # without it. Named once: validate_auth_mode_config reads the attributes by
+    # these names, so a new flag is added here and nowhere else.
+    SSO_DEPENDENT_FLAGS = ("SSO_ONLY_MODE", "SSO_AUTO_REDIRECT")
+
+    def validate_auth_mode_config(self) -> None:
+        """Validate the whole authentication-mode configuration at startup.
+
+        The single entry point for it: the flag checks below, **and** the provider
+        checks in validate_sso_config(), which this calls. Nothing else validates
+        SSO config any more - SSOService.__init__ used to, at module import, which
+        turned a bad config into an import traceback instead of the actionable
+        startup error below.
+
+        Deliberately not gated on SSO_ENABLED, unlike validate_sso_config(), which
+        returns early when it is false. That early return means it cannot catch a
+        flag set *without* SSO_ENABLED - the single most likely misconfiguration,
+        and the one that would otherwise boot cleanly into an instance whose login
+        form is hidden and whose SSO does not exist.
+
+        Raises ValueError with an actionable message. The caller (startup_event)
+        logs it and aborts the boot: failing loudly is the difference between "my
+        compose file has a typo" and "nobody can log into the medical records app
+        and I don't know why".
+        """
+        enabled_flags = [
+            name for name in self.SSO_DEPENDENT_FLAGS if getattr(self, name)
+        ]
+
+        if enabled_flags and not self.SSO_ENABLED:
+            flags = " and ".join(enabled_flags)
+            raise ValueError(
+                f"{flags} {'are' if len(enabled_flags) > 1 else 'is'} enabled but "
+                "SSO_ENABLED is not. These settings only control how SSO is used, "
+                "so without it there would be no way to sign in at all. Set "
+                f"SSO_ENABLED=true and configure an SSO provider, or unset {flags}."
+            )
+
+        # Unconditional: validate_sso_config() no-ops when SSO_ENABLED is false, and
+        # any flag reaching here implies it is true. A half-configured provider must
+        # fail the boot rather than the first login attempt.
+        self.validate_sso_config()
+
+    def auth_mode_warnings(self) -> list[tuple[str, str]]:
+        """Configurations that are legitimate but worth saying out loud at startup.
+
+        Returns (event_name, message) pairs, so a second warning added here carries
+        its own event rather than inheriting the first one's.
+
+        Separate from validate_auth_mode_config() because these must never fail a
+        boot, and separate from startup_event() because a policy inlined in a
+        200-line boot sequence can only be tested by reconstructing the whole boot.
+
+        Caller-sensitive: ALLOW_USER_REGISTRATION is admin-toggleable and persisted,
+        so this must be called *after* the stored settings are loaded or it reports
+        on a value that is not in effect.
+        """
+        warnings = []
+
+        if self.SSO_ONLY_MODE and not self.ALLOW_USER_REGISTRATION:
+            warnings.append(
+                (
+                    "sso_only_no_registration_route",
+                    "SSO_ONLY_MODE is enabled and user registration is disabled. No "
+                    "new user can be created by any self-service route; accounts "
+                    "must be created by an administrator. If this was not intended, "
+                    "enable registration or unset SSO_ONLY_MODE.",
+                )
+            )
+
+        return warnings
 
     def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:
         """Ensure directory exists with proper permission error handling for Docker bind mounts."""

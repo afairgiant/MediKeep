@@ -133,11 +133,16 @@ def _store_state_entry(key: str, payload: Dict) -> None:
 
 
 class SSOService:
-    """Simple SSO service - clean and maintainable"""
+    """Simple SSO service - clean and maintainable.
 
-    def __init__(self):
-        if settings.SSO_ENABLED:
-            settings.validate_sso_config()
+    Construction has no side effects, deliberately. This class is instantiated at
+    module import (endpoints/sso.py), and the config validation that used to live in
+    __init__ therefore surfaced an invalid SSO config as an import traceback, before
+    the lifespan hook existed to report it properly. startup_event() ->
+    settings.validate_auth_mode_config() is the single authority now, and it still
+    fails the boot whenever SSO_ENABLED is true and the provider config is
+    incomplete.
+    """
 
     async def get_authorization_url(
         self, return_url: Optional[str] = None

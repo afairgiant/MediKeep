@@ -31,6 +31,24 @@ async def startup_event():
         },
     )
 
+    # Validate the authentication-mode configuration before anything else runs.
+    # This is deliberately ahead of the database check and the SKIP_MIGRATIONS
+    # early return: the misconfiguration it catches is a compose-file typo, which
+    # must fail loudly whether or not the database happens to be reachable.
+    try:
+        settings.validate_auth_mode_config()
+    except ValueError as e:
+        error_msg = f"STARTUP FAILED: {e}"
+        logger.error(
+            error_msg,
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "auth_mode_config_invalid",
+                LogFields.ERROR: str(e),
+            },
+        )
+        raise RuntimeError(str(e)) from e
+
     # Initialize the event system (event registry and bus)
     event_bus = setup_event_system()
     logger.info("Event system initialized")
@@ -138,6 +156,18 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Could not load persisted admin settings: {e}")
         # Non-fatal - app falls back to env-var defaults already in memory
+
+    # Emitted here, and not beside validate_auth_mode_config() above, because these
+    # warnings read ALLOW_USER_REGISTRATION - admin-toggleable and persisted in
+    # system_settings, so the stored value only takes effect at
+    # load_persisted_settings() immediately above. Warning any earlier would report
+    # on a value that is not in force. A toggle flipped at runtime is still not
+    # covered; a startup warning cannot reach it.
+    for event, message in settings.auth_mode_warnings():
+        logger.warning(
+            message,
+            extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
+        )
 
     # Initialize standardized tests from LOINC
     try:

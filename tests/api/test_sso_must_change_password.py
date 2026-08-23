@@ -305,11 +305,11 @@ class TestEdgeCases:
         with patch_callback(user):
             response = client.post(CALLBACK_URL, json=CALLBACK_BODY)
 
-        # Login does not succeed, so the clear never runs. The status is currently
-        # 500 rather than 401 because the endpoint's broad `except Exception`
-        # swallows UnauthorizedException - a pre-existing defect tracked separately
-        # in TECHNICAL_DEBT.md, deliberately not changed here.
-        assert response.status_code != 200
+        # Login does not succeed, so the clear never runs. 401, not the 500 this
+        # used to return: the endpoint's broad `except Exception` no longer swallows
+        # UnauthorizedException (SSO_ONLY_MODE_SPEC.md 8.6). The deactivation case is
+        # covered directly in test_sso_inactive_user.py.
+        assert response.status_code == 401
 
         db_session.expire_all()
         assert db_session.get(User, user_id).must_change_password is True
