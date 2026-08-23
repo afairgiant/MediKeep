@@ -858,7 +858,7 @@
       "createError": "Falha ao criar painel de exames",
       "testResultRequired": "É necessário pelo menos um resultado de exame",
       "tagsPlaceholder": "Adicione tags para organizar e pesquisar este registo mais tarde",
-      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
+      "componentPartialSaveMessage": "O painel foi criado, mas alguns componentes de teste não puderam ser guardados. Edite o painel para os rever.",
       "componentPartialSaveTitle": "Some components not saved",
       "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
       "componentSaveFailedTitle": "Test components not saved"
