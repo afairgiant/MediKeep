@@ -861,7 +861,7 @@
       "componentSaveFailedTitle": "Test components not saved",
       "componentSaveFailedMessage": "The panel was created but test components could not be saved. Edit the panel to add them.",
       "componentPartialSaveTitle": "Some components not saved",
-      "componentPartialSaveMessage": "The panel was created but test components could not be saved. Edit the panel to add them."
+      "componentPartialSaveMessage": "The panel was created but some test components failed to save. Edit the panel to review."
     },
     "buttons": {
       "addLabResults": "Add Lab Results"
