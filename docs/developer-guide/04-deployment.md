@@ -539,6 +539,15 @@ the offending variable named. This is deliberate: booting with password login re
 and no working SSO means nobody can sign in, and that is far harder to diagnose after
 the fact.
 
+**These two flags are parsed strictly.** `true`/`false`, `1`/`0`, `yes`/`no`, and
+`on`/`off` are accepted in any case; an empty value means unset. Anything else fails
+the boot with an error naming the variable and showing what it was set to, rather
+than being read as `false`. Everywhere else `false` merely means "off", but for
+`SSO_ONLY_MODE` it means password login is still open, so a misread value would leave
+an instance accepting credentials its operator believes are refused — with nothing in
+the logs to say so. The most common cause is an inline comment: a compose env file
+does not strip them, so `SSO_ONLY_MODE=true # sso only` is read as the entire string.
+
 If `SSO_ONLY_MODE` is combined with registration disabled, no new user can enter by
 any self-service route. That is valid for a sealed instance and is logged as a startup
 warning rather than a failure.

@@ -8,7 +8,7 @@ message said the identity provider had failed.
 This blocks more than tidiness. The redirect design rejects a silent bounce back to
 the IdP specifically because it "completely hides the deactivated-account case", so
 the error page the frontend is about to grow has nothing accurate to render until
-the status code tells the truth (SSO_ONLY_MODE_SPEC.md 8.6, criterion 17).
+the status code tells the truth.
 
 All three login endpoints are tested separately: each carries its own try/except and
 a fix applied to one is easy to miss on the others.

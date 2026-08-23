@@ -263,7 +263,7 @@ class SSOService:
 
         # Carry the deep link the flow started from back to the caller. Ships inert -
         # no frontend reads it yet (deep links currently survive via sessionStorage,
-        # which fails in private browsing). See SSO_ONLY_MODE_SPEC.md 8.8.
+        # which fails in private browsing).
         result["return_url"] = state_data.get("return_url")
 
         return result

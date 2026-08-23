@@ -307,7 +307,7 @@ class TestEdgeCases:
 
         # Login does not succeed, so the clear never runs. 401, not the 500 this
         # used to return: the endpoint's broad `except Exception` no longer swallows
-        # UnauthorizedException (SSO_ONLY_MODE_SPEC.md 8.6). The deactivation case is
+        # UnauthorizedException. The deactivation case is
         # covered directly in test_sso_inactive_user.py.
         assert response.status_code == 401
 

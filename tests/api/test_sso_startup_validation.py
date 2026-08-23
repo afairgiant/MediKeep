@@ -13,12 +13,14 @@ so from the lifespan hook rather than as an import traceback.
 
 import asyncio
 import logging
+import os
 from contextlib import ExitStack, contextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core import config
 from app.core.config import settings
 from app.main import app
 
@@ -104,8 +106,8 @@ class TestBootSuccess:
                 assert booted.get("/api/v1/auth/sso/config").json()["sso_only"] is True
 
     def test_the_flags_default_off_and_do_not_affect_startup(self):
-        # The regression that matters for criterion 1: an existing deployment sees
-        # no change. Every other test in the suite boots this way already.
+        # The regression that matters: an existing deployment sees no change.
+        # Every other test in the suite boots this way already.
         assert settings.SSO_ONLY_MODE is False
         assert settings.SSO_AUTO_REDIRECT is False
 
@@ -113,9 +115,105 @@ class TestBootSuccess:
             pass
 
 
+class TestFlagParsing:
+    """An unrecognized value fails the boot rather than reading as False.
+
+    `.lower() == "true"` - the idiom every other boolean in config.py uses - reads
+    `SSO_ONLY_MODE=1`, a trailing space, or `SSO_ONLY_MODE=true # sso only` (a
+    compose env file does not strip inline comments) as False. Here False means
+    password login is still accepted, so a silent misparse is a security control
+    failing open, and the pairing check above cannot catch it: that only fires when
+    the flag parses True.
+    """
+
+    @pytest.fixture(autouse=True)
+    def clean_parse_errors(self):
+        """_strict_bool records into module state; do not leak it between tests."""
+        original = dict(config._AUTH_FLAG_PARSE_ERRORS)
+        config._AUTH_FLAG_PARSE_ERRORS.clear()
+        yield
+        config._AUTH_FLAG_PARSE_ERRORS.clear()
+        config._AUTH_FLAG_PARSE_ERRORS.update(original)
+
+    @pytest.mark.parametrize(
+        "raw", ["true", "TRUE", "True", "1", "yes", "on", " true "]
+    )
+    def test_the_spellings_that_mean_on(self, raw):
+        with patch.dict(os.environ, {"SSO_ONLY_MODE": raw}):
+            assert config._strict_bool("SSO_ONLY_MODE") is True
+
+        assert config._AUTH_FLAG_PARSE_ERRORS == {}
+
+    @pytest.mark.parametrize("raw", ["false", "FALSE", "0", "no", "off", ""])
+    def test_the_spellings_that_mean_off(self, raw):
+        with patch.dict(os.environ, {"SSO_ONLY_MODE": raw}):
+            assert config._strict_bool("SSO_ONLY_MODE") is False
+
+        # "" included deliberately: `SSO_ONLY_MODE=` in a compose file is an unset
+        # variable, not a typo, and must not fail anyone's boot.
+        assert config._AUTH_FLAG_PARSE_ERRORS == {}
+
+    def test_an_unset_variable_takes_the_default(self):
+        with patch.dict(os.environ):
+            os.environ.pop("SSO_ONLY_MODE", None)
+            assert config._strict_bool("SSO_ONLY_MODE") is False
+
+        assert config._AUTH_FLAG_PARSE_ERRORS == {}
+
+    @pytest.mark.parametrize("raw", ["true # sso only", "1 # sso only", "maybe", "tru"])
+    def test_an_unrecognized_value_is_recorded_rather_than_guessed(self, raw):
+        with patch.dict(os.environ, {"SSO_ONLY_MODE": raw}):
+            config._strict_bool("SSO_ONLY_MODE")
+
+        assert config._AUTH_FLAG_PARSE_ERRORS == {"SSO_ONLY_MODE": raw}
+
+    def test_a_recorded_value_aborts_the_boot(self):
+        with configured(AUTH_FLAG_PARSE_ERRORS={"SSO_ONLY_MODE": "true # sso only"}):
+            with pytest.raises(RuntimeError) as excinfo:
+                with TestClient(app):
+                    pass
+
+        # Both halves are the deliverable: the operator has to know which variable
+        # and what it was actually set to, or the inline-comment case is invisible.
+        message = str(excinfo.value)
+        assert "SSO_ONLY_MODE" in message
+        assert "true # sso only" in message
+
+    def test_it_aborts_even_though_the_flag_itself_reads_false(self):
+        """The case the pairing check cannot reach.
+
+        Everything else in this file is reachable only once a flag parses True. A
+        value that failed to parse is not a flag that is off - it is a flag whose
+        state nobody knows - and the configuration is otherwise entirely valid, so
+        without this check the instance boots clean.
+        """
+        with configured(
+            SSO_ONLY_MODE=False,
+            AUTH_FLAG_PARSE_ERRORS={"SSO_ONLY_MODE": "maybe"},
+        ):
+            with pytest.raises(RuntimeError):
+                with TestClient(app):
+                    pass
+
+    def test_the_failure_is_logged_before_it_is_raised(self, caplog):
+        with configured(AUTH_FLAG_PARSE_ERRORS={"SSO_AUTO_REDIRECT": "maybe"}):
+            with caplog.at_level(logging.ERROR, logger=STARTUP_LOGGER):
+                with pytest.raises(RuntimeError):
+                    with TestClient(app):
+                        pass
+
+        events = [getattr(record, "event", None) for record in caplog.records]
+        assert "auth_mode_config_invalid" in events
+
+    def test_a_clean_environment_records_nothing(self):
+        """The default state: the real settings object carries no parse errors."""
+        assert settings.AUTH_FLAG_PARSE_ERRORS == {}
+
+
 class TestValidationRunsFromTheLifespanNotAtImport:
     def test_importing_the_sso_endpoints_with_an_invalid_config_does_not_raise(self):
-        """Criterion 2 asks for a logged startup failure, not an import traceback.
+        """An invalid config must surface as a logged startup failure, not an
+        import traceback.
 
         Re-importing the module with a broken config is what used to blow up, via
         the module-level SSOService() construction.
@@ -230,6 +328,49 @@ class TestSealedInstanceWarning:
 
         events = [getattr(record, "event", None) for record in caplog.records]
         assert "sso_only_no_registration_route" in events
+
+    @staticmethod
+    def run_startup_in_test_mode():
+        """Run startup_event() with SKIP_MIGRATIONS set, as the test compose file does.
+
+        Barely any stubbing: that flag *is* an early return, and everything above it
+        is in-memory.
+        """
+        with patch.dict("os.environ", {"SKIP_MIGRATIONS": "true"}):
+            from app.core.startup import startup_event
+
+            asyncio.run(startup_event())
+
+    def test_skip_migrations_still_warns(self, caplog):
+        """The early return must not swallow the warning.
+
+        SKIP_MIGRATIONS returns from startup_event() above the warning site, so a
+        deployment running with it set - `tests/docker-compose.test.yml` does, and
+        operators can - got no warning at all for the sealed-instance combination.
+        That is exactly the configuration that needs saying out loud: nobody can
+        create an account by any self-service route.
+
+        Reading the env value here is correct rather than a compromise: with no
+        database there is no stored ALLOW_USER_REGISTRATION to override it.
+        """
+        with configured(SSO_ONLY_MODE=True):
+            settings.ALLOW_USER_REGISTRATION = False
+            with caplog.at_level(logging.WARNING, logger=STARTUP_LOGGER):
+                self.run_startup_in_test_mode()
+
+        events = [getattr(record, "event", None) for record in caplog.records]
+        assert "sso_only_no_registration_route" in events
+
+    def test_skip_migrations_stays_silent_when_there_is_nothing_to_warn_about(
+        self, caplog
+    ):
+        with configured(SSO_ONLY_MODE=True):
+            settings.ALLOW_USER_REGISTRATION = True
+            with caplog.at_level(logging.WARNING, logger=STARTUP_LOGGER):
+                self.run_startup_in_test_mode()
+
+        events = [getattr(record, "event", None) for record in caplog.records]
+        assert "sso_only_no_registration_route" not in events
 
     def test_the_sealed_combination_does_not_fail_the_boot(self):
         with configured(SSO_ONLY_MODE=True, SSO_ENABLED=True):

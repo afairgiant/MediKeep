@@ -99,7 +99,6 @@ class ApiService {
       // the app's traffic, so an expired session surfaced as a generic error
       // toast on whatever screen the user happened to be on, indistinguishable
       // from a server fault. Same rule as every other client now.
-      // See SSO_ONLY_MODE_SPEC.md 8.10.
       if (response.status === 401) {
         handleUnauthorized(url);
       }

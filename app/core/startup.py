@@ -17,6 +17,22 @@ from app.services.notification_handlers import create_notification_handler
 logger = get_logger(__name__, "app")
 
 
+def _emit_auth_mode_warnings():
+    """Log the auth-mode configurations that are legal but worth saying out loud.
+
+    A function because startup_event() has two exits that need it: the normal path,
+    after the persisted settings load, and the SKIP_MIGRATIONS early return, which
+    never reaches that load. Emitting from only the first meant a deployment running
+    with SKIP_MIGRATIONS got no warning at all - including the sealed-instance case,
+    which is precisely the one an operator needs told.
+    """
+    for event, message in settings.auth_mode_warnings():
+        logger.warning(
+            message,
+            extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
+        )
+
+
 async def startup_event():
     """Initialize database tables on startup"""
     # Record the actual application startup time
@@ -86,6 +102,11 @@ async def startup_event():
     skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
 
     if skip_migrations:
+        # This path never reaches load_persisted_settings(), so the warning site
+        # further down is unreachable from here. Emitting now is not a compromise:
+        # with no database there is no stored ALLOW_USER_REGISTRATION that could
+        # override the env value, so the env value is the one in force.
+        _emit_auth_mode_warnings()
         logger.info("⏭️ Skipping database operations (test mode)")
         logger.info("Application startup completed (test mode)")
         return
@@ -163,11 +184,7 @@ async def startup_event():
     # load_persisted_settings() immediately above. Warning any earlier would report
     # on a value that is not in force. A toggle flipped at runtime is still not
     # covered; a startup warning cannot reach it.
-    for event, message in settings.auth_mode_warnings():
-        logger.warning(
-            message,
-            extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
-        )
+    _emit_auth_mode_warnings()
 
     # Initialize standardized tests from LOINC
     try:

@@ -214,8 +214,8 @@ def _complete_sso_login(
         "must_change_password": bool(sso_user.must_change_password),
         # The deep link /auth/sso/initiate was given, carried through the state entry.
         # Ships inert: no frontend reads it yet (deep links currently survive via
-        # sessionStorage, which fails in private browsing). See SSO_ONLY_MODE_SPEC.md
-        # 8.8 - the consumer is a later PR.
+        # sessionStorage, which fails in private browsing) - the consumer is a
+        # later PR.
         "return_url": result.get("return_url"),
     }
     response = JSONResponse(content=response_data)
@@ -281,7 +281,7 @@ async def initiate_sso_login(
                 **headers,
                 # X-Error-Code lets a client distinguish this from the generic SSO
                 # failures without matching on the message text. Nothing reads it
-                # yet - the frontend consumer is SSO_ONLY_MODE_SPEC.md criterion 15.
+                # yet - the frontend consumer arrives in a later PR.
                 "X-Error-Code": "sso_rate_limited",
             },
         )
@@ -296,6 +296,17 @@ async def initiate_sso_login(
     # same reason: the length cap lives inside is_safe_return_url and only decides
     # the rejection, so without this an oversized value would be written to the
     # security log in full.
+    #
+    # FastAPI binds a bare `?return_url=` to "", not None. That is "no deep link",
+    # not a hostile value: rejecting it would lock out any client that appends the
+    # parameter unconditionally, and under SSO_ONLY_MODE that client has no password
+    # login to fall back to. Collapsed to None rather than merely skipped, so the
+    # empty value is not stored and echoed back to the callback as "" where every
+    # consumer expects a path or null. Matches safeInternalPath, which returns null
+    # for an empty value rather than failing.
+    if not return_url:
+        return_url = None
+
     if return_url is not None and not is_safe_return_url(return_url):
         log_security_event(
             logger,

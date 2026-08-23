@@ -131,7 +131,7 @@ describe('ProtectedRoute login redirect', () => {
 
   /**
    * Storage being unavailable must not affect suppression at all - it travels in
-   * the URL specifically so it does not depend on storage. See criterion 10.
+   * the URL specifically so it does not depend on storage.
    */
   test('suppression works with sessionStorage throwing', () => {
     withThrowingSessionStorage(() => {

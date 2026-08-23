@@ -25,10 +25,9 @@ const SSO_USER = { id: 7, username: 'ssouser', role: 'user' };
 /**
  * Deep-link preservation across the SSO round trip used to rest entirely on
  * sessionStorage, which is exactly the mechanism that fails in private browsing
- * and with storage disabled - the case acceptance criterion 11 covers. The
- * backend now carries the return path in the state entry, keyed to the OAuth
- * state parameter, which survives anything sessionStorage does not.
- * See SSO_ONLY_MODE_SPEC.md 8.8 and 8.11.
+ * and with storage disabled. The backend now carries the return path in the
+ * state entry, keyed to the OAuth state parameter, which survives anything
+ * sessionStorage does not.
  */
 describe('SSOCallback return path', () => {
   beforeEach(() => {
@@ -105,7 +104,7 @@ describe('SSOCallback return path', () => {
   });
 
   /**
-   * This is criterion 11's real case: the mechanism must not depend on storage.
+   * The real case this exists for: the mechanism must not depend on storage.
    */
   test('works with sessionStorage unavailable', async () => {
     await withThrowingSessionStorage(async () => {

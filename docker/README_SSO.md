@@ -166,7 +166,11 @@ cannot make itself unfixable:
    for every account, including that one. Pair it with step 1.
 3. Startup validation refuses the most likely misconfiguration before it takes
    effect, so a typo in these variables surfaces as a logged startup failure rather
-   than a login page nobody can get past.
+   than a login page nobody can get past. That includes a value it cannot parse:
+   `SSO_ONLY_MODE` and `SSO_AUTO_REDIRECT` accept `true`/`false` (also `1`/`0`,
+   `yes`/`no`, `on`/`off`, any case), and anything else fails the boot instead of
+   being read as `false`. Watch for inline comments — a compose env file does not
+   strip them, so `SSO_ONLY_MODE=true # sso only` is the whole string.
 
 If registration is also disabled (`ALLOW_USER_REGISTRATION=false`, or the admin
 setting), no new user can enter by any self-service route. That is a legitimate

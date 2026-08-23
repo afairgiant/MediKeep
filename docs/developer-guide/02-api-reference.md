@@ -278,8 +278,11 @@ Base path: `/api/v1/auth/sso`
   - `return_url` (string, optional): where to send the user after authentication.
     Must be a **root-relative internal path** (`/patients/42`,
     `/lab-results?status=open`). Stored against the state token and echoed back by
-    `/auth/sso/callback`
-- **Error Response** (400): `return_url` is not a root-relative internal path.
+    `/auth/sso/callback`. An empty value (`?return_url=`) is treated as absent, not
+    as invalid, so a client may send the parameter unconditionally; the callback
+    reports `null` for it
+- **Error Response** (400): `return_url` is present, non-empty, and not a
+  root-relative internal path.
   Absolute (`https://evil.example`), protocol-relative (`//evil.example`,
   `/\evil.example`), and non-root-relative (`../admin`) values are all refused, and
   no state entry is created. The value never reaches the state store, so any

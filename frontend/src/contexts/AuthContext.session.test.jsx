@@ -128,7 +128,7 @@ describe('AuthContext session teardown', () => {
    * logout(). Suppression placed inside logout() would miss it entirely, and
    * under SSO_AUTO_REDIRECT an idle-timed-out user would be bounced to an IdP
    * that still holds a live session and signed straight back in - the timeout
-   * disabled for the whole deployment. See SSO_ONLY_MODE_SPEC.md 8.12.
+   * disabled for the whole deployment.
    */
   test('the inactivity timeout records session_expired', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -159,7 +159,7 @@ describe('AuthContext session teardown', () => {
    * simpleAuthService.logout() used to swallow a non-2xx from POST /auth/logout,
    * so the client cleared its state while the HttpOnly cookie stayed valid - a
    * logged-out UI over a live session. It now throws; this is what the app does
-   * with that. See SSO_ONLY_MODE_SPEC.md 8.7b.
+   * with that.
    */
   test('a failed server logout still tears down locally, and says so', async () => {
     const user = userEvent.setup();

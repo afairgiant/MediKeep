@@ -3,7 +3,7 @@
 The frontend now consumes this field, and validates it before navigating. This module
 also covers the server-side half of that guard: a value that is not a root-relative
 internal path is refused at /initiate, so it is never written into the state store and
-any future consumer inherits the guarantee (SSO_ONLY_MODE_SPEC.md 8.11, criterion 18).
+any future consumer inherits the guarantee.
 
 A client-only check is defeated by anyone talking to the API directly, and the value
 is consumed at the highest-trust moment in the app - immediately after a successful
@@ -177,6 +177,31 @@ def test_the_rate_limit_is_checked_before_the_return_url(
 @pytest.mark.parametrize("value", ["/patients/42", "/lab-results?status=open", "/"])
 def test_internal_paths_are_still_accepted(client: TestClient, sso_flow, value: str):
     assert client.post(INITIATE_URL, params={"return_url": value}).status_code == 200
+
+
+def test_an_empty_return_url_is_treated_as_absent(client: TestClient, sso_flow):
+    """`?return_url=` means "no deep link", not a value to reject.
+
+    FastAPI binds a bare parameter to "" rather than None, so a `is not None` guard
+    sends it to is_safe_return_url, which refuses it. A client that appends the
+    parameter unconditionally would then be unable to start SSO at all - and under
+    SSO_ONLY_MODE it has no password login to fall back to.
+    """
+    response = client.post(INITIATE_URL, params={"return_url": ""})
+
+    assert response.status_code == 200
+
+
+def test_an_empty_return_url_carries_through_as_null(client: TestClient, sso_flow):
+    stub_token_exchange(sso_flow)
+
+    initiate = client.post(INITIATE_URL, params={"return_url": ""})
+    state = initiate.json()["state"]
+
+    response = client.post(CALLBACK_URL, json={"code": "authcode", "state": state})
+
+    assert response.status_code == 200
+    assert response.json()["return_url"] is None
 
 
 def test_the_state_entry_is_still_single_use(client: TestClient, sso_flow):
