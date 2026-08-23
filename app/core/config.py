@@ -106,6 +106,49 @@ def _derive_salt(purpose: str) -> str:
     return salt_from_env
 
 
+# Raw values of auth flags that _strict_bool() could not parse, keyed by variable
+# name. Populated at class definition time and reported by
+# validate_auth_mode_config() at startup - never raised from here, because a
+# ValueError at import is the import traceback that moving validation into the
+# lifespan hook exists to avoid.
+_AUTH_FLAG_PARSE_ERRORS: dict = {}
+
+_TRUE_VALUES = frozenset({"1", "true", "yes", "on"})
+# "" included: `SSO_ONLY_MODE=` in a compose file means "unset", not "broken".
+_FALSE_VALUES = frozenset({"0", "false", "no", "off", ""})
+
+
+def _strict_bool(name: str, default: bool = False) -> bool:
+    """Parse a boolean env var, recording anything unrecognized instead of guessing.
+
+    The `.lower() == "true"` idiom used elsewhere in this file silently reads every
+    other value as False. For a flag that only relaxes behavior that is merely
+    annoying; for a flag that *is* a security control it is a failure to fail
+    closed. `SSO_ONLY_MODE=1`, a trailing space, or `SSO_ONLY_MODE=true # sso only`
+    in a compose env file (Compose does not strip inline comments) would each leave
+    password login accepting credentials while the operator believed it was off,
+    with nothing logged to say so - and the pairing check in
+    validate_auth_mode_config() cannot catch it either, because that only fires
+    when the flag parses True.
+
+    Deliberately not applied to the other booleans in this file. Changing what
+    `DEBUG=1` means is unrelated behavior with its own blast radius; this is scoped
+    to the flags where a misread value decides whether passwords are accepted.
+    """
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+
+    value = raw.strip().lower()
+    if value in _TRUE_VALUES:
+        return True
+    if value in _FALSE_VALUES:
+        return False
+
+    _AUTH_FLAG_PARSE_ERRORS[name] = raw
+    return default
+
+
 class Settings:  # App Info
     APP_NAME: str = "MediKeep"
     VERSION: str = "0.69.0"
@@ -240,6 +283,32 @@ class Settings:  # App Info
     SSO_RATE_LIMIT_WINDOW_MINUTES: int = int(
         os.getenv("SSO_RATE_LIMIT_WINDOW_MINUTES", "10")
     )
+
+    # SSO-only mode and IdP auto-redirect.
+    #
+    # Both default off, so a deployment upgrading to this release behaves exactly
+    # as before. Neither is meaningful without SSO_ENABLED, and the combination is
+    # refused at startup rather than silently ignored - see
+    # validate_auth_mode_config().
+    #
+    # Env-driven on purpose: there is deliberately no in-app toggle, so a broken
+    # IdP or an unlinked admin account cannot lock an operator out of their own
+    # instance permanently.
+    #
+    # SSO_ONLY_MODE     - the server refuses password login and password
+    #                     registration; the frontend hides the form.
+    # SSO_AUTO_REDIRECT - unauthenticated visitors are sent straight to the IdP.
+    #
+    # Parsed strictly - see _strict_bool(). An unrecognized value fails the boot
+    # rather than reading as False, because False here means "password login is
+    # still open" on an instance whose operator believes it is closed.
+    SSO_ONLY_MODE: bool = _strict_bool("SSO_ONLY_MODE")
+    SSO_AUTO_REDIRECT: bool = _strict_bool("SSO_AUTO_REDIRECT")
+
+    # Snapshot of what the two calls above could not parse. An attribute rather
+    # than a module global so it is patchable like every other setting, and read
+    # after them so the class body has finished populating it.
+    AUTH_FLAG_PARSE_ERRORS: dict = dict(_AUTH_FLAG_PARSE_ERRORS)
 
     # Paperless-ngx Integration Configuration
     PAPERLESS_REQUEST_TIMEOUT: int = int(
@@ -414,6 +483,94 @@ class Settings:  # App Info
             and not self.SSO_ISSUER_URL
         ):
             raise ValueError("SSO_ISSUER_URL is required for OIDC providers")
+
+    # The flags that only describe how SSO is used, and are therefore meaningless
+    # without it. Named once: validate_auth_mode_config reads the attributes by
+    # these names, so a new flag is added here and nowhere else.
+    SSO_DEPENDENT_FLAGS = ("SSO_ONLY_MODE", "SSO_AUTO_REDIRECT")
+
+    def validate_auth_mode_config(self) -> None:
+        """Validate the whole authentication-mode configuration at startup.
+
+        The single entry point for it: the flag checks below, **and** the provider
+        checks in validate_sso_config(), which this calls. Nothing else validates
+        SSO config any more - SSOService.__init__ used to, at module import, which
+        turned a bad config into an import traceback instead of the actionable
+        startup error below.
+
+        Deliberately not gated on SSO_ENABLED, unlike validate_sso_config(), which
+        returns early when it is false. That early return means it cannot catch a
+        flag set *without* SSO_ENABLED - the single most likely misconfiguration,
+        and the one that would otherwise boot cleanly into an instance whose login
+        form is hidden and whose SSO does not exist.
+
+        Raises ValueError with an actionable message. The caller (startup_event)
+        logs it and aborts the boot: failing loudly is the difference between "my
+        compose file has a typo" and "nobody can log into the medical records app
+        and I don't know why".
+        """
+        # First, because every check below reads a parsed flag. A value this could
+        # not parse is not a flag that is off - it is a flag whose state is
+        # unknown, and the enabled_flags check would read it as off and pass.
+        if self.AUTH_FLAG_PARSE_ERRORS:
+            details = ", ".join(
+                f"{name}={raw!r}"
+                for name, raw in sorted(self.AUTH_FLAG_PARSE_ERRORS.items())
+            )
+            raise ValueError(
+                f"Unrecognized boolean value for {details}. Use true or false. "
+                "Note that a compose env file does not strip inline comments, so "
+                "'true # my note' is read as the whole string, not as true. "
+                "Refusing to start rather than guess: guessing wrong here leaves "
+                "password login open on an instance meant to be SSO-only."
+            )
+
+        enabled_flags = [
+            name for name in self.SSO_DEPENDENT_FLAGS if getattr(self, name)
+        ]
+
+        if enabled_flags and not self.SSO_ENABLED:
+            flags = " and ".join(enabled_flags)
+            raise ValueError(
+                f"{flags} {'are' if len(enabled_flags) > 1 else 'is'} enabled but "
+                "SSO_ENABLED is not. These settings only control how SSO is used, "
+                "so without it there would be no way to sign in at all. Set "
+                f"SSO_ENABLED=true and configure an SSO provider, or unset {flags}."
+            )
+
+        # Unconditional: validate_sso_config() no-ops when SSO_ENABLED is false, and
+        # any flag reaching here implies it is true. A half-configured provider must
+        # fail the boot rather than the first login attempt.
+        self.validate_sso_config()
+
+    def auth_mode_warnings(self) -> list[tuple[str, str]]:
+        """Configurations that are legitimate but worth saying out loud at startup.
+
+        Returns (event_name, message) pairs, so a second warning added here carries
+        its own event rather than inheriting the first one's.
+
+        Separate from validate_auth_mode_config() because these must never fail a
+        boot, and separate from startup_event() because a policy inlined in a
+        200-line boot sequence can only be tested by reconstructing the whole boot.
+
+        Caller-sensitive: ALLOW_USER_REGISTRATION is admin-toggleable and persisted,
+        so this must be called *after* the stored settings are loaded or it reports
+        on a value that is not in effect.
+        """
+        warnings = []
+
+        if self.SSO_ONLY_MODE and not self.ALLOW_USER_REGISTRATION:
+            warnings.append(
+                (
+                    "sso_only_no_registration_route",
+                    "SSO_ONLY_MODE is enabled and user registration is disabled. No "
+                    "new user can be created by any self-service route; accounts "
+                    "must be created by an administrator. If this was not intended, "
+                    "enable registration or unset SSO_ONLY_MODE.",
+                )
+            )
+
+        return warnings
 
     def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:
         """Ensure directory exists with proper permission error handling for Docker bind mounts."""

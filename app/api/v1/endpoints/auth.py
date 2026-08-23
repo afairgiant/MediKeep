@@ -12,6 +12,7 @@ from app.api.activity_logging import log_create, safe_log_activity
 from app.api.deps import (
     BusinessLogicException,
     ConflictException,
+    ForbiddenException,
     UnauthorizedException,
 )
 from app.core.config import settings
@@ -41,7 +42,26 @@ security_logger = get_logger(__name__, "security")
 
 @router.get("/registration-status")
 def get_registration_status():
-    """Check if new user registration is enabled."""
+    """Check if new self-service (password) user registration is enabled.
+
+    Reports the *effective* answer, so SSO_ONLY_MODE is folded in: under that flag
+    POST /auth/register returns 403 regardless of ALLOW_USER_REGISTRATION, and an
+    endpoint that answers "can I create an account here" must not advertise a route
+    that refuses every caller.
+
+    Note this is not the same question as /auth/sso/config's registration_enabled,
+    which reports the raw ALLOW_USER_REGISTRATION setting because there it governs
+    whether SSO may provision new accounts - which SSO_ONLY_MODE does not disable.
+    """
+    if settings.SSO_ONLY_MODE:
+        return {
+            "registration_enabled": False,
+            "message": (
+                "This instance uses single sign-on. Sign in with your identity "
+                "provider, or contact an administrator for an account."
+            ),
+        }
+
     return {
         "registration_enabled": settings.ALLOW_USER_REGISTRATION,
         "message": (
@@ -66,6 +86,25 @@ def register(
     The password will be automatically hashed for security.
     A basic patient record is automatically created for the user.
     """
+    # Checked before ALLOW_USER_REGISTRATION and independently of it: under
+    # SSO_ONLY_MODE there is no password-registration route at all, and the event
+    # name has to say which of the two reasons applied.
+    if settings.SSO_ONLY_MODE:
+        log_security_event(
+            logger,
+            "registration_blocked_sso_only",
+            request,
+            f"Registration attempt blocked - SSO-only mode. Username: {user_in.username}",
+            username=user_in.username,
+        )
+        raise ForbiddenException(
+            message=(
+                "This instance uses single sign-on. Please sign in with your "
+                "identity provider instead of creating a password account."
+            ),
+            request=request,
+        )
+
     # Check if registration is enabled
     if not settings.ALLOW_USER_REGISTRATION:
         log_security_event(
@@ -251,6 +290,29 @@ def login(
 
     Returns a JWT token that can be used for authenticated requests.
     """
+    # Refused before any credential check, and before the login_attempt event: a
+    # request that cannot succeed is not a login attempt, and running authenticate()
+    # first would leave the endpoint answering "does this account exist" by timing
+    # under a flag whose whole purpose is to switch password login off.
+    #
+    # This is the security boundary for SSO-only mode. Hiding the form (frontend) is
+    # cosmetic - anyone can POST here directly.
+    if settings.SSO_ONLY_MODE:
+        log_security_event(
+            logger,
+            "password_login_blocked_sso_only",
+            request,
+            f"Password login blocked - SSO-only mode. Username: {form_data.username}",
+            username=form_data.username,
+        )
+        raise ForbiddenException(
+            message=(
+                "Password sign-in is disabled on this instance. Please sign in "
+                "with your identity provider."
+            ),
+            request=request,
+        )
+
     user_ip = (
         getattr(request.client, "host", "unknown") if request.client else "unknown"
     )
@@ -438,6 +500,15 @@ async def change_password(
     Change user password.
 
     Requires the current password to be provided for security.
+
+    Deliberately NOT gated on SSO_ONLY_MODE. It needs a session, which under that
+    flag can only have come from SSO - so this is not a way in, it is what a user
+    who is already in uses to set or rotate a local password. A hybrid account
+    carrying must_change_password completes its forced change here.
+
+    That local password is what makes the account usable again once SSO_ONLY_MODE is
+    turned off, which is the actual break-glass sequence; the flag itself can only be
+    cleared by an operator with access to the environment.
     """
     log_security_event(
         logger,

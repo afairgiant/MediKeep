@@ -20,7 +20,7 @@ import { stubLocation } from '../../test-utils/browserStubs';
  * clients happened to make the request: baseApi redirected except on /admin/
  * URLs, apiClient redirected only for three hardcoded endpoints, and
  * services/api/index.js - which carries most of the traffic - did nothing at all.
- * These tests pin the one shared rule. See SSO_ONLY_MODE_SPEC.md 8.10.
+ * These tests pin the one shared rule.
  */
 
 const jsonResponse = (status, url, body = {}) => ({

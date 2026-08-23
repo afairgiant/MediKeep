@@ -20,7 +20,6 @@ import { takeSSOReturnUrl } from '../../utils/ssoReturnUrl';
  * The return path is preferred from the server, which keyed it to the OAuth state
  * parameter and hands it back on the callback. That survives private browsing and
  * disabled storage; sessionStorage, which used to be the only carrier, does not.
- * See SSO_ONLY_MODE_SPEC.md 8.8.
  *
  * Both sources are untrusted input - the backend stores return_url verbatim and
  * echoes it back - so both go through safeInternalPath before anyone navigates

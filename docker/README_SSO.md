@@ -47,6 +47,11 @@ environment:
   SSO_ISSUER_URL: ${SSO_ISSUER_URL:-}
   SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-}
   SSO_ALLOWED_DOMAINS: ${SSO_ALLOWED_DOMAINS:-[]}
+
+  # Optional - see "SSO-Only Mode and Auto-Redirect" below. Both require
+  # SSO_ENABLED=true; the container refuses to start otherwise.
+  SSO_ONLY_MODE: ${SSO_ONLY_MODE:-false}
+  SSO_AUTO_REDIRECT: ${SSO_AUTO_REDIRECT:-false}
 ```
 
 ### 3. Restart the containers
@@ -97,6 +102,80 @@ SSO_ISSUER_URL=https://homelab.local/auth/realms/family
 | `SSO_REDIRECT_URI` | If SSO enabled | empty | Callback URL (use your domain + `/auth/sso/callback`) |
 | `SSO_ISSUER_URL` | If OIDC provider | empty | OIDC issuer URL |
 | `SSO_ALLOWED_DOMAINS` | No | `[]` | JSON array of allowed email domains |
+| `SSO_ONLY_MODE` | No | `false` | Refuse password login and password registration |
+| `SSO_AUTO_REDIRECT` | No | `false` | Send unauthenticated visitors straight to the IdP |
+
+## SSO-Only Mode and Auto-Redirect
+
+Two independent flags turn the identity provider into the instance's front door.
+They are kept separate because the behaviors are independently useful: an operator
+may want SSO-only while still presenting a landing page, or auto-redirect as a
+convenience while keeping password login available.
+
+Both default off, so upgrading changes nothing. **Neither is meaningful without
+`SSO_ENABLED=true`, and the container refuses to start if either is set without
+it** — that is deliberate. Booting into an instance that refuses password login and
+has no working SSO means nobody can sign in, and the error is much harder to
+diagnose after the fact than at startup.
+
+> **This release ships the server-side half only.** Nothing in the web UI reads
+> these two settings yet. Under `SSO_ONLY_MODE` the login page still draws the
+> password form and every submission is refused with 403, and `SSO_AUTO_REDIRECT`
+> does nothing at all — no visitor is redirected anywhere. The table below is the
+> configuration contract; the rows marked *(UI half pending)* describe behavior that
+> arrives with the frontend half of this feature in a following release.
+
+| `SSO_ENABLED` | `SSO_ONLY_MODE` | `SSO_AUTO_REDIRECT` | Result |
+|---|---|---|---|
+| `false` | `false` | `false` | Current behavior, unchanged |
+| `false` | either flag set | either flag set | **Startup failure** with an explicit error |
+| `true` | `false` | `false` | Standard SSO — login form plus an SSO button |
+| `true` | `true` | `false` | `/auth/login` and `/auth/register` return 403; sign in with SSO |
+| `true` | `false` | `true` | Password login still works; visitors are sent to the IdP, and `/login?local=1` reaches the login page directly *(UI half pending)* |
+| `true` | `true` | `true` | Pure SSO front door *(UI half pending)* |
+
+`SSO_ONLY_MODE` is enforced server-side: `POST /auth/login` and `POST /auth/register`
+return 403 before any credential check, and each refusal is recorded in the security
+log. That enforcement is the security boundary and it is already complete — hiding
+the form is only cosmetic, since anyone can POST to the API directly.
+
+Still available under `SSO_ONLY_MODE`, by design:
+
+- `POST /auth/change-password` — break-glass admins need it, and an account with
+  both a local password and a linked SSO identity (`hybrid`) completes a forced
+  password change here
+- Admin user creation — the administrative recovery path
+- GitHub manual account linking — SSO flow machinery, and the only route in for a
+  GitHub user whose email the provider does not expose
+
+### If you get locked out
+
+There is deliberately no in-app toggle for these settings, precisely so a broken IdP
+cannot make itself unfixable:
+
+1. **Set `SSO_ONLY_MODE=false` and restart, then sign in locally.** This is the
+   primary path, and the only one that restores access when the IdP is unreachable.
+2. **If SSO still works but no account has admin rights**, run
+   `app/scripts/create_emergency_admin.py --username <name> --promote` against an
+   account that can sign in through your IdP. Promotion writes directly to the
+   database and preserves the existing password, so the user signs in via SSO as
+   usual and is now an admin.
+
+   Note what this does **not** do: creating a *new* password admin with this script
+   does not get you in while `SSO_ONLY_MODE=true`, because password login is refused
+   for every account, including that one. Pair it with step 1.
+3. Startup validation refuses the most likely misconfiguration before it takes
+   effect, so a typo in these variables surfaces as a logged startup failure rather
+   than a login page nobody can get past. That includes a value it cannot parse:
+   `SSO_ONLY_MODE` and `SSO_AUTO_REDIRECT` accept `true`/`false` (also `1`/`0`,
+   `yes`/`no`, `on`/`off`, any case), and anything else fails the boot instead of
+   being read as `false`. Watch for inline comments — a compose env file does not
+   strip them, so `SSO_ONLY_MODE=true # sso only` is the whole string.
+
+If registration is also disabled (`ALLOW_USER_REGISTRATION=false`, or the admin
+setting), no new user can enter by any self-service route. That is a legitimate
+configuration for a sealed instance, and it is logged as a startup warning so it is
+visible if it was not intended.
 
 ## Production Considerations
 

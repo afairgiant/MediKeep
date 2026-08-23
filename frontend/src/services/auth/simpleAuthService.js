@@ -397,7 +397,6 @@ class SimpleAuthService {
    * clear_auth_cookie would never run, and the HttpOnly cookie would stay valid --
    * the user is shown a logged-out UI while still holding a live session. Under
    * SSO_AUTO_REDIRECT that is unrecoverable rather than merely wrong.
-   * See SSO_ONLY_MODE_SPEC.md 8.7b.
    */
   async logout() {
     logger.info('Logging out user', { category: 'auth_logout' });
@@ -634,7 +633,7 @@ class SimpleAuthService {
         // entry. Keyed to the OAuth state parameter, so it survives private
         // browsing and disabled storage where sessionStorage does not.
         // Untrusted - the backend stores and echoes it verbatim; validate before
-        // navigating. See SSO_ONLY_MODE_SPEC.md 8.8 and 8.11.
+        // navigating.
         returnUrl: data.return_url || null,
       };
     } catch (error) {

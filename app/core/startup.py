@@ -17,6 +17,22 @@ from app.services.notification_handlers import create_notification_handler
 logger = get_logger(__name__, "app")
 
 
+def _emit_auth_mode_warnings():
+    """Log the auth-mode configurations that are legal but worth saying out loud.
+
+    A function because startup_event() has two exits that need it: the normal path,
+    after the persisted settings load, and the SKIP_MIGRATIONS early return, which
+    never reaches that load. Emitting from only the first meant a deployment running
+    with SKIP_MIGRATIONS got no warning at all - including the sealed-instance case,
+    which is precisely the one an operator needs told.
+    """
+    for event, message in settings.auth_mode_warnings():
+        logger.warning(
+            message,
+            extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
+        )
+
+
 async def startup_event():
     """Initialize database tables on startup"""
     # Record the actual application startup time
@@ -30,6 +46,24 @@ async def startup_event():
             "version": settings.VERSION,
         },
     )
+
+    # Validate the authentication-mode configuration before anything else runs.
+    # This is deliberately ahead of the database check and the SKIP_MIGRATIONS
+    # early return: the misconfiguration it catches is a compose-file typo, which
+    # must fail loudly whether or not the database happens to be reachable.
+    try:
+        settings.validate_auth_mode_config()
+    except ValueError as e:
+        error_msg = f"STARTUP FAILED: {e}"
+        logger.error(
+            error_msg,
+            extra={
+                LogFields.CATEGORY: "app",
+                LogFields.EVENT: "auth_mode_config_invalid",
+                LogFields.ERROR: str(e),
+            },
+        )
+        raise RuntimeError(str(e)) from e
 
     # Initialize the event system (event registry and bus)
     event_bus = setup_event_system()
@@ -68,6 +102,11 @@ async def startup_event():
     skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
 
     if skip_migrations:
+        # This path never reaches load_persisted_settings(), so the warning site
+        # further down is unreachable from here. Emitting now is not a compromise:
+        # with no database there is no stored ALLOW_USER_REGISTRATION that could
+        # override the env value, so the env value is the one in force.
+        _emit_auth_mode_warnings()
         logger.info("⏭️ Skipping database operations (test mode)")
         logger.info("Application startup completed (test mode)")
         return
@@ -138,6 +177,14 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Could not load persisted admin settings: {e}")
         # Non-fatal - app falls back to env-var defaults already in memory
+
+    # Emitted here, and not beside validate_auth_mode_config() above, because these
+    # warnings read ALLOW_USER_REGISTRATION - admin-toggleable and persisted in
+    # system_settings, so the stored value only takes effect at
+    # load_persisted_settings() immediately above. Warning any earlier would report
+    # on a value that is not in force. A toggle flipped at runtime is still not
+    # covered; a startup warning cannot reach it.
+    _emit_auth_mode_warnings()
 
     # Initialize standardized tests from LOINC
     try:

@@ -51,7 +51,7 @@ const Login = () => {
   // survives private browsing and disabled storage too. `from` stays as the
   // fallback for soft navigations, but a stale `from` must not beat a fresh
   // `next`. Both are untrusted - `next` is attacker-supplied in a link - so both
-  // go through safeInternalPath. See SSO_ONLY_MODE_SPEC.md 8.11.
+  // go through safeInternalPath.
   //
   // The reason is rendered below so a session that expired mid-use is
   // distinguishable from a random failure - the toast the HTTP clients used to

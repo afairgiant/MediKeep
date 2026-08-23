@@ -12,7 +12,7 @@
  * The answer travels in the URL rather than in sessionStorage or router state.
  * The URL survives a full page load (two of the HTTP clients hard-navigate),
  * survives private browsing and disabled storage, and is visible in the address
- * bar when a user reports a problem. See SSO_ONLY_MODE_SPEC.md section 6.
+ * bar when a user reports a problem.
  *
  * Importable from non-React modules - the HTTP clients are plain singletons with
  * no access to react-router's navigate.
@@ -185,7 +185,7 @@ export function redirectToLogin(options: LoginRedirectOptions = {}): void {
  * existed the app had four independent request paths and four different answers:
  * one redirected except on /admin/ URLs, one redirected only for three hardcoded
  * endpoints, and two did nothing at all - and the two that did nothing carried
- * most of the traffic. See SSO_ONLY_MODE_SPEC.md 8.10.
+ * most of the traffic.
  *
  * `simpleAuthService` is the deliberate exception and must stay one: its 401s
  * ARE the auth state rather than a symptom of it. A rejected login, a missing

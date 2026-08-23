@@ -177,7 +177,7 @@ export function AuthProvider({ children }) {
   // session and only one of them is a button. The inactivity timeout used to
   // clear and dispatch by hand; under SSO_AUTO_REDIRECT that meant an idle user
   // was bounced to the IdP, silently re-authenticated, and returned to the app --
-  // the inactivity timeout disabled deployment-wide. See SSO_ONLY_MODE_SPEC.md 8.12.
+  // the inactivity timeout disabled deployment-wide.
   //
   // useCallback with no dependencies so the inactivity effect can depend on it
   // without being torn down and recreated on every render. dispatch is stable,
@@ -451,7 +451,7 @@ export function AuthProvider({ children }) {
     // Tracked so the `finally` can tell a clean logout from one where the server
     // never cleared the cookie. authService.logout() used to swallow a non-2xx
     // response, which made this catch unreachable for anything but a total
-    // network failure -- see SSO_ONLY_MODE_SPEC.md 8.7b.
+    // network failure.
     let serverLogoutFailed = false;
 
     try {

@@ -133,11 +133,16 @@ def _store_state_entry(key: str, payload: Dict) -> None:
 
 
 class SSOService:
-    """Simple SSO service - clean and maintainable"""
+    """Simple SSO service - clean and maintainable.
 
-    def __init__(self):
-        if settings.SSO_ENABLED:
-            settings.validate_sso_config()
+    Construction has no side effects, deliberately. This class is instantiated at
+    module import (endpoints/sso.py), and the config validation that used to live in
+    __init__ therefore surfaced an invalid SSO config as an import traceback, before
+    the lifespan hook existed to report it properly. startup_event() ->
+    settings.validate_auth_mode_config() is the single authority now, and it still
+    fails the boot whenever SSO_ENABLED is true and the provider config is
+    incomplete.
+    """
 
     async def get_authorization_url(
         self, return_url: Optional[str] = None
@@ -258,7 +263,7 @@ class SSOService:
 
         # Carry the deep link the flow started from back to the caller. Ships inert -
         # no frontend reads it yet (deep links currently survive via sessionStorage,
-        # which fails in private browsing). See SSO_ONLY_MODE_SPEC.md 8.8.
+        # which fails in private browsing).
         result["return_url"] = state_data.get("return_url")
 
         return result

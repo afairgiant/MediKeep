@@ -493,6 +493,8 @@ TRASH_RETENTION_DAYS=60
 | `SSO_ALLOWED_DOMAINS`           | JSON array | `[]`    | No             | Allowed email domains                                                     |
 | `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `10`    | No             | Max `POST /auth/sso/initiate` calls per IP per window                     |
 | `SSO_RATE_LIMIT_WINDOW_MINUTES` | integer    | `10`    | No             | Rate limit window                                                         |
+| `SSO_ONLY_MODE`                 | boolean    | `false` | No             | Refuse password login and password registration; requires `SSO_ENABLED`   |
+| `SSO_AUTO_REDIRECT`             | boolean    | `false` | No             | Send unauthenticated visitors straight to the IdP; requires `SSO_ENABLED` |
 
 **SSO rate limiting:** these two variables throttle `POST /api/v1/auth/sso/initiate`,
 the unauthenticated endpoint that starts the sign-in redirect. Exceeding the limit
@@ -509,6 +511,59 @@ Two consequences worth knowing before tuning these:
   automatic redirect-to-IdP on unauthenticated page loads, a household or CGNAT range
   sharing one address could plausibly reach the default 10-per-10-minutes. Raise
   `SSO_RATE_LIMIT_ATTEMPTS` if legitimate users report being turned away.
+
+**SSO-only mode and auto-redirect:** `SSO_ONLY_MODE` makes the identity provider the
+only way in — `POST /auth/login` and `POST /auth/register` return `403` before any
+credential check. `SSO_AUTO_REDIRECT` is intended to send unauthenticated visitors to
+the IdP without interaction, with `/login?local=1` reaching the login page directly.
+
+> **Server-side half only in this release.** No part of the web UI reads these two
+> settings yet: under `SSO_ONLY_MODE` the login page still draws the password form
+> (every submission is refused with `403`), and `SSO_AUTO_REDIRECT` does nothing at
+> all — no visitor is redirected anywhere. The table below is the configuration
+> contract; rows marked *(UI half pending)* describe behavior that arrives with the
+> frontend half of this feature.
+
+| `SSO_ENABLED` | `SSO_ONLY_MODE` | `SSO_AUTO_REDIRECT` | Result                                                           |
+| ------------- | --------------- | ------------------- | ---------------------------------------------------------------- |
+| `false`       | `false`         | `false`             | Current behavior, unchanged                                      |
+| `false`       | either flag set | either flag set     | **Startup failure** with an explicit error                       |
+| `true`        | `false`         | `false`             | Standard SSO — login form plus an SSO button                     |
+| `true`        | `true`          | `false`             | `/auth/login` and `/auth/register` return `403`; sign in with SSO |
+| `true`        | `false`         | `true`              | Password login works, and visitors are sent to the IdP *(UI half pending)* |
+| `true`        | `true`          | `true`              | Pure SSO front door *(UI half pending)*                          |
+
+**The app refuses to start** if *either* flag is set without `SSO_ENABLED`, or with an
+incomplete provider configuration. The failure is logged from the startup hook with
+the offending variable named. This is deliberate: booting with password login refused
+and no working SSO means nobody can sign in, and that is far harder to diagnose after
+the fact.
+
+**These two flags are parsed strictly.** `true`/`false`, `1`/`0`, `yes`/`no`, and
+`on`/`off` are accepted in any case; an empty value means unset. Anything else fails
+the boot with an error naming the variable and showing what it was set to, rather
+than being read as `false`. Everywhere else `false` merely means "off", but for
+`SSO_ONLY_MODE` it means password login is still open, so a misread value would leave
+an instance accepting credentials its operator believes are refused — with nothing in
+the logs to say so. The most common cause is an inline comment: a compose env file
+does not strip them, so `SSO_ONLY_MODE=true # sso only` is read as the entire string.
+
+If `SSO_ONLY_MODE` is combined with registration disabled, no new user can enter by
+any self-service route. That is valid for a sealed instance and is logged as a startup
+warning rather than a failure.
+
+**Recovering from a locked-out instance.** There is deliberately no in-app toggle for
+these settings, so a broken IdP cannot make itself unfixable:
+
+1. Set `SSO_ONLY_MODE=false`, restart, sign in locally — the primary path, and the
+   only one that works when the IdP itself is unreachable.
+2. If SSO still works but no account has admin rights, run
+   `app/scripts/create_emergency_admin.py --username <name> --promote` against an
+   account that can sign in through the IdP; promotion preserves the existing
+   password and grants admin. Creating a *new* password admin does not help while
+   `SSO_ONLY_MODE=true` — password login is refused for that account too — so pair it
+   with step 1.
+3. Startup validation catches the most likely misconfiguration before it takes effect.
 
 **Example (Google):**
 

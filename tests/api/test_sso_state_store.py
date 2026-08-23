@@ -80,11 +80,11 @@ SSO_LOGGER_NAME = "medical_records.sso.services.sso_service"
 
 @pytest.fixture
 def service():
-    """An SSOService built while SSO is disabled.
+    """An SSOService, constructed with SSO disabled.
 
-    SSOService.__init__ runs validate_sso_config() when SSO_ENABLED is true, which
-    a test environment cannot satisfy. Constructing here and enabling SSO afterwards
-    keeps the tests focused on the state store rather than on provider config.
+    The constructor no longer validates provider configuration - startup_event()
+    owns that now - so this is a plain construction. SSO stays off here to keep the
+    tests focused on the state store rather than on provider config.
     """
     with patch.object(sso_module.settings, "SSO_ENABLED", False):
         instance = SSOService()

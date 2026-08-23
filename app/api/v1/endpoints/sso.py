@@ -11,6 +11,7 @@ from app.api.activity_logging import safe_log_activity
 from app.api.deps import UnauthorizedException
 from app.auth.sso.exceptions import *
 from app.core.config import settings
+from app.core.http.error_handling import MedicalRecordsAPIException
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
     log_endpoint_access,
@@ -19,6 +20,7 @@ from app.core.logging.helpers import (
 )
 from app.core.utils.cookie_auth import set_auth_cookie
 from app.core.utils.rate_limit import SlidingWindowRateLimiter, get_client_ip
+from app.core.utils.return_url import is_safe_return_url
 from app.core.utils.security import create_access_token
 from app.crud.user_preferences import user_preferences
 from app.models.activity_log import ActionType, EntityType
@@ -42,6 +44,10 @@ _initiate_limiter = SlidingWindowRateLimiter(
     max_requests=settings.SSO_RATE_LIMIT_ATTEMPTS,
     window_seconds=settings.SSO_RATE_LIMIT_WINDOW_MINUTES * 60,
 )
+
+# How much of a rejected return_url reaches the security log. Enough to identify
+# what was attempted, short enough that an oversized value cannot pad the log.
+_LOGGED_RETURN_URL_CHARS = 200
 
 
 class SSOConflictRequest(BaseModel):
@@ -208,8 +214,8 @@ def _complete_sso_login(
         "must_change_password": bool(sso_user.must_change_password),
         # The deep link /auth/sso/initiate was given, carried through the state entry.
         # Ships inert: no frontend reads it yet (deep links currently survive via
-        # sessionStorage, which fails in private browsing). See SSO_ONLY_MODE_SPEC.md
-        # 8.8 - the consumer is a later PR.
+        # sessionStorage, which fails in private browsing) - the consumer is a
+        # later PR.
         "return_url": result.get("return_url"),
     }
     response = JSONResponse(content=response_data)
@@ -219,22 +225,28 @@ def _complete_sso_login(
 
 @router.get("/config")
 async def get_sso_config(request: Request):
-    """Check if SSO is enabled and get configuration info for frontend"""
-    try:
-        return {
-            "enabled": settings.SSO_ENABLED,
-            "provider_type": (
-                settings.SSO_PROVIDER_TYPE if settings.SSO_ENABLED else None
-            ),
-            "registration_enabled": settings.ALLOW_USER_REGISTRATION,
-        }
-    except Exception as e:
-        log_endpoint_error(logger, request, "Error getting SSO config", e)
-        return {
-            "enabled": False,
-            "provider_type": None,
-            "registration_enabled": settings.ALLOW_USER_REGISTRATION,
-        }
+    """Check if SSO is enabled and get configuration info for frontend
+
+    `registration_enabled` reports the raw ALLOW_USER_REGISTRATION setting, which in
+    this payload governs whether SSO may provision new accounts - something
+    SSO_ONLY_MODE does not disable. The question "can someone register with a
+    password" is answered by /auth/registration-status, which folds SSO_ONLY_MODE in.
+
+    No try/except here on purpose. The body is four settings reads and cannot fail;
+    the handler this used to carry synthesized `enabled: false, sso_only: false` on
+    error, which under SSO_ONLY_MODE is the one answer that strands the user - the
+    client hides the SSO button (SSO reported off) and shows a password form the
+    server refuses. A 500 is better: the client cannot mistake it for "SSO is off"
+    and shows its retry UI instead. Anything unexpected is handled by the global
+    handler in app/core/http/error_handling.py.
+    """
+    return {
+        "enabled": settings.SSO_ENABLED,
+        "provider_type": settings.SSO_PROVIDER_TYPE if settings.SSO_ENABLED else None,
+        "registration_enabled": settings.ALLOW_USER_REGISTRATION,
+        "sso_only": settings.SSO_ONLY_MODE,
+        "auto_redirect": settings.SSO_AUTO_REDIRECT,
+    }
 
 
 @router.post("/initiate")
@@ -269,10 +281,42 @@ async def initiate_sso_login(
                 **headers,
                 # X-Error-Code lets a client distinguish this from the generic SSO
                 # failures without matching on the message text. Nothing reads it
-                # yet - the frontend consumer is SSO_ONLY_MODE_SPEC.md criterion 15.
+                # yet - the frontend consumer arrives in a later PR.
                 "X-Error-Code": "sso_rate_limited",
             },
         )
+
+    # Outside the try below on purpose: an HTTPException raised inside it is caught
+    # by the broad handler and re-reported as a 500, which is the same defect this
+    # PR fixes on the three login endpoints.
+    #
+    # After the rate limit, so a caller probing this burns its quota. The rejected
+    # value is logged for the operator but deliberately not echoed in `detail` -
+    # it is attacker-controlled text that a client would render. Truncated for the
+    # same reason: the length cap lives inside is_safe_return_url and only decides
+    # the rejection, so without this an oversized value would be written to the
+    # security log in full.
+    #
+    # FastAPI binds a bare `?return_url=` to "", not None. That is "no deep link",
+    # not a hostile value: rejecting it would lock out any client that appends the
+    # parameter unconditionally, and under SSO_ONLY_MODE that client has no password
+    # login to fall back to. Collapsed to None rather than merely skipped, so the
+    # empty value is not stored and echoed back to the callback as "" where every
+    # consumer expects a path or null. Matches safeInternalPath, which returns null
+    # for an empty value rather than failing.
+    if not return_url:
+        return_url = None
+
+    if return_url is not None and not is_safe_return_url(return_url):
+        log_security_event(
+            logger,
+            "sso_return_url_rejected",
+            request,
+            "Rejected non-internal return_url on SSO initiate",
+            endpoint="/api/v1/auth/sso/initiate",
+            return_url=return_url[:_LOGGED_RETURN_URL_CHARS],
+        )
+        raise HTTPException(status_code=400, detail="Invalid return URL")
 
     try:
         result = await sso_service.get_authorization_url(return_url)
@@ -282,6 +326,12 @@ async def initiate_sso_login(
             logger, "sso_config_error", request, "SSO configuration error", error=str(e)
         )
         raise HTTPException(status_code=400, detail="SSO configuration error")
+    except (MedicalRecordsAPIException, HTTPException):
+        # Same guard the three login endpoints carry. This endpoint has no typed
+        # raise inside the try today - the return_url check sits above it precisely
+        # so its 400 cannot be swallowed - but leaving the fourth broad handler
+        # unguarded is what makes the next guard written inside it a silent 500.
+        raise
     except Exception as e:
         log_endpoint_error(logger, request, "Failed to initiate SSO", e)
         raise HTTPException(
@@ -346,6 +396,14 @@ async def sso_callback(
             error=str(e),
         )
         raise HTTPException(status_code=400, detail=str(e))
+    except (MedicalRecordsAPIException, HTTPException):
+        # A typed response is a deliberate answer, not a failure. Without this the
+        # broad handler below swallows it: _check_user_active raises
+        # UnauthorizedException from inside this try, so a deactivated user was
+        # told "SSO authentication failed" with a 500 instead of being told their
+        # account is deactivated. HTTPException is included so that any guard added
+        # inside this try later does not silently become a 500 too.
+        raise
     except Exception as e:
         log_endpoint_error(logger, req, "Unexpected error in SSO callback", e)
         raise HTTPException(status_code=500, detail="SSO authentication failed")
@@ -380,6 +438,9 @@ async def resolve_account_conflict(
             error=str(e),
         )
         raise HTTPException(status_code=400, detail=str(e))
+    except (MedicalRecordsAPIException, HTTPException):
+        # See /callback - a deactivated user's 401 must not become a 500.
+        raise
     except Exception as e:
         log_endpoint_error(
             logger, req, "Unexpected error in SSO conflict resolution", e
@@ -391,7 +452,13 @@ async def resolve_account_conflict(
 async def resolve_github_manual_link(
     req: Request, request: GitHubLinkRequest, db: Session = Depends(deps.get_db)
 ):
-    """Resolve GitHub manual linking by verifying user credentials"""
+    """Resolve GitHub manual linking by verifying user credentials
+
+    Deliberately NOT gated on SSO_ONLY_MODE. It verifies a password, which makes it
+    look like an alternative to SSO, but it is SSO flow machinery: every GitHub user
+    whose email the provider does not expose is routed here, so under SSO-only this
+    is their only route into the app.
+    """
     try:
         result = sso_service.resolve_github_manual_link(
             request.temp_token, request.username, request.password, db
@@ -417,6 +484,9 @@ async def resolve_github_manual_link(
             username=request.username,
         )
         raise HTTPException(status_code=400, detail=str(e))
+    except (MedicalRecordsAPIException, HTTPException):
+        # See /callback - a deactivated user's 401 must not become a 500.
+        raise
     except Exception as e:
         log_endpoint_error(
             logger,

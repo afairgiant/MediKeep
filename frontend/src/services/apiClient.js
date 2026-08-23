@@ -76,7 +76,7 @@ class APIClient {
     // /users/me, which are not the requests that need protecting - none of the
     // app's background polls goes through this client at all, so the swallow it
     // implemented protected nothing and the redirect it skipped mattered
-    // everywhere else. See SSO_ONLY_MODE_SPEC.md 8.10.
+    // everywhere else.
     //
     // The explanation is no longer raised here as a toast: this ends in a full
     // page load, which discarded the toast before it could render. It travels in
