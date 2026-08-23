@@ -385,8 +385,8 @@
       "cleanupFailed": "Bestanden opschonen mislukt. Probeer het later opnieuw.",
       "noOutOfSync": "Geen niet-gesynchroniseerde bestanden gevonden om op te schonen",
       "sessionTimeoutUpdated": "Sessietime-out bijgewerkt naar {{minutes}} minuten. Uw sessie is vernieuwd.",
-      "saveFailed": "Failed to save settings",
-      "saved": "Settings saved successfully"
+      "saveFailed": "Instellingen opslaan mislukt",
+      "saved": "Instellingen succesvol opgeslagen"
     },
     "sharing": {
       "accessRevoked": "Toegang ingetrokken voor gebruiker {{userId}}",
@@ -414,7 +414,7 @@
       "fileUploadFailed": "Bestandsupload mislukt",
       "paperlessUploadFailed": "Paperless-upload mislukt",
       "partialSuccess": "{{completed}}/{{total}} bestanden succesvol geüpload. {{failed}} mislukt.",
-      "failed": "File Upload Failed"
+      "failed": "Bestandsupload mislukt"
     },
     "vitals": {
       "deleteFailed": "Meting verwijderen mislukt",
