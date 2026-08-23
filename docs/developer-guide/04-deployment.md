@@ -514,13 +514,15 @@ Two consequences worth knowing before tuning these:
 
 **SSO-only mode and auto-redirect:** `SSO_ONLY_MODE` makes the identity provider the
 only way in — `POST /auth/login` and `POST /auth/register` return `403` before any
-credential check. `SSO_AUTO_REDIRECT` sends unauthenticated visitors to the IdP
-without interaction; `/login?local=1` reaches the login page without being redirected.
+credential check. `SSO_AUTO_REDIRECT` is intended to send unauthenticated visitors to
+the IdP without interaction, with `/login?local=1` reaching the login page directly.
 
 > **Server-side half only in this release.** No part of the web UI reads these two
 > settings yet: under `SSO_ONLY_MODE` the login page still draws the password form
-> (every submission is refused with `403`), and `SSO_AUTO_REDIRECT` has no visible
-> effect at all. The login-page behavior ships with the frontend half of this feature.
+> (every submission is refused with `403`), and `SSO_AUTO_REDIRECT` does nothing at
+> all — no visitor is redirected anywhere. The table below is the configuration
+> contract; rows marked *(UI half pending)* describe behavior that arrives with the
+> frontend half of this feature.
 
 | `SSO_ENABLED` | `SSO_ONLY_MODE` | `SSO_AUTO_REDIRECT` | Result                                                           |
 | ------------- | --------------- | ------------------- | ---------------------------------------------------------------- |
@@ -528,8 +530,8 @@ without interaction; `/login?local=1` reaches the login page without being redir
 | `false`       | either flag set | either flag set     | **Startup failure** with an explicit error                       |
 | `true`        | `false`         | `false`             | Standard SSO — login form plus an SSO button                     |
 | `true`        | `true`          | `false`             | `/auth/login` and `/auth/register` return `403`; sign in with SSO |
-| `true`        | `false`         | `true`              | Password login works, and visitors are sent to the IdP           |
-| `true`        | `true`          | `true`              | Pure SSO front door                                              |
+| `true`        | `false`         | `true`              | Password login works, and visitors are sent to the IdP *(UI half pending)* |
+| `true`        | `true`          | `true`              | Pure SSO front door *(UI half pending)*                          |
 
 **The app refuses to start** if *either* flag is set without `SSO_ENABLED`, or with an
 incomplete provider configuration. The failure is logged from the startup hook with

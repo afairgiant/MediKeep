@@ -119,6 +119,11 @@ HOSTILE_RETURN_URLS = [
     "https://evil.example",
     # The forms a naive startswith("/") check waves through.
     "//evil.example",
+    # And the ones urlsplit itself waves through: it reports a netloc only for
+    # exactly two leading slashes, while a browser skips every leading slash and
+    # resolves all of these off-origin.
+    "///evil.example",
+    "////evil.example",
     "/\\evil.example",
     "../admin",
     "javascript:alert(1)",

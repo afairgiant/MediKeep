@@ -246,10 +246,14 @@ Base path: `/api/v1/auth/sso`
 }
 ```
 
-- `sso_only` — `SSO_ONLY_MODE`. Password login and password registration are
-  refused server-side; the login form is hidden
-- `auto_redirect` — `SSO_AUTO_REDIRECT`. Unauthenticated visitors are sent to the
-  IdP without interaction
+- `sso_only` — `SSO_ONLY_MODE`. `POST /auth/login` and `POST /auth/register` are
+  refused server-side with `403`, before any credential check. The web UI does not
+  read this field yet, so the login page still draws the password form; hiding it
+  ships with the frontend half of this feature
+- `auto_redirect` — `SSO_AUTO_REDIRECT`. Advertised for clients that will send
+  unauthenticated visitors straight to the IdP. It has **no effect in this release**
+  — nothing reads it, and the backend behaves identically whether it is set or not
+  (beyond refusing to boot when it is set without `SSO_ENABLED`)
 - `registration_enabled` — the raw `ALLOW_USER_REGISTRATION` setting, which **in
   this payload** governs whether SSO may provision new accounts. `SSO_ONLY_MODE`
   does not disable that, so this field is unaffected by it. The different question

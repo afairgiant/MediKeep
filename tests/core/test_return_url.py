@@ -48,6 +48,14 @@ class TestRejected:
             ("http://evil.example/dashboard", "absolute URL with a path"),
             ("//evil.example", "protocol-relative"),
             ("//evil.example/dashboard", "protocol-relative with a path"),
+            # urlsplit reports a netloc only for exactly two leading slashes -
+            # "///evil.example" parses as a path - but a browser skips every
+            # leading slash and resolves all of these to http://evil.example.
+            ("///evil.example", "three leading slashes"),
+            ("////evil.example", "four leading slashes"),
+            ("///evil.example/dashboard", "three leading slashes with a path"),
+            ("//", "bare double slash"),
+            ("///", "bare triple slash"),
             ("/\\evil.example", "backslash form of protocol-relative"),
             ("\\\\evil.example", "UNC-style backslashes"),
             ("/dashboard\\..\\admin", "backslash anywhere"),

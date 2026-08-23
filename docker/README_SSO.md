@@ -118,25 +118,26 @@ it** — that is deliberate. Booting into an instance that refuses password logi
 has no working SSO means nobody can sign in, and the error is much harder to
 diagnose after the fact than at startup.
 
+> **This release ships the server-side half only.** Nothing in the web UI reads
+> these two settings yet. Under `SSO_ONLY_MODE` the login page still draws the
+> password form and every submission is refused with 403, and `SSO_AUTO_REDIRECT`
+> does nothing at all — no visitor is redirected anywhere. The table below is the
+> configuration contract; the rows marked *(UI half pending)* describe behavior that
+> arrives with the frontend half of this feature in a following release.
+
 | `SSO_ENABLED` | `SSO_ONLY_MODE` | `SSO_AUTO_REDIRECT` | Result |
 |---|---|---|---|
 | `false` | `false` | `false` | Current behavior, unchanged |
-| `false` | `true` or `true` | either flag set | **Startup failure** with an explicit error |
+| `false` | either flag set | either flag set | **Startup failure** with an explicit error |
 | `true` | `false` | `false` | Standard SSO — login form plus an SSO button |
 | `true` | `true` | `false` | `/auth/login` and `/auth/register` return 403; sign in with SSO |
-| `true` | `false` | `true` | Password login still works; visitors are sent to the IdP, and `/login?local=1` reaches the login page directly |
-| `true` | `true` | `true` | Pure SSO front door |
+| `true` | `false` | `true` | Password login still works; visitors are sent to the IdP, and `/login?local=1` reaches the login page directly *(UI half pending)* |
+| `true` | `true` | `true` | Pure SSO front door *(UI half pending)* |
 
 `SSO_ONLY_MODE` is enforced server-side: `POST /auth/login` and `POST /auth/register`
 return 403 before any credential check, and each refusal is recorded in the security
-log. That enforcement is the security boundary and it is complete — hiding the form
-is only cosmetic, since anyone can POST to the API directly.
-
-> **This release ships the server-side half only.** The login page does not yet hide
-> the password form, and `SSO_AUTO_REDIRECT` has no visible effect: nothing in the
-> web UI reads these settings yet. Under `SSO_ONLY_MODE` the form is still drawn and
-> every submission is refused with 403. The login-page behavior ships with the
-> frontend half of this feature in a following release.
+log. That enforcement is the security boundary and it is already complete — hiding
+the form is only cosmetic, since anyone can POST to the API directly.
 
 Still available under `SSO_ONLY_MODE`, by design:
 

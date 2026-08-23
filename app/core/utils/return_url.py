@@ -64,13 +64,22 @@ def is_safe_return_url(value: object) -> bool:
     if _UNSAFE_CHARS.search(value):
         return False
 
+    # Protocol-relative forms, checked textually and before urlsplit because
+    # urlsplit is what disagrees with the browser here. It reports a netloc only
+    # for exactly two leading slashes: "///evil.example" parses as a path with no
+    # netloc at all. A browser resolving that against a special scheme skips every
+    # leading slash and lands on evil.example, so any run of two or more is
+    # off-origin no matter what urlsplit says.
+    if value.startswith("//"):
+        return False
+
     try:
         parts = urlsplit(value)
     except ValueError:
         return False
 
-    # Catches absolute ("https://evil.example") and protocol-relative
-    # ("//evil.example") forms alike.
+    # Catches absolute forms ("https://evil.example"). Protocol-relative ones are
+    # already gone above; this still rejects them if that check ever moves.
     if parts.scheme or parts.netloc:
         return False
 
