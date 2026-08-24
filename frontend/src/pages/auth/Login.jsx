@@ -7,6 +7,8 @@ import { authService } from '../../services/auth/simpleAuthService';
 import frontendLogger from '../../services/frontendLogger';
 import { safeInternalPath } from '../../utils/safeInternalPath';
 import { storeSSOReturnUrl } from '../../utils/ssoReturnUrl';
+import { shouldSuppressAutoRedirect } from '../../utils/loginRedirect';
+import { useAutoRedirectToProvider } from '../../hooks/useAutoRedirectToProvider';
 import { IconUser, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
 import styles from '../../styles/pages/Login.module.css';
 
@@ -23,6 +25,7 @@ const REDIRECT_REASON_KEYS = {
   sso_error: 'login.redirectReason.ssoError',
   account_changed: 'login.redirectReason.accountChanged',
   registered: 'login.redirectReason.registered',
+  auth_unavailable: 'login.redirectReason.authUnavailable',
 };
 
 const Login = () => {
@@ -41,7 +44,8 @@ const Login = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, error, clearError, isAuthenticated } = useAuth();
+  const { login, error, clearError, isAuthenticated, sessionEndedReason } =
+    useAuth();
   const { t } = useTranslation(['auth', 'common', 'shared']);
 
   // Where to go after signing in, and why the user is here at all.
@@ -59,7 +63,7 @@ const Login = () => {
   //
   // Memoized because this page re-renders on every keystroke, and each pass
   // would otherwise re-parse the query string and re-validate both candidates.
-  const { returnPath, redirectReason } = useMemo(() => {
+  const { returnPath, redirectReason, urlSuppressesRedirect } = useMemo(() => {
     const params = new URLSearchParams(location.search);
     // `from` is the whole location object ProtectedRoute captured, so rebuild the
     // full path from it. Reading only `.pathname` silently dropped the query and
@@ -74,8 +78,42 @@ const Login = () => {
         ) ||
         '/dashboard',
       redirectReason: params.get('reason'),
+      urlSuppressesRedirect: shouldSuppressAutoRedirect(location.search),
     };
   }, [location.search, location.state]);
+
+  // The config fetch has definitively succeeded. Named once because four render
+  // gates below depend on it, and "loaded" alone is not the same question --
+  // loaded-but-failed must not be read as "the backend said no".
+  const configReady = configLoaded && !configError;
+
+  // Whether this instance refuses password login. Only true when the backend
+  // said so: a failed config fetch leaves it false, which keeps the form and the
+  // retry notice on screen rather than showing a page with no way in.
+  //
+  // Deliberately independent of redirect suppression. `?local=1` suppresses the
+  // redirect to the identity provider and nothing else -- wiring it in here
+  // would bring the password form back on a URL anyone can type, while the
+  // server still refuses the credentials. That would be an authentication
+  // bypass in a query string.
+  const ssoOnly =
+    configReady && ssoConfig.enabled === true && ssoConfig.sso_only === true;
+
+  // Two carriers, because a session can end without anyone navigating. The URL
+  // covers arrivals from elsewhere (ProtectedRoute translates the reason into
+  // it, and it survives a full page load); reducer state covers the visitor who
+  // was already sitting on /login when the session ended -- a failed startup
+  // probe, most often -- where no navigation happens and the URL stays clean.
+  const suppressRedirect = urlSuppressesRedirect || Boolean(sessionEndedReason);
+
+  const autoRedirect = useAutoRedirectToProvider({
+    configReady,
+    ssoEnabled: Boolean(ssoConfig.enabled),
+    autoRedirectEnabled: Boolean(ssoConfig.auto_redirect),
+    isAuthenticated,
+    suppressed: suppressRedirect,
+    returnPath,
+  });
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -204,6 +242,35 @@ const Login = () => {
     return () => window.removeEventListener('online', onOnline);
   }, [loadConfig, configLoaded, configError]);
 
+  // One shape, three states. Adding a fourth is a row here rather than a fourth
+  // copy of the same div with its className, role and testid re-typed by hand.
+  const autoRedirectNotice = {
+    redirecting: {
+      className: styles.redirectNotice,
+      role: 'status',
+      testId: 'auto-redirect',
+      text: t('login.autoRedirect.redirecting'),
+    },
+    rate_limited: {
+      className: styles.configWarning,
+      role: 'alert',
+      testId: 'auto-redirect-throttled',
+      // The seconds are optional -- a proxy can strip Retry-After, and "wait
+      // null seconds" is worse than not naming a number at all.
+      text: autoRedirect.retryAfterSeconds
+        ? t('login.autoRedirect.rateLimited', {
+            seconds: autoRedirect.retryAfterSeconds,
+          })
+        : t('login.autoRedirect.rateLimitedGeneric'),
+    },
+    failed: {
+      className: styles.configWarning,
+      role: 'alert',
+      testId: 'auto-redirect-failed',
+      text: t('login.autoRedirect.failed'),
+    },
+  }[autoRedirect.status];
+
   const handleChange = e => {
     clearError(); // Clear any existing errors
     setFormData({
@@ -295,81 +362,95 @@ const Login = () => {
           </div>
         )}
 
+        {autoRedirectNotice && (
+          <div
+            className={autoRedirectNotice.className}
+            role={autoRedirectNotice.role}
+            data-testid={autoRedirectNotice.testId}
+          >
+            <span>{autoRedirectNotice.text}</span>
+          </div>
+        )}
+
         {error && <div className={styles.errorMessage}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="username">{t('shared:labels.username')}</label>
-            <div className={styles.inputWrapper}>
-              <span className={styles.inputIconPrefix}>
-                <IconUser size={18} />
-              </span>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder={t('login.usernamePlaceholder')}
-                required
-                disabled={isLoading}
-              />
+        {/* Hidden under sso_only (the server refuses these credentials) and
+            while a redirect is in flight (the page is being torn down). */}
+        {!ssoOnly && autoRedirect.status !== 'redirecting' && (
+          <form onSubmit={handleSubmit}>
+            <div className={styles.formGroup}>
+              <label htmlFor="username">{t('shared:labels.username')}</label>
+              <div className={styles.inputWrapper}>
+                <span className={styles.inputIconPrefix}>
+                  <IconUser size={18} />
+                </span>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder={t('login.usernamePlaceholder')}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password">{t('shared:labels.password')}</label>
-            <div className={styles.inputWrapper}>
-              <span className={styles.inputIconPrefix}>
-                <IconLock size={18} />
-              </span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder={t('login.passwordPlaceholder')}
-                required
-                disabled={isLoading}
-              />
-              <span
-                className={styles.inputIconSuffix}
-                onClick={() => setShowPassword(prev => !prev)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setShowPassword(prev => !prev);
+            <div className={styles.formGroup}>
+              <label htmlFor="password">{t('shared:labels.password')}</label>
+              <div className={styles.inputWrapper}>
+                <span className={styles.inputIconPrefix}>
+                  <IconLock size={18} />
+                </span>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder={t('login.passwordPlaceholder')}
+                  required
+                  disabled={isLoading}
+                />
+                <span
+                  className={styles.inputIconSuffix}
+                  onClick={() => setShowPassword(prev => !prev)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setShowPassword(prev => !prev);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={
+                    showPassword
+                      ? t('login.hidePassword')
+                      : t('login.showPassword')
                   }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-label={
-                  showPassword
-                    ? t('login.hidePassword')
-                    : t('login.showPassword')
-                }
-              >
-                {showPassword ? (
-                  <IconEyeOff size={18} />
-                ) : (
-                  <IconEye size={18} />
-                )}
-              </span>
+                >
+                  {showPassword ? (
+                    <IconEyeOff size={18} />
+                  ) : (
+                    <IconEye size={18} />
+                  )}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={styles.submitBtn}
-          >
-            {isLoading ? t('login.submitting') : t('login.submit')}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={styles.submitBtn}
+            >
+              {isLoading ? t('login.submitting') : t('login.submit')}
+            </button>
+          </form>
+        )}
 
         {/* Config-fetch failed -- show retry instead of silently hiding SSO */}
-        {configLoaded && configError && (
+        {configLoaded && !configReady && (
           <div
             className={styles.configWarning}
             data-testid="config-error"
@@ -387,32 +468,46 @@ const Login = () => {
         )}
 
         {/* SSO Login Option -- only when config loaded successfully AND backend says SSO is on */}
-        {configLoaded && !configError && ssoConfig.enabled && (
-          <div className={styles.ssoSection} data-testid="sso-section">
-            <div className={styles.divider}>
-              <span>{t('login.or')}</span>
+        {/* Stays visible on the rate-limited and failed paths on purpose: it is
+            the manual way in once auto-redirect has stopped trying. */}
+        {configReady &&
+          ssoConfig.enabled &&
+          autoRedirect.status !== 'redirecting' && (
+            <div className={styles.ssoSection} data-testid="sso-section">
+              <div className={styles.divider}>
+                <span>{t('login.or')}</span>
+              </div>
+              <button
+                type="button"
+                className={styles.ssoBtn}
+                onClick={handleSSOLogin}
+                disabled={isLoading || ssoLoading}
+              >
+                {ssoLoading
+                  ? t('common:labels.loading')
+                  : t('login.continueWith', {
+                      provider:
+                        ssoConfig.provider_type === 'google'
+                          ? 'Google'
+                          : ssoConfig.provider_type === 'github'
+                            ? 'GitHub'
+                            : 'SSO',
+                    })}
+              </button>
             </div>
-            <button
-              type="button"
-              className={styles.ssoBtn}
-              onClick={handleSSOLogin}
-              disabled={isLoading || ssoLoading}
-            >
-              {ssoLoading
-                ? t('common:labels.loading')
-                : t('login.continueWith', {
-                    provider:
-                      ssoConfig.provider_type === 'google'
-                        ? 'Google'
-                        : ssoConfig.provider_type === 'github'
-                          ? 'GitHub'
-                          : 'SSO',
-                  })}
-            </button>
+          )}
+
+        {/* Under sso_only the server returns registration_enabled:false with an
+            English message; render our own translated notice instead. */}
+        {ssoOnly && (
+          <div className={styles.loginActions} data-testid="sso-only-notice">
+            <div className={styles.registrationDisabledMessage}>
+              {t('login.ssoOnly.notice')}
+            </div>
           </div>
         )}
 
-        {configLoaded && !configError && (
+        {configReady && !ssoOnly && (
           <div className={styles.loginActions}>
             {registrationEnabled ? (
               <button
@@ -433,7 +528,7 @@ const Login = () => {
 
         {/* When config fails, we don't actually know whether registration is on --
             show a neutral notice instead of a misleading "disabled" message */}
-        {configLoaded && configError && (
+        {configLoaded && !configReady && (
           <div className={styles.loginActions}>
             <div className={styles.registrationDisabledMessage}>
               {t('login.registrationStatusUnavailable')}

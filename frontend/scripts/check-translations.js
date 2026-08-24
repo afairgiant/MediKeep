@@ -22,16 +22,51 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const LOCALES_DIR = path.join(__dirname, '..', 'public', 'locales');
-const ALL_LOCALES = ['en', 'de', 'es', 'fr', 'it', 'nl', 'pt', 'ru', 'sv', 'pl', 'el'];
-const ALL_NAMESPACES = ['common', 'medical', 'errors', 'navigation', 'notifications', 'admin', 'shared'];
+// All 13 locales present in public/locales. `th` and `zh` were missing here, so
+// this check reported a clean bill of health while never looking at either.
+const ALL_LOCALES = [
+  'en',
+  'de',
+  'es',
+  'fr',
+  'it',
+  'nl',
+  'pt',
+  'ru',
+  'sv',
+  'pl',
+  'el',
+  'th',
+  'zh',
+];
+// All 15 namespaces present in public/locales, verified complete across every
+// locale. Eight were missing here -- including `auth`, so this check has never
+// looked at the login, SSO or account-creation copy at all.
+const ALL_NAMESPACES = [
+  'admin',
+  'auth',
+  'common',
+  'documents',
+  'errors',
+  'invitations',
+  'labresults',
+  'medical',
+  'navigation',
+  'notifications',
+  'reportPdf',
+  'reports',
+  'settings',
+  'shared',
+  'vitals',
+];
 
 // ─── Argument Parsing ────────────────────────────────────────────────
 const args = process.argv.slice(2);
-const getArg = (flag) => {
+const getArg = flag => {
   const idx = args.indexOf(flag);
   return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : null;
 };
-const hasFlag = (flag) => args.includes(flag);
+const hasFlag = flag => args.includes(flag);
 
 const filterLocale = getArg('--locale');
 const filterNamespace = getArg('--namespace') || getArg('--ns');
@@ -75,7 +110,11 @@ function extractKeys(obj, prefix = '') {
   let keys = [];
   for (const key in obj) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
-    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+    if (
+      typeof obj[key] === 'object' &&
+      obj[key] !== null &&
+      !Array.isArray(obj[key])
+    ) {
       keys = keys.concat(extractKeys(obj[key], fullKey));
     } else {
       keys.push(fullKey);
@@ -108,7 +147,11 @@ function findEmptyValues(obj, prefix = '') {
   const empties = [];
   for (const key in obj) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
-    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+    if (
+      typeof obj[key] === 'object' &&
+      obj[key] !== null &&
+      !Array.isArray(obj[key])
+    ) {
       empties.push(...findEmptyValues(obj[key], fullKey));
     } else if (typeof obj[key] === 'string' && obj[key].trim() === '') {
       empties.push(fullKey);
@@ -128,12 +171,16 @@ const namespacesToCheck = filterNamespace
   : ALL_NAMESPACES;
 
 if (localesToCheck.length === 0) {
-  console.error(`Invalid locale: ${filterLocale}. Must be one of: ${ALL_LOCALES.filter(l => l !== 'en').join(', ')}`);
+  console.error(
+    `Invalid locale: ${filterLocale}. Must be one of: ${ALL_LOCALES.filter(l => l !== 'en').join(', ')}`
+  );
   process.exit(1);
 }
 
 if (namespacesToCheck.length === 0) {
-  console.error(`Invalid namespace: ${filterNamespace}. Must be one of: ${ALL_NAMESPACES.join(', ')}`);
+  console.error(
+    `Invalid namespace: ${filterNamespace}. Must be one of: ${ALL_NAMESPACES.join(', ')}`
+  );
   process.exit(1);
 }
 
@@ -150,12 +197,16 @@ for (const locale of localesToCheck) {
     const localeData = loadJSON(locale, namespace);
 
     if (!enData) {
-      report.locales[locale].namespaces[namespace] = { error: 'EN file not found' };
+      report.locales[locale].namespaces[namespace] = {
+        error: 'EN file not found',
+      };
       continue;
     }
 
     if (!localeData) {
-      report.locales[locale].namespaces[namespace] = { error: 'Locale file not found' };
+      report.locales[locale].namespaces[namespace] = {
+        error: 'Locale file not found',
+      };
       continue;
     }
 
@@ -186,7 +237,11 @@ for (const locale of localesToCheck) {
         setNestedValue(updatedData, key, enValue);
       }
       const filePath = path.join(LOCALES_DIR, locale, `${namespace}.json`);
-      fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2) + '\n', 'utf8');
+      fs.writeFileSync(
+        filePath,
+        JSON.stringify(updatedData, null, 2) + '\n',
+        'utf8'
+      );
     }
   }
 }
@@ -201,16 +256,22 @@ if (jsonOutput) {
 // Console table output
 const { totalMissing, totalExtra, totalEmpty } = report.summary;
 
-console.log('\n╔══════════════════════════════════════════════════════════════╗');
+console.log(
+  '\n╔══════════════════════════════════════════════════════════════╗'
+);
 console.log('║              Translation Key Consistency Report             ║');
-console.log('╚══════════════════════════════════════════════════════════════╝\n');
+console.log(
+  '╚══════════════════════════════════════════════════════════════╝\n'
+);
 
 let hasIssues = false;
 
 for (const [locale, localeReport] of Object.entries(report.locales)) {
   for (const [namespace, nsReport] of Object.entries(localeReport.namespaces)) {
     if (nsReport.error) {
-      console.log(`  ❌ ${locale.toUpperCase()}/${namespace}: ${nsReport.error}`);
+      console.log(
+        `  ❌ ${locale.toUpperCase()}/${namespace}: ${nsReport.error}`
+      );
       hasIssues = true;
       continue;
     }
@@ -219,10 +280,14 @@ for (const [locale, localeReport] of Object.entries(report.locales)) {
     const ok = missing.length === 0 && extra.length === 0 && empty.length === 0;
 
     if (ok) {
-      console.log(`  ✅ ${locale.toUpperCase()}/${namespace}.json — ${localeKeyCount}/${enKeyCount} keys`);
+      console.log(
+        `  ✅ ${locale.toUpperCase()}/${namespace}.json — ${localeKeyCount}/${enKeyCount} keys`
+      );
     } else {
       hasIssues = true;
-      console.log(`  ⚠️  ${locale.toUpperCase()}/${namespace}.json — ${localeKeyCount}/${enKeyCount} keys`);
+      console.log(
+        `  ⚠️  ${locale.toUpperCase()}/${namespace}.json — ${localeKeyCount}/${enKeyCount} keys`
+      );
 
       if (missing.length > 0) {
         console.log(`     Missing (${missing.length}):`);
@@ -241,10 +306,14 @@ for (const [locale, localeReport] of Object.entries(report.locales)) {
 }
 
 console.log('\n──────────────────────────────────────────────────────────────');
-console.log(`  Total: ${totalMissing} missing, ${totalExtra} extra, ${totalEmpty} empty`);
+console.log(
+  `  Total: ${totalMissing} missing, ${totalExtra} extra, ${totalEmpty} empty`
+);
 
 if (fixMode && totalMissing > 0) {
-  console.log(`  📝 Fixed: copied ${totalMissing} missing keys from EN (English values as placeholders)`);
+  console.log(
+    `  📝 Fixed: copied ${totalMissing} missing keys from EN (English values as placeholders)`
+  );
 }
 
 console.log('──────────────────────────────────────────────────────────────\n');

@@ -425,7 +425,7 @@ function App() {
                           <Route
                             path="/user-creation"
                             element={
-                              <PublicRoute>
+                              <PublicRoute requiresRegistration>
                                 <UserCreation />
                               </PublicRoute>
                             }

@@ -491,7 +491,7 @@ TRASH_RETENTION_DAYS=60
 | `SSO_ISSUER_URL`                | string     | -       | For OIDC       | OIDC issuer URL                                                           |
 | `SSO_REDIRECT_URI`              | string     | -       | If SSO enabled | OAuth redirect URI                                                        |
 | `SSO_ALLOWED_DOMAINS`           | JSON array | `[]`    | No             | Allowed email domains                                                     |
-| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `10`    | No             | Max `POST /auth/sso/initiate` calls per IP per window                     |
+| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `30`    | No             | Max `POST /auth/sso/initiate` calls per IP per window                     |
 | `SSO_RATE_LIMIT_WINDOW_MINUTES` | integer    | `10`    | No             | Rate limit window                                                         |
 | `SSO_ONLY_MODE`                 | boolean    | `false` | No             | Refuse password login and password registration; requires `SSO_ENABLED`   |
 | `SSO_AUTO_REDIRECT`             | boolean    | `false` | No             | Send unauthenticated visitors straight to the IdP; requires `SSO_ENABLED` |
@@ -509,8 +509,11 @@ Two consequences worth knowing before tuning these:
   headers on your proxy.
 - Each sign-in attempt is one attempt against the limit. If a future release adds
   automatic redirect-to-IdP on unauthenticated page loads, a household or CGNAT range
-  sharing one address could plausibly reach the default 10-per-10-minutes. Raise
-  `SSO_RATE_LIMIT_ATTEMPTS` if legitimate users report being turned away.
+  sharing one address could plausibly reach the limit. The default was raised from 10 to
+  30 per 10 minutes for exactly that reason; raise `SSO_RATE_LIMIT_ATTEMPTS` further if
+  legitimate users still report being turned away. Under `SSO_ONLY_MODE` there is no
+  password login to fall back on, so being throttled means no way in until the window
+  rolls off.
 
 **SSO-only mode and auto-redirect:** `SSO_ONLY_MODE` makes the identity provider the
 only way in — `POST /auth/login` and `POST /auth/register` return `403` before any

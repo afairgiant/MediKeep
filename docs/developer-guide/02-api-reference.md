@@ -273,7 +273,7 @@ Base path: `/api/v1/auth/sso`
 - **Purpose**: Start SSO authentication flow
 - **Authentication**: No
 - **Rate Limited**: yes — `SSO_RATE_LIMIT_ATTEMPTS` per client IP per
-  `SSO_RATE_LIMIT_WINDOW_MINUTES` (defaults: 10 per 10 minutes)
+  `SSO_RATE_LIMIT_WINDOW_MINUTES` (defaults: 30 per 10 minutes)
 - **Query Parameters**:
   - `return_url` (string, optional): where to send the user after authentication.
     Must be a **root-relative internal path** (`/patients/42`,

@@ -359,6 +359,47 @@ const AdminSettings = () => {
                   </Badge>
                 </Group>
 
+                <Group justify="space-between">
+                  <Text fw={500}>
+                    {t('settings.sso.ssoOnly', 'SSO-Only Mode')}
+                  </Text>
+                  <Badge
+                    variant="light"
+                    color={ssoConfig.sso_only ? 'orange' : 'gray'}
+                  >
+                    {ssoConfig.sso_only
+                      ? t('shared:labels.enabled', 'Enabled')
+                      : t('shared:labels.disabled', 'Disabled')}
+                  </Badge>
+                </Group>
+
+                <Group justify="space-between">
+                  <Text fw={500}>
+                    {t(
+                      'settings.sso.autoRedirect',
+                      'Auto-Redirect to Provider'
+                    )}
+                  </Text>
+                  <Badge
+                    variant="light"
+                    color={ssoConfig.auto_redirect ? 'orange' : 'gray'}
+                  >
+                    {ssoConfig.auto_redirect
+                      ? t('shared:labels.enabled', 'Enabled')
+                      : t('shared:labels.disabled', 'Disabled')}
+                  </Badge>
+                </Group>
+
+                {/* Read-only by design: these are env-driven precisely so a
+                    broken identity provider cannot be made permanent from
+                    inside the app. */}
+                <Text size="sm" c="dimmed">
+                  {t(
+                    'settings.sso.envOnly',
+                    'These are set by environment variable and cannot be changed here.'
+                  )}
+                </Text>
+
                 <Group justify="space-between" align="flex-start">
                   <Stack gap={4}>
                     <Text fw={500}>

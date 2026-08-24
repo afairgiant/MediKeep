@@ -1,5 +1,22 @@
 module.exports = {
-  locales: ['en', 'de', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'ru', 'sv', 'zh'],
+  // All 13 locales present in public/locales. `el` and `th` were missing here
+  // while their JSON files existed, so extract silently skipped them and every
+  // new key had to be added to those two by hand or not at all.
+  locales: [
+    'en',
+    'de',
+    'el',
+    'es',
+    'fr',
+    'it',
+    'nl',
+    'pl',
+    'pt',
+    'ru',
+    'sv',
+    'th',
+    'zh',
+  ],
 
   input: ['src/**/*.{js,jsx,ts,tsx}'],
   output: 'public/locales/$LOCALE/$NAMESPACE.json',

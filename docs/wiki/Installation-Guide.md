@@ -213,6 +213,12 @@ SSO_PROVIDER_TYPE=github  # google, github, oidc, authentik, authelia, keycloak
 SSO_CLIENT_ID=your-client-id
 SSO_CLIENT_SECRET=your-client-secret
 SSO_REDIRECT_URI=http://localhost:8005/auth/sso/callback
+
+# Optional: make SSO the only way in. Both default to false and both require
+# SSO_ENABLED=true (the app refuses to start otherwise). /login?local=1 skips the
+# automatic redirect but does NOT re-enable password login.
+SSO_ONLY_MODE=false
+SSO_AUTO_REDIRECT=false
 ```
 
 See [SSO Quick Start](SSO-Quick-Start) for detailed setup.

@@ -532,7 +532,10 @@
     "resetAll": "Alles zurücksetzen",
     "saveAllChanges": "Alle Änderungen speichern",
     "sso": {
+      "autoRedirect": "Automatische Weiterleitung zum Anbieter",
+      "envOnly": "Diese Einstellungen werden über Umgebungsvariablen festgelegt und können hier nicht geändert werden.",
       "ssoDisabledInfo": "SSO ist derzeit deaktiviert. Um SSO zu aktivieren, konfigurieren Sie die folgenden Umgebungsvariablen und starten Sie die Anwendung neu:",
+      "ssoOnly": "Nur-SSO-Modus",
       "ssoRegistration": "SSO-Registrierung",
       "testConnection": "Verbindung testen",
       "testConnectionDesc": "SSO-Anbieterverbindung und -konfiguration testen",

@@ -532,7 +532,10 @@
     "resetAll": "Zresetuj wszystko",
     "saveAllChanges": "Zapisz wszystkie zmiany",
     "sso": {
+      "autoRedirect": "Automatyczne przekierowanie do dostawcy",
+      "envOnly": "Te ustawienia są określane przez zmienne środowiskowe i nie można ich tutaj zmienić.",
       "ssoDisabledInfo": "SSO jest obecnie wyłączone. Aby włączyć SSO, skonfiguruj następujące zmienne środowiskowe i uruchom ponownie aplikację:",
+      "ssoOnly": "Tryb tylko SSO",
       "ssoRegistration": "Rejestracja SSO",
       "testConnection": "Testuj połączenie",
       "testConnectionDesc": "Przetestuj połączenie dostawcy SSO i konfigurację",

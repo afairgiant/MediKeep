@@ -268,7 +268,14 @@ export function AuthProvider({ children }) {
           stack: error.stack,
           timestamp: new Date().toISOString(),
         });
-        discardSession();
+        // We never got an answer -- getCurrentUser throws only when the request
+        // itself failed. That is NOT the same as "no session": recording a
+        // reason suppresses the bounce to the identity provider, so a blip at
+        // startup lands on a login page that explains itself instead of a
+        // silent round trip the user cannot interpret. Under SSO_ONLY_MODE that
+        // round trip is the only way in, so a failure during it is otherwise
+        // indistinguishable from the provider being down.
+        endSession('auth_unavailable');
       } finally {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
