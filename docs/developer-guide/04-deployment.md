@@ -491,7 +491,7 @@ TRASH_RETENTION_DAYS=60
 | `SSO_ISSUER_URL`                | string     | -       | For OIDC       | OIDC issuer URL                                                           |
 | `SSO_REDIRECT_URI`              | string     | -       | If SSO enabled | OAuth redirect URI                                                        |
 | `SSO_ALLOWED_DOMAINS`           | JSON array | `[]`    | No             | Allowed email domains                                                     |
-| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `30`    | No             | Max `POST /auth/sso/initiate` calls per IP per window                     |
+| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `30`    | No             | Max `POST /api/v1/auth/sso/initiate` calls per IP per window              |
 | `SSO_RATE_LIMIT_WINDOW_MINUTES` | integer    | `10`    | No             | Rate limit window                                                         |
 | `SSO_ONLY_MODE`                 | boolean    | `false` | No             | Refuse password login and password registration; requires `SSO_ENABLED`   |
 | `SSO_AUTO_REDIRECT`             | boolean    | `false` | No             | Send unauthenticated visitors straight to the IdP; requires `SSO_ENABLED` |
