@@ -115,6 +115,16 @@ const Login = () => {
     returnPath,
   });
 
+  // Hidden under sso_only (the server refuses these credentials) and while a
+  // redirect is in flight (the page is being torn down).
+  //
+  // Named because the "or" divider below depends on the same answer: that
+  // divider exists only to separate this form from the SSO button, so deciding
+  // it independently is how the page ended up drawing a rule and the word "or"
+  // across empty space with nothing above them.
+  const passwordFormVisible =
+    !ssoOnly && autoRedirect.status !== 'redirecting';
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
@@ -374,9 +384,7 @@ const Login = () => {
 
         {error && <div className={styles.errorMessage}>{error}</div>}
 
-        {/* Hidden under sso_only (the server refuses these credentials) and
-            while a redirect is in flight (the page is being torn down). */}
-        {!ssoOnly && autoRedirect.status !== 'redirecting' && (
+        {passwordFormVisible && (
           <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
               <label htmlFor="username">{t('shared:labels.username')}</label>
@@ -474,9 +482,14 @@ const Login = () => {
           ssoConfig.enabled &&
           autoRedirect.status !== 'redirecting' && (
             <div className={styles.ssoSection} data-testid="sso-section">
-              <div className={styles.divider}>
-                <span>{t('login.or')}</span>
-              </div>
+              {/* Only meaningful with the password form above it to divide
+                  from. Under sso_only the SSO button is not an alternative to
+                  anything -- it is the whole page. */}
+              {passwordFormVisible && (
+                <div className={styles.divider} data-testid="sso-divider">
+                  <span>{t('login.or')}</span>
+                </div>
+              )}
               <button
                 type="button"
                 className={styles.ssoBtn}

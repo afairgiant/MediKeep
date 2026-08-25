@@ -74,6 +74,17 @@ describe('SSO-only mode', () => {
     expect(await screen.findByTestId('sso-section')).toBeInTheDocument();
   });
 
+  test('drops the "or" divider along with the form it divided', async () => {
+    // The divider separates the password form from the SSO button. With the
+    // form gone it drew a rule and the word "or" across empty space, which
+    // reads as a form that failed to load rather than one that was never there.
+    render(<Login />);
+
+    await screen.findByTestId('sso-section');
+    expect(screen.queryByTestId('sso-divider')).not.toBeInTheDocument();
+    expect(screen.queryByText('login.or')).not.toBeInTheDocument();
+  });
+
   test('hides the create-account block and explains why in our own copy', async () => {
     render(<Login />);
 
@@ -126,6 +137,8 @@ describe('without SSO-only mode', () => {
     expect(form()).toBeInTheDocument();
     expect(createAccountButton()).toBeInTheDocument();
     expect(screen.queryByTestId('sso-only-notice')).not.toBeInTheDocument();
+    // Two ways in, so the divider between them still has a job.
+    expect(screen.getByTestId('sso-divider')).toBeInTheDocument();
   });
 
   test('sso_only is ignored when SSO itself is off', async () => {
