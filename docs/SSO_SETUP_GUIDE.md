@@ -111,7 +111,7 @@ SSO_REDIRECT_URI=http://localhost:8000/auth/sso/callback
 
 **GitHub-Specific Notes:**
 
-- **Private Emails**: If users have private email settings, they'll see a manual linking modal to connect with existing accounts
+- **Private Emails**: If users have private email settings, they'll see a manual linking modal to connect with existing accounts. This is asked **once per account** - after linking, later sign-ins are recognized by the stored GitHub account id
 - **Public Emails**: Users with public emails work like Google SSO with automatic email matching
 - **No Domain Restrictions**: GitHub doesn't enforce email domain restrictions like workplace providers
 
@@ -239,6 +239,11 @@ When GitHub users have private email settings:
 2. Shows GitHub manual linking modal
 3. User enters existing account credentials to link
 4. GitHub account gets permanently linked to local account
+5. Every later sign-in matches on the stored GitHub account id, so the credential prompt is not repeated
+
+> Earlier releases wrote the link but never read it back, so this prompt reappeared on every
+> login. That matters most with `SSO_ONLY_MODE=true`, where the user has no local password to
+> answer it with.
 
 **User Preferences:**
 

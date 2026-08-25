@@ -57,6 +57,44 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         )
         return users[0] if users else None
 
+    def get_by_external_id(
+        self, db: Session, *, external_id: str, sso_provider: str
+    ) -> Optional[User]:
+        """
+        Retrieve a user by the identifier their SSO provider issued for them.
+
+        Args:
+            db: SQLAlchemy database session
+            external_id: The provider's identifier for the user (user_info.sub)
+            sso_provider: The provider that issued it, e.g. "github"
+
+        Returns:
+            User object if a linked account exists, None otherwise
+
+        Example:
+            user = user_crud.get_by_external_id(
+                db, external_id="12345", sso_provider="github"
+            )
+        """
+        # Both columns are nullable, so a None here would match every unlinked
+        # account rather than none of them.
+        if not external_id or not sso_provider:
+            return None
+
+        # Scoped by provider even though external_id is unique - the value only
+        # means anything within the provider that issued it. Direct query rather
+        # than self.query(), which lowercases string filters (crud/base.py) while
+        # external_id is stored verbatim: GitHub's numeric ids hide that, a
+        # mixed-case OIDC sub would not.
+        return (
+            db.query(self.model)
+            .filter(
+                self.model.external_id == external_id,
+                self.model.sso_provider == sso_provider,
+            )
+            .first()
+        )
+
     def create(
         self, db: Session, *, obj_in: UserCreate, must_change_password: bool = False
     ) -> User:

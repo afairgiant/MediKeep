@@ -225,6 +225,11 @@ class SSOService:
 
         # Validate email domain if configured
         if not self._validate_email_domain(user_info.email):
+            if not user_info.email:
+                raise SSOAuthenticationError(
+                    "This provider account does not share an email address, and "
+                    "this instance only accepts specific email domains."
+                )
             raise SSOAuthenticationError(
                 f"Email domain not allowed: {user_info.email.split('@')[1]}"
             )
@@ -245,11 +250,20 @@ class SSOService:
             )
             raise SSOAuthenticationError("Failed to create or link user account")
 
-        # Log success (handle both regular and conflict responses)
+        # Log success (handle regular, conflict and manual-link responses)
         if result.get("conflict"):
             logger.info(
                 f"SSO authentication detected conflict for {user_info.email}",
                 extra={"category": "sso", "event": "auth_conflict"},
+            )
+        elif result.get("github_manual_link"):
+            # No account has been identified yet, so there is no authentication to
+            # report and no is_new_user to report it with - reading one here raised
+            # KeyError, which the endpoint's broad except turned into a 500. The
+            # prompt this response exists to render never reached the user.
+            logger.info(
+                "SSO authentication needs a manual GitHub account link",
+                extra={"category": "sso", "event": "github_manual_link_required"},
             )
         else:
             logger.info(
@@ -313,10 +327,18 @@ class SSOService:
 
         return str(exc)
 
-    def _validate_email_domain(self, email: str) -> bool:
+    def _validate_email_domain(self, email: Optional[str]) -> bool:
         """Check if email domain is allowed"""
         if not settings.SSO_ALLOWED_DOMAINS:
             return True  # No restrictions
+
+        # GitHub exposes no email for accounts with a private email setting, so
+        # there is no domain to check. Refuse rather than skip: skipping would let
+        # any GitHub user bypass the allowlist by making their email private,
+        # which is the control failing open. Reading .split() off None here also
+        # raised AttributeError outside any try, surfacing as a 500.
+        if not email:
+            return False
 
         domain = email.split("@")[1].lower()
         allowed_domains = [d.lower() for d in settings.SSO_ALLOWED_DOMAINS]
@@ -392,7 +414,29 @@ class SSOService:
         )
 
         if is_github_no_email:
-            # For GitHub users without accessible email, show manual linking modal
+            # A previous manual link already recorded this GitHub identity, so
+            # there is nothing left to ask. Without this lookup the branch below
+            # fires on every login: the link writes external_id but nothing ever
+            # read it back, so a private-email GitHub user re-entered their local
+            # password each time - and under SSO_ONLY_MODE they have none to
+            # enter, which makes a working prompt a lockout.
+            linked_user = user_crud.get_by_external_id(
+                db,
+                external_id=user_info.sub,
+                sso_provider=settings.SSO_PROVIDER_TYPE,
+            )
+            if linked_user:
+                logger.info(
+                    f"SSO login for GitHub account linked by external_id: {linked_user.username}",
+                    extra={
+                        "category": "sso",
+                        "event": "github_external_id_login",
+                        "user_id": linked_user.id,
+                    },
+                )
+                return self._link_existing_user(linked_user, user_info, db)
+
+            # No account carries this identity yet - show the manual linking modal
             return self._return_github_manual_linking(user_info)
 
         # Check for existing user by email
