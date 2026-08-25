@@ -392,7 +392,29 @@ class SSOService:
         )
 
         if is_github_no_email:
-            # For GitHub users without accessible email, show manual linking modal
+            # A previous manual link already recorded this GitHub identity, so
+            # there is nothing left to ask. Without this lookup the branch below
+            # fires on every login: the link writes external_id but nothing ever
+            # read it back, so a private-email GitHub user re-entered their local
+            # password each time - and under SSO_ONLY_MODE they have none to
+            # enter, which makes a working prompt a lockout.
+            linked_user = user_crud.get_by_external_id(
+                db,
+                external_id=user_info.sub,
+                sso_provider=settings.SSO_PROVIDER_TYPE,
+            )
+            if linked_user:
+                logger.info(
+                    f"SSO login for GitHub account linked by external_id: {linked_user.username}",
+                    extra={
+                        "category": "sso",
+                        "event": "github_external_id_login",
+                        "user_id": linked_user.id,
+                    },
+                )
+                return self._link_existing_user(linked_user, user_info, db)
+
+            # No account carries this identity yet - show the manual linking modal
             return self._return_github_manual_linking(user_info)
 
         # Check for existing user by email

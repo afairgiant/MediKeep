@@ -23,6 +23,7 @@ from app.crud.user import user as user_crud
 from app.models.models import User
 from app.schemas.user import UserCreate
 from app.services.sso_service import _STATE_TTL, SSOService, _state_storage
+from tests.utils.sso import store_github_link_token
 
 PASSWORD = "linkpassword123"
 TEMP_TOKEN = "github-temp-token"
@@ -51,18 +52,7 @@ def local_user(db_session) -> User:
 
 
 def store_link_token(token: str = TEMP_TOKEN, *, age: timedelta = timedelta(0)) -> str:
-    created_at = datetime.utcnow() - age
-    key = f"github_manual_link_{token}"
-    _state_storage[key] = {
-        "created_at": created_at,
-        "sso_user_info": {
-            "sub": "github-12345",
-            "email": None,
-            "name": "GitHub Linker",
-        },
-        "expires_at": created_at + _STATE_TTL,
-    }
-    return key
+    return store_github_link_token(token, sub="github-12345", age=age)
 
 
 class TestSuccessfulLink:
