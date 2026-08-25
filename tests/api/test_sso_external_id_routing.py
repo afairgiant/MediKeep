@@ -19,6 +19,7 @@ from datetime import timedelta
 import pytest
 
 from app.auth.sso.base_provider import SSOUserInfo
+from app.auth.sso.exceptions import SSOAuthenticationError
 from app.core.config import settings
 from app.crud.user import user as user_crud
 from app.models.models import User
@@ -69,6 +70,29 @@ def github_login(sub: str = GITHUB_ID) -> SSOUserInfo:
     return SSOUserInfo(
         sub=sub, email=None, username="githubrouter", name="GitHub Router"
     )
+
+
+@pytest.fixture
+def stub_sso_provider(monkeypatch):
+    """Stand in for the provider's two network calls.
+
+    The collaborator is stubbed because it does real HTTP; the method under test
+    never is - that is how the credential defect in this flow (8.5) survived.
+    """
+
+    def install(user_info: SSOUserInfo):
+        class StubProvider:
+            async def exchange_code_for_token(self, code):
+                return {"access_token": "stub-access-token"}
+
+            async def get_user_info(self, access_token):
+                return user_info
+
+        monkeypatch.setattr(
+            "app.services.sso_service.create_sso_provider", lambda: StubProvider()
+        )
+
+    return install
 
 
 def link_identity(db_session, user: User, *, sso_provider: str, external_id=GITHUB_ID):
@@ -247,24 +271,6 @@ class TestThroughCompleteAuthentication:
     STATE = "state-token-routing"
 
     @pytest.fixture
-    def stub_provider(self, monkeypatch):
-        """Stand in for the GitHub provider's two network calls."""
-
-        def install(user_info: SSOUserInfo):
-            class StubProvider:
-                async def exchange_code_for_token(self, code):
-                    return {"access_token": "stub-access-token"}
-
-                async def get_user_info(self, access_token):
-                    return user_info
-
-            monkeypatch.setattr(
-                "app.services.sso_service.create_sso_provider", lambda: StubProvider()
-            )
-
-        return install
-
-    @pytest.fixture
     def valid_state(self):
         _store_state_entry(self.STATE, {"return_url": "/patients/42"})
         return self.STATE
@@ -276,10 +282,10 @@ class TestThroughCompleteAuthentication:
         db_session,
         local_user,
         github_provider,
-        stub_provider,
+        stub_sso_provider,
         valid_state,
     ):
-        stub_provider(github_login())
+        stub_sso_provider(github_login())
 
         result = await service.complete_authentication("code", valid_state, db_session)
 
@@ -294,10 +300,10 @@ class TestThroughCompleteAuthentication:
         db_session,
         local_user,
         github_provider,
-        stub_provider,
+        stub_sso_provider,
         valid_state,
     ):
-        stub_provider(github_login())
+        stub_sso_provider(github_login())
 
         result = await service.complete_authentication("code", valid_state, db_session)
 
@@ -305,9 +311,9 @@ class TestThroughCompleteAuthentication:
 
     @pytest.mark.asyncio
     async def test_a_linked_user_completes_authentication_normally(
-        self, service, db_session, linked_user, stub_provider, valid_state
+        self, service, db_session, linked_user, stub_sso_provider, valid_state
     ):
-        stub_provider(github_login())
+        stub_sso_provider(github_login())
 
         result = await service.complete_authentication("code", valid_state, db_session)
 
@@ -315,3 +321,79 @@ class TestThroughCompleteAuthentication:
         assert result["is_new_user"] is False
         assert result["user"].id == linked_user.id
         assert result["return_url"] == "/patients/42"
+
+
+class TestAllowedDomainsWithNoEmail:
+    """``SSO_ALLOWED_DOMAINS`` against a provider that exposes no email.
+
+    ``_validate_email_domain`` read ``email.split()`` off ``None``, raising
+    AttributeError outside any ``try`` in ``complete_authentication`` - a 500
+    before ``_find_or_create_user`` ran at all, so neither the manual-link prompt
+    nor the linked-user lookup was reachable on a domain-restricted instance.
+
+    The policy is now explicit: no verifiable domain means refused. Skipping the
+    check instead would let any GitHub user bypass the allowlist by making their
+    email private.
+    """
+
+    STATE = "state-token-domains"
+
+    @pytest.fixture
+    def restricted_domains(self, monkeypatch):
+        monkeypatch.setattr(settings, "SSO_ALLOWED_DOMAINS", ["example.com"])
+
+    @pytest.fixture
+    def valid_state(self):
+        _store_state_entry(self.STATE, {"return_url": None})
+        return self.STATE
+
+    @pytest.mark.asyncio
+    async def test_unlinked_user_is_refused_not_crashed(
+        self,
+        service,
+        db_session,
+        local_user,
+        github_provider,
+        stub_sso_provider,
+        valid_state,
+        restricted_domains,
+    ):
+        stub_sso_provider(github_login())
+
+        with pytest.raises(SSOAuthenticationError) as exc:
+            await service.complete_authentication("code", valid_state, db_session)
+
+        assert "email" in str(exc.value).lower()
+
+    @pytest.mark.asyncio
+    async def test_linked_user_is_refused_too(
+        self,
+        service,
+        db_session,
+        linked_user,
+        stub_sso_provider,
+        valid_state,
+        restricted_domains,
+    ):
+        """Deliberate: an allowlist the account cannot satisfy is not waived by
+        having linked earlier. Flagged as a policy call - see the PR notes."""
+        stub_sso_provider(github_login())
+
+        with pytest.raises(SSOAuthenticationError):
+            await service.complete_authentication("code", valid_state, db_session)
+
+    @pytest.mark.asyncio
+    async def test_without_an_allowlist_the_flow_is_untouched(
+        self,
+        service,
+        db_session,
+        linked_user,
+        stub_sso_provider,
+        valid_state,
+    ):
+        """The default configuration - no allowlist - must be unaffected."""
+        stub_sso_provider(github_login())
+
+        result = await service.complete_authentication("code", valid_state, db_session)
+
+        assert result["user"].id == linked_user.id

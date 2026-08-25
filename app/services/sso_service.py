@@ -225,6 +225,11 @@ class SSOService:
 
         # Validate email domain if configured
         if not self._validate_email_domain(user_info.email):
+            if not user_info.email:
+                raise SSOAuthenticationError(
+                    "This provider account does not share an email address, and "
+                    "this instance only accepts specific email domains."
+                )
             raise SSOAuthenticationError(
                 f"Email domain not allowed: {user_info.email.split('@')[1]}"
             )
@@ -322,10 +327,18 @@ class SSOService:
 
         return str(exc)
 
-    def _validate_email_domain(self, email: str) -> bool:
+    def _validate_email_domain(self, email: Optional[str]) -> bool:
         """Check if email domain is allowed"""
         if not settings.SSO_ALLOWED_DOMAINS:
             return True  # No restrictions
+
+        # GitHub exposes no email for accounts with a private email setting, so
+        # there is no domain to check. Refuse rather than skip: skipping would let
+        # any GitHub user bypass the allowlist by making their email private,
+        # which is the control failing open. Reading .split() off None here also
+        # raised AttributeError outside any try, surfacing as a 500.
+        if not email:
+            return False
 
         domain = email.split("@")[1].lower()
         allowed_domains = [d.lower() for d in settings.SSO_ALLOWED_DOMAINS]
