@@ -491,7 +491,7 @@ TRASH_RETENTION_DAYS=60
 | `SSO_ISSUER_URL`                | string     | -       | For OIDC       | OIDC issuer URL                                                           |
 | `SSO_REDIRECT_URI`              | string     | -       | If SSO enabled | OAuth redirect URI                                                        |
 | `SSO_ALLOWED_DOMAINS`           | JSON array | `[]`    | No             | Allowed email domains                                                     |
-| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `10`    | No             | Max `POST /auth/sso/initiate` calls per IP per window                     |
+| `SSO_RATE_LIMIT_ATTEMPTS`       | integer    | `30`    | No             | Max `POST /api/v1/auth/sso/initiate` calls per IP per window              |
 | `SSO_RATE_LIMIT_WINDOW_MINUTES` | integer    | `10`    | No             | Rate limit window                                                         |
 | `SSO_ONLY_MODE`                 | boolean    | `false` | No             | Refuse password login and password registration; requires `SSO_ENABLED`   |
 | `SSO_AUTO_REDIRECT`             | boolean    | `false` | No             | Send unauthenticated visitors straight to the IdP; requires `SSO_ENABLED` |
@@ -507,31 +507,36 @@ Two consequences worth knowing before tuning these:
 - Behind a reverse proxy that does not set `X-Forwarded-For` or `X-Real-IP`, every
   request resolves to the proxy's address and shares a single bucket. Set those
   headers on your proxy.
-- Each sign-in attempt is one attempt against the limit. If a future release adds
-  automatic redirect-to-IdP on unauthenticated page loads, a household or CGNAT range
-  sharing one address could plausibly reach the default 10-per-10-minutes. Raise
-  `SSO_RATE_LIMIT_ATTEMPTS` if legitimate users report being turned away.
+- Each sign-in attempt is one attempt against the limit. With `SSO_AUTO_REDIRECT` on,
+  an unauthenticated page load starts one without anyone clicking anything, so a
+  household or CGNAT range sharing one address can plausibly reach the limit. The
+  default was raised from 10 to
+  30 per 10 minutes for exactly that reason; raise `SSO_RATE_LIMIT_ATTEMPTS` further if
+  legitimate users still report being turned away. Under `SSO_ONLY_MODE` there is no
+  password login to fall back on, so being throttled means no way in until the window
+  rolls off.
 
 **SSO-only mode and auto-redirect:** `SSO_ONLY_MODE` makes the identity provider the
 only way in — `POST /auth/login` and `POST /auth/register` return `403` before any
-credential check. `SSO_AUTO_REDIRECT` is intended to send unauthenticated visitors to
-the IdP without interaction, with `/login?local=1` reaching the login page directly.
+credential check, and the login page hides the password form rather than drawing one
+every submission of which is refused. `SSO_AUTO_REDIRECT` sends an unauthenticated
+visitor arriving at `/login` to the IdP without interaction.
 
-> **Server-side half only in this release.** No part of the web UI reads these two
-> settings yet: under `SSO_ONLY_MODE` the login page still draws the password form
-> (every submission is refused with `403`), and `SSO_AUTO_REDIRECT` does nothing at
-> all — no visitor is redirected anywhere. The table below is the configuration
-> contract; rows marked *(UI half pending)* describe behavior that arrives with the
-> frontend half of this feature.
+> **`/login?local=1` suppresses the redirect, not `SSO_ONLY_MODE`.** It is the escape
+> hatch for reaching the login page while auto-redirect is on — under `SSO_ONLY_MODE`
+> the password form stays hidden either way, since the server refuses those
+> credentials no matter which URL asked for the form. Any `reason=` on the login URL
+> (a sign-out, an expired session) suppresses the redirect the same way, so ending a
+> session does not bounce straight back to a provider that still holds its own.
 
 | `SSO_ENABLED` | `SSO_ONLY_MODE` | `SSO_AUTO_REDIRECT` | Result                                                           |
 | ------------- | --------------- | ------------------- | ---------------------------------------------------------------- |
 | `false`       | `false`         | `false`             | Current behavior, unchanged                                      |
 | `false`       | either flag set | either flag set     | **Startup failure** with an explicit error                       |
 | `true`        | `false`         | `false`             | Standard SSO — login form plus an SSO button                     |
-| `true`        | `true`          | `false`             | `/auth/login` and `/auth/register` return `403`; sign in with SSO |
-| `true`        | `false`         | `true`              | Password login works, and visitors are sent to the IdP *(UI half pending)* |
-| `true`        | `true`          | `true`              | Pure SSO front door *(UI half pending)*                          |
+| `true`        | `true`          | `false`             | `/auth/login` and `/auth/register` return `403`; password form hidden |
+| `true`        | `false`         | `true`              | Visitors are sent to the IdP; password login still works via `?local=1` |
+| `true`        | `true`          | `true`              | Pure SSO front door — no password form, no button to click        |
 
 **The app refuses to start** if *either* flag is set without `SSO_ENABLED`, or with an
 incomplete provider configuration. The failure is logged from the startup hook with

@@ -37,7 +37,13 @@ export type LoginRedirectReason =
   | 'session_expired'
   | 'sso_error'
   | 'account_changed'
-  | 'registered';
+  | 'registered'
+  // We could not establish whether a session exists -- the startup probe failed
+  // to reach the server at all. Distinct from 'session_expired', which means the
+  // server answered and said no. Suppresses the redirect for the same reason
+  // every other reason does: bouncing to the identity provider on a network
+  // blip hides the failure behind a round trip.
+  | 'auth_unavailable';
 
 export interface LoginRedirectOptions {
   reason?: LoginRedirectReason | null;
@@ -130,6 +136,26 @@ export function buildLoginPath({
 
   const query = params.toString();
   return query ? `${LOGIN_PATH}?${query}` : LOGIN_PATH;
+}
+
+/**
+ * Read back what buildLoginPath wrote: should the login page stay put rather
+ * than bouncing to the identity provider?
+ *
+ * The decoder lives next to the encoder deliberately. This is one contract with
+ * two halves, and the rule that "every reason suppresses" is stated once, here,
+ * where the code that attaches a reason can be seen alongside the code that acts
+ * on it. Spelling the same condition out at the reading end means a future
+ * non-suppressing reason has to be discovered in two files instead of one.
+ *
+ * Accepts a bare `reason` with no `local=1` as well: the two are always written
+ * together today, but a hand-edited or older link may carry only one, and the
+ * safe reading of an ambiguous URL is "do not bounce" -- a skipped redirect
+ * costs a click, an unwanted one is the logout loop.
+ */
+export function shouldSuppressAutoRedirect(search: string): boolean {
+  const params = new URLSearchParams(search);
+  return params.get('local') === '1' || Boolean(params.get('reason'));
 }
 
 /**

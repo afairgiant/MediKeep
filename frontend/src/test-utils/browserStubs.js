@@ -13,7 +13,11 @@ import { vi } from 'vitest';
  *
  * @returns the `assign` spy, so a caller can assert on where it was sent.
  */
-export const stubLocation = (pathname = '/dashboard', search = '', hash = '') => {
+export const stubLocation = (
+  pathname = '/dashboard',
+  search = '',
+  hash = ''
+) => {
   const assign = vi.fn();
   Object.defineProperty(window, 'location', {
     configurable: true,
@@ -30,6 +34,33 @@ export const stubLocation = (pathname = '/dashboard', search = '', hash = '') =>
     },
   });
   return assign;
+};
+
+/**
+ * Give sessionStorage a real in-memory backing store for the current test.
+ *
+ * `setupTests.js` replaces sessionStorage with bare `vi.fn()`s that store
+ * nothing, so anything that writes a value and reads it back later silently sees
+ * nothing and its test can never fail. Point those same spies at a Map when the
+ * behavior under test is "the value persisted".
+ *
+ * Storage being *unavailable* is the other half of that story and has its own
+ * helper below -- code that depends on storage generally has to work without it.
+ *
+ * @returns the backing Map, so a caller can seed or inspect it.
+ */
+export const stubWorkingSessionStorage = () => {
+  const store = new Map();
+  vi.mocked(sessionStorage.getItem).mockImplementation(
+    key => store.get(key) ?? null
+  );
+  vi.mocked(sessionStorage.setItem).mockImplementation((key, value) => {
+    store.set(key, String(value));
+  });
+  vi.mocked(sessionStorage.removeItem).mockImplementation(key => {
+    store.delete(key);
+  });
+  return store;
 };
 
 /**

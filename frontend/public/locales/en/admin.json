@@ -532,7 +532,10 @@
     "resetAll": "Reset All",
     "saveAllChanges": "Save All Changes",
     "sso": {
+      "autoRedirect": "Auto-Redirect to Provider",
+      "envOnly": "These are set by environment variable and cannot be changed here.",
       "ssoDisabledInfo": "SSO is currently disabled. To enable SSO, configure the following environment variables and restart the application:",
+      "ssoOnly": "SSO-Only Mode",
       "ssoRegistration": "SSO Registration",
       "testConnection": "Test Connection",
       "testConnectionDesc": "Test the SSO provider connection and configuration",

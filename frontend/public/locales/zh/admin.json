@@ -532,7 +532,10 @@
     "resetAll": "全部重置",
     "saveAllChanges": "保存所有更改",
     "sso": {
+      "autoRedirect": "自动重定向到提供程序",
+      "envOnly": "这些设置由环境变量控制，无法在此处更改。",
       "ssoDisabledInfo": "SSO当前已禁用。要启用SSO，请配置以下环境变量并重启应用程序：",
+      "ssoOnly": "仅 SSO 模式",
       "ssoRegistration": "SSO注册",
       "testConnection": "测试连接",
       "testConnectionDesc": "测试SSO提供商连接和配置",

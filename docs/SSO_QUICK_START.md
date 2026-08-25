@@ -102,6 +102,21 @@ And add the same URL to your Google/GitHub app settings.
 
 ## Advanced Options
 
+### Make SSO the Only Way In (Optional)
+```bash
+SSO_ONLY_MODE=true      # password login and registration return 403; the form is hidden
+SSO_AUTO_REDIRECT=true  # visitors go straight to your provider, no button to click
+```
+
+Both default to `false` and both require `SSO_ENABLED=true` — the app refuses to start
+otherwise, rather than hiding the login form with no SSO behind it.
+
+**Before you turn this on, know how to turn it off.** If your provider goes down, set
+`SSO_ONLY_MODE=false` and restart to sign in locally. `/login?local=1` skips the automatic
+redirect but does **not** re-enable password login. Full recovery steps are in the
+[Setup Guide](SSO_SETUP_GUIDE.md#break-glass-getting-back-in-when-sso-is-broken).
+
+
 ### Restrict to Family Domains (Optional)
 ```bash
 # Allow any Google account (most common)

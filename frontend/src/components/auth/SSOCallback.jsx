@@ -9,6 +9,7 @@ import logger from '../../services/logger';
 import { buildLoginPath } from '../../utils/loginRedirect';
 import { safeInternalPath } from '../../utils/safeInternalPath';
 import { takeSSOReturnUrl } from '../../utils/ssoReturnUrl';
+import { clearAutoRedirectAttempts } from '../../utils/autoRedirectGuard';
 
 /**
  * Where to send a user after any successful SSO login.
@@ -33,6 +34,11 @@ const getPostSSORedirectPath = ({
   // Consume the stored value on every path so it cannot leak into a later login,
   // even when the branches below do not use it.
   const storedReturnUrl = takeSSOReturnUrl();
+
+  // Authentication succeeded, so whatever bounces preceded it were not a loop.
+  // Reached from all three SSO entry points (callback, conflict resolution,
+  // GitHub linking), which is why it sits here rather than at each of them.
+  clearAutoRedirectAttempts();
 
   // Every other route is blocked until the password is changed
   if (mustChangePassword) {

@@ -532,7 +532,10 @@
     "resetAll": "Tout réinitialiser",
     "saveAllChanges": "Sauvegarder tous les changements",
     "sso": {
+      "autoRedirect": "Redirection automatique vers le fournisseur",
+      "envOnly": "Ces paramètres sont définis par des variables d'environnement et ne peuvent pas être modifiés ici.",
       "ssoDisabledInfo": "Le SSO est actuellement désactivé. Pour l'activer, configurez les variables d'environnement suivantes et redémarrez l'application :",
+      "ssoOnly": "Mode SSO uniquement",
       "ssoRegistration": "Enregistrement via SSO",
       "testConnection": "Tester la connexion",
       "testConnectionDesc": "Testez la connexion et la configuration du fournisseur SSO",

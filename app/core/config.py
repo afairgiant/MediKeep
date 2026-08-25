@@ -279,7 +279,17 @@ class Settings:  # App Info
     SSO_ALLOWED_DOMAINS: list = json.loads(os.getenv("SSO_ALLOWED_DOMAINS", "[]"))
 
     # Basic rate limiting (simple approach)
-    SSO_RATE_LIMIT_ATTEMPTS: int = int(os.getenv("SSO_RATE_LIMIT_ATTEMPTS", "10"))
+    #
+    # 30, not 10. Ten per ten minutes per IP was sized for a deliberate click on
+    # "Sign in with SSO". Under SSO_AUTO_REDIRECT this endpoint is called on every
+    # unauthenticated page load, so a household or an office behind one NAT
+    # reaches ten in ordinary use - and under SSO_ONLY_MODE, being rate limited
+    # means no way into the app at all until the window rolls off.
+    #
+    # Loosening it is affordable because the limit exists to bound the in-memory
+    # state store, and that store is now swept (see _sweep_expired_states).
+    # Per-process either way: the container pins --workers 1.
+    SSO_RATE_LIMIT_ATTEMPTS: int = int(os.getenv("SSO_RATE_LIMIT_ATTEMPTS", "30"))
     SSO_RATE_LIMIT_WINDOW_MINUTES: int = int(
         os.getenv("SSO_RATE_LIMIT_WINDOW_MINUTES", "10")
     )

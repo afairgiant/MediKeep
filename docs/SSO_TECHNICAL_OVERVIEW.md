@@ -496,10 +496,18 @@ works.
 
 `POST /auth/sso/initiate` is unauthenticated and mints a state entry per call, so it is
 throttled per client IP by `SSO_RATE_LIMIT_ATTEMPTS` per `SSO_RATE_LIMIT_WINDOW_MINUTES`
-(defaults: 10 per 10 minutes). The check runs *before* the state entry is created, which is
+(defaults: 30 per 10 minutes). The check runs *before* the state entry is created, which is
 what bounds the store against an anonymous caller. Exceeding it returns 429 with
 `Retry-After`, `X-RateLimit-*`, and `X-Error-Code: sso_rate_limited`, and logs
 `sso_initiate_rate_limited`.
+
+Note the 429's machine-readable marker travels three ways, and only one is always
+readable. The **status code** is; `error_code: "RATE-429"` in the body is; the
+`X-Error-Code` and `Retry-After` *headers* are not, unless the response is same-origin or
+the API lists them in `expose_headers` (it does — see `app/main.py`). A reverse proxy can
+still strip them, so a client must treat the retry seconds as optional and branch on the
+status. The body field is `message`, not `detail`: the global handler in
+`app/core/http/error_handling.py` rewrites every `HTTPException` on the way out.
 
 The limiter is `app/core/utils/rate_limit.SlidingWindowRateLimiter`, shared with the
 system log-level and medical-specialty create endpoints. Counters are per-process and do

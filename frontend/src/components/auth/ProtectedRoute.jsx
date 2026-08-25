@@ -5,6 +5,7 @@ import { isUserAdmin } from '../../utils/authUtils';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { notifyError, notifyWarning } from '../../utils/notifyTranslated';
 import { buildLoginPath } from '../../utils/loginRedirect';
+import { useRegistrationAvailable } from '../../hooks/useRegistrationAvailable';
 
 /**
  * Enhanced Protected Route Component
@@ -161,10 +162,20 @@ export function RoleRoute({ role, roles, children, ...props }) {
  * If the user must change their password, they are sent to /change-password
  * rather than the default dashboard so the forced-change flow is not skipped.
  */
-export function PublicRoute({ children, redirectTo = '/dashboard' }) {
+export function PublicRoute({
+  children,
+  redirectTo = '/dashboard',
+  requiresRegistration = false,
+}) {
   const { isAuthenticated, isLoading, mustChangePassword } = useAuth();
+  // Opt-in, and skipped entirely for a signed-in user: they are being sent to
+  // the dashboard below and should not wait on a request that cannot change
+  // that. /login and the SSO callback pass no prop and issue no request.
+  const registration = useRegistrationAvailable(
+    requiresRegistration && !isAuthenticated
+  );
 
-  if (isLoading) {
+  if (isLoading || registration.loading) {
     return <LoadingSpinner message="Loading..." />;
   }
 
@@ -175,6 +186,17 @@ export function PublicRoute({ children, redirectTo = '/dashboard' }) {
         replace
       />
     );
+  }
+
+  // Registration is unavailable -- because SSO_ONLY_MODE is on, or because
+  // ALLOW_USER_REGISTRATION is off. Either way this page can do nothing but
+  // fail at submit, so send them somewhere that can help.
+  //
+  // No reason attached: nobody was signed out. Attaching one would tell a
+  // visitor they had been, and would suppress a redirect to the identity
+  // provider that should happen under SSO_AUTO_REDIRECT.
+  if (requiresRegistration && !registration.available) {
+    return <Navigate to={buildLoginPath()} replace />;
   }
 
   return children;

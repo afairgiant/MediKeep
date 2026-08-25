@@ -70,7 +70,20 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept", "X-Request-ID"],
-    expose_headers=["X-Request-ID", "Content-Disposition"],
+    expose_headers=[
+        "X-Request-ID",
+        "Content-Disposition",
+        # Rate-limit responses are only actionable if the client can read them.
+        # Requests are same-origin in production, but the dev server talks to
+        # :8000 cross-origin, where anything not listed here is invisible to
+        # JavaScript. Without these, a 429's wait time renders in production and
+        # silently reads null throughout development.
+        "Retry-After",
+        "X-RateLimit-Limit",
+        "X-RateLimit-Remaining",
+        "X-RateLimit-Reset",
+        "X-Error-Code",
+    ],
 )
 
 # Setup comprehensive error handling system

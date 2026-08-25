@@ -247,13 +247,17 @@ Base path: `/api/v1/auth/sso`
 ```
 
 - `sso_only` — `SSO_ONLY_MODE`. `POST /auth/login` and `POST /auth/register` are
-  refused server-side with `403`, before any credential check. The web UI does not
-  read this field yet, so the login page still draws the password form; hiding it
-  ships with the frontend half of this feature
-- `auto_redirect` — `SSO_AUTO_REDIRECT`. Advertised for clients that will send
-  unauthenticated visitors straight to the IdP. It has **no effect in this release**
-  — nothing reads it, and the backend behaves identically whether it is set or not
-  (beyond refusing to boot when it is set without `SSO_ENABLED`)
+  refused server-side with `403`, before any credential check. The web UI reads this
+  field and hides the password form, leaving the SSO button and a notice. `?local=1`
+  does **not** bring the form back — it suppresses the auto-redirect and nothing else,
+  and the server refuses those credentials regardless
+- `auto_redirect` — `SSO_AUTO_REDIRECT`. The web UI sends an unauthenticated visitor
+  arriving at `/login` straight to the provider through `POST /auth/sso/initiate`,
+  with no button to click. A `?local=1` or any `reason=` on the login URL suppresses
+  it, which is what stops a sign-out from bouncing back into a provider that still
+  holds its session. The backend behaves identically whether the flag is set or not
+  (beyond refusing to boot when it is set without `SSO_ENABLED`) — for the API this
+  field is advertisement only
 - `registration_enabled` — the raw `ALLOW_USER_REGISTRATION` setting, which **in
   this payload** governs whether SSO may provision new accounts. `SSO_ONLY_MODE`
   does not disable that, so this field is unaffected by it. The different question
@@ -273,7 +277,7 @@ Base path: `/api/v1/auth/sso`
 - **Purpose**: Start SSO authentication flow
 - **Authentication**: No
 - **Rate Limited**: yes — `SSO_RATE_LIMIT_ATTEMPTS` per client IP per
-  `SSO_RATE_LIMIT_WINDOW_MINUTES` (defaults: 10 per 10 minutes)
+  `SSO_RATE_LIMIT_WINDOW_MINUTES` (defaults: 30 per 10 minutes)
 - **Query Parameters**:
   - `return_url` (string, optional): where to send the user after authentication.
     Must be a **root-relative internal path** (`/patients/42`,

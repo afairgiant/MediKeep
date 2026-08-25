@@ -532,7 +532,10 @@
     "resetAll": "Alles herstellen",
     "saveAllChanges": "Alle wijzigingen opslaan",
     "sso": {
+      "autoRedirect": "Automatisch doorsturen naar provider",
+      "envOnly": "Deze instellingen worden bepaald door omgevingsvariabelen en kunnen hier niet worden gewijzigd.",
       "ssoDisabledInfo": "SSO is momenteel uitgeschakeld. Om SSO in te schakelen, configureer de volgende omgevingsvariabelen en herstart de applicatie:",
+      "ssoOnly": "Alleen-SSO-modus",
       "ssoRegistration": "SSO-registratie",
       "testConnection": "Verbinding testen",
       "testConnectionDesc": "Test de SSO-providerverbinding en -configuratie",

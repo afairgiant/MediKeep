@@ -532,7 +532,10 @@
     "resetAll": "Restablecer todo",
     "saveAllChanges": "Guardar todos los cambios",
     "sso": {
+      "autoRedirect": "Redirección automática al proveedor",
+      "envOnly": "Estos valores se definen mediante variables de entorno y no se pueden cambiar aquí.",
       "ssoDisabledInfo": "SSO está actualmente deshabilitado. Para habilitar SSO, configure las siguientes variables de entorno y reinicie la aplicación:",
+      "ssoOnly": "Modo solo SSO",
       "ssoRegistration": "Registro por SSO",
       "testConnection": "Probar conexión",
       "testConnectionDesc": "Probar la conexión y configuración del proveedor de SSO",

@@ -532,7 +532,10 @@
     "resetAll": "Återställ allt",
     "saveAllChanges": "Spara alla ändringar",
     "sso": {
+      "autoRedirect": "Automatisk omdirigering till leverantör",
+      "envOnly": "Dessa inställningar styrs av miljövariabler och kan inte ändras här.",
       "ssoDisabledInfo": "SSO är för närvarande inaktiverat. För att aktivera SSO, konfigurera följande miljövariabler och starta om applikationen:",
+      "ssoOnly": "Endast SSO-läge",
       "ssoRegistration": "SSO-registrering",
       "testConnection": "Testa anslutning",
       "testConnectionDesc": "Testa SSO-leverantörens anslutning och konfiguration",

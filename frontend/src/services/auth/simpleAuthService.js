@@ -356,27 +356,31 @@ class SimpleAuthService {
     }
   }
 
+  /**
+   * The current user, or null when the server says there is no session.
+   *
+   * Throws when we could not ask at all. Those are different facts and the
+   * caller needs both: under SSO_AUTO_REDIRECT, "no session" is a visitor who
+   * should be sent to the identity provider, while "we could not ask" is a
+   * network blip that must not bounce anyone anywhere.
+   *
+   * This used to catch everything and return null, which collapsed the two --
+   * a failed fetch at startup was indistinguishable from a valid "you are not
+   * signed in", so a blip during boot silently redirected the user off-site.
+   */
   async getCurrentUser() {
-    try {
-      const response = await this.makeRequest('/users/me', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
+    const response = await this.makeRequest('/users/me', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-      if (response.ok) {
-        return await response.json();
-      }
-
-      // Non-2xx means the cookie/session is invalid or the user was deleted
-      return null;
-    } catch (error) {
-      logger.error('Error fetching current user from backend', {
-        error: error.message,
-        errorType: error.constructor.name,
-        category: 'auth_user_fetch_error',
-      });
-      return null;
+    if (response.ok) {
+      return await response.json();
     }
+
+    // Non-2xx means the cookie/session is invalid or the user was deleted.
+    // The server answered; the answer is "no".
+    return null;
   }
 
   // Refresh token (not implemented for this simple auth system)
@@ -524,14 +528,41 @@ class SimpleAuthService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Seconds, as a string. Absent whenever a reverse proxy strips it, and
+        // absent in development regardless: makeRequest tries the direct backend
+        // origin first, which is cross-origin from the dev server, and only the
+        // headers named in the API's CORS expose list are readable there.
+        // Callers must treat it as optional and fall back to generic copy.
+        const retryAfter = Number.parseInt(
+          response.headers.get('Retry-After') ?? '',
+          10
+        );
+
+        // This app's error envelope is `message`, not `detail`. Every
+        // HTTPException is rewritten by the global handler before it leaves the
+        // server, which copies `detail` into `message`. Reading `detail` here
+        // discarded the server's text on every failure of this endpoint -- the
+        // rate limit's wait time and the return_url rejection alike -- and left
+        // every one of them showing the same generic fallback below.
+        const error = new Error(
+          errorData.message || 'Failed to start SSO authentication'
+        );
+        error.status = response.status;
+        error.errorCode = errorData.error_code || null;
+        error.retryAfterSeconds = Number.isFinite(retryAfter)
+          ? retryAfter
+          : null;
+
+        // Structured fields rather than the whole payload: `message` is
+        // server-rendered text and this is what anyone debugging actually reads.
         logger.error('Failed to initiate SSO', {
-          status: response.status,
-          errorData,
+          status: error.status,
+          errorCode: error.errorCode,
+          retryAfterSeconds: error.retryAfterSeconds,
           category: 'sso_initiate',
         });
-        throw new Error(
-          errorData.detail || 'Failed to start SSO authentication'
-        );
+        throw error;
       }
 
       const data = await response.json();
