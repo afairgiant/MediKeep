@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import { PublicRoute } from './ProtectedRoute';
 import { resetRegistrationAvailability } from '../../hooks/useRegistrationAvailable';
@@ -25,6 +25,21 @@ vi.spyOn(authService, 'checkRegistrationEnabled');
  * which is why the guard keys off the endpoint that folds both in.
  */
 
+/**
+ * Reports the URL the guard actually redirected to. Asserting on rendered markup
+ * cannot tell "no reason was attached" from "a reason was attached and the login
+ * page happens not to print it".
+ */
+const LoginPage = () => {
+  const location = useLocation();
+  return (
+    <div>
+      <span>login page</span>
+      <span data-testid="login-search">{location.search}</span>
+    </div>
+  );
+};
+
 const renderUserCreation = () =>
   render(
     <MemoryRouter initialEntries={['/user-creation']}>
@@ -37,7 +52,7 @@ const renderUserCreation = () =>
             </PublicRoute>
           }
         />
-        <Route path="/login" element={<div>login page</div>} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<div>dashboard</div>} />
       </Routes>
     </MemoryRouter>
@@ -68,10 +83,13 @@ describe('when registration is unavailable', () => {
       registration_enabled: false,
     });
 
-    const { container } = renderUserCreation();
+    renderUserCreation();
     await screen.findByText('login page');
 
-    expect(container.innerHTML).not.toContain('reason=');
+    const params = new URLSearchParams(
+      screen.getByTestId('login-search').textContent
+    );
+    expect(params.get('reason')).toBeNull();
   });
 });
 

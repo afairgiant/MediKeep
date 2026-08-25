@@ -292,6 +292,20 @@ describe('when the provider call fails', () => {
     expect(authService.initiateSSOLogin).toHaveBeenCalledTimes(1);
   });
 
+  test('a 200 with no auth_url is a failure, not a navigation', async () => {
+    // Assigning an empty value navigates relative to the current page, which
+    // reloads /login having spent the one-shot guard -- no notice, no way in.
+    authService.initiateSSOLogin.mockResolvedValue({ provider: 'oidc' });
+
+    render(<Login />);
+
+    expect(
+      await screen.findByTestId('auto-redirect-failed')
+    ).toBeInTheDocument();
+    await flushEffects();
+    expect(assign).not.toHaveBeenCalled();
+  });
+
   test('the SSO button stays available as the manual way in', async () => {
     // Under SSO_ONLY_MODE there is no password form behind this. If the button
     // went too, a throttled instance would be a blank page.

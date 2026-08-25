@@ -17,10 +17,6 @@ from fastapi.testclient import TestClient
 
 from app.core.config import settings
 
-# Read rather than hardcode: the middleware only answers for an allowed origin,
-# so a hardcoded value silently stops testing anything if the default changes.
-ALLOWED_ORIGIN = settings.CORS_ALLOWED_ORIGINS[0]
-
 RATE_LIMIT_HEADERS = [
     "Retry-After",
     "X-RateLimit-Limit",
@@ -31,7 +27,24 @@ RATE_LIMIT_HEADERS = [
 
 
 @pytest.fixture(scope="module")
-def exposed_headers() -> set:
+def allowed_origin() -> str:
+    """An origin the CORS middleware will actually answer for.
+
+    Read rather than hardcoded: the middleware only answers for an allowed
+    origin, so a hardcoded value silently stops testing anything if the default
+    changes. A fixture rather than a module constant because
+    `CORS_ALLOWED_ORIGINS` can be configured empty -- subscripting at import time
+    turned that into an IndexError during collection, failing the whole module
+    instead of skipping it.
+    """
+    origins = settings.CORS_ALLOWED_ORIGINS
+    if not origins:
+        pytest.skip("CORS_ALLOWED_ORIGINS is empty -- no origin to assert against")
+    return origins[0]
+
+
+@pytest.fixture(scope="module")
+def exposed_headers(allowed_origin: str) -> set:
     """The exposed-header set, fetched once.
 
     Module-scoped deliberately. The answer is middleware configuration and cannot
@@ -46,7 +59,7 @@ def exposed_headers() -> set:
 
     with TestClient(app) as module_client:
         response = module_client.get(
-            "/api/v1/auth/sso/config", headers={"Origin": ALLOWED_ORIGIN}
+            "/api/v1/auth/sso/config", headers={"Origin": allowed_origin}
         )
 
     assert response.status_code == 200

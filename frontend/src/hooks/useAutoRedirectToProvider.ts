@@ -101,6 +101,13 @@ export function useAutoRedirectToProvider({
         // survives whichever way the user ends up signing in.
         storeSSOReturnUrl(returnPath);
         const result = await authService.initiateSSOLogin(returnPath);
+        // A 200 carrying no URL is still a failure. Assigning an empty or
+        // undefined value navigates relative to the current page instead of to
+        // the provider, which reloads /login and burns the one-shot guard --
+        // the visitor lands on a page with no notice and no way in.
+        if (!result?.auth_url) {
+          throw new Error('SSO initiate returned no auth_url');
+        }
         window.location.assign(result.auth_url);
       } catch (err: any) {
         // Stop either way. Retrying into a rate limit is how a throttled
