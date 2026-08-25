@@ -22,7 +22,7 @@ from app.auth.sso.base_provider import SSOUserInfo
 from app.core.config import settings
 from app.crud.user import user as user_crud
 from app.models.models import User
-from app.services.sso_service import SSOService, _state_storage
+from app.services.sso_service import SSOService, _state_storage, _store_state_entry
 from tests.api.conftest import LOCAL_PASSWORD
 from tests.utils.sso import store_github_link_token
 
@@ -227,3 +227,91 @@ class TestGetByExternalId:
             )
             is None
         )
+
+
+class TestThroughCompleteAuthentication:
+    """The callback path, not just the routing helper underneath it.
+
+    Every other test here (and in ``test_sso_github_manual_link.py``) calls
+    ``_find_or_create_user`` or ``resolve_github_manual_link`` directly. That
+    leaves the caller unexercised, and the caller had a defect: its success log
+    read ``result["is_new_user"]``, a key the manual-link response does not carry,
+    so an unknown private-email GitHub user raised KeyError inside the endpoint's
+    broad ``except`` and got a 500 instead of the prompt. Linking could never
+    begin, which makes the second-login fix above unreachable for a new user.
+
+    The provider is stubbed because it does network I/O; the method under test is
+    not.
+    """
+
+    STATE = "state-token-routing"
+
+    @pytest.fixture
+    def stub_provider(self, monkeypatch):
+        """Stand in for the GitHub provider's two network calls."""
+
+        def install(user_info: SSOUserInfo):
+            class StubProvider:
+                async def exchange_code_for_token(self, code):
+                    return {"access_token": "stub-access-token"}
+
+                async def get_user_info(self, access_token):
+                    return user_info
+
+            monkeypatch.setattr(
+                "app.services.sso_service.create_sso_provider", lambda: StubProvider()
+            )
+
+        return install
+
+    @pytest.fixture
+    def valid_state(self):
+        _store_state_entry(self.STATE, {"return_url": "/patients/42"})
+        return self.STATE
+
+    @pytest.mark.asyncio
+    async def test_unknown_private_email_user_gets_the_prompt_not_a_keyerror(
+        self,
+        service,
+        db_session,
+        local_user,
+        github_provider,
+        stub_provider,
+        valid_state,
+    ):
+        stub_provider(github_login())
+
+        result = await service.complete_authentication("code", valid_state, db_session)
+
+        assert result["github_manual_link"] is True
+        assert result["github_user_info"]["github_id"] == GITHUB_ID
+        assert "is_new_user" not in result
+
+    @pytest.mark.asyncio
+    async def test_the_prompt_response_still_carries_the_return_url(
+        self,
+        service,
+        db_session,
+        local_user,
+        github_provider,
+        stub_provider,
+        valid_state,
+    ):
+        stub_provider(github_login())
+
+        result = await service.complete_authentication("code", valid_state, db_session)
+
+        assert result["return_url"] == "/patients/42"
+
+    @pytest.mark.asyncio
+    async def test_a_linked_user_completes_authentication_normally(
+        self, service, db_session, linked_user, stub_provider, valid_state
+    ):
+        stub_provider(github_login())
+
+        result = await service.complete_authentication("code", valid_state, db_session)
+
+        assert "github_manual_link" not in result
+        assert result["is_new_user"] is False
+        assert result["user"].id == linked_user.id
+        assert result["return_url"] == "/patients/42"

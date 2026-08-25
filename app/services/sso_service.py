@@ -245,11 +245,20 @@ class SSOService:
             )
             raise SSOAuthenticationError("Failed to create or link user account")
 
-        # Log success (handle both regular and conflict responses)
+        # Log success (handle regular, conflict and manual-link responses)
         if result.get("conflict"):
             logger.info(
                 f"SSO authentication detected conflict for {user_info.email}",
                 extra={"category": "sso", "event": "auth_conflict"},
+            )
+        elif result.get("github_manual_link"):
+            # No account has been identified yet, so there is no authentication to
+            # report and no is_new_user to report it with - reading one here raised
+            # KeyError, which the endpoint's broad except turned into a 500. The
+            # prompt this response exists to render never reached the user.
+            logger.info(
+                "SSO authentication needs a manual GitHub account link",
+                extra={"category": "sso", "event": "github_manual_link_required"},
             )
         else:
             logger.info(
