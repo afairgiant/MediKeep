@@ -555,11 +555,12 @@ than being read as `false`. Everywhere else `false` merely means "off", but for
 an instance accepting credentials its operator believes are refused — with nothing in
 the logs to say so.
 
-Compose strips unquoted ` #` comments from env files and trims whitespace, so the plain
-inline-comment case works. The values that actually arrive unreadable are a typo (`fasle`),
-a quoted comment (`"true # sso only"`), a hash with no space before it (`true# sso only`),
-or anything set through a vehicle that does no parsing — `docker run -e`, an Unraid template
-field, a literal in the compose `environment:` block.
+Compose strips `#` comments from env files when the hash is unquoted and preceded by a
+space, and trims whitespace, so the plain inline-comment case works. The values that
+actually arrive unreadable are a typo (`fasle`), a quoted comment (`"true # sso only"`),
+a hash with no space before it (`true# sso only`), or anything set through a vehicle that
+does no parsing — `docker run -e`, an Unraid template field, a literal in the compose
+`environment:` block.
 
 If `SSO_ONLY_MODE` is combined with registration disabled, no new user can enter by
 any self-service route. That is valid for a sealed instance and is logged as a startup

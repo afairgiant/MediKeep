@@ -188,8 +188,9 @@ Accepted values are `true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`, in any case
 variables are parsed strictly: anything else fails the boot with an error naming the variable
 and echoing what you set.
 
-Docker Compose strips unquoted ` #` comments from env files and trims whitespace, so a plain
-`SSO_ONLY_MODE=true # my note` reaches the app as `true` and works. It reaches the app *broken*
+Docker Compose strips `#` comments from env files when the hash is unquoted and preceded by a
+space, and trims whitespace, so a plain `SSO_ONLY_MODE=true # my note` reaches the app as
+`true` and works. It reaches the app *broken*
 when the quoting hides the comment from Compose, or when the value never passes through Compose
 at all: `SSO_ONLY_MODE="true # my note"`, `SSO_ONLY_MODE=true# my note` (no space before the
 hash), a `-e` argument to `docker run`, or an Unraid template field. Simplest to put comments on
@@ -331,9 +332,12 @@ expect a forced password change on first sign-in.
 SSO_ONLY_MODE=false
 ```
 
-**Then recreate the container** — `docker compose up -d`, or the equivalent for your setup.
-A plain `docker restart` reuses the old environment and will not pick the change up, which looks
-exactly like the setting having no effect.
+**Then restart the application so it reads the new value.** Under Docker that means recreating
+the container — `docker compose up -d`, or the equivalent for your setup; a plain `docker restart`
+reuses the old environment and will not pick the change up, which looks exactly like the setting
+having no effect. Running directly on a host, stop and start the process itself (your service unit,
+or the `python run.py` you launched): the environment is read once at startup, so editing `.env`
+under a running process changes nothing until it restarts.
 
 If `SSO_AUTO_REDIRECT` is also on, either set it to `false` in the same edit or reach the login
 page at `/login?local=1`. With it left on, visiting the app still bounces you to the identity
@@ -347,14 +351,19 @@ originally:
 | Docker Compose | the `.env` file next to `docker-compose.yml`, or the `environment:` block in the file itself if you set it there — the block wins |
 | Unraid | the template variable in the container's edit screen, not any `.env` on the array |
 | `docker run` | the `-e SSO_ONLY_MODE=...` argument; recreate the container, restarting is not enough |
+| Directly on a host | the `.env` file in the repo root, or whatever your service unit exports — an exported variable wins over `.env`; restart the process |
 
 Setting it in the wrong one of these is a common way to spend an hour: the app comes up healthy,
 still refuses your password, and nothing in the log contradicts you. If you are unsure what the
 container actually received, ask it directly:
 
 ```bash
+# Container deployments
 docker compose exec medikeep-app printenv SSO_ONLY_MODE
 ```
+
+On a host install, check the environment of the running process rather than the file you edited —
+`.env` and what the process actually loaded can disagree after an incomplete restart.
 
 Watch the startup logs. A typo in the recovery value now fails the boot with a message naming
 the variable and echoing what you set — that is deliberate. Without it, `SSO_ONLY_MODE=fasle`

@@ -177,9 +177,10 @@ cannot make itself unfixable:
    than a login page nobody can get past. That includes a value it cannot parse:
    `SSO_ONLY_MODE` and `SSO_AUTO_REDIRECT` accept `true`/`false` (also `1`/`0`,
    `yes`/`no`, `on`/`off`, any case), and anything else fails the boot instead of
-   being read as `false`. Compose strips an unquoted ` #` comment from this file, so
-   `SSO_ONLY_MODE=true # sso only` works here — but not when quoted, when no space
-   precedes the hash, or via `docker run -e` or an Unraid field.
+   being read as `false`. Compose strips a `#` comment from this file when the hash is
+   unquoted and preceded by a space, so `SSO_ONLY_MODE=true # sso only` works here — but
+   not when quoted, when no space precedes the hash, or via `docker run -e` or an Unraid
+   field.
 
 If registration is also disabled (`ALLOW_USER_REGISTRATION=false`, or the admin
 setting), no new user can enter by any self-service route. That is a legitimate
