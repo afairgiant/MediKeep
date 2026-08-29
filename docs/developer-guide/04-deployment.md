@@ -512,9 +512,12 @@ Two consequences worth knowing before tuning these:
   household or CGNAT range sharing one address can plausibly reach the limit. The
   default was raised from 10 to
   30 per 10 minutes for exactly that reason; raise `SSO_RATE_LIMIT_ATTEMPTS` further if
-  legitimate users still report being turned away. Under `SSO_ONLY_MODE` there is no
+  anyone is turned away in ordinary use. Under `SSO_ONLY_MODE` there is no
   password login to fall back on, so being throttled means no way in until the window
-  rolls off.
+  rolls off — and on a self-hosted instance the person that happens to may well be you,
+  with no second account to check from. The limit is there to bound the sign-in state
+  store, not to stop a determined attacker, so tune it for the household and not for the
+  worst case.
 
 **SSO-only mode and auto-redirect:** `SSO_ONLY_MODE` makes the identity provider the
 only way in — `POST /auth/login` and `POST /auth/register` return `403` before any
@@ -561,7 +564,11 @@ warning rather than a failure.
 these settings, so a broken IdP cannot make itself unfixable:
 
 1. Set `SSO_ONLY_MODE=false`, restart, sign in locally — the primary path, and the
-   only one that works when the IdP itself is unreachable.
+   only one that works when the IdP itself is unreachable. It assumes some account has
+   a local password: accounts created through the IdP (`auth_method='sso'`) have none,
+   while a local account that later linked an identity is `hybrid` and keeps its own.
+   If every account is pure SSO, turn the flag off and then create a password admin
+   with step 2's create form — `--promote` preserves a password that is not there.
 2. If SSO still works but no account has admin rights, run
    `app/scripts/create_emergency_admin.py --username <name> --promote` against an
    account that can sign in through the IdP; promotion preserves the existing

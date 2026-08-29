@@ -52,6 +52,11 @@ environment:
   # SSO_ENABLED=true; the container refuses to start otherwise.
   SSO_ONLY_MODE: ${SSO_ONLY_MODE:-false}
   SSO_AUTO_REDIRECT: ${SSO_AUTO_REDIRECT:-false}
+
+  # Optional - per-IP throttle on sign-in attempts. Worth raising with
+  # SSO_AUTO_REDIRECT on, where every unauthenticated page load is one attempt.
+  SSO_RATE_LIMIT_ATTEMPTS: ${SSO_RATE_LIMIT_ATTEMPTS:-30}
+  SSO_RATE_LIMIT_WINDOW_MINUTES: ${SSO_RATE_LIMIT_WINDOW_MINUTES:-10}
 ```
 
 ### 3. Restart the containers
@@ -104,6 +109,8 @@ SSO_ISSUER_URL=https://homelab.local/auth/realms/family
 | `SSO_ALLOWED_DOMAINS` | No | `[]` | JSON array of allowed email domains |
 | `SSO_ONLY_MODE` | No | `false` | Refuse password login and password registration |
 | `SSO_AUTO_REDIRECT` | No | `false` | Send unauthenticated visitors straight to the IdP |
+| `SSO_RATE_LIMIT_ATTEMPTS` | No | `30` | Sign-in attempts allowed per IP per window |
+| `SSO_RATE_LIMIT_WINDOW_MINUTES` | No | `10` | Length of the rate limit window |
 
 ## SSO-Only Mode and Auto-Redirect
 

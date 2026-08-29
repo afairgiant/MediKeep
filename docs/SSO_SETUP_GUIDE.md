@@ -287,8 +287,44 @@ flag, not after.
 **1. Turn the flag off and sign in locally.** This is the primary path, and the only one that
 works when the provider itself is down.
 
+This step assumes something worth checking *before* you enable the flag: **that at least one
+account still has a local password.** `auth_method='sso'` accounts — the ones created by signing
+in through the provider — have no password at all, so turning the flag off gives them a login
+form they cannot answer. An account that existed locally first and later linked a provider
+identity becomes `hybrid` and keeps its password; one that was born at the provider never had
+one.
+
+If every account on the instance is pure SSO, this step is still required but is not enough on
+its own — turn the flag off here, then use step 2's *create* form to make an account that has a
+password:
+
+```bash
+python app/scripts/create_emergency_admin.py --username emergency --password "..."
+```
+
+Order matters. That account cannot sign in while `SSO_ONLY_MODE=true`, because `/auth/login`
+returns 403 before looking at any credential. It is created with `must_change_password=True`, so
+expect a forced password change on first sign-in.
+
 ```bash
 SSO_ONLY_MODE=false   # then restart the container
+```
+
+**Change it where the container actually reads it from**, which is not always where you set it
+originally:
+
+| How you deploy | Where the value lives |
+|---|---|
+| Docker Compose | the `.env` file next to `docker-compose.yml`, or the `environment:` block in the file itself if you set it there — the block wins |
+| Unraid | the template variable in the container's edit screen, not any `.env` on the array |
+| `docker run` | the `-e SSO_ONLY_MODE=...` argument; recreate the container, restarting is not enough |
+
+Setting it in the wrong one of these is a common way to spend an hour: the app comes up healthy,
+still refuses your password, and nothing in the log contradicts you. If you are unsure what the
+container actually received, ask it directly:
+
+```bash
+docker compose exec medikeep-app printenv SSO_ONLY_MODE
 ```
 
 Watch the startup logs. A typo in the recovery value now fails the boot with a message naming

@@ -66,6 +66,13 @@ services:
       # start otherwise, rather than booting with no usable way to sign in.
       SSO_ONLY_MODE: ${SSO_ONLY_MODE:-false}
       SSO_AUTO_REDIRECT: ${SSO_AUTO_REDIRECT:-false}
+      # Per-IP throttle on POST /auth/sso/initiate. Worth raising with
+      # SSO_AUTO_REDIRECT on, where every unauthenticated page load is one
+      # attempt. The defaults repeat config.py's because an empty value is not
+      # the same as an unset one here - the app parses these as integers, so
+      # `${VAR:-}` would fail the boot rather than fall back.
+      SSO_RATE_LIMIT_ATTEMPTS: ${SSO_RATE_LIMIT_ATTEMPTS:-30}
+      SSO_RATE_LIMIT_WINDOW_MINUTES: ${SSO_RATE_LIMIT_WINDOW_MINUTES:-10}
 
       # Default Admin Password Configuration (optional - defaults to admin123 in app if not set)
       #ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-}

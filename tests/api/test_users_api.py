@@ -185,7 +185,9 @@ class TestUserPreferencesAPI:
         assert response.status_code == 200
         data = response.json()
         assert data["session_timeout_minutes"] == 60
-        assert "new_token" in data
+        # No reissue: this preference drives the frontend inactivity timer, not JWT
+        # expiry (`users.py:213-216`). See tests/api/test_session_timeout.py.
+        assert "new_token" not in data
 
     def test_update_session_timeout_bounds_validation(
         self, client: TestClient, user_with_patient, authenticated_headers

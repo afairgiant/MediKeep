@@ -116,6 +116,13 @@ otherwise, rather than hiding the login form with no SSO behind it.
 redirect but does **not** re-enable password login. Full recovery steps are in the
 [Setup Guide](SSO_SETUP_GUIDE.md#break-glass-getting-back-in-when-sso-is-broken).
 
+> **Keep one account with a local password.** Turning the flag back off only helps if some
+> account can answer a password prompt, and an account created through SSO has no password to
+> answer with. Signing into an existing local account through your provider makes it *hybrid*
+> and keeps its password, so it stays usable — an account that started life at the provider does
+> not. Check this before you need it; there is a way back without it, but it involves a shell on
+> the host.
+
 
 ### Restrict to Family Domains (Optional)
 ```bash
