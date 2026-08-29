@@ -178,9 +178,13 @@ cannot make itself unfixable:
    `SSO_ONLY_MODE` and `SSO_AUTO_REDIRECT` accept `true`/`false` (also `1`/`0`,
    `yes`/`no`, `on`/`off`, any case), and anything else fails the boot instead of
    being read as `false`. Compose strips a `#` comment from this file when the hash is
-   unquoted and preceded by a space, so `SSO_ONLY_MODE=true # sso only` works here — but
-   not when quoted, when no space precedes the hash, or via `docker run -e` or an Unraid
-   field.
+   unquoted and preceded by a space — including after a quoted value, so both
+   `SSO_ONLY_MODE=true # sso only` and `SSO_ONLY_MODE="true" # sso only` work here. What
+   survives into the value is a hash *inside* the quotes (`"true # sso only"`), a hash
+   with no space before it (`true# sso only`), or a value from something that does no
+   such parsing: an Unraid template field, a compose `environment:` literal, or a
+   `docker run -e` argument quoted to keep the hash (typed unquoted at a shell, the
+   shell removes the comment before Docker sees it).
 
 If registration is also disabled (`ALLOW_USER_REGISTRATION=false`, or the admin
 setting), no new user can enter by any self-service route. That is a legitimate

@@ -515,9 +515,12 @@ Two consequences worth knowing before tuning these:
   anyone is turned away in ordinary use. Under `SSO_ONLY_MODE` there is no
   password login to fall back on, so being throttled means no way in until the window
   rolls off — and on a self-hosted instance the person who happens to be throttled may
-  well be you, with no second account to check from. The limit is there to bound the sign-in state
-  store, not to stop a determined attacker, so tune it for the household and not for the
-  worst case.
+  well be you, with no second account to check from. What the limit actually bounds is how
+  much sign-in state any *one* client address can mint; it is not a global ceiling, since
+  enough distinct live addresses still grow the store. That global bound is a separate
+  10,000-entry cap on the SSO state store, which evicts the oldest entries rather than
+  growing without limit. So tune this limit for the household, not for the worst case —
+  the worst case is held elsewhere.
 
 **SSO-only mode and auto-redirect:** `SSO_ONLY_MODE` makes the identity provider the
 only way in — `POST /auth/login` and `POST /auth/register` return `403` before any
@@ -556,11 +559,13 @@ an instance accepting credentials its operator believes are refused — with not
 the logs to say so.
 
 Compose strips `#` comments from env files when the hash is unquoted and preceded by a
-space, and trims whitespace, so the plain inline-comment case works. The values that
-actually arrive unreadable are a typo (`fasle`), a quoted comment (`"true # sso only"`),
-a hash with no space before it (`true# sso only`), or anything set through a vehicle that
-does no parsing — `docker run -e`, an Unraid template field, a literal in the compose
-`environment:` block.
+space, and trims whitespace. That holds after a quoted value too, so `true # sso only`
+and `"true" # sso only` both arrive as `true`. The values that actually arrive unreadable
+are a typo (`fasle`), a hash *inside* the quotes (`"true # sso only"`), a hash with no
+space before it (`true# sso only`), or anything set through a vehicle that does no such
+parsing — an Unraid template field, a literal in the compose `environment:` block, or a
+`docker run -e` argument quoted to keep the hash. An unquoted `-e VAR=true # note` typed
+at a shell is fine: the shell strips the comment before Docker is invoked.
 
 If `SSO_ONLY_MODE` is combined with registration disabled, no new user can enter by
 any self-service route. That is valid for a sealed instance and is logged as a startup

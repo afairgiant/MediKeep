@@ -189,12 +189,18 @@ variables are parsed strictly: anything else fails the boot with an error naming
 and echoing what you set.
 
 Docker Compose strips `#` comments from env files when the hash is unquoted and preceded by a
-space, and trims whitespace, so a plain `SSO_ONLY_MODE=true # my note` reaches the app as
-`true` and works. It reaches the app *broken*
-when the quoting hides the comment from Compose, or when the value never passes through Compose
-at all: `SSO_ONLY_MODE="true # my note"`, `SSO_ONLY_MODE=true# my note` (no space before the
-hash), a `-e` argument to `docker run`, or an Unraid template field. Simplest to put comments on
-their own line and not think about which case you are in.
+space, and trims whitespace. That applies after a quoted value as well, so both
+`SSO_ONLY_MODE=true # my note` and `SSO_ONLY_MODE="true" # my note` reach the app as `true`
+and work. It reaches the app *broken* when the hash is inside the quotes and so is part of the
+value, when nothing separates it from the value, or when the value never passes through a parser
+that strips comments: `SSO_ONLY_MODE="true # my note"`, `SSO_ONLY_MODE=true# my note` (no space
+before the hash), or an Unraid template field.
+
+A `-e` argument to `docker run` depends on how you quote it. Typed unquoted at a shell,
+`-e SSO_ONLY_MODE=true # my note` is fine — the shell treats the hash as the start of a comment
+and Docker never sees it. Quote it into the value (`-e "SSO_ONLY_MODE=true # my note"`) and the
+hash reaches the app and fails the boot. Simplest to put comments on their own line and not
+think about which case you are in.
 
 **Built-in for Google/GitHub:**
 
@@ -358,9 +364,16 @@ still refuses your password, and nothing in the log contradicts you. If you are 
 container actually received, ask it directly:
 
 ```bash
-# Container deployments
+# Docker Compose (service name from your compose file)
 docker compose exec medikeep-app printenv SSO_ONLY_MODE
+
+# docker run (container name, not a compose service name)
+docker exec medikeep-app printenv SSO_ONLY_MODE
 ```
+
+On Unraid, the container has no compose service to address: open the container's context menu in
+the Docker tab, choose **Console**, and run `printenv SSO_ONLY_MODE` inside it — or use the
+`docker exec` form above with the name from the template.
 
 On a host install, check the environment of the running process rather than the file you edited —
 `.env` and what the process actually loaded can disagree after an incomplete restart.

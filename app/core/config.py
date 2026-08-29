@@ -134,10 +134,14 @@ def _strict_bool(name: str, default: bool = False) -> bool:
     survived its transport. Docker Compose strips unquoted ` #` comments from env
     files and trims whitespace - measured on Compose v5, both the project `.env`
     and a service `env_file:` - so a plain `SSO_ONLY_MODE=true # sso only` arrives
-    as `true`. It survives when quoted (`"true # sso only"`), when there is no
-    space before the hash (`true# sso only`), or when it comes from a vehicle that
-    does no such parsing: `docker run -e`, an Unraid template field, or a literal
-    in the compose `environment:` block.
+    as `true`. The strip happens after a quoted value too, so
+    `SSO_ONLY_MODE="true" # sso only` also arrives as `true` - measured on the
+    python-dotenv parser this module loads for the host path, not re-measured on
+    Compose. It survives when the hash is inside the quotes
+    (`"true # sso only"`), when there is no space before the hash (`true# sso only`),
+    or when it comes from a vehicle that does no such parsing: an Unraid template
+    field, a literal in the compose `environment:` block, or a `docker run -e`
+    argument quoted to keep the hash (unquoted at a shell, the shell strips it).
 
     Deliberately not applied to the other booleans in this file. Changing what
     `DEBUG=1` means is unrelated behavior with its own blast radius; this is scoped
