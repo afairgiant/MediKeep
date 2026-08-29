@@ -124,12 +124,24 @@ def _strict_bool(name: str, default: bool = False) -> bool:
     The `.lower() == "true"` idiom used elsewhere in this file silently reads every
     other value as False. For a flag that only relaxes behavior that is merely
     annoying; for a flag that *is* a security control it is a failure to fail
-    closed. `SSO_ONLY_MODE=1`, a trailing space, or `SSO_ONLY_MODE=true # sso only`
-    in a compose env file (Compose does not strip inline comments) would each leave
-    password login accepting credentials while the operator believed it was off,
-    with nothing logged to say so - and the pairing check in
-    validate_auth_mode_config() cannot catch it either, because that only fires
-    when the flag parses True.
+    closed. A value this cannot read would otherwise leave password login accepting
+    credentials while the operator believed it was off, with nothing logged to say
+    so - and the pairing check in validate_auth_mode_config() cannot catch it
+    either, because that only fires when the flag parses True.
+
+    `1`, `yes`, `on` and a trailing space are all accepted, so the values that
+    actually reach here unreadable are a typo (`fasle`) or a stray `#` note that
+    survived its transport. Docker Compose strips unquoted ` #` comments from env
+    files and trims whitespace - measured on Compose v5, both the project `.env`
+    and a service `env_file:` - so a plain `SSO_ONLY_MODE=true # sso only` arrives
+    as `true`. The strip happens after a quoted value too, so
+    `SSO_ONLY_MODE="true" # sso only` also arrives as `true` - measured on the
+    python-dotenv parser this module loads for the host path, not re-measured on
+    Compose. It survives when the hash is inside the quotes
+    (`"true # sso only"`), when there is no space before the hash (`true# sso only`),
+    or when it comes from a vehicle that does no such parsing: an Unraid template
+    field, a literal in the compose `environment:` block, or a `docker run -e`
+    argument quoted to keep the hash (unquoted at a shell, the shell strips it).
 
     Deliberately not applied to the other booleans in this file. Changing what
     `DEBUG=1` means is unrelated behavior with its own blast radius; this is scoped
@@ -528,9 +540,11 @@ class Settings:  # App Info
                 for name, raw in sorted(self.AUTH_FLAG_PARSE_ERRORS.items())
             )
             raise ValueError(
-                f"Unrecognized boolean value for {details}. Use true or false. "
-                "Note that a compose env file does not strip inline comments, so "
-                "'true # my note' is read as the whole string, not as true. "
+                f"Unrecognized boolean value for {details}. Accepted: "
+                "true/false, 1/0, yes/no, on/off, in any case. If the value above "
+                "carries a trailing '# note', quoting it or omitting the space "
+                "before the hash is what preserved it - and 'docker run -e' and "
+                "Unraid template fields never strip one. "
                 "Refusing to start rather than guess: guessing wrong here leaves "
                 "password login open on an instance meant to be SSO-only."
             )

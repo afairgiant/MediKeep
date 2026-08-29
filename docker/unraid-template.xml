@@ -85,11 +85,17 @@
     Description="SSO Client Secret (if SSO enabled)" Type="Variable" Display="advanced"
     Required="false" Mask="true" />
   <Config Name="SSO Only Mode" Target="SSO_ONLY_MODE" Default="false" Mode=""
-    Description="Refuse password login and registration (403); sign in with SSO only. Requires SSO Enabled - the container will not start without it. Set back to false to recover if the identity provider is unreachable. Note: the login page still shows the password form in this release; the server refuses it."
+    Description="Refuse password login and registration (403); sign in with SSO only. Requires SSO Enabled - the container will not start without it. Set back to false to recover if the identity provider is unreachable. Accepted values are true/false, 1/0, yes/no, on/off - anything else stops the container with an error naming this variable, rather than leaving password login open."
     Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
   <Config Name="SSO Auto Redirect" Target="SSO_AUTO_REDIRECT" Default="false" Mode=""
-    Description="Send unauthenticated visitors straight to the identity provider, with /login?local=1 to reach the login page directly. Requires SSO Enabled - the container will not start without it. Note: not yet active in this release; it takes effect with the web UI half of this feature."
+    Description="Send unauthenticated visitors straight to the identity provider, with /login?local=1 to reach the login page directly. Requires SSO Enabled - the container will not start without it. Same accepted values as SSO Only Mode."
     Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="SSO Rate Limit Attempts" Target="SSO_RATE_LIMIT_ATTEMPTS" Default="30" Mode=""
+    Description="Sign-in attempts allowed per IP address per window. Worth raising with SSO Auto Redirect on, where every unauthenticated page load counts as one attempt."
+    Type="Variable" Display="advanced" Required="false" Mask="false">30</Config>
+  <Config Name="SSO Rate Limit Window Minutes" Target="SSO_RATE_LIMIT_WINDOW_MINUTES" Default="10"
+    Mode="" Description="Length of the rate limit window in minutes." Type="Variable"
+    Display="advanced" Required="false" Mask="false">10</Config>
   <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID" Type="Variable"
     Display="advanced" Required="false" Mask="false">99</Config>
   <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID" Type="Variable"

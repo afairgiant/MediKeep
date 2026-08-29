@@ -1,11 +1,25 @@
 """
 Test session timeout and JWT token expiration functionality.
 
-Tests verify that:
-1. JWT tokens are created with user's session_timeout_minutes preference
-2. Tokens are regenerated when user changes their timeout
-3. Default timeout is used when no preference is set
-4. All authentication flows (login, SSO) respect user preferences
+`session_timeout_minutes` drives the *frontend inactivity timer*. It is not the JWT
+lifetime, and these tests previously asserted that it was -- the contract changed in
+4c4bb995 (cookie auth, #722) and they were left behind, failing for every timeout
+below ACCESS_TOKEN_EXPIRE_MINUTES while passing for every value above it.
+
+The contract they assert now, from `auth.py:401-403` and `users.py:213-216`:
+
+1. The JWT must *outlive* the inactivity timer, so its lifetime is
+   `max(ACCESS_TOKEN_EXPIRE_MINUTES, session_timeout_minutes)`. If the cookie expired
+   first the user would get a hard 401 before the timer ever fired.
+2. Login returns the preference so the frontend can arm its timer.
+3. Changing the preference does **not** reissue the token -- JWT expiry is fixed at
+   server config. See the DEFERRED note below for the one case where that shows.
+4. A user with no explicit preference gets the column default.
+
+**Deferred, filed in TECHNICAL_DEBT.md:** raising the preference above
+ACCESS_TOKEN_EXPIRE_MINUTES mid-session leaves the old, shorter JWT in place until the
+next login, which is the exact "cookie expires before the timer fires" case point 1
+exists to prevent. Not exercised here; the tests below assert the behavior as built.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -15,8 +29,15 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.crud.user_preferences import user_preferences
+from app.models.user import UserPreferences
 from app.schemas.user_preferences import UserPreferencesUpdate
 from tests.utils.user import create_random_user
+
+# The column default, so a change to it fails one assertion here rather than being
+# restated as a literal in four places.
+DEFAULT_SESSION_TIMEOUT_MINUTES = (
+    UserPreferences.__table__.c.session_timeout_minutes.default.arg
+)
 
 
 class TestSessionTimeout:
@@ -40,11 +61,9 @@ class TestSessionTimeout:
         data = response.json()
         assert "access_token" in data
         assert "session_timeout_minutes" in data
-        # Should have default timeout (30 minutes or config default)
-        assert data["session_timeout_minutes"] in [
-            30,
-            settings.ACCESS_TOKEN_EXPIRE_MINUTES,
-        ]
+        # The column default, read from the model so this test does not have to be
+        # edited again when the default moves.
+        assert data["session_timeout_minutes"] == DEFAULT_SESSION_TIMEOUT_MINUTES
 
     def test_login_jwt_token_uses_user_preference(
         self, client: TestClient, db_session: Session
@@ -78,10 +97,12 @@ class TestSessionTimeout:
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
-        # Calculate expected expiration time (current time + custom_timeout minutes)
-        # Both times should be in UTC for comparison
+        # The JWT outlives the inactivity timer: max(config, preference). 1440 is
+        # above ACCESS_TOKEN_EXPIRE_MINUTES, so the preference wins here -- which is
+        # why this one test kept passing while its siblings failed.
         now_timestamp = datetime.now(timezone.utc).timestamp()
-        expected_exp_timestamp = now_timestamp + (custom_timeout * 60)
+        expected_lifetime = max(settings.ACCESS_TOKEN_EXPIRE_MINUTES, custom_timeout)
+        expected_exp_timestamp = now_timestamp + (expected_lifetime * 60)
         token_exp_timestamp = decoded["exp"]
 
         # Allow 5 second tolerance for test execution time
@@ -133,18 +154,33 @@ class TestSessionTimeout:
                 algorithms=[settings.ALGORITHM],
             )
 
+            # Below ACCESS_TOKEN_EXPIRE_MINUTES the config floor applies; above it the
+            # preference does. test_timeouts deliberately straddles the boundary.
             now_timestamp = datetime.now(timezone.utc).timestamp()
-            expected_exp_timestamp = now_timestamp + (timeout_minutes * 60)
+            expected_lifetime = max(
+                settings.ACCESS_TOKEN_EXPIRE_MINUTES, timeout_minutes
+            )
+            expected_exp_timestamp = now_timestamp + (expected_lifetime * 60)
             token_exp_timestamp = decoded["exp"]
             time_diff = abs(token_exp_timestamp - expected_exp_timestamp)
 
-            assert time_diff < 5, f"Timeout {timeout_minutes}min: Token exp mismatch"
+            assert time_diff < 5, (
+                f"Timeout {timeout_minutes}min: expected a "
+                f"{expected_lifetime}min JWT, got exp {token_exp_timestamp}"
+            )
 
-    def test_update_preferences_regenerates_token(
+    def test_update_timeout_does_not_reissue_token(
         self, authenticated_client: TestClient
     ):
-        """Test that updating session timeout generates a new token."""
-        # Update session timeout to a new value
+        """Changing the timeout persists it and leaves the token alone.
+
+        Was `test_update_preferences_regenerates_token`, asserting the reverse. The
+        endpoint stopped reissuing when JWT lifetime stopped tracking this preference
+        (`users.py:213-216`); the test kept asserting a `new_token` key that no
+        response carries any more.
+        """
+        # 720 is above ACCESS_TOKEN_EXPIRE_MINUTES deliberately: this is the case
+        # where a reissue would change the JWT if one happened.
         new_timeout = 720  # 12 hours
 
         response = authenticated_client.put(
@@ -155,29 +191,18 @@ class TestSessionTimeout:
         assert response.status_code == 200
         data = response.json()
 
-        # Should include new token
-        assert "new_token" in data
-        assert "token_type" in data
-        assert data["token_type"] == "bearer"
         assert data["session_timeout_minutes"] == new_timeout
+        assert "new_token" not in data
+        assert "token_type" not in data
 
-        # Decode the new token and verify expiration using timestamps
-        new_token = data["new_token"]
-        decoded = jwt.decode(
-            new_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-
-        now_timestamp = datetime.now(timezone.utc).timestamp()
-        expected_exp_timestamp = now_timestamp + (new_timeout * 60)
-        token_exp_timestamp = decoded["exp"]
-        time_diff = abs(token_exp_timestamp - expected_exp_timestamp)
-
-        assert time_diff < 5, "New token expiration doesn't match updated timeout"
-
-    def test_update_preferences_only_regenerates_on_timeout_change(
+    def test_update_non_timeout_preference_does_not_reissue_token(
         self, authenticated_client: TestClient
     ):
-        """Test that updating non-timeout preferences doesn't regenerate token."""
+        """A non-timeout preference update carries no token either.
+
+        Renamed: "only_regenerates_on_timeout_change" described a rule that no longer
+        holds in either direction -- nothing reissues now.
+        """
         # Update a different preference (not session_timeout_minutes)
         response = authenticated_client.put(
             "/api/v1/users/me/preferences", json={"unit_system": "metric"}
@@ -186,14 +211,13 @@ class TestSessionTimeout:
         assert response.status_code == 200
         data = response.json()
 
-        # Should NOT include new token
         assert "new_token" not in data
         assert data["unit_system"] == "metric"
 
-    def test_update_timeout_to_same_value_no_regeneration(
+    def test_update_timeout_to_same_value_carries_no_token(
         self, authenticated_client: TestClient
     ):
-        """Test that setting timeout to current value doesn't regenerate token."""
+        """Setting the timeout to its current value is still a plain update."""
         # Get current timeout
         prefs_response = authenticated_client.get("/api/v1/users/me/preferences")
         current_timeout = prefs_response.json()["session_timeout_minutes"]
@@ -207,7 +231,6 @@ class TestSessionTimeout:
         assert response.status_code == 200
         data = response.json()
 
-        # Should NOT regenerate token (value unchanged)
         assert "new_token" not in data
 
     def test_default_timeout_when_no_preference(
@@ -227,18 +250,21 @@ class TestSessionTimeout:
         assert response.status_code == 200
         data = response.json()
 
-        # Should use database default (30 minutes) for new users
-        # Database default is defined in models.py: session_timeout_minutes = Column(Integer, default=30)
-        expected_default = 30
-        assert data["session_timeout_minutes"] == expected_default
+        # Should use the column default for new users
+        assert data["session_timeout_minutes"] == DEFAULT_SESSION_TIMEOUT_MINUTES
 
         # Verify token expiration using timestamps
         decoded = jwt.decode(
             data["access_token"], settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
+        # The default is below ACCESS_TOKEN_EXPIRE_MINUTES, so the config floor sets
+        # the JWT lifetime here, not the preference.
         now_timestamp = datetime.now(timezone.utc).timestamp()
-        expected_exp_timestamp = now_timestamp + (expected_default * 60)
+        expected_lifetime = max(
+            settings.ACCESS_TOKEN_EXPIRE_MINUTES, DEFAULT_SESSION_TIMEOUT_MINUTES
+        )
+        expected_exp_timestamp = now_timestamp + (expected_lifetime * 60)
         token_exp_timestamp = decoded["exp"]
         time_diff = abs(token_exp_timestamp - expected_exp_timestamp)
 

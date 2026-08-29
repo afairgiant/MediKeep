@@ -186,8 +186,21 @@ guard is server-side and is not reachable from a query string.
 
 Accepted values are `true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`, in any case. These two
 variables are parsed strictly: anything else fails the boot with an error naming the variable
-and echoing what you set. A compose env file does **not** strip inline comments, so
-`SSO_ONLY_MODE=true # my note` is the entire value — put comments on their own line.
+and echoing what you set.
+
+Docker Compose strips `#` comments from env files when the hash is unquoted and preceded by a
+space, and trims whitespace. That applies after a quoted value as well, so both
+`SSO_ONLY_MODE=true # my note` and `SSO_ONLY_MODE="true" # my note` reach the app as `true`
+and work. It reaches the app *broken* when the hash is inside the quotes and so is part of the
+value, when nothing separates it from the value, or when the value never passes through a parser
+that strips comments: `SSO_ONLY_MODE="true # my note"`, `SSO_ONLY_MODE=true# my note` (no space
+before the hash), or an Unraid template field.
+
+A `-e` argument to `docker run` depends on how you quote it. Typed unquoted at a shell,
+`-e SSO_ONLY_MODE=true # my note` is fine — the shell treats the hash as the start of a comment
+and Docker never sees it. Quote it into the value (`-e "SSO_ONLY_MODE=true # my note"`) and the
+hash reaches the app and fails the boot. Simplest to put comments on their own line and not
+think about which case you are in.
 
 **Built-in for Google/GitHub:**
 
@@ -287,9 +300,83 @@ flag, not after.
 **1. Turn the flag off and sign in locally.** This is the primary path, and the only one that
 works when the provider itself is down.
 
+This step assumes something worth checking *before* you enable the flag: **that at least one
+account still has a local password.** `auth_method='sso'` accounts — the ones created by signing
+in through the provider — have no password at all, so turning the flag off gives them a login
+form they cannot answer. An account that existed locally first and later linked a provider
+identity becomes `hybrid` and keeps its password; one that was born at the provider never had
+one.
+
+If every account on the instance is pure SSO, this step is still required but is not enough on
+its own — turn the flag off here, then use step 2's *create* form to make an account that has a
+password. Run it wherever the application lives:
+
 ```bash
-SSO_ONLY_MODE=false   # then restart the container
+# Docker Compose
+docker compose exec -it medikeep-app python app/scripts/create_emergency_admin.py --username emergency --force
+
+# Docker / Unraid (container name from your template; medikeep-app by default)
+docker exec -it medikeep-app python app/scripts/create_emergency_admin.py --username emergency --force
+
+# Directly on the host, from the repo root
+python app/scripts/create_emergency_admin.py --username emergency --force
 ```
+
+**Omit `--password`** — the script prompts for it twice, hidden, so the password does not land in
+your shell history or in `ps` output on a shared box.
+
+**`--force` is required here**, and this is the case that needs it: an all-SSO instance still has
+admin *accounts*, they simply have no passwords, so the script refuses to create another admin
+unless you say you mean it. Use a username that does not already exist; if it does, the script
+takes the promote path instead and promotion preserves the password that is not there.
+
+Order matters. That account cannot sign in while `SSO_ONLY_MODE=true`, because `/auth/login`
+returns 403 before looking at any credential. It is created with `must_change_password=True`, so
+expect a forced password change on first sign-in.
+
+```bash
+SSO_ONLY_MODE=false
+```
+
+**Then restart the application so it reads the new value.** Under Docker that means recreating
+the container — `docker compose up -d`, or the equivalent for your setup; a plain `docker restart`
+reuses the old environment and will not pick the change up, which looks exactly like the setting
+having no effect. Running directly on a host, stop and start the process itself (your service unit,
+or the `python run.py` you launched): the environment is read once at startup, so editing `.env`
+under a running process changes nothing until it restarts.
+
+If `SSO_AUTO_REDIRECT` is also on, either set it to `false` in the same edit or reach the login
+page at `/login?local=1`. With it left on, visiting the app still bounces you to the identity
+provider that is down — the password form is back, and you never get to see it.
+
+**Change it where the container actually reads it from**, which is not always where you set it
+originally:
+
+| How you deploy | Where the value lives |
+|---|---|
+| Docker Compose | the `.env` file next to `docker-compose.yml`, or the `environment:` block in the file itself if you set it there — the block wins |
+| Unraid | the template variable in the container's edit screen, not any `.env` on the array |
+| `docker run` | the `-e SSO_ONLY_MODE=...` argument; recreate the container, restarting is not enough |
+| Directly on a host | the `.env` file in the repo root, or whatever your service unit exports — an exported variable wins over `.env`; restart the process |
+
+Setting it in the wrong one of these is a common way to spend an hour: the app comes up healthy,
+still refuses your password, and nothing in the log contradicts you. If you are unsure what the
+container actually received, ask it directly:
+
+```bash
+# Docker Compose (service name from your compose file)
+docker compose exec medikeep-app printenv SSO_ONLY_MODE
+
+# docker run (container name, not a compose service name)
+docker exec medikeep-app printenv SSO_ONLY_MODE
+```
+
+On Unraid, the container has no compose service to address: open the container's context menu in
+the Docker tab, choose **Console**, and run `printenv SSO_ONLY_MODE` inside it — or use the
+`docker exec` form above with the name from the template.
+
+On a host install, check the environment of the running process rather than the file you edited —
+`.env` and what the process actually loaded can disagree after an incomplete restart.
 
 Watch the startup logs. A typo in the recovery value now fails the boot with a message naming
 the variable and echoing what you set — that is deliberate. Without it, `SSO_ONLY_MODE=fasle`

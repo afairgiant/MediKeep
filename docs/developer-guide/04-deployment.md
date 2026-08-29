@@ -512,9 +512,15 @@ Two consequences worth knowing before tuning these:
   household or CGNAT range sharing one address can plausibly reach the limit. The
   default was raised from 10 to
   30 per 10 minutes for exactly that reason; raise `SSO_RATE_LIMIT_ATTEMPTS` further if
-  legitimate users still report being turned away. Under `SSO_ONLY_MODE` there is no
+  anyone is turned away in ordinary use. Under `SSO_ONLY_MODE` there is no
   password login to fall back on, so being throttled means no way in until the window
-  rolls off.
+  rolls off — and on a self-hosted instance the person who happens to be throttled may
+  well be you, with no second account to check from. What the limit actually bounds is how
+  much sign-in state any *one* client address can mint; it is not a global ceiling, since
+  enough distinct live addresses still grow the store. That global bound is a separate
+  10,000-entry cap on the SSO state store, which evicts the oldest entries rather than
+  growing without limit. So tune this limit for the household, not for the worst case —
+  the worst case is held elsewhere.
 
 **SSO-only mode and auto-redirect:** `SSO_ONLY_MODE` makes the identity provider the
 only way in — `POST /auth/login` and `POST /auth/register` return `403` before any
@@ -550,8 +556,16 @@ the boot with an error naming the variable and showing what it was set to, rathe
 than being read as `false`. Everywhere else `false` merely means "off", but for
 `SSO_ONLY_MODE` it means password login is still open, so a misread value would leave
 an instance accepting credentials its operator believes are refused — with nothing in
-the logs to say so. The most common cause is an inline comment: a compose env file
-does not strip them, so `SSO_ONLY_MODE=true # sso only` is read as the entire string.
+the logs to say so.
+
+Compose strips `#` comments from env files when the hash is unquoted and preceded by a
+space, and trims whitespace. That holds after a quoted value too, so `true # sso only`
+and `"true" # sso only` both arrive as `true`. The values that actually arrive unreadable
+are a typo (`fasle`), a hash *inside* the quotes (`"true # sso only"`), a hash with no
+space before it (`true# sso only`), or anything set through a vehicle that does no such
+parsing — an Unraid template field, a literal in the compose `environment:` block, or a
+`docker run -e` argument quoted to keep the hash. An unquoted `-e VAR=true # note` typed
+at a shell is fine: the shell strips the comment before Docker is invoked.
 
 If `SSO_ONLY_MODE` is combined with registration disabled, no new user can enter by
 any self-service route. That is valid for a sealed instance and is logged as a startup
@@ -560,14 +574,28 @@ warning rather than a failure.
 **Recovering from a locked-out instance.** There is deliberately no in-app toggle for
 these settings, so a broken IdP cannot make itself unfixable:
 
-1. Set `SSO_ONLY_MODE=false`, restart, sign in locally — the primary path, and the
-   only one that works when the IdP itself is unreachable.
-2. If SSO still works but no account has admin rights, run
-   `app/scripts/create_emergency_admin.py --username <name> --promote` against an
-   account that can sign in through the IdP; promotion preserves the existing
-   password and grants admin. Creating a *new* password admin does not help while
-   `SSO_ONLY_MODE=true` — password login is refused for that account too — so pair it
-   with step 1.
+1. Set `SSO_ONLY_MODE=false` and recreate the container (`docker compose up -d`, or
+   your equivalent — a plain `docker restart` reuses the old environment). Then sign in
+   locally. This is the primary path and the only one that works when the IdP itself is
+   unreachable. Two conditions on it:
+   - **Clear `SSO_AUTO_REDIRECT` too, or use `/login?local=1`.** Left on, it bounces
+     you to the provider that is down before you ever see the password form.
+   - **Some account must have a local password.** Accounts created through the IdP
+     (`auth_method='sso'`) have none; a local account that later linked an identity is
+     `hybrid` and keeps its own. If every account is pure SSO, turn the flag off and
+     then create a password admin per step 2 — `--promote` preserves a password that is
+     not there.
+2. Run `create_emergency_admin.py` inside the container
+   (`docker compose exec -it medikeep-app python app/scripts/create_emergency_admin.py …`),
+   or directly from the repo root on a host install.
+   - **No admin rights, SSO working:** `--username <existing> --promote`. Promotion
+     grants admin and preserves the existing password.
+   - **No account with a password:** `--username <new-name> --force`. `--force` is
+     required because admin accounts do exist, they simply cannot answer a password
+     prompt. Creating one does not help while `SSO_ONLY_MODE=true` — password login is
+     refused for it too — so pair it with step 1.
+   - **Omit `--password`** in both cases; the script prompts twice, hidden, keeping the
+     credential out of shell history and `ps`.
 3. Startup validation catches the most likely misconfiguration before it takes effect.
 
 **Example (Google):**
