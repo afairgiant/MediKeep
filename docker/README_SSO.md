@@ -125,26 +125,19 @@ it** — that is deliberate. Booting into an instance that refuses password logi
 has no working SSO means nobody can sign in, and the error is much harder to
 diagnose after the fact than at startup.
 
-> **This release ships the server-side half only.** Nothing in the web UI reads
-> these two settings yet. Under `SSO_ONLY_MODE` the login page still draws the
-> password form and every submission is refused with 403, and `SSO_AUTO_REDIRECT`
-> does nothing at all — no visitor is redirected anywhere. The table below is the
-> configuration contract; the rows marked *(UI half pending)* describe behavior that
-> arrives with the frontend half of this feature in a following release.
-
 | `SSO_ENABLED` | `SSO_ONLY_MODE` | `SSO_AUTO_REDIRECT` | Result |
 |---|---|---|---|
 | `false` | `false` | `false` | Current behavior, unchanged |
 | `false` | either flag set | either flag set | **Startup failure** with an explicit error |
 | `true` | `false` | `false` | Standard SSO — login form plus an SSO button |
 | `true` | `true` | `false` | `/auth/login` and `/auth/register` return 403; sign in with SSO |
-| `true` | `false` | `true` | Password login still works; visitors are sent to the IdP, and `/login?local=1` reaches the login page directly *(UI half pending)* |
-| `true` | `true` | `true` | Pure SSO front door *(UI half pending)* |
+| `true` | `false` | `true` | Password login still works; visitors are sent to the IdP, and `/login?local=1` reaches the login page directly |
+| `true` | `true` | `true` | Pure SSO front door — no password form, no button to click |
 
 `SSO_ONLY_MODE` is enforced server-side: `POST /auth/login` and `POST /auth/register`
 return 403 before any credential check, and each refusal is recorded in the security
-log. That enforcement is the security boundary and it is already complete — hiding
-the form is only cosmetic, since anyone can POST to the API directly.
+log. That enforcement is the security boundary — hiding the form is only cosmetic,
+since anyone can POST to the API directly.
 
 Still available under `SSO_ONLY_MODE`, by design:
 
@@ -160,24 +153,33 @@ Still available under `SSO_ONLY_MODE`, by design:
 There is deliberately no in-app toggle for these settings, precisely so a broken IdP
 cannot make itself unfixable:
 
-1. **Set `SSO_ONLY_MODE=false` and restart, then sign in locally.** This is the
+1. **Set `SSO_ONLY_MODE=false`, recreate the container, then sign in locally.** The
    primary path, and the only one that restores access when the IdP is unreachable.
-2. **If SSO still works but no account has admin rights**, run
-   `app/scripts/create_emergency_admin.py --username <name> --promote` against an
-   account that can sign in through your IdP. Promotion writes directly to the
-   database and preserves the existing password, so the user signs in via SSO as
-   usual and is now an admin.
+   `docker compose up -d` — a plain `docker restart` reuses the old environment. If
+   `SSO_AUTO_REDIRECT` is also on, clear it too or use `/login?local=1`, otherwise you
+   are bounced to the provider that is down before you see the password form.
 
-   Note what this does **not** do: creating a *new* password admin with this script
-   does not get you in while `SSO_ONLY_MODE=true`, because password login is refused
-   for every account, including that one. Pair it with step 1.
+   This assumes some account **has** a local password. Accounts created through the
+   IdP (`auth_method='sso'`) have none; see step 2.
+2. **Run `create_emergency_admin.py` inside the container**, e.g.
+   `docker compose exec -it medikeep-app python app/scripts/create_emergency_admin.py …`
+   - No admin rights but SSO works: `--username <existing> --promote`. Preserves the
+     existing password and grants admin.
+   - No account has a password at all: `--username <new> --force`. `--force` is needed
+     because admin accounts do exist, they just cannot answer a password prompt.
+   - **Omit `--password`** — the script prompts twice, hidden, keeping it out of shell
+     history.
+
+   Creating a password admin does not get you in while `SSO_ONLY_MODE=true`, because
+   password login is refused for every account including that one. Pair it with step 1.
 3. Startup validation refuses the most likely misconfiguration before it takes
    effect, so a typo in these variables surfaces as a logged startup failure rather
    than a login page nobody can get past. That includes a value it cannot parse:
    `SSO_ONLY_MODE` and `SSO_AUTO_REDIRECT` accept `true`/`false` (also `1`/`0`,
    `yes`/`no`, `on`/`off`, any case), and anything else fails the boot instead of
-   being read as `false`. Watch for inline comments — a compose env file does not
-   strip them, so `SSO_ONLY_MODE=true # sso only` is the whole string.
+   being read as `false`. Compose strips an unquoted ` #` comment from this file, so
+   `SSO_ONLY_MODE=true # sso only` works here — but not when quoted, when no space
+   precedes the hash, or via `docker run -e` or an Unraid field.
 
 If registration is also disabled (`ALLOW_USER_REGISTRATION=false`, or the admin
 setting), no new user can enter by any self-service route. That is a legitimate

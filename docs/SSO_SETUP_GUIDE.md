@@ -186,8 +186,14 @@ guard is server-side and is not reachable from a query string.
 
 Accepted values are `true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`, in any case. These two
 variables are parsed strictly: anything else fails the boot with an error naming the variable
-and echoing what you set. A compose env file does **not** strip inline comments, so
-`SSO_ONLY_MODE=true # my note` is the entire value — put comments on their own line.
+and echoing what you set.
+
+Docker Compose strips unquoted ` #` comments from env files and trims whitespace, so a plain
+`SSO_ONLY_MODE=true # my note` reaches the app as `true` and works. It reaches the app *broken*
+when the quoting hides the comment from Compose, or when the value never passes through Compose
+at all: `SSO_ONLY_MODE="true # my note"`, `SSO_ONLY_MODE=true# my note` (no space before the
+hash), a `-e` argument to `docker run`, or an Unraid template field. Simplest to put comments on
+their own line and not think about which case you are in.
 
 **Built-in for Google/GitHub:**
 
@@ -296,19 +302,42 @@ one.
 
 If every account on the instance is pure SSO, this step is still required but is not enough on
 its own — turn the flag off here, then use step 2's *create* form to make an account that has a
-password:
+password. Run it wherever the application lives:
 
 ```bash
-python app/scripts/create_emergency_admin.py --username emergency --password "..."
+# Docker Compose
+docker compose exec -it medikeep-app python app/scripts/create_emergency_admin.py --username emergency --force
+
+# Docker / Unraid (container name from your template; medikeep-app by default)
+docker exec -it medikeep-app python app/scripts/create_emergency_admin.py --username emergency --force
+
+# Directly on the host, from the repo root
+python app/scripts/create_emergency_admin.py --username emergency --force
 ```
+
+**Omit `--password`** — the script prompts for it twice, hidden, so the password does not land in
+your shell history or in `ps` output on a shared box.
+
+**`--force` is required here**, and this is the case that needs it: an all-SSO instance still has
+admin *accounts*, they simply have no passwords, so the script refuses to create another admin
+unless you say you mean it. Use a username that does not already exist; if it does, the script
+takes the promote path instead and promotion preserves the password that is not there.
 
 Order matters. That account cannot sign in while `SSO_ONLY_MODE=true`, because `/auth/login`
 returns 403 before looking at any credential. It is created with `must_change_password=True`, so
 expect a forced password change on first sign-in.
 
 ```bash
-SSO_ONLY_MODE=false   # then restart the container
+SSO_ONLY_MODE=false
 ```
+
+**Then recreate the container** — `docker compose up -d`, or the equivalent for your setup.
+A plain `docker restart` reuses the old environment and will not pick the change up, which looks
+exactly like the setting having no effect.
+
+If `SSO_AUTO_REDIRECT` is also on, either set it to `false` in the same edit or reach the login
+page at `/login?local=1`. With it left on, visiting the app still bounces you to the identity
+provider that is down — the password form is back, and you never get to see it.
 
 **Change it where the container actually reads it from**, which is not always where you set it
 originally:

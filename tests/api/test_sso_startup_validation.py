@@ -119,11 +119,16 @@ class TestFlagParsing:
     """An unrecognized value fails the boot rather than reading as False.
 
     `.lower() == "true"` - the idiom every other boolean in config.py uses - reads
-    `SSO_ONLY_MODE=1`, a trailing space, or `SSO_ONLY_MODE=true # sso only` (a
-    compose env file does not strip inline comments) as False. Here False means
-    password login is still accepted, so a silent misparse is a security control
-    failing open, and the pairing check above cannot catch it: that only fires when
-    the flag parses True.
+    every value other than "true" as False. Here False means password login is still
+    accepted, so a silent misparse is a security control failing open, and the
+    pairing check above cannot catch it: that only fires when the flag parses True.
+
+    `1`, `yes`, `on` and surrounding whitespace are accepted rather than refused, so
+    the cases below are the ones that genuinely cannot be read: a typo, and a `#`
+    note that survived its transport. Docker Compose strips unquoted ` #` comments
+    and trims whitespace (measured on Compose v5, PR 6), so the note survives only
+    when quoted, when no space precedes the hash, or when it arrives by a vehicle
+    that does no parsing at all - `docker run -e`, an Unraid field.
     """
 
     @pytest.fixture(autouse=True)

@@ -27,6 +27,9 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PY = REPO_ROOT / "app" / "core" / "config.py"
 COMPOSE = REPO_ROOT / "docker" / "docker-compose.yml"
+# The service the application runs in. Asserted to exist before its environment is
+# read, so a rename surfaces here rather than silently skipping the check.
+APP_SERVICE = "medikeep-app"
 UNRAID_TEMPLATE = REPO_ROOT / "docker" / "unraid-template.xml"
 ENV_EXAMPLE = REPO_ROOT / "docker" / ".env.example"
 
@@ -49,21 +52,33 @@ def sso_settings():
 
 
 def test_compose_passes_every_sso_setting(sso_settings):
-    """Union across services, so renaming one does not quietly turn this off."""
+    """Checked against the application service specifically.
+
+    Not a union across services: the database service passing `SSO_ONLY_MODE` would
+    satisfy a union while the application still never saw it. Naming the service means
+    a rename fails this test loudly, which is the outcome a union was reaching for and
+    did not achieve.
+    """
     compose = yaml.safe_load(COMPOSE.read_text(encoding="utf-8"))
-    passed = set()
-    for service in (compose.get("services") or {}).values():
-        environment = service.get("environment")
-        if isinstance(environment, dict):
-            passed.update(environment)
-        elif isinstance(environment, list):
-            # `- NAME=value` and bare `- NAME` are both legal.
-            passed.update(entry.split("=", 1)[0] for entry in environment)
+    services = compose.get("services") or {}
+    assert APP_SERVICE in services, (
+        f"docker-compose.yml has no '{APP_SERVICE}' service. If it was renamed, "
+        "update APP_SERVICE here — this test cannot check a service it cannot find."
+    )
+
+    environment = services[APP_SERVICE].get("environment")
+    if isinstance(environment, dict):
+        passed = set(environment)
+    elif isinstance(environment, list):
+        # `- NAME=value` and bare `- NAME` are both legal.
+        passed = {entry.split("=", 1)[0] for entry in environment}
+    else:
+        passed = set()
 
     missing = sorted(sso_settings - passed)
     assert not missing, (
-        f"docker/docker-compose.yml does not pass {missing}. The app reads "
-        "these, so an operator setting one would see no effect."
+        f"docker/docker-compose.yml does not pass {missing} to '{APP_SERVICE}'. "
+        "The app reads these, so an operator setting one would see no effect."
     )
 
 
