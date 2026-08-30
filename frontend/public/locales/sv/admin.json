@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Tillåt registrering av nya användare",
       "allowRegistrationDesc": "Aktivera eller inaktivera möjligheten för nya användare att skapa konton från inloggningssidan"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "Endast SSO-läge är aktiverat och användarregistrering är nu inaktiverad. Inget nytt konto kan skapas via självregistrering - en administratör måste skapa dem. Om det inte var meningen, aktivera registrering igen eller stäng av endast SSO-läge."
     }
   },
   "shared": {

@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "允许新用户注册",
       "allowRegistrationDesc": "启用或禁用新用户从登录页面创建账户的功能"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "仅 SSO 模式已启用，用户注册现已关闭。任何人都无法自助创建新账户，只能由管理员创建。如果这不是本意，请重新启用注册或关闭仅 SSO 模式。"
     }
   },
   "shared": {

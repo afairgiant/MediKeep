@@ -45,6 +45,7 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [warnings, setWarnings] = useState([]);
   const [ssoConfig, setSSOConfig] = useState({ enabled: false });
   const [ssoTestLoading, setSSOTestLoading] = useState(false);
   const [ssoTestResult, setSSOTestResult] = useState(null);
@@ -119,6 +120,10 @@ const AdminSettings = () => {
         type: 'success',
         text: response.message || 'Settings updated successfully',
       });
+
+      // Replaced only by a successful save, so a failed one cannot discard a
+      // lockout notice the admin has not read yet.
+      setWarnings(response.warnings || []);
 
       if (response.current_settings) {
         setSettings(response.current_settings);
@@ -231,6 +236,22 @@ const AdminSettings = () => {
             {message.text}
           </Alert>
         )}
+
+        {/* Server sends a code; the copy is ours, so it translates. */}
+        {warnings.map(warning => (
+          <Alert
+            key={warning.code}
+            color="yellow"
+            icon={<IconAlertCircle size={16} />}
+            withCloseButton
+            onClose={() =>
+              setWarnings(prev => prev.filter(w => w.code !== warning.code))
+            }
+            mb="lg"
+          >
+            {t(`settings.warnings.${warning.code}`, warning.message)}
+          </Alert>
+        ))}
 
         {/* Data Retention */}
         <Card shadow="sm" p="lg" mb="lg" withBorder>

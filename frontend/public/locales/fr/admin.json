@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Permettre l'enregistrement de nouveaux utilisateurs",
       "allowRegistrationDesc": "Activer ou désactiver la possibilité pour les nouveaux utilisateurs de créer des comptes depuis la page de connexion"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "Le mode SSO uniquement est activé et l'inscription des utilisateurs est désormais désactivée. Aucun nouveau compte ne peut être créé en libre-service - un administrateur doit les créer. Si ce n'était pas voulu, réactivez l'inscription ou désactivez le mode SSO uniquement."
     }
   },
   "shared": {

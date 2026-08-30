@@ -10,6 +10,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship as orm_relationship
 
 from .base import Base, get_utc_now
@@ -101,7 +102,7 @@ class User(Base):
     # Indexes for performance
     __table_args__ = (Index("idx_users_email", "email"),)
 
-    @property
+    @hybrid_property
     def has_usable_password(self) -> bool:
         """False for accounts whose password_hash is a discarded random token.
 

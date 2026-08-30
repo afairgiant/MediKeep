@@ -5545,7 +5545,31 @@ Base path: `/api/v1/admin/backup`
 }
 ```
 
-- **Success Response** (200): Updated settings
+- **Success Response** (200): Updated settings, plus a `warnings` array
+
+```json
+{
+  "message": "Settings updated successfully",
+  "updated_settings": { "allow_user_registration": false },
+  "warnings": [
+    {
+      "code": "sso_only_no_registration_route",
+      "message": "SSO_ONLY_MODE is enabled and user registration is disabled..."
+    }
+  ],
+  "current_settings": { "allow_user_registration": false }
+}
+```
+
+`warnings` is always present and usually empty. Entries are advisory — the update
+succeeded regardless. Clients should render their own copy keyed by `code` and treat
+`message` as a fallback for codes they do not recognize.
+
+Current codes:
+
+| Code | Raised when |
+|---|---|
+| `sso_only_no_registration_route` | Registration was turned off while `SSO_ONLY_MODE` is on, leaving no self-service route into the instance |
 
 #### Get Retention Stats
 

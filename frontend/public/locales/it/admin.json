@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Consenti registrazione nuovi utenti",
       "allowRegistrationDesc": "Abilita o disabilita la possibilità per i nuovi utenti di creare account dalla pagina di accesso"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "La modalità solo SSO è attiva e la registrazione degli utenti è ora disabilitata. Nessun nuovo account può essere creato in autonomia: deve crearli un amministratore. Se non era voluto, riabilita la registrazione o disattiva la modalità solo SSO."
     }
   },
   "shared": {
