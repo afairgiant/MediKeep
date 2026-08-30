@@ -98,7 +98,6 @@ const AdminSettings = () => {
     try {
       setSaving(true);
       setMessage({ type: '', text: '' });
-      setWarnings([]);
 
       const validSettings = {
         trash_retention_days: settings.trash_retention_days || 30,
@@ -122,7 +121,8 @@ const AdminSettings = () => {
         text: response.message || 'Settings updated successfully',
       });
 
-      // Not cleared on the timeout below: this one has to survive being read.
+      // Replaced only by a successful save, so a failed one cannot discard a
+      // lockout notice the admin has not read yet.
       setWarnings(response.warnings || []);
 
       if (response.current_settings) {

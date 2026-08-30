@@ -126,6 +126,22 @@ test('tolerates a response with no warnings key', async () => {
   ).toBeInTheDocument();
 });
 
+test('a failed save does not discard a warning already on screen', async () => {
+  respondWith([{ code: SEALED, message: SERVER_COPY }]);
+
+  render(<AdminSettings />);
+  await saveSettings();
+  await screen.findByText(SEALED_DE);
+
+  adminApiService.updateRetentionSettings.mockRejectedValue(
+    new Error('network down')
+  );
+  await saveSettings();
+
+  await screen.findByText(/Failed to save settings/);
+  expect(screen.getByText(SEALED_DE)).toBeInTheDocument();
+});
+
 test('the warning outlives the success message', async () => {
   // The success message clears itself after 5s. A lockout notice that vanished
   // with it would be worse than not showing one.
