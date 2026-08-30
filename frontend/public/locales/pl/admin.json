@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Zezwól na rejestrację nowych użytkowników",
       "allowRegistrationDesc": "Włącz lub wyłącz możliwość tworzenia nowych kont przez użytkowników na stronie logowania"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "Tryb wyłącznie SSO jest włączony, a rejestracja użytkowników jest teraz wyłączona. Nie można samodzielnie utworzyć nowego konta - musi je utworzyć administrator. Jeśli nie było to zamierzone, ponownie włącz rejestrację lub wyłącz tryb wyłącznie SSO."
     }
   },
   "shared": {

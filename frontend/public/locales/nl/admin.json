@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Nieuwe gebruikersregistratie toestaan",
       "allowRegistrationDesc": "Schakel de mogelijkheid voor nieuwe gebruikers om accounts aan te maken vanaf de inlogpagina in of uit"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "De SSO-only-modus staat aan en gebruikersregistratie is nu uitgeschakeld. Er kan geen nieuw account meer via zelfregistratie worden aangemaakt - een beheerder moet ze aanmaken. Als dat niet de bedoeling was, schakel registratie weer in of zet de SSO-only-modus uit."
     }
   },
   "shared": {

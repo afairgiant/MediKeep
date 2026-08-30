@@ -20,11 +20,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.core import config
+from app.core import auth_mode, config
+from app.core.auth_mode import no_local_password_warning
 from app.core.config import settings
 from app.main import app
+from app.models.user import User
 
 STARTUP_LOGGER = "medical_records.app.core.startup"
+AUTH_MODE_LOGGER = "medical_records.app.core.auth_mode"
 
 # A provider configuration complete enough for validate_sso_config() to pass.
 VALID_SSO = {
@@ -50,6 +53,17 @@ def configured(**overrides):
         for name, value in values.items():
             stack.enter_context(patch.object(settings, name, value))
         yield
+
+
+@contextmanager
+def configured_and_captured(caplog, level=logging.WARNING, **overrides):
+    """configured() plus caplog scoped to the startup logger.
+
+    The pairing every startup-emission test below needs.
+    """
+    with configured(**overrides):
+        with caplog.at_level(level, logger=STARTUP_LOGGER):
+            yield
 
 
 class TestBootFailure:
@@ -273,20 +287,28 @@ class TestSealedInstanceWarning:
         with configured(SSO_ONLY_MODE=sso_only):
             settings.ALLOW_USER_REGISTRATION = registration_enabled
 
-            events = [event for event, _ in settings.auth_mode_warnings()]
+            events = [event for event, _ in auth_mode.warnings()]
 
         assert ("sso_only_no_registration_route" in events) is expected
 
     @staticmethod
-    def run_startup(persisted_registration: bool):
+    def run_startup(persisted_registration: bool, no_local_password=None):
         """Run startup_event() to completion with the database work stubbed out.
 
         `persisted_registration` is what the database says, applied by the stubbed
         load_persisted_settings exactly where the real one applies it.
+        `no_local_password` stubs 8c's account query - database work too, and a real
+        one here leaves a pooled SQLite connection holding the test file open.
         """
 
         def load(_db):
             settings.ALLOW_USER_REGISTRATION = persisted_registration
+
+        no_local_password_patch = (
+            {"side_effect": no_local_password}
+            if callable(no_local_password)
+            else {"return_value": no_local_password}
+        )
 
         scheduler = MagicMock()
         scheduler.start = AsyncMock()
@@ -305,6 +327,9 @@ class TestSealedInstanceWarning:
             "app.core.startup.run_startup_data_migrations"
         ), patch(
             "app.core.persisted_settings.load_persisted_settings", side_effect=load
+        ), patch(
+            "app.core.auth_mode.no_local_password_warning",
+            **no_local_password_patch,
         ), patch(
             "app.core.utils.test_initialization.ensure_tests_initialized"
         ), patch(
@@ -382,3 +407,221 @@ class TestSealedInstanceWarning:
             settings.ALLOW_USER_REGISTRATION = False
             with TestClient(app):
                 pass
+
+
+def make_user(db, username, auth_method, is_active=True):
+    """Persist a minimal user with the given auth_method."""
+    user = User(
+        username=username,
+        email=f"{username}@example.test",
+        password_hash="not-a-real-hash",
+        full_name=username,
+        role="user",
+        auth_method=auth_method,
+        is_active=is_active,
+    )
+    db.add(user)
+    db.commit()
+    return user
+
+
+class TestHasUsablePasswordIsQueryable:
+    """One definition has to serve both the instance and the filter.
+
+    It was a plain property, so the rule could only be evaluated in Python. 8c needs
+    it in SQL, and writing the same auth_method != 'sso' a second time is how the two
+    quietly diverge.
+    """
+
+    def test_it_resolves_on_an_instance(self, db_session):
+        assert make_user(db_session, "alice", "sso").has_usable_password is False
+        assert make_user(db_session, "bob", "local").has_usable_password is True
+        assert make_user(db_session, "carol", "hybrid").has_usable_password is True
+
+    def test_it_resolves_inside_a_filter(self, db_session):
+        make_user(db_session, "alice", "sso")
+        make_user(db_session, "bob", "local")
+        make_user(db_session, "carol", "hybrid")
+
+        names = {
+            u.username
+            for u in db_session.query(User).filter(User.has_usable_password).all()
+        }
+
+        assert names == {"bob", "carol"}
+
+
+class TestNoLocalPasswordWarning:
+    """SSO_ONLY_MODE on an instance where no account can answer a password prompt.
+
+    Break-glass step 1 says to unset the flag and sign in locally. Where every
+    account came from the provider there is no password to sign in with, so that
+    step recovers nothing and recovery needs a shell on the host.
+    """
+
+    @pytest.fixture(autouse=True)
+    def restore_auth_settings(self):
+        original = (settings.SSO_ONLY_MODE, settings.ALLOW_USER_REGISTRATION)
+        yield
+        settings.SSO_ONLY_MODE, settings.ALLOW_USER_REGISTRATION = original
+
+    def test_warns_when_every_account_is_sso(self, db_session):
+        make_user(db_session, "alice", "sso")
+        make_user(db_session, "bob", "sso")
+
+        with configured(SSO_ONLY_MODE=True):
+            warning = no_local_password_warning(db_session)
+
+        assert warning is not None
+        assert warning[0] == auth_mode.NO_LOCAL_PASSWORD_EVENT
+
+    @pytest.mark.parametrize("auth_method", ["local", "hybrid"])
+    def test_silent_when_one_account_can_answer(self, db_session, auth_method):
+        make_user(db_session, "alice", "sso")
+        make_user(db_session, "bob", auth_method)
+
+        with configured(SSO_ONLY_MODE=True):
+            assert no_local_password_warning(db_session) is None
+
+    def test_a_deactivated_local_admin_still_suppresses_it(self, db_session):
+        """Counts accounts, not sessions.
+
+        Being disabled is reversible from the same shell that would run the
+        emergency script, so it is not the situation this warns about.
+        """
+        make_user(db_session, "alice", "sso")
+        make_user(db_session, "bob", "local", is_active=False)
+
+        with configured(SSO_ONLY_MODE=True):
+            assert no_local_password_warning(db_session) is None
+
+    def test_silent_when_the_flag_is_off(self, db_session):
+        make_user(db_session, "alice", "sso")
+
+        with configured(SSO_ONLY_MODE=False):
+            assert no_local_password_warning(db_session) is None
+
+    def test_startup_emits_it(self, caplog):
+        warning = (
+            auth_mode.NO_LOCAL_PASSWORD_EVENT,
+            auth_mode.NO_LOCAL_PASSWORD_MESSAGE,
+        )
+        with configured_and_captured(caplog, SSO_ONLY_MODE=True):
+            TestSealedInstanceWarning.run_startup(
+                persisted_registration=True, no_local_password=warning
+            )
+
+        events = [getattr(record, "event", None) for record in caplog.records]
+        assert auth_mode.NO_LOCAL_PASSWORD_EVENT in events
+
+    def test_skip_migrations_stays_silent(self, caplog):
+        """No database means no session, so the check that needs one is skipped."""
+        with configured_and_captured(caplog, SSO_ONLY_MODE=True):
+            settings.ALLOW_USER_REGISTRATION = True
+            TestSealedInstanceWarning.run_startup_in_test_mode()
+
+        events = [getattr(record, "event", None) for record in caplog.records]
+        assert auth_mode.NO_LOCAL_PASSWORD_EVENT not in events
+
+    def test_a_failing_query_warns_rather_than_aborting_the_boot(self, caplog):
+        """Failing the boot here would turn a recoverable instance into a dead one."""
+
+        def boom(_db):
+            raise RuntimeError("database is on fire")
+
+        # Scoped to auth_mode, not startup: the collector isolates each check there.
+        with configured(SSO_ONLY_MODE=True):
+            with caplog.at_level(logging.WARNING, logger=AUTH_MODE_LOGGER):
+                TestSealedInstanceWarning.run_startup(
+                    persisted_registration=True, no_local_password=boom
+                )
+
+        assert "database is on fire" in caplog.text
+
+
+class TestEffectiveAuthModeLogged:
+    """A clean boot has to say which mode it came up in.
+
+    Strict parsing catches a value the app cannot read. It cannot catch a perfectly
+    valid value that came from a file the operator was not editing, which is the
+    ordinary self-hosted mistake and looks identical in the log without this line.
+    """
+
+    @pytest.fixture(autouse=True)
+    def restore_registration_setting(self):
+        original = settings.ALLOW_USER_REGISTRATION
+        yield
+        settings.ALLOW_USER_REGISTRATION = original
+
+    @staticmethod
+    def auth_mode_record(caplog):
+        for record in caplog.records:
+            if getattr(record, "event", None) == "auth_mode_configured":
+                return record
+        return None
+
+    def test_emitted_with_the_flags_off(self, caplog):
+        with configured_and_captured(
+            caplog,
+            logging.INFO,
+            SSO_ENABLED=False,
+            SSO_ONLY_MODE=False,
+            SSO_AUTO_REDIRECT=False,
+        ):
+            TestSealedInstanceWarning.run_startup(persisted_registration=True)
+
+        record = self.auth_mode_record(caplog)
+        assert record is not None
+        assert record.sso_only_mode is False
+
+    def test_emitted_with_the_flags_on(self, caplog):
+        with configured_and_captured(
+            caplog, logging.INFO, SSO_ONLY_MODE=True, SSO_AUTO_REDIRECT=True
+        ):
+            TestSealedInstanceWarning.run_startup(persisted_registration=True)
+
+        record = self.auth_mode_record(caplog)
+        assert record is not None
+        assert record.sso_only_mode is True
+        assert record.sso_auto_redirect is True
+
+    def test_the_values_are_in_the_message_not_only_the_extras(self, caplog):
+        """The console formatter only appends extra fields at WARNING+.
+
+        An info line carrying its values only in extra reaches the JSON log and never
+        reaches docker logs, which is the one place a locked-out operator can look.
+        """
+        with configured_and_captured(caplog, logging.INFO, SSO_ONLY_MODE=True):
+            TestSealedInstanceWarning.run_startup(persisted_registration=True)
+
+        message = self.auth_mode_record(caplog).getMessage()
+        assert "sso_only_mode=True" in message
+        assert "sso_enabled=True" in message
+
+    def test_it_reports_the_persisted_registration_value(self, caplog):
+        """Env says on, the database says off; the line must report what is in force."""
+        with configured_and_captured(caplog, logging.INFO, SSO_ONLY_MODE=True):
+            settings.ALLOW_USER_REGISTRATION = True
+            TestSealedInstanceWarning.run_startup(persisted_registration=False)
+
+        assert self.auth_mode_record(caplog).allow_user_registration is False
+
+    def test_it_carries_no_secret(self, caplog):
+        with configured_and_captured(
+            caplog,
+            logging.INFO,
+            SSO_ONLY_MODE=True,
+            SSO_CLIENT_SECRET="super-secret-value",
+        ):
+            TestSealedInstanceWarning.run_startup(persisted_registration=True)
+
+        record = self.auth_mode_record(caplog)
+        assert "super-secret-value" not in record.getMessage()
+        assert "super-secret-value" not in str(record.__dict__)
+
+    def test_emitted_on_the_skip_migrations_path(self, caplog):
+        with configured_and_captured(caplog, logging.INFO, SSO_ONLY_MODE=True):
+            settings.ALLOW_USER_REGISTRATION = True
+            TestSealedInstanceWarning.run_startup_in_test_mode()
+
+        assert self.auth_mode_record(caplog) is not None

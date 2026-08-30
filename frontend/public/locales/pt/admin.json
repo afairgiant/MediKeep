@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Permitir Registro de Novos Usuários",
       "allowRegistrationDesc": "Ativar ou desativar a capacidade de novos usuários criarem contas a partir da página de login"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "O modo apenas SSO está ativado e o registo de utilizadores está agora desativado. Nenhuma conta nova pode ser criada por autosserviço - um administrador tem de as criar. Se não era essa a intenção, reative o registo ou desative o modo apenas SSO."
     }
   },
   "shared": {

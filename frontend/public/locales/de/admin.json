@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Neue Benutzerregistrierung erlauben",
       "allowRegistrationDesc": "Aktivieren oder deaktivieren Sie die Möglichkeit für neue Benutzer, Konten über die Anmeldeseite zu erstellen"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "Der SSO-only-Modus ist aktiv und die Benutzerregistrierung ist jetzt deaktiviert. Es kann kein neues Konto mehr per Selbstregistrierung erstellt werden - ein Administrator muss die Konten anlegen. Falls das nicht beabsichtigt war, aktivieren Sie die Registrierung wieder oder schalten Sie den SSO-only-Modus aus."
     }
   },
   "shared": {

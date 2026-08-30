@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Allow New User Registration",
       "allowRegistrationDesc": "Enable or disable the ability for new users to create accounts from the login page"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "SSO-only mode is on and user registration is now disabled. No new account can be created by any self-service route - an administrator must create them. If that was not intended, re-enable registration or turn off SSO-only mode."
     }
   },
   "shared": {

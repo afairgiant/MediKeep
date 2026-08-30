@@ -14,8 +14,10 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin_user, get_db
 from app.api.v1.admin.csv_utils import stream_csv
+from app.core.auth_mode import sealed_instance_warning
 from app.core.config import settings
 from app.core.logging.config import get_logger
+from app.core.logging.constants import LogFields
 from app.core.logging.helpers import (
     log_endpoint_access,
     log_endpoint_error,
@@ -756,6 +758,22 @@ async def update_retention_settings(
                 registration_enabled=settings_update.allow_user_registration,
             )
 
+        # The boot-time check cannot see a toggle, so the same warning is raised here
+        # and returned to the caller. Warn, never refuse - a sealed instance is a
+        # legitimate configuration.
+        warnings = []
+        if settings_update.allow_user_registration is False:
+            sealed = sealed_instance_warning(
+                settings.SSO_ONLY_MODE, settings.ALLOW_USER_REGISTRATION
+            )
+            if sealed:
+                event, message = sealed
+                logger.warning(
+                    message,
+                    extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
+                )
+                warnings.append({"code": event, "message": message})
+
         log_security_event(
             logger,
             "settings_updated",
@@ -769,6 +787,7 @@ async def update_retention_settings(
         return {
             "message": "Settings updated successfully",
             "updated_settings": updated_settings,
+            "warnings": warnings,
             "current_settings": {
                 "backup_retention_days": settings.BACKUP_RETENTION_DAYS,
                 "trash_retention_days": settings.TRASH_RETENTION_DAYS,

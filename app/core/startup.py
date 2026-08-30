@@ -1,5 +1,6 @@
 import os
 
+from app.core import auth_mode
 from app.core.config import settings
 from app.core.database.database import (
     check_database_connection,
@@ -17,20 +18,42 @@ from app.services.notification_handlers import create_notification_handler
 logger = get_logger(__name__, "app")
 
 
-def _emit_auth_mode_warnings():
+def _emit_auth_mode_warnings(db=None):
     """Log the auth-mode configurations that are legal but worth saying out loud.
 
-    A function because startup_event() has two exits that need it: the normal path,
-    after the persisted settings load, and the SKIP_MIGRATIONS early return, which
-    never reaches that load. Emitting from only the first meant a deployment running
-    with SKIP_MIGRATIONS got no warning at all - including the sealed-instance case,
-    which is precisely the one an operator needs told.
+    Called from both startup exits. Pass a session to include the checks that need
+    one; the SKIP_MIGRATIONS path has no database and correctly passes none.
     """
-    for event, message in settings.auth_mode_warnings():
+    for event, message in auth_mode.warnings(db):
         logger.warning(
             message,
             extra={LogFields.CATEGORY: "app", LogFields.EVENT: event},
         )
+
+
+def _log_effective_auth_mode():
+    """Log the authentication configuration the instance actually came up with.
+
+    Provider type only - never the client id or secret.
+    """
+    values = {
+        "sso_enabled": settings.SSO_ENABLED,
+        "sso_provider_type": settings.SSO_PROVIDER_TYPE,
+        "sso_only_mode": settings.SSO_ONLY_MODE,
+        "sso_auto_redirect": settings.SSO_AUTO_REDIRECT,
+        "allow_user_registration": settings.ALLOW_USER_REGISTRATION,
+    }
+    # Values in the message: the console formatter only appends extras at WARNING+.
+    summary = " ".join(f"{name}={value}" for name, value in values.items())
+
+    logger.info(
+        f"Authentication mode: {summary}",
+        extra={
+            LogFields.CATEGORY: "app",
+            LogFields.EVENT: "auth_mode_configured",
+            **values,
+        },
+    )
 
 
 async def startup_event():
@@ -107,6 +130,7 @@ async def startup_event():
         # with no database there is no stored ALLOW_USER_REGISTRATION that could
         # override the env value, so the env value is the one in force.
         _emit_auth_mode_warnings()
+        _log_effective_auth_mode()
         logger.info("⏭️ Skipping database operations (test mode)")
         logger.info("Application startup completed (test mode)")
         return
@@ -166,25 +190,27 @@ async def startup_event():
     # allow_user_registration, backup/trash retention). The env-var defaults
     # from app.core.config.Settings were already loaded at import time; any
     # persisted value overrides them here.
+    # The warnings below are emitted here, and not beside validate_auth_mode_config()
+    # above, because they read ALLOW_USER_REGISTRATION - admin-toggleable and persisted
+    # in system_settings, so the stored value only takes effect at
+    # load_persisted_settings(). Warning any earlier would report on a value that is not
+    # in force. A toggle flipped at runtime is not covered here - the admin settings
+    # endpoint warns at the toggle. The session stays open past the load: warnings need it.
+    db = None
     try:
         from app.core.persisted_settings import load_persisted_settings
 
         db = SessionLocal()
-        try:
-            load_persisted_settings(db)
-        finally:
-            db.close()
+        load_persisted_settings(db)
     except Exception as e:
         logger.warning(f"Could not load persisted admin settings: {e}")
         # Non-fatal - app falls back to env-var defaults already in memory
-
-    # Emitted here, and not beside validate_auth_mode_config() above, because these
-    # warnings read ALLOW_USER_REGISTRATION - admin-toggleable and persisted in
-    # system_settings, so the stored value only takes effect at
-    # load_persisted_settings() immediately above. Warning any earlier would report
-    # on a value that is not in force. A toggle flipped at runtime is still not
-    # covered; a startup warning cannot reach it.
-    _emit_auth_mode_warnings()
+    try:
+        _emit_auth_mode_warnings(db)
+        _log_effective_auth_mode()
+    finally:
+        if db is not None:
+            db.close()
 
     # Initialize standardized tests from LOINC
     try:

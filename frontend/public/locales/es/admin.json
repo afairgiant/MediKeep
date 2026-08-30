@@ -547,6 +547,9 @@
     "userManagement": {
       "allowRegistration": "Permitir registro de nuevos usuarios",
       "allowRegistrationDesc": "Habilitar o deshabilitar la posibilidad de que nuevos usuarios creen cuentas desde la página de inicio de sesión"
+    },
+    "warnings": {
+      "sso_only_no_registration_route": "El modo solo SSO está activado y el registro de usuarios ahora está deshabilitado. No se puede crear ninguna cuenta nueva por autoservicio: un administrador debe crearlas. Si no era la intención, vuelva a habilitar el registro o desactive el modo solo SSO."
     }
   },
   "shared": {

@@ -567,35 +567,6 @@ class Settings:  # App Info
         # fail the boot rather than the first login attempt.
         self.validate_sso_config()
 
-    def auth_mode_warnings(self) -> list[tuple[str, str]]:
-        """Configurations that are legitimate but worth saying out loud at startup.
-
-        Returns (event_name, message) pairs, so a second warning added here carries
-        its own event rather than inheriting the first one's.
-
-        Separate from validate_auth_mode_config() because these must never fail a
-        boot, and separate from startup_event() because a policy inlined in a
-        200-line boot sequence can only be tested by reconstructing the whole boot.
-
-        Caller-sensitive: ALLOW_USER_REGISTRATION is admin-toggleable and persisted,
-        so this must be called *after* the stored settings are loaded or it reports
-        on a value that is not in effect.
-        """
-        warnings = []
-
-        if self.SSO_ONLY_MODE and not self.ALLOW_USER_REGISTRATION:
-            warnings.append(
-                (
-                    "sso_only_no_registration_route",
-                    "SSO_ONLY_MODE is enabled and user registration is disabled. No "
-                    "new user can be created by any self-service route; accounts "
-                    "must be created by an administrator. If this was not intended, "
-                    "enable registration or unset SSO_ONLY_MODE.",
-                )
-            )
-
-        return warnings
-
     def _ensure_directory_exists(self, directory: Path, directory_type: str) -> None:
         """Ensure directory exists with proper permission error handling for Docker bind mounts."""
         if not directory.exists():

@@ -585,6 +585,11 @@ these settings, so a broken IdP cannot make itself unfixable:
      `hybrid` and keeps its own. If every account is pure SSO, turn the flag off and
      then create a password admin per step 2 — `--promote` preserves a password that is
      not there.
+
+     The instance checks this for you at every boot: if `SSO_ONLY_MODE` is on and no
+     account has a usable password, startup logs a `sso_only_no_local_password`
+     warning saying this step will not recover anything. Seeing it in `docker logs`
+     while things are working is the cheapest time to fix it.
 2. Run `create_emergency_admin.py` inside the container
    (`docker compose exec -it medikeep-app python app/scripts/create_emergency_admin.py …`),
    or directly from the repo root on a host install.
