@@ -14,7 +14,7 @@ Paperless-ngx is an open-source document management system that scans, indexes, 
 
 Before configuring the integration, you need:
 
-1. A running **Paperless-ngx instance** accessible from your MediKeep server
+1. A running **Paperless-ngx instance** accessible from your MediKeep server (2.x and 3.x are both supported)
 2. A **Paperless-ngx API token** (recommended) or username/password credentials
 
 ### Getting an API Token
@@ -76,6 +76,14 @@ Documents linked to medical records (lab results, encounter notes, etc.) can be 
 - Verify your API token is correct and has not expired
 - If using username/password, confirm the credentials are valid
 - Check that the user account has sufficient permissions in Paperless-ngx
+
+### Document Stays In "Processing" And Then Disappears
+
+- The document reaches Paperless but MediKeep never links it, and the entry
+  reports the Paperless document as missing
+- Affected MediKeep 0.69.0 and earlier with Paperless-ngx 3.x, which reports task
+  status in a new format; update MediKeep, then use **Link Existing Document** to
+  attach anything uploaded while the bug was present
 
 ### Timeout Errors
 

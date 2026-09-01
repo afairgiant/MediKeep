@@ -4,6 +4,7 @@ Unit tests for paperless service.
 
 import pytest
 import asyncio
+import datetime as datetime_module
 from unittest.mock import Mock, AsyncMock, patch
 import aiohttp
 from aiohttp import web
@@ -845,6 +846,116 @@ class TestPaperlessAuthentication:
             assert service.get_auth_type() == "basic_auth"
             assert service.username == self.username
             assert service.password == self.password
+
+
+class PollGuard(BaseException):
+    """Aborts a polling loop that never reaches its deadline (BaseException dodges `except Exception`)."""
+
+
+class TestWaitForTaskCompletion:
+    """Polling loop that resolves an upload task to a document ID."""
+
+    def setup_method(self):
+        self.service = PaperlessServiceToken(
+            "https://1.1.1.1", "a1b2c3d4e5f6789012345678901234567890abcd", 123
+        )
+
+    @staticmethod
+    def _response(payload, status_code=200):
+        response = AsyncMock()
+        response.status = status_code
+        response.json.return_value = payload
+        return response
+
+    @staticmethod
+    def _clock(step_seconds):
+        """Fake `datetime` whose utcnow() advances, so deadlines trip without waiting."""
+
+        class Clock:
+            now = datetime_module.datetime(2026, 1, 1)
+
+            @classmethod
+            def utcnow(cls):
+                cls.now += datetime_module.timedelta(seconds=step_seconds)
+                return cls.now
+
+        return Clock
+
+    @staticmethod
+    def _bounded_sleep(max_polls=3):
+        """Patched asyncio.sleep that aborts rather than letting a stuck loop hang."""
+        sleep = AsyncMock()
+        sleep.side_effect = [None] * max_polls + [PollGuard("polled past the deadline")]
+        return sleep
+
+    @pytest.mark.asyncio
+    async def test_success_returns_document_id(self):
+        response = self._response(
+            {"results": [{"status": "success", "result_data": {"document_id": 2744}}]}
+        )
+
+        with patch.object(self.service, "_make_request") as mock_request:
+            mock_request.return_value.__aenter__.return_value = response
+
+            assert (
+                await self.service._wait_for_task_completion("uuid", "report.pdf")
+                == "2744"
+            )
+
+    @pytest.mark.asyncio
+    async def test_failure_surfaces_paperless_error(self):
+        """A resolved failure must not be swallowed by the transient-error handler."""
+        response = self._response(
+            {
+                "results": [
+                    {
+                        "status": "failure",
+                        "result_data": {"error_message": "OCR failed"},
+                    }
+                ]
+            }
+        )
+
+        with patch.object(self.service, "_make_request") as mock_request, patch(
+            "app.services.paperless_service.asyncio.sleep", self._bounded_sleep()
+        ), patch("app.services.paperless_service.datetime", self._clock(6)):
+            mock_request.return_value.__aenter__.return_value = response
+
+            with pytest.raises(PaperlessUploadError, match="OCR failed"):
+                await self.service._wait_for_task_completion("uuid", "report.pdf", 10)
+
+    @pytest.mark.asyncio
+    async def test_repeated_http_errors_time_out(self):
+        """Non-200 replies must hit the deadline instead of polling forever."""
+        response = self._response(None, status_code=503)
+
+        mock_sleep = self._bounded_sleep()
+
+        with patch.object(self.service, "_make_request") as mock_request, patch(
+            "app.services.paperless_service.asyncio.sleep", mock_sleep
+        ), patch("app.services.paperless_service.datetime", self._clock(6)):
+            mock_request.return_value.__aenter__.return_value = response
+
+            with pytest.raises(PaperlessUploadError, match="timed out"):
+                await self.service._wait_for_task_completion("uuid", "report.pdf", 10)
+
+            assert mock_sleep.await_count == 1
+
+    @pytest.mark.asyncio
+    async def test_unknown_status_times_out(self):
+        response = self._response({"results": [{"status": "surprise"}]})
+
+        mock_sleep = self._bounded_sleep()
+
+        with patch.object(self.service, "_make_request") as mock_request, patch(
+            "app.services.paperless_service.asyncio.sleep", mock_sleep
+        ), patch("app.services.paperless_service.datetime", self._clock(6)):
+            mock_request.return_value.__aenter__.return_value = response
+
+            with pytest.raises(PaperlessUploadError, match="timed out"):
+                await self.service._wait_for_task_completion("uuid", "report.pdf", 10)
+
+            assert mock_sleep.await_count == 1
 
 
 # Integration test fixtures (commented out - would need actual paperless instance)

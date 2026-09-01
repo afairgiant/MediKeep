@@ -5,9 +5,7 @@ Provides API endpoints for paperless-ngx integration including connection testin
 settings management, and document operations.
 """
 
-import json
 import os
-import re
 import traceback
 from datetime import datetime
 from typing import Any, Dict
@@ -40,6 +38,7 @@ from app.services.paperless_service import (
     _build_title_fallback_query,
     create_paperless_service,
 )
+from app.services.paperless_task_status import extract_task, parse_task
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -62,6 +61,38 @@ def get_preferred_auth_method(user_prefs) -> str:
     ):
         return "basic_auth"
     return "none"
+
+
+_TASK_ERROR_KEYWORDS = (
+    (
+        "corrupted_file",
+        (
+            "corrupted",
+            "corrupt",
+            "invalid format",
+            "cannot parse",
+            "unsupported format",
+        ),
+    ),
+    ("permission_error", ("permission denied", "access denied", "forbidden")),
+    ("file_too_large", ("file too large", "size exceeds", "too big")),
+    ("storage_full", ("disk space", "storage full", "no space")),
+    ("ocr_failed", ("ocr failed", "text extraction")),
+    ("network_error", ("timeout", "connection")),
+)
+
+
+def _categorize_task_error(error_message: str, is_duplicate: bool) -> str:
+    """Map a Paperless failure message to the error type the frontend renders."""
+    if is_duplicate:
+        return "duplicate"
+
+    message = error_message.lower()
+    for error_type, keywords in _TASK_ERROR_KEYWORDS:
+        if any(keyword in message for keyword in keywords):
+            return error_type
+
+    return "processing_error"
 
 
 def _update_entity_file_from_task_result(
@@ -1145,243 +1176,92 @@ async def get_paperless_task_status(
                     if response.status == 200:
                         tasks = await response.json()
 
-                        # Handle both list format and paginated format
-                        if isinstance(tasks, list):
-                            task_list = tasks
-                        else:
-                            task_list = tasks.get("results", [])
+                        task = extract_task(tasks)
+                        if task is None:
+                            raise HTTPException(
+                                status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"Task {task_uuid} not found",
+                            )
 
-                        if task_list and len(task_list) > 0:
-                            task = task_list[0]
+                        parsed = parse_task(task)
 
-                            if task["status"] == "SUCCESS":
-                                # Log the raw task response from Paperless for debugging
-                                logger.error(
-                                    f"🔍 RAW PAPERLESS TASK RESPONSE: {json.dumps(task, indent=2)}",
-                                    extra={
-                                        "user_id": current_user.id,
-                                        "task_uuid": task_uuid,
-                                        "raw_paperless_response": task,
-                                    },
-                                )
-
-                                # Extract document ID from the task result
-                                # Paperless returns document ID in 'related_document' field, NOT 'id' (which is task ID)
-                                logger.debug(
-                                    f"Document ID extraction - Full task result: {task}"
-                                )
-                                logger.debug(f"task.get('id'): {task.get('id')}")
-                                logger.debug(
-                                    f"task.get('related_document'): {task.get('related_document')}"
-                                )
-                                logger.debug(
-                                    f"task.get('result'): {task.get('result')}"
-                                )
-
-                                # FIXED: Try related_document FIRST (this is the actual document ID)
-                                document_id = task.get("related_document")
-                                extraction_method = "task.related_document"
-
-                                # Fallback to other possible locations if not found
-                                if not document_id:
-                                    if isinstance(task.get("result"), dict):
-                                        document_id = task.get("result", {}).get(
-                                            "document_id"
-                                        )
-                                        extraction_method = "task.result.document_id"
-                                    elif isinstance(task.get("result"), str):
-                                        # Try to extract from result string like "Success. New document id 2744 created"
-                                        match = re.search(
-                                            r"document id (\d+)", task.get("result", "")
-                                        )
-                                        if match:
-                                            document_id = match.group(1)
-                                            extraction_method = (
-                                                "regex_from_result_string"
-                                            )
-                                    # Only use task.id as LAST resort since it's the task ID, not document ID
-                                    if not document_id:
-                                        document_id = task.get("id")
-                                        extraction_method = (
-                                            "task.id (fallback - may be incorrect)"
-                                        )
-
-                                logger.error(
-                                    f"🔍 EXTRACTED DOCUMENT ID: {document_id} (type: {type(document_id)}) via {extraction_method}",
-                                    extra={
-                                        "user_id": current_user.id,
-                                        "task_uuid": task_uuid,
-                                        "extracted_document_id": document_id,
-                                        "extraction_method": extraction_method,
-                                        "full_task_result": task,
-                                    },
-                                )
-
-                                # VALIDATE: Check if extracted document ID actually exists in Paperless
-                                if document_id:
-                                    try:
-                                        exists = await paperless_service.check_document_exists(
-                                            document_id
-                                        )
-                                        logger.error(
-                                            f"🔍 VALIDATION - Document {document_id} exists in Paperless: {exists}"
-                                        )
-                                        if not exists:
-                                            logger.error(
-                                                f"🚨 BUG DETECTED - Extracted document ID {document_id} does not exist in Paperless! Task result may be wrong."
-                                            )
-                                    except Exception as e:
-                                        logger.error(
-                                            f"🔍 VALIDATION - Failed to check document existence: {e}"
-                                        )
-
-                                # Update database record with successful completion
-                                _update_entity_file_from_task_result(
-                                    db,
-                                    task_uuid,
-                                    {
-                                        "status": "SUCCESS",
-                                        "result": {"document_id": document_id},
-                                        "document_id": document_id,
-                                    },
-                                )
-
-                                result = {
+                        if parsed.is_success:
+                            _update_entity_file_from_task_result(
+                                db,
+                                task_uuid,
+                                {
                                     "status": "SUCCESS",
-                                    "result": {"document_id": document_id},
-                                    "task_id": task_uuid,
-                                    "timestamp": datetime.utcnow().isoformat(),
-                                }
+                                    "result": {"document_id": parsed.document_id},
+                                    "document_id": parsed.document_id,
+                                },
+                            )
 
-                                logger.info(
-                                    f"Paperless task {task_uuid} completed successfully",
-                                    extra={
-                                        "user_id": current_user.id,
-                                        "task_uuid": task_uuid,
-                                        "document_id": document_id,
-                                    },
-                                )
+                            logger.info(
+                                f"Paperless task {task_uuid} completed successfully",
+                                extra={
+                                    "user_id": current_user.id,
+                                    "task_uuid": task_uuid,
+                                    "document_id": parsed.document_id,
+                                },
+                            )
 
-                                return result
-
-                            if task["status"] == "FAILURE":
-                                # Task failed - extract error information
-                                error_message = task.get("result", "Task failed")
-
-                                # Categorize the error type for better user messaging
-                                error_message_lower = error_message.lower()
-
-                                # Determine specific error type
-                                if (
-                                    "duplicate" in error_message_lower
-                                    or "already exists" in error_message_lower
-                                    or "not consuming" in error_message_lower
-                                ):
-                                    error_type = "duplicate"
-                                    is_duplicate = True
-                                elif (
-                                    "corrupted" in error_message_lower
-                                    or "corrupt" in error_message_lower
-                                    or "invalid format" in error_message_lower
-                                    or "cannot parse" in error_message_lower
-                                    or "unsupported format" in error_message_lower
-                                ):
-                                    error_type = "corrupted_file"
-                                    is_duplicate = False
-                                elif (
-                                    "permission denied" in error_message_lower
-                                    or "access denied" in error_message_lower
-                                    or "forbidden" in error_message_lower
-                                ):
-                                    error_type = "permission_error"
-                                    is_duplicate = False
-                                elif (
-                                    "file too large" in error_message_lower
-                                    or "size exceeds" in error_message_lower
-                                    or "too big" in error_message_lower
-                                ):
-                                    error_type = "file_too_large"
-                                    is_duplicate = False
-                                elif (
-                                    "disk space" in error_message_lower
-                                    or "storage full" in error_message_lower
-                                    or "no space" in error_message_lower
-                                ):
-                                    error_type = "storage_full"
-                                    is_duplicate = False
-                                elif (
-                                    "ocr failed" in error_message_lower
-                                    or "text extraction" in error_message_lower
-                                ):
-                                    error_type = "ocr_failed"
-                                    is_duplicate = False
-                                elif (
-                                    "timeout" in error_message_lower
-                                    or "connection" in error_message_lower
-                                ):
-                                    error_type = "network_error"
-                                    is_duplicate = False
-                                else:
-                                    error_type = "processing_error"
-                                    is_duplicate = False
-
-                                # Update database record with failure status
-                                _update_entity_file_from_task_result(
-                                    db,
-                                    task_uuid,
-                                    {
-                                        "status": "FAILURE",
-                                        "result": error_message,
-                                        "error_type": error_type,
-                                        "is_duplicate": is_duplicate,
-                                    },
-                                )
-
-                                result = {
-                                    "status": "FAILURE",
-                                    "result": error_message,
-                                    "task_id": task_uuid,
-                                    "timestamp": datetime.utcnow().isoformat(),
-                                    "error_type": (
-                                        "duplicate"
-                                        if is_duplicate
-                                        else "processing_error"
-                                    ),
-                                }
-
-                                logger.warning(
-                                    f"Paperless task {task_uuid} failed",
-                                    extra={
-                                        "user_id": current_user.id,
-                                        "task_uuid": task_uuid,
-                                        "error": error_message,
-                                        "is_duplicate": is_duplicate,
-                                    },
-                                )
-
-                                return result
-                            # Task is still pending/processing
-                            result = {
-                                "status": "PENDING",
-                                "result": None,
+                            return {
+                                "status": "SUCCESS",
+                                "result": {"document_id": parsed.document_id},
                                 "task_id": task_uuid,
                                 "timestamp": datetime.utcnow().isoformat(),
                             }
 
-                            logger.debug(
-                                f"Paperless task {task_uuid} still processing",
-                                extra={
-                                    "user_id": current_user.id,
-                                    "task_uuid": task_uuid,
+                        if parsed.is_failure:
+                            error_message = parsed.error_message or "Task failed"
+                            error_type = _categorize_task_error(
+                                error_message, parsed.is_duplicate
+                            )
+
+                            _update_entity_file_from_task_result(
+                                db,
+                                task_uuid,
+                                {
+                                    "status": "FAILURE",
+                                    "result": error_message,
+                                    "error_type": error_type,
+                                    "is_duplicate": parsed.is_duplicate,
                                 },
                             )
 
-                            return result
-                        # Task not found
-                        raise HTTPException(
-                            status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Task {task_uuid} not found",
+                            logger.warning(
+                                f"Paperless task {task_uuid} failed",
+                                extra={
+                                    "user_id": current_user.id,
+                                    "task_uuid": task_uuid,
+                                    "error": error_message,
+                                    "is_duplicate": parsed.is_duplicate,
+                                },
+                            )
+
+                            return {
+                                "status": "FAILURE",
+                                "result": error_message,
+                                "task_id": task_uuid,
+                                "timestamp": datetime.utcnow().isoformat(),
+                                "error_type": error_type,
+                            }
+
+                        logger.debug(
+                            f"Paperless task {task_uuid} still processing",
+                            extra={
+                                "user_id": current_user.id,
+                                "task_uuid": task_uuid,
+                                "task_status": parsed.status,
+                            },
                         )
+
+                        return {
+                            "status": "PENDING",
+                            "result": None,
+                            "task_id": task_uuid,
+                            "timestamp": datetime.utcnow().isoformat(),
+                        }
                     if response.status == 403:
                         logger.warning(
                             f"Permission denied checking task {task_uuid} - auth may have failed"
@@ -1984,16 +1864,10 @@ async def update_background_task(
             request_data.sync_status == "synced"
             and request_data.task_result.get("status") == "SUCCESS"
         ):
-            task_result = request_data.task_result
-            # Use the same extraction logic as the main task processing
+            # The task status endpoint reports the document ID under result.document_id
+            result = request_data.task_result.get("result")
             document_id = (
-                task_result.get("related_document")
-                or task_result.get("id")
-                or (
-                    task_result.get("result", {}).get("document_id")
-                    if isinstance(task_result.get("result"), dict)
-                    else None
-                )
+                result.get("document_id") if isinstance(result, dict) else None
             )
 
         # Update the record with final result
