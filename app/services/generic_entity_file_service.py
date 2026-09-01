@@ -34,8 +34,11 @@ from app.services.paperless_client import (
     create_paperless_client,
 )
 from app.services.paperless_service import (
+    PaperlessAuthenticationError,
+    PaperlessError,
     create_paperless_service_with_username_password,
 )
+from app.services.paperless_task_status import extract_task, parse_task
 
 logger = get_logger(__name__, "app")
 
@@ -2365,8 +2368,6 @@ class GenericEntityFileService:
             paperless_files: List of EntityFile records with paperless storage
         """
         try:
-            import re
-
             # Find files that have active task UUIDs (in the paperless_task_uuid field)
             files_with_tasks = [f for f in paperless_files if f.paperless_task_uuid]
 
@@ -2390,48 +2391,18 @@ class GenericEntityFileService:
                         "GET", f"/api/tasks/?task_id={task_uuid}"
                     ) as response:
                         if response.status == 200:
-                            data = await response.json()
+                            task_data = extract_task(await response.json())
 
-                            # Handle both single task and list responses
-                            if isinstance(data, list):
-                                if not data:
-                                    logger.info(
-                                        f"Task {task_uuid} not found in API response"
-                                    )
-                                    continue
-                                task_data = data[0]
-                            elif isinstance(data, dict):
-                                # If results key exists, it's paginated
-                                if "results" in data and data["results"]:
-                                    task_data = data["results"][0]
-                                else:
-                                    task_data = data
-                            else:
-                                logger.warning(
-                                    f"Unexpected task response format: {type(data)}"
+                            if task_data is None:
+                                logger.info(
+                                    f"Task {task_uuid} not found in API response"
                                 )
                                 continue
 
-                            status = task_data.get("status", "").lower()
+                            parsed = parse_task(task_data)
 
-                            if status == "success":
-                                # Extract document ID from result
-                                result = task_data.get("result", {})
-                                document_id = None
-
-                                if isinstance(result, dict):
-                                    document_id = result.get(
-                                        "document_id"
-                                    ) or result.get("id")
-                                elif isinstance(result, str):
-                                    # Parse document ID from string like "Success. New document id 2677 created"
-                                    match = re.search(r"document id (\d+)", result)
-                                    if match:
-                                        document_id = match.group(1)
-                                    else:
-                                        document_id = result
-                                else:
-                                    document_id = result
+                            if parsed.is_success:
+                                document_id = parsed.document_id
 
                                 # Use centralized validation and fallback logic
                                 validated_doc_id = (
@@ -2460,9 +2431,9 @@ class GenericEntityFileService:
                                         f"Task {task_uuid} failed validation and fallback for file {file_record.file_name}"
                                     )
 
-                            elif status == "failure":
+                            elif parsed.is_failure:
                                 # Task failed - mark as failed
-                                error_info = task_data.get("result", "Unknown error")
+                                error_info = parsed.error_message or "Unknown error"
                                 file_record.sync_status = "failed"
                                 file_record.last_sync_at = get_utc_now()
                                 logger.warning(
@@ -2566,55 +2537,22 @@ class GenericEntityFileService:
                                 "GET", f"/api/tasks/?task_id={task_uuid}"
                             ) as response:
                                 if response.status == 200:
-                                    data = await response.json()
+                                    task_data = extract_task(await response.json())
 
-                                    # Handle both single task and list responses
-                                    if isinstance(data, list):
-                                        if not data:
-                                            logger.warning(
-                                                f"No task found with UUID {task_uuid}"
-                                            )
-                                            continue
-                                        task_data = data[0]
-                                    elif isinstance(data, dict):
-                                        # If results key exists, it's paginated
-                                        if "results" in data and data["results"]:
-                                            task_data = data["results"][0]
-                                        else:
-                                            task_data = data
-                                    else:
+                                    if task_data is None:
                                         logger.warning(
-                                            f"Unexpected task response format: {type(data)}"
+                                            f"No task found with UUID {task_uuid}"
                                         )
                                         continue
 
-                                    status = task_data.get("status", "").lower()
-                                    task_name = task_data.get("task_name", "")
+                                    parsed = parse_task(task_data)
 
                                     logger.debug(
-                                        f"Task {task_uuid} status: {status} ({task_name})"
+                                        f"Task {task_uuid} status: {parsed.status}"
                                     )
 
-                                    if status == "success":
-                                        # Task completed successfully - extract document ID
-                                        result = task_data.get("result", {})
-                                        document_id = None
-
-                                        if isinstance(result, dict):
-                                            document_id = result.get(
-                                                "document_id"
-                                            ) or result.get("id")
-                                        elif isinstance(result, str):
-                                            # Parse document ID from string like "Success. New document id 2677 created"
-                                            match = re.search(
-                                                r"document id (\d+)", result
-                                            )
-                                            if match:
-                                                document_id = match.group(1)
-                                            else:
-                                                document_id = result
-                                        else:
-                                            document_id = result
+                                    if parsed.is_success:
+                                        document_id = parsed.document_id
 
                                         # Use centralized validation and fallback logic
                                         validated_doc_id = await self._validate_and_process_document_id(
@@ -2651,25 +2589,11 @@ class GenericEntityFileService:
                                                 f"Task {task_uuid} completed but document ID validation failed for {file_record.file_name} - likely duplicate or invalid"
                                             )
 
-                                    elif status == "failure":
-                                        # Task failed - extract error information
-                                        error_info = task_data.get(
-                                            "result", "Unknown error"
+                                    elif parsed.is_failure:
+                                        error_info = (
+                                            parsed.error_message or "Unknown error"
                                         )
-
-                                        # Check if it's a duplicate error
-                                        error_str = str(error_info).lower()
-                                        is_duplicate = any(
-                                            keyword in error_str
-                                            for keyword in [
-                                                "duplicate",
-                                                "already exists",
-                                                "similar document",
-                                                "document with this checksum",
-                                                "identical file",
-                                                "not consuming",
-                                            ]
-                                        )
+                                        is_duplicate = parsed.is_duplicate
 
                                         # Update record accordingly
                                         file_record.paperless_task_uuid = (
@@ -2694,7 +2618,7 @@ class GenericEntityFileService:
 
                                         file_record.last_sync_at = get_utc_now()
 
-                                    elif status in ["pending", "started", "retry"]:
+                                    elif parsed.is_in_progress:
                                         # Task still in progress - keep as processing
                                         status_updates[str(file_record.id)] = (
                                             "processing"
@@ -2705,7 +2629,7 @@ class GenericEntityFileService:
 
                                     else:
                                         logger.warning(
-                                            f"Unknown task status: {status} for task {task_uuid}"
+                                            f"Unknown task status: {parsed.status} for task {task_uuid}"
                                         )
                                         status_updates[str(file_record.id)] = (
                                             "processing"  # Keep checking

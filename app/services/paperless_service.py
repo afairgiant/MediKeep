@@ -21,6 +21,7 @@ from app.core.config import settings
 from app.core.logging.config import get_logger
 from app.core.utils.url_security import validate_no_ssrf
 from app.services.credential_encryption import credential_encryption
+from app.services.paperless_task_status import extract_task, parse_task
 
 logger = get_logger(__name__)
 
@@ -438,6 +439,123 @@ class PaperlessServiceBase(ABC):
                 extra={"user_id": self.user_id, "task_id": task_id, "error": str(e)},
             )
             raise PaperlessError(f"Task status check failed: {str(e)}")
+
+    async def wait_for_task_completion(
+        self, task_uuid: str, timeout_seconds: int = 60
+    ) -> Optional[str]:
+        """
+        Public method to wait for task completion and get document ID.
+
+        Args:
+            task_uuid: Task UUID to check
+            timeout_seconds: Maximum time to wait in seconds
+
+        Returns:
+            Document ID as string if completed successfully, None if still processing
+
+        Raises:
+            PaperlessUploadError: If task fails
+        """
+        try:
+            return await self._wait_for_task_completion(
+                task_uuid, "document", timeout_seconds
+            )
+        except PaperlessUploadError as e:
+            # Re-raise upload errors
+            raise e
+        except Exception as e:
+            # For other errors, return None to indicate still processing
+            logger.warning(f"Task check failed for {task_uuid}: {str(e)}")
+            return None
+
+    async def _wait_for_task_completion(
+        self, task_uuid: str, filename: str, max_wait_time: int = 60
+    ) -> str:
+        """
+        Poll the tasks endpoint to wait for document consumption completion and get document ID.
+
+        Args:
+            task_uuid: Task UUID returned from upload
+            filename: Original filename for logging
+            max_wait_time: Maximum time to wait in seconds
+
+        Returns:
+            Document ID as string
+
+        Raises:
+            PaperlessUploadError: If task fails or times out
+        """
+        logger.info(f"Polling task status for {filename} (task: {task_uuid})")
+
+        start_time = datetime.utcnow()
+        poll_interval = 2  # Start with 2 second intervals
+        max_poll_interval = 10  # Cap at 10 seconds
+
+        while True:
+            try:
+                async with self._make_request(
+                    "GET", f"/api/tasks/?task_id={task_uuid}"
+                ) as response:
+                    if response.status != 200:
+                        logger.warning(
+                            f"Task status check failed: HTTP {response.status}"
+                        )
+                        await asyncio.sleep(poll_interval)
+                        continue
+
+                    task_data = extract_task(await response.json())
+
+                    if task_data is None:
+                        logger.warning(f"No task found with UUID {task_uuid}")
+                        await asyncio.sleep(poll_interval)
+                        continue
+
+                    parsed = parse_task(task_data)
+                    logger.debug(f"Task {task_uuid} status: {parsed.status}")
+
+                    if parsed.is_success:
+                        if parsed.document_id:
+                            logger.info(
+                                f"Task completed successfully: document_id={parsed.document_id}"
+                            )
+                            return parsed.document_id
+                        raise PaperlessUploadError(
+                            f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
+                        )
+
+                    if parsed.is_failure:
+                        raise PaperlessUploadError(
+                            f"Document processing failed for '{filename}': {parsed.error_message or 'Unknown error'}"
+                        )
+
+                    if parsed.is_in_progress:
+                        # Task still in progress
+                        elapsed = (datetime.utcnow() - start_time).total_seconds()
+                        if elapsed > max_wait_time:
+                            raise PaperlessUploadError(
+                                f"Upload of '{filename}' timed out after {max_wait_time} seconds"
+                            )
+
+                        # Wait before next poll with exponential backoff
+                        await asyncio.sleep(poll_interval)
+                        poll_interval = min(poll_interval * 1.5, max_poll_interval)
+                        continue
+
+                    else:
+                        logger.warning(f"Unknown task status: {parsed.status}")
+                        await asyncio.sleep(poll_interval)
+                        continue
+
+            except Exception as e:
+                elapsed = (datetime.utcnow() - start_time).total_seconds()
+                if elapsed > max_wait_time:
+                    raise PaperlessUploadError(
+                        f"Upload of '{filename}' timed out after {max_wait_time} seconds"
+                    )
+
+                logger.warning(f"Error checking task status: {e}")
+                await asyncio.sleep(poll_interval)
+                continue
 
     async def search_documents(
         self, query: str = "", page: int = 1, page_size: int = 25
@@ -968,161 +1086,6 @@ class PaperlessServiceToken(PaperlessServiceBase):
 
         # Default message for unknown errors
         return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
-
-    async def wait_for_task_completion(
-        self, task_uuid: str, timeout_seconds: int = 60
-    ) -> Optional[str]:
-        """
-        Public method to wait for task completion and get document ID.
-
-        Args:
-            task_uuid: Task UUID to check
-            timeout_seconds: Maximum time to wait in seconds
-
-        Returns:
-            Document ID as string if completed successfully, None if still processing
-
-        Raises:
-            PaperlessUploadError: If task fails
-        """
-        try:
-            return await self._wait_for_task_completion(
-                task_uuid, "document", timeout_seconds
-            )
-        except PaperlessUploadError as e:
-            # Re-raise upload errors
-            raise e
-        except Exception as e:
-            # For other errors, return None to indicate still processing
-            logger.warning(f"Task check failed for {task_uuid}: {str(e)}")
-            return None
-
-    async def _wait_for_task_completion(
-        self, task_uuid: str, filename: str, max_wait_time: int = 60
-    ) -> str:
-        """
-        Poll the tasks endpoint to wait for document consumption completion and get document ID.
-
-        Args:
-            task_uuid: Task UUID returned from upload
-            filename: Original filename for logging
-            max_wait_time: Maximum time to wait in seconds
-
-        Returns:
-            Document ID as string
-
-        Raises:
-            PaperlessUploadError: If task fails or times out
-        """
-        logger.info(f"Polling task status for {filename} (task: {task_uuid})")
-
-        start_time = datetime.utcnow()
-        poll_interval = 2  # Start with 2 second intervals
-        max_poll_interval = 10  # Cap at 10 seconds
-
-        while True:
-            try:
-                async with self._make_request(
-                    "GET", f"/api/tasks/?task_id={task_uuid}"
-                ) as response:
-                    if response.status != 200:
-                        logger.warning(
-                            f"Task status check failed: HTTP {response.status}"
-                        )
-                        await asyncio.sleep(poll_interval)
-                        continue
-
-                    data = await response.json()
-                    logger.debug(f"Raw task API response: {data}")
-
-                    # Handle both single task and list responses
-                    if isinstance(data, list):
-                        if not data:
-                            logger.warning(f"No task found with UUID {task_uuid}")
-                            await asyncio.sleep(poll_interval)
-                            continue
-                        task_data = data[0]
-                    elif isinstance(data, dict):
-                        # If results key exists, it's paginated
-                        if "results" in data and data["results"]:
-                            task_data = data["results"][0]
-                        else:
-                            task_data = data
-                    else:
-                        logger.warning(f"Unexpected task response format: {type(data)}")
-                        await asyncio.sleep(poll_interval)
-                        continue
-
-                    status = task_data.get("status", "").lower()
-                    task_name = task_data.get("task_name", "")
-
-                    logger.debug(f"Task {task_uuid} status: {status} ({task_name})")
-
-                    if status == "success":
-                        # Task completed successfully - get document ID
-                        result = task_data.get("result", {})
-                        document_id = None
-
-                        # Log the full result for debugging
-                        logger.info(f"Task result: {result}")
-
-                        if isinstance(result, dict):
-                            document_id = result.get("document_id") or result.get("id")
-                        elif isinstance(result, str):
-                            # Parse document ID from string like "Success. New document id 2677 created"
-
-                            match = re.search(r"document id (\d+)", result)
-                            if match:
-                                document_id = match.group(1)
-                            else:
-                                document_id = result
-                        else:
-                            document_id = result
-
-                        if document_id:
-                            logger.info(
-                                f"Task completed successfully: document_id={document_id}"
-                            )
-                            return str(document_id)
-                        raise PaperlessUploadError(
-                            f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
-                        )
-
-                    if status == "failure":
-                        # Task failed
-                        error_info = task_data.get("result", "Unknown error")
-                        raise PaperlessUploadError(
-                            f"Document processing failed for '{filename}': {error_info}"
-                        )
-
-                    if status in ["pending", "started", "retry"]:
-                        # Task still in progress
-                        elapsed = (datetime.utcnow() - start_time).total_seconds()
-                        if elapsed > max_wait_time:
-                            raise PaperlessUploadError(
-                                f"Upload of '{filename}' timed out after {max_wait_time} seconds"
-                            )
-
-                        # Wait before next poll with exponential backoff
-                        await asyncio.sleep(poll_interval)
-                        poll_interval = min(poll_interval * 1.5, max_poll_interval)
-                        continue
-
-                    else:
-                        logger.warning(f"Unknown task status: {status}")
-                        await asyncio.sleep(poll_interval)
-                        continue
-
-            except Exception as e:
-                elapsed = (datetime.utcnow() - start_time).total_seconds()
-                if elapsed > max_wait_time:
-                    raise PaperlessUploadError(
-                        f"Upload of '{filename}' timed out after {max_wait_time} seconds"
-                    )
-
-                logger.warning(f"Error checking task status: {e}")
-                await asyncio.sleep(poll_interval)
-                continue
 
     async def download_document(self, document_id: int) -> bytes:
         """
@@ -1703,161 +1666,6 @@ class PaperlessService(PaperlessServiceBase):
 
         # Default message for unknown errors
         return f"Upload of '{filename}' failed: {error_msg}. Please check your Paperless configuration or contact support."
-
-    async def wait_for_task_completion(
-        self, task_uuid: str, timeout_seconds: int = 60
-    ) -> Optional[str]:
-        """
-        Public method to wait for task completion and get document ID.
-
-        Args:
-            task_uuid: Task UUID to check
-            timeout_seconds: Maximum time to wait in seconds
-
-        Returns:
-            Document ID as string if completed successfully, None if still processing
-
-        Raises:
-            PaperlessUploadError: If task fails
-        """
-        try:
-            return await self._wait_for_task_completion(
-                task_uuid, "document", timeout_seconds
-            )
-        except PaperlessUploadError as e:
-            # Re-raise upload errors
-            raise e
-        except Exception as e:
-            # For other errors, return None to indicate still processing
-            logger.warning(f"Task check failed for {task_uuid}: {str(e)}")
-            return None
-
-    async def _wait_for_task_completion(
-        self, task_uuid: str, filename: str, max_wait_time: int = 60
-    ) -> str:
-        """
-        Poll the tasks endpoint to wait for document consumption completion and get document ID.
-
-        Args:
-            task_uuid: Task UUID returned from upload
-            filename: Original filename for logging
-            max_wait_time: Maximum time to wait in seconds
-
-        Returns:
-            Document ID as string
-
-        Raises:
-            PaperlessUploadError: If task fails or times out
-        """
-        logger.info(f"Polling task status for {filename} (task: {task_uuid})")
-
-        start_time = datetime.utcnow()
-        poll_interval = 2  # Start with 2 second intervals
-        max_poll_interval = 10  # Cap at 10 seconds
-
-        while True:
-            try:
-                async with self._make_request(
-                    "GET", f"/api/tasks/?task_id={task_uuid}"
-                ) as response:
-                    if response.status != 200:
-                        logger.warning(
-                            f"Task status check failed: HTTP {response.status}"
-                        )
-                        await asyncio.sleep(poll_interval)
-                        continue
-
-                    data = await response.json()
-                    logger.debug(f"Raw task API response: {data}")
-
-                    # Handle both single task and list responses
-                    if isinstance(data, list):
-                        if not data:
-                            logger.warning(f"No task found with UUID {task_uuid}")
-                            await asyncio.sleep(poll_interval)
-                            continue
-                        task_data = data[0]
-                    elif isinstance(data, dict):
-                        # If results key exists, it's paginated
-                        if "results" in data and data["results"]:
-                            task_data = data["results"][0]
-                        else:
-                            task_data = data
-                    else:
-                        logger.warning(f"Unexpected task response format: {type(data)}")
-                        await asyncio.sleep(poll_interval)
-                        continue
-
-                    status = task_data.get("status", "").lower()
-                    task_name = task_data.get("task_name", "")
-
-                    logger.debug(f"Task {task_uuid} status: {status} ({task_name})")
-
-                    if status == "success":
-                        # Task completed successfully - get document ID
-                        result = task_data.get("result", {})
-                        document_id = None
-
-                        # Log the full result for debugging
-                        logger.info(f"Task result: {result}")
-
-                        if isinstance(result, dict):
-                            document_id = result.get("document_id") or result.get("id")
-                        elif isinstance(result, str):
-                            # Parse document ID from string like "Success. New document id 2677 created"
-
-                            match = re.search(r"document id (\d+)", result)
-                            if match:
-                                document_id = match.group(1)
-                            else:
-                                document_id = result
-                        else:
-                            document_id = result
-
-                        if document_id:
-                            logger.info(
-                                f"Task completed successfully: document_id={document_id}"
-                            )
-                            return str(document_id)
-                        raise PaperlessUploadError(
-                            f"Task completed but no document ID returned for '{filename}'. This might indicate a duplicate document was detected."
-                        )
-
-                    if status == "failure":
-                        # Task failed
-                        error_info = task_data.get("result", "Unknown error")
-                        raise PaperlessUploadError(
-                            f"Document processing failed for '{filename}': {error_info}"
-                        )
-
-                    if status in ["pending", "started", "retry"]:
-                        # Task still in progress
-                        elapsed = (datetime.utcnow() - start_time).total_seconds()
-                        if elapsed > max_wait_time:
-                            raise PaperlessUploadError(
-                                f"Upload of '{filename}' timed out after {max_wait_time} seconds"
-                            )
-
-                        # Wait before next poll with exponential backoff
-                        await asyncio.sleep(poll_interval)
-                        poll_interval = min(poll_interval * 1.5, max_poll_interval)
-                        continue
-
-                    else:
-                        logger.warning(f"Unknown task status: {status}")
-                        await asyncio.sleep(poll_interval)
-                        continue
-
-            except Exception as e:
-                elapsed = (datetime.utcnow() - start_time).total_seconds()
-                if elapsed > max_wait_time:
-                    raise PaperlessUploadError(
-                        f"Upload of '{filename}' timed out after {max_wait_time} seconds"
-                    )
-
-                logger.warning(f"Error checking task status: {e}")
-                await asyncio.sleep(poll_interval)
-                continue
 
     async def download_document(self, document_id: int) -> bytes:
         """

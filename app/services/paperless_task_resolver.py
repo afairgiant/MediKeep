@@ -4,13 +4,13 @@ Simplified Paperless Task Resolution
 Replaces the complex task resolution logic with a single, clear method.
 """
 
-import re
 from typing import Optional, Tuple
 
 import aiohttp
 
 from app.core.logging.config import get_logger
 from app.services.paperless_auth import PaperlessAuth
+from app.services.paperless_task_status import extract_task, parse_task
 
 logger = get_logger(__name__)
 
@@ -43,12 +43,11 @@ class PaperlessTaskResolver:
                 logger.debug(f"Task {task_uuid} not found or still queued")
                 return "processing", None
 
-            status = task_data.get("status", "").lower()
-            logger.debug(f"Task {task_uuid} status: {status}")
+            parsed = parse_task(task_data)
+            logger.debug(f"Task {task_uuid} status: {parsed.status}")
 
-            if status == "success":
-                # Try to extract document ID
-                document_id = self._extract_document_id(task_data)
+            if parsed.is_success:
+                document_id = parsed.document_id
 
                 if document_id:
                     # Verify the document actually exists
@@ -64,7 +63,7 @@ class PaperlessTaskResolver:
                 logger.warning(f"Task {task_uuid} successful but no document ID found")
                 return "failed", None
 
-            if status in ["failure", "failed"]:
+            if parsed.is_failure:
                 logger.debug(f"Task {task_uuid} failed")
                 return "failed", None
 
@@ -90,64 +89,11 @@ class PaperlessTaskResolver:
                         logger.debug(f"Task status request failed: {response.status}")
                         return None
 
-                    data = await response.json()
-
-                    # Handle different response formats
-                    if isinstance(data, list) and data:
-                        return data[0]
-                    if isinstance(data, dict):
-                        if "results" in data and data["results"]:
-                            return data["results"][0]
-                        if "status" in data:  # Direct task object
-                            return data
-
-                    return None
+                    return extract_task(await response.json())
 
         except Exception as e:
             logger.debug(f"Error fetching task status for {task_uuid}: {e}")
             return None
-
-    def _extract_document_id(self, task_data: dict) -> Optional[str]:
-        """
-        Extract document ID from task result data.
-
-        Uses a simple, single-method approach instead of multiple fallbacks.
-        """
-        result = task_data.get("result", {})
-
-        # Try direct extraction from result object
-        if isinstance(result, dict):
-            # Common locations for document ID
-            doc_id = (
-                result.get("document_id")
-                or result.get("id")
-                or result.get("document")
-                or result.get("doc_id")
-            )
-            if doc_id:
-                return str(doc_id)
-
-        # Try string parsing for text results
-        if isinstance(result, str):
-            # Look for patterns like "document id 123" or "created document 456"
-            patterns = [
-                r"document id (\d+)",
-                r"created document (\d+)",
-                r"document (\d+)",
-                r"id[:\s]+(\d+)",
-            ]
-
-            for pattern in patterns:
-                match = re.search(pattern, result, re.IGNORECASE)
-                if match:
-                    return match.group(1)
-
-        # Check task data itself for document reference
-        doc_id = task_data.get("document_id") or task_data.get("related_document")
-        if doc_id:
-            return str(doc_id)
-
-        return None
 
     async def _verify_document_exists(self, document_id: str) -> bool:
         """Verify that a document actually exists in Paperless."""
