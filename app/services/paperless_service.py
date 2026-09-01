@@ -492,6 +492,12 @@ class PaperlessServiceBase(ABC):
         max_poll_interval = 10  # Cap at 10 seconds
 
         while True:
+            elapsed = (datetime.utcnow() - start_time).total_seconds()
+            if elapsed > max_wait_time:
+                raise PaperlessUploadError(
+                    f"Upload of '{filename}' timed out after {max_wait_time} seconds"
+                )
+
             try:
                 async with self._make_request(
                     "GET", f"/api/tasks/?task_id={task_uuid}"
@@ -529,13 +535,6 @@ class PaperlessServiceBase(ABC):
                         )
 
                     if parsed.is_in_progress:
-                        # Task still in progress
-                        elapsed = (datetime.utcnow() - start_time).total_seconds()
-                        if elapsed > max_wait_time:
-                            raise PaperlessUploadError(
-                                f"Upload of '{filename}' timed out after {max_wait_time} seconds"
-                            )
-
                         # Wait before next poll with exponential backoff
                         await asyncio.sleep(poll_interval)
                         poll_interval = min(poll_interval * 1.5, max_poll_interval)
@@ -546,12 +545,16 @@ class PaperlessServiceBase(ABC):
                         await asyncio.sleep(poll_interval)
                         continue
 
+            except PaperlessUploadError:
+                # A resolved task outcome, not a transient polling error
+                raise
+
             except Exception as e:
                 elapsed = (datetime.utcnow() - start_time).total_seconds()
                 if elapsed > max_wait_time:
                     raise PaperlessUploadError(
                         f"Upload of '{filename}' timed out after {max_wait_time} seconds"
-                    )
+                    ) from e
 
                 logger.warning(f"Error checking task status: {e}")
                 await asyncio.sleep(poll_interval)
