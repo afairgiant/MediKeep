@@ -817,6 +817,8 @@ Base path: `/api/v1/patient-management`
 ```
 
 - **Success Response** (201): Created patient object
+- **Error Responses**: 400 if `physician_id` refers to a practitioner that does not exist; 422 if
+  `physician_id` is not a positive integer
 
 #### List All Patients
 
@@ -851,7 +853,13 @@ Base path: `/api/v1/patient-management`
 
 - **Purpose**: Update patient information
 - **Request Body**: Same as create (all fields optional)
+- **Partial update semantics**: An omitted field is left unchanged. An explicit `null` clears the field, which
+  is how a nullable field such as `physician_id`, `address`, `blood_type`, `gender`, `height`, `weight`, or
+  `relationship_to_self` is unset. `null` for `first_name`, `last_name`, or `birth_date` is ignored, since
+  those columns are NOT NULL.
 - **Success Response** (200): Updated patient object
+- **Error Responses**: 400 if `physician_id` refers to a practitioner that does not exist; 422 if
+  `physician_id` is not a positive integer (use `null`, not `0`, to unassign)
 
 #### Delete Patient
 

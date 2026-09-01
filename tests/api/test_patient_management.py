@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.models.models import User, Patient
+from app.models.models import Patient, Practitioner, User
 
 
 class TestPatientManagementAPI:
@@ -440,3 +440,196 @@ class TestPatientManagementAPI:
         )
 
         assert response.status_code == 422
+
+
+@pytest.fixture
+def patient_with_physician(
+    db_session: Session, test_patient: Patient, test_practitioner: Practitioner
+) -> Patient:
+    """A patient that already has a physician assigned."""
+    test_patient.physician_id = test_practitioner.id
+    db_session.commit()
+    db_session.refresh(test_patient)
+    return test_patient
+
+
+class TestPatientPhysicianAssignment:
+    """Regression tests for #995: removing a patient's assigned practitioner."""
+
+    def test_update_clears_physician_with_explicit_null(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        patient_with_physician: Patient,
+    ):
+        """Regression test for #995: an explicit null must unassign the physician."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{patient_with_physician.id}",
+            json={"physician_id": None},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["physician_id"] is None
+
+        db_session.refresh(patient_with_physician)
+        assert patient_with_physician.physician_id is None
+
+    def test_update_without_physician_field_preserves_assignment(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        patient_with_physician: Patient,
+        test_practitioner: Practitioner,
+    ):
+        """An omitted field must not be treated as a request to clear it."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{patient_with_physician.id}",
+            json={"address": "456 Unrelated Ave"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["physician_id"] == test_practitioner.id
+
+        db_session.refresh(patient_with_physician)
+        assert patient_with_physician.physician_id == test_practitioner.id
+
+    def test_update_assigns_physician(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        test_patient: Patient,
+        test_practitioner: Practitioner,
+    ):
+        """Assigning a valid physician still works."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={"physician_id": test_practitioner.id},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["physician_id"] == test_practitioner.id
+
+        db_session.refresh(test_patient)
+        assert test_patient.physician_id == test_practitioner.id
+
+    def test_update_unknown_physician_returns_400_not_500(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
+        """Regression test for #995: an unknown physician must not surface as ISE-500."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={"physician_id": 999999},
+        )
+
+        assert response.status_code == 400
+        assert "physician" in response.json()["message"].lower()
+
+    def test_create_unknown_physician_returns_400_not_500(
+        self, authenticated_client: TestClient
+    ):
+        """Create must reject an unknown physician the same way update does."""
+        response = authenticated_client.post(
+            "/api/v1/patient-management/",
+            json={
+                "first_name": "Unknown",
+                "last_name": "Physician",
+                "birth_date": "1990-01-01",
+                "physician_id": 999999,
+                "is_self_record": False,
+            },
+        )
+
+        assert response.status_code == 400
+        assert "physician" in response.json()["message"].lower()
+
+    def test_update_rejects_zero_physician_id(
+        self, authenticated_client: TestClient, test_patient: Patient
+    ):
+        """Zero is not a valid ID; null is the way to clear the assignment."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={"physician_id": 0},
+        )
+
+        assert response.status_code == 422
+
+    def test_create_rejects_zero_physician_id(self, authenticated_client: TestClient):
+        """Create and update must agree that zero is invalid."""
+        response = authenticated_client.post(
+            "/api/v1/patient-management/",
+            json={
+                "first_name": "Zero",
+                "last_name": "Physician",
+                "birth_date": "1990-01-01",
+                "physician_id": 0,
+                "is_self_record": False,
+            },
+        )
+
+        assert response.status_code == 422
+
+
+class TestPatientNullableFieldClearing:
+    """Every nullable field was unclearable through this endpoint before #995."""
+
+    @pytest.mark.parametrize(
+        "field,initial_value",
+        [
+            ("address", "123 Clearable St"),
+            ("blood_type", "A+"),
+            ("gender", "F"),
+            ("height", 70.5),
+            ("weight", 180.25),
+            ("relationship_to_self", "child"),
+        ],
+    )
+    def test_explicit_null_clears_nullable_field(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        test_patient: Patient,
+        field,
+        initial_value,
+    ):
+        """An explicit null must clear any nullable field, not just physician_id."""
+        setattr(test_patient, field, initial_value)
+        db_session.commit()
+
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={field: None},
+        )
+
+        assert response.status_code == 200
+        assert response.json()[field] is None
+
+        db_session.refresh(test_patient)
+        assert getattr(test_patient, field) is None
+
+    @pytest.mark.parametrize(
+        "field,expected_value",
+        [
+            ("first_name", "Test"),
+            ("last_name", "User"),
+            ("birth_date", "1990-01-01"),
+        ],
+    )
+    def test_explicit_null_does_not_clear_required_field(
+        self,
+        authenticated_client: TestClient,
+        db_session: Session,
+        test_patient: Patient,
+        field,
+        expected_value,
+    ):
+        """Columns that are NOT NULL keep their value rather than failing the request."""
+        response = authenticated_client.put(
+            f"/api/v1/patient-management/{test_patient.id}",
+            json={field: None},
+        )
+
+        assert response.status_code == 200
+        assert response.json()[field] == expected_value
+
+        db_session.refresh(test_patient)
+        assert getattr(test_patient, field) is not None
