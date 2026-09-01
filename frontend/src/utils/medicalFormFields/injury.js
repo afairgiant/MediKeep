@@ -74,6 +74,7 @@ export const injuryFormFields = [
     gridColumn: 6,
     clearable: true,
     options: [
+      { value: 'none', labelKey: 'common:severity.none' },
       { value: 'mild', labelKey: 'common:severity.mild' },
       { value: 'moderate', labelKey: 'common:severity.moderate' },
       { value: 'severe', labelKey: 'common:severity.severe' },

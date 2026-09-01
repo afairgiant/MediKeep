@@ -254,6 +254,7 @@
           "critical": "🚨 Krytyczny - Zagrażający życiu",
           "mild": "💛 Łagodny - Niewielki wpływ",
           "moderate": "⚡ Umiarkowany - Zauważalny wpływ",
+          "none": "🚫 Brak - Brak dyskomfortu",
           "severe": "⚠️ Ciężki - Znaczący wpływ"
         },
         "status": {
@@ -533,6 +534,7 @@
         "lifeThreatening": "Zagrażający życiu - Potrzebna pomoc doraźna",
         "mild": "Łagodny - Nieznaczny dyskomfort",
         "moderate": "Umiarkowany - Zauważalny wpływ",
+        "none": "Brak - Brak dyskomfortu",
         "severe": "Ciężki - Znaczący wpływ"
       },
       "placeholder": "Wybierz nasilenie"
