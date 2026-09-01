@@ -975,6 +975,7 @@
       "description": "Hur läkemedlet administreras",
       "label": "Administreringsväg",
       "options": {
+        "aural": "Aurikulärt",
         "inhalation": "Inhalation",
         "injection": "Injektion",
         "intramuscular": "Intramuskulärt",
@@ -984,8 +985,7 @@
         "rectal": "Rektalt",
         "subcutaneous": "Subkutant",
         "sublingual": "Sublingualt",
-        "topical": "Topikalt",
-        "aural": "Auditiv"
+        "topical": "Topikalt"
       },
       "placeholder": "Välj administreringsväg"
     },

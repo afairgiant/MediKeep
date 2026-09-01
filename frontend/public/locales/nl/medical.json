@@ -975,6 +975,7 @@
       "description": "Hoe de medicatie wordt toegediend",
       "label": "Toedieningsweg",
       "options": {
+        "aural": "Auriculair",
         "inhalation": "Inhalatie",
         "injection": "Injectie",
         "intramuscular": "Intramusculair",
@@ -984,8 +985,7 @@
         "rectal": "Rectaal",
         "subcutaneous": "Subcutaan",
         "sublingual": "Sublinguaal",
-        "topical": "Uitwendig",
-        "aural": "Auditief"
+        "topical": "Uitwendig"
       },
       "placeholder": "Selecteer toedieningsweg"
     },

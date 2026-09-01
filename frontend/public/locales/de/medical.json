@@ -975,6 +975,7 @@
       "description": "Wie das Medikament verabreicht wird",
       "label": "Applikationsweg",
       "options": {
+        "aural": "Aural",
         "inhalation": "Inhalation",
         "injection": "Injektion",
         "intramuscular": "Intramuskulär",
@@ -984,8 +985,7 @@
         "rectal": "Rektal",
         "subcutaneous": "Subkutan",
         "sublingual": "Sublingual",
-        "topical": "Äußerlich",
-        "aural": "Aural"
+        "topical": "Äußerlich"
       },
       "placeholder": "Applikationsweg auswählen"
     },

@@ -975,6 +975,7 @@
       "description": "How the medication is administered",
       "label": "Route",
       "options": {
+        "aural": "Aural",
         "inhalation": "Inhalation",
         "injection": "Injection",
         "intramuscular": "Intramuscular",
@@ -984,8 +985,7 @@
         "rectal": "Rectal",
         "subcutaneous": "Subcutaneous",
         "sublingual": "Sublingual",
-        "topical": "Topical",
-        "aural": "Aural"
+        "topical": "Topical"
       },
       "placeholder": "Select Route"
     },

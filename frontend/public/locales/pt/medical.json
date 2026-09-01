@@ -975,6 +975,7 @@
       "description": "Como o medicamento é administrado",
       "label": "Via de Administração",
       "options": {
+        "aural": "Auricular",
         "inhalation": "Inalação",
         "injection": "Injeção",
         "intramuscular": "Intramuscular",
@@ -984,8 +985,7 @@
         "rectal": "Retal",
         "subcutaneous": "Subcutânea",
         "sublingual": "Sublingual",
-        "topical": "Tópica",
-        "aural": "Auditivo"
+        "topical": "Tópica"
       },
       "placeholder": "Selecione a via"
     },

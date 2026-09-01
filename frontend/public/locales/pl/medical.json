@@ -975,6 +975,7 @@
       "description": "Sposób podawania leku",
       "label": "Droga podania",
       "options": {
+        "aural": "Usznie",
         "inhalation": "Wziewnie",
         "injection": "Zastrzyk",
         "intramuscular": "Domięśniowo",
@@ -984,8 +985,7 @@
         "rectal": "Doodbytniczo",
         "subcutaneous": "Podskórnie",
         "sublingual": "Podjęzykowo",
-        "topical": "Miejscowo",
-        "aural": "Słuchowy"
+        "topical": "Miejscowo"
       },
       "placeholder": "Wybierz drogę"
     },

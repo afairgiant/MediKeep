@@ -975,6 +975,7 @@
       "description": "Cómo se administra el medicamento",
       "label": "Vía",
       "options": {
+        "aural": "Ótica",
         "inhalation": "Inhalación",
         "injection": "Inyección",
         "intramuscular": "Intramuscular",
@@ -984,8 +985,7 @@
         "rectal": "Rectal",
         "subcutaneous": "Subcutánea",
         "sublingual": "Sublingual",
-        "topical": "Tópica",
-        "aural": "Auditivo"
+        "topical": "Tópica"
       },
       "placeholder": "Seleccione la Vía"
     },

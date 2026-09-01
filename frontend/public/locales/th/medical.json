@@ -913,6 +913,7 @@
       "description": "วิธีการใช้ยา",
       "label": "วิธีใช้",
       "options": {
+        "aural": "ทางหู",
         "inhalation": "สูดดม",
         "injection": "ฉีด",
         "intramuscular": "ฉีดเข้ากล้ามเนื้อ",
@@ -922,8 +923,7 @@
         "rectal": "ทางทวารหนัก",
         "subcutaneous": "ฉีดใต้ผิวหนัง",
         "sublingual": "ใต้ลิ้น",
-        "topical": "ทาภายนอก",
-        "aural": "เกี่ยวกับการได้ยิน"
+        "topical": "ทาภายนอก"
       },
       "placeholder": "เลือกวิธีใช้"
     },

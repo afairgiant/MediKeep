@@ -975,6 +975,7 @@
       "description": "Πώς χορηγείται το φάρμακο",
       "label": "Οδός",
       "options": {
+        "aural": "Ωτική",
         "inhalation": "Εισπνοή",
         "injection": "Ένεση",
         "intramuscular": "Ενδομυϊκά",
@@ -984,8 +985,7 @@
         "rectal": "Ορθικά",
         "subcutaneous": "Υποδόρια",
         "sublingual": "Υπογλώσσια",
-        "topical": "Τοπικά",
-        "aural": "Ωτικός"
+        "topical": "Τοπικά"
       },
       "placeholder": "Επιλέξτε Οδό"
     },
