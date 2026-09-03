@@ -321,6 +321,21 @@ def default_specialty(db_session: Session):
 
 
 @pytest.fixture
+def test_practitioner(db_session: Session, default_specialty):
+    """Provide a persisted Practitioner row tests can assign as a physician."""
+    from app.models.practice import Practitioner
+
+    practitioner = Practitioner(
+        name="Dr. Test Practitioner",
+        specialty_id=default_specialty.id,
+    )
+    db_session.add(practitioner)
+    db_session.commit()
+    db_session.refresh(practitioner)
+    return practitioner
+
+
+@pytest.fixture
 def sample_practitioner_data(default_specialty):
     """Sample practitioner data for testing."""
     return {

@@ -43,7 +43,9 @@ class PatientCreateRequest(BaseModel):
     height: Optional[float] = Field(None, gt=0, description="Height in inches")
     weight: Optional[float] = Field(None, gt=0, description="Weight in pounds")
     address: Optional[str] = Field(None, max_length=500)
-    physician_id: Optional[int] = Field(None, description="Primary care physician ID")
+    physician_id: Optional[int] = Field(
+        None, gt=0, description="Primary care physician ID"
+    )
     is_self_record: bool = Field(
         False, description="Whether this is the user's own medical record"
     )
@@ -64,6 +66,12 @@ class PatientCreateRequest(BaseModel):
     def validate_relationship_to_self(cls, v):
         """Convert empty string to None, consistent with PatientUpdateRequest."""
         return None if v == "" else v
+
+
+# An explicit null for one of these is dropped rather than applied, since the column rejects it
+_NON_NULLABLE_UPDATE_FIELDS = frozenset(
+    c.name for c in Patient.__table__.columns if not c.nullable
+)
 
 
 class PatientUpdateRequest(BaseModel):
@@ -241,11 +249,14 @@ def create_patient(
                     request=request,
                 )
 
-        patient = service.create_patient(
-            user=current_user,
-            patient_data=patient_in.model_dump(),
-            is_self_record=patient_in.is_self_record,
-        )
+        try:
+            patient = service.create_patient(
+                user=current_user,
+                patient_data=patient_in.model_dump(),
+                is_self_record=patient_in.is_self_record,
+            )
+        except ValueError as e:
+            raise BusinessLogicException(message=str(e), request=request) from e
 
         log_data_access(
             logger,
@@ -528,9 +539,11 @@ def update_patient(
                 request=request,
             )
 
-        # Filter out None values
+        # exclude_unset keeps an explicit null (clear the field) distinct from an omitted field
         patient_data = {
-            k: v for k, v in patient_in.model_dump().items() if v is not None
+            k: v
+            for k, v in patient_in.model_dump(exclude_unset=True).items()
+            if not (v is None and k in _NON_NULLABLE_UPDATE_FIELDS)
         }
 
         # Log fields being updated without sensitive values
@@ -544,7 +557,11 @@ def update_patient(
                 fields_updated=list(patient_data.keys()),
             )
 
-        patient = service.update_patient(current_user, patient_id, patient_data)
+        try:
+            patient = service.update_patient(current_user, patient_id, patient_data)
+        except ValueError as e:
+            # Existence and edit permission are checked above, so what is left is bad request data
+            raise BusinessLogicException(message=str(e), request=request) from e
 
         log_data_access(
             logger,

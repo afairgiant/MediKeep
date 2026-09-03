@@ -12,11 +12,15 @@ from app.core.logging.config import get_logger, log_security_event
 from app.core.logging.constants import LogFields
 from app.core.utils.activity_tracker import activity_tracking_disabled_var
 from app.models.models import Patient, PatientShare, User
+from app.models.practice import Practitioner
 from app.services.patient_access import PatientAccessService
 
 security_logger = get_logger(__name__, "security")
 
 logger = get_logger(__name__, "app")
+
+# Shared so the pre-flush check and the IntegrityError backstop cannot drift apart
+PHYSICIAN_NOT_FOUND_ERROR = "The specified physician does not exist"
 
 
 class PatientManagementService:
@@ -25,6 +29,19 @@ class PatientManagementService:
     def __init__(self, db: Session):
         self.db = db
         self.access_service = PatientAccessService(db)
+
+    def _validate_physician(self, physician_id: Optional[int]) -> None:
+        """Raise ValueError unless physician_id is None or names an existing practitioner."""
+        if physician_id is None:
+            return
+
+        exists = (
+            self.db.query(Practitioner.id)
+            .filter(Practitioner.id == physician_id)
+            .first()
+        )
+        if not exists:
+            raise ValueError(PHYSICIAN_NOT_FOUND_ERROR)
 
     def create_patient(
         self, user: User, patient_data: dict, is_self_record: bool = False
@@ -64,6 +81,8 @@ class PatientManagementService:
         # Validate birth_date is not in the future
         if patient_data["birth_date"] > date.today():
             raise ValueError("Birth date cannot be in the future")
+
+        self._validate_physician(patient_data.get("physician_id"))
 
         # If user is creating their own record, check if they already have one
         if is_self_record:
@@ -186,6 +205,8 @@ class PatientManagementService:
             if patient_data["birth_date"] > date.today():
                 raise ValueError("Birth date cannot be in the future")
 
+        self._validate_physician(patient_data.get("physician_id"))
+
         # Update allowed fields
         updatable_fields = [
             "first_name",
@@ -218,7 +239,7 @@ class PatientManagementService:
 
             if "foreign key" in error_msg.lower():
                 if "physician" in error_msg.lower():
-                    raise ValueError("The specified physician does not exist")
+                    raise ValueError(PHYSICIAN_NOT_FOUND_ERROR)
                 raise ValueError("Invalid reference in patient update")
             if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 raise ValueError("This update would create a duplicate patient record")
