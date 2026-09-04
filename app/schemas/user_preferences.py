@@ -94,7 +94,7 @@ class UserPreferencesBase(BaseModel):
 
     unit_system: str
     session_timeout_minutes: Optional[int] = 120
-    language: Optional[str] = "en"
+    language: Optional[str] = None
     date_format: Optional[str] = "mdy"
     paperless_enabled: Optional[bool] = False
     paperless_url: Optional[str] = None

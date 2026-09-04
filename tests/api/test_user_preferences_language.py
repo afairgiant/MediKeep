@@ -15,8 +15,10 @@ from tests.utils.user import create_random_user, create_user_authentication_head
 class TestUserPreferencesLanguage:
     """Test language preference management."""
 
-    def test_default_language_is_english(self, client: TestClient, db_session: Session):
-        """Test that new users get English as default language."""
+    def test_language_is_unset_for_new_users(
+        self, client: TestClient, db_session: Session
+    ):
+        """New users have no stored language, so the client can auto-detect one."""
         # Create a test user
         user_data = create_random_user(db_session)
         headers = create_user_authentication_headers(
@@ -30,7 +32,7 @@ class TestUserPreferencesLanguage:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["language"] == "en"
+        assert data["language"] is None
 
     def test_update_language_to_french(self, client: TestClient, db_session: Session):
         """Test updating user language preference to French."""
@@ -256,9 +258,30 @@ class TestUserPreferencesLanguage:
 
         assert response.status_code == 200
         data = response.json()
-        # Language should still be default (en)
-        assert data["language"] == "en"
+        # Language stays unset - updating other fields must not imply a choice
+        assert data["language"] is None
         assert data["unit_system"] == "metric"
+
+    def test_explicit_english_is_stored(self, client: TestClient, db_session: Session):
+        """A deliberate choice of English must be distinguishable from no choice."""
+        user_data = create_random_user(db_session)
+        headers = create_user_authentication_headers(
+            client=client,
+            username=user_data["username"],
+            password=user_data["password"],
+        )
+
+        response = client.put(
+            "/api/v1/users/me/preferences",
+            headers=headers,
+            json={"language": "en"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["language"] == "en"
+
+        response = client.get("/api/v1/users/me/preferences", headers=headers)
+        assert response.json()["language"] == "en"
 
     def test_supported_languages_list(self, client: TestClient, db_session: Session):
         """Test that all supported languages can be set successfully."""
@@ -322,12 +345,12 @@ class TestLanguageValidation:
         with pytest.raises(ValueError, match="Language must be one of"):
             UserPreferencesUpdate(language="xx")
 
-    def test_language_defaults_to_en(self):
-        """Test that language defaults to 'en' when not specified."""
+    def test_language_defaults_to_unset(self):
+        """Test that language is None when not specified."""
         from app.schemas.user_preferences import UserPreferencesBase
 
         prefs = UserPreferencesBase(unit_system="imperial")
-        assert prefs.language == "en"
+        assert prefs.language is None
 
     def test_language_normalization_to_lowercase(self):
         """Test that language codes are normalized to lowercase."""
@@ -388,7 +411,7 @@ class TestLanguageCRUD:
         prefs = user_preferences.get_or_create_by_user_id(
             db_session, user_id=user_obj.id
         )
-        assert prefs.language == "en"
+        assert prefs.language is None
 
         # Update to German
         updated_prefs = user_preferences.update_by_user_id(

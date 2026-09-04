@@ -513,6 +513,10 @@ Base path: `/api/v1/users`
 }
 ```
 
+- **Note**: `language` is `null` until the user explicitly picks one. Clients should
+  fall back to browser detection in that case and may persist the detected code with a
+  `PUT`; an explicit `"en"` is a real choice and overrides detection.
+
 ### Update User Preferences
 
 `PUT /users/me/preferences`

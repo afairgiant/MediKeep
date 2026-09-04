@@ -130,8 +130,9 @@ class UserPreferences(Base):
     # Session timeout in minutes (default 120 minutes)
     session_timeout_minutes = Column(Integer, default=120, nullable=False)
 
-    # Language preference (ISO 639-1 code, e.g., 'en', 'es', 'fr')
-    language = Column(String(10), default="en", nullable=False)
+    # Language preference (ISO 639-1 code); NULL means the user never chose one,
+    # so browser detection applies instead of an assumed English
+    language = Column(String(10), nullable=True)
 
     # Date format preference: 'mdy' (US), 'dmy' (European), 'ymd' (ISO)
     date_format = Column(String(10), default="mdy", nullable=False)

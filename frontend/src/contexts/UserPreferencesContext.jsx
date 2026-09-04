@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 import {
   getUserPreferences,
@@ -15,27 +16,65 @@ import { PAPERLESS_SETTING_DEFAULTS } from '../constants/paperlessSettings';
 import { timezoneService } from '../services/timezoneService';
 import { DATE_FORMAT_OPTIONS, DEFAULT_DATE_FORMAT } from '../utils/constants';
 import i18n from '../i18n';
-
-// Supported languages - must match backend validation
-const SUPPORTED_LANGUAGES = [
-  'en',
-  'fr',
-  'de',
-  'es',
-  'it',
-  'pt',
-  'ru',
-  'sv',
-  'nl',
-  'pl',
-  'zh',
-  'el',
-];
+import {
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGE_CODES,
+  extractPrimaryLanguage,
+  normalizeLanguage,
+} from '../constants/languages';
 
 /**
  * User Preferences Context
  * Provides user preferences (including unit system) throughout the app
  */
+
+/** Applies a language to i18next, tolerating a failed translation load. */
+const applyLanguage = async language => {
+  if (
+    !SUPPORTED_LANGUAGE_CODES.includes(language) ||
+    language === i18n.language
+  ) {
+    return;
+  }
+
+  try {
+    await i18n.changeLanguage(language);
+  } catch (langErr) {
+    frontendLogger.logError('Failed to apply saved language preference', {
+      language,
+      error: langErr.message,
+      component: 'UserPreferencesContext',
+    });
+  }
+};
+
+/**
+ * The browser's language when it is worth recording, otherwise null.
+ *
+ * Reads navigator rather than i18n.language, which on a shared browser may still
+ * hold the language a previously signed-in user chose.
+ */
+const detectBrowserLanguage = userId => {
+  const detectedRaw = extractPrimaryLanguage(
+    navigator.languages?.[0] || navigator.language
+  );
+  const detected = normalizeLanguage(detectedRaw);
+
+  if (detected !== DEFAULT_LANGUAGE) {
+    return detected;
+  }
+
+  if (detectedRaw !== DEFAULT_LANGUAGE) {
+    frontendLogger.logInfo('Browser language not supported, keeping default', {
+      browserLanguage: detectedRaw,
+      supportedLanguages: SUPPORTED_LANGUAGE_CODES,
+      userId,
+      component: 'UserPreferencesContext',
+    });
+  }
+
+  return null;
+};
 
 const UserPreferencesContext = createContext();
 
@@ -54,38 +93,69 @@ export const UserPreferencesProvider = ({ children }) => {
   const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // The auto-detect write is not awaited on the load path, so an explicit choice
+  // made moments later must queue behind it or the server keeps whichever landed last.
+  const pendingDetectedLanguageWrite = useRef(null);
 
   // Load user preferences when authenticated user changes
   useEffect(() => {
+    // A logout or user switch mid-request must not let the old response apply its
+    // language or write its preferences over whoever is signed in now.
+    let cancelled = false;
+
     const loadPreferences = async () => {
       try {
         setLoading(true);
         setError(null);
         const userPrefs = await getUserPreferences();
+        if (cancelled) return;
 
-        // Apply the backend-stored language to i18next BEFORE updating React state.
-        // This ensures syncAutoDetectedLanguage never reads a stale i18n.language
-        // in the window between setPreferences and changeLanguage completing.
-        if (
-          userPrefs.language &&
-          SUPPORTED_LANGUAGES.includes(userPrefs.language) &&
-          userPrefs.language !== i18n.language
-        ) {
-          try {
-            await i18n.changeLanguage(userPrefs.language);
-          } catch (langErr) {
-            frontendLogger.logError(
-              'Failed to apply saved language preference',
-              {
-                language: userPrefs.language,
-                error: langErr.message,
-                component: 'UserPreferencesContext',
-              }
-            );
-          }
+        // A stored choice outranks browser detection on every device; with no
+        // stored choice the browser decides.
+        const detected = userPrefs.language
+          ? null
+          : detectBrowserLanguage(user?.id);
+        const activeLanguage = userPrefs.language || detected;
+
+        if (activeLanguage) {
+          await applyLanguage(activeLanguage);
+          if (cancelled) return;
         }
 
         setPreferences(userPrefs);
+
+        // Record the detected language off the loading path, so a first login in a
+        // non-English browser is not delayed by a round trip. It matters only to
+        // server-rendered output (PDF reports, exports); i18next already has it.
+        if (detected) {
+          const write = updateUserPreferences({
+            language: detected,
+          })
+            .then(saved => {
+              if (cancelled) return;
+              setPreferences(prev => (prev ? { ...prev, ...saved } : prev));
+              frontendLogger.logInfo('Auto-detected language saved to backend', {
+                language: detected,
+                userId: user?.id,
+                component: 'UserPreferencesContext',
+              });
+            })
+            .catch(langErr => {
+              frontendLogger.logError('Failed to save auto-detected language', {
+                language: detected,
+                error: langErr.message,
+                userId: user?.id,
+                component: 'UserPreferencesContext',
+              });
+            })
+            .finally(() => {
+              // A later login may already have queued its own write
+              if (pendingDetectedLanguageWrite.current === write) {
+                pendingDetectedLanguageWrite.current = null;
+              }
+            });
+          pendingDetectedLanguageWrite.current = write;
+        }
 
         frontendLogger.logInfo('User preferences loaded', {
           unitSystem: userPrefs.unit_system,
@@ -94,6 +164,8 @@ export const UserPreferencesProvider = ({ children }) => {
           component: 'UserPreferencesContext',
         });
       } catch (err) {
+        if (cancelled) return;
+
         const errorMessage = err.message || 'Failed to load user preferences';
         setError(errorMessage);
 
@@ -118,7 +190,9 @@ export const UserPreferencesProvider = ({ children }) => {
           }
         );
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
@@ -135,12 +209,19 @@ export const UserPreferencesProvider = ({ children }) => {
         component: 'UserPreferencesContext',
       });
     }
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-load on auth state or user ID change; full user object would re-trigger on every refresh
   }, [isAuthenticated, user?.id, authLoading]);
 
   // Function to update preferences and save to server
   const updatePreferences = useCallback(async newPreferences => {
     try {
+      // Let an in-flight auto-detect write land first; it never rejects
+      await pendingDetectedLanguageWrite.current;
+
       // Save to server first
       const updatedPreferences = await updateUserPreferences(newPreferences);
 
@@ -169,55 +250,6 @@ export const UserPreferencesProvider = ({ children }) => {
       throw err;
     }
   }, []);
-
-  // Sync auto-detected language to backend on first login
-  useEffect(() => {
-    const syncAutoDetectedLanguage = async () => {
-      if (isAuthenticated && user && preferences && !loading) {
-        const currentLanguage = (i18n.language || 'en')
-          .split('-')[0]
-          .toLowerCase();
-        const savedLanguage = preferences.language;
-
-        // Only save if user has no language preference yet (still on default 'en')
-        // and their browser/system language is different AND supported
-        if (
-          savedLanguage === 'en' &&
-          currentLanguage !== 'en' &&
-          SUPPORTED_LANGUAGES.includes(currentLanguage)
-        ) {
-          try {
-            await updatePreferences({ language: currentLanguage });
-            frontendLogger.logInfo('Auto-detected language saved to backend', {
-              language: currentLanguage,
-              userId: user.id,
-              component: 'UserPreferencesContext',
-            });
-          } catch (error) {
-            frontendLogger.logError('Failed to save auto-detected language', {
-              error: error.message,
-              language: currentLanguage,
-              userId: user.id,
-              component: 'UserPreferencesContext',
-            });
-          }
-        } else if (savedLanguage === 'en' && currentLanguage !== 'en') {
-          // Log when browser language is not supported
-          frontendLogger.logInfo(
-            'Browser language not supported, keeping default',
-            {
-              browserLanguage: currentLanguage,
-              supportedLanguages: SUPPORTED_LANGUAGES,
-              userId: user.id,
-              component: 'UserPreferencesContext',
-            }
-          );
-        }
-      }
-    };
-
-    syncAutoDetectedLanguage();
-  }, [isAuthenticated, user, preferences, loading, updatePreferences]);
 
   // Sync date format locale to timezoneService when preferences change
   useEffect(() => {

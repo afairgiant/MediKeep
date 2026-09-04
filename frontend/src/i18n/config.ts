@@ -103,6 +103,8 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
 
+    // Provisional until login: UserPreferencesContext overrides this with the
+    // user's stored choice, or records what was detected here when there is none.
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
