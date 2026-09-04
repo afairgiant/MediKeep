@@ -28,8 +28,8 @@ import {
  * Provides user preferences (including unit system) throughout the app
  */
 
-/** Applies a stored language choice to i18next, which outranks browser detection. */
-const applyStoredLanguage = async language => {
+/** Applies a language to i18next, tolerating a failed translation load. */
+const applyLanguage = async language => {
   if (
     !SUPPORTED_LANGUAGE_CODES.includes(language) ||
     language === i18n.language
@@ -48,9 +48,16 @@ const applyStoredLanguage = async language => {
   }
 };
 
-/** The detected language worth recording, or null when there is nothing to record. */
-const detectedLanguageToPersist = userId => {
-  const detectedRaw = extractPrimaryLanguage(i18n.language);
+/**
+ * The browser's language when it is worth recording, otherwise null.
+ *
+ * Reads navigator rather than i18n.language, which on a shared browser may still
+ * hold the language a previously signed-in user chose.
+ */
+const detectBrowserLanguage = userId => {
+  const detectedRaw = extractPrimaryLanguage(
+    navigator.languages?.[0] || navigator.language
+  );
   const detected = normalizeLanguage(detectedRaw);
 
   if (detected !== DEFAULT_LANGUAGE) {
@@ -98,8 +105,15 @@ export const UserPreferencesProvider = ({ children }) => {
         setError(null);
         const userPrefs = await getUserPreferences();
 
-        if (userPrefs.language) {
-          await applyStoredLanguage(userPrefs.language);
+        // A stored choice outranks browser detection on every device; with no
+        // stored choice the browser decides.
+        const detected = userPrefs.language
+          ? null
+          : detectBrowserLanguage(user?.id);
+        const activeLanguage = userPrefs.language || detected;
+
+        if (activeLanguage) {
+          await applyLanguage(activeLanguage);
         }
 
         setPreferences(userPrefs);
@@ -107,12 +121,8 @@ export const UserPreferencesProvider = ({ children }) => {
         // Record the detected language off the loading path, so a first login in a
         // non-English browser is not delayed by a round trip. It matters only to
         // server-rendered output (PDF reports, exports); i18next already has it.
-        const detected = userPrefs.language
-          ? null
-          : detectedLanguageToPersist(user?.id);
-
         if (detected) {
-          pendingDetectedLanguageWrite.current = updateUserPreferences({
+          const write = updateUserPreferences({
             language: detected,
           })
             .then(saved => {
@@ -132,8 +142,12 @@ export const UserPreferencesProvider = ({ children }) => {
               });
             })
             .finally(() => {
-              pendingDetectedLanguageWrite.current = null;
+              // A later login may already have queued its own write
+              if (pendingDetectedLanguageWrite.current === write) {
+                pendingDetectedLanguageWrite.current = null;
+              }
             });
+          pendingDetectedLanguageWrite.current = write;
         }
 
         frontendLogger.logInfo('User preferences loaded', {

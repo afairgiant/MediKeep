@@ -30,13 +30,26 @@ vi.mock('../i18n', () => ({
   },
 }));
 
+// Mutable so a test can simulate one user signing out and another signing in
+const authState = {
+  isAuthenticated: true,
+  user: { id: 1, username: 'testuser' },
+  isLoading: false,
+};
+
 vi.mock('./AuthContext', () => ({
-  useAuth: () => ({
-    isAuthenticated: true,
-    user: { id: 1, username: 'testuser' },
-    isLoading: false,
-  }),
+  useAuth: () => authState,
 }));
+
+const setAuthUser = id => {
+  authState.user = { id, username: `testuser${id}` };
+};
+
+// The browser's language, which detection reads instead of i18next's current one
+const setBrowserLanguage = lang => {
+  vi.spyOn(navigator, 'languages', 'get').mockReturnValue([lang]);
+  vi.spyOn(navigator, 'language', 'get').mockReturnValue(lang);
+};
 
 // Minimal preferences response covering all fields read by the context
 const makePrefs = (overrides = {}) => ({
@@ -155,12 +168,15 @@ describe('UserPreferencesContext — language sync on load', () => {
 
 describe('UserPreferencesContext — auto-detect when no language is stored', () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
     vi.clearAllMocks();
     i18n.language = 'en';
+    setAuthUser(1);
+    setBrowserLanguage('en');
   });
 
   test('saves the detected language and keeps it in the UI', async () => {
-    i18n.language = 'de';
+    setBrowserLanguage('de');
     vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
       makePrefs({ language: null })
     );
@@ -176,11 +192,11 @@ describe('UserPreferencesContext — auto-detect when no language is stored', ()
     expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledWith({
       language: 'de',
     });
-    expect(i18n.changeLanguage).not.toHaveBeenCalled();
+    expect(i18n.changeLanguage).toHaveBeenCalledWith('de');
   });
 
   test('normalizes a regional browser locale before saving', async () => {
-    i18n.language = 'de-AT';
+    setBrowserLanguage('de-AT');
     vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
       makePrefs({ language: null })
     );
@@ -212,7 +228,7 @@ describe('UserPreferencesContext — auto-detect when no language is stored', ()
   });
 
   test('does not save an unsupported browser language and logs it', async () => {
-    i18n.language = 'xx';
+    setBrowserLanguage('xx');
     vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
       makePrefs({ language: null })
     );
@@ -232,7 +248,7 @@ describe('UserPreferencesContext — auto-detect when no language is stored', ()
   });
 
   test('still loads preferences when saving the detected language fails', async () => {
-    i18n.language = 'fr';
+    setBrowserLanguage('fr');
     vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
       makePrefs({ language: null })
     );
@@ -258,14 +274,17 @@ describe('UserPreferencesContext — auto-detect when no language is stored', ()
 
 describe('UserPreferencesContext — auto-detect vs. manual write ordering', () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
     vi.clearAllMocks();
     i18n.language = 'en';
+    setAuthUser(1);
+    setBrowserLanguage('en');
   });
 
   // A manual choice made while the auto-detect write is still in flight must be
   // the last write the server sees, whatever order the responses would resolve in.
   test('queues a manual language change behind the in-flight auto-detect write', async () => {
-    i18n.language = 'de';
+    setBrowserLanguage('de');
     vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
       makePrefs({ language: null })
     );
@@ -309,6 +328,103 @@ describe('UserPreferencesContext — auto-detect vs. manual write ordering', () 
     });
     await waitFor(() => {
       expect(result.current.preferences.language).toBe('fr');
+    });
+  });
+});
+
+describe('UserPreferencesContext — one browser, successive users', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
+    i18n.language = 'en';
+    setAuthUser(1);
+    setBrowserLanguage('en');
+  });
+
+  // i18next still holds the first user's German after they sign out; the second
+  // user's own browser must decide, not the leftover state.
+  test('does not inherit the language of the previous user', async () => {
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'de' })
+    );
+
+    const { rerender } = renderHook(() => useUserPreferences(), {
+      wrapper: UserPreferencesProvider,
+    });
+
+    await waitFor(() => {
+      expect(i18n.changeLanguage).toHaveBeenCalledWith('de');
+    });
+
+    i18n.language = 'de';
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
+    );
+    vi.mocked(userPrefsApi.updateUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'en' })
+    );
+
+    setAuthUser(2);
+    rerender();
+
+    await waitFor(() => {
+      expect(userPrefsApi.getUserPreferences).toHaveBeenCalledTimes(2);
+    });
+    expect(userPrefsApi.updateUserPreferences).not.toHaveBeenCalled();
+    expect(i18n.changeLanguage).not.toHaveBeenCalledWith('de-DE');
+  });
+
+  // Each login queues its own write; the first to settle must not clear a newer one
+  test('keeps the newer auto-detect write pending when an older one settles', async () => {
+    setBrowserLanguage('de');
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
+    );
+
+    const resolvers = [];
+    vi.mocked(userPrefsApi.updateUserPreferences).mockImplementation(
+      () => new Promise(resolve => resolvers.push(resolve))
+    );
+
+    const { result, rerender } = renderHook(() => useUserPreferences(), {
+      wrapper: UserPreferencesProvider,
+    });
+
+    await waitFor(() => {
+      expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledTimes(1);
+    });
+
+    setAuthUser(2);
+    rerender();
+
+    await waitFor(() => {
+      expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledTimes(2);
+    });
+
+    // The older write settles first
+    await act(async () => {
+      resolvers[0](makePrefs({ language: 'de' }));
+    });
+
+    const manualWrite = result.current.updatePreferences({ language: 'fr' });
+    await act(async () => {});
+
+    // The newer write is still pending, so the manual one must not have gone out
+    expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledTimes(2);
+
+    // Once it settles, the manual write is released
+    resolvers[1](makePrefs({ language: 'de' }));
+    await waitFor(() => {
+      expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledTimes(3);
+    });
+
+    await act(async () => {
+      resolvers[2](makePrefs({ language: 'fr' }));
+      await manualWrite;
+    });
+
+    expect(userPrefsApi.updateUserPreferences).toHaveBeenNthCalledWith(3, {
+      language: 'fr',
     });
   });
 });
