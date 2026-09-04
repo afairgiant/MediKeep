@@ -46,10 +46,12 @@ const makePrefs = (overrides = {}) => ({
   ...overrides,
 });
 
-// Renders the provider and returns a consumer that exposes the loaded language
+// Renders the provider and returns a consumer that exposes the loaded language.
+// 'unset' distinguishes a loaded-but-null language from a still-loading provider.
 const Consumer = () => {
-  const { preferences } = useUserPreferences();
-  return <div data-testid="lang">{preferences?.language ?? 'loading'}</div>;
+  const { preferences, loading } = useUserPreferences();
+  if (loading) return <div data-testid="lang">loading</div>;
+  return <div data-testid="lang">{preferences?.language ?? 'unset'}</div>;
 };
 
 const renderProvider = () =>
@@ -126,11 +128,72 @@ describe('UserPreferencesContext — language sync on load', () => {
       expect(userPrefsApi.getUserPreferences).toHaveBeenCalled();
     });
     expect(i18n.changeLanguage).not.toHaveBeenCalled();
+    expect(userPrefsApi.updateUserPreferences).not.toHaveBeenCalled();
   });
 
-  test('does not call i18n.changeLanguage when backend language is absent', async () => {
+  test('applies an explicit English choice over a non-English browser language', async () => {
+    i18n.language = 'de';
     vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
-      makePrefs({ language: undefined })
+      makePrefs({ language: 'en' })
+    );
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('lang').textContent).toBe('en');
+    });
+    expect(i18n.changeLanguage).toHaveBeenCalledWith('en');
+    expect(userPrefsApi.updateUserPreferences).not.toHaveBeenCalled();
+  });
+});
+
+describe('UserPreferencesContext — auto-detect when no language is stored', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    i18n.language = 'en';
+  });
+
+  test('saves the detected language and keeps it in the UI', async () => {
+    i18n.language = 'de';
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
+    );
+    vi.mocked(userPrefsApi.updateUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'de' })
+    );
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('lang').textContent).toBe('de');
+    });
+    expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledWith({
+      language: 'de',
+    });
+    expect(i18n.changeLanguage).not.toHaveBeenCalled();
+  });
+
+  test('normalizes a regional browser locale before saving', async () => {
+    i18n.language = 'de-AT';
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
+    );
+    vi.mocked(userPrefsApi.updateUserPreferences).mockResolvedValue(
+      makePrefs({ language: 'de' })
+    );
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledWith({
+        language: 'de',
+      });
+    });
+  });
+
+  test('does not save when the detected language is English', async () => {
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
     );
 
     renderProvider();
@@ -138,6 +201,51 @@ describe('UserPreferencesContext — language sync on load', () => {
     await waitFor(() => {
       expect(userPrefsApi.getUserPreferences).toHaveBeenCalled();
     });
+    expect(userPrefsApi.updateUserPreferences).not.toHaveBeenCalled();
     expect(i18n.changeLanguage).not.toHaveBeenCalled();
+  });
+
+  test('does not save an unsupported browser language and logs it', async () => {
+    i18n.language = 'xx';
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
+    );
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(frontendLogger.logInfo).toHaveBeenCalledWith(
+        'Browser language not supported, keeping default',
+        expect.objectContaining({
+          browserLanguage: 'xx',
+          component: 'UserPreferencesContext',
+        })
+      );
+    });
+    expect(userPrefsApi.updateUserPreferences).not.toHaveBeenCalled();
+  });
+
+  test('still loads preferences when saving the detected language fails', async () => {
+    i18n.language = 'fr';
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
+    );
+    vi.mocked(userPrefsApi.updateUserPreferences).mockRejectedValueOnce(
+      new Error('network down')
+    );
+
+    renderProvider();
+
+    await waitFor(() => {
+      expect(frontendLogger.logError).toHaveBeenCalledWith(
+        'Failed to save auto-detected language',
+        expect.objectContaining({
+          language: 'fr',
+          error: 'network down',
+          component: 'UserPreferencesContext',
+        })
+      );
+    });
+    expect(screen.getByTestId('lang').textContent).toBe('unset');
   });
 });

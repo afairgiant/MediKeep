@@ -4,6 +4,7 @@ import { Select } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import logger from '../../services/logger';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
+import { LANGUAGES, normalizeLanguage } from '../../constants/languages';
 
 interface LanguageSwitcherProps {
   compact?: boolean;
@@ -11,44 +12,6 @@ interface LanguageSwitcherProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   comboboxWithinPortal?: boolean;
 }
-
-interface Language {
-  value: string;
-  label: string;
-  shortLabel: string;
-}
-
-// Available languages - defined outside component to avoid recreation
-const LANGUAGES: Language[] = [
-  { value: 'en', label: 'English', shortLabel: 'EN' },
-  { value: 'fr', label: 'Français', shortLabel: 'FR' },
-  { value: 'de', label: 'Deutsch', shortLabel: 'DE' },
-  { value: 'es', label: 'Español', shortLabel: 'ES' },
-  { value: 'it', label: 'Italiano', shortLabel: 'IT' },
-  { value: 'pt', label: 'Português', shortLabel: 'PT' },
-  { value: 'ru', label: 'Русский', shortLabel: 'RU' },
-  { value: 'sv', label: 'Svenska', shortLabel: 'SV' },
-  { value: 'nl', label: 'Nederlands', shortLabel: 'NL' },
-  { value: 'pl', label: 'Polski', shortLabel: 'PL' },
-  { value: 'zh', label: '中文', shortLabel: 'ZH' },
-  { value: 'el', label: 'Ελληνικά', shortLabel: 'EL' },
-];
-
-const SUPPORTED_LANGUAGE_CODES = LANGUAGES.map(l => l.value);
-
-/**
- * Normalizes a language code to match our supported languages.
- * Handles locale codes (e.g., 'en-US' -> 'en') and validates against supported languages.
- */
-const normalizeLanguage = (lang: string): string => {
-  if (!lang) return 'en';
-
-  // Extract primary language code (e.g., 'en-US' -> 'en')
-  const primaryLang = lang.split('-')[0].toLowerCase();
-
-  // Return the primary language if supported, otherwise fallback to 'en'
-  return SUPPORTED_LANGUAGE_CODES.includes(primaryLang) ? primaryLang : 'en';
-};
 
 /**
  * LanguageSwitcher - Component for switching application language

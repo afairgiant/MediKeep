@@ -6,12 +6,7 @@ columns referenced by the migration, runs ``upgrade`` then ``downgrade``, and
 asserts the schema changes are applied and reversed cleanly.
 """
 
-import importlib.util
-from pathlib import Path
-
 import pytest
-from alembic.migration import MigrationContext
-from alembic.operations import Operations
 from sqlalchemy import (
     Column,
     Date,
@@ -23,25 +18,9 @@ from sqlalchemy import (
     inspect,
 )
 
+from tests.utils.migrations import run_migration
 
-# Loaded by file path — the repo's alembic/ directory is shadowed by the
-# installed alembic package, so a dotted import cannot reach it.
-MIGRATION_FILE = (
-    Path(__file__).resolve().parents[2]
-    / "alembic"
-    / "migrations"
-    / "versions"
-    / "20260609_1000_b3f7c1d9e2a4_add_reminders_to_medications.py"
-)
-
-
-def _load_migration_module():
-    spec = importlib.util.spec_from_file_location(
-        "reminder_migration_under_test", MIGRATION_FILE
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+MIGRATION_FILE = "20260609_1000_b3f7c1d9e2a4_add_reminders_to_medications.py"
 
 
 @pytest.fixture
@@ -71,30 +50,13 @@ def engine_with_baseline_medications():
     engine.dispose()
 
 
-def _run_migration(engine, direction: str) -> None:
-    """Run upgrade() or downgrade() in a proper Alembic operations context."""
-    module = _load_migration_module()
-    with engine.begin() as conn:
-        ctx = MigrationContext.configure(conn)
-        ops = Operations(ctx)
-        # The migration module reads ``from alembic import op`` at import time;
-        # rebinding that module-level name to our scoped Operations instance is
-        # the standard pattern for testing migrations in isolation.
-        original_op = module.op
-        module.op = ops
-        try:
-            getattr(module, direction)()
-        finally:
-            module.op = original_op
-
-
 class TestReminderColumnsMigration:
     """Upgrade adds the columns + index; downgrade removes them."""
 
     def test_upgrade_adds_columns_and_index(self, engine_with_baseline_medications):
         engine = engine_with_baseline_medications
 
-        _run_migration(engine, "upgrade")
+        run_migration(engine, MIGRATION_FILE, "upgrade")
 
         inspector = inspect(engine)
         column_names = {c["name"] for c in inspector.get_columns("medications")}
@@ -107,7 +69,7 @@ class TestReminderColumnsMigration:
     def test_existing_row_gets_default_false(self, engine_with_baseline_medications):
         engine = engine_with_baseline_medications
 
-        _run_migration(engine, "upgrade")
+        run_migration(engine, MIGRATION_FILE, "upgrade")
 
         with engine.connect() as conn:
             value = conn.exec_driver_sql(
@@ -120,8 +82,8 @@ class TestReminderColumnsMigration:
     ):
         engine = engine_with_baseline_medications
 
-        _run_migration(engine, "upgrade")
-        _run_migration(engine, "downgrade")
+        run_migration(engine, MIGRATION_FILE, "upgrade")
+        run_migration(engine, MIGRATION_FILE, "downgrade")
 
         inspector = inspect(engine)
         column_names = {c["name"] for c in inspector.get_columns("medications")}

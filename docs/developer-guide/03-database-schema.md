@@ -245,6 +245,7 @@ JUNCTION TABLES (Many-to-Many)
 | user_id | Integer | FK(users.id), NOT NULL, UNIQUE | Associated user |
 | unit_system | String | NOT NULL, DEFAULT 'imperial' | imperial or metric |
 | session_timeout_minutes | Integer | NOT NULL, DEFAULT 30 | Session timeout duration |
+| language | String(10) | NULL | ISO 639-1 UI language; NULL means the user never chose one, so browser detection applies |
 | paperless_enabled | Boolean | NOT NULL, DEFAULT FALSE | Enable Paperless integration |
 | paperless_url | String(500) | | Paperless-ngx instance URL |
 | paperless_api_token_encrypted | Text | | Encrypted API token |
