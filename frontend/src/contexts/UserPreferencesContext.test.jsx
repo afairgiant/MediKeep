@@ -428,3 +428,49 @@ describe('UserPreferencesContext — one browser, successive users', () => {
     });
   });
 });
+
+describe('UserPreferencesContext — obsolete session responses', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
+    i18n.language = 'en';
+    setAuthUser(1);
+    setBrowserLanguage('en');
+  });
+
+  // The first user's request completes after the second user has already loaded
+  test('ignores a preferences response from a signed-out user', async () => {
+    let resolveFirstLoad;
+    vi.mocked(userPrefsApi.getUserPreferences)
+      .mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            resolveFirstLoad = () => resolve(makePrefs({ language: 'de' }));
+          })
+      )
+      .mockResolvedValueOnce(makePrefs({ language: 'fr' }));
+
+    const { result, rerender } = renderHook(() => useUserPreferences(), {
+      wrapper: UserPreferencesProvider,
+    });
+
+    await waitFor(() => {
+      expect(userPrefsApi.getUserPreferences).toHaveBeenCalledTimes(1);
+    });
+
+    setAuthUser(2);
+    rerender();
+
+    await waitFor(() => {
+      expect(result.current.preferences.language).toBe('fr');
+    });
+
+    await act(async () => {
+      resolveFirstLoad();
+    });
+
+    expect(result.current.preferences.language).toBe('fr');
+    expect(i18n.changeLanguage).not.toHaveBeenCalledWith('de');
+    expect(userPrefsApi.updateUserPreferences).not.toHaveBeenCalled();
+  });
+});

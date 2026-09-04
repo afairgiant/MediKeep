@@ -99,11 +99,16 @@ export const UserPreferencesProvider = ({ children }) => {
 
   // Load user preferences when authenticated user changes
   useEffect(() => {
+    // A logout or user switch mid-request must not let the old response apply its
+    // language or write its preferences over whoever is signed in now.
+    let cancelled = false;
+
     const loadPreferences = async () => {
       try {
         setLoading(true);
         setError(null);
         const userPrefs = await getUserPreferences();
+        if (cancelled) return;
 
         // A stored choice outranks browser detection on every device; with no
         // stored choice the browser decides.
@@ -114,6 +119,7 @@ export const UserPreferencesProvider = ({ children }) => {
 
         if (activeLanguage) {
           await applyLanguage(activeLanguage);
+          if (cancelled) return;
         }
 
         setPreferences(userPrefs);
@@ -126,6 +132,7 @@ export const UserPreferencesProvider = ({ children }) => {
             language: detected,
           })
             .then(saved => {
+              if (cancelled) return;
               setPreferences(prev => (prev ? { ...prev, ...saved } : prev));
               frontendLogger.logInfo('Auto-detected language saved to backend', {
                 language: detected,
@@ -157,6 +164,8 @@ export const UserPreferencesProvider = ({ children }) => {
           component: 'UserPreferencesContext',
         });
       } catch (err) {
+        if (cancelled) return;
+
         const errorMessage = err.message || 'Failed to load user preferences';
         setError(errorMessage);
 
@@ -181,7 +190,9 @@ export const UserPreferencesProvider = ({ children }) => {
           }
         );
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
@@ -198,6 +209,10 @@ export const UserPreferencesProvider = ({ children }) => {
         component: 'UserPreferencesContext',
       });
     }
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-load on auth state or user ID change; full user object would re-trigger on every refresh
   }, [isAuthenticated, user?.id, authLoading]);
 
