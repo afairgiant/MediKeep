@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from 'react';
 import {
   getUserPreferences,
@@ -85,6 +86,9 @@ export const UserPreferencesProvider = ({ children }) => {
   const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // The auto-detect write is not awaited on the load path, so an explicit choice
+  // made moments later must queue behind it or the server keeps whichever landed last.
+  const pendingDetectedLanguageWrite = useRef(null);
 
   // Load user preferences when authenticated user changes
   useEffect(() => {
@@ -108,7 +112,9 @@ export const UserPreferencesProvider = ({ children }) => {
           : detectedLanguageToPersist(user?.id);
 
         if (detected) {
-          updateUserPreferences({ language: detected })
+          pendingDetectedLanguageWrite.current = updateUserPreferences({
+            language: detected,
+          })
             .then(saved => {
               setPreferences(prev => (prev ? { ...prev, ...saved } : prev));
               frontendLogger.logInfo('Auto-detected language saved to backend', {
@@ -124,6 +130,9 @@ export const UserPreferencesProvider = ({ children }) => {
                 userId: user?.id,
                 component: 'UserPreferencesContext',
               });
+            })
+            .finally(() => {
+              pendingDetectedLanguageWrite.current = null;
             });
         }
 
@@ -181,6 +190,9 @@ export const UserPreferencesProvider = ({ children }) => {
   // Function to update preferences and save to server
   const updatePreferences = useCallback(async newPreferences => {
     try {
+      // Let an in-flight auto-detect write land first; it never rejects
+      await pendingDetectedLanguageWrite.current;
+
       // Save to server first
       const updatedPreferences = await updateUserPreferences(newPreferences);
 

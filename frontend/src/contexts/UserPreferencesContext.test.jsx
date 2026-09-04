@@ -1,5 +1,11 @@
 import { vi, describe, test, expect, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import {
   UserPreferencesProvider,
   useUserPreferences,
@@ -247,5 +253,62 @@ describe('UserPreferencesContext — auto-detect when no language is stored', ()
       );
     });
     expect(screen.getByTestId('lang').textContent).toBe('unset');
+  });
+});
+
+describe('UserPreferencesContext — auto-detect vs. manual write ordering', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    i18n.language = 'en';
+  });
+
+  // A manual choice made while the auto-detect write is still in flight must be
+  // the last write the server sees, whatever order the responses would resolve in.
+  test('queues a manual language change behind the in-flight auto-detect write', async () => {
+    i18n.language = 'de';
+    vi.mocked(userPrefsApi.getUserPreferences).mockResolvedValue(
+      makePrefs({ language: null })
+    );
+
+    let resolveAutoWrite;
+    vi.mocked(userPrefsApi.updateUserPreferences)
+      .mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            resolveAutoWrite = () => resolve(makePrefs({ language: 'de' }));
+          })
+      )
+      .mockResolvedValueOnce(makePrefs({ language: 'fr' }));
+
+    const { result } = renderHook(() => useUserPreferences(), {
+      wrapper: UserPreferencesProvider,
+    });
+
+    await waitFor(() => {
+      expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledWith({
+        language: 'de',
+      });
+    });
+
+    const manualWrite = result.current.updatePreferences({ language: 'fr' });
+
+    // The manual PUT must not be issued while the auto-detect write is pending
+    await Promise.resolve();
+    expect(userPrefsApi.updateUserPreferences).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveAutoWrite();
+      await manualWrite;
+    });
+
+    expect(userPrefsApi.updateUserPreferences).toHaveBeenNthCalledWith(1, {
+      language: 'de',
+    });
+    expect(userPrefsApi.updateUserPreferences).toHaveBeenNthCalledWith(2, {
+      language: 'fr',
+    });
+    await waitFor(() => {
+      expect(result.current.preferences.language).toBe('fr');
+    });
   });
 });
