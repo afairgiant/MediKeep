@@ -306,7 +306,8 @@ For admin-specific functionality, extend the `AdminApiService` class in `adminAp
 
 The API services provide comprehensive error handling:
 
-- **401 Unauthorized**: Automatic token cleanup and user notification
+- **401 Unauthorized**: Automatic token cleanup and user notification (see
+  *Background requests* below for the one case that does not eject the user)
 - **422 Validation Errors**: Detailed field-level error parsing and user-friendly messages
 - **Network Errors**: Graceful handling with multiple URL fallbacks for Docker environments
 - **Token Expiration**: Automatic detection and cleanup of expired JWT tokens
@@ -328,6 +329,36 @@ Authentication is handled automatically across all services:
 - **Environment Security**: Different security configurations for development and production
 
 The system automatically handles token expiration and prompts users to re-authenticate when necessary.
+
+## Background Requests
+
+A 401 normally ejects the user to the login page. Requests that run unattended -
+on a timer, while the user is doing something else - must not, or a transient
+auth blip throws someone out of a form mid-edit.
+
+Declare those at the request site:
+
+```javascript
+// Polled every 30s; its 401 is logged and swallowed.
+apiService.getRecentActivity(patientId, { background: true });
+
+// Same endpoint, user-initiated. Its 401 ejects.
+apiService.getRecentActivity(patientId);
+```
+
+`background` is accepted by `apiService.request` (and every verb built on it),
+`baseApi.get`, and `apiClient` via the request config.
+
+**Declare it at the call site, never in a shared list of endpoints.** The same
+function usually serves both a mount and a timer - `Dashboard.jsx` and
+`InvitationNotifications.jsx` each do - so the URL cannot distinguish them. An
+allowlist keyed on paths exempted the mount loads too, and silently stopped
+matching whenever a path changed.
+
+For hooks that poll, keep the flag separate from any "silent" or "quiet" option
+that only suppresses error UI: `useAdminData` takes `loadData(silent, { background })`
+because its Refresh All buttons pass `silent: true` on a click, which must still
+eject.
 
 ## Request Management Features
 

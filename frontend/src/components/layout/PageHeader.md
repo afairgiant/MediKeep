@@ -66,8 +66,9 @@ import { PageHeader } from '../../components';
 | `onBackClick`       | function        | -                       | Custom back button handler (overrides default navigation)  |
 | `actions`           | React.ReactNode | -                       | Custom actions to display on the right side                |
 | `className`         | string          | `''`                    | Additional CSS classes                                     |
-| `variant`           | string          | `'medical'`             | Variant style ('medical' or 'dashboard')                   |
-| `showGlobalActions` | boolean         | `true`                  | Whether to show settings, theme toggle, and logout buttons |
+| `variant`           | string          | `'dashboard'`           | Variant style ('medical' or 'dashboard')                   |
+| `showNavigation`    | boolean         | `true`                  | Whether to render the navigation bar below the header      |
+| `showTitle`         | boolean         | `true`                  | Whether to render the title block                          |
 
 ## Page-Specific Configurations
 
@@ -91,7 +92,7 @@ By default, all pages include:
 - **Theme Toggle**: Switch between light/dark mode
 - **Logout Button**: Sign out of the application
 
-These can be hidden by setting `showGlobalActions={false}` if needed (e.g., on login page).
+These live in the navigation bar, which `showNavigation={false}` removes entirely.
 
 ## Consistent Styling
 

@@ -62,7 +62,7 @@ class ApiService {
   getAuthHeaders() {
     return { 'Content-Type': 'application/json' };
   }
-  async handleResponse(response, method, url) {
+  async handleResponse(response, method, url, background = false) {
     if (!response.ok) {
       const errorData = await response.text();
       let errorMessage;
@@ -100,7 +100,7 @@ class ApiService {
       // toast on whatever screen the user happened to be on, indistinguishable
       // from a server fault. Same rule as every other client now.
       if (response.status === 401) {
-        handleUnauthorized(url);
+        handleUnauthorized(url, { background });
       }
 
       logger.apiError('API Error', method, url, response.status, errorMessage);
@@ -139,6 +139,7 @@ class ApiService {
       headers: customHeaders = {},
       responseType,
       params,
+      background = false,
     } = options;
 
     // Handle query parameters
@@ -203,7 +204,7 @@ class ApiService {
           return response.blob();
         }
 
-        return this.handleResponse(response, method, fullUrl);
+        return this.handleResponse(response, method, fullUrl, background);
       } catch (error) {
         logger.warn(`Failed to connect to ${fullUrl}:`, error.message);
         lastError = error;
@@ -293,7 +294,7 @@ class ApiService {
     return this.put('/patients/me', patientData, { signal });
   }
 
-  async getRecentActivity(patientId = null, signal) {
+  async getRecentActivity(patientId = null, signal, { background } = {}) {
     // Always send patient_id parameter if we have one, even if it's 0
     const params =
       patientId !== null && patientId !== undefined
@@ -303,6 +304,7 @@ class ApiService {
     return this.get('/patients/recent-activity/', {
       params,
       signal,
+      background,
     });
   }
 
@@ -1151,7 +1153,7 @@ class ApiService {
   }
 
   // Check Paperless document sync status
-  async checkPaperlessSyncStatus(signal) {
+  async checkPaperlessSyncStatus(signal, { background } = {}) {
     // Create a timeout signal to prevent hanging requests
     let timeoutId;
     const timeoutSignal = new AbortController();
@@ -1179,6 +1181,7 @@ class ApiService {
         {},
         {
           signal: finalSignal,
+          background,
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             Pragma: 'no-cache',
@@ -1264,7 +1267,7 @@ class ApiService {
   }
 
   // Check Papra document sync status
-  async checkPapraSyncStatus(signal) {
+  async checkPapraSyncStatus(signal, { background } = {}) {
     let timeoutId;
     const timeoutSignal = new AbortController();
 
@@ -1282,6 +1285,7 @@ class ApiService {
         {},
         {
           signal: finalSignal,
+          background,
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             Pragma: 'no-cache',
@@ -1314,7 +1318,7 @@ class ApiService {
   }
 
   // Update processing files status by checking Paperless task completion
-  updateProcessingFiles(signal) {
+  updateProcessingFiles(signal, { background } = {}) {
     try {
       logger.info(
         'api_update_processing_files',
@@ -1329,6 +1333,7 @@ class ApiService {
         {},
         {
           signal,
+          background,
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             Pragma: 'no-cache',

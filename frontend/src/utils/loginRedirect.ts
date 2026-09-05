@@ -51,52 +51,14 @@ export interface LoginRedirectOptions {
   next?: string | null;
 }
 
-/**
- * Requests whose 401 must not eject an active user.
- *
- * These paths are polled on a timer while the user is doing something else, so a
- * transient auth blip on one of them would throw someone out of a form they are
- * in the middle of filling. A user-initiated request that 401s still ejects
- * normally, so nobody is stranded on a dead page - they are ejected by their next
- * click instead of by a background timer.
- *
- * **This matches on the URL, so it exempts every call to these paths, not only
- * the polled ones.** Two of the five are also fetched on mount
- * (`Dashboard.jsx` calls `getRecentActivity` from both its interval and its
- * patient-change effect), so those loads are exempt too. That is tolerable
- * because some other request on the same screen will eject the user, but it is
- * not what "unattended" means, and the right fix is for callers to declare
- * `{ background: true }` at the call site where the knowledge actually lives.
- * Tracked in TECHNICAL_DEBT.md.
- *
- * These are matched against the URL the client actually builds, which includes
- * each service's basePath -- `adminApiService` is `/admin` + `/dashboard/...`,
- * so the admin entries below are NOT `/admin/system-health`. Getting that wrong
- * is silent: the exemption simply never fires. Keep them in step with
- * `services/api/adminApi.js`.
- *
- * Derived from an audit of every setInterval-driven request in the app, not from
- * either client's previous hardcoded list - those were a "critical endpoints"
- * allowlist in apiClient and an "/admin/" carve-out in baseApi, and neither
- * covered any of the real pollers.
- */
-const NON_EJECTING_ENDPOINTS: readonly string[] = [
-  '/patients/recent-activity', // Dashboard.jsx - every 30s
-  '/invitations/pending', // InvitationNotifications.jsx - every 2 min
-  '/paperless/sync-status', // DocumentManagerCore.jsx - every 5 min
-  '/admin/dashboard/system-health', // SystemHealth.jsx - every 30s
-  '/admin/dashboard/system-metrics', // SystemHealth.jsx - every 30s
-];
-
-/**
- * True when a 401 from this URL should be logged and swallowed rather than
- * ejecting the user. Accepts absolute or relative URLs.
- */
-export function isNonEjectingEndpoint(url: unknown): boolean {
-  if (typeof url !== 'string' || !url) {
-    return false;
-  }
-  return NON_EJECTING_ENDPOINTS.some(endpoint => url.includes(endpoint));
+export interface HandleUnauthorizedOptions {
+  /**
+   * Unattended request - a timer, not a person. Its 401 is logged and swallowed
+   * rather than ejecting whoever is mid-form. Declare it at the request site:
+   * one function often serves both a mount and an interval, so it cannot be
+   * inferred here.
+   */
+  background?: boolean;
 }
 
 /**
@@ -220,9 +182,15 @@ export function redirectToLogin(options: LoginRedirectOptions = {}): void {
  *
  * Returns true when the user was ejected, so a caller can skip its own error
  * handling for a request whose page is already being torn down.
+ *
+ * `url` is for the log line only and decides nothing. Whether a 401 ejects is
+ * `options.background`, which the request site declares.
  */
-export function handleUnauthorized(url: unknown): boolean {
-  if (isNonEjectingEndpoint(url)) {
+export function handleUnauthorized(
+  url: unknown,
+  { background = false }: HandleUnauthorizedOptions = {}
+): boolean {
+  if (background) {
     // Deliberately swallowed. The user stays where they are and is ejected by
     // their next real interaction instead of by a timer firing under them.
     logger.warn('api_auth_error_background', {

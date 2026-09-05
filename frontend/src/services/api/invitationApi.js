@@ -1,14 +1,15 @@
 import { apiService } from './index';
 
 class InvitationApi {
-  async getPendingInvitations(invitationType = null) {
+  async getPendingInvitations(invitationType = null, { background } = {}) {
     const params = new URLSearchParams();
     if (invitationType) {
       params.append('invitation_type', invitationType);
     }
 
     const response = await apiService.get(
-      `/invitations/pending?${params.toString()}`
+      `/invitations/pending?${params.toString()}`,
+      { background }
     );
     return response;
   }

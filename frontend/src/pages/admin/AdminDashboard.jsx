@@ -94,7 +94,7 @@ const AdminDashboard = () => {
   } = useAdminData({
     entityName: 'System Health',
     apiMethodsConfig: {
-      load: signal => adminApiService.getSystemHealth(signal),
+      load: (signal, options) => adminApiService.getSystemHealth(signal, options),
     },
     autoRefresh: false,
   });

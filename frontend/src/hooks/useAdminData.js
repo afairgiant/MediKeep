@@ -37,8 +37,11 @@ export const useAdminData = config => {
   }, [entityName, apiMethodsConfig, autoRefresh, refreshInterval]);
 
   // Load data function
+  //
+  // `silent` (no error banner) is not `background` (unattended, do not eject on
+  // 401): the Refresh All buttons pass silent on a user click. Do not merge them.
   const loadData = useCallback(
-    async (silent = false) => {
+    async (silent = false, { background = false } = {}) => {
       const config = configRef.current;
 
       const result = await execute(
@@ -48,7 +51,9 @@ export const useAdminData = config => {
             entityName: config.entityName,
             operation: 'load_start',
           });
-          const response = await config.apiMethodsConfig.load(signal);
+          const response = await config.apiMethodsConfig.load(signal, {
+            background,
+          });
 
           if (response) {
             setData(response);
@@ -258,7 +263,7 @@ export const useAdminData = config => {
       });
 
       refreshIntervalRef.current = setInterval(() => {
-        loadData(true); // Silent refresh
+        loadData(true, { background: true }); // Silent, unattended refresh
       }, config.refreshInterval);
 
       return () => {
