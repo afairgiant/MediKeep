@@ -328,13 +328,18 @@ const useDocumentManagerCore = ({
   }, [entityType, entityId]);
 
   // Load files from server
-  const loadFiles = useCallback(async () => {
+  const loadFiles = useCallback(async ({ background } = {}) => {
     if (!entityId) return;
 
     setError('');
 
     try {
-      const response = await apiService.getEntityFiles(entityType, entityId);
+      const response = await apiService.getEntityFiles(
+        entityType,
+        entityId,
+        null,
+        { background }
+      );
       const fileList = Array.isArray(response) ? response : [];
 
       // Files loaded successfully
@@ -567,8 +572,9 @@ const useDocumentManagerCore = ({
           }
         }
 
-        // Reload files to refresh the UI with updated sync status
-        await loadFiles();
+        // Reload files to refresh the UI with updated sync status. Inherits
+        // `background`: on the 5-minute poll this must not eject either.
+        await loadFiles({ background });
       } catch (err) {
         const currentFiles = filesRef.current || files;
         const paperlessFiles = currentFiles.filter(

@@ -9,7 +9,7 @@ A standardized header component that can be used across all medical pages and th
 ```jsx
 import { PageHeader } from '../../components';
 
-<PageHeader title="Medical Conditions" icon="🏥" />;
+<PageHeader title="Medical Conditions" icon="🏥" variant="medical" />;
 ```
 
 ### Medical Page with Actions
@@ -18,6 +18,7 @@ import { PageHeader } from '../../components';
 <PageHeader
   title="Healthcare Practitioners"
   icon="👩‍⚕️"
+  variant="medical"
   actions={
     <>
       <button className="add-btn" onClick={handleAdd}>
@@ -74,6 +75,7 @@ import { PageHeader } from '../../components';
 
 ### Medical Pages
 
+- `variant`: "medical" — must be passed explicitly; the default is "dashboard"
 - `title`: Page-specific title (e.g., "Healthcare Practitioners", "Lab Results")
 - `icon`: Page-specific emoji (e.g., "👩‍⚕️", "🧪", "💊")
 - `actions`: Add buttons, search inputs, filters, etc.

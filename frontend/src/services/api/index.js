@@ -447,7 +447,7 @@ class ApiService {
   }
 
   // Get all files for an entity
-  getEntityFiles(entityType, entityId, signal) {
+  getEntityFiles(entityType, entityId, signal, { background } = {}) {
     try {
       const endpoint = this.getFileEndpoint(entityType, entityId);
 
@@ -460,6 +460,7 @@ class ApiService {
 
       return this.get(endpoint, {
         signal,
+        background,
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
