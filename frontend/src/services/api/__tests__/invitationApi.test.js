@@ -31,7 +31,9 @@ describe('InvitationApi Service', () => {
 
       const result = await invitationApi.getPendingInvitations();
 
-      expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?');
+      expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?', {
+        background: undefined,
+      });
       expect(result).toEqual(mockInvitations);
     });
 
@@ -50,7 +52,8 @@ describe('InvitationApi Service', () => {
       );
 
       expect(apiService.get).toHaveBeenCalledWith(
-        '/invitations/pending?invitation_type=family_history_share'
+        '/invitations/pending?invitation_type=family_history_share',
+        { background: undefined }
       );
       expect(result).toEqual(mockInvitations);
     });
@@ -62,7 +65,9 @@ describe('InvitationApi Service', () => {
       await expect(invitationApi.getPendingInvitations()).rejects.toThrow(
         'Network error'
       );
-      expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?');
+      expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?', {
+        background: undefined,
+      });
     });
 
     it('should handle null invitation type parameter', async () => {
@@ -71,7 +76,9 @@ describe('InvitationApi Service', () => {
 
       const result = await invitationApi.getPendingInvitations(null);
 
-      expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?');
+      expect(apiService.get).toHaveBeenCalledWith('/invitations/pending?', {
+        background: undefined,
+      });
       expect(result).toEqual(mockInvitations);
     });
   });

@@ -9,7 +9,7 @@ A standardized header component that can be used across all medical pages and th
 ```jsx
 import { PageHeader } from '../../components';
 
-<PageHeader title="Medical Conditions" icon="🏥" />;
+<PageHeader title="Medical Conditions" icon="🏥" variant="medical" />;
 ```
 
 ### Medical Page with Actions
@@ -18,6 +18,7 @@ import { PageHeader } from '../../components';
 <PageHeader
   title="Healthcare Practitioners"
   icon="👩‍⚕️"
+  variant="medical"
   actions={
     <>
       <button className="add-btn" onClick={handleAdd}>
@@ -66,13 +67,15 @@ import { PageHeader } from '../../components';
 | `onBackClick`       | function        | -                       | Custom back button handler (overrides default navigation)  |
 | `actions`           | React.ReactNode | -                       | Custom actions to display on the right side                |
 | `className`         | string          | `''`                    | Additional CSS classes                                     |
-| `variant`           | string          | `'medical'`             | Variant style ('medical' or 'dashboard')                   |
-| `showGlobalActions` | boolean         | `true`                  | Whether to show settings, theme toggle, and logout buttons |
+| `variant`           | string          | `'dashboard'`           | Variant style ('medical' or 'dashboard')                   |
+| `showNavigation`    | boolean         | `true`                  | Whether to render the navigation bar below the header      |
+| `showTitle`         | boolean         | `true`                  | Whether to render the title block                          |
 
 ## Page-Specific Configurations
 
 ### Medical Pages
 
+- `variant`: "medical" — must be passed explicitly; the default is "dashboard"
 - `title`: Page-specific title (e.g., "Healthcare Practitioners", "Lab Results")
 - `icon`: Page-specific emoji (e.g., "👩‍⚕️", "🧪", "💊")
 - `actions`: Add buttons, search inputs, filters, etc.
@@ -91,7 +94,7 @@ By default, all pages include:
 - **Theme Toggle**: Switch between light/dark mode
 - **Logout Button**: Sign out of the application
 
-These can be hidden by setting `showGlobalActions={false}` if needed (e.g., on login page).
+These live in the navigation bar, which `showNavigation={false}` removes entirely.
 
 ## Consistent Styling
 

@@ -57,11 +57,11 @@ class AdminApiService extends BaseApiService {
     const options = signal ? { signal } : {};
     return this.get('/dashboard/recent-activity', params, options);
   }
-  async getSystemHealth() {
-    return this.get('/dashboard/system-health');
+  async getSystemHealth(signal, { background } = {}) {
+    return this.get('/dashboard/system-health', { signal, background });
   }
-  async getSystemMetrics() {
-    return this.get('/dashboard/system-metrics');
+  async getSystemMetrics(signal, { background } = {}) {
+    return this.get('/dashboard/system-metrics', { signal, background });
   }
 
   async getStorageHealth() {

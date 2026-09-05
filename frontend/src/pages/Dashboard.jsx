@@ -135,7 +135,9 @@ const Dashboard = () => {
   // Auto-refresh recent activity every 30 seconds to catch new updates
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchRecentActivity();
+      // The only unattended caller. The mount load and the patient-change
+      // effect below share this function and must still eject on a 401.
+      fetchRecentActivity(null, { background: true });
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
@@ -183,11 +185,15 @@ const Dashboard = () => {
     setPatientSelectorLoading(false);
   };
 
-  const fetchRecentActivity = async (patientId = null) => {
+  const fetchRecentActivity = async (patientId = null, { background } = {}) => {
     try {
       setActivityLoading(true);
       const targetPatientId = patientId || currentPatient?.id;
-      const activity = await apiService.getRecentActivity(targetPatientId);
+      const activity = await apiService.getRecentActivity(
+        targetPatientId,
+        null,
+        { background }
+      );
 
       // Filter out erroneous "deleted" patient information activities
       // This is a temporary fix for a backend issue where patient updates are logged as deletions

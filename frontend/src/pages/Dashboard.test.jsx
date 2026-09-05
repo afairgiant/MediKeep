@@ -171,6 +171,49 @@ describe('Dashboard Component', () => {
     });
   });
 
+  /**
+   * The 30s activity poll and the mount/patient-change loads share one
+   * fetchRecentActivity. A 401 must eject on the latter and be swallowed on the
+   * former, so only the timer may declare itself unattended. This used to be
+   * decided by matching the request URL, which exempted all three.
+   */
+  describe('Background poll declaration', () => {
+    it('does not declare the mount load as background', async () => {
+      renderDashboard();
+
+      await waitFor(() => {
+        expect(apiService.getRecentActivity).toHaveBeenCalled();
+      });
+
+      const [, , options] = apiService.getRecentActivity.mock.calls[0];
+      expect(options?.background).toBeFalsy();
+    });
+
+    it('declares the 30s interval as background', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        renderDashboard();
+
+        await waitFor(() => {
+          expect(apiService.getRecentActivity).toHaveBeenCalled();
+        });
+        apiService.getRecentActivity.mockClear();
+
+        await act(async () => {
+          vi.advanceTimersByTime(30000);
+        });
+
+        expect(apiService.getRecentActivity).toHaveBeenCalledWith(
+          expect.anything(),
+          null,
+          expect.objectContaining({ background: true })
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
   describe('Rendering and Layout', () => {
     it('renders dashboard with correct structure', async () => {
       await act(async () => {
