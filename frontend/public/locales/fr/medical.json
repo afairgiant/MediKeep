@@ -975,6 +975,7 @@
       "description": "Mode d'administration du médicament",
       "label": "Voie d'administration",
       "options": {
+        "aural": "Auriculaire",
         "inhalation": "Inhalation",
         "injection": "Injection",
         "intramuscular": "Intramusculaire",

@@ -975,6 +975,7 @@
       "description": "Wie das Medikament verabreicht wird",
       "label": "Applikationsweg",
       "options": {
+        "aural": "Aural",
         "inhalation": "Inhalation",
         "injection": "Injektion",
         "intramuscular": "Intramuskulär",

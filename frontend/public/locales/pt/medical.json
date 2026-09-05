@@ -975,6 +975,7 @@
       "description": "Como o medicamento é administrado",
       "label": "Via de Administração",
       "options": {
+        "aural": "Auricular",
         "inhalation": "Inalação",
         "injection": "Injeção",
         "intramuscular": "Intramuscular",

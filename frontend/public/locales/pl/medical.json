@@ -975,6 +975,7 @@
       "description": "Sposób podawania leku",
       "label": "Droga podania",
       "options": {
+        "aural": "Usznie",
         "inhalation": "Wziewnie",
         "injection": "Zastrzyk",
         "intramuscular": "Domięśniowo",

@@ -913,6 +913,7 @@
       "description": "วิธีการใช้ยา",
       "label": "วิธีใช้",
       "options": {
+        "aural": "ทางหู",
         "inhalation": "สูดดม",
         "injection": "ฉีด",
         "intramuscular": "ฉีดเข้ากล้ามเนื้อ",
