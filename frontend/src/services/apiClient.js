@@ -85,7 +85,9 @@ class APIClient {
     // No per-request re-entry guard is needed: request() builds a fresh config
     // per call and invokes this once, and redirectToLogin carries a global one.
     if (error.status === 401) {
-      handleUnauthorized(originalConfig.url);
+      handleUnauthorized(originalConfig.url, {
+        background: originalConfig.background,
+      });
     }
 
     throw error;

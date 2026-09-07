@@ -12,6 +12,7 @@ vi.mock('../logger', () => ({
 
 import BaseApiService from './baseApi';
 import { apiService } from './index';
+import adminApiService from './adminApi';
 import { resetLoginRedirectGuard } from '../../utils/loginRedirect';
 import { stubLocation } from '../../test-utils/browserStubs';
 
@@ -105,19 +106,54 @@ describe('baseApi 401 handling', () => {
     expect(assign).toHaveBeenCalledTimes(1);
   });
 
-  test('a 401 from a background poll does not eject the user', async () => {
-    fetch.mockResolvedValue(jsonResponse(401, '/api/v1/admin/dashboard/system-health'));
+  test('a 401 from a declared background request does not eject', async () => {
+    fetch.mockResolvedValue(jsonResponse(401, '/api/v1/anything'));
 
-    await expect(api.get('/admin/dashboard/system-health')).rejects.toThrow();
+    await expect(
+      api.get('/anything', { background: true })
+    ).rejects.toThrow();
 
     expect(assign).not.toHaveBeenCalled();
   });
 
-  test('an exempt 401 followed by a user-initiated 401 does eject', async () => {
-    fetch.mockResolvedValueOnce(
+  /**
+   * Driven through the real service rather than a hand-written path. The list
+   * this replaced shipped with '/admin/system-health' while adminApiService
+   * builds '/admin' + '/dashboard/system-health', so neither admin entry could
+   * ever match - and both tests asserted against URLs no client produces, so
+   * nothing caught it. Asserting on the URL the client actually built is the
+   * regression for that.
+   */
+  test('the admin health poll declares itself, and the URL it builds is real', async () => {
+    fetch.mockResolvedValue(
       jsonResponse(401, '/api/v1/admin/dashboard/system-health')
     );
-    await expect(api.get('/admin/dashboard/system-health')).rejects.toThrow();
+
+    await expect(
+      adminApiService.getSystemHealth(null, { background: true })
+    ).rejects.toThrow();
+
+    expect(assign).not.toHaveBeenCalled();
+    expect(fetch.mock.calls[0][0]).toContain('/admin/dashboard/system-health');
+  });
+
+  test('the same admin endpoint ejects when the caller does not declare', async () => {
+    fetch.mockResolvedValue(
+      jsonResponse(401, '/api/v1/admin/dashboard/system-health')
+    );
+
+    await expect(adminApiService.getSystemHealth()).rejects.toThrow();
+
+    // The defect this PR fixes: the URL used to decide, so a user-initiated
+    // load of a polled endpoint was exempt too.
+    expect(assign).toHaveBeenCalledTimes(1);
+  });
+
+  test('a declared 401 followed by a user-initiated 401 does eject', async () => {
+    fetch.mockResolvedValueOnce(jsonResponse(401, '/api/v1/anything'));
+    await expect(
+      api.get('/anything', { background: true })
+    ).rejects.toThrow();
     expect(assign).not.toHaveBeenCalled();
 
     // The exemption keeps a timer from throwing an active user out; it does not
@@ -125,6 +161,21 @@ describe('baseApi 401 handling', () => {
     fetch.mockResolvedValue(jsonResponse(401, '/api/v1/medications'));
     await expect(api.get('/medications')).rejects.toThrow();
     expect(assign).toHaveBeenCalledTimes(1);
+  });
+
+  test('a declared admin 401 is not replayed before being swallowed', async () => {
+    fetch.mockResolvedValue(
+      jsonResponse(401, '/api/v1/admin/dashboard/system-health')
+    );
+
+    await expect(
+      api.get('/admin/dashboard/system-health', { background: true })
+    ).rejects.toThrow();
+
+    // Retrying a request whose 401 is about to be swallowed spends two round
+    // trips to arrive at "do nothing".
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(assign).not.toHaveBeenCalled();
   });
 
   test('concurrent 401s produce exactly one navigation', async () => {
@@ -164,17 +215,33 @@ describe('apiService (services/api/index.js) 401 handling', () => {
     expect(loginTarget().get('reason')).toBe('session_expired');
   });
 
-  test('does not eject on its own background poll', async () => {
+  test('does not eject on a declared background poll', async () => {
     assign = stubLocation('/dashboard');
     fetch.mockResolvedValue(
       jsonResponse(401, '/api/v1/patients/recent-activity/')
     );
 
     await expect(
-      apiService.get('/patients/recent-activity/')
+      apiService.getRecentActivity(42, null, { background: true })
     ).rejects.toThrow();
 
     expect(assign).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Dashboard.jsx calls getRecentActivity from its patient-change effect as
+   * well as its 30s interval. The URL allowlist exempted both; only the timer
+   * should be exempt.
+   */
+  test('ejects on an undeclared call to the same polled endpoint', async () => {
+    assign = stubLocation('/dashboard');
+    fetch.mockResolvedValue(
+      jsonResponse(401, '/api/v1/patients/recent-activity/')
+    );
+
+    await expect(apiService.getRecentActivity(42)).rejects.toThrow();
+
+    expect(assign).toHaveBeenCalledTimes(1);
   });
 
   test('ejects even when the error body is not JSON', async () => {

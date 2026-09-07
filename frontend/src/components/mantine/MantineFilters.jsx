@@ -342,7 +342,7 @@ const MantineFilters = ({
                 {/* Category Filter */}
                 {/* Not translated: categoryOptions is often built at runtime
                     from real data (e.g. route names), so its labels can't be
-                    safely treated as translation keys — see TECHNICAL_DEBT.md */}
+                    safely treated as translation keys */}
                 {showCategory &&
                   categoryOptions &&
                   categoryOptions.length > 1 && (
@@ -366,7 +366,7 @@ const MantineFilters = ({
 
                 {/* Practitioner Filter */}
                 {/* Not translated: practitionerOptions is built at runtime
-                    from real prescriber names — see TECHNICAL_DEBT.md */}
+                    from real prescriber names */}
                 {showPractitioner &&
                   practitionerOptions &&
                   practitionerOptions.length > 1 && (
@@ -391,7 +391,7 @@ const MantineFilters = ({
 
                 {/* Pharmacy Filter */}
                 {/* Not translated: pharmacyOptions is built at runtime
-                    from real pharmacy names — see TECHNICAL_DEBT.md */}
+                    from real pharmacy names */}
                 {showPharmacy &&
                   pharmacyOptions &&
                   pharmacyOptions.length > 1 && (

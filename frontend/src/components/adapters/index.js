@@ -11,4 +11,3 @@ export { default as ResponsiveSelect } from './ResponsiveSelect';
 export { default as ResponsiveTable } from './ResponsiveTable';
 export { default as ResponsiveModal } from './ResponsiveModal';
 export { default as DateInput } from './DateInput';
-export { default as PageHeader } from './PageHeader';

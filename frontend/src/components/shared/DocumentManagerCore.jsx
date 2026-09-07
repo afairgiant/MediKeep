@@ -328,13 +328,18 @@ const useDocumentManagerCore = ({
   }, [entityType, entityId]);
 
   // Load files from server
-  const loadFiles = useCallback(async () => {
+  const loadFiles = useCallback(async ({ background } = {}) => {
     if (!entityId) return;
 
     setError('');
 
     try {
-      const response = await apiService.getEntityFiles(entityType, entityId);
+      const response = await apiService.getEntityFiles(
+        entityType,
+        entityId,
+        null,
+        { background }
+      );
       const fileList = Array.isArray(response) ? response : [];
 
       // Files loaded successfully
@@ -383,7 +388,7 @@ const useDocumentManagerCore = ({
   // Check sync status for Paperless documents
   // Performance optimization: Use stable references to prevent infinite loops
   const checkSyncStatus = useCallback(
-    async (isManualSync = false) => {
+    async ({ manual: isManualSync = false, background = false } = {}) => {
       if (isManualSync) setSyncLoading(true);
 
       try {
@@ -467,7 +472,10 @@ const useDocumentManagerCore = ({
               component: 'DocumentManagerCore',
             }
           );
-          const processingUpdates = await apiService.updateProcessingFiles();
+          const processingUpdates = await apiService.updateProcessingFiles(
+            null,
+            { background }
+          );
           if (Object.keys(processingUpdates).length > 0) {
             logger.info(
               'processing_files_updated',
@@ -495,7 +503,10 @@ const useDocumentManagerCore = ({
         }
 
         // Run Paperless sync check
-        const paperlessStatus = await apiService.checkPaperlessSyncStatus();
+        const paperlessStatus = await apiService.checkPaperlessSyncStatus(
+          null,
+          { background }
+        );
 
         // Run Papra sync check
         let papraStatus = {};
@@ -504,7 +515,9 @@ const useDocumentManagerCore = ({
         );
         if (papraFiles.length > 0 || isManualSync) {
           try {
-            papraStatus = await apiService.checkPapraSyncStatus();
+            papraStatus = await apiService.checkPapraSyncStatus(null, {
+              background,
+            });
           } catch (papraErr) {
             logger.warn('papra_sync_check_failed', {
               error: papraErr.message,
@@ -559,8 +572,9 @@ const useDocumentManagerCore = ({
           }
         }
 
-        // Reload files to refresh the UI with updated sync status
-        await loadFiles();
+        // Reload files to refresh the UI with updated sync status. Inherits
+        // `background`: on the 5-minute poll this must not eject either.
+        await loadFiles({ background });
       } catch (err) {
         const currentFiles = filesRef.current || files;
         const paperlessFiles = currentFiles.filter(
@@ -701,7 +715,7 @@ const useDocumentManagerCore = ({
             entityId,
             component: 'DocumentManagerCore',
           });
-          checkSyncStatus();
+          checkSyncStatus({ background: true });
         },
         5 * 60 * 1000
       ); // 5 minutes
@@ -1677,7 +1691,7 @@ const useDocumentManagerCore = ({
 
   // Performance optimization: Memoize sync check handler
   const handleCheckSyncStatus = useCallback(() => {
-    checkSyncStatus(true);
+    checkSyncStatus({ manual: true });
   }, [checkSyncStatus]);
 
   // Cleanup function to clear all intervals on component unmount

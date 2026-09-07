@@ -59,10 +59,12 @@ const InvitationNotifications = () => {
   ] = useDisclosure(false);
   const [selectedInvitation, setSelectedInvitation] = useState(null);
 
-  const loadPendingInvitations = async () => {
+  const loadPendingInvitations = async ({ background } = {}) => {
     try {
       setLoading(true);
-      const invitations = await invitationApi.getPendingInvitations();
+      const invitations = await invitationApi.getPendingInvitations(null, {
+        background,
+      });
       setPendingInvitations(invitations);
       setLastUpdate(new Date());
     } catch (error) {
@@ -75,8 +77,12 @@ const InvitationNotifications = () => {
   useEffect(() => {
     loadPendingInvitations();
 
-    // Auto-refresh every 2 minutes
-    const interval = setInterval(loadPendingInvitations, 120000);
+    // Auto-refresh every 2 minutes. Wrapped rather than passed directly: only
+    // the timer is unattended, and the mount call above shares this function.
+    const interval = setInterval(
+      () => loadPendingInvitations({ background: true }),
+      120000
+    );
     return () => clearInterval(interval);
   }, []);
 

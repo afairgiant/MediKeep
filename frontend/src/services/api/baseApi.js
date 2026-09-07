@@ -2,10 +2,7 @@
 import logger from '../logger';
 import { getApiUrl } from '../../config/env';
 import { extractErrorMessage } from '../../utils/errorUtils.js';
-import {
-  handleUnauthorized,
-  isNonEjectingEndpoint,
-} from '../../utils/loginRedirect';
+import { handleUnauthorized } from '../../utils/loginRedirect';
 
 const API_BASE_URL = getApiUrl();
 
@@ -80,9 +77,9 @@ class BaseApiService {
   // through here and ejects like any other. The exemption used to be permanent
   // for /admin/ URLs, and the retry meant to bound it never worked at all, so an
   // expired admin session hung rather than redirecting.
-  handleAuthError(response) {
+  handleAuthError(response, background = false) {
     if (response.status === 401) {
-      return handleUnauthorized(response.url);
+      return handleUnauthorized(response.url, { background });
     }
 
     if (response.status === 429) {
@@ -97,19 +94,21 @@ class BaseApiService {
     return false;
   } // Enhanced response handling with retry logic
   /**
-   * @param {object} [retry] - how to replay this request, when it can be
-   *   replayed at all. Omitted by every verb except GET: the replay is the
+   * @param {object} [options.retry] - how to replay this request, when it can
+   *   be replayed at all. Omitted by every verb except GET: the replay is the
    *   caller's own fetch, and there is no safe way to replay a POST/PUT/DELETE
    *   from here. Omitting it means an admin 401 ejects immediately rather than
    *   being absorbed.
-   * @param {number} retry.attempt - replays already made.
-   * @param {() => Promise<Response>} retry.replay - re-issues the original
-   *   request, with its original method and abort signal.
+   * @param {number} options.retry.attempt - replays already made.
+   * @param {() => Promise<Response>} options.retry.replay - re-issues the
+   *   original request, with its original method and abort signal.
+   * @param {boolean} [options.background] - the request site declared this
+   *   unattended, so a 401 must not eject the user. See handleUnauthorized.
    */
   async handleResponse(
     response,
     errorMessage = 'API request failed',
-    retry = null
+    { retry = null, background = false } = {}
   ) {
     if (!response.ok) {
       // Absorb a transient 401 before handleAuthError can eject on it. A
@@ -122,7 +121,7 @@ class BaseApiService {
         retry &&
         retry.attempt < MAX_401_RETRIES &&
         response.url?.includes('/admin/') &&
-        !isNonEjectingEndpoint(response.url);
+        !background;
 
       if (willRetry) {
         logger.info('api_retry', {
@@ -145,15 +144,18 @@ class BaseApiService {
         // never settled. An admin page whose session had expired hung on its
         // spinner forever. Verified against main before changing it.
         return this.handleResponse(await retry.replay(), errorMessage, {
-          ...retry,
-          // Must be threaded through, or maxRetries never binds and the hang
-          // becomes an unbounded loop instead.
-          attempt: retry.attempt + 1,
+          retry: {
+            ...retry,
+            // Must be threaded through, or maxRetries never binds and the hang
+            // becomes an unbounded loop instead.
+            attempt: retry.attempt + 1,
+          },
+          background,
         });
       }
 
       // Not retryable, or retries exhausted -- now a 401 may eject.
-      if (this.handleAuthError(response)) {
+      if (this.handleAuthError(response, background)) {
         // handleAuthError returned true, so a redirect to login is underway.
         // Throw so the calling code knows the request failed.
         throw new Error('Authentication failed - redirecting to login');
@@ -184,7 +186,7 @@ class BaseApiService {
 
   // Enhanced GET method with queuing
   async get(endpoint, options = {}) {
-    const { params, signal, ...rest } = options;
+    const { params, signal, background = false, ...rest } = options;
     const errorMessage = rest.errorMessage || 'Request failed';
 
     // Build URL with query parameters BEFORE queuing
@@ -227,13 +229,16 @@ class BaseApiService {
         method: 'GET',
       });
       return this.handleResponse(response, errorMessage, {
-        attempt: 0,
-        replay: sendRequest,
+        retry: { attempt: 0, replay: sendRequest },
+        background,
       });
     });
   }
 
   // Enhanced POST method with queuing
+  //
+  // Third arg is an errorMessage string, not an options bag: unlike get(), the
+  // mutating verbs cannot carry `background`. No poller mutates today.
   async post(endpoint, data, errorMessage) {
     return this.queueRequest(async () => {
       const response = await fetch(

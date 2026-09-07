@@ -62,7 +62,7 @@ const SystemHealth = () => {
   } = useAdminData({
     entityName: 'System Health',
     apiMethodsConfig: {
-      load: signal => adminApiService.getSystemHealth(signal),
+      load: (signal, options) => adminApiService.getSystemHealth(signal, options),
     },
     autoRefresh: true,
     refreshInterval: 30000,
@@ -77,7 +77,7 @@ const SystemHealth = () => {
   } = useAdminData({
     entityName: 'System Metrics',
     apiMethodsConfig: {
-      load: signal => adminApiService.getSystemMetrics(signal),
+      load: (signal, options) => adminApiService.getSystemMetrics(signal, options),
     },
     autoRefresh: true,
     refreshInterval: 30000,

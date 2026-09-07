@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   buildLoginPath,
-  isNonEjectingEndpoint,
+  handleUnauthorized,
   redirectToLogin,
   resetLoginRedirectGuard,
 } from './loginRedirect';
@@ -124,40 +124,42 @@ describe('redirectToLogin', () => {
   });
 });
 
-describe('isNonEjectingEndpoint', () => {
-  // These are the URLs the API services actually build, basePath included -- the
-  // admin ones are `/admin` + `/dashboard/system-health`, not
-  // `/admin/system-health`. Asserting on a hand-written shape instead is what let
-  // the first version of the list ship with two entries that never matched.
-  test.each([
-    '/api/v1/patients/recent-activity/',
-    'http://localhost:8000/api/v1/invitations/pending?invitation_type=family',
-    '/api/v1/paperless/sync-status',
-    '/api/v1/admin/dashboard/system-health',
-    '/api/v1/admin/dashboard/system-metrics',
-  ])('%s is a background poll', url => {
-    expect(isNonEjectingEndpoint(url)).toBe(true);
+describe('handleUnauthorized', () => {
+  beforeEach(() => {
+    resetLoginRedirectGuard();
+    stubLocation('/dashboard');
   });
 
-  test.each(['/api/v1/admin/system-health', '/api/v1/admin/system-metrics'])(
-    '%s does not match -- no client builds this shape',
-    url => {
-      expect(isNonEjectingEndpoint(url)).toBe(false);
-    }
-  );
+  afterEach(() => {
+    resetLoginRedirectGuard();
+  });
 
+  test('a declared background request is swallowed', () => {
+    expect(handleUnauthorized('/api/v1/anything', { background: true })).toBe(
+      false
+    );
+  });
+
+  test('an undeclared request ejects', () => {
+    expect(handleUnauthorized('/api/v1/anything')).toBe(true);
+  });
+
+  // The whole point of the change: the same path can be both, so the URL cannot
+  // be what decides. This used to be a substring match against five hardcoded
+  // paths, which exempted on-mount loads along with the polls they shared a
+  // function with.
   test.each([
-    '/api/v1/patients/42',
-    '/api/v1/medications',
-    '/api/v1/admin/models/user/1',
-    '/api/v1/users/me',
-  ])('%s is user-initiated and ejects', url => {
-    expect(isNonEjectingEndpoint(url)).toBe(false);
+    '/api/v1/patients/recent-activity/',
+    '/api/v1/invitations/pending?invitation_type=family',
+    '/api/v1/admin/dashboard/system-health',
+  ])('%s ejects when undeclared and is swallowed when declared', url => {
+    expect(handleUnauthorized(url)).toBe(true);
+    resetLoginRedirectGuard();
+    expect(handleUnauthorized(url, { background: true })).toBe(false);
   });
 
   test('handles missing or non-string urls', () => {
-    expect(isNonEjectingEndpoint(undefined)).toBe(false);
-    expect(isNonEjectingEndpoint(null)).toBe(false);
-    expect(isNonEjectingEndpoint('')).toBe(false);
+    expect(handleUnauthorized(undefined, { background: true })).toBe(false);
+    expect(handleUnauthorized(null)).toBe(true);
   });
 });
