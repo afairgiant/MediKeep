@@ -975,6 +975,7 @@
       "description": "Hoe de medicatie wordt toegediend",
       "label": "Toedieningsweg",
       "options": {
+        "aural": "Auriculair",
         "inhalation": "Inhalatie",
         "injection": "Injectie",
         "intramuscular": "Intramusculair",
