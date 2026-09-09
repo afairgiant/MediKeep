@@ -17,6 +17,7 @@ from app.api.deps import (
 )
 from app.core.config import settings
 from app.core.events import get_event_bus
+from app.core.http.auth_codes import AuthErrorCode, AuthMessageCode
 from app.core.http.error_handling import handle_database_errors
 from app.core.logging.config import get_logger
 from app.core.logging.helpers import (
@@ -56,17 +57,22 @@ def get_registration_status():
     if settings.SSO_ONLY_MODE:
         return {
             "registration_enabled": False,
+            "message_code": AuthMessageCode.SSO_ONLY_REGISTRATION_UNAVAILABLE,
             "message": (
                 "This instance uses single sign-on. Sign in with your identity "
                 "provider, or contact an administrator for an account."
             ),
         }
 
+    registration_enabled = settings.ALLOW_USER_REGISTRATION
     return {
-        "registration_enabled": settings.ALLOW_USER_REGISTRATION,
+        "registration_enabled": registration_enabled,
+        "message_code": (
+            None if registration_enabled else AuthMessageCode.REGISTRATION_DISABLED
+        ),
         "message": (
             "Registration is currently disabled. Please contact an administrator."
-            if not settings.ALLOW_USER_REGISTRATION
+            if not registration_enabled
             else None
         ),
     }
@@ -103,6 +109,7 @@ def register(
                 "identity provider instead of creating a password account."
             ),
             request=request,
+            error_code=AuthErrorCode.SSO_ONLY_REGISTRATION_BLOCKED,
         )
 
     # Check if registration is enabled
@@ -117,6 +124,7 @@ def register(
         raise UnauthorizedException(
             message="New user registration is currently disabled. Please contact an administrator.",
             request=request,
+            error_code=AuthErrorCode.REGISTRATION_DISABLED,
         )
 
     user_ip = request.client.host if request.client else "unknown"
@@ -137,6 +145,7 @@ def register(
         raise ConflictException(
             message=f"An account with the username '{user_in.username}' already exists. Please choose a different username.",
             request=request,
+            error_code=AuthErrorCode.USERNAME_TAKEN,
         )
 
     # Check if email already exists
@@ -145,6 +154,7 @@ def register(
         raise ConflictException(
             message=f"An account with the email address '{user_in.email}' already exists. Please use a different email or try logging in.",
             request=request,
+            error_code=AuthErrorCode.EMAIL_TAKEN,
         )
 
     # SECURITY: Force role='user' for all public registrations (GHSA-xx23-8fx5-ph4q)
@@ -311,6 +321,7 @@ def login(
                 "with your identity provider."
             ),
             request=request,
+            error_code=AuthErrorCode.SSO_ONLY_PASSWORD_LOGIN_DISABLED,
         )
 
     user_ip = (
@@ -344,6 +355,7 @@ def login(
         raise UnauthorizedException(
             message="Incorrect username or password",
             request=request,
+            error_code=AuthErrorCode.INVALID_CREDENTIALS,
         )
 
     # Validate required fields
@@ -351,6 +363,7 @@ def login(
         raise BusinessLogicException(
             message="User account is incomplete. Please contact support.",
             request=request,
+            error_code=AuthErrorCode.ACCOUNT_INCOMPLETE,
         )
 
     # Check if user account is active
@@ -365,6 +378,7 @@ def login(
         raise UnauthorizedException(
             message="This account has been deactivated. Please contact an administrator.",
             request=request,
+            error_code=AuthErrorCode.ACCOUNT_DEACTIVATED,
         )
 
     # Check if user has an active patient, if not try to set one
@@ -532,13 +546,17 @@ async def change_password(
             username=current_user.username,
         )
         raise UnauthorizedException(
-            message="Current password is incorrect", request=request
+            message="Current password is incorrect",
+            request=request,
+            error_code=AuthErrorCode.CURRENT_PASSWORD_INCORRECT,
         )
 
     # Validate new password
     if len(password_data.newPassword) < 6:
         raise BusinessLogicException(
-            message="New password must be at least 6 characters long", request=request
+            message="New password must be at least 6 characters long",
+            request=request,
+            error_code=AuthErrorCode.PASSWORD_TOO_SHORT,
         )
 
     has_letter = any(c.isalpha() for c in password_data.newPassword)
@@ -547,6 +565,7 @@ async def change_password(
         raise BusinessLogicException(
             message="New password must contain at least one letter and one number",
             request=request,
+            error_code=AuthErrorCode.PASSWORD_COMPLEXITY,
         )
 
     # Update password (also clears must_change_password flag)

@@ -225,10 +225,14 @@ class UnauthorizedException(MedicalRecordsAPIException):
     """Exception for unauthorized access (401)."""
 
     def __init__(
-        self, message: Optional[str] = None, description: Optional[str] = None, **kwargs
+        self,
+        message: Optional[str] = None,
+        description: Optional[str] = None,
+        error_code: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(
-            error_code=ExceptionCode.UNAUTHORIZED,
+            error_code=error_code or ExceptionCode.UNAUTHORIZED,
             http_status_code=HTTP_401_UNAUTHORIZED,
             status=ExceptionStatus.FAIL,
             message=message or "Authentication required",
@@ -242,10 +246,14 @@ class ForbiddenException(MedicalRecordsAPIException):
     """Exception for forbidden access (403)."""
 
     def __init__(
-        self, message: Optional[str] = None, description: Optional[str] = None, **kwargs
+        self,
+        message: Optional[str] = None,
+        description: Optional[str] = None,
+        error_code: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(
-            error_code=ExceptionCode.FORBIDDEN,
+            error_code=error_code or ExceptionCode.FORBIDDEN,
             http_status_code=HTTP_403_FORBIDDEN,
             status=ExceptionStatus.FAIL,
             message=message or "Access denied",
@@ -286,10 +294,14 @@ class ConflictException(MedicalRecordsAPIException):
     """Exception for resource conflicts (409)."""
 
     def __init__(
-        self, message: Optional[str] = None, description: Optional[str] = None, **kwargs
+        self,
+        message: Optional[str] = None,
+        description: Optional[str] = None,
+        error_code: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(
-            error_code=ExceptionCode.CONFLICT,
+            error_code=error_code or ExceptionCode.CONFLICT,
             http_status_code=HTTP_409_CONFLICT,
             status=ExceptionStatus.FAIL,
             message=message or "Resource conflict",
@@ -324,10 +336,14 @@ class BusinessLogicException(MedicalRecordsAPIException):
     """Exception for business logic violations (400)."""
 
     def __init__(
-        self, message: Optional[str] = None, description: Optional[str] = None, **kwargs
+        self,
+        message: Optional[str] = None,
+        description: Optional[str] = None,
+        error_code: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(
-            error_code=ExceptionCode.BUSINESS_LOGIC_ERROR,
+            error_code=error_code or ExceptionCode.BUSINESS_LOGIC_ERROR,
             http_status_code=HTTP_400_BAD_REQUEST,
             status=ExceptionStatus.FAIL,
             message=message or "Business rule violation",
@@ -615,7 +631,10 @@ def setup_error_handling(app: FastAPI):
     @app.exception_handler(HTTPException)
     async def http_exception_handler(request: Request, exc: HTTPException):
         """Convert standard FastAPI HTTPExceptions to our standardized response format."""
-        error_code = _HTTP_STATUS_TO_CODE.get(
+        # A raiser that knows which rule fired says so in X-Error-Code; the status
+        # alone cannot distinguish the several failures that share one code.
+        declared_code = (exc.headers or {}).get("X-Error-Code")
+        error_code = declared_code or _HTTP_STATUS_TO_CODE.get(
             exc.status_code, ExceptionCode.INTERNAL_SERVER_ERROR
         )
 

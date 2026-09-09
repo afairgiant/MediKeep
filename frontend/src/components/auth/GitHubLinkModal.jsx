@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { authErrorCopy } from '../../utils/authErrorCopy';
 import Modal from '../adapters/Modal';
 import Button from '../adapters/Button';
 import FormInput from '../adapters/FormInput';
@@ -46,16 +47,18 @@ const GitHubLinkModal = ({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.detail?.message || 'Failed to link GitHub account'
+        const errorData = await response.json().catch(() => ({}));
+        const linkError = new Error(
+          errorData.message || 'Failed to link GitHub account'
         );
+        linkError.errorCode = errorData.error_code || null;
+        throw linkError;
       }
 
       const data = await response.json();
       onLinkComplete(data);
     } catch (error) {
-      setErrors({ general: error.message });
+      setErrors({ general: error.message, code: error.errorCode || null });
       onError(error);
     } finally {
       setIsLoading(false);
@@ -145,7 +148,7 @@ const GitHubLinkModal = ({
                 className="error-message"
                 style={{ color: 'red', marginBottom: '1rem' }}
               >
-                {errors.general}
+                {authErrorCopy(t, errors.code, errors.general)}
               </div>
             )}
 

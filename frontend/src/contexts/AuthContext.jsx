@@ -28,6 +28,7 @@ const initialState = {
   isAuthenticated: false,
   isLoading: true,
   error: null,
+  errorCode: null,
   lastActivity: Date.now(),
   sessionTimeoutMinutes: 120, // Default timeout
   mustChangePassword: false,
@@ -92,7 +93,8 @@ function authReducer(state, action) {
         user: null,
         isAuthenticated: false,
         isLoading: false,
-        error: action.payload,
+        error: action.payload.message,
+        errorCode: action.payload.errorCode || null,
       };
 
     case AUTH_ACTIONS.LOGOUT:
@@ -120,6 +122,7 @@ function authReducer(state, action) {
     case AUTH_ACTIONS.CLEAR_ERROR:
       return {
         ...state,
+        errorCode: null,
         error: null,
       };
 
@@ -386,7 +389,10 @@ export function AuthProvider({ children }) {
         if (!result.success) {
           dispatch({
             type: AUTH_ACTIONS.LOGIN_FAILURE,
-            payload: result.error || 'Login failed',
+            payload: {
+              message: result.error || 'Login failed',
+              errorCode: result.errorCode || null,
+            },
           });
           return { success: false, error: result.error };
         }
@@ -447,7 +453,7 @@ export function AuthProvider({ children }) {
       const errorMessage = error.message || 'Login failed';
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
-        payload: errorMessage,
+        payload: { message: errorMessage, errorCode: error.errorCode || null },
       });
       notifyInfo('notifications:toasts.auth.loginFailed');
       return { success: false, error: errorMessage };
@@ -563,6 +569,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: state.isAuthenticated,
     isLoading: state.isLoading,
     error: state.error,
+    errorCode: state.errorCode,
     sessionTimeoutMinutes: state.sessionTimeoutMinutes,
     mustChangePassword: state.mustChangePassword,
     sessionEndedReason: state.sessionEndedReason,
